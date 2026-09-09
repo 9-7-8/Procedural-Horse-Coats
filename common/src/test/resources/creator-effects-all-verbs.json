@@ -136,6 +136,16 @@
         {
           "type": "combat",
           "damage": 7.5
+        },
+        {
+          "type": "night_temper",
+          "mood": "aggressive",
+          "towards": "hostile"
+        },
+        {
+          "type": "night_watch",
+          "mode": "behind",
+          "radius": 2
         }
       ]
     },

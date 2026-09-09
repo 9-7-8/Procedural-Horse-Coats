@@ -81,16 +81,35 @@ public enum GeneFamily {
             "The naturals that are neither pigment nor pattern nor disorder - what the horse "
                     + "will eat, and what colour its eyes are."),
 
-    /** The hand-written magical genes, the way {@code wiki/pages.js} groups them. */
-    MAGIC_CORE("Magical genes", false, "Magical genes",
-            "Where the magic starts. Every gene from here down was invented for this mod and "
-                    + "adds signed colour in phase 3, on top of the pigment the natural genes "
-                    + "have already resolved - or changes what the horse does instead. Most of "
-                    + "these are Java classes rather than gene files, because they do something "
-                    + "no colour op can: swap the whole palette, trail particles, turn into "
-                    + "something else at night. The rest are the markings deliberately parked at "
-                    + "the very bottom of the paint order, so that almost anything else the "
-                    + "horse carries is drawn on top of them."),
+    /** The hand-written magical genes that <b>paint</b>. */
+    MAGIC_CORE("Magical coat genes", false, "Magical coat genes",
+            "Where the magic starts. These are the hand-written genes that put colour on the "
+                    + "horse - Java classes rather than gene files, because each does something "
+                    + "no colour op can: swap the whole gradient chart, colour the hair on its "
+                    + "own axis, draw an emblem over the finished texture, take the front third "
+                    + "of the animal away. The data-driven markings are in the seven families "
+                    + "below this one, sorted by what shape they are made of."),
+
+    /** Non-painting: what the horse gives you, and what it leaves behind. */
+    MAGIC_YIELD("Magical yield genes", false, "Yield and death",
+            "Genes about what you get out of the horse rather than what it looks like - what "
+                    + "fills a bucket, how often, how much meat it leaves, what it drops, and "
+                    + "what happens to the ground it died on. None of them paints anything, and "
+                    + "most of them cannot be seen on a living animal at all, which is what "
+                    + "makes them worth a gene database."),
+
+    /** Non-painting: how the horse acts. */
+    MAGIC_BEHAVIOUR("Magical behaviour genes", false, "Behaviour",
+            "Genes that change what the horse <i>does</i> - how mobs feel about it, what it "
+                    + "becomes after dark, what it eats and what it turns into. The night loci "
+                    + "are the reason this family exists: a horse that stands in the corner "
+                    + "watching you is not a coat pattern and never belonged beside one."),
+
+    /** Non-painting: what the horse gives off. */
+    MAGIC_EMISSION("Magical emission genes", false, "Trails and emissions",
+            "Genes that put something in the air around the horse rather than on it - the "
+                    + "particle loci, whose colour, body site and density are all written on the "
+                    + "allele copy and inherited with it."),
     MAGIC_BODY("Magical body-stat genes", false, "Magical body-stat genes",
             "Loci that move what a horse's body can do and paint nothing at all - the magical "
                     + "mirror of the performance genes, with far wider ranges and no real-world "
@@ -124,7 +143,9 @@ public enum GeneFamily {
     MAGIC_MODIFIERS("Magic: colour modifiers", false, "Colour modifiers",
             "Genes with no shape of their own. Each reads what the horse already is and "
                     + "changes it - which is why they paint last, and why a plain horse shows "
-                    + "some of them not at all.");
+                    + "some of them not at all. The far end of the band is where the few genes "
+                    + "that must have the LAST word live: a neon outline over everything, a "
+                    + "head blacked out under whatever else was drawn on it.");
 
     private final String label;
     private final boolean natural;
@@ -199,6 +220,31 @@ public enum GeneFamily {
      */
     private static final Map<String, GeneFamily> NATURAL_OVERRIDES = new LinkedHashMap<>();
 
+    /**
+     * The magical genes that <b>do not paint</b>, and what each is actually
+     * about.
+     *
+     * <p>This table exists because <b>priority is the wrong axis for these
+     * genes and always was</b>. For a gene that paints, its priority is a real
+     * fact with a real meaning - where in the stack it lands - and the bands
+     * below were laid out as families precisely because the paint order and the
+     * taxonomy want the same grouping. A gene that paints nothing has a priority
+     * only because every gene needs a slot in the genotype code, and banding on
+     * it grouped genes by an accident of when they were written.
+     *
+     * <p>The result was one family holding a hood marking, a milk bucket, a
+     * spawn egg and a horse that stares at you through walls, which is not a
+     * category anybody could use. So the non-painting magicals are named here
+     * instead, by what they do - and the bands go back to meaning what they
+     * were built to mean.
+     *
+     * <p>It is the same split the naturals already make: {@link #NATURAL_HEALTH}
+     * is "the natural loci you cannot see", asked of {@link Genes#influencesCoat}.
+     * This is that idea applied to the other half of the registry, with the
+     * groups spelled out because "invisible" covers more ground here.
+     */
+    private static final Map<String, GeneFamily> MAGICAL_OVERRIDES = new LinkedHashMap<>();
+
     static {
         MAGICAL_BANDS.put(100, MAGIC_CORE);
         MAGICAL_BANDS.put(140, MAGIC_BODY);      // size, speed, health, jump
@@ -216,6 +262,29 @@ public enum GeneFamily {
         NATURAL_BANDS.put(30, NATURAL_DILUTION);  // silver .. grey
         NATURAL_BANDS.put(60, NATURAL_OTHER);     // tiger eye - the eyes and nothing else
         NATURAL_BANDS.put(65, NATURAL_WHITE);     // zebra striping .. PAX3, and the PATN modifiers
+
+        // What you get out of the horse.
+        MAGICAL_OVERRIDES.put("horsegenetics.milk", MAGIC_YIELD);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_milk_volume", MAGIC_YIELD);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_meat", MAGIC_YIELD);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_item_drop", MAGIC_YIELD);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_on_death", MAGIC_YIELD);
+
+        // How it acts.
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_mob_aura", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_night_temper", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_night_watch", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.lycan", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.verdant", MAGIC_BEHAVIOUR);
+
+        // What it gives off.
+        MAGICAL_OVERRIDES.put("horsegenetics.particle", MAGIC_EMISSION);
+        MAGICAL_OVERRIDES.put("horsegenetics.rainbow_dust", MAGIC_EMISSION);
+
+        // Cutie mark paints nothing in phase 3 - it draws its emblem in the
+        // overlay pass, over the finished texture - but it is unambiguously a
+        // marking and belongs with the genes that put colour on a horse.
+        MAGICAL_OVERRIDES.put("horsegenetics.cutie_mark", MAGIC_CORE);
 
         // The sex locus paints nothing and is not a disorder. The editors keep
         // it off their lists entirely - the Sex button owns it - but it is a
@@ -238,6 +307,10 @@ public enum GeneFamily {
     /** The family a gene belongs to. Never null. */
     public static GeneFamily of(Gene gene) {
         if (!gene.isNatural()) {
+            GeneFamily named = MAGICAL_OVERRIDES.get(gene.key());
+            if (named != null) {
+                return named;
+            }
             return ofMagicalPriority(gene.priority());
         }
         GeneFamily override = NATURAL_OVERRIDES.get(gene.key());
@@ -254,7 +327,8 @@ public enum GeneFamily {
     /**
      * The magical family a priority falls in. Public because
      * {@code GeneWikiTool} groups {@code SpecGene}s before they are registered
-     * and so cannot ask {@link #of}.
+     * and so cannot ask {@link #of}. A data-driven gene always paints, so the
+     * bands are the whole answer for one.
      */
     public static GeneFamily ofMagicalPriority(int priority) {
         Map.Entry<Integer, GeneFamily> e = MAGICAL_BANDS.floorEntry(priority);

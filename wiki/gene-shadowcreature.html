@@ -28,6 +28,12 @@
 
 <section class="tab-panel" data-tab="gameplay">
 
+<!-- The gene, on the base coats, as a horse you can spin. One div and one
+     script: everything in here is asked of the mod at run time.
+     See wiki/gene-preview/gene-preview.js. -->
+
+<div class="gene-preview" data-gene="horsegenetics.shadowcreature"></div>
+
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.shadowcreature"></div>
@@ -215,6 +221,7 @@ double k = (1.0 - BodyStripes.smoothstep(half, half + 0.3, d)) * fade;</code></p
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 <script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>

@@ -202,6 +202,33 @@ public sealed interface GeneAbility {
                    Condition when, int minDose) implements GeneAbility {}
 
     /**
+     * <b>How the horse feels about other creatures after dark</b> -
+     * {@code aggressive} or {@code flee}, toward one of the {@code towards}
+     * groups on {@link AbilityType#NIGHT_TEMPER}.
+     *
+     * <p>Night is part of the verb rather than a {@code when} condition, and
+     * that is deliberate: a horse whose temperament merely happened to be
+     * gated on darkness would need the gate written on every allele, and the
+     * one thing this locus is <i>about</i> is that the animal changes when the
+     * sun goes down.
+     */
+    record NightTemper(String mood, String towards, double radius, int intervalTicks,
+                       int maxTargets, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>What the horse does about the nearest player after dark</b> - one of
+     * the {@code mode} choices on {@link AbilityType#NIGHT_WATCH}.
+     *
+     * <p>{@code silentSteps} suppresses the horse's footfall sound while the
+     * mode is active. It rides on this record rather than being a verb of its
+     * own because it is not a separate trait: it is what makes a watcher a
+     * watcher rather than a horse standing there, and no gene has ever wanted
+     * one without the other.
+     */
+    record NightWatch(String mode, double radius, boolean silentSteps,
+                      Condition when, int minDose) implements GeneAbility {}
+
+    /**
      * <b>What the horse hits for</b>, in health points - two per heart. A
      * vanilla horse has no attack at all; this is the whole of the mod's combat
      * side, and the number is absolute rather than a modifier so that a reader

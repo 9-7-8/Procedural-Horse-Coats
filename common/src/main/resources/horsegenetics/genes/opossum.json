@@ -34,6 +34,16 @@
       "name": "hue",
       "min": 0.0,
       "max": 360.0
+    },
+    {
+      "name": "fringeMid",
+      "min": 0.26,
+      "max": 0.34
+    },
+    {
+      "name": "fringeFar",
+      "min": 0.14,
+      "max": 0.22
     }
   ],
   "expressions": [
@@ -63,7 +73,7 @@
               "space": "body",
               "from": "$extent",
               "to": 1.0,
-              "softness": 0.055
+              "softness": 0.012
             },
             {
               "type": "SPECKLE",
@@ -77,10 +87,97 @@
               "seed": "$roanSeed",
               "spacing": 0.7,
               "size": 0.6,
-              "density": 0.75,
+              "density": 0.82,
               "clumping": 0.6,
-              "clumpScale": 5.0,
-              "softness": 0.5
+              "clumpScale": 4.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efece7",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the roan thinning out behind it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeMid",
+              "to": "$extent",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.42,
+              "clumping": 0.6,
+              "clumpScale": 3.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efece7",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the last few flecks further back still",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeFar",
+              "to": "$fringeMid",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.16,
+              "clumping": 0.6,
+              "clumpScale": 2.4,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -174,7 +271,7 @@
               "space": "body",
               "from": "$extent",
               "to": 1.0,
-              "softness": 0.055
+              "softness": 0.012
             },
             {
               "type": "SPECKLE",
@@ -188,10 +285,101 @@
               "seed": "$roanSeed",
               "spacing": 0.7,
               "size": 0.6,
-              "density": 0.75,
+              "density": 0.82,
               "clumping": 0.6,
-              "clumpScale": 5.0,
-              "softness": 0.5
+              "clumpScale": 4.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the roan thinning out behind it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeMid",
+              "to": "$extent",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.42,
+              "clumping": 0.6,
+              "clumpScale": 3.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "and the last few flecks further back still",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeFar",
+              "to": "$fringeMid",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.16,
+              "clumping": 0.6,
+              "clumpScale": 2.4,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -278,5 +466,8 @@
     "Opo/n": 0.114,
     "Opc/Opc": 0.024,
     "n/n": 99.832
-  }
+  },
+  "notes": [
+    "The rear edge is DITHERED rather than faded (owner's call), and the difference is worth stating because the format makes it easy to get wrong. Coverage scales an op's strength, so an AXIS ramp multiplied by a SPECKLE gives you *faded dots* - every dot present, each one weaker - which reads as a gradient with texture in it rather than as roan running out. Dots that get rarer is a density change, and density is a SPECKLE parameter that no mask can drive. So the falloff is three bands with hard edges and falling densities (0.82, 0.42, 0.16), which is the format's way of writing a density gradient. The band edges are separate knobs kept strictly below 'extent' so no band can invert its own from/to - a reversed pair is smoothstep's degenerate hard step (gap 106), and it would put a solid block where the fringe should be."
+  ]
 }

@@ -171,7 +171,7 @@ window.HG.pages = {
             ]
         },
         {
-            title: "Magical genes",
+            title: "Magical coat genes",
             items: [
                 { href: "gene-cutie-mark.html", text: "Cutie mark", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-dhampir.html", text: "Dhampir", kind: "magical", views: ["gameplay","coding","science"] },
@@ -179,22 +179,39 @@ window.HG.pages = {
                 { href: "gene-hood.html", text: "Hood", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-light.html", text: "Light", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-lut.html", text: "LUT", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-lycan.html", text: "LYCAN", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-magic-item-drop.html", text: "Magic item drop", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-magic-meat.html", text: "Magic meat", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-magic-milk-volume.html", text: "Magic milk volume", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-magic-mob-aura.html", text: "Magic mob aura", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-magic-on-death.html", text: "Magic on death", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-mane-color.html", text: "Mane colour", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-milk.html", text: "Milk", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-particle.html", text: "Particle", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-suit.html", text: "Suit", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-synort.html", text: "Synort", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] }
+            ]
+        },
+        {
+            title: "Magical yield genes",
+            items: [
+                { href: "gene-magic-item-drop.html", text: "Magic item drop", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-meat.html", text: "Magic meat", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-milk-volume.html", text: "Magic milk volume", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-on-death.html", text: "Magic on death", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-milk.html", text: "Milk", kind: "magical", views: ["gameplay","coding","science"] }
+            ]
+        },
+        {
+            title: "Magical behaviour genes",
+            items: [
+                { href: "gene-lycan.html", text: "LYCAN", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-mob-aura.html", text: "Magic mob aura", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-night-temper.html", text: "Magic night temper", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-night-watch.html", text: "Magic night watch", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical", views: ["gameplay","coding"] }
+            ]
+        },
+        {
+            title: "Magical emission genes",
+            items: [
+                { href: "gene-particle.html", text: "Particle", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] }
             ]
         },
         {

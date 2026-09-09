@@ -46,6 +46,10 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
+<h2 id="about">About this gene</h2>
+
+<p>The rear edge is DITHERED rather than faded (owner's call), and the difference is worth stating because the format makes it easy to get wrong. Coverage scales an op's strength, so an AXIS ramp multiplied by a SPECKLE gives you *faded dots* - every dot present, each one weaker - which reads as a gradient with texture in it rather than as roan running out. Dots that get rarer is a density change, and density is a SPECKLE parameter that no mask can drive. So the falloff is three bands with hard edges and falling densities (0.82, 0.42, 0.16), which is the format's way of writing a density gradient. The band edges are separate knobs kept strictly below 'extent' so no band can invert its own from/to - a reversed pair is smoothstep's degenerate hard step (gap 106), and it would put a solid block where the fringe should be.</p>
+
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.opossum"></div>
@@ -100,7 +104,7 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>267 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Opo</code> &middot; <code>Opc</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, PARTS, SPECKLE, TOWARD</td></tr>
 </tbody>
 </table>
@@ -121,6 +125,8 @@
 
 <ol>
 <li>grey from the forehead backward &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
+<li>the roan thinning out behind it &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
+<li>and the last few flecks further back still &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
 <li>the mane where the grey touches it &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
 <li>a pink muzzle where it gets that far &mdash; <code>PARTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
@@ -131,6 +137,8 @@
 
 <ol>
 <li>grey from the forehead backward, in colour &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
+<li>the roan thinning out behind it &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
+<li>and the last few flecks further back still &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
 <li>the mane where the grey touches it, in colour &mdash; <code>AXIS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
 <li>a pink muzzle where it gets that far, in colour &mdash; <code>PARTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>

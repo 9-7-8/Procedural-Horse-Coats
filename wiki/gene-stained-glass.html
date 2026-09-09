@@ -36,8 +36,11 @@
 <tbody>
 <tr><th>Violet glass</th><td><code>Sgv/Sgv</code></td></tr>
 <tr><th>Meadow glass</th><td><code>Sgm/Sgm</code></td></tr>
-<tr><th>Both windows</th><td><code>Sgv/Sgm</code></td></tr>
-<tr><th>Wild type</th><td><code>Sgv/n</code> &middot; <code>Sgm/n</code> &middot; <code>n/n</code></td></tr>
+<tr><th>Grisaille glass</th><td><code>Sgg/Sgg</code></td></tr>
+<tr><th>Two trays</th><td><code>Sgv/Sgm</code></td></tr>
+<tr><th>Two trays</th><td><code>Sgv/Sgg</code></td></tr>
+<tr><th>Two trays</th><td><code>Sgm/Sgg</code></td></tr>
+<tr><th>Wild type</th><td><code>Sgv/n</code> &middot; <code>Sgm/n</code> &middot; <code>Sgg/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
@@ -47,6 +50,10 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
+<h2 id="about">About this gene</h2>
+
+<p>The palette is the ALLELE here, not an epigenetic value, which is unique in the registry - every other gene that varies its colour writes a hue on the allele copy. It is deliberate: a stained-glass window is a made object with a chosen palette, and a horse whose window drifted hue by hue down the generations would be a different idea. The consequence is that mixing two lines gives a window with both trays in it rather than an average of the two.</p>
+
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.stained_glass"></div>
@@ -54,7 +61,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 833</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 556</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -66,7 +73,8 @@
 <tbody>
 <tr><td><code>Sgv/Sgv</code></td><td>Violet glass</td><td>0.06% &mdash; 1 in 1,667</td></tr>
 <tr><td><code>Sgm/Sgm</code></td><td>Meadow glass</td><td>0.06% &mdash; 1 in 1,667</td></tr>
-<tr><td><code>n/n</code></td><td>Wild type</td><td>99.88%</td></tr>
+<tr><td><code>Sgg/Sgg</code></td><td>Grisaille glass</td><td>0.06% &mdash; 1 in 1,667</td></tr>
+<tr><td><code>n/n</code></td><td>Wild type</td><td>99.82%</td></tr>
 </tbody>
 </table>
 </div>
@@ -98,7 +106,7 @@
 <tr><th>Key</th><td><code>horsegenetics.stained_glass</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>382 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Sgv</code> &middot; <code>Sgm</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Sgv</code> &middot; <code>Sgm</code> &middot; <code>Sgg</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>CRACKLE, PALETTE, TOWARD</td></tr>
 </tbody>
@@ -125,16 +133,43 @@
 
 <h3>Meadow glass</h3>
 
-<p>Two meadow copies. The same leading, and panes of green, yellow and white instead. Nothing else about the gene changes - the two alleles differ in three colours and in nothing at all besides.</p>
+<p>Two meadow copies. The same leading, and panes of green, yellow and white instead.</p>
 
 <ol>
 <li>the panes, each washed a quarter of the way to its own colour &mdash; <code>CRACKLE</code>, painted with <code>PALETTE</code></li>
 <li>the leading between them &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
 </ol>
 
-<h3>Both windows</h3>
+<h3>Grisaille glass</h3>
 
-<p>One of each. Neither allele is dominant to the other, so the horse gets a window cut the same way with all six colours in the tray - the only way to see blue and yellow in one coat, and something a breeder has to make on purpose because no wild horse is born with this pair.</p>
+<p>Two grisaille copies. The same leading again, and panes of grey and white only - the colourless glazing a real window uses where it wants light rather than a picture. It is the one palette here that reads as glass on any base coat, because it adds no hue of its own to argue with the horse.</p>
+
+<ol>
+<li>the panes, each washed a quarter of the way to its own colour &mdash; <code>CRACKLE</code>, painted with <code>PALETTE</code></li>
+<li>the leading between them &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Two trays</h3>
+
+<p>One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.</p>
+
+<ol>
+<li>the panes, each washed a quarter of the way to its own colour &mdash; <code>CRACKLE</code>, painted with <code>PALETTE</code></li>
+<li>the leading between them &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Two trays</h3>
+
+<p>One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.</p>
+
+<ol>
+<li>the panes, each washed a quarter of the way to its own colour &mdash; <code>CRACKLE</code>, painted with <code>PALETTE</code></li>
+<li>the leading between them &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Two trays</h3>
+
+<p>One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.</p>
 
 <ol>
 <li>the panes, each washed a quarter of the way to its own colour &mdash; <code>CRACKLE</code>, painted with <code>PALETTE</code></li>

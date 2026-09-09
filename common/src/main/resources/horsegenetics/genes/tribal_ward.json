@@ -5,10 +5,12 @@
   "phase": "magical",
   "priority": 220,
   "rarity": "EPIC",
-  "blurb": "A painted ward - a pale ground with coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, and the coat left bare at the throat and chest.",
+  "blurb": "A painted ward - coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, laid straight onto the horse's own colour.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The bare throat and chest are subtracted out of the ground rather than painted back over it, so what shows through is whatever the horse actually is - a bay reveals bay, a grey reveals grey. Painting them back would have needed a colour, and any colour would have been a lie about the horse underneath.",
-    "SPIRAL draws one spiral per named part, so 'a swirl at each hip and each shoulder' is two layers at different offsets along the body rather than four placements. On a bake the pair reads as hip and shoulder; it is not four independent motifs."
+    "SPIRAL draws one spiral per named part, so 'a swirl at each hip and each shoulder' is two layers at different offsets along the body rather than four placements. On a bake the pair reads as hip and shoulder; it is not four independent motifs.",
+    "The pale ground was removed (owner's call). It is worth knowing that this layer is the one the invert/parts fix of 2026-09-08 briefly deleted and then restored, because the restore is what made it visible enough to judge - and the judgement was that the ward reads better as paint on a horse than as paint on a white field.",
+    "The old note here said the ink stays black because 'it is the ink that makes it a ward', and the coloured allele varied the pale ground instead. With the ground gone that reasoning left the allele with nothing at all to do - the two expressions came out identical - so the ink is what varies now. The earlier argument was about a design that no longer exists rather than about the ink."
   ],
   "alleles": [
     {
@@ -69,47 +71,13 @@
     {
       "id": "white",
       "name": "Tribal Ward",
-      "description": "The ground goes on first and everything else is inked over it, so the ward reads as paint on a painted horse rather than as marking on a coat. The bare throat and chest are a band subtracted out of the ground rather than painted back, which is why the coat under them is whatever the horse actually is.",
+      "description": "The ward inked straight onto the horse in near-black - swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs.",
       "when": [
         "Twd/Twd",
         "Twd/Twc",
         "Twd/n"
       ],
       "layers": [
-        {
-          "name": "the ground, with the throat and chest left bare",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "softness": 0.2,
-              "invert": true,
-              "combine": "MULTIPLY",
-              "from": -0.1,
-              "to": "$chestReveal"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f5f2ee",
-            "strength": 96.0
-          }
-        },
         {
           "name": "a coiled swirl at each hip",
           "masks": [
@@ -256,7 +224,7 @@
     {
       "id": "coloured",
       "name": "Tribal Ward, coloured",
-      "description": "The same ward on a ground in a colour the line carries. The ink stays black - it is the ink that makes it a ward. Fully recessive.",
+      "description": "The same ward inked in a colour the line carries. Fully recessive: it takes two copies, and a single one beside the black allele inks black.",
       "notes": [
         "The ink stays black in this form on purpose. Both the ground and the ink taking the same hue made a horse that looked like one wash rather than like something painted on."
       ],
@@ -264,42 +232,6 @@
         "Twc": 2
       },
       "layers": [
-        {
-          "name": "the ground, with the throat and chest left bare",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "softness": 0.2,
-              "invert": true,
-              "combine": "MULTIPLY",
-              "from": -0.1,
-              "to": "$chestReveal"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.5,
-            "lightness": 0.66,
-            "strength": 96.0
-          }
-        },
         {
           "name": "a coiled swirl at each hip",
           "masks": [
@@ -319,7 +251,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -342,7 +276,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -367,7 +303,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -392,7 +330,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -437,7 +377,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         }

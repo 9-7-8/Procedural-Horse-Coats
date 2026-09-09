@@ -37,6 +37,8 @@ import com.example.horsegenetics.common.genetics.genes.MagicItemDropGene;
 import com.example.horsegenetics.common.genetics.genes.MagicMeatGene;
 import com.example.horsegenetics.common.genetics.genes.MagicMilkVolumeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicMobAuraGene;
+import com.example.horsegenetics.common.genetics.genes.MagicNightTemperGene;
+import com.example.horsegenetics.common.genetics.genes.MagicNightWatchGene;
 import com.example.horsegenetics.common.genetics.genes.MagicOnDeathGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSwimSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicWaterBreathingGene;
@@ -334,6 +336,20 @@ public final class Genes {
      */
     public static final MagicOnDeathGene MAGIC_ON_DEATH = new MagicOnDeathGene();
     public static final MagicMobAuraGene MAGIC_MOB_AURA = new MagicMobAuraGene();
+    /**
+     * The <b>night loci</b> - what a horse becomes after dark. Both are unlike
+     * anything else in the registry in one respect: their founder tables are
+     * <b>entirely heterozygous</b>, so every feral horse carries exactly one
+     * variant and none of them expresses it. The plainest outcome each locus has
+     * is the one that cannot be caught. (Owner's call.)
+     *
+     * <p>{@link #MAGIC_NIGHT_TEMPER} supersedes {@link #MAGIC_NIGHT_WATCH}
+     * whenever it has something to act on - a horse cannot both stalk you and
+     * flee from you - and that rule lives in the translator, because which mobs
+     * are nearby is a question only the running game can answer.
+     */
+    public static final MagicNightTemperGene MAGIC_NIGHT_TEMPER = new MagicNightTemperGene();
+    public static final MagicNightWatchGene MAGIC_NIGHT_WATCH = new MagicNightWatchGene();
     public static final ManeColorGene MANE_COLOR = new ManeColorGene();
     public static final TailColorGene TAIL_COLOR = new TailColorGene();
     public static final ParticleGene PARTICLE = new ParticleGene();
@@ -452,6 +468,7 @@ public final class Genes {
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,
             MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
+            MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH,
             MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, LYCAN,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             DHAMPIR, SHADOWCREATURE,

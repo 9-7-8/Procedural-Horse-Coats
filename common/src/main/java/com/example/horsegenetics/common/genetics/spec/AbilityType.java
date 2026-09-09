@@ -544,6 +544,74 @@ public final class AbilityType {
                         v.when, v.minDose);
             }));
 
+    /** Who a {@link #NIGHT_TEMPER} feels something about. */
+    public static final List<String> NIGHT_TARGETS = List.of("players", "passive", "hostile", "all");
+
+    /**
+     * <b>How the horse feels about other creatures after dark.</b>
+     *
+     * <p>The night is in the verb rather than in a {@code when} condition. A
+     * temperament that merely happened to be gated on darkness would need that
+     * gate written onto every allele of every gene using it, and the whole
+     * point of the locus this was built for is that the animal is one thing by
+     * day and another after sunset - so the verb says so once.
+     */
+    public static final AbilityType NIGHT_TEMPER = register(new AbilityType("night_temper",
+            List.of(
+                    Param.requiredChoice("mood", List.of("aggressive", "flee"),
+                            "whether the horse goes for them or runs from them"),
+                    Param.requiredChoice("towards", NIGHT_TARGETS,
+                            "who it feels that about - 'passive' is animals, 'hostile' is "
+                                    + "monsters, 'all' is both plus players"),
+                    Param.num("radius", 16, "how far it notices, in blocks, 1-48"),
+                    Param.num("interval", 20, "ticks between scans (at least 1)"),
+                    Param.num("max_targets", 8, "most entities one scan may consider, 1-64")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 48) {
+                    throw v.bad("radius must be 1-48 blocks, got " + radius);
+                }
+                int interval = v.intOf("interval");
+                if (interval < 1) {
+                    throw v.bad("interval must be at least 1 tick, got " + interval);
+                }
+                int maxTargets = v.intOf("max_targets");
+                if (maxTargets < 1 || maxTargets > 64) {
+                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
+                }
+                return new GeneAbility.NightTemper(v.str("mood"), v.str("towards"), radius,
+                        interval, maxTargets, v.when, v.minDose);
+            }));
+
+    /**
+     * <b>What the horse does about the nearest player after dark.</b>
+     *
+     * <p>Five modes, and they are a deliberate progression from "does not care
+     * where you are" to "is directly behind you": {@code stare} never moves and
+     * does not need line of sight, {@code approach} closes to
+     * {@code radius} first, {@code line_of_sight} watches only while it can
+     * actually see you, {@code unseen} tries to stand where you cannot see
+     * <i>it</i>, and {@code behind} closes to arm's length behind your back.
+     */
+    public static final AbilityType NIGHT_WATCH = register(new AbilityType("night_watch",
+            List.of(
+                    Param.requiredChoice("mode",
+                            List.of("stare", "approach", "line_of_sight", "unseen", "behind"),
+                            "what it does about the nearest player"),
+                    Param.num("radius", 10,
+                            "the distance the mode is measured against, in blocks, 1-48 - what "
+                                    + "'approach' closes to, and how far the others look"),
+                    Param.bool("silent_steps", true,
+                            "suppress the horse's footfall sound while the mode is active")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 48) {
+                    throw v.bad("radius must be 1-48 blocks, got " + radius);
+                }
+                return new GeneAbility.NightWatch(v.str("mode"), radius, v.bool("silent_steps"),
+                        v.when, v.minDose);
+            }));
+
     /** The most damage one hit may deal. A guard against a typo, not a balance number. */
     public static final double MAX_COMBAT_DAMAGE = 200.0;
 

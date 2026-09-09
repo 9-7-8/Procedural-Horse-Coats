@@ -27,6 +27,137 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-09">2026-09-09</h2>
+
+<h3 id="night-genes-and-coat-pass-2026-09-09">Two genes that make a horse frightening, a per-gene coat test, and a category audit that found the taxonomy was sorting on the wrong axis.</h3>
+
+<h4>The night loci</h4>
+
+<p>Two new mechanical genes, and between them they are the mod&rsquo;s first deliberate
+attempt at <em>unsettling</em> rather than pretty.
+<a href="gene-magic-night-temper.html">Night temper</a> has eight variants in two families
+&mdash; four that hunt and four that flee, each naming who it feels that about.
+<a href="gene-magic-night-watch.html">Night watch</a> has five, and they are a ladder
+rather than a list: stares from anywhere through walls, closes to ten blocks first, watches
+only while it can see you, moves to where you <em>cannot see it</em>, stands directly
+behind you. Any of the five silences the horse&rsquo;s footfalls at night, which is what
+makes the locus work at all &mdash; the behaviours are unsettling in proportion to how
+little warning you get, and hoofbeats are warning.</p>
+
+<p><strong>The temper locus supersedes the watch locus</strong> whenever it has something to
+act on, because a horse that both stalks you and flees from you is not two behaviours, it
+is a bug. That rule could not live in <code>common/</code>: whether there is a cow within
+sixteen blocks is a question only the running game can answer. So the handler resolves the
+temper first and withholds the watch ability if it found a target, and the goal reports
+<code>canUse() == false</code> and stands down instead of fighting for the navigation.</p>
+
+<p><strong>Both founder tables are entirely heterozygous</strong> (owner&rsquo;s call), which
+nothing else in the registry does. Every feral horse carries exactly one variant and none of
+them expresses it, so the plainest outcome each locus has is the one that <em>cannot be
+caught</em>. It broke a test, and the test was right to break: <code>GenotypeTest</code>
+asserted that a maximal founder roll lands every gene on its default homozygote, and these
+two have no such row at all.</p>
+
+<h4>The coat pass</h4>
+
+<p>Nine genes, all from the owner&rsquo;s own list. Three were painting a <strong>ground over
+the whole horse</strong> before marking it &mdash; <a href="gene-coccinella.html">coccinella</a>
+black, <a href="gene-shieldback.html">shieldback</a> green,
+<a href="gene-tribal-ward.html">tribal ward</a> pale &mdash; which made every carrier the same
+animal underneath, the opposite of what a coat gene here is for. All three grounds are
+gone.</p>
+
+<p><strong>Removing them broke two genes, and the break is the interesting part.</strong>
+Shieldback and tribal ward each had a &ldquo;coloured&rdquo; allele whose only job was to
+vary the ground. With the ground gone the two alleles came out
+<em>byte-identical</em> &mdash; a locus with two names for one outcome. Both now point their
+unused hue knob at the marking instead, which is what &ldquo;a colour the line carries&rdquo;
+should always have meant on a gene whose ground was never the interesting part.</p>
+
+<ul>
+<li><a href="gene-koi.html">Koi</a> was painting the bright patches <em>and</em> their
+    complement, so the two tiled the horse and no base coat showed. The complement layer is
+    gone from the orange and dark varieties; the white one keeps it, because
+    white-against-colour is the variety whose whole point is the hard boundary.</li>
+<li><a href="gene-snow-cloud.html">Snow cloud</a>&rsquo;s white was a flat <code>PARTS</code>
+    mask over every part, so the base coat could only ever be not-seen. It runs through a
+    large-scale <code>PATCHES</code> mask now, so there are bare drifts &mdash; which is
+    what the gene&rsquo;s own name describes.</li>
+<li><a href="gene-cleave.html">Cleave</a>&rsquo;s &ldquo;detached spears&rdquo; were fat
+    ovals scattered over a band up to 42% of the horse long, which read as white splotches
+    loose on the far half. Long and thin now, and tied close behind the line.</li>
+<li><a href="gene-opossum.html">Opossum</a>&rsquo;s edge is <strong>dithered</strong> rather
+    than faded, and the distinction is worth stating because the format makes it easy to get
+    wrong. Coverage scales an op&rsquo;s strength, so an axis ramp times a speckle gives
+    <em>faded dots</em> &mdash; every dot present, each one weaker &mdash; which reads as a
+    gradient with texture in it. Dots that get <em>rarer</em> is a density change, and
+    density is a speckle parameter no mask can drive. So the falloff is three bands with hard
+    edges and falling densities, which is this format&rsquo;s way of writing a density
+    gradient.</li>
+<li><a href="gene-nyxborn.html">Nyxborn</a> stars only what is genuinely black. On the
+    shipped gradient a black horse reads 0.807 on <code>LUMA</code>&rsquo;s <code>dark</code>
+    channel and a bay reads 0.782 &mdash; no threshold separates those without losing half the
+    black. What does separate them is <strong>saturation</strong>: 0.02 against 0.556,
+    because the difference between them is colour and not brightness.</li>
+<li><a href="gene-stained-glass.html">Stained glass</a> gained a grisaille palette &mdash;
+    grey and white only, the colourless glazing a real window uses where it wants light
+    rather than a picture, and the one palette that reads as glass on any base coat.</li>
+</ul>
+
+<h4>The category audit found the taxonomy sorting on the wrong axis</h4>
+
+<p>The complaint was concrete: <a href="gene-hood.html">hood</a> and
+<a href="gene-magic-item-drop.html">magic item drop</a> were in the same category. The cause
+was general. Magical families are derived from <strong>priority bands</strong>, and
+<code>MAGIC_CORE</code> had become a 24-gene dumping ground holding coat markings, hair
+colour, milk buckets, spawn eggs and a horse that stares at you through walls.</p>
+
+<p><strong>Priority is a real fact about a gene that paints and an accident about one that
+does not.</strong> For a painter it says where in the stack it lands, and the bands were laid
+out as families precisely because the paint order and the taxonomy want the same grouping.
+A gene that paints nothing has a priority only because every gene needs a slot in the
+genotype code, so banding on it grouped genes by when they happened to be written.</p>
+
+<p>So the non-painting magicals are named explicitly now, by what they do &mdash;
+<strong>yield and death</strong>, <strong>behaviour</strong>, <strong>trails and
+emissions</strong>, and the body stats that already had their own band &mdash; and the bands
+go back to meaning what they were built to mean. It is the same split the naturals already
+make, where anything invisible is a health locus; this is that idea applied to the other
+half of the registry, with the groups spelled out because &ldquo;invisible&rdquo; covers more
+ground here.</p>
+
+<h4>The coat baking test</h4>
+
+<p><code>CoatBakeGoldenTest</code> closes <a href="known-gaps.html#gap-124">gap 124</a>: every
+registered gene, every variant allele, composed through the real gradient and hashed.
+<strong>203 genes in 623 lines, and it runs in seconds</strong> rather than needing the
+ten-minute suite &mdash; which is the property that matters, because the pipeline golden is
+expensive enough that its cost gets weighed against its value and this one is not. It was
+checked by nudging one gene&rsquo;s strength by a single point and confirming it fails.</p>
+
+<p>It hashes; it does not look. Four of the twelve genes that broke their hashes yesterday
+were <em>fixed</em> by the change that broke them, so a diff here is a prompt to go and look
+at the icons, never a verdict &mdash; and the test says so in its own failure message.</p>
+
+<h4>What the audit of the generator turned up</h4>
+
+<ul>
+<li><strong>Phase 1 chains its layers and phase 3 does not</strong>, and only phase 1 says
+    so. A <code>LUMA</code> mask reads the coat as it was before <em>this gene</em> painted,
+    so &ldquo;replace the white, then star the black&rdquo; is not expressible in that order.
+    Nyxborn works around it with a union mask. <a href="known-gaps.html#gap-125">Gap 125</a>.</li>
+<li><strong>Two genes make opposite total claims about white.</strong>
+    <a href="gene-extreme-white-dominant.html">Extreme white dominant</a> holds a lock that
+    beats every gene at every slot; Nyxborn promises to paint every white out. The lock wins,
+    which is correct and falls out of the design &mdash; but neither description mentioned the
+    other, so the only way to find out was to breed the pair.
+    <a href="known-gaps.html#gap-126">Gap 126</a>.</li>
+</ul>
+
+<p>Also: <a href="gene-shadowcreature.html">shadowcreature</a>&rsquo;s page had no preview
+widget at all &mdash; it was written from the template for a gene that paints nothing, and
+shadowcreature paints plenty. That is why its previewer &ldquo;was not loading&rdquo;.</p>
+
 <h2 id="d2026-09-08">2026-09-08</h2>
 
 <h3 id="overnight-upkeep-2026-09-08">An overnight upkeep pass: a link checker, the invert bug measured and fixed, and two rules that now enforce themselves.</h3>

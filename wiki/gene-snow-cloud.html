@@ -21,7 +21,7 @@
 <h1>Snow Cloud</h1>
 
 <p class="lede">
-    A white horse with its colour left only where the snow did not settle - clustered high on the croup, round the ankles, and across the face in front of the ears.
+    Snow lying over the horse in drifts, with the coat showing through where none settled - and dark points clustered high on the croup, round the ankles and across the face in front of the ears.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -51,6 +51,8 @@
 <p>Imported from the magic-gene intake, 2026-09-08. White goes on first over everything, and the three clouds of points are painted back over it. Clumping on the speckle fields is what makes them clouds rather than an even dusting.</p>
 
 <p>The points are subtler on a bake than the source description suggests. If they want to be louder the knob to move is the speckle size rather than the density - denser small points still read as grey from a distance.</p>
+
+<p>The white used to be a flat PARTS mask over every part, so the horse went entirely white and the only thing the base coat could do was not be seen. It now runs through a large-scale PATCHES mask (owner's call), so there are bare drifts the coat shows through - which is what the gene's own name describes and what makes a snow-cloud chestnut and a snow-cloud black different animals. The three point clusters are untouched; where a cluster lands on a bare drift it simply has less white to sit on.</p>
 
 <h2 id="inheritance">Crossing two of them</h2>
 
@@ -106,8 +108,8 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>219 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Snw</code> &middot; <code>Snc</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>10 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>AXIS, PARTS, SPECKLE, TOWARD</td></tr>
+<tr><th>Varies per horse</th><td>13 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Built from</th><td>AXIS, PARTS, PATCHES, SPECKLE, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
@@ -123,10 +125,10 @@
 
 <h3>Snow Cloud</h3>
 
-<p>The whole horse goes white first, and then three clouds of dark points are laid back over it - each one a speckle field with clumping turned up, cut down to its own region. Clumping is what makes them clouds rather than an even dusting, and the three regions are the parts of a horse the weather reaches last.</p>
+<p>Snow lies over the horse in drifts with the coat showing through where none settled, and three clouds of dark points are laid over the top - each a speckle field pinned to one part of the body: high on the croup, round the ankles, and across the face in front of the ears.</p>
 
 <ol>
-<li>white over the whole horse &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
+<li>snow over the horse, with bare drifts the coat shows through &mdash; <code>PARTS</code> &times; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
 <li>points clustered high on the croup &mdash; <code>SPECKLE</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>points round the ankles &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>points across the face, forward of the ears &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
@@ -134,10 +136,10 @@
 
 <h3>Snow Cloud, coloured points</h3>
 
-<p>The same white ground with the points in a colour the line carries instead of in near-black. Fully recessive.</p>
+<p>The same drifted snow with the points in a colour the line carries instead of in near-black. Fully recessive.</p>
 
 <ol>
-<li>white over the whole horse &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
+<li>snow over the horse, with bare drifts the coat shows through &mdash; <code>PARTS</code> &times; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
 <li>points clustered high on the croup &mdash; <code>SPECKLE</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>points round the ankles &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>points across the face, forward of the ears &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

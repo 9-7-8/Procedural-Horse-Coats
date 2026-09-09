@@ -16,6 +16,10 @@
       "label": "Stained glass, meadow (Sgm)"
     },
     {
+      "token": "Sgg",
+      "label": "Stained glass, grisaille (Sgg)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -108,7 +112,7 @@
     {
       "id": "meadow",
       "name": "Meadow glass",
-      "description": "Two meadow copies. The same leading, and panes of green, yellow and white instead. Nothing else about the gene changes - the two alleles differ in three colours and in nothing at all besides.",
+      "description": "Two meadow copies. The same leading, and panes of green, yellow and white instead.",
       "when": {
         "Sgm": 2
       },
@@ -174,9 +178,77 @@
       ]
     },
     {
-      "id": "both",
-      "name": "Both windows",
-      "description": "One of each. Neither allele is dominant to the other, so the horse gets a window cut the same way with all six colours in the tray - the only way to see blue and yellow in one coat, and something a breeder has to make on purpose because no wild horse is born with this pair.",
+      "id": "grisaille",
+      "name": "Grisaille glass",
+      "description": "Two grisaille copies. The same leading again, and panes of grey and white only - the colourless glazing a real window uses where it wants light rather than a picture. It is the one palette here that reads as glass on any base coat, because it adds no hue of its own to argue with the horse.",
+      "when": {
+        "Sgg": 2
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#9aa0a6",
+              "#d9dde0",
+              "#f7f8f9"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "v-m",
+      "name": "Two trays",
+      "description": "One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.",
       "when": {
         "Sgv": 1,
         "Sgm": 1
@@ -246,6 +318,150 @@
       ]
     },
     {
+      "id": "v-g",
+      "name": "Two trays",
+      "description": "One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.",
+      "when": {
+        "Sgv": 1,
+        "Sgg": 1
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#4a7ce8",
+              "#e86fbb",
+              "#8b52d6",
+              "#9aa0a6",
+              "#d9dde0",
+              "#f7f8f9"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "m-g",
+      "name": "Two trays",
+      "description": "One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.",
+      "when": {
+        "Sgm": 1,
+        "Sgg": 1
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#4fbf5c",
+              "#e8d24a",
+              "#f4f2ec",
+              "#9aa0a6",
+              "#d9dde0",
+              "#f7f8f9"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "Nothing. Both variants are recessive to the wild type, so a single copy of either is silent and a carrier looks like any other horse.",
@@ -255,6 +471,10 @@
   "founders": {
     "Sgv/Sgv": 0.06,
     "Sgm/Sgm": 0.06,
-    "n/n": 99.88
-  }
+    "Sgg/Sgg": 0.06,
+    "n/n": 99.82
+  },
+  "notes": [
+    "The palette is the ALLELE here, not an epigenetic value, which is unique in the registry - every other gene that varies its colour writes a hue on the allele copy. It is deliberate: a stained-glass window is a made object with a chosen palette, and a horse whose window drifted hue by hue down the generations would be a different idea. The consequence is that mixing two lines gives a window with both trays in it rather than an average of the two."
+  ]
 }

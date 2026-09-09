@@ -21,7 +21,7 @@
 <h1>Coccinella Marking</h1>
 
 <p class="lede">
-    A beetle-black coat with red paisley over the barrel and a cream patch at each shoulder - a seven-spot ladybird read onto a horse.
+    Red paisley over the barrel with the seven spots inside it and a cream patch at each shoulder - a seven-spot ladybird read onto whatever colour the horse already is.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -51,6 +51,8 @@
 <p>Imported from the magic-gene intake, 2026-09-08. The source placed the shoulder patches and the barrel wings with explicit x/y/z boxes. There is no box mask; two crossed AXIS bands in body units are the same thing in the vocabulary that exists, and are what the shoulder patch and the paisley clip are built from.</p>
 
 <p>The paisley is a RINGS mask with arc 0.55 - a ring drawn as just over half its circumference, which comes out as a comma rather than a circle. That is the whole of what makes it paisley.</p>
+
+<p>The gene used to paint the whole horse beetle-black before marking it, and the marking was designed against that black. The ground is gone (owner's call): a coat gene here is supposed to let the base coat through, and a ground makes every carrier the same animal underneath. The paisley, the spots and the shoulder patches are unchanged, so on a dark horse it reads much as it always did and on a chestnut it is a new thing.</p>
 
 <h2 id="inheritance">Crossing two of them</h2>
 
@@ -107,7 +109,7 @@
 <tr><th>Priority</th><td>222 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Ccr</code> &middot; <code>Ccv</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>8 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>AXIS, PARTS, RINGS, SPOTS, TOWARD</td></tr>
+<tr><th>Built from</th><td>AXIS, RINGS, SPOTS, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
@@ -123,10 +125,9 @@
 
 <h3>Coccinella Marking</h3>
 
-<p>Black first, over the whole horse, and then the ladybird is painted back onto it. The paisley is a ring drawn as a 55% arc - a partial ring is a comma rather than a circle - and the spots inside are a mirrored field, so the two sides match the way an elytron pair does.</p>
+<p>The ladybird painted onto the horse's own colour: red paisley over the barrel, the seven spots inside it, and a cream patch at each shoulder. The paisley is a ring drawn as an arc rather than a closed circle, which is what gives it the comma shape.</p>
 
 <ol>
-<li>the coat taken to beetle black &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>a cream patch at each shoulder &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>red paisley over the barrel &mdash; <code>RINGS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>and the seven spots inside it &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
@@ -134,10 +135,9 @@
 
 <h3>Coccinella, variant</h3>
 
-<p>The same beetle with both the paisley and the shoulders in colours the line carries - the yellow and orange ladybirds rather than the red. Fully recessive.</p>
+<p>The same ladybird in a lighter, more saturated red with paler shoulder patches - the same insect in a different season. Fully recessive.</p>
 
 <ol>
-<li>the coat taken to beetle black &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>a cream patch at each shoulder &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>red paisley over the barrel &mdash; <code>RINGS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>and the seven spots inside it &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

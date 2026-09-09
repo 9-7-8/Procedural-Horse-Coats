@@ -166,6 +166,19 @@ class GenotypeTest {
                 // homozygote, not the default allele, hence the chestnut above
                 continue;
             }
+            if (gene == Genes.MAGIC_NIGHT_TEMPER || gene == Genes.MAGIC_NIGHT_WATCH) {
+                // The two night loci have NO n/n row: their founder tables are
+                // entirely heterozygous by design, so every feral horse carries
+                // one variant and the plain combination cannot be caught. A
+                // maximal roll therefore lands on the last CARRIER, which is
+                // still "the last bucket the table declares" - the invariant
+                // this test is really about. Asserted as carrying exactly one
+                // variant copy rather than as a specific allele, so adding a
+                // ninth variant does not edit this test.
+                assertEquals(1, x.pair(gene).count(gene.defaultAllele()),
+                        gene.key() + " draws only heterozygotes, so a maximal roll is a carrier");
+                continue;
+            }
             assertTrue(x.pair(gene).homozygousFor(gene.defaultAllele()),
                     gene.key() + " should have landed on its baseline combination");
         }

@@ -21,7 +21,7 @@
 <h1>Shieldback</h1>
 
 <p class="lede">
-    A shield-bug's back: a green ground, a scalloped collar across the withers, and a fanning column of ringed eyespots down the topline.
+    A scalloped collar across the withers and a fanning column of ringed eyespots down the topline - a shield bug's back, on the horse's own colour.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -51,6 +51,10 @@
 <p>Imported from the magic-gene intake, 2026-09-08. The source file is not valid JSON - it has arithmetic in it (`27.0 + &quot;$collarBorderWidth&quot;`), which the format has no notion of. Every computed bound here is written out as a constant or a knob instead.</p>
 
 <p>The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest. That is the opposite of what the 90/77.94 saw-wave trick does, and it is the right answer for a collar.</p>
+
+<p>The shield-bug green ground was removed (owner's call) for the same reason as coccinella's black: it covered the horse before marking it. Only the collar and the eyespots remain, and they now sit on the base coat.</p>
+
+<p>The 'coloured' allele used to vary the GROUND and nothing else, so when the ground was removed the two alleles became byte-identical - a locus with two names for one outcome. The hue knob now drives the collar and the eyespot rings instead, which is what 'a colour the line carries' should always have meant on a gene whose ground was never the interesting part.</p>
 
 <h2 id="inheritance">Crossing two of them</h2>
 
@@ -107,7 +111,7 @@
 <tr><th>Priority</th><td>319 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Shb</code> &middot; <code>Shc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>9 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>AXIS, PARTS, RINGS, SPOTS, TOWARD, WAVES</td></tr>
+<tr><th>Built from</th><td>AXIS, RINGS, SPOTS, TOWARD, WAVES</td></tr>
 </tbody>
 </table>
 </div>
@@ -123,10 +127,9 @@
 
 <h3>Shieldback</h3>
 
-<p>The collar is a sine band read ACROSS the neck rather than along it - axis Z, which runs side to side - so it scallops round the withers instead of running up the crest. The eyespots are a ring and a spot on one lattice, cut to the top of the barrel, so they queue down the spine rather than covering the flank.</p>
+<p>The collar and the eyespots in their own red, laid on whatever colour the horse already is. The eyespots are drawn as a ring with a dark centre, which is the shape the warning depends on - a solid disc does not read as an eye.</p>
 
 <ol>
-<li>the ground, a shield-bug green &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>a scalloped collar across the withers &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
 <li>a column of ringed eyespots down the topline &mdash; <code>RINGS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>each with a dark centre &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
@@ -134,12 +137,11 @@
 
 <h3>Shieldback, coloured</h3>
 
-<p>The same back with the ground in a colour the line carries. The eyespots stay red and black - they are the warning, and a warning that matches the animal is not one. Fully recessive.</p>
+<p>The same collar and eyespots with the ring in a colour the line carries rather than in red. The centres stay dark: the pupil is what makes an eyespot an eye, and a beetle that varied it would be advertising something else. Fully recessive - it takes two copies, and a single one beside the red allele shows red.</p>
 
 <p>The eyespots stay red and black in both forms. A warning that matches the animal is not a warning, and letting the hue knob reach them made the gene read as a plain spotted horse.</p>
 
 <ol>
-<li>the ground, a shield-bug green &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>a scalloped collar across the withers &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
 <li>a column of ringed eyespots down the topline &mdash; <code>RINGS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>each with a dark centre &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

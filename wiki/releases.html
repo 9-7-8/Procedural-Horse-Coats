@@ -36,46 +36,87 @@
     </p>
 </div>
 
-<h2 id="unreleased">Unreleased</h2>
+<h2 id="v0-3-1">0.3.1</h2>
 
 <p class="lede">
-    On <code>main</code>, not in any tag or jar yet.
+    Two genes that make a horse frightening, nine coat genes repainted, and the categories
+    reorganised so they mean something.
 </p>
 
+<h3 id="v0-3-1-night">The night loci</h3>
+
 <ul>
-    <li><strong>A mask stays inside the parts it names.</strong> Twelve genes change.
-        Four of them change enormously &mdash; <a href="gene-webbed.html">webbed</a>,
-        <a href="gene-elytra-veins.html">elytra veins</a>,
-        <a href="gene-iridescent-jewel.html">iridescent jewel</a> and
-        <a href="gene-opal-wing-veins.html">opal wing veins</a> were each painting the head,
-        muzzle, ears, mane, tail and all four legs at full strength while declaring only
-        the barrel and the neck, and webbed was putting four times more paint outside its
-        declared region than inside it. Smaller corrections to
-        <a href="gene-moth-mantle.html">moth mantle</a>, <a href="gene-lace.html">lace</a>,
-        <a href="gene-fracture.html">fracture</a> and <a href="gene-koi.html">koi</a>.
-        And five gain coverage they had been losing on parts they explicitly listed:
-        <a href="gene-masked.html">masked</a>&rsquo;s mask now reaches the ears,
-        <a href="gene-ehretia.html">ehretia</a>&rsquo;s dorsal stripe now reaches the tail,
-        and <a href="gene-peafowl.html">peafowl</a>,
-        <a href="gene-snow-cloud.html">snow cloud</a> and
-        <a href="gene-war-mask.html">war mask</a> likewise. See
-        <a href="known-gaps.html#gap-120">gap 120</a>.</li>
-    <li>Two broken wiki links fixed, and a link checker added so the next one fails loudly.</li>
-    <li>The <code>common/</code> portability rules &mdash; no Minecraft imports, no empty
-        immutable map, no re-introduced Java 9+ call &mdash; are enforced by a test rather
-        than written down. <a href="known-gaps.html#gap-116">Gap 116</a>.</li>
+    <li><strong><a href="gene-magic-night-temper.html">Magic night temper</a></strong> &mdash;
+        eight variants in two families. Four <em>hunt</em> and four <em>flee</em>, and each
+        names who: riders, passive animals, monsters, or everything. By day every one of them
+        is an ordinary horse. The monster-hunter is the only one most people would keep on
+        purpose; the one that flees riders is catchable, tamable and rideable by day and will
+        not let you near it after dark.</li>
+    <li><strong><a href="gene-magic-night-watch.html">Magic night watch</a></strong> &mdash;
+        five variants that are a ladder rather than a list. It stares from anywhere through
+        walls; or closes to ten blocks first; or watches only while it can see you; or moves
+        to where <em>you</em> cannot see <em>it</em>; or stands directly behind you. Any of
+        them makes the horse <strong>silent on its feet at night</strong>.</li>
+    <li>The temper locus <strong>supersedes</strong> the watch locus whenever it has
+        something to act on, so a horse never tries to stalk you and flee from you at once.</li>
+    <li>Both are <strong>entirely heterozygous in the wild</strong>: every feral horse
+        carries exactly one variant and none of them shows it, so the plainest outcome each
+        locus has is the one that cannot be caught.</li>
 </ul>
 
-<div class="note warn">
-    <span class="label">The 0.3.0 jar does not have the invert fix</span>
-    <p>
-        It was found and fixed after the tag was cut. If you are running the attached
-        0.3.0 jar, those ten genes still behave as described in
-        <a href="known-gaps.html#gap-120">gap 120</a> &mdash; which for four of them means
-        covering the whole horse. Worth a 0.3.1 whenever somebody is next at a keyboard;
-        the procedure is on <a href="architecture.html#running">architecture</a>.
-    </p>
-</div>
+<h3 id="v0-3-1-coats">Coat genes</h3>
+
+<ul>
+    <li><strong>Three genes stopped painting a ground over the whole horse</strong> &mdash;
+        <a href="gene-coccinella.html">coccinella</a>&rsquo;s black,
+        <a href="gene-shieldback.html">shieldback</a>&rsquo;s green,
+        <a href="gene-tribal-ward.html">tribal ward</a>&rsquo;s pale. All three now mark the
+        horse&rsquo;s own colour, so two carriers are different animals.</li>
+    <li><strong><a href="gene-koi.html">Koi</a></strong>&rsquo;s orange and dark varieties
+        lay patches on the coat instead of tiling the whole horse. The white variety still
+        covers, because that is the one whose point is the hard boundary between two
+        fields.</li>
+    <li><strong><a href="gene-snow-cloud.html">Snow cloud</a></strong> has bare drifts the
+        coat shows through, which is what its name always described.</li>
+    <li><strong><a href="gene-cleave.html">Cleave</a></strong>&rsquo;s detached spears are
+        spear-shaped and close to the line, instead of splotches loose on the far half.</li>
+    <li><strong><a href="gene-opossum.html">Opossum</a></strong>&rsquo;s rear edge is
+        dithered &mdash; the dots get rarer &mdash; rather than a gradient fade.</li>
+    <li><strong><a href="gene-nyxborn.html">Nyxborn</a></strong> stars only what is
+        genuinely black, so a bay keeps its brown shoulder unstarred.</li>
+    <li><strong><a href="gene-stained-glass.html">Stained glass</a></strong> gained a
+        <strong>grisaille</strong> palette &mdash; grey and white only, and the one palette
+        that reads as glass on any base coat.</li>
+    <li>Shieldback and tribal ward&rsquo;s &ldquo;coloured&rdquo; alleles now colour the
+        <em>marking</em>. They previously varied only the ground, so removing it left them
+        identical to their first allele.</li>
+</ul>
+
+<h3 id="v0-3-1-elsewhere">Elsewhere</h3>
+
+<ul>
+    <li><strong>The magical categories were reorganised.</strong> They were derived from
+        priority bands, which is a real fact about a gene that paints and an accident about
+        one that does not &mdash; so one category held coat markings, milk buckets, spawn
+        eggs and a horse that stares through walls. The non-painting genes are grouped by
+        what they do now: yield and death, behaviour, trails and emissions, body stats.</li>
+    <li><a href="gene-shadowcreature.html">Shadowcreature</a>&rsquo;s page has its preview
+        back. It never had one &mdash; the page was written from the template for a gene that
+        paints nothing.</li>
+    <li>An inverted mask no longer escapes its own <code>parts</code>, which corrects twelve
+        genes (carried over from the unreleased work at 0.3.0 &mdash; see the notes there).</li>
+</ul>
+
+<h3 id="v0-3-1-notes">Notes</h3>
+
+<ul>
+    <li><strong>Not save-compatible with 0.3.0.</strong> Two new loci change the genotype
+        code and every horse&rsquo;s epigenetic slots. Start a new world.</li>
+    <li><strong>The night loci have never run in a game.</strong> Two AI goals, a supersede
+        rule and a sound suppression, all written against the sources and none of it seen.
+        <a href="verification.html">To be verified</a> &sect;0-AT is the checklist.</li>
+    <li>Still NeoForge, Minecraft <strong>26.1.2</strong> only. Both sides need the mod.</li>
+</ul>
 
 <h2 id="v0-3-0">0.3.0</h2>
 

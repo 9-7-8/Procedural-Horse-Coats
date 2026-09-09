@@ -21,7 +21,7 @@
 <h1>Koi</h1>
 
 <p class="lede">
-    A hard-edged patchwork over the whole horse, the way a koi carp is marked - one colour against another with nothing blended between them, and the mane and tail striped to match.
+    Hard-edged patches the way a koi carp is marked, with nothing blended at their boundaries and the mane and tail striped to match. The white variety covers the horse in two fields; the other two lay their patches on the coat and leave the rest of it showing.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -52,6 +52,8 @@
 <p>Imported from the magic-gene intake, 2026-09-08. One PATCHES field and its inverse, so every texel is one colour or the other. There is deliberately no third tone and no soft edge anywhere: a koi with a gradient in it is a paint horse.</p>
 
 <p>Three alleles rather than two - orange dominant, dark and white each recessive homozygotes. The dark and white forms are not carriers of each other; a Kob beside a Kow is an ordinary horse, the same rule the LUT locus uses.</p>
+
+<p>Only the WHITE variety covers the horse. The orange and dark varieties used to carry a second layer painting 'the dark patches, in what the bright ones left' - the complement of the first - so the two tiled the horse and no base coat showed anywhere. That layer is gone from both (owner's call), leaving the bright patches as actual patches against the horse's own colour. The white variety keeps it, because white-against-colour is the variety whose whole point is the hard boundary between two fields.</p>
 
 <h2 id="inheritance">Crossing two of them</h2>
 
@@ -132,7 +134,6 @@
 
 <ol>
 <li>the bright patches &mdash; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
-<li>the dark patches, in what the bright ones left &mdash; <code>PATCHES inverted</code>, painted with <code>TOWARD</code></li>
 <li>the mane and tail striped to match &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 </ol>
 
@@ -142,7 +143,6 @@
 
 <ol>
 <li>the bright patches &mdash; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
-<li>the dark patches, in what the bright ones left &mdash; <code>PATCHES inverted</code>, painted with <code>TOWARD</code></li>
 <li>the mane and tail striped to match &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 </ol>
 

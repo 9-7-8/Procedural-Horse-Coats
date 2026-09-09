@@ -45,8 +45,8 @@
     },
     {
       "name": "reach",
-      "min": 0.18,
-      "max": 0.38
+      "min": 0.3,
+      "max": 0.4
     },
     {
       "name": "far",
@@ -298,11 +298,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -579,11 +579,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -830,11 +830,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -1082,11 +1082,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -1145,5 +1145,8 @@
     "Wac/Wac": 0.004,
     "Wac/n": 0.019,
     "n/n": 99.846
-  }
+  },
+  "notes": [
+    "The detached spears used to be fat ovals (radius 1.3, stretch 2.4) scattered over a band up to 42% of the horse long, which read as random white splotches loose on the far half rather than as spears thrown clear of the boundary (owner's call). They are now long and thin (radius 0.55, stretch 4.2) and the band they sit in is tied close behind the line, because 'reach' was narrowed to 0.30-0.40 against a split of 0.42-0.60. 'reach' stays strictly below the split's minimum so the band can never invert its own from/to."
+  ]
 }

@@ -5,10 +5,11 @@
   "phase": "magical",
   "priority": 222,
   "rarity": "RARE",
-  "blurb": "A beetle-black coat with red paisley over the barrel and a cream patch at each shoulder - a seven-spot ladybird read onto a horse.",
+  "blurb": "Red paisley over the barrel with the seven spots inside it and a cream patch at each shoulder - a seven-spot ladybird read onto whatever colour the horse already is.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The source placed the shoulder patches and the barrel wings with explicit x/y/z boxes. There is no box mask; two crossed AXIS bands in body units are the same thing in the vocabulary that exists, and are what the shoulder patch and the paisley clip are built from.",
-    "The paisley is a RINGS mask with arc 0.55 - a ring drawn as just over half its circumference, which comes out as a comma rather than a circle. That is the whole of what makes it paisley."
+    "The paisley is a RINGS mask with arc 0.55 - a ring drawn as just over half its circumference, which comes out as a comma rather than a circle. That is the whole of what makes it paisley.",
+    "The gene used to paint the whole horse beetle-black before marking it, and the marking was designed against that black. The ground is gone (owner's call): a coat gene here is supposed to let the base coat through, and a ground makes every carrier the same animal underneath. The paisley, the spots and the shoulder patches are unchanged, so on a dark horse it reads much as it always did and on a chestnut it is a new thing."
   ],
   "alleles": [
     {
@@ -69,34 +70,13 @@
     {
       "id": "red",
       "name": "Coccinella Marking",
-      "description": "Black first, over the whole horse, and then the ladybird is painted back onto it. The paisley is a ring drawn as a 55% arc - a partial ring is a comma rather than a circle - and the spots inside are a mirrored field, so the two sides match the way an elytron pair does.",
+      "description": "The ladybird painted onto the horse's own colour: red paisley over the barrel, the seven spots inside it, and a cream patch at each shoulder. The paisley is a ring drawn as an arc rather than a closed circle, which is what gives it the comma shape.",
       "when": [
         "Ccr/Ccr",
         "Ccr/Ccv",
         "Ccr/n"
       ],
       "layers": [
-        {
-          "name": "the coat taken to beetle black",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#0e0e10",
-            "strength": 94.0
-          }
-        },
         {
           "name": "a cream patch at each shoulder",
           "masks": [
@@ -210,32 +190,11 @@
     {
       "id": "variant",
       "name": "Coccinella, variant",
-      "description": "The same beetle with both the paisley and the shoulders in colours the line carries - the yellow and orange ladybirds rather than the red. Fully recessive.",
+      "description": "The same ladybird in a lighter, more saturated red with paler shoulder patches - the same insect in a different season. Fully recessive.",
       "when": {
         "Ccv": 2
       },
       "layers": [
-        {
-          "name": "the coat taken to beetle black",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#0e0e10",
-            "strength": 94.0
-          }
-        },
         {
           "name": "a cream patch at each shoulder",
           "masks": [

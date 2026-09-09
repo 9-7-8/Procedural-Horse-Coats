@@ -35,6 +35,71 @@
     </p>
 </div>
 
+<h2 id="night-genes">&sect;0-AT &mdash; The night loci, and nine genes repainted (2026-09-09, NOT looked at)</h2>
+
+<p>
+    The two night loci are the largest piece of <strong>unverified behaviour</strong> in the
+    mod: two new AI goals, a supersede rule between two genes, and a sound suppression, none
+    of which has run in a game. The coat changes were all eyeballed as icons, which is not
+    the same as having seen one in a world.
+</p>
+
+<h3>The night loci &mdash; behaviour, so nothing here is confirmed by a render</h3>
+
+<ul>
+    <li><strong>Does night actually start and stop it?</strong> The simplest thing to get
+        wrong. A horse homozygous for any watcher should change at dusk and be an ordinary
+        horse at dawn, and the handler clears its state on the day branch rather than
+        leaving it stale &mdash; which is what makes dawn end the behaviour rather than
+        merely stop renewing it.</li>
+    <li><strong>Does the watcher actually stand still?</strong> The goal claims
+        <code>Flag.MOVE</code> even in the two modes that never path anywhere, to stop the
+        wander goal drifting the horse off mid-stare. If a staring horse wanders, that flag
+        is not doing what it is meant to.</li>
+    <li><strong>Do the two positioning modes work at all?</strong> <code>unseen</code> uses
+        a yaw test rather than a raycast, and <code>behind</code> paths to a point derived
+        from the player&rsquo;s look vector. Both are guesses about how a horse&rsquo;s
+        navigation behaves when the destination moves every tick, and the plausible failure
+        is a horse that jitters or gives up.</li>
+    <li><strong>Are the footsteps actually silent?</strong> Both
+        <code>PlayLevelSoundEvent</code> shapes are handled because it was not possible to
+        determine from the sources which one a horse&rsquo;s step takes. If it turns out to
+        be neither, the gene is silent about being silent.</li>
+    <li><strong>Does the supersede rule read cleanly?</strong> Breed a horse homozygous for
+        both loci, stand it in a field with a cow, and check it deals with the cow rather
+        than doing both. Then remove the cow and check the watching resumes.</li>
+    <li><strong>Does hunting hurt?</strong> Aggression is <code>setTarget</code> on
+        machinery that already existed, so it should just work &mdash; but it has never been
+        seen to.</li>
+</ul>
+
+<h3>The nine repainted genes &mdash; looked at as icons, never in a world</h3>
+
+<ul>
+    <li><strong>The three that lost a ground</strong> &mdash;
+        <a href="gene-coccinella.html">coccinella</a>,
+        <a href="gene-shieldback.html">shieldback</a>,
+        <a href="gene-tribal-ward.html">tribal ward</a>. All three now sit on the base coat,
+        so the thing to check is whether they still read on a <em>pale</em> horse: they were
+        designed against a dark ground, and a cream one is the case most likely to look
+        washed out.</li>
+    <li><strong>The two whose second allele was rescued</strong> &mdash; shieldback and
+        tribal ward again. Their &ldquo;coloured&rdquo; alleles were identical to their
+        first until the hue knob was pointed at the marking. Worth confirming the two
+        alleles now look like two things.</li>
+    <li><strong><a href="gene-koi.html">Koi</a>&rsquo;s orange and dark varieties</strong>
+        are patches on the coat now rather than a tiling. The icon shows the white variety,
+        which deliberately still covers, so <em>neither of the changed alleles has actually
+        been seen</em> &mdash; the only two on this list that were not eyeballed.</li>
+    <li><strong><a href="gene-nyxborn.html">Nyxborn</a> on a chestnut and a grey.</strong>
+        The star mask is dark <em>and</em> unsaturated, and a grey drifts through both
+        readings as it ages, so a mid-grey is the interesting case.</li>
+    <li><strong><a href="gene-opossum.html">Opossum</a>&rsquo;s dithered edge</strong> is
+        three hard bands at falling densities. On the icon it reads as roan running out; on
+        a moving horse at distance it may read as three stripes, which is the failure worth
+        looking for.</li>
+</ul>
+
 <h2 id="invert-parts">&sect;0-AS &mdash; Twelve genes whose masks now stay inside the parts they name (2026-09-08, NOT looked at)</h2>
 
 <p>

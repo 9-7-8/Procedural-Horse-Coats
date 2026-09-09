@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic night temper &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic night temper</h1>
+
+<p class="lede">
+    What the horse becomes after dark. Eight variants in two families: one
+    <strong>hunts</strong> and the other <strong>runs</strong>, and each names who it feels
+    that about &mdash; riders, passive animals, monsters, or everything. By day every one of
+    them is an ordinary horse.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_night_temper"></div>
+
+<h2 id="what">The eight</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>After dark</th></tr></thead>
+    <tbody>
+        <tr><td><code>Agp/Agp</code></td><td>goes for <strong>riders</strong></td></tr>
+        <tr><td><code>Agc/Agc</code></td><td>goes for <strong>passive animals</strong></td></tr>
+        <tr><td><code>Agh/Agh</code></td><td>goes for <strong>monsters</strong></td></tr>
+        <tr><td><code>Aga/Aga</code></td><td>goes for <strong>everything</strong></td></tr>
+        <tr><td><code>Flp/Flp</code></td><td>flees <strong>riders</strong></td></tr>
+        <tr><td><code>Flc/Flc</code></td><td>flees <strong>passive animals</strong></td></tr>
+        <tr><td><code>Flh/Flh</code></td><td>flees <strong>monsters</strong></td></tr>
+        <tr><td><code>Fla/Fla</code></td><td>flees <strong>everything</strong></td></tr>
+        <tr><td>anything else</td><td>an ordinary horse</td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>It takes a matched pair.</strong> A horse carrying two <em>different</em>
+    variants shows neither, because &ldquo;hunt everything&rdquo; and &ldquo;run from
+    everything&rdquo; cannot both be what an animal does.
+</p>
+
+<h2 id="which">Which ones are worth having</h2>
+
+<p>
+    <code>Agh</code> is the only one most people would keep on purpose: a horse that goes
+    for the monsters is a horse worth leaving in a yard, though it will get itself killed
+    doing it unless it was bred for <a href="gene-magic-fighter.html">the fight</a> and
+    <a href="gene-magic-health.html">the health</a> as well. <code>Flh</code> is the
+    sensible one &mdash; it runs from monsters instead of standing to be hit, and it is the
+    variant that most reliably keeps the animal alive.
+</p>
+
+<p>
+    The rest are problems. <code>Flp</code> is the cruel one: perfectly catchable, tamable
+    and rideable by day, and after dark it will not let you near it.
+</p>
+
+<h2 id="founders">Every feral horse carries one, and none of them shows it</h2>
+
+<p>
+    <strong>The founder table is entirely heterozygous.</strong> The variants split the whole
+    wild population between them and there is no wild-type row at all, so a horse you catch
+    always carries exactly one of them and never expresses it. The plainest outcome the
+    locus has &mdash; an ordinary horse, day and night &mdash; is the one that
+    <em>cannot be caught</em>. It turns up a generation later, in a quarter of the foals of
+    two carriers.
+</p>
+
+<p>
+    That is unlike every other locus in the mod and it is the owner&rsquo;s design rather
+    than a consequence of one. The other genes with invisible carriers put wild horses on
+    the combinations that <em>show</em>, so that what you catch is what you watched it do.
+    Here nothing is meant to be watchable: the point is that any horse in the world might be
+    hiding one of these, and the only way to find out which is to breed it and wait for
+    dark.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    No disorder, but three of these will get a horse killed &mdash; anything that picks
+    fights after dark, and <code>Fla</code>, which will not be where you left it. The
+    server&rsquo;s health switch does not govern any of it: this is the rule of the gene
+    rather than a defect.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_night_temper"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_night_temper</code></dd></div>
+    <div><dt>Alleles</dt><dd>eight variants in two families of four, plus <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>136 &mdash; the magical behaviour band</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>night_temper</code> effect</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in a game. The AI goals and the sound
+        suppression were written against the 26.1.2 sources and are flagged as
+        unverified in their own comments. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="night">Night is in the verb, not in a condition</h2>
+
+<p>
+    The effect format has a <code>when</code> clause and a <code>night</code> flag, so this
+    could have been eight alleles each carrying <code>"when": {"flag": "night"}</code>. It
+    is not, and the reason is that the gate would then be written fourteen times across two
+    genes and be wrong the first time somebody forgot it. The verb says it once: a
+    <code>night_temper</code> is night-only by definition, and the check is a single
+    <code>isBrightOutside</code> in the translator.
+</p>
+
+<h2 id="supersede">It talks over the watching locus</h2>
+
+<p>
+    <a href="gene-magic-night-watch.html">Magic night watch</a> makes a horse follow and
+    stare at a player. This gene <strong>supersedes it</strong> whenever it actually has
+    something to act on &mdash; a horse that both stalks you and flees from you is not two
+    behaviours, it is a bug.
+</p>
+
+<p>
+    The rule lives in the translator and could not live anywhere else: whether there is a
+    cow within sixteen blocks is a question only the running game can answer.
+    <code>NightBehaviourHandler</code> resolves the temper first and, if it found a target,
+    withholds the watch ability for the next scan &mdash; so the watch goal reports
+    <code>canUse() == false</code> and stands down cleanly instead of fighting it for the
+    navigation.
+</p>
+
+<div class="codebox">
+<div class="filename">neoforge/server/NightBehaviourHandler.java</div>
+<pre><code class="language-java">boolean temperActing = temper != null &amp;&amp; applyTemper(temper, horse, level);
+// THE SUPERSEDE RULE: the watch only runs when the temper found nothing.
+if (temperActing || watch == null) {
+    WATCHING.remove(id);
+} else {
+    WATCHING.put(id, watch);
+}</code></pre>
+</div>
+
+<h2 id="aggro">Hunting is three lines, because the machinery was already there</h2>
+
+<p>
+    Horses in this mod already have an <code>ATTACK_DAMAGE</code> attribute and a melee
+    goal &mdash; <a href="gene-magic-fighter.html">the fighter locus</a> and
+    <code>HorseAggroHandler</code> put them there so a wild horse could kick back. So
+    &ldquo;goes for it&rdquo; is <code>horse.setTarget(nearest)</code> and nothing else.
+    Fleeing needed its own path, because there is no vanilla avoid-goal to borrow.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="why">Why eight and not two</h2>
+
+<p>
+    &ldquo;Aggressive at night&rdquo; and &ldquo;skittish at night&rdquo; would have been
+    two alleles and a much duller locus. Naming the <em>target</em> is what makes it a
+    breeding problem rather than a switch: a horse that hunts monsters and a horse that
+    hunts you are the same gene, one allele apart, and they look identical in daylight.
+</p>
+
+<p>
+    It also gives the locus a real internal geography. The four aggressive variants nest
+    &mdash; players, animals, monsters, all &mdash; so &ldquo;all&rdquo; is not a fifth
+    thing but the union of the other three, and a breeder who wants a monster-hunter has to
+    avoid throwing the one that includes them.
+</p>
+
+<h2 id="dark">Why the change is total rather than gradual</h2>
+
+<p>
+    Nothing here ramps at dusk. The horse is one animal and then it is another, and it
+    stops at dawn with no memory of it. That is deliberate: a gradual version would read as
+    a mood, and the thing this locus is for is the discovery that the animal you have been
+    riding all week is not the animal in your yard at night.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-night-watch.html">Magic night watch</a>
+        <a href="gene-magic-mob-aura.html">Magic mob aura</a>
+        <a href="gene-magic-fighter.html">Magic fighter</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicNightTemperGene.java</code>,
+    <code>neoforge/server/NightBehaviourHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

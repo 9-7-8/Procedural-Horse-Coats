@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic night watch &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic night watch</h1>
+
+<p class="lede">
+    What the horse does about <em>you</em> after dark. Five variants, and they are a
+    progression rather than a list &mdash; each one is a little closer and a little worse.
+    A horse homozygous for any of them makes <strong>no footstep sound at night</strong>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_night_watch"></div>
+
+<h2 id="what">The five</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>After dark</th></tr></thead>
+    <tbody>
+        <tr><td><code>Wst/Wst</code></td><td>stops, turns to face you, and stares &mdash; <strong>through walls</strong>, from anywhere. It does not graze, wander or follow.</td></tr>
+        <tr><td><code>Wnr/Wnr</code></td><td>closes to about ten blocks first, then does the same and comes no nearer.</td></tr>
+        <tr><td><code>Wsi/Wsi</code></td><td>watches only while it genuinely has line of sight, and goes back to grazing when you step behind something.</td></tr>
+        <tr><td><code>Wun/Wun</code></td><td>works out where you are looking and puts itself somewhere else, then watches from there. Turn round and it is already moving.</td></tr>
+        <tr><td><code>Wbh/Wbh</code></td><td>stands as close behind you as it can get, and stays there.</td></tr>
+        <tr><td>anything else</td><td>an ordinary horse</td></tr>
+    </tbody>
+</table>
+
+<h2 id="quiet">It goes quiet</h2>
+
+<p>
+    <strong>Any</strong> of the five silences the horse&rsquo;s footfalls at night. That is
+    not a sixth variant, it is a property of all of them, and it is what turns the locus
+    from a novelty into the thing it is for: the behaviours above are unsettling in
+    proportion to how little warning you get, and hoofbeats are warning.
+</p>
+
+<p>
+    It stays quiet even while <a href="gene-magic-night-temper.html">the temper locus</a> is
+    talking over it. The horse still has the allele, and a stalker that became audible the
+    moment a cow wandered past would be a tell.
+</p>
+
+<h2 id="escape">Only one of them can be escaped</h2>
+
+<p>
+    <code>Wsi</code> is stopped by a closed door. The other four do not need to see you:
+    the fixed stare goes through walls and floors, the closing one paths to you, and the
+    two that position themselves are working from where you are looking rather than from
+    what you can see.
+</p>
+
+<h2 id="founders">Every feral horse carries one, and none of them shows it</h2>
+
+<p>
+    <strong>The founder table is entirely heterozygous.</strong> The variants split the whole
+    wild population between them and there is no wild-type row at all, so a horse you catch
+    always carries exactly one of them and never expresses it. The plainest outcome the
+    locus has &mdash; an ordinary horse, day and night &mdash; is the one that
+    <em>cannot be caught</em>. It turns up a generation later, in a quarter of the foals of
+    two carriers.
+</p>
+
+<p>
+    That is unlike every other locus in the mod and it is the owner&rsquo;s design rather
+    than a consequence of one. The other genes with invisible carriers put wild horses on
+    the combinations that <em>show</em>, so that what you catch is what you watched it do.
+    Here nothing is meant to be watchable: the point is that any horse in the world might be
+    hiding one of these, and the only way to find out which is to breed it and wait for
+    dark.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. A watcher is in no danger and is no danger &mdash; it does not attack. If you
+    want one that does, that is <a href="gene-magic-night-temper.html">the other locus</a>,
+    and the two together are the horse people are actually asking for.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_night_watch"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_night_watch</code></dd></div>
+    <div><dt>Alleles</dt><dd>five watchers, plus <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>137 &mdash; the magical behaviour band</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>night_watch</code> effect</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in a game. The AI goals and the sound
+        suppression were written against the 26.1.2 sources and are flagged as
+        unverified in their own comments. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="one-goal">Five modes, one goal class</h2>
+
+<p>
+    <code>NightWatchGoal</code> handles all five, because they differ only in
+    <em>where the horse wants to stand</em> and <em>whether it needs to see you</em>.
+    Everything else &mdash; find the nearest player, face them, hold &mdash; is shared, and
+    five classes would have been the same forty lines five times.
+</p>
+
+<div class="codebox">
+<div class="filename">neoforge/server/NightWatchGoal.java</div>
+<pre><code class="language-java">private Vec3 destination(GeneAbility.NightWatch w) {
+    return switch (w.mode()) {
+        case "stare", "line_of_sight" -&gt; null;          // never moves
+        case "approach" -&gt; horse.distanceTo(target) &gt; w.radius() ? target.position() : null;
+        case "behind" -&gt; target.position()
+                .subtract(target.getLookAngle().normalize().scale(w.radius()));
+        case "unseen" -&gt; inView() ? behindOffset(target) : null;
+        default -&gt; null;
+    };
+}</code></pre>
+</div>
+
+<h2 id="standing-still">Standing still is a thing the goal has to hold</h2>
+
+<p>
+    The goal claims <code>Flag.MOVE</code> even in the two modes that never path anywhere,
+    which looks wrong and is not: holding MOVE is what stops the wander goal taking over
+    and drifting the horse off mid-stare. A watcher that wandered would just be a horse.
+</p>
+
+<h2 id="unseen">&ldquo;Cannot see it&rdquo; is a yaw test, not a raycast</h2>
+
+<p>
+    <code>unseen</code> asks whether the horse is inside the player&rsquo;s view arc &mdash;
+    a dot product against their flattened look vector, about 80&deg; either side. It is
+    deliberately not a line-of-sight trace, because for this gene &ldquo;can the player see
+    it&rdquo; means <em>is it in front of them</em>. The unsettling part is turning round and
+    finding it there; whether a fencepost happened to be in the way is not the point.
+</p>
+
+<h2 id="sound">Silencing a footfall, twice over</h2>
+
+<p>
+    A step sound may arrive as <code>PlayLevelSoundEvent.AtEntity</code> or as
+    <code>AtPosition</code>, depending on how the entity happens to call
+    <code>playSound</code> &mdash; which is exactly the kind of detail that is true in one
+    version and not the next. Both are handled. Listening for both costs one extra method
+    and cannot be wrong; listening for the wrong one costs a gene that silently does
+    nothing.
+</p>
+
+<p>
+    The sound is matched on its id containing <code>step</code>, which covers every
+    block&rsquo;s footfall without naming any of them. A watcher is silent on its feet, not
+    mute &mdash; it can still be heard breathing, and that is the point.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="progression">The five are a ladder</h2>
+
+<p>
+    They were not chosen as five separate ideas. Read in order they are a single one taken
+    steadily further: <em>it is looking at you</em>, <em>it has come closer</em>, <em>it is
+    only looking when it can</em>, <em>it is standing where you cannot check</em>, <em>it is
+    directly behind you</em>. The third is the odd one out and belongs there &mdash; it is
+    the rung where the horse is least frightening, and having it in the middle is what makes
+    the last two land.
+</p>
+
+<h2 id="pairing">It is half a horse</h2>
+
+<p>
+    On its own this locus is unsettling and harmless. Paired with
+    <a href="gene-magic-night-temper.html">the temper locus</a> it is something else, and
+    the supersede rule is what makes the pair coherent rather than a mess: the horse watches
+    you all night, silently, until something walks past &mdash; and then it stops watching
+    and deals with that instead.
+</p>
+
+<p>
+    That is also why the two are separate loci rather than one gene with ten alleles. They
+    are independent draws, so a breeder can have one without the other, and the horse that
+    has both is a cross somebody made on purpose.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-night-temper.html">Magic night temper</a>
+        <a href="gene-effects.html">The effects block</a>
+        <a href="horse-care.html">Bond, herds and horse care</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicNightWatchGene.java</code>,
+    <code>neoforge/server/NightWatchGoal.java</code>,
+    <code>neoforge/server/NightBehaviourHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

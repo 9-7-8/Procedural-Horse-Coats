@@ -57,7 +57,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#0b0b12",
+            "color": "#0c0c0c",
             "strength": 97,
             "opacity": 100
           }
@@ -77,6 +77,14 @@
               "from": 0.8,
               "to": 0.94,
               "combine": "MAX"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.1,
+              "to": 0.28,
+              "invert": true,
+              "combine": "MULTIPLY"
             },
             {
               "type": "NOISE",
@@ -118,6 +126,14 @@
               "combine": "MAX"
             },
             {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.1,
+              "to": 0.28,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
               "type": "SPOTS",
               "seed": "$starSeed",
               "spacing": 1.6,
@@ -147,5 +163,10 @@
   "founders": {
     "Nyx/Nyx": 0.05,
     "n/n": 99.95
-  }
+  },
+  "notes": [
+    "The stars land on BLACK, not merely on dark (owner's call), and telling those apart needs two readings rather than one. On the shipped gradient a black horse reads 0.807 on LUMA's 'dark' channel and a bay reads 0.782 - close enough that no threshold separates them without also losing half the black. What does separate them is SATURATION: black sits at 0.02 and a bay's red at 0.556, because the difference between them is colour and not brightness. So the star masks are dark AND unsaturated, and a bay keeps its brown shoulder unstarred.\n\nThat is also why the white-to-black layer paints a neutral #0c0c0c rather than the blue-black it used to: a tinted void reads as saturated, and the gene would have refused to star the very black it had just made.",
+    "A horse carrying EXTREME WHITE DOMINANT shows none of this. That gene holds a white lock - every white texel is permanent and nothing painted afterwards may change it, at any slot in the paint order - and this gene's first act is to paint the white out. The lock wins, which is correct and is what 'extreme' means, but the two genes make opposite total claims and neither would otherwise mention the other. See known-gaps gap 126.",
+    "The stars cannot see the black this gene just made. Phase 3 hands every layer the coat as it was BEFORE the gene painted, so 'replace the white, THEN star the black' is not expressible in the obvious order - which is why the star layers mask on 'wherever it is dark, OR wherever it was white' rather than simply on 'wherever it is dark'. The two are the same set once the first layer has run. See known-gaps gap 125."
+  ]
 }

@@ -199,7 +199,7 @@ and fails *silently* when stale:
 
 | If you touched | Re-run | Commit |
 |---|---|---|
-| any gene, or a coat deliberately moved | the golden file moves. Regenerating it needs a **full** `:common:test`, so leave it stale, say so, and note it in `wiki/known-gaps.html` | `common/src/test/resources/coat-golden.txt` |
+| any gene, or a coat deliberately moved | **two** goldens move. `*CoatBakeGoldenTest` covers every registered gene and regenerates in seconds - run it, look at the icons, copy `common/build/` over the resource. `coat-golden.txt` covers 39 genes and needs a **full** `:common:test`, so leave that one stale, say so, and note it in `wiki/known-gaps.html` | `common/src/test/resources/coat-bake-golden.txt`, `coat-golden.txt` |
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs`; geometry also moves `:common:bakeGeneIcons` | `wiki/gene-creator/fixtures/expected.json`, `wiki/assets/gene-icons/` |

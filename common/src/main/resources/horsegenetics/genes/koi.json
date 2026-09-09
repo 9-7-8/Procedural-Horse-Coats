@@ -5,10 +5,11 @@
   "phase": "magical",
   "priority": 218,
   "rarity": "EPIC",
-  "blurb": "A hard-edged patchwork over the whole horse, the way a koi carp is marked - one colour against another with nothing blended between them, and the mane and tail striped to match.",
+  "blurb": "Hard-edged patches the way a koi carp is marked, with nothing blended at their boundaries and the mane and tail striped to match. The white variety covers the horse in two fields; the other two lay their patches on the coat and leave the rest of it showing.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. One PATCHES field and its inverse, so every texel is one colour or the other. There is deliberately no third tone and no soft edge anywhere: a koi with a gradient in it is a paint horse.",
-    "Three alleles rather than two - orange dominant, dark and white each recessive homozygotes. The dark and white forms are not carriers of each other; a Kob beside a Kow is an ordinary horse, the same rule the LUT locus uses."
+    "Three alleles rather than two - orange dominant, dark and white each recessive homozygotes. The dark and white forms are not carriers of each other; a Kob beside a Kow is an ordinary horse, the same rule the LUT locus uses.",
+    "Only the WHITE variety covers the horse. The orange and dark varieties used to carry a second layer painting 'the dark patches, in what the bright ones left' - the complement of the first - so the two tiled the horse and no base coat showed anywhere. That layer is gone from both (owner's call), leaving the bright patches as actual patches against the horse's own colour. The white variety keeps it, because white-against-colour is the variety whose whole point is the hard boundary between two fields."
   ],
   "alleles": [
     {
@@ -96,32 +97,6 @@
           }
         },
         {
-          "name": "the dark patches, in what the bright ones left",
-          "masks": [
-            {
-              "type": "PATCHES",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ],
-              "seed": "$seedBody",
-              "scale": "$cellSize",
-              "threshold": "$patchWeight",
-              "softness": 0.05,
-              "invert": true
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#141414",
-            "strength": 97.0
-          }
-        },
-        {
           "name": "the mane and tail striped to match",
           "masks": [
             {
@@ -180,32 +155,6 @@
             "hue": "$hue",
             "saturation": 0.7,
             "lightness": 0.3,
-            "strength": 97.0
-          }
-        },
-        {
-          "name": "the dark patches, in what the bright ones left",
-          "masks": [
-            {
-              "type": "PATCHES",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ],
-              "seed": "$seedBody",
-              "scale": "$cellSize",
-              "threshold": "$patchWeight",
-              "softness": 0.05,
-              "invert": true
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#0d0d0f",
             "strength": 97.0
           }
         },

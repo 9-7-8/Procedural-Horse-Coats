@@ -5,10 +5,11 @@
   "phase": "magical",
   "priority": 219,
   "rarity": "EPIC",
-  "blurb": "A white horse with its colour left only where the snow did not settle - clustered high on the croup, round the ankles, and across the face in front of the ears.",
+  "blurb": "Snow lying over the horse in drifts, with the coat showing through where none settled - and dark points clustered high on the croup, round the ankles and across the face in front of the ears.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. White goes on first over everything, and the three clouds of points are painted back over it. Clumping on the speckle fields is what makes them clouds rather than an even dusting.",
-    "The points are subtler on a bake than the source description suggests. If they want to be louder the knob to move is the speckle size rather than the density - denser small points still read as grey from a distance."
+    "The points are subtler on a bake than the source description suggests. If they want to be louder the knob to move is the speckle size rather than the density - denser small points still read as grey from a distance.",
+    "The white used to be a flat PARTS mask over every part, so the horse went entirely white and the only thing the base coat could do was not be seen. It now runs through a large-scale PATCHES mask (owner's call), so there are bare drifts the coat shows through - which is what the gene's own name describes and what makes a snow-cloud chestnut and a snow-cloud black different animals. The three point clusters are untouched; where a cluster lands on a bare drift it simply has less white to sit on."
   ],
   "alleles": [
     {
@@ -71,13 +72,27 @@
       "name": "hue",
       "min": 0.0,
       "max": 360.0
+    },
+    {
+      "name": "driftSeed",
+      "type": "seed"
+    },
+    {
+      "name": "driftScale",
+      "min": 7.0,
+      "max": 13.0
+    },
+    {
+      "name": "settled",
+      "min": 0.34,
+      "max": 0.56
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Snow Cloud",
-      "description": "The whole horse goes white first, and then three clouds of dark points are laid back over it - each one a speckle field with clumping turned up, cut down to its own region. Clumping is what makes them clouds rather than an even dusting, and the three regions are the parts of a horse the weather reaches last.",
+      "description": "Snow lies over the horse in drifts with the coat showing through where none settled, and three clouds of dark points are laid over the top - each a speckle field pinned to one part of the body: high on the croup, round the ankles, and across the face in front of the ears.",
       "when": [
         "Snw/Snw",
         "Snw/Snc",
@@ -85,7 +100,7 @@
       ],
       "layers": [
         {
-          "name": "white over the whole horse",
+          "name": "snow over the horse, with bare drifts the coat shows through",
           "masks": [
             {
               "type": "PARTS",
@@ -98,6 +113,23 @@
                 "EARS",
                 "HAIR"
               ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS",
+                "HAIR"
+              ],
+              "seed": "$driftSeed",
+              "scale": "$driftScale",
+              "threshold": "$settled",
+              "softness": 0.09,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -229,13 +261,13 @@
     {
       "id": "coloured",
       "name": "Snow Cloud, coloured points",
-      "description": "The same white ground with the points in a colour the line carries instead of in near-black. Fully recessive.",
+      "description": "The same drifted snow with the points in a colour the line carries instead of in near-black. Fully recessive.",
       "when": {
         "Snc": 2
       },
       "layers": [
         {
-          "name": "white over the whole horse",
+          "name": "snow over the horse, with bare drifts the coat shows through",
           "masks": [
             {
               "type": "PARTS",
@@ -248,6 +280,23 @@
                 "EARS",
                 "HAIR"
               ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS",
+                "HAIR"
+              ],
+              "seed": "$driftSeed",
+              "scale": "$driftScale",
+              "threshold": "$settled",
+              "softness": 0.09,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {

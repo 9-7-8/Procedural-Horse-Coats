@@ -2533,8 +2533,8 @@
     },
     {
       "name": "reach",
-      "min": 0.18,
-      "max": 0.38
+      "min": 0.3,
+      "max": 0.4
     },
     {
       "name": "far",
@@ -2786,11 +2786,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -3067,11 +3067,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -3318,11 +3318,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -3570,11 +3570,11 @@
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 3.6,
-              "radius": 1.3,
-              "vary": 0.6,
-              "chance": 0.35,
-              "stretch": 2.4,
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
               "axis": "X",
               "softness": 0.02
             },
@@ -3633,7 +3633,10 @@
     "Wac/Wac": 0.004,
     "Wac/n": 0.019,
     "n/n": 99.846
-  }
+  },
+  "notes": [
+    "The detached spears used to be fat ovals (radius 1.3, stretch 2.4) scattered over a band up to 42% of the horse long, which read as random white splotches loose on the far half rather than as spears thrown clear of the boundary (owner's call). They are now long and thin (radius 0.55, stretch 4.2) and the band they sit in is tied close behind the line, because 'reach' was narrowed to 0.30-0.40 against a split of 0.42-0.60. 'reach' stays strictly below the split's minimum so the band can never invert its own from/to."
+  ]
 },
 {
   "format": 3,
@@ -3642,10 +3645,11 @@
   "phase": "magical",
   "priority": 222,
   "rarity": "RARE",
-  "blurb": "A beetle-black coat with red paisley over the barrel and a cream patch at each shoulder - a seven-spot ladybird read onto a horse.",
+  "blurb": "Red paisley over the barrel with the seven spots inside it and a cream patch at each shoulder - a seven-spot ladybird read onto whatever colour the horse already is.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The source placed the shoulder patches and the barrel wings with explicit x/y/z boxes. There is no box mask; two crossed AXIS bands in body units are the same thing in the vocabulary that exists, and are what the shoulder patch and the paisley clip are built from.",
-    "The paisley is a RINGS mask with arc 0.55 - a ring drawn as just over half its circumference, which comes out as a comma rather than a circle. That is the whole of what makes it paisley."
+    "The paisley is a RINGS mask with arc 0.55 - a ring drawn as just over half its circumference, which comes out as a comma rather than a circle. That is the whole of what makes it paisley.",
+    "The gene used to paint the whole horse beetle-black before marking it, and the marking was designed against that black. The ground is gone (owner's call): a coat gene here is supposed to let the base coat through, and a ground makes every carrier the same animal underneath. The paisley, the spots and the shoulder patches are unchanged, so on a dark horse it reads much as it always did and on a chestnut it is a new thing."
   ],
   "alleles": [
     {
@@ -3706,34 +3710,13 @@
     {
       "id": "red",
       "name": "Coccinella Marking",
-      "description": "Black first, over the whole horse, and then the ladybird is painted back onto it. The paisley is a ring drawn as a 55% arc - a partial ring is a comma rather than a circle - and the spots inside are a mirrored field, so the two sides match the way an elytron pair does.",
+      "description": "The ladybird painted onto the horse's own colour: red paisley over the barrel, the seven spots inside it, and a cream patch at each shoulder. The paisley is a ring drawn as an arc rather than a closed circle, which is what gives it the comma shape.",
       "when": [
         "Ccr/Ccr",
         "Ccr/Ccv",
         "Ccr/n"
       ],
       "layers": [
-        {
-          "name": "the coat taken to beetle black",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#0e0e10",
-            "strength": 94.0
-          }
-        },
         {
           "name": "a cream patch at each shoulder",
           "masks": [
@@ -3847,32 +3830,11 @@
     {
       "id": "variant",
       "name": "Coccinella, variant",
-      "description": "The same beetle with both the paisley and the shoulders in colours the line carries - the yellow and orange ladybirds rather than the red. Fully recessive.",
+      "description": "The same ladybird in a lighter, more saturated red with paler shoulder patches - the same insect in a different season. Fully recessive.",
       "when": {
         "Ccv": 2
       },
       "layers": [
-        {
-          "name": "the coat taken to beetle black",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#0e0e10",
-            "strength": 94.0
-          }
-        },
         {
           "name": "a cream patch at each shoulder",
           "masks": [
@@ -13111,10 +13073,11 @@
   "phase": "magical",
   "priority": 218,
   "rarity": "EPIC",
-  "blurb": "A hard-edged patchwork over the whole horse, the way a koi carp is marked - one colour against another with nothing blended between them, and the mane and tail striped to match.",
+  "blurb": "Hard-edged patches the way a koi carp is marked, with nothing blended at their boundaries and the mane and tail striped to match. The white variety covers the horse in two fields; the other two lay their patches on the coat and leave the rest of it showing.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. One PATCHES field and its inverse, so every texel is one colour or the other. There is deliberately no third tone and no soft edge anywhere: a koi with a gradient in it is a paint horse.",
-    "Three alleles rather than two - orange dominant, dark and white each recessive homozygotes. The dark and white forms are not carriers of each other; a Kob beside a Kow is an ordinary horse, the same rule the LUT locus uses."
+    "Three alleles rather than two - orange dominant, dark and white each recessive homozygotes. The dark and white forms are not carriers of each other; a Kob beside a Kow is an ordinary horse, the same rule the LUT locus uses.",
+    "Only the WHITE variety covers the horse. The orange and dark varieties used to carry a second layer painting 'the dark patches, in what the bright ones left' - the complement of the first - so the two tiled the horse and no base coat showed anywhere. That layer is gone from both (owner's call), leaving the bright patches as actual patches against the horse's own colour. The white variety keeps it, because white-against-colour is the variety whose whole point is the hard boundary between two fields."
   ],
   "alleles": [
     {
@@ -13202,32 +13165,6 @@
           }
         },
         {
-          "name": "the dark patches, in what the bright ones left",
-          "masks": [
-            {
-              "type": "PATCHES",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ],
-              "seed": "$seedBody",
-              "scale": "$cellSize",
-              "threshold": "$patchWeight",
-              "softness": 0.05,
-              "invert": true
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#141414",
-            "strength": 97.0
-          }
-        },
-        {
           "name": "the mane and tail striped to match",
           "masks": [
             {
@@ -13286,32 +13223,6 @@
             "hue": "$hue",
             "saturation": 0.7,
             "lightness": 0.3,
-            "strength": 97.0
-          }
-        },
-        {
-          "name": "the dark patches, in what the bright ones left",
-          "masks": [
-            {
-              "type": "PATCHES",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ],
-              "seed": "$seedBody",
-              "scale": "$cellSize",
-              "threshold": "$patchWeight",
-              "softness": 0.05,
-              "invert": true
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#0d0d0f",
             "strength": 97.0
           }
         },
@@ -16644,7 +16555,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#0b0b12",
+            "color": "#0c0c0c",
             "strength": 97,
             "opacity": 100
           }
@@ -16664,6 +16575,14 @@
               "from": 0.8,
               "to": 0.94,
               "combine": "MAX"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.1,
+              "to": 0.28,
+              "invert": true,
+              "combine": "MULTIPLY"
             },
             {
               "type": "NOISE",
@@ -16705,6 +16624,14 @@
               "combine": "MAX"
             },
             {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.1,
+              "to": 0.28,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
               "type": "SPOTS",
               "seed": "$starSeed",
               "spacing": 1.6,
@@ -16734,7 +16661,12 @@
   "founders": {
     "Nyx/Nyx": 0.05,
     "n/n": 99.95
-  }
+  },
+  "notes": [
+    "The stars land on BLACK, not merely on dark (owner's call), and telling those apart needs two readings rather than one. On the shipped gradient a black horse reads 0.807 on LUMA's 'dark' channel and a bay reads 0.782 - close enough that no threshold separates them without also losing half the black. What does separate them is SATURATION: black sits at 0.02 and a bay's red at 0.556, because the difference between them is colour and not brightness. So the star masks are dark AND unsaturated, and a bay keeps its brown shoulder unstarred.\n\nThat is also why the white-to-black layer paints a neutral #0c0c0c rather than the blue-black it used to: a tinted void reads as saturated, and the gene would have refused to star the very black it had just made.",
+    "A horse carrying EXTREME WHITE DOMINANT shows none of this. That gene holds a white lock - every white texel is permanent and nothing painted afterwards may change it, at any slot in the paint order - and this gene's first act is to paint the white out. The lock wins, which is correct and is what 'extreme' means, but the two genes make opposite total claims and neither would otherwise mention the other. See known-gaps gap 126.",
+    "The stars cannot see the black this gene just made. Phase 3 hands every layer the coat as it was BEFORE the gene painted, so 'replace the white, THEN star the black' is not expressible in the obvious order - which is why the star layers mask on 'wherever it is dark, OR wherever it was white' rather than simply on 'wherever it is dark'. The two are the same set once the first layer has run. See known-gaps gap 125."
+  ]
 },
 {
   "format": 3,
@@ -17773,6 +17705,16 @@
       "name": "hue",
       "min": 0.0,
       "max": 360.0
+    },
+    {
+      "name": "fringeMid",
+      "min": 0.26,
+      "max": 0.34
+    },
+    {
+      "name": "fringeFar",
+      "min": 0.14,
+      "max": 0.22
     }
   ],
   "expressions": [
@@ -17802,7 +17744,7 @@
               "space": "body",
               "from": "$extent",
               "to": 1.0,
-              "softness": 0.055
+              "softness": 0.012
             },
             {
               "type": "SPECKLE",
@@ -17816,10 +17758,97 @@
               "seed": "$roanSeed",
               "spacing": 0.7,
               "size": 0.6,
-              "density": 0.75,
+              "density": 0.82,
               "clumping": 0.6,
-              "clumpScale": 5.0,
-              "softness": 0.5
+              "clumpScale": 4.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efece7",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the roan thinning out behind it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeMid",
+              "to": "$extent",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.42,
+              "clumping": 0.6,
+              "clumpScale": 3.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efece7",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the last few flecks further back still",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeFar",
+              "to": "$fringeMid",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.16,
+              "clumping": 0.6,
+              "clumpScale": 2.4,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -17913,7 +17942,7 @@
               "space": "body",
               "from": "$extent",
               "to": 1.0,
-              "softness": 0.055
+              "softness": 0.012
             },
             {
               "type": "SPECKLE",
@@ -17927,10 +17956,101 @@
               "seed": "$roanSeed",
               "spacing": 0.7,
               "size": 0.6,
-              "density": 0.75,
+              "density": 0.82,
               "clumping": 0.6,
-              "clumpScale": 5.0,
-              "softness": 0.5
+              "clumpScale": 4.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the roan thinning out behind it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeMid",
+              "to": "$extent",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.42,
+              "clumping": 0.6,
+              "clumpScale": 3.0,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "and the last few flecks further back still",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$fringeFar",
+              "to": "$fringeMid",
+              "softness": 0.012
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY",
+                "FRONT_LEGS"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.16,
+              "clumping": 0.6,
+              "clumpScale": 2.4,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -18017,7 +18137,10 @@
     "Opo/n": 0.114,
     "Opc/Opc": 0.024,
     "n/n": 99.832
-  }
+  },
+  "notes": [
+    "The rear edge is DITHERED rather than faded (owner's call), and the difference is worth stating because the format makes it easy to get wrong. Coverage scales an op's strength, so an AXIS ramp multiplied by a SPECKLE gives you *faded dots* - every dot present, each one weaker - which reads as a gradient with texture in it rather than as roan running out. Dots that get rarer is a density change, and density is a SPECKLE parameter that no mask can drive. So the falloff is three bands with hard edges and falling densities (0.82, 0.42, 0.16), which is the format's way of writing a density gradient. The band edges are separate knobs kept strictly below 'extent' so no band can invert its own from/to - a reversed pair is smoothstep's degenerate hard step (gap 106), and it would put a solid block where the fringe should be."
+  ]
 },
 {
   "format": 3,
@@ -23872,10 +23995,12 @@
   "phase": "magical",
   "priority": 319,
   "rarity": "EPIC",
-  "blurb": "A shield-bug's back: a green ground, a scalloped collar across the withers, and a fanning column of ringed eyespots down the topline.",
+  "blurb": "A scalloped collar across the withers and a fanning column of ringed eyespots down the topline - a shield bug's back, on the horse's own colour.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The source file is not valid JSON - it has arithmetic in it (`27.0 + \"$collarBorderWidth\"`), which the format has no notion of. Every computed bound here is written out as a constant or a knob instead.",
-    "The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest. That is the opposite of what the 90/77.94 saw-wave trick does, and it is the right answer for a collar."
+    "The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest. That is the opposite of what the 90/77.94 saw-wave trick does, and it is the right answer for a collar.",
+    "The shield-bug green ground was removed (owner's call) for the same reason as coccinella's black: it covered the horse before marking it. Only the collar and the eyespots remain, and they now sit on the base coat.",
+    "The 'coloured' allele used to vary the GROUND and nothing else, so when the ground was removed the two alleles became byte-identical - a locus with two names for one outcome. The hue knob now drives the collar and the eyespot rings instead, which is what 'a colour the line carries' should always have meant on a gene whose ground was never the interesting part."
   ],
   "alleles": [
     {
@@ -23940,34 +24065,13 @@
     {
       "id": "green",
       "name": "Shieldback",
-      "description": "The collar is a sine band read ACROSS the neck rather than along it - axis Z, which runs side to side - so it scallops round the withers instead of running up the crest. The eyespots are a ring and a spot on one lattice, cut to the top of the barrel, so they queue down the spine rather than covering the flank.",
+      "description": "The collar and the eyespots in their own red, laid on whatever colour the horse already is. The eyespots are drawn as a ring with a dark centre, which is the shape the warning depends on - a solid disc does not read as an eye.",
       "when": [
         "Shb/Shb",
         "Shb/Shc",
         "Shb/n"
       ],
       "layers": [
-        {
-          "name": "the ground, a shield-bug green",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#2f6b4f",
-            "strength": 92.0
-          }
-        },
         {
           "name": "a scalloped collar across the withers",
           "masks": [
@@ -24067,7 +24171,7 @@
     {
       "id": "coloured",
       "name": "Shieldback, coloured",
-      "description": "The same back with the ground in a colour the line carries. The eyespots stay red and black - they are the warning, and a warning that matches the animal is not one. Fully recessive.",
+      "description": "The same collar and eyespots with the ring in a colour the line carries rather than in red. The centres stay dark: the pupil is what makes an eyespot an eye, and a beetle that varied it would be advertising something else. Fully recessive - it takes two copies, and a single one beside the red allele shows red.",
       "notes": [
         "The eyespots stay red and black in both forms. A warning that matches the animal is not a warning, and letting the hue knob reach them made the gene read as a plain spotted horse."
       ],
@@ -24075,29 +24179,6 @@
         "Shc": 2
       },
       "layers": [
-        {
-          "name": "the ground, a shield-bug green",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.6,
-            "lightness": 0.4,
-            "strength": 92.0
-          }
-        },
         {
           "name": "a scalloped collar across the withers",
           "masks": [
@@ -24119,7 +24200,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#7d1f22",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.42,
             "strength": 92.0
           }
         },
@@ -24154,7 +24237,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#c2352f",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.5,
             "strength": 90.0
           }
         },
@@ -24332,10 +24417,11 @@
   "phase": "magical",
   "priority": 219,
   "rarity": "EPIC",
-  "blurb": "A white horse with its colour left only where the snow did not settle - clustered high on the croup, round the ankles, and across the face in front of the ears.",
+  "blurb": "Snow lying over the horse in drifts, with the coat showing through where none settled - and dark points clustered high on the croup, round the ankles and across the face in front of the ears.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. White goes on first over everything, and the three clouds of points are painted back over it. Clumping on the speckle fields is what makes them clouds rather than an even dusting.",
-    "The points are subtler on a bake than the source description suggests. If they want to be louder the knob to move is the speckle size rather than the density - denser small points still read as grey from a distance."
+    "The points are subtler on a bake than the source description suggests. If they want to be louder the knob to move is the speckle size rather than the density - denser small points still read as grey from a distance.",
+    "The white used to be a flat PARTS mask over every part, so the horse went entirely white and the only thing the base coat could do was not be seen. It now runs through a large-scale PATCHES mask (owner's call), so there are bare drifts the coat shows through - which is what the gene's own name describes and what makes a snow-cloud chestnut and a snow-cloud black different animals. The three point clusters are untouched; where a cluster lands on a bare drift it simply has less white to sit on."
   ],
   "alleles": [
     {
@@ -24398,13 +24484,27 @@
       "name": "hue",
       "min": 0.0,
       "max": 360.0
+    },
+    {
+      "name": "driftSeed",
+      "type": "seed"
+    },
+    {
+      "name": "driftScale",
+      "min": 7.0,
+      "max": 13.0
+    },
+    {
+      "name": "settled",
+      "min": 0.34,
+      "max": 0.56
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Snow Cloud",
-      "description": "The whole horse goes white first, and then three clouds of dark points are laid back over it - each one a speckle field with clumping turned up, cut down to its own region. Clumping is what makes them clouds rather than an even dusting, and the three regions are the parts of a horse the weather reaches last.",
+      "description": "Snow lies over the horse in drifts with the coat showing through where none settled, and three clouds of dark points are laid over the top - each a speckle field pinned to one part of the body: high on the croup, round the ankles, and across the face in front of the ears.",
       "when": [
         "Snw/Snw",
         "Snw/Snc",
@@ -24412,7 +24512,7 @@
       ],
       "layers": [
         {
-          "name": "white over the whole horse",
+          "name": "snow over the horse, with bare drifts the coat shows through",
           "masks": [
             {
               "type": "PARTS",
@@ -24425,6 +24525,23 @@
                 "EARS",
                 "HAIR"
               ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS",
+                "HAIR"
+              ],
+              "seed": "$driftSeed",
+              "scale": "$driftScale",
+              "threshold": "$settled",
+              "softness": 0.09,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -24556,13 +24673,13 @@
     {
       "id": "coloured",
       "name": "Snow Cloud, coloured points",
-      "description": "The same white ground with the points in a colour the line carries instead of in near-black. Fully recessive.",
+      "description": "The same drifted snow with the points in a colour the line carries instead of in near-black. Fully recessive.",
       "when": {
         "Snc": 2
       },
       "layers": [
         {
-          "name": "white over the whole horse",
+          "name": "snow over the horse, with bare drifts the coat shows through",
           "masks": [
             {
               "type": "PARTS",
@@ -24575,6 +24692,23 @@
                 "EARS",
                 "HAIR"
               ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS",
+                "HAIR"
+              ],
+              "seed": "$driftSeed",
+              "scale": "$driftScale",
+              "threshold": "$settled",
+              "softness": 0.09,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -25122,6 +25256,10 @@
       "label": "Stained glass, meadow (Sgm)"
     },
     {
+      "token": "Sgg",
+      "label": "Stained glass, grisaille (Sgg)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -25214,7 +25352,7 @@
     {
       "id": "meadow",
       "name": "Meadow glass",
-      "description": "Two meadow copies. The same leading, and panes of green, yellow and white instead. Nothing else about the gene changes - the two alleles differ in three colours and in nothing at all besides.",
+      "description": "Two meadow copies. The same leading, and panes of green, yellow and white instead.",
       "when": {
         "Sgm": 2
       },
@@ -25280,9 +25418,77 @@
       ]
     },
     {
-      "id": "both",
-      "name": "Both windows",
-      "description": "One of each. Neither allele is dominant to the other, so the horse gets a window cut the same way with all six colours in the tray - the only way to see blue and yellow in one coat, and something a breeder has to make on purpose because no wild horse is born with this pair.",
+      "id": "grisaille",
+      "name": "Grisaille glass",
+      "description": "Two grisaille copies. The same leading again, and panes of grey and white only - the colourless glazing a real window uses where it wants light rather than a picture. It is the one palette here that reads as glass on any base coat, because it adds no hue of its own to argue with the horse.",
+      "when": {
+        "Sgg": 2
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#9aa0a6",
+              "#d9dde0",
+              "#f7f8f9"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "v-m",
+      "name": "Two trays",
+      "description": "One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.",
       "when": {
         "Sgv": 1,
         "Sgm": 1
@@ -25352,6 +25558,150 @@
       ]
     },
     {
+      "id": "v-g",
+      "name": "Two trays",
+      "description": "One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.",
+      "when": {
+        "Sgv": 1,
+        "Sgg": 1
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#4a7ce8",
+              "#e86fbb",
+              "#8b52d6",
+              "#9aa0a6",
+              "#d9dde0",
+              "#f7f8f9"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "m-g",
+      "name": "Two trays",
+      "description": "One copy of each. No variant is dominant to another, so the horse gets a window cut the same way with both palettes in the tray - and a pane may take any colour from either. No wild horse is born with a mixed pair, so every one of these was made on purpose.",
+      "when": {
+        "Sgm": 1,
+        "Sgg": 1
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#4fbf5c",
+              "#e8d24a",
+              "#f4f2ec",
+              "#9aa0a6",
+              "#d9dde0",
+              "#f7f8f9"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "Nothing. Both variants are recessive to the wild type, so a single copy of either is silent and a carrier looks like any other horse.",
@@ -25361,8 +25711,12 @@
   "founders": {
     "Sgv/Sgv": 0.06,
     "Sgm/Sgm": 0.06,
-    "n/n": 99.88
-  }
+    "Sgg/Sgg": 0.06,
+    "n/n": 99.82
+  },
+  "notes": [
+    "The palette is the ALLELE here, not an epigenetic value, which is unique in the registry - every other gene that varies its colour writes a hue on the allele copy. It is deliberate: a stained-glass window is a made object with a chosen palette, and a horse whose window drifted hue by hue down the generations would be a different idea. The consequence is that mixing two lines gives a window with both trays in it rather than an average of the two."
+  ]
 },
 {
   "format": 3,
@@ -27469,10 +27823,12 @@
   "phase": "magical",
   "priority": 220,
   "rarity": "EPIC",
-  "blurb": "A painted ward - a pale ground with coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, and the coat left bare at the throat and chest.",
+  "blurb": "A painted ward - coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, laid straight onto the horse's own colour.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The bare throat and chest are subtracted out of the ground rather than painted back over it, so what shows through is whatever the horse actually is - a bay reveals bay, a grey reveals grey. Painting them back would have needed a colour, and any colour would have been a lie about the horse underneath.",
-    "SPIRAL draws one spiral per named part, so 'a swirl at each hip and each shoulder' is two layers at different offsets along the body rather than four placements. On a bake the pair reads as hip and shoulder; it is not four independent motifs."
+    "SPIRAL draws one spiral per named part, so 'a swirl at each hip and each shoulder' is two layers at different offsets along the body rather than four placements. On a bake the pair reads as hip and shoulder; it is not four independent motifs.",
+    "The pale ground was removed (owner's call). It is worth knowing that this layer is the one the invert/parts fix of 2026-09-08 briefly deleted and then restored, because the restore is what made it visible enough to judge - and the judgement was that the ward reads better as paint on a horse than as paint on a white field.",
+    "The old note here said the ink stays black because 'it is the ink that makes it a ward', and the coloured allele varied the pale ground instead. With the ground gone that reasoning left the allele with nothing at all to do - the two expressions came out identical - so the ink is what varies now. The earlier argument was about a design that no longer exists rather than about the ink."
   ],
   "alleles": [
     {
@@ -27533,47 +27889,13 @@
     {
       "id": "white",
       "name": "Tribal Ward",
-      "description": "The ground goes on first and everything else is inked over it, so the ward reads as paint on a painted horse rather than as marking on a coat. The bare throat and chest are a band subtracted out of the ground rather than painted back, which is why the coat under them is whatever the horse actually is.",
+      "description": "The ward inked straight onto the horse in near-black - swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs.",
       "when": [
         "Twd/Twd",
         "Twd/Twc",
         "Twd/n"
       ],
       "layers": [
-        {
-          "name": "the ground, with the throat and chest left bare",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "softness": 0.2,
-              "invert": true,
-              "combine": "MULTIPLY",
-              "from": -0.1,
-              "to": "$chestReveal"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f5f2ee",
-            "strength": 96.0
-          }
-        },
         {
           "name": "a coiled swirl at each hip",
           "masks": [
@@ -27720,7 +28042,7 @@
     {
       "id": "coloured",
       "name": "Tribal Ward, coloured",
-      "description": "The same ward on a ground in a colour the line carries. The ink stays black - it is the ink that makes it a ward. Fully recessive.",
+      "description": "The same ward inked in a colour the line carries. Fully recessive: it takes two copies, and a single one beside the black allele inks black.",
       "notes": [
         "The ink stays black in this form on purpose. Both the ground and the ink taking the same hue made a horse that looked like one wash rather than like something painted on."
       ],
@@ -27728,42 +28050,6 @@
         "Twc": 2
       },
       "layers": [
-        {
-          "name": "the ground, with the throat and chest left bare",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE",
-                "LEGS",
-                "EARS"
-              ]
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "softness": 0.2,
-              "invert": true,
-              "combine": "MULTIPLY",
-              "from": -0.1,
-              "to": "$chestReveal"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.5,
-            "lightness": 0.66,
-            "strength": 96.0
-          }
-        },
         {
           "name": "a coiled swirl at each hip",
           "masks": [
@@ -27783,7 +28069,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -27806,7 +28094,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -27831,7 +28121,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -27856,7 +28148,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         },
@@ -27901,7 +28195,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#141210",
+            "hue": "$hue",
+            "saturation": 0.68,
+            "lightness": 0.34,
             "strength": 94.0
           }
         }
