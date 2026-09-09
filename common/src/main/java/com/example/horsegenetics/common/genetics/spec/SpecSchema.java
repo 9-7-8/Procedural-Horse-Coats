@@ -37,7 +37,18 @@ public final class SpecSchema {
         /** {@code "#rrggbb"}. */
         COLOR,
         /** A list of {@code "#rrggbb"} - a palette, or a ramp's stops. */
-        COLORS
+        COLORS,
+        /**
+         * A flat array of numbers read as {@code [u0, v0, u1, v1, ...]} - the
+         * control points of a {@code PATH}, in the plane that mask names.
+         *
+         * <p>The first parameter kind in the format that is neither a number
+         * nor a word, and it exists because a <b>drawn</b> shape has no
+         * parametric description. Every other mask here says what a shape is
+         * made of and lets the horse decide where it lands; this one carries
+         * the shape itself.
+         */
+        POINTS
     }
 
     /**
@@ -70,6 +81,10 @@ public final class SpecSchema {
         static Param colors(String name, String doc) {
             return new Param(name, Kind.COLORS, 0, List.of(), doc);
         }
+
+        static Param points(String name, String doc) {
+            return new Param(name, Kind.POINTS, 0, List.of(), doc);
+        }
     }
 
     /**
@@ -85,6 +100,62 @@ public final class SpecSchema {
      * than cut across it wants {@code local}.
      */
     public static final List<String> AXIS_SPACES = List.of("part", "body", "units", "local");
+
+    /**
+     * Which plane a {@code PATH} is drawn in, and therefore which axis it is
+     * extruded along. Each names its two axes in {@code (u, v)} order.
+     *
+     * <p>{@code side} is {@code (x, y)} seen from the horse's flank, extruded
+     * along {@code z} - so a shape drawn once appears on <b>both</b> flanks,
+     * mirrored, which is what a marking drawn on a side view of a horse should
+     * do. {@code top} is {@code (x, z)} seen from above, extruded down: the
+     * plane for anything that straddles the spine. {@code front} is
+     * {@code (z, y)} seen from the nose, extruded along the length - a girth, a
+     * collar, a band round the barrel.
+     *
+     * <p>The first entry is the default, so it has to be the one
+     * {@code SpecPainter} falls back to.
+     */
+    public static final List<String> PATH_PLANES = List.of("side", "top", "front");
+
+    /**
+     * How a {@code PATH}'s {@code points} are measured.
+     *
+     * <p>{@code body} normalises each axis over the whole-horse bounds, so
+     * {@code 0.5, 0.5} is the middle of the horse whichever skin is being
+     * baked - which is the only way a path drawn on the adult lands in the same
+     * anatomical place on the foal, whose boxes are a different size.
+     * {@code units} takes them as raw body units, for a path positioned against
+     * something measured.
+     *
+     * <p><b>Only the points are affected.</b> {@code width} and
+     * {@code softness} are in body units either way. Mixing the two is
+     * deliberate: a stroke a quarter of a horse wide is never what anybody
+     * meant, and {@code WAVES} is already a standing lesson in what happens
+     * when a length changes meaning with a space setting.
+     */
+    public static final List<String> PATH_SPACES = List.of("body", "units");
+
+    /**
+     * How many straight sub-segments each span of a smoothed {@code PATH} is
+     * walked in.
+     *
+     * <p>It is a constant rather than a knob because it is not a look, it is a
+     * <b>fidelity</b>: too few and a curve reads as the polyline it is made of,
+     * more and the extra segments are shorter than the texel that samples them.
+     * Eight puts the error of a right-angle span well under half a texel at
+     * horse scale. It also has to match the creator's port exactly, and a
+     * number both sides hard-code is one fewer thing that can drift.
+     */
+    public static final int PATH_CURVE_SAMPLES = 8;
+
+    /**
+     * The most control points a {@code PATH} may carry. Every texel of every
+     * skin walks all of them, so this is the cost ceiling; it is generous
+     * because a hand-drawn outline really can want thirty or forty, and it is
+     * finite because a gene file is not a place to put a traced photograph.
+     */
+    public static final int MAX_PATH_POINTS = 64;
 
     /** Which pigment reading a {@code PIGMENT} mask thresholds. */
     public static final List<String> PIGMENT_CHANNELS = List.of("darkness", "red", "black", "total");
@@ -283,6 +354,30 @@ public final class SpecSchema {
                                 + "fold (both extremes bright)"),
                 Param.value("threshold", 0.5, "how much of the horse the field covers - lower is more"),
                 Param.value("softness", 0.12, "edge fade, in field units either side of the threshold")));
+
+        MASKS.put(MaskType.PATH, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.choice("plane", PATH_PLANES,
+                        "which two axes the shape is drawn in, and so which one it is extruded "
+                                + "along - 'side' (x,y) appears on both flanks, 'top' (x,z) "
+                                + "straddles the spine, 'front' (z,y) runs round the barrel"),
+                Param.choice("space", PATH_SPACES,
+                        "how 'points' are measured - 'body' normalises each axis over the whole "
+                                + "horse so the shape lands in the same anatomical place on the "
+                                + "foal, 'units' takes raw body units. 'width' and 'softness' "
+                                + "are in body units either way"),
+                Param.points("points",
+                        "the control points, flat: [u0, v0, u1, v1, ...]. At least two points, "
+                                + "at most " + MAX_PATH_POINTS),
+                Param.flag("curve",
+                        "smooth the points into a Catmull-Rom spline that passes through every "
+                                + "one of them, instead of joining them with straight lines"),
+                Param.flag("closed", "join the last point back to the first"),
+                Param.flag("fill",
+                        "fill the enclosed area rather than stroking the line. Implies 'closed'; "
+                                + "'width' is then unread"),
+                Param.value("width", 1.0, "stroke width, body units - a texel is about 0.5"),
+                Param.value("softness", 0.25, "edge fade, body units")));
 
         MASKS.put(MaskType.CHOICE, List.of(
                 Param.parts("parts", "restrict to these parts"),

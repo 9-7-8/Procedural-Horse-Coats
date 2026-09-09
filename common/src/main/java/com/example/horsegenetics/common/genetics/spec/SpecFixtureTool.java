@@ -134,6 +134,13 @@ public final class SpecFixtureTool {
             sb.append(i > 0 ? ", " : "").append("\"").append(AbilityType.CONDITION_FLAGS.get(i)).append("\"");
         }
         sb.append("],\n");
+        // A shared CONSTANT rather than a schema parameter, and so invisible to
+        // the parameter comparison above. It still has to match, and the probe
+        // cases cannot be relied on to notice: they sample four texels per part,
+        // and one sub-segment more or less on a curve moves the line by a
+        // fraction of a texel. Compared directly, like the condition flags.
+        sb.append("    \"pathCurveSamples\": ").append(SpecSchema.PATH_CURVE_SAMPLES)
+                .append(",\n");
         sb.append(composerSection());
         sb.append(geometrySection());
         sb.append("  },\n");

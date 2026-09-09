@@ -782,6 +782,17 @@ window.HG = window.HG || {};
       } else if (p.kind === "CHOICE") {
         card.appendChild(field(p.name, select(p.choices, mask[p.name] || p.fallback,
           function (v) { mask[p.name] = v; changed(); }), p.doc));
+      } else if (p.kind === "FLAG") {
+        // A mask flag used to fall through to valueEditor, which is the
+        // number/knob/per-dose control - so SPOTS' `mirror` offered to be
+        // driven by a knob and could not simply be ticked. There is no such
+        // thing as a per-dose boolean; it is a checkbox.
+        card.appendChild(field(p.name, checkbox(!!mask[p.name], function (v) {
+          mask[p.name] = v;
+          changed();
+        }), p.doc));
+      } else if (p.kind === "POINTS") {
+        card.appendChild(field(p.name, pointsEditor(mask, p.name), p.doc));
       } else {
         card.appendChild(field(p.name, valueEditor(mask, p.name, p, changed), p.doc));
       }
@@ -803,6 +814,56 @@ window.HG = window.HG || {};
         function (v) { op[p.name] = v; changed(); }), p.doc);
     }
     return field(p.name, valueEditor(op, p.name, p, changed), p.doc);
+  }
+
+  /**
+   * <b>A PATH's control points</b>, as a textarea of {@code u, v} pairs.
+   *
+   * <p>This is deliberately the plain version. The point of the PATH mask is
+   * that a shape can be <i>drawn</i>, and a canvas with draggable handles is
+   * what it is for - but the mask has to exist and be trusted before the
+   * surface that edits it is worth building, and in the meantime typing
+   * coordinates against the live preview is a real way to author one. The
+   * format does not change when the canvas arrives; only this control does.
+   *
+   * <p>One point per line, {@code u, v}. Anything unparseable is left in the
+   * box rather than silently dropped, so a half-typed line does not erase the
+   * shape while you are in the middle of it.
+   */
+  function pointsEditor(mask, name) {
+    var wrap = el("div", { class: "col" });
+    var flat = mask[name] || [];
+    var text = "";
+    for (var i = 0; i + 1 < flat.length; i += 2) {
+      text += flat[i] + ", " + flat[i + 1] + "\n";
+    }
+    var area = el("textarea", { rows: Math.max(4, flat.length / 2 + 1), value: text.trim() });
+    var note = el("span", { class: "hint" });
+    function reread() {
+      var out = [];
+      var bad = 0;
+      area.value.split("\n").forEach(function (line) {
+        if (!line.trim()) return;
+        var bits = line.split(/[\s,]+/).filter(function (b) { return b.length; });
+        if (bits.length !== 2 || isNaN(Number(bits[0])) || isNaN(Number(bits[1]))) {
+          bad++;
+          return;
+        }
+        out.push(Number(bits[0]), Number(bits[1]));
+      });
+      note.textContent = bad
+        ? bad + " line(s) not read yet - each one wants two numbers"
+        : (out.length / 2) + " points";
+      if (out.length >= 4) {
+        mask[name] = out;
+        changed();
+      }
+    }
+    area.addEventListener("input", reread);
+    wrap.appendChild(area);
+    wrap.appendChild(note);
+    reread();
+    return wrap;
   }
 
   /**

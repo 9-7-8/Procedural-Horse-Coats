@@ -579,6 +579,32 @@ public final class SpecPainter {
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.12), leg));
                 return BodyStripes.smoothstep(threshold - soft, threshold + soft, n);
             }
+            case PATH: {
+                double[] pts = p.points("points");
+                if (pts.length < 4) {
+                    return 0;   // the parser refuses this; a hand-built Params could still reach it
+                }
+                Bounds whole = HorseSkinGeometry.bodyBounds(skin);
+                String plane = p.text("plane", SpecSchema.PATH_PLANES.get(0));
+                Axis uAxis = "top".equals(plane) ? Axis.X : ("front".equals(plane) ? Axis.Z : Axis.X);
+                Axis vAxis = "top".equals(plane) ? Axis.Z : Axis.Y;
+                // 'side' is (x, y) extruded along z, so a shape drawn once shows
+                // on both flanks - and |z| is never consulted, which is exactly
+                // what makes that happen.
+                double u = point.along(uAxis);
+                double vv = point.along(vAxis);
+                boolean normalised = !"units".equals(p.text("space", SpecSchema.PATH_SPACES.get(0)));
+                double uMin = normalised ? whole.min(uAxis) : 0;
+                double uSpan = normalised ? Math.max(1e-6, whole.span(uAxis)) : 1;
+                double vMin = normalised ? whole.min(vAxis) : 0;
+                double vSpan = normalised ? Math.max(1e-6, whole.span(vAxis)) : 1;
+                boolean fill = p.flag("fill", false);
+                boolean closed = fill || p.flag("closed", false);
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
+                double half = Math.max(0.0, v.get(p.value("width", 1.0), leg)) / 2.0;
+                return pathCoverage(pts, p.flag("curve", false), closed, fill,
+                        uMin, uSpan, vMin, vSpan, u, vv, half, soft);
+            }
             case CHOICE: {
                 // Constant across the whole horse, and exactly 0 or 1 - no
                 // drift, and no strip of draws that lands between the two.
@@ -1114,6 +1140,135 @@ public final class SpecPainter {
 
     private static double lerp(double a, double b, double t) {
         return a + (b - a) * t;
+    }
+
+    /**
+     * <b>The {@code PATH} mask's coverage</b> at one point in the drawn plane.
+     *
+     * <p>Walks the control points once, generating each straight sub-segment as
+     * it goes and never building the polyline. That matters: this runs per
+     * texel, and a smoothed sixty-four-point path is five hundred segments - so
+     * allocating the sampled line here would allocate it seventy thousand times
+     * per skin. Generating on the fly costs the same arithmetic and no memory
+     * at all.
+     *
+     * <p>One walk answers both questions. The <b>distance</b> to the nearest
+     * segment is what strokes the line, and the <b>crossing parity</b> of a ray
+     * cast along +u is what fills it, so a filled path costs no more than a
+     * stroked one.
+     *
+     * <p>{@code uMin}/{@code uSpan} carry the {@code space} setting: the
+     * identity for {@code units}, the whole-horse bounds for {@code body}. The
+     * conversion is applied to the <b>control points</b> rather than to the
+     * sample point, so {@code width} and {@code softness} stay in body units
+     * whichever space the points are in.
+     */
+    static double pathCoverage(double[] pts, boolean curve, boolean closed, boolean fill,
+                                       double uMin, double uSpan, double vMin, double vSpan,
+                                       double u, double v, double half, double soft) {
+        int n = pts.length / 2;
+        int spans = closed ? n : n - 1;
+        int steps = curve ? SpecSchema.PATH_CURVE_SAMPLES : 1;
+        double best = Double.MAX_VALUE;
+        boolean inside = false;
+
+        double au = uMin + pts[0] * uSpan;
+        double av = vMin + pts[1] * vSpan;
+        for (int span = 0; span < spans; span++) {
+            for (int step = 1; step <= steps; step++) {
+                double bu;
+                double bv;
+                if (curve) {
+                    double t = step / (double) steps;
+                    bu = uMin + spline(pts, n, closed, span, t, 0) * uSpan;
+                    bv = vMin + spline(pts, n, closed, span, t, 1) * vSpan;
+                } else {
+                    int j = (span + 1) % n;
+                    bu = uMin + pts[j * 2] * uSpan;
+                    bv = vMin + pts[j * 2 + 1] * vSpan;
+                }
+                double d = segmentDistance(u, v, au, av, bu, bv);
+                if (d < best) {
+                    best = d;
+                }
+                if (fill && crosses(u, v, au, av, bu, bv)) {
+                    inside = !inside;
+                }
+                au = bu;
+                av = bv;
+            }
+        }
+        if (fill) {
+            // Solid inside, fading outward over 'softness'. The stroke width is
+            // deliberately not read here: a filled shape's edge is its outline,
+            // and adding half a width to it would make 'fill' quietly change
+            // the size of what was drawn.
+            return inside ? 1.0 : 1.0 - BodyStripes.smoothstep(0, soft, best);
+        }
+        return 1.0 - BodyStripes.smoothstep(half, half + soft, best);
+    }
+
+    /**
+     * A Catmull-Rom point on the span starting at control point {@code span},
+     * in axis {@code axis} (0 for u, 1 for v).
+     *
+     * <p>Catmull-Rom because it <b>passes through every control point</b>. A
+     * Bezier's handles do not sit on the curve, which is the right trade for a
+     * pen tool and the wrong one here: these points are what an author placed
+     * and what the creator will draw as draggable handles, and a curve that
+     * misses them would make the editor lie about its own data.
+     *
+     * <p>The ends are handled by <b>duplicating</b> the first and last point
+     * rather than by extrapolating a phantom one. Extrapolating overshoots -
+     * the curve leaves the horse and comes back - and duplicating simply makes
+     * the end tangent point at the neighbour, which is what a drawn line does.
+     * A closed path wraps instead, so it has no ends to special-case.
+     */
+    static double spline(double[] pts, int n, boolean closed, int span, double t, int axis) {
+        int i1 = span;
+        int i2 = closed ? (span + 1) % n : Math.min(span + 1, n - 1);
+        int i0 = closed ? (span - 1 + n) % n : Math.max(span - 1, 0);
+        int i3 = closed ? (span + 2) % n : Math.min(span + 2, n - 1);
+        double p0 = pts[i0 * 2 + axis];
+        double p1 = pts[i1 * 2 + axis];
+        double p2 = pts[i2 * 2 + axis];
+        double p3 = pts[i3 * 2 + axis];
+        double t2 = t * t;
+        double t3 = t2 * t;
+        return 0.5 * ((2 * p1)
+                + (-p0 + p2) * t
+                + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2
+                + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+    }
+
+    /** Distance from {@code (u, v)} to the segment {@code a}-{@code b}. */
+    private static double segmentDistance(double u, double v, double au, double av,
+                                          double bu, double bv) {
+        double du = bu - au;
+        double dv = bv - av;
+        double len2 = du * du + dv * dv;
+        double t = len2 <= 1e-12 ? 0 : ((u - au) * du + (v - av) * dv) / len2;
+        t = t < 0 ? 0 : (t > 1 ? 1 : t);
+        double cu = au + t * du;
+        double cv = av + t * dv;
+        return Math.sqrt((u - cu) * (u - cu) + (v - cv) * (v - cv));
+    }
+
+    /**
+     * Does a ray cast from {@code (u, v)} along +u cross this segment? The
+     * even-odd fill test, one segment at a time.
+     *
+     * <p>The half-open comparison on {@code v} is what stops a vertex lying
+     * exactly on the ray from being counted twice - the classic way this test
+     * goes wrong, and it shows up as a single row of texels through the middle
+     * of a filled shape coming out inverted.
+     */
+    private static boolean crosses(double u, double v, double au, double av, double bu, double bv) {
+        if ((av > v) == (bv > v)) {
+            return false;
+        }
+        double at = (v - av) / (bv - av);
+        return u < au + at * (bu - au);
     }
 
     /**

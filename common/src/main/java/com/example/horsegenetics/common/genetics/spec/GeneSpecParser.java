@@ -727,6 +727,39 @@ public final class GeneSpecParser {
         return List.copyOf(out);
     }
 
+    /**
+     * A {@code PATH}'s control points: a flat array of numbers,
+     * {@code [u0, v0, u1, v1, ...]}.
+     *
+     * <p>Flat rather than an array of pairs because that is what survives being
+     * hand-edited. A nested form puts a bracket between every coordinate and
+     * every one of them is a chance to close the wrong one; a flat list has a
+     * single failure - an odd length - and it can be named exactly, which is
+     * what the error below does.
+     */
+    private static double[] readPoints(Object raw, String where) {
+        List<Object> a = asArray(raw, where);
+        if (a.size() % 2 != 0) {
+            throw new IllegalArgumentException(where + ": needs an even number of coordinates - "
+                    + "they are read as [u0, v0, u1, v1, ...] - but got " + a.size()
+                    + ", so one coordinate is missing or one too many");
+        }
+        int count = a.size() / 2;
+        if (count < 2) {
+            throw new IllegalArgumentException(where + ": needs at least two points, got " + count
+                    + " - a one-point path has no length and paints nothing");
+        }
+        if (count > SpecSchema.MAX_PATH_POINTS) {
+            throw new IllegalArgumentException(where + ": at most " + SpecSchema.MAX_PATH_POINTS
+                    + " points, got " + count + " - every texel of every skin walks all of them");
+        }
+        double[] out = new double[a.size()];
+        for (int i = 0; i < a.size(); i++) {
+            out[i] = asNumber(a.get(i), where + " [" + i + "]");
+        }
+        return out;
+    }
+
     private static int readMinDose(Map<String, Object> o, String where) {
         int d = (int) number(o, "minDose", 1);
         if (d != 1 && d != 2) {
@@ -1075,6 +1108,7 @@ public final class GeneSpecParser {
                 case FLAG -> asBoolean(raw, where + " '" + p.name() + "'");
                 case COLOR -> readColor(raw, where + " '" + p.name() + "'");
                 case COLORS -> readColors(raw, where + " '" + p.name() + "'");
+                case POINTS -> readPoints(raw, where + " '" + p.name() + "'");
             });
         }
         return new Params(CommonMaps.copyOf(out));

@@ -394,6 +394,7 @@
 <tr><td><code>PATCHES</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td>Big irregular blobs &mdash; pinto, tobiano, roan patching.</td></tr>
 <tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
 <tr><td><code>FRACTAL</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>octaves</code> 3, <code>lacunarity</code> 2.13, <code>gain</code> 0.5, <code>warp</code> 0, <code>shape</code> (<strong>fbm</strong>/ridged/billow), <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td><strong>The same field as <code>PATCHES</code>, at several scales at once.</strong> One octave <em>is</em> <code>PATCHES</code>; each further octave adds finer detail to the same shapes. <code>shape: "ridged"</code> is what makes it worth having &mdash; it turns the blob outlines into lines that fork, taper and pinch out, which at a high <code>threshold</code> is lace. See <a href="#fractal">the note below</a>.</td></tr>
+<tr><td><code>PATH</code></td><td><code>plane</code> (<strong>side</strong>/top/front), <code>space</code> (<strong>body</strong>/units), <code>points</code>, <code>curve</code>, <code>closed</code>, <code>fill</code>, <code>width</code> 1.0, <code>softness</code> 0.25</td><td><strong>A shape you drew.</strong> Control points in a plane, stroked as a line or filled as an outline, extruded through the horse. The only mask that carries a shape instead of a rule for making one &mdash; for a bolt, a crescent, a brand, a curl on a particular shoulder. See <a href="#path">the note below</a>.</td></tr>
 <tr><td><code>CHOICE</code></td><td><code>seed</code>, <code>options</code> 2, <code>is</code> 0</td><td><strong>A choice made once per horse</strong> &mdash; constant across the whole body, and fully on or fully off.</td></tr>
 <tr><td colspan="3"><div class="note" id="fractal">
 <span class="label"><code>octaves</code> buys detail and nothing else &mdash; on purpose</span>
@@ -439,6 +440,71 @@
     or 6 the finest detail is below the sheet’s resolution and the ridge breaks into
     stipple: a perfectly good speckle, and not what was asked for. Take the detail from
     <code>warp</code> instead, which bends the lines without shortening them.
+</p>
+</div></td></tr>
+<tr><td colspan="3"><div class="note" id="path">
+<span class="label">Drawing on a horse: the plane, the space, and the one number that catches everybody</span>
+<p>
+    <code>points</code> is a <strong>flat</strong> array &mdash;
+    <code>[u0, v0, u1, v1, &hellip;]</code>, at least two points and at most
+    sixty-four. Flat rather than nested because that is what survives being hand-edited:
+    a nested form puts a bracket between every coordinate, and a flat one has exactly
+    one way to go wrong (an odd length) which the loader names precisely.
+</p>
+<p>
+    <code>plane</code> picks which two axes you are drawing in, and therefore which one
+    the shape is extruded along. <code>side</code> is <code>(x, y)</code> from the flank,
+    extruded along <code>z</code> &mdash; so a shape drawn once appears on
+    <strong>both</strong> flanks, which is what a marking drawn on a side view of a horse
+    should do. <code>top</code> is <code>(x, z)</code> from above, for anything that
+    straddles the spine. <code>front</code> is <code>(z, y)</code> from the nose, for a
+    girth or a band round the barrel.
+</p>
+<div class="note danger">
+    <span class="label">In <code>body</code> space, the topline is <code>0.62</code> &mdash; not <code>1.0</code></span>
+    <p>
+        <code>space: "body"</code> normalises each axis over the <strong>whole-horse</strong>
+        box, and that box runs from the hoof to the <strong>ear tips</strong>. So on the adult
+        mesh <code>v = 0.33</code> is the underline, <code>0.62</code> is the spine, and
+        everything above that is neck, mane and head. Points at <code>v = 0.7</code> are not
+        high on the flank; they are floating above the back, and the shape simply does not
+        appear on the barrel at all.
+    </p>
+    <p>
+        This is the same trap that once put a splash waterline above the underline &mdash; see
+        <code>WhitePattern.toplineHeight</code>, which exists because of it. It is
+        <em>correct</em> for a drawn mask to measure against the whole box, because the whole
+        horse is what you are drawing on; it is just not anatomical, and the numbers have to
+        be read that way. The flank is roughly <code>u</code> 0.18&ndash;0.72,
+        <code>v</code> 0.33&ndash;0.62.
+    </p>
+</div>
+<p>
+    <code>space: "units"</code> takes raw body units instead, for a path positioned against
+    something already measured. Either way <strong><code>width</code> and
+    <code>softness</code> are in body units</strong> &mdash; only the points change meaning.
+    That asymmetry is deliberate: a stroke a quarter of a horse wide is never what anybody
+    meant, and <code>WAVES</code> is a standing lesson in what happens when a length changes
+    units with a space setting.
+</p>
+<p>
+    <code>curve</code> smooths the points into a spline that <strong>passes through every one
+    of them</strong> (Catmull-Rom, not a Bezier &mdash; the points are what you placed, so a
+    curve that merely got near them would be lying about your own data). The ends hold their
+    tangent by duplicating the first and last point rather than extrapolating, which is what
+    stops a smoothed path from overshooting off the horse and back.
+</p>
+<p>
+    <code>fill</code> fills the enclosed area instead of stroking the outline; it implies
+    <code>closed</code>, and <code>width</code> is then unread &mdash; a filled shape's edge
+    <em>is</em> its outline, and padding it by half a stroke would quietly resize what you
+    drew. Concave shapes fill correctly, so a crescent keeps its notch.
+</p>
+<p>
+    It is still a mask, so everything composes as usual: multiply a <code>PATH</code> by a
+    <code>NOISE</code> to tear its edge up, or by a <code>CHOICE</code> so only some horses
+    carry it. And the points can be plain constants while <code>width</code> is a knob
+    &mdash; so a drawn shape still varies per horse without ceasing to be that shape.
 </p>
 </div></td></tr>
 <tr><td colspan="3"><div class="note">

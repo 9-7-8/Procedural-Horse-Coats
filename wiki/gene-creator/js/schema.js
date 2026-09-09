@@ -29,6 +29,7 @@ window.HG = window.HG || {};
   function choice(name, choices, doc) { return { name: name, kind: "CHOICE", choices: choices, fallback: choices[0], doc: doc }; }
   function color(name, doc) { return { name: name, kind: "COLOR", fallback: "#ffffff", doc: doc }; }
   function colors(name, doc) { return { name: name, kind: "COLORS", doc: doc }; }
+  function points(name, doc) { return { name: name, kind: "POINTS", doc: doc }; }
 
   // The three that turn any colour op into an epigenetic one. They repeat on
   // four ops, so they are built rather than retyped - a hue that drifts between
@@ -42,6 +43,11 @@ window.HG = window.HG || {};
   }
   var HUE_DOC = "hue in degrees - 0 red, 120 green, 240 blue. Below 0 means \"not set\", "
     + "so the layer paints 'color' instead. Point it at a knob to give every horse its own.";
+
+  // How many straight sub-segments each span of a smoothed PATH is walked in.
+  // Must equal SpecSchema.PATH_CURVE_SAMPLES; parity.js compares them, because
+  // the probe cases are too sparse to notice a sub-texel difference.
+  var PATH_CURVE_SAMPLES = 8;
 
   var PART_NAMES = HG.geometry.PARTS;
   var GROUP_NAMES = ["ALL", "LEGS", "FRONT_LEGS", "HIND_LEGS", "EARS", "HAIR", "FACE", "POINTS", "BARREL"];
@@ -145,6 +151,22 @@ window.HG = window.HG || {};
           "'fbm' is the field (blobs with detailed edges), 'ridged' its midpoint crossings (lines that fork and taper), 'billow' its fold (both extremes bright)"),
         v("threshold", 0.5, "lower covers more of the horse"),
         v("softness", 0.12, "edge fade, in field units either side of the threshold")
+      ]
+    },
+    PATH: {
+      blurb: "A shape you drew - control points in a plane, stroked as a line or filled as an outline, extruded through the horse. The one mask that carries a shape instead of a rule for making one.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        choice("plane", ["side", "top", "front"],
+          "which two axes the shape is drawn in - 'side' (x,y) appears on both flanks, 'top' (x,z) straddles the spine, 'front' (z,y) runs round the barrel"),
+        choice("space", ["body", "units"],
+          "how the points are measured - 'body' normalises over the whole horse so the shape lands in the same place on a foal, 'units' is raw body units. 'width' and 'softness' are body units either way"),
+        points("points", "the control points, flat: u0, v0, u1, v1, ..."),
+        flag("curve", "smooth the points into a curve that passes through every one of them"),
+        flag("closed", "join the last point back to the first"),
+        flag("fill", "fill the enclosed area rather than stroking the line - implies 'closed', and 'width' is then unread"),
+        v("width", 1.0, "stroke width, body units - a texel is about 0.5", { min: 0, max: 8, step: 0.05 }),
+        v("softness", 0.25, "edge fade, body units", { min: 0, max: 4, step: 0.05 })
       ]
     },
     CHOICE: {
@@ -609,6 +631,7 @@ window.HG = window.HG || {};
     MASKS: MASKS,
     OPS: OPS,
     EFFECTS: EFFECTS,
+    PATH_CURVE_SAMPLES: PATH_CURVE_SAMPLES,
     CONDITION_FLAGS: CONDITION_FLAGS,
     TRIGGER_KINDS: TRIGGER_KINDS,
     effectParam: function (verb, name) {

@@ -175,6 +175,10 @@ window.HG = window.HG || {};
   function newMask(type) {
     var mask = { type: type };
     if (type === "PARTS") mask.parts = ["LEGS"];
+    // A PATH with no points paints nothing and cannot be exported, so a fresh
+    // one starts as a visible shape on the flank rather than as an empty box:
+    // a shallow arc across the barrel, in normalised body space.
+    if (type === "PATH") mask.points = [0.25, 0.45, 0.45, 0.6, 0.65, 0.55, 0.8, 0.4];
     schema.MASKS[type].params.forEach(function (p) {
       if (p.kind === "VALUE" && !(p.ui && p.ui.seedRef)) mask[p.name] = initial(p);
       if (p.kind === "CHOICE") mask[p.name] = p.fallback;
@@ -437,6 +441,17 @@ window.HG = window.HG || {};
       if (v === undefined || v === null || v === "") return;
       if (p.kind === "VALUE" && isDefault(v, p.fallback)) return;
       if (p.kind === "CHOICE" && v === p.fallback) return;
+      if (p.kind === "FLAG") {
+        // false IS the fallback, so an unticked box writes nothing at all -
+        // otherwise every mask carrying a flag exports it whether or not the
+        // author ever touched it.
+        if (v) out[p.name] = true;
+        return;
+      }
+      if (p.kind === "POINTS") {
+        if (v.length >= 4) out[p.name] = v.slice();
+        return;
+      }
       out[p.name] = tidyValue(v);
     });
     if (mask.combine && mask.combine !== "MULTIPLY") out.combine = mask.combine;

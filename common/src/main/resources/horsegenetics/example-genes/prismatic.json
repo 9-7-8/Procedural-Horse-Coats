@@ -609,6 +609,63 @@
             "color": "#d8a24b",
             "strength": 45
           }
+        },
+        {
+          "name": "a drawn bolt down the shoulder - a stroked, smoothed PATH",
+          "masks": [
+            {
+              "type": "PATH",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "plane": "side",
+              "space": "body",
+              "points": [
+                0.68, 0.60,
+                0.60, 0.48,
+                0.66, 0.44,
+                0.56, 0.30
+              ],
+              "curve": true,
+              "width": 0.5,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffe98a",
+            "strength": 90
+          }
+        },
+        {
+          "name": "and a filled crescent on the hindquarter, so fill and closed are compared too",
+          "masks": [
+            {
+              "type": "PATH",
+              "parts": [
+                "BODY"
+              ],
+              "plane": "side",
+              "space": "body",
+              "points": [
+                0.20, 0.40,
+                0.24, 0.55,
+                0.36, 0.58,
+                0.43, 0.47,
+                0.34, 0.52,
+                0.26, 0.48
+              ],
+              "curve": true,
+              "fill": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6f4bd8",
+            "strength": 75
+          }
         }
       ]
     },

@@ -489,6 +489,35 @@ public record GeneSpec(
         /** One closed <b>spiral</b> per named part - the filigree / circuit figure. */
         SPIRAL,
         /**
+         * <b>A shape somebody drew</b> - control points in a plane, stroked as
+         * a line or filled as an outline, extruded through the horse.
+         *
+         * <p>It is the odd one out here and is meant to be. Every other mask
+         * says what a shape is <i>made of</i> - a lattice of spots, a band of
+         * this width, noise over that scale - and lets the geometry and the
+         * horse's own numbers decide where it lands. Those are the right tool
+         * for a marking that has a rule behind it, which is nearly all of
+         * them. But a lightning bolt, a crescent, a brand, a specific curl on
+         * a specific shoulder has no rule behind it: it is a shape, and the
+         * only honest way to describe it is to give its outline.
+         *
+         * <p><b>Points, not pixels.</b> A drawn shape could have been stored as
+         * a small bitmap stencil, and that would have been easier to draw with
+         * and wrong in three ways: it fixes the resolution, it cannot be
+         * measured in body units so it does not follow a resized horse, and it
+         * turns a gene file into a picture file. Control points in body space
+         * stay small, stay legible in the JSON, and are the same maths in Java
+         * and in the browser.
+         *
+         * <p>It is still a <b>mask</b>, so everything else composes with it as
+         * usual: multiply a {@code PATH} by a {@code NOISE} to break its edge
+         * up, or by a {@code CHOICE} so only some horses carry it. And because
+         * the points can be knob-free constants while the width is a knob, a
+         * drawn shape can still vary per horse without ceasing to be that
+         * shape.
+         */
+        PATH,
+        /**
          * A band whose edges are displaced by a <b>sine</b> running along
          * another axis - the one shape in the vocabulary that is smooth on
          * purpose.
@@ -599,6 +628,8 @@ public record GeneSpec(
 
         public static final Params EMPTY = new Params(CommonMaps.<String, Object>empty());
 
+        private static final double[] EMPTY_POINTS = new double[0];
+
         public Value value(String name, double fallback) {
             Object o = raw.get(name);
             return o == null ? new Value.Const(fallback) : (Value) o;
@@ -635,6 +666,21 @@ public record GeneSpec(
         public int color(String name, int fallback) {
             Object o = raw.get(name);
             return o == null ? fallback : (Integer) o;
+        }
+
+        /**
+         * A {@code PATH}'s control points, flat as {@code [u0, v0, u1, v1,
+         * ...]}; empty when absent.
+         *
+         * <p>Handed back as the array the parser built rather than a copy,
+         * because the painter asks for it once per texel and copying sixty-four
+         * doubles seventy thousand times to protect a value nobody writes to is
+         * not a trade worth making. Nothing in the pipeline writes to it; the
+         * parser is the only thing that ever fills it in.
+         */
+        public double[] points(String name) {
+            Object o = raw.get(name);
+            return o == null ? EMPTY_POINTS : (double[]) o;
         }
     }
 }

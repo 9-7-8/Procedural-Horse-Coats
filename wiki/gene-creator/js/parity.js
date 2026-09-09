@@ -205,6 +205,14 @@ window.HG = window.HG || {};
           }
         });
         count();
+        if (schema.pathCurveSamples !== undefined) {
+          count();
+          if (schema.pathCurveSamples !== HG.schema.PATH_CURVE_SAMPLES) {
+            fail("PATH curve sampling differs: the game walks each span in "
+              + schema.pathCurveSamples + " sub-segments, the creator "
+              + HG.schema.PATH_CURVE_SAMPLES);
+          }
+        }
         if (String(schema.conditionFlags) !== String(HG.schema.CONDITION_FLAGS)) {
           fail("condition flags differ: the game has [" + schema.conditionFlags
             + "], the creator [" + HG.schema.CONDITION_FLAGS + "]");

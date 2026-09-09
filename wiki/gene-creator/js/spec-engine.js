@@ -126,6 +126,79 @@ window.HG = window.HG || {};
     return clamp01(0.5 + sum / Math.sqrt(sumSq));
   }
 
+  /**
+   * The PATH mask's coverage - mirrors SpecPainter.pathCoverage.
+   *
+   * One walk of the control points answers both questions: distance to the
+   * nearest sub-segment strokes the line, crossing parity of a ray along +u
+   * fills it. Sub-segments are generated on the fly rather than collected into
+   * an array, because this runs per texel.
+   */
+  function pathCoverage(pts, curve, closed, fill, uMin, uSpan, vMin, vSpan, u, v, half, soft) {
+    var n = pts.length / 2;
+    var spans = closed ? n : n - 1;
+    var steps = curve ? HG.schema.PATH_CURVE_SAMPLES : 1;
+    var best = Infinity;
+    var inside = false;
+    var au = uMin + pts[0] * uSpan;
+    var av = vMin + pts[1] * vSpan;
+    for (var span = 0; span < spans; span++) {
+      for (var step = 1; step <= steps; step++) {
+        var bu, bv;
+        if (curve) {
+          var t = step / steps;
+          bu = uMin + spline(pts, n, closed, span, t, 0) * uSpan;
+          bv = vMin + spline(pts, n, closed, span, t, 1) * vSpan;
+        } else {
+          var j = (span + 1) % n;
+          bu = uMin + pts[j * 2] * uSpan;
+          bv = vMin + pts[j * 2 + 1] * vSpan;
+        }
+        var d = segmentDistance(u, v, au, av, bu, bv);
+        if (d < best) best = d;
+        if (fill && crosses(u, v, au, av, bu, bv)) inside = !inside;
+        au = bu;
+        av = bv;
+      }
+    }
+    if (fill) return inside ? 1 : 1 - smoothstep(0, soft, best);
+    return 1 - smoothstep(half, half + soft, best);
+  }
+
+  /** Catmull-Rom, ends held by duplicating the first and last point. */
+  function spline(pts, n, closed, span, t, axis) {
+    var i1 = span;
+    var i2 = closed ? (span + 1) % n : Math.min(span + 1, n - 1);
+    var i0 = closed ? (span - 1 + n) % n : Math.max(span - 1, 0);
+    var i3 = closed ? (span + 2) % n : Math.min(span + 2, n - 1);
+    var p0 = pts[i0 * 2 + axis], p1 = pts[i1 * 2 + axis];
+    var p2 = pts[i2 * 2 + axis], p3 = pts[i3 * 2 + axis];
+    var t2 = t * t, t3 = t2 * t;
+    return 0.5 * ((2 * p1) + (-p0 + p2) * t
+      + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2
+      + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+  }
+
+  function segmentDistance(u, v, au, av, bu, bv) {
+    var du = bu - au, dv = bv - av;
+    var len2 = du * du + dv * dv;
+    var t = len2 <= 1e-12 ? 0 : ((u - au) * du + (v - av) * dv) / len2;
+    t = t < 0 ? 0 : (t > 1 ? 1 : t);
+    var cu = au + t * du, cv = av + t * dv;
+    return Math.sqrt((u - cu) * (u - cu) + (v - cv) * (v - cv));
+  }
+
+  /**
+   * Even-odd crossing along +u. The half-open comparison on v is what stops a
+   * vertex sitting exactly on the ray being counted twice - which shows up as
+   * one inverted row through a filled shape.
+   */
+  function crosses(u, v, au, av, bu, bv) {
+    if ((av > v) === (bv > v)) return false;
+    var at = (v - av) / (bv - av);
+    return u < au + at * (bu - au);
+  }
+
   function choiceOf(seed, options) {
     var z = scramble(seed);
     // The low 32 bits are enough for a modulus this small, and staying inside
@@ -331,6 +404,29 @@ window.HG = window.HG || {};
         var ft = get(values, mask.threshold, 0.5, legIndex);
         var fsf = Math.max(1e-6, get(values, mask.softness, 0.12, legIndex));
         return smoothstep(ft - fsf, ft + fsf, fn);
+      }
+      case "PATH": {
+        var ppts = mask.points || [];
+        if (ppts.length < 4) return 0;
+        var whole = geo.bodyBounds(skin);
+        var pl = mask.plane || "side";
+        var uAxis = pl === "front" ? "Z" : "X";
+        var vAxis = pl === "top" ? "Z" : "Y";
+        // 'side' is (x,y) extruded along z, so |z| is never consulted and the
+        // shape shows on both flanks. Mirrors the Java.
+        var pu = uAxis === "X" ? point.x : point.z;
+        var pv = vAxis === "Z" ? point.z : point.y;
+        var norm = (mask.space || "body") !== "units";
+        var uMin = norm ? whole.min(uAxis) : 0;
+        var uSpan = norm ? Math.max(1e-6, whole.span(uAxis)) : 1;
+        var vMin = norm ? whole.min(vAxis) : 0;
+        var vSpan = norm ? Math.max(1e-6, whole.span(vAxis)) : 1;
+        var pfill = !!mask.fill;
+        var pclosed = pfill || !!mask.closed;
+        var psoft = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
+        var phalf = Math.max(0, get(values, mask.width, 1.0, legIndex)) / 2;
+        return pathCoverage(ppts, !!mask.curve, pclosed, pfill,
+          uMin, uSpan, vMin, vSpan, pu, pv, phalf, psoft);
       }
       case "CHOICE": {
         // Constant across the horse and exactly 0 or 1 - the position is
