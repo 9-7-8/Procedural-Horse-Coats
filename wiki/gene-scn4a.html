@@ -70,7 +70,7 @@
     </p>
 </div>
 
-<h2>The combination table</h2>
+<h2 id="combination-table">The combination table</h2>
 
 <div class="table-wrap">
 <table>
@@ -145,6 +145,286 @@
     and the reference is used for the <em>ordering</em> of the disorders against each
     other, not for the arithmetic. Every other new health locus follows the same rule.
 </p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<div class="note warn">
+    <span class="label">The one place this page contradicts the mod outright</span>
+    <p>
+        The mod makes <code>H/H</code> <b>lethal at birth</b>. In the real world it is not:
+        homozygous HYPP horses live, are generally more severely affected than heterozygotes,
+        and transmit the allele to 100% of their foals. What actually happens to them is a
+        <em>registry</em> rule, not a death &mdash; the AQHA has made <code>H/H</code> foals
+        born on or after 1 January 2007 ineligible for registration. See
+        <a href="#hh">the section below</a> for why the mod made the change and what it costs.
+    </p>
+</div>
+
+<h2 id="core">Core facts</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>SCN4A</em>, encoding the alpha subunit of the skeletal-muscle
+    voltage-gated sodium channel, <b>Nav1.4</b></td></tr>
+<tr><th>Disease allele</th><td>c.4248C&gt;G, giving p.Phe1416Leu (F1416L) &mdash; missense</td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 11; EquCab3.0 g.15474228C&gt;G</td></tr>
+<tr><th>Condition</th><td>Hyperkalaemic periodic paralysis (HYPP)</td></tr>
+<tr><th>Inheritance</th><td>Autosomal dominant with variable expressivity; often called
+    incompletely dominant, since <code>H/H</code> horses are usually more severely affected
+    than <code>N/H</code></td></tr>
+<tr><th>Breed background</th><td>Quarter Horse and populations with Quarter Horse /
+    Impressive-line ancestry, including some Paints and Appaloosas</td></tr>
+<tr><th>Body system</th><td>Skeletal-muscle membrane excitability &mdash; not coat, height or
+    athletic aptitude</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="channel">What the channel does, and what the mutation stops it doing</h2>
+
+<p>
+    Skeletal muscle contracts by creating and propagating an electrical impulse. Nav1.4 is
+    central to it: a channel opens briefly and lets sodium into the cell; the inward current
+    depolarises the membrane and starts an action potential; the channel rapidly
+    <strong>inactivates</strong>, shutting sodium entry off; potassium movement then returns the
+    membrane to rest, ready for the next controlled contraction.
+</p>
+
+<p>
+    F1416L impairs that inactivation step. Channels stay open too long or reopen
+    inappropriately, giving excess sodium entry and a persistently depolarised, electrically
+    unstable membrane.
+    <a href="https://vgl.ucdavis.edu/test/hypp">UC&nbsp;Davis VGL</a>
+</p>
+
+<p>
+    The instability has two phases, and they look like opposite diseases:
+</p>
+
+<ul>
+    <li><strong>Early, excitable:</strong> fasciculations, twitching, stiffness, myotonia,
+        sometimes spasm.</li>
+    <li><strong>Later, inexcitable:</strong> if sustained depolarisation goes far enough, the
+        channels cannot reset at all. Fibres stop firing &mdash; weakness, wobbliness, inability
+        to rise, collapse, flaccid paralysis.</li>
+</ul>
+
+<p>
+    Serum potassium is often elevated during an episode. Hyperkalaemia both worsens the membrane
+    instability and makes repolarisation harder, and spontaneous muscle activity moves more
+    potassium out of cells &mdash; so the attack reinforces itself.
+    <a href="https://www.vetlexicon.com/equis/internal-medicine/articles/muscle-hyperkalemic-periodic-paralysis/">Vetlexicon</a>
+</p>
+
+<h2 id="clinical">The clinical picture</h2>
+
+<p>
+    Episodes last minutes to hours. Horses can look completely normal between them, and some
+    genetically positive animals have few or no observable events under ordinary management
+    &mdash; which does not make them clear, and does not stop them transmitting.
+</p>
+
+<p>
+    Signs include fine muscle twitching over flank, shoulder, neck or face; prolapse of the
+    third eyelid; stiffness or a locked-up appearance; weakness, stumbling, hindquarter weakness
+    or abnormal gait; sweating, an anxious look, respiratory noise; recumbency, inability to
+    rise, partial or generalised paralysis; and rarely sudden death from severe respiratory-muscle
+    involvement or an arrhythmia with marked hyperkalaemia.
+</p>
+
+<p>
+    HYPP is often first noticed in young horses, but the age of recognition varies, and so does
+    severity &mdash; the same genotype looks different across individuals and within one horse
+    depending on diet, stress and management. A horse showing tremors, weakness or collapse
+    should not be assumed to have HYPP on appearance: colic, exertional disorders, neurologic
+    disease, toxicities and other electrolyte abnormalities all overlap. Potassium and acid-base
+    testing help during an acute episode; the DNA test settles whether the allele is there.
+</p>
+
+<h2 id="real-inheritance">Inheritance</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>pairing</th><th><code>N/N</code></th><th><code>N/H</code></th><th><code>H/H</code></th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code> &times; <code>N/N</code></td><td class="ok">100%</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td><code>N/N</code> &times; <code>N/H</code></td><td>50%</td><td class="warn">50%</td><td>&mdash;</td></tr>
+<tr><td><code>N/H</code> &times; <code>N/H</code></td><td>25%</td><td class="warn">50%</td><td class="bad">25%</td></tr>
+<tr><td><code>N/N</code> &times; <code>H/H</code></td><td>&mdash;</td><td class="warn">100%</td><td>&mdash;</td></tr>
+<tr><td><code>N/H</code> &times; <code>H/H</code></td><td>&mdash;</td><td class="warn">50%</td><td class="bad">50%</td></tr>
+<tr><td><code>H/H</code> &times; <code>H/H</code></td><td>&mdash;</td><td>&mdash;</td><td class="bad">100%</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Autosomal, so sex is irrelevant, and each conception is independent. Dominant, so
+    <code>N/H</code> is not a benign carrier state &mdash; there is no silent carrier at this
+    locus at all, which is the structural difference between HYPP and every recessive on the
+    health layer.
+</p>
+
+<p>
+    The disease lineage traces to the influential AQHA stallion <strong>Impressive</strong>
+    (born 1969); every horse identified with the allele in an early study descended from him.
+    That HYPP spread <em>despite</em> its cost is a standard population-genetics story: a
+    heavily used sire disseminates an allele fast, especially when breeders associate his line
+    with a desired show phenotype. AQHA requires testing for horses descending from Impressive
+    or other designated positive bloodlines.
+    <a href="https://www.aqha.com/hypp">AQHA</a>
+</p>
+
+<h2 id="hh">The homozygote, and what the mod does with it</h2>
+
+<p>
+    <code>H/H</code> horses exist, live, and are generally at higher risk with earlier onset
+    and more severe disease. They pass the allele to every foal. Since 2007 they cannot be
+    registered with AQHA, which is a rule about paperwork rather than about survival.
+</p>
+
+<div class="note warn">
+    <span class="label">Why the mod kills the homozygote anyway</span>
+    <p>
+        This is the mod&rsquo;s largest deliberate departure from the source material on the
+        health layer, and it is a <em>design</em> call rather than a misreading. HYPP is the
+        only locus where a player makes the mistake with their eyes open: an <code>H/N</code>
+        horse is visibly unwell and can still be excellent on every other axis, so it is
+        genuinely tempting to breed from. Making <code>H/H</code> lethal turns that temptation
+        into a cliff &mdash; two affected parents throw a dead foal one time in four while half
+        the survivors are affected again. The real consequence, a foal that lives and is
+        unregisterable, has no analogue in a game with no registry.
+    </p>
+    <p>
+        The cost is that this page and
+        <a href="gene-scn4a.html#combination-table">the combination table</a> now disagree about
+        a fact, and the disagreement is not an artefact of the missing age model the way
+        <a href="gene-toe1.html">TOE1</a>&rsquo;s and <a href="gene-st14.html">ST14</a>&rsquo;s
+        are. If the mod ever grows a severity axis, <code>H/H</code> becoming <em>much worse
+        but survivable</em> is the change that would put it right &mdash; and would cost the
+        gene its cliff.
+    </p>
+</div>
+
+<h2 id="traits">Coat, build, size, performance</h2>
+
+<p>
+    <strong>Coat.</strong> No evidence that the allele determines or predicts black, bay,
+    chestnut, grey, dun, cream, champagne, roan, pearl or silver; tobiano, overo, sabino,
+    splash, leopard complex or any white pattern; or eye, skin, mane and tail colour. It is a
+    muscle ion channel, not a pigment locus.
+</p>
+
+<p>
+    <strong>The halter-horse claim.</strong> Some breeders favoured an unusually heavily muscled
+    look in Impressive descendants, which produced a persistent belief that HYPP itself causes
+    exceptional muscling. The evidence does not establish F1416L as a muscling gene. Affected
+    horses show intermittent stiffness, prolonged contraction and abnormal muscle activity
+    &mdash; that is <em>pathology</em>, not hypertrophy or desirable athletic muscle physiology.
+    The historical concentration in halter stock is far better explained by sire-line use and
+    selection around one family. OMIA notes that breeders selected the associated muscular
+    phenotype; that is not proof the mutation causes it.
+    <a href="https://omia.org/OMIA000785/9796/">OMIA&nbsp;000785</a>
+</p>
+
+<p>
+    There is likewise no reliable evidence that the allele determines mature height, weight,
+    bone, body size, head shape, neck set, hip angle, limb proportion, hoof structure, baseline
+    muscle-fibre type, soundness or a reliably desirable build.
+</p>
+
+<p>
+    <strong>Speed.</strong> No robust evidence supports using HYPP genotype to predict sprint
+    speed, racing success, stride length, acceleration, earnings or endurance. One could
+    speculate that altered excitability changes contraction behaviour &mdash; but uncontrolled
+    excitability is exactly what makes HYPP dangerous, and during an episode weakness,
+    stiffness, impaired coordination and paralysis plainly reduce performance and endanger
+    horse and rider. A symptom-free <code>N/H</code> horse has no genetic speed advantage from
+    HYPP.
+</p>
+
+<p>
+    <strong>Jumping.</strong> No validated association with scope, carefulness, technique,
+    bascule, take-off power, landing or competitive results. The real point is risk management:
+    HYPP is potentially incompatible with any situation where sudden weakness or paralysis
+    endangers horse and rider &mdash; jumping, eventing, riding out alone, racing, transport.
+    That is individualised veterinary judgement, not a blanket bar. The mod&rsquo;s
+    &minus;0.040 speed and &minus;0.18 jump on the heterozygote are the mod&rsquo;s way of
+    saying &ldquo;this horse is not reliable&rdquo; in the only vocabulary
+    <a href="horse-body.html">the trait layer</a> has.
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>population</th><th>frequency</th><th>note</th></tr></thead>
+<tbody>
+<tr><td>Quarter Horse overall</td><td><b>~4.4%</b> carriers</td><td>AQHA figure; concentrated in halter horses</td></tr>
+<tr><td>QH halter subpopulation</td><td>H-allele frequency <b>0.299</b></td><td>2009 study; an <em>allele</em> frequency, not a share of horses</td></tr>
+<tr><td>QH western pleasure</td><td>allele <b>0.013</b></td><td>same study</td></tr>
+<tr><td>QH barrel racing</td><td>allele <b>0.006</b></td><td>present but uncommon</td></tr>
+<tr><td>QH cutting, cow horse, reining, racing</td><td>not detected</td><td>in that study sample &mdash; not proof of zero</td></tr>
+<tr><td>American Paint Horse</td><td>present with QH ancestry</td><td>registry-, line- and country-dependent; not a universal Paint allele</td></tr>
+<tr><td>Appaloosa</td><td>occurs where QH ancestry is present</td><td>recognised in panel guidance; population frequency less well defined</td></tr>
+<tr><td>breeds without QH ancestry</td><td>not a recognised disease allele</td><td>test on pedigree or registry grounds, not on appearance</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">0.299 is not &ldquo;29.9% of horses&rdquo;</span>
+    <p>
+        An allele frequency of 0.299 in a selected halter population would, under a naive
+        Hardy-Weinberg calculation, predict a much <em>larger</em> proportion of positive
+        genotypes than 29.9%. Real breeding populations are structured, selected, and shaped by
+        registration rules, so the calculation does not hold and individual testing is the only
+        way to know a horse&rsquo;s status. This is the same
+        <a href="gene-prkdc.html#breeds">three-numbers confusion</a> that recurs across every
+        page on this layer.
+    </p>
+</div>
+
+<p>
+    The mod puts <code>WILD_AFFECTED_PERCENT</code> at <b>1.2</b> &mdash; the lowest number on
+    the health layer, and deliberately so, because at this locus every positive founder is
+    <em>sick</em> rather than merely carrying something. Founders <em>have</em> to be able to be
+    affected here: a dominant with no silent carrier that never appeared in a founder could
+    never appear at all.
+</p>
+
+<h2 id="management">Management</h2>
+
+<p>
+    The aim is to avoid abrupt rises in blood potassium and the stressors that precipitate
+    episodes. Reported triggers include high-potassium feeding or sudden dietary change,
+    fasting, illness, transport, cold, anaesthesia and restriction of regular exercise &mdash;
+    and they differ between individuals. Usual principles: a consistently low-potassium ration
+    designed with a vet or equine nutritionist; avoiding sudden large alfalfa meals where
+    relevant; regular turnout or exercise rather than long confinement; routine, minimal stress,
+    no fasting; telling the veterinary team the HYPP status before sedation, anaesthesia,
+    hospitalisation or emergency treatment; and an individualised emergency plan for a horse
+    that has ever collapsed or shown marked weakness. Acetazolamide is used in some horses, as a
+    veterinarian&rsquo;s decision rather than a substitute for testing, diet and management.
+</p>
+
+<div class="note">
+    <span class="label">A note on the mod&rsquo;s numbers</span>
+    <p>
+        The reference material this locus was built from gives HYPP as roughly &ldquo;30% health,
+        60% speed and jump&rdquo;, in a severity model the mod does not have
+        (<a href="roadmap.html#decisions">roadmap &sect;3</a> flags it and does not decide it).
+        Read literally against a 22-health baseline, those percentages would make an
+        <em>affected but living</em> horse worse than several of the mod&rsquo;s outright
+        lethals, which is plainly not what the table means. So the figures are calibrated against
+        the disorders that already ship &mdash; the worst survivable outcome in the mod, and
+        comfortably short of a lethal &mdash; and the reference is used for the
+        <em>ordering</em>, not the arithmetic. <a href="gene-gys1.html">GYS1</a> was calibrated
+        the same way and against this gene.
+    </p>
+</div>
 
 </section>
 

@@ -139,6 +139,253 @@
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="at-a-glance">At a glance</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>MYO5A</em>, encoding the intracellular motor protein myosin&nbsp;Va</td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 1 (ECA1); EquCab3.0 NC_009144.3:g.139290592del</td></tr>
+<tr><th>Disease allele</th><td>A one-base deletion causing a frameshift &mdash;
+    XM_023617258.1:c.4249del, predicted p.(Arg1417Alafs*13)</td></tr>
+<tr><th>Disorder</th><td>Lavender foal syndrome (LFS), also called coat-colour dilution lethal</td></tr>
+<tr><th>Inheritance</th><td>Autosomal recessive</td></tr>
+<tr><th>Homozygote</th><td>Pale, diluted coat plus severe neurologic dysfunction at or soon
+    after birth; usually euthanised or dies</td></tr>
+<tr><th>Heterozygote</th><td>Generally healthy and outwardly normal</td></tr>
+<tr><th>Performance</th><td>No validated effect on carrier height, build, speed, jump,
+    athleticism or soundness</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="motor">A motor that carries the wrong cargo nowhere</h2>
+
+<p>
+    Myosin&nbsp;Va walks selected cellular cargo along actin filaments &mdash; the
+    cell&rsquo;s internal transport tracks. Two of the places that matters most are exactly
+    the two things LFS breaks:
+</p>
+
+<ul>
+    <li><strong>Melanocytes.</strong> It moves melanosomes, the pigment-containing
+        organelles, out to the cell periphery so pigment can be handed to the
+        hair-producing keratinocytes around them.</li>
+    <li><strong>Neurons</strong>, particularly in dendrites, where it carries mRNAs,
+        glutamate receptors and secretory vesicles.</li>
+</ul>
+
+<p>
+    The causal variant is a single-base deletion in <strong>exon 30</strong>. It shifts the
+    reading frame and produces a premature stop shortly afterwards, truncating roughly 379
+    amino acids of the C-terminal globular tail. That is the biologically important part:
+    the tail is what binds the cargo. The motor may keep some of its structure and lose the
+    function it exists for.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2855325/">Brooks
+    <em>et&nbsp;al.</em>, PMC2855325</a>
+</p>
+
+<p>
+    The original work went past association: all seven tested affected foals were
+    homozygous, the available parents were carriers, the affected horses shared a homozygous
+    region on chromosome&nbsp;1 spanning <em>MYO5A</em>, the deleted region is highly
+    conserved across species, and the clinical picture matches known <em>MYO5A</em>
+    pigment-and-neurology disorders in other mammals.
+</p>
+
+<h2 id="pleiotropy">Why one gene gives both a colour and a seizure</h2>
+
+<p>
+    The lavender coat and the neurologic syndrome are two readings of the same
+    transport failure &mdash; <strong>pleiotropy</strong>, one gene reaching two traits that
+    look unrelated.
+</p>
+
+<p>
+    Pigmentation is not only making melanin. It is moving melanosomes correctly inside the
+    melanocyte and transferring pigment into the developing hair shaft, which myosin&nbsp;Va
+    does as part of a complex with <b>RAB27A</b> and <b>melanophilin (<em>MLPH</em>)</b>.
+    Disrupt the motor and delivery goes wrong, and the newborn foal is visibly diluted:
+    described as lavender, pale grey, pewter, silver or pinkish-silver, or a very light
+    chestnut.
+</p>
+
+<div class="note warn">
+    <span class="label">This is not a dilution allele</span>
+    <p>
+        &ldquo;Lavender&rdquo; here is not a stable cosmetic colour in the class of
+        <a href="gene-matp.html">cream and pearl</a>,
+        <a href="gene-champagne.html">champagne</a>, <a href="gene-dun.html">dun</a> or
+        <a href="gene-silver.html">silver</a>. It is the warning sign of a lethal neonatal
+        syndrome. The shade also varies, because the foal&rsquo;s base colour and other
+        pigment loci still contribute to what a diluted coat looks like &mdash; so coat
+        appearance cannot diagnose LFS on its own, and the DNA test is what settles it.
+    </p>
+</div>
+
+<p>
+    The neurologic signs follow myosin&nbsp;Va&rsquo;s job in neurons. Affected foals show
+    seizures or tetany-like episodes, opisthotonus &mdash; severe backward arching of the
+    neck and spine &mdash; rigid or paddling limbs, nystagmus, an inability to stand
+    normally, an inability to nurse, and rapid deterioration after birth. Mild leukopenia
+    has sometimes been reported, but the core pathology is neurologic and not the profound
+    immune deficiency seen with the related pathway gene <em>RAB27A</em>. It is
+    &ldquo;lethal&rdquo; because the impairment is severe enough that the foal cannot
+    function or feed; there is no curative treatment and euthanasia is frequently necessary.
+</p>
+
+<div class="note warn">
+    <span class="label">The mod does not paint the lavender, on purpose</span>
+    <p>
+        This is the only lethal in the mod whose real presentation includes a colour, and
+        it would be the obvious thing to draw. Two reasons it is not.
+        <a href="pipeline.html">Phase 1</a> can only <em>remove</em> pigment, and a
+        de-pigmented mane reads as a <b>white</b> mane &mdash; a different horse, and a
+        worse lie than drawing nothing. And the foal dies within seconds of being born, so
+        a player would essentially never see it. If a delayed-death path ever lands, this is
+        the first gene that would want a coat.
+        <a href="gene-st14.html">ST14</a> is in the same position for the opposite reason.
+    </p>
+</div>
+
+<h2 id="carrier">Affected foal versus carrier</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>trait</th><th>affected <code>lfs/lfs</code></th><th>carrier <code>N/lfs</code></th></tr></thead>
+<tbody>
+<tr><td>coat</td><td>visibly diluted &mdash; lavender or pewter</td><td class="ok">no validated effect</td></tr>
+<tr><td>build</td><td>no specific skeletal phenotype; largely moot, the disease is neonatal</td><td class="ok">no validated effect on conformation, muscling, bone or proportion</td></tr>
+<tr><td>adult size</td><td>does not normally survive to reach one</td><td class="ok">no evidence of any size effect</td></tr>
+<tr><td>health</td><td class="bad">severe neonatal neurologic dysfunction; fatal</td><td class="ok">clinically unaffected; the risk is reproductive</td></tr>
+<tr><td>speed</td><td>not meaningfully measurable</td><td class="ok">no evidence either way</td></tr>
+<tr><td>jump</td><td>not meaningful</td><td class="ok">no published evidence on scope, technique or soundness</td></tr>
+<tr><td>breeding</td><td>not a viable adult</td><td>passes the allele to about half its foals</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The occasional claim that a &ldquo;lavender gene&rdquo; goes with unusual athletic
+    ability or a particular refinement is <strong>not supported</strong>. A carrier has one
+    functional copy, which appears to be enough for normal pigment trafficking and normal
+    neurology, and that is precisely why carriers look, train, race, jump and breed normally
+    while still transmitting the allele. The mod agrees: the carrier row costs nothing.
+</p>
+
+<h2 id="real-inheritance">Inheritance and breeding maths</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>mating</th><th>expected offspring</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code> &times; <code>N/N</code></td><td>100% clear</td></tr>
+<tr><td><code>N/N</code> &times; <code>N/lfs</code></td><td>50% clear, 50% carrier; no affected foals</td></tr>
+<tr><td><code>N/lfs</code> &times; <code>N/lfs</code></td><td class="warn">25% clear, 50% carrier, 25% affected</td></tr>
+<tr><td><code>N/lfs</code> &times; <code>lfs/lfs</code></td><td>50% carrier, 50% affected &mdash; if an affected animal were viable</td></tr>
+<tr><td><code>N/N</code> &times; <code>lfs/lfs</code></td><td>100% carrier &mdash; if an affected animal were viable</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Per-conception probabilities, not a guaranteed ratio across a small set of foals. Two
+    carriers can produce several clear foals in a row and then an affected one; earlier
+    outcomes do not change the next draw. The goal is not to purge every carrier &mdash;
+    they are clinically normal and can be genetically valuable &mdash; but to test and avoid
+    carrier-to-carrier pairings.
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    Firmly documented in the <strong>Arabian horse</strong>, and especially in horses of
+    <strong>Egyptian Arabian</strong> descent. OMIA&rsquo;s breed listing for the causal
+    variant is Arab alone; related Arab-influenced populations and crossbreds carry it only
+    insofar as they inherit that ancestry, and it is not established as a meaningful allele
+    in unrelated breeds.
+    <a href="https://omia.org/OMIA001501/9796/">OMIA&nbsp;001501</a>
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>population</th><th>carrier rate</th><th>caveat</th></tr></thead>
+<tbody>
+<tr><td>US Egyptian Arabians, 2010 discovery screen</td><td>6/58 &mdash; <b>10.3%</b></td><td>small voluntary sample</td></tr>
+<tr><td>US non-Egyptian Arabians, same screen</td><td>1/56 &mdash; <b>1.8%</b></td><td>very small; not representative of every family</td></tr>
+<tr><td>Egyptian Arabians sampled in Egypt, 2023</td><td><b>16%</b>, allele frequency 0.08</td><td>reflects its own sampled pedigrees</td></tr>
+<tr><td>Registered purebred Arabian foals, South Africa 2009/10</td><td><b>11.7%</b> (95% CI 7.6&ndash;17.0)</td><td>one country, one registry, two birth cohorts</td></tr>
+<tr><td>Arabian cohort, 2021 MENA study</td><td>5/80 &mdash; <b>6.3%</b></td><td>regional; no carriers in its 41 Barb horses</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The discovery study put the allele frequency at 5.2% among its Egyptian Arabians and
+    0.89% among the non-Egyptian sample. The spread from 1.8% to 16% across those rows is
+    the point: quoting one number as &ldquo;the breed frequency&rdquo; is not safe, because
+    it moves with country, subpopulation, line concentration, which farms send samples, and
+    how heavily particular families have been used.
+    <a href="https://beva.onlinelibrary.wiley.com/doi/10.1111/evj.13604?af=R">EVJ 13604</a>
+</p>
+
+<p>
+    The Egyptian concentration is a <strong>founder effect amplified by linebreeding</strong>.
+    In the original mapping pedigrees the affected foals shared an ancestor six to eight
+    generations back, though later carrier identification suggested the true origin is older
+    than that conspicuous recent one.
+</p>
+
+<p>
+    The mod carries 2.2% <code>WILD_CARRIER_PERCENT</code>, applied to every founder
+    horse rather than to one breed &mdash; the same distance problem
+    <a href="gene-b4galt7.html#breeds">B4GALT7</a> and <a href="gene-gbe1.html#breeds">GBE1</a>
+    have.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<p><strong>Well established.</strong> The exon-30 deletion is the causal LFS variant in
+    Arabians; it is a frameshift loss-of-function on ECA1; affected foals are homozygous;
+    inheritance is autosomal recessive; homozygotes show severe neonatal neurologic disease
+    with characteristic dilution; heterozygotes are clinically normal on the available
+    evidence; and the mechanism is consistent with myosin&nbsp;Va&rsquo;s roles in
+    melanosome and neuronal transport.</p>
+
+<p><strong>Plausible, not fully demonstrated in horses.</strong> The cell-by-cell chain from
+    the mutant protein to each clinical sign has not been mapped in equine tissue &mdash; it
+    is inferred from the predicted truncation and comparative biology. Whether the mutation
+    reduces total MYO5A protein or produces a dysfunctional truncated one is unresolved in
+    affected foals. The dilution&rsquo;s exact relationship to base colour and the other
+    pigment loci has never been quantified in a large LFS cohort. And whether the allele
+    exists at meaningful frequency in every Arabian-derived or non-Arabian light breed is
+    unproven &mdash; the original authors flagged it for future screening.</p>
+
+<p><strong>Specifically unproven.</strong> Any carrier athletic advantage; any carrier
+    conformation effect; any carrier health syndrome, including subclinical dilution or
+    neurologic impairment. And a survivable &ldquo;mild LFS&rdquo; in carriers: the 2010
+    paper noted a rumour that some juvenile, survivable seizure disorders in the same
+    pedigrees might be related, and was explicit that this had <b>not</b> been validated
+    because the samples were unavailable. It should not be treated as a carrier phenotype.</p>
+
+<div class="note">
+    <span class="label">Two cousins in other species</span>
+    <p>
+        The closest human analogue is <b>Griscelli syndrome type&nbsp;1</b>, from biallelic
+        <em>MYO5A</em> variants; the pairing of pigment dilution with major neurologic
+        involvement is what made <em>MYO5A</em> the leading candidate for LFS in the first
+        place. The useful contrast is <b>RAB27A</b>: <em>RAB27A</em>, <em>MLPH</em> and
+        <em>MYO5A</em> cooperate on melanosome trafficking, but <em>RAB27A</em> defects also
+        compromise cytotoxic immune-cell granule release and cause immunodeficiency. LFS has
+        the neurology and the dilution without that immune phenotype, which is one of the
+        things that points at <em>MYO5A</em> rather than its partners.
+    </p>
+</div>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-plod1.html">PLOD1</a>

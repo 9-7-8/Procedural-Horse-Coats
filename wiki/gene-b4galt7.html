@@ -30,7 +30,7 @@
 
 <div class="gene-inheritance" data-gene="horsegenetics.b4galt7"></div>
 
-<h2>What is drawn, and what is not</h2>
+<h2 id="what-is-drawn">What is drawn, and what is not</h2>
 
 <p>
     The real defect hits the long bones and the chest and leaves the skull almost
@@ -129,6 +129,260 @@
         whole design: it is what makes a pedigree worth keeping, and what turns the
         carrier wording in the info panel from decoration into the difference between
         a breeding programme and a lottery.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="locus">The locus</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>B4GALT7</em> &mdash; beta-1,4-galactosyltransferase 7, also written
+    xylosylprotein beta-1,4-galactosyltransferase I</td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 14 (<b>ECA14</b>), on the reverse strand</td></tr>
+<tr><th>Critical region</th><td>Mapped first to the telomeric end of the ECA14 short arm; fine-mapped
+    to roughly 3.15&ndash;6.23&nbsp;Mb in EquCab2</td></tr>
+<tr><th>Variant</th><td>ECA14:g.4535550C&gt;T (EquCab2); NC_009157.3:g.3772591C&gt;T (EquCab3)</td></tr>
+<tr><th>Transcript</th><td><em>B4GALT7</em> c.50G&gt;A, p.Arg17Lys</td></tr>
+<tr><th>Variant type</th><td>A single-base substitution at the <b>last nucleotide of exon&nbsp;1</b>.
+    It reads as a missense change, but the weight of the evidence is that what it
+    actually breaks is splicing</td></tr>
+<tr><th>Disorder</th><td><em>B4GALT7</em>-related Friesian dwarfism, historically just
+    &ldquo;Friesian dwarfism&rdquo;</td></tr>
+<tr><th>Inheritance</th><td>Autosomal recessive</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    This locus is a good argument against reading a variant off its amino-acid change.
+    Arginine to lysine is chemically conservative &mdash; both are basic &mdash; and the
+    prediction software did not flag it hard. But the base that changed is also part of
+    the splice-donor junction, where it matters for making a correct transcript at all.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5084406/">Leegwater
+    <em>et&nbsp;al.</em>, PMC5084406</a>
+</p>
+
+<h2 id="mechanism">What the enzyme does, and what the variant costs</h2>
+
+<p>
+    <em>B4GALT7</em> encodes an enzyme in the assembly of <strong>proteoglycans</strong>,
+    which are a large part of the extracellular matrix &mdash; the material around cells
+    that organises cartilage, tendon, ligament, bone and skin. A proteoglycan is a core
+    protein, long glycosaminoglycan chains such as chondroitin or dermatan sulfate, and a
+    four-sugar linker joining the two. B4GALT7 performs an early step in that linker: it
+    adds a galactose after xylose has been placed on the core protein.
+</p>
+
+<p>
+    Get the linker wrong and many proteoglycans come out abnormal at once, which is why
+    the syndrome is not confined to one bone or one tendon. The class of disorder has a
+    name &mdash; a <strong>linkeropathy</strong>, a defect in linker synthesis &mdash; and
+    in the horse it shows up hardest in growth plates, in tendons and ligaments, and in
+    the rib cage.
+</p>
+
+<p>
+    The mechanism is <strong>defective pre-mRNA splicing</strong>, not simply a slightly
+    wrong protein. In fibroblasts, RNA from the mutant allele was predominantly
+    mis-spliced while the normal allele in a carrier spliced correctly; homozygous
+    affected fibroblasts held about <b>2% of normal <em>B4GALT7</em> mRNA</b> by
+    quantitative PCR. Some abnormal transcripts kept intronic sequence or picked up
+    cryptic exons, and some are likely cleared by nonsense-mediated decay. So the
+    defensible model is a severe reduction in usable expression &mdash; a strong partial
+    loss of function &mdash; rather than proof that p.Arg17Lys is itself the damaging
+    event. The authors said as much: conservation at that position may be a splice-site
+    requirement rather than an indispensable arginine.
+</p>
+
+<h2 id="real-inheritance">Inheritance in a real population</h2>
+
+<p>
+    A simple autosomal recessive. Not sex-linked, so colts and fillies carry and are
+    affected at equal rates, and it takes two copies to show the syndrome.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>mating</th><th>expected foals</th><th>clinical outcome</th></tr></thead>
+<tbody>
+<tr><td>clear &times; clear</td><td>100% clear</td><td>no affected foals, and no carriers either</td></tr>
+<tr><td>clear &times; carrier</td><td>50% clear, 50% carrier</td><td>no affected foals</td></tr>
+<tr><td>carrier &times; carrier</td><td>25% clear, 50% carrier, 25% affected</td><td class="warn">one in four per conception</td></tr>
+<tr><td>affected &times; clear</td><td>100% carrier</td><td>no affected foals; every foal carries</td></tr>
+<tr><td>affected &times; carrier</td><td>50% affected, 50% carrier</td><td class="bad">very high risk</td></tr>
+<tr><td>affected &times; affected</td><td>100% affected</td><td class="bad">all foals expected affected</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The 25% is a probability <em>per foal</em>, not a promise about any four of them. Two
+    carriers can produce none affected, or several, by chance alone &mdash; which is the
+    same thing <a href="breeding.html">the mod&rsquo;s own draw</a> does, and the reason a
+    carrier pairing is a risk rather than a schedule.
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    The variant is established in <strong>Friesians and Friesian crosses</strong> and
+    nowhere else. Validation was unusually clean for a breed-associated recessive: all 29
+    affected Friesians with DNA available were homozygous, all eight obligate carriers
+    were heterozygous, and 22 of 177 Friesians in a DNA-bank sample carried &mdash; about
+    <b>12.4%</b>, consistent with the ~12% figure
+    <a href="https://vgl.ucdavis.edu/test/friesian-horse-dwarfism">UC&nbsp;Davis</a>
+    quotes. That is a discovery cohort, not a census; it should not be read as a current
+    universal rate for every Friesian registry, country or crossbred group.
+</p>
+
+<div class="note">
+    <span class="label">Why the mod&rsquo;s carrier rate is much lower</span>
+    <p>
+        <code>WILD_CARRIER_PERCENT</code> is 4.0, against ~12% in the sampled Friesians.
+        That is not a contradiction: the mod&rsquo;s number applies to <em>every</em>
+        founder horse in the world, and this locus is a Friesian bottleneck, not a
+        species-wide one. If <a href="breeds.html">the breed system</a> ever gives a breed
+        its own carrier weights, the Friesian is the first place to spend that &mdash; a
+        12% carrier rate concentrated in one breed is a far more interesting breeding
+        problem than 4% smeared over all of them.
+    </p>
+</div>
+
+<p>
+    Carrier-to-clear breeding avoids affected foals while keeping the lines. Culling
+    every carrier at once would narrow a breed that has already been through bottlenecks
+    &mdash; which is exactly the decision this gene exists to put in front of a player.
+</p>
+
+<h2 id="body">Coat, build, and what &ldquo;dwarfism&rdquo; actually means here</h2>
+
+<p>
+    There is <strong>no evidence</strong> that the allele touches coat colour, white
+    markings, black pigment, mane length, feathering or hair texture. The Friesian&rsquo;s
+    black coat and heavy feather come from elsewhere. Nor is it established as a
+    coat-quality gene: human <em>B4GALT7</em> variants can affect skin, but Friesian
+    dwarfs have not shown the loose skin, atrophic scarring or delayed wound healing
+    described in the human syndromes.
+</p>
+
+<p>
+    The build is <strong>disproportionate</strong> dwarfism, not a uniformly smaller
+    horse:
+</p>
+
+<ul>
+    <li>Markedly shortened limbs.</li>
+    <li>Shortened ribs and an abnormal rib cage.</li>
+    <li>A head that reaches roughly normal size for the breed.</li>
+    <li>A back of roughly normal length, so the body reads long against the legs.</li>
+    <li>A broad chest that narrows and turns inward at the costochondral junctions
+        &mdash; described as thickened, S-shaped junctions with inward protrusion around
+        thoracic vertebrae 10&ndash;16, closer to a pectus excavatum than to a small
+        horse&rsquo;s chest.</li>
+    <li>A weak, rounded abdomen and poorly developed musculature in mature affected
+        horses.</li>
+</ul>
+
+<p>
+    The short stature comes from abnormal <strong>physeal</strong> &mdash; growth-plate
+    &mdash; development, not from a growth-hormone deficiency. Affected foals showed
+    growth retardation in limb and rib growth plates, disorganised and thickened
+    chondrocyte columns, an irregular cartilage-to-bone transition, and dysplastic
+    metaphyses, particularly at the distal metacarpus and metatarsus. A separate study of
+    three dwarf foals found the hypothalamic-pituitary growth axis <b>normal</b>. This is
+    an extracellular-matrix and skeletal-development disorder, and that is what explains
+    the disproportion: long bones and ribs depend on highly ordered growth-plate matrix
+    in a way the skull does not.
+</p>
+
+<div class="note warn">
+    <span class="label">The mod draws the wrong shape, knowingly</span>
+    <p>
+        <code>Attributes.SCALE</code> is one number for the whole entity, so an affected
+        horse renders at a flat <b>0.75&times;</b> &mdash; a small horse, when the science
+        says short-limbed with a normal head. Per-part scaling means owning the horse
+        model instead of borrowing the vanilla one. The rib-cage weakness is paid for in
+        hearts instead of geometry. This is the single largest gap between this page and
+        <a href="gene-b4galt7.html#what-is-drawn">what is drawn</a>, and it is logged on
+        <a href="roadmap.html#health-genes">the roadmap</a> rather than approximated.
+    </p>
+</div>
+
+<h2 id="performance">Speed, jumping and the carrier question</h2>
+
+<p>
+    No published trial has measured jump height, gallop speed, stride kinetics or
+    force-plate data in affected Friesians, so a numerical penalty has no source behind
+    it. What the anatomy supports is a strong clinical inference: hyperextended fetlocks
+    give unstable support and poor energy transfer, flexor-tendon laxity removes passive
+    support of the distal limb, outward rotation through the carpi and hocks spoils
+    straight tracking and take-off alignment, and shortened limbs change the leverage of
+    bascule and landing. An affected horse should not be expected to be sound for
+    jumping, sprinting, collection or high-speed turning.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>genotype</th><th>expected effect on speed and jump</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td class="ok">none from this allele</td></tr>
+<tr><td><code>N/d</code></td><td class="ok">no recognised phenotype; <b>no evidence</b> carriers are slower, smaller or poorer jumpers</td></tr>
+<tr><td><code>d/d</code></td><td class="bad">major structural and gait impairment; normal athletic use not expected</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The mod agrees on all three rows &mdash; the carrier costs nothing, which is what makes
+    it hide. The affected horse&rsquo;s &minus;0.020 speed and &minus;0.10 jump are the
+    mod&rsquo;s own numbers standing in for &ldquo;not sound for athletic work&rdquo;, and
+    they are not derived from anything measured, because nothing has been.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<p><strong>Well established.</strong> The c.50G&gt;A variant is strongly associated with
+    the dwarfism-with-joint-laxity syndrome; it maps to ECA14 and segregates as an
+    autosomal recessive; affected animals were homozygous and obligate carriers
+    heterozygous throughout the validation cohort; the allele compromises the exon-1
+    splice donor and collapses transcript abundance in affected fibroblasts; the phenotype
+    is disproportionate limb and rib restriction with a normal-looking head, fetlock
+    hyperextension, flexor-tendon laxity, abnormal gait and rib-cage deformity; and the
+    growth axis is endocrinologically normal.</p>
+
+<p><strong>Strong inference, incomplete chain.</strong> That the collapse in expression
+    disrupts proteoglycan production in growth-plate and connective-tissue matrix; that
+    matrix dysfunction drives the disorganised chondrocyte columns and the skeletal
+    disproportion; that abnormal proteoglycan-rich matrix is behind the laxity and
+    hyperextension. Biologically compelling and consistent with the pathology, but the
+    original work did not quantify the specific proteoglycan products in affected equine
+    cartilage, tendon or ligament.</p>
+
+<p><strong>Not settled.</strong> How much p.Arg17Lys contributes independently of the
+    splice defect; residual enzyme activity tissue by tissue; whether other
+    <em>B4GALT7</em> variants could give milder or atypical equine phenotypes; the full
+    cardiopulmonary, pain, fertility and longevity picture in affected horses; whether
+    carriers have any very subtle connective-tissue or gait effect at all; any quantitative
+    performance figure; and whether any of this generalises past Friesians and their
+    crosses.</p>
+
+<div class="note">
+    <span class="label">The human side, for contrast</span>
+    <p>
+        Biallelic human <em>B4GALT7</em> disease sits in the same linkeropathy spectrum and
+        has been tied to forms of Ehlers-Danlos and Larsen syndrome &mdash; growth
+        retardation, osteopenia, joint laxity, bone dysplasia, facial differences, skin
+        findings and variable neurodevelopmental effects. The horse overlaps on growth
+        restriction, hypermobility and chest abnormality, and diverges elsewhere:
+        cognitive impairment has <b>not</b> been apparent in Friesian dwarfs, and the skin
+        and wound-healing findings have not been observed. Different alleles, different
+        species, different phenotype &mdash; which is worth remembering before importing a
+        human symptom list into a horse.
     </p>
 </div>
 

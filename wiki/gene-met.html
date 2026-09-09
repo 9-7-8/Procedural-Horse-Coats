@@ -132,6 +132,220 @@
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="variant">The variant</h2>
+
+<p>
+    <em>MET</em> is the <strong>MET proto-oncogene, receptor tyrosine kinase</strong>. It
+    encodes a cell-surface signalling receptor that responds to hepatocyte growth factor. In
+    mammals, HGF&ndash;MET signalling has large developmental roles: cell survival, cell
+    migration, tissue growth, placental biology, migration of muscle precursor cells, and the
+    development of several organs.
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>MET</em></td></tr>
+<tr><th>Trait</th><td>MET-related embryonic lethality / reduced insemination success</td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 4 (ECA4); EquCab3.0
+    NC_009147.3:g.74041982_74041995del</td></tr>
+<tr><th>DNA change</th><td>A 14-base-pair deletion</td></tr>
+<tr><th>Transcript</th><td>XM_014739000.3:c.1559_1572del</td></tr>
+<tr><th>Protein</th><td>XP_014594486.1:p.(P392Lfs*3) &mdash; frameshift, premature stop three
+    amino acids later</td></tr>
+<tr><th>Inheritance</th><td>Autosomal recessive</td></tr>
+<tr><th>First reported</th><td>2026, in Friesians</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A 14-base deletion shifts the reading frame from around amino acid 392 onward, giving a
+    short wrong sequence and then an early stop. The likely result is a truncated,
+    non-functional receptor, or destruction of the abnormal mRNA by nonsense-mediated decay
+    &mdash; which is what makes the deletion a credible causal candidate rather than a linked
+    marker.
+    <a href="https://omia.org/OMIA003064/9796/">OMIA&nbsp;003064</a>
+</p>
+
+<h2 id="what-it-does">A gene whose only visible symptom is an absence</h2>
+
+<p>
+    This is an autosomal recessive <strong>embryonic lethal</strong>. The field observation
+    that anchors it is a roughly <b>25% reduction in insemination success in carrier-by-carrier
+    Friesian matings</b> &mdash; exactly the loss of the one-quarter of conceptions expected to
+    be homozygous. The disorder is therefore inferred to act <em>before birth</em>, probably
+    early enough that it presents as a failure to establish or maintain pregnancy rather than
+    as a malformed foal.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>mating</th><th>expected</th><th>practical reading</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code> &times; <code>N/N</code></td><td>100% clear</td><td class="ok">no carriers produced</td></tr>
+<tr><td><code>N/N</code> &times; <code>N/met</code></td><td>50% clear, 50% carrier</td><td class="ok">no affected conceptions from this locus</td></tr>
+<tr><td><code>N/met</code> &times; <code>N/met</code></td><td>25% / 50% / 25%</td><td class="warn">about a quarter of conceptions lost early</td></tr>
+<tr><td><code>N/met</code> &times; <code>met/met</code></td><td>50% carrier, 50% affected</td><td>theoretical &mdash; no living homozygote exists to breed</td></tr>
+<tr><td><code>met/met</code> &times; <code>met/met</code></td><td>100% affected</td><td>theoretical</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The 25% is an expectation across many pregnancies, not a promise that a carrier pair loses
+    exactly one in four. Chance, mare fertility, semen quality, timing, uterine health and every
+    other cause of embryo loss still apply to each attempt.
+</p>
+
+<div class="note">
+    <span class="label">The one gene where the mod&rsquo;s mechanism <em>is</em> the science</span>
+    <p>
+        Everywhere else on the health layer, the mod compresses a real course into an instant.
+        Here it does not have to. <code>LETHAL_AT_CONCEPTION</code> means the Mendelian draw
+        happens exactly as usual &mdash; <code>Genotype.breedWith</code> knows nothing about
+        viability &mdash; and then the breeding handler reads the genotype it just drew and
+        cancels the birth. From the player&rsquo;s side that reads as two horses which will
+        breed with anything else and never with each other, about a quarter of the time. Which
+        is what the Friesian data measured: a pairing that keeps refusing.
+        <a href="gene-gbe1.html#affected">MET owns this path alone</a>, on purpose, so that one
+        gene means &ldquo;the pairing yields nothing&rdquo; and everything else is born and lost
+        where a player can watch it happen.
+    </p>
+</div>
+
+<h2 id="carriers">Carriers</h2>
+
+<p>
+    <strong>Coat.</strong> No coat phenotype is known or expected. The distinction matters
+    because &ldquo;embryonic lethal&rdquo; in horse genetics summons very different conditions:
+    <a href="gene-ednrb.html">frame overo lethal white</a> involves <em>EDNRB</em>, produces
+    frame spotting in many heterozygotes, and kills homozygous foals with intestinal disease;
+    some <a href="gene-kit.html">KIT-associated dominant white</a> alleles produce dramatic
+    white patterns and may be lethal homozygous. Separate genes, mechanisms and clinical
+    pictures. The <em>MET</em> allele explains nothing about a Friesian&rsquo;s black coat or
+    its markings.
+</p>
+
+<p>
+    <strong>Build and size.</strong> No published evidence that one copy changes adult height or
+    growth rate, frame, bone, topline, muscling, head or neck conformation, limb conformation,
+    body mass, condition, metabolism, or Friesian type. This is worth stating precisely: a gene
+    can have broad developmental functions without a particular naturally occurring allele
+    producing an observable trait in healthy heterozygotes. The evidence supports a
+    <b>normal carrier versus non-viable homozygote</b> model, not a graded spectrum.
+</p>
+
+<p>
+    <strong>Health and lifespan.</strong> No disease syndrome, health deficit or shortened
+    lifespan has been reported in carriers. Carrier status is a reproductive-management finding.
+</p>
+
+<p>
+    <strong>Performance.</strong> No evidence that the deletion improves or impairs jump scope
+    or technique, gallop speed, trot or canter mechanics, acceleration, endurance, muscle
+    power, recovery, soundness, trainability or temperament. Nor is there any demonstrated
+    <b>heterozygote advantage</b>: a recessive lethal can become common through founder effects,
+    drift, heavy use of popular sires, small population size and linkage with selected lines,
+    without doing carriers any good at all.
+</p>
+
+<h2 id="evidence">Why MET is plausible, and where the proof stops</h2>
+
+<p>
+    <strong>Population-genetic evidence.</strong> Researchers analysed more than 8,000 Friesians
+    on a 70K SNP dataset and found several haplotypes strikingly deficient in homozygotes.
+    Three related chromosome-4 haplotypes &mdash; FH2, FH3 and FH4 &mdash; were associated with
+    the deletion. A missing homozygote class is the classic signature of a recessive allele
+    that removes individuals before they can be sampled.
+</p>
+
+<p>
+    <strong>Functional evidence.</strong> The deletion disrupts the coding sequence directly and
+    is predicted to frameshift and stop early. A major truncation of a receptor tyrosine kinase
+    is a plausible route to embryonic lethality given how broadly MET signalling matters in
+    development.
+</p>
+
+<p>
+    Plausible is not proven. The study identifies a <em>likely</em> causal variant, and the
+    curated OMIA entry notes that formal animal-variant pathogenicity classification had not
+    yet been completed.
+</p>
+
+<h2 id="breeds">Breed and frequency</h2>
+
+<p>
+    The only breed documented for this deletion is the <strong>Friesian</strong>, and the
+    available source material gives <b>no published carrier percentage or allele frequency</b>.
+    The 8,000-plus horses are the discovery population, which is a different thing from a
+    reported frequency.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>breed</th><th>evidence</th><th>frequency</th></tr></thead>
+<tbody>
+<tr><td>Friesian</td><td>documented; associated with FH2/FH3/FH4 and reduced carrier-pair success</td><td class="warn">not reported</td></tr>
+<tr><td>every other breed</td><td>no published documentation of this exact 14-bp deletion</td><td class="warn">unknown</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">Do not import a frequency from another lethal-haplotype study</span>
+    <p>
+        A 2020 study identified a <em>different</em> candidate lethal haplotype near or in
+        <em>LY49B</em> on chromosome 6 in Thoroughbreds and several other breeds, and reported
+        high heterozygote frequencies in sampled Quarter Horses, Thoroughbreds, Swedish
+        Warmbloods and Coldblooded Trotters. That is interesting background on recessive lethal
+        haplotypes in horses. It is not the Friesian <em>MET</em> variant, it does not measure
+        <em>MET</em>, and it does not imply those breeds carry this deletion.
+        <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403398/">PMC7403398</a>
+    </p>
+</div>
+
+<p>
+    The mod&rsquo;s <code>WILD_CARRIER_PERCENT</code> of 3.0 therefore has no published number
+    to be checked against &mdash; unlike every other gene on this layer, where the mod&rsquo;s
+    figure can at least be set beside a measured breed frequency. It is a design choice, sized
+    against the other disorders rather than against the literature.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<p><strong>Established or strongly supported.</strong> The variant is a naturally occurring
+    14-bp <em>MET</em> deletion on chromosome 4; it is predicted to cause a disruptive
+    frameshift, p.(P392Lfs*3); the phenotype is autosomal recessive; risk matings between
+    carriers show about a 25% reduction in insemination success, consistent with the loss of
+    homozygous embryos; the association is documented in Friesians; and healthy carriers have no
+    reported coat, conformation, health or performance phenotype.</p>
+
+<p><strong>Reasonable but unproven.</strong> That the embryo dies very early, perhaps around
+    implantation or early placental development, since the visible outcome is reduced pregnancy
+    success rather than a syndrome in live foals. That the loss follows from insufficient MET
+    receptor function in embryonic or extraembryonic tissue. That FH2, FH3 and FH4 are
+    overlapping linked haplotypes carrying the same deletion rather than three independent
+    diseases.</p>
+
+<p><strong>Not known.</strong> The exact stage at which homozygous conceptions fail; the
+    tissue-level defect &mdash; implantation, trophoblast and placenta, organogenesis, vascular
+    development or something else; whether <em>every</em> homozygous embryo is lost or whether
+    rare later fetal losses occur; whether the variant exists outside Friesians; its true carrier
+    frequency anywhere; any carrier effect on fertility outside carrier-by-carrier matings; and
+    any relationship at all to performance, locomotion, size, coat or conformation.</p>
+
+<p>
+    The one-line version, and it is very close to what the mod implements: <b>a
+    Friesian-specific, likely loss-of-function <em>MET</em> deletion on ECA4, inherited
+    recessively, associated with early embryonic loss in homozygotes and no demonstrated
+    visible or athletic effect in carriers.</b>
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-ednrb.html">EDNRB (lethal white)</a>

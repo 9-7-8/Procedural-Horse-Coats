@@ -189,6 +189,346 @@ f.whiten(px, py, 1f);                          // hard edge; whiten(1) is exactl
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="what-it-is">What tobiano is</h2>
+
+<p>
+    Tobiano is a <strong>white-spotting structural variant</strong> &mdash; not a build or
+    performance gene. The best-supported conclusion is that it changes where pigment cells
+    populate the developing skin, producing characteristic large white patches, and there is no
+    credible evidence that it alters height, conformation, jumping, speed, gait, strength or
+    general health.
+</p>
+
+<p>
+    It is a pinto pattern that can occur over any base coat &mdash; black, bay, chestnut, dun,
+    cream. It does not create pigment; it leaves areas of skin and hair unpigmented. Typical
+    features:
+</p>
+
+<ul>
+    <li>Large, relatively smooth-edged white patches that usually <strong>cross the
+        topline</strong> &mdash; the back between the ears and the tail.</li>
+    <li>White generally extending downward from the dorsal body, often giving white legs.</li>
+    <li>Pink skin beneath white hair; dark skin beneath pigmented hair.</li>
+    <li>A mostly pigmented head, often with ordinary facial markings rather than an extensively
+        white face.</li>
+    <li>Frequently a two-coloured tail.</li>
+    <li>Usually brown eyes, though blue or partly blue can occur, particularly alongside other
+        white-pattern alleles.</li>
+</ul>
+
+<p>
+    The amount and placement of white are highly variable. A horse may be unmistakably tobiano,
+    or a &ldquo;crypto-tobiano&rdquo; with so little white that visual identification fails
+    &mdash; which is why the DNA test beats phenotype.
+    <a href="https://vgl.ucdavis.edu/test/tobiano">UC&nbsp;Davis VGL</a>
+</p>
+
+<div class="note">
+    <span class="label">Crossing the topline is the whole identification, and the mod uses it</span>
+    <p>
+        The tell that separates tobiano from <a href="gene-ednrb.html">frame overo</a> is that
+        tobiano white crosses the back and frame white never does. The mod encodes this literally:
+        white is placed where a low-frequency <code>BodyNoise</code> field crosses a threshold,
+        with a <code>TOPLINE_BIAS</code> added toward the spine so the patches favour crossing it.
+        That is a rendering trick standing in for a developmental one, and it produces the same
+        diagnostic rule for a player as the real pattern gives a breeder.
+    </p>
+</div>
+
+<h2 id="variant">The causal variant, and why &ldquo;the KIT gene&rdquo; is imprecise</h2>
+
+<p>
+    The tobiano allele, written <b>TO</b>, is associated with a large <strong>paracentric
+    inversion</strong> on equine chromosome 3 &mdash; a segment of DNA flipped in orientation
+    without including the centromere. The literature describes it as an approximately
+    <b>43&nbsp;Mb inversion</b>. It does <em>not</em> cut through the protein-coding sequence of
+    any known gene; one breakpoint lies roughly 70&ndash;100&nbsp;kb downstream of <b>KIT</b>,
+    which strongly suggests the inversion disrupts or relocates regulatory DNA that <em>KIT</em>
+    needs in pigment-cell precursors.
+    <a href="https://pubmed.ncbi.nlm.nih.gov/18410476/">PMID 18410476</a>
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>statement</th><th>accuracy</th></tr></thead>
+<tbody>
+<tr><td>&ldquo;Tobiano is at the KIT locus.&rdquo;</td><td class="warn">a useful practical shorthand</td></tr>
+<tr><td>&ldquo;Tobiano is a mutation in KIT&rsquo;s protein-coding sequence.&rdquo;</td><td class="bad">not supported</td></tr>
+<tr><td>&ldquo;Tobiano is an inversion near KIT that likely changes KIT regulation.&rdquo;</td><td class="ok">the best current description</td></tr>
+<tr><td>&ldquo;The molecular mechanism is completely resolved.&rdquo;</td><td class="bad">no &mdash; the regulatory details are incomplete</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So <em>KIT</em> is the proposed functional gene while the mutation itself is a much larger
+    structural rearrangement near it. <em>KIT</em> encodes a receptor tyrosine kinase essential
+    to melanocyte development, survival, migration and function; during development, melanoblasts
+    must migrate and populate the skin, and where KIT-dependent pigmentation is disrupted the
+    pigment cells never establish, leaving pink skin and white hair.
+</p>
+
+<p>
+    The defensible model is: the embryo starts with melanocyte precursors &rarr; the inversion
+    changes <em>KIT</em> regulation in some of them or in some locations &rarr; pigment cells do
+    not fully migrate into or persist in particular regions &rarr; those regions have no
+    melanin-producing cells &rarr; white hair grows from unpigmented pink skin. That explains the
+    spotting. It does <b>not</b> explain why one tobiano has a few small patches and another has
+    extensive body white &mdash; developmental randomness, modifier genes, other pigment alleles
+    and selection within lines are all likely contributors.
+</p>
+
+<div class="note">
+    <span class="label">The mod&rsquo;s noise field is standing in for that unexplained part</span>
+    <p>
+        The thing the biology cannot yet predict &mdash; which particular horse gets which
+        particular patches &mdash; is exactly the thing the mod has to decide for every horse. It
+        does it with a per-horse noise field, which is not a claim that the developmental process
+        is noise; it is an admission that the deterministic part is unknown and the observed
+        variation is what a random field looks like from outside.
+    </p>
+</div>
+
+<h2 id="real-inheritance">Inheritance</h2>
+
+<p>
+    <strong>Autosomal dominant.</strong> Not sex-linked; on chromosome 3, not X or Y.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>genotype</th><th>visible tobiano?</th><th>expected transmission</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>no</td><td>0%</td></tr>
+<tr><td><code>N/TO</code></td><td>yes, though the amount may be minimal</td><td>50% of foals on average</td></tr>
+<tr><td><code>TO/TO</code></td><td>yes</td><td>100% of foals inherit TO</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A per-pregnancy probability, not a guarantee that a small group of foals matches the ratio.
+</p>
+
+<p>
+    <strong><code>TO/TO</code> is viable.</strong> Homozygous tobiano horses are documented in
+    multiple breeds, and are usually not distinguishable from heterozygotes on amount of white
+    alone &mdash; testing is required to establish homozygosity.
+</p>
+
+<div class="note warn">
+    <span class="label">Tobiano is not the lethal-white gene</span>
+    <p>
+        People hear that &ldquo;two white-pattern genes can be lethal&rdquo; and apply the warning
+        to tobiano. That is wrong. Lethal white foal syndrome is associated with a completely
+        different allele &mdash; <a href="gene-ednrb.html">frame overo, <em>EDNRB</em></a>,
+        especially homozygous. It has nothing to do with TO. The mod is consistent with this:
+        <code>To/To</code> is an ordinary viable outcome here, and the lethal lives on the EDNRB
+        page where it belongs.
+    </p>
+</div>
+
+<p>
+    Tobiano combines with other white-pattern variants, which is a major reason phenotype gets
+    hard to read: <b>W20</b> and <b>Sabino-1</b> (both <em>KIT</em>-associated),
+    <a href="gene-pax3.html">splashed white</a> (<em>MITF</em> or <em>PAX3</em>),
+    <a href="gene-ednrb.html">frame overo</a>, and
+    <a href="gene-leopard.html">leopard complex</a> with its modifiers through a separate pathway.
+    In a UC&nbsp;Davis dataset, TO with W20 and/or SB1 was observed, and TO/W20 was especially
+    common among sampled Paint Horses and Gypsy Cobs. The outcome is often more extensive or
+    atypical white &mdash; and it cannot be predicted from an additive &ldquo;paint
+    percentage&rdquo; rule.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498372/">PMC9498372</a>
+</p>
+
+<h2 id="effects">Coat effects versus body effects</h2>
+
+<p>
+    Tobiano&rsquo;s established biological effect is pigmentation patterning: it changes hair
+    colour distribution rather than the base-colour genetics; it produces pink skin under white
+    areas; it commonly gives a partly white or mixed tail; it often leaves the head relatively
+    dark, though other white genes can override that; and it may be associated with blue or
+    partly blue eyes in some horses, which are more characteristic of splash patterns and are not
+    a defining tobiano feature. A black tobiano and a chestnut tobiano are still genetically black
+    or chestnut at their base loci.
+</p>
+
+<p>
+    There is <strong>no established causal effect</strong> of TO on height at the withers, bone
+    circumference, head shape, neck length or set, shoulder angle, back length, hip structure,
+    hoof conformation, muscle mass, growth rate or mature body weight.
+</p>
+
+<div class="note">
+    <span class="label">Why tobiano looks like it comes with a body type</span>
+    <p>
+        It is concentrated in particular populations &mdash; stock-type Paints, cobs, ponies,
+        gaited breeds, draught-influenced coloured horses. That is a <b>breed and selection
+        effect</b>, not evidence the inversion causes a body type. A tobiano American Paint Horse
+        and a tobiano Icelandic can look radically different in height, gait and musculature while
+        carrying the same allele; the differences come from the rest of the genome and from
+        management.
+    </p>
+</div>
+
+<h2 id="health">Health</h2>
+
+<p>
+    There is no validated evidence that ordinary tobiano causes a congenital lethal syndrome,
+    deafness, blindness or a specific eye disease, neurologic disease, immune deficiency, skin
+    fragility, metabolic disease, reproductive impairment or reduced longevity.
+</p>
+
+<p>
+    This matters because several other equine pigment genes <em>do</em> have important pleiotropic
+    effects:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>pattern / allele</th><th>gene or region</th><th>health issue</th></tr></thead>
+<tbody>
+<tr><td>frame overo, homozygous</td><td><a href="gene-ednrb.html"><em>EDNRB</em></a></td><td class="bad">lethal white foal syndrome / aganglionosis</td></tr>
+<tr><td>silver, especially homozygous</td><td><a href="gene-silver.html"><em>PMEL</em></a></td><td class="warn">multiple congenital ocular anomalies</td></tr>
+<tr><td>leopard complex, homozygous</td><td><a href="gene-leopard.html"><em>TRPM1</em></a></td><td class="warn">congenital stationary night blindness</td></tr>
+<tr><td>some splash-white alleles</td><td><a href="gene-mitf.html"><em>MITF</em></a> or <a href="gene-pax3.html"><em>PAX3</em></a></td><td class="warn">deafness in certain high-white phenotypes</td></tr>
+<tr><td><b>tobiano</b></td><td>ECA3 inversion near <em>KIT</em></td><td class="ok">no established disease syndrome</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The real caution is that a tobiano horse may <em>simultaneously carry</em> one of those other
+    alleles. The risk comes from the other allele, or the combination, and not from TO.
+</p>
+
+<p>
+    <strong>Skin and sunlight.</strong> Pink-skinned white areas have less melanin protection
+    from ultraviolet, so extensively white-skinned horses can be more susceptible to sunburn or
+    photosensitivity in exposed areas, especially the muzzle. That is a consequence of
+    unpigmented skin, not a systemic tobiano disorder &mdash; the same reasoning that appears on
+    <a href="gene-matp.html#health">the cream page</a>.
+</p>
+
+<h2 id="performance">Speed, jumping, gait, athletic ability</h2>
+
+<p>
+    No good evidence that the inversion independently improves or impairs sprint speed, racing
+    distance aptitude, aerobic capacity, jumping scope or technique, soundness, agility, muscle
+    fibre type, gaitedness, trainability or endurance. Equine performance is polygenic and
+    strongly influenced by conditioning, handling, injury history, nutrition, footing, rider skill
+    and breeding goals. Known performance-associated loci include
+    <a href="gene-mstn.html">MSTN</a> for racing-distance propensity and <em>DMRT3</em> for
+    alternate gaits &mdash; not TO. The scientific catalogue lists tobiano as a pigmentation trait
+    on chromosome 3, with performance traits mapping elsewhere.
+</p>
+
+<p><strong>Why the myth persists.</strong> Tobiano is common in American Paint Horses, a breed
+    with many highly athletic stock horses, so a breed association is mistaken for a colour-gene
+    effect. It is also common in gaited breeds, cobs, ponies and cold-blood-influenced
+    populations, which makes it look linked to gait, temperament, substance or size. Highly
+    visible markings make individuals memorable in competition. And breeders selectively retain
+    colour-and-performance combinations, producing pedigree linkage inside a line even though TO
+    is not the cause.</p>
+
+<p>
+    The scientific position: <b>no demonstrated direct effect on jumping or speed; any apparent
+    association should be treated as population structure, linked ancestry or selection until a
+    properly controlled study shows otherwise.</b>
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    Tobiano occurs in many breeds worldwide, very unevenly, because registries and breeding
+    cultures differ in whether they historically encouraged, tolerated or excluded pinto
+    patterning.
+</p>
+
+<p>
+    A 2022 UC&nbsp;Davis analysis tested <b>11,281 horses across 28 breeds</b>. TO was found in
+    <b>787 horses from 15 breeds</b>; after relatedness filtering, allele frequencies ranged from
+    <b>0.0033 in Arabians</b> to <b>0.22 in Shetland Ponies</b>. The study identified <b>179
+    homozygotes in nine breeds</b>: Appaloosa, Gypsy Cob, Gypsy Vanner, Icelandic Horse,
+    Miniature Horse, Missouri Fox Trotter, Paint Horse, Shetland Pony and Tennessee Walking
+    Horse.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>breed</th><th>what the survey shows</th></tr></thead>
+<tbody>
+<tr><td>American Paint Horse</td><td>a major tobiano breed; homozygotes documented</td></tr>
+<tr><td>Appaloosa</td><td>present; homozygotes documented</td></tr>
+<tr><td>Gypsy Cob</td><td>present; homozygotes documented</td></tr>
+<tr><td>Gypsy Vanner</td><td>present; homozygotes documented</td></tr>
+<tr><td>Icelandic Horse</td><td>present; homozygotes documented</td></tr>
+<tr><td>American Miniature Horse</td><td>present; homozygotes documented</td></tr>
+<tr><td>Missouri Fox Trotter</td><td>present; homozygotes documented</td></tr>
+<tr><td>Shetland Pony</td><td><b>highest reported allele frequency: 0.22</b></td></tr>
+<tr><td>Tennessee Walking Horse</td><td>present; homozygotes documented</td></tr>
+<tr><td>Arabian</td><td>rare &mdash; <b>lowest reported: 0.0033</b></td></tr>
+<tr><td>Quarter Horse</td><td>present in broader testing; the historical relationship with Paint breeding means population definitions matter</td></tr>
+<tr><td>Welsh Pony, Mustang, Pony of the Americas</td><td>detected in the survey</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Those numbers are not breed-wide census values. These were horses submitted for genetic
+    testing, then filtered to reduce close relatedness &mdash; and colour-test customers are
+    disproportionately likely to own spotted horses, which inflates observed frequency against
+    the whole breed population.
+</p>
+
+<p>
+    Beyond the surveyed breeds, tobiano is widely recognised in American Paint and Pinto
+    populations; Gypsy Cob, Gypsy Vanner and Tinker coloured-cob populations; Icelandic Horses;
+    Miniature Horses and several pony populations; Missouri Fox Trotters and Tennessee Walking
+    Horses; certain European warmblood, draught and crossbred coloured lines; and some Hucul,
+    Barock Pinto and other regional coloured-horse populations. Being present in a breed does not
+    mean it is allowed by every registry or accepted in every studbook division.
+</p>
+
+<p>
+    The mod uses one tobiano allele in <b>50</b> &mdash; 2% &mdash; which sits between the
+    Arabian 0.33% and the Shetland 22%, nearer the low end. Given that TO is the mod&rsquo;s most
+    recognisable pinto and that a founder paddock should not be mostly pinto, that is a
+    defensible place to put it.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<p><strong>Well established.</strong> Tobiano is inherited as an autosomal dominant allele; it
+    maps to a large inversion on equine chromosome 3; the inversion is strongly associated with
+    TO and is used for direct genetic testing; it lies near <em>KIT</em> and likely alters
+    <em>KIT</em> regulation rather than disrupting a protein-coding gene; the effect is white
+    spotting through altered melanocyte development and distribution; <code>TO/TO</code> is
+    viable and produces 100% TO-carrying offspring; TO has no established disease, conformation
+    or athletic syndrome; and pattern expression varies, with other white alleles able to change
+    the appearance substantially.
+    <a href="https://karger.com/cgr/article/119/3-4/225/61716/A-chromosome-inversion-near-the-KIT-gene-and-the">Karger CGR 119:225</a></p>
+
+<p><strong>Plausible but not resolved.</strong> The exact enhancers, chromatin changes and
+    embryonic timing by which the inversion changes <em>KIT</em> expression; why particular body
+    regions become white in an individual horse; the relative contributions of stochastic
+    embryonic cell migration versus modifier genes; whether homozygotes have any subtle average
+    difference in white extent (visual phenotype is not reliable enough to replace testing); and
+    how far specific combinations with W20, SB1, splash or frame predict the final white
+    distribution.</p>
+
+<p><strong>Not supported.</strong> That tobiano makes a horse faster; that it makes a horse jump
+    better or worse; that it creates a stock-horse, cob, draught, pony or gaited build; that it is
+    lethal when homozygous; that all pinto horses are tobiano; that a horse cannot be tobiano if
+    it has a mostly white head; or that a visually solid horse cannot carry TO &mdash; TO has high
+    expression in general, and borderline or crypto presentations make the DNA test the
+    appropriate way to resolve it.</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-ednrb.html">EDNRB (frame overo)</a>

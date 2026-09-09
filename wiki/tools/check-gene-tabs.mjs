@@ -7,8 +7,9 @@
 // actually has. The group that loses most is the health loci, which is exactly
 // the group a science reader comes for.
 //
-// The 25 pages below are the debt as it stood when this check was written. They
-// are NOT stubbed on purpose: a tab reading "not written yet" on 25 pages is
+// The pages below are what is left of the debt as it stood when this check was
+// written - 25 pages then, and the rest have since been written. They are NOT
+// stubbed on purpose: a tab reading "not written yet" on a page is
 // worse than an honest absence, and filling them means writing real veterinary
 // and population-genetics material, not generating it. So this tool does not
 // demand they be fixed today. What it does is stop the list GROWING: add a new
@@ -33,31 +34,11 @@ const wiki = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Natural gene pages that predate this check and have no science tab yet. */
 const GRANDFATHERED = new Set([
-  "gene-b4galt7.html",
-  "gene-champagne.html",
-  "gene-ckm.html",
-  "gene-diet.html",
-  "gene-dun.html",
-  "gene-gbe1.html",
-  "gene-gys1.html",
-  "gene-hmga2.html",
-  "gene-matp.html",
-  "gene-met.html",
-  "gene-mstn.html",
-  "gene-mushroom.html",
-  "gene-myo5a.html",
-  "gene-pax3.html",
-  "gene-plod1.html",
-  "gene-ppib.html",
-  "gene-prkdc.html",
+  // The science source files for these two arrived with the wrong content (both
+  // were copies of the mushroom write-up), so they are the last two left of the
+  // original 25. Everything else on that list now has a real science tab.
   "gene-rabicano.html",
-  "gene-rapgef5.html",
-  "gene-scn4a.html",
-  "gene-shox.html",
-  "gene-st14.html",
-  "gene-tiger-eye.html",
-  "gene-tobiano.html",
-  "gene-toe1.html"
+  "gene-tiger-eye.html"
 ]);
 
 const pages = readdirSync(wiki).filter((f) => /^gene-.*\.html$/.test(f)).sort();

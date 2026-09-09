@@ -125,6 +125,366 @@
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="what-mstn-does">What myostatin does</h2>
+
+<p>
+    <em>MSTN</em> &mdash; also called <em>GDF8</em> &mdash; is one of the best-evidenced
+    performance loci in the horse. It encodes <strong>myostatin</strong>, a
+    transforming-growth-factor-&beta; superfamily protein that acts as a molecular
+    <b>brake</b> on skeletal-muscle growth: it limits myoblast proliferation and
+    differentiation and constrains fibre growth. Less myostatin signalling generally means
+    more capacity for muscularity, though what that looks like depends heavily on the
+    particular mutation and species.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2913906/">PMC2913906</a>
+</p>
+
+<p>
+    The equine gene is on <strong>equine chromosome 18</strong> (ECA18), with three exons and
+    two introns, spanning roughly 6.2&nbsp;kb on the reverse strand around 66.49&ndash;66.50
+    Mb in EquCab2. Myostatin is made as a precursor and processed into an N-terminal
+    propeptide and an active C-terminal signalling molecule.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>kind of change</th><th>what it means</th><th>relevance in horses</th></tr></thead>
+<tbody>
+<tr><td>coding loss of function</td><td>alters or disables the protein itself</td><td>famous in double-muscled cattle and some dogs; <b>not</b> the standard equine variant</td></tr>
+<tr><td>regulatory variant</td><td>changes when, where or how much is expressed</td><td class="ok">the central story in Thoroughbred and Quarter Horse performance genetics</td></tr>
+<tr><td>linked marker SNP</td><td>a nearby marker inherited with the causal variant</td><td>the popular &ldquo;C/T speed gene&rdquo; test is historically this</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So &mdash; unlike Belgian Blue cattle or homozygous myostatin-mutant whippets &mdash;
+    ordinary performance-horse &ldquo;speed gene&rdquo; genotypes do <b>not</b> create a
+    dramatic double-muscling syndrome. The equine variant is subtler: it shifts myostatin
+    expression, and with it muscle architecture and exercise phenotype.
+</p>
+
+<h2 id="variants">The two variants that matter</h2>
+
+<h3>The intron-1 C/T marker</h3>
+
+<p>
+    The widely marketed Thoroughbred test targets a T-to-C SNP in intron 1, in legacy notation
+    <b>g.66493737C&gt;T</b>, giving <code>C/C</code>, <code>C/T</code> and <code>T/T</code>
+    results. It is intronic and changes no amino acid. The initial association studies found it
+    an exceptionally strong predictor of optimal racing distance.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>genotype</th><th>tendency in flat racing</th><th>mean best distance, elite study</th></tr></thead>
+<tbody>
+<tr><td><code>C/C</code></td><td>short-distance sprint orientation</td><td>~6.2 furlongs</td></tr>
+<tr><td><code>C/T</code></td><td>intermediate; mile to middle distance, often the most versatile</td><td>~9.1 furlongs</td></tr>
+<tr><td><code>T/T</code></td><td>longer distance, stamina orientation</td><td>~10.5 furlongs</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <code>C/C</code> horses were common in the short-distance cohort and <b>absent</b> from the
+    longer-distance cohort; the National Hunt horses in that sample likewise had none. These are
+    tendencies, not destiny &mdash; a <code>C/C</code> horse can be a poor sprinter and a
+    <code>T/T</code> horse can win a short race.
+    <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0008645">Hill
+    <em>et&nbsp;al.</em>, PLoS ONE 5:e8645</a>
+</p>
+
+<h3>The 227-bp promoter SINE insertion</h3>
+
+<p>
+    The key advance is that the intron-1 marker is usually in <strong>linkage
+    disequilibrium</strong> with a <b>227-base-pair SINE insertion</b> in the <em>MSTN</em>
+    promoter. A SINE is a short interspersed nuclear element &mdash; mobile, repetitive DNA
+    that landed near the gene&rsquo;s regulatory machinery. It is now the best-supported
+    functional variant:
+</p>
+
+<ul>
+    <li>It reduces <em>MSTN</em> production in cell experiments by about <b>4.5-fold</b>.</li>
+    <li>Horses carrying it have lower circulating myostatin.</li>
+    <li>The effect is <b>dosage-related</b>: two copies lowest, one intermediate, none
+        highest.</li>
+    <li>In Thoroughbreds, insertion homozygotes have a higher proportion of fast type-IIX
+        fibres and fewer slow type-I fibres than wild type.</li>
+</ul>
+
+<p>
+    That changes how the old C/T test should be read. The SNP is an excellent
+    <em>predictive marker</em> in populations where it tracks the insertion; the promoter SINE
+    is more likely the <em>causal</em> change. They are not interchangeable across every breed
+    or family, because linkage patterns differ, and for cross-breed work testing the SINE
+    directly is cleaner.
+    <a href="https://www.nature.com/articles/s41598-025-22472-7">Sci. Rep. s41598-025-22472-7</a>
+</p>
+
+<h3>Everything else at the locus</h3>
+
+<p>
+    Other promoter and intronic SNPs are documented &mdash; g.26T&gt;C and g.156T&gt;C have
+    different frequencies across heavy, mesomorphic and light horse populations, and one sits
+    in a TATA-box-like motif. Plausible regulatory candidates; nothing like the SINE&rsquo;s
+    causal evidence. There are also multiple <em>MSTN</em> <b>haplotypes</b> rather than one
+    universal fast allele and one slow allele, which is why simple cross-breed interpretation is
+    risky.
+    <a href="https://pubmed.ncbi.nlm.nih.gov/25160752/">PMID 25160752</a>
+</p>
+
+<div class="note">
+    <span class="label">The mod is modelling the phenotype, not the marker</span>
+    <p>
+        <code>MstnGene</code> declares <span class="allele dom">C</span> sprint and
+        <span class="allele wild">T</span> stayer, codominant and additive by copy count. That
+        matches the literature&rsquo;s <em>shape</em> unusually well &mdash; the real effect is
+        dosage-related, the heterozygote really is intermediate, and the letters are the ones
+        the commercial test uses. What it flattens is the two-variant story above: the mod has
+        one allele where reality has a marker SNP standing in for a promoter insertion. For a
+        game that is the right simplification, and it is worth knowing the C is a proxy for
+        something 227 bases long a little further upstream.
+    </p>
+</div>
+
+<h2 id="build">Build, muscle and size</h2>
+
+<p>
+    The clearest body relationship is not height but <strong>muscle mass relative to
+    frame</strong>. In Thoroughbreds measured in their two-year-old seasons: <code>C/C</code>
+    averaged 2.94&nbsp;kg per cm of wither height, <code>C/T</code> 2.88, <code>T/T</code>
+    2.83 &mdash; and in males, <code>C/C</code> averaged about <b>6.7% greater mass per unit
+    height</b> than <code>T/T</code>.
+</p>
+
+<p>
+    So the C/insertion end is more compact and power-oriented with a fast-fibre bias, and the
+    T/no-insertion end is relatively lighter with more stamina-oriented muscle physiology. None
+    of which means MSTN determines a good shoulder, a broad hip, a short back or big bone.
+    Those are highly polygenic and shaped by breed selection, sex, maturity, nutrition and
+    training.
+</p>
+
+<p>
+    <em>MSTN</em> is <b>not a primary height gene</b>. The strongest stature signals are
+    elsewhere, notably the ECA3 region near <a href="gene-lcorl.html">LCORL/NCAPG</a>, which in
+    a large German Warmblood study explained far more withers-height variation than any
+    putative MSTN effect.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11177368/">PMC11177368</a>
+    &ldquo;<code>C/C</code> makes a horse smaller&rdquo; and &ldquo;<code>T/T</code> makes a
+    horse taller&rdquo; are both unsupported. Older breed-comparison work found promoter allele
+    frequencies differing between heavy and light morphological groups, and the authors
+    explicitly noted that linkage to another ECA18 locus, or population structure, could explain
+    it.
+</p>
+
+<h2 id="performance">Speed, stamina, jumping</h2>
+
+<p>
+    <strong>Flat-race speed</strong> is the strongest evidence base. Lower myostatin from the
+    promoter insertion is consistent with a fast-twitch, power-oriented phenotype; in sprint
+    conditions a horse benefits from rapid force development and glycolytic capacity, so the
+    insertion-homozygous state associates with short-distance aptitude, heterozygotes are
+    intermediate, and no-insertion horses more often suit sustained racing.
+</p>
+
+<p>
+    The nuance that matters: MSTN predicts <b>distance preference</b> far more convincingly than
+    it predicts absolute maximum speed, earnings, soundness, temperament, start quality or the
+    ability to beat a particular rival. It describes an engine&rsquo;s tuning, not whether the
+    car wins.
+</p>
+
+<p>
+    <strong>Endurance.</strong> The T/no-SINE profile associates with longer race-distance
+    aptitude, not with success in competitive endurance riding, which also turns on
+    thermoregulation, metabolic efficiency, cardiovascular capacity, hydration, management,
+    feet, musculoskeletal durability, rider strategy and many other genes. The original study
+    included Egyptian Arabians in which <code>T/T</code> was very common, consistent with
+    selection for endurance-type physiology &mdash; and not proof that MSTN alone makes an
+    endurance champion.
+</p>
+
+<p>
+    <strong>Jumping.</strong> There is no robust evidence that MSTN is a major jumping gene.
+    Jumping depends on canter quality and adjustability, coordination and balance and rider
+    partnership, fore- and hindlimb conformation and spinal mechanics, tendon and ligament
+    integrity, and on careful take-off judgement, agility, willingness and technique as much as
+    on power. A fast-twitch bias plausibly helps the power component &mdash; a mechanistic
+    hypothesis, not a selection rule. Reviews list MSTN among broad athletic-performance genes;
+    that is not proof an MSTN test predicts jumping talent. The mod gives MSTN no jump effect,
+    which matches.
+</p>
+
+<div class="note">
+    <span class="label">Where the mod put the stamina, and why it is defensible</span>
+    <p>
+        The real locus trades sprint against stamina. The mod has settled that
+        <a href="roadmap.html#settled">there is no stamina resource</a>, so the
+        <code>T</code> side has nothing to buy &mdash; and a gene where one allele is simply
+        better is a chore rather than a choice. Stamina is therefore paid in <b>max
+        health</b>: 2 hearts&rsquo; worth of health per <code>C</code> copy, against
+        <code>+0.020</code> speed. That is a substitution, not a finding, and this page is
+        where it should be admitted. What survives the substitution is the thing the science
+        actually establishes: <em>the locus is a trade-off, not an upgrade</em>, and its
+        heterozygote is genuinely in the middle.
+    </p>
+</div>
+
+<h2 id="health">Health and injury</h2>
+
+<p>
+    In Thoroughbreds, the intron-1 marker linked to the promoter SINE has been associated with
+    <strong>susceptibility to carpal fracture</strong> &mdash; plausibly through the combination
+    of greater body mass, higher speed and repeated high loading of immature racehorse limbs.
+</p>
+
+<p>
+    Read that carefully. It is an association, not a diagnosis; it does not mean the genotype
+    causes fragile bones; and race surface, training load, age, growth rate, shoeing,
+    conformation, prior injury and management are all major contributors. Genotype does not
+    substitute for sound conditioning and veterinary monitoring.
+</p>
+
+<p>
+    <strong>Not established:</strong> that common MSTN performance variants directly cause a
+    general inherited muscle disease, <a href="gene-gys1.html">PSSM1</a>,
+    <a href="gene-scn4a.html">HYPP</a>, <a href="gene-ppib.html">HERDA</a> or any other named
+    disorder; a universal disease-prone phenotype; a predictable joint, tendon or ligament
+    condition outside specific study contexts; or a generally healthier or less healthy horse.
+    Recent work also shows circulating myostatin is fairly consistent within an individual over
+    time, while stating explicitly that it is unresolved whether differences <em>within the same
+    SINE genotype group</em> predict performance, muscle phenotype or fracture risk.
+</p>
+
+<h2 id="coat">Coat</h2>
+
+<p>
+    No known role in coat colour, white patterning, grey, dilution, mane and tail colour or coat
+    quality. MSTN is on ECA18 and regulates muscle; colour lives at
+    <a href="gene-extension.html">MC1R</a>, <a href="gene-agouti.html">ASIP</a>,
+    <a href="gene-grey.html">STX17</a>, <a href="gene-kit.html">KIT</a>,
+    <a href="gene-mitf.html">MITF</a>, <a href="gene-ednrb.html">EDNRB</a>, <em>PMEL</em> and
+    their neighbours. If an MSTN type &ldquo;often appears&rdquo; in a particular colour, that
+    is breed history, sire-line popularity or selection practice.
+</p>
+
+<h2 id="real-inheritance">Inheritance</h2>
+
+<p>
+    Autosomal, on chromosome 18. Each horse has 0, 1 or 2 copies of the insertion; two
+    heterozygous parents give 25% / 50% / 25%. The molecular inheritance is
+    <strong>codominant and additive</strong> in the sense that insertion dosage tracks average
+    myostatin level. For the C/T marker the same 0/1/2 logic holds, but since it is usually a
+    linked marker it is best not described as simply dominant or recessive.
+</p>
+
+<p>
+    And the phenotype is not Mendelian in the &ldquo;genotype equals outcome&rdquo; sense. The
+    variants segregate by Mendel; race-distance aptitude, muscle composition, build and injury
+    are <b>complex traits</b>, and the three genotype classes express a graded pattern with
+    large overlap between individual horses. The mod, having no way to express overlap, renders
+    the tendency as a fixed number &mdash; which is the general shape of
+    <a href="philosophy.html">the compromise this whole model makes</a>.
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    <strong>Thoroughbreds</strong> are the most-studied breed and the SINE is common. One
+    14-breed haplotype study put SINE frequency at about <b>0.73</b> in Thoroughbreds; another
+    reported <b>0.51</b> in its sample &mdash; published frequency moves with population,
+    country, sampling, and whether the horses are selected for a racing subtype. The original
+    performance study showed how sharply class selects: the C allele was <b>0.72</b> in its
+    short-distance elite cohort against <b>0.36</b> in the longer-distance cohort. That is not
+    a population estimate; it is evidence of how strongly training and breeding choices enrich a
+    performance subgroup.
+</p>
+
+<p>
+    <strong>Quarter Horses</strong> are the other high-prevalence breed, fitting a history of
+    selection for high-power short-distance racing &mdash; and published samples differ
+    markedly: about <b>0.48</b> SINE frequency in one multi-breed study, <b>0.81</b> in a
+    smaller Italian sample, and in an earlier sample of 35 Quarter Horses a C-marker frequency
+    of <b>0.90</b> with <code>C/C</code> in 83% of horses. Common to very common, and not a
+    fixed allele.
+</p>
+
+<p>
+    <strong>Other breeds.</strong> The intron-1 C allele is more widespread than the functional
+    SINE: across 301 horses from 14 breeds it was present in <b>12 of 14</b> breeds at an
+    aggregate ~0.27, while the promoter SINE was detected in only <b>five</b> breeds and was
+    common only in Thoroughbreds and Quarter Horses.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>breed, 10-breed SINE study</th><th>SINE frequency</th></tr></thead>
+<tbody>
+<tr><td>Quarter Horse</td><td>0.81</td></tr>
+<tr><td>Thoroughbred</td><td>0.51</td></tr>
+<tr><td>Uruguayan Creole</td><td>0.02</td></tr>
+<tr><td>Noric, Rapid Heavy Draft, Haflinger, Lipizzan, Italian Saddle, Spanish Purebred, Italian Trotter</td><td>not detected in the sampled animals</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    In Egyptian Arabians from the original study <code>T/T</code> was <b>90%</b>. In Miyako
+    horses, a Japanese native breed, the intron-1 variant sat at minor-allele frequency 0.04 and
+    the SINE was absent.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12995546/">PMC12995546</a>
+    In Mongolian native horses the C allele ran around 0.11 overall (0.06&ndash;0.15 by
+    population) and the insertion was not detected among 381 genotyped horses &mdash; and those
+    researchers found <b>no association</b> between the SNP and seven measured conformation
+    traits, which is a good reminder not to export Thoroughbred conclusions to unrelated breeds.
+    <a href="https://www.jstage.jst.go.jp/article/abgri/54/2/54_25/_article/-char/en">Anim. Behav. Genet. 54(2)</a>
+</p>
+
+<p>
+    The mod uses <code>p(C) = 0.35</code>, deliberately common at both ends so a player finds
+    both a sprinter and a stayer in their first handful of caught horses. Against the real
+    numbers that is a world-average sitting between the Thoroughbred/Quarter Horse end (0.48
+    to 0.9) and the many breeds where the insertion is absent altogether &mdash; which is
+    arguably the most defensible thing the mod could do with a locus whose real frequency is
+    almost entirely a statement about breed rather than about horses.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<p><strong>Strongly supported.</strong> <em>MSTN</em> is on ECA18 and encodes a negative
+    regulator of muscle development; the 227-bp promoter SINE reduces expression and is the
+    best-supported functional explanation for the speed-gene effect; in Thoroughbreds the
+    genotype is strongly associated with optimal race distance in the sprint / intermediate /
+    stayer pattern; the effect is tied to measurable changes in circulating myostatin and
+    muscle-fibre composition; and the SINE is common in Thoroughbreds and Quarter Horses and
+    uncommon or absent in many other sampled breeds.</p>
+
+<p><strong>Plausible but incomplete.</strong> That the fibre effects influence burst power,
+    acceleration and recovery beyond simple race distance; that the locus contributes to body
+    mass relative to height in specific sex, breed and training contexts; and that the
+    carpal-fracture association reflects a real interaction between speed, mass, bone loading
+    and immature racing schedules.</p>
+
+<p><strong>Not established, or overclaimed.</strong> That MSTN determines coat colour; that it
+    reliably predicts height, broad conformation, temperament, trainability or overall athletic
+    talent; that it is a validated jumping test; that it identifies a best breeding match
+    without pedigree diversity, conformation, soundness and the rest of the genome; that it
+    proves a horse healthy or unhealthy; or that a commercial C/T result alone is a causal
+    diagnosis.</p>
+
+<p>
+    The defensible wording: <b>MSTN genotype helps describe an inherited tendency toward a more
+    sprint-power or more stamina-oriented muscle phenotype, especially in Thoroughbred-derived
+    racing populations. It does not determine athletic worth, soundness, coat, size or jumping
+    ability.</b>
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-pdk4.html">PDK4</a>

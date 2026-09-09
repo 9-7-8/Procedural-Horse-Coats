@@ -115,10 +115,10 @@ window.HG.pages = {
             items: [
                 { href: "gene-silver.html", text: "Silver dapple", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-flaxen.html", text: "Flaxen", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-dun.html", text: "Dun", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-matp.html", text: "MATP", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-champagne.html", text: "Champagne", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-dun.html", text: "Dun", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-matp.html", text: "MATP", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-champagne.html", text: "Champagne", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-grey.html", text: "Grey", kind: "natural", views: ["gameplay","coding","science"] }
             ]
         },
@@ -128,39 +128,39 @@ window.HG.pages = {
                 { href: "gene-natural-zebra.html", text: "Zebra striping", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-roan.html", text: "Roan", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-rabicano.html", text: "Rabicano", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-tobiano.html", text: "Tobiano", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-tobiano.html", text: "Tobiano", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-leopard.html", text: "The leopard complex (appaloosa)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-ednrb.html", text: "EDNRB (frame overo)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-kit.html", text: "KIT (white spotting)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-manchado.html", text: "Manchado", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-mitf.html", text: "MITF (splash white)", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-pax3.html", text: "PAX3 (splash white)", kind: "natural", views: ["gameplay","coding"] }
+                { href: "gene-pax3.html", text: "PAX3 (splash white)", kind: "natural", views: ["gameplay","coding","science"] }
             ]
         },
         {
             title: "Natural health genes",
             items: [
-                { href: "gene-mstn.html", text: "MSTN (myostatin)", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-mstn.html", text: "MSTN (myostatin)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-pdk4.html", text: "PDK4", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-ckm.html", text: "CKM", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-ckm.html", text: "CKM", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-ryr2.html", text: "RYR2 (jumping)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-lcorl.html", text: "LCORL / NCAPG (height)", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-hmga2.html", text: "HMGA2 (pony)", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-hmga2.html", text: "HMGA2 (pony)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-acan.html", text: "ACAN (chondrodysplastic dwarfism)", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-b4galt7.html", text: "B4GALT7 (Friesian dwarfism)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-plod1.html", text: "PLOD1 (fragile foal syndrome)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-rapgef5.html", text: "RAPGEF5 (EFIH)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-st14.html", text: "ST14 (naked foal syndrome)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-shox.html", text: "SHOX (skeletal atavism)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-met.html", text: "MET (embryonic lethal)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-scn4a.html", text: "SCN4A (HYPP)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-gys1.html", text: "GYS1 (PSSM1)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-ppib.html", text: "PPIB (HERDA)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-prkdc.html", text: "PRKDC (SCID)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-myo5a.html", text: "MYO5A (lavender foal syndrome)", kind: "natural", views: ["gameplay","coding"] },
-                { href: "gene-toe1.html", text: "TOE1 (cerebellar abiotrophy)", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-b4galt7.html", text: "B4GALT7 (Friesian dwarfism)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-plod1.html", text: "PLOD1 (fragile foal syndrome)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-rapgef5.html", text: "RAPGEF5 (EFIH)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-st14.html", text: "ST14 (naked foal syndrome)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-shox.html", text: "SHOX (skeletal atavism)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-met.html", text: "MET (embryonic lethal)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-scn4a.html", text: "SCN4A (HYPP)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-gys1.html", text: "GYS1 (PSSM1)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-ppib.html", text: "PPIB (HERDA)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-prkdc.html", text: "PRKDC (SCID)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-myo5a.html", text: "MYO5A (lavender foal syndrome)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-toe1.html", text: "TOE1 (cerebellar abiotrophy)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-cvm.html", text: "CVM (cervical vertebral malformation)", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-gbe1.html", text: "GBE1 (GBED)", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-gbe1.html", text: "GBE1 (GBED)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-megaesophagus.html", text: "Megaesophagus", kind: "natural", views: ["gameplay","coding","science"] }
             ]
         },
@@ -168,7 +168,7 @@ window.HG.pages = {
             title: "Other natural genes",
             items: [
                 { href: "gene-sex.html", text: "Sex", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-diet.html", text: "Diet", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-diet.html", text: "Diet", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-tiger-eye.html", text: "Tiger eye (SLC24A5)", kind: "natural", views: ["gameplay","coding"] }
             ]
         },

@@ -149,6 +149,298 @@
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="at-a-glance">At a glance</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>GYS1</em>, glycogen synthase 1 &mdash; the principal
+    glycogen-synthesising enzyme of skeletal muscle</td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 10, historically the short arm of ECA10; the
+    causal variant is in exon&nbsp;6</td></tr>
+<tr><th>Disease allele</th><td>A G&rarr;A substitution giving p.Arg309His (R309H)</td></tr>
+<tr><th>Trait</th><td>Type&nbsp;1 polysaccharide storage myopathy (PSSM1)</td></tr>
+<tr><th>Functional effect</th><td><b>Gain of function</b> &mdash; the enzyme is abnormally
+    active and poorly switched off</td></tr>
+<tr><th>Inheritance</th><td>Autosomal dominant, but variable and dose-dependent &mdash; better
+    described as incompletely dominant or semidominant</td></tr>
+<tr><th>Coat</th><td>No direct effect known</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="normal-function">What the enzyme normally does</h2>
+
+<p>
+    Glycogen synthase transfers glucose from UDP-glucose onto a growing glycogen chain, mostly
+    through &alpha;-1,4 linkages; <a href="gene-gbe1.html">glycogen branching enzyme</a> then
+    adds the &alpha;-1,6 branch points that make glycogen compact, soluble and easy to
+    mobilise. The two genes are neighbours in the same pathway and fail in opposite directions
+    &mdash; GBE1 cannot build the branches, GYS1 builds too much chain.
+</p>
+
+<p>
+    The normal enzyme is tightly regulated, because glycogen production has to switch on after
+    a meal and down when stores are full. <b>Phosphorylation</b> generally inhibits it;
+    <b>glucose-6-phosphate</b> allosterically activates it; muscle glycogen itself provides
+    feedback. <em>GYS1</em> is the skeletal-muscle isoform, <em>GYS2</em> the liver one.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5148651/">PMC5148651</a>
+</p>
+
+<h2 id="mutation">A brake that will not engage</h2>
+
+<p>
+    R309H sits in a highly conserved part of the protein, found in exon 6 after PSSM1 was
+    localised to an approximately 3&nbsp;Mb segment of ECA10. It is a <strong>gain of
+    function</strong>, not a defect:
+</p>
+
+<ul>
+    <li>Substantially greater baseline activity.</li>
+    <li>Much greater affinity for UDP-glucose, its substrate.</li>
+    <li>Strongly active at far lower G6P concentrations than normal enzyme &mdash; a
+        half-activation concentration around <b>0.24&nbsp;mM</b> against about
+        <b>3.0&nbsp;mM</b> for wild type.</li>
+    <li>Inappropriately active even when phosphorylation should be suppressing it.</li>
+</ul>
+
+<p>
+    Its UDP-glucose <em>K</em><sub>m</sub> was also much lower &mdash; 0.48&nbsp;mM against
+    2.4&nbsp;mM without G6P &mdash; so it makes glycogen readily under conditions where normal
+    enzyme would be restrained. Structural modelling suggests why: Arg309 probably takes part in
+    a salt bridge stabilising the low-activity state, and replacing it with histidine is
+    predicted to destabilise that &ldquo;off&rdquo; configuration. Well supported
+    biochemically, still partly model-based &mdash; there is no equine protein crystal
+    structure showing it directly.
+</p>
+
+<p>
+    What accumulates: total skeletal-muscle glycogen at roughly <b>2&ndash;4 times normal</b> in
+    some research contexts; abnormal, less-branched glycogen-like material;
+    amylase-resistant polysaccharide inclusions described as polyglucosan or amylopectin-like;
+    and subsarcolemmal vacuoles and cytoplasmic inclusions inside muscle fibres, especially in
+    fast and mixed fast/oxidative fibres including type&nbsp;2A. Whether the damage comes mainly
+    from mechanical disruption, altered energy metabolism, or something else is unresolved.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3409190/">PMC3409190</a>
+</p>
+
+<h2 id="real-inheritance">Inheritance and dosage</h2>
+
+<p>
+    Autosomal &mdash; sex does not change the odds. Labs write the alleles <code>N</code> for
+    normal and <code>P1</code> for R309H; older papers use R for the arginine allele and H for
+    the histidine one.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>genotype</th><th>meaning</th><th>transmission</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td class="ok">no R309H allele</td><td>cannot pass it on</td></tr>
+<tr><td><code>N/P1</code></td><td class="warn">heterozygous; can develop disease, from apparently normal to clinically important</td><td>50% per foal against an <code>N/N</code> mate</td></tr>
+<tr><td><code>P1/P1</code></td><td class="bad">homozygous; usually greater pathological burden</td><td>passes it to 100% of foals</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Calling it &ldquo;dominant&rdquo; is right for breeding decisions and misses the biology.
+    There is <strong>variable expressivity</strong> and evidence of <strong>incomplete
+    dominance</strong>: two copies generally carry more biochemical and histologic disease than
+    one. In Belgians and Percherons managed under the same conditions, homozygotes had more
+    amylase-resistant inclusions, more vacuolation, higher resting muscle-enzyme activities and
+    higher post-exercise CK than controls &mdash; while <b>heterozygotes commonly overlapped
+    with normal horses</b>.
+</p>
+
+<div class="note warn">
+    <span class="label">The mod makes every heterozygote sick; reality does not</span>
+    <p>
+        <code>Gys1Gene</code> gives <code>P/N</code> a guaranteed impairing condition and
+        <code>P/P</code> a worse one. The dose-dependence is exactly right &mdash; it is one of
+        the closest matches on the health layer. What it cannot express is that a real
+        <code>N/P1</code> horse is often clinically quiet, particularly with turnout, regular
+        low-intensity movement and an appropriate ration, and that a positive test is a
+        <em>risk factor</em> rather than a diagnosis. Penetrance is not something
+        <a href="genetics-model.html">the expression model</a> can currently represent (the
+        same limit that flattens <a href="gene-toe1.html#real-inheritance">TOE1</a>), and it is
+        the single most load-bearing simplification in this locus.
+    </p>
+</div>
+
+<h2 id="health">What the disease does</h2>
+
+<p>
+    PSSM1 is a <strong>skeletal-muscle disease</strong>. It is not a colour defect and is not
+    established as a bone, tendon, joint, heart, fertility or neurologic disorder. Reported
+    signs, and expression varies a great deal by genotype, breed background, diet, fitness,
+    management and work type:
+</p>
+
+<ul>
+    <li>Muscle stiffness, cramping, soreness, reluctance to go forward.</li>
+    <li>&ldquo;Tying up&rdquo; &mdash; exertional rhabdomyolysis.</li>
+    <li>Sweating, skin twitching, firm painful muscles, abnormal stance.</li>
+    <li>Exercise intolerance, poor recovery, gait change, resistance to collection.</li>
+    <li>Progressive muscle atrophy or weakness in some horses, particularly draft types.</li>
+    <li>Severe episodes with myoglobinuria or inability to rise.</li>
+</ul>
+
+<p>
+    Blood CK and AST rise with muscle damage but are imperfect screens: some positive horses,
+    especially heterozygotes, sit inside the normal range. In the cited study both were
+    generally higher in homozygotes and the elevation correlated with histologic pathology. The
+    DNA test identifies R309H directly and is more definitive than inferring genotype from
+    enzymes or signs.
+</p>
+
+<p>
+    <strong>Modifiers matter.</strong> The <em>RYR1</em> mutation causing malignant hyperthermia
+    susceptibility can worsen the PSSM1 phenotype in some Quarter Horse-related animals. GYS1
+    status alone does not fully predict severity, which is why a positive result is a strong
+    causal risk factor for a specific myopathy and not a complete prediction of a
+    horse&rsquo;s future.
+</p>
+
+<h2 id="coat">Coat, build, size</h2>
+
+<p>
+    No known causal role in coat colour, white patterning, dilution, grey, roan, leopard complex
+    or any pigment trait.
+</p>
+
+<div class="note">
+    <span class="label">The Noriker colour association, and what it actually shows</span>
+    <p>
+        An Austrian Noriker study found PSSM1 carrier rates differing substantially between
+        colour-defined breeding subpopulations &mdash; higher in chestnut groups, lower in
+        leopard-spotted groups. The authors&rsquo; point was that colour-line breeding, genetic
+        bottlenecks and mating patterns created <b>population substructure</b> that moved
+        <em>GYS1</em> allele frequencies. It does not mean chestnut causes PSSM1, or the
+        reverse. If a stallion line happens to carry both a colour allele and PSSM1, its
+        descendants show an association in that registry &mdash; pedigree linkage, not one gene
+        doing two jobs.
+        <a href="https://onlinelibrary.wiley.com/doi/10.1111/age.12481">Anim. Genet. 10.1111/age.12481</a>
+    </p>
+</div>
+
+<p>
+    Nor is there convincing evidence that R309H makes a horse taller or shorter, heavier or
+    finer, more or less naturally muscled, or better built for any discipline. The allele turns
+    up across Quarter Horse-related breeds, drafts, warmbloods, cobs, ponies and crosses because
+    it is an <b>old founder mutation that predates many modern breed divisions</b> &mdash; its
+    spread across body types is history, not a build gene.
+</p>
+
+<p>
+    There <em>are</em> secondary appearance changes in clinically affected horses: chronic muscle
+    pain, reduced work tolerance, disuse and muscle pathology can give a poor topline, focal
+    atrophy, asymmetry or difficulty holding condition. Disease consequences, not a programmed
+    body type.
+</p>
+
+<h2 id="performance">Jumping, speed, and the advantage theory</h2>
+
+<p>
+    No robust study establishes that R309H improves maximum galloping speed, sprint
+    acceleration, jump height or scope or bascule or technique, race performance, endurance, or
+    training response in healthy sport horses. It is not an accepted performance marker and a
+    PSSM1 test should not be used to pick a horse as more athletic.
+</p>
+
+<p>
+    The speculation has a real starting point: affected horses can carry more muscle glycogen
+    and may replenish it faster after work, and glycogen is a critical fuel for high-intensity
+    effort. So it has been hypothesised that the allele once helped horses doing frequent daily
+    work on modest feed &mdash; the <b>thrifty gene</b> idea. Population-genetic data support
+    historical positive selection around the mutation in Belgian horses, meaning the
+    allele&rsquo;s frequency and surrounding haplotype are unlikely to be neutral drift alone in
+    that population.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3920812/">PMC3920812</a>
+</p>
+
+<p>
+    None of which demonstrates modern speed or jumping ability. More stored glycogen is not
+    automatically more usable fuel: PSSM1 muscle has abnormal glycogen regulation and can show
+    an <em>energy deficit</em> during submaximal aerobic exercise, alongside painful cramping,
+    exercise intolerance and muscle injury. A mutation that helped under one historical
+    work-and-feed regime can be harmful under intermittent work and energy-dense feeding.
+</p>
+
+<p>
+    For jumping the consequence is <strong>reliability risk</strong>, not a change in scope: an
+    affected horse may resist impulsion, feel stiff behind, fatigue oddly, cramp, or go
+    inconsistently, and pain or subclinical damage can affect take-off commitment, bascule and
+    willingness in a horse with perfectly normal talent. For speed, a quiet carrier under good
+    management may show nothing, and an affected horse loses acceleration, sustained pace,
+    recovery and willingness. The mod&rsquo;s costs &mdash; &minus;0.015 speed and &minus;0.06
+    jump per copy &mdash; encode exactly that reading: a horse that is <em>less reliable</em>,
+    not a horse built differently.
+</p>
+
+<h2 id="breeds">Breed distribution and history</h2>
+
+<p>
+    Found across Quarter Horse-related breeds, drafts, some warmbloods, Morgans, Mustangs, Rocky
+    Mountain Horses, cobs, ponies and crosses. A conserved haplotype around the mutation across
+    breeds shows it arose <b>once</b> and was inherited identical-by-descent rather than
+    appearing repeatedly. The original allele-age estimate was roughly 159 generations &mdash;
+    an origin about <b>1,200&ndash;1,500 years ago</b>, before most present-day breeds existed.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2430182/">PMC2430182</a>
+</p>
+
+<p>
+    Frequency varies markedly. Historic studies reported high frequencies in some draft
+    populations; selection analysis found evidence consistent with positive selection in
+    Belgians; and the same signal was not clearly attributable to direct positive selection in
+    Quarter Horses, where founder effects and rapid population expansion may explain persistence
+    better. That history explains the breadth of the spread &mdash; and does not mean every
+    horse with draft or Quarter Horse ancestry is positive.
+</p>
+
+<div class="note">
+    <span class="label">Why the mod&rsquo;s 2.5% is deliberately below the real rate</span>
+    <p>
+        This is the one disorder in the mod a player will actually meet. Everything else on the
+        health layer is rare by construction, because a recessive needs two carriers to find
+        each other; this one is dominant, so every copy shows. At
+        <code>WILD_AFFECTED_PERCENT = 2.5</code> it is by a wide margin the most likely disorder
+        to run into &mdash; which is true of the real thing too, across drafts, warmbloods,
+        paints and appaloosas. The number is set <em>low</em> against the real population on
+        purpose: a dominant disorder at a realistic draft-breed rate would mean a visible
+        fraction of every paddock is unwell, which stops reading as a disorder and starts
+        reading as the baseline horse being bad. Rare enough to notice, common enough to matter.
+    </p>
+</div>
+
+<h2 id="settled">What is still open</h2>
+
+<p><strong>Penetrance and modifiers.</strong> Not every heterozygote develops obvious disease.
+    Allele dosage is part of it, <em>RYR1</em> is a documented modifier, and breed-specific
+    muscle-fibre profiles, diet, body condition, turnout, exercise consistency, training load and
+    stress all contribute. Which additional genes matter most is not mapped.</p>
+
+<p><strong>How the inclusions cause symptoms.</strong> Abnormal polysaccharide accumulates and
+    more pathology tracks more enzyme leakage; whether the clinical disease comes mainly from
+    direct structural disruption by vacuoles and inclusions, impaired energy regulation during
+    particular exercise conditions, altered signalling and gene expression from excess glycogen,
+    or all three, is unsettled.</p>
+
+<p><strong>The thrifty-gene hypothesis</strong> is plausible and indirectly supported by
+    selection signatures and glycogen biology. It is not a demonstration that historical carriers
+    pulled harder or travelled further.</p>
+
+<p><strong>PSSM1 versus &ldquo;PSSM2&rdquo;.</strong> PSSM1 is genetically defined by the
+    validated R309H mutation. Not every horse once labelled &ldquo;PSSM&rdquo; from biopsy or
+    signs carries it &mdash; and those cases are not evidence against GYS1 causing PSSM1. Modern
+    veterinary literature treats PSSM1 as the confirmed GYS1 disease and emphasises that
+    <b>no single causative mutation has been validated</b> for the broader historical PSSM2
+    category. The mod models PSSM1 only, which is the right half to model.</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-scn4a.html">SCN4A (HYPP)</a>

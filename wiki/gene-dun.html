@@ -580,6 +580,347 @@ private static double accessory(float roll, double chance) {
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="locus">The gene, and two different things near it</h2>
+
+<p>
+    <strong>TBX3</strong> is <em>T-box transcription factor 3</em> &mdash; a protein that
+    regulates when and where other genes switch on during development, with broad roles across
+    mammals including limb and skeletal development. What makes it interesting here is that
+    <b>different regulatory variants near the same gene affect two very different traits</b>: the
+    dun coat, and (in certain Chinese horse and pony populations) a substantial component of
+    wither height. The familiar dun test is about the first of those and predicts nothing about
+    the second.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>coat-colour locus</th><th>size-associated enhancer</th></tr></thead>
+<tbody>
+<tr><th>chromosome</th><td>ECA8</td><td>ECA8</td></tr>
+<tr><th>position</th><td><em>downstream</em> regulatory region of <em>TBX3</em></td><td><em>upstream</em> enhancer of <em>TBX3</em></td></tr>
+<tr><th>phenotype</th><td>dun dilution and primitive markings</td><td>wither height in sampled Chinese horses and ponies</td></tr>
+<tr><th>variants</th><td><code>D</code>, <code>nd1</code>, <code>nd2</code> regulatory haplotypes</td><td>TBX3-EN2 A/G at ECA8:20,644,555</td></tr>
+<tr><th>same test?</th><td>yes &mdash; the standard dun test</td><td class="warn">no &mdash; a distinct research marker</td></tr>
+<tr><th>health consequence</th><td class="ok">none recognised</td><td class="ok">none established</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The original mapping put the coat locus in a roughly 200&nbsp;kb interval on chromosome 8
+    containing <em>TBX3</em>. On EquCab3 the gene is annotated around 20.51&ndash;20.53&nbsp;Mb;
+    older papers report positions near 18.2&nbsp;Mb because they used an older assembly. That is
+    an assembly-version mismatch, not two loci.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4731265/">Imsland
+    <em>et&nbsp;al.</em>, PMC4731265</a>
+</p>
+
+<h2 id="mechanism">The mechanism, which is inside the hair</h2>
+
+<p>
+    Dun is <strong>not simply less melanin</strong>. In a dun horse most body hairs have pigment
+    packed into only about <b>25&ndash;50% of the hair cortex</b>, giving a radially asymmetric,
+    partly diluted shaft. Hairs in the dorsal stripe stay evenly and intensely pigmented, so the
+    stripe stays dark.
+</p>
+
+<p>The developmental sequence appears to be:</p>
+
+<ol>
+    <li>In a growing follicle, TBX3 is expressed <b>asymmetrically</b> in a subset of hair-bulb
+        keratinocytes.</li>
+    <li>That asymmetry changes follicle differentiation and locally reduces expression of
+        <b>KITLG</b>, a major signal supporting melanocyte migration and survival.</li>
+    <li>Melanocytes and pigment therefore occupy only part of the developing cortex.</li>
+    <li>The finished hair looks diluted, while selected regions keep darker hairs and form the
+        primitive markings.</li>
+</ol>
+
+<p>
+    That explains why dun looks so <em>patterned</em>: it is controlled at a microscopic radial
+    level inside individual hairs as well as by where on the body the follicle sits.
+</p>
+
+<div class="note">
+    <span class="label">The mod models the outcome, not the hair</span>
+    <p>
+        <a href="gene-dun.html#one-mask">One dilution and one mask</a> is a pixel-level
+        restriction plus a marking pass &mdash; a per-pixel decision where the biology is a
+        per-hair, sub-hair one. That is the right level for a 64&times;64 texture, and it is why
+        the mod&rsquo;s markings are drawn as explicit geometry rather than falling out of the
+        dilution the way they do in a real follicle. The one thing the real mechanism predicts
+        and the mod has to assert separately is exactly <em>why</em> the stripe stays dark: in a
+        horse it is the same field, read differently by follicle position.
+    </p>
+</div>
+
+<h2 id="alleles">Three alleles, one dominance order</h2>
+
+<p>
+    <code>D</code> &gt; <code>nd1</code> &gt; <code>nd2</code>, where <code>D</code> is dun,
+    <code>nd1</code> is non-dun with possible primitive markings, and <code>nd2</code> is
+    ordinary non-dun with no genetically expected markings.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>allele</th><th>molecular description</th><th>visible effect</th></tr></thead>
+<tbody>
+<tr><td><b>D</b></td><td>ancestral regulatory haplotype, preserving hair-follicle TBX3 regulation</td><td>full dun dilution plus primitive markings</td></tr>
+<tr><td><b>nd1</b></td><td>a regulatory SNP affecting enhancer activity</td><td>no body dilution; markings, especially a dorsal stripe, may remain</td></tr>
+<tr><td><b>nd2</b></td><td>a derived ~1.6&nbsp;kb deletion in a downstream enhancer</td><td>no dilution, no TBX3-caused markings</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Some laboratories write <code>d1</code> and <code>d2</code> in lower case; same alleles. The
+    mod uses that second convention. A <b>single <code>D</code> is enough</b> to produce dun, so
+    a <code>D/nd2</code> horse is visibly dun and transmits <code>D</code> to only half its
+    foals, while <code>D/D</code> transmits to all of them.
+</p>
+
+<div class="note">
+    <span class="label">Two dominance orders over one locus &mdash; and the mod says so</span>
+    <p>
+        The thing this allele series does that most do not is run <em>two</em> orders at once:
+        <code>D</code> alone dilutes, but <code>D</code> and <code>d1</code> both mark. That is
+        exactly how <a href="gene-dun.html#d1">the mod implements it</a> &mdash; two predicates,
+        <code>dilutes()</code> asking for <code>D</code> and <code>marks()</code> asking for
+        <code>D</code> or <code>d1</code> &mdash; and it is a faithful rendering of a real allele
+        series that is genuinely awkward to state in one sentence.
+    </p>
+</div>
+
+<h3>Why a dorsal stripe is not proof of dun</h3>
+
+<p>
+    A horse can show a countershading stripe, seasonal shading, or an <code>nd1</code>-associated
+    marking without being genetically dun &mdash; easily misread in buckskins, bays, red horses
+    and horses carrying other dilutions. Going the other way, the darker the base the harder some
+    markings are to see: in the original work, markings were easier to recognise against red
+    pigment than against dark eumelanin. Phenotype alone misleads; the DNA test is the clean
+    answer.
+</p>
+
+<h2 id="bases">What it looks like on each base</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>base</th><th>dun-modified appearance</th><th>names</th></tr></thead>
+<tbody>
+<tr><td>bay</td><td>tan or gold body, dark mane, tail and lower legs</td><td>bay dun, classic dun, zebra dun</td></tr>
+<tr><td>black</td><td>slate, smoky or mouse-grey body with dark points</td><td>grullo / grulla, blue dun, mouse dun</td></tr>
+<tr><td>chestnut</td><td><b>peach, apricot or red-gold body</b>; mane and tail may be darker or more body-coloured</td><td>red dun</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The most reliable hallmark is the dark <b>dorsal stripe</b> from mane to tail. Others: leg
+    barring (zebra bars), a shoulder cross, dark ear edging, facial masking, cobwebbing or
+    forehead marks, neck and shoulder shadows, dark tail barbs, and dark regions around the
+    muzzle and vibrissae. Expression is variable &mdash; not every dun horse shows every marking
+    clearly, which the mod reproduces deliberately in
+    <a href="gene-dun.html#rolls">the incomplete-marking rolls</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">Red dun: the mod and the source describe different horses</span>
+    <p>
+        The mod holds <code>KEEP_RED</code> very close to 1 and states outright that
+        <a href="gene-dun.html#asymmetry">a red dun is a chestnut with primitive markings, not a
+        pale horse</a>. The reference here says a chestnut base gives a <b>peach, apricot or
+        red-gold</b> body &mdash; a visible dilution &mdash; and the cortex mechanism above is
+        pigment-type-agnostic, restricting pigment to 25&ndash;50% of the shaft regardless of
+        which melanin is in it. On that reading, red dun <em>should</em> be perceptibly lighter
+        than chestnut.
+    </p>
+    <p>
+        This is a real disagreement, not a rendering limitation. It is also the one the mod is
+        most likely to be right about for its own purposes: the asymmetry is what makes grullo,
+        bay dun and red dun come out as three visibly different horses from one pair of numbers,
+        and a red dun that is merely &ldquo;a slightly paler chestnut&rdquo; is hard to identify
+        in-game. But it should be recorded as a deliberate departure rather than left to be
+        rediscovered, and <code>KEEP_RED</code> is the single number that would move it.
+    </p>
+</div>
+
+<h2 id="not-build">What the coat locus does not do</h2>
+
+<p>
+    There is no good evidence that <code>D</code>/<code>nd1</code>/<code>nd2</code> changes
+    build, bone, conformation, muscle mass, mature height, frame, movement quality or athletic
+    phenotype. The coat alleles alter a hair-follicle enhancer&rsquo;s activity in a restricted
+    developmental context, and the foundational paper specifically reported <b>no recognised
+    limb-development or other pleiotropic differences</b> between dun and non-dun horses.
+</p>
+
+<p>
+    So a Fjord&rsquo;s compact sturdy build, a Quarter Horse&rsquo;s muscling and a
+    Konik&rsquo;s hardiness are not consequences of the dun genotype. They are breed-level
+    outcomes from many genes, selection history, management and environment. The mod agrees:
+    dun paints and contributes nothing to <a href="horse-body.html">the trait layer</a>.
+</p>
+
+<h3>The separate height signal</h3>
+
+<p>
+    A different regulatory region <em>upstream</em> of <em>TBX3</em> has been associated with
+    stature in Chinese horses and ponies. The strongest site, <b>TBX3-EN2</b>, is an A/G SNP at
+    ECA8:20,644,555; in a panel of 763 Chinese horses and ponies the G allele went with greater
+    wither height, and the model estimated it could account for up to about <b>20.3% of height
+    variation</b> &mdash; roughly 10&nbsp;cm &mdash; in that population.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8796118/">PMC8796118</a>
+</p>
+
+<p>
+    The functional work makes it credible: reporter assays found the G allele increased enhancer
+    activity and TBX3 expression; TBX3 expression was higher in the placentas of larger Yili
+    horses than in Ningqiang ponies; and deleting the corresponding enhancer segment in mice
+    reduced TBX3 expression in developing limbs and produced shorter limb bones. The A allele was
+    common in ponies &mdash; 65.6% across seven pony breeds &mdash; and fixed in the 13 sampled
+    Przewalski&rsquo;s horses; G averaged 81.2% across 18 Chinese horse breeds, ranging from
+    21.1% in Debao ponies to 85.7% in Yili horses.
+</p>
+
+<div class="note warn">
+    <span class="label">This is not the dun test, and the mod does not model it</span>
+    <p>
+        The coat variants and TBX3-EN2 are separate regulatory changes in different regions
+        around the same gene. A dun horse can be small or large; a non-dun horse can be small or
+        large. Height is polygenic and environmentally influenced, and the EN2 result &mdash;
+        powerful in the Chinese populations studied &mdash; is not a universal one-marker height
+        calculator: Western pony breeds show different major signals, <a href="gene-hmga2.html">HMGA2</a>
+        in Falabellas among them, so similar stature arises by different genetic routes. The mod
+        models the coat locus only, and puts size on <a href="gene-lcorl.html">LCORL</a> and
+        HMGA2. That is the correct split.
+    </p>
+</div>
+
+<h2 id="health">Health, jumping, speed</h2>
+
+<p>
+    <strong>Dun is a pigmentation trait, not a disorder.</strong> OMIA classifies it as not
+    disease-related, and the foundational study found no developmental, limb or systemic effects
+    attributable to the coat variants.
+</p>
+
+<p>
+    That needs distinguishing from the wider biology of the gene. In humans, damaging one copy of
+    <em>TBX3</em> causes <b>ulnar-mammary syndrome</b> &mdash; limb, tooth, gland and genital
+    abnormalities. That does not mean a dun horse carries a disease mutation: the equine coat
+    variants leave the protein intact and modify hair-follicle expression rather than removing
+    the gene&rsquo;s developmental function. It is the cleanest example on this wiki of why
+    &ldquo;this gene causes X in humans&rdquo; is not an argument about a horse.
+</p>
+
+<p>
+    For the size enhancer there is likewise no established equine health syndrome or soundness
+    risk. The mouse enhancer-deletion experiments show why TBX3 <em>can</em> affect limb growth;
+    they are not evidence that naturally occurring horse genotypes cause orthopaedic disease,
+    hoof disease, infertility, metabolic disease or reduced lifespan.
+</p>
+
+<p>
+    <strong>Jumping.</strong> No validated evidence that any of these variants predicts scope,
+    technique, carefulness, bascule, soundness under jumping load or competition success.
+    TBX3&rsquo;s developmental role makes it tempting to speculate about limb architecture and
+    biomechanics; that inference has not been demonstrated in horses, and would need replicated
+    genotype-phenotype associations controlling for breed, height, training, rider, pedigree,
+    competition level and other athletic loci.
+</p>
+
+<p>
+    <strong>Speed.</strong> No robust evidence that the dun alleles affect sprint speed, stamina,
+    earnings, stride mechanics or gait. The speed-gene discussion centres on
+    <a href="gene-mstn.html">MSTN</a>. The Chinese size variant could in theory correlate
+    indirectly with body dimensions where it affects height &mdash; which is not causing speed,
+    and taller is not inherently faster.
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    The coat work genotyped <b>1,814 animals from more than 45 breeds</b>, confirming that TBX3
+    variation is broad rather than confined to one &ldquo;primitive&rdquo; breed. Breed-by-breed
+    frequencies remain unevenly measured, and many figures circulating online rest on phenotypes,
+    registry preferences or small samples rather than population surveys.
+</p>
+
+<p>
+    OMIA documents the dun phenotype or the causal variants in the American Trotter, Arabian,
+    American Bashkir Curly, Faroes Pony, Norwegian Fjord, Gotland Pony, Icelandic Horse,
+    Mongolian Horse, Polish Konik, Quarter Horse, Shetland Pony, Swedish Warmblood and Vyatka.
+    Variant-specific reporting is narrower:
+</p>
+
+<ul>
+    <li><b>D</b> in Curly, Fjord, Icelandic, Polish Konik, Quarter Horse and Vyatka.</li>
+    <li><b>nd1</b> in American Trotter, Arabian, Curly, Faroes Pony, Gotland Pony, Mongolian,
+        Quarter Horse, Shetland Pony, Swedish Warmblood and Vyatka.</li>
+    <li><b>nd2</b> is the reference-genome allele, widespread, and the most prevalent allele
+        among common domestic breeds.</li>
+</ul>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>population</th><th>best-supported conclusion</th></tr></thead>
+<tbody>
+<tr><td>Norwegian Fjord</td><td><code>D</code> commonly described as fixed or effectively so; dun is a defining breed feature, though base colour still modifies how it presents</td></tr>
+<tr><td>Polish Konik</td><td>common and a direct selection target; genomic scans show a strong selection signal at or near <em>TBX3</em> in blue-dun Koniks</td></tr>
+<tr><td>Icelandic Horse</td><td><code>D</code> well established and historically used in inheritance studies; no modern population-wide frequency in the sources here</td></tr>
+<tr><td>Quarter Horse</td><td><code>D</code> exists and produces recognisable duns; not universal, and no representative contemporary survey</td></tr>
+<tr><td>Mongolian Horse</td><td>dun and <code>nd1</code> documented; phenotype and local structure vary enough that one breed-wide percentage would overstate the data</td></tr>
+<tr><td>most modern breeds</td><td><code>nd2</code> is the most prevalent allele</td></tr>
+<tr><td>Przewalski&rsquo;s horse</td><td>dun is characteristic; all sampled animals in the size study carried the ancestral EN2 <b>A</b> allele</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The distinction between &ldquo;known to occur&rdquo; and &ldquo;common&rdquo; matters here
+    more than anywhere. For Arabians, Swedish Warmbloods, American Trotters and Shetlands,
+    documentation of <code>nd1</code> does not mean many individuals are visibly dun &mdash;
+    <code>nd1</code> is a <em>non-dun</em> allele that merely preserves subtle markings.
+</p>
+
+<p>
+    The mod uses <code>D</code> at 1/24 (4.2%) and <code>d1</code> at 1/10 (10%), so a founder is
+    more than twice as likely to carry the marking allele as the dilution &mdash; which matches
+    the qualitative picture above, where <code>nd1</code> turns up in far more breeds than
+    <code>D</code> does. No published global figure exists to check either number against.
+</p>
+
+<h2 id="evolution">Evolution, and the open questions</h2>
+
+<p><strong>Well established.</strong> Dun is likely the ancestral equid coat state, seen in
+    Przewalski&rsquo;s horses and other wild equids, and plausibly adaptive camouflage &mdash;
+    inferred from ecology and phylogenetic distribution rather than directly quantified. The
+    <code>D</code> and <code>nd1</code> haplotypes <b>predate domestication</b>: ancient DNA
+    identified a roughly 42,700-year-old horse carrying <code>D/nd1</code> and a roughly
+    4,400-year-old horse inferred <code>nd1/nd1</code>. <code>nd2</code> is more recent, was not
+    observed outside domestic horses in that study, and likely rose during domestication
+    alongside selection for more intensely pigmented, non-camouflage colours. And all three are
+    regulatory changes &mdash; they alter <em>where</em> TBX3 is expressed in a growing follicle,
+    not the protein&rsquo;s amino-acid sequence.</p>
+
+<p><strong>Speculative or incomplete.</strong> The camouflage advantage is plausible and often
+    stated, and its magnitude and historical setting are unresolved. Researchers have proposed
+    that spatial TBX3 regulation could illuminate the evolution of <b>zebra stripes</b> &mdash;
+    TBX3 is <em>not</em> established as the zebra-stripe gene, which is worth knowing next to
+    <a href="gene-natural-zebra.html">the mod&rsquo;s own zebra genes</a>. Work in dun Mongolian
+    horses is exploring differential TBX3 skin expression in relation to <b>Bider markings</b>,
+    an active area that does not change the central point: dun expression is patterned and
+    region-specific rather than on/off. Claims that dun changes temperament, durability,
+    athleticism or &ldquo;primitive hardiness&rdquo; are unsupported unless they can separate
+    TBX3 from breed ancestry and selection. And the TBX3-EN2 height finding needs validation
+    outside the Chinese populations before it can be a general stature predictor.</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-matp.html">MATP</a>

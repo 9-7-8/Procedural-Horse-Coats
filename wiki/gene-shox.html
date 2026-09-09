@@ -136,6 +136,299 @@
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="what-shox-does">What SHOX does, and why &ldquo;atavism&rdquo; is a description not a mechanism</h2>
+
+<p>
+    <strong>SHOX</strong> is <em>short stature homeobox</em>. It encodes a homeobox
+    transcription factor &mdash; a DNA-binding developmental regulator that helps control the
+    growth and patterning of bone, particularly during limb development.
+</p>
+
+<p>
+    In the horse it matters for the radius&ndash;ulna and tibia&ndash;fibula complexes. A
+    modern horse normally has reduced, largely fused ulnae and fibulae, which is part of what
+    gives it a long, stiff distal limb and efficient one-toed locomotion. In skeletal atavism
+    the ulna and fibula develop more fully and stay separate and elongated, reaching toward or
+    across the carpus and tarsus. That resembles ancestral equid anatomy &mdash; hence the
+    name &mdash; but it is a <b>pathological developmental defect, not a genetic reversion</b>
+    to an ancestral horse. The inference is that normal SHOX dosage and regulation are needed
+    to suppress or coordinate that growth pattern; SHOX also influences cell-cycle regulation
+    and osteogenic-cell activity, which fits the severity.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4938674/">Rafati
+    <em>et&nbsp;al.</em>, PMC4938674</a>
+</p>
+
+<h2 id="variants">Two deletions, not one allele</h2>
+
+<p>
+    The molecular association comes from a 2016 whole-genome sequencing study of affected
+    Shetland ponies, with long-read sequencing of BAC clones to resolve a difficult region.
+    It found <b>two large overlapping deletions</b>, both of which are disease alleles.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>allele</th><th>size</th><th>what it removes</th></tr></thead>
+<tbody>
+<tr><td><b>Del-1</b></td><td>~160&ndash;180 kb</td><td>the entire <em>SHOX</em> coding region, plus part of the downstream <em>CRLF2</em></td></tr>
+<tr><td><b>Del-2</b></td><td>~60&ndash;80 kb</td><td>not the <em>SHOX</em> coding sequence itself, but a downstream overlapping region including part of <em>CRLF2</em> &mdash; thought to remove <em>SHOX</em> regulatory DNA</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">The mod models one allele where reality has two</span>
+    <p>
+        <code>ShoxGene</code> declares a single <code>sa</code> allele against wild-type,
+        so <code>sa/sa</code> is the only affected genotype. In the real locus there are three:
+        <code>Del-1/Del-1</code>, <code>Del-2/Del-2</code>, and the <b>compound
+        heterozygote</b> <code>Del-1/Del-2</code>, which is affected as well &mdash; which is
+        why laboratories test for both. Collapsing them is a defensible simplification (the
+        inheritance maths for a carrier pairing is identical either way) and it is a real
+        divergence: the mod cannot represent a horse that carries two <em>different</em>
+        broken copies. Nothing in <a href="genetics-model.html">the gene model</a> forbids a
+        two-allele version; it simply has not been written.
+    </p>
+</div>
+
+<h2 id="par">Why a sex-chromosome locus inherits like an autosome</h2>
+
+<p>
+    Both deletions sit in the <strong>pseudoautosomal region</strong> (PAR) of the X and Y.
+    The PAR is the homologous segment the two sex chromosomes share, where recombination
+    happens. So although the locus is physically on a sex chromosome, it transmits like an
+    autosomal one: colts and fillies inherit and pass it the same way, and this is not a
+    conventional X-linked disorder. The PAR recombines and is not subject to ordinary female
+    X-inactivation the way the rest of the X is.
+</p>
+
+<p>
+    The clearest wording is <b>pseudoautosomal recessive inheritance with autosomal-like
+    transmission</b> &mdash; which is exactly why the mod can model it as a plain autosomal
+    recessive and needs none of the sex-linked scaffolding
+    (<a href="roadmap.html#settled">roadmap</a>) that is still unbuilt. If that scaffolding
+    ever lands, this is the gene to check it against, because it must keep behaving the way it
+    does now.
+</p>
+
+<p>
+    A technical caveat worth keeping: this region was poorly represented in older horse
+    reference genomes, being repeat-rich and structurally complex. Long-read sequencing
+    improved the local assembly but did not resolve every breakpoint precisely, and long
+    tracts of repeated sequence &mdash; TGGA repeats among them &mdash; may be what generated
+    the rearrangements in the first place.
+</p>
+
+<h2 id="real-inheritance">Inheritance</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>genotype</th><th>status</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td class="ok">clear for both tested deletions</td></tr>
+<tr><td><code>N/Del-1</code> or <code>N/Del-2</code></td><td class="ok">clinically normal carrier; passes it to about half its foals</td></tr>
+<tr><td><code>Del-1/Del-1</code></td><td class="bad">affected</td></tr>
+<tr><td><code>Del-2/Del-2</code></td><td class="bad">affected</td></tr>
+<tr><td><code>Del-1/Del-2</code></td><td class="bad">affected compound heterozygote</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A carrier pairing on either deletion gives the usual 25% affected, 50% carrier, 25% clear.
+</p>
+
+<h2 id="affected">What an affected horse looks like</h2>
+
+<p>
+    A disproportionate limb-skeletal disorder: markedly short legs against the body, a low
+    rectangular outline, abnormally developed and elongated ulnae and fibulae, failure of the
+    normal ulna/radius and fibula/tibia fusion, narrowing and deformity around the knees,
+    severe angular and rotational deformity in fore and hind limbs, clubfoot-like conformation
+    in some foals, and limb angles and gait that get <b>worse as the animal grows</b>.
+</p>
+
+<p>
+    Affected foals may initially survive but often cannot move normally, and the problems are
+    not cosmetic &mdash; they compromise loading of the carpus, hock and distal limb. Many
+    affected horses are euthanised early; UC&nbsp;Davis notes euthanasia is common by
+    <b>six months</b> because the impairment is progressive.
+</p>
+
+<div class="note warn">
+    <span class="label">Two divergences the mod makes at once</span>
+    <p>
+        The mod kills the foal at birth, where reality gives roughly six worsening months.
+        And the mod pays for the deformity with a whole-entity <code>scale &times; 0.9</code>
+        plus flat speed and jump penalties, where reality is a normal-bodied animal on
+        malformed limbs. Both are the same underlying limitation &mdash; one scale number, no
+        age model &mdash; and they land here the same way they do on
+        <a href="gene-b4galt7.html#what-is-drawn">B4GALT7</a>. Of the two, the missing
+        <em>progression</em> is the one that changes the gene&rsquo;s meaning most: the real
+        disorder is a foal that looks passable and deteriorates.
+    </p>
+</div>
+
+<h2 id="carriers">Carriers: nothing detected, which is not nothing found</h2>
+
+<p>
+    The study did <b>not</b> find a significant withers-height difference between carriers and
+    non-carriers in its sample of 130 horses after accounting for sex &mdash; comparing
+    <code>N/Del-1</code> and <code>N/Del-2</code> against <code>N/N</code>.
+</p>
+
+<p>
+    That is not proof that carriers have no small effect on conformation, limb proportion or
+    growth. It means the published sample did not detect one, and the authors explicitly
+    cautioned that their carrier sample was limited and may have lacked the power to see a
+    subtle difference. So: <b>established</b>, two deletions cause severe skeletal atavism
+    when biallelic; <b>not established</b>, that carriers are reliably smaller, shorter-legged,
+    stronger, more athletic or more pony-like; <b>possible but unproven</b>, subtle carrier
+    effects on skeletal proportion or SHOX-regulated growth.
+</p>
+
+<p>
+    This matters because small stature in horses is genetically crowded. <a href="gene-acan.html">ACAN</a>
+    and the size loci <a href="gene-lcorl.html">LCORL/NCAPG</a>,
+    <a href="gene-hmga2.html">HMGA2</a> and <em>TBX3</em> all bear on normal and extreme size
+    variation and on other dwarfing syndromes. SHOX skeletal atavism should not be folded in
+    with miniaturisation generally &mdash; and in the mod it is not: it sits on
+    <a href="horse-body.html">the health layer</a>, not among the size genes.
+</p>
+
+<h2 id="coat">Coat</h2>
+
+<p>
+    No evidence that these deletions affect base colour, black/red pigment production,
+    dilution, grey, white spotting, appaloosa patterning, or mane, tail, feather and hair
+    texture. SHOX is a developmental skeletal regulator; contemporary equine genomic summaries
+    file it under body size and skeletal development, away from
+    <a href="gene-extension.html">MC1R</a>, <a href="gene-agouti.html">ASIP</a>,
+    <a href="gene-kit.html">KIT</a>, <em>STX17</em>, <em>PMEL</em> and
+    <a href="gene-mitf.html">MITF</a>. If a colour looks linked to the disorder inside one
+    family or breed, that is pedigree structure or chance, not a SHOX coat effect.
+</p>
+
+<h2 id="crlf2">CRLF2, the unresolved passenger</h2>
+
+<p>
+    Both deletions also remove part of <strong>CRLF2</strong>, which encodes a
+    cytokine-receptor-related protein in haematopoietic and immune signalling, with pathways
+    touching bone metabolism. The evidence still favours SHOX loss or misregulation as the
+    driver: Del-1 removes the SHOX coding sequence outright, Del-2 leaves it intact and
+    probably removes the regulatory elements it needs, and human SHOX deficiency produces
+    short stature and limb deformity, which is strong cross-species support.
+</p>
+
+<p>
+    What is unresolved is whether CRLF2 loss modifies the skeletal phenotype or adds effects
+    of its own in affected horses or carriers. The original paper says this cannot be excluded
+    and that possible non-skeletal effects remain unexplored. That is a stated uncertainty,
+    not evidence that affected horses have a known immune disease &mdash; and the mod models
+    none.
+</p>
+
+<h2 id="performance">Jumping and speed</h2>
+
+<p>
+    For affected horses the answer is not interesting: the limb geometry, joint deformation,
+    rotational and angular deviation and progressive locomotor impairment make jumping or
+    speed work medically inappropriate.
+</p>
+
+<p>
+    For carriers, no published evidence demonstrates any advantage or disadvantage in jump
+    height or scope, gallop speed, racing performance, stride length, turning, endurance, gait
+    quality or soundness under sport workloads. Athletic performance is highly polygenic and
+    heavily shaped by training, conformation, management, rider and injury history; reviews
+    associate speed, stamina, gait and jumping with <a href="gene-mstn.html">MSTN</a>,
+    <em>DMRT3</em>, <em>COX4I2</em> and <a href="gene-pdk4.html">PDK4</a>, not SHOX.
+</p>
+
+<div class="note">
+    <span class="label">Short and stout is not this</span>
+    <p>
+        A short, sturdy pony can be perfectly functional and athletic. SHOX-associated skeletal
+        atavism is not &ldquo;short and stout&rdquo; &mdash; it is a severe limb-development
+        disease when two disease alleles meet. There is no basis for choosing a carrier in
+        hope of a more compact performance pony.
+    </p>
+</div>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    <strong>Shetland Pony.</strong> The breed with the strongest molecular evidence; Del-1 and
+    Del-2 were discovered and validated there, and OMIA lists Shetland Pony as the documented
+    breed for both.
+    <a href="https://omia.org/OMIA002013/9796/">OMIA&nbsp;002013</a>
+    In a random sample of 94 Swedish Shetlands born between 1968 and 2000, Del-1 allele
+    frequency was <b>4.79%</b>, Del-2 was <b>1.06%</b>, and the combined observed carrier
+    frequency was <b>11.7%</b> &mdash; usually rounded to about 12%.
+</p>
+
+<p>
+    Those are historical and population-specific figures and should not be read as the current
+    frequency in every country, registry or line. Testing could push them down over time;
+    founder effects or a popular sire could raise them locally.
+</p>
+
+<p>
+    <strong>Miniature Horse.</strong> Skeletal atavism has been clinically reported in
+    miniatures, including an 8-month-old filly with severe rotational and angular deformity and
+    radiographically complete ulnae and fibulae.
+    <a href="https://pubmed.ncbi.nlm.nih.gov/15373256/">PMID 15373256</a>
+    The 2016 molecular study included 18 US horses, four of them apparent cases found while
+    investigating another congenital dwarfism disorder, and laboratories now list Miniature
+    Horse alongside Shetland Pony for testing. But there is <b>no</b> peer-reviewed,
+    representative allele-frequency estimate for American Miniatures comparable to the
+    94-pony Swedish survey &mdash; the phenotype is documented, testing is recommended, and a
+    breed-wide carrier frequency is not established.
+    <a href="https://vgl.ucdavis.edu/test/skeletal-atavism">UC&nbsp;Davis VGL</a>
+</p>
+
+<p>
+    <strong>Everything else.</strong> The specific Del-1 and Del-2 deletions are firmly
+    documented as causal in Shetland Ponies, with testing guidance extending to Miniatures,
+    likely on shared miniature-pony ancestry. That should not be generalised to all pony
+    breeds, drafts, sport horses or full-sized horses without breed-specific evidence &mdash;
+    skeletal malformation and dwarfism-like phenotypes have different causes in different
+    populations. The mod&rsquo;s <code>WILD_CARRIER_PERCENT</code> of 2.0 is once again a
+    world-wide founder number standing in for a ~12% figure inside one small breed.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>question</th><th>evidence</th></tr></thead>
+<tbody>
+<tr><td>Does biallelic Del-1/Del-2 cause skeletal atavism?</td><td class="ok">strong &mdash; complete disease association in the validation set</td></tr>
+<tr><td>Is SHOX central to the disorder?</td><td class="ok">strong biological and genetic support</td></tr>
+<tr><td>Does Del-2 act by deleting a SHOX regulatory region?</td><td class="warn">plausible and favoured, not experimentally proven; the element is unmapped</td></tr>
+<tr><td>Does CRLF2 loss contribute?</td><td class="warn">possible, unresolved; SHOX is the parsimonious explanation</td></tr>
+<tr><td>Are carriers smaller or unusually built?</td><td class="warn">not demonstrated; no significant height difference found, subtle effects not ruled out</td></tr>
+<tr><td>Does it influence coat colour?</td><td class="bad">no evidence</td></tr>
+<tr><td>Does it confer an athletic benefit?</td><td class="bad">no evidence</td></tr>
+<tr><td>Does carrier status affect sport performance?</td><td class="warn">unknown; no convincing study exists</td></tr>
+<tr><td>Are the deletion breakpoints fully resolved?</td><td class="warn">no &mdash; the repetitive PAR architecture defeated complete resolution</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The breeding answer is testing before pairing at-risk animals, not indiscriminate culling:
+    a carrier bred to a clear mate cannot produce an affected foal from this disorder. Test
+    <b>both</b> deletions, because either contributes; do not read athletic ability, coat or
+    ordinary height off carrier status; and remember that a negative result for these two
+    deletions does not rule out every other cause of dwarfism, chondrodysplasia, congenital
+    angular limb deformity or orthopaedic disease.
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-sex.html">Sex (X / Y)</a>

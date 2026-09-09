@@ -87,7 +87,7 @@
 </table>
 </div>
 
-<h2>The heaviest jump penalty in the mod</h2>
+<h2 id="jump-penalty">The heaviest jump penalty in the mod</h2>
 
 <p>
     And the only disorder where that is the <em>headline</em> symptom rather than a
@@ -126,6 +126,309 @@
         a breeding programme and a lottery.
     </p>
 </div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="abiotrophy">What abiotrophy means</h2>
+
+<p>
+    <strong>Abiotrophy</strong> is the premature degeneration of cells that formed normally
+    and then fail to survive. In equine CA the cells are the <strong>Purkinje neurons</strong>
+    of the cerebellum.
+</p>
+
+<p>
+    The cerebellum does not generate strength or willingness to move. It makes movement
+    controlled and accurate: balance, posture, timing, precision, motor learning, rapid
+    adjustment of body position. So when Purkinje cells die, the horse keeps its muscle power
+    and loses the ability to <em>aim</em> it. That is the whole character of the disorder, and
+    it is why <a href="gene-toe1.html#jump-penalty">the mod&rsquo;s heaviest jump penalty</a> sits
+    on this gene rather than its heaviest health penalty.
+</p>
+
+<p>
+    CA foals can look normal at birth. Signs usually appear from about <b>6 weeks to 4
+    months</b>, with onset ranging from birth to around six months, and severity varies a great
+    deal &mdash; some foals are profoundly ataxic, others show little more than an intention
+    head tremor.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5336519/">Scott
+    <em>et&nbsp;al.</em>, PMC5336519</a>
+</p>
+
+<h2 id="variant">Gene, variant, locus</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene tested</th><td><em>TOE1</em> &mdash; target of EGR1, member 1</td></tr>
+<tr><th>Variant</th><td>rs397160943; EquCab3.0 ECA2:NC_009145.3:g.13122415C&gt;T</td></tr>
+<tr><th>Transcript</th><td><em>TOE1</em>:c.284G&gt;A</td></tr>
+<tr><th>Protein</th><td>p.Arg95His (R95H)</td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 2 (ECA2), exon&nbsp;4</td></tr>
+<tr><th>Overlapping candidate</th><td><em>MUTYH</em>, transcribed from the opposite strand</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The original mapping narrowed CA to an approximately 142&nbsp;kb region on the p arm of
+    chromosome 2. The associated SNP is in exon 4 and produces an arginine-to-histidine
+    substitution at amino acid 95, in a highly conserved region of the protein.
+    <a href="https://omia.org/OMIA000175/9796/">OMIA&nbsp;000175</a>
+</p>
+
+<p>
+    <em>TOE1</em> encodes an RNA-processing protein &mdash; a 3&prime; exonuclease/deadenylase
+    working on small nuclear RNA, in Cajal bodies and cytoplasmic P-bodies, structures that
+    matter for RNA maturation, RNA turnover and gene-expression regulation. In humans,
+    biallelic loss-of-function <em>TOE1</em> variants cause pontocerebellar hypoplasia, which
+    is what makes <em>TOE1</em> a persuasive neurological candidate in the horse.
+</p>
+
+<h2 id="nuance">Why &ldquo;the TOE1 gene&rdquo; is a slight shortcut</h2>
+
+<p>
+    The test is legitimately called TOE1 CA, and the mechanism is not fully settled. The SNP
+    sits in <strong>two genomic contexts at once</strong>: it is a coding missense change in
+    <em>TOE1</em>, and it is about 1,200 base pairs upstream of the start of <em>MUTYH</em> on
+    the opposite strand, near a predicted GATA2 transcription-factor binding site in the
+    <em>MUTYH</em> regulatory region.
+</p>
+
+<p>
+    <em>MUTYH</em> encodes a DNA glycosylase that repairs oxidative DNA damage including
+    8-oxoguanine lesions &mdash; an early and compelling candidate, since failing
+    oxidative-damage repair could plausibly endanger metabolically active developing neurons.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>question</th><th>current answer</th></tr></thead>
+<tbody>
+<tr><td>Is the ECA2 SNP an excellent disease marker?</td><td class="ok">yes &mdash; completely concordant with CA in the original Arabian work</td></tr>
+<tr><td>Does it alter the TOE1 protein sequence?</td><td class="ok">yes, p.Arg95His</td></tr>
+<tr><td>Is the disease definitely caused by altered TOE1 protein alone?</td><td class="warn">not conclusively proven in horses</td></tr>
+<tr><td>Could altered <em>MUTYH</em> regulation contribute?</td><td class="warn">plausible, initially supported by expression findings, not established</td></tr>
+<tr><td>Did later cerebellar RNA-seq find a sustained expression difference in either gene?</td><td class="bad">no &mdash; neither was significantly differentially expressed</td></tr>
+<tr><td>Does human TOE1 biology strengthen it as the leading candidate?</td><td class="ok">yes, strongly</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So the honest description is a highly concordant, likely causal or causally informative
+    variant inside a complex overlapping <em>TOE1</em>&ndash;<em>MUTYH</em> neighbourhood
+    &mdash; not a fully dissected molecular pathway. The mod names the gene
+    <code>horsegenetics.toe1</code> and inherits that shortcut; the alternative naming problem
+    is the one <a href="gene-cvm.html#no-variant">CVM</a> has, from the opposite direction.
+</p>
+
+<h2 id="pathology">The lesion</h2>
+
+<p>
+    Postnatal degeneration and apoptosis of cerebellar Purkinje neurons. Purkinje cells are the
+    <em>sole</em> output neurons of the cerebellar cortex, so losing them disrupts cerebellar
+    signalling even when the rest of the nervous system and the musculature look grossly
+    normal. Affected cerebella show depletion of Purkinje neurons, disorganisation of the
+    normal three-layer cortical architecture, secondary effects on granular neurons, increased
+    Bergmann glial changes, and activation of microglial phagocytic pathways clearing dying
+    cells.
+</p>
+
+<p>
+    RNA sequencing found reduced expression of Purkinje-neuron and calcium-homeostasis markers
+    including <em>CALB1</em> and <em>CA8</em> in affected tissue, and increased expression of
+    microglial phagocytosis genes including <em>TYROBP</em> and <em>TREM2</em>. Those are best
+    read as the molecular footprint of Purkinje-cell loss and neuroinflammatory cleanup, not as
+    the mutation&rsquo;s direct action.
+</p>
+
+<h2 id="signs">Clinical signs</h2>
+
+<p>
+    Cerebellar <strong>ataxia</strong> &mdash; uncoordinated movement from loss of central
+    motor coordination, not from weakness. What is seen:
+</p>
+
+<ul>
+    <li>Intention head tremor, most obvious during focused purposeful movement such as reaching
+        toward feed.</li>
+    <li>A wide-based stance compensating for poor equilibrium.</li>
+    <li>Exaggerated, high, paddling forelimb action.</li>
+    <li>Hypermetric steps &mdash; overreaching or poorly measured limb placement.</li>
+    <li>Swaying, stumbling, startling easily, falling.</li>
+    <li>Difficulty rising after lying down.</li>
+    <li>Poor quick balance corrections.</li>
+    <li>Reduced or absent menace response despite intact vision, in some horses.</li>
+</ul>
+
+<p>
+    A CA foal may have normal curiosity, appetite and apparent strength, and then oversteps,
+    sways, falls or struggles to rise when it turns sharply, crosses uneven ground, is
+    startled, or tries to correct its balance. That is why early CA gets mistaken for injury, a
+    previous fall, weakness, poor handling or an orthopaedic problem.
+</p>
+
+<div class="note warn">
+    <span class="label">The mod charges from birth for something that arrives at six weeks</span>
+    <p>
+        CA is progressive: a foal looks normal and worsens over months. The mod applies a flat
+        cost from birth, because expressing onset needs an age model it deliberately does not
+        have (<a href="known-gaps.html#gap-1">gap&nbsp;1</a>). What it does capture, and this is
+        the part worth keeping, is the <em>shape</em> of the cost &mdash; &minus;0.30 jump
+        against only &minus;8 health. A CA horse is not sick. It cannot judge a distance, and
+        that is a cost a player feels through the reins rather than reads in a panel.
+    </p>
+</div>
+
+<h2 id="traits">Coat, build, size</h2>
+
+<p>
+    No established effect on coat colour or pigment production, grey, white spotting, dilution
+    or appaloosa patterning, mane and tail quantity or hair texture, mature height, body mass,
+    muscling or ordinary conformation, hoof colour or quality, or reproductive phenotype in
+    clinically normal carriers. A CA foal can be any colour its parents could produce; the
+    allele is unrelated to <em>MC1R</em>, <em>ASIP</em>, <em>KIT</em>, <em>STX17</em>,
+    <em>SLC45A2</em>, <em>PMEL</em> and <em>MITF</em>.
+</p>
+
+<p>
+    CA is not a dwarfism or a conformation disease. Affected horses may pick up scrapes,
+    bruises, abnormal posture or reduced condition from falls and restricted activity &mdash;
+    consequences of the neurology, not evidence that the mutation makes a horse short or badly
+    made.
+</p>
+
+<h2 id="performance">Speed, jumping, athletic use</h2>
+
+<p>
+    <strong>Affected horses.</strong> CA is incompatible with safe athletic use. Even a mildly
+    affected horse can have unpredictable balance failure, poor limb placement, an exaggerated
+    gait and heightened injury risk. UC&nbsp;Davis notes clinically affected horses are often
+    euthanised or limited to pasture-pet status because they never become coordinated enough to
+    ride safely.
+    <a href="https://vgl.ucdavis.edu/test/ca">UC&nbsp;Davis VGL</a>
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>activity</th><th>reading</th></tr></thead>
+<tbody>
+<tr><td>racing or speed work</td><td class="bad">unsafe &mdash; coordination, straightness, recovery from imbalance and reaction to stimuli all impaired</td></tr>
+<tr><td>jumping</td><td class="bad">unsafe &mdash; take-off, aerial balance, landing precision and stumble recovery are all cerebellar</td></tr>
+<tr><td>endurance or trail</td><td class="bad">unsafe &mdash; terrain, fatigue, turns and spooking magnify fall risk</td></tr>
+<tr><td>driving</td><td class="bad">unsafe &mdash; sudden incoordination endangers horse and people</td></tr>
+<tr><td>breeding</td><td class="bad">avoid &mdash; an affected horse carries two copies and transmits one to every foal</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>Carriers.</strong> No reliable evidence of altered speed, stamina, jumping talent,
+    gait quality, trainability, muscle power, coordination, size, conformation or general
+    health. A carrier is expected to be neurologically normal, and the concern is reproductive.
+    Claims that carriers are delicate, unusually athletic, less coordinated, more reactive or
+    visibly identifiable are unsupported: a carrier cannot be picked out by look, movement,
+    colour, pedigree prestige or performance record.
+</p>
+
+<h2 id="real-inheritance">Inheritance</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>result</th><th>clinical expectation</th><th>transmission</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td class="ok">not affected by this variant</td><td>cannot pass it</td></tr>
+<tr><td><code>N/ca</code></td><td class="ok">normal carrier</td><td>~50% of foals inherit it</td></tr>
+<tr><td><code>ca/ca</code></td><td class="bad">genetically affected; signs variable</td><td>passes it to 100% of foals</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Autosomal, so mares and stallions carry equally. A carrier pairing gives 25% / 50% / 25%,
+    per foal independently, and a carrier crossed to a clear mate cannot produce an affected
+    foal though about half the foals will carry.
+</p>
+
+<div class="note">
+    <span class="label">A few <code>ca/ca</code> horses reportedly show no obvious signs</span>
+    <p>
+        That does not make the genotype low-risk or safe to breed. Onset and severity vary,
+        subtle deficits are easy to miss, and the horse transmits the allele to <em>every</em>
+        foal. It is also the one part of the real disorder the mod actively contradicts: in the
+        mod, <code>ca/ca</code> always expresses at full weight, because
+        <a href="genetics-model.html">the expression model</a> has no vocabulary for variable
+        penetrance.
+    </p>
+</div>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    CA occurs <strong>almost exclusively in Arabians</strong> and Arabian-derived populations,
+    and is one of the core diseases on Arabian health panels. The largest screening figure
+    comes from UC&nbsp;Davis testing of nearly 11,000 horses: an estimated average Arabian
+    carrier frequency of about <b>20%</b>. That is an aggregate screening estimate, not a
+    current value for every registry, country, family or programme.
+</p>
+
+<p>
+    Twenty percent carriers corresponds to roughly a 10% allele frequency under Hardy-Weinberg,
+    which would imply about 1% homozygotes under random mating with no selection. Observed CA
+    foal frequency differs, because breeders avoid carrier matings once testing exists, affected
+    foals die or are euthanised, and populations do not mate at random.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>breed</th><th>CA allele frequency</th><th>note</th></tr></thead>
+<tbody>
+<tr><td>Bashkir Curly</td><td>2.8%</td><td>pedigree and haplotype work traced entry to an Arabian stallion used in the 1960s</td></tr>
+<tr><td>Trakehner</td><td>0.68%</td><td>tested carriers had substantial Arabian ancestry</td></tr>
+<tr><td>Welsh Pony</td><td>0.33%</td><td>tested carriers had substantial Arabian ancestry</td></tr>
+<tr><td>Danish Sport Horse</td><td>low, unquantified</td><td>recognised as at-risk; no single population estimate in the cited source</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The allele largely entered non-Arabian populations through Arabian ancestry, which is why
+    the advice is to test horses with Arabian ancestors rather than horses of a particular
+    breed. CA and the tested allele have also been recorded in Arabian crosses and in curated
+    disease records for Quarter Horses and Icelandic Horses &mdash; which is not evidence that
+    CA is common in those breeds, and is exactly why ancestry and direct testing beat breed
+    labels.
+</p>
+
+<p>
+    The mod&rsquo;s <code>WILD_CARRIER_PERCENT</code> is 2.4, against ~20% in Arabians &mdash;
+    the widest gap of any gene on the health layer, and the same distance artefact as the rest:
+    a world-wide founder rate standing where a breed-specific one belongs.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<p><strong>Established.</strong> CA is an autosomal recessive neurological disorder; the
+    validated SNP is on ECA2 in exon 4 of <em>TOE1</em> and causes p.Arg95His; it was highly
+    concordant with CA in the original Arabian studies; the defining pathology is postnatal
+    Purkinje-cell degeneration; the outcome is ataxia, tremor, exaggerated gait, balance
+    deficits, falls and unsafe athletic use; and the variant is common enough in Arabians to
+    warrant routine testing.</p>
+
+<p><strong>Plausible but unresolved.</strong> Whether p.Arg95His directly impairs
+    <em>TOE1</em>&rsquo;s RNA-processing function in Purkinje-cell maturation; whether the SNP
+    also changes <em>MUTYH</em> transcription or oxidative-repair capacity at a key
+    developmental moment; why onset and severity differ between affected horses; whether granular
+    neuron changes are consistently secondary; and why a few affected horses show no easily
+    recognised signs.</p>
+
+<p><strong>Unsupported.</strong> That CA changes coat colour, sheen, height, build or
+    conformation; that carriers are visibly recognisable or poor performers; that carriers have
+    any speed, endurance, jump or gait advantage; or that a horse which looks normal, performs
+    well, or has an unaffected parent must be genetically clear.</p>
 
 </section>
 

@@ -226,6 +226,282 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="identity">Genetic identity</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Allele</th><td>Champagne, conventionally written <em>Ch</em></td></tr>
+<tr><th>Gene</th><td><em>SLC36A1</em> &mdash; solute carrier family 36 member 1</td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 14 (ECA14); EquCab3.0
+    NC_009157.3:g.26012449G&gt;C</td></tr>
+<tr><th>Coding variant</th><td><em>SLC36A1</em> c.188C&gt;G, exon&nbsp;2</td></tr>
+<tr><th>Protein</th><td>p.Thr63Arg (T63R) &mdash; missense</td></tr>
+<tr><th>Inheritance</th><td>Autosomal dominant</td></tr>
+<tr><th>Disease status</th><td><b>None.</b> Classified as a pigmentation trait, not a
+    disease-associated variant</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The substitution changes amino acid 63 from threonine to arginine in a predicted
+    transmembrane part of the protein, and that threonine is highly conserved across mammals
+    &mdash; which is the main reason to think the change is consequential. The original mapping
+    put champagne in a roughly 6-centimorgan region of ECA14 and then sequenced the candidate
+    genes inside it: <b>all 85</b> non-cream champagne horses in the phenotype-selected sample
+    carried the variant and <b>none of 97</b> non-champagne controls did.
+    <a href="https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1000195">Cook
+    <em>et&nbsp;al.</em>, PLoS Genet. 4:e1000195</a>
+</p>
+
+<h2 id="both-pigments">It dilutes both pigments, which is the unusual part</h2>
+
+<p>
+    Champagne reduces the visible intensity of <strong>both</strong> principal melanins &mdash;
+    pheomelanin (red and yellow) and eumelanin (black and brown) &mdash; from a single copy.
+    That distinguishes it from the neighbours: one copy of
+    <a href="gene-matp.html">cream</a> chiefly dilutes red, and
+    <a href="gene-silver.html">silver</a> primarily alters black.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>base colour</th><th>champagne result</th><th>appearance</th></tr></thead>
+<tbody>
+<tr><td>chestnut (<code>e/e</code>)</td><td>gold champagne</td><td>gold to yellow-gold body; mane and tail often pale or flaxen-looking</td></tr>
+<tr><td>bay (<code>E/_ A/_</code>)</td><td>amber champagne</td><td>tan-golden body with diluted brown points</td></tr>
+<tr><td>black (<code>E/_ a/a</code>)</td><td>classic champagne</td><td>taupe, olive-tan, chocolate or mousy body with brownish points</td></tr>
+<tr><td>seal-brown-type</td><td>often called sable champagne</td><td>darker brown or taupe; terminology varies</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Champagne segregates independently of cream, dun, silver, grey, leopard complex, tobiano and
+    the other white-patterning loci, so combinations make visual identification unreliable and
+    the DNA test is what a breeding decision should rest on.
+</p>
+
+<div class="note">
+    <span class="label">The mod&rsquo;s three outcomes are these four, minus one</span>
+    <p>
+        <a href="gene-champagne.html#tint">The tint mechanism</a> reproduces the table above
+        directly: a chestnut stays gold, a black lands taupe, and the bay&rsquo;s black points
+        are lifted to chocolate rather than being pulled out to the body colour. Sable is not
+        separately modelled, which is consistent with the way
+        <a href="gene-shade.html">shade</a> handles seal brown &mdash; it is a shade of bay here,
+        not a locus, and the same reasoning applies one dilution downstream. Champagne on a white
+        horse is invisible in the mod and in reality alike.
+    </p>
+</div>
+
+<h2 id="skin-eyes">Skin and eyes &mdash; often more diagnostic than the hair</h2>
+
+<ul>
+    <li>Foals commonly have <strong>blue eyes at birth</strong>.</li>
+    <li>Those usually mature to <strong>amber, green, hazel or light brown</strong> rather than
+        staying blue.</li>
+    <li>Foals tend to have pink skin.</li>
+    <li>Adult skin develops the characteristic pinkish-tan to lavender-toned, mottled
+        <strong>&ldquo;pumpkin skin&rdquo;</strong>, especially around the eyes, muzzle and
+        genital region.</li>
+</ul>
+
+<p>
+    Champagne therefore becomes <em>more</em> recognisable with age, as the mottling and the eye
+    colour develop. Going the other way, cream dilution, grey, extensive white markings, sun
+    fading and certain base-colour variants can obscure or imitate parts of it.
+</p>
+
+<div class="note warn">
+    <span class="label">Two things the mod does not draw</span>
+    <p>
+        The mod gives an adult champagne eye straight away, picked from the amber&ndash;hazel&ndash;olive
+        range off the expressing copy&rsquo;s epigenetic seed, so it is fixed for life and
+        inherited with the allele. The real <b>blue-eyed foal</b> that turns amber needs an age
+        model the mod does not have (<a href="known-gaps.html#gap-1">gap&nbsp;1</a>) &mdash; the
+        same limit that flattens <a href="gene-toe1.html">TOE1</a> and
+        <a href="gene-prkdc.html">PRKDC</a>, showing up here as a cosmetic loss rather than a
+        clinical one. The <b>pumpkin skin</b> is not drawn either: the mod paints a coat, not a
+        muzzle or a sheath, and mottled skin has nowhere to go in
+        <a href="pipeline.html">the pipeline</a> as it stands. Of the two, the skin is the one a
+        real identifier would miss most, because in a horse whose coat colour is ambiguous it is
+        the mottling that settles it.
+    </p>
+</div>
+
+<h2 id="real-inheritance">Inheritance and dosage</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>cross</th><th>expected genotypes</th><th>champagne foals</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code> &times; <code>N/N</code></td><td>100% <code>N/N</code></td><td>0%</td></tr>
+<tr><td><code>Ch/N</code> &times; <code>N/N</code></td><td>50% <code>Ch/N</code></td><td>50%</td></tr>
+<tr><td><code>Ch/Ch</code> &times; <code>N/N</code></td><td>100% <code>Ch/N</code></td><td>100%</td></tr>
+<tr><td><code>Ch/N</code> &times; <code>Ch/N</code></td><td>25 / 50 / 25</td><td>75%</td></tr>
+<tr><td><code>Ch/Ch</code> &times; anything</td><td>every foal inherits <code>Ch</code></td><td>100%</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Treated as <strong>fully dominant</strong>. There is no reliable dramatic double-dilute
+    phenotype comparable to cream&rsquo;s palomino-versus-cremello dosage effect: both
+    <code>Ch/N</code> and <code>Ch/Ch</code> are champagne. The original study suggested
+    homozygotes may sometimes be slightly lighter or show less skin mottling, and the phenotypes
+    overlap enough that <b>zygosity cannot be read off appearance</b> &mdash; test rather than
+    infer. <code>Ch/Ch</code> is viable, with no evidence of embryonic lethality or any
+    syndrome.
+</p>
+
+<p>
+    The mod matches exactly: <code>expressionOf</code> is <code>pair.has(Ch)</code>, one copy and
+    two produce the same outcome, and the locus contributes one entry to the catalogue rather
+    than two.
+</p>
+
+<h2 id="health">Health, build, performance</h2>
+
+<p>
+    No adverse health condition has been established for champagne. A large 2022
+    breed-distribution study explicitly reported <b>no known adverse health effects</b>, and OMIA
+    lists it as a pigmentation trait rather than a disease variant.
+    <a href="https://omia.org/OMIA001263/9796/">OMIA&nbsp;001263</a>
+    That means no champagne-linked congenital eye disease, no established hearing disorder, no
+    demonstrated skin disorder, no metabolic, neurologic, reproductive or musculoskeletal
+    syndrome, and no evidence that the homozygote is riskier than the heterozygote.
+</p>
+
+<div class="note">
+    <span class="label">Do not borrow silver&rsquo;s eye problem</span>
+    <p>
+        <a href="gene-silver.html">Silver (<em>PMEL</em>)</a> is a dilution that <em>can</em> be
+        associated with multiple congenital ocular anomalies, especially in homozygotes. A horse
+        can carry champagne and silver together, and any MCOA concern belongs to the silver
+        genotype. This is the same trap
+        <a href="gene-tobiano.html">tobiano</a> sits next to with EDNRB lethal white: two
+        pigment genes in one animal, one of which has a health story, and the risk gets attached
+        to whichever is more visible.
+    </p>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>trait</th><th>evidence for a direct champagne effect</th></tr></thead>
+<tbody>
+<tr><td>height or mature size</td><td class="ok">none</td></tr>
+<tr><td>bone, muscle, body build</td><td class="ok">none</td></tr>
+<tr><td>limb conformation</td><td class="ok">none</td></tr>
+<tr><td>hoof quality</td><td class="ok">none</td></tr>
+<tr><td>jumping scope, technique, soundness</td><td class="ok">none</td></tr>
+<tr><td>sprint speed, racing performance</td><td class="ok">none</td></tr>
+<tr><td>gait quality, endurance</td><td class="ok">none</td></tr>
+<tr><td>temperament, trainability, metabolism</td><td class="ok">none</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Which does not mean champagne horses cannot be exceptional athletes &mdash; it means their
+    ability is explained by conformation, training, management, soundness and the many
+    performance-relevant genes, not by the <em>SLC36A1</em> result. The likely source of
+    confusion is population structure: champagne turns up in several gaited and stock-type
+    American breeds, so champagne individuals get noticed in a particular kind of horse. Breed
+    association, not causation. The mod agrees by construction &mdash; champagne contributes to
+    <a href="eye-colour.html">the eye</a> and to the coat and to nothing on
+    <a href="horse-body.html">the trait layer</a> at all.
+</p>
+
+<h2 id="mechanism">What the protein does, and where the proof runs out</h2>
+
+<p>
+    <strong>Established.</strong> <em>SLC36A1</em> encodes a proton-coupled small-amino-acid
+    transporter, known in other species as PAT1. The gene is expressed in equine skin, the T63R
+    variant is tightly associated with champagne, and the phenotype reaches hair, skin and eyes
+    &mdash; so the locus influences pigment biology in horses. In other species the protein is
+    known to participate in amino-acid and proton transport, described in intestinal
+    brush-border membranes and in lysosome-associated contexts.
+</p>
+
+<p>
+    <strong>Plausible, unproven.</strong> The leading hypothesis is that T63R changes ion or
+    amino-acid transport, or pH handling, in pigment-cell organelles &mdash; especially early
+    melanosomes, which are lysosome-related. Melanin production needs correctly regulated
+    melanosome maturation, protein trafficking and pH, and altered organelle pH could affect
+    tyrosinase activation or pigment processing, reducing pigment in coat, skin and eyes at
+    once. That would explain the unusual both-pigments behaviour neatly, and it remains
+    inference. The original investigators noted they could not entirely rule out another causal
+    non-coding variant in linkage with c.188C&gt;G, and the field still lacks a functional
+    experiment in an equine melanocyte system showing how T63R changes transport, melanosome pH
+    or melanin quantity.
+</p>
+
+<p>
+    So: <b>well supported</b> that c.188C&gt;G / T63R is the test marker and very likely causal;
+    <b>supported</b> that the phenotype is dilution of red and black plus the characteristic eye
+    and skin pigmentation; <b>not established</b>, the cell-biological mechanism; <b>not
+    supported</b>, anything about conformation, health, jumping, speed or athleticism.
+</p>
+
+<h2 id="breeds">Breeds and frequency</h2>
+
+<p>
+    Uncommon overall, and concentrated in North American and American-derived populations. It is
+    documented in the American Cream Draft, Miniature Horse, American Paint Horse, American
+    Saddlebred, American Quarter Horse, Appaloosa, Missouri Fox Trotter, Tennessee Walking Horse,
+    Kentucky Mountain Saddle Horse, Spanish Mustang, Rocky Mountain Horse, Shetland Pony, Gypsy
+    Cob, and related crosses and American stock or gaited populations.
+</p>
+
+<p>
+    The <b>American Cream Draft</b> is a special case: gold champagne is integral to the
+    breed&rsquo;s historical identity, so it is far more conspicuous there than in horses
+    generally &mdash; and the large frequency study below did not include the breed, so there is
+    no modern population estimate for it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>breed</th><th>estimated <em>Ch</em> allele frequency</th></tr></thead>
+<tbody>
+<tr><td>Missouri Fox Trotter</td><td><b>5.4%</b> &mdash; highest in the dataset, still uncommon</td></tr>
+<tr><td>Rocky Mountain Horse</td><td>2.6%</td></tr>
+<tr><td>Miniature Horse</td><td>1.7%</td></tr>
+<tr><td>Gypsy Cob</td><td>0.8%</td></tr>
+<tr><td>Quarter Horse</td><td>0.8%</td></tr>
+<tr><td>Tennessee Walking Horse</td><td>0.8%</td></tr>
+<tr><td>Paint Horse</td><td>0.7%</td></tr>
+<tr><td>Shetland Pony</td><td>0.2%</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Those come from a UC&nbsp;Davis study of <b>11,281</b> samples across 28 breeds, filtered for
+    first-degree relatives &mdash; and champagne was detected in only <b>8 of the 28</b>.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498372/">PMC9498372</a>
+    They are <em>allele</em> frequencies, not the share of visibly champagne horses: since
+    champagne is dominant and rare, visible prevalence is roughly twice the allele frequency
+    under random mating, and real studbooks, popular sires, colour-focused breeding, registration
+    rules, relatedness and testing bias all move that. The samples were laboratory testing
+    records, not a census. Notably, Tennessee Walking Horses &mdash; the breed the allele was
+    first identified in &mdash; came out at a low estimated frequency.
+</p>
+
+<p>
+    The mod uses one champagne allele in <b>40</b>, or 2.5% &mdash; which lands inside the real
+    range and near its middle, between the Missouri Fox Trotter at 5.4% and the several breeds
+    under 1%. It is one of the better-calibrated frequencies in the mod, and for the same reason
+    as <a href="gene-ppib.html#breeds">PPIB</a>: the real allele is spread thinly across many
+    breeds rather than concentrated in one, so a single world-wide number is not far wrong.
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-matp.html">MATP (cream / pearl)</a>
