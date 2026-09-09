@@ -29,6 +29,78 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="creating-a-gene-2026-09-08">Built 2026-09-08: a &ldquo;Creating a gene&rdquo; page, written twice - once for a person and once for a model.</h3>
+
+<p>Owner-driven. <a href="creating-a-gene.html">The page</a> carries two tab panels rather than two pages, so the sidebar has one entry and a reader picks the register they want.</p>
+
+<ul>
+
+<li><strong>The Gameplay tab is about the part that is hard, which is not the format.</strong> <a href="gene-format.html">The gene file format</a> already documents every field; what it does not say is that you are not drawing, you are writing a rule that is true at every point on a horse and then finding out what it looks like. So the human tab is a decision table (what KIND of thing is this marking - region, countable marks, wandering lines, something periodic?), the argument for composing before inventing, and the traps in the order they actually catch people.</li>
+
+<li><strong>The Coding tab ends in a paste-able prompt.</strong> Ten numbered rules that are not optional, the body-space extents, the part names, a full template, and the instruction to output JSON only - so an owner with a reference image and two sentences can hand the whole job to a model. Every rule in it is one this session learned the hard way: region-first-shape-last, width-under-spacing, PALETTE has walls, RAMP varies colour and not coverage, reversed smoothstep edges are a hard step, which PIGMENT channel actually discriminates, and the neck&rsquo;s two tilts with their calibrated constants.</li>
+
+<li><strong>The vocabulary tables were transcribed, not remembered.</strong> They come from <code>expected.json</code>&rsquo;s <code>schema</code> block, which <code>:common:bakeSpecFixtures</code> writes out of <code>SpecSchema</code> - so every parameter name and every fallback on the page was correct when written. They are still a <em>copy</em>, which is exactly the failure mode <a href="known-gaps.html#gap-13">gap 13</a> is about, so the page says so in a box at the top and names both the maintained prose table and the machine-readable one as the things to believe instead.</li>
+
+<li><strong>The icon baker found a gene that sometimes paints nothing.</strong> Sharing the visibility measurement with the preview picker meant re-baking every icon, and auroraband&rsquo;s came out empty. It is not the tooling: its band is one stroke at a spacing wider than the barrel, so on about one epigenome in six the stroke lands off the mesh entirely and the horse wears nothing. <a href="known-gaps.html#gap-108">Gap 108</a>; the icon is deleted rather than kept stale, which is the baker working as intended.</li>
+
+</ul>
+
+<h3 id="gene-review-3-2026-09-08">Built 2026-09-08: a third pass over the registry, and two more masks caught painting the wrong thing.</h3>
+
+<p>Owner-driven, another twenty-odd notes off the gene pages. Most of it is placement and colour and is written up on each gene's page; what is worth keeping is below.</p>
+
+<ul>
+
+<li><strong>A <code>PALETTE</code> has walls, and Gamma's were cutting across its own fields.</strong> Its blooms had softnesses of two and three body units - several texels of fade - and still read as hard-edged shapes, because the edge was not in the mask at all. <code>PALETTE</code> gives each cell of <em>its own</em> lattice one whole colour and neighbouring cells meet at a wall; that is the documented point of the op and the difference between an opal and a gradient. But its lattice has nothing to do with the spot field's, so the walls ran straight through the blooms. A <code>RAMP</code> has no cells, so the hue sweeps along the body instead and the gene still carries several colours without any of them ending on a line. <strong>The same trap is live wherever a soft mask is painted with a hard op</strong> - the mask's softness is not the whole story about whether a marking has an edge.</li>
+
+<li><strong>The neck's pitch bites in both directions.</strong> <a href="gene-hood.html">Hood</a> is meant to fade back along the neck and was fading from the crest down instead - the colour left the top of the neck before it left the throat. A band on plain <code>X</code> is a plane of constant X, and against a long axis sixty degrees off horizontal that plane cuts the neck <em>diagonally</em>. The fix is the same trick as goth's with the sign flipped: goth wants a plane lying <em>along</em> the neck (slope tan 60), hood wants one square <em>across</em> it (slope -tan 30). Two genes, two opposite tilts, one calibration - and <a href="known-gaps.html#gap-103">gap 103</a> now covers six genes rather than two.</li>
+
+<li><strong>A <code>RAMP</code> varies the colour, not the coverage.</strong> <a href="gene-fade.html">Fade</a> is an ombre that should leave the roots alone, and it was painting the whole mane and tail: its only mask was <code>PARTS: HAIR</code>, so coverage was 1 everywhere and the roots got the ramp's <em>first stop</em> rather than the horse's own hair. A ramp positions colour along an axis and has no opinion about where the layer applies; if a gradient is supposed to fade <em>out</em>, the coverage has to fade with it.</li>
+
+<li><strong>Two more genes were flooding a part because the region was folded in after the shape.</strong> <a href="gene-filigree.html">Filigree</a>'s new head tracery and <a href="gene-lasertae.html">Lasertae</a>'s shoulder both did it: a <code>PARTS</code> or <code>AXIS</code> mask <code>MAX</code>ed on after the shape mask evaluates to <code>max(shape, 1)</code> on the named part and the shape is simply gone. That is three instances in two days of the same mistake, and it reads perfectly naturally the wrong way round, which is why it keeps happening. <strong>Region first, shape last.</strong></li>
+
+<li><strong>Voided stopped being random, and the format did the rest.</strong> It was painting a warm grey - hue 25, saturation 0.25 - through a lightness knob, so "black" was whatever the knob rolled. The gene's whole promise is that it changes no pattern and no boundary, only the pigment, so there was nothing about it that should vary. Deleting the knob makes it deterministic <em>by the format's own rule</em> (a gene with no knobs is), which lets the coat cache share one texture across every voided horse with the same markings. A knob removed is sometimes a cache win.</li>
+
+<li><strong>Circuit's colour was a thirty-degree slice of the wheel.</strong> Its <code>coreHue</code> ran 195 to 225, so every circuit horse ever bred was the same cyan give or take a shade. The value was already stored per allele copy - every knob is - so nothing was missing but the range. Opened to the full wheel and renamed <code>hue</code> to match the other forty-odd colour genes.</li>
+
+<li><strong>Gudial is a gradient between two hues</strong> rather than two flat ones. It already carried two hue knobs; a <code>RAMP</code> is written as a start plus a <em>span</em>, and the format has no arithmetic, so the second hue could not stay a hue and be subtracted from the first. It became the span, which is the better knob anyway - it cannot roll the two colours on top of each other the way two independent hues can.</li>
+
+<li><strong>Two genes got a fade onto the tops of the legs and nothing more.</strong> <a href="gene-nebula-light.html">Nebula Light</a> and <a href="gene-spectrum-light.html">Spectrum Light</a> both ended at the elbow on a line. Each gained a <em>separate layer</em> for the legs rather than an extra mask on the body one - different parts cannot double-paint, and it avoids the fold problem above entirely. Nebula also took a curated pink-violet-blue palette off the owner's own list, with the teal-green entries left out: those were the ones that made a palette wall jump.</li>
+
+<li><strong>Not fixed: Invert's preview.</strong> The owner reports the window does not load on that page. Everything it consumes checks out from here - <code>genePreviewJson</code> and <code>previewGenotypeCode</code> both return well-formed output, the icon is baked, the founder table is sane, the page is registered and carries a family - so it is a browser-side failure and needs a console. <a href="known-gaps.html#gap-107">Gap 107</a>.</li>
+
+</ul>
+
+<h3 id="pavonem-2026-09-08">Built 2026-09-08: Pavonem is an actual ocellus, because the owner drew one.</h3>
+
+<p>Owner-driven, and the one item on the review that was <em>flagged rather than guessed</em> - the note said &ldquo;flag that one if you need me to walk you through it&rdquo; and it was taken up. What came back was an SVG with the proportions in it, which settled in one message what several passes of guessing would not have.</p>
+
+<ul>
+
+<li><strong>The middle ring is not painted, and that is the whole thing.</strong> The gene had been a pale oval with a bright spot low in it - a spot with a highlight, not an eye. A peacock ocellus is <b>three</b> zones: a dark pupil, a ring around it that is the horse&rsquo;s own coat left completely alone, and a broad outer leaf around that. Paint the middle and it stops being an eye. Off the reference drawing the radii are 0.20, 0.55 and 1.00 of the leaf, and all three are about 1.2 times taller than wide.</li>
+
+<li><strong>Two saturations of one hue, not two colours.</strong> The reference is navy and green; the instruction was that the centre is the most saturated, the middle is the coat, and the outer is a washed-out version of the centre. So the coloured form runs the pupil at 0.98 saturation and the leaf at 0.42, and the white form - which has no saturation to vary - runs the pupil to white at 96 and the leaf at 52, which is the same relationship expressed in the only axis it has.</li>
+
+<li><strong>Concentric by construction.</strong> All three zones are <code>SPOTS</code> masks sharing one seed, spacing, stretch and <code>vary</code>, so they land on the same lattice cell <em>and draw the same per-element size roll</em> - <code>vary</code> multiplies every radius by the same per-cell factor, so an eye that rolls large rolls large in all three zones and the ratios hold. That is why the radii are literals rather than knobs: three independently drawn knobs would break the proportions the reference is made of. The drawing sets the eye slightly low in the leaf rather than dead centre; at the size these render that offset is under one texel, so it was dropped and said so.</li>
+
+</ul>
+
+<h3 id="preview-base-2026-09-08">Built 2026-09-08: a gene page's preview opens on a coat the gene can actually be seen on.</h3>
+
+<p>Owner-driven, one request - &ldquo;set the default preview model for fielded to tobiano bay&rdquo;. Written up in <code>CoatVisibility</code> and in <code>gene-preview.js</code>'s header.</p>
+
+<ul>
+
+<li><strong>It could not be done by editing the page, because the page is generated.</strong> A hand-written <code>data-base</code> on <code>gene-fielded.html</code> would survive exactly until the next <code>bakeGeneWikiPages</code>. So the choice had to be made by the tool - and once the tool is making it, making it <em>per gene by name</em> would be a list to keep, which is the thing this repo keeps learning not to build.</li>
+
+<li><strong>So it is measured.</strong> <code>GeneWikiTool</code> now bakes every gene against every base coat and writes <code>data-base</code> when the first coat the gene can be <i>seen</i> on is not the bay. <a href="gene-fielded.html">Fielded</a> was the request; <a href="gene-voided.html">Voided</a> and <a href="gene-opalized.html">Opalized</a> came out of it for free, because all three modify white somebody else put there and none of them paints a thing on a solid horse. No list anywhere says so, and a gene that starts or stops painting changes its own answer at the next bake.</li>
+
+<li><strong>The measurement was already written, twice over nearly.</strong> <code>GeneIconTool</code> has chosen an icon's backdrop this way since the bulk import - bake the plain coat, bake the gene over it, count the texels that moved by more than jitter. Rather than write that a second time it moved to <code>CoatVisibility</code>, which both bakers now call. Two tools answering &ldquo;can this gene be seen here?&rdquo; differently is a small bug that would have been very hard to notice.</li>
+
+<li><strong>The window ignores an attribute it does not recognise.</strong> <code>data-base</code> is generated, but the page carrying it can be older than <code>BaseCoats.all()</code>; an unknown key falls back to bay rather than being trusted into a blank selector.</li>
+
+</ul>
+
 <h3 id="gene-review-2026-09-08">Built 2026-09-08: the owner reviewed the whole registry gene by gene, and the review found more than the fixes did.</h3>
 
 <p>Owner-driven, roughly thirty notes taken while reading the gene pages, arriving as a running commentary rather than a list. Written up on each gene's page; the two engine changes are on <a href="gene-format.html#masks">the gene format</a>.</p>
@@ -45,6 +117,7 @@
 
 <li><strong>A mask list is a fold, and putting the shape first throws it away.</strong> Lasertae's eclipses were meant to be confined to the shoulder, and the region terms were <code>MAX</code>ed on after the <code>RINGS</code> mask - so a neck texel evaluated <code>max(0, neckBand)</code>, the band on its own with no ring in it, and the shoulder came out as a wash. The rule is: fold the <em>region</em> into one number first, then multiply the <em>shape</em> in. Worth remembering because it reads perfectly naturally the wrong way round.</li>
 
+<li><strong>An eclipse is not an annulus, and <code>RINGS</code> could never draw one.</strong> Lasertae took three passes. A ring has two edges by construction, and the whole point of an eclipse is that its outer one is not there - the corona has to run out into the coat over two or three texels rather than stop. What draws it is <b>two concentric <code>SPOTS</code></b> on the same seed and spacing: a big disc with a softness of more than a body unit, times a small one <em>inverted</em> and sharp. The big disc's soft edge is the corona fading to alpha zero; the small one's hard edge is the circle of bare coat it closes around. Neither is a shape the mask vocabulary has a name for, and both fall out of composing two it does.</li>
 <li><strong><code>width</code> has to stay under <code>spacing</code>.</strong> Zebra's Coat had stripes up to 10 body units wide at a 3-unit pitch - they overlapped four deep, and the &ldquo;narrow transverse striping&rdquo; its own description promised rendered as a solid white neck. Six genes were within a whisker of the same thing; the others are broad by design, and only this one was reported.</li>
 
 <li><strong>Two markings lost a stamped-on spiral.</strong> The <code>SPIRAL</code> mask draws one figure per part, centred on the part's bounding box, and it reads as a decal applied to the horse rather than as something grown on it. Circuit and Filigree both dropped theirs at the owner's request; nothing else uses it, and the mask is now unexercised outside the parity gene.</li>
