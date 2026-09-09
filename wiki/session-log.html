@@ -29,6 +29,114 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="science-tabs-2026-09-09">Twenty-three loci get the science they were built from &mdash; and three of them argue back.</h3>
+
+<p>The health layer and most of the natural colour genes have been carrying their
+real-world basis in a Java doc comment and nowhere a reader could reach it.
+<a href="known-gaps.html#gap-89">Gap 89</a> had that written down as 25 pages missing from
+the science view, with a check
+(<code>wiki/tools/check-gene-tabs.mjs</code>) holding the list so it could not grow. The
+owner supplied source material for all 25. <strong>Twenty-three are now written; the
+backlog is 2.</strong></p>
+
+<p>Each tab is the same shape, because the source files were: the locus and the variant
+with its coordinates, the mechanism, the real inheritance table, breed-by-breed frequency
+where anyone has measured it, and an explicit three-way split between what is established,
+what is strong inference, and what is not supported. That last section is the one worth
+having &mdash; a page that only says what is known reads as more certain than the field is,
+and several of these loci have a <em>famous</em> unsupported claim attached that a player is
+more likely to arrive holding than the real one.</p>
+
+<h4>The point was never the citations</h4>
+
+<p>It was the fourth thing each page now does: <strong>state where the mod and the
+literature disagree, and which way.</strong> Until both halves were on one page there was
+nowhere that comparison could happen, and the risk was never that a divergence was wrong
+&mdash; it was that it was undocumented and would be &ldquo;corrected&rdquo; one day by
+somebody who had read only one side. Three turned out to be substantive enough to earn
+<a href="known-gaps.html#gap-134">a gap of their own</a>.</p>
+
+<p><strong><a href="gene-scn4a.html#hh">SCN4A</a> kills a horse that lives.</strong> The mod
+makes the HYPP homozygote lethal at birth. A real <code>H/H</code> horse survives, is more
+severely affected than a heterozygote, and is <em>ineligible for AQHA registration</em>
+&mdash; a studbook rule, which has no analogue in a game. This is the mod&rsquo;s largest
+flat contradiction of fact on the health layer, and it is a design call rather than a
+misreading: HYPP is the one locus where the player makes the mistake with their eyes open,
+because an <code>H/N</code> horse is visibly unwell and can still be excellent on every
+other axis. Making the homozygote a cliff is what turns that temptation into a decision. If
+a severity axis ever lands, <code>H/H</code> becoming <em>much worse but survivable</em> is
+the fix &mdash; and it would cost the gene its cliff.</p>
+
+<p><strong><a href="gene-hmga2.html#health">HMGA2</a> pays the pony allele in the wrong
+direction.</strong> <code>HEALTH_PER_P</code> is <code>+2.0</code>, on the reasoning that a
+pony is a hardy horse rather than a broken one and that a locus whose only effect is
+&ldquo;worse&rdquo; is one a player fixes once and never thinks about again. Sound design.
+The only validated health association at that locus is <em>higher</em> basal insulin and,
+through it, laminitis risk &mdash; so the sign is inverted against the evidence. A metabolic
+or laminitis system would give the real effect somewhere honest to live;
+<a href="gene-diet.html">the diet gene</a> is the nearest existing hook.</p>
+
+<p><strong><a href="gene-ckm.html#verdict">CKM</a> is a speed locus the literature does not
+support.</strong> Its only equine performance claim came from a 2010 Thoroughbred
+candidate-gene study, <em>failed that same paper&rsquo;s own independent replication
+sample</em> &mdash; the combined analysis retained <em>COX4I2</em>, not CKM &mdash; and was
+explicitly non-significant in a later Quarter Horse study. The biochemistry is real and the
+genotype-to-phenotype link is not. The trade is deliberate: the mod wants three legible
+speed genes of different sizes so a breeding programme has a gradient with a long tail, and
+CKM is the smallest of the three precisely because it is the least defensible. It also
+names its alleles <code>T</code>/<code>C</code> where the marker in the paper is G&gt;A.</p>
+
+<p>A fourth is drift rather than a decision. <strong><a href="gene-matp.html#breeds">MATP</a>
+makes pearl commoner than cream</strong> &mdash; <code>1/22</code> against
+<code>1/30</code> &mdash; where the real ordering is emphatic in the other direction: cream
+is in 25 of 28 surveyed breeds and reaches 0.42 in Lusitanos, pearl is in 7 and tops out
+near 0.12 in Iberians. The cause is visible in the source comment: those are &ldquo;the same
+numbers the two old genes carried&rdquo;, from when cream and pearl were separate loci tuned
+independently. Merging them made the two figures directly comparable for the first time, and
+nobody had looked.</p>
+
+<h4>Everything else that diverges, diverges for one reason</h4>
+
+<p>The <a href="known-gaps.html#gap-1">missing age model</a>, showing through on gene after
+gene. <a href="gene-toe1.html">Cerebellar abiotrophy</a> arrives at six weeks and worsens
+for months; <a href="gene-prkdc.html">SCID</a> gives a foal a fortnight of perfect health on
+its dam&rsquo;s borrowed antibodies; <a href="gene-ppib.html">HERDA</a> is a horse that is
+fine until you put a saddle on it at two; <a href="gene-st14.html">naked foal syndrome</a>
+runs from weeks to three years; <a href="gene-champagne.html#skin-eyes">champagne</a> foals
+are born blue-eyed and turn amber. All of them are charged flat, from birth. Written out
+across five pages it reads less like five separate approximations and more like one missing
+system, which is what it is.</p>
+
+<p>Two pages needed a different kind of honesty. <a href="gene-diet.html">Diet</a> has no
+real locus behind it at all, so its tab is a real-horse feeding guide judged against the
+mod&rsquo;s own item list &mdash; and the finding worth having is that <code>Dveg</code> and
+<code>Dwht</code> are the only narrow diets a real horse could survive on, while hay, the
+one thing the mod treats as ordinary, is the only item on the whole list a horse actually
+lives on. <a href="gene-shox.html">SHOX</a> models one allele where the real locus has two
+overlapping deletions whose <em>compound heterozygote</em> is also affected, which the
+mod cannot currently represent.</p>
+
+<h4>What is left, and why</h4>
+
+<p><a href="gene-rabicano.html">Rabicano</a> and <a href="gene-tiger-eye.html">tiger eye</a>
+have no tabs. Their source files both arrived holding a byte-identical copy of the
+<a href="gene-mushroom.html">mushroom</a> write-up &mdash; all three hash to the same MD5.
+That is a re-supply rather than a writing job, and they are the entire remaining allowlist
+in <code>check-gene-tabs.mjs</code>.</p>
+
+<p>The other half of the audit was the tabs that already existed. Measured against the new
+ones, which run 1,200&ndash;2,300 words, <strong>the older science tabs are thin</strong>:
+<a href="gene-extension.html">MC1R</a> is 41 words for the foundational red/black locus,
+<a href="gene-ednrb.html">EDNRB</a> is 62 for the frame-overo lethal that four new pages cite
+as the cautionary example, and <a href="gene-mitf.html">MITF</a> is 90 for SW1 &mdash; the
+<em>common</em> splash allele, whose PAX3 twin now has 2,024. And 20 of the 46 natural
+science tabs name no breed at all. Some of those are universal loci where that is correct
+(<a href="gene-shade.html">shade</a>, <a href="gene-sex.html">sex</a>), but
+<a href="gene-leopard.html">leopard complex</a> without Appaloosa,
+<a href="gene-acan.html">ACAN</a> without the Miniature Horse and
+<a href="gene-megaesophagus.html">megaesophagus</a> without the Friesian are gaps of the
+same kind gap 89 described, one level down.</p>
+
 <h3 id="body-size-toggle-2026-09-09">Some players would rather their saddles fit.</h3>
 
 <p>An owner's call, and a small one to build: <strong>the size loci now answer to a server
