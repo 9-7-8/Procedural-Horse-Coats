@@ -141,10 +141,11 @@
 <ul>
     <li><strong>Horse texture packs implemented as mods</strong> that swap the horse
         renderer or model rather than shipping resources.</li>
-    <li><strong>Other horse-genetics mods</strong> (Realistic Horse Genetics, Swem's
-        coat system, and their kin). Two mods both generating a coat from their own
-        genome is not a conflict that can be reconciled &mdash; they are two answers to
-        the same question.</li>
+    <li><strong>Other horse-genetics mods</strong> (Realistic Horse Genetics,
+        <a href="#swem">SWEM</a>'s coat system, and their kin). Two mods both generating a
+        coat from their own genome is not a conflict that can be reconciled &mdash; they
+        are two answers to the same question. A <em>deliberate</em> patch is a different
+        matter and can be very clean: see <a href="#patches">supporting another mod</a>.</li>
     <li><strong>Model-replacement mods</strong> that give the horse a new mesh. Our coat
         generator projects into <em>our</em> UV layout
         (<code>HorseSkinGeometry</code>); a different mesh means every pattern lands in
@@ -153,7 +154,11 @@
 <p>
     A <em>resource pack</em> that retextures horses is a different matter and is simply
     ignored: we never sample the vanilla horse textures. Our template is
-    <code>horse_white.png</code> in this mod's own namespace.
+    <code>horse_white.png</code> in this mod's own namespace. <strong>That is the intended
+    behaviour today and the intended behaviour is meant to change</strong> &mdash; the plan
+    is to read the pack's own white horse and paint on it, at the pack's own resolution
+    (<a href="texture-resolution.html#pack-template">texture resolution</a>, and
+    <a href="#resource-packs">below</a>).
 </p>
 
 <h2 id="attributes">Attributes: we overwrite, and that is deliberate</h2>
@@ -224,6 +229,432 @@
     not parse. Adding a gene mod mid-world is therefore a fresh-world operation for now.
 </p>
 
+<h2 id="patches">Supporting another mod deliberately</h2>
+
+<p>
+    Everything above is about accidents &mdash; what happens when this mod and another are
+    installed together and neither knows about the other. This section is the other
+    question: <strong>what would it take to make a specific mod work with this one on
+    purpose?</strong> The answer is different for each, but it decomposes the same way
+    every time, into four seams.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Seam</th><th>What we own</th><th>What a patch would have to supply</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>1. Entity identity</strong></td>
+    <td>Attachments on <code>minecraft:horse</code>, applied on first tick.</td>
+    <td>If the other mod uses its own entity class, the attachment hooks, the sync
+        payloads and the spawn-time genome roll all have to be re-pointed at
+        <em>its</em> type. Mechanical but pervasive &mdash; and impossible if that type
+        does not extend <code>AbstractHorse</code>.</td>
+</tr>
+<tr>
+    <td><strong>2. The mesh, and its UVs</strong></td>
+    <td><code>HorseSkinGeometry</code>: a table of axis-aligned boxes and their UV
+        rectangles, from which every texel&rsquo;s body-space point is derived.</td>
+    <td>The same table for the other mod&rsquo;s mesh. This is the seam that matters most
+        and the one that is closest to already being data &mdash;
+        <a href="#remaps">see below</a>.</td>
+</tr>
+<tr>
+    <td><strong>3. The renderer</strong></td>
+    <td>One renderer for <code>EntityType.HORSE</code>, drawing a generated texture.</td>
+    <td>Whoever loses this loses everything. A real patch does not fight for it &mdash; it
+        either hands our texture to their renderer, or hands their model to ours.</td>
+</tr>
+<tr>
+    <td><strong>4. Gameplay overlap</strong></td>
+    <td>Stats from the genotype, bond, herds, breeding, recall.</td>
+    <td>A decision per system about which mod is authoritative, and the code to make the
+        loser defer. Usually easier than it sounds, because the two mods rarely both care
+        about the same number.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Seam 2 is the interesting one, because <strong>we already cover more than a patch
+    author would expect</strong>. What this mod brings that almost no horse mod has is the
+    part between a genome and a pixel: a Mendelian model over
+    <code>Genes.codeOrder()</code> loci with inherited per-allele epigenetics, a
+    <a href="pipeline.html">three-phase paint pipeline</a>, a body-space projection so
+    every pattern is a function of anatomy rather than of texture coordinates, and a
+    <a href="gene-format.html">data-driven gene format</a> that lets a pattern be written
+    without Java. What it does <em>not</em> bring, and what most of the mods below have,
+    is tack, carts, animation, riding feel, storage, and detailed models. Those are almost
+    perfectly complementary. The conflicts are nearly all seam 3, and seam 3 is
+    negotiable.
+</p>
+
+<h2 id="remaps">User-written model remaps</h2>
+
+<p>
+    <code>HorseSkinGeometry</code> is a table: for each part, a pivot, a box, a rest-pose
+    pitch, and a 64-space <code>texOffs</code>. From those it derives every part&rsquo;s
+    bounding box in body space and every face&rsquo;s UV rectangle, and from
+    <em>those</em> it answers the only question the paint engine ever asks &mdash;
+    <em>given texel (px, py), what point on the horse&rsquo;s body does it shade?</em>
+</p>
+<p>
+    <strong>Nothing in that table is Minecraft-specific and nothing in it is
+    hard-coded per gene.</strong> It is a Java constant today only because there has
+    only ever been one mesh to describe. Lift it into a file and a pack author could
+    describe someone else&rsquo;s horse:
+</p>
+
+<div class="codebox">
+<pre><code class="language-json">{
+  "id": "betterhorses:adult",
+  "sheet": 128,
+  "texels_per_unit": 2,
+  "parts": {
+    "body":      { "pivot": [0, 11, 5], "box": [-5, -8, -17, 10, 10, 22], "tex": [0, 32] },
+    "left_front_leg": { "pivot": [4, 14, -10], "box": [-3, -1, -1.9, 4, 11, 4], "tex": [26, 16] }
+  }
+}</code></pre>
+</div>
+
+<p>
+    That is close to a transcription of what a model&rsquo;s <code>addBox</code> /
+    <code>texOffs</code> calls already say, which is the point: <strong>a remap is
+    readable off the other mod&rsquo;s model class, or off an OptiFine/EMF
+    <code>.jem</code> file, by someone who cannot write Java.</strong> Given one, the
+    entire existing paint engine works unchanged &mdash; every gene, every spec file,
+    both editors &mdash; because no gene has ever known what mesh it was painting.
+</p>
+<p>What a remap format would have to settle, none of which is decided:</p>
+<ul>
+    <li><strong>Non-box geometry.</strong> The projection assumes axis-aligned boxes;
+        rotated parts already use their rest-pose AABB as an approximation. A mesh with
+        real curved geometry, or with parts that are not boxes at all, cannot be described
+        this way without a genuine UV-unwrap importer &mdash; a much larger project.</li>
+    <li><strong>Part naming.</strong> <code>HorseSkinGeometry.Part</code> is a closed enum,
+        and a good deal of gene code names members of it directly (mane, tail, the four
+        legs, the two ears). A mesh that splits a leg into three segments needs those to
+        map onto one logical <code>LEFT_FRONT_LEG</code>, which means the remap file needs
+        a many-to-one <em>grouping</em> layer as well as a geometry table.</li>
+    <li><strong>Who resolves the conflict.</strong> A remap says how to paint another
+        mod&rsquo;s mesh; it does not say who gets to register the renderer. That is still
+        seam 3 and still needs one side to yield.</li>
+    <li><strong>Validation.</strong> A wrong remap produces a horse with patterns in the
+        wrong places and no error. The
+        <a href="body-space.html">four-band colour probe</a> is the existing tool for
+        exactly this and would have to be exposed to pack authors.</li>
+</ul>
+
+<h2 id="gaits">Gaits, for models with real legs</h2>
+
+<p>
+    A related and separable idea. Vanilla&rsquo;s horse has four box legs and one
+    animation; several mods below ship articulated legs and distinct gaits &mdash;
+    <a href="#swem">SWEM</a> has walk, trot, canter and gallop as separate animations.
+    This mod currently has <strong>nothing to say about movement</strong>: it resolves
+    speed, jump and health onto attributes and stops there.
+</p>
+<p>
+    That is a gap worth filling on its own terms, and it is the one place where a mod with
+    a better model would let this mod express something it genuinely cannot today. The
+    genome already carries the inputs &mdash; <code>MSTN</code>, <code>LCORL</code>,
+    <code>HMGA2</code>, the body-size locus and the resolved speed stat all describe how a
+    horse is built and how it moves &mdash; and gait is a real, heritable, breed-defining
+    trait in horses that the mod currently throws away. A Standardbred that paces rather
+    than trots is a genetic fact (<code>DMRT3</code>), and it is exactly the kind of thing
+    this project exists to model.
+</p>
+<p>Sketch, unbuilt and not on the roadmap yet:</p>
+<ul>
+    <li>A <code>GaitContribution</code> interface alongside the existing coat and eye
+        contributions, so a gene declares a gait rather than the renderer inferring
+        one.</li>
+    <li>Resolution in <code>common/</code> to a plain named result &mdash;
+        <em>walk / trot / pace / canter / gallop</em> plus a tempo scalar &mdash; with no
+        animation concepts in it at all, so the backport and the browser tools keep
+        working.</li>
+    <li>A thin NeoForge translation that maps that result onto whatever the active model
+        offers: vanilla&rsquo;s single animation ignores it, an articulated model selects
+        its matching clip.</li>
+    <li>Which means the patch for a detailed-leg mod is small &mdash; a table from our
+        gait names to their animation ids &mdash; and the gene work is shared across every
+        such mod rather than written per-mod.</li>
+</ul>
+
+<h2 id="swem">SWEM and SWEM Lite</h2>
+
+<p>
+    The Star Worm Equestrian Mod is the largest equestrian mod there is, and it is the
+    most interesting case on this page because <strong>the overlap is almost exactly one
+    subsystem</strong>.
+</p>
+<p>
+    SWEM adds its own horse entity with its own GeckoLib model, its own animations
+    including separate gaits, and a large hand-drawn coat catalogue &mdash; well over a
+    hundred coats, selected by tags. Its own documentation is candid that the breeding is
+    not genetics: each coat carries one or more colour tags, a foal picks a tag from a
+    parent, and the result can be biologically nonsense (their example: a white foal
+    growing into a leopard appaloosa, because both carry the white tag). That was
+    explicitly a placeholder until a real genetics system was possible.
+</p>
+<p>
+    So the patch writes itself in principle: <strong>this mod supplies the genetics and
+    the coat, SWEM keeps everything else.</strong> Their tack, stable blocks, tools,
+    animations, jumps, horse care and the rest are untouched; we replace the tag-based
+    coat selection with a genome and a generated texture.
+</p>
+<p>What that would actually require, in the order it bites:</p>
+<ol>
+    <li><strong>A geometry table for the SWEM mesh</strong> (<a href="#remaps">seam
+        2</a>). Their model is not vanilla&rsquo;s and is not box-only, so this is the
+        hard part and may be the blocking one &mdash; a GeckoLib model with curved or
+        non-axis-aligned geometry cannot be described by the current projection without a
+        real unwrap importer.</li>
+    <li><strong>Attachments on their entity</strong> (seam 1). Viable if their horse
+        extends <code>AbstractHorse</code>; a full port of the attachment layer if
+        not.</li>
+    <li><strong>Suppressing their coat selection</strong> &mdash; their texture resolution
+        step has to be overridden to ask us instead. Whether that is possible without
+        mixins depends on how their renderer is structured.</li>
+    <li><strong>Deciding the stat boundary</strong> (seam 4). SWEM has its own progression
+        and its own per-horse stats; ours are resolved from the genotype. Two answers to
+        one question again, and the honest resolution is that <em>one</em> of them wins
+        outright and the other is disabled &mdash; not an average.</li>
+    <li><strong>Mapping their hundred-plus coats onto genotypes</strong>, if the patch
+        wants to preserve existing horses. That is a content project, not a code one, and
+        probably should not be attempted: a fresh world is the cheaper answer and matches
+        this mod&rsquo;s <a href="#third-party-genes">no-back-compatibility rule</a>.</li>
+</ol>
+<div class="note warn">
+    <span class="label">Version reality</span>
+    <p>
+        SWEM targets Forge 1.16.5 and 1.18.2. This mod targets NeoForge 26.1.2. There is
+        no version on which the patch could currently be installed, and there would not be
+        until either project moves. A SWEM patch is therefore a <em>1.12.2-backport-era
+        or later</em> conversation, not a near-term one. <strong>SWEM Lite</strong> is a
+        reduced distribution of the same mod, so the analysis above applies to it
+        unchanged, minus whatever content it drops.
+    </p>
+</div>
+
+<h2 id="icys">Icy&rsquo;s Better Horses</h2>
+
+<p>
+    A horse-overhaul mod that works the way this one does &mdash; it enhances the vanilla
+    horse rather than replacing it &mdash; which makes it simultaneously the most
+    compatible in architecture and the most directly overlapping in features.
+</p>
+<p>
+    It adds ownership and a 0&ndash;100 <strong>bond</strong> stat that grants speed and
+    jump bonuses at thresholds; fifteen named real-world <strong>breeds</strong> with
+    breed-specific coats, gendered breeding, biome-locked wild spawning and stat
+    inheritance; upgraded saddles with gear slots, horse chests and ender chests;
+    stabilizers, medkits and hitchposts; auto-ride, free-look, two-rider support and a
+    command wheel.
+</p>
+<p>
+    Read that list against <a href="horse-care.html">horse care</a>,
+    <a href="breeds.html">breeds</a> and <a href="breeding.html">breeding</a> and the
+    problem is obvious: <strong>we both implement bond, breeds, gendered breeding, stat
+    inheritance and biome spawning, and we do all five differently.</strong> Their bond is
+    a flat percentage buff; ours is four behaviour tiers. Their breeds are fifteen named
+    presets; ours are <a href="breed-format.html">JSON founder distributions over a
+    genome</a>. Their foals inherit stats plus a random bonus; ours resolve stats from a
+    genotype and never roll.
+</p>
+<p>A patch would be a division of territory, and a fairly clean one:</p>
+<ul>
+    <li><strong>They keep</strong> the equipment layer entirely &mdash; saddles, slots,
+        chests, medkits, hitchposts, stabilizers &mdash; and the riding-feel changes.
+        Nothing in this mod touches any of it.</li>
+    <li><strong>We keep</strong> coat, genome, breeding and inherited stats, because that
+        is the whole of what this mod is and their version is explicitly the simpler
+        one.</li>
+    <li><strong>Bond has to be picked, not merged.</strong> Two bond numbers on one horse
+        is a bug generator. Either their percentage buff reads our bond value, or ours is
+        disabled and our tier behaviours read theirs. The first is less work and keeps
+        both mods&rsquo; UIs honest.</li>
+    <li><strong>Their breeds become a breed file each.</strong> Fifteen named breeds is
+        exactly what <a href="breed-format.html">the breed format</a> is for; expressing
+        Thoroughbred or Friesian as a founder distribution is authoring work, not
+        engineering, and the result is strictly better because the horses then actually
+        carry the genes.</li>
+    <li><strong>Spawning must be de-duplicated</strong> &mdash; both mods add biome
+        spawns, so installed together you get both.</li>
+</ul>
+<p>
+    Mechanically it is the most tractable patch on this page: both mods hang data off the
+    vanilla horse, so seams 1 and 2 are free and only seam 3 (their renderer, if they
+    replace it for breed coats &mdash; unconfirmed) and seam 4 need work. Note also they
+    require GeckoLib and Modonomicon, and they ship for Fabric 26.2, NeoForge 1.21.1 and
+    Forge 1.20.1 &mdash; again, no shared version with this mod today.
+</p>
+
+<h2 id="horseman">Horseman</h2>
+
+<p>
+    A quality-of-life riding mod: hitching a mounted horse to a fence, a copper horn that
+    summons bound horses, horses that swim when you press jump, horses that fit in boats,
+    better camera handling, step-up increases, reduced mining penalty while mounted,
+    horse/player inventory switching, dismount direction fixes.
+</p>
+<p>
+    <strong>This should work out of the box, and it is the best-matched mod on the
+    page.</strong> It touches controls, movement and interaction; it does not touch the
+    horse&rsquo;s model, renderer, textures, attributes or coat, so all four seams are
+    clear. It also targets 1.21.10 through 26.2 on NeoForge, so unlike SWEM and Icy&rsquo;s
+    it is a mod this could genuinely be installed alongside today.
+</p>
+<p>Two things to check rather than assume:</p>
+<ul>
+    <li><strong>Its copper horn overlaps our <a href="item-whistles.html">whistles</a>,</strong>
+        and the roadmap wants to take that further still
+        (<a href="roadmap.html#callable-horses">callable horses</a>). Not a conflict &mdash;
+        two items that both recall a horse is redundancy, not breakage &mdash; but if a
+        patch is ever written the right move is to bind the two to one notion of
+        &ldquo;your horse&rdquo; rather than have each keep its own.</li>
+    <li><strong>Its swimming may collide with ours.</strong> This mod has its own
+        riding-through-water handling (<a href="architecture.html#water-riding">see
+        architecture</a>) and a magical swim-speed locus. Two mods changing how a ridden
+        horse behaves in water is the one place they overlap in substance.</li>
+</ul>
+
+<h2 id="armour">Mods that only change horse armour</h2>
+
+<p>
+    <strong>No issues, and there is a structural reason rather than a lucky one.</strong>
+    Horse armour in 26.1.2 is an equipment layer: the renderer adds a
+    <code>SimpleEquipmentLayer</code> with its own model and its own
+    <code>EquipmentClientInfo</code>, drawing from
+    <code>minecraft:textures/entity/equipment/horse_body/*</code>. That is a separate
+    texture, a separate model and a separate draw call from the coat. Our generated coat
+    goes on the base layer and knows nothing about it; an armour mod adds items and
+    equipment assets and knows nothing about the coat.
+</p>
+<p>
+    The one caveat is the same as everywhere: an armour mod that also <em>replaces the
+    horse renderer</em> in order to add its layer, rather than adding a layer to the
+    existing one, collides on seam 3 like anything else would. That is unusual and would
+    be a design mistake on their part, but it is the thing to check first if an
+    armour-only mod somehow breaks coats.
+</p>
+
+<h2 id="horse-powered">Horse Powered</h2>
+
+<p>
+    Animal-labour machinery: a horse grindstone, chopping block, press, drying rack,
+    granite anvil and an energy generator, driven by attaching a leashable mob to a block.
+    It targets NeoForge 26.1.2 among others, so it is directly installable alongside this
+    mod today.
+</p>
+<p>
+    The mechanism is the interesting bit. Attached workers become <em>a virtual ghost
+    render</em>: the real mob is stored on the block so it cannot be killed, despawned or
+    wander off. That means two things for us, and both need checking in-game rather than
+    assuming:
+</p>
+<ul>
+    <li><strong>Storing and restoring the entity must preserve the attachments.</strong>
+        Our genome, pedigree, bond and cooldowns live on data attachments. If the block
+        serialises the mob with a full NBT round-trip they survive; if it reconstructs a
+        fresh horse from a subset of fields, <strong>the horse comes back with a new
+        genome and a different coat</strong>. That is the single failure mode to look for,
+        it is silent, and it would look to a player like the horse changed colour in the
+        mill.</li>
+    <li><strong>The ghost render has to go through our renderer</strong> to be painted at
+        all. If it draws the mob itself with a hand-rolled path rather than the registered
+        entity renderer, a working horse renders white while a loose one renders correctly
+        &mdash; cosmetic, obvious, and diagnostic of exactly which path it took.</li>
+</ul>
+<p>
+    Beyond that there is no overlap: it adds blocks and consumes labour, we add genetics
+    and coats. It is a good pairing conceptually &mdash; a mod that makes a horse&rsquo;s
+    strength matter is a mod that makes our <code>MSTN</code> / <code>LCORL</code> stat
+    genes matter &mdash; and a patch that read our resolved speed or size to set work rate
+    would be a genuinely small piece of code and the most rewarding one on this page.
+</p>
+
+<h2 id="combat-controls">Horse Combat Controls</h2>
+
+<p>
+    Mount-and-Blade-style directional steering: forward accelerates, back decelerates,
+    left and right steer, with a key to toggle between vanilla and combat control modes
+    and a server config to lock players into one. It changes controls and nothing else
+    &mdash; no entity, model, renderer, texture, attribute or AI change.
+</p>
+<p>
+    <strong>No conflict on any seam.</strong> It is a client input mod and we are a
+    server-side data model with a client renderer; the two do not meet. The only thing
+    worth noting is that this mod adds an <code>ATTACK_DAMAGE</code> attribute to horses
+    and a melee goal, so a horse here can fight &mdash; which makes combat steering more
+    useful than it is in vanilla, not less compatible. Version support stops at 1.21.4, so
+    like most of this list it is not currently co-installable.
+</p>
+
+<h2 id="astikorcarts">AstikorCarts</h2>
+
+<p>
+    Carts pulled by other entities &mdash; a supply cart with double-chest storage, a
+    plough, and an animal cart. It adds cart entities and attaches them to existing
+    pullers; it does not modify the horse&rsquo;s model, texture or rendering, and the
+    puller list is configurable so any entity can be added.
+</p>
+<p>
+    <strong>No conflict.</strong> All four seams are clear: it hangs a second entity off
+    the horse rather than changing the horse. The one thing to watch is our
+    <a href="item-whistles.html">whistle recall</a>, which teleports horses &mdash;
+    teleporting a horse that is pulling a cart is exactly the sort of thing that leaves a
+    cart behind, stretched, or attached across dimensions. If a patch is ever wanted, it
+    is one check: do not recall a horse that is pulling something, or drop the cart
+    first, the way we already drop a lead.
+</p>
+<p>
+    The practical obstacle is age. AstikorCarts is Forge-only and stops at 1.19.2, and its
+    own author points at <strong>Astikor Carts Redux</strong> (Forge) and
+    <strong>NiftyCarts</strong> (Fabric) as the maintained successors. Any real work here
+    should target those, and the analysis carries over unchanged &mdash; they are the same
+    design.
+</p>
+
+<h2 id="resource-packs">Resource packs, Fresh Animations, and EMF / ETF</h2>
+
+<p>
+    A category apart, because it is where most people&rsquo;s &ldquo;better horses&rdquo;
+    actually come from. <strong>Better Horses x Fresh Animations</strong> by CanineGray is
+    a <em>resource pack</em>, not a mod: it needs OptiFine, or the modern replacements
+    Entity Model Features and Entity Texture Features, to supply a custom entity model and
+    animations for the horse.
+</p>
+<p>
+    Today that pack and this mod ignore each other completely, in the worst way. We never
+    sample the vanilla horse textures &mdash; our template is
+    <code>horse_white.png</code> in our own namespace &mdash; so the pack&rsquo;s art
+    never reaches a coat. And if EMF replaces the horse mesh, our
+    <a href="body-space.html">body-space projection</a> is describing a model that is no
+    longer on screen, so every pattern lands somewhere arbitrary.
+</p>
+<p>Both halves have a planned answer, and they are separate pieces of work:</p>
+<ul>
+    <li><strong>The texture half</strong> is
+        <a href="texture-resolution.html#pack-template">the resource-pack template
+        plan</a>: read the player&rsquo;s own
+        <code>minecraft:textures/entity/horse/horse_white.png</code> at whatever resolution
+        the pack drew it, and paint the genome onto <em>that</em>. It costs a namespace
+        change plus an un-mirroring pass plus making the sheet size a variable, and it
+        makes every horse resource pack in existence work with this mod automatically.</li>
+    <li><strong>The mesh half</strong> is <a href="#remaps">the remap format</a>. An EMF
+        <code>.jem</code> file is a box-and-<code>texOffs</code> description already, which
+        is very close to the shape a remap needs &mdash; close enough that reading one
+        directly, rather than asking the pack author to write a second file, is worth
+        considering before inventing a format.</li>
+</ul>
+<p>
+    Neither is built. Together they would turn the biggest current incompatibility &mdash;
+    &ldquo;this mod ignores your horse pack&rdquo; &mdash; into the mod&rsquo;s best
+    feature.
+</p>
+
 <h2 id="known">Known-good and known-bad</h2>
 <table class="data">
     <thead><tr><th>Kind of mod</th><th>Verdict</th></tr></thead>
@@ -241,12 +672,56 @@
     </tbody>
 </table>
 
+<p>
+    And the named mods analysed above. <strong>&ldquo;Version&rdquo; is whether it can be
+    installed alongside this mod at all today</strong>, which for most of this list is the
+    binding constraint rather than any technical conflict:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Mod</th><th>Overlap</th><th>Version</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td><a href="#horseman">Horseman</a></td><td>Controls, hitching, swimming, a summoning horn</td>
+    <td class="ok">NeoForge 26.x</td>
+    <td class="ok">Should just work &mdash; check swimming and the horn</td></tr>
+<tr><td><a href="#horse-powered">Horse Powered</a></td><td>Stores the mob on a block, ghost-renders it</td>
+    <td class="ok">NeoForge 26.1.2</td>
+    <td class="warn">Check the attachments survive capture, and that the ghost uses our renderer</td></tr>
+<tr><td><a href="#astikorcarts">AstikorCarts</a> / Redux / NiftyCarts</td><td>A second entity attached to the horse</td>
+    <td class="bad">Forge, &le;&nbsp;1.19.2</td>
+    <td class="ok">No conflict; whistle recall should refuse a horse pulling a cart</td></tr>
+<tr><td><a href="#combat-controls">Horse Combat Controls</a></td><td>Client input only</td>
+    <td class="bad">&le;&nbsp;1.21.4</td>
+    <td class="ok">No conflict on any seam</td></tr>
+<tr><td><a href="#armour">Horse-armour-only mods</a></td><td>A separate equipment layer</td>
+    <td class="ok">n/a</td>
+    <td class="ok">No conflict &mdash; different texture, model and draw call</td></tr>
+<tr><td><a href="#icys">Icy&rsquo;s Better Horses</a></td><td>Bond, breeds, gendered breeding, stat inheritance, spawning</td>
+    <td class="bad">Fabric 26.2 / NeoForge 1.21.1 / Forge 1.20.1</td>
+    <td class="warn">Heavy feature overlap, easy architecture &mdash; the most tractable patch here</td></tr>
+<tr><td><a href="#swem">SWEM</a> / SWEM Lite</td><td>Its own entity, model, gaits and tag-based coats</td>
+    <td class="bad">Forge 1.16.5 / 1.18.2</td>
+    <td class="warn">Complementary in principle; blocked on a non-box mesh and on versions</td></tr>
+<tr><td><a href="#resource-packs">Better Horses x Fresh Animations</a> (pack + EMF/ETF)</td>
+    <td>Replaces the horse mesh and textures from a resource pack</td>
+    <td class="ok">Pack-side</td>
+    <td class="bad">Ignored today; both halves have a plan and neither is built</td></tr>
+</tbody>
+</table>
+</div>
+
 <h2 id="unverified">Unverified</h2>
 <p>
     <strong>None of this has been tested against another mod.</strong> Every claim above
     is read off this mod's own source and off how NeoForge's registries and events work,
     not off a play session with a modpack. The rows marked "fine" are predictions, and
-    the renderer row is the only one that is a certainty. Treat this page as the map of
+    the renderer row is the only one that is a certainty. <strong>The named mods are
+    described from their own public listings, not from their source</strong> &mdash; so
+    every claim about what they do or do not touch is their description of themselves, and
+    the two failure modes that matter most (whether Horse Powered's capture preserves data
+    attachments, and whether Icy's Better Horses replaces the renderer for its breed coats)
+    are exactly the ones a listing does not answer. Treat this page as the map of
     where to look when something breaks, not as a compatibility report.
 </p>
 

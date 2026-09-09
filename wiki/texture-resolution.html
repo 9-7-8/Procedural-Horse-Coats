@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Texture resolution &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Coat engine <span class="sep">/</span> scaling the sheet</p>
+<h1>Texture resolution</h1>
+<p class="lede">
+    The coat sheet is <code>HorseSkinGeometry.SHEET_SIZE</code> square &mdash; today
+    <strong>2&times; the vanilla horse sheet</strong>. This page is about what it would
+    take to make that a number instead of a constant: what already scales for free, what
+    is written in texels and would break, what it costs in memory and frame time at each
+    step up, and the feature the whole exercise is really for &mdash;
+    <a href="#pack-template">painting on whatever white horse the player&rsquo;s own
+    resource pack ships</a>, at whatever resolution that pack drew it.
+</p>
+
+<div class="note warn">
+    <span class="label">Nothing on this page is built</span>
+    <p>
+        The engine runs at one resolution and only one. Everything below is analysis of
+        the code as it stands plus a design sketch; no scaling work has been started, and
+        none of the cost figures have been measured &mdash; they are arithmetic off the
+        array shapes, not a profile. See <a href="#unverified">the last section</a>.
+    </p>
+</div>
+
+<h2 id="today">What 128 actually is</h2>
+
+<p>
+    There is exactly one number, and it is already expressed as a multiple of vanilla:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Constant</th><th>Where</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td><code>TEXELS_PER_UNIT</code></td><td><code>HorseSkinGeometry</code></td>
+    <td>How many texels one model unit (1/16 block) covers. Call it <strong>k</strong>.</td></tr>
+<tr><td><code>SHEET_SIZE</code></td><td><code>HorseSkinGeometry</code></td>
+    <td>The sheet edge, and it is <code>64 &times; k</code> &mdash; vanilla&rsquo;s sheet
+        scaled by k.</td></tr>
+<tr><td><code>HD</code></td><td><code>HdHorseModel</code>, <code>HdBabyHorseModel</code></td>
+    <td>The per-cube <code>texScale</code>, <code>1 / k</code>. The layer bakes at
+        <code>TEX_SIZE</code> and each cube divides by <code>TEX_SIZE &times; HD</code>
+        = 64, so every normalized UV comes out identical to vanilla.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    That last row is the reason this is tractable at all. The models keep vanilla&rsquo;s
+    own 64-space <code>texOffs</code> and box dimensions verbatim and let
+    <code>texScale</code> do the conversion, and
+    <code>HorseSkinGeometry.faceMapsOf</code> does the mirror image of the same trick on
+    the CPU side &mdash; it multiplies the same 64-space <code>texOffs</code> by
+    <code>TEXELS_PER_UNIT</code> to get its UV rectangles. <strong>The UV layout is
+    already a function of k.</strong> Nobody has ever typed a texel coordinate into the
+    geometry tables.
+</p>
+
+<p>
+    The one place k is <em>not</em> a clean multiplier is the adult layout&rsquo;s
+    un-mirroring. Vanilla points all four legs at one patch and both ears at one patch;
+    <code>HdHorseModel</code> gives each its own patch in what was empty space on the
+    vanilla sheet, so the coat engine can paint the near and off fore independently.
+    Those four new <code>texOffs</code> are still 64-space numbers, so they scale with k
+    like everything else &mdash; but they mean the adult template is not simply
+    &ldquo;the vanilla sheet, bigger&rdquo;. The foal is: vanilla&rsquo;s
+    <code>BabyHorseModel</code> already gives each leg a distinct patch, so
+    <code>HdBabyHorseModel</code> is a straight resolution pass with no re-layout.
+</p>
+
+<h2 id="free">What already scales for free</h2>
+
+<p>
+    More of the engine than you would expect, because of a decision made early and held:
+    <strong>a pattern is a function of a point in body space, not of a texel.</strong>
+    <code>CoatPattern</code> takes <code>(x, y, z)</code> in model units;
+    <code>HorseSkinGeometry.forEachTexel</code> hands a gene the body point each texel
+    covers and the gene reads <em>that</em>; <code>BodyNoise</code> and
+    <code>PatchNoise</code> are sampled in 3D at body-unit frequencies. See
+    <a href="body-space.html">body space</a>.
+</p>
+
+<p>
+    So raising k is <strong>supersampling the same continuous function</strong>. Feature
+    sizes are in model units and do not move. A dun&rsquo;s dorsal stripe is the same
+    physical width; a leopard&rsquo;s spots are the same physical spots; a smoothstep
+    tuned over 0.4 units stays a 0.4-unit ramp. What changes is that the edges stop being
+    staircases. That is the good half of the answer, and it holds for the great majority
+    of the paint code.
+</p>
+
+<div class="note good">
+    <span class="label">The seam is already half-built</span>
+    <p>
+        <code>CoatBuildContext.size()</code> exists and is the sheet edge for the bake in
+        progress. Genes that read <em>that</em> rather than
+        <code>HorseSkinGeometry.SHEET_SIZE</code> are already resolution-agnostic. It is
+        currently initialised from the constant, so nothing has ever exercised the
+        difference &mdash; but the parameter is there and the right refactor is to make
+        it mean something rather than to invent a new one.
+    </p>
+</div>
+
+<h2 id="absolute">What is written in texels, and would break</h2>
+
+<p>
+    Everything in this table is an <strong>absolute reference</strong> &mdash; a length,
+    a rectangle or an allocation stated in texels rather than in model units. This is the
+    complete list as of the current source; it is short, which is the encouraging part,
+    but two entries on it are load-bearing.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Site</th><th>What it hard-codes</th><th>Effect of changing k</th></tr></thead>
+<tbody>
+<tr>
+    <td><code>CoatRegions.EYE_RECTS_ADULT</code> /<br><code>EYE_RECTS_BABY</code></td>
+    <td>Literal <code>{x, y, w, h}</code> texel rectangles for the two eyes on each mesh.</td>
+    <td class="bad">Wrong immediately. Every value is exactly divisible by k, so they are
+        really 64-space rectangles that were pre-multiplied &mdash; the fix is to store
+        them in 64-space and multiply by <code>TEXELS_PER_UNIT</code>, the same as the
+        geometry tables already do.</td>
+</tr>
+<tr>
+    <td><code>EyePatch</code> &mdash; the 4-bit quadrant mask</td>
+    <td>&ldquo;An iris is a 2&times;2 block, so a sector is four bits.&rdquo; Both
+        <a href="eye-colour.html">heterochromias</a> are built out of it.</td>
+    <td class="warn">Survives k&nbsp;&gt;&nbsp;2 as a coarse quarter-split (each quadrant
+        becomes a k/2-square block) and <strong>dies at k&nbsp;=&nbsp;1</strong>, where
+        the iris is a single texel. Above k&nbsp;=&nbsp;2 the four-bit premise stops being
+        a rendering fact and starts being a limitation &mdash; a real wedge angle is the
+        right replacement.</td>
+</tr>
+<tr>
+    <td><code>SpecPainter.spread</code></td>
+    <td>A texel-space neighbourhood dilation. The radius is a body-unit number, converted
+        with <code>ceil(radius &times; TEXELS_PER_UNIT) + 1</code>, then it walks a square
+        of that many texels per texel.</td>
+    <td class="bad">Correct at any k and <strong>quartic in cost</strong>: k&sup2; more
+        texels, each searching a k&sup2;-times-larger box. This is the single worst thing
+        in the engine for scaling and the one that has to be redesigned rather than
+        re-parameterised.</td>
+</tr>
+<tr>
+    <td><code>HorseSkinGeometry</code>&rsquo;s sample grid</td>
+    <td>A cached <code>Sample[SHEET_SIZE&sup2;]</code> per mesh &mdash; an object per
+        mapped texel, each holding a <code>BodyPoint</code> of three doubles.</td>
+    <td class="bad">Correct at any k and the <strong>largest single allocation in the
+        mod</strong>. It is an object graph, so it costs roughly an order of magnitude
+        more per texel than the finished texture does, and it is static and permanent.</td>
+</tr>
+<tr>
+    <td><code>GeneticCoatTextureFactory.loadArgb</code></td>
+    <td>Asserts the template PNG is exactly <code>N &times; N</code>.</td>
+    <td class="ok">Trivial &mdash; but it is also the assertion that would need to become
+        a <em>discovery</em> for <a href="#pack-template">the resource-pack feature</a>.</td>
+</tr>
+<tr>
+    <td><code>CoatTextureComposer.bake</code></td>
+    <td>Rejects a template that is not <code>SHEET_SIZE&sup2;</code> pixels.</td>
+    <td class="ok">Trivial; becomes &ldquo;the template decides n&rdquo;.</td>
+</tr>
+<tr>
+    <td><code>GeneIconTool.BLOCK</code></td>
+    <td><code>SCALE / TEXELS_PER_UNIT + 2</code> &mdash; how many icon pixels one coat
+        texel paints.</td>
+    <td class="warn">Goes to the <code>+ 2</code> floor at k&nbsp;&gt;&nbsp;4 and the
+        gene icons become a sparse dot spray. <code>SCALE</code> has to move with k.</td>
+</tr>
+<tr>
+    <td><code>wiki/gene-creator/js/geometry.js</code>,<br><code>js/ui.js</code></td>
+    <td><code>var SHEET_SIZE = 128</code>, and <code>bake.coverage[py * 128 + px]</code>.</td>
+    <td class="bad">The legacy hand-written JS port (<a href="modding.html">hard rule
+        3</a>) has its own copy of the number. It breaks silently &mdash; the creator
+        would draw a quarter of the horse and report parity against a stale fixture.</td>
+</tr>
+<tr>
+    <td>Both golden files</td>
+    <td>A SHA-256 per row over the whole sheet.</td>
+    <td class="warn">Every row of both moves. They will tell you the coats changed; they
+        cannot tell you <em>which genes got worse</em>, which is the thing you would
+        actually need to know.</td>
+</tr>
+<tr>
+    <td>Every <code>private static final int N = SHEET_SIZE</code></td>
+    <td>A dozen classes in <code>coat/pattern/</code>, plus the texture factory, plus most
+        of the gene tests.</td>
+    <td class="warn">Mechanical, and the bulk of the diff: each has to become a field or a
+        parameter threaded from <code>CoatBuildContext.size()</code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="genes">Which genes use absolute references</h3>
+
+<p>
+    <strong>Effectively none of them do it directly</strong>, and that is worth stating
+    plainly because the intuition runs the other way. Every gene under
+    <code>genetics/genes/</code> takes <code>(px, py)</code> from
+    <code>forEachTexel</code> purely as an <em>address</em> to write to, and does all of
+    its actual arithmetic on the <code>BodyPoint</code> that comes with it. Grep the
+    package for a gene that thresholds on <code>px</code>, hashes <code>(px, py)</code>
+    into a per-texel random, or steps to a neighbouring texel, and there is nothing.
+</p>
+
+<p>The genes that are nonetheless coupled to k, and how:</p>
+
+<ul>
+    <li><strong>Anything with an <code>effects</code> spread mask</strong> &mdash; via
+        <code>SpecPainter.spread</code>, which is the shared implementation. Correct at any
+        k, ruinously expensive at a large one. Every data-driven gene that grows a mark
+        outward from pigment goes through here.</li>
+    <li><strong>Everything that touches an eye</strong> &mdash; the two heterochromia
+        genes, the light locus, anything implementing <code>EyeColorContribution</code> or
+        <code>EyePatchContribution</code> &mdash; via the literal eye rectangles and the
+        four-bit sector. Note that <code>CoatOverlay</code> itself is <em>already</em>
+        resolution-general here: it finds the dark texels inside the rectangle, takes their
+        bounding box and halves it, rather than assuming where the pupil is. Only the
+        rectangles and the four-bit premise are fixed.</li>
+    <li><strong>Genes tuned by eye at k&nbsp;=&nbsp;2.</strong> This is the soft one and
+        the one that will actually cost time. A softness constant chosen because it
+        &ldquo;landed on about a texel&rdquo; becomes a hairline at k&nbsp;=&nbsp;32. A
+        high-frequency threshold that currently reads as a pleasant dither <em>because</em>
+        the texels are large resolves into visible speckle. Nothing detects this; the
+        goldens move for every gene at once, so they cannot isolate it.</li>
+</ul>
+
+<h2 id="scales">Scale by scale</h2>
+
+<p>
+    Sizes below are the whole sheet. <em>Working set</em> is one bake&rsquo;s live
+    intermediates &mdash; the finished ARGB, two <code>PigmentField</code>s (eight bytes a
+    texel: two float channels), one <code>ColorField</code> (eighteen: four signed int
+    channels plus two flag planes), the overlay and the emissive mask &mdash; and excludes
+    the shared sample grid, which is larger still.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>k</th><th>Sheet</th><th>Texture</th><th>Working set / bake</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td><strong>0.5&times;</strong></td><td>1</td><td>64&sup2;</td><td>16 KiB</td><td>~0.2 MiB</td>
+    <td class="bad">Representable, not worth having &mdash; see below</td></tr>
+<tr><td><strong>1&times;</strong> (today)</td><td>2</td><td>128&sup2;</td><td>64 KiB</td><td>~0.7 MiB</td>
+    <td class="ok">Ships</td></tr>
+<tr><td><strong>8&times;</strong></td><td>16</td><td>1024&sup2;</td><td>4 MiB</td><td>~45 MiB</td>
+    <td class="warn">Plausible target; needs the spread rewrite and off-thread baking</td></tr>
+<tr><td><strong>16&times;</strong></td><td>32</td><td>2048&sup2;</td><td>16 MiB</td><td>~180 MiB</td>
+    <td class="warn">Needs a bounded texture cache and a disk cache</td></tr>
+<tr><td><strong>32&times;</strong></td><td>64</td><td>4096&sup2;</td><td>64 MiB</td><td>~720 MiB</td>
+    <td class="bad">One bake exceeds a default heap</td></tr>
+<tr><td><strong>64&times;</strong></td><td>128</td><td>8192&sup2;</td><td>256 MiB</td><td>~2.9 GiB</td>
+    <td class="bad">Not a resolution, a different program</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>0.5&times; &mdash; 64px, k = 1</h3>
+<p>
+    This is exactly vanilla&rsquo;s sheet, and it fits: the four extra leg patches and the
+    extra ear patch that <code>HdHorseModel</code> introduced were placed in space that is
+    empty on the vanilla 64 layout, so the un-mirrored layout is representable at k = 1
+    with no overlap. Everything else about it is a downgrade, and specifically:
+</p>
+<ul>
+    <li><strong>The eyes collapse.</strong> The iris becomes one texel. Both
+        heterochromias stop existing &mdash; not degrade, stop &mdash; and iris tinting
+        becomes a single-pixel operation.</li>
+    <li><strong>Face markings become unusable.</strong> A star, stripe and snip are drawn
+        across a head face that is six units wide; at k&nbsp;=&nbsp;1 that is six texels
+        for the whole forehead.</li>
+    <li><strong>Sock and band edges quantise hard.</strong> A leg face is 4&times;11
+        texels, so every boundary snaps to a whole texel and the per-leg jitter that makes
+        four socks differ mostly disappears.</li>
+</ul>
+<p>
+    It is a useful thing to be <em>able</em> to do &mdash; it is what a
+    &ldquo;potato&rdquo; setting would be, and it is the resolution a vanilla-faithful
+    resource pack would hand us &mdash; but it is not a mode to design for.
+</p>
+
+<h3>8&times; &mdash; 1024px, k = 16</h3>
+<p>
+    The first genuinely interesting step, and the one to aim at if this is ever built. A
+    texel is 1/16 of a model unit, so the sheet finally has more resolution than the
+    geometry has structure: dapples, ticking and roan hairs become individually drawable
+    rather than implied, and the template&rsquo;s hair shading could carry real strand
+    detail. Four mebibytes a horse is a real but survivable texture.
+</p>
+<p>
+    What has to change first: <code>spread</code> (a 4-unit radius means searching a
+    65&times;65 box per texel over a million texels &mdash; four orders of magnitude more
+    sample work than today), and the bake has to leave the render thread. Today
+    <code>getOrCreate</code> composes synchronously inside a <code>computeIfAbsent</code>
+    on the render thread, the first frame a horse of a new genome is visible. At
+    k&nbsp;=&nbsp;2 that is a stutter; at k&nbsp;=&nbsp;16 it is a multi-second freeze
+    every time a new horse walks over a hill.
+</p>
+
+<h3>16&times; &mdash; 2048px, k = 32</h3>
+<p>
+    Past the point where a texel corresponds to anything anatomical, and into territory
+    where the constraint is the cache rather than the bake. The texture cache is keyed by
+    genome and <strong>never evicted within a session</strong> &mdash;
+    <code>GeneticCoatTextureFactory.clear()</code> runs on logout and nothing else. Twenty
+    distinct horses is 320 MiB of VRAM that is never released while you play. A bounded,
+    LRU-evicting cache stops being a nicety here and becomes a prerequisite.
+</p>
+
+<h3>32&times; and 64&times; &mdash; 4096px and 8192px</h3>
+<p>
+    Both are legal OpenGL &mdash; <code>GL_MAX_TEXTURE_SIZE</code> is 16384 or better on
+    anything modern &mdash; and neither is legal arithmetic. A single
+    <code>ColorField</code> at k&nbsp;=&nbsp;128 is six arrays over 67 million texels,
+    about 1.2 GiB, and the composer holds one of those plus two pigment fields at once. A
+    horse would cost more VRAM than most players have, for detail no player can see: at
+    8192&sup2; a texel is 1/128 of a model unit, roughly a hundredth of a Minecraft block,
+    on a mob usually viewed from four blocks away.
+</p>
+<p>
+    If ultra resolution is ever wanted, the answer is not a bigger sheet. It is to stop
+    baking a sheet &mdash; move the pigment and colour fields into a fragment shader and
+    evaluate the same body-space functions per fragment, which is the one approach whose
+    cost tracks screen pixels instead of texels. That is a different project and it would
+    have to live in the NeoForge module, so it buys nothing for the backport.
+</p>
+
+<h2 id="drawers">Re-tooling the drawers</h2>
+
+<p>In dependency order, because two of these gate the rest:</p>
+
+<ol>
+    <li><strong>Make <code>SHEET_SIZE</code> a parameter, not a constant.</strong>
+        <code>HorseSkinGeometry</code> becomes per-k: the geometry tables already are, but
+        the baked mesh and its sample grid have to be keyed by <code>(Skin, k)</code>
+        rather than by <code>Skin</code> alone. Every <code>static final int N</code> in
+        <code>coat/pattern/</code> becomes a field read from
+        <code>CoatBuildContext.size()</code>. This is a large, boring diff and it is
+        almost the whole job.</li>
+    <li><strong>Redesign <code>spread</code>.</strong> A per-texel square search is the
+        wrong shape at any large k. Three candidates, none tried: run the mask at a fixed
+        low resolution and bilinearly upsample the coverage (cheap, correct-looking,
+        loses crisp edges); replace the search with a separable two-pass dilation over the
+        body-space grid (linear in radius rather than quadratic); or precompute a signed
+        distance field over the sheet once per bake and have every spread mask read it
+        (one O(n&sup2;) pass, then O(1) per texel &mdash; probably the right answer, and it
+        would speed up k&nbsp;=&nbsp;2 as well).</li>
+    <li><strong>Move the eye rectangles into 64-space</strong> and multiply by k, the way
+        <code>faceMapsOf</code> already does. Every current value divides exactly, so this
+        is a pure refactor with no behaviour change at k&nbsp;=&nbsp;2 &mdash; which means
+        the goldens can prove it.</li>
+    <li><strong>Give <code>EyePatch</code> a real shape.</strong> Above k&nbsp;=&nbsp;2 a
+        four-bit mask is throwing away the resolution you just paid for. A sector angle
+        plus a fraction, rasterised against the iris bounding box <code>CoatOverlay</code>
+        already computes, degrades gracefully in both directions: it reproduces the four
+        quadrants at k&nbsp;=&nbsp;2 and gives a real wedge at k&nbsp;=&nbsp;16.</li>
+    <li><strong>Bake off-thread.</strong> The composer is pure and allocates nothing
+        shared, so it is already safe to run on a worker; the only thing that must happen
+        on the render thread is the <code>NativeImage</code> upload. Render the white
+        template until the bake lands.</li>
+    <li><strong>Bound the cache.</strong> LRU with a texel budget rather than an entry
+        count, so one setting covers every k.</li>
+    <li><strong>Scale the tools with it.</strong> <code>GeneIconTool.SCALE</code>,
+        <code>CoatSampleTool</code>, <code>CreatorAssetTool</code>,
+        <code>GeneWikiTool</code> and <code>DesignerApi</code> all read the template and
+        assume its size; the wiki tools should keep baking at k&nbsp;=&nbsp;2 whatever the
+        game runs at, since a gene icon does not want to be a megabyte.</li>
+    <li><strong>Decide what happens to the legacy creator JS.</strong> It has its own
+        <code>SHEET_SIZE</code> and cannot be extended (hard rule 3). Either it is pinned
+        to k&nbsp;=&nbsp;2 forever and the creator stops claiming to preview what the game
+        will draw, or it is finally retired in favour of the wasm path.</li>
+</ol>
+
+<h2 id="cost">Memory, frame time and storage</h2>
+
+<h3>Memory is the sample grid, not the texture</h3>
+<p>
+    The obvious cost &mdash; the finished ARGB sheet &mdash; is the smallest one. Per
+    mapped texel the engine holds four bytes of output, eight of pigment (twice over,
+    since a gene works on a copy), eighteen of colour accumulator, four of overlay and one
+    of emissive mask: call it forty-odd bytes of scratch for every four bytes of result.
+    And above all of that sits <code>HorseSkinGeometry</code>&rsquo;s sample grid, which is
+    a <code>Sample</code> object plus a <code>BodyPoint</code> object per mapped texel
+    &mdash; on the order of seventy bytes each, allocated once per mesh and never freed.
+    At k&nbsp;=&nbsp;2 it is about a megabyte and nobody notices. At k&nbsp;=&nbsp;16 it is
+    tens of megabytes of permanently resident object graph, and it is the first thing that
+    should be flattened into parallel primitive arrays if any of this is attempted.
+</p>
+
+<h3>Frame time</h3>
+<p>
+    Most of the bake is linear in texels: <code>Genes.naturalOrder().size()</code> passes
+    over the sheet in phase 1, <code>Genes.magicalOrder().size()</code> in phase 3, one
+    gradient lookup per texel in phase 2. Those scale as k&sup2; and are unpleasant but
+    predictable. The spread mask scales as k&#8308; and is not. The other quiet cost is
+    allocation churn: phase 1 hands each visible natural gene a
+    <code>PigmentView.mutableCopy()</code>, so a bake allocates and discards one whole
+    pigment field per visible natural gene &mdash; a rounding error today, hundreds of
+    megabytes of garbage per horse at k&nbsp;=&nbsp;16.
+</p>
+
+<h3>Storage is nearly free, and that is deliberate</h3>
+<p>
+    <strong>No coat is ever written to disk.</strong> A horse stores its genome and
+    epigenome; the texture is re-derived on the client that needs it and thrown away on
+    logout. So raising the resolution costs essentially <em>nothing</em> in save size, in
+    jar size or in network traffic &mdash; the only on-disk growth is the two white
+    templates and the gradient LUTs, and the templates are the one thing the
+    <a href="#pack-template">resource-pack plan</a> would stop shipping anyway. This is
+    a real advantage of generating rather than selecting, and it is worth not giving up:
+    if a disk cache is added at high k it should be a cache in the strict sense
+    &mdash; deletable at any time, never a save format.
+</p>
+
+<h2 id="optifine">Does any of this need OptiFine?</h2>
+
+<p>
+    <strong>No.</strong> Nothing about the resolution of a generated entity texture
+    involves OptiFine, or ETF, or EMF, on either version. The coat is a
+    <code>NativeImage</code> uploaded as a <code>DynamicTexture</code> and bound by an
+    ordinary entity renderer; the size of that image is a matter between the mod and the
+    driver. Entity textures are not atlased, so there is no atlas limit to run into, and
+    the ceiling is <code>GL_MAX_TEXTURE_SIZE</code> and VRAM &mdash; both of which sit far
+    above any resolution worth wanting.
+</p>
+<p>
+    The reason people associate high-resolution horses with OptiFine is that OptiFine (and
+    now <a href="compatibility.html">ETF / EMF</a>) is how a <em>resource pack</em> gets to
+    supply custom entity models and per-entity texture variants. That is the
+    selection problem, and this mod does not have it: we generate the texture rather than
+    picking one, so the machinery has nothing to do here. The one idea worth taking from
+    that world is the principle &mdash; that the pack should own the pixels &mdash; and
+    that is the next section.
+</p>
+<p>
+    Two things genuinely would want attention at high k and are not OptiFine&rsquo;s
+    business either. <strong>Mipmaps:</strong> a <code>DynamicTexture</code> uploads one
+    level, so a 1024&sup2; horse seen from thirty blocks away will shimmer where a
+    mipmapped one would not. <strong>Filtering:</strong> the coat is nearest-filtered like
+    every vanilla entity texture, which is right at k&nbsp;=&nbsp;2 and starts to look
+    like a mistake once texels are subpixel.
+</p>
+
+<h2 id="backport">26.1.2 versus the 1.12.2 backport</h2>
+
+<p>
+    The <a href="architecture.html#modules">module split</a> pays off here: every item in
+    <a href="#drawers">the re-tooling list</a> except the last two lives in
+    <code>common/</code> and is version-neutral. What differs is the translation layer.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>NeoForge 26.1.2</th><th>Forge 1.12.2 (planned)</th></tr></thead>
+<tbody>
+<tr>
+    <td>Changing the sheet size on the model</td>
+    <td class="ok">Two constants. <code>LayerDefinition.create(mesh, TEX_SIZE, TEX_SIZE)</code>
+        with a per-cube <code>texScale</code> of <code>1/k</code>; vanilla&rsquo;s
+        <code>texOffs</code> numbers stay untouched.</td>
+    <td class="warn">There is no per-cube <code>texScale</code>. <code>ModelBase</code> has
+        <code>textureWidth</code>/<code>textureHeight</code> and
+        <code>ModelRenderer.setTextureOffset</code> divides by them, so you set both to
+        <code>64 &times; k</code> and every offset scales uniformly &mdash; which happens
+        to be exactly what we want, but it is a different mechanism and the
+        un-mirrored leg patches have to be re-derived by hand.</td>
+</tr>
+<tr>
+    <td>Uploading the texture</td>
+    <td class="ok"><code>NativeImage</code> + <code>DynamicTexture</code>, registered with
+        the <code>TextureManager</code>.</td>
+    <td class="warn"><code>DynamicTexture</code> exists but is an <code>int[]</code> and
+        <code>TextureUtil</code> upload; workable, and the <code>int[]</code> the composer
+        already returns is the native format there. Hundreds of live dynamic textures is
+        less well-trodden ground on that version.</td>
+</tr>
+<tr>
+    <td>Hardware floor</td>
+    <td class="ok">Core-profile GL on hardware from the last decade.</td>
+    <td class="bad">The realistic 1.12.2 audience includes machines with a 4096 or even
+        2048 <code>GL_MAX_TEXTURE_SIZE</code>, and 32-bit JVMs with 2 GiB heaps. 8&times;
+        is the ceiling there, and it needs a runtime cap, not a config the player can
+        set past their driver.</td>
+</tr>
+<tr>
+    <td>The <code>common/</code> constraint</td>
+    <td colspan="2" class="warn">Whatever the parameterisation looks like it must stay
+        inside <a href="architecture.html">the rules</a>: no Minecraft imports, no Java 9+
+        APIs. Plain fields and constructor parameters &mdash; no records-with-defaults
+        cleverness, nothing from <code>java.util.concurrent</code> that postdates 8.</td>
+</tr>
+<tr>
+    <td>Custom entity models in the wild</td>
+    <td class="ok">Rare; ETF/EMF users are a minority.</td>
+    <td class="bad">OptiFine is close to universal on 1.12.2, and OptiFine
+        <code>.jem</code> custom entity models silently replace the horse mesh &mdash;
+        which means our UV assumptions break for a large slice of that audience.
+        <a href="compatibility.html">Compatibility</a> covers what a remap would take.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="pack-template">Planned: paint on the player&rsquo;s own resource pack</h2>
+
+<div class="note rule">
+    <span class="label">The intent, stated once</span>
+    <p>
+        The mod should stop shipping a white horse. It should read <strong>whatever white
+        horse the player&rsquo;s active resource pack supplies</strong>, at whatever
+        resolution that pack drew it, and paint the genome on top of that. A player
+        running a 512&times; pack gets 512&times; horses whose art is the pack&rsquo;s own,
+        with our genetics on it; a player running vanilla gets vanilla-looking horses. The
+        mod supplies the pattern, the pack supplies the pixels.
+    </p>
+</div>
+
+<p>
+    This is not implemented and this section is a design sketch, not a specification. But
+    it is the reason the rest of the page matters: <strong>resolution
+    parameterisation is not the feature, it is the prerequisite.</strong> The moment the
+    template comes from the pack, k stops being ours to choose.
+</p>
+
+<h3>What makes it plausible</h3>
+<p>
+    The paths line up exactly. Vanilla 26.1.2 ships
+    <code>minecraft:textures/entity/horse/horse_white.png</code> and
+    <code>horse_white_baby.png</code>, both 64&sup2; &mdash; the same two files, under the
+    same two names, that this mod keeps its own 128&sup2; copies of. And
+    <code>Minecraft.getInstance().getResourceManager()</code>, which
+    <code>GeneticCoatTextureFactory</code> already uses, <em>already</em> resolves through
+    the player&rsquo;s active pack stack. Reading the pack&rsquo;s horse instead of ours is
+    a namespace change on one identifier. Everything below is what has to happen around
+    that one line.
+</p>
+
+<h3>The five problems, in the order they bite</h3>
+
+<ol>
+    <li>
+        <strong>Discovering k.</strong> Read the image, require it square, set
+        <code>k = width / 64</code> and require that to be a positive integer. A 192&sup2;
+        pack is k&nbsp;=&nbsp;3 and fine &mdash; nothing in the engine needs k to be a
+        power of two, since the geometry tables multiply rather than shift. A 100&sup2;
+        sheet is refused, loudly, and we fall back to a bundled template. The current
+        exact-size assertion in <code>loadArgb</code> becomes this.
+    </li>
+    <li>
+        <strong>Un-mirroring the adult sheet.</strong> This is the real work. Vanilla&rsquo;s
+        adult layout shares one patch across all four legs and one across both ears; our
+        engine paints each independently, which is what
+        <a href="pipeline.html">the whole pipeline</a> assumes. So a runtime pass has to
+        take the pack&rsquo;s 64k-sized vanilla sheet and blit the shared leg patch into
+        the three extra leg slots and the ear patch into the extra ear slot &mdash;
+        exactly the transformation that produced our shipped <code>horse_white.png</code>
+        by hand, expressed as a function of k. <strong>The foal needs none of this</strong>:
+        vanilla&rsquo;s baby model already gives each leg its own patch, so the foal
+        template is a straight read.
+    </li>
+    <li>
+        <strong>A pack&rsquo;s white horse is not our white horse.</strong> The composite
+        onto the template is a multiply, which assumes the template carries
+        <em>shading and nothing else</em>. Vanilla&rsquo;s <code>horse_white</code> is
+        near enough. A pack that draws its white horse warm, or cream, or with a
+        painted-on blaze, would tint or mark every coat in the game. Three answers, and
+        this one is the owner&rsquo;s call: normalise the template against its own peak
+        luminance per region; accept the tint as the pack&rsquo;s artistic intent, which is
+        arguably the honest reading of &ldquo;use the pack&rsquo;s art&rdquo;; or gate the
+        whole feature behind a config default-off. Flagged, undecided.
+    </li>
+    <li>
+        <strong>An explicit opt-in path, for packs that want control.</strong> Two tiers,
+        no more: if the pack provides
+        <code>horsegenetics:textures/entity/horse/horse_white.png</code> we use it
+        verbatim, un-mirrored layout and all, and the pack author has total control. If it
+        does not, we derive from <code>minecraft:</code> and do the un-mirroring ourselves.
+        No third case, no fallback chain.
+    </li>
+    <li>
+        <strong>Reload and invalidation.</strong> Changing packs has to drop every baked
+        coat and re-derive the templates.
+        <code>GeneticCoatTextureFactory.clear()</code> already does precisely this and is
+        currently wired only to logout; it needs to hang off a resource-reload listener
+        as well. Cheap, and the piece most likely to be forgotten.
+    </li>
+</ol>
+
+<h3>Consequences worth accepting up front</h3>
+<ul>
+    <li><strong>Two players see different horses.</strong> The genome is authoritative and
+        shared; the pixels are local. A screenshot stops being canonical. That is correct
+        behaviour for a texture pack and should be said out loud rather than treated as a
+        bug report later.</li>
+    <li><strong>The vanilla markings overlays stay ignored.</strong> Packs also retexture
+        <code>horse_markings_*.png</code>, and the renderer deliberately has no marking
+        layer &mdash; all white patterning comes from the genome. A pack whose character
+        lives mostly in its markings will lose that half.</li>
+    <li><strong>The browser tools diverge.</strong> The
+        <a href="horse-designer/index.html">horse designer</a> and the gene creator bake
+        against the shipped template and cannot see the player&rsquo;s pack. A deliberate
+        divergence, and one to write in the comment on both sides per
+        <a href="architecture.html">hard rule 5</a>.</li>
+    <li><strong>The eye rectangles become the pack&rsquo;s problem.</strong> They are
+        stated in 64-space and multiplied by k &mdash; which is correct for any pack that
+        keeps vanilla&rsquo;s layout, and silently wrong for one that moves the eyes.
+        There is no defence against that short of asking the pack to declare it, and it is
+        not worth building one until someone hits it.</li>
+</ul>
+
+<h2 id="unverified">Unverified</h2>
+<p>
+    <strong>Every cost figure on this page is arithmetic, not measurement.</strong> They
+    come from array shapes and element sizes in the source; no bake has been profiled, no
+    resolution other than the shipped one has ever been run, and the k&#8308; claim about
+    <code>spread</code> is read off the loop bounds rather than timed. The list of absolute
+    references was assembled by grep and by reading <code>coat/pattern/</code> and
+    <code>genetics/genes/</code>, and the claim that no gene indexes on texel coordinates
+    is a negative result from searching &mdash; strong, but a negative result.
+</p>
+<p>
+    The two facts here that <em>are</em> checked: vanilla 26.1.2 ships
+    <code>horse_white.png</code> and <code>horse_white_baby.png</code> at 64&sup2; under
+    the paths quoted, and every current eye-rectangle value divides exactly by
+    <code>TEXELS_PER_UNIT</code>.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="body-space.html">Body space &amp; regions</a>
+        <a href="pipeline.html">The coat pipeline</a>
+        <a href="eye-colour.html">Eye colour</a>
+        <a href="compatibility.html">Mod compatibility</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="roadmap.html">Roadmap</a>
+    </div>
+    The constants are <code>HorseSkinGeometry.TEXELS_PER_UNIT</code> and
+    <code>SHEET_SIZE</code>; the model side is <code>HdHorseModel.HD</code> /
+    <code>TEX_SIZE</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

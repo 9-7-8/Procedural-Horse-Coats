@@ -58,7 +58,8 @@ window.HG.pages = {
                 { href: "pipeline.html", text: "Three-phase pipeline", kind: "core", views: ["coding"] },
                 { href: "body-space.html", text: "Body space & regions", kind: "core", views: ["coding"] },
                 { href: "paint-order.html", text: "The paint order", kind: "core", views: ["gameplay","coding"] },
-                { href: "eye-colour.html", text: "Eye colour & heterochromia", kind: "core", views: ["gameplay","coding","science"] }
+                { href: "eye-colour.html", text: "Eye colour & heterochromia", kind: "core", views: ["gameplay","coding","science"] },
+                { href: "texture-resolution.html", text: "Texture resolution", kind: "core", views: ["coding"] }
             ]
         },
         {

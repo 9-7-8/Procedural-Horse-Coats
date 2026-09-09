@@ -947,11 +947,194 @@
 <tbody>
 <tr><td><strong>Stalls and holding pens</strong></td><td>Stall <em>definition</em> is built &mdash; a sign bound to a horse, placed on a wall, flood-fills the enclosed area behind it and stores it.</td><td><strong>Nothing consumes a stall.</strong> No teleport-to-stall, no auto-return, no &ldquo;recalled to a pen&rdquo;. Cleanup beyond breaking the exact sign block &mdash; rebuilding a wall elsewhere, or removing the horse, leaves a stale record. Holding pens as distinct from stalls. A real stall-sign <em>block</em> instead of a repurposed <code>oak_wall_sign</code>. A persistent client wireframe rather than the F7 particle flash, which needs a <code>RenderLevelStageEvent</code> renderer against the changed 26.1.2 pipeline.</td></tr>
 <tr><td><strong>Tickets</strong> &mdash; blank, basic, bound, interdimensional</td><td>Four tiers, hair-based recipes, all crafting correctly.</td><td><strong>They are inert.</strong> The stated intent is &ldquo;teleport a bound horse to its stall&rdquo; &mdash; now possible (<code>StallRecord.center()</code> exists), just unbuilt. Whether &ldquo;interdimensional&rdquo; reaches <a href="horse-dimension.html">the horse dimension</a> is a decision (&sect;<a href="#decisions">3</a>).</td></tr>
-<tr><td><strong>Whistles</strong></td><td>Built &mdash; recall your tamed horses within 16 / 32 / 64 blocks.</td><td>Bond gating (&sect;<a href="#bond">14</a>); whether they should path rather than teleport; and what &ldquo;echo&rdquo; adds <em>beyond</em> range &mdash; longer reach, or crossing dimensions.</td></tr>
+<tr><td><strong>Whistles</strong></td><td>Built &mdash; recall your tamed horses within 16 / 32 / 64 blocks.</td><td>Bond gating (&sect;<a href="#bond">14</a>); whether they should path rather than teleport; and what &ldquo;echo&rdquo; adds <em>beyond</em> range. <strong>All three are answered by <a href="#callable-horses">callable horses</a>, below.</strong></td></tr>
 <tr><td><strong>Double-wide gate</strong></td><td>Crafted via braided rope.</td><td>Presumably a two-block-wide fence gate. A vanilla-shaped block problem, unrelated to the genetics.</td></tr>
 </tbody>
 </table>
 </div>
+
+<h3 id="callable-horses">Callable horses &mdash; the whistle, bound</h3>
+
+<p>
+    The <a href="item-whistles.html">whistles</a> are an area recall: blow one and every
+    tamed horse of yours inside 16&nbsp;/&nbsp;32&nbsp;/&nbsp;64 blocks comes. The wanted
+    end state is the RPG one &mdash; <strong>press a thing, and <em>your</em> horse
+    arrives, wherever it is</strong>. The reference implementation is the
+    <em>Callable Horses</em> mod: sit on a horse and press P to make it your personal
+    horse, press V to call it (it walks if near, teleports if far, optionally across
+    dimensions), one personal horse per player, with permanent death and a maximum call
+    distance both configurable.
+</p>
+<p>
+    Taking the <em>feature</em> is right. Taking its <em>shape</em> is not, on three
+    counts, and each disagreement points at the version this mod should build instead.
+</p>
+
+<h4>One personal horse is the wrong limit &mdash; bind the whistle, not the player</h4>
+
+<p>
+    A player of this mod has a stable of horses with pedigrees, and picking a single
+    favourite is exactly the choice the mod exists to make hard. So the binding lives on
+    the <strong>item</strong>: a whistle is bound to one horse, a player carries as many
+    whistles as they have horses worth calling, and an unbound whistle keeps today&rsquo;s
+    area recall unchanged.
+</p>
+<ul>
+    <li><strong>The component already exists.</strong>
+        <code>ModDataComponents.BOUND_HORSE</code> carries a horse UUID plus a display name
+        for tooltips, and its javadoc already anticipates being reused beyond the stall
+        sign. A bound whistle is that component on a whistle.</li>
+    <li><strong>Bind by right-clicking the horse with the whistle</strong> &mdash; how the
+        stall sign binds, and how every other item in this mod claims a horse. Not by a
+        keybind while mounted. It also means binding is an <code>EntityInteract</code>
+        handler of a shape we already have.</li>
+    <li><strong>Rebinding is free; unbinding is sneak-right-click on air.</strong> No
+        ceremony &mdash; a whistle is not a contract, the
+        <a href="item-transfer-papers.html">transfer paper</a> is.</li>
+    <li><strong>Naming falls out.</strong> The component&rsquo;s <code>name</code> field
+        puts the horse&rsquo;s own name on the whistle&rsquo;s tooltip, so a hotbar of five
+        whistles is readable at a glance. That is the answer to &ldquo;how does this work
+        for many horses&rdquo;.</li>
+</ul>
+
+<h4>Keybinds: the item is the interface</h4>
+
+<p>
+    This mod has exactly one production keybind &mdash; <kbd>H</kbd> for the
+    <a href="#browser">horse browser</a>, in <code>HorseBrowserKeyBindings</code> &mdash;
+    and everything else a player does is done by holding an item and clicking. That is a
+    pattern, not an accident, and a feature that arrived with two new default keys would
+    break it.
+</p>
+<ul>
+    <li><strong>Right-click a bound whistle = call that horse.</strong> Right-click an
+        unbound whistle = today&rsquo;s area recall. Neither needs a key.</li>
+    <li><strong>At most one optional keybind</strong>, and only as a convenience over the
+        item: <em>blow the whistle you are holding, else the first whistle in your
+        hotbar</em>. Registered exactly as <code>HorseBrowserKeyBindings</code> does it
+        &mdash; <code>KeyConflictContext.IN_GAME</code>, a built-in
+        <code>KeyMapping.Category</code> rather than a localised custom one, rebindable in
+        Controls, and a default that collides with neither <kbd>H</kbd> nor vanilla.</li>
+    <li><strong>No mounted-bind key at all.</strong> Callable Horses needs P because it has
+        nowhere else to put the binding. We have an item in hand already.</li>
+</ul>
+
+<h4>The three tiers already are the config</h4>
+
+<p>
+    Callable Horses exposes <code>maxCallingDistance</code>,
+    <code>callableInEveryDimension</code> and a dimension whitelist as options. We have
+    three crafted tiers that already mean range, and an open question on this page about
+    <em>what the echo whistle adds beyond reach</em>. This answers it:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Whistle</th><th>Unbound (today)</th><th>Bound (proposed)</th></tr></thead>
+<tbody>
+<tr><td>Basic</td><td>16 blocks</td><td>Calls a horse in a loaded chunk, same dimension</td></tr>
+<tr><td>Golden</td><td>32 blocks</td><td>Any distance, same dimension &mdash; including unloaded chunks</td></tr>
+<tr><td>Echo</td><td>64 blocks</td><td>Any distance, <strong>across dimensions</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    That gives the echo whistle a real identity, gives the crafting ladder a reason to
+    exist, and keeps the numbers in the recipe rather than in a config file, which is the
+    house style. A server that wants Callable Horses&rsquo; restrictions still gets them
+    &mdash; as a config that caps the usable tier, not as a distance in blocks.
+</p>
+<p>
+    It has to be settled against <a href="#items">the tickets</a>, which were specified as
+    &ldquo;teleport a bound horse to its stall&rdquo; and are still inert. The clean split,
+    and the one to take unless something argues against it: <strong>a whistle brings the
+    horse to you; a ticket sends the horse to its stall.</strong> Two directions, two
+    items, no overlap &mdash; and the interdimensional ticket and the echo whistle are the
+    same idea pointed opposite ways.
+</p>
+
+<h4>Walk, then teleport &mdash; and gate it on bond</h4>
+
+<ul>
+    <li><strong>Path if it can, teleport if it cannot.</strong> Callable Horses gets this
+        right, and it closes the open &ldquo;should whistles path rather than
+        teleport&rdquo; question: inside the bond-follow goal&rsquo;s range the horse walks
+        to you, which is legible and charming; beyond it, it teleports, which is the only
+        thing that works. <code>BondFollowGoal</code> already knows how to walk a horse to
+        its owner.</li>
+    <li><strong>Binding should cost bond.</strong> A whistle that binds to a barely-tamed
+        horse makes bond meaningless. Requiring a tier to bind is the gating this page
+        already wants for whistles generally, and this is the natural place for it. Which
+        tier is an open number.</li>
+    <li><strong>Re-check ownership at call time, not at bind time.</strong> A
+        <a href="item-transfer-papers.html">transfer paper</a> changes an owner without
+        rewriting history, and <code>HorseRoster</code> already documents that the
+        record&rsquo;s tamer and the entity&rsquo;s owner are two different facts. A whistle
+        bound to a horse you have since sold must refuse, and say why.</li>
+</ul>
+
+<h4>The one real technical unknown: calling a horse you cannot see</h4>
+
+<p>
+    Everything above is design. This is the part that might not work.
+    <code>HorseRoster</code> states the problem already: <em>whereabouts are entity facts,
+    so they are only knowable for a horse in a loaded chunk</em>. A whistle that calls a
+    horse two thousand blocks away has to find an entity that is not ticking.
+</p>
+<ul>
+    <li><strong>Option A &mdash; remember where it was.</strong> Write last-known position
+        and dimension into the horse&rsquo;s record on unload; on a call, load that chunk,
+        find the entity by UUID, teleport it. Costs a record field and a chunk load, and
+        goes stale if a horse ever moves by a path that does not unload.</li>
+    <li><strong>Option B &mdash; ask every level.</strong>
+        <code>ServerLevel.getEntity(UUID)</code> per dimension is a map lookup rather than
+        a scan, and <code>HorseRoster.live</code> already does exactly this &mdash; but it
+        only answers for loaded entities, so it solves the easy half and none of the hard
+        half.</li>
+    <li><strong>Option C &mdash; keep an index.</strong> The per-world horse database is
+        already a <code>SavedData</code>; extending it to map a horse UUID to its last-seen
+        dimension and chunk is the durable answer, and probably the right one, since
+        <a href="#browser">the browser</a>, the stall records and the tickets all want the
+        same lookup.</li>
+</ul>
+<p>
+    <strong>Option C looks right, and it is shared infrastructure rather than whistle
+    infrastructure</strong> &mdash; so it should be scoped as its own piece of work and the
+    whistle built on top of it, not the other way round.
+</p>
+
+<h4>What we should <em>not</em> take</h4>
+
+<ul>
+    <li><strong>Respawning a dead horse</strong> (<code>deathIsPermanent = false</code>).
+        A horse here is a genome and a pedigree, and the whole breeding layer rests on a
+        dead horse being gone. A whistle bound to a dead horse should say so plainly and
+        offer to rebind, and nothing more. <em>Owner&rsquo;s call &mdash; but the default
+        should be no.</em></li>
+    <li><strong>The single-instance guarantee.</strong> Callable Horses despawns stale
+        copies of your personal horse because its calling can duplicate one. Ours moves an
+        entity found by UUID and never creates one, so there is nothing to de-duplicate
+        &mdash; and if we ever need that guarantee it means there is a bug
+        elsewhere.</li>
+    <li><strong>A stats viewer.</strong> Theirs is a feature; ours is
+        <code>HorseInfoScreen</code> plus the browser, and both already show more.</li>
+</ul>
+
+<h4>Left open</h4>
+
+<ul>
+    <li>Which bond tier binding requires.</li>
+    <li>Whether a bound whistle keeps the area recall as a secondary use
+        (sneak-right-click?) or gives it up entirely.</li>
+    <li>Whether non-horse equines can be bound. <code>WhistleItem</code> already filters on
+        <code>AbstractHorse</code>, so donkeys, mules and llamas answer an area whistle
+        today &mdash; but only <code>minecraft:horse</code> carries a genome, so a bound
+        llama is a slightly odd object.</li>
+    <li>Whether the browser should show which of your horses have a whistle out.</li>
+    <li>The three whistles still share one texture (below), and a bound whistle needs to
+        look different from an unbound one.</li>
+</ul>
 
 <h3>13.2 Art and coverage</h3>
 
