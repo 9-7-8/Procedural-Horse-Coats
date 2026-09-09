@@ -58,6 +58,32 @@
     </p>
 </div>
 
+<div class="note warn" id="paused">
+    <span class="label">&sect;10 was paused mid-way on 2026-09-09 &mdash; deliberately, and at a clean seam</span>
+    <p>
+        Work stopped to deal with something else, not because anything went wrong.
+        <strong>Nothing is half-finished:</strong> both new masks are complete on both
+        sides, tested, parity-gated, documented and pushed; the build is green and the
+        tree is clean. The next job is a <em>new</em> piece of work, not the back half of
+        an interrupted one.
+    </p>
+    <p>
+        <strong>Resume at the canvas</strong> &mdash; item 1 below, and
+        &sect;<a href="#designer">10</a> for what it is. Before writing any of it, read
+        <a href="gene-format.html#path">the <code>PATH</code> format</a>: the canvas is a
+        different <em>control</em> over an array that already exists and already works, so
+        the job is entirely UI and touches no format, no engine and no parity fixture.
+    </p>
+    <p>
+        One open question is waiting on the owner rather than on code, and it decides
+        whether the canvas is next at all:
+        <a href="verification.html#path-mask">verification &sect;0-BA</a> asks whether the
+        textarea of <code>u, v</code> pairs the creator ships today is usable enough to
+        author a shape with against the live preview. If it is, the canvas can wait behind
+        &sect;<a href="#drift">6</a>.
+    </p>
+</div>
+
 <h2 id="start">Where to start</h2>
 
 <p>
@@ -67,11 +93,14 @@
 </p>
 
 <ol>
-    <li><strong>The visual marking designer</strong> (<a href="#designer">&sect;10</a>)
-        &mdash; the blocker for the complex 1.0 patterns, and the largest single job
-        on this page. The <strong>fractal masks half of it shipped</strong>; what is
-        left is the drawing tools, and the storage question under them is now
-        settled (see the section).</li>
+    <li><strong>The drawing canvas</strong> (<a href="#designer">&sect;10</a>) &mdash;
+        all that is left of the visual marking designer. Both engine halves shipped
+        2026-09-09: <code>FRACTAL</code> (the multi-scale field peacock and laced tobiano
+        wanted) and <code>PATH</code> (a drawn shape, as control points). What remains is
+        a side view of the horse with draggable handles, writing into the
+        <code>points</code> array that already exists &mdash; <strong>no format, engine or
+        parity work in it at all</strong>. Also still open beside it: erase-down for the
+        minimal expression, per-region colour ranges, and glow / particle intensity.</li>
     <li><strong>Epigenetic drift</strong> (<a href="#drift">&sect;6</a>) &mdash; a foal
         copies a parent's per-allele seed exactly, so a closed line converges on one
         look.</li>
