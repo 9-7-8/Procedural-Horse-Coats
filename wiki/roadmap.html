@@ -1979,39 +1979,174 @@
     description of built behaviour, and it will drift.
 </div>
 
-<h2 id="science-tabs">The 24 gene pages with no science tab</h2>
+<h2 id="science-tabs">The 22 science tabs that are now the thin ones</h2>
 
 <p>
-    The wiki now reads as three views, and a page appears in the <strong>Science</strong>
-    view only if it has a science tab. Twenty-four natural gene pages have none &mdash;
-    not because the science is unknown, but because on those pages it is compressed into
-    the lede rather than written out in a section the
-    <a href="session-log.html#three-views-2026-09-07">split</a> could move.
+    <strong>The original backlog is gone.</strong> All 25 natural gene pages that had no
+    science tab have one, and
+    <code>wiki/tools/check-gene-tabs.mjs</code> now runs with an <em>empty</em> exempt
+    list, so a new natural gene page without a science tab fails immediately. What follows
+    is the work that closing it created.
 </p>
 
 <p>
-    They are listed in <a href="verification.html#three-views">&sect;0-AM</a> and the
-    absence is <a href="known-gaps.html#gap-89">gap 89</a>. The group is weighted towards
-    the <strong>health genes</strong> &mdash; PLOD1, PPIB, PRKDC, GYS1, GBE1, MET, MYO5A,
-    TOE1, SCN4A, ST14, SHOX, RAPGEF5, B4GALT7 &mdash; which is the worst place to have the
-    hole, because a real disorder is exactly what a reader comes to the science view for
-    and exactly what a mod should be careful about describing.
-</p>
-
-<p>
-    <strong>What each one needs</strong> is a short section saying what the real variant
-    is, what it does in real horses, and where this mod knowingly departs from it &mdash;
-    the shape <a href="gene-flaxen.html?view=science">flaxen</a> and
-    <a href="gene-silver.html?view=science">silver</a> already have. They were
-    deliberately not stubbed: a tab that says &ldquo;not written yet&rdquo; is worse than
-    an honest absence, and the alternative was inventing veterinary claims.
+    The 25 new tabs run <strong>1,200&ndash;2,300 words</strong> each and share a shape:
+    the locus and the variant with coordinates, the mechanism, the real inheritance table,
+    breed-by-breed frequency where anyone has measured it, an established / inferred /
+    unsupported split, and an explicit statement of where the mod departs from the
+    literature. Measured against that, <strong>the tabs that already existed read as
+    stubs</strong> &mdash; most are a single <code>&lt;h2&gt;</code> and one or two
+    paragraphs, and several are shorter than the lede above them.
 </p>
 
 <p class="muted">
-    Do the health genes first, and check each against the reference rather than writing
-    from memory. When one is written, re-run
-    <code>node wiki/tools/sync-page-views.mjs</code> so the page joins the science view,
-    and <code>node wiki/tools/build-search-index.mjs</code> so it becomes searchable.
+    Word counts below are from
+    <code>python</code> over the <code>data-tab="science"</code> panel of each page &mdash;
+    recount rather than trust them, they will drift the moment anything here is written.
+    Magical genes are excluded throughout: they have no real-world counterpart and having
+    no science to write is correct rather than a gap.
+</p>
+
+<h3>Tier 1 &mdash; cited by the new tabs and unable to answer</h3>
+
+<p>
+    These are the worst, and not because of their length. <strong>Each is named as
+    background by one or more of the new pages</strong>, so a reader follows a link
+    expecting the story and finds two sentences.
+</p>
+
+<ul>
+    <li><strong><a href="gene-ednrb.html?view=science">EDNRB</a> &mdash; 62 words.</strong>
+        Frame overo and lethal white foal syndrome. <em>Four</em> new tabs cite it as the
+        cautionary example of a pigment gene with a real health consequence
+        (<a href="gene-tobiano.html#health">tobiano</a>,
+        <a href="gene-matp.html#health">MATP</a>,
+        <a href="gene-champagne.html#health">champagne</a>,
+        <a href="gene-mushroom.html#health">mushroom</a>), and it cannot currently support
+        the citation. Highest priority on this page.</li>
+    <li><strong><a href="gene-silver.html?view=science">Silver</a> &mdash; 129 words.</strong>
+        Cited three times for multiple congenital ocular anomalies, and has no MCOA section
+        at all. <em>PMEL</em>, the homozygote severity, and why a champagne-plus-silver horse
+        gets its eye risk from the silver.</li>
+    <li><strong><a href="gene-mitf.html?view=science">MITF</a> &mdash; 90 words.</strong>
+        SW1 &mdash; the <em>common</em>, centuries-old, minimally-expressed splash allele.
+        Its <a href="gene-pax3.html?view=science">PAX3 twin now has 2,024 words</a> including
+        the full SW1&ndash;SW10 table, and the asymmetry between the two alleles is the whole
+        point of having two loci. This one is close to writable from the PAX3 page alone.</li>
+    <li><strong><a href="gene-kit.html?view=science">KIT</a> &mdash; 149 words.</strong>
+        Where <a href="gene-tobiano.html#variant">tobiano&rsquo;s 43&nbsp;Mb inversion</a>
+        sits, and the home of W20, SB1 and the dominant whites that four pages name in
+        passing.</li>
+    <li><strong><a href="gene-grey.html?view=science">Grey</a> &mdash; 164 words.</strong>
+        <em>STX17</em>, the duplication, and the age-related melanoma risk that
+        <a href="gene-matp.html#health">the MATP comparison table</a> lists and grey&rsquo;s
+        own page does not discuss.</li>
+    <li><strong><a href="gene-leopard.html?view=science">Leopard complex</a> &mdash; 224
+        words.</strong> <em>TRPM1</em> and congenital stationary night blindness in
+        homozygotes &mdash; cited twice, absent here. Also the obvious place for Appaloosa,
+        Knabstrupper and POA (see below).</li>
+    <li><strong><a href="gene-roan.html?view=science">Roan</a> &mdash; 129 words.</strong>
+        <a href="gene-rabicano.html#vs-lookalikes">Rabicano&rsquo;s new tab</a> contrasts the
+        two at length and roan&rsquo;s own page does not reciprocate. The honest content is
+        that roan&rsquo;s causal variant is <em>also</em> unsettled, which is worth a reader
+        knowing.</li>
+</ul>
+
+<h3>Tier 2 &mdash; foundational loci carrying a paragraph</h3>
+
+<ul>
+    <li><strong><a href="gene-extension.html?view=science">Extension / MC1R</a> &mdash; 41
+        words</strong>, the shortest science tab in the mod, for the locus every other colour
+        gene is described relative to.</li>
+    <li><strong><a href="gene-agouti.html?view=science">Agouti</a> &mdash; 200 words.</strong>
+        Good as far as it goes &mdash; it is an argument about why there are four bay
+        outcomes &mdash; but it has no <em>ASIP</em> variant, no 11&nbsp;bp deletion, no
+        breed distribution.</li>
+    <li><strong><a href="gene-lcorl.html?view=science">LCORL</a> &mdash; 85 words</strong>,
+        for the major height locus.
+        <a href="gene-hmga2.html#size">HMGA2</a> and <a href="gene-dun.html#not-build">dun</a>
+        both now cite the ECA3 region against it.</li>
+    <li><strong><a href="gene-acan.html?view=science">ACAN</a> &mdash; 144 words</strong>, and
+        <strong><a href="gene-megaesophagus.html?view=science">megaesophagus</a> &mdash; 152</strong>,
+        and <strong><a href="gene-cvm.html?view=science">CVM</a> &mdash; 259</strong>. The
+        three health loci that were <em>not</em> in the intake batch, so they are now the
+        only disorder pages without the full treatment their neighbours have.</li>
+    <li><strong><a href="gene-ryr2.html?view=science">RYR2</a> &mdash; 110 words</strong>, and
+        <strong><a href="gene-pdk4.html?view=science">PDK4</a> &mdash; 156</strong>. PDK4
+        especially: <a href="gene-ckm.html#verdict">CKM&rsquo;s new tab</a> ends by saying the
+        same marker-in-a-cluster caution applies to PDK4 with less force, and PDK4&rsquo;s own
+        page does not say what that caution is.</li>
+    <li><strong><a href="gene-brindle.html?view=science">Brindle</a> &mdash; 127 words</strong>,
+        and <strong><a href="gene-manchado.html?view=science">manchado</a> &mdash; 162</strong>.
+        Both are genuinely under-researched patterns, which is itself the content &mdash;
+        <a href="gene-rabicano.html">rabicano&rsquo;s tab</a> is the template for writing a
+        pattern whose gene nobody has found.</li>
+</ul>
+
+<h3>Tier 3 &mdash; short, and arguably finished</h3>
+
+<p>
+    <a href="gene-shade.html?view=science">Shade</a> (382) and
+    <a href="gene-natural-zebra.html?view=science">natural zebra</a> (394) are short because
+    they are complete arguments rather than surveys, and
+    <a href="gene-sex.html?view=science">sex</a> (203) is a locus with no variant story to
+    tell. <a href="gene-flaxen.html?view=science">Flaxen</a> (279),
+    <a href="gene-sooty.html?view=science">sooty</a> (321) and
+    <a href="gene-pangare.html?view=science">pangare</a> (175) are the three that already
+    named breeds before this pass. <strong>Leave all six alone</strong> unless something
+    specific is wrong &mdash; padding a finished argument to match a word count is the
+    opposite of the point.
+</p>
+
+<h3>The breed problem, which is separate</h3>
+
+<p>
+    <strong>20 of the 48 natural science tabs name no breed at all.</strong> For some that is
+    correct &mdash; <a href="gene-extension.html">extension</a>,
+    <a href="gene-agouti.html">agouti</a>, <a href="gene-shade.html">shade</a> and
+    <a href="gene-sex.html">sex</a> are universal loci. For the rest it is a real hole,
+    because &ldquo;which breed do I look in&rdquo; is one of the two questions a reader
+    brings to a genetics page, and the mod has
+    <a href="breeds.html">a breed system</a> that could act on the answer:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>page</th><th>the breed story it is missing</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-leopard.html">leopard complex</a></td><td>Appaloosa, Knabstrupper, Pony of the Americas, Noriker</td></tr>
+<tr><td><a href="gene-ednrb.html">EDNRB</a></td><td>Paint and frame lines &mdash; the concentration <em>is</em> the health story</td></tr>
+<tr><td><a href="gene-acan.html">ACAN</a></td><td>Miniature Horse dwarfism</td></tr>
+<tr><td><a href="gene-megaesophagus.html">megaesophagus</a></td><td>Friesian</td></tr>
+<tr><td><a href="gene-silver.html">silver</a></td><td>Rocky Mountain Horse, Icelandic, Shetland &mdash; and the MCOA link is breed-concentrated</td></tr>
+<tr><td><a href="gene-manchado.html">manchado</a></td><td>the Argentine breeds it was described in</td></tr>
+<tr><td><a href="gene-lcorl.html">LCORL</a></td><td>the draught-versus-pony spread that makes it a size locus at all</td></tr>
+<tr><td><a href="gene-mitf.html">MITF</a></td><td>SW1&rsquo;s cross-breed distribution &mdash; the entire contrast with SW2</td></tr>
+<tr><td><a href="gene-kit.html">KIT</a>, <a href="gene-roan.html">roan</a>, <a href="gene-grey.html">grey</a>, <a href="gene-brindle.html">brindle</a>, <a href="gene-cvm.html">CVM</a>, <a href="gene-ryr2.html">RYR2</a>, <a href="gene-pdk4.html">PDK4</a>, <a href="gene-natural-zebra.html">natural zebra</a></td><td>varies; check each against a source before asserting one</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>How to do one</h3>
+
+<p>
+    The 25 written this pass came from <strong>owner-supplied source files</strong>, not from
+    the model&rsquo;s memory, and that is the only reason they can state coordinates and
+    frequencies. <strong>Do not write one of these from memory.</strong> A veterinary claim
+    invented to fill a section is worse than the stub it replaced, and worse than the honest
+    absence the stub replaced before that.
+</p>
+
+<p>
+    When one is written: re-run <code>node wiki/tools/sync-page-views.mjs</code>,
+    <code>node wiki/tools/build-search-index.mjs</code> and
+    <code>node wiki/tools/check-links.mjs</code>. The shape to copy is any of the 25 &mdash;
+    <a href="gene-mushroom.html?view=science">mushroom</a> is the cleanest short one and
+    <a href="gene-dun.html?view=science">dun</a> the fullest. Note that every one of them ends
+    by saying where the mod and the literature disagree; <strong>that section is the reason
+    the pass was worth doing</strong>, and a rewrite that omits it has missed the point. Three
+    of those disagreements turned out to be substantive enough to become
+    <a href="known-gaps.html#gap-134">gap 134</a>.
 </p>
 
 </article>

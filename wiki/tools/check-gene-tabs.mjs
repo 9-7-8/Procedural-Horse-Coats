@@ -7,24 +7,23 @@
 // actually has. The group that loses most is the health loci, which is exactly
 // the group a science reader comes for.
 //
-// The pages below are what is left of the debt as it stood when this check was
-// written - 25 pages then, and the rest have since been written. They are NOT
-// stubbed on purpose: a tab reading "not written yet" on a page is
-// worse than an honest absence, and filling them means writing real veterinary
-// and population-genetics material, not generating it. So this tool does not
-// demand they be fixed today. What it does is stop the list GROWING: add a new
-// natural gene page without a science tab and this goes red, naming it.
+// The debt this check was written to freeze is now PAID: 25 natural gene pages
+// had no science tab when it was added, and all 25 have been written. The
+// allowlist below is deliberately EMPTY, which turns the check from "stop the
+// list growing" into a flat rule - every natural gene page carries a science
+// tab, and a new one without one goes red immediately.
+//
+// Leave it empty. If a page genuinely cannot have one, the honest move is to
+// argue that here in a comment beside its name rather than to let a silent
+// entry accumulate - that was the original failure mode this file exists to
+// prevent, and an empty set is the only state where nothing can rot in it.
 //
 // That is the same shape as the parser's refusals - freeze the corpus, prevent
 // the next one - and it is why the allowlist is written out in full rather than
 // counted. A number would let a page swap in for another silently.
 //
-//   node wiki/tools/check-gene-tabs.mjs           report and exit non-zero on a new one
-//   node wiki/tools/check-gene-tabs.mjs --list    print the outstanding pages and exit 0
-//
-// When you write one of these tabs, DELETE its line here. The check then holds
-// that page to its science tab for good, and the list is a live backlog rather
-// than a comment that rots.
+//   node wiki/tools/check-gene-tabs.mjs           report and exit non-zero on a gap
+//   node wiki/tools/check-gene-tabs.mjs --list    print anything still outstanding
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -32,14 +31,8 @@ import { fileURLToPath } from "node:url";
 
 const wiki = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** Natural gene pages that predate this check and have no science tab yet. */
-const GRANDFATHERED = new Set([
-  // The science source files for these two arrived with the wrong content (both
-  // were copies of the mushroom write-up), so they are the last two left of the
-  // original 25. Everything else on that list now has a real science tab.
-  "gene-rabicano.html",
-  "gene-tiger-eye.html"
-]);
+/** Natural gene pages exempted from the rule. Empty, and meant to stay empty. */
+const GRANDFATHERED = new Set([]);
 
 const pages = readdirSync(wiki).filter((f) => /^gene-.*\.html$/.test(f)).sort();
 
@@ -101,6 +94,8 @@ if (bad) process.exit(1);
 
 const outstanding = GRANDFATHERED.size - fixed.length;
 console.log(
-  `gene tabs OK - every natural gene page outside the grandfathered list has a ` +
-  `science tab (${outstanding} still owed; --list to see them)`
+  outstanding === 0
+    ? "gene tabs OK - every natural gene page has a science tab, and none is exempt"
+    : `gene tabs OK - every natural gene page outside the exempt list has a ` +
+      `science tab (${outstanding} still owed; --list to see them)`
 );

@@ -165,6 +165,323 @@
 
 </section>
 
+<section class="tab-panel" data-tab="science">
+
+<h2 id="gene">The gene</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>SLC24A5</em> &mdash; solute carrier family 24 member 5</td></tr>
+<tr><th>Protein</th><td>A potassium-dependent sodium/calcium exchanger, thought to work in the
+    trans-Golgi network of melanocytes and to take part in <b>melanosome maturation</b></td></tr>
+<tr><th>Chromosome</th><td>Equine chromosome 1 (ECA1). The mapping interval was roughly
+    3.5&nbsp;Mb; in EquCab2 coordinates the gene sits at about
+    chr1:141,657,837&ndash;141,678,329</td></tr>
+<tr><th>Inheritance</th><td>Simple autosomal recessive</td></tr>
+<tr><th>Phenotype</th><td>A dilute iris &mdash; bright yellow, amber or orange. <b>No known
+    coat effect</b></td></tr>
+<tr><th>Breed</th><td>Puerto Rican Paso Fino</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Across vertebrates, <em>SLC24A5</em> is a major pigmentation gene. Disrupting it in
+    zebrafish gives the well-known &ldquo;golden&rdquo; phenotype; common variation in humans
+    contributes to skin-pigmentation differences, and some biallelic damaging variants cause
+    oculocutaneous albinism type&nbsp;6. The most relevant cousin is the mouse: loss-of-function
+    work there implicates it particularly in the pigmentation of <em>ocular</em> tissues &mdash;
+    iris and retinal pigment epithelium &mdash; while the body coat stays fairly normal. That is
+    precisely the pattern the horse shows, which is a large part of why the candidate was
+    convincing.
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5555483/">Mack
+    <em>et&nbsp;al.</em>, PMC5555483</a>
+</p>
+
+<p>
+    Cross-species evidence makes the gene compelling; it does <b>not</b> license assigning
+    effects seen in people, mice or fish to a tiger-eyed horse.
+</p>
+
+<h2 id="alleles">Two alleles, one of them barely characterised</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>allele</th><th>molecular change</th><th>protein consequence</th><th>status</th></tr></thead>
+<tbody>
+<tr><td><b>TE1</b></td><td>exon-2 missense, c.271A&gt;T in the study transcript (modern
+    annotation c.272A&gt;T)</td><td>p.Phe91Tyr &mdash; a highly conserved phenylalanine becomes
+    tyrosine near the first predicted transmembrane / cation-exchange region</td>
+    <td class="ok">predicted damaging; the best-supported and commonest allele</td></tr>
+<tr><td><b>TE2</b></td><td>a 628-bp deletion, c.875-340_1081+82del, removing all of exon&nbsp;7
+    plus adjacent intronic sequence</td><td>in-frame loss of 69 amino acids (residues
+    292&ndash;360), removing part of the connecting loop and two transmembrane helices</td>
+    <td class="warn">structurally persuasive; <b>much more sparsely characterised</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Phe91 was conserved across the 100 vertebrates examined, and TE1 was computationally
+    predicted deleterious. TE2 is persuasive because it deletes an entire exon and parts of the
+    predicted ion-exchange membrane architecture. Both rest on association and
+    genotype-phenotype evidence rather than direct functional experiments in horse melanocytes.
+</p>
+
+<h2 id="iris">The iris, which is the whole of the established effect</h2>
+
+<p>
+    A dilute iris &mdash; bright yellow, amber or orange, called tiger-eye or goat-eye. It occurs
+    in either sex and has been seen on black, bay and chestnut bases.
+</p>
+
+<p>
+    What makes it unusual is the company it does not keep.
+    <a href="gene-matp.html">Cream</a> changes coat <em>and</em> eye; double cream dilutes
+    commonly have blue eyes. <a href="gene-champagne.html">Champagne</a> dilutes the coat and
+    goes with amber eyes. Several <a href="gene-pax3.html">white-spotting patterns</a> associate
+    with blue eyes. Tiger eye is the <b>first well-characterised equine iris-pigmentation locus
+    reported with no accompanying coat dilution or white-pattern effect at all</b>.
+</p>
+
+<div class="note">
+    <span class="label">It is filed under coat patterns in the reference the mod was built from, and it is not one</span>
+    <p>
+        This page and the source agree emphatically: the coat is unaffected and only the iris
+        changes. That is why the gene needed
+        <a href="gene-tiger-eye.html#channel">the eye-colour channel</a> to exist before it could
+        be built at all &mdash; there was no way to express &ldquo;changes the horse, paints
+        nothing&rdquo; until <code>EyeColorContribution</code> did.
+    </p>
+</div>
+
+<p>
+    For TE1 homozygotes and TE1/TE2 compound heterozygotes the study found <b>no apparent
+    coat-colour change</b>: tiger-eye animals occurred across all three non-dilute bases, there
+    was no association between chestnut status and stronger yellow or orange expression, and no
+    visible relationship between iris shade and coat colour.
+</p>
+
+<h2 id="te2">The TE2 homozygote, and what the mod asserts about it</h2>
+
+<p>
+    There is <strong>one</strong> documented <code>TE2/TE2</code> horse. It was a palomino with
+    blue / light yellow-blue eyes &mdash; and because it also carried one cream allele, the
+    researchers could not separate a possible TE2 effect from cream&rsquo;s known eye-pigment
+    effect, or from an interaction between the two.
+</p>
+
+<p>
+    So &ldquo;TE1 has no obvious coat effect&rdquo; is reasonably supported, and
+    &ldquo;<code>TE2/TE2</code> never affects coat or eye beyond tiger-eye&rdquo; is <b>not</b>
+    established. It is speculative but biologically plausible that a severe TE2-related
+    reduction of <em>SLC24A5</em> function produces a stronger ocular phenotype in some
+    backgrounds.
+</p>
+
+<div class="note warn">
+    <span class="label">The mod gives <code>TE2/TE2</code> a definite colour the literature does not have</span>
+    <p>
+        <code>TigerEyeGene</code> resolves <code>TE2/TE2</code> to a distinct paler,
+        greener-yellow iris &mdash; <code>tiger-eye-yellow</code>, a separate outcome from the
+        amber that <code>TE1/TE1</code> and <code>TE1/TE2</code> give. That is an extrapolation
+        from a single horse whose phenotype was explicitly <em>confounded by cream</em>, and it
+        is the one place this locus states something firmer than its source.
+    </p>
+    <p>
+        It is a defensible extrapolation &mdash; a more disruptive allele giving a more diluted
+        iris is exactly what the mechanism predicts &mdash; and a game cannot render
+        &ldquo;unresolved&rdquo;. But if the mod ever wanted to be conservative here, collapsing
+        <code>TE2/TE2</code> into the same amber as the other two would cost one catalogue entry
+        and would match what anyone has actually observed.
+    </p>
+</div>
+
+<h2 id="real-inheritance">Inheritance</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>genotype</th><th>expected iris</th><th>breeding</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td class="ok">usual dark brown or black</td><td>cannot pass either variant</td></tr>
+<tr><td><code>N/TE1</code>, <code>N/TE2</code></td><td class="ok">usually brown-eyed &mdash; a phenotypically normal carrier</td><td>50% chance of passing it per foal</td></tr>
+<tr><td><code>TE1/TE1</code></td><td>tiger eye</td><td>passes TE1 to every foal</td></tr>
+<tr><td><code>TE1/TE2</code></td><td>tiger eye &mdash; a compound heterozygote</td><td>passes TE1 or TE2 to every foal</td></tr>
+<tr><td><code>TE2/TE2</code></td><td class="warn">expected light iris; very rare in the documentation</td><td>passes TE2 to every foal</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Not sex-linked. Two carriers give the classic 25% affected, 50% carrier, 25% clear. The
+    principle that matters with two alleles is that <b>any pair of tiger-eye alleles
+    combines</b> &mdash; <code>TE1/TE2</code> is affected exactly as <code>TE1/TE1</code> is,
+    which is why a carrier of one variant and a carrier of the other can produce a tiger-eyed
+    foal between them. The mod implements this directly: <code>expressionOf</code> asks only
+    whether a wild-type copy is present.
+</p>
+
+<p>
+    The original pedigrees fit recessive inheritance well: tiger-eye &times; tiger-eye matings
+    produced five tiger-eyed offspring in the available data, and brown-eyed parents occasionally
+    produced tiger-eyed foals &mdash; consistent with unrecognised carriers.
+</p>
+
+<h2 id="health">Health and vision</h2>
+
+<p>
+    Reassuring, and thin. A board-certified veterinary ophthalmologist examined <b>three</b>
+    tiger-eyed Puerto Rican Paso Finos &mdash; two <code>TE1/TE1</code>, one
+    <code>TE1/TE2</code> &mdash; against three dark-eyed controls. Beyond iris pigment the study
+    reported no ocular abnormalities attributable to tiger eye, no visual deficits, no reduction
+    of pigment in the retina or retinal pigment epithelium, and none of the human-OCA-like signs
+    a more severe pigment disorder would predict &mdash; no obvious photophobia, nystagmus or
+    reduced acuity. One tiger-eyed horse had an eyelid-margin defect and a limbal dermoid, which
+    the authors considered unrelated.
+</p>
+
+<p>
+    <b>&ldquo;Not observed&rdquo; is not &ldquo;proven absent.&rdquo;</b> The formal ophthalmic
+    sample was six horses in total; the single known <code>TE2/TE2</code> horse was <em>not</em>
+    given a specialist exam; no large or long-term surveillance has tested light sensitivity,
+    retinal physiology, visual behaviour or subtle visual performance; and there is no direct
+    evidence that tiger eye either causes or prevents eye disease.
+</p>
+
+<p>
+    The defensible statement: <b><code>TE1/TE1</code> and <code>TE1/TE2</code> have not been
+    shown to impair vision or create a health disorder, and rare effects and the
+    <code>TE2/TE2</code> phenotype remain under-studied.</b> The mod carries no health cost at
+    this locus, which matches.
+</p>
+
+<h2 id="performance">Build, size, speed, jumping</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>trait</th><th>evidence for a TE1 or TE2 effect</th></tr></thead>
+<tbody>
+<tr><td>height or mature size</td><td class="ok">none</td></tr>
+<tr><td>bone, body mass, muscling, build</td><td class="ok">none</td></tr>
+<tr><td>conformation</td><td class="ok">none</td></tr>
+<tr><td>gait mechanics, Paso Fino gait quality</td><td class="ok">none</td></tr>
+<tr><td>aerobic capacity, endurance</td><td class="ok">none</td></tr>
+<tr><td>sprint speed, racing performance</td><td class="ok">none</td></tr>
+<tr><td>jumping scope, technique, soundness</td><td class="ok">none</td></tr>
+<tr><td>temperament, trainability</td><td class="ok">none</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The original work was a pigmentation study &mdash; eye photographs, pedigrees, sex and
+    coat-colour observations, then genetic mapping. It phenotyped no height, conformation,
+    locomotor biomechanics, race times, jumping results, muscle traits, metabolic variables or
+    veterinary outcomes beyond the small ophthalmic assessment. It therefore <em>cannot</em>
+    support a performance claim in either direction.
+</p>
+
+<div class="note">
+    <span class="label">The reasoning trap this locus illustrates best</span>
+    <p>
+        See a gene expressed in several tissues, or a pigment gene with health effects in another
+        species, and infer that it changes horse athleticism. The mapped signal here is for
+        <b>iris pigmentation</b>, and sitting on chromosome 1 does not make it a speed locus.
+        Claims that tiger-eyed horses are faster, lighter-built, better jumpers or weaker
+        athletes are breeder lore until someone produces a controlled study with
+        genotype-confirmed horses and objective measurements.
+    </p>
+</div>
+
+<h2 id="breeds">Breed and frequency</h2>
+
+<p>
+    TE1 and TE2 are documented in the <strong>Puerto Rican Paso Fino</strong>, and in no other
+    breed. The distinction matters, because &ldquo;Paso Fino&rdquo; covers related but genetically
+    distinct populations &mdash; the evidence concerns Puerto Rican Paso Finos specifically, not
+    every horse registered broadly as a Paso Fino.
+</p>
+
+<p>The original study screened 196 horses from related Iberian-origin populations:</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>breed</th><th>n</th><th>TE1 or TE2 detected?</th></tr></thead>
+<tbody>
+<tr><td>Colombian Paso</td><td>90</td><td class="ok">no</td></tr>
+<tr><td>Lusitano</td><td>44</td><td class="ok">no</td></tr>
+<tr><td>Andalusian</td><td>42</td><td class="ok">no</td></tr>
+<tr><td>Mangalarga</td><td>20</td><td class="ok">no</td></tr>
+<tr><td><b>total</b></td><td><b>196</b></td><td><b>no alleles found</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    All were homozygous reference at both sites. Strong evidence of absence from <em>that
+    sample</em>; not proof of absence from every animal, bloodline or cross in those breeds.
+</p>
+
+<p>
+    <strong>A breed-wide allele frequency is not established.</strong> The dataset was assembled
+    around phenotype discovery rather than as a random registry survey, so its raw counts are not
+    a prevalence estimate. What can be said: of 216 Puerto Rican Paso Finos photographed, 32 were
+    classified tiger-eyed after exclusions &mdash; about <b>14.8%</b> of the photographed group,
+    and explicitly <em>not</em> a reliable prevalence figure, since the sampling was not random
+    and many horses were excluded for intermediate, blue or dilution-associated phenotypes. Of
+    those 32, <b>20 were <code>TE1/TE1</code> and 8 were <code>TE1/TE2</code></b>, so the two
+    alleles explained 28 of 32 cases &mdash; <b>88%</b>.
+</p>
+
+<p>
+    The four unexplained cases are instructive. Three were heterozygous TE1 carriers with orange
+    eyes at the darker end of the study&rsquo;s range, and may simply have been borderline
+    light-brown. One was a yellow-eyed TE1 carrier that could plausibly carry an undiscovered
+    second <em>SLC24A5</em> allele &mdash; but the horse was dead and could not be rechecked.
+</p>
+
+<p>
+    The conclusion: <b>TE1 is probably the predominant documented allele, TE2 is rarer, and exact
+    frequencies await a modern random breed survey.</b> The mod encodes that ordering &mdash;
+    TE2 is set at 0.6&times; TE1&rsquo;s frequency &mdash; which is the right shape from a
+    20-against-8 split, and the absolute figure of one allele in 70 wild horses has no published
+    counterpart to check against. What the mod does have, and what this page supports, is
+    <a href="gene-tiger-eye.html#breed">the concentration</a>: this is the clearest case in the
+    mod of a gene you find by knowing which breed to look in.
+</p>
+
+<h2 id="settled">What is settled, and what is not</h2>
+
+<p><strong>Established.</strong> Tiger eye is a recessive iris-colour trait in Puerto Rican Paso
+    Finos; the locus is on ECA1 and involves <em>SLC24A5</em>; <code>TE1/TE1</code> and
+    <code>TE1/TE2</code> commonly produce yellow, amber or orange irides; the two alleles explain
+    most but not every classified case; neither was found in the 196 related-breed horses tested;
+    neither has a demonstrated coat effect; and in a very small specialist sample they were not
+    associated with any detected ocular or visual deficit.</p>
+
+<p><strong>Plausible but unproven.</strong> That the variants dilute iris pigment by altering ion
+    handling and melanosome maturation. Whether the amber result reflects reduced eumelanin, an
+    altered eumelanin-to-pheomelanin balance, altered pigment quantity, altered melanosome
+    packaging or some combination &mdash; none of which has been measured in tiger-eyed horse
+    iris tissue. That <code>TE2/TE2</code> gives a more extreme phenotype and might interact with
+    cream, which one confounded horse cannot settle. That further undiscovered
+    <em>SLC24A5</em> variants, or variants elsewhere, explain the phenotype-genotype mismatches.
+    And that the alleles might exist at very low frequency in unsampled related breeds.</p>
+
+<p><strong>Unsupported.</strong> That tiger eye changes coat colour in ordinary
+    <code>TE1/TE1</code> or <code>TE1/TE2</code> horses; that it changes height, body type,
+    strength, gait, speed, jumping, endurance or trainability; that it is itself a disease or
+    causes blindness; or that every amber, hazel, yellow or blue eye in a horse comes from
+    <em>SLC24A5</em> &mdash; iris colour also arises from cream, champagne, white spotting and
+    other contexts, and phenotype alone is not a test. The mod encodes that last point
+    structurally: tiger eye contributes its colour at
+    <a href="eye-colour.html"><code>RANK_PIGMENT</code></a>, so a tiger-eye horse that is
+    <em>also</em> splashed white has blue eyes rather than amber &mdash; there is no pigment left
+    in a depigmented iris for this gene to colour.</p>
+
+</section>
+
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>

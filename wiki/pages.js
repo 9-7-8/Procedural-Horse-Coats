@@ -127,7 +127,7 @@ window.HG.pages = {
             items: [
                 { href: "gene-natural-zebra.html", text: "Zebra striping", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-roan.html", text: "Roan", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-rabicano.html", text: "Rabicano", kind: "natural", views: ["gameplay","coding"] },
+                { href: "gene-rabicano.html", text: "Rabicano", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-tobiano.html", text: "Tobiano", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-leopard.html", text: "The leopard complex (appaloosa)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-ednrb.html", text: "EDNRB (frame overo)", kind: "natural", views: ["gameplay","coding","science"] },
@@ -169,7 +169,7 @@ window.HG.pages = {
             items: [
                 { href: "gene-sex.html", text: "Sex", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-diet.html", text: "Diet", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-tiger-eye.html", text: "Tiger eye (SLC24A5)", kind: "natural", views: ["gameplay","coding"] }
+                { href: "gene-tiger-eye.html", text: "Tiger eye (SLC24A5)", kind: "natural", views: ["gameplay","coding","science"] }
             ]
         },
         {
