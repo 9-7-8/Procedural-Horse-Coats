@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.CoatTextureId;
+import com.example.horsegenetics.common.coat.TexelBudgetCache;
 import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.pattern.GradientLut;
 import com.example.horsegenetics.common.coat.pattern.LutSet;
@@ -34,6 +35,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * result as a {@link DynamicTexture}, cached by {@link CoatData#textureKey()}
  * plus adult/foal (grey greys only adults, and the foal uses a different mesh /
  * template). The two white templates + the red/black gradient load once.
+ *
+ * <p>Both caches are {@linkplain TexelBudgetCache texel-budgeted LRUs}: an
+ * entry is a whole {@code N x N} sheet held both as CPU pixels and as a
+ * registered GPU texture, so the client used to accumulate one of each per
+ * distinct genome it had ever drawn and free them only on logging out. The
+ * budget is in texels rather than entries so it still means the same amount of
+ * memory if {@link HorseSkinGeometry#SHEET_SIZE} ever changes.
+ *
+ * <p>Everything here is loaded lazily and dropped by {@link #clear()}, which
+ * runs on logging out <i>and</i> on a client resource reload
+ * ({@link CoatAssetReload}) - the templates and the LUTs are pack resources,
+ * so a reload has to be able to take them back.
  */
 public final class GeneticCoatTextureFactory {
 
@@ -46,17 +59,48 @@ public final class GeneticCoatTextureFactory {
     private static final Identifier GRADIENT =
             Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "textures/coat/redblackgradient.png");
 
-    private static final Map<String, Identifier> CACHE = new ConcurrentHashMap<>();
+    /**
+     * How much a cache may hold, in texels - 8Mi, which is 32MiB of ARGB pixels
+     * plus the same again on the GPU, per cache. Chosen as a memory figure
+     * rather than as a horse count on purpose: it is the number that has to stay
+     * true at any sheet size, and at the current one it is comfortably more
+     * coats than a client can have on screen.
+     */
+    private static final long MAX_TEXELS_PER_CACHE = 8L * 1024 * 1024;
 
     /**
-     * Reverse of {@link #CACHE}, kept purely as a tripwire: two texture keys
+     * ...but never fewer than this many coats, whatever the sheet size. The
+     * budget alone would allow only 32 entries at a 512px sheet, and a cache
+     * smaller than the number of horses in view does not merely thrash - it can
+     * release a texture that an already-submitted draw call is still going to
+     * read. This floor keeps the LRU comfortably larger than any plausible
+     * frame.
+     */
+    private static final int MIN_ENTRIES = 64;
+
+    private static final long BUDGET = Math.max(MAX_TEXELS_PER_CACHE, (long) MIN_ENTRIES * N * N);
+
+    /** One composed sheet's worth of texels; a {@code null} value holds no texture at all. */
+    private static final TexelBudgetCache.Cost<Identifier> SHEET_COST =
+            id -> id == null ? 0L : (long) N * N;
+
+    /**
+     * Reverse of the coat cache, kept purely as a tripwire: two texture keys
      * landing on one {@link Identifier} is the bug that made chestnuts and bays
      * render as the bare white template (see {@link CoatTextureId}), and it is
      * silent - {@code TextureManager#register} just overwrites and closes the
      * loser. {@code CoatTextureId} is injective so this can't fire; it's here so
      * a future change to the id scheme can't reintroduce the bug quietly.
+     *
+     * <p>An evicted key is removed from here too, so the tripwire only ever
+     * covers ids that are <i>live at the same time</i> - which is exactly when
+     * the collision would do damage, since a released id has no texture left to
+     * overwrite.
      */
     private static final Map<Identifier, String> KEY_BY_ID = new ConcurrentHashMap<>();
+
+    private static final TexelBudgetCache<String, Identifier> CACHE =
+            new TexelBudgetCache<>(BUDGET, SHEET_COST, (key, id) -> release(id, KEY_BY_ID));
 
     /**
      * Emissive-mask textures, one per (coat, foal/adult, emissive part set). The
@@ -64,9 +108,24 @@ public final class GeneticCoatTextureFactory {
      * transparent everywhere else; {@code EmissiveCoatLayer} draws it full-bright
      * over the base coat. Keyed off the same texture key so it invalidates with
      * the coat.
+     *
+     * <p>A horse with nothing emissive caches a <b>null</b>, which is a real
+     * entry costing no texels: without it every ordinary horse would recompose
+     * its whole coat every frame to rediscover that nothing glows.
      */
-    private static final Map<String, Identifier> EMISSIVE_CACHE = new ConcurrentHashMap<>();
     private static final Map<Identifier, String> EMISSIVE_KEY_BY_ID = new ConcurrentHashMap<>();
+
+    private static final TexelBudgetCache<String, Identifier> EMISSIVE_CACHE =
+            new TexelBudgetCache<>(BUDGET, SHEET_COST, (key, id) -> release(id, EMISSIVE_KEY_BY_ID));
+
+    /** The one place a generated texture is handed back to the game. */
+    private static void release(Identifier id, Map<Identifier, String> reverse) {
+        if (id == null) {
+            return; // the "nothing glows" marker - never registered
+        }
+        reverse.remove(id);
+        Minecraft.getInstance().getTextureManager().release(id);
+    }
 
     private static volatile int[] adultTemplate;
     private static volatile int[] babyTemplate;
@@ -83,7 +142,7 @@ public final class GeneticCoatTextureFactory {
     /** {@code breedLabel} is dev-build cosmetic only - the [coat] chat line. */
     public static Identifier getOrCreate(CoatData coat, boolean baby, String breedLabel) {
         String key = coat.textureKey() + (baby ? ":foal" : ":adult");
-        return CACHE.computeIfAbsent(key, k -> generate(coat, baby, k, breedLabel));
+        return CACHE.get(key, k -> generate(coat, baby, k, breedLabel));
     }
 
     /**
@@ -110,17 +169,8 @@ public final class GeneticCoatTextureFactory {
         // The gene-written half of the mask is a function of the texture key
         // already, so only the spec parts need to appear in the cache key.
         String key = coat.textureKey() + (baby ? ":foal" : ":adult") + ":glow:" + tag;
-        Identifier cached = EMISSIVE_CACHE.computeIfAbsent(key, k -> generateEmissive(coat, baby, wanted, k));
-        return cached == NO_GLOW ? null : cached;
+        return EMISSIVE_CACHE.get(key, k -> generateEmissive(coat, baby, wanted, k));
     }
-
-    /**
-     * Cached stand-in for "this horse has nothing emissive". A real entry rather
-     * than {@code null}, because {@code computeIfAbsent} refuses to store a null
-     * and would recompose the whole coat every frame for every ordinary horse.
-     */
-    private static final Identifier NO_GLOW =
-            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "coat_glow/none");
 
     private static Identifier generateEmissive(CoatData coat, boolean baby, Set<Part> parts, String key) {
         ensureAssetsLoaded();
@@ -132,7 +182,7 @@ public final class GeneticCoatTextureFactory {
         boolean[] byGene = baked.emissive();
 
         if (parts.isEmpty() && byGene == null) {
-            return NO_GLOW;
+            return null; // nothing on this horse glows - cached as a real, free entry
         }
 
         int[] mask = new int[N * N];
@@ -157,7 +207,7 @@ public final class GeneticCoatTextureFactory {
             });
         }
         if (!any[0]) {
-            return NO_GLOW; // e.g. a mane glow on a foal, which has no mane
+            return null; // e.g. a mane glow on a foal, which has no mane
         }
 
         NativeImage image = new NativeImage(N, N, false);
@@ -301,20 +351,24 @@ public final class GeneticCoatTextureFactory {
         }
     }
 
-    /** Release every generated coat texture (called on world exit). */
+    /**
+     * Release every generated coat texture and drop the pack resources behind
+     * them. Called on world exit and on a client resource reload; the caches
+     * free each entry through the same eviction hook the LRU uses, so there is
+     * one release path rather than two.
+     */
     public static void clear() {
-        var textureManager = Minecraft.getInstance().getTextureManager();
-        for (Identifier id : CACHE.values()) {
-            textureManager.release(id);
-        }
-        for (Identifier id : EMISSIVE_CACHE.values()) {
-            if (!id.equals(NO_GLOW)) { // never registered - it is a "nothing glows" marker
-                textureManager.release(id);
-            }
-        }
+        // The session's only report on the LRU, and the one place the owner can
+        // see from a log whether it ever had to evict anything. Written before
+        // the clear, because after it every number is zero.
+        HorseGenetics.LOGGER.info(
+                "releasing {} coat textures and {} glow masks; {} coats and {} masks were recycled "
+                        + "for space during the session (budget {} texels each)",
+                CACHE.size(), EMISSIVE_CACHE.size(),
+                CACHE.evictionCount(), EMISSIVE_CACHE.evictionCount(), BUDGET);
         CACHE.clear();
-        KEY_BY_ID.clear();
         EMISSIVE_CACHE.clear();
+        KEY_BY_ID.clear();
         EMISSIVE_KEY_BY_ID.clear();
         adultTemplate = null;
         babyTemplate = null;

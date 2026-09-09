@@ -667,7 +667,13 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
     On the client, <code>GeneticCoatTextureFactory</code> loads the adult and foal
     templates plus the gradient once, runs <code>compose</code>, uploads a
     <code>DynamicTexture</code>, and caches by <code>textureKey()</code> plus
-    <code>:adult</code> / <code>:foal</code>. The cache is cleared on world exit.
+    <code>:adult</code> / <code>:foal</code>. The cache is a
+    <code>TexelBudgetCache</code>: a least-recently-used cache whose capacity is measured
+    in <strong>texels</strong> rather than in entries, since one entry is a whole sheet and
+    what has to stay bounded as <code>HorseSkinGeometry.SHEET_SIZE</code> changes is the
+    memory rather than the horse count. Everything is released on world exit and on a
+    client resource reload alike &mdash; the templates and the gradient are pack
+    resources, so <code>CoatAssetReload</code> has to be able to take them back.
 </p>
 
 <p>

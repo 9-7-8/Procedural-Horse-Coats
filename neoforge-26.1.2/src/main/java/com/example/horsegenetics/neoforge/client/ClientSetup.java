@@ -8,6 +8,7 @@ import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
@@ -49,6 +50,15 @@ public final class ClientSetup {
     @SubscribeEvent
     static void registerSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
         event.register(TransferDeedRenderer.ID, TransferDeedRenderer.Unbaked.MAP_CODEC);
+    }
+
+    /**
+     * The generated coats are composed from pack resources, so a resource
+     * reload has to be able to throw them away - see {@link CoatAssetReload}.
+     */
+    @SubscribeEvent
+    static void registerReloadListeners(AddClientReloadListenersEvent event) {
+        event.addListener(CoatAssetReload.ID, new CoatAssetReload());
     }
 
     @SubscribeEvent

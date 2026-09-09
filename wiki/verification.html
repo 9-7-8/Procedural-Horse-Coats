@@ -35,6 +35,48 @@
     </p>
 </div>
 
+<h2 id="coat-cache">&sect;0-AV &mdash; The coat texture cache is bounded, and F3+T now means something (2026-09-09, NOT looked at)</h2>
+
+<p>
+    <a href="known-gaps.html#gap-130">Gap 130</a>, both halves. The client used to keep
+    every coat it had ever baked until you logged out, and no resource reload touched any
+    of it. Both caches are now texel-budgeted LRUs and there is a client reload listener.
+    The <em>policy</em> is unit-tested away from the GPU
+    (<code>TexelBudgetCacheTest</code>); what no test on this side can see is whether
+    releasing a texture mid-session upsets the renderer, which is the whole of what is
+    listed here.
+</p>
+
+<ul>
+<li><strong>Nothing flickers, greys or goes white in a crowd.</strong> The one real risk in
+    the change: an eviction releases a registered texture, and if it ever released one that
+    a draw call already submitted this frame still wanted, that horse renders wrong for a
+    frame. The budget is deliberately far larger than a frame (a floor of 64 coats sits
+    under the texel budget), so this should be unobservable &mdash; stand in a paddock of
+    two dozen visibly different horses, or open the family tree on a large pedigree, and
+    watch for a single-frame flash of the bare white template.</li>
+<li><strong>Editing the gradient and pressing F3+T now redraws every horse.</strong> This is
+    the half a person will actually notice, and it is the easiest to check: edit
+    <code>common/src/main/resources/.../redblackgradient.png</code> (or drop in a resource
+    pack that does), press F3+T, and every horse on screen should recolour. Before this
+    change it did nothing at all. Switching resource packs is the same test by another
+    route.</li>
+<li><strong>The reload does not stutter or crash.</strong> The listener throws away the
+    templates and the LUT set as well as the coats, so the first horse drawn after a reload
+    re-reads them and recomposes &mdash; the same work a fresh login does, but happening
+    while a world is loaded, which is new.</li>
+<li><strong>The log line at world exit.</strong> Leaving a world now writes one line saying
+    how many coat textures and glow masks were released and how many were recycled for
+    space during the session. Nonzero recycling in an ordinary session would be a surprise
+    at the current sheet size and is worth knowing about; a nonzero count with no visual
+    complaint is the eviction path proving itself.</li>
+<li><strong>The &ldquo;nothing glows&rdquo; marker changed shape.</strong> The emissive
+    cache used to store a fake <code>coat_glow/none</code> id for a horse with nothing
+    emissive; it now stores a real <code>null</code> entry. An ordinary horse must still
+    not recompose its coat every frame (the dev build&rsquo;s <code>[coat]</code> chat line
+    repeating forever is the tell) and a glowing one must still glow.</li>
+</ul>
+
 <h2 id="reseed">&sect;0-AU &mdash; Every coat in the mod redrew (2026-09-09, NOT looked at)</h2>
 
 <p>

@@ -308,7 +308,7 @@
     What has to change first: <code>spread</code> (a 4-unit radius means searching a
     65&times;65 box per texel over a million texels &mdash; four orders of magnitude more
     sample work than today), and the bake has to leave the render thread. Today
-    <code>getOrCreate</code> composes synchronously inside a <code>computeIfAbsent</code>
+    <code>getOrCreate</code> composes synchronously inside the cache&rsquo;s own lock
     on the render thread, the first frame a horse of a new genome is visible. At
     k&nbsp;=&nbsp;2 that is a stutter; at k&nbsp;=&nbsp;16 it is a multi-second freeze
     every time a new horse walks over a hill.
@@ -317,11 +317,16 @@
 <h3>16&times; &mdash; 2048px, k = 32</h3>
 <p>
     Past the point where a texel corresponds to anything anatomical, and into territory
-    where the constraint is the cache rather than the bake. The texture cache is keyed by
-    genome and <strong>never evicted within a session</strong> &mdash;
-    <code>GeneticCoatTextureFactory.clear()</code> runs on logout and nothing else. Twenty
-    distinct horses is 320 MiB of VRAM that is never released while you play. A bounded,
-    LRU-evicting cache stops being a nicety here and becomes a prerequisite.
+    where the constraint is the cache rather than the bake. This is the step that made the
+    unbounded cache worth fixing before anything else: it was keyed by genome and never
+    evicted within a session, so twenty distinct horses at this size would have been
+    320&nbsp;MiB of VRAM held until logout. Both caches are now
+    <code>TexelBudgetCache</code>s, and the budget is <em>in texels</em> precisely so that
+    this row of the table costs the same memory as every other one &mdash; what changes
+    with <var>k</var> is how many coats fit inside it, which at 2048px is a couple of
+    dozen. That is the point where the cache starts evicting a horse that is still on
+    screen, and where the answer stops being a bigger budget and becomes an off-thread
+    bake plus a smaller sheet for distant horses.
 </p>
 
 <h3>32&times; and 64&times; &mdash; 4096px and 8192px</h3>
@@ -375,8 +380,12 @@
         shared, so it is already safe to run on a worker; the only thing that must happen
         on the render thread is the <code>NativeImage</code> upload. Render the white
         template until the bake lands.</li>
-    <li><strong>Bound the cache.</strong> LRU with a texel budget rather than an entry
-        count, so one setting covers every k.</li>
+    <li><strong>Bound the cache.</strong> <s>LRU with a texel budget rather than an entry
+        count, so one setting covers every k.</s> <strong>Done 2026-09-09</strong> &mdash;
+        <code>TexelBudgetCache</code>, one budget in texels, plus an entry floor so the
+        cache cannot end up smaller than a frame at a large <var>k</var>. It is the one
+        item on this list that was worth doing before the resolution work rather than
+        during it, because it was already a defect at the current size.</li>
     <li><strong>Scale the tools with it.</strong> <code>GeneIconTool.SCALE</code>,
         <code>CoatSampleTool</code>, <code>CreatorAssetTool</code>,
         <code>GeneWikiTool</code> and <code>DesignerApi</code> all read the template and
@@ -596,10 +605,12 @@
     </li>
     <li>
         <strong>Reload and invalidation.</strong> Changing packs has to drop every baked
-        coat and re-derive the templates.
-        <code>GeneticCoatTextureFactory.clear()</code> already does precisely this and is
-        currently wired only to logout; it needs to hang off a resource-reload listener
-        as well. Cheap, and the piece most likely to be forgotten.
+        coat and re-derive the templates. <strong>Built 2026-09-09</strong>, ahead of the
+        rest of this: <code>CoatAssetReload</code> is a client reload listener that calls
+        <code>GeneticCoatTextureFactory.clear()</code>, so F3+T and a pack switch already
+        invalidate every coat. It was the piece most likely to be forgotten and it was
+        also already a defect &mdash; without it, editing the gradient and reloading
+        appeared to do nothing at all.
     </li>
 </ol>
 
