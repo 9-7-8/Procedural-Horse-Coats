@@ -1,0 +1,87 @@
+{
+  "format": 3,
+  "key": "horsegenetics.banded_socks",
+  "name": "Banded Socks",
+  "phase": "magical",
+  "priority": 260,
+  "rarity": "COMMON",
+  "blurb": "Stacked bands up all four legs, like a set of rings pulled on - the height of the band and its colour are the horse's own.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The source asked for a PALETTE op stepping black and a hue up the leg. PALETTE puts hard walls between its own lattice cells and would have given bands in the wrong direction; a WAVES band with `spacing` turned up repeats along one axis by construction, which is what a stack of rings is.",
+    "Measured in part space, so a hind leg and a fore leg get the same NUMBER of bands rather than the same band height. That is the choice worth arguing about: in body units the two would line up across the horse and the count would differ per leg."
+  ],
+  "alleles": [
+    {
+      "token": "Bsk",
+      "label": "Banded Socks (Bsk)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "bandHue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "bandHeight",
+      "min": 0.12,
+      "max": 0.26
+    }
+  ],
+  "expressions": [
+    {
+      "id": "banded",
+      "name": "Banded Socks",
+      "description": "A repeating band across each leg, drawn in part space so a hind leg and a fore leg get the same number of rings rather than the same ring height. Below the knee it reads as a set of stacked socks; the number of them is one knob.",
+      "when": {
+        "Bsk": 2
+      },
+      "layers": [
+        {
+          "name": "bands stacked up each leg",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": 400.0,
+              "amplitude": 0.0,
+              "spacing": "$bandHeight",
+              "phase": 0.0,
+              "softness": 0.02,
+              "from": 0.0,
+              "to": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$bandHue",
+            "saturation": 0.7,
+            "lightness": 0.55,
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Plain legs.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Bsk/Bsk": 0.4,
+    "Bsk/n": 0.4,
+    "n/n": 99.2
+  }
+}

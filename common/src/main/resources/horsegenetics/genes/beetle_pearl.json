@@ -1,0 +1,310 @@
+{
+  "format": 3,
+  "key": "horsegenetics.beetle_pearl",
+  "name": "Beetle Pearl",
+  "phase": "magical",
+  "priority": 221,
+  "rarity": "RARE",
+  "blurb": "A hard black barrel scattered with pearls, a pale cap over the poll and a dark fork down the face - a pearl-spotted beetle rather than a spotted horse.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The ground goes to black before anything else, which is why this reads the same on a chestnut as on a black. The source used perDose coverage to make the heterozygote fainter; that was dropped, because a perDose triple on an expression the first allele does not reach is silently zero (gap 105) and this locus is simple dominant."
+  ],
+  "alleles": [
+    {
+      "token": "Bpw",
+      "label": "Pearl, white (Bpw)"
+    },
+    {
+      "token": "Bpc",
+      "label": "Pearl, coloured (Bpc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSpacing",
+      "min": 2.6,
+      "max": 3.6
+    },
+    {
+      "name": "spotRadius",
+      "min": 0.75,
+      "max": 1.15
+    },
+    {
+      "name": "spotStretch",
+      "min": 1.1,
+      "max": 1.6
+    },
+    {
+      "name": "spotVary",
+      "min": 0.25,
+      "max": 0.55
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Beetle Pearl",
+      "description": "The ground goes to black before anything else, so the pearls have something to be pearls against - on a chestnut as much as on a black. The spot field is mirrored, so the two flanks match, which is what separates this from an ordinary appaloosa.",
+      "when": [
+        "Bpw/Bpw",
+        "Bpw/Bpc",
+        "Bpw/n"
+      ],
+      "layers": [
+        {
+          "name": "the barrel taken to a hard black",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#111111",
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "pearls scattered over it, mirrored side to side",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$spotRadius",
+              "stretch": "$spotStretch",
+              "vary": "$spotVary",
+              "mirror": true,
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4f2ee",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a pale cap over the poll",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "softness": 0.1,
+              "from": 0.58,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4f2ee",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a dark fork down the face",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "halfWidth": 0.6,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#111111",
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "dark ear tips",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "EARS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.15,
+              "from": 0.5,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#111111",
+            "strength": 95.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Beetle Pearl, coloured",
+      "description": "The same black ground with the pearls in a colour the line carries. Fully recessive.",
+      "when": {
+        "Bpc": 2
+      },
+      "layers": [
+        {
+          "name": "the barrel taken to a hard black",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#111111",
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "pearls scattered over it, mirrored side to side",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$spotRadius",
+              "stretch": "$spotStretch",
+              "vary": "$spotVary",
+              "mirror": true,
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.68,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a pale cap over the poll",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "softness": 0.1,
+              "from": 0.58,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.68,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a dark fork down the face",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "halfWidth": 0.6,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#111111",
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "dark ear tips",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "EARS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.15,
+              "from": 0.5,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#111111",
+            "strength": 95.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No pearls.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Bpw/Bpw": 0.004,
+    "Bpw/Bpc": 0.012,
+    "Bpw/n": 0.06,
+    "Bpc/Bpc": 0.012,
+    "n/n": 99.912
+  }
+}

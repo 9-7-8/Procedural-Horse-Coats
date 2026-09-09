@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.genetics.genes.AcanGene;
 import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
 import com.example.horsegenetics.common.genetics.genes.B4galt7Gene;
@@ -407,8 +408,8 @@ public final class Genes {
     private static volatile List<Gene> order = List.of();
     private static volatile List<Gene> naturalOrder = List.of();
     private static volatile List<Gene> magicalOrder = List.of();
-    private static volatile Map<String, Gene> byKey = Map.of();
-    private static volatile Map<String, Allele> alleleByKey = Map.of();
+    private static volatile Map<String, Gene> byKey = CommonMaps.empty();
+    private static volatile Map<String, Allele> alleleByKey = CommonMaps.empty();
     private static volatile Set<String> coatInfluencing = Set.of();
 
     static {
@@ -572,8 +573,8 @@ public final class Genes {
                 alleles.put(a.key(), a);
             }
         }
-        byKey = Map.copyOf(keys);
-        alleleByKey = Map.copyOf(alleles);
+        byKey = CommonMaps.copyOf(keys);
+        alleleByKey = CommonMaps.copyOf(alleles);
 
         // "Does this gene change how the horse looks?" - asked often enough
         // (every editor row, every frame) to be worth a set rather than a walk.

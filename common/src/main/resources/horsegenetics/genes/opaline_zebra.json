@@ -1,0 +1,283 @@
+{
+  "format": 3,
+  "key": "horsegenetics.opaline_zebra",
+  "name": "Opaline Zebra",
+  "phase": "magical",
+  "priority": 380,
+  "rarity": "RARE",
+  "blurb": "A full set of stripes - round the barrel, across the face, and down the spine - on a ground that is opal rather than white.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The pale ground goes on first and the stripes over it, which is the honest way round: a zebra is a pale animal with dark stripes, and painting it the other way makes the stripe spacing the thing you notice.",
+    "Barrel strokes run along Z - round the horse rather than along it. On the face, Z is across the nose, which is the direction facial striping actually runs."
+  ],
+  "alleles": [
+    {
+      "token": "Opz",
+      "label": "Opaline, white (Opz)"
+    },
+    {
+      "token": "Opc",
+      "label": "Opaline, coloured (Opc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "phaseSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spacing",
+      "min": 2.2,
+      "max": 3.4
+    },
+    {
+      "name": "width",
+      "min": 0.9,
+      "max": 1.5
+    },
+    {
+      "name": "faceSpacing",
+      "min": 1.4,
+      "max": 2.2
+    },
+    {
+      "name": "faceWidth",
+      "min": 0.35,
+      "max": 0.6
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Opaline Zebra",
+      "description": "The pale ground goes on first and the stripes over it, which is the honest way round for a zebra: what you are looking at is a white horse with black on it, not a black horse with white on it. The stripes are WAVES rather than STROKES because only WAVES repeats evenly - strokes wander, and a zebra whose stripes wander is a brindle.",
+      "when": [
+        "Opz/Opz",
+        "Opz/Opc",
+        "Opz/n"
+      ],
+      "layers": [
+        {
+          "name": "the ground between the stripes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2f0ea",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "stripes round the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "wavelength": 14.0,
+              "amplitude": 0.9,
+              "spacing": "$spacing",
+              "phase": 0.0,
+              "softness": 0.12,
+              "from": 0.0,
+              "to": "$width"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "finer ones across the face",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "wavelength": 9.0,
+              "amplitude": 0.4,
+              "spacing": "$faceSpacing",
+              "phase": 0.0,
+              "softness": 0.08,
+              "from": 0.0,
+              "to": "$faceWidth"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "and a dorsal line down the spine",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY"
+              ],
+              "halfWidth": 0.4,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 93.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Opaline Zebra, coloured",
+      "description": "The same stripes on a ground the line carries a colour for - which is what makes it opaline rather than plain. Fully recessive.",
+      "when": {
+        "Opc": 2
+      },
+      "layers": [
+        {
+          "name": "the ground between the stripes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.35,
+            "lightness": 0.85,
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "stripes round the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "wavelength": 14.0,
+              "amplitude": 0.9,
+              "spacing": "$spacing",
+              "phase": 0.0,
+              "softness": 0.12,
+              "from": 0.0,
+              "to": "$width"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "finer ones across the face",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "wavelength": 9.0,
+              "amplitude": 0.4,
+              "spacing": "$faceSpacing",
+              "phase": 0.0,
+              "softness": 0.08,
+              "from": 0.0,
+              "to": "$faceWidth"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "and a dorsal line down the spine",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY"
+              ],
+              "halfWidth": 0.4,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 93.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No stripes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Opz/Opz": 0.004,
+    "Opz/Opc": 0.012,
+    "Opz/n": 0.06,
+    "Opc/Opc": 0.012,
+    "n/n": 99.912
+  }
+}

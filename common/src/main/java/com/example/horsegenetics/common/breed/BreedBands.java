@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.breed;
 
+import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
 
@@ -53,7 +54,7 @@ import java.util.Set;
 public final class BreedBands {
 
     /** A breed that pins no numbers - the common case. */
-    public static final BreedBands NONE = new BreedBands(Map.of());
+    public static final BreedBands NONE = new BreedBands(CommonMaps.empty());
 
     /** One closed range, and the point of it a founder is given. */
     public record Band(double lo, double hi) {
@@ -95,7 +96,7 @@ public final class BreedBands {
     /** The value name to band map for one gene, or an empty map. */
     public Map<String, Band> forGene(String geneKey) {
         Map<String, Band> m = byGene.get(geneKey);
-        return m == null ? Map.of() : m;
+        return m == null ? CommonMaps.empty() : m;
     }
 
     public Map<String, Band> forGene(Gene gene) {

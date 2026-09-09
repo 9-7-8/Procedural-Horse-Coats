@@ -74,7 +74,11 @@ tasks.register<Copy>("bakeDesignerAssets") {
         into("wasm")
     }
     from(project(":common").layout.projectDirectory.dir("src/main/resources/assets/horsegenetics/textures")) {
-        include("coat/redblackgradient.png", "coat/lutbluepink.png")
+        // Every LUT the LUT locus can name (LutGene.VARIANTS), plus the
+        // natural gradient. A new palette is a new file here and a new line in
+        // java.js's ASSETS - both are listed rather than globbed, so an
+        // unreferenced PNG in the coat folder does not quietly ship.
+        include("coat/redblackgradient.png", "coat/lutbluepink.png", "coat/lutgreenpink.png")
         include("entity/horse/horse_white.png", "entity/horse/horse_white_baby.png")
         eachFile { path = "assets/" + name }
         includeEmptyDirs = false

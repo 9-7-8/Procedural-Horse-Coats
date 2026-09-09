@@ -202,6 +202,13 @@ class CoatPipelineGoldenTest {
             override("lut=Blupnk/Blupnk"),
             override("agouti=A/a", "lut=Blupnk/Blupnk"),
             override("extension=e/e", "grey=G3/N", "lut=Blupnk/Blupnk"),
+            // ...and one row per further palette, so a new LUT allele that
+            // silently resolves against the base gradient fails here.
+            override("lut=Grnpnk/Grnpnk"),
+            override("agouti=A/a", "lut=Grnpnk/Grnpnk"),
+            // A mixed pair is NOT half of each - it is the natural gradient,
+            // and must hash as such.
+            override("agouti=A/a", "lut=Blupnk/Grnpnk"),
             // the leopard complex - each PATN combination is a different painter,
             // and LP zygosity flips leopard<->fewspot / blanket<->snowcap
             override("agouti=A/a", "leopard=LP/lp"),
@@ -288,7 +295,7 @@ class CoatPipelineGoldenTest {
     }
 
     private static String render() {
-        LutSet luts = new LutSet(lut(), java.util.Map.of("bluepink", altLut()));
+        LutSet luts = LutSet.fromRegistry(lut(), path -> altLut(path.hashCode()));
         int[] adultTemplate = template(Skin.ADULT);
         int[] foalTemplate = template(Skin.BABY);
         StringBuilder sb = new StringBuilder();
@@ -383,19 +390,28 @@ class CoatPipelineGoldenTest {
 
     /**
      * A synthetic <i>alternate</i> LUT for the {@code LUT} locus - same layout
-     * (left redder, bottom blacker) but cool blues and pinks, so a
-     * {@code Blupnk/Blupnk} horse hashes differently from its natural-gradient
+     * (left redder, bottom blacker) but not the natural colours, so a
+     * homozygous LUT horse hashes differently from its natural-gradient
      * carrier.
+     *
+     * <p><b>Synthetic on purpose</b>, and one per palette: the golden file pins
+     * the <i>pipeline</i>, not the art, so re-drawing {@code lutbluepink.png}
+     * must not invalidate it. {@code tag} is the palette's resource path, which
+     * only has to make the palettes differ from one another - so a horse that
+     * resolves against the wrong LUT, or falls back to the base gradient
+     * because its alternate never loaded, fails.
      */
-    private static GradientLut altLut() {
+    private static GradientLut altLut(int tag) {
         int s = 16;
         int[] a = new int[s * s];
-        int white = 0xFFF2ECF6, pink = 0xFFD86AA8, blueBlack = 0xFF10122A;
+        int white = 0xFFF2ECF6;
+        int hot = 0xFF000000 | (tag * 0x9E3779B9);
+        int dark = 0xFF10122A ^ (tag & 0x001F1F1F);
         for (int y = 0; y < s; y++) {
             for (int x = 0; x < s; x++) {
                 float redLevel = 1f - x / (float) (s - 1);
                 float blackLevel = y / (float) (s - 1);
-                a[y * s + x] = lerp(lerp(white, pink, redLevel), blueBlack, blackLevel);
+                a[y * s + x] = lerp(lerp(white, hot, redLevel), dark, blackLevel);
             }
         }
         return new GradientLut(a, s, s);

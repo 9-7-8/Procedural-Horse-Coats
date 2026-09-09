@@ -188,6 +188,56 @@
     the founder table: a wild horse does not get to roll a pair that shows nothing.
 </p>
 
+<h2 id="prose">Write down why, in the file</h2>
+
+<p>
+    A gene file carries <strong>three</strong> pieces of human-readable text, and they are
+    for three different readers. Keeping them apart is the difference between a gene
+    somebody can pick up in a year and a gene that is a wall of numbers.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Field</th><th>Who reads it</th><th>How long</th></tr></thead>
+<tbody>
+<tr><td><code>blurb</code></td><td>A <strong>player</strong>, in a tooltip and the in-game gene browser. What the locus does, at a glance.</td><td>One to three sentences. It has to stay that size &mdash; it is rendered somewhere small.</td></tr>
+<tr><td>an expression&rsquo;s <code>description</code></td><td>A <strong>player</strong> again: what a horse with <em>this</em> combination looks like.</td><td>A sentence or a short paragraph.</td></tr>
+<tr><td><code>notes</code>, on the gene and on each expression</td><td>The <strong>next person to open the file</strong> &mdash; possibly you.</td><td>As long as it needs to be. Usually nothing.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <code>notes</code> is the one that did not exist until it was needed. JSON has no
+    comments, so everything an author actually knew &mdash; why the wavelength is 90 and
+    not 45, which two layers have to stay in that order, what the source description asked
+    for and where this build knowingly does something else &mdash; had nowhere to go except
+    a hand-written wiki page, where it drifted from the gene the first time either moved.
+</p>
+
+<p>
+    Now it lives beside the layers it is about, and
+    <code>:common:bakeGeneWikiPages</code> prints it on the gene&rsquo;s own page &mdash;
+    the gene-level block under <em>About this gene</em>, an expression&rsquo;s block under
+    that outcome&rsquo;s heading in <em>What it paints</em>. Write it once, in the file.
+    It is an array of paragraphs, or a bare string for one; a gene with nothing worth
+    saying omits it, and most do.
+</p>
+
+<pre class="language-json"><code>"blurb": "Two arcs sweeping round the barrel, like the bands on a moth's wing.",
+"notes": [
+  "The source drew these as rings at explicit centres. There is no centred-ring mask,
+   so each band is a narrow WAVES band on a wavelength longer than the barrel - one
+   long curve across the flank rather than a closed circle.",
+  "The look is close and the mechanism is not the same. Worth knowing before anyone
+   tries to tighten the arc."
+]</code></pre>
+
+<p class="muted">
+    A good test for which field a sentence belongs in: if it would confuse a player who
+    has just caught the horse, it is a <code>note</code>.
+</p>
+
 <h2 id="tools">What to build it with</h2>
 
 <p>
@@ -277,6 +327,11 @@
   "priority": 275,
   "rarity": "RARE",
   "blurb": "One sentence, what a player sees.",
+  "notes": [
+    "Optional. Prose for whoever opens this file next - why the numbers are the numbers,
+     what was tried and abandoned. Printed on the gene's wiki page as written. Most genes
+     have none."
+  ],
   "alleles": [
     { "token": "Myg", "label": "My Gene (Myg)" },
     { "token": "Myc", "label": "My Gene, coloured (Myc)" },
@@ -292,6 +347,8 @@
       "id": "white",
       "name": "My Gene",
       "description": "What this outcome looks like, in prose.",
+      "notes": [ "Optional, and the same idea for one outcome: which layer does the work,
+                  why it is drawn this way, what it collides with." ],
       "when": [ "Myg/Myg", "Myg/Myc", "Myg/n" ],
       "layers": [
         {
@@ -389,6 +446,13 @@ CONVENTION: most magical markings ship as a pair - a white form on allele[0]
 and a fully recessive "coloured" form on allele[1] that draws the same shape
 with "hue": "$hue" instead of "color".
 
+PROSE: "blurb" is one to three sentences for a PLAYER; an expression's
+"description" is what THAT outcome looks like, also for a player. "notes" - on
+the gene and on any expression, an array of paragraphs - is for whoever opens
+the file next: why a number is that number, which layers must stay in order,
+and anything the description asked for that you did something else about.
+Write that down rather than dropping it; it is printed on the gene's wiki page.
+
 NOW: read the attached image and the description below, decide what KIND of
 shape each element is, and write the file. Prefer composing existing masks.
 State nothing; output the JSON only.
@@ -400,7 +464,10 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
 
 <ol>
 <li><code>./gradlew :common:test --tests "*GeneFilesTest*"</code> &mdash; catches a
-    duplicate priority and a malformed file.</li>
+    duplicate priority and a malformed file. One test class, not the whole suite.</li>
+<li>Add the file to <code>horsegenetics/genes/index.json</code>. It is a hand-kept list
+    and nothing generates it: a jar has no directory to walk, so a gene missing from the
+    index loads in dev and vanishes in a build.</li>
 <li>Bake and look: <code>./gradlew :common:bakeGeneIcons</code> writes one horse per gene
     to <code>wiki/assets/gene-icons/</code>. A gene that paints nothing gets no icon at
     all, which is the fastest possible failure signal.</li>

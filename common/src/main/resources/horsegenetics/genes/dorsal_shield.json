@@ -1,0 +1,346 @@
+{
+  "format": 3,
+  "key": "horsegenetics.dorsal_shield",
+  "name": "Dorsal Shield",
+  "phase": "magical",
+  "priority": 265,
+  "rarity": "UNCOMMON",
+  "blurb": "A plate laid over the back from withers to croup, studded with haloed marks - armour rather than a blanket.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The plate is defined in BODY UNITS rather than in part space on purpose: it has to sit at a fixed place on the animal, and a fraction of the barrel would slide as the barrel changes. Every stud layer repeats the same two bands so nothing can escape the plate.",
+    "The source used `spread` on a paint op to make the halo. spread is a PIGMENT mask parameter, not an op one; the halo here is the usual big-soft-disc-minus-small-sharp-disc instead."
+  ],
+  "alleles": [
+    {
+      "token": "Dsh",
+      "label": "Shield, pale (Dsh)"
+    },
+    {
+      "token": "Dsc",
+      "label": "Shield, coloured (Dsc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "studSpacing",
+      "min": 5.0,
+      "max": 7.5
+    },
+    {
+      "name": "studOuter",
+      "min": 1.6,
+      "max": 2.4
+    },
+    {
+      "name": "studInner",
+      "min": 0.6,
+      "max": 1.1
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Dorsal Shield",
+      "description": "Two crossed AXIS bands in body units make the plate, so it sits at a fixed place on the horse rather than at a fixed fraction of it - which is what keeps the front and back edges off the shoulder and the croup. Every stud layer carries the same two bands, so nothing escapes the plate.",
+      "when": [
+        "Dsh/Dsh",
+        "Dsh/Dsc",
+        "Dsh/n"
+      ],
+      "layers": [
+        {
+          "name": "the shield itself, a plate over the back",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe9dd",
+            "strength": 70.0
+          }
+        },
+        {
+          "name": "haloed studs set into it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$studSpacing",
+              "radius": "$studOuter",
+              "stretch": 1.2,
+              "vary": 0.3,
+              "softness": 0.4,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "and the stud at the centre of each",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$studSpacing",
+              "radius": "$studInner",
+              "stretch": 1.2,
+              "vary": 0.3,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe9dd",
+            "strength": 70.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Dorsal Shield, coloured",
+      "description": "The same plate and studs in a colour the line carries. Fully recessive.",
+      "when": {
+        "Dsc": 2
+      },
+      "layers": [
+        {
+          "name": "the shield itself, a plate over the back",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.5,
+            "lightness": 0.6,
+            "strength": 70.0
+          }
+        },
+        {
+          "name": "haloed studs set into it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$studSpacing",
+              "radius": "$studOuter",
+              "stretch": 1.2,
+              "vary": 0.3,
+              "softness": 0.4,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.75,
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "and the stud at the centre of each",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$studSpacing",
+              "radius": "$studInner",
+              "stretch": 1.2,
+              "vary": 0.3,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.5,
+            "lightness": 0.6,
+            "strength": 70.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No shield.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Dsh/Dsh": 0.02,
+    "Dsh/Dsc": 0.06,
+    "Dsh/n": 0.3,
+    "Dsc/Dsc": 0.06,
+    "n/n": 99.56
+  }
+}

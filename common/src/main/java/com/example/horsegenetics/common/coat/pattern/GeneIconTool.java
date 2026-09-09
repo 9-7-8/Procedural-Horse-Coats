@@ -7,6 +7,7 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.BaseCoats;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -118,9 +119,14 @@ public final class GeneIconTool {
         int[] template = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
         int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
         GradientLut base = new GradientLut(g, lastReadWidth, lastReadHeight);
-        int[] bp = readArgb("/assets/horsegenetics/textures/coat/lutbluepink.png");
-        GradientLut bluepink = new GradientLut(bp, lastReadWidth, lastReadHeight);
-        LutSet luts = new LutSet(base, java.util.Map.of("bluepink", bluepink));
+        LutSet luts = LutSet.fromRegistry(base, path -> {
+            try {
+                int[] px = readArgb("/assets/horsegenetics/" + path);
+                return new GradientLut(px, lastReadWidth, lastReadHeight);
+            } catch (IOException missing) {
+                return null;   // LutSet.resolve falls back to the base gradient
+            }
+        });
 
         List<String> written = new ArrayList<>();
         Map<String, List<String>> onBackdrop = new LinkedHashMap<>();
@@ -142,13 +148,27 @@ public final class GeneIconTool {
             // anything at all on a bay" was the old test, and it photographed
             // Fielded - which draws out of the edges of existing white - on a
             // horse whose only white was a couple of dozen texels of muzzle.
-            String[] stage = new String[BACKDROPS.length + 1];
-            stage[0] = BASE;
-            System.arraycopy(BACKDROPS, 0, stage, 1, BACKDROPS.length);
+            // A gene may say which coat it wants to be seen on, and then there
+            // is nothing to detect: one stage, and it is the declared one.
+            String[] stage;
+            Genotype[] horse;
+            if (gene.previewBase() != null) {
+                BaseCoats.BaseCoat declared = CoatVisibility.declaredBase(gene);
+                stage = new String[] {declared.key()};
+                horse = new Genotype[] {declared.genotype()};
+            } else {
+                stage = new String[BACKDROPS.length + 1];
+                stage[0] = BASE;
+                System.arraycopy(BACKDROPS, 0, stage, 1, BACKDROPS.length);
+                horse = new Genotype[stage.length];
+                for (int i = 0; i < stage.length; i++) {
+                    horse[i] = override(stage[i]);
+                }
+            }
             CoatVisibility.Shown[] shot = new CoatVisibility.Shown[stage.length];
             int best = 0;
             for (int i = 0; i < stage.length; i++) {
-                shot[i] = CoatVisibility.measure(gene, override(stage[i]), epi, template, luts);
+                shot[i] = CoatVisibility.measure(gene, horse[i], epi, template, luts);
                 best = Math.max(best, shot[i] == null ? 0 : shot[i].moved());
             }
             int[] sheet = null;

@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -29,6 +30,8 @@ import java.util.Optional;
  *   <tr><td>{@code n/n}</td><td>wild type - the natural red/black gradient</td></tr>
  *   <tr><td>{@code Blupnk/n}</td><td>{@code bluepink-carrier} - a wild type; nothing shows</td></tr>
  *   <tr><td>{@code Blupnk/Blupnk}</td><td>{@code bluepink} - resolves through {@code lutbluepink.png}</td></tr>
+ *   <tr><td>{@code Grnpnk/n}</td><td>{@code greenpink-carrier} - a wild type; nothing shows</td></tr>
+ *   <tr><td>{@code Grnpnk/Grnpnk}</td><td>{@code greenpink} - resolves through {@code lutgreenpink.png}</td></tr>
  * </table>
  *
  * <h2>Two of the same, or nothing</h2>
@@ -38,12 +41,14 @@ import java.util.Optional;
  * the natural gradient. That is the whole shape of the locus, and it is what
  * makes an unnatural coat a breeding project rather than a lucky catch.
  *
- * <h2>Currently one variant, built to grow</h2>
+ * <h2>Two variants, built to grow</h2>
  * {@code Blupnk} swaps the warm red/orange/brown gradient for a blue-and-pink
- * one - dreamier horse colours. More palettes are planned; each is one more
- * {@link Variant} in {@link #VARIANTS} (an allele, a LUT key and a texture
- * path) and the expression table, carrier wording and
- * {@link LutContribution} wiring all follow from that list.
+ * one and {@code Grnpnk} for green-through-pink - dreamier horse colours. Each
+ * palette is one more {@link Variant} in {@link #VARIANTS} (an allele, a LUT
+ * key and a texture path); the expression table, the carrier wording, the
+ * founder odds and the {@link LutContribution} wiring all follow from that
+ * list, and so does every offline tool - see
+ * {@link com.example.horsegenetics.common.coat.pattern.LutSet#fromRegistry}.
  *
  * <p><b>This is the only locus that can change the LUT, and it always will
  * be.</b> There is no per-gene "use this gradient" hook and there is not going
@@ -77,6 +82,7 @@ public final class LutGene implements Gene, LutContribution {
 
     public final Allele n = new Allele(KEY, 0, "n", "Wild-type (n)");
     public final Allele Blupnk = new Allele(KEY, 1, "Blupnk", "Blue-pink LUT (Blupnk)");
+    public final Allele Grnpnk = new Allele(KEY, 2, "Grnpnk", "Green-pink LUT (Grnpnk)");
 
     private final Expression WILD = Expression.wildType(
             "The natural red/black gradient - ordinary horse colours.");
@@ -92,7 +98,19 @@ public final class LutGene implements Gene, LutContribution {
                                     + "and pink one, so every melanin gene resolves to a dreamier, "
                                     + "cooler colour. Requires two Blupnk copies.")
                             .marker(),
-                    "bluepink", "textures/coat/lutbluepink.png"));
+                    "bluepink", "textures/coat/lutbluepink.png"),
+            new Variant(Grnpnk,
+                    Expression.wildType("greenpink-carrier", "Green-pink LUT carrier",
+                            "One copy of the green-pink allele. Nothing shows - a horse needs two "
+                                    + "copies of the same LUT allele to shift its palette, and a "
+                                    + "Blupnk beside a Grnpnk is not half of each."),
+                    Expression.of("greenpink", "Green-pink palette")
+                            .describe("The warm red/orange/brown gradient is replaced with green "
+                                    + "through pink, so a horse that would have been black comes "
+                                    + "out green and one that would have been chestnut comes out "
+                                    + "pink. Requires two Grnpnk copies.")
+                            .marker(),
+                    "greenpink", "textures/coat/lutgreenpink.png"));
 
     private final List<Allele> alleles;
     private final List<Expression> expressions;
@@ -169,6 +187,6 @@ public final class LutGene implements Gene, LutContribution {
         for (Variant v : VARIANTS) {
             out.put(v.lutKey(), v.texturePath());
         }
-        return Map.copyOf(out);
+        return CommonMaps.copyOf(out);
     }
 }

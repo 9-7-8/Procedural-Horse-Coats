@@ -1,0 +1,311 @@
+{
+  "format": 3,
+  "key": "horsegenetics.dragon_shroud",
+  "name": "Dragon Shroud",
+  "phase": "magical",
+  "priority": 217,
+  "rarity": "EPIC",
+  "blurb": "Soft-edged plumage laid over the whole horse and piped in steel grey, breaking into streamers down the mane and tail - with the coat underneath showing through as scattered windows.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The piping round each plume was specified as a `spread` on the plume's own spot field. `spread` is a PIGMENT parameter and does not exist on SPOTS, so the rim is built the way every other rim in this mod is: a slightly larger disc with the disc itself taken out of it, on the same seed and spacing so the two line up exactly.",
+    "The coloured form deliberately has no piping. One tone reads as a different gene at a glance, which is what a recessive form is for."
+  ],
+  "alleles": [
+    {
+      "token": "Drsw",
+      "label": "Shroud, white (Drsw)"
+    },
+    {
+      "token": "Drsc",
+      "label": "Shroud, coloured (Drsc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "fieldSeed",
+      "type": "seed"
+    },
+    {
+      "name": "holeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "plumeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "fieldSpacing",
+      "min": 5.0,
+      "max": 8.5
+    },
+    {
+      "name": "fieldRadius",
+      "min": 3.0,
+      "max": 5.5
+    },
+    {
+      "name": "fieldOuter",
+      "min": 3.6,
+      "max": 6.2
+    },
+    {
+      "name": "holeSpacing",
+      "min": 2.2,
+      "max": 4.2
+    },
+    {
+      "name": "holeRadius",
+      "min": 1.0,
+      "max": 2.4
+    },
+    {
+      "name": "vary",
+      "min": 0.0,
+      "max": 0.5
+    },
+    {
+      "name": "edgeWidth",
+      "min": 0.3,
+      "max": 1.0
+    },
+    {
+      "name": "plumeWavelength",
+      "min": 2.4,
+      "max": 4.4
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Dragon Shroud",
+      "description": "Overlapping white plumes cover almost the whole horse, each one outlined in a thin steel grey drawn as a slightly larger disc with the plume taken out of it. A second, much finer spot field is subtracted out of them, and that is what leaves the windows of ordinary coat scattered through the white. The mane and tail take saw waves instead, which read as feathered streamers rather than as hair.",
+      "when": [
+        "Drsw/Drsw",
+        "Drsw/Drsc",
+        "Drsw/n"
+      ],
+      "layers": [
+        {
+          "name": "the plumage, with windows of coat left in it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": "$fieldSpacing",
+              "radius": "$fieldRadius",
+              "vary": "$vary",
+              "softness": 0.9
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$holeSeed",
+              "spacing": "$holeSpacing",
+              "radius": "$holeRadius",
+              "vary": "$vary",
+              "softness": 0.35,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 97.0
+          }
+        },
+        {
+          "name": "the steel piping round each plume",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": "$fieldSpacing",
+              "radius": "$fieldOuter",
+              "vary": "$vary",
+              "softness": 0.4
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": "$fieldSpacing",
+              "radius": "$fieldRadius",
+              "vary": "$vary",
+              "softness": 0.4,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#8a8a8a",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "streamers down the mane and tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HAIR"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "part",
+              "seed": "$plumeSeed",
+              "wavelength": "$plumeWavelength",
+              "amplitude": 0.3,
+              "softness": 0.1,
+              "from": 0.25,
+              "to": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 97.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Dragon Shroud, coloured",
+      "description": "The same plumage in a colour the line carries, and without the piping - a coloured shroud is one tone, which is the difference a person will notice first. Fully recessive.",
+      "when": {
+        "Drsc": 2
+      },
+      "layers": [
+        {
+          "name": "the plumage, with windows of coat left in it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": "$fieldSpacing",
+              "radius": "$fieldRadius",
+              "vary": "$vary",
+              "softness": 0.9
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$holeSeed",
+              "spacing": "$holeSpacing",
+              "radius": "$holeRadius",
+              "vary": "$vary",
+              "softness": 0.35,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.5,
+            "lightness": 0.62,
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "streamers down the mane and tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HAIR"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "part",
+              "seed": "$plumeSeed",
+              "wavelength": "$plumeWavelength",
+              "amplitude": 0.3,
+              "softness": 0.1,
+              "from": 0.25,
+              "to": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.5,
+            "lightness": 0.62,
+            "strength": 95.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No shroud.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Drsw/Drsw": 0.002,
+    "Drsw/Drsc": 0.006,
+    "Drsw/n": 0.03,
+    "Drsc/Drsc": 0.006,
+    "n/n": 99.956
+  }
+}

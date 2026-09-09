@@ -5,6 +5,9 @@
   "phase": "magical",
   "priority": 272,
   "rarity": "RARE",
+  "preview": {
+    "expression": "flames"
+  },
   "blurb": "Fire on the horse - stylised flames licking up the legs and face with one copy, or a smooth ember gradient over the topline, face, hair and hooves with two. Never both on one horse.",
   "alleles": [
     {

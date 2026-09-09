@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.CommonMaps;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,11 +47,11 @@ public record GameteBias(boolean rerollEpigenetics,
                          Optional<Boolean> preferLowerOrder,
                          Map<String, AllelePair> substitutePairs) {
 
-    public static final GameteBias NONE = new GameteBias(false, Optional.empty(), Map.of());
+    public static final GameteBias NONE = new GameteBias(false, Optional.empty(), CommonMaps.empty());
 
     public GameteBias {
         preferLowerOrder = preferLowerOrder == null ? Optional.empty() : preferLowerOrder;
-        substitutePairs = substitutePairs == null ? Map.of() : Map.copyOf(substitutePairs);
+        substitutePairs = substitutePairs == null ? CommonMaps.empty() : CommonMaps.copyOf(substitutePairs);
     }
 
     public boolean isNone() {
@@ -69,15 +70,15 @@ public record GameteBias(boolean rerollEpigenetics,
     // --- builders for the common shapes -------------------------------
 
     public static GameteBias epigeneticSplice() {
-        return new GameteBias(true, Optional.empty(), Map.of());
+        return new GameteBias(true, Optional.empty(), CommonMaps.empty());
     }
 
     public static GameteBias stabilizer() {
-        return new GameteBias(false, Optional.of(Boolean.TRUE), Map.of());
+        return new GameteBias(false, Optional.of(Boolean.TRUE), CommonMaps.empty());
     }
 
     public static GameteBias magnifier() {
-        return new GameteBias(false, Optional.of(Boolean.FALSE), Map.of());
+        return new GameteBias(false, Optional.of(Boolean.FALSE), CommonMaps.empty());
     }
 
     public static GameteBias substituting(Map<String, AllelePair> pairs) {

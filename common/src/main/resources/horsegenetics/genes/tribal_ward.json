@@ -1,0 +1,460 @@
+{
+  "format": 3,
+  "key": "horsegenetics.tribal_ward",
+  "name": "Tribal Ward",
+  "phase": "magical",
+  "priority": 220,
+  "rarity": "EPIC",
+  "blurb": "A painted ward - a pale ground with coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, and the coat left bare at the throat and chest.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The bare throat and chest are subtracted out of the ground rather than painted back over it, so what shows through is whatever the horse actually is - a bay reveals bay, a grey reveals grey. Painting them back would have needed a colour, and any colour would have been a lie about the horse underneath.",
+    "SPIRAL draws one spiral per named part, so 'a swirl at each hip and each shoulder' is two layers at different offsets along the body rather than four placements. On a bake the pair reads as hip and shoulder; it is not four independent motifs."
+  ],
+  "alleles": [
+    {
+      "token": "Twd",
+      "label": "Ward, white (Twd)"
+    },
+    {
+      "token": "Twc",
+      "label": "Ward, coloured (Twc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hipSwirl",
+      "min": 3.0,
+      "max": 6.0
+    },
+    {
+      "name": "shoulderSwirl",
+      "min": 2.5,
+      "max": 4.5
+    },
+    {
+      "name": "neckBandWidth",
+      "min": 3.0,
+      "max": 6.0
+    },
+    {
+      "name": "chestReveal",
+      "min": 0.25,
+      "max": 0.45
+    },
+    {
+      "name": "chevronWavelength",
+      "min": 6.0,
+      "max": 11.0
+    },
+    {
+      "name": "lineWidth",
+      "min": 0.6,
+      "max": 1.2
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Tribal Ward",
+      "description": "The ground goes on first and everything else is inked over it, so the ward reads as paint on a painted horse rather than as marking on a coat. The bare throat and chest are a band subtracted out of the ground rather than painted back, which is why the coat under them is whatever the horse actually is.",
+      "when": [
+        "Twd/Twd",
+        "Twd/Twc",
+        "Twd/n"
+      ],
+      "layers": [
+        {
+          "name": "the ground, with the throat and chest left bare",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "invert": true,
+              "combine": "MULTIPLY",
+              "from": -0.1,
+              "to": "$chestReveal"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f5f2ee",
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "a coiled swirl at each hip",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "radius": "$hipSwirl",
+              "turns": 2.0,
+              "width": "$lineWidth",
+              "axis": "Z",
+              "offset": -0.3,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "a smaller one at each shoulder",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "radius": "$shoulderSwirl",
+              "turns": 1.6,
+              "width": "$lineWidth",
+              "axis": "Z",
+              "offset": 0.35,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "chevrons banded down the back",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$chevronWavelength",
+              "amplitude": 0.16,
+              "softness": 0.04,
+              "from": 0.74,
+              "to": 0.82
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "bands round the neck",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$neckBandWidth",
+              "amplitude": 0.1,
+              "softness": 0.05,
+              "from": 0.38,
+              "to": 0.48
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "rings round the legs",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "from": 0.18,
+              "to": 0.28
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "combine": "MAX",
+              "from": 0.46,
+              "to": 0.56
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "combine": "MAX",
+              "from": 0.74,
+              "to": 0.84
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Tribal Ward, coloured",
+      "description": "The same ward on a ground in a colour the line carries. The ink stays black - it is the ink that makes it a ward. Fully recessive.",
+      "notes": [
+        "The ink stays black in this form on purpose. Both the ground and the ink taking the same hue made a horse that looked like one wash rather than like something painted on."
+      ],
+      "when": {
+        "Twc": 2
+      },
+      "layers": [
+        {
+          "name": "the ground, with the throat and chest left bare",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "invert": true,
+              "combine": "MULTIPLY",
+              "from": -0.1,
+              "to": "$chestReveal"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.5,
+            "lightness": 0.66,
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "a coiled swirl at each hip",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "radius": "$hipSwirl",
+              "turns": 2.0,
+              "width": "$lineWidth",
+              "axis": "Z",
+              "offset": -0.3,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "a smaller one at each shoulder",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "radius": "$shoulderSwirl",
+              "turns": 1.6,
+              "width": "$lineWidth",
+              "axis": "Z",
+              "offset": 0.35,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "chevrons banded down the back",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$chevronWavelength",
+              "amplitude": 0.16,
+              "softness": 0.04,
+              "from": 0.74,
+              "to": 0.82
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "bands round the neck",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$neckBandWidth",
+              "amplitude": 0.1,
+              "softness": 0.05,
+              "from": 0.38,
+              "to": 0.48
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "rings round the legs",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "from": 0.18,
+              "to": 0.28
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "combine": "MAX",
+              "from": 0.46,
+              "to": 0.56
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "combine": "MAX",
+              "from": 0.74,
+              "to": 0.84
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 94.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No ward.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Twd/Twd": 0.002,
+    "Twd/Twc": 0.008,
+    "Twd/n": 0.04,
+    "Twc/Twc": 0.008,
+    "n/n": 99.942
+  }
+}

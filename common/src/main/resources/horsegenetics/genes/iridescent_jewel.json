@@ -1,0 +1,296 @@
+{
+  "format": 3,
+  "key": "horsegenetics.iridescent_jewel",
+  "name": "Iridescent Jewel Beetle Coat",
+  "phase": "magical",
+  "priority": 223,
+  "rarity": "EPIC",
+  "blurb": "A coat that runs through the spectrum from one flank to the other, pitted with dark punctures in warm haloes - the shell of a jewel beetle.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The source gave the sheen as a five-stop hue ramp along Z. RAMP here takes a start hue and a span rather than a stop list, so this is one hue knob and a 210-degree span - two thirds of the wheel, which covers the same ground with one number a horse can inherit.",
+    "A RAMP varies colour along an axis and never coverage. That is why the sheen covers the whole barrel and fades nowhere; to fade it you would fade the mask, not the ramp."
+  ],
+  "alleles": [
+    {
+      "token": "Ijw",
+      "label": "Jewel (Ijw)"
+    },
+    {
+      "token": "Ijm",
+      "label": "Jewel, muted (Ijm)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "baseHue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "spotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSpacing",
+      "min": 2.4,
+      "max": 4.2
+    },
+    {
+      "name": "spotStretch",
+      "min": 0.8,
+      "max": 1.25
+    },
+    {
+      "name": "spotVary",
+      "min": 0.0,
+      "max": 0.35
+    },
+    {
+      "name": "haloRadius",
+      "min": 1.2,
+      "max": 1.9
+    },
+    {
+      "name": "pitRadius",
+      "min": 0.55,
+      "max": 0.95
+    },
+    {
+      "name": "haloHue",
+      "min": 20.0,
+      "max": 55.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "jewel",
+      "name": "Iridescent Jewel Beetle Coat",
+      "description": "A RAMP along Z - centre of the horse to its right side - carries the hue a long way round the wheel, so the flank, the barrel and the belly are three different colours on one animal and the change is continuous. A ramp only varies colour, never coverage, which is why the sheen covers everything and fades nowhere.",
+      "when": [
+        "Ijw/Ijw",
+        "Ijw/Ijm",
+        "Ijw/n"
+      ],
+      "layers": [
+        {
+          "name": "the whole barrel run through the spectrum",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$baseHue",
+            "hueSpan": 210.0,
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "axis": "Z",
+            "space": "part",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the hindquarter darkened, the way a shell is",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 2.0,
+              "invert": true,
+              "from": 7.5,
+              "to": 13.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0b12",
+            "strength": 70.0
+          }
+        },
+        {
+          "name": "a warm halo round each pit",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$haloRadius",
+              "stretch": "$spotStretch",
+              "vary": "$spotVary",
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$haloHue",
+            "saturation": 0.9,
+            "lightness": 0.62,
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "and the dark pit inside it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$pitRadius",
+              "stretch": "$spotStretch",
+              "vary": "$spotVary",
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d14",
+            "strength": 88.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "muted",
+      "name": "Iridescent Jewel, muted",
+      "description": "The same shell with the spectrum run over a much narrower arc, so it reads as one colour shot with another rather than as a rainbow. Fully recessive.",
+      "notes": [
+        "Same ramp, span cut from 210 degrees to about 55. One knob is the difference between a rainbow and a shot silk."
+      ],
+      "when": {
+        "Ijm": 2
+      },
+      "layers": [
+        {
+          "name": "the whole barrel run through the spectrum",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$baseHue",
+            "hueSpan": 55.0,
+            "saturation": 0.7,
+            "lightness": 0.42,
+            "axis": "Z",
+            "space": "part",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the hindquarter darkened, the way a shell is",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 2.0,
+              "invert": true,
+              "from": 7.5,
+              "to": 13.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0b12",
+            "strength": 70.0
+          }
+        },
+        {
+          "name": "a warm halo round each pit",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$haloRadius",
+              "stretch": "$spotStretch",
+              "vary": "$spotVary",
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$haloHue",
+            "saturation": 0.6,
+            "lightness": 0.58,
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "and the dark pit inside it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$pitRadius",
+              "stretch": "$spotStretch",
+              "vary": "$spotVary",
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d14",
+            "strength": 88.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No sheen.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ijw/Ijw": 0.002,
+    "Ijw/Ijm": 0.008,
+    "Ijw/n": 0.04,
+    "Ijm/Ijm": 0.008,
+    "n/n": 99.942
+  }
+}

@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.BaseCoats;
 import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 
@@ -157,6 +158,10 @@ public final class CoatVisibility {
                                 int[] template, LutSet luts) {
         int[] plain = CoatTextureComposer.compose(base, epi, Skin.ADULT, true, template, luts);
 
+        if (gene.previewExpression() != null) {
+            return declared(gene, base, epi, template, luts, plain);
+        }
+
         Shown best = null;
         Shown blank = null;
         for (Allele variant : gene.alleles()) {
@@ -181,6 +186,40 @@ public final class CoatVisibility {
         }
         Shown pick = best != null ? best : blank;
         return pick != null && pick.moved() >= MIN_TEXELS ? pick : null;
+    }
+
+    /**
+     * <b>The gene as its author said to photograph it</b> - the loudest
+     * combination landing on {@link Gene#previewExpression()}, rather than the
+     * loudest combination full stop.
+     *
+     * <p>Every pair is tried, not just the homozygotes: the reason a gene
+     * declares an expression at all is usually that the one worth looking at is
+     * heterozygous. Flametouched is the case in hand - {@code Ffm/Ffm} is a
+     * whole-horse ember gradient and outshouts the {@code Ffm/n} flames the
+     * gene is named for.
+     */
+    private static Shown declared(Gene gene, Genotype base, Epigenome epi,
+                                  int[] template, LutSet luts, int[] plain) {
+        String want = gene.previewExpression();
+        Shown best = null;
+        for (Allele a : gene.alleles()) {
+            for (Allele b : gene.alleles()) {
+                AllelePair pair = new AllelePair(a, b);
+                if (!gene.canOccur(pair)) {
+                    continue;
+                }
+                Expression shows = gene.expressionOf(pair);
+                if (shows == null || !want.equals(shows.id())) {
+                    continue;
+                }
+                Shown shot = bake(base, a, b, epi, template, luts, plain);
+                if (shot.moved() >= MIN_TEXELS) {
+                    best = louder(best, shot);
+                }
+            }
+        }
+        return best;
     }
 
     private static Shown bake(Genotype base, Allele a, Allele b, Epigenome epi,
@@ -209,6 +248,10 @@ public final class CoatVisibility {
      */
     public static BaseCoats.BaseCoat firstShowing(Gene gene, Epigenome epi,
                                                   int[] template, LutSet luts) {
+        if (gene.previewBase() != null) {
+            BaseCoats.BaseCoat declared = declaredBase(gene);
+            return measure(gene, declared.genotype(), epi, template, luts) == null ? null : declared;
+        }
         List<BaseCoats.BaseCoat> coats = BaseCoats.all();
         int[] moved = new int[coats.size()];
         int best = 0;
@@ -226,6 +269,20 @@ public final class CoatVisibility {
             }
         }
         return null;
+    }
+
+    /**
+     * The base coat {@link Gene#previewBase()} names, resolved here rather than
+     * at parse time - {@link BaseCoats} builds its genotypes out of the gene
+     * registry, which is mid-load while a spec file is being read.
+     */
+    public static BaseCoats.BaseCoat declaredBase(Gene gene) {
+        BaseCoats.BaseCoat coat = BaseCoats.byKey(gene.previewBase());
+        if (coat == null) {
+            throw new IllegalArgumentException(gene.key() + ": preview.base '" + gene.previewBase()
+                    + "' is not a base coat");
+        }
+        return coat;
     }
 
     /** How many texels {@code sheet} moved off {@code from}, ignoring epigenome jitter. */

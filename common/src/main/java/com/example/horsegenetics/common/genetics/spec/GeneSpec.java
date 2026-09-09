@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.spec;
 
+import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 
@@ -65,7 +66,9 @@ public record GeneSpec(
         String blurb,
         GeneRarity rarity,
         Carrot carrot,
-        List<FounderWeight> splice) {
+        List<FounderWeight> splice,
+        Preview preview,
+        List<String> notes) {
 
     /**
      * The current format version. <b>3</b> adds the gameplay-economy metadata
@@ -94,6 +97,56 @@ public record GeneSpec(
         public Carrot {
             flavour = List.copyOf(flavour);
         }
+    }
+
+    /**
+     * <b>Prose about the gene, written by whoever wrote the gene.</b>
+     *
+     * <p>The format already had two pieces of human-readable text and neither
+     * is this one. {@code blurb} is a <i>summary</i> - one to three sentences,
+     * sized for a tooltip and an in-game browser entry, and it has to stay that
+     * size. An expression's {@code description} says what one outcome looks
+     * like. Between them there was nowhere to write down the thing an author
+     * actually knows and nobody else does: where the idea came from, why the
+     * numbers are the numbers, what it looks like on a horse that carries
+     * something else, what was tried and abandoned.
+     *
+     * <p>That used to go in a comment - except JSON has no comments - or on the
+     * wiki page, where it drifts from the gene the moment either moves. So it
+     * lives here, beside the layers it is about, and {@code GeneWikiTool} prints
+     * it on the generated page: <b>write it once, in the file</b>.
+     *
+     * <p>One entry per paragraph. Empty for most genes, and that is fine - this
+     * is for what is worth saying, not a field to fill in.
+     * {@link ExpressionSpec#notes} is the same thing for a single outcome.
+     */
+    public List<String> notes() {
+        return notes;
+    }
+
+    /**
+     * <b>What the gene's one photograph should be of</b>, when measuring it
+     * comes out wrong.
+     *
+     * <p>Which allele combination and which base coat a gene is illustrated on
+     * is normally <i>detected</i> - {@code CoatVisibility} bakes the candidates
+     * and keeps the loudest, so no list anywhere goes stale when a gene starts
+     * or stops painting. That is the right default and stays the default. But
+     * "the loudest" and "the one worth looking at" are not always the same
+     * thing: Flametouched's homozygote is a whole-horse ember gradient and its
+     * heterozygote is the flames the gene is named for, and Patina reads more
+     * clearly on a plain bay than on the tobiano that gives it more texels to
+     * move.
+     *
+     * <p>So a gene may <b>declare</b> either half and leave the other measured.
+     * {@code base} is a {@code BaseCoats} key ({@code "bay"},
+     * {@code "chestnut"}, {@code "tobiano"}, ...); {@code expression} is one of
+     * this gene's own expression ids, and the loudest combination landing on
+     * that expression is the one photographed. Both {@code null} - the usual
+     * case - means measure everything, as before.
+     */
+    public record Preview(String base, String expression) {
+        public static final Preview AUTO = new Preview(null, null);
     }
 
     /** The first-declared allele - the one {@code perDose} counts. */
@@ -163,7 +216,20 @@ public record GeneSpec(
             List<String> combinations,
             List<LocusCondition> needs,
             List<Layer> layers,
-            List<GeneAbility> abilities) {
+            List<GeneAbility> abilities,
+            List<String> notes) {
+
+        /**
+         * <b>Prose about this one outcome</b> - the same idea as
+         * {@link GeneSpec#notes()}, one level down. {@link #description} says
+         * what the outcome looks like and is written for a player;
+         * {@code notes} is for everything a reader of the <i>file</i> wants:
+         * why this outcome is drawn the way it is, which layer is doing the
+         * work, what it collides with. One entry per paragraph, usually empty.
+         */
+        public List<String> notes() {
+            return notes;
+        }
 
         /** Is this the catch-all that takes whatever no other expression claimed? */
         public boolean isCatchAll() {
@@ -432,7 +498,7 @@ public record GeneSpec(
      */
     public record Params(Map<String, Object> raw) {
 
-        public static final Params EMPTY = new Params(Map.of());
+        public static final Params EMPTY = new Params(CommonMaps.<String, Object>empty());
 
         public Value value(String name, double fallback) {
             Object o = raw.get(name);

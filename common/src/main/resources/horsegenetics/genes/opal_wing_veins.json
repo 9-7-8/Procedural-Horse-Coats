@@ -1,0 +1,259 @@
+{
+  "format": 3,
+  "key": "horsegenetics.opal_wing_veins",
+  "name": "Opal Wing-Vein Marking",
+  "phase": "magical",
+  "priority": 225,
+  "rarity": "EPIC",
+  "blurb": "The barrel as an insect wing - a membrane running dark at the belly to bright along the back, fanned with fine veins and lit between them.",
+  "alleles": [
+    {
+      "token": "Owv",
+      "label": "Wing-vein (Owv)"
+    },
+    {
+      "token": "Owm",
+      "label": "Wing-vein, muted (Owm)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "edgeHue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "veinSpacing",
+      "min": 1.5,
+      "max": 4.5
+    },
+    {
+      "name": "veinWidth",
+      "min": 0.15,
+      "max": 0.4
+    },
+    {
+      "name": "veinFan",
+      "min": 0.0,
+      "max": 1.2
+    },
+    {
+      "name": "seed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "opal",
+      "name": "Opal Wing-Vein Marking",
+      "description": "The membrane is a RAMP up the horse rather than a mask, so it fades nowhere and covers everything. The veins are a repeated saw band with a small amplitude, which makes them fan rather than run parallel; the glow is the same mask inverted, so the lit membrane is exactly what the veins are not.",
+      "when": [
+        "Owv/Owv",
+        "Owv/Owm",
+        "Owv/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing membrane, dark below and bright along the back",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 70.0,
+            "saturation": 0.65,
+            "lightness": 0.4,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the veins themselves",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "wavelength": "$veinSpacing",
+              "amplitude": "$veinFan",
+              "spacing": "$veinSpacing",
+              "phase": 0.0,
+              "softness": 0.06,
+              "invert": false,
+              "from": 0.0,
+              "to": "$veinWidth"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0b10",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "and the membrane between them lit from behind",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "wavelength": "$veinSpacing",
+              "amplitude": "$veinFan",
+              "spacing": "$veinSpacing",
+              "phase": 0.0,
+              "softness": 0.06,
+              "invert": true,
+              "from": 0.0,
+              "to": "$veinWidth"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$edgeHue",
+            "saturation": 0.6,
+            "lightness": 0.8,
+            "strength": 55.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "muted",
+      "name": "Opal Wing-Vein, muted",
+      "description": "The same wing with the glow between the veins turned right down, so it reads as a veined coat rather than as a lit membrane. Fully recessive.",
+      "when": {
+        "Owm": 2
+      },
+      "layers": [
+        {
+          "name": "the wing membrane, dark below and bright along the back",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 30.0,
+            "saturation": 0.45,
+            "lightness": 0.38,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the veins themselves",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "wavelength": "$veinSpacing",
+              "amplitude": "$veinFan",
+              "spacing": "$veinSpacing",
+              "phase": 0.0,
+              "softness": 0.06,
+              "invert": false,
+              "from": 0.0,
+              "to": "$veinWidth"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0b10",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "and the membrane between them lit from behind",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "wavelength": "$veinSpacing",
+              "amplitude": "$veinFan",
+              "spacing": "$veinSpacing",
+              "phase": 0.0,
+              "softness": 0.06,
+              "invert": true,
+              "from": 0.0,
+              "to": "$veinWidth"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$edgeHue",
+            "saturation": 0.35,
+            "lightness": 0.6,
+            "strength": 25.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No veins.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Owv/Owv": 0.002,
+    "Owv/Owm": 0.008,
+    "Owv/n": 0.04,
+    "Owm/Owm": 0.008,
+    "n/n": 99.942
+  }
+}

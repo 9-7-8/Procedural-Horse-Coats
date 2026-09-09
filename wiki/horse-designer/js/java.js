@@ -34,6 +34,7 @@ window.HG = window.HG || {};
   var ASSETS = {
     gradient: BASE + "assets/redblackgradient.png",
     bluepink: BASE + "assets/lutbluepink.png",
+    greenpink: BASE + "assets/lutgreenpink.png",
     adult: BASE + "assets/horse_white.png",
     baby: BASE + "assets/horse_white_baby.png"
   };
@@ -128,7 +129,8 @@ window.HG = window.HG || {};
           fetch(NAMES[0]).then(function (r) { return r.text(); }),
           fetch(NAMES[1]).then(function (r) { return r.text(); }),
           fetch(BREEDS).then(function (r) { return r.text(); }),
-          fetch(GENES).then(function (r) { return r.text(); })
+          fetch(GENES).then(function (r) { return r.text(); }),
+          decode(ASSETS.greenpink)
         ]);
       })
       .then(function (imgs) {
@@ -149,8 +151,11 @@ window.HG = window.HG || {};
         api.setNameWords(imgs[4], imgs[5]);
         api.setGradient(imgs[0].pixels, imgs[0].width, imgs[0].height);
         // Keyed exactly as LutContribution.lutResources() keys it, so the LUT
-        // locus resolves against the right chart.
+        // locus resolves against the right chart. One line per palette; a key
+        // the mod does not know is ignored, and a palette with no line here
+        // renders as the natural gradient rather than failing.
         api.setAlternateGradient("bluepink", imgs[1].pixels, imgs[1].width, imgs[1].height);
+        api.setAlternateGradient("greenpink", imgs[8].pixels, imgs[8].width, imgs[8].height);
         api.setTemplate(true, imgs[2].pixels);
         api.setTemplate(false, imgs[3].pixels);
         if (!api.ready()) {

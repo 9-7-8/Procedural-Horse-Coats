@@ -5,6 +5,9 @@
   "phase": "magical",
   "priority": 273,
   "rarity": "UNCOMMON",
+  "preview": {
+    "base": "bay"
+  },
   "blurb": "Copper going green - verdigris in the same places a mealy horse goes pale, arriving as speckled grains rather than as a wash, with mottling round the eyes and muzzle.",
   "alleles": [
     {

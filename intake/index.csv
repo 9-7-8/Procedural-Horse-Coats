@@ -84,3 +84,35 @@ Angler,anglerinfo.md,Ang,spots(string)+glow,yes
 Patina,patinageneinfo.md,Pat,verdigris-marble,yes
 Marble Tobiano,marbletobianoinfo.md,Tmr,patches(angular),yes
 Imperial,imperialinfo.md,Sbi,neck-cape+branches,yes
+Scarab Dapple,Scarabdapple.json,Scb,spots(concentric shells),yes
+Cracked Porcelain,crackedporcelain.json,Cpw,crackle(plates),yes
+Diamond Scutes,diamondscutes.json,Dsw,waves(triangle lattice),yes
+Dragon Shroud,dragonshroud.json,Drsw,spots(plumes)+waves,yes
+Duskwing Bands,duskwingbands.json,Dwb,waves(long arcs),yes
+Duskfall Speckle,dustfallspeckle.json,Dfs,speckle+topline fade,yes
+Ehretia,ehrieta.json,Ehr,spots(haloed)+centerline+speckle,yes
+Elytra Veins,elytraveins.json,Elw,crackle(twin nets),yes
+Ink Scroll,inkscroll.json,Isw,strokes+spots(medallions),yes
+Koi,koi.json,Koi,patches(hard-edged),yes
+Lace,marbletobiano2.json,Lac,crackle(twin fine nets),yes
+Nebula Points,nebulapoints.json,Nbg,points+strokes(emissive),yes
+Picasso Marking,picasso.json,Pic,spots+strokes(two hues),yes
+Snow Cloud,snowcloud.json,Snw,white ground+speckle clouds,yes
+Tidemark,tidemark.json,Tdm,waves(one wave read three times),yes
+Tribal Ward,triabalward.json,Twd,ground+spiral+waves,yes
+Wyrmwood Sigils,wyrmwoodsigils.json,Wys,strokes(filigree)+emissive ichor,yes
+Banded Socks,bandedsocks.json,Bsk,waves(repeated band),yes
+Beetle Pearl,beetlepearl.json,Bpw,ground+spots(mirrored),yes
+Coccinella Marking,coccinella.json,Ccr,ground+rings(arc)+spots,yes
+Dorsal Shield,dorsalsheild.json,Dsh,axis plate+spots(haloed),yes
+Harlequin Shield,hs.json,Hqs,waves(saw)+spots(nested),yes
+Iridescent Jewel Beetle Coat,ijbc.json,Ijw,ramp(hue across Z)+spots,yes
+Ladybug Saddle,ladybug saddle.json,Lbs,axis panel+centerline+crackle,yes
+Moth Wings,mothwings.json,Mwa,waves(triangle, repeated)+rings,yes
+Opaline Zebra,opalinezebra.json,Opz,ground+waves(stripes),yes
+Painted Lady Wingmark,paintedladywingmark.json,Plw,spots(mirrored)+crackle,yes
+Shieldback,sheildback.json,Shb,ground+waves(collar)+rings,yes
+Webbed,webbed.json,Web,crackle(venation),yes
+Wing Cloak,wingcloak.json,Wcw,rings(arc sweeps),yes
+Moth Mantle,mothmantle.json,Mmw,ground+crackle(net)+waves(tail bands),yes
+Opal Wing-Vein Marking,opalwingvein.json,Owv,ramp(membrane)+waves(veins),yes

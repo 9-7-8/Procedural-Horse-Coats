@@ -1,0 +1,141 @@
+{
+  "format": 3,
+  "key": "horsegenetics.picasso_marking",
+  "name": "Picasso Marking",
+  "phase": "magical",
+  "priority": 316,
+  "rarity": "RARE",
+  "blurb": "Flat dots in one colour and wandering squiggles in another, with the squiggles keeping clear of the dots - a horse marked like a painting rather than like a horse.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The squiggles have a LARGER copy of the dot field subtracted out of them, not the same one - the clearance is what keeps the two marks reading as two marks. Without it the lines cross the dots and the whole thing reads as noise.",
+    "Two independent hue knobs, so the dots and the lines are different colours on the same horse and the pair is inherited together."
+  ],
+  "alleles": [
+    {
+      "token": "Pic",
+      "label": "Picasso (Pic)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "dotHue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "squiggleHue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "dotSpacing",
+      "min": 5.0,
+      "max": 7.5
+    },
+    {
+      "name": "dotRadius",
+      "min": 1.3,
+      "max": 2.1
+    },
+    {
+      "name": "dotClearance",
+      "min": 2.0,
+      "max": 2.9
+    }
+  ],
+  "expressions": [
+    {
+      "id": "marked",
+      "name": "Picasso Marking",
+      "description": "Two colours the horse draws for itself, and they are drawn separately: the dots first, then the squiggles with a slightly larger copy of the dot field subtracted out of them. That clearance is the whole trick - without it the lines run over the dots and the pattern reads as noise. The dot field is mirrored, so the two sides of the horse match.",
+      "when": {
+        "Pic": 2
+      },
+      "layers": [
+        {
+          "name": "flat dots scattered over the barrel",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "spacing": "$dotSpacing",
+              "radius": "$dotRadius",
+              "vary": 0.4,
+              "mirror": true,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "hue": "$dotHue",
+            "saturation": 0.95,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "squiggles wandering between them",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "spacing": 5.5,
+              "length": 9.0,
+              "axis": "X",
+              "width": 0.8,
+              "curl": 0.85,
+              "softness": 0.15
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "spacing": "$dotSpacing",
+              "radius": "$dotClearance",
+              "vary": 0.4,
+              "mirror": true,
+              "softness": 0.12,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "hue": "$squiggleHue",
+            "saturation": 0.7,
+            "lightness": 0.45
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Pic/Pic": 0.15,
+    "Pic/n": 0.15,
+    "n/n": 99.7
+  }
+}

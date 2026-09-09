@@ -694,11 +694,16 @@ public final class DesignerApi {
             }
             j.obj().kv("tokens", pair.toTokens())
                     .kv("name", coarse ? pair.toTokens() : x.name())
+                    .kv("expression", x.id())
                     .kv("description", x.description())
                     .kv("varies", !x.deterministic())
                     .endObj();
         }
         j.endArr();
+        // Which of those the gene says to OPEN on, when it says. Same
+        // declaration the icon baker reads, so the page and the icon show the
+        // same horse - see GeneSpec.Preview.
+        j.kv("preview", g.previewExpression() == null ? "" : g.previewExpression());
         modifiers(j, g);
         return j.endObj().toString();
     }

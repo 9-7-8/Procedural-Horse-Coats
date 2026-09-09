@@ -1,0 +1,289 @@
+{
+  "format": 3,
+  "key": "horsegenetics.tidemark",
+  "name": "Tidemark",
+  "phase": "magical",
+  "priority": 258,
+  "rarity": "UNCOMMON",
+  "blurb": "The belly and lower barrel filled to an arched waterline, with the line picked out in a second colour and a row of dots riding along it.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. One sine wave read three times - the fill below it, the line at it, and a band just above it broken into dots by a spot field. Because all three read the SAME wave, the dots follow the waterline exactly however the arch knob is drawn, which three independent masks could not promise."
+  ],
+  "alleles": [
+    {
+      "token": "Tdm",
+      "label": "Tidemark, pale (Tdm)"
+    },
+    {
+      "token": "Tdc",
+      "label": "Tidemark, coloured (Tdc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "accentHue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "archHeight",
+      "min": 0.05,
+      "max": 0.14
+    },
+    {
+      "name": "reach",
+      "min": 0.3,
+      "max": 0.42
+    },
+    {
+      "name": "lineTop",
+      "min": 0.44,
+      "max": 0.5
+    },
+    {
+      "name": "dotTop",
+      "min": 0.5,
+      "max": 0.58
+    },
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "dotSpacing",
+      "min": 1.3,
+      "max": 2.0
+    },
+    {
+      "name": "dotSize",
+      "min": 0.3,
+      "max": 0.6
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Tidemark",
+      "description": "One sine wave, three times over: the fill below it, the line at it, and a band just above it with a spot field multiplied in to break the band into dots. Because all three read the same wave, the dots follow the line exactly however the arch is drawn - which is the point, and is not something three separate masks could promise.",
+      "when": [
+        "Tdm/Tdm",
+        "Tdm/Tdc",
+        "Tdm/n"
+      ],
+      "layers": [
+        {
+          "name": "the belly filled to an arched waterline",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.14,
+              "from": -0.1,
+              "to": "$reach"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f0e2",
+            "strength": 80.0
+          }
+        },
+        {
+          "name": "the waterline itself, drawn as a line",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.03,
+              "from": "$reach",
+              "to": "$lineTop"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9b48a",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "a row of dots riding along it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.05,
+              "from": "$reach",
+              "to": "$dotTop"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$dotSpacing",
+              "radius": "$dotSize",
+              "vary": 0.3,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9b48a",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Tidemark, coloured",
+      "description": "The same waterline with the fill and the accent in two colours the line carries. Fully recessive.",
+      "when": {
+        "Tdc": 2
+      },
+      "layers": [
+        {
+          "name": "the belly filled to an arched waterline",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.14,
+              "from": -0.1,
+              "to": "$reach"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.6,
+            "lightness": 0.62,
+            "strength": 80.0
+          }
+        },
+        {
+          "name": "the waterline itself, drawn as a line",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.03,
+              "from": "$reach",
+              "to": "$lineTop"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$accentHue",
+            "saturation": 0.85,
+            "lightness": 0.45,
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "a row of dots riding along it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.05,
+              "from": "$reach",
+              "to": "$dotTop"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$dotSpacing",
+              "radius": "$dotSize",
+              "vary": 0.3,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$accentHue",
+            "saturation": 0.85,
+            "lightness": 0.45,
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No tidemark.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Tdm/Tdm": 0.02,
+    "Tdm/Tdc": 0.06,
+    "Tdm/n": 0.3,
+    "Tdc/Tdc": 0.06,
+    "n/n": 99.56
+  }
+}

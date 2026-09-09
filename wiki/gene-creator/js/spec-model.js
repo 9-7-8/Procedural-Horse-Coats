@@ -331,6 +331,12 @@ window.HG = window.HG || {};
     // Header metadata, emitted only when it says something the game would not
     // already assume - a gene that leaves the economy alone stays a short file.
     if (spec.blurb && spec.blurb.trim()) out.blurb = spec.blurb.trim();
+    // The gene's own prose. blurb is a one-to-three-sentence SUMMARY and has to
+    // stay that size; notes is where the rest goes - why the numbers are the
+    // numbers, what was tried and abandoned - and it is printed on the gene's
+    // generated wiki page as written.
+    var notes = tidyNotes(spec.notes);
+    if (notes) out.notes = notes;
     if (spec.rarity && spec.rarity !== DEFAULT_RARITY) out.rarity = spec.rarity;
     out.alleles = alleles.map(function (a) {
       return a.label ? { token: a.token, label: a.label } : { token: a.token };
@@ -348,6 +354,11 @@ window.HG = window.HG || {};
     }
     out.expressions = (spec.expressions || []).map(function (e) {
       var entry = { id: e.id, name: e.name, description: e.description || "" };
+      // Prose about this one outcome, written for a reader of the FILE rather
+      // than for a player - see GeneSpec.ExpressionSpec#notes. Emitted only
+      // when there is something in it, so a gene that says nothing stays short.
+      var eNotes = tidyNotes(e.notes);
+      if (eNotes) entry.notes = eNotes;
       if (e.wildType) entry.wildType = true;
       if (e.masks) entry.masks = true;
       if (e.when !== undefined && e.when !== null) entry.when = e.when;
@@ -383,7 +394,38 @@ window.HG = window.HG || {};
       var flavour = (c.flavour || []).filter(function (f) { return f && f.trim(); });
       if (flavour.length) out.carrot.flavour = flavour.map(function (f) { return f.trim(); });
     }
+    // Which base coat and which expression the gene's ONE baked picture is
+    // taken on, when measuring it comes out wrong (GeneSpec.Preview). There is
+    // no editor for it - it is a handful of genes and an odd thing to want -
+    // but it is passed through rather than dropped, because a file that loses
+    // a key on a round-trip through this tool is worse than one that cannot
+    // set it here.
+    if (spec.preview && (spec.preview.base || spec.preview.expression)) {
+      out.preview = {};
+      if (spec.preview.base) out.preview.base = spec.preview.base;
+      if (spec.preview.expression) out.preview.expression = spec.preview.expression;
+    }
     return out;
+  }
+
+  /**
+   * A `notes` block, normalised: an array of non-empty trimmed paragraphs, or
+   * null when there is nothing to say.
+   *
+   * Accepts a plain string as well as an array, because the parser does and
+   * because that is what somebody writes the first time. Returning null rather
+   * than [] is what keeps the key out of the exported file entirely - an empty
+   * notes array on ninety genes is noise in every diff.
+   */
+  function tidyNotes(notes) {
+    if (!notes) return null;
+    var list = typeof notes === "string" ? [notes] : notes;
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var p = String(list[i] == null ? "" : list[i]).trim();
+      if (p) out.push(p);
+    }
+    return out.length ? out : null;
   }
 
   function tidyMask(mask) {

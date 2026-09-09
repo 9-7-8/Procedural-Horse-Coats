@@ -1,0 +1,140 @@
+{
+  "format": 3,
+  "key": "horsegenetics.cracked_porcelain",
+  "name": "Cracked Porcelain",
+  "phase": "magical",
+  "priority": 216,
+  "rarity": "EPIC",
+  "blurb": "A glaze laid over the whole horse and then crazed - the coat underneath shows through only as the hairline cracks between the plates.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. CRACKLE is the only mask in the vocabulary with a genuinely hard edge, which is why this gene is drawn with it rather than with a patch field - a crazed glaze whose cracks are soft is a marbled horse, not a broken pot.",
+    "The gene paints the plates and leaves the channels, rather than the other way round. That is worth knowing when reading the layer: the coat you can see IS the crack."
+  ],
+  "alleles": [
+    {
+      "token": "Cpw",
+      "label": "Porcelain, white (Cpw)"
+    },
+    {
+      "token": "Cpc",
+      "label": "Porcelain, coloured (Cpc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSize",
+      "min": 3.0,
+      "max": 8.0
+    },
+    {
+      "name": "lineWidth",
+      "min": 0.3,
+      "max": 0.9
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Cracked Porcelain",
+      "description": "The horse is white the way a glazed pot is white, and the only thing left of the coat is the crack pattern: a network of fine dark lines between plates a few units across. The channels are the one hard edge in the whole mod - nothing about this gene is soft. Bigger plates mean fewer, longer cracks.",
+      "notes": [
+        "The plates are FLAT rather than TOWARD - a glaze does not let the coat show through it at all, and TOWARD at any strength below 100 would have left the horse tinted by whatever it was."
+      ],
+      "when": [
+        "Cpw/Cpw",
+        "Cpw/Cpc",
+        "Cpw/n"
+      ],
+      "layers": [
+        {
+          "name": "the porcelain glaze over everything but the cracks",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$lineWidth",
+              "warp": 0.35,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Cracked Porcelain, glazed",
+      "description": "The same crazed plates in a colour the line carries rather than in white. Fully recessive: two copies, and a single copy beside the white allele glazes white.",
+      "when": {
+        "Cpc": 2
+      },
+      "layers": [
+        {
+          "name": "the porcelain glaze over everything but the cracks",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$lineWidth",
+              "warp": 0.35,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.72
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No glaze.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Cpw/Cpw": 0.002,
+    "Cpw/Cpc": 0.006,
+    "Cpw/n": 0.03,
+    "Cpc/Cpc": 0.006,
+    "n/n": 99.956
+  }
+}

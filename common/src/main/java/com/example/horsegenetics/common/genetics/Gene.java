@@ -100,6 +100,26 @@ public interface Gene {
     }
 
     /**
+     * <b>The base coat this gene should be illustrated on</b> - a
+     * {@code BaseCoats} key - or {@code null} to let it be measured, which is
+     * what nearly every gene wants. See
+     * {@link com.example.horsegenetics.common.genetics.spec.GeneSpec.Preview}.
+     */
+    default String previewBase() {
+        return null;
+    }
+
+    /**
+     * <b>The expression this gene should be illustrated in</b> - one of its own
+     * {@link #expressions} ids - or {@code null} to photograph whichever
+     * combination repaints the most. Declared by a gene whose loudest outcome
+     * is not its most recognisable one.
+     */
+    default String previewExpression() {
+        return null;
+    }
+
+    /**
      * Whether a <b>Known Gene Splice carrot</b> exists for this gene (&sect;14.2).
      * True for almost every gene; a handful turn it off because a carrot for
      * them is nonsense or hostile - the {@link com.example.horsegenetics.common.genetics.genes.SexGene

@@ -158,9 +158,14 @@ public final class GeneWikiTool {
         int[] template = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
         int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
         GradientLut base = new GradientLut(g, lastReadWidth, lastReadHeight);
-        int[] bp = readArgb("/assets/horsegenetics/textures/coat/lutbluepink.png");
-        GradientLut bluepink = new GradientLut(bp, lastReadWidth, lastReadHeight);
-        LutSet luts = new LutSet(base, Map.of("bluepink", bluepink));
+        LutSet luts = LutSet.fromRegistry(base, path -> {
+            try {
+                int[] px = readArgb("/assets/horsegenetics/" + path);
+                return new GradientLut(px, lastReadWidth, lastReadHeight);
+            } catch (IOException missing) {
+                return null;   // LutSet.resolve falls back to the base gradient
+            }
+        });
 
         Map<String, String> out = new LinkedHashMap<>();
         for (SpecGene gene : Genes.loaded()) {
@@ -764,6 +769,7 @@ public final class GeneWikiTool {
         sb.append("></div>\n\n");
 
         sb.append(outcomeSummary(gene));
+        sb.append(notes(gene.spec().notes(), "about", "About this gene"));
 
         sb.append("<h2 id=\"inheritance\">Crossing two of them</h2>\n\n");
         sb.append("<div class=\"gene-inheritance\" data-gene=\"").append(gene.key())
@@ -977,6 +983,30 @@ public final class GeneWikiTool {
         return s;
     }
 
+    /**
+     * A gene's <b>{@code notes}</b> block, as a section - the prose the author
+     * wrote in the gene file itself.
+     *
+     * <p>This is the whole reason that field exists. An author who knows why a
+     * number is what it is writes it beside the number, and it appears here
+     * with nobody editing a page; the alternative was a paragraph on a
+     * hand-written page that drifts the moment either side moves. Nothing is
+     * generated into it and nothing is inferred from it - it is printed as
+     * written, and a gene that says nothing gets no section rather than an
+     * empty one.
+     */
+    private static String notes(List<String> paragraphs, String anchor, String heading) {
+        if (paragraphs.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<h2 id=\"").append(anchor).append("\">").append(esc(heading)).append("</h2>\n\n");
+        for (String p : paragraphs) {
+            sb.append("<p>").append(esc(p)).append("</p>\n\n");
+        }
+        return sb.toString();
+    }
+
     private static String layers(SpecGene gene) {
         StringBuilder sb = new StringBuilder("<h2 id=\"layers\">What it paints</h2>\n\n");
         sb.append("<p>\n    Each outcome, described the way the gene file describes it, and then"
@@ -984,12 +1014,17 @@ public final class GeneWikiTool {
                 + " part\n    a reader checks a bake against; the list underneath is what the"
                 + " engine\n    actually did.\n</p>\n\n");
         for (GeneSpec.ExpressionSpec e : gene.spec().expressions()) {
-            if (e.layers().isEmpty() && e.description().isBlank()) {
+            if (e.layers().isEmpty() && e.description().isBlank() && e.notes().isEmpty()) {
                 continue;
             }
             sb.append("<h3>").append(esc(e.name())).append("</h3>\n\n");
             if (!e.description().isBlank()) {
                 sb.append("<p>").append(esc(e.description())).append("</p>\n\n");
+            }
+            // Whatever the author wrote about this one outcome, printed as
+            // written. See GeneSpec.ExpressionSpec#notes.
+            for (String note : e.notes()) {
+                sb.append("<p>").append(esc(note)).append("</p>\n\n");
             }
             if (e.layers().isEmpty()) {
                 sb.append("<p class=\"muted\">Paints nothing.</p>\n\n");

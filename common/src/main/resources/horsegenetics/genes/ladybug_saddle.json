@@ -1,0 +1,404 @@
+{
+  "format": 3,
+  "key": "horsegenetics.ladybug_saddle",
+  "name": "Ladybug Saddle",
+  "phase": "magical",
+  "priority": 275,
+  "rarity": "RARE",
+  "blurb": "A pair of wing panels over the barrel split by a black spine, veined in black, with a checkered collar where they meet the withers.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The panel is one shape with the spine drawn back through it, rather than two panels placed either side - which is what guarantees the split is straight and central however the panel is sized.",
+    "The source asked for a black-and-white CHECKERED collar. There is no checker mask; this is a tight spot field on a narrow band at the top of the neck, which reads as broken rather than as squares. Worth a look on a bake before anyone calls it done."
+  ],
+  "alleles": [
+    {
+      "token": "Lbs",
+      "label": "Saddle, cream (Lbs)"
+    },
+    {
+      "token": "Lbc",
+      "label": "Saddle, coloured (Lbc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 300.0,
+      "max": 360.0
+    },
+    {
+      "name": "veinSeed",
+      "type": "seed"
+    },
+    {
+      "name": "veinScale",
+      "min": 3.0,
+      "max": 5.0
+    },
+    {
+      "name": "veinSpread",
+      "min": 0.3,
+      "max": 0.6
+    },
+    {
+      "name": "spineWidth",
+      "min": 0.4,
+      "max": 1.0
+    },
+    {
+      "name": "collarSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "cream",
+      "name": "Ladybug Saddle",
+      "description": "The panel is one shape and the spine is drawn back through it, rather than two panels drawn separately - which is what guarantees the split is straight and central however the panel is sized. The veins are a crackle field clipped to the panel, so they stop where it does.",
+      "when": [
+        "Lbs/Lbs",
+        "Lbs/Lbc",
+        "Lbs/n"
+      ],
+      "layers": [
+        {
+          "name": "the two wing panels",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.8,
+              "from": 11.0,
+              "to": 26.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.35,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f3e9d6",
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "the spine stripe between them",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY"
+              ],
+              "halfWidth": "$spineWidth",
+              "softness": 0.3
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.8,
+              "from": 11.0,
+              "to": 26.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.35,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "forked veins across the panels",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.8,
+              "from": 11.0,
+              "to": 26.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.35,
+              "to": 1.1
+            },
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$veinSeed",
+              "scale": "$veinScale",
+              "gap": "$veinSpread",
+              "warp": 0.4,
+              "softness": 0.06,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "a checkered collar at the withers",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.12,
+              "from": -0.1,
+              "to": 0.3
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$collarSeed",
+              "spacing": 1.8,
+              "radius": 0.8,
+              "vary": 0.15,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 94.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Ladybug Saddle, coloured",
+      "description": "The same saddle with the panels in a colour the line carries - the pink and red end of the wheel, which is where a ladybird lives. Fully recessive.",
+      "when": {
+        "Lbc": 2
+      },
+      "layers": [
+        {
+          "name": "the two wing panels",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.8,
+              "from": 11.0,
+              "to": 26.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.35,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.6,
+            "lightness": 0.7,
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "the spine stripe between them",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY"
+              ],
+              "halfWidth": "$spineWidth",
+              "softness": 0.3
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.8,
+              "from": 11.0,
+              "to": 26.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.35,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "forked veins across the panels",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.8,
+              "from": 11.0,
+              "to": 26.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.35,
+              "to": 1.1
+            },
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$veinSeed",
+              "scale": "$veinScale",
+              "gap": "$veinSpread",
+              "warp": 0.4,
+              "softness": 0.06,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "a checkered collar at the withers",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.12,
+              "from": -0.1,
+              "to": 0.3
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$collarSeed",
+              "spacing": 1.8,
+              "radius": 0.8,
+              "vary": 0.15,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 94.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No saddle.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Lbs/Lbs": 0.004,
+    "Lbs/Lbc": 0.012,
+    "Lbs/n": 0.06,
+    "Lbc/Lbc": 0.012,
+    "n/n": 99.912
+  }
+}

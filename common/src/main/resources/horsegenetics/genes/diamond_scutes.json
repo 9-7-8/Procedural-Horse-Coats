@@ -1,0 +1,362 @@
+{
+  "format": 3,
+  "key": "horsegenetics.diamond_scutes",
+  "name": "Diamond Scutes",
+  "phase": "magical",
+  "priority": 370,
+  "rarity": "RARE",
+  "blurb": "A lattice of hollow diamonds crossing the back, running up the crest of the neck, down the tail and round the forelegs - a dragon's wing-scutes rather than a horse's coat.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. A diamond is two triangle waves crossing, and the format cannot intersect two bands in one mask - so each is its own WAVES entry combined with MAX, which unions the two zigzags into a lattice. The source file expected a STROKES pass to outline them; strokes on top of a wave lattice came out as noise at this scale and were dropped.",
+    "The neck chain uses the 90/77.94 saw-wave trick that lays a band along the crest rather than round the throat. Those two numbers are the neck's own geometry written out by hand and are shared with five other genes - see known-gaps gap 103 before changing either."
+  ],
+  "alleles": [
+    {
+      "token": "Dsw",
+      "label": "Scutes, white (Dsw)"
+    },
+    {
+      "token": "Dsc",
+      "label": "Scutes, coloured (Dsc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "clumpSeed",
+      "type": "seed"
+    },
+    {
+      "name": "meshWavelength",
+      "min": 5.0,
+      "max": 7.5
+    },
+    {
+      "name": "tailWavelength",
+      "min": 3.0,
+      "max": 4.5
+    },
+    {
+      "name": "strokeWidth",
+      "min": 0.4,
+      "max": 0.7
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Diamond Scutes",
+      "description": "Two triangle waves running the length of the barrel and crossing, which is what makes a row of diamonds rather than a row of teeth. The same trick, tighter, gives the tail and the forelegs their smaller chain, and a saw wave lays a single band along the crest of the neck rather than round it. Every edge is straight - this is one of the two genes in the mod that is not made of curves.",
+      "when": [
+        "Dsw/Dsw",
+        "Dsw/Dsc",
+        "Dsw/n"
+      ],
+      "layers": [
+        {
+          "name": "the scute lattice down the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": 0.22,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.5
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": -0.22,
+              "softness": 0.04,
+              "combine": "MAX",
+              "from": 0.42,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the chain along the neck crest",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "softness": 0.05,
+              "from": 0.58,
+              "to": 0.66
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": 0.1,
+              "softness": 0.04,
+              "combine": "MULTIPLY",
+              "from": 0.0,
+              "to": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the smaller chain down the tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$tailWavelength",
+              "amplitude": 0.3,
+              "softness": 0.05,
+              "from": 0.35,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the trim round the forelegs",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "FRONT_LEGS"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$tailWavelength",
+              "amplitude": 0.28,
+              "softness": 0.05,
+              "from": 0.36,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 96.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Diamond Scutes, coloured",
+      "description": "The same lattice in a colour the line carries. Fully recessive - two copies, and a single copy beside the white allele draws white.",
+      "when": {
+        "Dsc": 2
+      },
+      "layers": [
+        {
+          "name": "the scute lattice down the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": 0.22,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.5
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": -0.22,
+              "softness": 0.04,
+              "combine": "MAX",
+              "from": 0.42,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.5,
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the chain along the neck crest",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "softness": 0.05,
+              "from": 0.58,
+              "to": 0.66
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": 0.1,
+              "softness": 0.04,
+              "combine": "MULTIPLY",
+              "from": 0.0,
+              "to": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.5,
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the smaller chain down the tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$tailWavelength",
+              "amplitude": 0.3,
+              "softness": 0.05,
+              "from": 0.35,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.5,
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the trim round the forelegs",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "FRONT_LEGS"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$tailWavelength",
+              "amplitude": 0.28,
+              "softness": 0.05,
+              "from": 0.36,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.5,
+            "strength": 96.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No scutes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Dsw/Dsw": 0.002,
+    "Dsw/Dsc": 0.008,
+    "Dsw/n": 0.04,
+    "Dsc/Dsc": 0.008,
+    "n/n": 99.942
+  }
+}

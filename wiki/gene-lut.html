@@ -23,8 +23,10 @@
     A horse that resolves its colours against an <strong>unnatural gradient</strong>.
     Every melanin gene does exactly what it always does &mdash; but instead of the warm
     red/orange/brown lookup, a horse homozygous for a variant allele reads its pigment
-    off a different palette entirely. The one variant so far, <code>Blupnk</code>, is
-    blue and pink: dreamier coat colours from the same genotype.
+    off a different palette entirely. There are two: <code>Blupnk</code> is blue and
+    pink, <code>Grnpnk</code> green through pink. Dreamier coat colours from the same
+    genotype &mdash; and a horse needs <em>two copies of the same one</em>, so a
+    Blupnk beside a Grnpnk is an ordinary horse.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -65,24 +67,25 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.lut</dd></div>
     <div><dt>Priority</dt><dd>190 (magical band, after verdant)</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele wild">n</span> <span class="allele rec">Blupnk</span></dd></div>
-    <div><dt>Combinations</dt><dd>3, all carryable &mdash; 2 outcomes (a carrier wild type + the swap)</dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>bluepink-carrier</code> (a wild type), <code>bluepink</code></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele wild">n</span> <span class="allele rec">Blupnk</span> <span class="allele rec">Grnpnk</span></dd></div>
+    <div><dt>Combinations</dt><dd>6, all carryable &mdash; 5 outcomes (a carrier wild type and a swap per palette, plus the plain wild type; a mixed pair lands on the wild type)</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>bluepink-carrier</code> and <code>greenpink-carrier</code> (both wild types), <code>bluepink</code>, <code>greenpink</code></dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Wild frequency</dt><dd>~1 in 60 wild horses carries a variant copy; a homozygote is <strong>never</strong> a founder</dd></div>
+    <div><dt>Wild frequency</dt><dd>~1 in 60 wild horses carries <em>each</em> variant copy; a homozygote is <strong>never</strong> a founder</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Coat effect</dt><dd>replaces the phase-2 gradient for a variant homozygote &mdash; deterministic, so it is out of the per-horse texture fingerprint</dd></div>
     <div><dt>Gene carrot</dt><dd>none</dd></div>
 </dl>
 
 <div class="note warn">
-    <span class="label">Built 2026-09-05, not yet play-tested</span>
+    <span class="label">The green/pink palette is not yet play-tested</span>
     <p>
-        No horse has been seen rendered against the blue/pink LUT in game. The golden
-        test and a unit test confirm the swap fires only for a true homozygote and that
-        a carrier is byte-identical to a plain horse; sample bakes
-        (<code>:common:bakeCoatSamples</code>, the <code>lut_bluepink_*</code> images)
-        look right. Checklist on <a href="verification.html">To be verified</a>.
+        The blue/pink palette has been seen in game and works. <strong>The green/pink
+        one has not.</strong> The golden test pins both, and a unit test walks
+        <code>VARIANTS</code> rather than naming a palette, so the claims that hold for
+        one hold for the other &mdash; but nothing has looked at what green-through-pink
+        does to a bay, and the layout of the chart is the whole of what decides that.
+        Checklist on <a href="verification.html">To be verified</a>.
     </p>
 </div>
 
@@ -94,6 +97,9 @@
         <tr><td><code>n/n</code></td><td>wild</td><td>The natural red/black gradient</td></tr>
         <tr><td><code>Blupnk/n</code></td><td><code>bluepink-carrier</code></td><td>Nothing &mdash; a silent carrier, passes the allele on</td></tr>
         <tr><td><code>Blupnk/Blupnk</code></td><td><code>bluepink</code></td><td>Every melanin gene resolves against <code>lutbluepink.png</code></td></tr>
+        <tr><td><code>Grnpnk/n</code></td><td><code>greenpink-carrier</code></td><td>Nothing &mdash; a silent carrier, passes the allele on</td></tr>
+        <tr><td><code>Grnpnk/Grnpnk</code></td><td><code>greenpink</code></td><td>Every melanin gene resolves against <code>lutgreenpink.png</code></td></tr>
+        <tr><td><code>Blupnk/Grnpnk</code></td><td>wild</td><td>Nothing. Two <em>different</em> variants are not half of each palette &mdash; they are the natural gradient</td></tr>
     </tbody>
 </table>
 
@@ -136,13 +142,21 @@
     <thead><tr><th>Allele</th><th>LUT key</th><th>Texture</th><th>Look</th></tr></thead>
     <tbody>
         <tr><td><code>Blupnk</code></td><td><code>bluepink</code></td><td><code>textures/coat/lutbluepink.png</code></td><td>The warm red/orange/brown gradient replaced with blue and pink &mdash; cooler, dreamier horse colours</td></tr>
+        <tr><td><code>Grnpnk</code></td><td><code>greenpink</code></td><td><code>textures/coat/lutgreenpink.png</code></td><td>Green on the black end running to pink on the red one, through a pale seam in the middle &mdash; so a would-be black comes out green and a would-be chestnut pink</td></tr>
     </tbody>
 </table>
 
-<p>More palettes are planned; each is one more row in <code>LutGene.VARIANTS</code>
+<p>More palettes are welcome; each is one more row in <code>LutGene.VARIANTS</code>
 (an allele, a LUT key, a 500&times;500 texture laid out like
 <code>redblackgradient.png</code> &mdash; left redder, bottom blacker) and the
-expression table, carrier wording and wiring all follow from that list.</p>
+expression table, carrier wording, founder odds and in-game wiring all follow from
+that list. <strong>Three other places have to be told, and none of them is Java:</strong>
+the PNG goes in <code>common/src/main/resources/assets/horsegenetics/textures/coat/</code>,
+<code>web/build.gradle.kts</code> copies it to the designer, and
+<code>wiki/horse-designer/js/java.js</code> hands its pixels to the wasm with
+<code>setAlternateGradient</code>. The offline tools need nothing: they build their LUT
+set with <code>LutSet.fromRegistry</code>, which walks the registry the way the game
+does.</p>
 
 </section>
 

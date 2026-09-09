@@ -1,0 +1,344 @@
+{
+  "format": 3,
+  "key": "horsegenetics.shieldback",
+  "name": "Shieldback",
+  "phase": "magical",
+  "priority": 319,
+  "rarity": "EPIC",
+  "blurb": "A shield-bug's back: a green ground, a scalloped collar across the withers, and a fanning column of ringed eyespots down the topline.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The source file is not valid JSON - it has arithmetic in it (`27.0 + \"$collarBorderWidth\"`), which the format has no notion of. Every computed bound here is written out as a constant or a knob instead.",
+    "The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest. That is the opposite of what the 90/77.94 saw-wave trick does, and it is the right answer for a collar."
+  ],
+  "alleles": [
+    {
+      "token": "Shb",
+      "label": "Shieldback, green (Shb)"
+    },
+    {
+      "token": "Shc",
+      "label": "Shieldback, coloured (Shc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "collarSeed",
+      "type": "seed"
+    },
+    {
+      "name": "collarWavelength",
+      "min": 2.4,
+      "max": 4.2
+    },
+    {
+      "name": "collarAmplitude",
+      "min": 0.05,
+      "max": 0.14
+    },
+    {
+      "name": "eyeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "eyeSpacing",
+      "min": 4.0,
+      "max": 6.5
+    },
+    {
+      "name": "eyeRadius",
+      "min": 1.4,
+      "max": 2.2
+    },
+    {
+      "name": "eyeThickness",
+      "min": 0.45,
+      "max": 0.8
+    },
+    {
+      "name": "eyeCore",
+      "min": 0.5,
+      "max": 0.9
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "green",
+      "name": "Shieldback",
+      "description": "The collar is a sine band read ACROSS the neck rather than along it - axis Z, which runs side to side - so it scallops round the withers instead of running up the crest. The eyespots are a ring and a spot on one lattice, cut to the top of the barrel, so they queue down the spine rather than covering the flank.",
+      "when": [
+        "Shb/Shb",
+        "Shb/Shc",
+        "Shb/n"
+      ],
+      "layers": [
+        {
+          "name": "the ground, a shield-bug green",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2f6b4f",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a scalloped collar across the withers",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Z",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": "$collarWavelength",
+              "amplitude": "$collarAmplitude",
+              "softness": 0.06,
+              "from": 0.04,
+              "to": 0.24
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#7d1f22",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a column of ringed eyespots down the topline",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": "$eyeRadius",
+              "thickness": "$eyeThickness",
+              "vary": 0.25,
+              "chance": 0.7,
+              "softness": 0.18
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.25,
+              "combine": "MULTIPLY",
+              "from": 0.6,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c2352f",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "each with a dark centre",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": "$eyeCore",
+              "vary": 0.25,
+              "chance": 0.7,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.25,
+              "combine": "MULTIPLY",
+              "from": 0.6,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Shieldback, coloured",
+      "description": "The same back with the ground in a colour the line carries. The eyespots stay red and black - they are the warning, and a warning that matches the animal is not one. Fully recessive.",
+      "notes": [
+        "The eyespots stay red and black in both forms. A warning that matches the animal is not a warning, and letting the hue knob reach them made the gene read as a plain spotted horse."
+      ],
+      "when": {
+        "Shc": 2
+      },
+      "layers": [
+        {
+          "name": "the ground, a shield-bug green",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.6,
+            "lightness": 0.4,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a scalloped collar across the withers",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Z",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": "$collarWavelength",
+              "amplitude": "$collarAmplitude",
+              "softness": 0.06,
+              "from": 0.04,
+              "to": 0.24
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#7d1f22",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a column of ringed eyespots down the topline",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": "$eyeRadius",
+              "thickness": "$eyeThickness",
+              "vary": 0.25,
+              "chance": 0.7,
+              "softness": 0.18
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.25,
+              "combine": "MULTIPLY",
+              "from": 0.6,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c2352f",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "each with a dark centre",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": "$eyeCore",
+              "vary": 0.25,
+              "chance": 0.7,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.25,
+              "combine": "MULTIPLY",
+              "from": 0.6,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#101010",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No shield.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Shb/Shb": 0.002,
+    "Shb/Shc": 0.008,
+    "Shb/n": 0.04,
+    "Shc/Shc": 0.008,
+    "n/n": 99.942
+  }
+}

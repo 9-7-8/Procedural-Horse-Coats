@@ -1,0 +1,132 @@
+{
+  "format": 3,
+  "key": "horsegenetics.webbed",
+  "name": "Webbed",
+  "phase": "magical",
+  "priority": 381,
+  "rarity": "UNCOMMON",
+  "blurb": "A polygonal net of veins over the barrel and neck - the venation of a tiger-moth wing, and nothing else.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. One crackle field drawn as its channels. It is the simplest gene in this batch and the clearest demonstration of what CRACKLE is for: a tiling of polygons with a genuinely hard edge, which nothing else in the vocabulary gives."
+  ],
+  "alleles": [
+    {
+      "token": "Web",
+      "label": "Webbed, white (Web)"
+    },
+    {
+      "token": "Wec",
+      "label": "Webbed, coloured (Wec)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "cellSize",
+      "min": 4.0,
+      "max": 6.5
+    },
+    {
+      "name": "lineWidth",
+      "min": 0.22,
+      "max": 0.4
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Webbed",
+      "description": "One crackle field, drawn as its channels rather than its cells. It is the simplest gene in this family and the one that shows most clearly what CRACKLE is for: a tiling of polygons with a genuinely hard edge, which nothing else in the vocabulary can give.",
+      "when": [
+        "Web/Web",
+        "Web/Wec",
+        "Web/n"
+      ],
+      "layers": [
+        {
+          "name": "the venation net over the barrel and neck",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$lineWidth",
+              "warp": 0.4,
+              "softness": 0.07,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f6f2",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Webbed, coloured",
+      "description": "The same net in a colour the line carries. Fully recessive.",
+      "when": {
+        "Wec": 2
+      },
+      "layers": [
+        {
+          "name": "the venation net over the barrel and neck",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$lineWidth",
+              "warp": 0.4,
+              "softness": 0.07,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.35,
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No web.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Web/Web": 0.02,
+    "Web/Wec": 0.06,
+    "Web/n": 0.3,
+    "Wec/Wec": 0.06,
+    "n/n": 99.56
+  }
+}

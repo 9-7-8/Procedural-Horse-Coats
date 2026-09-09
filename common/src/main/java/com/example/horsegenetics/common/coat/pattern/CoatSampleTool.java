@@ -92,6 +92,9 @@ public final class CoatSampleTool {
             {"lut_bluepink_black", "lut=Blupnk/Blupnk"},
             {"lut_bluepink_bay", "agouti=A/a lut=Blupnk/Blupnk"},
             {"lut_bluepink_chestnut", "extension=e/e lut=Blupnk/Blupnk"},
+            {"lut_greenpink_black", "lut=Grnpnk/Grnpnk"},
+            {"lut_greenpink_bay", "agouti=A/a lut=Grnpnk/Grnpnk"},
+            {"lut_greenpink_chestnut", "extension=e/e lut=Grnpnk/Grnpnk"},
             // the leopard complex - LP zygosity x PATN1 x PATN2, all on a bay
             {"lp_mottled_bay", "agouti=A/a leopard=LP/lp"},
             {"lp_varnish_roan_bay", "agouti=A/a leopard=LP/LP"},
@@ -228,9 +231,14 @@ public final class CoatSampleTool {
         int[] babyTemplate = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white_baby.png");
         int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
         GradientLut base = new GradientLut(g, lastReadWidth, lastReadHeight);
-        int[] bp = readArgb("/assets/horsegenetics/textures/coat/lutbluepink.png");
-        GradientLut bluepink = new GradientLut(bp, lastReadWidth, lastReadHeight);
-        LutSet lut = new LutSet(base, java.util.Map.of("bluepink", bluepink));
+        LutSet lut = LutSet.fromRegistry(base, path -> {
+            try {
+                int[] px = readArgb("/assets/horsegenetics/" + path);
+                return new GradientLut(px, lastReadWidth, lastReadHeight);
+            } catch (IOException missing) {
+                return null;   // LutSet.resolve falls back to the base gradient
+            }
+        });
 
         for (int i = 0; i < SAMPLES.length; i++) {
             Genotype gt = build(SAMPLES[i][1]);

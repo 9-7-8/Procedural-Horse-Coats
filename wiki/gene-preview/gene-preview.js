@@ -34,6 +34,14 @@
 // cannot disagree about what a gene shows on. An unrecognised key falls back to
 // the default rather than being trusted.
 //
+// A gene may also declare WHICH OUTCOME its picture is of, in the gene file's
+// own `preview` block. That one is not an attribute: it comes back with the
+// gene from genePreviewJson, because it is the mod's opinion rather than the
+// page's. Flametouched is the case - its homozygote is a whole-horse ember
+// gradient and its heterozygote is the flames the gene is named for - and the
+// icon baker obeys the same declaration, so the card on the landing page and
+// the window on the gene page open on the same horse.
+//
 // It needs the wiki served over http: loading the wasm is a fetch, and a file://
 // page is its own opaque origin. The window says so rather than failing silently.
 window.HG = window.HG || {};
@@ -172,7 +180,7 @@ window.HG = window.HG || {};
 
     var state = {
       base: defaultBase(bases, wantBase),
-      outcome: 0,
+      outcome: defaultOutcome(gene),
       // One selected option per modifier locus this gene reads, all starting at
       // the baseline - so the first thing shown is the gene on its own.
       modifiers: gene.modifiers.map(function () { return 0; }),
@@ -300,6 +308,24 @@ window.HG = window.HG || {};
       if (bases[i].key === "bay") return bases[i].key;
     }
     return bases[0].key;
+  }
+
+  /**
+   * Which outcome the window opens on: the first one, unless the gene named an
+   * expression to be shown as.
+   *
+   * The same declaration the icon baker obeys (GeneSpec.Preview), so a gene
+   * whose loudest outcome is not its recognisable one - flametouched's
+   * homozygous ember gradient against the flames it is named for - opens on the
+   * horse its card on the landing page shows. An expression the gene no longer
+   * has falls back to the first, rather than opening on nothing.
+   */
+  function defaultOutcome(gene) {
+    if (!gene.preview) return 0;
+    for (var i = 0; i < gene.outcomes.length; i++) {
+      if (gene.outcomes[i].expression === gene.preview) return i;
+    }
+    return 0;
   }
 
   function indexOfBase(bases, key) {

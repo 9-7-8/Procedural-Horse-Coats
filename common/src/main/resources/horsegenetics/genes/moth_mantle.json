@@ -1,0 +1,344 @@
+{
+  "format": 3,
+  "key": "horsegenetics.moth_mantle",
+  "name": "Moth Mantle",
+  "phase": "magical",
+  "priority": 224,
+  "rarity": "RARE",
+  "blurb": "A pale mantle over the barrel crossed by a wing net, with a banded tail, a pair of spots at its tip, and a mark on each cheek - a tiger moth at rest.",
+  "alleles": [
+    {
+      "token": "Mmw",
+      "label": "Mantle, white (Mmw)"
+    },
+    {
+      "token": "Mmc",
+      "label": "Mantle, coloured (Mmc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "netCell",
+      "min": 3.5,
+      "max": 5.5
+    },
+    {
+      "name": "netWidth",
+      "min": 0.25,
+      "max": 0.45
+    },
+    {
+      "name": "bandSpacing",
+      "min": 0.14,
+      "max": 0.26
+    },
+    {
+      "name": "spotSize",
+      "min": 0.8,
+      "max": 1.4
+    },
+    {
+      "name": "cheekSpotSize",
+      "min": 0.7,
+      "max": 1.2
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Moth Mantle",
+      "description": "The mantle goes on as a solid ground and the net is drawn into it, so the pattern is the same whatever the horse underneath is doing. Everything else on the animal - tail bands, tail tip, cheeks - is drawn in the same ink as the net, which is what ties a set of unrelated marks into one moth.",
+      "when": [
+        "Mmw/Mmw",
+        "Mmw/Mmc",
+        "Mmw/n"
+      ],
+      "layers": [
+        {
+          "name": "a mantle over the barrel",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2ece0",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the wing net drawn across it",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$netCell",
+              "gap": "$netWidth",
+              "warp": 0.35,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "bands down the tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Z",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": 6.0,
+              "amplitude": 0.06,
+              "spacing": "$bandSpacing",
+              "phase": 0.0,
+              "softness": 0.05,
+              "from": 0.0,
+              "to": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a pair of spots at its tip",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "TAIL"
+              ],
+              "seed": "$seed",
+              "spacing": 4.0,
+              "radius": "$spotSize",
+              "vary": 0.2,
+              "mirror": true,
+              "softness": 0.15
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.15,
+              "combine": "MULTIPLY",
+              "from": -0.1,
+              "to": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "and a mark on each cheek",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": 6.0,
+              "radius": "$cheekSpotSize",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Moth Mantle, coloured",
+      "description": "The same moth on a mantle in a colour the line carries - the source asked for it over an orange coat, and this is how a horse gets there on its own. Fully recessive.",
+      "when": {
+        "Mmc": 2
+      },
+      "layers": [
+        {
+          "name": "a mantle over the barrel",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.58,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the wing net drawn across it",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$netCell",
+              "gap": "$netWidth",
+              "warp": 0.35,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "bands down the tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Z",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": 6.0,
+              "amplitude": 0.06,
+              "spacing": "$bandSpacing",
+              "phase": 0.0,
+              "softness": 0.05,
+              "from": 0.0,
+              "to": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a pair of spots at its tip",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "TAIL"
+              ],
+              "seed": "$seed",
+              "spacing": 4.0,
+              "radius": "$spotSize",
+              "vary": 0.2,
+              "mirror": true,
+              "softness": 0.15
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.15,
+              "combine": "MULTIPLY",
+              "from": -0.1,
+              "to": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "and a mark on each cheek",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": 6.0,
+              "radius": "$cheekSpotSize",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No mantle.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Mmw/Mmw": 0.004,
+    "Mmw/Mmc": 0.012,
+    "Mmw/n": 0.06,
+    "Mmc/Mmc": 0.012,
+    "n/n": 99.912
+  }
+}

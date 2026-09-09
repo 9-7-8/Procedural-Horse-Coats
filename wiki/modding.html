@@ -1020,6 +1020,31 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
     read the relevant one <em>before</em> you start, not after.
 </p>
 
+<h3 id="contract-gene-file">A new gene file</h3>
+
+<p>
+    Not four files, but two &mdash; and the second one is the one everybody forgets.
+</p>
+
+<ol>
+<li><code>common/src/main/resources/horsegenetics/genes/&lt;slug&gt;.json</code> &mdash; the
+    gene itself.</li>
+<li><code>&hellip;/genes/index.json</code> &mdash; a hand-kept list of every file in that
+    folder. <strong>Nothing generates it.</strong> A jar has no directory to walk, so
+    <code>GeneSpecLoader.fromClasspath</code> reads the index instead: a gene missing from
+    it loads perfectly in a dev run off the file system and is simply absent from a built
+    mod. That is the worst shape of failure this codebase has &mdash; it works on the
+    machine you tested it on.</li>
+</ol>
+
+<p>
+    Then the regeneration table in <code>CLAUDE.md</code>: a gene file means
+    <code>:common:bakeGeneBundle</code>, <code>:common:bakeGeneIcons</code>,
+    <code>:common:bakeGeneWikiPages</code>, <code>:web:bakeDesignerAssets</code>, and the
+    coat golden file moves &mdash; adding a gene changes the registry order, which changes
+    every horse&rsquo;s epigenome slots, which changes every hash in the file.
+</p>
+
 <h3 id="contract-mask">A new mask or op</h3>
 
 <ol>

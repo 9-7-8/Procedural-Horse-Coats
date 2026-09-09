@@ -88,6 +88,11 @@ window.HG = window.HG || {};
       name: "Blue / pink",
       file: "lutbluepink.png",
       note: "the LUT locus's Blupnk palette, shipped as an alternate"
+    },
+    {
+      name: "Green / pink",
+      file: "lutgreenpink.png",
+      note: "the LUT locus's Grnpnk palette, shipped as an alternate"
     }
   ];
 

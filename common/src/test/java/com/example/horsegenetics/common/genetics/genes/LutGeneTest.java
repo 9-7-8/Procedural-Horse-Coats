@@ -81,7 +81,49 @@ class LutGeneTest {
     @Test
     void lutResourcesNamesTheTextureForEachKey() {
         assertEquals("textures/coat/lutbluepink.png", LUT.lutResources().get("bluepink"));
+        assertEquals("textures/coat/lutgreenpink.png", LUT.lutResources().get("greenpink"));
         assertEquals(LUT.VARIANTS.size(), LUT.lutResources().size());
+    }
+
+    /**
+     * <b>Every</b> variant behaves the same way, whichever it is - which is the
+     * claim that stops a second palette being wired up as a special case of the
+     * first. Walks {@code VARIANTS} rather than naming them, so the next one is
+     * covered by existing.
+     */
+    @Test
+    void everyVariantIsASilentCarrierAloneAndAPaletteInPairs() {
+        for (LutGene.Variant v : LUT.VARIANTS) {
+            String t = v.allele().token();
+            assertTrue(LUT.expressionOf(pair(t + "/n")).wildType(), t + "/n should show nothing");
+            assertEquals(v.carrier(), LUT.expressionOf(pair(t + "/n")), t);
+            assertEquals(v.outcome(), LUT.expressionOf(pair(t + "/" + t)), t);
+            assertFalse(v.outcome().wildType(), t + "/" + t + " should change the coat");
+            assertTrue(v.outcome().deterministic(), t + " must not vary per horse");
+            assertTrue(LUT.alternateLut(pair(t + "/n"), Genotype.wildType()).isEmpty(), t);
+            assertEquals(v.lutKey(),
+                    LUT.alternateLut(pair(t + "/" + t), Genotype.wildType()).orElseThrow(), t);
+        }
+    }
+
+    /**
+     * Two <i>different</i> variant alleles are not half of each palette - they
+     * are the natural gradient. It is the rule the locus is built on and the
+     * one a new palette is most likely to break.
+     */
+    @Test
+    void aMixedPairOfVariantsIsTheNaturalGradient() {
+        for (LutGene.Variant a : LUT.VARIANTS) {
+            for (LutGene.Variant b : LUT.VARIANTS) {
+                if (a.allele().equals(b.allele())) {
+                    continue;
+                }
+                String tokens = a.allele().token() + "/" + b.allele().token();
+                assertTrue(LUT.alternateLut(pair(tokens), Genotype.wildType()).isEmpty(),
+                        tokens + " must resolve against the natural gradient");
+                assertTrue(LUT.expressionOf(pair(tokens)).wildType(), tokens + " shows nothing");
+            }
+        }
     }
 
     // --- founders ------------------------------------------------------

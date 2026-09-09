@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.spec;
 
+import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.AlleleSpec;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Combine;
@@ -95,7 +96,7 @@ public final class GeneSpecParser {
     private static GeneSpec read(Map<String, Object> root) {
         expectKeys(root, "the file", "format", "key", "name", "phase",
                 "priority", "alleles", "knobs", "expressions", "founders",
-                "blurb", "rarity", "carrot", "splice");
+                "blurb", "rarity", "carrot", "splice", "preview", "notes");
 
         int format = (int) number(root, "format", GeneSpec.FORMAT);
         if (format != GeneSpec.FORMAT) {
@@ -142,10 +143,78 @@ public final class GeneSpecParser {
         GeneRarity rarity = GeneRarity.fromString(string(root, "rarity", ""));
         GeneSpec.Carrot carrot = readCarrot(root);
         List<FounderWeight> splice = readWeightTable(root, "splice", combinations, false);
+        GeneSpec.Preview preview = readPreview(root, expressions);
+        List<String> notes = readNotes(root, "the file");
 
         return new GeneSpec(key, name, natural, priority,
                 alleles, List.copyOf(knobs), expressions, founders,
-                blurb, rarity, carrot, splice);
+                blurb, rarity, carrot, splice, preview, notes);
+    }
+
+    /**
+     * The optional {@code notes} block - free prose, one entry per paragraph,
+     * on the file or on a single expression. See {@link GeneSpec#notes()}.
+     *
+     * <p>A bare string is accepted as a one-paragraph list, because that is
+     * what an author writes the first time and refusing it would teach nothing.
+     * Blank entries are dropped rather than rendered as an empty paragraph.
+     */
+    private static List<String> readNotes(Map<String, Object> o, String where) {
+        Object raw = o.get("notes");
+        if (raw == null) {
+            return List.of();
+        }
+        List<String> out = new ArrayList<>();
+        if (raw instanceof String one) {
+            if (!one.isBlank()) {
+                out.add(one.trim());
+            }
+            return List.copyOf(out);
+        }
+        for (Object p : array(o, "notes")) {
+            if (!(p instanceof String text)) {
+                throw new IllegalArgumentException(where
+                        + ": every entry in \"notes\" must be a paragraph of text");
+            }
+            if (!text.isBlank()) {
+                out.add(text.trim());
+            }
+        }
+        return List.copyOf(out);
+    }
+
+    /**
+     * The optional {@code preview} block - defaults to "measure it", which is
+     * what all but a handful of genes want. See {@link GeneSpec.Preview}.
+     *
+     * <p>{@code expression} is checked here, because the ids it may name are
+     * right beside it in the same file. {@code base} deliberately is
+     * <b>not</b>: resolving a {@code BaseCoats} key builds genotypes out of
+     * {@code Genes}, and {@code Genes} is what is loading this file. It is
+     * checked where it is used instead.
+     */
+    private static GeneSpec.Preview readPreview(Map<String, Object> root,
+                                                List<ExpressionSpec> expressions) {
+        Object raw = root.get("preview");
+        if (raw == null) {
+            return GeneSpec.Preview.AUTO;
+        }
+        Map<String, Object> o = asObject(raw, "preview");
+        expectKeys(o, "preview", "base", "expression");
+        String base = string(o, "base", "");
+        String expression = string(o, "expression", "");
+        if (!expression.isEmpty()) {
+            boolean known = false;
+            for (ExpressionSpec e : expressions) {
+                known |= e.id().equals(expression);
+            }
+            if (!known) {
+                throw new IllegalArgumentException("preview.expression '" + expression
+                        + "' is not an expression of this gene");
+            }
+        }
+        return new GeneSpec.Preview(base.isEmpty() ? null : base,
+                expression.isEmpty() ? null : expression);
     }
 
     /** The optional {@code carrot} block - defaults to "enabled, heterozygous, no flavour". */
@@ -224,7 +293,7 @@ public final class GeneSpecParser {
             String where = "expression " + (i + 1);
             Map<String, Object> o = asObject(raw.get(i), where);
             expectKeys(o, where, "id", "name", "description", "wildType", "masks", "varies",
-                    "when", "needs", "layers", "effects");
+                    "when", "needs", "layers", "effects", "notes");
 
             String id = string(o, "id", null);
             if (ids.contains(id)) {
@@ -263,7 +332,8 @@ public final class GeneSpecParser {
                 }
                 boolean varies0 = flag(o, "varies", !wildType && !layers.isEmpty() && !knobs.isEmpty());
                 out.add(new ExpressionSpec(id, string(o, "name", id), string(o, "description", ""),
-                        wildType, masks, !varies0, claims, needs, List.copyOf(layers), abilities));
+                        wildType, masks, !varies0, claims, needs, List.copyOf(layers), abilities,
+                        readNotes(o, where)));
                 continue;
             }
             if (claims.isEmpty()) {
@@ -283,7 +353,8 @@ public final class GeneSpecParser {
 
             boolean varies = flag(o, "varies", !wildType && !layers.isEmpty() && !knobs.isEmpty());
             out.add(new ExpressionSpec(id, string(o, "name", id), string(o, "description", ""),
-                    wildType, masks, !varies, claims, List.of(), List.copyOf(layers), abilities));
+                    wildType, masks, !varies, claims, List.of(), List.copyOf(layers), abilities,
+                    readNotes(o, where)));
         }
 
         List<String> unclaimed = new ArrayList<>();
@@ -306,7 +377,8 @@ public final class GeneSpecParser {
             ExpressionSpec fallback = out.get(catchAllAt);
             out.set(catchAllAt, new ExpressionSpec(fallback.id(), fallback.name(), fallback.description(),
                     fallback.wildType(), fallback.masks(), fallback.deterministic(),
-                    List.copyOf(unclaimed), fallback.needs(), fallback.layers(), fallback.abilities()));
+                    List.copyOf(unclaimed), fallback.needs(), fallback.layers(), fallback.abilities(),
+                    fallback.notes()));
         }
         return List.copyOf(out);
     }
@@ -343,7 +415,7 @@ public final class GeneSpecParser {
                 }
                 copies.put(c.getKey(), n);
             }
-            out.add(new GeneSpec.LocusCondition(entry.getKey(), Map.copyOf(copies)));
+            out.add(new GeneSpec.LocusCondition(entry.getKey(), CommonMaps.copyOf(copies)));
         }
         return List.copyOf(out);
     }
@@ -811,7 +883,7 @@ public final class GeneSpecParser {
                 case COLORS -> readColors(raw, where + " '" + p.name() + "'");
             });
         }
-        return new Params(Map.copyOf(out));
+        return new Params(CommonMaps.copyOf(out));
     }
 
     /**

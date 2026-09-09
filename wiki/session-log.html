@@ -29,6 +29,131 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="notes-and-thirty-two-2026-09-08">A gene file can hold its own reasons now, and thirty-two genes arrived to test that.</h3>
+
+<p>Two things, and the first is why the second is worth having. The gene format gained a
+<strong><code>notes</code> block</strong> &mdash; on the gene and on each expression, an
+array of paragraphs, printed on the generated wiki page as written. JSON has no comments,
+so everything an author actually knew (why the wavelength is 90, which two layers must stay
+in that order, what the source description asked for and where the build knowingly does
+something else) used to go on a hand-written page and drift from the gene the first time
+either moved. It lives beside the layers now. See
+<a href="gene-format.html#header">the format</a> and
+<a href="creating-a-gene.html#prose">creating a gene</a>, which spells out which of the
+three prose fields a sentence belongs in.</p>
+
+<p>Then <strong>thirty-two genes</strong> off the intake folder, in three waves as they
+were dropped in. Every one is a <em>translation</em> rather than a transcription: the
+sketches were written against a vocabulary this mod does not have &mdash; boxes at explicit
+coordinates, rings at named centres, arithmetic inside JSON, <code>spread</code> on ops
+that have no such parameter, pigment ops on magical genes &mdash; and each gene&rsquo;s own
+<code>notes</code> block now records what it asked for and what was done instead. That is
+the first real use of the field and the reason it was added.</p>
+
+<ul>
+<li><strong>Looked at, not just parsed.</strong> All thirty-two were baked as icons and
+    read as a contact sheet, and four of them were wrong on the sheet in a way no test
+    would have caught: banded socks came out as a solid sock (the band was half the leg, so
+    every repeat overlapped), beetle pearl as a single blob, opaline zebra as a smudge, and
+    webbed as a white ground with brown islands rather than a net. The zebra is the
+    instructive one &mdash; it was built from <code>STROKES</code>, which wander, and a
+    zebra whose stripes wander is a brindle. <code>WAVES</code> is the only mask that
+    repeats evenly, and that is what it is for.</li>
+<li><strong><code>index.json</code> is hand-kept and nothing says so.</strong> A gene file
+    dropped in the folder loads perfectly in a dev run and is <em>absent from a built
+    jar</em>, because a jar has no directory to walk. That is now a
+    <a href="modding.html#contract-gene-file">contract</a> of its own next to the four-file
+    ones.</li>
+<li><strong>Four things the format cannot do</strong>, learned one rejection at a time and
+    all four recorded in the genes that met them: no arithmetic in a value, no addressing a
+    point on the body, <code>spread</code> is a <code>PIGMENT</code> mask parameter rather
+    than an op one, and a magical gene may not use a pigment op at all (the parser says so
+    outright, which saved two of these).</li>
+</ul>
+
+<h3 id="invert-preview-2026-09-08">Invert's preview window: an empty map, in the browser only.</h3>
+
+<p><a href="known-gaps.html">Gap 107</a> is closed, and the cause was not in the gene.
+TeaVM&rsquo;s <em>empty</em> immutable map traps with <code>remainder by zero</code> on the
+first <code>get</code> &mdash; it hashes the key into a table it never sized &mdash; so
+<code>Map.of()</code> and <code>Map.copyOf()</code> are correct on a JVM, correct in the
+game, and a live grenade in the wasm every wiki page runs. <a href="gene-invert.html">Invert</a>
+is the only gene in the registry with an <code>ALL</code> mask; an <code>ALL</code> mask
+takes no parameters; its <code>Params</code> map was therefore empty, and the painter&rsquo;s
+very first lookup on it killed the bake. Everything else about the gene was fine, which is
+why a session had already checked every value it consumes from Java and found nothing.</p>
+
+<ul>
+<li><strong>Found by running the wasm under node.</strong> The gap said it needed a browser
+    console, which is the one tool this end does not have &mdash; but the TeaVM runtime
+    takes a <code>nodejs</code> flag and reads the module off disk, and the four textures
+    the pipeline wants can be dumped out of Java as int arrays. Ten minutes of that gave
+    the exception and a stack. Then synthetic genes registered through
+    <code>registerGenes</code> bisected it to the mask in three runs: an <code>ALL</code>
+    mask failed, a <code>PARTS</code> mask with no parts failed, a <code>PARTS</code> mask
+    with parts did not. It was never about <code>INVERT</code>.</li>
+<li><strong>Eight sites now build their maps through <code>CommonMaps</code></strong>, which
+    is a <code>LinkedHashMap</code> behind an unmodifiable wrapper &mdash; correct empty on
+    both targets, and Java 8 clean, which hard rule 2 wanted anyway. Nothing enforces the
+    rule, so the next <code>Map.of()</code> in <code>common/</code> reintroduces it:
+    <a href="known-gaps.html#gap-116">gap 116</a>.</li>
+</ul>
+
+<h3 id="declared-previews-2026-09-08">A gene may now say which picture is its picture.</h3>
+
+<p>Which allele combination and which base coat a gene is illustrated on is
+<em>measured</em> &mdash; bake the candidates, keep the loudest &mdash; and that stays the
+default, because it means no list goes stale when a gene starts or stops painting. But
+loudest and most recognisable are not always the same thing.
+<a href="gene-flametouched.html">Flametouched</a>&rsquo;s homozygote is a whole-horse ember
+gradient and shouted down the <code>flames</code> the gene is named for;
+<a href="gene-patina.html">Patina</a> moves more texels on a tobiano than on the plain bay
+it reads better on. Both now declare a <code>preview</code> block, which the icon baker,
+the gene page&rsquo;s opening coat and the preview window&rsquo;s opening outcome all obey.
+Two genes out of a hundred and fifteen; the thresholds behind the measurement are
+<a href="known-gaps.html#gap-114">gap 114</a>.</p>
+
+<h3 id="lut-green-2026-09-08">A second palette, and the tools stopped keeping their own list.</h3>
+
+<p><a href="gene-lut.html">The LUT locus</a> has a green-through-pink allele beside the
+blue-pink one. The gene was built to grow and did: a row in <code>LutGene.VARIANTS</code>
+carries the allele, the expression table, the carrier wording and the founder odds. What
+did <em>not</em> follow from that row was the offline tooling &mdash; the icon baker, the
+wiki baker, the sample tool and the golden test each wrote <code>Map.of("bluepink", ...)</code>
+out by hand, four copies of a list none of them knew when to update. They call
+<code>LutSet.fromRegistry</code> now, which is the same walk the game has always done.</p>
+
+<h3 id="panda-order-2026-09-08">Smaller, and all owner's calls.</h3>
+
+<ul>
+<li><a href="gene-panda.html">Panda</a>&rsquo;s white band is half again as wide: the body
+    keeps its coat outside 0.22&ndash;0.70 rather than 0.30&ndash;0.62. The freckle band
+    moved with it, because it reads the same two edges.</li>
+<li><a href="gene-opalized.html">Opalized</a> dropped below <a href="gene-voided.html">voided</a>
+    (611 &rarr; 609), and <a href="gene-synort.html">synort</a> came down from the fields
+    band to 106, among suit and hood at the bottom of the order. 106 rather than the 104
+    first tried: 104 put it <em>under</em> <a href="gene-dhampir.html">dhampir</a>, whose
+    own test says only suit and hood may be painted under a dhampir &mdash; being invisible
+    on every dhampir is not what "one of the lowest" was asking for.</li>
+<li><strong>A test that failed for a reason that had nothing to do with its subject.</strong>
+    Moving those two priorities shifted magic jump along the epigenome stream, and 3000
+    sequential seeds put its mean 1.7% out &mdash; fifteen standard errors, on a
+    distribution that had not changed. <code>Epigenome.fromSeed</code> is a
+    <code>java.util.Random</code>, whose seed scramble is one XOR, so neighbouring seeds
+    are correlated streams and the draw at a given <em>position</em> in them is correlated
+    across the whole sample. The test now runs its index through a splitmix64 finaliser,
+    which is what makes <em>n</em> a sample rather than a stream offset. Whether the
+    underlying correlation matters to real horses is
+    <a href="known-gaps.html#gap-117">gap 117</a> and the owner&rsquo;s call, because the
+    fix would change every horse ever generated.</li>
+</ul>
+
+<p><strong>Not done:</strong> the coat golden file is a run behind &mdash; thirty-two genes
+moved every hash in it, and regenerating it means a full suite run, which the owner has
+asked not be done casually. The next deliberate run will fail on
+<code>CoatPipelineGoldenTest</code> and that failure is expected;
+<a href="known-gaps.html#gap-118">gap 118</a> has the recipe.</p>
+
 <h3 id="release-0-2-0-2026-09-08">Released 2026-09-08: 0.2.0, and two gene pages that outlived their genes.</h3>
 
 <p>Cutting a release rather than building anything, and the interesting part is what

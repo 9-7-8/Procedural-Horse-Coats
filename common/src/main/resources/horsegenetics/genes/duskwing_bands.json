@@ -1,0 +1,208 @@
+{
+  "format": 3,
+  "key": "horsegenetics.duskwing_bands",
+  "name": "Duskwing Bands",
+  "phase": "magical",
+  "priority": 314,
+  "rarity": "RARE",
+  "blurb": "Two curved bands sweeping round the barrel one inside the other, like the bands on a moth's wing.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The source drew the two bands as RINGS at explicit centres with an arc range; this build has no centred-ring mask, so each band is a narrow WAVES band on a wavelength longer than the barrel - which gives one long curve across the flank rather than a closed circle. The look is close and the mechanism is not the same."
+  ],
+  "alleles": [
+    {
+      "token": "Dwb",
+      "label": "Duskwing, pale (Dwb)"
+    },
+    {
+      "token": "Dwc",
+      "label": "Duskwing, coloured (Dwc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "bandArch",
+      "min": 0.08,
+      "max": 0.2
+    },
+    {
+      "name": "outerLow",
+      "min": 0.6,
+      "max": 0.68
+    },
+    {
+      "name": "outerHigh",
+      "min": 0.72,
+      "max": 0.8
+    },
+    {
+      "name": "innerLow",
+      "min": 0.34,
+      "max": 0.42
+    },
+    {
+      "name": "innerHigh",
+      "min": 0.5,
+      "max": 0.58
+    },
+    {
+      "name": "edgeSoftness",
+      "min": 0.03,
+      "max": 0.09
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Duskwing Bands",
+      "description": "Two arcs of pale cream across the flank, curved rather than straight because each one is a band on a long sine rather than a level line. The inner band sits lower and runs thicker; between and around them the coat is untouched, which is what makes it read as a wing rather than as a blanket.",
+      "when": [
+        "Dwb/Dwb",
+        "Dwb/Dwc",
+        "Dwb/n"
+      ],
+      "layers": [
+        {
+          "name": "the outer band sweeping round the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 26.0,
+              "amplitude": "$bandArch",
+              "softness": "$edgeSoftness",
+              "from": "$outerLow",
+              "to": "$outerHigh"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f3efd8",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the inner band, thicker and tighter in",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 26.0,
+              "amplitude": "$bandArch",
+              "softness": "$edgeSoftness",
+              "from": "$innerLow",
+              "to": "$innerHigh"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f3efd8",
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Duskwing Bands, coloured",
+      "description": "The same two arcs in a colour the line carries. Fully recessive.",
+      "when": {
+        "Dwc": 2
+      },
+      "layers": [
+        {
+          "name": "the outer band sweeping round the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 26.0,
+              "amplitude": "$bandArch",
+              "softness": "$edgeSoftness",
+              "from": "$outerLow",
+              "to": "$outerHigh"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.6,
+            "lightness": 0.6,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the inner band, thicker and tighter in",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 26.0,
+              "amplitude": "$bandArch",
+              "softness": "$edgeSoftness",
+              "from": "$innerLow",
+              "to": "$innerHigh"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.6,
+            "lightness": 0.6,
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No bands.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Dwb/Dwb": 0.004,
+    "Dwb/Dwc": 0.012,
+    "Dwb/n": 0.06,
+    "Dwc/Dwc": 0.012,
+    "n/n": 99.912
+  }
+}

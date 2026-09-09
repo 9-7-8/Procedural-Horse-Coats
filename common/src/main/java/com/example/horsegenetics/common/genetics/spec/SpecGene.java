@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.spec;
 
+import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.CoatOverlay;
 import com.example.horsegenetics.common.coat.pattern.CoatOverlayContribution;
@@ -94,8 +95,8 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
             }
         }
         this.expressions = List.copyOf(outcomes);
-        this.byCombination = Map.copyOf(byCombo);
-        this.specByCombination = Map.copyOf(specByCombo);
+        this.byCombination = CommonMaps.copyOf(byCombo);
+        this.specByCombination = CommonMaps.copyOf(specByCombo);
         this.conditionals = List.copyOf(conditional);
         this.dependsOn = List.copyOf(depends);
 
@@ -199,6 +200,8 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
 
     @Override public com.example.horsegenetics.common.genetics.GeneRarity rarity() { return spec.rarity(); }
 
+    @Override public String previewBase() { return spec.preview().base(); }
+    @Override public String previewExpression() { return spec.preview().expression(); }
     @Override public boolean hasGeneCarrot() { return spec.carrot().enabled(); }
 
     @Override public boolean geneCarrotHomozygous() { return spec.carrot().homozygous(); }

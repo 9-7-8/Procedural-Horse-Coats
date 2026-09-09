@@ -1,0 +1,363 @@
+{
+  "format": 3,
+  "key": "horsegenetics.moth_wings",
+  "name": "Moth Wings",
+  "phase": "magical",
+  "priority": 379,
+  "rarity": "RARE",
+  "blurb": "A moth's wing read onto the barrel - chevron bands each with a dark edge, a paired eye-spot on the flank, and a scalloped hem along the belly.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. Every element is drawn twice - wide and dark, then narrow and pale on top - which is how the whole gene gets its dark edges without a second mask type.",
+    "The row of chevrons is ONE mask with `spacing` turned up rather than several masks at different phases. WAVES is the only mask in the vocabulary that repeats evenly, and this is what that is for."
+  ],
+  "alleles": [
+    {
+      "token": "Mwa",
+      "label": "Moth, argent (Mwa)"
+    },
+    {
+      "token": "Mwc",
+      "label": "Moth, coloured (Mwc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "bandWavelength",
+      "min": 7.0,
+      "max": 12.0
+    },
+    {
+      "name": "bandSpacing",
+      "min": 0.22,
+      "max": 0.34
+    },
+    {
+      "name": "eyeSpacing",
+      "min": 9.0,
+      "max": 14.0
+    },
+    {
+      "name": "eyeRadius",
+      "min": 1.8,
+      "max": 2.8
+    },
+    {
+      "name": "eyeThickness",
+      "min": 0.5,
+      "max": 0.9
+    },
+    {
+      "name": "pupilRadius",
+      "min": 0.7,
+      "max": 1.2
+    }
+  ],
+  "expressions": [
+    {
+      "id": "argent",
+      "name": "Moth Wings",
+      "description": "Each band is drawn twice - once wide and dark, once narrow and pale on top - which is how every element here gets its edge without a second mask type. The row of chevrons is one mask with its spacing turned up rather than several, an eye-spot built from a ring and a spot on one lattice, and a scalloped hem that is just a sine band low on the barrel.",
+      "when": [
+        "Mwa/Mwa",
+        "Mwa/Mwc",
+        "Mwa/n"
+      ],
+      "layers": [
+        {
+          "name": "the dark edge of every chevron band",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Z",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$bandWavelength",
+              "amplitude": 0.3,
+              "softness": 0.05,
+              "spacing": "$bandSpacing",
+              "phase": 0.0,
+              "from": 0.4,
+              "to": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#173a1f",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "the pale band inside it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Z",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$bandWavelength",
+              "amplitude": 0.3,
+              "softness": 0.04,
+              "spacing": "$bandSpacing",
+              "phase": 0.0,
+              "from": 0.45,
+              "to": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f0eee4",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "a paired eye-spot on the flank",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$eyeSpacing",
+              "radius": "$eyeRadius",
+              "thickness": "$eyeThickness",
+              "vary": 0.15,
+              "chance": 0.4,
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#173a1f",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "its pale pupil",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$eyeSpacing",
+              "radius": "$pupilRadius",
+              "vary": 0.15,
+              "chance": 0.4,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f0eee4",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "a scalloped hem along the belly",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 5.0,
+              "amplitude": 0.06,
+              "softness": 0.05,
+              "from": -0.1,
+              "to": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#173a1f",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Moth Wings, coloured",
+      "description": "The same wing with the pale half in a colour the line carries. Fully recessive.",
+      "when": {
+        "Mwc": 2
+      },
+      "layers": [
+        {
+          "name": "the dark edge of every chevron band",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Z",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$bandWavelength",
+              "amplitude": 0.3,
+              "softness": 0.05,
+              "spacing": "$bandSpacing",
+              "phase": 0.0,
+              "from": 0.4,
+              "to": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.22,
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "the pale band inside it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Z",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$bandWavelength",
+              "amplitude": 0.3,
+              "softness": 0.04,
+              "spacing": "$bandSpacing",
+              "phase": 0.0,
+              "from": 0.45,
+              "to": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.45,
+            "lightness": 0.78,
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "a paired eye-spot on the flank",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$eyeSpacing",
+              "radius": "$eyeRadius",
+              "thickness": "$eyeThickness",
+              "vary": 0.15,
+              "chance": 0.4,
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.22,
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "its pale pupil",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$eyeSpacing",
+              "radius": "$pupilRadius",
+              "vary": 0.15,
+              "chance": 0.4,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.45,
+            "lightness": 0.78,
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "a scalloped hem along the belly",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 5.0,
+              "amplitude": 0.06,
+              "softness": 0.05,
+              "from": -0.1,
+              "to": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.22,
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No wings.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Mwa/Mwa": 0.004,
+    "Mwa/Mwc": 0.012,
+    "Mwa/n": 0.06,
+    "Mwc/Mwc": 0.012,
+    "n/n": 99.912
+  }
+}

@@ -1,0 +1,392 @@
+{
+  "format": 3,
+  "key": "horsegenetics.ehretia",
+  "name": "Ehretia",
+  "phase": "magical",
+  "priority": 315,
+  "rarity": "RARE",
+  "blurb": "Haloed spots over the barrel and neck, a dorsal stripe, dark socks, and a fine speckled bloom laid over the lot.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The source drew the socks and the dorsal stripe with a pigment op - it wanted to darken the coat rather than paint on it. This is a magical gene and the two phases cannot be mixed in one gene, so both are painted toward a near-black instead. On a dark horse that is nearly the same picture; on a pale one it is flatter than a real pigment restriction would be."
+  ],
+  "alleles": [
+    {
+      "token": "Ehr",
+      "label": "Ehretia, pale (Ehr)"
+    },
+    {
+      "token": "Ehc",
+      "label": "Ehretia, coloured (Ehc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "stripeHalfWidth",
+      "min": 0.6,
+      "max": 1.1
+    },
+    {
+      "name": "speckleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "speckleSpacing",
+      "min": 1.2,
+      "max": 2.2
+    },
+    {
+      "name": "spotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSpacing",
+      "min": 3.6,
+      "max": 5.4
+    },
+    {
+      "name": "spotStretch",
+      "min": 0.85,
+      "max": 1.25
+    },
+    {
+      "name": "spotVary",
+      "min": 0.2,
+      "max": 0.45
+    },
+    {
+      "name": "r1",
+      "min": 1.3,
+      "max": 1.9
+    },
+    {
+      "name": "r2",
+      "min": 1.0,
+      "max": 1.45
+    },
+    {
+      "name": "r3",
+      "min": 0.6,
+      "max": 1.0
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Ehretia",
+      "description": "Each spot is drawn twice - a pale ring where the outer disc survives the inner one, and then the spot itself inside it - so it reads as a mark with a light rim rather than as a blob. Under that, the coat keeps a dorsal stripe and four dark socks; over it, a fine speckle blooms across the barrel and blurs the whole arrangement together.",
+      "when": [
+        "Ehr/Ehr",
+        "Ehr/Ehc",
+        "Ehr/n"
+      ],
+      "layers": [
+        {
+          "name": "dark socks running up into a feathered edge",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.12,
+              "from": -0.1,
+              "to": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2b2620",
+            "strength": 75.0
+          }
+        },
+        {
+          "name": "a dorsal stripe from withers to tail",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY",
+                "TAIL"
+              ],
+              "halfWidth": "$stripeHalfWidth",
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.72,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2b2620",
+            "strength": 80.0
+          }
+        },
+        {
+          "name": "a pale halo round each spot",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r1",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.3
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r2",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.2,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f1e6",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "the spot itself inside the halo",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r3",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#5c5348",
+            "strength": 70.0
+          }
+        },
+        {
+          "name": "a speckled bloom over the whole pattern",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$speckleSeed",
+              "spacing": "$speckleSpacing",
+              "size": 0.4,
+              "density": 0.35,
+              "softness": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe7d8",
+            "strength": 45.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Ehretia, coloured",
+      "description": "The same haloed spots with the centre and the bloom in a colour the line carries. The halo stays pale whatever the centre does - it is the rim that makes it Ehretia. Fully recessive.",
+      "when": {
+        "Ehc": 2
+      },
+      "layers": [
+        {
+          "name": "dark socks running up into a feathered edge",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.12,
+              "from": -0.1,
+              "to": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2b2620",
+            "strength": 75.0
+          }
+        },
+        {
+          "name": "a dorsal stripe from withers to tail",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY",
+                "TAIL"
+              ],
+              "halfWidth": "$stripeHalfWidth",
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.72,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2b2620",
+            "strength": 80.0
+          }
+        },
+        {
+          "name": "a pale halo round each spot",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r1",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.3
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r2",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.2,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f1e6",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "the spot itself inside the halo",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r3",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.35,
+            "strength": 75.0
+          }
+        },
+        {
+          "name": "a speckled bloom over the whole pattern",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$speckleSeed",
+              "spacing": "$speckleSpacing",
+              "size": 0.4,
+              "density": 0.35,
+              "softness": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.62,
+            "strength": 45.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No spots.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ehr/Ehr": 0.004,
+    "Ehr/Ehc": 0.012,
+    "Ehr/n": 0.06,
+    "Ehc/Ehc": 0.012,
+    "n/n": 99.912
+  }
+}

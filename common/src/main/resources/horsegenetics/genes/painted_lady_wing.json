@@ -1,0 +1,313 @@
+{
+  "format": 3,
+  "key": "horsegenetics.painted_lady_wing",
+  "name": "Painted Lady Wingmark",
+  "phase": "magical",
+  "priority": 318,
+  "rarity": "RARE",
+  "blurb": "A butterfly wing laid over the barrel - a soft-edged field crossed by veins and rimmed in dark.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The wing, its veins and its rim are the same mirrored spot field read three times, so the veins cannot run off the wing and the rim cannot come adrift from it. The source placed the wing at an explicit centre; a mirrored SPOTS field with the spacing set near the barrel's length is the addressable version of that, and it means WHERE it lands is down to the seed."
+  ],
+  "alleles": [
+    {
+      "token": "Plw",
+      "label": "Wingmark, white (Plw)"
+    },
+    {
+      "token": "Plc",
+      "label": "Wingmark, coloured (Plc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "veinSeed",
+      "type": "seed"
+    },
+    {
+      "name": "wingSpacing",
+      "min": 12.0,
+      "max": 17.0
+    },
+    {
+      "name": "wingRadius",
+      "min": 5.0,
+      "max": 7.5
+    },
+    {
+      "name": "wingInner",
+      "min": 3.6,
+      "max": 5.6
+    },
+    {
+      "name": "veinScale",
+      "min": 3.0,
+      "max": 5.0
+    },
+    {
+      "name": "veinWidth",
+      "min": 0.35,
+      "max": 0.6
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Painted Lady Wingmark",
+      "description": "The wing, its veins and its rim are all the same mirrored spot field, read three times - so the veins cannot run off the wing and the rim cannot come adrift from it. The rim is the wing with a smaller copy of itself subtracted, which is the same trick every rim in this mod uses.",
+      "when": [
+        "Plw/Plw",
+        "Plw/Plc",
+        "Plw/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing itself",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f7f4ec",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "veins across it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            },
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "scale": "$veinScale",
+              "gap": "$veinWidth",
+              "warp": 0.3,
+              "softness": 0.05,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#12100e",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "and a dark rim round its edge",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingInner",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.6,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#12100e",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Painted Lady Wingmark, coloured",
+      "description": "The same wing in a colour the line carries, still rimmed and veined in dark. Fully recessive.",
+      "when": {
+        "Plc": 2
+      },
+      "layers": [
+        {
+          "name": "the wing itself",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.6,
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "veins across it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            },
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "scale": "$veinScale",
+              "gap": "$veinWidth",
+              "warp": 0.3,
+              "softness": 0.05,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#12100e",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "and a dark rim round its edge",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingInner",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.6,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#12100e",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No wingmark.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Plw/Plw": 0.004,
+    "Plw/Plc": 0.012,
+    "Plw/n": 0.06,
+    "Plc/Plc": 0.012,
+    "n/n": 99.912
+  }
+}

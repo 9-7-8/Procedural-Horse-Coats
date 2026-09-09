@@ -171,7 +171,7 @@ NeoForge module thin.** That is what makes a future `forge-1.12.2/` cheap.
 ## Build & test
 
 ```bash
-./gradlew :common:test               # pure-Java logic, no Minecraft - fastest loop
+./gradlew :common:test --tests '*XTest'  # one class, seconds - the working loop (see below)
 ./gradlew :neoforge-26.1.2:build     # full compile + jar
 ./gradlew :neoforge-26.1.2:runClient # launch the game with the mod
 ./gradlew :neoforge-26.1.2:runServer # headless; does not auto-stop, kill it after `Done`
@@ -184,6 +184,10 @@ node wiki/gene-creator/tools/check-parity.mjs  # ...and does the creator's JS ag
 Requires JDK 25 (auto-provisioned). Crash reports land in
 `neoforge-26.1.2/run/crash-reports/` - read the newest.
 
+**Never run the full `:common:test` unless the owner asks.** It is ten minutes and
+they will not wait through it; run one class with `--tests` instead, and say in the
+summary what a full run would still need to check. (Owner's rule, stated outright.)
+
 **The owner's last play session is on disk - read it rather than asking.**
 `neoforge-26.1.2/run/logs/latest.log`, and `debug.log` beside it for more.
 A bug report of the shape "it still doesn't work" is usually answerable from
@@ -195,7 +199,7 @@ and fails *silently* when stale:
 
 | If you touched | Re-run | Commit |
 |---|---|---|
-| any gene, or a coat deliberately moved | `:common:test`, then delete and regenerate the golden file | `common/src/test/resources/coat-golden.txt` |
+| any gene, or a coat deliberately moved | the golden file moves. Regenerating it needs a **full** `:common:test`, so leave it stale, say so, and note it in `wiki/known-gaps.html` | `common/src/test/resources/coat-golden.txt` |
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs`; geometry also moves `:common:bakeGeneIcons` | `wiki/gene-creator/fixtures/expected.json`, `wiki/assets/gene-icons/` |
@@ -246,7 +250,7 @@ where the session actually landed rather than narrating it mid-change.
 1. **Regenerate what the session invalidated** (the table under Build & test),
    then **fix the twin** if `CustomHorseSpawnScreen` or the designer changed
    (hard rule 5).
-2. **Build green**: `:common:test`, `:neoforge-26.1.2:build`,
+2. **Build green**: `:neoforge-26.1.2:build`,
    `check-parity.mjs`. Don't push red - and if you must, say so in the commit
    message and put it at the top of `wiki/verification.html`.
 3. **Commit and push the code.** Read `git status --short` first; the repo has a

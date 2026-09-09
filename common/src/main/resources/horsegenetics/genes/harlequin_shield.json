@@ -1,0 +1,310 @@
+{
+  "format": 3,
+  "key": "horsegenetics.harlequin_shield",
+  "name": "Harlequin Shield",
+  "phase": "magical",
+  "priority": 317,
+  "rarity": "RARE",
+  "blurb": "A saw-toothed shield across the flank, filled with lozenges that each have a smaller lozenge inside them - three tones, all hard-edged.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. Every layer starts from the SAME saw wave, so the lozenges are clipped to the shield and cannot wander off it. Drawn largest first - the reverse order paints the core and then covers it."
+  ],
+  "alleles": [
+    {
+      "token": "Hqs",
+      "label": "Harlequin, blue (Hqs)"
+    },
+    {
+      "token": "Hqc",
+      "label": "Harlequin, coloured (Hqc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "toothWavelength",
+      "min": 3.6,
+      "max": 6.0
+    },
+    {
+      "name": "spacing",
+      "min": 2.6,
+      "max": 4.0
+    },
+    {
+      "name": "radius",
+      "min": 1.0,
+      "max": 1.6
+    },
+    {
+      "name": "innerRadius",
+      "min": 0.4,
+      "max": 0.8
+    },
+    {
+      "name": "stretch",
+      "min": 0.9,
+      "max": 1.4
+    },
+    {
+      "name": "vary",
+      "min": 0.2,
+      "max": 0.5
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "blue",
+      "name": "Harlequin Shield",
+      "description": "Every layer starts from the same saw wave, so the lozenges are clipped to the shield and the shield keeps its teeth - a saw is the one waveform that gives a raked straight edge. The three tones are drawn largest first, which is the only order that leaves the core visible.",
+      "when": [
+        "Hqs/Hqs",
+        "Hqs/Hqc",
+        "Hqs/n"
+      ],
+      "layers": [
+        {
+          "name": "the toothed shield across the flank",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": "$toothWavelength",
+              "amplitude": 0.28,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.72
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#151312",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "lozenges set into it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": "$toothWavelength",
+              "amplitude": 0.28,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.72
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "radius": "$radius",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1d5f92",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "and a smaller lozenge inside each",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": "$toothWavelength",
+              "amplitude": 0.28,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.72
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "radius": "$innerRadius",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e8e2d4",
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Harlequin Shield, coloured",
+      "description": "The same shield with the two inner tones in colours the line carries. Fully recessive.",
+      "when": {
+        "Hqc": 2
+      },
+      "layers": [
+        {
+          "name": "the toothed shield across the flank",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": "$toothWavelength",
+              "amplitude": 0.28,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.72
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#151312",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "lozenges set into it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": "$toothWavelength",
+              "amplitude": 0.28,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.72
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "radius": "$radius",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.4,
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "and a smaller lozenge inside each",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": "$toothWavelength",
+              "amplitude": 0.28,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.72
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "radius": "$innerRadius",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.4,
+            "lightness": 0.82,
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No shield.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Hqs/Hqs": 0.004,
+    "Hqs/Hqc": 0.012,
+    "Hqs/n": 0.06,
+    "Hqc/Hqc": 0.012,
+    "n/n": 99.912
+  }
+}

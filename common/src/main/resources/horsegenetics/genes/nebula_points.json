@@ -1,0 +1,322 @@
+{
+  "format": 3,
+  "key": "horsegenetics.nebula_points",
+  "name": "Nebula Points",
+  "phase": "magical",
+  "priority": 254,
+  "rarity": "EPIC",
+  "blurb": "Black points - head, muzzle, ears, mane and tail - with a fan of light running up the crest and raking across the barrel. The dominant form glows in the dark; the recessive one is the same pattern in plain pigment.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The points are painted to near-black first and everything else is drawn over them, so the light has something to be light against. The source used a pigment op for that; a magical gene cannot, so it is a paint.",
+    "The dominant form is emissive and the recessive one is not. That is the whole difference between the two, and it is the only pair in the mod where the recessive form is the same picture with the light off."
+  ],
+  "alleles": [
+    {
+      "token": "Nbg",
+      "label": "Nebula, glowing (Nbg)"
+    },
+    {
+      "token": "Nbp",
+      "label": "Nebula, pigment (Nbp)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 150.0,
+      "max": 260.0
+    },
+    {
+      "name": "seed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "glow",
+      "name": "Nebula Points",
+      "description": "The points go to black first and everything else is drawn over them, so the light has something to be light against. The fan up the neck is a band on a saw wave, which is what makes it lie along the crest rather than wrap round the throat; the tail is a ramp from near-black at the dock to pale at the tip. All of it is emissive, so a nebula horse is visible at night.",
+      "notes": [
+        "The tail is a RAMP in part space, so it runs dark at the dock to pale at the tip whatever length the tail is. In body space it would have run along the horse instead."
+      ],
+      "when": [
+        "Nbg/Nbg",
+        "Nbg/Nbp",
+        "Nbg/n"
+      ],
+      "layers": [
+        {
+          "name": "the points taken to black",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "EARS",
+                "MANE",
+                "TAIL"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0b10",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a fan of light up the crest of the neck",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "softness": 0.12,
+              "from": 0.32,
+              "to": 0.58
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.68,
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "fine strands of it through the mane",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$seed",
+              "spacing": 1.4,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.15,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.68,
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "the same, wider and raked, across the barrel",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": 3.2,
+              "length": 10.0,
+              "axis": "X",
+              "width": 0.7,
+              "curl": 0.35,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.68,
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "the tail running from dark at the dock to light at the tip",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "TAIL"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 25.0,
+            "saturation": 0.85,
+            "lightness": 0.6,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "pigment",
+      "name": "Nebula Points, pigmented",
+      "description": "The same arrangement in ordinary pigment - no glow, and a colour the line carries rather than the bioluminescent blue. Fully recessive.",
+      "when": {
+        "Nbp": 2
+      },
+      "layers": [
+        {
+          "name": "the points taken to black",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "EARS",
+                "MANE",
+                "TAIL"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0b10",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a fan of light up the crest of the neck",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "saw",
+              "space": "part",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "softness": 0.12,
+              "from": 0.32,
+              "to": 0.58
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.5,
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "fine strands of it through the mane",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$seed",
+              "spacing": 1.4,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.15,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.5,
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "the same, wider and raked, across the barrel",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": 3.2,
+              "length": 10.0,
+              "axis": "X",
+              "width": 0.7,
+              "curl": 0.35,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.5,
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "the tail running from dark at the dock to light at the tip",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "TAIL"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 25.0,
+            "saturation": 0.85,
+            "lightness": 0.6,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No points.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Nbg/Nbg": 0.002,
+    "Nbg/Nbp": 0.008,
+    "Nbg/n": 0.04,
+    "Nbp/Nbp": 0.008,
+    "n/n": 99.942
+  }
+}
