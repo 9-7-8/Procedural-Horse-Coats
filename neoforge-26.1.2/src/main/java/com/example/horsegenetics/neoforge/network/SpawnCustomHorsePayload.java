@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.network;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.GenomeCodeCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -53,8 +54,8 @@ public record SpawnCustomHorsePayload(String genotypeCode, String epigenomeCode,
             // full code was already about 4500 characters, which means this
             // packet could not have worked - see EpigenomeSizeTest, which now
             // guards the margin from the common side.
-            ByteBufCodecs.stringUtf8(8192), SpawnCustomHorsePayload::genotypeCode,
-            ByteBufCodecs.stringUtf8(131072), SpawnCustomHorsePayload::epigenomeCode,
+            GenomeCodeCodecs.GENOTYPE_CODE, SpawnCustomHorsePayload::genotypeCode,
+            GenomeCodeCodecs.EPIGENOME_CODE, SpawnCustomHorsePayload::epigenomeCode,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::baby,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::female,
             ByteBufCodecs.stringUtf8(64), SpawnCustomHorsePayload::breed,

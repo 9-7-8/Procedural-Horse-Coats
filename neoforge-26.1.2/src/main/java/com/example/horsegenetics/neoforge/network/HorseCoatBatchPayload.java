@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.network;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.GenomeCodeCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -37,7 +38,7 @@ public record HorseCoatBatchPayload(List<Entry> entries) implements CustomPacket
 
     private static final StreamCodec<ByteBuf, Entry> ENTRY_STREAM_CODEC = StreamCodec.composite(
             UUIDUtil.STREAM_CODEC, Entry::id,
-            ByteBufCodecs.stringUtf8(65536), Entry::epigenomeCode,
+            GenomeCodeCodecs.EPIGENOME_CODE, Entry::epigenomeCode,
             Entry::new
     );
 

@@ -47,9 +47,12 @@ public record StoredGenome(String genotypeCode, String epigenomeCode,
             Codec.STRING.optionalFieldOf("breed", "").forGetter(StoredGenome::breed)
     ).apply(i, StoredGenome::new));
 
+    // genotype/epigenome on GenomeCodeCodecs, not STRING_UTF8: this component
+    // rides every inventory sync, so a code over 32 767 characters would kick
+    // the holder rather than fail quietly. See GenomeCodeCodecs.
     public static final StreamCodec<ByteBuf, StoredGenome> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, StoredGenome::genotypeCode,
-            ByteBufCodecs.STRING_UTF8, StoredGenome::epigenomeCode,
+            GenomeCodeCodecs.GENOTYPE_CODE, StoredGenome::genotypeCode,
+            GenomeCodeCodecs.EPIGENOME_CODE, StoredGenome::epigenomeCode,
             UUIDUtil.STREAM_CODEC, StoredGenome::sourceId,
             ByteBufCodecs.STRING_UTF8, StoredGenome::sourceName,
             ByteBufCodecs.STRING_UTF8, StoredGenome::breed,

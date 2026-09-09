@@ -3,7 +3,9 @@ package com.example.horsegenetics.neoforge.network;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.GenomeCodeCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -20,10 +22,14 @@ public record CoatSyncPayload(int entityId, String genotypeCode, String epigenom
     public static final Type<CoatSyncPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "coat_sync"));
 
+    // The two code fields are NOT on a default-length string codec, and must
+    // never go back to one: writeUtf(String) caps at 32 767 characters and an
+    // epigenome code passed that in 0.3.1, which kicked every client on world
+    // entry. See GenomeCodeCodecs.
     public static final StreamCodec<RegistryFriendlyByteBuf, CoatSyncPayload> STREAM_CODEC = StreamCodec.composite(
-            StreamCodec.of((buf, v) -> buf.writeVarInt(v), buf -> buf.readVarInt()), CoatSyncPayload::entityId,
-            StreamCodec.of((buf, v) -> buf.writeUtf(v), buf -> buf.readUtf()), CoatSyncPayload::genotypeCode,
-            StreamCodec.of((buf, v) -> buf.writeUtf(v), buf -> buf.readUtf()), CoatSyncPayload::epigenomeCode,
+            ByteBufCodecs.VAR_INT, CoatSyncPayload::entityId,
+            GenomeCodeCodecs.GENOTYPE_CODE, CoatSyncPayload::genotypeCode,
+            GenomeCodeCodecs.EPIGENOME_CODE, CoatSyncPayload::epigenomeCode,
             CoatSyncPayload::new
     );
 

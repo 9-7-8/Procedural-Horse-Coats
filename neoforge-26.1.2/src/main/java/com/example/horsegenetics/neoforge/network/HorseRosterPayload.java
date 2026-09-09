@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.network;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.GenomeCodeCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -88,7 +89,7 @@ public record HorseRosterPayload(List<Entry> entries) implements CustomPacketPay
                     String barnName = ByteBufCodecs.stringUtf8(64).decode(buf);
                     String breed = ByteBufCodecs.stringUtf8(64).decode(buf);
                     int generation = ByteBufCodecs.VAR_INT.decode(buf);
-                    String geneticCode = ByteBufCodecs.stringUtf8(8192).decode(buf);
+                    String geneticCode = GenomeCodeCodecs.GENOTYPE_CODE.decode(buf);
                     boolean tamed = ByteBufCodecs.BOOL.decode(buf);
                     boolean adult = ByteBufCodecs.BOOL.decode(buf);
                     boolean loaded = ByteBufCodecs.BOOL.decode(buf);
@@ -111,7 +112,7 @@ public record HorseRosterPayload(List<Entry> entries) implements CustomPacketPay
                     ByteBufCodecs.stringUtf8(64).encode(buf, entry.barnName());
                     ByteBufCodecs.stringUtf8(64).encode(buf, entry.breed());
                     ByteBufCodecs.VAR_INT.encode(buf, entry.generation());
-                    ByteBufCodecs.stringUtf8(8192).encode(buf, entry.geneticCode());
+                    GenomeCodeCodecs.GENOTYPE_CODE.encode(buf, entry.geneticCode());
                     ByteBufCodecs.BOOL.encode(buf, entry.tamed());
                     ByteBufCodecs.BOOL.encode(buf, entry.adult());
                     ByteBufCodecs.BOOL.encode(buf, entry.loaded());

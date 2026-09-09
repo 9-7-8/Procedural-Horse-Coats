@@ -4,7 +4,7 @@ license = "CC BY-NC 4.0"
 
 [[mods]]
 modId = "horsegenetics"
-version = "0.3.1"
+version = "0.3.2"
 displayName = "Horse Genetics"
 description = "Genetics-based coat generation for horses, starting with extension/agouti and bay leg patterning."
 
