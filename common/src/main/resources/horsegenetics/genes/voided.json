@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 430,
   "rarity": "UNCOMMON",
-  "blurb": "Every white the horse would have had comes out black instead - the same markings, the same edges, the opposite pigment.",
+  "blurb": "Every white the horse would have had comes out black instead - the same markings, the same edges, the opposite pigment, and as black as it will go.",
   "alleles": [
     {
       "token": "Vd",
@@ -16,18 +16,12 @@
       "label": "Wild-type (n)"
     }
   ],
-  "knobs": [
-    {
-      "name": "depth",
-      "min": 0.03,
-      "max": 0.28
-    }
-  ],
+  "knobs": [],
   "expressions": [
     {
       "id": "voided",
       "name": "Voided",
-      "description": "It changes no pattern and no boundary: whatever white the horse's other genes drew - a snip, a sock, a full tobiano - comes out as black hyperpigmentation of exactly the same shape, with the same hard or roaned edge the source pattern had. Mane and tail follow the same rule. How black varies between horses, from a faded sun-bleached brown-black to jet, but it is consistent across the whole marking on any one of them.",
+      "description": "It changes no pattern and no boundary: whatever white the horse's other genes drew - a snip, a sock, a full tobiano - comes out as black hyperpigmentation of exactly the same shape, with the same hard or roaned edge the source pattern had. Mane and tail follow the same rule. It goes as black as the coat will take, every time and on every horse: there is no pale version of this and nothing about it varies, which is what lets two voided horses with the same markings be the same horse.",
       "when": [
         "Vd/Vd",
         "Vd/n"
@@ -46,10 +40,8 @@
           ],
           "op": {
             "type": "TOWARD",
-            "hue": 25.0,
-            "saturation": 0.25,
-            "lightness": "$depth",
-            "strength": 96
+            "color": "#050505",
+            "strength": 99
           }
         }
       ]

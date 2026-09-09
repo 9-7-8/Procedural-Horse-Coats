@@ -21,7 +21,7 @@
 <h1>Gamma</h1>
 
 <p class="lede">
-    A chromatic modifier: diffuse fields of one saturated hue on the barrel and flank, each with a glow blooming past its edge - and nothing hard-edged anywhere on it.
+    Two to four diffuse fields of light on the barrel and flank, each with an outer bloom falling away to nothing, their colour sweeping along the horse rather than sitting in patches.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -98,7 +98,7 @@
 <tr><th>Priority</th><td>432 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Gam</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>PALETTE, SPOTS, emissive</td></tr>
+<tr><th>Built from</th><td>RAMP, SPOTS, emissive</td></tr>
 </tbody>
 </table>
 </div>
@@ -114,11 +114,11 @@
 
 <h3>Gamma</h3>
 
-<p>Two to four diffuse fields of colour a foot or two across, on the barrel and the back of the flank, gradient at every margin. The hues come from a fixed set - yellow, orange, red, violet, blue, green - at high saturation and mid luminance, and each field carries an outer bloom a few inches past its own edge at a third of its core saturation, falling to nothing. That bloom is what makes it read as light rather than as paint.</p>
+<p>Two to four diffuse fields of colour a foot or two across, on the barrel and the back of the flank, gradient at every margin and hard-edged at none of them. The hue is not one colour: it sweeps along the horse, so a field near the shoulder and a field near the hip are different colours and the change between them is continuous. Each field carries an outer bloom a few inches past its own edge at a third of its core saturation, falling to nothing. That bloom is what makes it read as light rather than as paint.</p>
 
 <ol>
-<li>the outer bloom &mdash; <code>SPOTS</code>, painted with <code>PALETTE</code></li>
-<li>the core of each field &mdash; <code>SPOTS</code>, painted with <code>PALETTE</code>, and it <strong>glows</strong></li>
+<li>the outer bloom &mdash; <code>SPOTS</code>, painted with <code>RAMP</code></li>
+<li>the core of each field &mdash; <code>SPOTS</code>, painted with <code>RAMP</code>, and it <strong>glows</strong></li>
 </ol>
 
 <h3>Wild type</h3>

@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 211,
   "rarity": "UNCOMMON",
-  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with a level band round each one.",
+  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design.",
   "alleles": [
     {
       "token": "Yal",
@@ -45,7 +45,7 @@
     {
       "id": "white",
       "name": "Yalia",
-      "description": "Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock rather than stopping at the barrel. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. It hides any other white pattern the horse carries, there is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.",
+      "description": "Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. Whatever white the horse already carries is taken into the design rather than left beside it: a tobiano patch, a splash, a blaze or a stocking is flattened to the same white and drawn round in the same outline colour, so the horse reads as one piece of architecture and not as two markings at once. There is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.",
       "when": [
         "Yal/Yal",
         "Yal/Ylc",
@@ -195,13 +195,82 @@
             "lightness": 0.45,
             "strength": 94
           }
+        },
+        {
+          "name": "the horse's own white markings, filled flat like a zone",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 97
+          }
+        },
+        {
+          "name": "and drawn round in the same outline colour",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "spread": 0.7
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
         }
       ]
     },
     {
       "id": "coloured",
       "name": "Coloured Yalia",
-      "description": "The same architecture with the fill in a colour rather than white - the outline stays its own colour, so the two are picked independently. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "description": "The same architecture in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. Unlike the white form it leaves the horse's own white markings alone - there is nothing for them to match - so a coloured Yalia over a tobiano is genuinely two markings on one horse. It never gives blue eyes.",
       "when": {
         "Ylc": 2
       },

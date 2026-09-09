@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 308,
   "rarity": "UNCOMMON",
-  "blurb": "Two to five large ellipses on each shoulder and the upper foreleg, each a bright diffuse halo closing around a core that stays darker than the coat around it.",
+  "blurb": "Two to five small eclipses on each shoulder - a pale halo closing round a circle of bare coat, sharp inside and fading away to nothing outside.",
   "alleles": [
     {
       "token": "Lst",
@@ -27,13 +27,13 @@
     },
     {
       "name": "outer",
-      "min": 1.9,
-      "max": 2.7
+      "min": 1.15,
+      "max": 1.75
     },
     {
-      "name": "haloBand",
-      "min": 0.7,
-      "max": 1.4
+      "name": "coreSize",
+      "min": 0.55,
+      "max": 0.85
     },
     {
       "name": "hue",
@@ -45,7 +45,7 @@
     {
       "id": "lasertae",
       "name": "Lasertae",
-      "description": "Two to five big soft-edged ellipses on each shoulder, their long axis lying roughly nose to tail, with a few carrying on down onto the upper foreleg and none of them reaching the flank or the hindquarter. The halo has no boundary worth the name on its outside and a firmer one inside, and within it the core sits a shade or two below the surrounding coat rather than above it - which is what makes a lasertae read as a hole with a light around it rather than as a spot.",
+      "description": "Two to five small eclipses on each shoulder and nowhere else on the horse - not the neck, not the barrel behind the scapula, not the legs. Each is a pale halo closing round a circle of the horse's own coat: sharp on the inside against that circle, and with no outer edge at all on the other side, running out over two or three hairs' breadth into the coat. That asymmetry is the whole marking - it is what makes a lasertae read as a light behind a hole rather than as a ring drawn on. Their long axis lies roughly nose to tail.",
       "when": [
         "Lst/Lst",
         "Lst/Lsc",
@@ -53,7 +53,7 @@
       ],
       "layers": [
         {
-          "name": "the halo",
+          "name": "the halo, closing round a circle of bare coat",
           "masks": [
             {
               "type": "AXIS",
@@ -62,115 +62,55 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.5,
+              "from": 0.6,
               "to": 1.0,
-              "softness": 0.18
+              "softness": 0.14
             },
             {
               "type": "AXIS",
               "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
+              "from": 0.22,
+              "to": 1.0,
+              "softness": 0.2
             },
             {
-              "type": "RINGS",
+              "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
+                "BODY"
               ],
               "seed": "$haloSeed",
-              "spacing": 8.0,
+              "spacing": 4.4,
               "radius": "$outer",
-              "thickness": "$haloBand",
-              "vary": 0.25,
-              "chance": 0.45,
-              "softness": 0.9
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 1.25
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$haloSeed",
+              "spacing": 4.4,
+              "radius": "$coreSize",
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 0.22,
+              "invert": true
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#fbf6e8",
-            "strength": 74
-          }
-        },
-        {
-          "name": "the darker core inside it",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.5,
-              "to": 1.0,
-              "softness": 0.18
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
-            },
-            {
-              "type": "SPOTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
-              ],
-              "seed": "$haloSeed",
-              "spacing": 8.0,
-              "radius": 1.3,
-              "vary": 0.25,
-              "chance": 0.45,
-              "stretch": 1.5,
-              "axis": "X",
-              "softness": 0.5
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#000000",
-            "strength": 16
+            "strength": 72
           }
         }
       ]
@@ -184,7 +124,7 @@
       },
       "layers": [
         {
-          "name": "the halo, in colour",
+          "name": "the halo, closing round a circle of bare coat, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -193,117 +133,57 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.5,
+              "from": 0.6,
               "to": 1.0,
-              "softness": 0.18
+              "softness": 0.14
             },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
-            },
-            {
-              "type": "RINGS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
-              ],
-              "seed": "$haloSeed",
-              "spacing": 8.0,
-              "radius": "$outer",
-              "thickness": "$haloBand",
-              "vary": 0.25,
-              "chance": 0.45,
-              "softness": 0.9
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 74,
-            "hue": "$hue",
-            "saturation": 0.82,
-            "lightness": 0.58
-          }
-        },
-        {
-          "name": "the darker core inside it, in colour",
-          "masks": [
             {
               "type": "AXIS",
               "parts": [
                 "BODY"
               ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.5,
-              "to": 1.0,
-              "softness": 0.18
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
-              ],
               "axis": "Y",
               "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
+              "from": 0.22,
+              "to": 1.0,
+              "softness": 0.2
             },
             {
               "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
+                "BODY"
               ],
               "seed": "$haloSeed",
-              "spacing": 8.0,
-              "radius": 1.3,
-              "vary": 0.25,
-              "chance": 0.45,
-              "stretch": 1.5,
+              "spacing": 4.4,
+              "radius": "$outer",
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
               "axis": "X",
-              "softness": 0.5
+              "softness": 1.25
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$haloSeed",
+              "spacing": 4.4,
+              "radius": "$coreSize",
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 0.22,
+              "invert": true
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#000000",
-            "strength": 16
+            "strength": 72,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
           }
         }
       ]

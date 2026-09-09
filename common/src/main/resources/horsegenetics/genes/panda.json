@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 203,
   "rarity": "RARE",
-  "blurb": "A strong white that keeps the coat only where a giant panda is dark - the ears, the eye patches, the shoulders and front legs, and the flanks, hindquarter and hind legs - with the neck, back and barrel between them white.",
+  "blurb": "A strong white that keeps the coat only in a bellyband round the middle of the horse and down all four legs, with the ears, eye patches and muzzle of a giant panda - and a coloured tail behind an entirely white croup.",
   "alleles": [
     {
       "token": "Pan",
@@ -44,7 +44,7 @@
     {
       "id": "white",
       "name": "Panda",
-      "description": "The coat is confined to the places a giant panda is dark and everything else goes white, mane and tail included: the ears, patches round the eyes, the muzzle, the shoulders carrying on down both front legs, and the flanks and hindquarter carrying on down both hind legs. Between the two coloured fields the barrel and the back are white, and so are the neck and the face, which is what makes it read as a panda rather than as a paint. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white.",
+      "description": "The coat survives in one band round the middle of the horse and nowhere else along it: a bellyband over the shoulder and barrel, wrapping the whole circumference, with all four legs carrying on down from it. Everything else goes white - the head except for the ears, the muzzle and the patches round the eyes, the neck, the back, and the croup and rump behind the band. The tail keeps its colour at the far end of that run, so the horse reads band, then nothing, then tail. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white.",
       "when": [
         "Pan/Pan",
         "Pan/Pnc",
@@ -61,7 +61,7 @@
                 "NECK",
                 "HEAD",
                 "LEGS",
-                "HAIR"
+                "MANE"
               ]
             }
           ],
@@ -72,7 +72,7 @@
           }
         },
         {
-          "name": "the coat kept on the shoulder and carried down both front legs",
+          "name": "the bellyband round the middle of the barrel, and all four legs",
           "masks": [
             {
               "type": "AXIS",
@@ -81,53 +81,14 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.76,
-              "to": 1.0,
-              "softness": 0.14
+              "from": 0.4,
+              "to": 0.88,
+              "softness": 0.13
             },
             {
               "type": "PARTS",
               "parts": [
-                "FRONT_LEGS"
-              ],
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": -99
-          }
-        },
-        {
-          "name": "the coat kept on the flank and hindquarter and down both hind legs",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.26,
-              "softness": 0.14
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": -0.1,
-              "to": 0.74,
-              "softness": 0.16
-            },
-            {
-              "type": "PARTS",
-              "parts": [
-                "HIND_LEGS"
+                "LEGS"
               ],
               "combine": "MAX"
             }
@@ -225,7 +186,7 @@
                 "NECK",
                 "HEAD",
                 "LEGS",
-                "HAIR"
+                "MANE"
               ]
             }
           ],
@@ -238,7 +199,7 @@
           }
         },
         {
-          "name": "the coat kept on the shoulder and carried down both front legs, in colour",
+          "name": "the bellyband round the middle of the barrel, and all four legs, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -247,55 +208,14 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.76,
-              "to": 1.0,
-              "softness": 0.14
+              "from": 0.4,
+              "to": 0.88,
+              "softness": 0.13
             },
             {
               "type": "PARTS",
               "parts": [
-                "FRONT_LEGS"
-              ],
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": -99,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
-          }
-        },
-        {
-          "name": "the coat kept on the flank and hindquarter and down both hind legs, in colour",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.26,
-              "softness": 0.14
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": -0.1,
-              "to": 0.74,
-              "softness": 0.16
-            },
-            {
-              "type": "PARTS",
-              "parts": [
-                "HIND_LEGS"
+                "LEGS"
               ],
               "combine": "MAX"
             }

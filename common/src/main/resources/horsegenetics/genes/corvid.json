@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 407,
   "rarity": "UNCOMMON",
-  "blurb": "A white mask running the whole length of the face to the back of the head with a black muzzle below it, black cannons over a thin white ring at the coronet, and black hair speckled white throughout.",
+  "blurb": "A head covered corner to corner in white over black, meeting on one hard curve with the ears left in the coat, black cannons over a thin white ring at the coronet, and black hair speckled white throughout.",
   "alleles": [
     {
       "token": "Cvd",
@@ -31,7 +31,7 @@
     {
       "id": "corvid",
       "name": "Corvid",
-      "description": "The face carries a white field from the muzzle boundary back over the nasal bone and orbits and on to the poll - the whole length of the head, not a wedge that runs out at the forehead - bounded along the upper cheek and hard-edged along a smooth curve throughout. Below it the muzzle is black to the nostrils, cut square across the nasal bone. Each leg has a white ring immediately above the hoof, with black up the cannon over it, and the mane and tail are black speckled white throughout.",
+      "description": "The head is covered corner to corner and the ears are not: every pixel of the face is either white or black, meeting along one hard curve, with the ears left in the coat behind them. White runs from the muzzle boundary back over the nasal bone and orbits and on to the poll - the whole length of the head - and below that line the face is black to the nostrils, taking the muzzle with it. Each leg has a white ring immediately above the hoof with black up the cannon over it, and the mane and tail are black speckled white throughout.",
       "when": [
         "Cvd/Cvd",
         "Cvd/n"
@@ -73,6 +73,27 @@
             "type": "TOWARD",
             "color": "#ffffff",
             "strength": 98
+          }
+        },
+        {
+          "name": "the black lower head, meeting the white on one line",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": -0.15,
+              "to": "$maskReach",
+              "softness": 0.04
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0b0c",
+            "strength": 96
           }
         },
         {

@@ -21,7 +21,7 @@
 <h1>Yalia</h1>
 
 <p class="lede">
-    Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with a level band round each one.
+    Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -101,7 +101,7 @@
 <tr><th>Priority</th><td>211 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Yal</code> &middot; <code>Ylc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>AXIS, PATCHES, TOWARD</td></tr>
+<tr><th>Built from</th><td>AXIS, PATCHES, PIGMENT, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
@@ -117,7 +117,7 @@
 
 <h3>Yalia</h3>
 
-<p>Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock rather than stopping at the barrel. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. It hides any other white pattern the horse carries, there is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.</p>
+<p>Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. Whatever white the horse already carries is taken into the design rather than left beside it: a tobiano patch, a splash, a blaze or a stocking is flattened to the same white and drawn round in the same outline colour, so the horse reads as one piece of architecture and not as two markings at once. There is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.</p>
 
 <ol>
 <li>the white fill &mdash; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
@@ -125,11 +125,13 @@
 <li>a band round every leg &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>the outline of the leg band &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>hooves in the outline colour &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the horse's own white markings, filled flat like a zone &mdash; <code>PIGMENT inverted</code>, painted with <code>TOWARD</code></li>
+<li>and drawn round in the same outline colour &mdash; <code>PIGMENT inverted</code> &times; <code>PIGMENT inverted</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Coloured Yalia</h3>
 
-<p>The same architecture with the fill in a colour rather than white - the outline stays its own colour, so the two are picked independently. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.</p>
+<p>The same architecture in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. Unlike the white form it leaves the horse's own white markings alone - there is nothing for them to match - so a coloured Yalia over a tobiano is genuinely two markings on one horse. It never gives blue eyes.</p>
 
 <ol>
 <li>the white fill, in colour &mdash; <code>PATCHES</code>, painted with <code>TOWARD</code></li>

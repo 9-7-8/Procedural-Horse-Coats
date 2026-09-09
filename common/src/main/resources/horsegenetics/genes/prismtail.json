@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 402,
   "rarity": "RARE",
-  "blurb": "The hair banded through the spectrum in order from the roots down - yellow, green, cyan, blue, violet, magenta - and back to its own colour before the ends.",
+  "blurb": "The hair banded through the spectrum in order from the roots down - yellow, green, cyan, blue, violet, magenta - the whole length of the mane and tail, and nothing anywhere else on the horse.",
   "alleles": [
     {
       "token": "Prt",
@@ -31,7 +31,7 @@
     {
       "id": "prismtail",
       "name": "Prismtail",
-      "description": "Colour occupies the part of the hair nearest the horse and stops before the ends, which always come back to the hair's own colour. Within that run it is stacked in bands, widest at the top and compressing downward, four to seven of them, and the boundaries between adjacent bands are soft - the hues blend rather than cut. The order is the spectrum's own and never repeats or reverses; a short run drops bands off the top rather than squeezing all seven in. Beside the mane's coloured section the upper neck carries a soft wash in the last of those hues, at a fraction of the saturation, with a scatter of pale points in it.",
+      "description": "Colour occupies the whole length of the mane, forelock and tail, roots to ends, with nothing of the hair's own shade left showing. Within that it is stacked in bands, widest at the top and compressing downward, four to seven of them, and the boundaries between adjacent bands are soft - the hues blend rather than cut. The order is the spectrum's own and never repeats or reverses; a short run compresses the whole spectrum into the upper hair and holds the last band the rest of the way down. It touches the hair and nothing else - the coat, the neck and the face are left entirely alone.",
       "when": [
         "Prt/Prt",
         "Prt/n"
@@ -53,9 +53,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": "$run",
-              "to": 1.0,
-              "softness": 0.16
+              "from": -0.15,
+              "to": 1.15,
+              "softness": 0.05
             }
           ],
           "op": {
@@ -73,60 +73,6 @@
             "from": 1.0,
             "to": "$run",
             "strength": 92
-          }
-        },
-        {
-          "name": "the wash on the upper neck beside it",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.6,
-              "to": 1.0,
-              "softness": 0.45
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#e0339a",
-            "strength": 30
-          }
-        },
-        {
-          "name": "pale points in the wash",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "NECK"
-              ],
-              "seed": "$frontSeed",
-              "spacing": 1.8,
-              "radius": 0.35,
-              "vary": 0.5,
-              "chance": 0.35,
-              "softness": 0.1
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.6,
-              "to": 1.0,
-              "softness": 0.4
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fffbe0",
-            "strength": 85
           }
         }
       ]

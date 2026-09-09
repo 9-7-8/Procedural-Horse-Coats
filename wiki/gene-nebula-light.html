@@ -21,7 +21,7 @@
 <h1>Nebula Light</h1>
 
 <p class="lede">
-    Overlapping zones of magenta, violet, blue and teal across the back half of the horse, with a fine population of points through them and a few larger ones wearing halos.
+    Overlapping zones of pink, violet and blue across the back half of the horse, fading onto the tops of the legs, with a fine population of points through them and a few larger ones wearing halos.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -114,10 +114,11 @@
 
 <h3>Nebula Light</h3>
 
-<p>A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from magenta, violet, blue and teal, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin. Through the field runs a population of small points, and among them three to ten larger ones with radial halos around them at half their own brightness.</p>
+<p>A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from a pink-through-violet-through-blue family so that no two of them clash, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin, and where the field meets the top of a leg it carries a little way onto it and fades out rather than stopping at the elbow - it does not run down the limb. Through the field runs a population of fine points, with a few larger ones wearing halos.</p>
 
 <ol>
 <li>the hue zones &mdash; <code>NOISE</code> &times; <code>AXIS</code>, painted with <code>PALETTE</code></li>
+<li>a little of the field bleeding onto the tops of the legs &mdash; <code>NOISE</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>PALETTE</code></li>
 <li>the fine point population &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
 <li>the larger points, with halos &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>

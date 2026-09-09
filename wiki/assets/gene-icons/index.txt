@@ -111,7 +111,6 @@ striped_mane_tail
 hood
 element_dusted
 corvid
-auroraband
 voided
 opalized
 gamma

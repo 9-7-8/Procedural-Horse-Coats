@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 404,
   "rarity": "COMMON",
-  "blurb": "A handful of contrasting bundles running the length of the mane and tail - light strands through dark hair, dark through light - and nothing at all on the body.",
+  "blurb": "Mane and tail split into alternating bundles, light where the hair is dark and dark where it is light - in cream and near-black, or in one colour the line carries.",
   "alleles": [
     {
       "token": "Smt",
-      "label": "Striped Mane and Tail (Smt)"
+      "label": "Striped mane and tail (Smt)"
+    },
+    {
+      "token": "Smc",
+      "label": "Striped mane and tail, coloured (Smc)"
     },
     {
       "token": "n",
@@ -25,6 +29,11 @@
       "name": "bundleWidth",
       "min": 0.5,
       "max": 1.6
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -34,6 +43,7 @@
       "description": "Three to nine bundles spaced along the crest, each running the whole length of the strand it is in, though about a third of them thin out and feather away partway down. The forelock joins in about half the time, at one to three bundles. The tail carries two to six, a little wider at the dock. The bundles are whatever contrasts: light on a dark mane, dark on a light one. No body coat expression of any kind.",
       "when": [
         "Smt/Smt",
+        "Smt/Smc",
         "Smt/n"
       ],
       "layers": [
@@ -90,16 +100,95 @@
               "parts": [
                 "HAIR"
               ],
+              "invert": true,
               "channel": "darkness",
               "from": 0.35,
-              "to": 0.6,
-              "invert": true
+              "to": 0.6
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#241d16",
             "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured striped mane and tail",
+      "description": "The same alternating bundles, worked in a colour the line carries rather than in cream and near-black: the bundles that would have gone light take the hue bright, and the ones that would have gone dark take it deep, so the striping still reads as striping and reads as one colour doing it. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Smc": 2
+      },
+      "layers": [
+        {
+          "name": "light bundles, where the hair is dark, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$bundleSeed",
+              "spacing": 2.6,
+              "length": 12.0,
+              "axis": "Y",
+              "width": "$bundleWidth",
+              "curl": 0.2,
+              "softness": 0.08
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "channel": "darkness",
+              "from": 0.35,
+              "to": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.68
+          }
+        },
+        {
+          "name": "dark bundles, where the hair is light, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$bundleSeed",
+              "spacing": 2.6,
+              "length": 12.0,
+              "axis": "Y",
+              "width": "$bundleWidth",
+              "curl": 0.2,
+              "softness": 0.08
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true,
+              "channel": "darkness",
+              "from": 0.35,
+              "to": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.22
           }
         }
       ]
@@ -113,7 +202,9 @@
   ],
   "founders": {
     "Smt/Smt": 0.006,
+    "Smt/Smc": 0.01,
     "Smt/n": 0.114,
-    "n/n": 99.88
+    "Smc/Smc": 0.01,
+    "n/n": 99.86
   }
 }

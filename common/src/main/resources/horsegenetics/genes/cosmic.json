@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 250,
   "rarity": "UNCOMMON",
-  "blurb": "A starfield hung off the topline and the crest, running from the muzzle to the croup and out down the legs with no edge anywhere - and, on a well-marked horse, a planet or two with a ring round it.",
+  "blurb": "A starfield hung off the topline and the crest, thinning out to nothing before the poll and before the knee rather than stopping anywhere - and, on a well-marked horse, a planet or two with a ring round it.",
   "alleles": [
     {
       "token": "Cs",
@@ -45,14 +45,14 @@
     {
       "id": "cosmic",
       "name": "Cosmic",
-      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It runs from the muzzle to the croup - the face and the whole length of the neck as well as the barrel, hanging off the crest the way it hangs off the back - and carries on down the legs, thinning the whole way and out before the hoof. There is no edge on it anywhere: every boundary is a long fade rather than a line. Inside are stars, thickest near the topline and thinning toward the edge, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
+      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It covers the back and the barrel, hangs off the crest for the first half of the neck, and reaches a little way onto the top of each leg - but it does not stop anywhere: it thins out and is simply gone before the poll and before the knee, so there is no edge on it at either end. Its lower boundary on the barrel is the same long fade. Inside are stars, thickest near the topline and thinning with the field itself, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
       "when": [
         "Cs/Cs",
         "Cs/n"
       ],
       "layers": [
         {
-          "name": "the blanket, hung from the topline",
+          "name": "the blanket over the back and barrel",
           "masks": [
             {
               "type": "AXIS",
@@ -66,52 +66,9 @@
               "softness": 0.45
             },
             {
-              "type": "WAVES",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 44.0,
-              "to": 90.0,
-              "softness": 5.0,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "HEAD"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.1,
-              "to": 1.3,
-              "softness": 0.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.28,
-              "to": 1.4,
-              "softness": 0.75,
-              "combine": "MAX"
-            },
-            {
               "type": "PATCHES",
               "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "LEGS"
+                "BODY"
               ],
               "seed": "$fieldSeed",
               "scale": 7.0,
@@ -122,10 +79,7 @@
             {
               "type": "AXIS",
               "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "LEGS"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
@@ -149,34 +103,8 @@
           }
         },
         {
-          "name": "the starfield inside it, densest at the spine",
+          "name": "the blanket running out along the neck",
           "masks": [
-            {
-              "type": "SPECKLE",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "LEGS"
-              ],
-              "seed": "$starSeed",
-              "spacing": 0.9,
-              "size": 0.4,
-              "density": 0.3,
-              "clumping": 0.4,
-              "clumpScale": 5.0
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.3,
-              "to": 1.0,
-              "softness": 0.5
-            },
             {
               "type": "WAVES",
               "parts": [
@@ -188,23 +116,38 @@
               "shape": "saw",
               "wavelength": 90.0,
               "amplitude": 77.94,
-              "from": 45.0,
+              "from": 44.0,
               "to": 90.0,
-              "softness": 5.0,
-              "combine": "MAX"
+              "softness": 6.0
             },
             {
               "type": "AXIS",
               "parts": [
-                "HEAD"
+                "NECK"
               ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.2,
-              "to": 1.3,
-              "softness": 0.6,
-              "combine": "MAX"
-            },
+              "axis": "X",
+              "space": "units",
+              "from": -5.0,
+              "to": 26.5,
+              "softness": 4.5
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$hueRun",
+            "saturation": 0.8,
+            "lightness": 0.22,
+            "axis": "X",
+            "space": "body",
+            "from": 0.15,
+            "to": 0.85,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and running out again down the legs",
+          "masks": [
             {
               "type": "AXIS",
               "parts": [
@@ -212,10 +155,97 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.35,
+              "from": 0.78,
               "to": 1.4,
-              "softness": 0.7,
-              "combine": "MAX"
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$hueRun",
+            "saturation": 0.8,
+            "lightness": 0.22,
+            "axis": "X",
+            "space": "body",
+            "from": 0.15,
+            "to": 0.85,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the starfield inside it, densest at the spine",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": "$drop",
+              "to": 1.0,
+              "softness": 0.45
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$starSeed",
+              "spacing": 0.9,
+              "size": 0.4,
+              "density": 0.3,
+              "clumping": 0.4,
+              "clumpScale": 5.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 90
+          }
+        },
+        {
+          "name": "stars carried onto the neck with it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 44.0,
+              "to": 90.0,
+              "softness": 6.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": -5.0,
+              "to": 26.5,
+              "softness": 4.5
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$starSeed",
+              "spacing": 0.9,
+              "size": 0.4,
+              "density": 0.3,
+              "clumping": 0.4,
+              "clumpScale": 5.0
             }
           ],
           "op": {

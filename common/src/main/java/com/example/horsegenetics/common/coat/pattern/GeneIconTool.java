@@ -173,68 +173,15 @@ public final class GeneIconTool {
         System.out.println("wrote " + written.size() + " icons to " + outDir.toAbsolutePath());
     }
 
-    /** A channel has to move this far before a texel counts as repainted. */
-    private static final int CHANNEL_STEP = 16;
-
-    /** And this many texels have to move before the gene counts as showing. */
-    private static final int MIN_TEXELS = 24;
-
     /**
-     * <b>The gene showing itself</b>, over {@code base}: whichever of its
-     * alleles repaints the most of the horse when homozygous - or {@code null}
-     * if none of them repaints enough of it to be worth a picture.
-     *
-     * <p>Homozygous, because an icon has one image to spend and the full
-     * expression is the honest thing to spend it on; the gene's own page
-     * carries the heterozygote beside it. <b>The loudest allele</b> rather than
-     * the first declared, because a great many genes declare the wild type
-     * first - Extension leads with {@code E}, and an icon of {@code E/E} on a
-     * bay is a picture of a bay.
-     *
-     * <p>Loudest is measured, not assumed equal-or-not: swapping one allele
-     * copy for another swaps the <i>epigenome slot</i> the coat reads with it,
-     * so {@code A/A} is never byte-identical to the {@code A/a} underneath it
-     * even though both are the same bay. A plain equality test therefore called
-     * the wild type a picture of the gene. Counting the texels that moved by
-     * {@value #CHANNEL_STEP} or more separates that jitter, which is a handful
-     * of texels, from a gene that actually paints, which is hundreds.
+     * <b>The gene showing itself</b> over one of the {@link #BACKDROPS} - see
+     * {@link CoatVisibility#showing}, which is where the measurement lives so
+     * that {@code GeneWikiTool} can ask the same question and get the same
+     * answer. This is only the genotype spelling around it.
      */
     private static int[] showing(Gene gene, String base, Epigenome epi,
             int[] template, LutSet luts) {
-        Genotype plain = override(base);
-        int[] plainSheet = CoatTextureComposer.compose(plain, epi,
-                Skin.ADULT, true, template, luts);
-        int[] best = null;
-        int loudest = 0;
-        for (Allele variant : gene.alleles()) {
-            int[] sheet = CoatTextureComposer.compose(
-                    plain.with(new AllelePair(variant, variant)), epi,
-                    Skin.ADULT, true, template, luts);
-            int moved = repainted(sheet, plainSheet);
-            if (moved > loudest) {
-                loudest = moved;
-                best = sheet;
-            }
-        }
-        return loudest >= MIN_TEXELS ? best : null;
-    }
-
-    /** How many texels {@code sheet} moved off {@code from}, ignoring jitter. */
-    private static int repainted(int[] sheet, int[] from) {
-        int moved = 0;
-        for (int i = 0; i < sheet.length; i++) {
-            if (sheet[i] == from[i]) {
-                continue;
-            }
-            int d = Math.max(Math.max(
-                    Math.abs(((sheet[i] >> 16) & 0xFF) - ((from[i] >> 16) & 0xFF)),
-                    Math.abs(((sheet[i] >> 8) & 0xFF) - ((from[i] >> 8) & 0xFF))),
-                    Math.abs((sheet[i] & 0xFF) - (from[i] & 0xFF)));
-            if (d >= CHANNEL_STEP) {
-                moved++;
-            }
-        }
-        return moved;
+        return CoatVisibility.showing(gene, override(base), epi, template, luts);
     }
 
     // ------------------------------------------------------------------

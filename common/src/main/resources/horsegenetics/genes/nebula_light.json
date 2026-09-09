@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 433,
   "rarity": "LEGENDARY",
-  "blurb": "Overlapping zones of magenta, violet, blue and teal across the back half of the horse, with a fine population of points through them and a few larger ones wearing halos.",
+  "blurb": "Overlapping zones of pink, violet and blue across the back half of the horse, fading onto the tops of the legs, with a fine population of points through them and a few larger ones wearing halos.",
   "alleles": [
     {
       "token": "Neb",
@@ -35,7 +35,7 @@
     {
       "id": "nebula",
       "name": "Nebula Light",
-      "description": "A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from magenta, violet, blue and teal, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin. Through the field runs a population of small points, and among them three to ten larger ones with radial halos around them at half their own brightness.",
+      "description": "A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from a pink-through-violet-through-blue family so that no two of them clash, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin, and where the field meets the top of a leg it carries a little way onto it and fades out rather than stopping at the elbow - it does not run down the limb. Through the field runs a population of fine points, with a few larger ones wearing halos.",
       "when": [
         "Neb/Neb",
         "Neb/n"
@@ -71,10 +71,68 @@
           "op": {
             "type": "PALETTE",
             "colors": [
-              "#c02a9e",
-              "#7a2ad0",
-              "#2a52d0",
-              "#2ab8c8"
+              "#CB88A7",
+              "#BC92CD",
+              "#9374EB",
+              "#844CAD",
+              "#5950B8",
+              "#524094",
+              "#307EC0",
+              "#1F8CC4",
+              "#25387A"
+            ],
+            "scale": 5.5,
+            "strength": 90
+          }
+        },
+        {
+          "name": "a little of the field bleeding onto the tops of the legs",
+          "masks": [
+            {
+              "type": "NOISE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$fieldSeed",
+              "scale": 8.0,
+              "low": 0.0,
+              "high": 1.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.82,
+              "to": 1.2,
+              "softness": 0.24
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.45
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#CB88A7",
+              "#BC92CD",
+              "#9374EB",
+              "#844CAD",
+              "#5950B8",
+              "#524094",
+              "#307EC0",
+              "#1F8CC4",
+              "#25387A"
             ],
             "scale": 5.5,
             "strength": 90

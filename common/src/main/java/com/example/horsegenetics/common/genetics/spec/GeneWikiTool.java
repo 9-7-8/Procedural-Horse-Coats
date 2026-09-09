@@ -6,8 +6,15 @@ import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.GenotypeCatalog;
 import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.coat.pattern.CoatVisibility;
+import com.example.horsegenetics.common.coat.pattern.GradientLut;
+import com.example.horsegenetics.common.coat.pattern.LutSet;
+import com.example.horsegenetics.common.genetics.BaseCoats;
+import com.example.horsegenetics.common.genetics.Epigenome;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -90,13 +97,27 @@ public final class GeneWikiTool {
             }
         }
 
+        // Which base coat each preview window opens on. Measured, not declared -
+        // see openingBase.
+        Map<String, String> opensOn = openingBases();
+
         int written = 0;
         for (SpecGene gene : Genes.loaded()) {
             if (handWritten.contains(gene.key())) {
                 continue;
             }
-            Files.writeString(wiki.resolve(pageOf(gene)), genePage(gene), StandardCharsets.UTF_8);
+            Files.writeString(wiki.resolve(pageOf(gene)),
+                    genePage(gene, opensOn.get(gene.key())), StandardCharsets.UTF_8);
             written++;
+        }
+        List<String> notBay = new ArrayList<>();
+        opensOn.forEach((key, base) -> {
+            if (!"bay".equals(base)) {
+                notBay.add(key.substring(key.indexOf('.') + 1) + " -> " + base);
+            }
+        });
+        if (!notBay.isEmpty()) {
+            System.out.println("previews opening on something other than a bay: " + notBay);
         }
 
         System.out.println("wrote " + written + " gene pages ("
@@ -109,6 +130,66 @@ public final class GeneWikiTool {
         // stop registering them by hand.
         rewritePages(wiki.resolve("pages.js"), geneSections(wiki));
         rewriteLanding(wiki.resolveSibling("index.html"), wiki);
+    }
+
+    /**
+     * The base coat each gene's preview window should <b>open on</b>: the first
+     * one in {@link BaseCoats#all()} that the gene can actually be seen on.
+     *
+     * <p>Bay leads that list, so almost every gene answers bay and the pages do
+     * not move. What this is for is the handful that modify <i>somebody else's
+     * white</i> rather than drawing a shape - fielded draws nothing whatever on
+     * a solid horse now, and voided and opalized only ever recoloured white -
+     * and opening those on a bay is opening them on a picture of a bay. They
+     * fall through to the tobiano.
+     *
+     * <p><b>Detected rather than declared</b>, deliberately, and it is the same
+     * measurement {@code GeneIconTool} uses to choose a backdrop: a gene that
+     * starts or stops painting changes what its page opens on at the next bake,
+     * and there is no list anywhere to go stale. It costs a coat bake per gene
+     * per base tried, which is why the answer is worked out once up front and
+     * handed to {@link #genePage}.
+     *
+     * <p>A gene that shows on none of them - a health locus, a modifier that
+     * paints nothing - gets {@code null} and the page emits no attribute, so
+     * the window falls back to its own default.
+     */
+    private static Map<String, String> openingBases() throws IOException {
+        int[] template = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
+        int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
+        GradientLut base = new GradientLut(g, lastReadWidth, lastReadHeight);
+        int[] bp = readArgb("/assets/horsegenetics/textures/coat/lutbluepink.png");
+        GradientLut bluepink = new GradientLut(bp, lastReadWidth, lastReadHeight);
+        LutSet luts = new LutSet(base, Map.of("bluepink", bluepink));
+
+        Map<String, String> out = new LinkedHashMap<>();
+        for (SpecGene gene : Genes.loaded()) {
+            // Seeded off the key, like the icons, so a re-bake gives the same
+            // answer rather than one that wobbles with the draw.
+            Epigenome epi = Epigenome.fromSeed(gene.key().hashCode() * 2654435761L);
+            BaseCoats.BaseCoat shown = CoatVisibility.firstShowing(gene, epi, template, luts);
+            if (shown != null) {
+                out.put(gene.key(), shown.key());
+            }
+        }
+        return out;
+    }
+
+    private static int lastReadWidth;
+    private static int lastReadHeight;
+
+    private static int[] readArgb(String resource) throws IOException {
+        try (InputStream in = GeneWikiTool.class.getResourceAsStream(resource)) {
+            if (in == null) {
+                throw new IOException("resource not found: " + resource);
+            }
+            BufferedImage img = javax.imageio.ImageIO.read(in);
+            lastReadWidth = img.getWidth();
+            lastReadHeight = img.getHeight();
+            int[] px = new int[lastReadWidth * lastReadHeight];
+            img.getRGB(0, 0, lastReadWidth, lastReadHeight, px, 0, lastReadWidth);
+            return px;
+        }
     }
 
     private static String slug(Gene gene) {
@@ -614,7 +695,12 @@ public final class GeneWikiTool {
     // One gene, one page
     // ------------------------------------------------------------------
 
-    private static String genePage(SpecGene gene) {
+    /**
+     * @param opensOn the base coat key this gene's preview window should open
+     *                on, or {@code null} to let the window choose - see
+     *                {@link #openingBases()}
+     */
+    private static String genePage(SpecGene gene, String opensOn) {
         // The family is the eyebrow's second half and nothing more: it names
         // the sidebar section and the landing-page heading this gene sits
         // under, neither of which is a page one could link to.
@@ -632,7 +718,13 @@ public final class GeneWikiTool {
 
         // ---- gameplay -------------------------------------------------
         sb.append("<section class=\"tab-panel\" data-tab=\"gameplay\">\n\n");
-        sb.append("<div class=\"gene-preview\" data-gene=\"").append(gene.key()).append("\"></div>\n\n");
+        sb.append("<div class=\"gene-preview\" data-gene=\"").append(gene.key()).append("\"");
+        if (opensOn != null && !"bay".equals(opensOn)) {
+            // Only when it is NOT the window's own default, so the attribute
+            // appears on the few pages where it means something.
+            sb.append(" data-base=\"").append(esc(opensOn)).append("\"");
+        }
+        sb.append("></div>\n\n");
 
         sb.append(outcomeSummary(gene));
 

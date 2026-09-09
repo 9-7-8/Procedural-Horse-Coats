@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 432,
   "rarity": "LEGENDARY",
-  "blurb": "A chromatic modifier: diffuse fields of one saturated hue on the barrel and flank, each with a glow blooming past its edge - and nothing hard-edged anywhere on it.",
+  "blurb": "Two to four diffuse fields of light on the barrel and flank, each with an outer bloom falling away to nothing, their colour sweeping along the horse rather than sitting in patches.",
   "alleles": [
     {
       "token": "Gam",
@@ -36,7 +36,7 @@
     {
       "id": "gamma",
       "name": "Gamma",
-      "description": "Two to four diffuse fields of colour a foot or two across, on the barrel and the back of the flank, gradient at every margin. The hues come from a fixed set - yellow, orange, red, violet, blue, green - at high saturation and mid luminance, and each field carries an outer bloom a few inches past its own edge at a third of its core saturation, falling to nothing. That bloom is what makes it read as light rather than as paint.",
+      "description": "Two to four diffuse fields of colour a foot or two across, on the barrel and the back of the flank, gradient at every margin and hard-edged at none of them. The hue is not one colour: it sweeps along the horse, so a field near the shoulder and a field near the hip are different colours and the change between them is continuous. Each field carries an outer bloom a few inches past its own edge at a third of its core saturation, falling to nothing. That bloom is what makes it read as light rather than as paint.",
       "when": [
         "Gam/Gam",
         "Gam/n"
@@ -62,12 +62,15 @@
             }
           ],
           "op": {
-            "type": "PALETTE",
+            "type": "RAMP",
             "hue": "$hue",
-            "hueSpread": "$spread",
+            "hueSpan": "$spread",
             "saturation": 0.5,
             "lightness": 0.6,
-            "scale": 10.0,
+            "axis": "X",
+            "space": "body",
+            "from": 0.1,
+            "to": 0.9,
             "strength": 35
           }
         },
@@ -92,12 +95,15 @@
             }
           ],
           "op": {
-            "type": "PALETTE",
+            "type": "RAMP",
             "hue": "$hue",
-            "hueSpread": "$spread",
+            "hueSpan": "$spread",
             "saturation": 0.9,
             "lightness": 0.6,
-            "scale": 10.0,
+            "axis": "X",
+            "space": "body",
+            "from": 0.1,
+            "to": 0.9,
             "strength": 88
           }
         }

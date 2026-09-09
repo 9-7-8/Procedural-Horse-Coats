@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 366,
   "rarity": "RARE",
-  "blurb": "Black strokes down the caudal neck and shoulder, the widest of them carrying a saturated blue core, with a blue band at every fetlock.",
+  "blurb": "Black strokes down the caudal neck and shoulder, the widest of them carrying a saturated core in whatever colour the line runs to, with a band of the same at every fetlock.",
   "alleles": [
     {
       "token": "Cir",
@@ -22,9 +22,9 @@
       "type": "seed"
     },
     {
-      "name": "coreHue",
-      "min": 195.0,
-      "max": 225.0
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     },
     {
       "name": "weight",
@@ -36,7 +36,7 @@
     {
       "id": "circuit",
       "name": "Circuit",
-      "description": "Tapering strokes running down and back from the crest to the point of shoulder, forking into two or three branches near their ends. Blue appears only inside black - as a lozenge inset along the core of the widest strokes, leaving black margins either side, and as the fetlock band. A single stroke sits over each orbital ridge, and the cannons carry the same cored strokes as the shoulder.",
+      "description": "Tapering strokes running down and back from the crest to the point of shoulder, forking into two or three branches near their ends. The colour appears only inside black - as a lozenge inset along the core of the widest strokes, leaving black margins either side, and as the fetlock band - and which colour it is runs in the line rather than being fixed: a horse carries it on the allele copy, so a foal that inherits the copy inherits the colour with it, and two circuit horses of different lines are different colours. A single stroke sits over each orbital ridge, and the cannons carry the same cored strokes as the shoulder.",
       "when": [
         "Cir/Cir",
         "Cir/n"
@@ -79,7 +79,7 @@
           }
         },
         {
-          "name": "the blue core inside the widest strokes",
+          "name": "the coloured core inside the widest strokes",
           "masks": [
             {
               "type": "STROKES",
@@ -122,7 +122,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "hue": "$coreHue",
+            "hue": "$hue",
             "saturation": 0.95,
             "lightness": 0.55,
             "strength": 95
@@ -162,7 +162,7 @@
           }
         },
         {
-          "name": "the blue band at each fetlock, and the black hoof below it",
+          "name": "the coloured band at each fetlock, and the black hoof below it",
           "masks": [
             {
               "type": "AXIS",
@@ -178,7 +178,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "hue": "$coreHue",
+            "hue": "$hue",
             "saturation": 1.0,
             "lightness": 0.55,
             "strength": 98

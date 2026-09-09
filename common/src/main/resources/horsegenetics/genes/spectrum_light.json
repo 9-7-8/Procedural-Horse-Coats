@@ -36,7 +36,7 @@
     {
       "id": "spectrum",
       "name": "Spectrum Light",
-      "description": "A single field, three or four feet long and a foot or two tall, lying over the back of the barrel, the flank and the hip with its long axis close to the body's. Along that axis the hue turns continuously through the spectrum in order - red, orange, yellow, green, cyan, blue, violet - at a steady few degrees an inch, with no banding and no segment repeated. Saturation is highest along the field's centre line and falls to nothing at its margins, so it has no edge. Most of these horses also have the neighbouring stretch of mane picking up whatever hue is local to it, at about half strength.",
+      "description": "A single field, three or four feet long and a foot or two tall, lying over the back of the barrel, the flank and the hip with its long axis close to the body's. Along that axis the hue turns continuously through the spectrum in order - red, orange, yellow, green, cyan, blue, violet - at a steady few degrees an inch, with no banding and no segment repeated. Saturation is highest along the field's centre line and falls to nothing at its margins, so it has no edge. Most of these horses also have the neighbouring stretch of mane picking up whatever hue is local to it, at about half strength. Where the field meets the top of a leg it carries a little way onto it and fades out, so the barrel does not end on a line; it does not run down the limb.",
       "when": [
         "Spc/Spc",
         "Spc/n"
@@ -57,6 +57,47 @@
               "stretch": 2.4,
               "axis": "X",
               "softness": 4.0
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$start",
+            "hueSpan": "$run",
+            "saturation": 0.75,
+            "lightness": 0.55,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.75,
+            "strength": 90
+          }
+        },
+        {
+          "name": "the field bleeding onto the tops of the legs",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": 30.0,
+              "radius": 14.0,
+              "vary": 0.2,
+              "stretch": 2.4,
+              "axis": "X",
+              "softness": 4.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.82,
+              "to": 1.2,
+              "softness": 0.24
             }
           ],
           "op": {

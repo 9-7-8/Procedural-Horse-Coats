@@ -25,6 +25,15 @@
 // resolves says so in the window rather than drawing a plain horse and calling
 // it the gene.
 //
+// An optional data-base="<base coat key>" says which coat to OPEN on. It is
+// written by :common:bakeGeneWikiPages, which bakes each gene against every
+// base coat and emits the attribute when the first one the gene can actually be
+// seen on is not the bay - fielded, voided and opalized only ever touch white
+// somebody else put there, so a bay is a picture of a bay. Measured rather than
+// listed, and by the same code the icon baker uses (CoatVisibility), so the two
+// cannot disagree about what a gene shows on. An unrecognised key falls back to
+// the default rather than being trusted.
+//
 // It needs the wiki served over http: loading the wasm is a fetch, and a file://
 // page is its own opaque origin. The window says so rather than failing silently.
 window.HG = window.HG || {};
@@ -100,11 +109,14 @@ window.HG = window.HG || {};
 
   function mount(host) {
     var geneKey = host.getAttribute("data-gene");
+    // Which base coat to open on, when the page knows better than the default.
+    // :common:bakeGeneWikiPages measures it and writes it out; see below.
+    var wantBase = host.getAttribute("data-base");
     host.classList.add("gene-preview");
     host.innerHTML = '<div class="gp-boot">Loading the coat pipeline&hellip;</div>';
 
     boot().then(function (api) {
-      build(host, api, geneKey);
+      build(host, api, geneKey, wantBase);
     }, function (err) {
       host.innerHTML = '<div class="gp-boot gp-failed">'
         + 'The preview could not start: ' + escapeHtml(err.message) + '.'
@@ -116,7 +128,7 @@ window.HG = window.HG || {};
     });
   }
 
-  function build(host, api, geneKey) {
+  function build(host, api, geneKey, wantBase) {
     var gene = JSON.parse(api.genePreviewJson(geneKey));
     if (gene.missing) {
       host.innerHTML = '<div class="gp-boot gp-failed">No gene is registered as <code>'
@@ -159,7 +171,7 @@ window.HG = window.HG || {};
     view.setSkin("ADULT");
 
     var state = {
-      base: defaultBase(bases),
+      base: defaultBase(bases, wantBase),
       outcome: 0,
       // One selected option per modifier locus this gene reads, all starting at
       // the baseline - so the first thing shown is the gene on its own.
@@ -259,16 +271,32 @@ window.HG = window.HG || {};
   }
 
   /**
-   * Which base coat a gene page opens on: BAY, by name.
+   * Which base coat a gene page opens on: BAY, by name - unless the page asked
+   * for something else with data-base.
    *
    * BaseCoats.all() puts bay first for exactly this reason, so this and the
    * plain "take the first one" other callers use now agree. It still asks by
    * name rather than taking index 0, because the reason bay is the right
    * default belongs next to the page that depends on it: a black horse hides
    * every dark marking on it, and a great many of these genes paint dark.
+   *
+   * WHY A PAGE MAY OVERRIDE IT. A gene that modifies somebody else's white
+   * rather than drawing a shape - fielded, voided, opalized - paints nothing
+   * whatever on any of the three solid coats, so opening it on a bay opens it
+   * on a picture of a bay. :common:bakeGeneWikiPages bakes each gene against
+   * every base coat and writes data-base when the first one it can be seen on
+   * is not the bay, which is the same measurement the icon baker uses to pick
+   * a backdrop. An unknown key is ignored rather than trusted: the attribute is
+   * generated, but the page it sits on may be older than the base coat list.
    */
-  function defaultBase(bases) {
-    for (var i = 0; i < bases.length; i++) {
+  function defaultBase(bases, wanted) {
+    var i;
+    if (wanted) {
+      for (i = 0; i < bases.length; i++) {
+        if (bases[i].key === wanted) return bases[i].key;
+      }
+    }
+    for (i = 0; i < bases.length; i++) {
       if (bases[i].key === "bay") return bases[i].key;
     }
     return bases[0].key;

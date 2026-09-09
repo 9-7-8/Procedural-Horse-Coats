@@ -29,15 +29,15 @@
     },
     {
       "name": "reach",
-      "min": 0.15,
-      "max": 0.85
+      "min": 61.0,
+      "max": 71.0
     }
   ],
   "expressions": [
     {
       "id": "hood",
       "name": "Hood",
-      "description": "Opaque over the whole head - muzzle, ears and all - and from there it weakens continuously back along the neck until it has vanished entirely, somewhere between the throatlatch and the shoulder depending on the horse. There is no edge to it at any point; it simply runs out. Both the colour and how far it carries are drawn once and passed on.",
+      "description": "Opaque over the whole head - muzzle, ears and all - and from there it weakens continuously back along the neck until it has vanished entirely, somewhere between the throatlatch and the shoulder depending on the horse. It runs out evenly all the way round: the crest, the sides and the throat lose it together rather than the top going first, so what travels down the neck is a band square to it and not a diagonal. There is no edge to it at any point; it simply runs out, and it starts running out well up the neck rather than near the shoulder. Both the colour and how far it carries are drawn once and passed on.",
       "when": {
         "Hd": 2
       },
@@ -65,15 +65,19 @@
           "name": "thinning out along the neck",
           "masks": [
             {
-              "type": "AXIS",
+              "type": "WAVES",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "space": "part",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": -25.98,
               "from": "$reach",
-              "to": 1.0,
-              "softness": 0.55
+              "to": 120.0,
+              "softness": 9.0
             }
           ],
           "op": {

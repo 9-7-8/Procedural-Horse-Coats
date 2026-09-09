@@ -40,7 +40,7 @@
     {
       "id": "white",
       "name": "Filigree",
-      "description": "Two element forms at once, both hard-edged and both the same white: long shallow arcs following the contour of the zone they sit in, and fields of short dashes lying parallel to the nearest arc, in broken tracks. The dashes crowd along the topline and the back edges of the shoulder and thin out below. The same work carries onto the head and all four legs, but drawn much finer there - a hairline rather than a band - so a leg reads as engraved rather than as painted.",
+      "description": "Two element forms at once, both hard-edged and both the same white: long shallow arcs following the contour of the zone they sit in, and fields of short dashes lying parallel to the nearest arc, in broken tracks. The dashes crowd along the topline and the back edges of the shoulder and thin out below. The same tracery carries onto the head and all four legs - swirls and dashes there too, not a flat field - but drawn much finer, a hairline rather than a band, so a face reads as engraved rather than as painted.",
       "when": [
         "Flg/Flg",
         "Flg/Flc",
@@ -123,21 +123,6 @@
           "name": "the same work at a hairline, down the legs and over the head",
           "masks": [
             {
-              "type": "STROKES",
-              "parts": [
-                "LEGS",
-                "HEAD",
-                "MUZZLE"
-              ],
-              "seed": "$workSeed",
-              "spacing": 1.7,
-              "length": 6.0,
-              "axis": "Y",
-              "width": 0.3,
-              "curl": 0.7,
-              "softness": 0.05
-            },
-            {
               "type": "AXIS",
               "parts": [
                 "LEGS"
@@ -155,6 +140,21 @@
                 "MUZZLE"
               ],
               "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.7,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.7,
+              "softness": 0.05
             }
           ],
           "op": {
@@ -253,21 +253,6 @@
           "name": "the same work at a hairline, down the legs and over the head",
           "masks": [
             {
-              "type": "STROKES",
-              "parts": [
-                "LEGS",
-                "HEAD",
-                "MUZZLE"
-              ],
-              "seed": "$workSeed",
-              "spacing": 1.7,
-              "length": 6.0,
-              "axis": "Y",
-              "width": 0.3,
-              "curl": 0.7,
-              "softness": 0.05
-            },
-            {
               "type": "AXIS",
               "parts": [
                 "LEGS"
@@ -285,6 +270,21 @@
                 "MUZZLE"
               ],
               "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.7,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.7,
+              "softness": 0.05
             }
           ],
           "op": {

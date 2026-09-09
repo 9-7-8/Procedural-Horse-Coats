@@ -21,7 +21,7 @@
 <h1>Striped Mane and Tail</h1>
 
 <p class="lede">
-    A handful of contrasting bundles running the length of the mane and tail - light strands through dark hair, dark through light - and nothing at all on the body.
+    Mane and tail split into alternating bundles, light where the hair is dark and dark where it is light - in cream and near-black, or in one colour the line carries.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,8 +34,9 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Striped mane and tail</th><td><code>Smt/Smt</code> &middot; <code>Smt/n</code></td></tr>
-<tr><th>Wild type</th><td><code>n/n</code></td></tr>
+<tr><th>Striped mane and tail</th><td><code>Smt/Smt</code> &middot; <code>Smt/Smc</code> &middot; <code>Smt/n</code></td></tr>
+<tr><th>Coloured striped mane and tail</th><td><code>Smc/Smc</code></td></tr>
+<tr><th>Wild type</th><td><code>Smc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
@@ -52,7 +53,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 833</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 714</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -63,8 +64,10 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Smt/Smt</code></td><td>Striped mane and tail</td><td>0.006% &mdash; 1 in 16,667</td></tr>
+<tr><td><code>Smt/Smc</code></td><td>Striped mane and tail</td><td>0.01% &mdash; 1 in 10,000</td></tr>
 <tr><td><code>Smt/n</code></td><td>Striped mane and tail</td><td>0.114% &mdash; 1 in 877</td></tr>
-<tr><td><code>n/n</code></td><td>Wild type</td><td>99.88%</td></tr>
+<tr><td><code>Smc/Smc</code></td><td>Coloured striped mane and tail</td><td>0.01% &mdash; 1 in 10,000</td></tr>
+<tr><td><code>n/n</code></td><td>Wild type</td><td>99.86%</td></tr>
 </tbody>
 </table>
 </div>
@@ -96,8 +99,8 @@
 <tr><th>Key</th><td><code>horsegenetics.striped_mane_tail</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>404 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Smt</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>2 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Alleles</th><td><code>Smt</code> &middot; <code>Smc</code> &middot; <code>n</code></td></tr>
+<tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>PIGMENT, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
@@ -119,6 +122,15 @@
 <ol>
 <li>light bundles, where the hair is dark &mdash; <code>STROKES</code> &times; <code>PIGMENT</code>, painted with <code>TOWARD</code></li>
 <li>dark bundles, where the hair is light &mdash; <code>STROKES</code> &times; <code>PIGMENT inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Coloured striped mane and tail</h3>
+
+<p>The same alternating bundles, worked in a colour the line carries rather than in cream and near-black: the bundles that would have gone light take the hue bright, and the ones that would have gone dark take it deep, so the striping still reads as striping and reads as one colour doing it. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes.</p>
+
+<ol>
+<li>light bundles, where the hair is dark, in colour &mdash; <code>STROKES</code> &times; <code>PIGMENT</code>, painted with <code>TOWARD</code></li>
+<li>dark bundles, where the hair is light, in colour &mdash; <code>STROKES</code> &times; <code>PIGMENT inverted</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Wild type</h3>

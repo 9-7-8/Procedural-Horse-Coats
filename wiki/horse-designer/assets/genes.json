@@ -1691,7 +1691,7 @@
   "phase": "magical",
   "priority": 366,
   "rarity": "RARE",
-  "blurb": "Black strokes down the caudal neck and shoulder, the widest of them carrying a saturated blue core, with a blue band at every fetlock.",
+  "blurb": "Black strokes down the caudal neck and shoulder, the widest of them carrying a saturated core in whatever colour the line runs to, with a band of the same at every fetlock.",
   "alleles": [
     {
       "token": "Cir",
@@ -1708,9 +1708,9 @@
       "type": "seed"
     },
     {
-      "name": "coreHue",
-      "min": 195.0,
-      "max": 225.0
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     },
     {
       "name": "weight",
@@ -1722,7 +1722,7 @@
     {
       "id": "circuit",
       "name": "Circuit",
-      "description": "Tapering strokes running down and back from the crest to the point of shoulder, forking into two or three branches near their ends. Blue appears only inside black - as a lozenge inset along the core of the widest strokes, leaving black margins either side, and as the fetlock band. A single stroke sits over each orbital ridge, and the cannons carry the same cored strokes as the shoulder.",
+      "description": "Tapering strokes running down and back from the crest to the point of shoulder, forking into two or three branches near their ends. The colour appears only inside black - as a lozenge inset along the core of the widest strokes, leaving black margins either side, and as the fetlock band - and which colour it is runs in the line rather than being fixed: a horse carries it on the allele copy, so a foal that inherits the copy inherits the colour with it, and two circuit horses of different lines are different colours. A single stroke sits over each orbital ridge, and the cannons carry the same cored strokes as the shoulder.",
       "when": [
         "Cir/Cir",
         "Cir/n"
@@ -1765,7 +1765,7 @@
           }
         },
         {
-          "name": "the blue core inside the widest strokes",
+          "name": "the coloured core inside the widest strokes",
           "masks": [
             {
               "type": "STROKES",
@@ -1808,7 +1808,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "hue": "$coreHue",
+            "hue": "$hue",
             "saturation": 0.95,
             "lightness": 0.55,
             "strength": 95
@@ -1848,7 +1848,7 @@
           }
         },
         {
-          "name": "the blue band at each fetlock, and the black hoof below it",
+          "name": "the coloured band at each fetlock, and the black hoof below it",
           "masks": [
             {
               "type": "AXIS",
@@ -1864,7 +1864,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "hue": "$coreHue",
+            "hue": "$hue",
             "saturation": 1.0,
             "lightness": 0.55,
             "strength": 98
@@ -2485,7 +2485,7 @@
   "phase": "magical",
   "priority": 407,
   "rarity": "UNCOMMON",
-  "blurb": "A white mask running the whole length of the face to the back of the head with a black muzzle below it, black cannons over a thin white ring at the coronet, and black hair speckled white throughout.",
+  "blurb": "A head covered corner to corner in white over black, meeting on one hard curve with the ears left in the coat, black cannons over a thin white ring at the coronet, and black hair speckled white throughout.",
   "alleles": [
     {
       "token": "Cvd",
@@ -2511,7 +2511,7 @@
     {
       "id": "corvid",
       "name": "Corvid",
-      "description": "The face carries a white field from the muzzle boundary back over the nasal bone and orbits and on to the poll - the whole length of the head, not a wedge that runs out at the forehead - bounded along the upper cheek and hard-edged along a smooth curve throughout. Below it the muzzle is black to the nostrils, cut square across the nasal bone. Each leg has a white ring immediately above the hoof, with black up the cannon over it, and the mane and tail are black speckled white throughout.",
+      "description": "The head is covered corner to corner and the ears are not: every pixel of the face is either white or black, meeting along one hard curve, with the ears left in the coat behind them. White runs from the muzzle boundary back over the nasal bone and orbits and on to the poll - the whole length of the head - and below that line the face is black to the nostrils, taking the muzzle with it. Each leg has a white ring immediately above the hoof with black up the cannon over it, and the mane and tail are black speckled white throughout.",
       "when": [
         "Cvd/Cvd",
         "Cvd/n"
@@ -2553,6 +2553,27 @@
             "type": "TOWARD",
             "color": "#ffffff",
             "strength": 98
+          }
+        },
+        {
+          "name": "the black lower head, meeting the white on one line",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": -0.15,
+              "to": "$maskReach",
+              "softness": 0.04
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0b0c",
+            "strength": 96
           }
         },
         {
@@ -2707,7 +2728,7 @@
   "phase": "magical",
   "priority": 250,
   "rarity": "UNCOMMON",
-  "blurb": "A starfield hung off the topline and the crest, running from the muzzle to the croup and out down the legs with no edge anywhere - and, on a well-marked horse, a planet or two with a ring round it.",
+  "blurb": "A starfield hung off the topline and the crest, thinning out to nothing before the poll and before the knee rather than stopping anywhere - and, on a well-marked horse, a planet or two with a ring round it.",
   "alleles": [
     {
       "token": "Cs",
@@ -2747,14 +2768,14 @@
     {
       "id": "cosmic",
       "name": "Cosmic",
-      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It runs from the muzzle to the croup - the face and the whole length of the neck as well as the barrel, hanging off the crest the way it hangs off the back - and carries on down the legs, thinning the whole way and out before the hoof. There is no edge on it anywhere: every boundary is a long fade rather than a line. Inside are stars, thickest near the topline and thinning toward the edge, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
+      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It covers the back and the barrel, hangs off the crest for the first half of the neck, and reaches a little way onto the top of each leg - but it does not stop anywhere: it thins out and is simply gone before the poll and before the knee, so there is no edge on it at either end. Its lower boundary on the barrel is the same long fade. Inside are stars, thickest near the topline and thinning with the field itself, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
       "when": [
         "Cs/Cs",
         "Cs/n"
       ],
       "layers": [
         {
-          "name": "the blanket, hung from the topline",
+          "name": "the blanket over the back and barrel",
           "masks": [
             {
               "type": "AXIS",
@@ -2768,52 +2789,9 @@
               "softness": 0.45
             },
             {
-              "type": "WAVES",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 44.0,
-              "to": 90.0,
-              "softness": 5.0,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "HEAD"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.1,
-              "to": 1.3,
-              "softness": 0.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.28,
-              "to": 1.4,
-              "softness": 0.75,
-              "combine": "MAX"
-            },
-            {
               "type": "PATCHES",
               "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "LEGS"
+                "BODY"
               ],
               "seed": "$fieldSeed",
               "scale": 7.0,
@@ -2824,10 +2802,7 @@
             {
               "type": "AXIS",
               "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "LEGS"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
@@ -2851,34 +2826,8 @@
           }
         },
         {
-          "name": "the starfield inside it, densest at the spine",
+          "name": "the blanket running out along the neck",
           "masks": [
-            {
-              "type": "SPECKLE",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "LEGS"
-              ],
-              "seed": "$starSeed",
-              "spacing": 0.9,
-              "size": 0.4,
-              "density": 0.3,
-              "clumping": 0.4,
-              "clumpScale": 5.0
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.3,
-              "to": 1.0,
-              "softness": 0.5
-            },
             {
               "type": "WAVES",
               "parts": [
@@ -2890,23 +2839,38 @@
               "shape": "saw",
               "wavelength": 90.0,
               "amplitude": 77.94,
-              "from": 45.0,
+              "from": 44.0,
               "to": 90.0,
-              "softness": 5.0,
-              "combine": "MAX"
+              "softness": 6.0
             },
             {
               "type": "AXIS",
               "parts": [
-                "HEAD"
+                "NECK"
               ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.2,
-              "to": 1.3,
-              "softness": 0.6,
-              "combine": "MAX"
-            },
+              "axis": "X",
+              "space": "units",
+              "from": -5.0,
+              "to": 26.5,
+              "softness": 4.5
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$hueRun",
+            "saturation": 0.8,
+            "lightness": 0.22,
+            "axis": "X",
+            "space": "body",
+            "from": 0.15,
+            "to": 0.85,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and running out again down the legs",
+          "masks": [
             {
               "type": "AXIS",
               "parts": [
@@ -2914,10 +2878,97 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.35,
+              "from": 0.78,
               "to": 1.4,
-              "softness": 0.7,
-              "combine": "MAX"
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$hueRun",
+            "saturation": 0.8,
+            "lightness": 0.22,
+            "axis": "X",
+            "space": "body",
+            "from": 0.15,
+            "to": 0.85,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the starfield inside it, densest at the spine",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": "$drop",
+              "to": 1.0,
+              "softness": 0.45
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$starSeed",
+              "spacing": 0.9,
+              "size": 0.4,
+              "density": 0.3,
+              "clumping": 0.4,
+              "clumpScale": 5.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 90
+          }
+        },
+        {
+          "name": "stars carried onto the neck with it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 44.0,
+              "to": 90.0,
+              "softness": 6.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": -5.0,
+              "to": 26.5,
+              "softness": 4.5
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$starSeed",
+              "spacing": 0.9,
+              "size": 0.4,
+              "density": 0.3,
+              "clumping": 0.4,
+              "clumpScale": 5.0
             }
           ],
           "op": {
@@ -4287,7 +4338,7 @@
     {
       "id": "fade",
       "name": "Fade",
-      "description": "A smooth ombre down the length of the mane, forelock and tail: coat colour at the roots, giving way somewhere down the strand to a colour that has nothing to do with the horse. Where the fade is pale the shift is barely a shift at all and you could miss it; where it is deep the far half of the hair is simply that colour and nothing else. Both the shade and how dark it runs are family traits - bright parents throw bright foals, and a line that has gone deep stays deep - but the drift is slow enough that it takes generations to move far.",
+      "description": "A smooth ombre down the length of the mane, forelock and tail: the roots keep the horse's own hair colour untouched, and somewhere down the strand that gives way to a colour which has nothing to do with the horse. Where the fade is pale the shift is barely a shift at all and you could miss it; where it is deep the far half of the hair is simply that colour and nothing else. Both the shade and how far up it reaches run in the family. It never touches the coat.",
       "when": [
         "Fd/Fd",
         "Fd/n"
@@ -4301,6 +4352,17 @@
               "parts": [
                 "HAIR"
               ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HAIR"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": -0.25,
+              "to": "$start",
+              "softness": 0.2
             }
           ],
           "op": {
@@ -4995,7 +5057,7 @@
     {
       "id": "white",
       "name": "Filigree",
-      "description": "Two element forms at once, both hard-edged and both the same white: long shallow arcs following the contour of the zone they sit in, and fields of short dashes lying parallel to the nearest arc, in broken tracks. The dashes crowd along the topline and the back edges of the shoulder and thin out below. The same work carries onto the head and all four legs, but drawn much finer there - a hairline rather than a band - so a leg reads as engraved rather than as painted.",
+      "description": "Two element forms at once, both hard-edged and both the same white: long shallow arcs following the contour of the zone they sit in, and fields of short dashes lying parallel to the nearest arc, in broken tracks. The dashes crowd along the topline and the back edges of the shoulder and thin out below. The same tracery carries onto the head and all four legs - swirls and dashes there too, not a flat field - but drawn much finer, a hairline rather than a band, so a face reads as engraved rather than as painted.",
       "when": [
         "Flg/Flg",
         "Flg/Flc",
@@ -5078,21 +5140,6 @@
           "name": "the same work at a hairline, down the legs and over the head",
           "masks": [
             {
-              "type": "STROKES",
-              "parts": [
-                "LEGS",
-                "HEAD",
-                "MUZZLE"
-              ],
-              "seed": "$workSeed",
-              "spacing": 1.7,
-              "length": 6.0,
-              "axis": "Y",
-              "width": 0.3,
-              "curl": 0.7,
-              "softness": 0.05
-            },
-            {
               "type": "AXIS",
               "parts": [
                 "LEGS"
@@ -5110,6 +5157,21 @@
                 "MUZZLE"
               ],
               "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.7,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.7,
+              "softness": 0.05
             }
           ],
           "op": {
@@ -5208,21 +5270,6 @@
           "name": "the same work at a hairline, down the legs and over the head",
           "masks": [
             {
-              "type": "STROKES",
-              "parts": [
-                "LEGS",
-                "HEAD",
-                "MUZZLE"
-              ],
-              "seed": "$workSeed",
-              "spacing": 1.7,
-              "length": 6.0,
-              "axis": "Y",
-              "width": 0.3,
-              "curl": 0.7,
-              "softness": 0.05
-            },
-            {
               "type": "AXIS",
               "parts": [
                 "LEGS"
@@ -5240,6 +5287,21 @@
                 "MUZZLE"
               ],
               "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.7,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.7,
+              "softness": 0.05
             }
           ],
           "op": {
@@ -6103,7 +6165,7 @@
   "phase": "magical",
   "priority": 432,
   "rarity": "LEGENDARY",
-  "blurb": "A chromatic modifier: diffuse fields of one saturated hue on the barrel and flank, each with a glow blooming past its edge - and nothing hard-edged anywhere on it.",
+  "blurb": "Two to four diffuse fields of light on the barrel and flank, each with an outer bloom falling away to nothing, their colour sweeping along the horse rather than sitting in patches.",
   "alleles": [
     {
       "token": "Gam",
@@ -6134,7 +6196,7 @@
     {
       "id": "gamma",
       "name": "Gamma",
-      "description": "Two to four diffuse fields of colour a foot or two across, on the barrel and the back of the flank, gradient at every margin. The hues come from a fixed set - yellow, orange, red, violet, blue, green - at high saturation and mid luminance, and each field carries an outer bloom a few inches past its own edge at a third of its core saturation, falling to nothing. That bloom is what makes it read as light rather than as paint.",
+      "description": "Two to four diffuse fields of colour a foot or two across, on the barrel and the back of the flank, gradient at every margin and hard-edged at none of them. The hue is not one colour: it sweeps along the horse, so a field near the shoulder and a field near the hip are different colours and the change between them is continuous. Each field carries an outer bloom a few inches past its own edge at a third of its core saturation, falling to nothing. That bloom is what makes it read as light rather than as paint.",
       "when": [
         "Gam/Gam",
         "Gam/n"
@@ -6160,12 +6222,15 @@
             }
           ],
           "op": {
-            "type": "PALETTE",
+            "type": "RAMP",
             "hue": "$hue",
-            "hueSpread": "$spread",
+            "hueSpan": "$spread",
             "saturation": 0.5,
             "lightness": 0.6,
-            "scale": 10.0,
+            "axis": "X",
+            "space": "body",
+            "from": 0.1,
+            "to": 0.9,
             "strength": 35
           }
         },
@@ -6190,12 +6255,15 @@
             }
           ],
           "op": {
-            "type": "PALETTE",
+            "type": "RAMP",
             "hue": "$hue",
-            "hueSpread": "$spread",
+            "hueSpan": "$spread",
             "saturation": 0.9,
             "lightness": 0.6,
-            "scale": 10.0,
+            "axis": "X",
+            "space": "body",
+            "from": 0.1,
+            "to": 0.9,
             "strength": 88
           }
         }
@@ -6514,7 +6582,7 @@
   "phase": "magical",
   "priority": 373,
   "rarity": "RARE",
-  "blurb": "Warning colours off a poison frog - bold bands round the neck and legs, a dark masked head worked over in stripes, and spotting along the topline.",
+  "blurb": "Warning colours off a poison frog, run as a gradient - bold bands round the neck and legs, a dark masked head worked over in stripes, and topline spotting, all sweeping between two hues from nose to tail.",
   "alleles": [
     {
       "token": "Gud",
@@ -6536,16 +6604,16 @@
       "max": 360.0
     },
     {
-      "name": "hue2",
-      "min": 0.0,
-      "max": 360.0
+      "name": "hueSpan",
+      "min": 55.0,
+      "max": 170.0
     }
   ],
   "expressions": [
     {
       "id": "two",
       "name": "Gudial, three colours",
-      "description": "A horse carrying two-colour speckling gets a third colour in the marking: the second hue joins the first through the neck and leg banding and the topline spotting, and the mask picks it up around the eyes.",
+      "description": "Two copies work the gradient twice over: the same nose-to-tail sweep through the banding and the spotting, with a paler inset laid inside the neck and leg bands and inside each topline spot, following the same sweep a few shades up. It reads as four colours on the horse and is two, plus the distance between them.",
       "when": {
         "Gud": 2
       },
@@ -6585,10 +6653,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         },
@@ -6610,10 +6683,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         },
@@ -6635,10 +6713,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         },
@@ -6672,10 +6755,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.55,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 92
           }
         },
@@ -6695,15 +6783,20 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.45,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         },
         {
-          "name": "the second colour through the neck bands",
+          "name": "the paler inset through the neck bands",
           "masks": [
             {
               "type": "STROKES",
@@ -6721,15 +6814,20 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
-            "hue": "$hue2",
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.62,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 92
           }
         },
         {
-          "name": "the second colour in the topline spotting",
+          "name": "the paler inset in the topline spotting",
           "masks": [
             {
               "type": "SPOTS",
@@ -6758,10 +6856,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
-            "hue": "$hue2",
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.68,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 92
           }
         }
@@ -6770,7 +6873,7 @@
     {
       "id": "one",
       "name": "Gudial",
-      "description": "The head goes dark and takes an intricate striped mask around the eyes and muzzle. Bold upright bands cross the neck, and the legs are banded the whole way down to the hoof in the same colours - segmented, high-contrast, deliberately loud. Along the back and barrel is a scatter of spotting. The mane carries no regular striping, the hooves take one of the speckling colours, and the marking permits no white patterning of any kind.",
+      "description": "The head goes dark and takes an intricate striped mask around the eyes and muzzle. Bold upright bands cross the neck, and the legs are banded the whole way down to the hoof - segmented, high-contrast, deliberately loud. Along the back and barrel is a scatter of spotting. All of it is one gradient rather than one colour: the marking sweeps between two hues from the nose to the tail, so the face stripes and the hindquarter spotting are visibly different colours and everything between them is on the way from one to the other. Which two, and how far apart, run in the line. The mane carries no regular striping and the hooves take the colour of their end of the sweep.",
       "when": {
         "Gud": 1
       },
@@ -6810,10 +6913,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         },
@@ -6835,10 +6943,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         },
@@ -6860,10 +6973,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         },
@@ -6897,10 +7015,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.55,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 92
           }
         },
@@ -6920,10 +7043,15 @@
             }
           ],
           "op": {
-            "type": "TOWARD",
+            "type": "RAMP",
             "hue": "$hue",
+            "hueSpan": "$hueSpan",
             "saturation": 0.95,
             "lightness": 0.45,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.95,
             "strength": 94
           }
         }
@@ -7104,15 +7232,15 @@
     },
     {
       "name": "reach",
-      "min": 0.15,
-      "max": 0.85
+      "min": 61.0,
+      "max": 71.0
     }
   ],
   "expressions": [
     {
       "id": "hood",
       "name": "Hood",
-      "description": "Opaque over the whole head - muzzle, ears and all - and from there it weakens continuously back along the neck until it has vanished entirely, somewhere between the throatlatch and the shoulder depending on the horse. There is no edge to it at any point; it simply runs out. Both the colour and how far it carries are drawn once and passed on.",
+      "description": "Opaque over the whole head - muzzle, ears and all - and from there it weakens continuously back along the neck until it has vanished entirely, somewhere between the throatlatch and the shoulder depending on the horse. It runs out evenly all the way round: the crest, the sides and the throat lose it together rather than the top going first, so what travels down the neck is a band square to it and not a diagonal. There is no edge to it at any point; it simply runs out, and it starts running out well up the neck rather than near the shoulder. Both the colour and how far it carries are drawn once and passed on.",
       "when": {
         "Hd": 2
       },
@@ -7140,15 +7268,19 @@
           "name": "thinning out along the neck",
           "masks": [
             {
-              "type": "AXIS",
+              "type": "WAVES",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "space": "part",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": -25.98,
               "from": "$reach",
-              "to": 1.0,
-              "softness": 0.55
+              "to": 120.0,
+              "softness": 9.0
             }
           ],
           "op": {
@@ -8742,7 +8874,7 @@
   "phase": "magical",
   "priority": 308,
   "rarity": "UNCOMMON",
-  "blurb": "Two to five large ellipses on each shoulder and the upper foreleg, each a bright diffuse halo closing around a core that stays darker than the coat around it.",
+  "blurb": "Two to five small eclipses on each shoulder - a pale halo closing round a circle of bare coat, sharp inside and fading away to nothing outside.",
   "alleles": [
     {
       "token": "Lst",
@@ -8764,13 +8896,13 @@
     },
     {
       "name": "outer",
-      "min": 1.9,
-      "max": 2.7
+      "min": 1.15,
+      "max": 1.75
     },
     {
-      "name": "haloBand",
-      "min": 0.7,
-      "max": 1.4
+      "name": "coreSize",
+      "min": 0.55,
+      "max": 0.85
     },
     {
       "name": "hue",
@@ -8782,7 +8914,7 @@
     {
       "id": "lasertae",
       "name": "Lasertae",
-      "description": "Two to five big soft-edged ellipses on each shoulder, their long axis lying roughly nose to tail, with a few carrying on down onto the upper foreleg and none of them reaching the flank or the hindquarter. The halo has no boundary worth the name on its outside and a firmer one inside, and within it the core sits a shade or two below the surrounding coat rather than above it - which is what makes a lasertae read as a hole with a light around it rather than as a spot.",
+      "description": "Two to five small eclipses on each shoulder and nowhere else on the horse - not the neck, not the barrel behind the scapula, not the legs. Each is a pale halo closing round a circle of the horse's own coat: sharp on the inside against that circle, and with no outer edge at all on the other side, running out over two or three hairs' breadth into the coat. That asymmetry is the whole marking - it is what makes a lasertae read as a light behind a hole rather than as a ring drawn on. Their long axis lies roughly nose to tail.",
       "when": [
         "Lst/Lst",
         "Lst/Lsc",
@@ -8790,7 +8922,7 @@
       ],
       "layers": [
         {
-          "name": "the halo",
+          "name": "the halo, closing round a circle of bare coat",
           "masks": [
             {
               "type": "AXIS",
@@ -8799,115 +8931,55 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.5,
+              "from": 0.6,
               "to": 1.0,
-              "softness": 0.18
+              "softness": 0.14
             },
             {
               "type": "AXIS",
               "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
+              "from": 0.22,
+              "to": 1.0,
+              "softness": 0.2
             },
             {
-              "type": "RINGS",
+              "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
+                "BODY"
               ],
               "seed": "$haloSeed",
-              "spacing": 8.0,
+              "spacing": 4.4,
               "radius": "$outer",
-              "thickness": "$haloBand",
-              "vary": 0.25,
-              "chance": 0.45,
-              "softness": 0.9
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 1.25
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$haloSeed",
+              "spacing": 4.4,
+              "radius": "$coreSize",
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 0.22,
+              "invert": true
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#fbf6e8",
-            "strength": 74
-          }
-        },
-        {
-          "name": "the darker core inside it",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.5,
-              "to": 1.0,
-              "softness": 0.18
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
-            },
-            {
-              "type": "SPOTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
-              ],
-              "seed": "$haloSeed",
-              "spacing": 8.0,
-              "radius": 1.3,
-              "vary": 0.25,
-              "chance": 0.45,
-              "stretch": 1.5,
-              "axis": "X",
-              "softness": 0.5
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#000000",
-            "strength": 16
+            "strength": 72
           }
         }
       ]
@@ -8921,7 +8993,7 @@
       },
       "layers": [
         {
-          "name": "the halo, in colour",
+          "name": "the halo, closing round a circle of bare coat, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -8930,117 +9002,57 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.5,
+              "from": 0.6,
               "to": 1.0,
-              "softness": 0.18
+              "softness": 0.14
             },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
-            },
-            {
-              "type": "RINGS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
-              ],
-              "seed": "$haloSeed",
-              "spacing": 8.0,
-              "radius": "$outer",
-              "thickness": "$haloBand",
-              "vary": 0.25,
-              "chance": 0.45,
-              "softness": 0.9
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 74,
-            "hue": "$hue",
-            "saturation": 0.82,
-            "lightness": 0.58
-          }
-        },
-        {
-          "name": "the darker core inside it, in colour",
-          "masks": [
             {
               "type": "AXIS",
               "parts": [
                 "BODY"
               ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.5,
-              "to": 1.0,
-              "softness": 0.18
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": 27.0,
-              "softness": 1.6,
-              "combine": "MAX"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "FRONT_LEGS"
-              ],
               "axis": "Y",
               "space": "part",
-              "from": 0.58,
-              "to": 1.1,
-              "softness": 0.16,
-              "combine": "MAX"
+              "from": 0.22,
+              "to": 1.0,
+              "softness": 0.2
             },
             {
               "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK",
-                "FRONT_LEGS"
+                "BODY"
               ],
               "seed": "$haloSeed",
-              "spacing": 8.0,
-              "radius": 1.3,
-              "vary": 0.25,
-              "chance": 0.45,
-              "stretch": 1.5,
+              "spacing": 4.4,
+              "radius": "$outer",
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
               "axis": "X",
-              "softness": 0.5
+              "softness": 1.25
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$haloSeed",
+              "spacing": 4.4,
+              "radius": "$coreSize",
+              "vary": 0.22,
+              "chance": 0.5,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 0.22,
+              "invert": true
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#000000",
-            "strength": 16
+            "strength": 72,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
           }
         }
       ]
@@ -9431,7 +9443,7 @@
   "phase": "magical",
   "priority": 433,
   "rarity": "LEGENDARY",
-  "blurb": "Overlapping zones of magenta, violet, blue and teal across the back half of the horse, with a fine population of points through them and a few larger ones wearing halos.",
+  "blurb": "Overlapping zones of pink, violet and blue across the back half of the horse, fading onto the tops of the legs, with a fine population of points through them and a few larger ones wearing halos.",
   "alleles": [
     {
       "token": "Neb",
@@ -9461,7 +9473,7 @@
     {
       "id": "nebula",
       "name": "Nebula Light",
-      "description": "A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from magenta, violet, blue and teal, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin. Through the field runs a population of small points, and among them three to ten larger ones with radial halos around them at half their own brightness.",
+      "description": "A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from a pink-through-violet-through-blue family so that no two of them clash, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin, and where the field meets the top of a leg it carries a little way onto it and fades out rather than stopping at the elbow - it does not run down the limb. Through the field runs a population of fine points, with a few larger ones wearing halos.",
       "when": [
         "Neb/Neb",
         "Neb/n"
@@ -9497,10 +9509,68 @@
           "op": {
             "type": "PALETTE",
             "colors": [
-              "#c02a9e",
-              "#7a2ad0",
-              "#2a52d0",
-              "#2ab8c8"
+              "#CB88A7",
+              "#BC92CD",
+              "#9374EB",
+              "#844CAD",
+              "#5950B8",
+              "#524094",
+              "#307EC0",
+              "#1F8CC4",
+              "#25387A"
+            ],
+            "scale": 5.5,
+            "strength": 90
+          }
+        },
+        {
+          "name": "a little of the field bleeding onto the tops of the legs",
+          "masks": [
+            {
+              "type": "NOISE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$fieldSeed",
+              "scale": 8.0,
+              "low": 0.0,
+              "high": 1.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.82,
+              "to": 1.2,
+              "softness": 0.24
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.45
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#CB88A7",
+              "#BC92CD",
+              "#9374EB",
+              "#844CAD",
+              "#5950B8",
+              "#524094",
+              "#307EC0",
+              "#1F8CC4",
+              "#25387A"
             ],
             "scale": 5.5,
             "strength": 90
@@ -10564,7 +10634,7 @@
   "phase": "magical",
   "priority": 203,
   "rarity": "RARE",
-  "blurb": "A strong white that keeps the coat only where a giant panda is dark - the ears, the eye patches, the shoulders and front legs, and the flanks, hindquarter and hind legs - with the neck, back and barrel between them white.",
+  "blurb": "A strong white that keeps the coat only in a bellyband round the middle of the horse and down all four legs, with the ears, eye patches and muzzle of a giant panda - and a coloured tail behind an entirely white croup.",
   "alleles": [
     {
       "token": "Pan",
@@ -10603,7 +10673,7 @@
     {
       "id": "white",
       "name": "Panda",
-      "description": "The coat is confined to the places a giant panda is dark and everything else goes white, mane and tail included: the ears, patches round the eyes, the muzzle, the shoulders carrying on down both front legs, and the flanks and hindquarter carrying on down both hind legs. Between the two coloured fields the barrel and the back are white, and so are the neck and the face, which is what makes it read as a panda rather than as a paint. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white.",
+      "description": "The coat survives in one band round the middle of the horse and nowhere else along it: a bellyband over the shoulder and barrel, wrapping the whole circumference, with all four legs carrying on down from it. Everything else goes white - the head except for the ears, the muzzle and the patches round the eyes, the neck, the back, and the croup and rump behind the band. The tail keeps its colour at the far end of that run, so the horse reads band, then nothing, then tail. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white.",
       "when": [
         "Pan/Pan",
         "Pan/Pnc",
@@ -10620,7 +10690,7 @@
                 "NECK",
                 "HEAD",
                 "LEGS",
-                "HAIR"
+                "MANE"
               ]
             }
           ],
@@ -10631,7 +10701,7 @@
           }
         },
         {
-          "name": "the coat kept on the shoulder and carried down both front legs",
+          "name": "the bellyband round the middle of the barrel, and all four legs",
           "masks": [
             {
               "type": "AXIS",
@@ -10640,53 +10710,14 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.76,
-              "to": 1.0,
-              "softness": 0.14
+              "from": 0.4,
+              "to": 0.88,
+              "softness": 0.13
             },
             {
               "type": "PARTS",
               "parts": [
-                "FRONT_LEGS"
-              ],
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": -99
-          }
-        },
-        {
-          "name": "the coat kept on the flank and hindquarter and down both hind legs",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.26,
-              "softness": 0.14
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": -0.1,
-              "to": 0.74,
-              "softness": 0.16
-            },
-            {
-              "type": "PARTS",
-              "parts": [
-                "HIND_LEGS"
+                "LEGS"
               ],
               "combine": "MAX"
             }
@@ -10784,7 +10815,7 @@
                 "NECK",
                 "HEAD",
                 "LEGS",
-                "HAIR"
+                "MANE"
               ]
             }
           ],
@@ -10797,7 +10828,7 @@
           }
         },
         {
-          "name": "the coat kept on the shoulder and carried down both front legs, in colour",
+          "name": "the bellyband round the middle of the barrel, and all four legs, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -10806,55 +10837,14 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.76,
-              "to": 1.0,
-              "softness": 0.14
+              "from": 0.4,
+              "to": 0.88,
+              "softness": 0.13
             },
             {
               "type": "PARTS",
               "parts": [
-                "FRONT_LEGS"
-              ],
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": -99,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
-          }
-        },
-        {
-          "name": "the coat kept on the flank and hindquarter and down both hind legs, in colour",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.26,
-              "softness": 0.14
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": -0.1,
-              "to": 0.74,
-              "softness": 0.16
-            },
-            {
-              "type": "PARTS",
-              "parts": [
-                "HIND_LEGS"
+                "LEGS"
               ],
               "combine": "MAX"
             }
@@ -11605,7 +11595,7 @@
   "phase": "magical",
   "priority": 310,
   "rarity": "RARE",
-  "blurb": "Peacock eyes - upright ovals filled paler than the coat, each with a bright spot low in it, and always a scatter of ordinary spots around them.",
+  "blurb": "Peacock eyes - a dark pupil inside a ring of bare coat inside a broad faint leaf, upright and a little taller than wide, with ordinary spots scattered around them.",
   "alleles": [
     {
       "token": "Pv",
@@ -11635,16 +11625,16 @@
       "max": 360.0
     },
     {
-      "name": "eyeRadius",
-      "min": 1.6,
-      "max": 3.0
+      "name": "eyeSpacing",
+      "min": 8.5,
+      "max": 11.5
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Pavonem",
-      "description": "A white paint marking rather than a coat colour, and it works on any base. The shape is an oval with a spot set into its lower part, filled with a lighter or roaned version of what is underneath, and it is never alone - ordinary spots always ring it. It stacks happily with tobiano and the rest.",
+      "description": "Peacock eyes, and built the way one is: a small dark pupil, a ring of the horse's own coat around it left completely alone, and a broad outer leaf around that - each zone about a fifth, a half and the whole of the width, and every one of them a little taller than it is wide. The ring is the part that makes it read: paint the middle and it stops being an eye and becomes a spot. The leaf is the same colour as the pupil but much weaker, so the three zones go strong, bare, faint from the centre out. It is never alone - ordinary small spots always ring the eyes - and it works on any base, stacking happily with tobiano and the rest.",
       "when": [
         "Pv/Pv",
         "Pv/Pvc",
@@ -11652,7 +11642,7 @@
       ],
       "layers": [
         {
-          "name": "the ovals, filled paler than the coat",
+          "name": "the outer leaf, with the eye left out of it",
           "masks": [
             {
               "type": "SPOTS",
@@ -11661,23 +11651,39 @@
                 "NECK"
               ],
               "seed": "$eyeSeed",
-              "spacing": 6.5,
-              "radius": "$eyeRadius",
-              "vary": 0.35,
-              "chance": 0.7,
-              "stretch": 1.5,
+              "spacing": "$eyeSpacing",
+              "radius": 4.0,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
               "axis": "Y",
-              "softness": 0.35
+              "softness": 0.15
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": 2.2,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
+              "axis": "Y",
+              "softness": 0.15,
+              "invert": true
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#efe9dd",
-            "strength": 70
+            "color": "#f4f1ea",
+            "strength": 52
           }
         },
         {
-          "name": "the spot low in each oval",
+          "name": "the pupil at the centre of the eye",
           "masks": [
             {
               "type": "SPOTS",
@@ -11686,29 +11692,19 @@
                 "NECK"
               ],
               "seed": "$eyeSeed",
-              "spacing": 6.5,
-              "radius": 0.7,
-              "vary": 0.35,
-              "chance": 0.7,
-              "softness": 0.12
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK"
-              ],
+              "spacing": "$eyeSpacing",
+              "radius": 0.8,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
               "axis": "Y",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.7,
-              "softness": 0.25
+              "softness": 0.15
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
-            "strength": 94
+            "strength": 96
           }
         },
         {
@@ -11721,17 +11717,17 @@
                 "NECK"
               ],
               "seed": "$spotSeed",
-              "spacing": 2.4,
-              "radius": 0.55,
+              "spacing": 3.2,
+              "radius": 0.5,
               "vary": 0.5,
-              "chance": 0.35,
+              "chance": 0.22,
               "softness": 0.12
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
-            "strength": 92
+            "strength": 88
           }
         }
       ]
@@ -11739,13 +11735,13 @@
     {
       "id": "coloured",
       "name": "Coloured Pavonem",
-      "description": "The same eyes in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "description": "The same eyes in a colour the line carries: the pupil at full saturation, the outer leaf in a washed-out version of it, and the horse's own coat between them. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
       "when": {
         "Pvc": 2
       },
       "layers": [
         {
-          "name": "the ovals, filled paler than the coat, in colour",
+          "name": "the outer leaf, with the eye left out of it, in colour",
           "masks": [
             {
               "type": "SPOTS",
@@ -11754,25 +11750,41 @@
                 "NECK"
               ],
               "seed": "$eyeSeed",
-              "spacing": 6.5,
-              "radius": "$eyeRadius",
-              "vary": 0.35,
-              "chance": 0.7,
-              "stretch": 1.5,
+              "spacing": "$eyeSpacing",
+              "radius": 4.0,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
               "axis": "Y",
-              "softness": 0.35
+              "softness": 0.15
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": 2.2,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
+              "axis": "Y",
+              "softness": 0.15,
+              "invert": true
             }
           ],
           "op": {
             "type": "TOWARD",
-            "strength": 70,
+            "strength": 80,
             "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
+            "saturation": 0.42,
+            "lightness": 0.5
           }
         },
         {
-          "name": "the spot low in each oval, in colour",
+          "name": "the pupil at the centre of the eye, in colour",
           "masks": [
             {
               "type": "SPOTS",
@@ -11781,31 +11793,21 @@
                 "NECK"
               ],
               "seed": "$eyeSeed",
-              "spacing": 6.5,
-              "radius": 0.7,
-              "vary": 0.35,
-              "chance": 0.7,
-              "softness": 0.12
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK"
-              ],
+              "spacing": "$eyeSpacing",
+              "radius": 0.8,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
               "axis": "Y",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.7,
-              "softness": 0.25
+              "softness": 0.15
             }
           ],
           "op": {
             "type": "TOWARD",
             "strength": 94,
             "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
+            "saturation": 0.98,
+            "lightness": 0.3
           }
         },
         {
@@ -11818,16 +11820,16 @@
                 "NECK"
               ],
               "seed": "$spotSeed",
-              "spacing": 2.4,
-              "radius": 0.55,
+              "spacing": 3.2,
+              "radius": 0.5,
               "vary": 0.5,
-              "chance": 0.35,
+              "chance": 0.22,
               "softness": 0.12
             }
           ],
           "op": {
             "type": "TOWARD",
-            "strength": 92,
+            "strength": 90,
             "hue": "$hue",
             "saturation": 0.8,
             "lightness": 0.55
@@ -12342,7 +12344,7 @@
   "phase": "magical",
   "priority": 402,
   "rarity": "RARE",
-  "blurb": "The hair banded through the spectrum in order from the roots down - yellow, green, cyan, blue, violet, magenta - and back to its own colour before the ends.",
+  "blurb": "The hair banded through the spectrum in order from the roots down - yellow, green, cyan, blue, violet, magenta - the whole length of the mane and tail, and nothing anywhere else on the horse.",
   "alleles": [
     {
       "token": "Prt",
@@ -12368,7 +12370,7 @@
     {
       "id": "prismtail",
       "name": "Prismtail",
-      "description": "Colour occupies the part of the hair nearest the horse and stops before the ends, which always come back to the hair's own colour. Within that run it is stacked in bands, widest at the top and compressing downward, four to seven of them, and the boundaries between adjacent bands are soft - the hues blend rather than cut. The order is the spectrum's own and never repeats or reverses; a short run drops bands off the top rather than squeezing all seven in. Beside the mane's coloured section the upper neck carries a soft wash in the last of those hues, at a fraction of the saturation, with a scatter of pale points in it.",
+      "description": "Colour occupies the whole length of the mane, forelock and tail, roots to ends, with nothing of the hair's own shade left showing. Within that it is stacked in bands, widest at the top and compressing downward, four to seven of them, and the boundaries between adjacent bands are soft - the hues blend rather than cut. The order is the spectrum's own and never repeats or reverses; a short run compresses the whole spectrum into the upper hair and holds the last band the rest of the way down. It touches the hair and nothing else - the coat, the neck and the face are left entirely alone.",
       "when": [
         "Prt/Prt",
         "Prt/n"
@@ -12390,9 +12392,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": "$run",
-              "to": 1.0,
-              "softness": 0.16
+              "from": -0.15,
+              "to": 1.15,
+              "softness": 0.05
             }
           ],
           "op": {
@@ -12410,60 +12412,6 @@
             "from": 1.0,
             "to": "$run",
             "strength": 92
-          }
-        },
-        {
-          "name": "the wash on the upper neck beside it",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.6,
-              "to": 1.0,
-              "softness": 0.45
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#e0339a",
-            "strength": 30
-          }
-        },
-        {
-          "name": "pale points in the wash",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "NECK"
-              ],
-              "seed": "$frontSeed",
-              "spacing": 1.8,
-              "radius": 0.35,
-              "vary": 0.5,
-              "chance": 0.35,
-              "softness": 0.1
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.6,
-              "to": 1.0,
-              "softness": 0.4
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fffbe0",
-            "strength": 85
           }
         }
       ]
@@ -15323,7 +15271,7 @@
     {
       "id": "spectrum",
       "name": "Spectrum Light",
-      "description": "A single field, three or four feet long and a foot or two tall, lying over the back of the barrel, the flank and the hip with its long axis close to the body's. Along that axis the hue turns continuously through the spectrum in order - red, orange, yellow, green, cyan, blue, violet - at a steady few degrees an inch, with no banding and no segment repeated. Saturation is highest along the field's centre line and falls to nothing at its margins, so it has no edge. Most of these horses also have the neighbouring stretch of mane picking up whatever hue is local to it, at about half strength.",
+      "description": "A single field, three or four feet long and a foot or two tall, lying over the back of the barrel, the flank and the hip with its long axis close to the body's. Along that axis the hue turns continuously through the spectrum in order - red, orange, yellow, green, cyan, blue, violet - at a steady few degrees an inch, with no banding and no segment repeated. Saturation is highest along the field's centre line and falls to nothing at its margins, so it has no edge. Most of these horses also have the neighbouring stretch of mane picking up whatever hue is local to it, at about half strength. Where the field meets the top of a leg it carries a little way onto it and fades out, so the barrel does not end on a line; it does not run down the limb.",
       "when": [
         "Spc/Spc",
         "Spc/n"
@@ -15344,6 +15292,47 @@
               "stretch": 2.4,
               "axis": "X",
               "softness": 4.0
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$start",
+            "hueSpan": "$run",
+            "saturation": 0.75,
+            "lightness": 0.55,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.75,
+            "strength": 90
+          }
+        },
+        {
+          "name": "the field bleeding onto the tops of the legs",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": 30.0,
+              "radius": 14.0,
+              "vary": 0.2,
+              "stretch": 2.4,
+              "axis": "X",
+              "softness": 4.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.82,
+              "to": 1.2,
+              "softness": 0.24
             }
           ],
           "op": {
@@ -16546,11 +16535,15 @@
   "phase": "magical",
   "priority": 404,
   "rarity": "COMMON",
-  "blurb": "A handful of contrasting bundles running the length of the mane and tail - light strands through dark hair, dark through light - and nothing at all on the body.",
+  "blurb": "Mane and tail split into alternating bundles, light where the hair is dark and dark where it is light - in cream and near-black, or in one colour the line carries.",
   "alleles": [
     {
       "token": "Smt",
-      "label": "Striped Mane and Tail (Smt)"
+      "label": "Striped mane and tail (Smt)"
+    },
+    {
+      "token": "Smc",
+      "label": "Striped mane and tail, coloured (Smc)"
     },
     {
       "token": "n",
@@ -16566,6 +16559,11 @@
       "name": "bundleWidth",
       "min": 0.5,
       "max": 1.6
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -16575,6 +16573,7 @@
       "description": "Three to nine bundles spaced along the crest, each running the whole length of the strand it is in, though about a third of them thin out and feather away partway down. The forelock joins in about half the time, at one to three bundles. The tail carries two to six, a little wider at the dock. The bundles are whatever contrasts: light on a dark mane, dark on a light one. No body coat expression of any kind.",
       "when": [
         "Smt/Smt",
+        "Smt/Smc",
         "Smt/n"
       ],
       "layers": [
@@ -16631,16 +16630,95 @@
               "parts": [
                 "HAIR"
               ],
+              "invert": true,
               "channel": "darkness",
               "from": 0.35,
-              "to": 0.6,
-              "invert": true
+              "to": 0.6
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#241d16",
             "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured striped mane and tail",
+      "description": "The same alternating bundles, worked in a colour the line carries rather than in cream and near-black: the bundles that would have gone light take the hue bright, and the ones that would have gone dark take it deep, so the striping still reads as striping and reads as one colour doing it. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Smc": 2
+      },
+      "layers": [
+        {
+          "name": "light bundles, where the hair is dark, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$bundleSeed",
+              "spacing": 2.6,
+              "length": 12.0,
+              "axis": "Y",
+              "width": "$bundleWidth",
+              "curl": 0.2,
+              "softness": 0.08
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "channel": "darkness",
+              "from": 0.35,
+              "to": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.68
+          }
+        },
+        {
+          "name": "dark bundles, where the hair is light, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$bundleSeed",
+              "spacing": 2.6,
+              "length": 12.0,
+              "axis": "Y",
+              "width": "$bundleWidth",
+              "curl": 0.2,
+              "softness": 0.08
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true,
+              "channel": "darkness",
+              "from": 0.35,
+              "to": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.22
           }
         }
       ]
@@ -16654,8 +16732,10 @@
   ],
   "founders": {
     "Smt/Smt": 0.006,
+    "Smt/Smc": 0.01,
     "Smt/n": 0.114,
-    "n/n": 99.88
+    "Smc/Smc": 0.01,
+    "n/n": 99.86
   }
 },
 {
@@ -17048,7 +17128,7 @@
   "phase": "magical",
   "priority": 430,
   "rarity": "UNCOMMON",
-  "blurb": "Every white the horse would have had comes out black instead - the same markings, the same edges, the opposite pigment.",
+  "blurb": "Every white the horse would have had comes out black instead - the same markings, the same edges, the opposite pigment, and as black as it will go.",
   "alleles": [
     {
       "token": "Vd",
@@ -17059,18 +17139,12 @@
       "label": "Wild-type (n)"
     }
   ],
-  "knobs": [
-    {
-      "name": "depth",
-      "min": 0.03,
-      "max": 0.28
-    }
-  ],
+  "knobs": [],
   "expressions": [
     {
       "id": "voided",
       "name": "Voided",
-      "description": "It changes no pattern and no boundary: whatever white the horse's other genes drew - a snip, a sock, a full tobiano - comes out as black hyperpigmentation of exactly the same shape, with the same hard or roaned edge the source pattern had. Mane and tail follow the same rule. How black varies between horses, from a faded sun-bleached brown-black to jet, but it is consistent across the whole marking on any one of them.",
+      "description": "It changes no pattern and no boundary: whatever white the horse's other genes drew - a snip, a sock, a full tobiano - comes out as black hyperpigmentation of exactly the same shape, with the same hard or roaned edge the source pattern had. Mane and tail follow the same rule. It goes as black as the coat will take, every time and on every horse: there is no pale version of this and nothing about it varies, which is what lets two voided horses with the same markings be the same horse.",
       "when": [
         "Vd/Vd",
         "Vd/n"
@@ -17089,10 +17163,8 @@
           ],
           "op": {
             "type": "TOWARD",
-            "hue": 25.0,
-            "saturation": 0.25,
-            "lightness": "$depth",
-            "strength": 96
+            "color": "#050505",
+            "strength": 99
           }
         }
       ]
@@ -18489,7 +18561,7 @@
   "phase": "magical",
   "priority": 211,
   "rarity": "UNCOMMON",
-  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with a level band round each one.",
+  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design.",
   "alleles": [
     {
       "token": "Yal",
@@ -18529,7 +18601,7 @@
     {
       "id": "white",
       "name": "Yalia",
-      "description": "Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock rather than stopping at the barrel. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. It hides any other white pattern the horse carries, there is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.",
+      "description": "Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. Whatever white the horse already carries is taken into the design rather than left beside it: a tobiano patch, a splash, a blaze or a stocking is flattened to the same white and drawn round in the same outline colour, so the horse reads as one piece of architecture and not as two markings at once. There is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.",
       "when": [
         "Yal/Yal",
         "Yal/Ylc",
@@ -18679,13 +18751,82 @@
             "lightness": 0.45,
             "strength": 94
           }
+        },
+        {
+          "name": "the horse's own white markings, filled flat like a zone",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 97
+          }
+        },
+        {
+          "name": "and drawn round in the same outline colour",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "spread": 0.7
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
         }
       ]
     },
     {
       "id": "coloured",
       "name": "Coloured Yalia",
-      "description": "The same architecture with the fill in a colour rather than white - the outline stays its own colour, so the two are picked independently. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "description": "The same architecture in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. Unlike the white form it leaves the horse's own white markings alone - there is nothing for them to match - so a coloured Yalia over a tobiano is genuinely two markings on one horse. It never gives blue eyes.",
       "when": {
         "Ylc": 2
       },
