@@ -555,6 +555,108 @@ window.HG.examples = {
             }
           },
           {
+            "name": "the black the gradient chart actually produced, edged in violet",
+            "masks": [
+              {
+                "type": "LUMA",
+                "parts": [
+                  "BODY",
+                  "NECK",
+                  "HEAD",
+                  "LEGS"
+                ],
+                "channel": "dark",
+                "from": 0.62,
+                "to": 0.9,
+                "spread": 1.25
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#6c3cc4",
+              "strength": 48
+            }
+          },
+          {
+            "name": "and the white the chart actually produced, warmed",
+            "masks": [
+              {
+                "type": "LUMA",
+                "parts": [
+                  "BODY",
+                  "NECK",
+                  "HEAD",
+                  "LEGS"
+                ],
+                "channel": "white",
+                "from": 0.72,
+                "to": 0.96
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#ffd9a8",
+              "strength": 34
+            }
+          },
+          {
+            "name": "a wireframe rim round every box",
+            "masks": [
+              {
+                "type": "EDGE",
+                "parts": [
+                  "BODY",
+                  "NECK",
+                  "HEAD",
+                  "LEGS"
+                ],
+                "width": 0.7,
+                "softness": 0.3
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#33e0ff",
+              "strength": 60
+            }
+          },
+          {
+            "name": "and a stain along the underside of that white, grown downward",
+            "masks": [
+              {
+                "type": "LUMA",
+                "parts": [
+                  "BODY",
+                  "NECK",
+                  "LEGS"
+                ],
+                "channel": "white",
+                "from": 0.8,
+                "to": 0.94
+              },
+              {
+                "type": "LUMA",
+                "parts": [
+                  "BODY",
+                  "NECK",
+                  "LEGS"
+                ],
+                "channel": "white",
+                "from": 0.8,
+                "to": 0.94,
+                "spread": 1.4,
+                "spreadFrom": "below",
+                "invert": true,
+                "combine": "MULTIPLY"
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#8e1122",
+              "strength": 70
+            }
+          },
+          {
             "name": "a sawtooth and a zigzag edge on the shoulder",
             "masks": [
               {

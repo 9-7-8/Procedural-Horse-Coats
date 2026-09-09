@@ -203,7 +203,7 @@ and fails *silently* when stale:
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs`; geometry also moves `:common:bakeGeneIcons` | `wiki/gene-creator/fixtures/expected.json`, `wiki/assets/gene-icons/` |
-| the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
+| the coat PNGs, the name tables, **or `example-genes/`** | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets, incl. `wiki/gene-creator/js/examples.js` |
 | **any file in `horsegenetics/genes/`, or any gene page's `<h1>` or tabs** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, the gene's `wiki/gene-*.html` **and the generated spans of `wiki/pages.js` and `index.html`** |
 | `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs` | `wiki/search-index.js` |
@@ -226,8 +226,8 @@ mod.
 Deliberately a set of pointers - the numbers live in the code and the detail
 lives on a page.
 
-- **`common/`** compiles, suite green bar the golden coat test (knowingly a run
-  behind - `wiki/known-gaps.html#gap-118`). **`neoforge-26.1.2/`** assembles,
+- **`common/`** compiles and the suite is **fully green** - the golden coat file was
+  regenerated at 0.3.0, so it is guarding again. **`neoforge-26.1.2/`** assembles,
   **`runServer`** boots clean, **creator parity** green. Confirm, don't trust.
 - **What has actually been seen in-game is a small fraction of what is built.**
   `wiki/verification.html` is the authority on which is which, and is the first

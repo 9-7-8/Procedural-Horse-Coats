@@ -29,6 +29,31 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="release-0-3-0-2026-09-08">0.3.0, and the release procedure earning its keep on the first run.</h3>
+
+<p>Tagged <strong>0.3.0</strong> for the mechanical-gene batch &mdash; a minor bump rather
+than a patch, because eight new behavioural loci and six coat genes are features and the
+genotype code moved again. Both version strings, the
+<a href="releases.html">releases page</a>, the tag and the GitHub release object.</p>
+
+<p><strong>The procedure&rsquo;s first step caught something on its first real use.</strong>
+&ldquo;Re-run every bake and confirm it moved nothing&rdquo; turned up a modified
+<code>wiki/gene-creator/js/examples.js</code>: <code>:common:bakeCreatorAssets</code> copies
+<code>example-genes/prismatic.json</code> into the creator&rsquo;s example list, and the
+previous session had edited prismatic (to exercise the new <code>LUMA</code> and
+<code>EDGE</code> masks for the parity check) without re-running that bake. The creator
+would have shipped an example gene missing the two masks the release is about. The
+regenerate table in <code>CLAUDE.md</code> only said &ldquo;the coat PNGs or the name
+tables&rdquo; for that task; it now names <code>example-genes/</code> too, in the same row
+rather than a new one.</p>
+
+<p><strong>The golden coat file was regenerated</strong>, which is what
+<a href="known-gaps.html">gap 118</a> said to do at the next deliberate suite run and closes
+it. It had been two sessions stale &mdash; forty-six genes across the two imports, each of
+which moves <code>Genes.codeOrder()</code> and so every horse&rsquo;s epigenome slots. The
+suite is genuinely green at this tag rather than green-except-one-known-failure, which is
+the state a tag ought to be in and had not been.</p>
+
 <h3 id="mechanical-genes-2026-09-08">Fourteen genes, a mask that asks the gradient chart what colour it made, and eight loci that paint nothing at all.</h3>
 
 <p>The brief was &ldquo;a bunch more mechanical genetic toggles, so a breed can be

@@ -36,6 +36,142 @@
     </p>
 </div>
 
+<h2 id="v0-3-0">0.3.0</h2>
+
+<p class="lede">
+    Genes that decide what a horse <em>does</em>. Eight new loci change nothing about how a
+    horse looks and everything about how it behaves &mdash; how fast it swims, how long it
+    lasts underwater, what it hits for, what it leaves behind when it dies, whether mobs
+    avoid it or fight over it, how much meat it drops and how many times a day it can be
+    milked. Six new coat genes come with them, and one new mask that asks the gradient
+    chart what colour it actually made.
+</p>
+
+<h3 id="v0-3-0-mechanical">Mechanical genes</h3>
+
+<p>
+    Eight loci that paint nothing at all. They exist so that a <strong>breed</strong> can
+    be described by what its horses do rather than only by what colour they are.
+</p>
+
+<ul>
+    <li><strong><a href="gene-magic-swim-speed.html">Magic swim speed</a></strong> &mdash;
+        how fast the horse moves in water, and nothing else. Completely unrelated to
+        <a href="gene-magic-speed.html">magic speed</a>: a horse can be the slowest thing
+        in the paddock and still cross a river faster than a boat.</li>
+    <li><strong><a href="gene-magic-water-breathing.html">Magic water breathing</a></strong>
+        &mdash; how long before it starts to drown. Independent of swimming speed, so a
+        ferry and a diver are two separate breeding projects.</li>
+    <li><strong><a href="gene-magic-fighter.html">Magic fighter</a></strong> &mdash; what it
+        hits for. Wild type is 3 points; the gladiator allele adds a percentage and the
+        wimp allele takes one off, and <strong>the two are added with opposite signs</strong>,
+        so a wimp copy really does cancel a gladiator copy. Breeding a fighter means
+        breeding the wimp allele out as much as breeding the gladiator in. No ceiling, but
+        a wild gladiator carrier is only worth one to three extra points &mdash; every
+        genuinely dangerous horse is one somebody made.</li>
+    <li><strong><a href="gene-magic-on-death.html">Magic on death</a></strong> &mdash; a
+        lava source, a water source, or a creeper-sized explosion where the horse died.
+        <strong>No feral horse has this</strong>: it is the one locus in the mod whose wild
+        population is carriers only, so a horse that leaves a crater is always somebody's
+        fault. Two different variants cancel each other, because &ldquo;what happens
+        here&rdquo; cannot have two answers.</li>
+    <li><strong><a href="gene-magic-item-drop.html">Magic item drop</a></strong> &mdash;
+        2&ndash;5 diamonds, an enchanted sword with the enchantment rolled at the moment of
+        death, or a spawn egg that puts <em>this horse</em> back. The egg carries the
+        genotype <em>and</em> the epigenome, so what comes out is a clone rather than a
+        horse with the same alleles &mdash; the only thing in the mod that undoes a death.
+        Nothing about the living animal shows any of it.</li>
+    <li><strong><a href="gene-magic-mob-aura.html">Magic mob aura</a></strong> &mdash;
+        warding keeps hostiles about ten blocks off; baiting makes every hostile that can
+        see the horse pick it over anything else, including its rider. One of each cancels
+        outright. The baiting allele is the one that makes health and fighting worth
+        stacking.</li>
+    <li><strong><a href="gene-magic-meat.html">Magic meat</a></strong> &mdash; how much meat
+        the horse leaves, <em>added</em> to whatever else it drops. So a diamond horse can
+        also be a meat horse.</li>
+    <li><strong><a href="gene-magic-milk-volume.html">Magic milk volume</a></strong> &mdash;
+        how many times a day it can be filled from. Unlike most of these a single copy
+        shows, so a milky horse can be found rather than only bred. It governs the
+        <a href="gene-milk.html">milk locus</a>'s water and lava too.</li>
+</ul>
+
+<h3 id="v0-3-0-coats">Coat genes</h3>
+
+<ul>
+    <li><strong><a href="gene-nyxborn.html">Nyxborn</a></strong> &mdash; every white marking
+        the horse has is painted out in black, and then the whole of that black is dusted
+        with tiny white points. A pinto goes in and a starfield comes out; the pattern
+        underneath is only recoverable from the genotype.</li>
+    <li><strong><a href="gene-tron.html">Tron</a></strong> &mdash; neon run along every edge
+        of the horse, full-bright so it holds its colour in the dark. It paints later than
+        anything else in the mod, so whatever else the horse is wearing, the lines are on
+        top. Two alleles: one solid colour, or a hue ramp running nose to tail.</li>
+    <li><strong><a href="gene-shadowcreature.html">Shadowcreature</a></strong> &mdash; the
+        head, muzzle, ears and whole neck go flat black, the eyes burn gold with no white
+        around them, and tapering tentacles run out of the join and down over the shoulder.
+        The horse gives off a dim light.</li>
+    <li><strong><a href="gene-stained-glass.html">Stained glass</a></strong> &mdash; black
+        leading in straight lines with a quarter-strength wash of colour in each pane. The
+        <em>palette is the allele</em> rather than an epigenetic value: one allele is blue,
+        pink and purple, the other green, yellow and white, and a horse with one of each
+        gets a window with all six in the tray.</li>
+    <li><strong><a href="gene-ocular.html">Ocular</a></strong> &mdash; open eyes down the
+        neck, each with a white, an iris in the line's own colour and a pupil. One copy
+        gives a handful, two crowd the neck.</li>
+    <li><strong><a href="gene-bloodstained.html">Bloodstained</a></strong> &mdash; red
+        gathers along the <em>bottom</em> edge of the horse's markings, inside the white
+        rather than around it, as though something had run down and settled where the white
+        stops.</li>
+</ul>
+
+<h3 id="v0-3-0-format">What a gene can now say</h3>
+
+<ul>
+    <li><strong>A gene can ask what colour the horse actually is.</strong> The new
+        <code>LUMA</code> mask reads the colour the gradient chart produced, rather than the
+        pigment behind it. That is a real difference and not a nicety: the
+        <a href="gene-lut.html">LUT locus</a> can hand a horse a chart whose black corner is
+        violet, and such a horse has identical pigment everywhere and is not black anywhere.
+        A gene that means &ldquo;cover the black parts&rdquo; has to ask the question a
+        viewer asks. <a href="gene-fielded.html">Fielded</a>,
+        <a href="gene-yalia.html">yalia</a>, <a href="gene-voided.html">voided</a> and
+        <a href="gene-opalized.html">opalized</a> now find the horse's white this way, so
+        they look different from 0.2.0 &mdash; noticeably so on cream coats, where a perlino
+        used to read as white and now reads as cream.</li>
+    <li><strong>A gene can outline the horse.</strong> The new <code>EDGE</code> mask draws
+        the rim of each body part's box &mdash; a wireframe. It is what Tron is built
+        from.</li>
+    <li><strong>A marking can have a bottom.</strong> <code>spreadFrom</code> lets a
+        <code>spread</code> grow from one side only, which is the only way to ask for the
+        lower edge of a marking rather than its whole rim.</li>
+    <li><strong>Six new effect verbs</strong> &mdash; <code>charges</code>,
+        <code>breath</code>, <code>on_death</code>, <code>item_drop</code>,
+        <code>mob_aura</code> and <code>combat</code> &mdash; all available to a data-driven
+        gene, not just to the built-in ones. See
+        <a href="gene-effects.html">the effects block</a>.</li>
+    <li><strong>The <code>attribute</code> verb actually does something now.</strong> It had
+        been parsed and ignored since it was written. Fixing that surfaced that its list
+        named <code>swim_speed</code>, an attribute Minecraft has never had &mdash; the name
+        never had to resolve to anything while the verb did nothing.</li>
+</ul>
+
+<h3 id="v0-3-0-notes">Notes</h3>
+
+<ul>
+    <li><strong>Not save-compatible with 0.2.0.</strong> Fourteen new loci change the
+        genotype code and every horse's epigenetic slots. Start a new world.</li>
+    <li><strong>An ordinary horse now kicks for 3 rather than 4.</strong> The baseline moved
+        onto <a href="gene-magic-fighter.html">the fighter locus</a>, so there is one number
+        in one place instead of two that could disagree.</li>
+    <li><strong>The mechanical genes have never run in a game.</strong> They compile and the
+        suite is green; that is all. <a href="verification.html">To be verified</a>
+        &sect;0-AR is the checklist, and the riskiest items are the attribute
+        add/remove cycle, the drowning accumulator and whether the mob-repel shove actually
+        overcomes a pathfinding mob.</li>
+    <li>Still NeoForge, Minecraft <strong>26.1.2</strong> only. Both sides need the
+        mod.</li>
+</ul>
+
 <h2 id="v0-2-0">0.2.0</h2>
 
 <p class="lede">
