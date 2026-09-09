@@ -226,18 +226,18 @@ mod.
 Deliberately a set of pointers - the numbers live in the code and the detail
 lives on a page.
 
-- **`common/`** compiles and its JUnit suite is green. **`neoforge-26.1.2/`**
-  compiles and assembles. **`runServer`** boots clean. **Creator parity** is
-  green. Confirm all four rather than trusting this line.
+- **`common/`** compiles, suite green bar the golden coat test (knowingly a run
+  behind - `wiki/known-gaps.html#gap-118`). **`neoforge-26.1.2/`** assembles,
+  **`runServer`** boots clean, **creator parity** green. Confirm, don't trust.
 - **What has actually been seen in-game is a small fraction of what is built.**
   `wiki/verification.html` is the authority on which is which, and is the first
   thing to read before claiming something works.
 - Recent work is summarised newest-first in `wiki/session-log.html`; what is
   known to be wrong is in `wiki/known-gaps.html`.
-- **Machine caveat (this dev laptop):** hybrid graphics. `java.exe` / `javaw.exe`
-  are pinned to the NVIDIA GPU and the FML early splash is disabled through a
-  deliberately git-tracked `run/config/fml.toml`, or the JVM hard-crashes in the
-  AMD GL driver. Details: `wiki/architecture.html#running`.
+- **Machine caveat (this dev laptop):** hybrid graphics - `java*.exe` pinned to
+  the NVIDIA GPU and the FML splash disabled via a git-tracked
+  `run/config/fml.toml`, or the JVM dies in the AMD GL driver.
+  `wiki/architecture.html#running`.
 
 ---
 
