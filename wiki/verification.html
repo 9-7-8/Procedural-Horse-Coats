@@ -35,6 +35,46 @@
     </p>
 </div>
 
+<h2 id="invert-parts">&sect;0-AS &mdash; Ten genes that stopped painting outside their own parts (2026-09-08, NOT looked at)</h2>
+
+<p>
+    <a href="known-gaps.html#gap-120">Gap 120</a> was fixed in the engine, so an inverted
+    mask no longer paints everything its <code>parts</code> list excluded. <strong>Ten
+    genes changed as a result</strong>, and the icons were re-baked and eyeballed &mdash;
+    which is not the same as having seen one in a world.
+</p>
+
+<ul>
+    <li><strong>The four that were painting the whole horse</strong> &mdash;
+        <a href="gene-webbed.html">webbed</a>,
+        <a href="gene-elytra-veins.html">elytra veins</a>,
+        <a href="gene-iridescent-jewel.html">iridescent jewel</a> and
+        <a href="gene-opal-wing-veins.html">opal wing veins</a>. Each was covering the
+        head, muzzle, ears, mane, tail and all four legs at full strength; each now paints
+        only the barrel and neck it declares. These are the ones worth looking at first,
+        because the change is enormous and it is possible one of them was
+        <em>liked</em> that way.</li>
+    <li><strong>The three that were partly straying</strong> &mdash;
+        <a href="gene-moth-mantle.html">moth mantle</a>,
+        <a href="gene-lace.html">lace</a> and
+        <a href="gene-fracture.html">fracture</a>. Smaller changes: a muzzle, a mane, some
+        ears.</li>
+    <li><strong>Three that moved for a subtler reason</strong> &mdash;
+        <a href="gene-koi.html">koi</a>, <a href="gene-galaxy.html">galaxy</a> and
+        <a href="gene-tribal-ward.html">tribal ward</a>. Their inverted mask is not the
+        first in its layer, so an earlier mask was already zeroing the excluded parts and
+        nothing escaped the horse; what changed is the coverage <em>within</em> the
+        declared region. Confirm they still read the way they did.</li>
+</ul>
+
+<p>
+    <strong>The check that would settle it fastest</strong> is a side-by-side against the
+    previous icons: <code>git show HEAD~1:wiki/assets/gene-icons/webbed.png</code> and
+    friends. The engine change is small and precisely scoped &mdash; exactly ten icons
+    moved and nothing else did &mdash; so anything that looks wrong is a gene whose art
+    was tuned around the bug, not a regression in the fix.
+</p>
+
 <h2 id="mechanical-genes">&sect;0-AR &mdash; Fourteen genes, two new masks and seven newly-executed effect verbs (2026-09-08, NOT looked at)</h2>
 
 <p>

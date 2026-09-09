@@ -80,17 +80,14 @@
           "name": "the leading between them",
           "masks": [
             {
-              "type": "PARTS",
+              "type": "CRACKLE",
               "parts": [
                 "BODY",
                 "NECK",
                 "HEAD",
                 "MUZZLE",
                 "LEGS"
-              ]
-            },
-            {
-              "type": "CRACKLE",
+              ],
               "seed": "$paneSeed",
               "scale": "$paneScale",
               "gap": "$leading",
@@ -151,17 +148,14 @@
           "name": "the leading between them",
           "masks": [
             {
-              "type": "PARTS",
+              "type": "CRACKLE",
               "parts": [
                 "BODY",
                 "NECK",
                 "HEAD",
                 "MUZZLE",
                 "LEGS"
-              ]
-            },
-            {
-              "type": "CRACKLE",
+              ],
               "seed": "$paneSeed",
               "scale": "$paneScale",
               "gap": "$leading",
@@ -226,17 +220,14 @@
           "name": "the leading between them",
           "masks": [
             {
-              "type": "PARTS",
+              "type": "CRACKLE",
               "parts": [
                 "BODY",
                 "NECK",
                 "HEAD",
                 "MUZZLE",
                 "LEGS"
-              ]
-            },
-            {
-              "type": "CRACKLE",
+              ],
               "seed": "$paneSeed",
               "scale": "$paneScale",
               "gap": "$leading",

@@ -524,7 +524,11 @@ window.HG = window.HG || {};
       var mask = masks[i];
       var c = maskCoverage(mask, values, skin, part, face, point, coat, colour, px, py, legIndex,
         noise.xor(fallbackSeed, noise.mul(noise.fromInt(i), noise.K1)));
-      if (mask.invert) c = 1 - c;
+      // The invert must NOT resurrect a texel the parts test excluded - see the
+      // Java. maskCoverage returns 0 both for "outside this mask's parts" and
+      // for "inside them and the field reads 0", and only the second is what
+      // invert is asking about.
+      if (mask.invert && !excludedByParts(mask, part)) c = 1 - c;
       c = spreadMask(mask, values, skin, coat, colour, part, face, point, px, py, legIndex, c);
       switch (mask.combine || "MULTIPLY") {
         case "MAX": acc = Math.max(acc, c); break;
@@ -538,6 +542,17 @@ window.HG = window.HG || {};
       if (acc <= 0 && cannotRise(masks, i + 1)) return 0;
     }
     return clamp01(acc);
+  }
+
+  /**
+   * Did this mask's `parts` list rule the texel out? PARTS is exempt: there the
+   * list IS the mask, so an inverted one means "everywhere except these". See
+   * the Java.
+   */
+  function excludedByParts(mask, part) {
+    if (mask.type === "PARTS") return false;
+    var parts = HG.schema.expandParts(mask.parts);
+    return parts.length > 0 && parts.indexOf(part) < 0;
   }
 
   /** Can any mask from `from` on raise the accumulator above zero? */

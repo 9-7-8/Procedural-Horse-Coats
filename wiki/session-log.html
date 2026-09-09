@@ -29,6 +29,93 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="overnight-upkeep-2026-09-08">An overnight upkeep pass: a link checker, the invert bug measured and fixed, and two rules that now enforce themselves.</h3>
+
+<p>Left to do &ldquo;whatever upkeep seems necessary&rdquo; with the long jobs unattended.
+Four things, and the second is the one that mattered.</p>
+
+<h4>A link checker, and two links it caught</h4>
+
+<p><code>wiki/tools/check-links.mjs</code> is new: every internal <code>href</code> and
+<code>src</code> across the wiki must resolve to a file that exists, and every
+<code>#fragment</code> must find an <code>id</code> on the page it points at. Nothing had
+ever checked this, and the wiki is hand-written HTML with several thousand cross-links
+added in two bulk sittings.</p>
+
+<p>It found two real breaks, both mine from the previous two commits:
+<a href="gene-magic-item-drop.html">magic item drop</a> linked to a page called
+<code>item-preset-horse-spawn-egg.html</code> that does not exist (the preset egg is
+documented on <a href="item-spawn-eggs.html">spawn eggs</a>), and the session log pointed
+at <code>known-gaps.html#gap-107</code>, which had been closed and deleted. The fragment
+half is the part most likely to rot, because an id is invisible in the rendered page.</p>
+
+<p>It also has a <code>--orphans</code> mode for the other half of
+<a href="known-gaps.html#gap-115">gap 115</a>. It reports none: the two gene pages not in
+<code>pages.js</code> (<a href="gene-shade.html">shade</a> and
+<a href="gene-accretion-field.html">accretion field</a>) are <em>deliberately</em> absent,
+because <code>GeneWikiTool.foldedInto</code> omits a locus that paints nothing and is
+documented inside the page of the gene that depends on it. Both are linked from their
+parent. Not a bug, and worth having established rather than assumed.</p>
+
+<h4>The invert bug: measured, then fixed</h4>
+
+<p><a href="known-gaps.html#gap-120">Gap 120</a> was opened the same day it was found, on
+<a href="gene-stained-glass.html">stained glass</a>, and left for the owner on the grounds
+that fixing it moves ten shipped coats. <strong>Measuring it settled the question.</strong>
+A throwaway probe rendered every gene that leads with an inverted, parts-restricted mask
+and counted texels inside and outside its declared parts:</p>
+
+<div class="codebox">
+<pre><code>gene                   inside  OUTSIDE parts it paints but never declared
+iridescent_jewel       5600    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+opal_wing_veins        5600    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+elytra_veins           3874    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+webbed                 1481    6176    [HEAD, MUZZLE, MANE, TAIL, EARS, all four LEGS]
+moth_mantle            7208    4568    [MUZZLE, MANE, EARS, all four LEGS]
+lace                   8322    2008    [MUZZLE, MANE, TAIL, EARS]
+fracture               4751    520     [MUZZLE]</code></pre>
+</div>
+
+<p>6&nbsp;176 is <em>every texel the gene excluded</em>, and
+<a href="gene-webbed.html">webbed</a> was putting four times more paint outside its
+declared region than inside it. That is not a curiosity to leave for a decision; the
+before-and-after render is a horse that had been dipped in white with a net on its barrel,
+versus a bay with a net on its barrel.</p>
+
+<p>The fix is one condition in <code>coverage</code> and its JavaScript twin: a texel the
+parts test ruled out stays 0 through the invert. <code>PARTS</code> is exempt, because
+there the list <em>is</em> the mask. Ten icons moved and nothing else did, and removing the
+stained-glass workaround produced a <strong>byte-identical</strong> icon &mdash; which is
+the check that the engine fix and the explicit workaround mean the same thing.</p>
+
+<p><strong>It also explains an entry already on this page.</strong>
+<a href="known-gaps.html#gap-119">Gap 119</a> records webbed being rebuilt after a contact
+sheet showed it as &ldquo;a white ground with brown islands rather than a net&rdquo;. That
+was this bug all along, and the rebuild had treated the symptom.</p>
+
+<h4>Two hard rules that now enforce themselves</h4>
+
+<p><code>CommonPortabilityTest</code> scans <code>common/</code>&rsquo;s own sources for a
+Minecraft / NeoForge / Mojang import, for <code>Map.of()</code> or
+<code>Map.copyOf(</code> outside <code>CommonMaps</code>, and for the two Java 9+ calls
+that were removed for the TeaVM and Java 8 targets. <strong>Nothing had ever checked hard
+rule 1 or hard rule 2</strong>, and both fail in ways the compiler cannot see &mdash; a
+green build, a shipped mod, and the damage in a browser or in a backport that does not
+exist yet. That closes <a href="known-gaps.html#gap-116">gap 116</a>.</p>
+
+<p>Writing it turned up the boundary worth recording: the check was too strict at first and
+flagged <a href="gene-light.html">light</a>&rsquo;s six-entry <code>Map.of(&hellip;)</code>.
+The trap is the <em>empty</em> immutable map specifically, a populated one gets a sized
+table, and that gene paints &mdash; so the browser exercises it on every preview and would
+have died on it the way the <code>ALL</code> mask did. Allowed, and the test says why.</p>
+
+<h4>And the long job</h4>
+
+<p>Full <code>:common:test</code> and a regenerated golden coat file, since ten genes
+changed what they paint. The bakes were re-run first, including
+<code>:web:bakeDesignerAssets</code>, because <code>common/</code> moved and the designer
+runs the real engine rather than a port of it.</p>
+
 <h3 id="release-0-3-0-2026-09-08">0.3.0, and the release procedure earning its keep on the first run.</h3>
 
 <p>Tagged <strong>0.3.0</strong> for the mechanical-gene batch &mdash; a minor bump rather
@@ -507,7 +594,7 @@ one.</li>
 
 <li><strong>Two genes got a fade onto the tops of the legs and nothing more.</strong> <a href="gene-nebula-light.html">Nebula Light</a> and <a href="gene-spectrum-light.html">Spectrum Light</a> both ended at the elbow on a line. Each gained a <em>separate layer</em> for the legs rather than an extra mask on the body one - different parts cannot double-paint, and it avoids the fold problem above entirely. Nebula also took a curated pink-violet-blue palette off the owner's own list, with the teal-green entries left out: those were the ones that made a palette wall jump.</li>
 
-<li><strong>Not fixed: Invert's preview.</strong> The owner reports the window does not load on that page. Everything it consumes checks out from here - <code>genePreviewJson</code> and <code>previewGenotypeCode</code> both return well-formed output, the icon is baked, the founder table is sane, the page is registered and carries a family - so it is a browser-side failure and needs a console. <a href="known-gaps.html#gap-107">Gap 107</a>.</li>
+<li><strong>Not fixed: Invert's preview.</strong> The owner reports the window does not load on that page. Everything it consumes checks out from here - <code>genePreviewJson</code> and <code>previewGenotypeCode</code> both return well-formed output, the icon is baked, the founder table is sane, the page is registered and carries a family - so it is a browser-side failure and needs a console. <a href="known-gaps.html#gap-116">Gap 107</a>.</li>
 
 </ul>
 

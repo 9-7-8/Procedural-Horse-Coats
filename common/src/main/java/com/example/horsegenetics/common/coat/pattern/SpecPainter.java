@@ -406,7 +406,16 @@ public final class SpecPainter {
             Mask mask = masks.get(i);
             double c = maskCoverage(mask, v, skin, bounds, part, face, point, coat, colour, px, py, leg,
                     fallbackSeed ^ ((long) i * 0x9E3779B97F4A7C15L));
-            if (mask.invert()) {
+            // The invert must NOT resurrect a texel the parts test excluded.
+            // maskCoverage returns 0 for two different reasons - "outside this
+            // mask's parts" and "inside them, and the field reads 0" - and only
+            // the second is what invert is asking about. Inverting the first
+            // turns "the barrel" into "everything that is not the barrel", at
+            // full strength: four shipped genes were painting the head, ears,
+            // mane, tail and all four legs that way, and one of them
+            // (webbed) put four times more paint outside its declared region
+            // than inside it. See known-gaps gap 120.
+            if (mask.invert() && !excludedByParts(mask, part)) {
                 c = 1.0 - c;
             }
             c = spread(mask, v, skin, coat, colour, part, face, point, px, py, leg, c);
@@ -430,6 +439,23 @@ public final class SpecPainter {
             }
         }
         return clamp01(acc);
+    }
+
+    /**
+     * Did this mask's {@code parts} list rule the texel out?
+     *
+     * <p>{@code PARTS} is deliberately exempt: there the list <i>is</i> the
+     * mask, so an inverted one means "everywhere except these parts" and that
+     * is exactly what it should keep meaning. For every other type the list is
+     * a <i>restriction</i> on where the mask applies at all, and a restriction
+     * that an invert can turn inside out is not a restriction.
+     */
+    private static boolean excludedByParts(Mask mask, Part part) {
+        if (mask.type() == GeneSpec.MaskType.PARTS) {
+            return false;
+        }
+        List<Part> parts = mask.params().parts("parts");
+        return !parts.isEmpty() && !parts.contains(part);
     }
 
     /** Can any mask from {@code from} on raise the accumulator above zero? */
