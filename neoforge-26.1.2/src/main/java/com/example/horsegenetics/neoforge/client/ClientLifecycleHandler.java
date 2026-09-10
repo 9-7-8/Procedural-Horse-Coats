@@ -29,6 +29,7 @@ public final class ClientLifecycleHandler {
         // its item stacks were built against that world's registries.
         TutorialPortraits.clear();
         TutorialPage.clear();
+        GenePreviews.clear();
         // The browser remembers where you were for the session; the parts of that
         // which name a *horse* are meaningless in the next world.
         HorseBrowserScreen.forgetWorld();

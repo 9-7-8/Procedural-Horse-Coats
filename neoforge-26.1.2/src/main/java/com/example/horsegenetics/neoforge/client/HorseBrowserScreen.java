@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.BreedingPreview;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -14,7 +15,16 @@ import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
 import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.equine.Horse;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -132,6 +142,10 @@ public final class HorseBrowserScreen extends Screen {
     private static final int TAB_TEXT_ON = 0xFFFFFFFF;
     private static final int TAB_TEXT_OFF = 0xFF888F9F;
     private static final int LABEL = 0xFF8890A8;
+    /** Side of one gene-preview square. Below about this a horse is a brown smudge. */
+    private static final int PREVIEW = 46;
+    /** The sunken square a preview horse stands in. */
+    private static final int WELL = 0xFF101018;
     private static final int ROW_HOVER = 0x22FFFFFF;
     private static final int ROW_SEL = 0x3355A0E0;
     private static final int NAME = 0xFFE4E8F0;
@@ -225,6 +239,8 @@ public final class HorseBrowserScreen extends Screen {
      * starts at the top of its own scroll and there is nothing above it.
      */
     private int tocInlineHeight = 0;
+    /** The single horse every gene preview is drawn with; built on first use, kept for the screen. */
+    private Horse previewModel;
     /** Which slice of the collection the Alleles tab shows. Sticky across opens, like the tab itself. */
     private static AlleleFilter alleleFilter = AlleleFilter.ALL;
     /** The filter chips' hit boxes, rebuilt every frame the way the contents list is. */
@@ -1123,6 +1139,103 @@ public final class HorseBrowserScreen extends Screen {
         }
     }
 
+    /**
+     * <b>A row of little horses showing what this gene actually does</b>, above
+     * the words that describe it.
+     *
+     * <p>Which outcomes, on what base, and why they never re-roll is
+     * {@link GenePreviews}. This only lays them out: as many across as the
+     * panel is wide, each one labelled with the allele it is, wrapping to a
+     * second row rather than shrinking, because a horse drawn much smaller than
+     * {@link #PREVIEW} is a brown smudge and teaches nothing.
+     *
+     * @return the height it used, or zero for a gene with nothing to show
+     */
+    private int drawGenePreviews(GuiGraphicsExtractor g, Gene gene, int x, int y, int w) {
+        List<GenePreviews.Shot> shots = GenePreviews.forGene(gene);
+        if (shots.isEmpty()) {
+            return 0;
+        }
+        Horse model = previewModel();
+        if (model == null) {
+            return 0;
+        }
+        int cell = PREVIEW + 6;
+        int perRow = Math.max(1, w / cell);
+        int used = 0;
+        for (int i = 0; i < shots.size(); i++) {
+            int col = i % perRow;
+            int row = i / perRow;
+            int cx = x + col * cell;
+            int cy = y + row * (PREVIEW + this.font.lineHeight + 4);
+            g.fill(cx, cy, cx + PREVIEW, cy + PREVIEW, WELL);
+            drawPreviewHorse(g, model, shots.get(i).coat(), cx, cy);
+            drawFitted(g, shots.get(i).label(), cx + 1, cy + PREVIEW + 1, PREVIEW - 2, TAG);
+            used = (row + 1) * (PREVIEW + this.font.lineHeight + 4);
+        }
+        return used + 6;
+    }
+
+    /**
+     * One throwaway horse, reused for every shot.
+     *
+     * <p>The coat rides on the render state rather than the entity, so a single
+     * model can draw every allele in the row - see
+     * {@code FamilyTreeScreen.drawHorseModel}, which does the same thing for a
+     * pedigree.
+     */
+    private Horse previewModel() {
+        if (previewModel != null) {
+            return previewModel;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return null;
+        }
+        try {
+            Horse h = EntityType.HORSE.create(mc.level, EntitySpawnReason.LOAD);
+            if (h != null) {
+                h.setBaby(false);
+            }
+            previewModel = h;
+        } catch (RuntimeException e) {
+            previewModel = null;
+        }
+        return previewModel;
+    }
+
+    /** Side-on, still, and centred in its well - a plate, not a toy that follows the mouse. */
+    private void drawPreviewHorse(GuiGraphicsExtractor g, Horse model, CoatData coat, int bx, int by) {
+        try {
+            EntityRenderer<? super Horse, ?> renderer =
+                    Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(model);
+            EntityRenderState state = renderer.createRenderState(model, 1.0F);
+            state.shadowPieces.clear();
+            state.outlineColor = 0;
+            if (state instanceof GeneticHorseRenderState gs) {
+                gs.coatData = coat;
+            }
+            if (state instanceof LivingEntityRenderState ls) {
+                // Three-quarters on: a pure side view hides the face and a pure
+                // front view hides everything the coat genes actually paint.
+                ls.bodyRot = 215.0F;
+                ls.yRot = 35.0F;
+                ls.xRot = 0.0F;
+                ls.boundingBoxWidth = ls.boundingBoxWidth / ls.scale;
+                ls.boundingBoxHeight = ls.boundingBoxHeight / ls.scale;
+                ls.scale = 1.0F;
+            }
+            Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
+            Quaternionf xRotation = new Quaternionf();
+            Vector3f translation = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F + 0.0625F, 0.0F);
+            g.entity(state, PREVIEW * 0.42F, translation, rotation, xRotation,
+                    bx, by, bx + PREVIEW, by + PREVIEW);
+        } catch (RuntimeException ignored) {
+            // A gene whose render state will not build should cost one square,
+            // not the whole panel.
+        }
+    }
+
     private void drawGeneDetail(GuiGraphicsExtractor g) {
         Gene gene = selected();
         int l = detailX();
@@ -1165,6 +1278,8 @@ public final class HorseBrowserScreen extends Screen {
             detailMaxScroll = 0f;
             return;
         }
+
+        y += drawGenePreviews(g, gene, l, y, w);
 
         String summary = gene.description();
         if (summary == null || summary.isBlank()) {
