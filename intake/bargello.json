@@ -1,0 +1,481 @@
+{
+  "format": 3,
+  "key": "ixora.bargello",
+  "name": "Bargello",
+  "phase": "magical",
+  "priority": 152,
+  "blurb": "Sharp zigzag ribbons run the length of the ribcage in stacked colours, over a fine screen of straight horizontal lines.",
+  "rarity": "rare",
+  "notes": [
+    "shape=triangle is the whole reason this can be drawn at all. WAVES is the one mask here that repeats on purpose, and triangle is one of only two waveforms that fold the edge into teeth with STRAIGHT sides. Everything noise-derived rounds its corners off, and a rounded zigzag is a ripple, not a glitch.",
+    "spacing 6.4 is what turns one band into a stack of parallel ribbons that rise and fall together. Four of the five layers share ONE wavelength (6.5), ONE amplitude (3.4), ONE spacing and phase 0, and differ only in from and to - which is what nests them inside each other. Change the wavelength on one layer alone and it becomes an unrelated zigzag crossing the others.",
+    "Band widths: black 4.6, green 3.2, magenta 1.95, violet 0.85. The rims that survive are 0.65 / 0.65 / 0.3 / 0.55 units. The magenta-to-violet rim at 0.3 is BELOW a texel on one side and will read as a hard transition rather than as a band - it is left in because it still separates the two colours, but do not expect a violet outline there.",
+    "The screen is a WAVES at amplitude 0, which collapses it to straight parallel ribbons - 0.7 units on, 0.7 off. That is the finest an even line screen can go here: a texel is 0.5 units, so anything tighter is one pixel on, one off, and then aliasing decides what you see.",
+    "No black form. The acid green and magenta are the gene; in greys this is just a chevron.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim."
+  ],
+  "alleles": [
+    {
+      "token": "P",
+      "label": "Ashen bargello (P)"
+    },
+    {
+      "token": "C",
+      "label": "Bargello (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "zigSeed",
+      "type": "seed"
+    },
+    {
+      "name": "screenSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Ashen bargello",
+      "description": "Stacked grey zigzags over a fine line screen along the ribs.",
+      "when": [
+        "P/P",
+        "P/C",
+        "P/n"
+      ],
+      "layers": [
+        {
+          "name": "the line screen behind it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$screenSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 0.0,
+              "to": 0.7,
+              "wavelength": 40.0,
+              "amplitude": 0.0,
+              "spacing": 1.4,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#bcbcbc"
+          }
+        },
+        {
+          "name": "the black between the chevrons",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": -0.7,
+              "to": 3.9,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "the green chevron",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": 0.0,
+              "to": 3.2,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#dedede"
+          }
+        },
+        {
+          "name": "the magenta chevron",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": 0.65,
+              "to": 2.6,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "the violet core of the chevron",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": 1.2,
+              "to": 2.05,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#9b9b9b"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Bargello",
+      "description": "Zigzag ribbons in stacked colour, black-edged, over a fine line screen.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the line screen behind it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$screenSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 0.0,
+              "to": 0.7,
+              "wavelength": 40.0,
+              "amplitude": 0.0,
+              "spacing": 1.4,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the black between the chevrons",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": -0.7,
+              "to": 3.9,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "the green chevron",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": 0.0,
+              "to": 3.2,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.68
+          }
+        },
+        {
+          "name": "the magenta chevron",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": 0.65,
+              "to": 2.6,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        },
+        {
+          "name": "the violet core of the chevron",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 10.0,
+              "to": 27.0,
+              "softness": 2.6
+            },
+            {
+              "type": "WAVES",
+              "seed": "$zigSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "units",
+              "from": 1.2,
+              "to": 2.05,
+              "wavelength": 6.5,
+              "amplitude": 3.4,
+              "spacing": 6.4,
+              "phase": 0.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.42
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "P/P": 0.003,
+    "P/C": 0.006,
+    "P/n": 0.3,
+    "C/C": 0.008,
+    "n/n": 99.683
+  }
+}

@@ -12,7 +12,8 @@
     "No stretch anywhere, deliberately. A stretched drip would read better, but stretch divides the sample before the lattice walk, so a draw with a different stretch is on a DIFFERENT lattice - and the drip would come apart from its own ring. Every layer of one compound element shares its stretch or the element scatters.",
     "Sizing against the wiki's floors: the ring is radius 2.4 on thickness 0.9 with softness 0.12, all clear of the 1.3 / 0.7 / half-the-thickness minimums. markSpacing bottoms out at 6.2 against an outer radius of about 2.85, so there is over a body unit of clear ground between neighbouring rings even at the tightest roll.",
     "The loose dots run on their own seed and spacing because in the source they have nothing to do with where the rings fell - they are thrown, not placed.",
-    "Three changes off looking at it. The white ground is gone - it covered the whole horse at 84% opacity and turned every base coat into the same pale grey, which is a lot of horse to spend on a backdrop for a scatter of small marks. The marks are on the BODY and the LEGS only rather than everywhere, and there are fewer of them: chance 0.7 down to 0.4 on the ringed marks and the loose dots from spacing 4 at chance 0.35 to spacing 7.5 at 0.18. And the runs are new - STROKES on Y, weighted to the lower half of the body by an inverted AXIS, which is what makes them read as ink running down rather than as a stripe pattern."
+    "Three changes off looking at it. The white ground is gone - it covered the whole horse at 84% opacity and turned every base coat into the same pale grey, which is a lot of horse to spend on a backdrop for a scatter of small marks. The marks are on the BODY and the LEGS only rather than everywhere, and there are fewer of them: chance 0.7 down to 0.4 on the ringed marks and the loose dots from spacing 4 at chance 0.35 to spacing 7.5 at 0.18. And the runs are new - STROKES on Y, weighted to the lower half of the body by an inverted AXIS, which is what makes them read as ink running down rather than as a stripe pattern.",
+    "The loose dots were thinned to spacing 7.5 at chance 0.18 when the marks were thinned, and at that pitch they stopped landing on the horse at all - DeadLayerTest caught the layer painting nothing on any base coat. 5.5 at 0.32 is still far fewer than the 4.0 at 0.35 it started with, and it is actually there."
   ],
   "preview": {
     "base": "chestnut",
@@ -175,10 +176,10 @@
             {
               "type": "SPOTS",
               "seed": "$dotSeed",
-              "spacing": 7.5,
-              "radius": 0.72,
+              "spacing": 5.5,
+              "radius": 0.8,
               "vary": 0.5,
-              "chance": 0.18,
+              "chance": 0.32,
               "softness": 0.16,
               "parts": [
                 "BODY",
@@ -350,10 +351,10 @@
             {
               "type": "SPOTS",
               "seed": "$dotSeed",
-              "spacing": 7.5,
-              "radius": 0.72,
+              "spacing": 5.5,
+              "radius": 0.8,
               "vary": 0.5,
-              "chance": 0.18,
+              "chance": 0.32,
               "softness": 0.16,
               "parts": [
                 "BODY",

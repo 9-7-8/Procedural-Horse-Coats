@@ -1,0 +1,34 @@
+# Layers that put nothing on the horse, on any base coat this check tries.
+# Written by DeadLayerTest; see its javadoc for what "nothing" means.
+#
+# THIS FILE IS A RATCHET AND IS MEANT TO REACH ZERO. A new entry fails the
+# test, and so does an entry that has come alive - fixing a gene is not done
+# until its line is deleted from here.
+concentric_eyespots / black / 6 / the neck eyespots, band at 0.8
+concentric_eyespots / coloured / 6 / the neck eyespots, band at 0.8
+concentric_eyespots / pale / 6 / the neck eyespots, band at 0.8
+dorsal_shield / black / 2 / and the stud at the centre of each
+dorsal_shield / coloured / 2 / and the stud at the centre of each
+dorsal_shield / pale / 2 / and the stud at the centre of each
+dripwork / coloured / 3 / the loose dots between the rings
+hood / hood / 1 / thinning out along the neck
+moth_mantle / black / 4 / and a mark on each cheek
+moth_mantle / coloured / 4 / and a mark on each cheek
+moth_mantle / white / 4 / and a mark on each cheek
+moth_wings / argent / 3 / its pale pupil
+moth_wings / coloured / 3 / its pale pupil
+nimbus / nimbus / 3 / the curdle inside the body, where the saturation gathers
+ocular / few / 3 / the pupil
+quarter / coloured / 0 / the two front quadrants, in colour
+quarter / coloured / 1 / the two back quadrants, in colour
+quarter / coloured / 3 / the two lower quadrants, in colour
+quarter / double / 0 / the two front quadrants
+quarter / double / 1 / the two back quadrants
+quarter / double / 3 / the two lower quadrants
+quarter / part / 0 / the front upper quadrant
+quarter / part / 2 / the back upper quadrant
+quarter / part / 3 / the back lower quadrant
+ringwork / coloured / 3 / the outer contour
+ringwork / coloured / 4 / the inner contour
+ringwork / ringwork / 3 / the outer contour
+ringwork / ringwork / 4 / the inner contour

@@ -1,0 +1,1066 @@
+{
+  "format": 3,
+  "key": "ixora.starburst",
+  "name": "Starburst",
+  "phase": "magical",
+  "priority": 151,
+  "blurb": "A hard-edged six-pointed star sits on each flank, ringed twice and thrown out over a longer eight-point burst, with shards and flecks scattered clear of it.",
+  "rarity": "epic",
+  "notes": [
+    "This is a drawn emblem, not a kind of shape, so it is four filled PATHs and not a field. Nothing noise-derived will give a straight-sided point - it rounds the corners off however far the softness is wound down - and a FAN would have got the radiating part but not the taper, because a FAN's bars widen as they travel and a star's points narrow.",
+    "Every star here is squashed to 0.55 of its height (0.46 for the burst). BODY runs 22 units nose to tail and only 10 hoof-to-withers, so a round star wide enough to read across the flank has its top and bottom points cut off square by the part bounds. The squash is what keeps them points.",
+    "The four stars are concentric by construction: same centre (19.5, 16.5), same vertex count and phase on the inner three, radii 4.2 / 5.3 / 6.4. That leaves outlines 1.1 and 1.1 units wide - two texels each. Radii of 4.2 / 4.7 / 5.2 would look better proportioned in a drawing and would put both outlines at half a texel, where they average away to nothing and the emblem loads as a plain white star.",
+    "Paint order is load-bearing and it is the order in the list: burst, shards, magenta, violet, white. Each smaller star overdraws the middle of the one before it, which is what leaves the rings as rings. Reorder them and the emblem fills solid.",
+    "The FRACTAL on the burst layer is what stops it reading as a clean vector shape - the reference's long spikes are ragged and broken up.",
+    "The shards and the flecks are the only fields here, so they are the only part that differs horse to horse. That is the trade a drawn shape makes.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim."
+  ],
+  "alleles": [
+    {
+      "token": "W",
+      "label": "Flashburst (W)"
+    },
+    {
+      "token": "B",
+      "label": "Voidburst (B)"
+    },
+    {
+      "token": "C",
+      "label": "Coloured burst (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "burstSeed",
+      "type": "seed"
+    },
+    {
+      "name": "shardSeed",
+      "type": "seed"
+    },
+    {
+      "name": "fleckSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Flashburst",
+      "description": "A white star inside two grey rings over a pale burst, flecked with silver.",
+      "when": [
+        "W/W",
+        "W/B",
+        "W/C",
+        "W/n"
+      ],
+      "layers": [
+        {
+          "name": "the long spikes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                22.37,
+                21.1,
+                19.16,
+                17.87,
+                15.57,
+                19.76,
+                17.15,
+                17.36,
+                8.9,
+                17.9,
+                16.52,
+                16.34,
+                11.68,
+                14.51,
+                17.63,
+                15.42,
+                16.63,
+                11.9,
+                19.84,
+                15.13,
+                23.43,
+                13.24,
+                21.85,
+                15.64,
+                30.1,
+                15.1,
+                22.48,
+                16.66,
+                27.32,
+                18.49,
+                21.37,
+                17.58
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.45
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$burstSeed",
+              "scale": 3.0,
+              "octaves": 2,
+              "shape": "fbm",
+              "threshold": 0.3,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#dedede"
+          }
+        },
+        {
+          "name": "black shards in the spikes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                22.37,
+                21.1,
+                19.16,
+                17.87,
+                15.57,
+                19.76,
+                17.15,
+                17.36,
+                8.9,
+                17.9,
+                16.52,
+                16.34,
+                11.68,
+                14.51,
+                17.63,
+                15.42,
+                16.63,
+                11.9,
+                19.84,
+                15.13,
+                23.43,
+                13.24,
+                21.85,
+                15.64,
+                30.1,
+                15.1,
+                22.48,
+                16.66,
+                27.32,
+                18.49,
+                21.37,
+                17.58
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.45
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$shardSeed",
+              "spacing": 3.4,
+              "radius": 0.85,
+              "vary": 0.5,
+              "stretch": 2.4,
+              "axis": "Y",
+              "chance": 0.42,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "the magenta outline",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                20.02,
+                18.12,
+                17.81,
+                14.51,
+                18.08,
+                16.75,
+                16.5,
+                13.51,
+                14.6,
+                18.12,
+                15.19,
+                19.5,
+                12.98,
+                20.88,
+                15.19,
+                24.49,
+                14.92,
+                22.25,
+                16.5,
+                25.49,
+                18.4,
+                20.88,
+                17.81
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#bcbcbc"
+          }
+        },
+        {
+          "name": "the violet inline",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                19.41,
+                18.38,
+                17.57,
+                15.37,
+                17.81,
+                17.25,
+                16.5,
+                14.54,
+                14.93,
+                18.38,
+                15.43,
+                19.5,
+                13.59,
+                20.62,
+                15.43,
+                23.63,
+                15.19,
+                21.75,
+                16.5,
+                24.46,
+                18.07,
+                20.62,
+                17.57
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#9b9b9b"
+          }
+        },
+        {
+          "name": "the white core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                18.81,
+                18.62,
+                17.33,
+                16.23,
+                17.54,
+                17.75,
+                16.5,
+                15.57,
+                15.25,
+                18.62,
+                15.67,
+                19.5,
+                14.19,
+                20.38,
+                15.67,
+                22.77,
+                15.46,
+                21.25,
+                16.5,
+                23.43,
+                17.75,
+                20.38,
+                17.33
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "flecks thrown clear",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$fleckSeed",
+              "spacing": 4.6,
+              "radius": 0.6,
+              "vary": 0.5,
+              "stretch": 2.0,
+              "axis": "X",
+              "chance": 0.3,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#dedede"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Voidburst",
+      "description": "The same emblem cut in soot - a charcoal star ringed in near-black over a gunmetal burst.",
+      "when": [
+        "B/B",
+        "B/C",
+        "B/n"
+      ],
+      "layers": [
+        {
+          "name": "the long spikes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                22.37,
+                21.1,
+                19.16,
+                17.87,
+                15.57,
+                19.76,
+                17.15,
+                17.36,
+                8.9,
+                17.9,
+                16.52,
+                16.34,
+                11.68,
+                14.51,
+                17.63,
+                15.42,
+                16.63,
+                11.9,
+                19.84,
+                15.13,
+                23.43,
+                13.24,
+                21.85,
+                15.64,
+                30.1,
+                15.1,
+                22.48,
+                16.66,
+                27.32,
+                18.49,
+                21.37,
+                17.58
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.45
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$burstSeed",
+              "scale": 3.0,
+              "octaves": 2,
+              "shape": "fbm",
+              "threshold": 0.3,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#575757"
+          }
+        },
+        {
+          "name": "black shards in the spikes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                22.37,
+                21.1,
+                19.16,
+                17.87,
+                15.57,
+                19.76,
+                17.15,
+                17.36,
+                8.9,
+                17.9,
+                16.52,
+                16.34,
+                11.68,
+                14.51,
+                17.63,
+                15.42,
+                16.63,
+                11.9,
+                19.84,
+                15.13,
+                23.43,
+                13.24,
+                21.85,
+                15.64,
+                30.1,
+                15.1,
+                22.48,
+                16.66,
+                27.32,
+                18.49,
+                21.37,
+                17.58
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.45
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$shardSeed",
+              "spacing": 3.4,
+              "radius": 0.85,
+              "vary": 0.5,
+              "stretch": 2.4,
+              "axis": "Y",
+              "chance": 0.42,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "the magenta outline",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                20.02,
+                18.12,
+                17.81,
+                14.51,
+                18.08,
+                16.75,
+                16.5,
+                13.51,
+                14.6,
+                18.12,
+                15.19,
+                19.5,
+                12.98,
+                20.88,
+                15.19,
+                24.49,
+                14.92,
+                22.25,
+                16.5,
+                25.49,
+                18.4,
+                20.88,
+                17.81
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#3e3e3e"
+          }
+        },
+        {
+          "name": "the violet inline",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                19.41,
+                18.38,
+                17.57,
+                15.37,
+                17.81,
+                17.25,
+                16.5,
+                14.54,
+                14.93,
+                18.38,
+                15.43,
+                19.5,
+                13.59,
+                20.62,
+                15.43,
+                23.63,
+                15.19,
+                21.75,
+                16.5,
+                24.46,
+                18.07,
+                20.62,
+                17.57
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#262626"
+          }
+        },
+        {
+          "name": "the white core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                18.81,
+                18.62,
+                17.33,
+                16.23,
+                17.54,
+                17.75,
+                16.5,
+                15.57,
+                15.25,
+                18.62,
+                15.67,
+                19.5,
+                14.19,
+                20.38,
+                15.67,
+                22.77,
+                15.46,
+                21.25,
+                16.5,
+                23.43,
+                17.75,
+                20.38,
+                17.33
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#707070"
+          }
+        },
+        {
+          "name": "flecks thrown clear",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$fleckSeed",
+              "spacing": 4.6,
+              "radius": 0.6,
+              "vary": 0.5,
+              "stretch": 2.0,
+              "axis": "X",
+              "chance": 0.3,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#575757"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured burst",
+      "description": "The star takes the line's own colour, ringed dark and bright over a burst in the same hue.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the long spikes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                22.37,
+                21.1,
+                19.16,
+                17.87,
+                15.57,
+                19.76,
+                17.15,
+                17.36,
+                8.9,
+                17.9,
+                16.52,
+                16.34,
+                11.68,
+                14.51,
+                17.63,
+                15.42,
+                16.63,
+                11.9,
+                19.84,
+                15.13,
+                23.43,
+                13.24,
+                21.85,
+                15.64,
+                30.1,
+                15.1,
+                22.48,
+                16.66,
+                27.32,
+                18.49,
+                21.37,
+                17.58
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.45
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$burstSeed",
+              "scale": 3.0,
+              "octaves": 2,
+              "shape": "fbm",
+              "threshold": 0.3,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.68
+          }
+        },
+        {
+          "name": "black shards in the spikes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                22.37,
+                21.1,
+                19.16,
+                17.87,
+                15.57,
+                19.76,
+                17.15,
+                17.36,
+                8.9,
+                17.9,
+                16.52,
+                16.34,
+                11.68,
+                14.51,
+                17.63,
+                15.42,
+                16.63,
+                11.9,
+                19.84,
+                15.13,
+                23.43,
+                13.24,
+                21.85,
+                15.64,
+                30.1,
+                15.1,
+                22.48,
+                16.66,
+                27.32,
+                18.49,
+                21.37,
+                17.58
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.45
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$shardSeed",
+              "spacing": 3.4,
+              "radius": 0.85,
+              "vary": 0.5,
+              "stretch": 2.4,
+              "axis": "Y",
+              "chance": 0.42,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "the magenta outline",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                20.02,
+                18.12,
+                17.81,
+                14.51,
+                18.08,
+                16.75,
+                16.5,
+                13.51,
+                14.6,
+                18.12,
+                15.19,
+                19.5,
+                12.98,
+                20.88,
+                15.19,
+                24.49,
+                14.92,
+                22.25,
+                16.5,
+                25.49,
+                18.4,
+                20.88,
+                17.81
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the violet inline",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                19.41,
+                18.38,
+                17.57,
+                15.37,
+                17.81,
+                17.25,
+                16.5,
+                14.54,
+                14.93,
+                18.38,
+                15.43,
+                19.5,
+                13.59,
+                20.62,
+                15.43,
+                23.63,
+                15.19,
+                21.75,
+                16.5,
+                24.46,
+                18.07,
+                20.62,
+                17.57
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.42
+          }
+        },
+        {
+          "name": "the white core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "plane": "side",
+              "space": "units",
+              "points": [
+                19.5,
+                18.81,
+                18.62,
+                17.33,
+                16.23,
+                17.54,
+                17.75,
+                16.5,
+                15.57,
+                15.25,
+                18.62,
+                15.67,
+                19.5,
+                14.19,
+                20.38,
+                15.67,
+                22.77,
+                15.46,
+                21.25,
+                16.5,
+                23.43,
+                17.75,
+                20.38,
+                17.33
+              ],
+              "closed": true,
+              "fill": true,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        },
+        {
+          "name": "flecks thrown clear",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$fleckSeed",
+              "spacing": 4.6,
+              "radius": 0.6,
+              "vary": 0.5,
+              "stretch": 2.0,
+              "axis": "X",
+              "chance": 0.3,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.68
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "W/W": 0.002,
+    "W/B": 0.0035,
+    "W/C": 0.0045,
+    "W/n": 0.26,
+    "B/B": 0.003,
+    "B/C": 0.005,
+    "B/n": 0.22,
+    "C/C": 0.006,
+    "n/n": 99.496
+  }
+}

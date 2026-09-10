@@ -1,0 +1,698 @@
+{
+  "format": 3,
+  "key": "ixora.wingmargin",
+  "name": "Wing Margin",
+  "phase": "magical",
+  "priority": 153,
+  "blurb": "The flank carries a butterfly's wing - a pale field crossed by fine veins running back toward the stifle, edged along the underline with a row of scallops and dark lunules.",
+  "rarity": "legendary",
+  "notes": [
+    "The veins are a FAN and could not be anything else. Every vein on a wing leaves one point and they fan apart as they travel; STROKES draws lines that wander independently and never share an origin, and WAVES takes its phase from a straight line so its bars stay parallel forever.",
+    "The FAN's pivot is at (6, 7) - off the marking, down by the stifle - and inner is 8.0, so only the far part of the fan crosses the flank. That is what makes the veins read as converging on somewhere rather than as radiating from a point you can see. spacing is an ANGLE: 0.17 is about thirty-seven veins round a full turn, and the wedge that reaches the barrel holds maybe eight of them. A number that reads like a body-unit spacing would have put three veins on the whole horse.",
+    "Vein width at ten units out is 0.17 x 10 x 0.42 = 0.71 units. It grows with distance, so the veins are thinnest at the belly and widest at the shoulder, which is the right way round.",
+    "The scallops and the lunules are two WAVES bands on ONE wavelength (5.6) and ONE phase, differing only in amplitude - 1.7 against 2.9. The deeper band's crests push up through the shallower one, and the dark lobes fall inside the olive scallops instead of beside them. This is why the lunules are not SPOTS: a SPOTS lattice lays down its own centres and has never had anything to do with where a wave crested.",
+    "Both bands are 4.0 and 3.1 units deep, so the olive that survives around each lunule is over a unit wide. Tightening either band toward the reference's thinner rim takes it under a texel.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim."
+  ],
+  "alleles": [
+    {
+      "token": "W",
+      "label": "Chalk margin (W)"
+    },
+    {
+      "token": "B",
+      "label": "Mourning margin (B)"
+    },
+    {
+      "token": "C",
+      "label": "Coloured margin (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "edgeSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Chalk margin",
+      "description": "A white wing field over the flank, veined in grey and scalloped along the underline.",
+      "when": [
+        "W/W",
+        "W/B",
+        "W/C",
+        "W/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing field",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "the fine veins",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 6.0,
+              "originV": 7.0,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "inner": 8.0,
+              "outer": 30.0,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#d3d3d3"
+          }
+        },
+        {
+          "name": "the heavy veins",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 6.0,
+              "originV": 7.0,
+              "spacing": 1.4,
+              "duty": 0.1,
+              "inner": 8.0,
+              "outer": 30.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "the scalloped margin",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$edgeSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 10.6,
+              "to": 14.6,
+              "wavelength": 5.6,
+              "amplitude": 1.7,
+              "phase": 0.0,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#a6a6a6"
+          }
+        },
+        {
+          "name": "the dark lunules inside the scallops",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$edgeSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 12.3,
+              "to": 15.4,
+              "wavelength": 5.6,
+              "amplitude": 2.9,
+              "phase": 0.0,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Mourning margin",
+      "description": "The wing in mourning colours - a slate field, black veins and near-black lunules.",
+      "when": [
+        "B/B",
+        "B/C",
+        "B/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing field",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#707070"
+          }
+        },
+        {
+          "name": "the fine veins",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 6.0,
+              "originV": 7.0,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "inner": 8.0,
+              "outer": 30.0,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#4f4f4f"
+          }
+        },
+        {
+          "name": "the heavy veins",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 6.0,
+              "originV": 7.0,
+              "spacing": 1.4,
+              "duty": 0.1,
+              "inner": 8.0,
+              "outer": 30.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "the scalloped margin",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$edgeSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 10.6,
+              "to": 14.6,
+              "wavelength": 5.6,
+              "amplitude": 1.7,
+              "phase": 0.0,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#2e2e2e"
+          }
+        },
+        {
+          "name": "the dark lunules inside the scallops",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$edgeSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 12.3,
+              "to": 15.4,
+              "wavelength": 5.6,
+              "amplitude": 2.9,
+              "phase": 0.0,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d0d0d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured margin",
+      "description": "The wing takes the line's own colour, dark-veined with a banded, scalloped margin.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the wing field",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        },
+        {
+          "name": "the fine veins",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 6.0,
+              "originV": 7.0,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "inner": 8.0,
+              "outer": 30.0,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.63
+          }
+        },
+        {
+          "name": "the heavy veins",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 13.0,
+              "to": 21.0,
+              "softness": 1.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 6.0,
+              "originV": 7.0,
+              "spacing": 1.4,
+              "duty": 0.1,
+              "inner": 8.0,
+              "outer": 30.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "the scalloped margin",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$edgeSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 10.6,
+              "to": 14.6,
+              "wavelength": 5.6,
+              "amplitude": 1.7,
+              "phase": 0.0,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.47
+          }
+        },
+        {
+          "name": "the dark lunules inside the scallops",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 12.0,
+              "to": 29.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$edgeSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 12.3,
+              "to": 15.4,
+              "wavelength": 5.6,
+              "amplitude": 2.9,
+              "phase": 0.0,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "W/W": 0.002,
+    "W/B": 0.0035,
+    "W/C": 0.0045,
+    "W/n": 0.26,
+    "B/B": 0.003,
+    "B/C": 0.005,
+    "B/n": 0.22,
+    "C/C": 0.006,
+    "n/n": 99.496
+  }
+}

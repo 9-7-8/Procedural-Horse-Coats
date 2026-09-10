@@ -27,6 +27,104 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10e">2026-09-10</h2>
+
+<h3>A check for gap 169, and the two metrics that were measured and thrown away
+    first.</h3>
+
+<p>Three genes in two days had been brought down by the same thing &mdash; a gene's
+    layers each measure their delta against the colour the <em>gene</em> started from
+    and the deltas are <b>added</b>, where every author expects them to stack. This
+    session built the check. Most of the work was finding out which measurement
+    actually separates the broken genes from the good ones, and the two that
+    <em>don't</em> are worth writing down, because both look obviously right until
+    you run them.</p>
+
+<h4>What was thrown away, and why</h4>
+
+<p><b>Divergence from stacking.</b> Render the expression twice &mdash; once the way
+    the engine does, once applying each layer before the next measures &mdash; and
+    diff. It is the most direct possible statement of the bug, and for disjoint
+    layers the two are identical by construction, so it looked like it would have no
+    false positives at all. It fires on <b>about half the corpus</b>. Ringwork
+    diverges on 92% of its painted texels, crazework on 96%, panda on 55%, and all
+    three look good. A gene with overlapping layers whose author tuned the colours
+    until the sum looked right is <em>indistinguishable</em> from one whose author
+    did not.</p>
+
+<p><b>Clip pressure.</b> How far past the byte the summed delta would have gone. This
+    one ranks pre-fix contour <b>first and second of every expression in the mod</b>,
+    at 89% and 88% of painted texels &mdash; exactly right. It also ranks dripwork
+    third and crazework fifth, and those are fine, because <em>clipping toward a
+    colour every contributing layer wanted is harmless</em>: dripwork's layers all
+    want black, so a sum that clamps to black is the intended answer.</p>
+
+<div class="note warn">
+    <span class="label">The conclusion that shaped the fix</span>
+    <p>
+        <strong>No metric separates &ldquo;relies on summing and looks good&rdquo; from
+        &ldquo;relies on summing and looks wrong&rdquo;</strong>, because the only
+        difference between those two is whether a human liked the result. Any check
+        built on the summing itself is either a gate that fails half the mod or a
+        report nobody reads. So the check had to be built on something objective, and
+        there is exactly one objective thing in the neighbourhood: whether a layer is
+        <em>there at all</em>.
+    </p>
+</div>
+
+<h4>What was built</h4>
+
+<p><code>DeadLayerTest</code>: <b>take a layer out; if the horse does not change on
+    any base coat, the layer was not doing anything.</b> No taste in it, and no
+    pattern-matching either &mdash; whether two masks overlap is not decidable by
+    reading them, since they are arbitrary functions of position folded with inversion
+    and subtraction, but it <em>is</em> decidable by evaluating them, which is what the
+    painter already does. 23 seconds, which keeps it inside the working loop; the
+    speed comes from an early exit, since a layer proven alive on the bay never gets
+    re-tested on the other coats.</p>
+
+<p>It catches three unrelated mistakes with one measurement, and <b>none of them fails
+    anything else</b>: an empty mask fold, a layer clamped away by an overlapping one,
+    and a feature smaller than a texel. It found <b>29 dead layers</b> in the shipped
+    genes. Validated against the known bug by reconstructing the pre-fix dorsal wing:
+    it flags exactly the two layers that were invisible, and the fixed gene is
+    clean.</p>
+
+<h4>What it found</h4>
+
+<ul>
+    <li><b><a href="gene-quarter.html">Quarter</a>: nine dead layers</b> &mdash; three
+        of the four quadrants, in three separate expressions.</li>
+    <li><b><a href="gene-ringwork.html">Ringwork</a>: both contour rings</b>, which are
+        annuli <b>0.1 body units wide</b> against a texel of 0.5. That is rule 15 of
+        the prompt &mdash; size it against a texel &mdash; and nothing enforced it
+        until now.</li>
+    <li>Moth mantle's cheek mark, moth wings' pale pupil, dorsal shield's centre stud,
+        the innermost neck band of concentric eyespots, hood's neck thinning, ocular's
+        pupil, nimbus's curdle.</li>
+    <li><b>And one of this session's own</b>: dripwork's loose dots, thinned to spacing
+        7.5 at chance 0.18 an hour earlier and landing on nothing at that pitch. Fixed
+        to 5.5 at 0.32 and its line deleted &mdash; at which point the ratchet caught
+        that the <em>coloured</em> form's dots are still dead, swamped by the ink
+        around them, which is a live gap-169 instance rather than a pitch problem.</li>
+</ul>
+
+<p>The blind spot is declared rather than papered over: 47 layers carry a
+    <code>PIGMENT</code> or <code>LUMA</code> mask, read the coat underneath, and cannot
+    be judged against a synthetic base &mdash; moth eyes' six layers read as dead on
+    every base the check builds and are simply unhoused. They are skipped and counted,
+    and a second test asserts the count has not quietly grown.</p>
+
+<h4>The root cause is still open</h4>
+
+<p>The reason authors keep writing this is that the format <b>cannot say &ldquo;paint
+    this on top of that&rdquo;</b>, so they write the thing that looks like it and get
+    summing. A per-layer <code>"over": true</code> that applies the accumulated delta
+    before the layer measures would make dorsal wing's original file correct as
+    written. That is a format change &mdash; the five-file contract plus every golden
+    &mdash; so it is written up on <a href="known-gaps.html#gap-169">gap 169</a> as a
+    decision rather than taken unasked.</p>
+
 <h2 id="d2026-09-10d">2026-09-10</h2>
 
 <h3>Four genes retuned off looking at them, and the coverage rule of thumb written

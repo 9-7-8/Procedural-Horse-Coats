@@ -1,0 +1,621 @@
+{
+  "format": 3,
+  "key": "ixora.nacre",
+  "name": "Nacre",
+  "phase": "magical",
+  "priority": 150,
+  "blurb": "A milky marbled saddle over the back, folded into pale lobes with a thin shifting film picked out along every rim.",
+  "rarity": "rare",
+  "notes": [
+    "Four readings of ONE noise field. The three fbm layers are the same seed and scale at rising thresholds, so they nest - each is a smaller core inside the last, which is what gives the folds their depth. The ridged layer is that same field's midpoint surface, so its lines fall exactly on the boundaries the other three are stacked around.",
+    "warp 1.0 on every layer, and the same value on every layer. warp pushes the sample point around with a coarser field before any octave is taken, which is the difference between an edge that wobbles and one that wanders. Give one of the four a different warp and it is sampling a different field and the nesting comes apart.",
+    "The rim colour is RAMP axis=noise on the film's own seed and scale. It is NOT iridescence and it cannot be: the coat is a texture baked once per horse and no mask or op will ever see a viewer. What it is instead is colour that wanders and pools with no hard edge, which is the honest half of the look. PALETTE would have been wrong here for the opposite reason - it puts hard walls between its lattice cells, and a soap film has no hard edge anywhere.",
+    "The PATCHES gate is what keeps this off the whole horse. Without it the marbling tiles every texel of the barrel it is allowed to reach.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim."
+  ],
+  "alleles": [
+    {
+      "token": "W",
+      "label": "Nacre (W)"
+    },
+    {
+      "token": "B",
+      "label": "Hematite (B)"
+    },
+    {
+      "token": "C",
+      "label": "Coloured nacre (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "filmSeed",
+      "type": "seed"
+    },
+    {
+      "name": "patchSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Nacre",
+      "description": "The reference form - a pearl-white marbled saddle with a shifting film along its folds.",
+      "when": [
+        "W/W",
+        "W/B",
+        "W/C",
+        "W/n"
+      ],
+      "layers": [
+        {
+          "name": "the milky ground",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.45,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "the lavender lobes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.62,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#a6a6a6"
+          }
+        },
+        {
+          "name": "the film on the rims",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "ridged",
+              "threshold": 0.8,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$filmSeed",
+            "scale": 5.5,
+            "strength": 100,
+            "colors": [
+              "#989898",
+              "#d3d3d3",
+              "#ffffff"
+            ]
+          }
+        },
+        {
+          "name": "the shadow under the deepest lobes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.74,
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 90,
+            "color": "#7a7a7a"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Hematite",
+      "description": "The same folded marbling in graphite and soot.",
+      "when": [
+        "B/B",
+        "B/C",
+        "B/n"
+      ],
+      "layers": [
+        {
+          "name": "the milky ground",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.45,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#707070"
+          }
+        },
+        {
+          "name": "the lavender lobes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.62,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#2e2e2e"
+          }
+        },
+        {
+          "name": "the film on the rims",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "ridged",
+              "threshold": 0.8,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$filmSeed",
+            "scale": 5.5,
+            "strength": 100,
+            "colors": [
+              "#393939",
+              "#4f4f4f",
+              "#676767"
+            ]
+          }
+        },
+        {
+          "name": "the shadow under the deepest lobes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.74,
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 90,
+            "color": "#0d0d0d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured nacre",
+      "description": "Marbling in the line's own colour, palest in the ground and brightest along the rims.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the milky ground",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.45,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        },
+        {
+          "name": "the lavender lobes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.62,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.47
+          }
+        },
+        {
+          "name": "the film on the rims",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "ridged",
+              "threshold": 0.8,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$filmSeed",
+            "scale": 5.5,
+            "strength": 100,
+            "hue": "$hue",
+            "hueSpan": 160,
+            "saturation": 0.88,
+            "lightness": 0.63
+          }
+        },
+        {
+          "name": "the shadow under the deepest lobes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 14.0,
+              "to": 21.5,
+              "softness": 1.4
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 10.0,
+              "threshold": 0.4,
+              "softness": 0.3
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filmSeed",
+              "scale": 5.5,
+              "octaves": 3,
+              "warp": 1.0,
+              "shape": "fbm",
+              "threshold": 0.74,
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 90,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "W/W": 0.002,
+    "W/B": 0.0035,
+    "W/C": 0.0045,
+    "W/n": 0.26,
+    "B/B": 0.003,
+    "B/C": 0.005,
+    "B/n": 0.22,
+    "C/C": 0.006,
+    "n/n": 99.496
+  }
+}
