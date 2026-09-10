@@ -22,6 +22,7 @@ window.HG.pages = {
                 { href: "genetics-model.html", text: "The genetics model", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "breeding.html", text: "Breeding & pedigree", kind: "core", views: ["gameplay","coding"] },
                 { href: "breeds.html", text: "Breeds", kind: "core", views: ["gameplay","coding"] },
+                { href: "breed-book.html", text: "The breed book", kind: "core", views: ["gameplay"] },
                 { href: "horse-body.html", text: "The horse's body", kind: "core", views: ["gameplay","coding"] }
             ]
         },

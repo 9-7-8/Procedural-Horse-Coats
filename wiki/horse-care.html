@@ -122,6 +122,21 @@
     line. The goal is inert while the horse is leashed or ridden.</p>
 
 <h3>Gains &mdash; capped at +15 per Minecraft day</h3>
+<p id="bareback"><strong>Riding bareback bonds exactly as well as riding saddled.</strong>
+    This is worth saying because the obvious implementation gets it wrong: vanilla
+    only regards a rider as the horse's <em>controlling</em> passenger once the
+    horse is saddled, so the natural test
+    (<code>getControllingPassenger() == owner</code>) quietly pays nothing for a
+    bareback rider, and the two cases look identical from the saddle. They are
+    not identical in what they mean. Bareback is how you talk a wild horse round
+    in the first place, and it is the least equipment-mediated thing you can do
+    with an animal &mdash; a system that rewards you for buying leather first has
+    the relationship backwards. The gate is <code>hasPassenger</code>.</p>
+
+<p>A saddle still buys you steering, and steering is what lets you go far enough
+    for the proximity gain and the riding gain to stack for any length of time.
+    So a saddle is worth having; it is simply not what the horse is counting.</p>
+
 <p>
     A "day" is <strong>24 000 game ticks</strong> (<code>DAY_TICKS</code>);
     <code>dayStamp = getGameTime() / 24000</code>, monotonic and reload-safe.
@@ -133,7 +148,7 @@
 <thead><tr><th>Source</th><th>Rate</th><th>How</th></tr></thead>
 <tbody>
 <tr><td>Proximity</td><td>~+0.5 / min</td><td>Owner within 10 blocks at scan time &rarr; +15 ticks into <code>bondTicks</code></td></tr>
-<tr><td>Riding</td><td>~+1 / min</td><td>Owner is the controlling passenger &rarr; +30 ticks into <code>bondTicks</code></td></tr>
+<tr><td>Riding</td><td>~+1 / min</td><td>Owner is <em>on</em> the horse (<code>hasPassenger</code>) &rarr; +30 ticks into <code>bondTicks</code>. <strong>Bareback counts</strong> &mdash; see below</td></tr>
 <tr><td>Feeding</td><td>+2 each</td><td>Owner right-clicks with any <code>isFood</code> item (event not cancelled &mdash; vanilla feeding still happens)</td></tr>
 <tr><td>Shearing</td><td>+5 each</td><td>A tamed horse sheared with shears (<code>server/HorseShearHandler</code>, see <a href="item-horse-hair.html#get">items</a>), via the new <code>HorseCareHandler.awardBondFor</code> entry point. Honours the daily cap.</td></tr>
 </tbody>

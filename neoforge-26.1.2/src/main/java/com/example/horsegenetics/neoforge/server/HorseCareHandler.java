@@ -152,8 +152,14 @@ public final class HorseCareHandler {
             if (horse.distanceToSqr(owner) <= 100.0) {   // ~10 blocks
                 add += SCAN_INTERVAL / 2L;               // proximity ~ +0.5/min
             }
-            if (horse.getControllingPassenger() == owner) {
-                add += SCAN_INTERVAL;                     // riding ~ +1/min
+            // hasPassenger, not getControllingPassenger: vanilla only calls a
+            // rider "controlling" once the horse is saddled, so keying off that
+            // meant sitting on your own horse bareback earned nothing but the
+            // proximity trickle. Bareback is how you tame one in the first
+            // place, and it is the least equipment-mediated thing you can do
+            // with a horse - if anything is bonding, it is that.
+            if (horse.hasPassenger(owner)) {
+                add += SCAN_INTERVAL;                     // riding ~ +1/min, saddle or not
             }
             if (add > 0) {
                 long ticks = after.bondTicks() + add;

@@ -38,7 +38,7 @@
     <strong>Feral Mixed</strong> is the only one shipping that way.
 </p>
 
-<h2>Herd or loner</h2>
+<h2 id="herd">Herd or loner</h2>
 <p>
     <code>BreedSpawnHandler</code> (a one-line <code>FinalizeSpawnEvent</code>
     hook) does nothing but tag a NATURAL / CHUNK_GENERATION / SPAWNER horse with
@@ -268,7 +268,7 @@
     it is the absence of a breed, so it never spawns as itself and never has an egg.
 </p>
 
-<h2>Breeding: crosses and mixes</h2>
+<h2 id="crosses">Breeding: crosses and mixes</h2>
 <p>
     A foal&rsquo;s breed label (<code>BreedLineage.combine</code>, applied in
     <code>HorseBreedingHandler.applyBredFoal</code>):
@@ -362,6 +362,11 @@
 </ul>
 
 <h2 id="commonness">The 49 breeds</h2>
+
+<p>Every one of them also has an entry in <a href="breed-book.html">the breed
+    book</a> &mdash; what the breed <em>is</em>, what it was made for, and how it
+    came to be running loose here. This table is the machinery; that page is the
+    reason the machinery has these particular numbers in it.</p>
 <p class="muted">
     Height is the stable-notation range from the sheet (baseline 15.75&nbsp;hh =
     &times;1.0 scale). S / J / H are the 1&ndash;10 speed / jump / heartiness
