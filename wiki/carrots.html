@@ -382,22 +382,34 @@
     (<code>data/loot/AddResearchPaperModifier</code>, a global loot modifier that
     seeds papers into ~8 chest tables weighted by <code>GeneRarity</code>),
     other players, and <strong>writing one</strong> from your own database at the
-    cost of a book &mdash; the <em>Craft research paper</em> button on a
-    discovered gene in the Horse Browser
-    (<code>WriteResearchPaperPayload</code> &rarr;
-    <code>server/ResearchPaperWriter</code>).
+    cost of a book &mdash; but <b>you do not choose which gene</b>. See below.
+</p>
+
+<h3 id="book-on-horse">A book on a horse</h3>
+
+<p>
+    Right-click a horse holding a book and you get a research paper for
+    <strong>one gene that horse carries, chosen at random</strong> from every
+    locus where it is not simply the plain baseline. An entirely ordinary horse
+    has nothing to teach and costs you no book.
 </p>
 
 <p>
-    The browser&rsquo;s <strong>Crafting</strong> tab is a 3&times;3 grid that only
-    makes this mod&rsquo;s recipes. A single book in it plus a discovered gene
-    picked in the list becomes that gene&rsquo;s research paper; the paper then
-    goes into the Known Gene Splice recipe above. <strong>Selecting a gene
-    auto-ghosts its splice recipe</strong> into the grid&rsquo;s empty slots
-    &mdash; dimmed placeholder items, client-side only, nothing moves in your
-    inventory &mdash; and hovering a ghost shows the real item&rsquo;s tooltip.
-    <code>menu/SpliceRecipeDisplay</code> is the canonical layout, shared by the
-    screen and the recipe so the two can never disagree.
+    It is random on purpose. The old route was a <em>Craft research paper</em>
+    button in the Horse Browser: pick the gene, spend a book, get exactly that
+    paper &mdash; which meant a paper was never a discovery, only paperwork once
+    you already knew. Now the horse decides, so a paper is something an animal
+    told you. Discovery is <b>not</b> required: reading the paper is what adds
+    the gene to your database, so gating it on the database would make it unable
+    to teach you anything.
+</p>
+
+<p>
+    The other half of the loop is the <strong>Equine Research Shelf</strong>,
+    where a paper you own becomes one you can copy. The browser&rsquo;s
+    <strong>Recipes</strong> tab is now a reference only &mdash; it makes
+    nothing; <code>menu/SpliceRecipeDisplay</code> is still the canonical splice
+    layout, shared by that reference and the recipe so the two cannot disagree.
 </p>
 
 <h2 id="metadata">The gene metadata it all reads</h2>

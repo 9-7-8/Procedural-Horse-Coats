@@ -39,15 +39,20 @@
     so you can decide before you read it.
 </p>
 
-<h2 id="get">Three ways to get one</h2>
+<h2 id="get">Four ways to get one</h2>
 
 <ul>
     <li><strong>Find it.</strong> Research papers turn up in about eight kinds of vanilla
         chest. Which gene a found paper names is weighted by rarity, so the common genes
         come up far more often.</li>
-    <li><strong>Write it.</strong> Open the <strong>Horse Browser</strong> (<code>H</code>),
-        pick a gene you have already discovered, and put a single book in the crafting
-        grid. One book, one paper.</li>
+    <li><strong>Take it off a horse.</strong> Right-click a horse while holding a book
+        and you get a paper for <strong>one gene that horse carries, at random</strong>.
+        You do not choose which &mdash; that is the point, and it is why a paper is a
+        discovery rather than paperwork. A completely ordinary horse has nothing to teach
+        and costs you no book.</li>
+    <li><strong>Copy one you already have.</strong> File a paper into an
+        <strong>Equine Research Shelf</strong> and that shelf can copy it onto blank books
+        for as long as the original stays in it.</li>
     <li><strong>Trade for it.</strong> Papers can be handed to other players &mdash; which
         is the point of being able to write them. Knowledge is shareable rather than
         hoardable.</li>
@@ -68,11 +73,10 @@
     <li><strong>Chest loot</strong> &mdash; injected into ~8 vanilla chest tables by a
         global loot modifier, with the gene weighted by its rarity tier
         (<code>data/loot/AddResearchPaperModifier</code>).</li>
-    <li><strong>Written by hand</strong> &mdash; in the <strong>Horse Browser</strong>
-        (<code>H</code>), pick a gene you have already discovered and put a single book in
-        the crafting grid. One book &rarr; one paper for that gene. There is no JSON
-        recipe for this; it is <code>menu/HorseBrowserRecipes</code>, because the result
-        depends on which gene is selected in the screen.</li>
+    <li><strong>Off a horse</strong> &mdash; <code>server/GeneBookFromHorse</code>, on
+        <code>EntityInteract</code> with a book. It collects every locus the horse is not
+        homozygous-baseline at (the same test discovery uses) and picks one uniformly. No
+        JSON recipe: the result depends on the animal.</li>
     <li><strong>Traded from another player</strong> &mdash; which is the point of the
         second route: knowledge is shareable rather than hoardable.</li>
 </ul>

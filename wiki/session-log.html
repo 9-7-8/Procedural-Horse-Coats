@@ -29,6 +29,325 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="research-shelf-2026-09-09">A bookshelf that remembers genes, and a portal that finally notices its frame.</h3>
+
+<p>
+    The <a href="item-research-shelf.html">Equine Research Shelf</a> is the other half of
+    the paper loop. A book on a horse gives you a paper for a gene <em>it</em> carries, at
+    random; the shelf is where a paper stops being scarce. File one and that shelf will
+    copy it onto blank books for as long as the original stays in it. Take the original
+    back and the copying stops.
+</p>
+
+<p>
+    <strong>What makes it worth having is that it can be emptied.</strong> A one-time
+    unlock would have been simpler and would have made knowledge a flag on a player; a
+    shelf is a thing in the world that somebody could walk into and read, and that you
+    can carry to a friend. Breaking it gives every paper back, deliberately - the
+    alternative is a player never daring to move one.
+</p>
+
+<h4>A set of keys, not a chest</h4>
+
+<p>
+    The block entity stores a <code>Set&lt;String&gt;</code> of gene keys. A research
+    paper is completely described by the gene it names, and the shelf holds one of each,
+    so the rule is <b>structural rather than enforced</b>: there is no way to express
+    "two papers for flaxen" in the data, so no code has to remember not to, and a shelf
+    can hold every gene in the mod without an item stack per gene. Keys become items
+    again at exactly two moments - a withdrawal, and the block being removed.
+</p>
+
+<p>
+    The tabs cost one small discovery: <code>Slot.x</code> and <code>Slot.y</code> are
+    <code>final</code>, so the obvious trick of parking a slot off-screen does not
+    compile. <code>Slot.isActive()</code> is the right mechanism anyway, and better -
+    vanilla consults it for drawing <em>and</em> for hit-testing, which is exactly the
+    pair that must never disagree. A slot you cannot see but can still click is the worst
+    of both.
+</p>
+
+<h4>The portal was never told its frame had gone</h4>
+
+<p>
+    Reported plainly: knock a hay bale out of a lit portal and the interior stays. The
+    portal block had no <code>updateShape</code>, so it was only ever removed
+    deliberately. Vanilla's mechanism is the good one and it is barely any code - a
+    portal block that finds itself no longer enclosed returns <b>air</b>, and turning to
+    air is itself a block change, so one broken bale collapses the whole sheet in a
+    cascade and nothing has to know how big the portal was.
+</p>
+
+<p>
+    <strong>Adding it would have broken lighting a portal, and reading vanilla is what
+    caught that.</strong> <code>Level.setBlock</code> runs neighbour <em>shape</em>
+    updates unless bit 16 (<code>UPDATE_KNOWN_SHAPE</code>) is set - flag 2 does not set
+    it. Both places that build a portal used flag 2, so each block placed would have
+    asked its neighbours to re-check themselves while the rest of the sheet was still
+    air, and the new rule would have eaten the portal as it was being lit. Vanilla's
+    <code>PortalShape.createPortalBlocks</code> passes 18 for exactly this reason, and now
+    so do both of ours. The bug never existed outside a compiler, which is the useful
+    kind to find.
+</p>
+
+<h4>And the Recipes tab, twice</h4>
+
+<p>
+    One row per discovered gene meant the splice carrots outnumbered every other recipe
+    several times over and buried the 27 that are not gene carrots, so the tab gained a
+    two-entry category dropdown defaulting to the small half. Each recipe also gained a
+    line saying what the thing it makes is <em>for</em>, out of the lang file so it is
+    translatable and so a recipe that converts <em>between</em> two items can say which
+    direction it goes - packing a bundle and unpacking one share an output but not a
+    purpose. The gene carrots' line is formulaic, as asked: there are as many of them as
+    there are genes and the only thing that changes is the gene.
+</p>
+
+<h3 id="browser-reference-2026-09-09">The H menu stops crafting, and a book becomes the way a horse tells you something.</h3>
+
+<p>
+    <i>"Putting crafting in the H menu breaks the flow of normal Minecraft so much
+    it's confusing people."</i> That is the whole argument and it is a good one: a
+    window bound to a key, that is not a block, that nonetheless crafts, is a fifth
+    thing to learn for no gain. Every recipe on that tab already worked at an
+    ordinary crafting table &mdash; both custom ones are registered serialisers with
+    real recipe JSON &mdash; so removing it cost nothing but the one thing the grid
+    could uniquely do.
+</p>
+
+<p>
+    The browser is now a plain <code>Screen</code>. <b>Losing the container was the
+    point rather than a side effect</b>: with no slots there is nothing to drag,
+    nothing to lose on close, and no server menu to keep in step. Seven types went
+    with it &mdash; the menu, its recipe class, the menu registry, three payloads and
+    the paper writer &mdash; and the key now opens the screen directly instead of
+    asking the server to open a menu. It came to about twenty container-specific
+    references in a 1,400-line file, which was a good deal less than it looked.
+</p>
+
+<p>
+    <strong>One behaviour change was caught by reading vanilla rather than by running
+    it:</strong> <code>Screen.isPauseScreen()</code> returns true and
+    <code>AbstractContainerScreen</code>'s returns false, so the conversion would have
+    quietly started pausing singleplayer &mdash; and a horse you were watching would
+    stop moving whenever you opened its gene list. Overridden back. It is the kind of
+    difference that does not show up in a compiler and does show up as "the mod feels
+    wrong", so <a href="known-gaps.html#gap-141">gap 141</a> says plainly that there
+    may be others of that shape.
+</p>
+
+<h4>Recipes, generated rather than queried</h4>
+
+<p>
+    The tab that is left is a reference to every recipe the mod adds. Getting the
+    ingredients to draw turned out to be the interesting part: the client has no
+    dependable way to ask for a recipe &mdash; <code>data/</code> is datapack
+    territory and 26.1.2's client-side recipe API hands out display objects rather
+    than recipes, with nothing in <a href="api-notes.html">api-notes</a> about
+    either. So <code>tools/bake-recipe-reference.mjs</code> reads the real recipe
+    files and writes a flat summary into <code>assets/</code>, where the client reads
+    it straight off the classpath. 26 shapeless, one shaped, and two custom recipes
+    whose inputs live in Java and are described in words instead of drawn wrongly.
+    The trade is written down as <a href="known-gaps.html#gap-142">gap 142</a>: it
+    describes the recipes <em>this jar ships</em>, not the ones a datapack might have
+    replaced.
+</p>
+
+<h4>A book on a horse</h4>
+
+<p>
+    Removing the grid removed the only targeted source of research papers, which
+    would have left the splice chain fed by chest loot alone. The replacement is
+    deliberately <b>not</b> targeted: right-click a horse with a book and you get a
+    paper for one gene that horse carries, chosen at random. Choosing the gene
+    yourself &mdash; which is what the old button did &mdash; meant a paper was never
+    a discovery, only paperwork once you already knew. Now the horse decides. An
+    entirely ordinary horse has nothing to teach and costs you no book, and discovery
+    is deliberately not required, since reading the paper is the thing that teaches
+    you.
+</p>
+
+<h4>Three smaller ones</h4>
+
+<p>
+    <strong>The search box was closing the window.</strong> Typing "speed" into the
+    gene search hit <kbd>e</kbd> and opened the player's inventory. It is a vanilla
+    trap rather than a mistake here: <code>EditBox.keyPressed</code> handles the
+    control keys and returns <code>false</code> for an ordinary letter, because
+    letters arrive separately through <code>charTyped</code> &mdash; so the letter
+    falls out of <code>super.keyPressed</code> and the next thing
+    <code>AbstractContainerScreen</code> does is test it against the inventory key.
+    Any screen with a text field and a container behind it has this bug until it says
+    otherwise. A focused box now swallows every key but Escape; the letter still
+    types, because GLFW's character callback is a separate one.
+</p>
+
+<p>
+    <strong>Two mares now say why nothing happened.</strong> Vanilla does not know
+    horses have a sex, so a same-sex pair fed breeding carrots goes through the whole
+    courtship and reaches <code>BabyEntitySpawnEvent</code> like any other pair, where
+    the foal was cancelled in silence. The attempt is left exactly as it was &mdash;
+    they still try &mdash; and it now says so, in one of three lines per sex, to the
+    player who fed them. Light rather than an error: nothing has gone wrong, and a red
+    warning would read as a bug in the mod rather than a fact about horses.
+</p>
+
+<p>
+    <strong>&#9792; and &#9794; after a horse's name</strong>, coloured, so sex is
+    readable across a paddock. Appended at <em>render</em> time through
+    <code>RenderNameTagEvent.CanRender</code> and never to the stored name &mdash;
+    that name is what the record keeps, what a transfer paper prints and what the
+    rename box shows, and a glyph baked into it would reach all three and then be
+    inherited. A display aid belongs at display time, which is also why the switch is
+    client-side.
+</p>
+
+<h3 id="gene-blurbs-2026-09-09">A gene says what it does when you point at it &mdash; and seventeen of them could not.</h3>
+
+<p>
+    Asked for plainly: hovering a gene in the custom spawn egg's list should pop up a
+    blurb describing what it does. The text already existed and already had the right
+    job description &mdash; <code>Gene.description()</code> is documented as
+    &ldquo;one to three plain sentences for the in-game gene browser and
+    tooltips&rdquo;, with built-ins reading <code>GeneDescriptions</code> and
+    data-driven genes carrying their own <code>blurb</code>.
+</p>
+
+<p>
+    <strong>Except for seventeen of them.</strong> The contract says an absent summary
+    resolves to <code>&quot;&quot;</code> and callers should treat that as &ldquo;no
+    summary available&rdquo;, which is honest and, on a hover panel, means the gene
+    silently has nothing to say while the one above it does. Coverage was 185 of 202:
+    missing were tiger eye, leopard, PATN1, PATN2, shadowcreature, the ten magic
+    utility loci, and two data-driven genes. All seventeen are written &mdash;
+    compressed from each gene's own wiki page rather than invented, which is the only
+    way to write a summary that will not contradict the page it summarises. It is 202
+    of 202 now, and <code>GeneDescriptionCoverageTest</code> fails by <em>name</em>
+    rather than by count when the next gene arrives without one.
+</p>
+
+<p>
+    The panel is drawn the way the dropdowns are &mdash; fills and text &mdash; rather
+    than as a vanilla <code>Tooltip</code>. Two reasons, and the second is the one that
+    decided it: a list row is not a widget on this screen (an unadded row takes its
+    click in <code>mouseClicked</code>), and the browser twin has no vanilla tooltip to
+    mirror. A panel built out of fills exists identically on both sides; a
+    <code>Tooltip</code> would have made the designer's version a reimplementation
+    rather than a copy.
+</p>
+
+<p>
+    Mirroring it turned up a real difference the two files had been carrying quietly:
+    <strong><code>rowAt()</code> returns a <em>view</em> index in the screen and a
+    <em>gene</em> index in the browser</strong>, because the screen's rows carry their
+    own gene and the browser's are bare indices into <code>genes[]</code>. Nothing had
+    ever needed to tell them apart &mdash; both are only compared against the same kind
+    of thing &mdash; but a panel has to be positioned beside the drawn row, and with a
+    family filter on, the two indices differ. The browser now has a separate
+    <code>rowSlotAt()</code>, named and commented for exactly that, and
+    <code>rowAt()</code> is written in terms of it.
+</p>
+
+<h3 id="play-session-fixes-2026-09-09">A play session, four reports, and one root cause behind three of them.</h3>
+
+<p>
+    0.3.2 launches and makes a world, which was the thing worth knowing. The session
+    that confirmed it then produced four more reports, and reading the log for one of
+    them turned up a fifth nobody had asked about.
+</p>
+
+<h4>The stables generated empty, and the guard that did it was commented as doing
+something else</h4>
+
+<p>
+    &ldquo;The structures generate, but there are no horses anywhere in the structure.&rdquo;
+    <code>StablePopulator</code> queues a stable when the chunk holding its
+    <code>StructureStart</code> loads, and guarded that with a comparison between the
+    bounding box's minimum corner and the chunk being loaded &mdash; under a comment
+    saying it queued &ldquo;only the chunk holding the structure's own start&rdquo;. Those
+    are different tests. A jigsaw start piece is placed at its chunk's minimum block
+    corner and then rotated, and <code>SinglePoolElement.getBoundingBox</code> rotates
+    about <code>BlockPos.ZERO</code> &mdash; so three of the four rotations carry the box
+    into the previous chunk in x, z, or both. <strong>Only unrotated stables were ever
+    queued.</strong> The other three quarters generated the building and stopped.
+</p>
+
+<p>
+    The guard was not merely wrong, it was unnecessary: <code>getAllStarts()</code>
+    already returns only the starts belonging to that chunk, and
+    <code>StablePopulationData.claim()</code> is what makes population happen once per
+    world. It now dedupes against the queue on the same (structure, corner) key
+    <code>claim()</code> uses, so the two cannot disagree. A stable also logs when it is
+    <em>queued</em> now, not only when it is filled &mdash; this bug's entire signature
+    was a missing <code>filled</code> line with nothing to say why, and one line without
+    the other is what tells you which half broke.
+</p>
+
+<h4>Two shipped assumptions, and they are the same assumption</h4>
+
+<p>
+    The <code>[Cowboy]</code> and <code>[Horseman]</code> lines were going to
+    <em>chat</em> in a normal install, because <code>DebugAnnounce.ENABLED</code> was a
+    hard-coded <code>true</code>. It was hard-coded for a good reason, written down at
+    the time: it had been <code>!FMLEnvironment.isProduction()</code>, and a whole
+    session went by unable to tell &ldquo;the gate is shut&rdquo; from &ldquo;the code
+    never ran&rdquo;. The constant was not the mistake. The mistake was that the
+    sentence beside it &mdash; <em>this mod is a dev build with one tester and is not
+    shipped</em> &mdash; stopped being true and nothing went back to look. It is now a
+    <code>debug.announce</code> server config, on in dev, off in a normal install,
+    switchable in both, which is what you want from a player who has something to
+    report. The startup line that says which way the gate went is kept.
+</p>
+
+<p>
+    That is the second defect this week from the same root, after
+    <a href="#coat-packet-cap-2026-09-09">the encoder crash</a> that was invisible on
+    the only machine that had ever run the mod. It has a gap of its own now
+    (<a href="known-gaps.html#gap-140">gap 140</a>), because the sweep has not been
+    done: nothing has gone looking for the <em>other</em> places that assume nobody
+    else is running this.
+</p>
+
+<h4>One hundred and twenty-one errors that meant nothing, every launch</h4>
+
+<p>
+    Found by reading their log for the stables line. <code>Genes</code> loads the
+    shipped gene files from its own class initialiser, on purpose; then
+    <code>ModGeneSpecs</code> called <code>loadAndRegister</code>, which re-read the
+    classpath and handed every one of them back to a registry that throws on a taken
+    key. Each throw was logged at ERROR. Nothing was actually broken &mdash; the first
+    registration is the one that counts &mdash; and that is what makes it worth fixing
+    rather than shrugging at: it trains the log's reader to scroll past a wall of red,
+    and a real collision would be sitting in the middle of it. The classpath half is
+    gone; a drop-in that collides still throws and is still reported. The launch now
+    says how many genes shipped and how many segments the genotype code has, every
+    time, which is the first thing worth knowing from a pasted log.
+</p>
+
+<h4>The spawn screen's right column</h4>
+
+<p>
+    &ldquo;WAY too cramped&rdquo;, and measurably so: the column was 96px wide with a
+    2px gutter, and <code>&quot;Spawn (creative only)&quot;</code> alone measures 111px.
+    A vanilla button neither shrinks nor wraps its label, so several were drawn straight
+    over the edges. It is 128 wide with a 4px gutter now, and the breed label fits
+    itself to the button rather than being cut at twelve characters &mdash; a number
+    that was a guess at what fitted a 96px button and was wrong in both directions.
+</p>
+
+<p>
+    The interesting part is what it exposed. Seven buttons grow down from the top of
+    that column and four are pinned to the bottom, and widening the gutter makes them
+    meet sooner. <code>rightStep()</code> now spends the gutter to buy room &mdash; but
+    seven 20-high buttons need 140px even touching, and a 1080p screen at GUI scale 4
+    leaves about 120, so below roughly 290px they still overlap exactly as they always
+    did. That is <a href="known-gaps.html#gap-139">gap 139</a> rather than a fix,
+    because the honest answers (scroll the column, or split it) are larger than the
+    change that surfaced the problem. <a href="horse-designer/">The designer</a> took
+    the same numbers, per the standing rule that those two screens are one screen in
+    two places.
+</p>
+
 <h3 id="coat-packet-cap-2026-09-09">Two releases nobody could play, and a test that was watching the wrong cap.</h3>
 
 <p>

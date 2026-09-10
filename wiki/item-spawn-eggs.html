@@ -44,6 +44,12 @@
         natural dilutions, the whites, the health genes, or any one family of magic. A
         hundred and seventy genes in one alphabetical column is a list you scroll rather
         than read.</li>
+    <li><strong>Point at a gene and it tells you what it is.</strong> A panel opens
+        beside the list with the gene's name and a sentence or three on what the locus
+        does &mdash; the same summary the gene browser uses, not a description of the
+        particular combination this horse has. Every gene has one. For the full account
+        of any of them, its own <code>gene-*.html</code> page is the authority; this is
+        the glanceable version.</li>
     <li>The <strong>padlock</strong> beside each gene holds it. A locked gene is kept
         exactly as it is by every randomize, alleles and variations both &mdash; which is
         how you roll another horse while keeping <em>this</em> tobiano.</li>
@@ -217,6 +223,15 @@
         genotype makes many horses is a lossy copy pretending to be an exact one. The
         browser designer&rsquo;s <em>Export</em> / <em>Import</em> are the same format
         against a file rather than a clipboard.</li>
+    <li>The hover panel reads <code>Gene.description()</code> &mdash; built-ins from the
+        <code>GeneDescriptions</code> table, data-driven genes from their file's
+        <code>blurb</code>. That accessor is documented as possibly empty and the panel
+        honours it by drawing nothing, but every registered gene has one and
+        <code>GeneDescriptionCoverageTest</code> fails by name if a new one does not.
+        It is drawn with fills and text rather than as a vanilla <code>Tooltip</code>,
+        because a list row is not a widget here and because
+        <a href="horse-designer/">the browser twin</a> has to draw the same panel with
+        no vanilla tooltip to mirror.</li>
     <li>The gene list is filtered by <code>GeneFamily.of</code>, which asks the gene rather
         than keeping a table beside it: magical genes band on their paint priority (the
         bands were laid out as families in the first place), naturals that change nothing

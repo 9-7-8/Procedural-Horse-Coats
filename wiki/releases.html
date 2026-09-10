@@ -36,6 +36,88 @@
     </p>
 </div>
 
+<h2 id="v0-3-3">0.3.3</h2>
+
+<p class="lede">
+    The H menu stops crafting and becomes a reference, a bookshelf starts remembering
+    genes, and five things a play session found get fixed.
+</p>
+
+<h3 id="v0-3-3-fixes">Fixed</h3>
+
+<ul>
+    <li><strong>Stables generated empty.</strong> Three in four never received horses at
+        all: the populator waited for the wrong chunk, and only an <em>unrotated</em>
+        stable ever matched. Existing worlds pick this up on their own &mdash; an empty
+        stable was never recorded as filled, so it fills the next time its chunk
+        loads.</li>
+    <li><strong><code>[Cowboy]</code> and <code>[Horseman]</code> lines in chat.</strong>
+        Development diagnostics that shipped switched on. They are off in a normal
+        install now, and <code>debug.announce</code> in the server config turns them back
+        on when you have something to report.</li>
+    <li><strong>The gene search closed the window.</strong> Typing &ldquo;speed&rdquo;
+        hit the <kbd>e</kbd> and opened your inventory. A focused text box now keeps the
+        keyboard.</li>
+    <li><strong>Breaking a hay portal&rsquo;s frame left the portal.</strong> Knock out
+        one bale and the whole interior goes now, the way a nether portal does.</li>
+    <li><strong>Two mares said nothing.</strong> A same-sex pair fed breeding carrots
+        courted, spent the carrots and produced nothing, silently. They still try, and
+        now they tell you why it did not work.</li>
+    <li><strong>121 error lines on every launch</strong> that meant nothing. Gone.</li>
+</ul>
+
+<h3 id="v0-3-3-browser">The Horse Browser makes nothing</h3>
+
+<p>
+    The <strong>Crafting</strong> tab is now <strong>Recipes</strong>: every recipe the
+    mod adds, drawn as its grid and its result, with a line saying what the thing is for.
+    You read it there and you craft at a crafting table, like anything else. A category
+    dropdown keeps the per-gene splice carrots from burying everything else.
+</p>
+
+<p>
+    Nothing became unobtainable &mdash; every one of those recipes already worked at a
+    crafting table. The one thing the grid could uniquely do has moved into the world,
+    below.
+</p>
+
+<h3 id="v0-3-3-shelf">Research papers, and a shelf to keep them on</h3>
+
+<ul>
+    <li><strong>A book on a horse</strong> gives you a research paper for one gene
+        <em>that horse</em> carries, chosen at random. You do not pick &mdash; which is
+        what makes a paper something you found rather than paperwork. An ordinary horse
+        has nothing to teach and costs you no book.</li>
+    <li><strong>The <a href="item-research-shelf.html">Equine Research Shelf</a></strong>
+        (1 bookshelf + 2 horse hair) files papers &mdash; one per gene, any number of
+        genes &mdash; and copies any of them onto blank books for as long as the original
+        stays in it. Take the original back and the copying stops. Breaking the shelf
+        gives every paper back.</li>
+</ul>
+
+<h3 id="v0-3-3-smaller">Smaller</h3>
+
+<ul>
+    <li><strong>Hover a gene in the custom spawn egg</strong> and it tells you what the
+        gene does. Every gene has a summary now; seventeen did not before.</li>
+    <li><strong>&#9792; and &#9794; after a horse&rsquo;s name</strong>, coloured, so you
+        can read sex across a paddock. Turn it off with
+        <code>nameplate.sexSymbol</code> in the client config. It is drawn, not stored
+        &mdash; the horse&rsquo;s actual name is unchanged.</li>
+    <li><strong>The spawn egg&rsquo;s right-hand buttons</strong> are wider, and stop
+        overflowing their labels.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Most of this has not been played</span>
+    <p>
+        The shelf in particular has never been placed &mdash; block, menu and screen were
+        all written in one pass. <a href="verification.html">To be verified</a> lists
+        what to look at, and <a href="known-gaps.html#gap-143">gap 143</a> says which
+        parts are most likely to be wrong.
+    </p>
+</div>
+
 <h2 id="v0-3-2">0.3.2</h2>
 
 <p class="lede">

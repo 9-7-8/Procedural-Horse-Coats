@@ -35,6 +35,197 @@
     </p>
 </div>
 
+<h2 id="research-shelf">&sect;0-BF &mdash; The Equine Research Shelf, and three smaller things (2026-09-09, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Nothing here has been run</span>
+    <p>
+        A block, a block entity, a container menu, a screen and two payloads, written
+        in one pass (<a href="known-gaps.html#gap-143">gap 143</a>). Start by placing
+        one; if the model or the screen is wrong, everything below is moot.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Craft one (1 bookshelf + 2 horse hair) and place it.</strong> It should
+        look like a bookshelf. Right-click opens a two-tab window.</li>
+    <li><strong>Store tab: file a paper.</strong> Put a research paper in the slot; it
+        should vanish and the gene should appear in the list. Filing a <em>second</em>
+        paper for the same gene should do nothing and leave the paper in the slot
+        rather than eating it.</li>
+    <li><strong>Craft tab: copy it.</strong> Pick the gene, add a blank book, take the
+        paper out. The book is spent and the shelf keeps its original, so a stack of
+        books should give a stack of papers.</li>
+    <li><strong>Take the original back</strong> from the Store tab and the gene should
+        leave the list and stop being copyable.</li>
+    <li><strong>Save, quit, come back.</strong> The single most valuable check: the
+        contents are a gene-key set on the block entity and nothing has round-tripped
+        it.</li>
+    <li><strong>Break it.</strong> Every filed paper should drop along with the block.</li>
+    <li><strong>The tabs must gate the slots.</strong> On Store, the book and result
+        slots should be <em>gone</em> - not merely invisible. Try clicking where they
+        were: if an item goes in, <code>Slot.isActive()</code> is not gating hit-testing
+        the way this screen assumes and the whole tab mechanism needs rethinking.</li>
+</ul>
+
+<p>Also in this build, and unrelated:</p>
+
+<ul>
+    <li><strong>Break one hay bale out of a lit horse portal.</strong> The whole interior
+        should vanish, not just the bale. Then <b>light a fresh portal</b> - that is the
+        half that could have broken, since the fix makes a portal block delete itself
+        when it is not enclosed and a portal is briefly not enclosed while it is being
+        filled in. Both the overworld portals and the horse dimension's return portal
+        are worth lighting.</li>
+    <li><strong>The Recipes tab's category dropdown.</strong> Two entries, "Everything
+        else" (the default) and "Gene carrots". The gene carrots were burying the 27
+        recipes that are not gene carrots. Searching inside a category should stay
+        inside it.</li>
+    <li><strong>Every recipe now has a line saying what the thing is for</strong>, under
+        the grid. The gene carrots' line is formulaic and names the gene. Worth reading
+        a few for length - the panel is a fixed 210 pixels tall and the longest blurb
+        (the unknown epigenetic splice) is the one that would overflow first.</li>
+</ul>
+
+<h2 id="browser-reference">&sect;0-BE &mdash; The H menu crafts nothing now, and four smaller things (2026-09-09, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">The riskiest change on this page</span>
+    <p>
+        The Horse Browser stopped being a container screen
+        (<a href="known-gaps.html#gap-141">gap 141</a>). It compiles and every
+        reference is gone, but a compiler cannot tell you whether a window still
+        <em>looks</em> right. <b>Open it first and look at all four tabs</b> before
+        anything else here.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Press <kbd>H</kbd>.</strong> It should open instantly and with no
+        server round trip. Check the tab strip, both scroll bars, and that
+        <b>My horses</b>, <b>Gene database</b> and <b>Breeding preview</b> all still
+        draw where they used to &mdash; those three were not meant to move, and the
+        geometry underneath them did.</li>
+    <li><strong>The world should keep moving behind it.</strong> A plain screen pauses
+        singleplayer and a container screen does not; that is overridden back, but it
+        was found by reading vanilla rather than by running it.</li>
+    <li><strong>The Recipes tab.</strong> Every recipe the mod adds, drawn as its grid
+        and result, plus one row per discovered gene for the splice carrot. Worth
+        checking: that the shapeless ones read sensibly laid out left-to-right, that
+        the two <code>#minecraft:fences</code> ingredients resolve to a real fence
+        rather than a blank, and that hovering a cell gives the item's tooltip. It
+        makes nothing &mdash; that is the point.</li>
+    <li><strong>Type &ldquo;speed&rdquo; into the gene search.</strong> The reported
+        bug: the <kbd>e</kbd> closed the window and opened your inventory. A focused
+        text box now swallows every key but Escape. Check that backspace, the arrows
+        and ctrl+A/C/V still work in the box, since those go through the same path.</li>
+    <li><strong>Right-click a horse with a book.</strong> You should get a research
+        paper for one gene that horse carries, at random, and a chat line naming it.
+        On a completely ordinary horse: a different line, and <b>no book spent</b>.
+        This is the replacement for the browser's old <em>Craft research paper</em>
+        button, which is gone.</li>
+    <li><strong>Feed breeding carrots to two mares (or two stallions).</strong> They
+        should court, spend the carrots, produce no foal, and now <em>say so</em> &mdash;
+        one of three lines per sex, only to the player who fed them.</li>
+    <li><strong>Sex symbols on nameplates.</strong> &#9792; in pink, &#9794; in blue,
+        after the name. The one real unknown: <b>whether they render as glyphs or as
+        boxes</b> &mdash; both are outside ASCII and come from the unicode fallback
+        font, which nobody here has tested. If they are boxes, say so and they can
+        become drawn shapes like the browser's padlock. <code>nameplate.sexSymbol</code>
+        in the client config turns them off.</li>
+</ul>
+
+<h2 id="gene-blurbs">&sect;0-BD &mdash; A gene says what it does when you point at it (2026-09-09, NOT looked at)</h2>
+
+<p>
+    Hovering a gene in the custom spawn egg's list now pops a panel with the gene's
+    name and its one-to-three-sentence summary. It sits to the right of the list,
+    which is empty space on that screen, and it is drawn the same way the dropdowns
+    are rather than as a vanilla tooltip &mdash; a list row is not a widget there, and
+    the browser twin has no vanilla tooltip to mirror.
+</p>
+
+<ul>
+    <li><strong>Hover a gene that is on the horse, and one that is not.</strong> Both
+        should give the same panel. The one case worth pushing on is <strong>a long
+        blurb near the bottom of the list</strong>: the panel is pushed back inside the
+        window rather than allowed to run off, so it should ride up rather than get
+        cut.</li>
+    <li><strong>Is it in the way?</strong> It covers part of the 3D preview while you
+        are pointing at a gene. That was the deliberate choice &mdash; the preview is
+        not what you are reading at that moment &mdash; but it has never been looked at
+        with a horse actually standing there.</li>
+    <li><strong>Does it flicker or lag the list?</strong> It is rebuilt every frame,
+        including the word wrap. Nothing measures that.</li>
+    <li><strong>Seventeen of the blurbs are new and unread in context.</strong> Every
+        registered gene now has one (it was 185 of 202), and
+        <code>GeneDescriptionCoverageTest</code> keeps it that way. The fifteen written
+        this session were compressed from each gene's own wiki page: tiger eye,
+        leopard, PATN1, PATN2, shadowcreature, and the ten magic utility loci. Worth
+        reading a few in game for tone and length &mdash; they were written to the
+        existing entries' style, not measured against the panel.</li>
+    <li><strong>The browser twin took the same panel.</strong>
+        <a href="horse-designer/">The horse designer</a> draws it fill for fill, so a
+        look there is a second look at the same change &mdash; and its gene list is the
+        easier place to scan a lot of blurbs quickly.</li>
+</ul>
+
+<h2 id="play-session-fixes">&sect;0-BC &mdash; Four things off a real play session, and the one that needs a fresh world (2026-09-09, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">The first item on this page that is a confirmation rather than a request</span>
+    <p>
+        <strong>0.3.2 launches and makes a world.</strong> The owner confirmed it,
+        which closes <a href="#coat-packet-cap">&sect;0-BB</a>'s first and largest
+        question. What follows are the four things that session then found, three of
+        them fixed by reasoning rather than by being watched working.
+    </p>
+</div>
+
+<ul>
+    <li><strong>A stable with horses in it &mdash; and the empty ones you already have
+        should fill themselves.</strong> Three stables in four generated empty
+        (<a href="known-gaps.html#gap-136">gap 136</a>), and the fix is reasoned from
+        how jigsaw rotation moves a bounding box, not observed. <b>An existing world is
+        the better test, not a worse one</b>: a stable is only recorded as claimed at
+        the moment it is <em>populated</em>, so the three quarters that were never
+        queued were never claimed either. Load a save with a known-empty stable, get its
+        chunk to reload (quitting to the title and going back in is enough), and walk
+        back to it &mdash; the horses should now be there. A new world should work too;
+        this is just the quicker check. If it still looks empty, the log says which half
+        broke: <code>[Stables] queued</code> and <code>[Stables] filled &hellip; with N
+        horse(s) (X stall, Y field found)</code> are two separate lines, and neither is
+        gated by the debug switch below.</li>
+    <li><strong>Where the horses stand, once there are any.</strong>
+        <a href="known-gaps.html#gap-82">Gap 82</a> &mdash; the stall scan is a
+        heuristic and has now been shown to be even less observed than it claimed,
+        since three quarters of the cases never got as far as scanning. Horses in a
+        corridor, in a tack room, or clipped into a wall are all live possibilities and
+        none of them has been ruled out.</li>
+    <li><strong>No <code>[Cowboy]</code> or <code>[Horseman]</code> lines in chat.</strong>
+        They are now off in a normal install and on in a dev run
+        (<a href="known-gaps.html#gap-137">gap 137</a>). Two things to confirm, and they
+        are opposite: that a <em>normal</em> install is quiet, and that a <em>dev</em>
+        run still talks &mdash; a gate that silences everything everywhere is the failure
+        this switch was built to avoid. The log line
+        <code>[Debug] chat+log diagnostics enabled=&hellip;</code> says which way it went.
+        Setting <code>debug.announce = true</code> in the server config should bring the
+        lines back in a normal install.</li>
+    <li><strong>The launch log should be quiet now.</strong> It printed 121
+        <code>[genes] could not register</code> ERROR lines before the title screen
+        (<a href="known-gaps.html#gap-138">gap 138</a>). There should now be none, and
+        two INFO lines instead saying how many genes shipped and how many segments the
+        genotype code has. A collision reported after this change is a real one.</li>
+    <li><strong>The custom spawn screen's right-hand column.</strong> Widened from 96 to
+        128 with a 4px gutter, and the breed label now fits itself to the button instead
+        of being cut at twelve characters. Worth an eye on whether 128 is actually
+        enough or merely more, and on <a href="known-gaps.html#gap-139">gap 139</a>:
+        at <b>GUI scale 4</b> the top and bottom halves of that column still overlap,
+        which nobody has looked at. <strong>The browser twin moved with it</strong>
+        &mdash; <a href="horse-designer/">the horse designer</a> carries the same
+        numbers, so a glance there is a second look at the same change.</li>
+</ul>
+
 <h2 id="coat-packet-cap">&sect;0-BB &mdash; 0.3.0 and 0.3.1 disconnected on world entry; 0.3.2 should not (2026-09-09, NOT looked at)</h2>
 
 <div class="note">
@@ -1945,13 +2136,7 @@
 <h3>The &ldquo;i&rdquo; button and the way in</h3>
 
 <ul>
-    <li><strong>Shift-right-click a tamed horse instead of riding it.</strong> This is the
-        case that was <em>broken</em> before: vanilla opens the same inventory screen
-        without mounting, and the mod read its horse off
-        <code>player.getVehicle()</code>, which is <code>null</code> there. Every one of
-        this mod's additions came up blank. The button should now work identically
-        whether you rode the horse or shift-clicked it &mdash; check both.</li>
-    <li><strong>Does Done / Escape go back to the horse inventory, and does that
+        <li><strong>Does Done / Escape go back to the horse inventory, and does that
         inventory still work?</strong> The information screen re-shows the container
         screen it came from rather than closing to the world. Go back and then
         <strong>move an item between the saddle slot and your inventory</strong>: if the

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equine Research Shelf &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Block <span class="sep">/</span> genes</p>
+<h1>Equine Research Shelf</h1>
+<p class="lede">
+    A bookshelf that files research papers &mdash; one of each gene &mdash; and copies any
+    of them onto blank books for as long as the original stays in it. It is what turns
+    knowing a gene into owning it.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="use">What it does</h2>
+
+<div class="plain">
+    <p>
+        <strong>Recipe (shapeless):</strong> 1 bookshelf + 2 horse hair.
+    </p>
+</div>
+
+<p>
+    Right-click it and you get two tabs.
+</p>
+
+<ul>
+    <li><strong>Store</strong> &mdash; put a research paper in the slot and the shelf
+        <em>files</em> it: the paper is gone and the gene is now on the shelf&rsquo;s list.
+        Click any row in that list to take that paper back out. A shelf holds
+        <strong>one paper per gene</strong> and any number of genes, so filing a
+        duplicate does nothing and the paper is left in the slot rather than eaten.</li>
+    <li><strong>Craft</strong> &mdash; pick a gene from the same list, put a blank book in,
+        and take a copy of that gene&rsquo;s paper out. The book is spent. <b>The
+        shelf&rsquo;s own paper never is</b>, so you can do it as many times as you have
+        books.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Taking a paper back stops the copying</span>
+    <p>
+        The list is the shelf&rsquo;s contents, not your gene database. Withdraw the
+        original and that gene leaves the list, and the shelf can no longer copy it. That
+        is the whole point: a shelf you have filled is a collection that exists in the
+        world, and it can be emptied.
+    </p>
+</div>
+
+<p>
+    <strong>Breaking it gives everything back</strong> &mdash; the block and every filed
+    paper drop together. Moving a shelf costs nothing.
+</p>
+
+<h2 id="loop">Where the papers come from</h2>
+
+<p>
+    The shelf makes papers <em>plentiful</em>; it does not make them <em>appear</em>. The
+    ways in are on <a href="item-research-papers.html">Research papers</a>, and the one
+    that pairs with this is <strong>a book on a horse</strong>: right-click a horse
+    holding a book and you get a paper for one gene <em>that horse</em> carries, chosen
+    at random. You cannot pick, which is what makes a paper something you found.
+</p>
+
+<p>
+    So the loop is: meet horses, take what they will tell you, file it, and copy it from
+    then on. A gene you have filed is a gene you can hand to somebody else as often as
+    you like &mdash; which is what makes knowledge shareable rather than hoardable.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="storage">It stores a set of keys, not items</h2>
+
+<p>
+    <code>EquineResearchShelfBlockEntity</code> keeps a <code>Set&lt;String&gt;</code> of
+    gene keys. A research paper is completely described by the one gene it names, and the
+    shelf holds at most one of each &mdash; so the rule is <strong>structural</strong>
+    rather than enforced. There is no way to express &ldquo;two papers for flaxen&rdquo;
+    in the data, so no code has to remember not to, and a shelf can hold every gene in
+    the mod without an item stack per gene.
+</p>
+
+<p>
+    Keys become items again at exactly two moments: a withdrawal, and
+    <code>affectNeighborsAfterRemoval</code>. A key for a gene this build no longer has is
+    kept and shown by its raw key rather than dropped &mdash; losing somebody&rsquo;s
+    collection because they removed a gene pack would be worse than a row that reads
+    oddly.
+</p>
+
+<h2 id="menu">Three slots, two tabs</h2>
+
+<p>
+    <code>ResearchShelfMenu</code> has a book slot, a result slot and a filing slot. Which
+    are live is the tab, and the mechanism is <code>Slot.isActive()</code> rather than
+    moving them: <code>Slot.x</code> and <code>Slot.y</code> are final, and
+    <code>isActive()</code> is what vanilla consults for drawing <em>and</em> for
+    hit-testing &mdash; the pair that must never disagree, because a slot you cannot see
+    but can still click is the worst of both.
+</p>
+
+<p>
+    The result is <strong>recomputed, never remembered</strong>: it exists only while a
+    book is in the slot and the shelf still holds the selected gene, so pulling the book
+    out or withdrawing the original clears it on its own.
+</p>
+
+<h2 id="sync">The shelf is the authority</h2>
+
+<p>
+    The contents are not items in slots, so none of it reaches the client through the
+    ordinary container sync. <code>ShelfSyncPayload</code> pushes the gene list on every
+    change, and <code>server/ShelfOpenSync</code> pushes it once when the menu opens
+    &mdash; that one has no change behind it, and without it a freshly opened shelf draws
+    empty until you touch something. It is an event rather than a line in the menu&rsquo;s
+    constructor because <code>openMenu</code> builds the menu <em>before</em> it sends the
+    open packet, so a constructor push would arrive first and be dropped.
+</p>
+
+<p>
+    <code>ShelfActionPayload</code> carries the two things a player can do &mdash; select
+    a gene, withdraw a paper &mdash; and both are re-checked against the block entity. A
+    forged packet can at worst ask for a gene the shelf does not hold, and get nothing.
+</p>
+
+</section>
+
+</article>
+</main>
+</body>
+</html>

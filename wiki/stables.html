@@ -272,11 +272,41 @@
 <p>
     There is no &ldquo;a structure finished generating&rdquo; event. What there is:
     a chunk load, and a <code>StructureStart</code> that knows the piece&rsquo;s whole
-    bounding box. So a stable is <strong>queued</strong> when the chunk holding its
-    start loads, and populated <strong>40 ticks later</strong> &mdash; by which time
+    bounding box. So a stable is <strong>queued</strong> when a loading chunk reports a
+    start for it, and populated <strong>40 ticks later</strong> &mdash; by which time
     the neighbouring chunks the piece spans have had their own feature stage and the
     stalls actually exist. It waits again if any of them is still unloaded, because a
     horse spawned into an unloaded chunk is a horse that never existed.
+</p>
+
+<div class="note">
+    <span class="label">Do not add a position check here</span>
+    <p>
+        There was one, and it emptied three stables in four
+        (<a href="known-gaps.html#gap-136">gap 136</a>). It compared the bounding
+        box&rsquo;s minimum corner against the chunk being loaded, meaning to say
+        &ldquo;only the chunk that owns this start&rdquo; &mdash; but a jigsaw start
+        piece is placed at its chunk&rsquo;s minimum block corner and <em>then
+        rotated</em>, and the rotation happens about <code>BlockPos.ZERO</code>. Three
+        of the four rotations carry the box into the previous chunk in x, z or both,
+        so three quarters of stables never matched and were never queued at all.
+    </p>
+    <p>
+        No check is needed: <code>getAllStarts()</code> already returns only the starts
+        belonging to that chunk, and <code>StablePopulationData.claim()</code> is what
+        makes population happen once per world. The queue dedupes on the same
+        (structure, corner) key <code>claim()</code> uses, so the two cannot disagree
+        about what &ldquo;the same stable&rdquo; means.
+    </p>
+</div>
+
+<p>
+    A stable writes <strong>two</strong> log lines, and which one is missing says which
+    half broke: <code>[Stables] queued &hellip;</code> when it is noticed, and
+    <code>[Stables] filled &hellip; with N horse(s) (X stall, Y field found)</code> when
+    it is populated. Neither is gated by
+    <a href="#debug-announce"><code>debug.announce</code></a> &mdash; they are once per
+    stable per world, and they are what a bug report needs.
 </p>
 
 <p>
@@ -293,6 +323,27 @@
     reloaded, and a bug report naming a location can be reproduced.
     Every horse is <code>setPersistenceRequired()</code>: one a player walked half a
     world to find must not despawn because they left to fetch a saddle.
+</p>
+
+<h2 id="debug-announce">Turning the commentary on</h2>
+
+<p>
+    This mod says what it is doing &mdash; a cowboy founding, a villager taking the
+    horseman job, a stable being filled &mdash; in chat and in the log, because most
+    of it happens where nobody is looking. That is a development tool, so
+    <code>debug.announce</code> in the <strong>server</strong> config is
+    <strong>on in a development run and off in a normal install</strong>. It shipped
+    hard-coded on once, and players got <code>[Cowboy]</code> and
+    <code>[Horseman]</code> lines in their chat
+    (<a href="known-gaps.html#gap-137">gap 137</a>).
+</p>
+
+<p>
+    Set it to <code>true</code> in a normal install when you are chasing something and
+    want a paste-able log. The line
+    <code>[Debug] chat+log diagnostics enabled=&hellip;</code> at startup says which way
+    the switch went, on purpose: a gate you cannot read is how &ldquo;no debug line ever
+    printed&rdquo; once became unanswerable.
 </p>
 
 <h2 id="rarity">How often they generate</h2>
