@@ -112,6 +112,9 @@ public final class HorseCareHandler {
         // Above everything: stand still while a player is reading this horse's
         // information screen (HorseInspectHold).
         horse.goalSelector.addGoal(InspectHoldGoal.PRIORITY, new InspectHoldGoal(horse));
+        // Taming by hand: approach a crouched player holding food it eats.
+        // Above the wandering goals, or a horse would drift off mid-approach.
+        horse.goalSelector.addGoal(GOAL_PRIORITY - 1, new CrouchFeedGoal(horse));
     }
 
     // ------------------------------------------------------------------
@@ -241,8 +244,28 @@ public final class HorseCareHandler {
         }
         int effective = (care.inHerd() && horse.isBaby()) ? amount * 2 : amount;
         int grant = Math.min(effective, room);
+        if (grant > 0) {
+            bondHearts(level, horse);
+        }
         return care.with(care.bond() + grant, care.herd(), bondToday + grant, dayStamp,
                 care.bondTicks(), care.togetherTicks());
+    }
+
+    /**
+     * <b>Hearts whenever the bond actually moves.</b>
+     *
+     * <p>Here rather than at any of the call sites for the same reason the bond
+     * tiers hang off {@code syncCare}: this is the one function that decides
+     * whether a point was really granted, so a path added later gets the
+     * feedback for free and none of them can grant silently. In particular it
+     * fires only when {@code grant} is non-zero, so a horse that has hit its
+     * daily cap stops showing hearts - which is the one piece of information
+     * the player had no way to read before.
+     */
+    private static void bondHearts(ServerLevel level, Horse horse) {
+        level.sendParticles(ParticleTypes.HEART,
+                horse.getX(), horse.getY() + horse.getBbHeight() * 0.85, horse.getZ(),
+                3, 0.4, 0.25, 0.4, 0.0);
     }
 
     private static HorseCareAttachment updateHerd(Horse horse, HorseCareAttachment care,

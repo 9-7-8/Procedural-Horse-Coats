@@ -218,6 +218,14 @@ public final class HorseBrowserScreen extends Screen {
     /** Right edge of the pinned contents column, or 0 when it is inline. */
     private int tocColumnRight = 0;
     /**
+     * How tall the <b>inline</b> contents list is - what "take me to that
+     * section" has to scroll past.
+     *
+     * <p>Zero when the list is pinned in its own column, where the article
+     * starts at the top of its own scroll and there is nothing above it.
+     */
+    private int tocInlineHeight = 0;
+    /**
      * <b>Which section of Getting Started is open.</b> A step index, or
      * {@code steps + g} for the checklist's group {@code g} - see
      * {@link #sectionCount()}.
@@ -1427,9 +1435,19 @@ public final class HorseBrowserScreen extends Screen {
             g.fill(l + TOC_W + 8, top, l + TOC_W + 9, bottom, DIVIDER);
         }
 
+        // Clamp BEFORE drawing as well as after. The scroll is static and the
+        // limit is per-instance, so a value left behind by a taller section -
+        // or by a previous screen - was being used for one frame's worth of
+        // offset before anything corrected it, and a large enough leftover
+        // scrolls the whole article up out of its own scissor. Clamping only
+        // afterwards means the frame that is wrong is always the frame the
+        // player is looking at.
+        tutorialScroll = Math.max(0f, Math.min(tutorialScroll, tutorialMaxScroll));
+
         g.enableScissor(textL - 4, top, r, bottom);
         int y = top - (int) tutorialScroll;
         int height = pinned ? 0 : drawContents(g, textL, y, w, bottom, mouseX, mouseY, false);
+        tocInlineHeight = height;
         height += drawSection(g, textL, y + height, w, mouseX, mouseY);
         g.disableScissor();
 
@@ -1584,7 +1602,13 @@ public final class HorseBrowserScreen extends Screen {
             }
             if (e.index() != tutorialSection) {
                 tutorialSection = e.index();
-                tutorialScroll = 0f; // a new section is read from its own top
+                // A new section is read from its own top - which is *not* the
+                // top of the scroll when the contents are inline. Scrolling to
+                // zero there just puts the reader back at the contents list
+                // they clicked in, with the section they chose still below the
+                // fold: the tab looked like a list of headings that did nothing
+                // when you clicked them.
+                tutorialScroll = tocInlineHeight;
             }
             return true;
         }

@@ -7,6 +7,7 @@ import com.example.horsegenetics.neoforge.item.TicketItem;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -40,9 +42,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  */
 @EventBusSubscriber
 public final class TicketHandler {
-
-    /** How far above the stall floor to look for headroom before giving up on a spot. */
-    private static final int HEADROOM = 2;
 
     private TicketHandler() {
     }
@@ -102,6 +101,15 @@ public final class TicketHandler {
         }
 
         BlockPos landing = landingSpot(target, stall);
+        if (landing == null) {
+            // Nothing is spent and nothing moves. A horse that quietly fails to
+            // arrive is indistinguishable from a horse that was deleted, and
+            // the version that guessed a spot instead of refusing put one
+            // inside a wall, where it suffocated.
+            say(player, "There is no room to stand in that stall - check the sign is still up and "
+                    + "that the stall has a floor and two blocks of headroom.");
+            return;
+        }
         // A puff where it was, so the player sees the horse leave rather than
         // just noticing it has gone.
         level.sendParticles(ParticleTypes.PORTAL, horse.getX(), horse.getY() + 0.8, horse.getZ(),
@@ -143,44 +151,29 @@ public final class TicketHandler {
     }
 
     /**
-     * Where in the stall to put the horse: the middle of the floor if that is
-     * standing room, otherwise the first cell in the stall that is.
+     * <b>Where in the stall to put the horse, or {@code null} if nowhere.</b>
      *
-     * <p>The stall may be the detector's fallback box rather than a real room
-     * (see {@link StallDetector}), so this cannot assume the volume is enclosed
-     * or even that its middle is empty - it checks, and falls back to the sign
-     * itself, which is the one block known to be somewhere the player stood.
+     * <p>The stall is measured <b>now</b>, not read back from the record. Two
+     * reasons, and the first one cost a horse: the stored span is a bounding
+     * box, and a box around any room that is not a plain cuboid contains the
+     * walls inside it. The second is that a player rebuilds stalls - re-running
+     * the detector means a stall that has been widened, floored or re-fenced
+     * since the sign went up is the stall the horse arrives in.
+     *
+     * <p>The chunk is pulled in first. A horse teleported into unloaded terrain
+     * is the failure that looks exactly like a horse that was deleted.
      */
     private static BlockPos landingSpot(ServerLevel level, StallRecord stall) {
-        BlockPos min = stall.min();
-        BlockPos max = stall.max();
-        BlockPos middle = new BlockPos(
-                (min.getX() + max.getX()) / 2, min.getY(), (min.getZ() + max.getZ()) / 2);
-        if (standable(level, middle)) {
-            return middle;
+        BlockPos signPos = stall.signPos();
+        level.getChunk(signPos); // load it, so what we read is real and the horse arrives somewhere
+        BlockState sign = level.getBlockState(signPos);
+        if (!(sign.getBlock() instanceof WallSignBlock)) {
+            return null; // the sign is gone - so is the stall it was naming
         }
-        for (int y = min.getY(); y <= max.getY(); y++) {
-            for (int x = min.getX(); x <= max.getX(); x++) {
-                for (int z = min.getZ(); z <= max.getZ(); z++) {
-                    BlockPos p = new BlockPos(x, y, z);
-                    if (standable(level, p)) {
-                        return p;
-                    }
-                }
-            }
-        }
-        return stall.signPos();
-    }
-
-    /** Room for a horse to stand: this cell and the ones above it are clear. */
-    private static boolean standable(ServerLevel level, BlockPos pos) {
-        for (int i = 0; i <= HEADROOM; i++) {
-            BlockState state = level.getBlockState(pos.above(i));
-            if (state.blocksMotion()) {
-                return false;
-            }
-        }
-        return true;
+        Direction facing = sign.getValue(WallSignBlock.FACING);
+        StallDetector.Result live =
+                StallDetector.forSign(level, signPos.relative(facing.getOpposite()), facing);
+        return StallDetector.landingSpot(level, live);
     }
 
     private static boolean ownedBy(Horse horse, UUID playerId) {

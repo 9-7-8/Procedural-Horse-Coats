@@ -119,7 +119,18 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
      * container screen's own toggles do: {@code Slot.x/y} are final, so a slot
      * cannot be moved out of the way - but {@link Slot#isActive()} is consulted
      * for both drawing <i>and</i> hit-testing, which is exactly the pair that
-     * has to agree. Always true server-side, where there is no tab.
+     * has to agree.
+     *
+     * <p><b>It is only ever set on the client</b> ({@link #setStoreTab} is
+     * called from the screen and from nowhere else), which is the whole reason
+     * {@link #activeOnTab} exists rather than the slots reading this field
+     * directly. The server's copy of the menu is a second object that never
+     * hears about a tab change, so it sat on the field's default of
+     * {@code false} forever - and the filing slot, whose rule was
+     * {@code isActive() { return storeTab; }}, was therefore <b>inactive on the
+     * server for the life of the block</b>. Nothing could be filed, ever: the
+     * click left the client, the server looked at a slot it believed was not
+     * there, and the paper snapped back to the cursor.
      */
     private boolean storeTab;
 
@@ -152,7 +163,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
 
             @Override
             public boolean isActive() {
-                return !storeTab;
+                return activeOnTab(false);
             }
         });
         addSlot(new Slot(result, 0, RESULT_X, SLOT_Y) {
@@ -163,7 +174,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
 
             @Override
             public boolean isActive() {
-                return !storeTab;
+                return activeOnTab(false);
             }
 
             @Override
@@ -181,7 +192,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
 
             @Override
             public boolean isActive() {
-                return storeTab;
+                return activeOnTab(true);
             }
         });
 
@@ -220,6 +231,21 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     }
 
     /** Client-side, from the screen, every frame. */
+    /**
+     * <b>Every slot is live on the server; the tab only hides them on the
+     * client.</b>
+     *
+     * <p>A tab is a piece of screen furniture, and the server has no screen. It
+     * cannot know which one the player is looking at without being told, and
+     * telling it would buy nothing: the client will not send a click on a slot
+     * it is not drawing, so hiding the slot there is already the whole of the
+     * enforcement. Deciding it twice, from state only one side has, is how the
+     * filing slot came to refuse everything.
+     */
+    private boolean activeOnTab(boolean tab) {
+        return !player.level().isClientSide() || storeTab == tab;
+    }
+
     public void setStoreTab(boolean store) {
         this.storeTab = store;
     }

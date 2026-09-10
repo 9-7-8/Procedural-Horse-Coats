@@ -176,9 +176,9 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
             drawCraft(g);
         } else {
             VanillaPanel.slot(g, leftPos + ResearchShelfMenu.FILE_X, topPos + ResearchShelfMenu.SLOT_Y);
-            g.text(this.font, Component.literal("Put a research paper here to file it"),
+            drawFitted(g, "File a research paper here",
                     leftPos + ResearchShelfMenu.MARGIN, topPos + ResearchShelfMenu.NOTE_Y,
-                    VanillaPanel.TEXT_DIM, false);
+                    ResearchShelfMenu.LIST_W, VanillaPanel.TEXT_DIM);
         }
 
         for (int i = 0; i < 27; i++) {
@@ -214,8 +214,8 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         int noteX = leftPos + ResearchShelfMenu.MARGIN;
         int noteY = topPos + ResearchShelfMenu.NOTE_Y;
         if (selected.isEmpty()) {
-            g.text(this.font, Component.literal("Pick a gene above, then add a book"),
-                    noteX, noteY, VanillaPanel.TEXT_DIM, false);
+            drawFitted(g, "Pick a gene, then add a book",
+                    noteX, noteY, ResearchShelfMenu.LIST_W, VanillaPanel.TEXT_DIM);
             return;
         }
         String name = EquineResearchShelfBlockEntity.displayName(selected);
@@ -236,11 +236,11 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
 
         List<String> genes = stored();
         if (genes.isEmpty()) {
-            g.text(this.font, Component.literal("This shelf is empty."), l + 3, t + 2, 0xFF3F3F3F, false);
-            g.text(this.font, Component.literal(tab == Tab.STORE
-                            ? "File a paper below to start it off."
-                            : "Nothing filed yet - see the Store tab."),
-                    l + 3, t + 2 + ROW_H, 0xFF3F3F3F, false);
+            drawFitted(g, "This shelf is empty.", l + 3, t + 2, w - 6, 0xFF3F3F3F);
+            drawFitted(g, tab == Tab.STORE
+                            ? "File a paper below to begin."
+                            : "Use the Store tab to file one.",
+                    l + 3, t + 2 + ROW_H, w - 6, 0xFF3F3F3F);
             return;
         }
         scroll = Math.max(0, Math.min(scroll, maxScroll()));
@@ -266,7 +266,19 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         }
     }
 
-    /** Left-aligned, squeezed down (never up) so a long gene name still fits its row. */
+    /**
+     * Left-aligned, squeezed down (never up) so a long gene name still fits its
+     * row.
+     *
+     * <p><b>Every string this window draws goes through here</b>, not just the
+     * gene names it was written for. The window is
+     * {@link ResearchShelfMenu#WIDTH} wide, which leaves
+     * {@link ResearchShelfMenu#LIST_W} of usable measure - about thirty-two
+     * characters - and four of the fixed captions were longer than that and
+     * drawn raw, so they ran straight out through the frame and over whatever
+     * was beside it. They are shorter now <i>and</i> fitted: the first stops it
+     * looking squeezed, the second stops the next one being a bug.
+     */
     private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int colour) {
         float w = this.font.width(text);
         if (w <= maxW || w <= 0) {
