@@ -73,7 +73,7 @@ public final class ModDataComponents {
      * The horse a {@code signed_transfer_paper} is a claim on
      * ({@link com.example.horsegenetics.common.horse.TransferDeed}) - written
      * when a player signs a blank against their own horse, or when the cowboy
-     * sells one out of his herd. Redeeming it moves that horse's ownership to
+     * sells one out of their herd. Redeeming it moves that horse's ownership to
      * whoever right-clicks the animal with it.
      */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<

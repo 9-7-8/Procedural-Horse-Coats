@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Names the <b>horseman</b> when a villager takes the job at a Horseman's Table:
- * a first name of his own, and the family name of the nearest cowboy in town.
+ * a first name of their own, and the family name of the nearest cowboy in town.
  *
  * <h2>One family per village</h2>
  * Whoever is hired first names the family, and everyone after joins it - see
@@ -32,15 +32,15 @@ import org.jspecify.annotations.Nullable;
  * <h2>Why a poll and not an event</h2>
  * Taking a job is not something NeoForge fires an event for. It happens deep in
  * vanilla's brain, when a villager's {@code AcquirePoi} behaviour claims a
- * ticket on a job-site POI, and the only outward sign is that his
+ * ticket on a job-site POI, and the only outward sign is that their
  * {@code VillagerData} now names a profession. So this watches for that: one
  * profession comparison per villager tick.
  *
  * <p>That also makes it the cheapest answer to the hardest thing about the
- * horseman to test. He does not generate ready-made - he exists when a table is
- * placed near an unemployed villager and he gets round to claiming it - and when
+ * horseman to test. They do not generate ready-made - they exist when a table is
+ * placed near an unemployed villager and they get round to claiming it - and when
  * nothing happens there are three indistinguishable reasons (the POI did not
- * register, the {@code acquirable_job_site} tag did not merge, or he simply has
+ * register, the {@code acquirable_job_site} tag did not merge, or they simply have
  * not yet). The line this prints separates the third from the first two.
  */
 @EventBusSubscriber
@@ -82,7 +82,7 @@ public final class HorsemanHandler {
      * and the table hand out their jobs independently, in whatever order the
      * villagers get round to claiming them - so neither role can be the one that
      * owns the name. Whoever is hired first looks round, finds nobody, and coins
-     * one; everybody after finds him and joins.
+     * one; everybody after finds them and joins.
      *
      * <p>The <b>nearest</b> namesake wins, which only matters in a village with
      * two outfits in it: a second hitch across town founds the Adamses, and a
@@ -90,7 +90,7 @@ public final class HorsemanHandler {
      * far end.
      *
      * <p>It counts the two roles this mod names and nothing else. A player who
-     * renames his own farmer "Bob" has not founded a horse family.
+     * renames their own farmer "Bob" has not founded a horse family.
      */
     public static String familySurname(ServerLevel level, BlockPos at, @Nullable Entity except, Rng rng) {
         AABB town = new AABB(at).inflate(TOWN);

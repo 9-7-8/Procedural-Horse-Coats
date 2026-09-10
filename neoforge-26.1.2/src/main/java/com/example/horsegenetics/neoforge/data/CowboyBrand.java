@@ -20,7 +20,7 @@ import java.util.UUID;
  * follow, and {@code TransferPaperHandler} uses it to refuse the ordinary
  * mount-until-it-gives-in taming that would otherwise let a player walk into
  * the barn and help themselves to the entire herd for free. Redemption clears
- * it, which is the moment the horse stops being his.
+ * it, which is the moment the horse stops being their.
  *
  * <p>Not on {@link HorseCareAttachment} on purpose. That record is the horse's
  * own social state - its bond, the wild herd it was born into - and its
@@ -30,7 +30,7 @@ import java.util.UUID;
  * tolerate.
  *
  * <p><b>Not</b> {@code copyOnDeath}: a cowboy horse that dies and is somehow
- * re-summoned is not still his.
+ * re-summoned is not still their.
  */
 public record CowboyBrand(Optional<UUID> cowboy) {
 

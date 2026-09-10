@@ -13,9 +13,9 @@ import net.minecraft.server.level.ServerPlayer;
  *
  * <h2>Why this exists</h2>
  * Most of what this mod does happens where nobody is looking. A cowboy founds
- * the moment his chunk starts ticking, usually before the barn is on screen; a
- * villager takes the horseman job silently; a mounted man changes what he is
- * doing without changing what he looks like. All three were previously
+ * the moment their chunk starts ticking, usually before the barn is on screen; a
+ * villager takes the horseman job silently; a mounted man changes what they are
+ * doing without changing what they look like. All three were previously
  * questions you answered by reading a server log while it scrolled.
  *
  * <h2>Both channels, every time</h2>

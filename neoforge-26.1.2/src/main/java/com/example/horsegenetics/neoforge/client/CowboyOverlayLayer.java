@@ -24,8 +24,8 @@ import net.minecraft.resources.Identifier;
  *
  * <p>The cowboy cannot use vanilla's {@code VillagerProfessionLayer} to do it:
  * that layer reads {@code VillagerData} off the render state to decide which
- * profession and which biome variant to draw, and he is not a {@link
- * net.minecraft.world.entity.npc.villager.Villager} and has none. He is always
+ * profession and which biome variant to draw, and they are not a {@link
+ * net.minecraft.world.entity.npc.villager.Villager} and has none. They are always
  * this one look, so both textures here are constants.
  *
  * <h2>The no-hat model</h2>

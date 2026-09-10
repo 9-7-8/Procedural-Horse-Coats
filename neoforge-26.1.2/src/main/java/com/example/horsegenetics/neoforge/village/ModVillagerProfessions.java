@@ -61,7 +61,7 @@ public final class ModVillagerProfessions {
                     Component.translatable("entity.horsegenetics.villager.horseman"),
                     poi -> poi.is(ModPoiTypes.HORSEMANS_TABLE_KEY),
                     poi -> poi.is(ModPoiTypes.HORSEMANS_TABLE_KEY),
-                    ImmutableSet.of(),  // nothing he picks up off the ground
+                    ImmutableSet.of(),  // nothing they pick up off the ground
                     ImmutableSet.of(),  // no secondary POI (a farmer's farmland, a fisherman's water)
                     SoundEvents.VILLAGER_WORK_LEATHERWORKER,
                     Int2ObjectMap.ofEntries(

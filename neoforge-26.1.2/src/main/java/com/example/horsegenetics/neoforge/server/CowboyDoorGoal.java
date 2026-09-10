@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Lets the {@link Cowboy} open a door he has walked into - <b>both leaves of it
+ * Lets the {@link Cowboy} open a door they have walked into - <b>both leaves of it
  * if it is a double door</b>, and <b>only in daylight</b>.
  *
  * <h2>Why not {@code OpenDoorGoal}</h2>
@@ -21,10 +21,10 @@ import org.jspecify.annotations.Nullable;
  * and one leaf is a one-block gap. Minecraft's ground pathfinder rounds a mob up
  * to {@code floor(width + 1)} blocks across, so a one-block gap is not a gap at
  * all to a horse, and the whole point of the man walking to the barn is the
- * string of horses walking in behind him. So this opens the partner leaf too.
+ * string of horses walking in behind them. So this opens the partner leaf too.
  *
  * <p>It also does not close anything. {@code OpenDoorGoal}'s close-behind is
- * wrong here twice over: the herd is following him and would be shut out, and
+ * wrong here twice over: the herd is following them and would be shut out, and
  * the barn doors standing open is what the doorway headroom in
  * {@code tools/barn/bake-barn.py} was cleared for.
  *
@@ -32,13 +32,13 @@ import org.jspecify.annotations.Nullable;
  * Two halves, and both are needed. {@link #canUse()} refuses after dark, and
  * {@link Cowboy} turns the navigator's own {@code canOpenDoors} off with it -
  * because that flag is what makes the pathfinder treat a shut door as a way
- * through. Leave it on with this goal switched off and he paths at a door he
+ * through. Leave it on with this goal switched off and they path at a door they
  * will not open and stands there shoving it.
  *
  * <p>"Day" is {@link Level#isBrightOutside()}, the same test the gene effects
  * use for their {@code day} trigger, so the mod has one definition of daytime.
  * It reads sky darkening rather than the clock, so a thunderstorm counts as
- * night and he will wait it out - which is the behaviour a shared definition
+ * night and they will wait it out - which is the behaviour a shared definition
  * buys, and is why this does not hand-roll a clock comparison instead.
  */
 public final class CowboyDoorGoal extends DoorInteractGoal {

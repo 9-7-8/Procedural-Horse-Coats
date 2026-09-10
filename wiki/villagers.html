@@ -20,7 +20,7 @@
 <p class="lede">
     Two people who trade in horses, and the item that lets a horse be sold without
     either of them touching it. The <strong>cowboy</strong> lives in a barn on the
-    edge of a plains village, never gets off his horse, and sells his herd as
+    edge of a plains village, never gets off their horse, and sells their herd as
     <strong>transfer papers</strong>; the <strong>horseman</strong> is an ordinary
     villager profession selling tack and gene goods from a workstation. This page is
     the source of truth for all three. The items themselves are listed on
@@ -89,7 +89,7 @@
     all &mdash; the binding is on the <em>blank</em>, so that only someone with the
     standing to write a paper can write one &mdash; and redeeming it does not require
     being the person who signed it, or the person who bought it. Buying one from the
-    cowboy moves nothing: the horse is still standing in his paddock, and you have to
+    cowboy moves nothing: the horse is still standing in their paddock, and you have to
     go out and find it.
 </p>
 
@@ -117,7 +117,7 @@
     <strong><code>tamedBy</code> is only ever filled in when it is blank.</strong> It
     records who first got a rope on the animal, which also does not change when the
     animal is sold. In practice the only horses it gets written to are the cowboy's,
-    because his stock has never been tamed by anyone.
+    because their stock has never been tamed by anyone.
 </p>
 
 <p>
@@ -131,20 +131,20 @@
 
 <p>
     A horse breeder who is generated with a barn on the outskirts of a plains
-    village, and who <strong>is always on a horse</strong>. His name is drawn from
+    village, and who <strong>is always on a horse</strong>. Their name is drawn from
     frontier given and family name tables
     (<code>PersonNameGenerator.cowboys()</code>), and that name is what the game says
-    when it says who bred one of his horses.
+    when it says who bred one of their horses.
 </p>
 
-<h3 id="not-a-profession">Why he is not a villager profession</h3>
+<h3 id="not-a-profession">Why they are not a villager profession</h3>
 
 <p>
-    He is a custom <code>AbstractVillager</code>, not a
+    They are a custom <code>AbstractVillager</code>, not a
     <code>VillagerProfession</code>. A profession is acquired from a job site by a
     villager whose brain runs vanilla's daily schedule, and that schedule would
-    dismount him every morning to go and stand at a workstation. Everything that makes
-    this character himself &mdash; always mounted, home is a barn and not a bed, stock
+    dismount them every morning to go and stand at a workstation. Everything that makes
+    this character themselves &mdash; always mounted, home is a barn and not a bed, stock
     is a live herd and not a trade table &mdash; is a fight with that brain. Extending
     <code>AbstractVillager</code> keeps the parts that are worth keeping (the merchant
     screen, the villager silhouette, the trading goals) and none of the schedule.
@@ -156,22 +156,22 @@
     goes to bed is exactly what that brain is for.
 </p>
 
-<h3 id="founding">Where he sets up</h3>
+<h3 id="founding">Where they set up</h3>
 
 <p>
-    The structure places him bare in the middle of the barn and
-    <code>CowboyHandler</code> builds him on his first server tick. His
-    <strong>home</strong> is that spot &mdash; the block his routine rides back to and
-    the centre of the box the door code works on &mdash; but he does not
+    The structure places them bare in the middle of the barn and
+    <code>CowboyHandler</code> builds them on their first server tick. Their
+    <strong>home</strong> is that spot &mdash; the block their routine rides back to and
+    the centre of the box the door code works on &mdash; but they do not
     <em>found</em> there. The barn's interior is eleven blocks by five with walls on
     every side and a horse is nearly a block and a half wide, so a string of them made
     around the barn's centre came out with half its members standing in the walls.
 </p>
 
 <p>
-    So he walks out first, to a paddock 12&ndash;24 blocks off, and the herd is made
-    around him there. The bearing is taken from the village bell to the barn and
-    sampled in a half-plane around it, so &ldquo;out of town&rdquo; is literal: he sets
+    So they walk out first, to a paddock 12&ndash;24 blocks off, and the herd is made
+    around them there. The bearing is taken from the village bell to the barn and
+    sampled in a half-plane around it, so &ldquo;out of town&rdquo; is literal: they set
     up on the grass past the last house rather than in somebody's turnip field. If that
     half-plane has no room in it the search widens to the whole circle rather than fall
     back to the barn.
@@ -181,7 +181,7 @@
     A candidate has to be <strong>ground</strong>, and the surface heightmap is not
     enough to know that: in a village the highest solid block in a column is very often
     a roof, which is where the first cowboy to walk out ended up standing &mdash; on a
-    house that was not even his. So a paddock must also sit within 3 blocks of the
+    house that was not even theirs. So a paddock must also sit within 3 blocks of the
     barn's own height and have 3 blocks of solid ground beneath it. Either test alone
     is fooled: the height test passes a low porch or a wall top, and the depth test
     passes the flat top of a hill fifteen blocks up. Together they mean &ldquo;ground,
@@ -190,60 +190,60 @@
 
 <p>
     Every
-    placement &mdash; his and every horse's, at founding and at every restock &mdash;
+    placement &mdash; their and every horse's, at founding and at every restock &mdash;
     now asks the level whether a <em>horse-sized box</em> fits, rather than whether a
     one-block column is clear. A clear column next to a wall still puts a horse's
     shoulders through it, which is exactly how the barn filled up with embedded horses.
 </p>
 
-<h3 id="herd">His herd</h3>
+<h3 id="herd">Their herd</h3>
 
 <ul>
-    <li><strong>Four to ten horses, plus the one he rides.</strong> All are made on
-        his first server tick, in the barn. That roll is also his
-        <code>stockTarget</code> &mdash; the number he is
+    <li><strong>Four to ten horses, plus the one they ride.</strong> All are made on
+        their first server tick, in the barn. That roll is also their
+        <code>stockTarget</code> &mdash; the number they are
         <a href="#restock">restocked</a> back up to for the rest of the world's
         life, so one cowboy is a four-horse outfit and the next is a ten-horse one,
         for good.</li>
     <li><strong>Every one is a foundation horse of a real breed</strong> &mdash; no
         parents, generation 0, and never <code>feral_mixed</code>.</li>
-    <li><strong>Half his string is one breed &mdash; the one he is known for.</strong>
+    <li><strong>Half their string is one breed &mdash; the one they are known for.</strong>
         A <code>preferredBreed</code> is settled at founding (drawn from the biome's
-        pool, weighted the way a wild herd is weighted) and the horse he rides is one
-        of them. Every horse he breeds after that is his breed until half the target
-        is his breed, and drawn from the biome pool after that &mdash; so a breeder's
+        pool, weighted the way a wild herd is weighted) and the horse they ride is one
+        of them. Every horse they breed after that is their breed until half the target
+        is their breed, and drawn from the biome pool after that &mdash; so a breeder's
         yard reads as a yard with a speciality rather than as a random sample of the
         county. <code>CowboyHandler.nextBreedFor</code> counts rather than flips a
         coin, because a coin flip on a string of six lands on six-out-of-six often
-        enough to be seen, and it self-corrects: sell three of his Fjords and the
-        next three he breeds are Fjords.</li>
-    <li><strong>Every one carries <code>bredBy = his name</code>.</strong></li>
-    <li><strong>The horse he rides is the herd lead.</strong> It is herd slot 0, and
+        enough to be seen, and it self-corrects: sell three of their Fjords and the
+        next three they breed are Fjords.</li>
+    <li><strong>Every one carries <code>bredBy = their name</code>.</strong></li>
+    <li><strong>The horse they ride is the herd lead.</strong> It is herd slot 0, and
         every other member carries its UUID as their
         <code>HorseCareAttachment.herd</code> &mdash; so the browser and the info
         panel see an ordinary herd with an ordinary lead horse, and the man on top is
         a detail. It is never for sale.</li>
     <li><strong>They are branded, not owned.</strong> A <code>CowboyBrand</code>
         attachment holds the cowboy's id. Vanilla lets a player tame any untamed horse
-        by climbing on it until it stops bucking, and his whole herd standing there
+        by climbing on it until it stops bucking, and their whole herd standing there
         untamed would otherwise be a free stable rather than a shop &mdash; so a
         branded horse refuses every interaction except a transfer paper. Kill the
-        cowboy and the brand is cleared: his horses go feral and can be tamed the hard
-        way, while keeping his name as their breeder.</li>
+        cowboy and the brand is cleared: their horses go feral and can be tamed the hard
+        way, while keeping their name as their breeder.</li>
 </ul>
 
-<h3 id="trades">What he sells</h3>
+<h3 id="trades">What they sell</h3>
 
 <p>
     One offer per herd horse. A horse costs <strong>one to three emeralds</strong>
     &mdash; <code>HorsePrices.DEFAULT_PRICE</code>, and what almost every horse in the
-    game costs. He is the <strong>early-game</strong> purchase this mod is built
+    game costs. They are the <strong>early-game</strong> purchase this mod is built
     around: you buy a horse before you have a farm, not after you have a trading hall.
 </p>
 
 <p>
-    Which breeds he can deal in at all is the breed's own
-    <a href="breeds.html#sources">source checklist</a>: he draws from the breeds of the
+    Which breeds they can deal in at all is the breed's own
+    <a href="breeds.html#sources">source checklist</a>: they draw from the breeds of the
     country round the barn that allow <code>cowboy</code>, and falls back to every breed
     that allows it when the local list is empty. So &ldquo;no dealer has ever had one&rdquo;
     is a thing a breed file can actually say, and it is a different claim from &ldquo;none
@@ -267,22 +267,22 @@
 <p>
     This replaced a table priced off the breed's <code>Commonness</code> tier that ran
     from ten emeralds to forty, which made the cowboy a shop you walked past for a
-    week. No breed sets a range yet, so every horse he sells is currently 1&ndash;3.
+    week. No breed sets a range yet, so every horse they sell is currently 1&ndash;3.
 </p>
 
 <p>
-    The offer list is rebuilt every time someone looks at him, because the herd is a
+    The offer list is rebuilt every time someone looks at them, because the herd is a
     live thing &mdash; a horse can be killed by a wolf between one customer and the
     next. A horse leaves the list <strong>for good</strong> the moment its paper is
-    bought, whether or not that paper is ever redeemed. He is not a levelling
-    villager: no XP, no tiers, no vanilla restock timer &mdash; what he does instead
+    bought, whether or not that paper is ever redeemed. They are not a levelling
+    villager: no XP, no tiers, no vanilla restock timer &mdash; what they do instead
     is <a href="#restock">breed replacements</a>.
 </p>
 
 <h3 id="restock">Restocking and rotation</h3>
 
 <p>
-    <code>CowboyHandler.restock</code> looks over his string about once a minute
+    <code>CowboyHandler.restock</code> looks over their string about once a minute
     (jittered, so two cowboys loaded on the same tick do not stay in lockstep) and
     does two slow things.
 </p>
@@ -302,55 +302,55 @@
     A horse is never retired with a player within 48 blocks of it &mdash; the rotation
     is meant to be something you notice by coming back to a different string, not
     something you watch happen; a horse vanishing in front of you reads as a bug
-    however well it is documented. And &ldquo;his string&rdquo; here is exactly the
-    set the merchant screen offers (alive, loaded, untamed, not his mount, not already
-    papered), because &ldquo;how many has he got?&rdquo; and &ldquo;how many can you
-    buy?&rdquo; have to be the same number or he restocks to fill a shelf nobody can
+    however well it is documented. And &ldquo;their string&rdquo; here is exactly the
+    set the merchant screen offers (alive, loaded, untamed, not their mount, not already
+    papered), because &ldquo;how many have they got?&rdquo; and &ldquo;how many can you
+    buy?&rdquo; have to be the same number or they restock to fill a shelf nobody can
     see. Tamed horses are dropped from the herd list entirely, so it cannot grow
     without bound over a long world.
 </p>
 
-<h3 id="routine">His day</h3>
+<h3 id="routine">Their day</h3>
 
 <div class="note rule">
-    <span class="label">He does not ride</span>
+    <span class="label">They do not ride</span>
     <p>
-        He did, for about a day, and it cost more than every other part of this
+        They did, for about a day, and it cost more than every other part of this
         character put together. A mob rider <strong>cannot steer</strong>, so the
         itinerary had to live on the horse; the horse's own goals all exist for the
         &ldquo;someone is on my back&rdquo; case and fought it; a villager has no seated
-        pose, so he had to be sunk into the saddle to stop looking like he was standing
+        pose, so they had to be sunk into the saddle to stop looking like they were standing
         on it; and getting a mounted man and eleven horses through a barn door at dusk
         was never made to work at all. Five rounds of fixes, each exposing the next.
     </p>
     <p>
-        <strong>The herd follows the man now.</strong> He is an ordinary villager who
-        walks, and <code>CowboyHerdGoal</code> points his horses at him instead of at a
+        <strong>The herd follows the man now.</strong> They are an ordinary villager who
+        walks, and <code>CowboyHerdGoal</code> points their horses at them instead of at a
         lead horse. That deleted <code>CowboyMountGoal</code>,
         <code>CowboyRemountGoal</code>, <code>CowboyRoutine</code>,
         <code>CowboyDoors</code>, <code>HerdCollision</code>, the saddle sink, the
         patrol, the shelter and the flee &mdash; roughly a thousand lines for a
-        character nobody could tell had them. He keeps ten times a villager's health
+        character nobody could tell had them. They keep ten times a villager's health
         (<code>Cowboy.HEALTH</code>), which is what the night cost in the end.
     </p>
 </div>
 
 <p>
-    So there is no routine to document. He floats, trades, panics, strolls and looks at
-    players &mdash; the goals every villager has, plus one of his own below. His horses
-    trail him at <strong>14 blocks</strong> and settle at 7 by day, tightening to 4 after
-    dark so the string gathers on him rather than strung out across a field.
+    So there is no routine to document. They float, trades, panics, strolls and looks at
+    players &mdash; the goals every villager has, plus one of their own below. Their horses
+    trail them at <strong>14 blocks</strong> and settle at 7 by day, tightening to 4 after
+    dark so the string gathers on them rather than strung out across a field.
 </p>
 
-<h3 id="doors">He can work a door, in daylight, with both hands</h3>
+<h3 id="doors">They can work a door, in daylight, with both hands</h3>
 
 <p>
-    <code>CowboyDoorGoal</code>. Until it existed he could not open a door at all &mdash;
+    <code>CowboyDoorGoal</code>. Until it existed they could not open a door at all &mdash;
     not for want of trying, but because a mob needs <em>two</em> unrelated things to use
-    one and he had neither. The goal is what swings it; the navigator's
+    one and they had neither. The goal is what swings it; the navigator's
     <code>canOpenDoors</code> is what makes the pathfinder score a shut wooden door as a
-    way through rather than as wall. On its own, either is useless: no goal and he plans a
-    route he cannot take, no flag and he never plans the route at all.
+    way through rather than as wall. On its own, either is useless: no goal and they plan a
+    route they cannot take, no flag and they never plan the route at all.
 </p>
 
 <ul>
@@ -359,34 +359,34 @@
         <em>pair</em>. One leaf is a one-block gap, and the ground pathfinder rounds a mob
         up to <code>floor(width + 1)</code> blocks across &mdash; so a one-block gap is not
         a gap at all to a horse, and the whole point of the man walking to the barn is the
-        string walking in behind him. The partner leaf is the neighbour along the wall with
+        string walking in behind them. The partner leaf is the neighbour along the wall with
         the same facing and the opposite hinge.</li>
     <li><strong>Daylight only</strong>, on <code>Level.isBrightOutside()</code> &mdash; the
         same test the gene effects use for their <code>day</code> trigger, so the mod has
         one definition of daytime. It reads sky darkening rather than the clock, so a
         thunderstorm counts as night.</li>
-    <li><strong>He never closes anything.</strong> <code>OpenDoorGoal</code>'s
-        close-behind would be wrong here twice over: the herd is following him and would be
+    <li><strong>They never close anything.</strong> <code>OpenDoorGoal</code>'s
+        close-behind would be wrong here twice over: the herd is following them and would be
         shut out, and the barn doors standing open is what the doorway headroom in
         <code>bake-barn.py</code> was cleared for.</li>
 </ul>
 
 <p>
-    None of it is a routine &mdash; he opens a door he has walked into, which is vanilla's
-    own cheap trigger, and nothing sends him at one on purpose. What it buys is that the
+    None of it is a routine &mdash; they open a door they have walked into, which is vanilla's
+    own cheap trigger, and nothing sends them at one on purpose. What it buys is that the
     barn is now a building the outfit can actually get inside.
     <a href="known-gaps.html#gap-63">Gap 63</a> is the part that is designed rather than
     measured.
 </p>
 
-<h3 id="nights">He does not go indoors, and does not need to</h3>
+<h3 id="nights">They do not go indoors, and does not need to</h3>
 
 <p>
-    <strong>He cannot.</strong> Walking into a house and getting into a bed lives in
+    <strong>They cannot.</strong> Walking into a house and getting into a bed lives in
     vanilla's <em>villager brain</em>, and a <code>Cowboy</code> is an
     <code>AbstractVillager</code> &mdash; the same base as a wandering trader, chosen
-    precisely so that no schedule drags him away from his horses. A wandering trader does
-    not go indoors either. Giving him somewhere to sleep is what the entire barn-shelter
+    precisely so that no schedule drags them away from their horses. A wandering trader does
+    not go indoors either. Giving them somewhere to sleep is what the entire barn-shelter
     subsystem <em>was</em>, and it is written up in
     <a href="known-gaps.html#gap-55">gap 55</a> as the thing that could not be made to
     work.
@@ -398,19 +398,19 @@
 
 <ul>
     <li><strong>Ten times a villager's health</strong> (<code>Cowboy.HEALTH</code>).</li>
-    <li><strong>Nothing hunts him.</strong> <code>CowboySafetyHandler</code> cancels
+    <li><strong>Nothing hunts them.</strong> <code>CowboySafetyHandler</code> cancels
         <code>LivingChangeTargetEvent</code> whenever an <code>Enemy</code> is about to
-        pick him, and that event fires from <code>Mob.setTarget</code> &mdash; the one
+        pick them, and that event fires from <code>Mob.setTarget</code> &mdash; the one
         door every way of acquiring a target goes through, whether that is a
-        nearest-attackable goal, a raid's orders or retaliation for being hit. He is
-        never anybody's target, so nothing paths to him and nothing swings at him.</li>
+        nearest-attackable goal, a raid's orders or retaliation for being hit. They are
+        never anybody's target, so nothing paths to them and nothing swings at them.</li>
 </ul>
 
 <p>
     <code>Enemy</code> rather than <code>Monster</code> on purpose: it is the interface
     that means &ldquo;this thing is hostile&rdquo;, and it catches the few hostiles that
     are not <code>Monster</code> subclasses. Players are not covered and can still hit
-    him. <strong>His horses are not covered either</strong> &mdash; they are ordinary
+    them. <strong>Their horses are not covered either</strong> &mdash; they are ordinary
     animals, a wolf getting one is a thing that happens, and that is what the
     <a href="#restock">restocking</a> is for.
 </p>
@@ -529,11 +529,11 @@
 <h3 id="entity-in-structure">The cowboy comes with the building</h3>
 
 <p>
-    He is carried in the structure template's <code>entities</code> list, which is the
+    They are carried in the structure template's <code>entities</code> list, which is the
     same mechanism vanilla uses to put villagers in
     <code>village/plains/villagers/*.nbt</code>. A template can only place an entity,
-    not roll one, so he arrives <strong>bare</strong> &mdash; nothing but his id
-    &mdash; and <code>CowboyHandler</code> builds him on his first server tick: name,
+    not roll one, so they arrive <strong>bare</strong> &mdash; nothing but their id
+    &mdash; and <code>CowboyHandler</code> builds them on their first server tick: name,
     home, herd.
 </p>
 
@@ -620,7 +620,7 @@
     <td><strong>Cowboy Hitch</strong></td>
     <td>the cowboy</td>
     <td><strong>Not a job site at all.</strong> A cowboy is an <em>entity</em>, not a
-        profession &mdash; he has a herd, a stock target and a merchant screen that sells
+        profession &mdash; they have a herd, a stock target and a merchant screen that sells
         papers rather than goods, none of which fits on a <code>Villager</code> &mdash;
         so there is nothing for a profession to point at and no POI to claim.
         <code>server/CowboyHitchHandler</code> looks for the <em>block</em> instead:
@@ -636,26 +636,26 @@
     <p>
         One block tried to do both, handing out a cowboy first and a horseman second by
         alternating. It could not. Converting the villager meant either
-        <strong>discarding</strong> him &mdash; which silently holds his job-site ticket
+        <strong>discarding</strong> them &mdash; which silently holds their job-site ticket
         for ever, because <code>Villager.releaseAllPois</code> is private and runs on
         death, so the post produced one cowboy and then nothing while the rest of the
-        village stood unemployed &mdash; or demoting him and trusting vanilla to
-        re-assign him, which is two more moving parts than a second block.
+        village stood unemployed &mdash; or demoting them and trusting vanilla to
+        re-assign them, which is two more moving parts than a second block.
     </p>
     <p>
         A post each is far less clever and simply works. The hitch makes cowboys, the
         table makes horsemen, and neither has to know the other exists. Discarding the
         villager is safe at the hitch for exactly the reason it was not safe at the
-        shared post: he never claimed the hitch, because the hitch is not a job site.
+        shared post: they never claimed the hitch, because the hitch is not a job site.
     </p>
 </div>
 
 <p>
     <strong>One cowboy per hitch</strong>, guarded by looking rather than remembering: a
     hitch with a cowboy already within 32 blocks is spoken for. That is self-correcting
-    &mdash; kill him and the next villager past the hitch takes over &mdash; where a
+    &mdash; kill them and the next villager past the hitch takes over &mdash; where a
     &ldquo;used&rdquo; flag on the block would need saving and would go stale the moment
-    he died.
+    they died.
 </p>
 
 <h3 id="post-at-the-barn">Both of them stand at the house</h3>
@@ -663,7 +663,7 @@
 <p>
     They flank the <a href="#horseman-nights">house's</a> front step, one either side of
     it, with a villager on the <a href="#barn">walk</a> in front of each. A villager takes
-    the post he is standing on &mdash; one becomes the horseman, the other the cowboy.
+    the post they are standing on &mdash; one becomes the horseman, the other the cowboy.
 </p>
 
 <p>
@@ -693,7 +693,7 @@
     <strong>Whoever is hired first names the family, and everyone after joins it.</strong>
     Both handlers ask the same question &mdash;
     <code>HorsemanHandler.familySurname</code> &mdash; which looks round the village for
-    a cowboy or a horseman who already has a surname and takes his; finding nobody, it
+    a cowboy or a horseman who already has a surname and takes their; finding nobody, it
     coins a new one. So a village reads as one outfit in the horse trade: Wade Hargreave
     at the hitch, Frank Hargreave behind the table.
 </p>
@@ -710,17 +710,17 @@
     The <em>nearest</em> namesake wins, which only matters in a village with two outfits
     in it: a second hitch across town founds the Adamses, and a table put up beside it
     joins the Adamses rather than the Hargreaves at the far end. It counts the two roles
-    this mod names and nothing else &mdash; a player who renames his own farmer
+    this mod names and nothing else &mdash; a player who renames their own farmer
     &ldquo;Bob&rdquo; has not founded a horse family.
 </p>
 
 <h3 id="horseman-nights">The horseman keeps vanilla's brain, and gets a house</h3>
 
 <p>
-    Nothing in this mod touches how the horseman behaves. He is a completely ordinary
+    Nothing in this mod touches how the horseman behaves. They are a completely ordinary
     villager with a profession, so going indoors at night, panicking in a raid, hiding
     from a zombie, restocking and gossiping are all <strong>free</strong> &mdash; that is
-    the whole reason he is a profession where the <a href="#cowboy">cowboy</a> is not.
+    the whole reason they are a profession where the <a href="#cowboy">cowboy</a> is not.
 </p>
 
 <p>
@@ -728,12 +728,12 @@
     outskirts can easily be out of range of the nearest house's. Beds went into the barn
     first and came straight back out: <strong>the barn is a building made of doors.</strong>
     Four double doors and a two-block gap at either end, and a villager only ever shuts
-    the one he walked through &mdash; so a bed in there is a bed in a corridor with three
+    the one they walked through &mdash; so a bed in there is a bed in a corridor with three
     doors standing open.
 </p>
 
 <p>
-    So he gets a house, and it is <strong>part of the same structure piece as the
+    So they get a house, and it is <strong>part of the same structure piece as the
     barn</strong>. It is a copy of vanilla's <code>plains_small_house_1</code>, copied
     rather than referenced because it needs changing and because a vanilla template is not
     ours to rely on keeping its shape. <code>tools/barn/bake-barn.py</code> reshapes it:
@@ -754,7 +754,7 @@
         <code>horsegenetics:chests/cowboy_house</code>: feed by the armful, a lead or a
         saddle now and then, and one roll in four or so at a piece of this mod's own kit,
         so a chest can teach you an item exists. Nothing in it should make a player feel
-        he can skip the horseman &mdash; the saddle is the only real prize.</li>
+        they can skip the horseman &mdash; the saddle is the only real prize.</li>
     <li><strong>The stair beside the beds comes out.</strong> It is a chair in the vanilla
         house and it reads as a headboard once there are two beds against that wall.</li>
     <li><strong>A step outside the front door</strong>, with the
@@ -786,8 +786,8 @@
 
 <p>
     The cowboy will not use a bed &mdash; an <code>AbstractVillager</code> has no schedule
-    at all &mdash; which is why he gets ten times the health and hostile mobs that ignore
-    him instead.
+    at all &mdash; which is why they get ten times the health and hostile mobs that ignore
+    them instead.
 </p>
 
 <h3 id="trade-table">The trade table</h3>

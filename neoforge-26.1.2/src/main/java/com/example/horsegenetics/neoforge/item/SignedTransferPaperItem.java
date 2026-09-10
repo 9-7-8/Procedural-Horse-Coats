@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * yours; the paper is spent.
  *
  * <p>Two sources, and they behave identically once written - an owner signing a
- * blank against their own horse, and the cowboy selling one out of his herd.
+ * blank against their own horse, and the cowboy selling one out of their herd.
  * That is the point of the item: a horse can be sold without either party ever
  * standing next to it, and the buyer can sell the claim on again before they
  * collect.

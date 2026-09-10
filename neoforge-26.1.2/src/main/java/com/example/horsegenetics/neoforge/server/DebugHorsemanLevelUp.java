@@ -13,7 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
- * Dev-only: <b>right-click a horseman with a clock to promote him one tier.</b>
+ * Dev-only: <b>right-click a horseman with a clock to promote them one tier.</b>
  *
  * <h2>Why</h2>
  * The horseman's interesting trades are at tiers 4 and 5 - the random gene
@@ -77,7 +77,7 @@ public final class DebugHorsemanLevelUp {
         villager.increaseMerchantCareer(level);
         int now = villager.getVillagerData().level();
         // Keep the XP consistent with the tier, or the merchant screen's progress
-        // bar reads as a Master who has never traded - which is exactly what he is,
+        // bar reads as a Master who has never traded - which is exactly what they are,
         // but it looks like a bug rather than a shortcut.
         villager.setVillagerXp(VillagerData.getMinXpPerLevel(now));
 

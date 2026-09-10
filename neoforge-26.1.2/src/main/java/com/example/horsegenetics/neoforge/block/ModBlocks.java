@@ -61,7 +61,7 @@ public final class ModBlocks {
      *
      * <p>Two blocks rather than one because one block could not do both jobs.
      * A single post had to hand out a cowboy and then a horseman by alternating,
-     * and the villager it converted took his job-site ticket with him - see
+     * and the villager it converted took their job-site ticket with them - see
      * {@code server/CowboyHitchHandler}. A post each is a great deal less clever
      * and works.
      *

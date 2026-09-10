@@ -16,9 +16,9 @@ import java.util.UUID;
  * Keeps a <b>branded</b> horse - one the cowboy bred and still owns - with the
  * cowboy.
  *
- * <p><b>The man is the lead.</b> He used to ride one of them and the rest
- * trailed the horse he was on, which was the same thing positionally and a
- * great deal more machinery; he does not ride any more, so they follow him
+ * <p><b>The man is the lead.</b> They used to ride one of them and the rest
+ * trailed the horse they were on, which was the same thing positionally and a
+ * great deal more machinery; they do not ride any more, so they follow them
  * directly and there is no lead horse to keep track of.
  *
  * <p>The same shape as {@link WildHerdGoal}, and deliberately not the same goal.
@@ -28,7 +28,7 @@ import java.util.UUID;
  * running for good.
  *
  * <p>By day it only closes the gap when the gap is real ({@link #FOLLOW_RANGE}),
- * so the herd spreads out and grazes around him instead of stacking on him.
+ * so the herd spreads out and grazes around them instead of stacking on them.
  * After dark it tightens right up and quickens ({@link #NIGHT_RANGE}): a string
  * gathered on its owner is the closest thing to a stable there is.
  */
@@ -108,7 +108,7 @@ public final class CowboyHerdGoal extends Goal {
         return horse.level().isDarkOutside();
     }
 
-    /** The man. He is the lead - see the class comment. */
+    /** The man. They are the lead - see the class comment. */
     private BlockPos target() {
         return cowboy.blockPosition();
     }

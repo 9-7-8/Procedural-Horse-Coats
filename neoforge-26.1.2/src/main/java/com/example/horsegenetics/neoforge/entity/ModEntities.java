@@ -13,13 +13,13 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 /**
  * The mod's own entities. One so far: the {@link Cowboy}.
  *
- * <p>He is <b>never spawned naturally</b> - there is no spawn egg and no biome
+ * <p>They are <b>never spawned naturally</b> - there is no spawn egg and no biome
  * spawner entry. The only thing that makes one is the barn structure, which
- * carries him in its {@code entities} list the same way vanilla's
- * {@code village/plains/villagers/*.nbt} carry villagers. Everything about him
- * is then built on his first server tick by {@code CowboyHandler}.
+ * carries them in its {@code entities} list the same way vanilla's
+ * {@code village/plains/villagers/*.nbt} carry villagers. Everything about them
+ * is then built on their first server tick by {@code CowboyHandler}.
  *
- * <p>Sized and tracked like the wandering trader, whose model and texture he
+ * <p>Sized and tracked like the wandering trader, whose model and texture they
  * borrows for now ({@code client/CowboyRenderer}).
  */
 @EventBusSubscriber(modid = HorseGenetics.MOD_ID)

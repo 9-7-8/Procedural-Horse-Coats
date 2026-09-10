@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * What the cowboy asks in emeralds for one of his horses.
+ * What the cowboy asks in emeralds for one of their horses.
  *
  * <h2>Cheap by default</h2>
  * A horse is the <b>early-game</b> purchase this mod is built around - you buy
@@ -29,9 +29,9 @@ import java.util.UUID;
  * is the same every time the offer list is rebuilt. {@code Cowboy.updateTrades}
  * rebuilds from scratch on every look, and a price that moved between one
  * glance at the merchant screen and the next would look like the man was
- * haggling with himself.
+ * haggling with themselves.
  *
- * <p>He only ever stocks pure breeds, so the cross / mixed / feral branches are
+ * <p>They only ever stocks pure breeds, so the cross / mixed / feral branches are
  * a floor rather than a real case; they exist because {@link HorseRecord} can
  * carry any label and a hard failure over a price is a bad trade for
  * robustness.

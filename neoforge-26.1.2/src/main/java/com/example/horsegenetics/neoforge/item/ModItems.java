@@ -166,7 +166,7 @@ public final class ModItems {
     // A blank is bound to whoever crafted it and can only be signed against a
     // horse that player currently owns; signing it produces a signed paper,
     // which is a bearer claim on that one animal - tradeable, and redeemed by
-    // right-clicking the horse itself. The cowboy sells his stock as signed
+    // right-clicking the horse itself. The cowboy sells their stock as signed
     // papers. Mechanics: server/TransferPaperHandler.
     public static final DeferredItem<TransferPaperItem> BLANK_TRANSFER_PAPER =
             register("blank_transfer_paper", TransferPaperItem::new);

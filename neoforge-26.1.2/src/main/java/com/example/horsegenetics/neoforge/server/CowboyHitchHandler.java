@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
  * {@link Cowboy}.
  *
  * <h2>Why this is not a job site</h2>
- * Because a cowboy is an <b>entity</b>, not a profession. He has a herd, a stock
+ * Because a cowboy is an <b>entity</b>, not a profession. They have a herd, a stock
  * target and a merchant screen that sells papers rather than goods, and none of
  * that fits on a {@code Villager} - so there is nothing for a profession to
  * point at and no POI for one to claim. The hitch is just a block, and this
@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>That is also why there are <b>two</b> posts now. One block tried to hand
  * out both trades by alternating, and it needed the villager it converted to
- * release his job-site ticket - which a discarded villager never does, so the
+ * release their job-site ticket - which a discarded villager never does, so the
  * post produced one cowboy and then nothing for ever. A post each is far less
  * clever and simply works: the hitch makes cowboys, the
  * {@linkplain com.example.horsegenetics.neoforge.village.ModPoiTypes table}
@@ -36,13 +36,13 @@ import org.jspecify.annotations.Nullable;
  *
  * <h2>One cowboy per hitch</h2>
  * Guarded by looking, not by remembering: a hitch with a cowboy already within
- * {@link #ONE_PER} blocks is spoken for. That is self-correcting - kill him and
+ * {@link #ONE_PER} blocks is spoken for. That is self-correcting - kill them and
  * the next villager to wander past the hitch takes over - where a "used" flag on
- * the block would need saving and would go stale the moment he died.
+ * the block would need saving and would go stale the moment they died.
  *
  * <p>The villager is <b>consumed</b>, which is safe here for exactly the reason
- * it was not safe at the old shared post: he holds no ticket on the hitch,
- * because the hitch is not a job site and he never claimed it.
+ * it was not safe at the old shared post: they hold no ticket on the hitch,
+ * because the hitch is not a job site and they never claimed it.
  */
 @EventBusSubscriber
 public final class CowboyHitchHandler {

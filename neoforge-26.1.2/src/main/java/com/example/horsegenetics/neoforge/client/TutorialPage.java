@@ -213,9 +213,9 @@ public final class TutorialPage {
 
         out.add(new Step("The horseman",
                 List.of("The horseman is a villager with a job you will not have seen before. Put a "
-                                + "Horseman's Table down near one who has no work and he will take "
+                                + "Horseman's Table down near one who has no work and they will take "
                                 + "it.",
-                        "He deals in research papers, and the rarer the gene the more he wants for "
+                        "They deal in research papers, and the rarer the gene the more they want for "
                                 + "one. Buying a paper is not the same as knowing the gene - see "
                                 + "above - but it is how you get one for a horse you have never "
                                 + "met."),
@@ -223,13 +223,13 @@ public final class TutorialPage {
                         new ItemStack(Items.EMERALD)), Art.HORSEMAN));
 
         out.add(new Step("The cowboy",
-                List.of("The cowboy is not a villager at all. He keeps his own herd, and he will "
+                List.of("The cowboy is not a villager at all. They keep their own herd, and they will "
                                 + "sell you one outright if you would rather buy a bloodline than "
-                                + "breed one. A Cowboy Hitch is what brings him.",
+                                + "breed one. A Cowboy Hitch is what brings them.",
                         "The two of them come as a pair - they built their posts side by side, and "
                                 + "the story in the villages is that they are married. You will "
-                                + "find him out where the horses are rather than in a village, and "
-                                + "he is worth the walk."),
+                                + "find them out where the horses are rather than in a village, and "
+                                + "they are worth the walk."),
                 List.of(new ItemStack(ModItems.COWBOY_HITCH.get()),
                         new ItemStack(Items.EMERALD)), Art.COWBOY));
 

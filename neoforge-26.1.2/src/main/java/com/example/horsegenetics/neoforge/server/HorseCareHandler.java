@@ -279,8 +279,8 @@ public final class HorseCareHandler {
         // A natural wild herd is owned by HerdManager - the together-timer must
         // not dissolve it or re-home the horse. The cowboy's string is owned by
         // CowboyHandler for exactly the same reason, and needs the same
-        // exemption: his horses spread out to graze, which would run the
-        // together-timer down to zero and quietly disband a herd he is standing
+        // exemption: their horses spread out to graze, which would run the
+        // together-timer down to zero and quietly disband a herd they are standing
         // in the middle of.
         if (care.inWildHerd() || horse.getData(ModAttachments.COWBOY_BRAND.get()).isBranded()) {
             return care;

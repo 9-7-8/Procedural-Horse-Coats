@@ -199,7 +199,7 @@ public final class TransferPaperHandler {
         // and the horse's genome, name, pedigree and generation are untouched.
         horse.setOwner(player);
         horse.setTamed(true);
-        CowboyHandler.clearBrand(horse); // it has an owner now; it is not his stock any more
+        CowboyHandler.clearBrand(horse); // it has an owner now; it is not their stock any more
 
         // "Tamed by" is who first got a rope on it, not who owns it now. Only
         // fill it in when the horse has never been tamed at all - which is

@@ -68,7 +68,7 @@ public final class ModAttachments {
     // to follow and by TransferPaperHandler to refuse free taming. Synced,
     // because refusing an interaction only on the server makes the client
     // predict a mount it then has to take back - see CowboyBrand.STREAM_CODEC.
-    // NOT copyOnDeath - a re-summoned horse is not still his.
+    // NOT copyOnDeath - a re-summoned horse is not still their.
     public static final Supplier<AttachmentType<CowboyBrand>> COWBOY_BRAND =
             ATTACHMENT_TYPES.register("cowboy_brand", () -> AttachmentType
                     .builder(() -> CowboyBrand.NONE)

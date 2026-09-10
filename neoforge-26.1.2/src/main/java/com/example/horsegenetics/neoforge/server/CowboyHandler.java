@@ -39,17 +39,17 @@ import java.util.UUID;
 
 /**
  * Builds a cowboy out of the bare entity the barn structure placed, and wires
- * the two goals that make him and his horses behave like a working outfit.
+ * the two goals that make them and their horses behave like a working outfit.
  *
  * <h2>Founding, on the tick and not on the join</h2>
  * {@code cowboy_barn.nbt} carries a {@code horsegenetics:cowboy} with nothing in
  * it but its id - a structure template can only place an entity, not roll one.
- * So his name, his home, his mount and his herd are all made here, on his first
+ * So their name, their home, their mount and their herd are all made here, on their first
  * server tick.
  *
- * <p>He is also <b>restocked</b> from here, on the same tick handler and for
+ * <p>They are also <b>restocked</b> from here, on the same tick handler and for
  * the same reason - see {@link #restock}. The <b>horseman</b> next door is not
- * built here at all: his post is a block in {@code cowboy_barn.nbt}, in the
+ * built here at all: their post is a block in {@code cowboy_barn.nbt}, in the
  * middle of the road-facing end, and the villager who takes the job off it is a
  * structure entity beside it. A shop front is architecture.
  *
@@ -103,7 +103,7 @@ public final class CowboyHandler {
      * <p>The <b>roof rule</b>, half of it. The surface heightmap answers "what is
      * the highest solid block in this column", and in a village that is very
      * often somebody's roof - which is where the first cowboy to try this ended
-     * up standing, on a house that was not even his. A paddock is meant to be the
+     * up standing, on a house that was not even theirs. A paddock is meant to be the
      * field the barn stands in, so it has to be at about the barn's own level.
      */
     private static final int PADDOCK_RISE = 3;
@@ -119,7 +119,7 @@ public final class CowboyHandler {
      */
     private static final int PADDOCK_GROUND_DEPTH = 3;
 
-    /** Ticks between two looks over his string - about a minute. */
+    /** Ticks between two looks over their string - about a minute. */
     private static final int RESTOCK_INTERVAL = 1200;
 
     /**
@@ -144,13 +144,13 @@ public final class CowboyHandler {
     /**
      * At most one new horse per look.
      *
-     * <p>A cowboy who has just sold his whole string gets it back over several
+     * <p>A cowboy who has just sold their whole string gets it back over several
      * minutes rather than in one tick - which paces better in play, and keeps
      * the spawn work per tick where founding already proved it is safe.
      */
     private static final int RESTOCK_PER_LOOK = 1;
 
-    /** Ticks between the cowboy's own state line, and between attempts to get him back on. */
+    /** Ticks between the cowboy's own state line, and between attempts to get them back on. */
     private static final int COWBOY_REPORT_INTERVAL = 20;
 
     private static final PersonNameGenerator NAMES = PersonNameGenerator.cowboys();
@@ -184,11 +184,11 @@ public final class CowboyHandler {
     }
 
     /**
-     * One line a second about the man himself, whether or not he is on a horse.
+     * One line a second about the man themselves, whether or not they are on a horse.
      *
      * <p>{@code CowboyMountGoal}'s own report only runs while that goal is
      * running, so it is silent in precisely the case that needs explaining. This
-     * one runs off the cowboy's tick, which is the same tick that founds him, so
+     * one runs off the cowboy's tick, which is the same tick that founds them, so
      * it cannot be silent for a cowboy that exists at all.
      */
     private static void reportCowboy(Cowboy cowboy, ServerLevel level) {
@@ -214,26 +214,26 @@ public final class CowboyHandler {
         cowboy.setCustomName(Component.literal(NAMES.generateParts(rng).first() + " " + surname));
         cowboy.setCustomNameVisible(true);
 
-        // Home is where the structure put him - the middle of the barn - and it
-        // stays that whatever happens next. Nothing walks him back to it any
+        // Home is where the structure put them - the middle of the barn - and it
+        // stays that whatever happens next. Nothing walks them back to it any
         // more: the dusk ride and the door sweep that used to read this both
         // went with the mounted cowboy. It is a remembered address now, not a
-        // routine. (CowboyDoorGoal opens doors he bumps into; it does not know
+        // routine. (CowboyDoorGoal opens doors they bump into; it does not know
         // about this.)
         BlockPos barn = cowboy.blockPosition();
         cowboy.setHome(barn);
         cowboy.markFounded();
 
-        // But he does not found *in* it. The barn interior is eleven blocks by
+        // But they do not found *in* it. The barn interior is eleven blocks by
         // five with walls on every side, and a horse is nearly a block and a half
         // wide: placing a string of them in there put half of them in the walls.
-        // He walks out to open ground first and the herd is made around him.
+        // They walk out to open ground first and the herd is made around them.
         BlockPos paddock = findPaddock(level, barn);
         if (paddock != null) {
             cowboy.snapTo(paddock, cowboy.getYRot(), 0.0F);
         }
 
-        // The breed he is known for, settled before the first horse is made so
+        // The breed they are known for, settled before the first horse is made so
         // that horse can be one.
         Breed favourite = pickBreed(cowboy, level);
         cowboy.setPreferredBreed(favourite.id());
@@ -254,7 +254,7 @@ public final class CowboyHandler {
     /**
      * In a dev build, say in chat that a cowboy just founded and where.
      *
-     * <p>Founding happens the moment his chunk starts ticking, which is usually
+     * <p>Founding happens the moment their chunk starts ticking, which is usually
      * before the player is close enough to see the barn - so without this, "did
      * one generate?" is a question you answer by reading the server log, and the
      * answer scrolls past. See {@link DebugAnnounce} for the rest of the reasoning
@@ -269,8 +269,8 @@ public final class CowboyHandler {
 
     /**
      * One horse of the cowboy's own breeding: a <b>foundation</b> horse with no
-     * parents and generation 0, stamped with a real breed - he never keeps a
-     * feral mixed - and with {@code bredBy} set to his name.
+     * parents and generation 0, stamped with a real breed - they never keep a
+     * feral mixed - and with {@code bredBy} set to their name.
      *
      * <p>{@code bredBy} is the whole point of the character. It is the field
      * {@link HorseRecord#attribution()} prefers over {@code tamedBy}, so long
@@ -287,8 +287,8 @@ public final class CowboyHandler {
             return null;
         }
         horse.snapTo(spot, level.getRandom().nextFloat() * 360.0F, 0.0F);
-        horse.setAge(0);                 // an adult; he does not sell foals
-        horse.setPersistenceRequired();  // his stock does not despawn
+        horse.setAge(0);                 // an adult; they do not sell foals
+        horse.setPersistenceRequired();  // their stock does not despawn
 
         Genome genome = BreedFounder.roll(breed, rng);
         NameParts name = HorseRecords.newNameParts(rng);
@@ -301,9 +301,9 @@ public final class CowboyHandler {
         HorseRecords.apply(horse, record);
         horse.setData(ModAttachments.COWBOY_BRAND.get(), CowboyBrand.of(cowboy.getUUID()));
         cowboy.addToHerd(horse.getUUID());
-        // The herd's lead id is the man himself. Every other herd in this mod
+        // The herd's lead id is the man themselves. Every other herd in this mod
         // leads with a horse, but this one has never had a horse to lead with
-        // since he stopped riding - and the browser only needs the ids to agree.
+        // since they stopped riding - and the browser only needs the ids to agree.
         HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
         horse.setData(ModAttachments.HORSE_CARE.get(), care.withHerd(Optional.of(cowboy.getUUID())));
         return horse;
@@ -311,11 +311,11 @@ public final class CowboyHandler {
 
     /**
      * A breed that belongs where the barn is, weighted the way a wild herd is
-     * weighted - so most of his string is workaday and the rare one is worth
+     * weighted - so most of their string is workaday and the rare one is worth
      * the ride out. Never {@link Breeds#FERAL_MIXED}: a horse of unrecorded
      * ancestry is precisely what a breeder does not have.
      *
-     * <p>This is the <b>random half</b> of his string. Which half a given horse
+     * <p>This is the <b>random half</b> of their string. Which half a given horse
      * falls in is {@link #nextBreedFor}'s call.
      */
     private static Breed pickBreed(Cowboy cowboy, ServerLevel level) {
@@ -324,7 +324,7 @@ public final class CowboyHandler {
         if (breed != Breeds.FERAL_MIXED) {
             return breed;
         }
-        // Nothing local he is allowed to deal in - fall back to the whole set he
+        // Nothing local they are allowed to deal in - fall back to the whole set they
         // is, still weighted by commonness. A breed that has switched the cowboy
         // source off is not in this list either, so "no dealer has ever had one"
         // is a thing a breed can actually say.
@@ -352,13 +352,13 @@ public final class CowboyHandler {
      *
      * <p>The bearing is taken from the village bell to the barn, and candidates
      * are sampled in a {@link #PADDOCK_ARC} fan around it - so "out of town" is
-     * literal, and he sets up on the grass past the last house rather than in
+     * literal, and they set up on the grass past the last house rather than in
      * somebody's turnip field. Past {@link #PADDOCK_FAN_SHARE} of the attempts the
      * search widens to the whole circle rather than fail, and a village with no
      * findable bell starts from a random bearing.
      *
      * <p>Each candidate is dropped onto the surface heightmap and then has to pass
-     * {@link #standingOnGround}, which is what keeps him off the rooftops - see
+     * {@link #standingOnGround}, which is what keeps them off the rooftops - see
      * {@link #PADDOCK_RISE} and {@link #PADDOCK_GROUND_DEPTH} for why a heightmap
      * position on its own is not enough in a village.
      */
@@ -405,7 +405,7 @@ public final class CowboyHandler {
     }
 
     /**
-     * Half-span of the box that counts as "at the barn", around his home block.
+     * Half-span of the box that counts as "at the barn", around their home block.
      *
      * <p>An approximation, and knowingly so: the barn is 15x7 on the ground and
      * the jigsaw can rotate it any of four ways, so the only shape that is
@@ -423,7 +423,7 @@ public final class CowboyHandler {
             net.minecraft.world.entity.ai.village.poi.PoiType>> MEETING =
             holder -> holder.is(net.minecraft.world.entity.ai.village.poi.PoiTypes.MEETING);
 
-    /** Near enough to his home block to count as "at the barn". */
+    /** Near enough to their home block to count as "at the barn". */
     private static boolean nearHome(BlockPos barn, BlockPos pos) {
         return Math.abs(pos.getX() - barn.getX()) <= HOME_RADIUS
                 && Math.abs(pos.getZ() - barn.getZ()) <= HOME_RADIUS
@@ -496,7 +496,7 @@ public final class CowboyHandler {
     // ------------------------------------------------------------------
 
     /**
-     * Keep his string worth walking out to see.
+     * Keep their string worth walking out to see.
      *
      * <p>Two things happen here, both slowly and both on the same clock:
      *
@@ -504,17 +504,17 @@ public final class CowboyHandler {
      *   <li><b>Topping up.</b> Horses leave - bought, tamed, eaten by a wolf -
      *       and without this a cowboy the player has traded with once is a man
      *       standing next to an empty field for the rest of the world's life.
-     *       He breeds back up to {@link Cowboy#stockTarget()}, the number he had
-     *       the day he set up, one horse per look.</li>
+     *       They breed back up to {@link Cowboy#stockTarget()}, the number they had
+     *       the day they set up, one horse per look.</li>
      *   <li><b>Rotation.</b> A <i>full</i> string turns over now and then: one
      *       horse retires and the top-up replaces it next look. Without it a
      *       player who did not like the six horses on offer never has a reason
      *       to come back, because they would be the same six horses forever.</li>
      * </ul>
      *
-     * <p>Only ever the horses he can still sell. His mount is not stock, a horse
+     * <p>Only ever the horses they can still sell. Their mount is not stock, a horse
      * somebody has already bought the papers for is spoken for, and one that has
-     * been tamed has left his hands entirely - {@link #forgetTamed} drops those
+     * been tamed has left their hands entirely - {@link #forgetTamed} drops those
      * from the herd so they stop counting against the target they no longer fill.
      */
     private static void restock(Cowboy cowboy, ServerLevel level) {
@@ -542,18 +542,18 @@ public final class CowboyHandler {
     }
 
     /**
-     * The horses he could write a paper for right now: alive, loaded, untamed,
-     * not his mount, not already sold.
+     * The horses they could write a paper for right now: alive, loaded, untamed,
+     * not their mount, not already sold.
      *
      * <p>The same test {@code Cowboy.updateTrades} applies when it builds the
-     * offer list, and deliberately so - "how many has he got?" and "how many can
-     * you buy?" have to be the same number, or he restocks to fill a shelf the
+     * offer list, and deliberately so - "how many has they got?" and "how many can
+     * you buy?" have to be the same number, or they restock to fill a shelf the
      * merchant screen cannot see.
      *
      * <p><b>Loaded only.</b> An unloaded horse is indistinguishable from a dead
      * one through {@code getEntity}, so it does not count - which is safe in the
      * direction that matters, because this only ever runs on a cowboy whose own
-     * chunk is ticking, and his string is by construction standing around him.
+     * chunk is ticking, and their string is by construction standing around them.
      */
     private static List<Horse> sellableStock(Cowboy cowboy, ServerLevel level) {
         List<UUID> ids = cowboy.herdIds();
@@ -571,8 +571,8 @@ public final class CowboyHandler {
 
     /**
      * Drop tamed horses out of the herd for good. A redeemed paper tames the
-     * horse and clears its brand, so it has stopped following him and stopped
-     * being his - leaving the id in the list would only make {@code herd} grow
+     * horse and clears its brand, so it has stopped following them and stopped
+     * being their - leaving the id in the list would only make {@code herd} grow
      * without bound over a long world.
      */
     private static void forgetTamed(Cowboy cowboy, ServerLevel level) {
@@ -599,13 +599,13 @@ public final class CowboyHandler {
     }
 
     /**
-     * Which breed the next horse he breeds should be: <b>his own until half the
-     * string is it</b>, and something the country round him produces after that.
+     * Which breed the next horse they breed should be: <b>their own until half the
+     * string is it</b>, and something the country round them produces after that.
      *
      * <p>Counted rather than coin-flipped, because a coin flip on a string of
      * six lands on eight-out-of-eight often enough to be seen, and "the man who
      * only has Fjords" is a different character from "the Fjord man". Counting
-     * also self-corrects: sell three of his Fjords and the next three he breeds
+     * also self-corrects: sell three of their Fjords and the next three they breed
      * are Fjords.
      */
     private static Breed nextBreedFor(Cowboy cowboy, ServerLevel level) {
@@ -641,7 +641,7 @@ public final class CowboyHandler {
      * Every horse gets both cowboy goals on join. They are cheap and they check
      * their own preconditions - a horse with no brand and no rider on its back
      * never leaves {@code canUse()} - which is a much smaller thing to get
-     * wrong than trying to add a goal at the moment a horse becomes his.
+     * wrong than trying to add a goal at the moment a horse becomes their.
      */
     @SubscribeEvent
     static void onHorseJoin(EntityJoinLevelEvent event) {
@@ -660,7 +660,7 @@ public final class CowboyHandler {
     // brands
     // ------------------------------------------------------------------
 
-    /** The cowboy who owns this horse, if it is branded and he is still alive. */
+    /** The cowboy who owns this horse, if it is branded and they are still alive. */
     public static @Nullable Cowboy ownerOf(Horse horse, ServerLevel level) {
         CowboyBrand brand = horse.getData(ModAttachments.COWBOY_BRAND.get());
         if (brand == null || brand.cowboy().isEmpty()) {
@@ -670,7 +670,7 @@ public final class CowboyHandler {
         if (level.getEntity(id) instanceof Cowboy cowboy && cowboy.isAlive()) {
             return cowboy;
         }
-        // He is gone. His horses are nobody's now - clear the brand so they can
+        // They are gone. Their horses are nobody's now - clear the brand so they can
         // be tamed the ordinary way rather than becoming untameable orphans.
         horse.setData(ModAttachments.COWBOY_BRAND.get(), CowboyBrand.NONE);
         return null;
@@ -682,8 +682,8 @@ public final class CowboyHandler {
     }
 
     /**
-     * Kill the cowboy and his herd goes feral: the horses stop following, and
-     * anyone may tame them the hard way. They keep his name as their breeder,
+     * Kill the cowboy and their herd goes feral: the horses stop following, and
+     * anyone may tame them the hard way. They keep their name as their breeder,
      * because that is a fact about where they came from and not a claim on
      * them.
      */

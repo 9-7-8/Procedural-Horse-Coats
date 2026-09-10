@@ -53,73 +53,73 @@ import java.util.UUID;
 
 /**
  * The <b>cowboy</b> - a horse breeder who lives at a barn on the edge of a
- * plains village, rides everywhere, and sells his stock as
+ * plains village, rides everywhere, and sells their stock as
  * {@linkplain TransferDeed transfer papers} rather than as animals.
  *
- * <h2>What he is, and is not</h2>
- * He is <b>not a villager profession</b>. A profession is acquired from a job
+ * <h2>What they are, and is not</h2>
+ * They are <b>not a villager profession</b>. A profession is acquired from a job
  * site by a villager whose brain runs vanilla's schedule, and that schedule
- * would dismount him every morning to go stand at his workstation. Everything
- * that makes this character himself - home is a barn and not a bed, stock is a
- * live herd and not a trade table - is a fight with that brain. So he is his own
- * {@link AbstractVillager}: he keeps the merchant screen, the villager
+ * would dismount them every morning to go stand at their workstation. Everything
+ * that makes this character themselves - home is a barn and not a bed, stock is a
+ * live herd and not a trade table - is a fight with that brain. So they are their own
+ * {@link AbstractVillager}: they keep the merchant screen, the villager
  * silhouette and the trading goals, and none of the schedule. The <b>horseman</b>
  * ({@code ModVillagerProfessions}) is the one that is a real profession, because
  * a shopkeeper standing at a workstation is exactly what vanilla's brain is for.
  *
- * <h2>He does not ride</h2>
- * He did, for about a day, and it cost more than every other part of this
+ * <h2>They do not ride</h2>
+ * They did, for about a day, and it cost more than every other part of this
  * character put together. A mob rider cannot steer, so the itinerary had to live
  * on the horse; the horse's own goals all exist for the "someone is on my back"
- * case and fought it; a villager has no seated pose so he had to be sunk into
+ * case and fought it; a villager has no seated pose so they had to be sunk into
  * the saddle; and getting a mounted man and eleven horses through a barn door at
  * dusk was never made to work at all. <b>The herd follows the man now</b>, on
  * foot, and everything above went in the bin with the saddle. See
  * {@code wiki/known-gaps.html}.
  *
- * <h2>Selling a horse he does not hand over</h2>
+ * <h2>Selling a horse they do not hand over</h2>
  * Each offer is one emerald price against one signed transfer paper, named for
- * one horse in his herd. Buying it does not move the animal: the buyer has to
+ * one horse in their herd. Buying it does not move the animal: the buyer has to
  * walk out to the horse the paper names and redeem it there
  * ({@code TransferPaperHandler}). That is what keeps a paper worth trading
  * onward - it is a claim someone else can still collect.
  *
- * <p>A horse he has written a paper for leaves the offer list for good
+ * <p>A horse they have written a paper for leaves the offer list for good
  * ({@link #hasSold}), whether or not the paper was ever redeemed - the animal
  * is spoken for even if the buyer never walks out to collect it.
  *
  * <h2>Restocking</h2>
- * What he does <b>not</b> do is run out. {@code CowboyHandler} breeds him back
- * up to {@link #stockTarget} - the number he had for sale the day he set up -
+ * What they do <b>not</b> do is run out. {@code CowboyHandler} breeds them back
+ * up to {@link #stockTarget} - the number they had for sale the day they set up -
  * and now and then retires a horse nobody is looking at and breeds a
  * replacement. So a player who comes back a week later finds a different string
- * of the same size, rather than the same six horses he was not interested in
+ * of the same size, rather than the same six horses they were not interested in
  * the first time.
  *
  * <h2>State</h2>
  * <ul>
- *   <li>{@code home} - the barn he was generated in, and the place he and his
+ *   <li>{@code home} - the barn they were generated in, and the place they and their
  *       herd return to at night.</li>
- *   <li>{@code herd} - the horses he bred, in the order they were made. All of
- *       them follow him and all of them are for sale.</li>
- *   <li>{@code sold} - herd members he has already issued a paper for.</li>
- *   <li>{@code stockTarget} - how many horses he had for sale on the day he
- *       set up, and the number {@code CowboyHandler} breeds him back up to. A
+ *   <li>{@code herd} - the horses they bred, in the order they were made. All of
+ *       them follow them and all of them are for sale.</li>
+ *   <li>{@code sold} - herd members they have already issued a paper for.</li>
+ *   <li>{@code stockTarget} - how many horses they had for sale on the day they
+ *       set up, and the number {@code CowboyHandler} breeds them back up to. A
  *       fixed cast no longer, but a fixed <i>size</i> of cast.</li>
- *   <li>{@code preferredBreed} - the breed he is known for. Half his string is
- *       it and the rest is whatever else the country round him produces, which
+ *   <li>{@code preferredBreed} - the breed they are known for. Half their string is
+ *       it and the rest is whatever else the country round them produces, which
  *       is how a real breeder's yard looks.</li>
- *   <li>{@code founded} - has {@code CowboyHandler} given him his name and his
- *       herd yet? He arrives bare - a villager who claimed a Horse Trader's Post
- *       and was replaced by one of these - and everything about him is built on
- *       his first server tick.</li>
+ *   <li>{@code founded} - has {@code CowboyHandler} given them their name and their
+ *       herd yet? They arrive bare - a villager who claimed a Horse Trader's Post
+ *       and was replaced by one of these - and everything about them is built on
+ *       their first server tick.</li>
  * </ul>
  */
 public class Cowboy extends AbstractVillager {
 
-    /** Fewest horses in his string. */
+    /** Fewest horses in their string. */
     public static final int MIN_HERD = 4;
-    /** Most horses in his string. */
+    /** Most horses in their string. */
     public static final int MAX_HERD = 10;
 
     private @Nullable BlockPos home;
@@ -138,9 +138,9 @@ public class Cowboy extends AbstractVillager {
     /**
      * Ten times a villager's health.
      *
-     * <p>He spends the night on foot in a field now (see {@link #letHimDown}),
+     * <p>They spend the night on foot in a field now (see {@link #letHimDown}),
      * and a villager on foot in a field at night is a zombie's supper. The
-     * alternative was a barn he could reliably get into, and a day of trying
+     * alternative was a barn they could reliably get into, and a day of trying
      * established that a man who tries to bed down costs more than it is worth.
      * Owner's call, and the right one: this is one number against a subsystem.
      */
@@ -168,16 +168,16 @@ public class Cowboy extends AbstractVillager {
      * Doors, in daylight only.
      *
      * <p>{@link CowboyDoorGoal} is the half that swings them; this is the half
-     * that lets him route through one in the first place. {@code canOpenDoors}
+     * that lets them route through one in the first place. {@code canOpenDoors}
      * is what makes the pathfinder score a shut wooden door as passable rather
      * than as wall, so it has to rise and fall with the goal - on its own it
-     * would send him at a door he has no behaviour to open, and off on its own
-     * it would leave him unable to plan a way through a door he is perfectly
+     * would send them at a door they have no behaviour to open, and off on its own
+     * it would leave them unable to plan a way through a door they are perfectly
      * able to open.
      *
      * <p>Set every tick rather than on a schedule change, because there is no
      * event for "it got dark" and a path already in flight is re-planned often
-     * enough that a stale flag would strand him at the barn door either way.
+     * enough that a stale flag would strand them at the barn door either way.
      */
     @Override
     protected void customServerAiStep(ServerLevel level) {
@@ -187,15 +187,15 @@ public class Cowboy extends AbstractVillager {
 
     // --- identity -------------------------------------------------------
 
-    /** His full name - the one written on his horses as their breeder. */
+    /** Their full name - the one written on their horses as their breeder. */
     public String cowboyName() {
         Component name = getCustomName();
         return name == null ? "" : name.getString();
     }
 
     /**
-     * His family name. The <b>horseman</b> at the post outside his barn is given
-     * this too, with a first name of his own - the two of them are the family
+     * Their family name. The <b>horseman</b> at the post outside their barn is given
+     * this too, with a first name of their own - the two of them are the family
      * that runs the place, which is the shortest way to say so.
      *
      * <p>Split back out of the full name rather than stored beside it: the name
@@ -217,8 +217,8 @@ public class Cowboy extends AbstractVillager {
     }
 
     /**
-     * How many horses he keeps for sale. Set once, at founding, from the roll
-     * that made his first string - so one cowboy is a four-horse outfit and the
+     * How many horses they keep for sale. Set once, at founding, from the roll
+     * that made their first string - so one cowboy is a four-horse outfit and the
      * next is a ten-horse one, for good.
      */
     public int stockTarget() {
@@ -229,7 +229,7 @@ public class Cowboy extends AbstractVillager {
         this.stockTarget = Math.max(0, target);
     }
 
-    /** The breed he is known for, if he has been founded. */
+    /** The breed they are known for, if they have been founded. */
     public Optional<String> preferredBreed() {
         return Optional.ofNullable(preferredBreed);
     }
@@ -240,7 +240,7 @@ public class Cowboy extends AbstractVillager {
 
     // --- home and herd --------------------------------------------------
 
-    /** The barn, if he has been founded. */
+    /** The barn, if they have been founded. */
     public Optional<BlockPos> home() {
         return Optional.ofNullable(home);
     }
@@ -249,7 +249,7 @@ public class Cowboy extends AbstractVillager {
         this.home = pos.immutable();
     }
 
-    /** Every horse he bred. Ids only - some may be unloaded or dead. */
+    /** Every horse they bred. Ids only - some may be unloaded or dead. */
     public List<UUID> herdIds() {
         return List.copyOf(herd);
     }
@@ -270,7 +270,7 @@ public class Cowboy extends AbstractVillager {
     }
 
     /**
-     * Count down to the next look over his string; true on the tick it comes
+     * Count down to the next look over their string; true on the tick it comes
      * due. Deliberately <b>not saved</b> - a reload simply brings the next look
      * forward, which is the harmless direction to be wrong in.
      */
@@ -299,7 +299,7 @@ public class Cowboy extends AbstractVillager {
     // --- trading --------------------------------------------------------
 
     /**
-     * One offer per herd horse that is still his to sell: alive, still untamed,
+     * One offer per herd horse that is still their to sell: alive, still untamed,
      * and not already papered. Rebuilt from scratch every time
      * the list is asked for, because the herd is a live thing - a horse can be
      * killed by a wolf between one player looking and the next.
@@ -323,12 +323,12 @@ public class Cowboy extends AbstractVillager {
                     new ItemCost(Items.EMERALD, HorsePrices.emeraldsFor(record)),
                     papersFor(record),
                     1,   // one paper per horse, ever
-                    0,   // he is not a levelling villager
+                    0,   // they are not a levelling villager
                     0.0F));
         }
     }
 
-    /** The item one of his horses is sold as: a signed paper, named for the horse. */
+    /** The item one of their horses is sold as: a signed paper, named for the horse. */
     private ItemStack papersFor(HorseRecord record) {
         ItemStack stack = new ItemStack(ModItems.SIGNED_TRANSFER_PAPER.get());
         stack.set(ModDataComponents.HORSE_DEED.get(), TransferDeed.forHorse(record, cowboyName()));
@@ -382,12 +382,12 @@ public class Cowboy extends AbstractVillager {
 
     @Override
     protected void rewardTradeXp(MerchantOffer offer) {
-        // He is not a levelling villager: no XP, no restock, no tiers.
+        // They are not a levelling villager: no XP, no restock, no tiers.
     }
 
     // --- the rest -------------------------------------------------------
 
-    /** He is generated with a village and stays with it, however far the player wanders. */
+    /** They are generated with a village and stays with it, however far the player wanders. */
     @Override
     public boolean removeWhenFarAway(double distSqr) {
         return false;

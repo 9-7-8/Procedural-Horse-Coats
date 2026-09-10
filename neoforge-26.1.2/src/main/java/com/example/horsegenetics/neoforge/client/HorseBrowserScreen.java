@@ -1,5 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.BreedingPreview;
@@ -100,6 +102,7 @@ public final class HorseBrowserScreen extends Screen {
 
     private enum Tab {
         GETTING_STARTED("Getting started"),
+        BREEDS("Breeds"),
         MY_HORSES("My horses"),
         GENE_DATABASE("Gene database"),
         ALLELES("Alleles"),
@@ -142,10 +145,17 @@ public final class HorseBrowserScreen extends Screen {
     private static final int TAB_TEXT_ON = 0xFFFFFFFF;
     private static final int TAB_TEXT_OFF = 0xFF888F9F;
     private static final int LABEL = 0xFF8890A8;
-    /** Side of one gene-preview square. Below about this a horse is a brown smudge. */
-    private static final int PREVIEW = 46;
-    /** The sunken square a preview horse stands in. */
+    /**
+     * One gene-preview cell. <b>Wider than it is tall</b>, because a horse is:
+     * a square cell either cropped the animal at the shoulders or shrank it
+     * until the markings the gene exists to show were three pixels across.
+     */
+    private static final int PREVIEW_W = 62;
+    private static final int PREVIEW_H = 46;
+    /** The sunken cell a preview horse stands in. */
     private static final int WELL = 0xFF101018;
+    /** Resting turn for a preview horse, in degrees off head-on. */
+    private static final float REST = 26.0F;
     private static final int ROW_HOVER = 0x22FFFFFF;
     private static final int ROW_SEL = 0x3355A0E0;
     private static final int NAME = 0xFFE4E8F0;
@@ -239,6 +249,8 @@ public final class HorseBrowserScreen extends Screen {
      * starts at the top of its own scroll and there is nothing above it.
      */
     private int tocInlineHeight = 0;
+    private static float breedScroll = 0f;
+    private float breedMaxScroll = 0f;
     /** The single horse every gene preview is drawn with; built on first use, kept for the screen. */
     private Horse previewModel;
     /** Which slice of the collection the Alleles tab shows. Sticky across opens, like the tab itself. */
@@ -842,6 +854,9 @@ public final class HorseBrowserScreen extends Screen {
         if (tab == Tab.ALLELES && alleleFilterClicked(event.x(), event.y())) {
             return true;
         }
+        if (tab == Tab.BREEDS) {
+            return super.mouseClicked(event, doubleClick); // a reference list, nothing to pick
+        }
         if (tab == Tab.GETTING_STARTED || tab == Tab.ALLELES) {
             return super.mouseClicked(event, doubleClick); // neither has a list
         }
@@ -970,6 +985,10 @@ public final class HorseBrowserScreen extends Screen {
             alleleScroll = Math.max(0f, Math.min(alleleScroll - (float) sy * 18f, alleleMaxScroll));
             return true;
         }
+        if (tab == Tab.BREEDS) {
+            breedScroll = Math.max(0f, Math.min(breedScroll - (float) sy * 18f, breedMaxScroll));
+            return true;
+        }
         if (tab == Tab.MY_HORSES) {
             int max = Math.max(0, horseRows.size() - horseVisibleRows());
             horseScroll = Math.max(0, Math.min(max, horseScroll - (int) Math.signum(sy) * 3));
@@ -1049,7 +1068,7 @@ public final class HorseBrowserScreen extends Screen {
             // different lists reads as a bug the first time it clears itself.
             // My horses has its own box, with its own query language.
             boolean showSearch = tab == Tab.GENE_DATABASE || tab == Tab.RECIPES
-                    || tab == Tab.ALLELES;
+                    || tab == Tab.ALLELES || tab == Tab.BREEDS;
             searchBox.visible = showSearch;
             searchBox.active = showSearch;
         }
@@ -1069,6 +1088,7 @@ public final class HorseBrowserScreen extends Screen {
             }
             case BREEDING_PREVIEW -> drawBreedingPreview(g, mouseX, mouseY);
             case GETTING_STARTED -> drawGettingStarted(g, mouseX, mouseY);
+            case BREEDS -> drawBreeds(g, mouseX, mouseY);
             case ALLELES -> drawAlleles(g, mouseX, mouseY);
             case RECIPES -> drawRecipes(g, mouseX, mouseY);
         }
@@ -1151,7 +1171,8 @@ public final class HorseBrowserScreen extends Screen {
      *
      * @return the height it used, or zero for a gene with nothing to show
      */
-    private int drawGenePreviews(GuiGraphicsExtractor g, Gene gene, int x, int y, int w) {
+    private int drawGenePreviews(GuiGraphicsExtractor g, Gene gene, int x, int y, int w,
+                                 int mouseX, int mouseY) {
         List<GenePreviews.Shot> shots = GenePreviews.forGene(gene);
         if (shots.isEmpty()) {
             return 0;
@@ -1160,18 +1181,18 @@ public final class HorseBrowserScreen extends Screen {
         if (model == null) {
             return 0;
         }
-        int cell = PREVIEW + 6;
+        int cell = PREVIEW_W + 4;
         int perRow = Math.max(1, w / cell);
         int used = 0;
         for (int i = 0; i < shots.size(); i++) {
             int col = i % perRow;
             int row = i / perRow;
             int cx = x + col * cell;
-            int cy = y + row * (PREVIEW + this.font.lineHeight + 4);
-            g.fill(cx, cy, cx + PREVIEW, cy + PREVIEW, WELL);
-            drawPreviewHorse(g, model, shots.get(i).coat(), cx, cy);
-            drawFitted(g, shots.get(i).label(), cx + 1, cy + PREVIEW + 1, PREVIEW - 2, TAG);
-            used = (row + 1) * (PREVIEW + this.font.lineHeight + 4);
+            int cy = y + row * (PREVIEW_H + this.font.lineHeight + 4);
+            g.fill(cx, cy, cx + PREVIEW_W, cy + PREVIEW_H, WELL);
+            drawPreviewHorse(g, model, shots.get(i).coat(), cx, cy, mouseX, mouseY);
+            drawFitted(g, shots.get(i).label(), cx + 1, cy + PREVIEW_H + 1, PREVIEW_W - 2, TAG);
+            used = (row + 1) * (PREVIEW_H + this.font.lineHeight + 4);
         }
         return used + 6;
     }
@@ -1204,8 +1225,22 @@ public final class HorseBrowserScreen extends Screen {
         return previewModel;
     }
 
-    /** Side-on, still, and centred in its well - a plate, not a toy that follows the mouse. */
-    private void drawPreviewHorse(GuiGraphicsExtractor g, Horse model, CoatData coat, int bx, int by) {
+    /**
+     * <b>A live model, not a picture.</b>
+     *
+     * <p>It was drawn at one hard-coded angle to begin with, which read as a
+     * baked sprite and sat at a strange three-quarter twist besides. It is the
+     * same real-time entity render the pedigree screen uses, so it may as well
+     * behave like one: each horse turns to follow the pointer, which is both a
+     * better default pose and the clearest possible statement that these are
+     * models rather than images. Resting pose is very slightly off square, so a
+     * row at rest still shows the barrel where a coat gene does most of its
+     * work.
+     */
+    private void drawPreviewHorse(GuiGraphicsExtractor g, Horse model, CoatData coat,
+                                  int bx, int by, int mouseX, int mouseY) {
+        int cx = bx + PREVIEW_W / 2;
+        int cy = by + PREVIEW_H / 2;
         try {
             EntityRenderer<? super Horse, ?> renderer =
                     Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(model);
@@ -1215,21 +1250,27 @@ public final class HorseBrowserScreen extends Screen {
             if (state instanceof GeneticHorseRenderState gs) {
                 gs.coatData = coat;
             }
+            // Same construction as FamilyTreeScreen.drawHorseModel: bodyRot runs
+            // 180 degrees ahead of yRot, and the pair together is what turns the
+            // animal. REST biases the whole thing off square so a row sitting
+            // under an untouched cursor is still three-quarters on.
+            float xAngle = (float) Math.atan((cx - mouseX) / 40.0F);
+            float yAngle = (float) Math.atan((cy - mouseY) / 40.0F);
+            float turn = REST + xAngle * 26.0F;
             if (state instanceof LivingEntityRenderState ls) {
-                // Three-quarters on: a pure side view hides the face and a pure
-                // front view hides everything the coat genes actually paint.
-                ls.bodyRot = 215.0F;
-                ls.yRot = 35.0F;
-                ls.xRot = 0.0F;
+                ls.bodyRot = 180.0F + turn;
+                ls.yRot = turn;
+                ls.xRot = -yAngle * 14.0F;
                 ls.boundingBoxWidth = ls.boundingBoxWidth / ls.scale;
                 ls.boundingBoxHeight = ls.boundingBoxHeight / ls.scale;
                 ls.scale = 1.0F;
             }
             Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
-            Quaternionf xRotation = new Quaternionf();
+            Quaternionf xRotation = new Quaternionf().rotateX(yAngle * 14.0F * ((float) Math.PI / 180.0F));
+            rotation.mul(xRotation);
             Vector3f translation = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F + 0.0625F, 0.0F);
-            g.entity(state, PREVIEW * 0.42F, translation, rotation, xRotation,
-                    bx, by, bx + PREVIEW, by + PREVIEW);
+            g.entity(state, PREVIEW_H * 0.40F, translation, rotation, xRotation,
+                    bx, by, bx + PREVIEW_W, by + PREVIEW_H);
         } catch (RuntimeException ignored) {
             // A gene whose render state will not build should cost one square,
             // not the whole panel.
@@ -1279,7 +1320,7 @@ public final class HorseBrowserScreen extends Screen {
             return;
         }
 
-        y += drawGenePreviews(g, gene, l, y, w);
+        y += drawGenePreviews(g, gene, l, y, w, lastMouseX, lastMouseY);
 
         String summary = gene.description();
         if (summary == null || summary.isBlank()) {
@@ -1801,6 +1842,98 @@ public final class HorseBrowserScreen extends Screen {
      * gameplay gate and deliberately harder; collecting an <i>allele</i> is just
      * a record of what you have laid eyes on.
      */
+    /**
+     * <b>Every breed in the mod, in one list.</b>
+     *
+     * <p>The information was all there already - a breed decides what a wild
+     * herd looks like, what it is carrying and how big it grows - and there was
+     * nowhere in the game to read it. You could meet a Fjord, be told it was a
+     * Fjord on its information panel, and have no way to find out what that
+     * meant without leaving the game. (Owner's report: "I don't see a list of
+     * breeds anywhere.")
+     *
+     * <p>Deliberately a flat reference rather than a browsable catalogue with a
+     * detail pane: what a player wants here is "what is a Karabakh, roughly",
+     * answered in one line, next to the forty-eight others so the answer has
+     * something to be compared against. The full picture - colour genes,
+     * disorder risks, the fiction - is the wiki's job.
+     */
+    private void drawBreeds(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int l = listX();
+        int r = fsRight();
+        int top = listTop();
+        int bottom = contentBottom();
+        int w = r - l - 8;
+
+        String q = search.trim().toLowerCase(Locale.ROOT);
+        List<Breed> shown = new ArrayList<>();
+        for (Breed b : Breeds.all()) {
+            if (q.isEmpty() || b.name().toLowerCase(Locale.ROOT).contains(q)
+                    || b.id().toLowerCase(Locale.ROOT).contains(q)
+                    || biomeLine(b).toLowerCase(Locale.ROOT).contains(q)) {
+                shown.add(b);
+            }
+        }
+        shown.sort(Comparator.comparing(Breed::name, String.CASE_INSENSITIVE_ORDER));
+
+        g.text(this.font, Component.literal(shown.size()
+                        + (shown.size() == 1 ? " breed" : " breeds")),
+                l, top - 12, LABEL, false);
+        g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
+        g.enableScissor(l - 4, top, r, bottom);
+
+        int y = top - (int) breedScroll;
+        int start = y;
+        for (Breed b : shown) {
+            drawFitted(g, b.name(), l, y, w - 90, NAME);
+            String size = heightLine(b);
+            if (!size.isEmpty()) {
+                g.text(this.font, Component.literal(size), r - 86, y, ALLELE_TOK, false);
+            }
+            y += this.font.lineHeight + 1;
+            drawFitted(g, biomeLine(b), l + 8, y, w - 8, TAG);
+            y += this.font.lineHeight + 5;
+        }
+        if (shown.isEmpty()) {
+            g.text(this.font, Component.literal("No breed matches \"" + search + "\"."), l, y, TAG, false);
+            y += this.font.lineHeight;
+        }
+        g.disableScissor();
+
+        int height = y - start;
+        breedMaxScroll = Math.max(0f, height - (bottom - top));
+        breedScroll = Math.max(0f, Math.min(breedScroll, breedMaxScroll));
+        if (breedMaxScroll > 0) {
+            int trackH = bottom - top;
+            scrollBarV(g, r - 2, r + 1, top, bottom, breedScroll, breedMaxScroll,
+                    Math.max(16, (int) ((long) trackH * trackH / Math.max(1, height))),
+                    v -> breedScroll = (float) v);
+        }
+    }
+
+    /** "14.5-16.0 hh", or empty for a breed that pins no height. */
+    private static String heightLine(Breed b) {
+        return b.scores().heightHands()
+                .map(range -> String.format(Locale.ROOT, "%.1f-%.1f hh", range.lo(), range.hi()))
+                .orElse("");
+    }
+
+    /** The biomes a breed spawns in, without the namespace, as a sentence. */
+    private static String biomeLine(Breed b) {
+        if (b.biomes().isEmpty()) {
+            return "anywhere horses spawn";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String id : b.biomes()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            String bare = id.contains(":") ? id.substring(id.indexOf(':') + 1) : id;
+            sb.append(bare.replace('_', ' '));
+        }
+        return sb.toString();
+    }
+
     private void drawAlleles(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int l = listX();
         int r = fsRight();
@@ -1816,7 +1949,11 @@ public final class HorseBrowserScreen extends Screen {
         List<AlleleRow> rows = new ArrayList<>();
         for (Gene gene : allGenes) {
             int mine = 0;
-            for (Allele a : gene.alleles()) {
+            List<Allele> collectable = collectable(gene);
+            if (collectable.isEmpty()) {
+                continue; // a locus whose only allele is the baseline has nothing to collect
+            }
+            for (Allele a : collectable) {
                 total++;
                 if (ClientGeneDatabase.hasAllele(gene.key(), a.token())) {
                     have++;
@@ -1827,7 +1964,7 @@ public final class HorseBrowserScreen extends Screen {
                     && !gene.key().toLowerCase(Locale.ROOT).contains(q)) {
                 continue;
             }
-            AlleleRow row = new AlleleRow(gene, mine, gene.alleles().size());
+            AlleleRow row = new AlleleRow(gene, mine, collectable.size());
             if (alleleFilter.accepts(row)) {
                 rows.add(row);
             }
@@ -1863,7 +2000,7 @@ public final class HorseBrowserScreen extends Screen {
             y += this.font.lineHeight + 2;
 
             int cx = l + 10;
-            for (Allele a : gene.alleles()) {
+            for (Allele a : collectable(gene)) {
                 boolean got = ClientGeneDatabase.hasAllele(gene.key(), a.token());
                 String label = got ? a.label() : "??? (" + a.token().replaceAll(".", "?") + ")";
                 int tw = this.font.width(label) + 8;
@@ -1888,6 +2025,31 @@ public final class HorseBrowserScreen extends Screen {
                     Math.max(16, (int) ((long) trackH * trackH / Math.max(1, height))),
                     v -> alleleScroll = (float) v);
         }
+    }
+
+    /**
+     * <b>The alleles at a locus that are worth collecting</b> - which is all of
+     * them except the baseline.
+     *
+     * <p>Every horse in the world carries the wild type at nearly every locus,
+     * so it lands in the collection on the first animal you ever tame and stays
+     * there. Counting it made the tab congratulate a player for <i>not</i>
+     * having found the gene, and inflated every fraction toward finished by one
+     * free step. A locus whose only allele is the baseline drops out of the list
+     * entirely rather than sitting at 0/0. (Owner's call.)
+     *
+     * <p>The <i>collection</i> still records baselines - this is a display rule,
+     * not a data one, so nothing has to be re-swept if the call is reversed.
+     */
+    private static List<Allele> collectable(Gene gene) {
+        Allele baseline = gene.defaultAllele();
+        List<Allele> out = new ArrayList<>(gene.alleles().size());
+        for (Allele a : gene.alleles()) {
+            if (!a.equals(baseline)) {
+                out.add(a);
+            }
+        }
+        return out;
     }
 
     /** One locus as the Alleles tab counts it. */

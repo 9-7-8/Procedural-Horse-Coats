@@ -91,7 +91,7 @@ public final class HorsePaperInspectHandler {
      * (untamed)" beside a barn full of a named man's horses is wrong in the way
      * that matters, because the animal plainly does have an owner and you plainly
      * cannot take it. A branded horse reports <b>owned by</b> its breeder instead,
-     * which is the same person by construction: he only ever sells what he bred.
+     * which is the same person by construction: they only ever sells what they bred.
      *
      * <p>{@code tamedBy} itself is left alone. It means "who first got a rope on
      * it", it is filled in for the buyer when a transfer paper is redeemed, and
