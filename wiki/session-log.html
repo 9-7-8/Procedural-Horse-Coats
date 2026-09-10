@@ -168,8 +168,16 @@
     they were all false.</p>
 
 <p><code>founders.py</code> was re-run over the whole set, as it is designed to be: it
-    budgets the tiers together, so twenty-two new genes moved twenty-two old tables.
-    9.70% of founder horses now express some magical gene.</p>
+    budgets the tiers together, so twenty-two new genes re-derived everybody&rsquo;s
+    numbers. <b>Forty-three existing tables moved</b>, not the twenty-two the commit
+    message guessed at &mdash; because the re-derivation also flattened every table that
+    had drifted <em>above</em> its declared tier, and several had, by a factor of seven.
+    Across the mod the share of founders expressing some magical gene went from 16.32% to
+    13.35% <em>while gaining twenty-two genes</em>. The table and the question of whether
+    those are the right numbers are on
+    <a href="verification.html#engine-fallout">verification &sect;0-BM</a>; the fix, if they
+    are wrong, is a gene&rsquo;s <code>rarity</code> tier and another run, never a
+    hand-edited founders block.</p>
 
 <p>Sources: <code>common/coat/pattern/SvgPath.java</code>,
     <code>SpecPainter</code>, <code>SpecSchema</code>,

@@ -35,6 +35,165 @@
     </p>
 </div>
 
+<h2 id="engine-fallout">&sect;0-BM &mdash; What the drawing-engine change did to the genes that were already here (0.4.1, 2026-09-09, NOT looked at)</h2>
+
+<p>Twenty-two genes and three masks landed at once, and the honest question after a change
+    that size is not &ldquo;do the new ones work&rdquo; &mdash; that is
+    <a href="#svg-intake">&sect;0-BL</a> &mdash; but <strong>what did it do to the hundred
+    and twenty that were already here</strong>. The answer splits cleanly in two, and the
+    two halves want completely different amounts of attention.</p>
+
+<div class="note">
+    <span class="label">The short version</span>
+    <p>
+        <strong>No existing horse changed colour. Forty-three existing genes got rarer in
+        the wild</strong>, some of them by a factor of seven. Nothing else moved.
+    </p>
+</div>
+
+<h3>Confirmed, by measurement: not one existing coat moved</h3>
+
+<p>This is not a judgement, it is a hash comparison, and it is the one thing on this page
+    that does not need a play session.</p>
+
+<ul>
+    <li><strong>All 1056 composed coats in the pipeline golden are byte-identical</strong>
+        before and after. The file&rsquo;s every line changed, which looks alarming until
+        you read which half: the <em>key</em> is a genotype code and it got twenty-two
+        segments longer. The hash on the end of each line is the same on all 1056.</li>
+    <li><strong>All 620 rows of the bake golden are unchanged</strong>, and 57 new rows
+        joined them. Not one pre-existing gene&times;allele hash moved.</li>
+    <li>That covers the four masks whose code was edited &mdash; <code>SPOTS</code>,
+        <code>RINGS</code>, <code>CRACKLE</code> and the <code>RAMP</code> op. Every new
+        parameter defaults to the behaviour that was there before, and the goldens are what
+        say so rather than the intention.</li>
+</ul>
+
+<p><strong>So no gene needs re-verifying for appearance.</strong> If a marking you knew
+    looks different in 0.4.1, that is a bug and a serious one, because two golden files say
+    it cannot be.</p>
+
+<h3>Not confirmed, and the reason this section exists: forty-three genes got rarer</h3>
+
+<p><code>intake/tools/founders.py</code> was re-run over the whole set, which is what it is
+    for &mdash; it budgets the tiers <em>together</em>, so adding genes necessarily moves
+    everybody&rsquo;s numbers. What it also did was flatten forty-three tables that had
+    been sitting <strong>above</strong> their declared tier, some of them well above.
+    Across the whole mod the share of founder horses expressing <em>some</em> magical gene
+    went from <strong>16.32% to 13.35%</strong> &mdash; and that is with twenty-two new
+    genes added, so the existing ones absorbed rather more than that figure suggests.</p>
+
+<p>The ones that moved by more than a factor of two, worst first. <strong>None of these is
+    a coat change</strong>; it is purely how often a wild horse turns up carrying one.</p>
+
+<div class="table-wrap">
+<table class="facts">
+<thead><tr><th>Gene</th><th>Tier</th><th>Founders expressing, before</th><th>after</th><th>factor</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-banded-socks.html">Banded Socks</a></td><td>COMMON</td><td>0.800%</td><td>0.120%</td><td>&divide;6.7</td></tr>
+<tr><td><a href="gene-ocular.html">Ocular</a></td><td>EPIC</td><td>0.150%</td><td>0.020%</td><td>&divide;7.5</td></tr>
+<tr><td><a href="gene-tron.html">Tron</a></td><td>EPIC</td><td>0.200%</td><td>0.028%</td><td>&divide;7.1</td></tr>
+<tr><td><a href="gene-picasso-marking.html">Picasso Marking</a></td><td>RARE</td><td>0.300%</td><td>0.040%</td><td>&divide;7.5</td></tr>
+<tr><td><a href="gene-dorsal-shield.html">Dorsal Shield</a></td><td>UNCOMMON</td><td>0.440%</td><td>0.112%</td><td>&divide;3.9</td></tr>
+<tr><td><a href="gene-duskfall-speckle.html">Duskfall Speckle</a></td><td>UNCOMMON</td><td>0.440%</td><td>0.112%</td><td>&divide;3.9</td></tr>
+<tr><td><a href="gene-tidemark.html">Tidemark</a></td><td>UNCOMMON</td><td>0.440%</td><td>0.112%</td><td>&divide;3.9</td></tr>
+<tr><td><a href="gene-webbed.html">Webbed</a></td><td>UNCOMMON</td><td>0.440%</td><td>0.112%</td><td>&divide;3.9</td></tr>
+<tr><td><a href="gene-wing-cloak.html">Wing Cloak</a></td><td>UNCOMMON</td><td>0.440%</td><td>0.112%</td><td>&divide;3.9 (and still <a href="known-gaps.html#gap-129">killswitched</a>)</td></tr>
+<tr><td><a href="gene-lace.html">Lace</a></td><td>RARE</td><td>0.230%</td><td>0.056%</td><td>&divide;4.1</td></tr>
+<tr><td><a href="gene-stained-glass.html">Stained Glass</a></td><td>RARE</td><td>0.180%</td><td>0.056%</td><td>&divide;3.2</td></tr>
+<tr><td><a href="gene-cleave.html">Cleave</a></td><td>RARE</td><td>0.154%</td><td>0.056%</td><td>&divide;2.8</td></tr>
+<tr><td><a href="gene-yalia.html">Yalia</a></td><td>UNCOMMON</td><td>0.236%</td><td>0.112%</td><td>&divide;2.1</td></tr>
+<tr><td><a href="gene-bloodstained.html">Bloodstained</a></td><td>RARE</td><td>0.090%</td><td>0.040%</td><td>&divide;2.3</td></tr>
+<tr><td><a href="gene-nyxborn.html">Nyxborn</a></td><td>EPIC</td><td>0.050%</td><td>0.020%</td><td>&divide;2.5</td></tr>
+<tr><td><a href="gene-koi.html">Koi</a></td><td>EPIC</td><td>0.060%</td><td>0.028%</td><td>&divide;2.1</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Another twenty-seven moved by less than a factor of two &mdash; mostly RARE and EPIC
+    markings settling from 0.088% to 0.056% and from 0.058% to 0.028%, which is the tier
+    budget doing exactly what it says. One went <em>up</em>:
+    <a href="gene-striped-mane-tail.html">Striped Mane and Tail</a>, 0.140% to 0.168%.</p>
+
+<p class="note"><strong>This is the decision to look at, and it is not a bug report.</strong>
+    Every one of those numbers is what the gene&rsquo;s own declared rarity tier says it
+    should be; what changed is that the tier is now being enforced where before some tables
+    had drifted above it. Whether <a href="gene-banded-socks.html">Banded Socks</a> at
+    0.12% is <em>right</em> is a taste question about how often a player should meet one,
+    and the answer might well be that it was tiered wrongly rather than budgeted wrongly.
+    <strong>The fix, if the rates are wrong, is to change the gene&rsquo;s
+    <code>rarity</code> and re-run <code>founders.py</code></strong> &mdash; not to
+    hand-edit a founders table, which is exactly the drift that produced this.</p>
+
+<h3>Existing worlds: they load, and they load a little wrong</h3>
+
+<ul>
+    <li><strong>A horse saved before 0.4.1 loads.</strong> <code>Genotype.parse</code>
+        drops a segment for a gene it does not know and <code>Genotype.of</code> fills every
+        <em>missing</em> gene with its default allele, so an old horse comes back with all
+        twenty-two new loci at wild type. It keeps its coat, because the pipeline golden
+        says its coat did not depend on them.</li>
+    <li><strong>But it can never have carried one</strong>, which is the part worth
+        checking. Every horse in an existing world is <code>n/n</code> at all twenty-two
+        loci for ever, and so is everything bred from two of them. <strong>The new markings
+        can only enter an old world through a newly spawned wild horse</strong> &mdash; a
+        new chunk, a new herd, a stable, a spawn egg. On a world where the areas you play in
+        are already generated, that is close to never.</li>
+    <li><strong>The thing to actually try:</strong> load an existing save, check a horse you
+        know looks the same, then go find unexplored ground and look at a wild herd. If the
+        new markings never appear anywhere, that is the expected behaviour above rather than
+        a defect &mdash; but it is worth confirming they appear <em>somewhere</em>, because
+        &ldquo;the founder table is right and nothing ever rolls it&rdquo; is a failure this
+        page has seen before.</li>
+    <li><strong>The genotype code is 22 segments longer.</strong> It is sent on the coat
+        packet, stored on the spawn egg and on a genome jar, and
+        <a href="known-gaps.html#gap-135">gap 135</a> is the release that disconnected
+        everybody by crossing a string cap nobody had written down. The caps all come from
+        <code>GenomeCodeCodecs</code> now and <code>EpigenomeSizeTest</code> guards each at
+        half budget, so this should be fine &mdash; <strong>but 0.3.0 and 0.3.1 also
+        &ldquo;should have been fine&rdquo;</strong>, and the symptom is that entering a
+        world with a horse in view disconnects you. First horse you see is the test.</li>
+</ul>
+
+<h3>The two editors, which are the same screen twice</h3>
+
+<ul>
+    <li><strong>The gene creator</strong> (<code>wiki/gene-creator/</code>) offers three new
+        masks with parameter kinds it has never had &mdash; a textarea for path data that
+        reports what it parsed, a <code>viewBox</code> field, and two checkboxes that are
+        <em>ticked</em> by default, which no mask flag has ever been. Add an
+        <code>SVG</code> mask to a fresh gene and check: the preview draws the starting
+        teardrop, the note under the path says &ldquo;points in N subpaths&rdquo;, and
+        unticking <code>fill</code> exports <code>"fill": false</code> rather than dropping
+        it. Its own boot-time parity self-check has to stay green too.</li>
+    <li><strong>The horse designer</strong> (<code>wiki/horse-designer/</code>) runs the
+        real engine as WebAssembly and was re-baked, so it should need nothing &mdash; but
+        it is the surface where a stale <code>web.wasm</code> shows yesterday&rsquo;s mod
+        convincingly. The twenty-two new genes should be in its gene list, grouped by
+        family, and a horse rolled there should match one spawned in game from the same
+        code.</li>
+    <li><strong>The spawn screen</strong> is the designer&rsquo;s twin and is unchanged by
+        this work, but the gene list it draws from is 22 longer. Check the list scrolls and
+        that nothing overlaps at <a href="known-gaps.html#gap-139">GUI scale 4</a>, which
+        is the size that has produced two reports already.</li>
+</ul>
+
+<h3>Everything downstream of &ldquo;how many genes are there&rdquo;</h3>
+
+<ul>
+    <li><strong>The gene database and the allele collection</strong> both count genes and
+        both hide what you have not met. The denominators moved by 22 loci and 47 alleles;
+        the browser should say so rather than showing a stale total.</li>
+    <li><strong>Gene carrots.</strong> Every new gene takes the default carrot block, so all
+        twenty-two are craftable and all twenty-two are on the Unknown Gene Splice table.
+        <code>check-recipes.mjs</code> says no two recipes claim the same inputs, which is
+        the collision that matters; what it cannot say is whether the splice table is now
+        so wide that the carrot is useless.</li>
+    <li><strong>The landing page says 225 genes</strong> and both numbers on it are computed
+        from the registry rather than typed. Worth one glance that they are not obviously
+        wrong.</li>
+</ul>
+
 <h2 id="svg-intake">&sect;0-BL &mdash; An SVG mask, three new masks, and twenty-two genes (2026-09-09, NOT looked at)</h2>
 
 <p>The largest single addition to the drawing vocabulary since it existed, and

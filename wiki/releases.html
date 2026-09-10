@@ -36,6 +36,122 @@
     </p>
 </div>
 
+<h2 id="v0-4-1">0.4.1</h2>
+
+<p class="lede">
+    Twenty-two new markings, an engine that can read an SVG, and everything that piled up
+    behind 0.3.7 &mdash; 0.3.8, 0.3.9 and 0.4.0 were built and never tagged, so their work
+    ships here too.
+</p>
+
+<h3>Twenty-two new coat markings</h3>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><td><a href="gene-agate.html">Agate</a></td><td>Cracked jewel-toned cells, each softening to a pale rim and deepening at its heart.</td></tr>
+<tr><td><a href="gene-carapace-sheen.html">Carapace Sheen</a></td><td>A beetle-shell gleam sitting on the planes that turn up into the light, with a bright ridge down the spine.</td></tr>
+<tr><td><a href="gene-concentric-eyespots.html">Concentric Eyespots</a></td><td>Butterfly eyespots &mdash; nested rings round a pale glint &mdash; down the neck and all four legs.</td></tr>
+<tr><td><a href="gene-coral-bloom.html">Coral Bloom</a></td><td>Ruffled overlapping lobes, orange rim to deep blue to a pale crown, flecked with gold.</td></tr>
+<tr><td><a href="gene-emberveins.html">Emberveins</a></td><td>Molten seams that pool where they meet and thin to a hairline between. Glowing, or a quiet rust.</td></tr>
+<tr><td><a href="gene-fish-scales.html">Fish Scales</a></td><td>Overlapping scales across the barrel, each rimmed in a warm colour that line of horses carries.</td></tr>
+<tr><td><a href="gene-gill-bloom.html">Gill Bloom</a></td><td>Gold-rimmed fan patches, spoked inside like the underside of a mushroom cap.</td></tr>
+<tr><td><a href="gene-iridescent-rosette.html">Iridescent Rosette</a></td><td>Dark rosettes ringed in green, gold and magenta &mdash; a jewel beetle&rsquo;s shell.</td></tr>
+<tr><td><a href="gene-iris-bloom-diamonds.html">Iris Bloom Diamonds</a></td><td>Royal-blue diamonds with ink rims, white dapples and radiating amber veins.</td></tr>
+<tr><td><a href="gene-kite-bloom.html">Kite Bloom</a></td><td>Stained-glass panels tiling the coat, each its own colour, salted with pale flecks.</td></tr>
+<tr><td><a href="gene-lacevein.html">Lacevein</a></td><td>Branching black lace rooted in two deep jewel blooms at the withers and poll.</td></tr>
+<tr><td><a href="gene-moonwing.html">Moonwing</a></td><td>Twin pearl wings across the ribs, iridescent-dusted and bound in gold.</td></tr>
+<tr><td><a href="gene-morpho-wing.html">Morpho Wing</a></td><td>A patch of light low on the haunch, cut by black bars raking toward the tail.</td></tr>
+<tr><td><a href="gene-moth-eyes.html">Moth Eyes</a></td><td>Wing-membrane veins and gold-ringed eyespots &mdash; only on a coat already black or grey.</td></tr>
+<tr><td><a href="gene-nacre.html">Nacre</a></td><td>Hard-edged shell plates, paler at their gold seams and richer at their middles.</td></tr>
+<tr><td><a href="gene-nightbloom-shroud.html">Nightbloom Shroud</a></td><td>Abyssal blue on crest and skull, gold-to-violet gill ribbons down the neck and barrel.</td></tr>
+<tr><td><a href="gene-oil-sheen.html">Oil Sheen</a></td><td>A soap film &mdash; a cracked iridescent web, pooling over the barrel into a bubble-pitted slick.</td></tr>
+<tr><td><a href="gene-opal-crackle.html">Opal Crackle</a></td><td>Fine dark seams, each catching light in its own colour.</td></tr>
+<tr><td><a href="gene-opaline.html">Opaline</a></td><td>A glassy vein mosaic &mdash; pale cream-on-cream, or blazing blue and violet.</td></tr>
+<tr><td><a href="gene-orchid-frost.html">Orchid Frost</a></td><td>Pink frost that bleaches a dark coat and finds nothing to bite into on a pale one.</td></tr>
+<tr><td><a href="gene-petaled.html">Petaled</a></td><td>Overlapping petals rimmed in rose and black, veined across a blush field.</td></tr>
+<tr><td><a href="gene-tidefoam-sash.html">Tidefoam Sash</a></td><td>A marbled sea-teal sash across the ribcage, laced with a white foam net.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Most ship as a <strong>pair</strong> &mdash; a pale dominant, and a fully recessive
+    coloured form drawing the same shape in a colour that line of horses carries and passes
+    to its foals. All of them are rare.
+</p>
+
+<h3>The engine can read an SVG</h3>
+
+<p>
+    A gene could already carry a shape somebody <em>drew</em>, but only as control points
+    typed in by hand. It now takes a real <a href="making-a-gene.html#svg">SVG path</a>:
+    every command including elliptical arcs, subpaths so a letter O has a hole, the fill
+    rule, the transform list, the <code>viewBox</code>, and a stroke with caps, joins and
+    dashes. <a href="gene-moonwing.html">Moonwing</a> is the first marking in the mod that
+    is an actual drawing rather than a rule for making one.
+</p>
+
+<p>
+    Three new shapes came with it, each because some marking needed a measurement nothing
+    could make: <strong>FAN</strong>, bars that radiate from a point and widen as they go
+    (everything periodic before this ran in parallel lines); <strong>NORMAL</strong>, which
+    way the surface faces, for a rim light or a shell&rsquo;s curvature sheen; and six new
+    parameters covering veins that pool at their junctions, per-cell radial fades, tiled
+    fields clipped into shingles, off-centre glints, and colour that wanders instead of
+    sweeping.
+</p>
+
+<h3>Behind 0.3.7</h3>
+
+<ul>
+    <li><strong>A stall that killed horses.</strong> The detector leaked over its own front
+        rail into the aisle, decided the room was not a room, and landed the horse inside
+        the wall the sign was on. Both halves fixed.</li>
+    <li><strong>Taming by hand</strong>, and a research shelf that accepts papers.</li>
+    <li><strong>A Breeds tab</strong> &mdash; all forty-nine, searchable, each with an entry
+        showing a horse that breed can actually produce, where it lives, its build and
+        height band, its disposition and what health to watch for. A breed sits under
+        question marks until you have owned one, and the count keeps the honest denominator
+        so you can see how much is left.</li>
+    <li><strong>Bareback riding</strong> at the top bond tier &mdash; rewritten onto a real
+        but invisible saddle, so jump and sprint work, which the first version could not
+        do.</li>
+    <li>The cowboy and the horseman are <strong>they/them</strong>.</li>
+</ul>
+
+<h3>What this does to horses you already have</h3>
+
+<p>
+    <strong>Nothing changes colour.</strong> All 1056 composed coats in the golden file are
+    byte-identical to 0.4.0&rsquo;s, so no gene that existed before this release paints
+    differently. An older save loads and every horse in it keeps its coat, with the
+    twenty-two new loci filled in at wild type &mdash; which also means <em>no horse in an
+    old world can be carrying one</em>, so the new markings reach it only through newly
+    spawned wild horses.
+</p>
+
+<p>
+    <strong>Forty-three existing genes did get rarer in the wild.</strong> Founder rates are
+    budgeted across the whole set from each gene&rsquo;s declared rarity tier, and adding
+    twenty-two genes re-derived all of them &mdash; which also flattened a number of tables
+    that had drifted <em>above</em> their tier. <a href="gene-banded-socks.html">Banded
+    Socks</a>, <a href="gene-ocular.html">Ocular</a>, <a href="gene-tron.html">Tron</a> and
+    <a href="gene-picasso-marking.html">Picasso Marking</a> each dropped by about a factor
+    of seven. The full table, and the argument about whether those are the right numbers, is
+    on <a href="verification.html#engine-fallout">to be verified &sect;0-BM</a>.
+</p>
+
+<div class="note">
+    <span class="label">Not played yet</span>
+    <p>
+        Every one of the twenty-two markings has been rendered and looked at as an icon
+        &mdash; that is how four defects in them were caught &mdash; but
+        <strong>none has been seen on a horse in the game</strong>, and nor has the drawing
+        engine. <a href="verification.html#svg-intake">&sect;0-BL</a> is the checklist.
+    </p>
+</div>
+
 <h2 id="v0-3-6">0.3.6</h2>
 
 <p class="lede">
