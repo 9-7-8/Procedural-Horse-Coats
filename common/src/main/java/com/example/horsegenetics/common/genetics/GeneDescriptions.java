@@ -256,6 +256,13 @@ public final class GeneDescriptions {
                             + "four hooves as it walks, fading from one colour to the next and "
                             + "working round the whole rainbow. One copy shows nothing. How fast "
                             + "the colour turns is drawn per allele copy and inherited with it."),
+            Map.entry("horsegenetics.molten_hooves",
+                    "A magical DOMINANT that paints nothing - the only dominant one among the "
+                            + "trails: one Mlt copy is enough, and the horse leaves burning "
+                            + "hoofprints that fade out behind it as it moves. Nothing catches "
+                            + "fire. Two copies behave exactly the same but draw the trail from "
+                            + "both copies' colours at once. The colour is drawn per allele copy "
+                            + "and inherited with it, so a line breeds true to its own fire."),
             Map.entry("horsegenetics.lycan",
                     "The werewolf locus, and it paints nothing: two copies of the SAME allele and "
                             + "the horse becomes a real animal from dusk to dawn - a wolf, a cat, "

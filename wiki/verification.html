@@ -35,6 +35,43 @@
     </p>
 </div>
 
+<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves, the first dominant emission gene (2026-09-10, NOT looked at in game)</h2>
+
+<p><a href="gene-molten-hooves.html">Molten hooves</a> is built and registered. It
+    paints nothing &mdash; confirmed by measurement, not by assertion: all 1056 rows
+    of the coat pipeline golden kept their rendered-bytes hash and only their
+    genotype key moved, and both of the gene's rows in the bake golden carry the
+    same &ldquo;paints nothing&rdquo; hash as sex and diet. What no test can check is
+    whether it reads as fire.</p>
+
+<ul>
+    <li><strong>Does the trail look like burning hoofprints, or like coloured
+        dust?</strong> This is the whole question. It is a
+        <code>dust_color_transition</code> off the <code>hooves</code> anchor, fading
+        from the copy's first colour to its second, because flame particles ignore
+        colour and a per-copy colour is the point of the locus. If it reads as
+        confetti rather than fire, the fix is the colour pair or the fade, not the
+        count.</li>
+    <li><strong>Is it too much on a full stable?</strong> It is the only
+        <strong>dominant</strong> emission locus, so unlike
+        <a href="gene-particle.html">particle</a> a paddock can contain a dozen of
+        them emitting at once. The count is fixed at 2 and the chance is 0.15,
+        deliberately below the particle locus's 0.2, and
+        <code>MoltenHoovesGeneTest</code> guards both &mdash; but the number that
+        matters is what a dozen of them look like together, and only the game can say.</li>
+    <li><strong>Does a doubled horse read as two-toned?</strong> <code>Mlt/Mlt</code>
+        emits <em>two</em> emitters, one per copy, rather than blending. Whether that
+        is visible at a trot or just looks like a slightly denser single is unknown.</li>
+    <li><strong>A molten horse may burn blue</strong>, and this is deliberate.
+        <code>EpiValue.colour</code> bounds saturation and value but rolls hue over
+        the whole circle. Worth looking at a few founders to decide whether an
+        unconstrained hue is charming or wrong &mdash; it is the one design call in
+        the gene that was made for cost rather than for taste.</li>
+    <li><strong>Wild frequency is 3% single, 0.4% double.</strong> Both express, so
+        there are no invisible carriers. Whether 3% feels like &ldquo;uncommon but you
+        will meet one&rdquo; is a judgement that needs a few hundred wild horses.</li>
+</ul>
+
 <h2 id="intake-eleven">&sect;0-BR &mdash; Eleven more genes, and dorsal wing's underline (2026-09-10, NOT looked at in game)</h2>
 
 <p>Agatebound, bargello, bracketed, coronal, geode, maelstrom,

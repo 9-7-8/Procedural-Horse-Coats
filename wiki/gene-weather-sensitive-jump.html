@@ -87,12 +87,46 @@
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
-<div class="note good">
-    <span class="label">Almost entirely existing machinery</span>
+<div class="note danger">
+    <span class="label">Correction: this is <em>not</em> a copy of swim speed</span>
     <p>
-        <code>AbstractMagicFactorGene</code> &mdash; the base class behind <a href="gene-magic-swim-speed.html">swim speed</a> and <a href="gene-magic-water-breathing.html">water breathing</a> &mdash; already implements this exact inheritance: a positive allele, a negative allele, one copy giving that copy&rsquo;s epigenetic percentage and two copies adding both. The <code>raining</code> and <code>thundering</code> condition flags already exist and already work. No new verb.
+        An earlier draft of this page said the gene was &ldquo;nearly a copy&rdquo; of
+        <a href="gene-magic-swim-speed.html">swim speed</a> on
+        <code>AbstractMagicFactorGene</code>. <strong>That base class is strictly three
+        alleles</strong> &mdash; one that pushes the quantity up, one that pushes it down,
+        and the wild type &mdash; so it cannot express a positive <em>and</em> a negative
+        allele <em>per weather type</em>. What it genuinely provides is the
+        <em>inheritance</em>: codominance, a percentage drawn per allele copy, and both
+        copies adding with the down allele counting negative.
     </p>
 </div>
+
+<h2 id="shape">So what it actually needs</h2>
+
+<p>
+    Two options, and they are a real choice rather than a detail:
+</p>
+
+<ul>
+    <li><strong>One locus per weather type</strong> &mdash; rain speed, storm speed, and so
+        on &mdash; each one a genuine <code>AbstractMagicFactorGene</code> subclass costing
+        almost nothing. Cheapest by far, and it multiplies the locus count by the number of
+        weathers, twice over once the jump twin is counted.</li>
+    <li><strong>One locus, several signed pairs</strong> &mdash; alleles
+        <code>Rain+</code>, <code>Rain&minus;</code>, <code>Thndr+</code>,
+        <code>Thndr&minus;</code> and the wild type, each carrying its own epigenetic delta
+        <em>and</em> its own condition. This needs a generalisation of the factor gene to
+        several conditioned pairs, which is new code &mdash; but it keeps the locus count
+        at two and gives a genuinely interesting compound heterozygote: a
+        <code>Rain+/Thndr&minus;</code> horse is better in rain and worse in storms, and
+        both halves apply independently because their conditions never both hold.</li>
+</ul>
+
+<p>
+    The second is what this page describes and what the design settled on. It is
+    <strong>not free</strong>, and the estimate should say so.
+</p>
+
 
 <div class="note warn">
     <span class="label">Snow is not weather in Minecraft</span>

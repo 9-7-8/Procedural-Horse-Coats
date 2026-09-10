@@ -28,16 +28,6 @@
 
 <section class="tab-panel" data-tab="gameplay">
 
-<div class="note warn">
-    <span class="label">Not built yet &mdash; this page is the specification</span>
-    <p>
-        This gene does not exist in the mod. The page is written first, as the
-        settled design, so that building it is transcription rather than
-        invention. Until it is registered by <code>Genes</code> it is absent
-        from the sidebar and the landing page. Its slot on the backlog is
-        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
-    </p>
-</div>
 
 <h2 id="what">What it does</h2>
 
@@ -77,16 +67,33 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd><code>horsegenetics.molten_hooves</code></dd></div>
     <div><dt>Alleles</dt><dd><code>Mlt</code> molten, <code>n</code></dd></div>
-    <div><dt>Inheritance</dt><dd>dominant &mdash; one copy expresses</dd></div>
-    <div><dt>Reaches the game as</dt><dd>an <code>emitter</code> effect</dd></div>
-    <div><dt>Epigenetic</dt><dd>trail colour, per allele copy</dd></div>
+    <div><dt>Priority</dt><dd>154 &mdash; beside the other emission loci; it paints nothing, so the number is a slot</dd></div>
+    <div><dt>Inheritance</dt><dd><strong>dominant</strong> &mdash; one copy expresses</dd></div>
+    <div><dt>Reaches the game as</dt><dd>one <code>emitter</code> effect <strong>per molten copy</strong></dd></div>
+    <div><dt>Particle</dt><dd><code>minecraft:dust_color_transition</code></dd></div>
+    <div><dt>Epigenetic</dt><dd>both trail colours, per allele copy</dd></div>
+    <div><dt>Wild founders</dt><dd>3% one copy, 0.4% two &mdash; both express, so no invisible carriers</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
-<div class="note good">
-    <span class="label">No new machinery at all</span>
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
     <p>
-        This is the cheapest gene on the behaviour list: an <code>emitter</code> anchored at <code>hooves</code> with an epigenetic colour, which is exactly what <a href="gene-particle.html">particle</a> and <a href="gene-rainbow-dust.html">rainbow dust</a> already do. No verb, no trigger, no flag &mdash; a gene file and a bake.
+        Nothing on this page has been seen in game. The gene, its founder table and its
+        emitter are covered by <code>MoltenHoovesGeneTest</code>; what no test can check is
+        whether the trail actually reads as fire at the hooves of a moving horse.
+        Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">It needed no new machinery, and that held</span>
+    <p>
+        No verb, no trigger, no condition flag. An <code>emitter</code> anchored at
+        <code>hooves</code> with an epigenetic colour, which is what
+        <a href="gene-particle.html">particle</a> and
+        <a href="gene-rainbow-dust.html">rainbow dust</a> already do. The whole gene is one
+        class and one line in <code>Genes</code>.
     </p>
 </div>
 
@@ -103,6 +110,28 @@
         The first specification placed actual fire blocks. On a <em>dominant</em> gene that burns down the stable, the forest and the horse. If a later session wants the mechanic back, it must come with a demotion to recessive &mdash; the two decisions are one decision.
     </p>
 </div>
+
+<h2 id="particle">Why it is dust and not flame</h2>
+
+<p>
+    Flame particles ignore colour entirely, and a colour written on the allele
+    copy is the entire point of the locus &mdash; so the trail is drawn with
+    <code>dust_color_transition</code>, which is also the only particle that
+    <em>fades</em> the way a cooling hoofprint should. It is the same particle
+    <a href="gene-rainbow-dust.html">rainbow dust</a> uses, with the cycle left at
+    zero: rainbow dust reads its hue off the clock, and this one means the two
+    colours it carries.
+</p>
+
+<h2 id="hue">A molten horse may burn blue</h2>
+
+<p>
+    The hue is unconstrained. <code>EpiValue.colour</code> bounds saturation and
+    value but rolls hue over the whole circle, and rather than add a hue-bounded
+    draw for one gene the locus simply allows it. Nothing about molten hooves
+    needs to be orange, and a line that breeds true to a cold blue fire is a
+    better outcome than a fourth kind of colour draw.
+</p>
 
 <h2 id="colour">Where the colour lives</h2>
 

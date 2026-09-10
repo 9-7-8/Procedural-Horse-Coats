@@ -966,6 +966,14 @@
 <h4 id="behaviour-genes">Twenty-seven specified, each with a page</h4>
 
 <p>
+    <strong><a href="gene-molten-hooves.html">Molten hooves</a> has since shipped</strong>
+    and is off this list. It cost one class and one line in <code>Genes</code> &mdash; no
+    verb, no trigger, no condition flag &mdash; which is the forecast on its page holding
+    up exactly. It is the mod&rsquo;s first <em>dominant</em> emission locus.
+</p>
+
+
+<p>
     A design pass walked a twenty-nine-gene proposal one gene at a time and settled the
     shape of each. <strong>Every survivor has its own page already</strong>, written before
     the code so that building it is transcription rather than invention &mdash; the
@@ -1016,7 +1024,8 @@
 <tr><td><code>bond</code> verb</td><td><a href="gene-music-enjoyer.html">music enjoyer</a>, <a href="gene-food-preference.html">food preference</a></td><td>Must count against <code>bondToday</code>. Also closes &sect;<a href="#bond">15</a>&rsquo;s &ldquo;more bond sources&rdquo;.</td></tr>
 <tr><td><code>produce</code>, <code>teleport</code>, <code>summon</code></td><td><a href="gene-egg-layer.html">egg layer</a>, <a href="gene-ender-echo.html">ender echo</a>, <a href="gene-spawner.html">spawner</a> &mdash; one each</td><td>All three carry danger-level notes on their own pages.</td></tr>
 <tr><td>Triggers <code>on_hurt</code>, <code>on_owner_hurt</code></td><td><a href="gene-ender-echo.html">ender echo</a>, <a href="gene-guardian.html">guardian</a></td><td>Two new entries in a closed set of four. <code>on_owner_hurt</code> fires on every damage event to every player &mdash; early-out before any lookup. Land them together.</td></tr>
-<tr><td>Flags <code>light_level</code>, <code>near_jukebox</code>, <code>snowing</code></td><td><a href="gene-eyesight-locus.html">eyesight</a>, <a href="gene-music-enjoyer.html">music enjoyer</a>, <a href="gene-weather-sensitive-speed.html">weather sensitive</a></td><td>Every existing flag is a field read. These three touch the world &mdash; interval-sampled and cached, never per tick.</td></tr>
+<tr><td>Flags <code>light_level</code>, <code>near_jukebox</code>, <code>snowing</code></td><td><a href="gene-eyesight-locus.html">eyesight</a>, <a href="gene-music-enjoyer.html">music enjoyer</a>, <a href="gene-weather-sensitive-speed.html">weather sensitive</a></td><td>Every existing flag is a field read. These three touch the world &mdash; interval-sampled and cached, never per tick. <strong>Note</strong> the weather loci need more than a flag: see the correction on their pages.</td></tr>
+<tr><td>A conditioned multi-pair factor gene &mdash; a generalisation of <code>AbstractMagicFactorGene</code></td><td><a href="gene-weather-sensitive-speed.html">weather sensitive (speed)</a>, <a href="gene-weather-sensitive-jump.html">(jump)</a></td><td>The existing base class is strictly <em>one</em> up/down pair, so it cannot carry a positive and a negative allele per weather type. Either generalise it to several conditioned pairs, or accept one locus per weather type and watch the locus count multiply. <strong>Not the free win an earlier draft claimed.</strong></td></tr>
 <tr><td>Two <code>spread</code> vocabulary words</td><td><a href="gene-hot-blooded.html">hot blooded</a>, <a href="gene-dryad.html">dryad</a></td><td>Dryad first &mdash; one block a day exercises the whole path at a rate where nothing can go wrong quickly. Hot blooded is the expensive one.</td></tr>
 <tr><td>Open ids resolved live</td><td>egg layer (items), spawner and leader of the pack (mobs), singer (discs), potion milk (effects)</td><td>Follow <a href="gene-lycan.html">lycan</a>: an id this game version has never heard of simply does nothing. Never throw, never log per firing.</td></tr>
 </tbody>
@@ -1026,14 +1035,10 @@
 <h4 id="behaviour-order">Suggested order</h4>
 
 <ol>
-    <li><strong>Wins with no new machinery.</strong>
-        <a href="gene-molten-hooves.html">Molten hooves</a> needs literally nothing new;
-        <a href="gene-weather-sensitive-speed.html">weather sensitive (speed)</a> and
-        <a href="gene-weather-sensitive-jump.html">(jump)</a> are near-copies of
-        <a href="gene-magic-swim-speed.html">swim speed</a> on
-        <code>AbstractMagicFactorGene</code>;
-        <a href="gene-eyesight-locus.html">eyesight</a> needs one condition flag;
-        <a href="gene-potion-milk.html">potion milk</a> needs one merge.</li>
+    <li><strong>Wins with almost no new machinery.</strong>
+        <a href="gene-eyesight-locus.html">Eyesight</a> needs one condition flag and
+        <a href="gene-potion-milk.html">potion milk</a> needs one merge in the yield
+        translator. Both are otherwise existing machinery, and either is a day.</li>
     <li><strong>The shared changes</strong>, in the table above &mdash; the traversal
         <code>target</code>, the group filter, the <code>sound</code> verb. Nine genes fall
         out of these three.</li>

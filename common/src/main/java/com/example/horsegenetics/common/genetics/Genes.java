@@ -44,6 +44,7 @@ import com.example.horsegenetics.common.genetics.genes.MagicSwimSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicWaterBreathingGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
+import com.example.horsegenetics.common.genetics.genes.MoltenHoovesGene;
 import com.example.horsegenetics.common.genetics.genes.ManchadoGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
@@ -363,6 +364,16 @@ public final class Genes {
      */
     public static final RainbowDustGene RAINBOW_DUST = new RainbowDustGene();
     /**
+     * <b>Molten hooves</b> - burning hoofprints that fade behind the horse, in
+     * a colour written on the allele copy. It sits with the other emission loci
+     * and is the only <b>dominant</b> one among them, deliberately: every other
+     * trail is a reward for breeding, and this one spreads through a herd on its
+     * own so that catching a single molten horse is immediately worth something.
+     * It sets nothing alight - see the class note, which is where the argument
+     * against real fire is kept.
+     */
+    public static final MoltenHoovesGene MOLTEN_HOOVES = new MoltenHoovesGene();
+    /**
      * <b>LYCAN</b> - the werewolf locus, thirty-seven shapes, every one of them
      * recessive to the wild type <i>and</i> to each other: only two copies of
      * the same allele shift. It paints nothing and grants no
@@ -469,7 +480,7 @@ public final class Genes {
             MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,
             MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
             MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH,
-            MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, LYCAN,
+            MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, MOLTEN_HOOVES, LYCAN,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             DHAMPIR, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,

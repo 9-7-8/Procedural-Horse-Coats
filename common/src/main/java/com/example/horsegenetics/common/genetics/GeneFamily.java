@@ -280,6 +280,7 @@ public enum GeneFamily {
         // What it gives off.
         MAGICAL_OVERRIDES.put("horsegenetics.particle", MAGIC_EMISSION);
         MAGICAL_OVERRIDES.put("horsegenetics.rainbow_dust", MAGIC_EMISSION);
+        MAGICAL_OVERRIDES.put("horsegenetics.molten_hooves", MAGIC_EMISSION);
 
         // Cutie mark paints nothing in phase 3 - it draws its emblem in the
         // overlay pass, over the finished texture - but it is unambiguously a

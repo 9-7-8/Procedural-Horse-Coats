@@ -230,6 +230,7 @@ window.HG.pages = {
         {
             title: "Magical emission genes",
             items: [
+                { href: "gene-molten-hooves.html", text: "Molten hooves", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-particle.html", text: "Particle", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] }
             ]
