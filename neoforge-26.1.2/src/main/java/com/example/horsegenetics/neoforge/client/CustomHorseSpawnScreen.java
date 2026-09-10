@@ -210,6 +210,9 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     /** Rows in the top group: Age, Sex, Breed, Randomize, Add, Rnd health, Clear. */
     private static final int RIGHT_ROWS = 7;
+
+    /** How much the preview gives up to the Spawn button beneath it. */
+    private static final int SPAWN_BAND = 22;
     private static final int PANEL = 0x90000000;
     /** The padlock column down the left of the gene list. */
     private static final int LOCK_W = 10;
@@ -774,11 +777,33 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     /**
      * Top of the group pinned to the bottom of the column - Make egg, Copy /
-     * Paste, Spawn, Cancel, each {@link #RIGHT_STEP} apart, with Cancel landing
-     * 26 from the bottom edge.
+     * Paste, Cancel, each {@link #RIGHT_STEP} apart, with Cancel landing 26 from
+     * the bottom edge.
+     *
+     * <p><b>Three rows, not four.</b> Spawn used to be the third of them and is
+     * now under the preview ({@link #spawnButtonBounds}), which is both a better
+     * home for the one button that does the thing and 24 pixels the column no
+     * longer has to find. It had run out: "Clear genes" at the bottom of the top
+     * group and "Make egg" at the top of this one were overlapping in a real
+     * window, which is <code>known-gaps.html#gap-139</code> arriving.
      */
     private int bottomStackTop() {
-        return this.height - 26 - 3 * RIGHT_STEP;
+        return this.height - 26 - 2 * RIGHT_STEP;
+    }
+
+    /**
+     * <b>Spawn, centred under the horse.</b> The strip between the preview panel
+     * and the bottom of the window is otherwise empty, and putting the primary
+     * action beneath the thing it acts on reads better than a fourth entry in a
+     * column of secondary ones.
+     *
+     * @return {@code x, y, width} - height is the usual 20.
+     */
+    private int[] spawnButtonBounds() {
+        int x0 = previewLeft();
+        int x1 = previewRight();
+        int w = Math.max(60, Math.min(140, x1 - x0 - 8));
+        return new int[] {(x0 + x1) / 2 - w / 2, this.height - 26, w};
     }
 
     /**
@@ -1011,9 +1036,10 @@ public final class CustomHorseSpawnScreen extends Screen {
         // that produces exactly that report.
         boolean creative = Minecraft.getInstance().player != null
                 && Minecraft.getInstance().player.getAbilities().instabuild;
+        int[] spawnAt = spawnButtonBounds();
         Button spawnButton = Button.builder(Component.literal(creative ? "Spawn" : "Spawn (creative only)"),
                         b -> spawn())
-                .bounds(rx, bottomStackTop() + 2 * RIGHT_STEP, RIGHT_W, 20)
+                .bounds(spawnAt[0], spawnAt[1], spawnAt[2], 20)
                 .tooltip(creative ? null : net.minecraft.client.gui.components.Tooltip.create(
                         Component.literal("The custom spawn egg builds a horse from scratch, so it is a "
                                 + "creative-mode tool. Switch to creative to spawn what you have built; "
@@ -1052,7 +1078,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         eggButton.active = creative;
         addRenderableWidget(eggButton);
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
-                .bounds(rx, bottomStackTop() + 3 * RIGHT_STEP, RIGHT_W, 20).build());
+                .bounds(rx, bottomStackTop() + 2 * RIGHT_STEP, RIGHT_W, 20).build());
     }
 
     /**
@@ -1358,6 +1384,8 @@ public final class CustomHorseSpawnScreen extends Screen {
         int x0 = previewLeft();
         int x1 = previewRight();
         int y0 = LIST_TOP;
+        // The 30px below this is where the Spawn button goes - see
+        // spawnButtonBounds(). Nothing else has ever drawn there.
         int y1 = this.height - 30;
         int w = x1 - x0;
         int h = y1 - y0;

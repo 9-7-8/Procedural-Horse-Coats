@@ -104,7 +104,16 @@ window.HG = window.HG || {};
     // The group pinned to the bottom of the right column, and the gutter the
     // top group gets. Both verbatim from CustomHorseSpawnScreen - see
     // bottomStackTop() / rightStep() there for why the spacing can give.
-    function bottomStackTop() { return vh - 26 - 3 * RIGHT_STEP; }
+    // Three rows, not four - the screen moved its Spawn button under the preview
+    // and this moved Reroll name to the same place, so the two columns stay the
+    // same shape. See CustomHorseSpawnScreen.bottomStackTop().
+    function bottomStackTop() { return vh - 26 - 2 * RIGHT_STEP; }
+    /** The screen's spawnButtonBounds(), for the button under the horse. */
+    function underPreview() {
+      var x0 = previewLeft(), x1 = previewRight();
+      var w = Math.max(60, Math.min(140, x1 - x0 - 8));
+      return { x: (x0 + x1) / 2 - w / 2, y: vh - 26, w: w };
+    }
     function rightStep() {
       var available = bottomStackTop() - 8 - (LIST_TOP + 4);
       var fits = Math.floor((available - 20) / (RIGHT_ROWS - 1));
@@ -527,17 +536,20 @@ window.HG = window.HG || {};
       // Where the screen has Spawn / Cancel there is nothing to spawn - the
       // horse is already standing in the field. These are the browser's own,
       // and the only controls here with no counterpart in game.
-      button(rx, bottomStackTop(), RIGHT_W, 20, "Reroll name",
+      // Where the screen puts Spawn. There is nothing to spawn here, so the
+      // browser's own primary action takes the slot.
+      var under = underPreview();
+      button(under.x, under.y, under.w, 20, "Reroll name",
         function () { opts.edit("rerollName", 3); }, true);
       // Export and Import share a row - two halves of one idea, and the column
       // has no space to spare. They sit in the slot the screen gives Copy horse
       // and Paste horse, which write the same format to the clipboard.
       var halfW = (RIGHT_W - 4) / 2;
-      button(rx, bottomStackTop() + RIGHT_STEP, halfW, 20, "Export", function () { opts.exportJson(); }, true);
-      button(rx + halfW + 4, bottomStackTop() + RIGHT_STEP, halfW, 20, "Import", function () { opts.importJson(); }, true);
-      button(rx, bottomStackTop() + 2 * RIGHT_STEP, RIGHT_W, 20, state.wander ? "Wander: on" : "Wander: off",
+      button(rx, bottomStackTop(), halfW, 20, "Export", function () { opts.exportJson(); }, true);
+      button(rx + halfW + 4, bottomStackTop(), halfW, 20, "Import", function () { opts.importJson(); }, true);
+      button(rx, bottomStackTop() + RIGHT_STEP, RIGHT_W, 20, state.wander ? "Wander: on" : "Wander: off",
         function () { opts.toggleWander(); }, true);
-      button(rx, bottomStackTop() + 3 * RIGHT_STEP, RIGHT_W, 20, "Reset view", function () { opts.resetView(); }, true);
+      button(rx, bottomStackTop() + 2 * RIGHT_STEP, RIGHT_W, 20, "Reset view", function () { opts.resetView(); }, true);
     }
 
     function drawGenomeLine() {
