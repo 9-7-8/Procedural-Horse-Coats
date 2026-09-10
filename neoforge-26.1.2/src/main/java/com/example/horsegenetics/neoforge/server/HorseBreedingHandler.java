@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.neoforge.data.CarrotWindowAttachment;
+import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
 import com.example.horsegenetics.common.horse.Sex;
@@ -230,6 +231,7 @@ public final class HorseBreedingHandler {
             if (owner instanceof Player ownerPlayer) {
                 childRecord = childRecord.withTamedBy(ownerPlayer.getGameProfile().name());
             }
+            inheritBond(damHorse, child);
         }
 
         HorseRecords.apply(child, childRecord);
@@ -300,6 +302,36 @@ public final class HorseBreedingHandler {
      * somebody else's paddock is not everyone's business, and
      * {@code BabyEntitySpawnEvent} hands us exactly the player who fed them.
      */
+    /**
+     * <b>A foal starts out already part-way fond of you</b> - a quarter of what
+     * its dam feels.
+     *
+     * <p>Starting every foal at zero made a horse born in your own stable, to
+     * your own mare, exactly as wary of you as one caught wild that morning,
+     * which is backwards: the animal that has never known anyone else should
+     * not be the harder one to win over. A quarter rather than all of it
+     * because the bond is still the foal's own to earn - this is the head start
+     * of having been born to somebody who trusts you, not an inheritance.
+     *
+     * <p>Written straight onto the attachment rather than through
+     * {@code awardBond}, deliberately: that path exists to meter out bond
+     * against a daily cap, and a birthright is not a day's worth of care. It
+     * would also swallow most of the grant, since the cap is
+     * {@link HorseCareAttachment#DAILY_CAP} and a well-bonded dam gives more
+     * than that.
+     */
+    private static void inheritBond(Horse dam, Horse foal) {
+        HorseCareAttachment damCare = dam.getData(ModAttachments.HORSE_CARE.get());
+        int inherited = damCare.bond() / 4;
+        if (inherited <= 0) {
+            return;
+        }
+        HorseCareAttachment foalCare = foal.getData(ModAttachments.HORSE_CARE.get());
+        foal.setData(ModAttachments.HORSE_CARE.get(), foalCare.with(
+                inherited, foalCare.herd(), foalCare.bondToday(), foalCare.dayStamp(),
+                foalCare.bondTicks(), foalCare.togetherTicks()));
+    }
+
     private static void sameSexAttempt(Sex sex, String nameA, String nameB,
                                        Player player, Horse child) {
         if (!(player instanceof ServerPlayer serverPlayer)) {

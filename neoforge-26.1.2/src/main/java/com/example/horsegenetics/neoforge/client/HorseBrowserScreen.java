@@ -225,6 +225,10 @@ public final class HorseBrowserScreen extends Screen {
      * starts at the top of its own scroll and there is nothing above it.
      */
     private int tocInlineHeight = 0;
+    /** Which slice of the collection the Alleles tab shows. Sticky across opens, like the tab itself. */
+    private static AlleleFilter alleleFilter = AlleleFilter.ALL;
+    /** The filter chips' hit boxes, rebuilt every frame the way the contents list is. */
+    private final List<TocEntry> alleleChips = new ArrayList<>();
     /**
      * <b>Which section of Getting Started is open.</b> A step index, or
      * {@code steps + g} for the checklist's group {@code g} - see
@@ -772,7 +776,11 @@ public final class HorseBrowserScreen extends Screen {
                 listScroll = 0;
                 detailScroll = 0f;
                 applyFilter();
-                if ((tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES)
+                // Alleles is in this list even though it draws no horses: the
+                // roster request is what makes the server sweep the stable into
+                // the allele collection, and without it the tab shows a stale
+                // count until something else asks for the roster.
+                if ((tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES || tab == Tab.ALLELES)
                         && !ClientHorseRoster.received()) {
                     requestRoster();
                 }
@@ -814,6 +822,9 @@ public final class HorseBrowserScreen extends Screen {
                 return true;
             }
             return super.mouseClicked(event, doubleClick);
+        }
+        if (tab == Tab.ALLELES && alleleFilterClicked(event.x(), event.y())) {
+            return true;
         }
         if (tab == Tab.GETTING_STARTED || tab == Tab.ALLELES) {
             return super.mouseClicked(event, doubleClick); // neither has a list
@@ -1000,6 +1011,7 @@ public final class HorseBrowserScreen extends Screen {
         lastMouseY = mouseY;
         bars.clear();
         tocEntries.clear();
+        alleleChips.clear();
         drawChrome(g, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (tab == Tab.RECIPES) {
@@ -1486,28 +1498,26 @@ public final class HorseBrowserScreen extends Screen {
     }
 
     /**
-     * <b>The way on.</b> A sectioned page still has to be readable straight
-     * through - somebody meeting the mod reads it in order, and hunting the next
-     * chapter in the contents list every time would be a worse walkthrough than
-     * the scroll it replaced. So the last line of every section is the next one,
-     * and the last section of all signs off instead.
+     * <b>The sign-off, and nothing else.</b>
+     *
+     * <p>There used to be a "Next: &hellip;" link at the foot of every section,
+     * on the argument that the page should read straight through. With the
+     * contents list pinned beside the article that argument does not survive:
+     * the next section is already one click away, permanently, in a list that
+     * also says where you are - so the link was a second control doing the
+     * first one's job, sitting between the end of the prose and the end of the
+     * panel. (Owner's call.)
+     *
+     * <p>The last section still signs off, because the end of the page should
+     * not look like a cut.
      */
     private int drawSectionFooter(GuiGraphicsExtractor g, int x, int y, int w,
                                   int mouseX, int mouseY, int section) {
-        if (section >= sectionCount() - 1) {
-            // A last line, so the end of the page does not look like a cut.
-            g.text(this.font, Component.literal("\u2014 good luck."), x, y, TAG, false);
-            return this.font.lineHeight;
+        if (section < sectionCount() - 1) {
+            return 0;
         }
-        String label = "Next:  " + sectionLabel(section + 1) + "  \u203a";
-        int wLine = Math.min(w, this.font.width(label) + 8);
-        boolean hover = mouseX >= x - 3 && mouseX < x + wLine && mouseY >= y - 2
-                && mouseY < y + this.font.lineHeight + 2;
-        g.fill(x - 3, y - 3, x + wLine, y + this.font.lineHeight + 2, hover ? ROW_HOVER : DIVIDER);
-        g.text(this.font, Component.literal(label), x, y, hover ? HEADING : NAME_DIM, false);
-        // Registered with the contents list, so one hit test serves both.
-        tocEntries.add(new TocEntry(x - 3, y - 3, x + wLine, y + this.font.lineHeight + 2, section + 1));
-        return this.font.lineHeight + 4;
+        g.text(this.font, Component.literal("\u2014 good luck."), x, y, TAG, false);
+        return this.font.lineHeight;
     }
 
     /** What the contents list calls a section. */
@@ -1688,35 +1698,53 @@ public final class HorseBrowserScreen extends Screen {
         String q = search.trim().toLowerCase(Locale.ROOT);
         int have = 0;
         int total = 0;
+        List<AlleleRow> rows = new ArrayList<>();
         for (Gene gene : allGenes) {
+            int mine = 0;
             for (Allele a : gene.alleles()) {
                 total++;
                 if (ClientGeneDatabase.hasAllele(gene.key(), a.token())) {
                     have++;
+                    mine++;
                 }
+            }
+            if (!q.isEmpty() && !gene.name().toLowerCase(Locale.ROOT).contains(q)
+                    && !gene.key().toLowerCase(Locale.ROOT).contains(q)) {
+                continue;
+            }
+            AlleleRow row = new AlleleRow(gene, mine, gene.alleles().size());
+            if (alleleFilter.accepts(row)) {
+                rows.add(row);
             }
         }
 
+        // Finished loci first. The list is a collection, and what a collector
+        // wants at the top is what they have finished - with the part-done ones
+        // directly under it, because those are the ones worth going out for.
+        // Ties break by name so the order is stable rather than registry order,
+        // which means nothing to a player.
+        rows.sort(Comparator.comparingDouble(AlleleRow::fraction).reversed()
+                .thenComparing(row -> row.gene().name(), String.CASE_INSENSITIVE_ORDER));
+
         g.text(this.font, Component.literal("Alleles collected  " + have + " / " + total),
                 l, top - 12, LABEL, false);
+        drawAlleleFilters(g, r, top - 13, mouseX, mouseY);
         g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
         g.enableScissor(l - 4, top, r, bottom);
 
         int y = top - (int) alleleScroll;
         int start = y;
-        for (Gene gene : allGenes) {
-            if (!q.isEmpty() && !gene.name().toLowerCase(Locale.ROOT).contains(q)
-                    && !gene.key().toLowerCase(Locale.ROOT).contains(q)) {
-                continue;
-            }
-            int mine = 0;
-            for (Allele a : gene.alleles()) {
-                if (ClientGeneDatabase.hasAllele(gene.key(), a.token())) {
-                    mine++;
-                }
-            }
-            drawFitted(g, gene.name() + "   " + mine + "/" + gene.alleles().size(),
-                    l, y, w, mine == gene.alleles().size() ? EXPR_ON : NAME);
+        if (rows.isEmpty()) {
+            g.text(this.font, Component.literal(alleleFilter == AlleleFilter.ALL
+                            ? "No alleles match that search."
+                            : "Nothing under “" + alleleFilter.label + "” yet."),
+                    l, y, TAG, false);
+            y += this.font.lineHeight + 2;
+        }
+        for (AlleleRow row : rows) {
+            Gene gene = row.gene();
+            drawFitted(g, gene.name() + "   " + row.mine() + "/" + row.total(),
+                    l, y, w, row.complete() ? EXPR_ON : NAME);
             y += this.font.lineHeight + 2;
 
             int cx = l + 10;
@@ -1745,6 +1773,86 @@ public final class HorseBrowserScreen extends Screen {
                     Math.max(16, (int) ((long) trackH * trackH / Math.max(1, height))),
                     v -> alleleScroll = (float) v);
         }
+    }
+
+    /** One locus as the Alleles tab counts it. */
+    private record AlleleRow(Gene gene, int mine, int total) {
+
+        boolean complete() {
+            return total > 0 && mine == total;
+        }
+
+        boolean started() {
+            return mine > 0;
+        }
+
+        /** How far along, 0..1. An empty locus counts as done so it cannot sit at the top forever. */
+        double fraction() {
+            return total <= 0 ? 1.0 : (double) mine / total;
+        }
+    }
+
+    /**
+     * <b>The four views of the collection.</b>
+     *
+     * <p>Sorting finished-first answers "what have I got"; it does not answer
+     * "what am I part-way through", because a long list still buries the middle.
+     * {@link #STARTED} is the one that earns its place - the loci with one copy
+     * of two, which are the only ones where knowing changes where you go next.
+     */
+    private enum AlleleFilter {
+        ALL("All"),
+        COMPLETE("Complete"),
+        INCOMPLETE("Incomplete"),
+        STARTED("Started");
+
+        final String label;
+
+        AlleleFilter(String label) {
+            this.label = label;
+        }
+
+        boolean accepts(AlleleRow row) {
+            return switch (this) {
+                case ALL -> true;
+                case COMPLETE -> row.complete();
+                case INCOMPLETE -> !row.complete();
+                case STARTED -> row.started() && !row.complete();
+            };
+        }
+    }
+
+    /** Right-aligned chips beside the running total, so they cost the list no height. */
+    private void drawAlleleFilters(GuiGraphicsExtractor g, int right, int y, int mouseX, int mouseY) {
+        AlleleFilter[] all = AlleleFilter.values();
+        int x = right;
+        for (int i = all.length - 1; i >= 0; i--) {
+            AlleleFilter f = all[i];
+            int tw = this.font.width(f.label) + 10;
+            x -= tw + 3;
+            boolean active = f == alleleFilter;
+            boolean hover = mouseX >= x && mouseX < x + tw && mouseY >= y && mouseY < y + 12;
+            g.fill(x, y, x + tw, y + 12, active ? ROW_SEL : (hover ? ROW_HOVER : DIVIDER));
+            g.text(this.font, Component.literal(f.label), x + 5, y + 2,
+                    active ? NAME : (hover ? HEADING : NAME_DIM), false);
+            alleleChips.add(new TocEntry(x, y, x + tw, y + 12, i));
+        }
+    }
+
+    /** A click on one of the Alleles tab's filter chips. */
+    private boolean alleleFilterClicked(double mx, double my) {
+        for (TocEntry e : alleleChips) {
+            if (mx < e.x0() || mx > e.x1() || my < e.y0() || my > e.y1()) {
+                continue;
+            }
+            AlleleFilter picked = AlleleFilter.values()[e.index()];
+            if (picked != alleleFilter) {
+                alleleFilter = picked;
+                alleleScroll = 0f;
+            }
+            return true;
+        }
+        return false;
     }
 
     private void drawRecipeList(GuiGraphicsExtractor g, int mouseX, int mouseY) {

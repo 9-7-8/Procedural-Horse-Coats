@@ -92,7 +92,7 @@ public final class TutorialPage {
                                 + "until the sun goes down. You will know one when you meet it."),
                 List.of(), Art.NONE));
 
-        out.add(new Step("1. Tame one",
+        out.add(new Step("Tame one",
                 List.of("Find a wild horse and get on it, with nothing in your hand. It will throw "
                                 + "you off. Get back on. Keep getting back on until hearts appear. "
                                 + "That is the whole of taming.",
@@ -101,7 +101,7 @@ public final class TutorialPage {
                 List.of(new ItemStack(Items.SADDLE), new ItemStack(Items.WHEAT),
                         new ItemStack(Items.GOLDEN_APPLE)), Art.NONE));
 
-        out.add(new Step("2. Shear one for hair",
+        out.add(new Step("Shear one for hair",
                 List.of("Right-click a horse with shears. You get one to three horse hair, "
                                 + "and it grows back after a while.",
                         "Do this early and often. Horse hair is the base material for "
@@ -112,7 +112,7 @@ public final class TutorialPage {
                 List.of(new ItemStack(Items.SHEARS), new ItemStack(ModItems.HORSE_HAIR.get()),
                         new ItemStack(ModItems.BRAIDED_ROPE.get())), Art.NONE));
 
-        out.add(new Step("3. You need one of each",
+        out.add(new Step("You need one of each",
                 List.of("Every horse is a mare or a stallion, and it is a gene like any other - a "
                                 + "foal inherits its sex rather than being assigned one. Two mares "
                                 + "will not give you a foal however much they like each other, and "
@@ -123,7 +123,7 @@ public final class TutorialPage {
                                 + "switch in the client config.)"),
                 List.of(), Art.NONE));
 
-        out.add(new Step("4. Feed a golden carrot",
+        out.add(new Step("Feed a golden carrot",
                 List.of("Tame a mare and a stallion, put them together, and feed each of them a "
                                 + "golden carrot. Hearts, and then a foal.",
                         "The foal is not a copy of either parent. Each parent passes on one of its "
@@ -132,7 +132,7 @@ public final class TutorialPage {
                                 + "and why breeding is worth doing at all."),
                 List.of(new ItemStack(Items.GOLDEN_CARROT)), Art.NONE));
 
-        out.add(new Step("5. Milk a mare",
+        out.add(new Step("Milk a mare",
                 List.of("Right-click a tamed adult mare with an empty bucket. Stallions "
                                 + "decline, and are not shy about it.",
                         "How often a mare can be milked is itself genetic - most manage it "
@@ -175,7 +175,7 @@ public final class TutorialPage {
                 List.of(new ItemStack(Items.WHEAT), new ItemStack(Items.SUGAR),
                         new ItemStack(Items.SHEARS)), Art.NONE));
 
-        out.add(new Step("6. Take a gene with a book",
+        out.add(new Step("Research a gene with a book",
                 List.of("Hold a book and right-click a horse. The book grabs one of that "
                                 + "horse's genes at random and becomes a research paper naming it. "
                                 + "You cannot pick which.",
@@ -196,7 +196,7 @@ public final class TutorialPage {
                                 + "you."),
                 List.of(), Art.NONE));
 
-        out.add(new Step("7. Keep them on a shelf",
+        out.add(new Step("Keep them on a shelf",
                 List.of("A research paper is a thing you can lose. File it into an Equine Research "
                                 + "Shelf and it stops being one: that shelf will copy the gene onto "
                                 + "blank books for as long as the original stays in it.",
@@ -211,7 +211,7 @@ public final class TutorialPage {
                         new ItemStack(Items.BOOK),
                         new ItemStack(ModItems.RESEARCH_PAPER.get())), Art.NONE));
 
-        out.add(new Step("8. The horseman",
+        out.add(new Step("The horseman",
                 List.of("The horseman is a villager with a job you will not have seen before. Put a "
                                 + "Horseman's Table down near one who has no work and he will take "
                                 + "it.",
@@ -222,7 +222,7 @@ public final class TutorialPage {
                 List.of(new ItemStack(ModItems.HORSEMANS_TABLE.get()),
                         new ItemStack(Items.EMERALD)), Art.HORSEMAN));
 
-        out.add(new Step("9. The cowboy",
+        out.add(new Step("The cowboy",
                 List.of("The cowboy is not a villager at all. He keeps his own herd, and he will "
                                 + "sell you one outright if you would rather buy a bloodline than "
                                 + "breed one. A Cowboy Hitch is what brings him.",
@@ -233,7 +233,7 @@ public final class TutorialPage {
                 List.of(new ItemStack(ModItems.COWBOY_HITCH.get()),
                         new ItemStack(Items.EMERALD)), Art.COWBOY));
 
-        out.add(new Step("10. Put a gene into a foal",
+        out.add(new Step("Put a gene into a foal",
                 List.of("Once a gene is in your database you can make its gene carrot - a golden "
                                 + "carrot, that gene's research paper, some horse hair, and an ingot "
                                 + "whose metal depends on how rare the gene is.",
@@ -249,7 +249,7 @@ public final class TutorialPage {
                         new ItemStack(Items.GOLD_INGOT),
                         new ItemStack(Items.DIAMOND)), Art.NONE));
 
-        out.add(new Step("11. Breed your own herd",
+        out.add(new Step("Breed your own herd",
                 List.of("Now it is a loop. Meet horses, take what they will tell you, file it, copy "
                                 + "it, splice it, and breed the result into the next generation. "
                                 + "Every horse in the paddock gets a little more like the one you "

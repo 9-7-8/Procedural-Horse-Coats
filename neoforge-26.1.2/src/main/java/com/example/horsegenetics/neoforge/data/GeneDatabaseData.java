@@ -118,12 +118,27 @@ public final class GeneDatabaseData extends SavedData {
      * genuinely not met it.
      */
     public void collect(ServerPlayer player, com.example.horsegenetics.common.genetics.Genotype genotype) {
+        collect(player, java.util.List.of(genotype));
+    }
+
+    /**
+     * <b>The same, for a whole stable at once.</b>
+     *
+     * <p>One sync at the end rather than one per horse, which is the only
+     * reason this overload exists: the sweep that fixed the empty Alleles tab
+     * walks every horse a player owns, and a player with a breeding programme
+     * owns a lot of them.
+     */
+    public void collect(ServerPlayer player,
+                        Iterable<com.example.horsegenetics.common.genetics.Genotype> genotypes) {
         Set<String> mine = collectedByPlayer.computeIfAbsent(player.getUUID(), k -> new LinkedHashSet<>());
         boolean changed = false;
-        for (Gene gene : com.example.horsegenetics.common.genetics.Genes.codeOrder()) {
-            var pair = genotype.pair(gene);
-            changed |= mine.add(allele(gene.key(), pair.first().token()));
-            changed |= mine.add(allele(gene.key(), pair.second().token()));
+        for (com.example.horsegenetics.common.genetics.Genotype genotype : genotypes) {
+            for (Gene gene : com.example.horsegenetics.common.genetics.Genes.codeOrder()) {
+                var pair = genotype.pair(gene);
+                changed |= mine.add(allele(gene.key(), pair.first().token()));
+                changed |= mine.add(allele(gene.key(), pair.second().token()));
+            }
         }
         if (changed) {
             setDirty();

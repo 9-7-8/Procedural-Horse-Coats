@@ -46,7 +46,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 @EventBusSubscriber
 public final class HorseShearHandler {
 
-    private static final int SHEAR_BOND = 5;
+    private static final int SHEAR_BOND = 2;
 
     @SubscribeEvent
     static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {

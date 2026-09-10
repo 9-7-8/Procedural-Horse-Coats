@@ -69,6 +69,20 @@ public final class HorseRoster {
             }
         }
 
+        // Every horse you own contributes its alleles to the collection.
+        //
+        // The only hooks used to be taming and breeding, so a horse bought from
+        // the cowboy, handed over on a transfer paper, or tamed before the
+        // collection existed at all counted for nothing - and the Alleles tab
+        // read empty for a player with a full stable, which is what it was
+        // reported as (known gap 149). Swept here rather than at the moment of
+        // acquisition because there is no single such moment, and because a
+        // sweep is retroactive: it repairs a save that predates the feature
+        // instead of only being right from now on. It runs on the uncapped
+        // list, before MAX_ENTRIES cuts the packet down - what you can see in
+        // the table and what you have met are different questions.
+        collectAlleles(server, player, mine);
+
         // Newest first: a breeding programme is nearly always about the horses
         // at the front of it, and this is also the sensible thing to keep when
         // the list has to be cut to the packet cap. The table re-sorts on the
@@ -84,6 +98,25 @@ public final class HorseRoster {
             out.add(entry(server, record));
         }
         return List.copyOf(out);
+    }
+
+    /** Hand every owned genotype to the collection in one batch. */
+    private static void collectAlleles(MinecraftServer server, ServerPlayer player,
+                                       List<HorseRecord> mine) {
+        List<com.example.horsegenetics.common.genetics.Genotype> genotypes =
+                new ArrayList<>(mine.size());
+        for (HorseRecord record : mine) {
+            try {
+                genotypes.add(com.example.horsegenetics.common.genetics.Genotype.parse(
+                        record.geneticCode()));
+            } catch (RuntimeException unparseable) {
+                // a code written against a different registry - nothing to learn
+            }
+        }
+        if (!genotypes.isEmpty()) {
+            com.example.horsegenetics.neoforge.data.GeneDatabaseData.get(server)
+                    .collect(player, genotypes);
+        }
     }
 
     private static HorseRosterPayload.Entry entry(MinecraftServer server, HorseRecord record) {

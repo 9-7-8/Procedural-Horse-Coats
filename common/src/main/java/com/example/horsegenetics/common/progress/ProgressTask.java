@@ -52,8 +52,8 @@ public enum ProgressTask {
             "Right-click a tamed adult mare with an empty bucket. Stallions decline, at some length."),
 
     // ---- reading a horse ---------------------------------------------
-    GENE_BOOK(Group.GENETICS, "Take a gene off a horse",
-            "Right-click any horse while holding a book. The book grabs one of its genes at random."),
+    GENE_BOOK(Group.GENETICS, "Research a gene with a book",
+            "Right-click any horse while holding a book. The book records one of its genes at random - the horse keeps it."),
     BUILD_SHELF(Group.GENETICS, "Build an Equine Research Shelf",
             "One bookshelf and two horse hair. Right-click it to open."),
     FILE_PAPER(Group.GENETICS, "File a paper into the shelf",
