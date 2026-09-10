@@ -1,17 +1,17 @@
 {
-  "format": 3,
-  "key": "ixora.bracketed",
+  "key": "horsegenetics.bracketed",
   "name": "Bracketed",
   "phase": "magical",
   "priority": 142,
   "blurb": "Overlapping shelf lobes crowd the haunch, each one a pale rim around a darker body, stacked the way bracket fungus climbs a trunk.",
-  "rarity": "rare",
+  "rarity": "RARE",
   "notes": [
     "Three SPOTS draws on ONE seed, spacing, stretch and vary, so the three bands of every lobe stay concentric and stay in proportion - vary scales all three by the same per-cell factor. Only radius differs between them. Change stretch on one and the lattice changes under it and the lobes come apart.",
     "arc 0.62 at angle 250 is what makes it read as a shingled pile rather than a net. Drawing each lobe closed puts a rim all the way round it, and a field of closed rings is the one thing that makes an overlapping surface look wrong - the leading edge of a real lobe is under the lobe in front of it and shows no line at all.",
     "Band widths are 0.60 and 0.60 units against a 0.5-unit texel. Radii of 1.8 / 1.3 / 0.8 would look better proportioned on paper and would draw two bands of 0.5 that average away to nothing.",
     "The AXIS term keeps the cluster on the rear half of the barrel and the haunch instead of letting it tile the whole horse.",
-    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene."
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene.",
+    "Arrived keyed 'ixora.bracketed'. Renamed to the horsegenetics namespace every other gene in the mod uses - the format allows a modder their own, but a gene shipping INSIDE this mod under a second namespace breaks the tooling that builds a key from a slug."
   ],
   "alleles": [
     {
@@ -443,5 +443,6 @@
     "B/n": 0.22,
     "C/C": 0.006,
     "n/n": 99.496
-  }
+  },
+  "format": 3
 }

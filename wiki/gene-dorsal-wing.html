@@ -101,7 +101,7 @@
 <tr><th>Priority</th><td>121 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Wb</code> &middot; <code>Wc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>NORMAL, SPOTS, SVG, TINT, TOWARD</td></tr>
+<tr><th>Built from</th><td>AXIS, NORMAL, SPOTS, SVG, TINT, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
@@ -130,6 +130,8 @@
 
 <p>What is on the FLANK is an extrusion and not a drawing, and it is worth knowing which is which. A top-plane shape is read at (x, z), and a flank face has one constant z - so the whole side shows a single vertical slice of the butterfly, stretched downward. On the back you are looking at the drawing; on the sides you are looking at its cross-section running down. That reads as wings folding over the barrel, which is what it is for, and it is the honest cost of the plane that makes the mirror line the spine.</p>
 
+<p>The wing stops CLEAR OF THE UNDERLINE. Opening the NORMAL mask to -0.75 at round 0.85 is what carries the marking down the flank, but a rounded normal that far open also admits the belly - a downward-facing face reads well above the threshold once it is blended - so the wing ran right to the bottom of the barrel. An explicit AXIS on Y cuts it at 0.40 of the whole-horse box, which is y 13.5, about two and a half units above the underline. A height is the right tool for a height: raising the NORMAL instead would have pulled the marking back off the shoulder as well.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -146,10 +148,10 @@
 <p>Layer order is ground, margin, squiggle, cell: each is drawn inside the one before it, so reversing any pair loses the inner colour entirely.</p>
 
 <ol>
-<li>the wing, dark &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code>, painted with <code>TINT</code></li>
-<li>the margin band &mdash; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>NORMAL</code>, painted with <code>TOWARD</code></li>
-<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code>, painted with <code>TOWARD</code></li>
-<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code>, painted with <code>TOWARD</code></li>
+<li>the wing, dark &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TINT</code></li>
+<li>the margin band &mdash; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Coloured dorsal wing</h3>
@@ -159,10 +161,10 @@
 <p>The recessive coloured half of the usual pair. Two hue knobs, because the source's margin is on the far side of the wheel from its wing markings and one hue driving both would lose the edge. The wing's own two - 0.3 and 0.68 lightness - stay on one hue, since there the pink genuinely is the rust lit brighter.</p>
 
 <ol>
-<li>the wing, dark &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code>, painted with <code>TINT</code></li>
-<li>the margin band &mdash; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>NORMAL</code>, painted with <code>TOWARD</code></li>
-<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code>, painted with <code>TOWARD</code></li>
-<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code>, painted with <code>TOWARD</code></li>
+<li>the wing, dark &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TINT</code></li>
+<li>the margin band &mdash; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Wild type</h3>

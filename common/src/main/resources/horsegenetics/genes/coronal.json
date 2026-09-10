@@ -1,17 +1,17 @@
 {
-  "format": 3,
-  "key": "ixora.coronal",
+  "key": "horsegenetics.coronal",
   "name": "Coronal",
   "phase": "magical",
   "priority": 141,
   "blurb": "A dark, ragged disc sits high on each flank with a ring of long tapering spikes thrown out around it, brightest at the tips.",
-  "rarity": "epic",
+  "rarity": "EPIC",
   "notes": [
     "The reference is an eclipse: a bare middle, a spiked corona, and nothing in between. The corona is a FAN rather than STROKES because every spike shares one origin and widens as it travels, which is the one thing STROKES will not do - its strokes are independent and wander.",
     "FAN's inner is 3.2 and the PATH core is about 3.4 units across, so the spikes start just off the rim of the core rather than inside it. Those two numbers have to move together; changing one alone either buries the spike roots or leaves a bare ring between core and corona.",
     "spacing 0.42 gives about fifteen spikes and a ray 0.56 units wide at the inner radius - just over one texel, which is the floor. Winding spacing down for more spikes takes the inner end of each below a texel and they vanish from the roots outward.",
     "The core is a filled PATH rather than a SPOTS cell so that it is in a known place - the same place the FAN pivots on. The FRACTAL multiplied into it is what tears its edge; the reference's core is lumpy, not round.",
-    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene."
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene.",
+    "Arrived keyed 'ixora.coronal'. Renamed to the horsegenetics namespace every other gene in the mod uses - the format allows a modder their own, but a gene shipping INSIDE this mod under a second namespace breaks the tooling that builds a key from a slug."
   ],
   "alleles": [
     {
@@ -565,5 +565,6 @@
     "B/n": 0.22,
     "C/C": 0.006,
     "n/n": 99.496
-  }
+  },
+  "format": 3
 }

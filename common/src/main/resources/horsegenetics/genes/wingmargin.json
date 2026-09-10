@@ -1,18 +1,19 @@
 {
-  "format": 3,
-  "key": "ixora.wingmargin",
+  "key": "horsegenetics.wingmargin",
   "name": "Wing Margin",
   "phase": "magical",
   "priority": 153,
   "blurb": "The flank carries a butterfly's wing - a pale field crossed by fine veins running back toward the stifle, edged along the underline with a row of scallops and dark lunules.",
-  "rarity": "legendary",
+  "rarity": "LEGENDARY",
   "notes": [
     "The veins are a FAN and could not be anything else. Every vein on a wing leaves one point and they fan apart as they travel; STROKES draws lines that wander independently and never share an origin, and WAVES takes its phase from a straight line so its bars stay parallel forever.",
     "The FAN's pivot is at (6, 7) - off the marking, down by the stifle - and inner is 8.0, so only the far part of the fan crosses the flank. That is what makes the veins read as converging on somewhere rather than as radiating from a point you can see. spacing is an ANGLE: 0.17 is about thirty-seven veins round a full turn, and the wedge that reaches the barrel holds maybe eight of them. A number that reads like a body-unit spacing would have put three veins on the whole horse.",
     "Vein width at ten units out is 0.17 x 10 x 0.42 = 0.71 units. It grows with distance, so the veins are thinnest at the belly and widest at the shoulder, which is the right way round.",
     "The scallops and the lunules are two WAVES bands on ONE wavelength (5.6) and ONE phase, differing only in amplitude - 1.7 against 2.9. The deeper band's crests push up through the shallower one, and the dark lobes fall inside the olive scallops instead of beside them. This is why the lunules are not SPOTS: a SPOTS lattice lays down its own centres and has never had anything to do with where a wave crested.",
     "Both bands are 4.0 and 3.1 units deep, so the olive that survives around each lunule is over a unit wide. Tightening either band toward the reference's thinner rim takes it under a texel.",
-    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim."
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim.",
+    "Arrived keyed 'ixora.wingmargin'. Renamed to the horsegenetics namespace every other gene in the mod uses - the format allows a modder their own, but a gene shipping INSIDE this mod under a second namespace breaks the tooling that builds a key from a slug.",
+    "The heavy veins were on FAN spacing 1.4 with duty 0.1, and painted NOTHING - spacing is an ANGLE, so at 1.4 radians the veins are eighty degrees apart and the barrel does not subtend enough of the fan for one to land on it. 0.51 is three times the fine veins' 0.17, which puts a heavy vein at every third fine one, and duty 0.16 gives it a little more width than they have. Caught by DeadLayerTest; the layer read as valid and drew on nothing."
   ],
   "alleles": [
     {
@@ -162,8 +163,8 @@
               "space": "units",
               "originU": 6.0,
               "originV": 7.0,
-              "spacing": 1.4,
-              "duty": 0.1,
+              "spacing": 0.51,
+              "duty": 0.16,
               "inner": 8.0,
               "outer": 30.0,
               "softness": 0.2
@@ -370,8 +371,8 @@
               "space": "units",
               "originU": 6.0,
               "originV": 7.0,
-              "spacing": 1.4,
-              "duty": 0.1,
+              "spacing": 0.51,
+              "duty": 0.16,
               "inner": 8.0,
               "outer": 30.0,
               "softness": 0.2
@@ -580,8 +581,8 @@
               "space": "units",
               "originU": 6.0,
               "originV": 7.0,
-              "spacing": 1.4,
-              "duty": 0.1,
+              "spacing": 0.51,
+              "duty": 0.16,
               "inner": 8.0,
               "outer": 30.0,
               "softness": 0.2
@@ -694,5 +695,6 @@
     "B/n": 0.22,
     "C/C": 0.006,
     "n/n": 99.496
-  }
+  },
+  "format": 3
 }

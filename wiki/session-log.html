@@ -27,6 +27,85 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10f">2026-09-10</h2>
+
+<h3>Eleven more genes out of intake, none of them duplicates, and the dead-layer
+    check paying for itself on its first batch.</h3>
+
+<p>Agatebound, bargello, bracketed, coronal, geode, maelstrom, nacre, starburst,
+    sunspiral, wing margin and witchfire. The batch was checked for duplicates
+    <em>by content</em> rather than by name first: every gene's layer signature
+    &mdash; which masks, folded how, painted with what &mdash; and the nouns in its
+    blurb, scored against all 159 that already ship. <b>The best match in the whole
+    batch scored 0.13</b>, so nothing was a re-arrival and nothing was skipped.</p>
+
+<h4>Two collisions, both resolved rather than skipped</h4>
+
+<p><b>Nacre</b> collided by name with a gene that already ships, and the content
+    check is what settled what to do about it: they score 0.04 against each other.
+    The installed one breaks the coat into hard-edged plates at gold seams; the new
+    one is a marbled saddle with a shifting film along its folds. They have nothing
+    in common but the word, so the new one is <b>Nacre Saddle</b>.</p>
+
+<p><b>All eleven arrived keyed <code>ixora.*</code></b> where every other gene in
+    the mod is <code>horsegenetics.*</code>. The format allows a modder their own
+    namespace and should &mdash; but a gene shipping <em>inside</em> this mod under a
+    second one breaks every tool that builds a key from a slug, so they were
+    renamed. Recorded in each file's notes rather than done silently.</p>
+
+<h4>The check caught nine dead layers before anything shipped</h4>
+
+<p><a href="known-gaps.html#gap-169">DeadLayerTest</a> was written earlier the same
+    day, and this is the first batch it saw. It failed on <b>nine layers across three
+    genes</b> &mdash; every one of which would have shipped, because all eleven files
+    parse, all eleven paint plenty of texels, and ten of the eleven look fine in a
+    render. The nine had <b>three different causes</b>, which is the argument for
+    measuring the symptom rather than pattern-matching the cause:</p>
+
+<ul>
+    <li><b><a href="gene-wingmargin.html">Wing margin</a>'s heavy veins painted
+        nothing at all.</b> <code>FAN</code>'s <code>spacing</code> is an
+        <em>angle</em>, and at 1.4 radians the veins are eighty degrees apart &mdash;
+        the barrel does not subtend enough of the fan for a single one to land on it.
+        0.51 puts a heavy vein at every third fine one.</li>
+    <li><b><a href="gene-starburst.html">Starburst</a>'s white core was
+        overruled</b> &mdash; a genuine gap-169 instance. Outline, inline and core
+        are three nested filled <code>PATH</code>s at strength 100, so the core was
+        adding white to a texel the two outside it had already driven to the clamp.
+        Each star now subtracts the one inside it. Its flecks were a separate problem:
+        spacing 4.6 at radius 0.6 and chance 0.3 is about three spots a texel and a
+        half across, and they landed on <em>four texels in total</em>.</li>
+    <li><b><a href="gene-geode.html">Geode</a> was mis-scaled, not mis-built.</b>
+        Every layer was bounded by an <code>AXIS</code> reaching 11.5 units and a
+        <code>WAVES</code> band reaching 7, so the shards lived in the bottom quarter
+        of the horse and the whole gene moved about <b>three hundred texels out of
+        eleven thousand</b>. Visible in the file, invisible on the horse &mdash; and
+        the one gene in the batch whose icon had already made me suspicious.</li>
+</ul>
+
+<p>Diagnosis needed one measurement the check does not make: render each dead layer
+    <em>alone</em>. A layer that paints nothing alone has an empty mask fold; a layer
+    that paints plenty alone and nothing in place has been overruled by its
+    neighbours. Wing margin's veins scored 0 alone, starburst's core 132. That two-way
+    split is worth building into the check's failure message the next time it fires.</p>
+
+<h4>And dorsal wing stops clear of the underline</h4>
+
+<p>Opening the <code>NORMAL</code> mask to -0.75 at <code>round</code> 0.85 is what
+    carries the butterfly down the flank, but a rounded normal that far open also
+    admits the <em>belly</em> &mdash; a downward-facing face reads well above the
+    threshold once it is blended &mdash; so the wing ran to the bottom of the barrel.
+    An explicit <code>AXIS</code> on Y now cuts it at y 13.5, about two and a half
+    units above the underline. A height is the right tool for a height: raising the
+    <code>NORMAL</code> instead would have pulled the marking back off the shoulder
+    as well.</p>
+
+<h4>What was regenerated</h4>
+
+<p>Bundle, icons, 168 gene pages, the designer wasm, both goldens. The bake golden
+    gained 40 rows and moved exactly two &mdash; dorsal wing's, from the belly cut.
+    Every pipeline-golden code grew by eleven loci and no horse moved.</p>
+
 <h2 id="d2026-09-10e">2026-09-10</h2>
 
 <h3>A check for gap 169, and the two metrics that were measured and thrown away

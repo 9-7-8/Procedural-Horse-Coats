@@ -46,6 +46,17 @@ magic_zebra
 dorsal_wing
 contour
 dripwork
+coronal
+bracketed
+witchfire
+maelstrom
+sunspiral
+geode
+agatebound
+nacre_saddle
+starburst
+bargello
+wingmargin
 light
 lut
 qular

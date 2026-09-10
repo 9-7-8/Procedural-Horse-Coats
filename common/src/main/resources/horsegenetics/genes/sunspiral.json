@@ -1,17 +1,17 @@
 {
-  "format": 3,
-  "key": "ixora.sunspiral",
+  "key": "horsegenetics.sunspiral",
   "name": "Sunspiral",
   "phase": "magical",
   "priority": 146,
   "blurb": "A tight spiral sits centred on each flank with three rings of short dashes thrown out around it, gathered into five points like a rock-carved sun.",
-  "rarity": "epic",
+  "rarity": "EPIC",
   "notes": [
     "Two FANs on one pivot, multiplied. The fine one at spacing 0.36 makes about seventeen rays; the coarse one at spacing 1.257 makes five, and using it as a gate leaves three or four fine rays alive inside each of the five arms. That is where the star comes from, and neither FAN alone would have given it - FAN has one periodicity around the pivot and this needs two.",
     "The dashes are three separate FAN layers bounded by inner and outer rather than one long ray broken up, because nothing in the vocabulary measures distance from a placed point except FAN's own bounds. Each ring is one unit deep with 0.6 of bare coat between - both above a texel.",
     "The fine ray is 0.72 units wide at inner 4.0. Winding spacing below about 0.36 takes the inner ring under a texel and the innermost dashes silently disappear while the outer two stay, which reads as a tuning problem and is not one.",
     "The SPIRAL centres itself on the BODY bounds and the FANs are written to the same point, (18.5, 16). Those numbers have to move together.",
-    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene."
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene.",
+    "Arrived keyed 'ixora.sunspiral'. Renamed to the horsegenetics namespace every other gene in the mod uses - the format allows a modder their own, but a gene shipping INSIDE this mod under a second namespace breaks the tooling that builds a key from a slug."
   ],
   "alleles": [
     {
@@ -547,5 +547,6 @@
     "B/n": 0.22,
     "C/C": 0.006,
     "n/n": 99.496
-  }
+  },
+  "format": 3
 }
