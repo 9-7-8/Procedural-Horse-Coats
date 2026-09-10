@@ -29,6 +29,40 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="session-close-2026-09-09">Where the day ended.</h3>
+
+<p>
+    Six releases, 0.3.1 through 0.3.6, and the shape of the day was <b>outside
+    testers</b>: almost everything here started as somebody else playing the mod and
+    saying what went wrong. That is new, and it changed what the work looked like &mdash;
+    less building, more reading a stranger's stack trace and asking what they actually
+    saw.
+</p>
+
+<p>
+    <strong>Two of the day's bugs were invisible from this machine and obvious from
+    theirs.</strong> The encoder crash that made 0.3.0 and 0.3.1 unplayable fired the
+    moment a horse came into render range, which a dev world reaches less reliably than a
+    survival one; the empty stables needed a rotated jigsaw, and three quarters of them
+    were. Neither would have been found by running the game here for another week.
+</p>
+
+<p>
+    <strong>And two of the reports were not bugs at all</strong> &mdash; a shared horse
+    inventory that was the player's own hotbar showing under every horse, and a crash that
+    was this session rebuilding <code>common.jar</code> underneath a running client. Both
+    cost real time to rule out, and both are now written down
+    (<a href="coding-notes.html#rebuild-under-client">coding notes</a>) because the second
+    one looks exactly like a packaging bug and would be chased again.
+</p>
+
+<p>
+    What is <em>not</em> done is the playing. The Equine Research Shelf has never been
+    placed, the Getting Started tab has never been drawn, and thirty-one checklist hooks
+    are proven reachable rather than proven correct. Those are gaps 143, 146 and 148, and
+    they are the first thing the next session should ask about rather than build past.
+</p>
+
 <h3 id="checklist-2026-09-09">A checklist that teaches the mod, and a collection that makes you want to find one more horse.</h3>
 
 <p>
