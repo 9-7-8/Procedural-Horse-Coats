@@ -35,6 +35,41 @@
     </p>
 </div>
 
+<h2 id="gene-page-merge">&sect;0-BK &mdash; One page for making a gene, in eight tabs (2026-09-09, NOT looked at)</h2>
+
+<p>Documentation only &mdash; no behaviour changed, and the eight Java edits in it are
+    comments and test messages. What wants <em>looking at</em> is the page itself, because
+    it is the first one on the wiki to use a mechanism at this scale.</p>
+
+<ul>
+    <li><strong>Does the tab bar render with eight buttons?</strong>
+        <a href="making-a-gene.html">Making a gene</a> is the only page with more than
+        three. <code>.tab-bar</code> gained <code>flex-wrap</code> for it; check it wraps
+        rather than overflowing at a narrow window, and that the three-tab pages
+        (any <code>gene-*.html</code>) are unchanged at every width.</li>
+    <li><strong>Does it open on <em>Start here</em>?</strong> Every panel is page-local, so
+        <code>tabs.js</code> falls through its stored-view logic to the first panel. Arrive
+        from the sidebar (which appends <code>?view=coding</code>) and from a bare URL.</li>
+    <li><strong>Is it purple?</strong> The page sets <code>data-view="coding"</code> on
+        <code>&lt;html&gt;</code> by hand, because <code>tabs.js</code> only sets that for a
+        real view tab. If the accent is grey rather than the coding purple, that attribute
+        is not surviving.</li>
+    <li><strong>Do cross-tab links switch tabs?</strong> <code>tabs.js</code> resolves an
+        in-page link by <code>querySelector</code>, so a link to a <em>panel</em> rather
+        than to a real <code>id</code> silently does nothing. Try Start here &rarr; The
+        file, Start here &rarr; In Java, and the Effects tab&rsquo;s links out to
+        <a href="horse-traits.html">horse-traits</a>.</li>
+    <li><strong>Is it in the sidebar under Coding only?</strong> It should be absent from
+        the gameplay and science views entirely.</li>
+</ul>
+
+<p class="note">The three deleted pages &mdash; <code>creating-a-gene</code>,
+    <code>gene-format</code>, <code>modding</code> &mdash; and <code>gene-effects</code>
+    had roughly 190 inbound links between them, all rewritten to the tab their material
+    moved to. <code>check-links.mjs</code> passes and reports no orphans, which proves every
+    href <em>resolves</em>; it cannot prove any of them lands somewhere sensible. A spot
+    check from a gene page and from the roadmap is worth a minute.</p>
+
 <h2 id="stall-rewrite">&sect;0-BJ &mdash; A stall that stopped killing horses, and eight things nobody has touched (2026-09-09, NOT looked at)</h2>
 
 <p class="callout"><strong>Confirmed in play tonight, so deleted from the list above:</strong>

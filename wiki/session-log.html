@@ -29,6 +29,106 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3>Four pages about making a gene become one, and the prompt is allowed to say a shape
+    cannot be drawn.</h3>
+
+<p>A documentation session, run alongside the play session below and touching none of the
+    same files. It started as &ldquo;bring the gene-writing page up to date&rdquo; and
+    turned into a merge, because the reason the page was out of date was structural.</p>
+
+<h4>The page had missed five masks, and the reason it missed them is the interesting part</h4>
+
+<p><code>FRACTAL</code>, <code>PATH</code> and <code>CHOICE</code> landed earlier the same
+    day; <code>LUMA</code>, <code>EDGE</code> and <code>spreadFrom</code> the day before.
+    None of them had reached <code>creating-a-gene.html</code>, so its machine-facing tab
+    was handing a model a vocabulary with <strong>no lace, no drawn shape, no branch and no
+    way to read the resolved colour</strong> &mdash; and cheerfully inviting it to
+    approximate. Both schema tables were re-transcribed <em>whole</em> from
+    <code>expected.json</code> rather than patched row by row, which is how they went stale
+    the first time, and the page now says so and gives the one-liner that dumps the
+    fixture.</p>
+
+<p>Also caught up in the same pass: <code>space: "local"</code> in all four places it
+    appears, the parts-by-position rule, that a layer cannot see what the layer above it
+    painted, <code>PATH</code>&rsquo;s body space where the spine is 0.62 and not 1.0, and
+    the six things the loader now <em>refuses</em> outright &mdash; several of which the
+    page still described as traps to be careful about, which they have not been for some
+    time.</p>
+
+<h4>&ldquo;No commentary&rdquo; was buying a worse failure than it prevented</h4>
+
+<p>The pasteable prompt used to end <em>output ONLY the JSON, no commentary</em>. That is
+    right about the ninety per cent of the job that is transcription. It is wrong about the
+    rest, and wrong in a way that hides: <strong>a model told to emit JSON and nothing else
+    will always find something to emit</strong>, so the answer to &ldquo;draw a shape this
+    format cannot express&rdquo; came back as a confident approximation with no sign
+    attached that it was one. Every mask after the first eight exists because a
+    <em>person</em> hit that wall and said which measurement was missing.</p>
+
+<p>It is now conditional and narrow: ship the closest honest approximation, record it in
+    <code>notes</code>, then a fixed-shape <b>TOOL GAP</b> section &mdash; the element, how
+    the approximation falls short, why no composition reaches it, and a concrete mask or op
+    design with every parameter and default. Two at most, nothing else. The bar is the one
+    <a href="making-a-gene.html#shapes">the page already sets for a human author</a>: a
+    different <em>measurement</em>, not different tuning, with <code>PATH</code> and
+    &ldquo;you have not found the numbers yet&rdquo; both named as explicitly not gaps.</p>
+
+<h4>Then the merge, on the owner&rsquo;s call that it was spread too thin</h4>
+
+<p>The split across four pages was not by subject, it was by accident of when each was
+    written: <code>creating-a-gene.html</code> had the traps, <code>gene-format.html</code>
+    had the parameter that caused them, <code>modding.html</code> had the Java escape hatch,
+    <code>gene-effects.html</code> had the effects vocabulary &mdash; and
+    <strong>which one you needed depended on already knowing the answer</strong>.
+    <a href="making-a-gene.html">Making a gene</a> is all of it in eight topical tabs:
+    Start here, Shapes, The file, Masks &amp; ops, Effects, In Java, The prompt, Checks.</p>
+
+<p>The material was <strong>moved by line range, not retyped</strong>. Four thousand lines
+    of reference retyped by hand is four thousand chances to introduce something nobody
+    would ever find; what is newly written is the connective tissue, and an assembler script
+    refused to emit a page that still named a file it had just deleted.</p>
+
+<p>The tabs are <b>page-local</b> &mdash; <code>tabs.js</code> has given a panel whose
+    <code>data-tab</code> is not one of the three wiki views its own button since the LUT
+    lab, but nothing had used it at this scale. Two things had to give. <code>
+    sync-page-views.mjs</code> derived <code>views</code> from the panels and would have
+    written <code>[]</code> for a page whose panels are <em>all</em> topical, hiding it from
+    every view at once; a page that names no wiki view is now left alone exactly as an
+    untabbed page is, and this one&rsquo;s <code>views: ["coding"]</code> is hand-set. And
+    <code>.tab-bar</code> had no <code>flex-wrap</code>: three buttons never needed it,
+    eight do.</p>
+
+<h4>The unbuilt architecture was being written twice</h4>
+
+<p>Half of <code>gene-effects.html</code> was auras, pools, memory, goals and spawn variants
+    &mdash; none of which runs. The plan was to move it to
+    <a href="horse-traits.html">the trait architecture page</a>, and on comparison
+    <strong>that page already carried a faithful summary of every one of those
+    sections</strong>. So the merge there is not a bulk move: horse-traits gained the
+    anchors the new page links into, the build-order table annotated with what actually
+    shipped against each step, and the divergences catalogue in place of a
+    slice-vs-architecture table that still described five live verbs.</p>
+
+<h4>Two things that were simply wrong</h4>
+
+<ul>
+    <li><strong><code>night_temper</code> and <code>night_watch</code> were undocumented.</strong>
+        Both have been registered on <code>AbilityType</code> since the night loci landed
+        this morning, and the effects reference never got them &mdash; so it documented
+        every verb but two, with no sign the other two existed. Both now have a section
+        written from the declarations. <a href="known-gaps.html#gap-160">Gap 160</a> is the
+        shape of that failure rather than the instance.</li>
+    <li><strong>The format page still said the creator cannot edit an <code>effects</code>
+        block.</strong> That stopped being true when the creator grew a form for it.</li>
+</ul>
+
+<p class="note">Nothing here touched the play session&rsquo;s files. The eight Java edits in
+    this work are one-line doc comments and test failure messages that named a page which no
+    longer exists &mdash; including <code>GeneWikiTool</code>, which is the
+    <em>generator</em> for every gene page, so leaving it would have had the next bake
+    rewrite all of them with a dead link.</p>
+
+
 <h3>0.3.8 &ndash; 0.4.0 &mdash; the stall that killed a horse, and a long evening of the owner playing while I worked.</h3>
 
 <p>An unusual session in shape: the owner was in the game the whole time, so almost

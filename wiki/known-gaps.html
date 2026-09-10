@@ -59,6 +59,35 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-160"><strong>Nothing checks that a registered effect verb has a section on the
+    page that documents them.</strong> Opened 2026-09-09. <code>night_temper</code> and
+    <code>night_watch</code> were registered on <code>AbilityType</code> and shipped in two
+    loci, and the effects reference did not mention them at all &mdash; not marked unbuilt,
+    not marked undocumented, simply absent, which reads exactly like a verb that does not
+    exist. They were found by counting <code>register(new AbilityType(</code> against the
+    page while merging it, which is not a method. This is the same shape as the gap that
+    produced <code>wiki/tools/check-gene-tabs.mjs</code>, and the same fix works: a check
+    that walks <code>AbilityType</code>&rsquo;s registry and fails on the first verb with no
+    <code>id</code> on <a href="making-a-gene.html#effects">the verb list</a>. It is cheap
+    because the ids are already the verb names. <b>The general form is worth stating</b>:
+    the wiki has checks for links, for tabs and for parity, and none for <em>coverage</em>
+    &mdash; a registry growing an entry the docs never hear about is silent in every
+    direction.</li>
+
+<li id="gap-161"><strong>The mask and op parameters are written out twice on one page, and
+    only prose stops them diverging.</strong> Opened 2026-09-09 with the merge.
+    <a href="making-a-gene.html#masks">Masks &amp; ops</a> carries the prose table a reader
+    works from; <a href="making-a-gene.html#schema">The prompt</a> carries a terse one-line
+    form of the same defaults, because that tab has to be pasteable into a model in one
+    piece. Both were transcribed from <code>expected.json</code> and agreed when written.
+    <b>Nothing compares them.</b> This is strictly better than the old arrangement, where
+    the two copies were on different pages and one could go a week behind without anyone
+    holding both in view &mdash; but the failure mode is unchanged, and it is the failure
+    mode that let five masks go missing in the first place. The honest fix is to generate
+    one or both out of the fixture at bake time, the way the gene pages are generated;
+    the cheap one is a node check that both tables name the same mask set with the same
+    defaults.</li>
+
 <li id="gap-154"><strong>The Breeds tab does not fill in when you tame a horse, and ignores creative.</strong>
     Opened 2026-09-09 with 0.4.0, reported the same evening: &ldquo;the breeds tab should be
     fully filled in on creative, and when I tested it just now, it did not fill in when I
