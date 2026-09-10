@@ -626,9 +626,15 @@ window.HG = window.HG || {};
       doc: "Keep a status effect topped up on the horse or its rider.",
       params: [
         eReq("effect", "mob effect id, e.g. 'minecraft:dolphins_grace'"),
-        eChoice("target", ["self", "rider"], "self", "who the effect lands on"),
+        eChoice("target", ["self", "rider", "group"], "self",
+          "who the effect lands on. 'group' reaches everything of that group within 'radius'"),
+        eChoice("group", MOB_GROUPS, "all", "used when target is 'group'"),
+        eNum("radius", 8, "reach in blocks when target is 'group'", { min: 1, max: 32, step: 1 }),
         eNum("amplifier", 0, "0-based amplifier", { min: 0, max: 4, step: 1 }),
-        eNum("refresh", 40, "re-apply every N ticks (at least 1)", { min: 1, max: 200, step: 1 })
+        eNum("refresh", 40, "re-apply every N ticks (at least 1)", { min: 1, max: 200, step: 1 }),
+        eNum("max_targets", 12, "most entities one refresh may reach. A mob effect syncs to every "
+          + "client tracking the entity, so this is a PACKET cap, not a tick one",
+          { min: 1, max: 64, step: 1 })
       ]
     },
     yield: {
@@ -846,7 +852,7 @@ window.HG = window.HG || {};
     "day", "night", "raining", "thundering", "sky_visible",
     // These three read the WORLD rather than a field on the horse, so the game
     // samples them on an interval rather than every tick. No difference here.
-    "dark", "near_jukebox", "snowing"];
+    "dark", "near_jukebox", "snowing", "hostile_near"];
 
   var TRIGGER_KINDS = ["continuous", "on_move", "interval", "on_interact",
     "on_hurt", "on_owner_hurt"];

@@ -282,6 +282,35 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.rainbow_dust", MAGIC_EMISSION);
         MAGICAL_OVERRIDES.put("horsegenetics.molten_hooves", MAGIC_EMISSION);
 
+        // The behaviour family. Priority is meaningless for a gene that paints
+        // nothing, so every one of these is named rather than banded.
+        MAGICAL_OVERRIDES.put("horsegenetics.fireproof", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.bird_boned", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.ocean_born", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.hydrophobic", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.hot_blooded", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.dryad", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.intimidating", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.meowing", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.cleansing_light", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.holy_ward", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.echolocate", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.base_alarm", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.music_enjoyer", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.gladiator", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.guardian", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.ender_echo", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.spontaneous_breeding", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.eyesight", MAGIC_BODY);
+        MAGICAL_OVERRIDES.put("horsegenetics.weather_speed", MAGIC_BODY);
+        MAGICAL_OVERRIDES.put("horsegenetics.weather_jump", MAGIC_BODY);
+        MAGICAL_OVERRIDES.put("horsegenetics.food_preference", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.potion_milk", MAGIC_YIELD);
+        MAGICAL_OVERRIDES.put("horsegenetics.egg_layer", MAGIC_YIELD);
+        MAGICAL_OVERRIDES.put("horsegenetics.singer", MAGIC_EMISSION);
+        MAGICAL_OVERRIDES.put("horsegenetics.pack_leader", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.spawner", MAGIC_BEHAVIOUR);
+
         // Cutie mark paints nothing in phase 3 - it draws its emblem in the
         // overlay pass, over the finished texture - but it is unambiguously a
         // marking and belongs with the genes that put colour on a horse.

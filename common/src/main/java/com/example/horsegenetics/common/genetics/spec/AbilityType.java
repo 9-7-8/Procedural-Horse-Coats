@@ -63,7 +63,7 @@ public final class AbilityType {
             "day", "night", "raining", "thundering", "sky_visible",
             // The three that read the WORLD rather than a field on the horse -
             // see WORLD_FLAGS below, and the interval sampling in the translator.
-            "dark", "near_jukebox", "snowing");
+            "dark", "near_jukebox", "snowing", "hostile_near");
 
     /**
      * The flags whose answer comes from a <b>world lookup</b> rather than a
@@ -78,7 +78,8 @@ public final class AbilityType {
      * way, so that adding a fourth world-reading flag is one line here rather
      * than a performance bug nobody notices.
      */
-    public static final List<String> WORLD_FLAGS = List.of("dark", "near_jukebox", "snowing");
+    public static final List<String> WORLD_FLAGS =
+            List.of("dark", "near_jukebox", "snowing", "hostile_near");
 
     /**
      * <b>Which creatures a radius effect is about.</b> Shared by
@@ -360,16 +361,34 @@ public final class AbilityType {
     public static final AbilityType MOB_EFFECT = register(new AbilityType("mob_effect",
             List.of(
                     Param.required("effect", "mob effect id, e.g. 'minecraft:dolphins_grace'"),
-                    Param.choice("target", List.of("self", "rider"), "self", "who the effect lands on"),
+                    Param.choice("target", List.of("self", "rider", "group"), "self",
+                            "who the effect lands on. 'group' reaches everything of that group "
+                                    + "within 'radius', which is the only way an effect leaves "
+                                    + "the horse and its rider"),
+                    Param.choice("group", MOB_GROUPS, "all", "used when target is 'group'"),
+                    Param.num("radius", 8, "reach in blocks when target is 'group', 1-32"),
                     Param.num("amplifier", 0, "0-based amplifier"),
-                    Param.num("refresh", 40, "re-apply every N ticks (at least 1)")),
+                    Param.num("refresh", 40, "re-apply every N ticks (at least 1)"),
+                    Param.num("max_targets", 12,
+                            "most entities one refresh may reach, 1-64. This is the cap that "
+                                    + "matters: a mob effect syncs to every client tracking the "
+                                    + "entity, so a wide group effect on a short refresh is a "
+                                    + "packet flood rather than a tick cost")),
             v -> {
                 int refresh = v.intOf("refresh");
                 if (refresh < 1) {
                     throw v.bad("refresh must be at least 1 tick, got " + refresh);
                 }
-                return new GeneAbility.SelfEffect(v.str("effect"), v.str("target"),
-                        v.intOf("amplifier"), refresh, v.when, v.minDose);
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 32) {
+                    throw v.bad("radius must be 1-32 blocks, got " + radius);
+                }
+                int maxTargets = v.intOf("max_targets");
+                if (maxTargets < 1 || maxTargets > 64) {
+                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
+                }
+                return new GeneAbility.SelfEffect(v.str("effect"), v.str("target"), v.str("group"),
+                        radius, v.intOf("amplifier"), refresh, maxTargets, v.when, v.minDose);
             }));
 
     /** Something the horse hands back on a right-click. Fires on {@code on_interact} only. */

@@ -930,6 +930,10 @@ public final class GeneAbilityHandler {
         if (horse.tickCount % refresh != 0) {
             return; // only re-apply on the refresh beat
         }
+        if ("group".equals(e.target())) {
+            applyGroupEffect(e, horse, geneKey);
+            return;
+        }
         LivingEntity target = "rider".equals(e.target()) ? horse.getControllingPassenger() : horse;
         if (target == null) {
             return; // "rider" with nobody aboard
@@ -944,6 +948,43 @@ public final class GeneAbilityHandler {
         // not a potion. When 'when' goes false the re-apply stops and the effect
         // fades within refresh+20 ticks.
         target.addEffect(new MobEffectInstance(effect, refresh + 20, e.amplifier(), true, false, false), null);
+    }
+
+    /**
+     * The one shape of mob effect that leaves the horse and its rider:
+     * everything of a group inside a radius.
+     *
+     * <p><b>The cap here is a packet cap, not a tick cap.</b> A mob effect syncs
+     * to every client tracking the entity it lands on, so re-applying one to
+     * every living thing in a wide radius on a short refresh is a network flood
+     * in a busy cave - which is exactly the cost that does not show up when
+     * testing with one horse in a field. As above, the duration outlives the
+     * refresh, so the effect can be left to lapse rather than re-stamped on
+     * every beat.
+     */
+    private static void applyGroupEffect(GeneAbility.SelfEffect e, Horse horse, String geneKey) {
+        Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.get(Identifier.parse(e.effect())).orElse(null);
+        if (effect == null) {
+            warnUntranslated("mob_effect:" + e.effect(), geneKey);
+            return;
+        }
+        if (!(horse.level() instanceof ServerLevel level)) {
+            return;
+        }
+        int refresh = Math.max(1, e.refreshTicks());
+        AABB box = horse.getBoundingBox().inflate(e.radius());
+        int touched = 0;
+        for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, box)) {
+            if (touched >= e.maxTargets()) {
+                break;
+            }
+            if (candidate == horse || !MobGroups.matches(e.group(), candidate)) {
+                continue;
+            }
+            candidate.addEffect(new MobEffectInstance(effect, refresh + 40, e.amplifier(),
+                    true, false, false), null);
+            touched++;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -987,7 +1028,7 @@ public final class GeneAbilityHandler {
             // The three that read the WORLD - sampled on an interval and cached,
             // because a condition is evaluated once per ability per tick and
             // these are a light lookup, a block search and a biome query.
-            case "dark", "near_jukebox", "snowing" -> worldFlag(name, horse);
+            case "dark", "near_jukebox", "snowing", "hostile_near" -> worldFlag(name, horse);
             default -> false;
         };
     }
@@ -1034,7 +1075,11 @@ public final class GeneAbilityHandler {
     /** Block light at or below this counts as dark. Vanilla's own hostile-spawn threshold. */
     private static final int DARK_LEVEL = 7;
 
-    private record WorldSample(long tick, boolean dark, boolean nearJukebox, boolean snowing) {}
+    /** How far {@code hostile_near} looks. The alarm range, and an entity scan rather than a block one. */
+    private static final double HOSTILE_NEAR_RANGE = 16.0;
+
+    private record WorldSample(long tick, boolean dark, boolean nearJukebox, boolean snowing,
+                               boolean hostileNear) {}
 
     private static final Map<UUID, WorldSample> WORLD_FLAGS = new ConcurrentHashMap<>();
 
@@ -1063,6 +1108,7 @@ public final class GeneAbilityHandler {
             case "dark" -> sample.dark();
             case "near_jukebox" -> sample.nearJukebox();
             case "snowing" -> sample.snowing();
+            case "hostile_near" -> sample.hostileNear();
             default -> false;
         };
     }
@@ -1085,7 +1131,18 @@ public final class GeneAbilityHandler {
                 break;
             }
         }
-        return new WorldSample(now, dark, jukebox, snowing);
+        // An entity scan, which is why this is a sampled flag and not a live one.
+        boolean hostile = false;
+        if (level instanceof ServerLevel sl) {
+            AABB box = horse.getBoundingBox().inflate(HOSTILE_NEAR_RANGE);
+            for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, box)) {
+                if (MobGroups.isHostile(e)) {
+                    hostile = true;
+                    break;
+                }
+            }
+        }
+        return new WorldSample(now, dark, jukebox, snowing, hostile);
     }
 
     // ------------------------------------------------------------------

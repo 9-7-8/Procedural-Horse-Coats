@@ -263,6 +263,133 @@ public final class GeneDescriptions {
                             + "fire. Two copies behave exactly the same but draw the trail from "
                             + "both copies' colours at once. The colour is drawn per allele copy "
                             + "and inherited with it, so a line breeds true to its own fire."),
+            Map.entry("horsegenetics.fireproof",
+                    "A magical recessive that paints nothing: two copies and neither the horse "
+                            + "nor its rider takes fire damage, and the horse swims THROUGH lava rather "
+                            + "than over it. Wild horses carry it and never show it, so a fireproof horse "
+                            + "is always one somebody bred."),
+            Map.entry("horsegenetics.bird_boned",
+                    "A magical recessive that paints nothing: two copies and neither the horse "
+                            + "nor its rider takes any falling damage, from any height. It removes fall "
+                            + "damage, not falling."),
+            Map.entry("horsegenetics.ocean_born",
+                    "A magical recessive that paints nothing: two copies and neither the horse "
+                            + "nor its rider can drown. It says nothing about how fast the horse swims or "
+                            + "how long it lasts under - those are other loci, on purpose."),
+            Map.entry("horsegenetics.hydrophobic",
+                    "A magical recessive that paints nothing, and the odd one out: it RESTORES "
+                            + "vanilla behaviour rather than adding to it. Two copies and the horse "
+                            + "throws its rider in deep water and heads for shore, losing the swimming "
+                            + "assist every other tamed horse here gets."),
+            Map.entry("horsegenetics.hot_blooded",
+                    "A magical recessive that paints nothing: two copies and snow and ice "
+                            + "within a couple of blocks melt away, leaving a thawed circle wherever the "
+                            + "horse stands. On a frozen lake it melts the ice it is standing on and is "
+                            + "then in the water."),
+            Map.entry("horsegenetics.dryad",
+                    "A magical recessive that paints nothing: about once a day the horse plants "
+                            + "a sapling near where it stands. It plants; it does not fertilise. How "
+                            + "often is drawn per allele copy and inherited with it."),
+            Map.entry("horsegenetics.intimidating",
+                    "A magical recessive that paints nothing: two copies and everything that is "
+                            + "not a horse - your cows as readily as any monster - is pushed out of a "
+                            + "radius drawn per allele copy. It cannot be pastured with your animals, "
+                            + "which is the cost and is deliberate."),
+            Map.entry("horsegenetics.meowing",
+                    "A magical recessive that paints nothing: two copies and the horse meows "
+                            + "occasionally, and creepers keep outside a radius drawn per allele copy. "
+                            + "Creepers are the mob that costs you a horse, which is what makes the joke "
+                            + "worth breeding."),
+            Map.entry("horsegenetics.cleansing_light",
+                    "A magical recessive that paints nothing: two copies and undead within a "
+                            + "radius drawn per allele copy take steady damage. Anything the aura kills "
+                            + "was killed by the HORSE, so you get no experience and no player-only drops "
+                            + "- it is defence, not farming."),
+            Map.entry("horsegenetics.holy_ward",
+                    "A magical recessive that paints nothing: two copies and hostile mobs "
+                            + "cannot SPAWN within a radius drawn per allele copy, at least eight blocks "
+                            + "and never more than sixteen. A camp that walks. Wild horses carry it and "
+                            + "never show it."),
+            Map.entry("horsegenetics.echolocate",
+                    "A magical recessive that paints nothing: two copies and the horse cries "
+                            + "like a bat now and then, outlining everything alive nearby through walls "
+                            + "and darkness. It shows you the skeleton and the lost cow without "
+                            + "distinguishing between them."),
+            Map.entry("horsegenetics.base_alarm",
+                    "A magical DOMINANT that paints nothing: one copy is enough, and the horse "
+                            + "whinnies when something hostile comes within about sixteen blocks of IT - "
+                            + "not of your base, which is not a thing this mod has. Where you stable it "
+                            + "is the configuration."),
+            Map.entry("horsegenetics.music_enjoyer",
+                    "A magical recessive that paints nothing: two copies and the horse's bond "
+                            + "rises while a jukebox plays nearby, with hearts. It answers to the same "
+                            + "daily bond ceiling as every other source, so it is a pleasant way to spend "
+                            + "a day rather than a shortcut past one."),
+            Map.entry("horsegenetics.gladiator",
+                    "A magical recessive that paints nothing: two copies and the horse attacks "
+                            + "hostile mobs that come within reach - but only while nobody is riding it, "
+                            + "and it holds its ground rather than chasing. It makes the horse willing; "
+                            + "magic fighter is what makes it dangerous."),
+            Map.entry("horsegenetics.guardian",
+                    "A magical recessive that paints nothing: two copies, tamed, and the horse "
+                            + "attacks whatever damaged its OWNER within about sixteen blocks. It never "
+                            + "picks the fight and it keeps working while you ride, which is what "
+                            + "separates it from a gladiator."),
+            Map.entry("horsegenetics.ender_echo",
+                    "A magical recessive that paints nothing: two copies and the horse blinks "
+                            + "about eight blocks away when something damages it, carrying its rider. "
+                            + "Against skeletons it is close to immunity; against a skeleton across a "
+                            + "ravine it is a trip you did not plan."),
+            Map.entry("horsegenetics.spontaneous_breeding",
+                    "A magical recessive that paints nothing and grants no effect at all: two "
+                            + "copies, AND another horse nearby with two copies, and the pair breed on "
+                            + "their own with no golden carrots. Wild horses carry it and never show it, "
+                            + "so the first pair in a world is one somebody bred."),
+            Map.entry("horsegenetics.eyesight",
+                    "A magical recessive that paints nothing: Cav/Cav is faster in the dark and "
+                            + "slower in light, Day/Day the reverse, and one of each cancels. It reads "
+                            + "the actual LIGHT LEVEL rather than the clock, so a cave at noon counts and "
+                            + "your own torches slow a caveborn horse down."),
+            Map.entry("horsegenetics.weather_speed",
+                    "A magical codominant that paints nothing: a positive and a negative allele "
+                            + "for rain, storms and snowfall, each moving the horse's speed by a "
+                            + "percentage drawn per allele copy while its own weather holds. Unlinked to "
+                            + "the jump locus. You cannot check it on demand - you wait for the sky."),
+            Map.entry("horsegenetics.weather_jump",
+                    "A magical codominant that paints nothing: the same idea as the weather "
+                            + "speed locus and a completely separate gene, moving jump instead. "
+                            + "Inheriting one tells you nothing about the other, which is the whole "
+                            + "reason there are two."),
+            Map.entry("horsegenetics.food_preference",
+                    "A magical DOMINANT that paints nothing: one copy and the horse has one "
+                            + "favourite food, which gives a short buff and far more bond than it should. "
+                            + "It OVERRIDES the diet locus - a meat-eater that inexplicably loves carrots "
+                            + "will eat them, and that is the point."),
+            Map.entry("horsegenetics.potion_milk",
+                    "A magical incomplete dominant that paints nothing: milk a tamed grown mare "
+                            + "with an EMPTY BOTTLE rather than a bucket and get a potion. One copy is "
+                            + "weak, two matching copies are strong, and two DIFFERENT copies give one "
+                            + "bottle carrying both effects at the weak grade."),
+            Map.entry("horsegenetics.egg_layer",
+                    "A magical recessive that paints nothing: two copies of the SAME allele and "
+                            + "the horse drops an item on the ground every few hours with nothing "
+                            + "required from you. One copy shows nothing, and two different alleles show "
+                            + "nothing. How often is drawn per allele copy."),
+            Map.entry("horsegenetics.singer",
+                    "A magical recessive that paints nothing: two copies of the SAME allele and "
+                            + "the horse plays the OPENING of a music disc now and then - not the whole "
+                            + "thing and never the middle, because a Minecraft sound cannot be started "
+                            + "partway through. Duration and volume are per allele copy."),
+            Map.entry("horsegenetics.pack_leader",
+                    "A magical recessive that paints nothing: two copies of the SAME allele and "
+                            + "every creature of one kind within sixteen blocks trails the horse around. "
+                            + "One allele per non-hostile mob, and wild horses only ever carry - so a "
+                            + "matched pair is always something somebody bred."),
+            Map.entry("horsegenetics.spawner",
+                    "A magical recessive that paints nothing: two copies of the SAME allele and "
+                            + "once a day the horse tops the local population of one mob UP TO two - "
+                            + "doing nothing at all if they are still there. One allele per mob INCLUDING "
+                            + "the monsters, and never expressed in the wild."),
             Map.entry("horsegenetics.lycan",
                     "The werewolf locus, and it paints nothing: two copies of the SAME allele and "
                             + "the horse becomes a real animal from dusk to dawn - a wolf, a cat, "

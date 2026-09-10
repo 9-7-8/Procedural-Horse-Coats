@@ -45,6 +45,32 @@ import com.example.horsegenetics.common.genetics.genes.MagicWaterBreathingGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.MoltenHoovesGene;
+import com.example.horsegenetics.common.genetics.genes.FireproofGene;
+import com.example.horsegenetics.common.genetics.genes.BirdBonedGene;
+import com.example.horsegenetics.common.genetics.genes.OceanBornGene;
+import com.example.horsegenetics.common.genetics.genes.HydrophobicGene;
+import com.example.horsegenetics.common.genetics.genes.HotBloodedGene;
+import com.example.horsegenetics.common.genetics.genes.DryadGene;
+import com.example.horsegenetics.common.genetics.genes.IntimidatingGene;
+import com.example.horsegenetics.common.genetics.genes.MeowingGene;
+import com.example.horsegenetics.common.genetics.genes.CleansingLightGene;
+import com.example.horsegenetics.common.genetics.genes.HolyWardGene;
+import com.example.horsegenetics.common.genetics.genes.EcholocateGene;
+import com.example.horsegenetics.common.genetics.genes.BaseAlarmGene;
+import com.example.horsegenetics.common.genetics.genes.MusicEnjoyerGene;
+import com.example.horsegenetics.common.genetics.genes.GladiatorGene;
+import com.example.horsegenetics.common.genetics.genes.GuardianGene;
+import com.example.horsegenetics.common.genetics.genes.EnderEchoGene;
+import com.example.horsegenetics.common.genetics.genes.SpontaneousBreedingGene;
+import com.example.horsegenetics.common.genetics.genes.EyesightGene;
+import com.example.horsegenetics.common.genetics.genes.WeatherSpeedGene;
+import com.example.horsegenetics.common.genetics.genes.WeatherJumpGene;
+import com.example.horsegenetics.common.genetics.genes.FoodPreferenceGene;
+import com.example.horsegenetics.common.genetics.genes.PotionMilkGene;
+import com.example.horsegenetics.common.genetics.genes.EggLayerGene;
+import com.example.horsegenetics.common.genetics.genes.SingerGene;
+import com.example.horsegenetics.common.genetics.genes.PackLeaderGene;
+import com.example.horsegenetics.common.genetics.genes.SpawnerGene;
 import com.example.horsegenetics.common.genetics.genes.ManchadoGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
@@ -373,6 +399,42 @@ public final class Genes {
      * against real fire is kept.
      */
     public static final MoltenHoovesGene MOLTEN_HOOVES = new MoltenHoovesGene();
+
+    // ------------------------------------------------------------------
+    // The behaviour family
+    //
+    // Twenty-six loci that change what a horse DOES rather than how it looks.
+    // None of them paints; most are recessive and several are never expressed
+    // in the wild at all, so they are the clearest argument the gene database
+    // has for existing. Their hazards - what each one can do to a world if it
+    // is built carelessly - are on the coding tab of each gene's page.
+    // ------------------------------------------------------------------
+    public static final FireproofGene FIREPROOF = new FireproofGene();
+    public static final BirdBonedGene BIRD_BONED = new BirdBonedGene();
+    public static final OceanBornGene OCEAN_BORN = new OceanBornGene();
+    public static final HydrophobicGene HYDROPHOBIC = new HydrophobicGene();
+    public static final HotBloodedGene HOT_BLOODED = new HotBloodedGene();
+    public static final DryadGene DRYAD = new DryadGene();
+    public static final IntimidatingGene INTIMIDATING = new IntimidatingGene();
+    public static final MeowingGene MEOWING = new MeowingGene();
+    public static final CleansingLightGene CLEANSING_LIGHT = new CleansingLightGene();
+    public static final HolyWardGene HOLY_WARD = new HolyWardGene();
+    public static final EcholocateGene ECHOLOCATE = new EcholocateGene();
+    public static final BaseAlarmGene BASE_ALARM = new BaseAlarmGene();
+    public static final MusicEnjoyerGene MUSIC_ENJOYER = new MusicEnjoyerGene();
+    public static final GladiatorGene GLADIATOR = new GladiatorGene();
+    public static final GuardianGene GUARDIAN = new GuardianGene();
+    public static final EnderEchoGene ENDER_ECHO = new EnderEchoGene();
+    public static final SpontaneousBreedingGene SPONTANEOUS_BREEDING = new SpontaneousBreedingGene();
+    public static final EyesightGene EYESIGHT = new EyesightGene();
+    public static final WeatherSpeedGene WEATHER_SPEED = new WeatherSpeedGene();
+    public static final WeatherJumpGene WEATHER_JUMP = new WeatherJumpGene();
+    public static final FoodPreferenceGene FOOD_PREFERENCE = new FoodPreferenceGene();
+    public static final PotionMilkGene POTION_MILK = new PotionMilkGene();
+    public static final EggLayerGene EGG_LAYER = new EggLayerGene();
+    public static final SingerGene SINGER = new SingerGene();
+    public static final PackLeaderGene PACK_LEADER = new PackLeaderGene();
+    public static final SpawnerGene SPAWNER = new SpawnerGene();
     /**
      * <b>LYCAN</b> - the werewolf locus, thirty-seven shapes, every one of them
      * recessive to the wild type <i>and</i> to each other: only two copies of
@@ -481,6 +543,13 @@ public final class Genes {
             MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
             MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH,
             MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, MOLTEN_HOOVES, LYCAN,
+            FIREPROOF, BIRD_BONED, OCEAN_BORN, HYDROPHOBIC,
+            HOT_BLOODED, DRYAD, INTIMIDATING, MEOWING,
+            CLEANSING_LIGHT, HOLY_WARD, ECHOLOCATE, BASE_ALARM,
+            MUSIC_ENJOYER, GLADIATOR, GUARDIAN, ENDER_ECHO,
+            SPONTANEOUS_BREEDING, EYESIGHT, WEATHER_SPEED, WEATHER_JUMP,
+            FOOD_PREFERENCE, POTION_MILK, EGG_LAYER, SINGER,
+            PACK_LEADER, SPAWNER,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             DHAMPIR, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,

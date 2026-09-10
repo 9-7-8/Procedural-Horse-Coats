@@ -114,7 +114,8 @@ public sealed interface GeneAbility {
      * {@link #when()} holds - the "aura on self" pattern. Re-applied every
      * {@code refreshTicks}; {@code amplifier} is 0-based.
      */
-    record SelfEffect(String effect, String target, int amplifier, int refreshTicks,
+    record SelfEffect(String effect, String target, String group, double radius,
+                      int amplifier, int refreshTicks, int maxTargets,
                       Condition when, int minDose) implements GeneAbility {}
 
     /**
