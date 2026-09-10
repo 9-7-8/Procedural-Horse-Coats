@@ -105,7 +105,7 @@ public final class HealerGene implements Gene, AbilityContribution {
     private final FounderTable founders = FounderTable.hardyWeinberg(Hlr, n, WILD_HLR_FREQUENCY);
 
     private final List<GeneAbility> aura = List.of(new GeneAbility.Healing(
-            "players", HEAL_RADIUS, HEAL_AMOUNT, HEAL_INTERVAL_TICKS, HEAL_MAX_TARGETS,
+            "players", "animals", HEAL_RADIUS, HEAL_AMOUNT, HEAL_INTERVAL_TICKS, HEAL_MAX_TARGETS,
             GeneAbility.Condition.ALWAYS, 1));
 
     @Override public String key() { return KEY; }

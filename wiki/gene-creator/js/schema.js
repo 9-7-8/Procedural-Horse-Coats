@@ -572,12 +572,19 @@ window.HG = window.HG || {};
   }
   function eColor(name, doc) { return e(name, "COLOR", "#ffffff", doc); }
 
+  // Which creatures a radius effect is about. The game resolves these against
+  // entity type tags, so a modded mob is covered without this list changing.
+  var MOB_GROUPS = ["players", "passive", "hostile", "undead", "animals", "non_horse", "all"];
+
   var EFFECTS = {
     traversal: {
       doc: "Grant a movement or survival flag while the condition holds.",
       params: [
-        eChoice("flag", ["walk_on_water", "walk_on_lava", "fire_immune", "fall_immune",
-          "underwater_breathing", "water_averse"], null, "the flag to grant")
+        eChoice("flag", ["walk_on_water", "walk_on_lava", "lava_swim", "fire_immune",
+          "fall_immune", "underwater_breathing", "water_averse"], null, "the flag to grant"),
+        eChoice("target", ["self", "rider", "both"], "self",
+          "who the flag protects. 'rider' and 'both' reach the PLAYER - the game grants those "
+          + "per tick and stores nothing, so nothing is left on a player who dismounts")
       ]
     },
     attribute: {
@@ -637,7 +644,13 @@ window.HG = window.HG || {};
           { min: 0, max: 20, step: 0.5 }),
         eStr("denied_message", "", "message shown when the condition fails, or empty for silent"),
         eStr("kind", "", "a name for what sort of yield this is, so a 'charges' effect on some "
-          + "OTHER gene can grant extra uses of it. Empty opts out")
+          + "OTHER gene can grant extra uses of it. Empty opts out"),
+        eStr("potion_effect", "", "a mob effect id to attach to what is produced, or empty for a "
+          + "plain item. Two yields of the same 'kind' that both name one are MERGED into a "
+          + "single item carrying both"),
+        eNum("potion_amplifier", 0, "0-based amplifier for potion_effect", { min: 0, max: 4, step: 1 }),
+        eNum("potion_duration", 900, "duration of potion_effect, in ticks",
+          { min: 20, max: 24000, step: 20 })
       ]
     },
     glow: {
@@ -652,10 +665,13 @@ window.HG = window.HG || {};
     healing: {
       doc: "A healing aura around the horse.",
       params: [
-        eChoice("target", ["players", "rider", "self", "animals"], "players", "who the aura heals"),
+        eChoice("target", ["players", "rider", "self", "animals", "group"], "players",
+          "who the aura reaches; 'group' defers to the group below"),
+        eChoice("group", MOB_GROUPS, "animals",
+          "used when target is 'group'. 'undead' with a NEGATIVE amount is a damaging aura"),
         eNum("radius", 3, "reach in blocks, 1-16", { min: 1, max: 16, step: 1 }),
-        eNum("amount", 1, "health points restored per beat (two per heart)",
-          { min: 0.5, max: 10, step: 0.5 }),
+        eNum("amount", 1, "health points restored per beat (two per heart); negative damages",
+          { min: -10, max: 10, step: 0.5 }),
         eNum("interval", 40, "ticks between beats (at least 1)", { min: 1, max: 200, step: 1 }),
         eNum("max_targets", 8, "most entities one beat may reach, 1-64", { min: 1, max: 64, step: 1 })
       ]
@@ -663,10 +679,86 @@ window.HG = window.HG || {};
     spread: {
       doc: "Convert blocks under the hooves - mycelium, moss or grass.",
       params: [
-        eChoice("cover", ["mycelium", "moss", "grass"], null, "what it spreads"),
+        eChoice("cover", ["mycelium", "moss", "grass", "sapling", "melt"], null,
+          "what it spreads. 'sapling' plants one; 'melt' takes snow and ice away"),
         eNum("radius", 2, "reach in blocks", { min: 1, max: 8, step: 1 }),
         eNum("chance", 0.5, "odds of converting on any given beat", { min: 0, max: 1, step: 0.01 }),
         eNum("interval", 40, "ticks between beats", { min: 1, max: 200, step: 1 })
+      ]
+    },
+    sound: {
+      doc: "A sound the horse makes. 'duration' is the stop - a Minecraft sound plays from its "
+        + "beginning or not at all, so 'a section of a record' means 'the opening, then stopped'.",
+      params: [
+        eReq("sound", "sound id, e.g. minecraft:entity.cat.ambient"),
+        e("trigger", "TRIGGER", { interval: 200 }, "when it fires"),
+        eNum("volume", 1, "volume", { min: 0.1, max: 4, step: 0.1 }),
+        eNum("pitch", 1, "pitch", { min: 0.5, max: 2, step: 0.05 }),
+        eNum("duration", 0, "stop it after N ticks; 0 = let it run to its own end",
+          { min: 0, max: 24000, step: 20 }),
+        eNum("cooldown", 100, "minimum ticks between firings. The hazard on every sound gene is "
+          + "SPAM, not tick cost", { min: 0, max: 24000, step: 20 })
+      ]
+    },
+    produce: {
+      doc: "Drop an item on a clock - the third leg of item_drop (on death) and yield "
+        + "(on interaction).",
+      params: [
+        eReq("item", "item id to drop; an id this game has never heard of simply never lays"),
+        eNum("interval", 6000, "ticks between firings", { min: 20, max: 24000, step: 20 }),
+        eNum("min", 1, "fewest items one firing drops", { min: 1, max: 16, step: 1 }),
+        eNum("max", 1, "most items one firing drops", { min: 1, max: 16, step: 1 }),
+        eNum("nearby_cap", 8, "skip the drop when this many are already lying nearby. 0 disables "
+          + "the guard, which is almost always wrong", { min: 0, max: 64, step: 1 })
+      ]
+    },
+    teleport: {
+      doc: "The horse blinks away. The game validates the destination and refuses rather than "
+        + "moving into blocks, the void or past a world border.",
+      params: [
+        eNum("distance", 8, "how far one blink may go", { min: 1, max: 32, step: 1 }),
+        e("with_rider", "BOOL", true, "whether a rider comes along"),
+        e("trigger", "TRIGGER", "on_hurt", "what fires it"),
+        eNum("cooldown", 40, "minimum ticks between blinks", { min: 0, max: 24000, step: 20 })
+      ]
+    },
+    summon: {
+      doc: "Top the local population of one mob UP TO a fixed number - it counts what is already "
+        + "there first, so a horse in a stocked field does nothing at all.",
+      params: [
+        eReq("mob", "mob id to spawn; resolved live against the registry"),
+        eNum("radius", 32, "how far it looks and places", { min: 1, max: 64, step: 1 }),
+        eNum("up_to", 2, "top the local population up to this many", { min: 1, max: 8, step: 1 }),
+        e("trigger", "TRIGGER", { interval: 24000 }, "when it fires")
+      ]
+    },
+    temper: {
+      doc: "How the horse feels about other creatures - night_temper with the night gate lifted "
+        + "out into an ordinary 'when'.",
+      params: [
+        eChoice("mood", ["aggressive", "flee"], null, "go for them, or run from them"),
+        eChoice("towards", MOB_GROUPS, "hostile", "who it feels that about"),
+        eNum("radius", 16, "how far it notices", { min: 1, max: 48, step: 1 }),
+        eNum("interval", 20, "ticks between scans", { min: 1, max: 200, step: 1 }),
+        eNum("max_targets", 8, "most entities one scan may consider", { min: 1, max: 64, step: 1 }),
+        e("hold", "BOOL", true, "hold a radius and return rather than pursuing. Turning this off "
+          + "is a gameplay decision, not a tuning one"),
+        e("trigger", "TRIGGER", "continuous", "what fires it")
+      ]
+    },
+    bond: {
+      doc: "Raise bond from something other than the player's attention. The game puts it "
+        + "through the same DAILY CAP as every other bond source.",
+      params: [
+        eNum("amount", 1, "bond points per beat", { min: 1, max: 10, step: 1 }),
+        eNum("interval", 200, "ticks between beats", { min: 20, max: 24000, step: 20 })
+      ]
+    },
+    ward: {
+      doc: "Nothing hostile SPAWNS near the horse - not pushed away, never spawned. The game "
+        + "cancels natural spawns only, so mob farms and spawners keep working.",
+      params: [
+        eNum("radius", 8, "how far spawning is suppressed", { min: 1, max: 16, step: 1 })
       ]
     },
     charges: {
@@ -705,9 +797,11 @@ window.HG = window.HG || {};
     mob_aura: {
       doc: "How mobs feel about the horse - keep away from it, or fight over it.",
       params: [
-        eChoice("mode", ["repel", "attract"], null,
+        eChoice("mode", ["repel", "attract", "follow"], null,
           "'repel' keeps mobs outside the radius; 'attract' makes hostiles inside it "
-          + "prefer the horse to anything else"),
+          + "prefer the horse to anything else; 'follow' makes them trail it"),
+        eChoice("group", MOB_GROUPS, "hostile", "which creatures it is about"),
+        eStr("mob", "", "a single mob id instead of a group, or empty to use the group"),
         eNum("radius", 8, "reach in blocks, 1-32", { min: 1, max: 32, step: 1 }),
         eNum("interval", 20, "ticks between beats (at least 1)", { min: 1, max: 200, step: 1 }),
         eNum("max_targets", 12, "most entities one beat may reach, 1-64", { min: 1, max: 64, step: 1 })
@@ -749,9 +843,14 @@ window.HG = window.HG || {};
   // The vocabulary a "when" may name, shared by every verb.
   var CONDITION_FLAGS = ["sex_female", "sex_male", "tamed", "untamed", "adult", "baby",
     "full_health", "has_rider", "in_water", "submerged", "on_ground", "on_fire",
-    "day", "night", "raining", "thundering", "sky_visible"];
+    "day", "night", "raining", "thundering", "sky_visible",
+    // These three read the WORLD rather than a field on the horse, so the game
+    // samples them on an interval rather than every tick. No difference here.
+    "dark", "near_jukebox", "snowing"];
 
-  var TRIGGER_KINDS = ["continuous", "on_move", "interval", "on_interact"];
+  var TRIGGER_KINDS = ["continuous", "on_move", "interval", "on_interact",
+    "on_hurt", "on_owner_hurt"];
+
 
   HG.schema = {
     MASKS: MASKS,

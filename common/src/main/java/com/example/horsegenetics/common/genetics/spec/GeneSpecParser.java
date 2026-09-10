@@ -778,20 +778,25 @@ public final class GeneSpecParser {
             return switch (s.toLowerCase(Locale.ROOT)) {
                 case "continuous" -> new GeneAbility.Trigger.Continuous();
                 case "on_move" -> new GeneAbility.Trigger.OnMove();
+                case "on_hurt" -> new GeneAbility.Trigger.OnHurt();
+                case "on_owner_hurt" -> new GeneAbility.Trigger.OnOwnerHurt();
                 default -> throw new IllegalArgumentException(where + ": bare trigger must be "
-                        + "'continuous' or 'on_move'; use an object for 'interval' / 'on_interact'");
+                        + "'continuous', 'on_move', 'on_hurt' or 'on_owner_hurt'; use an object "
+                        + "for 'interval' / 'on_interact'");
             };
         }
         Map<String, Object> o = asObject(raw, where);
         if (o.size() != 1) {
             throw new IllegalArgumentException(where + ": name exactly one of "
-                    + "[continuous, on_move, interval, on_interact]");
+                    + "[continuous, on_move, interval, on_interact, on_hurt, on_owner_hurt]");
         }
         String kind = o.keySet().iterator().next();
         Object v = o.get(kind);
         return switch (kind) {
             case "continuous" -> new GeneAbility.Trigger.Continuous();
             case "on_move" -> new GeneAbility.Trigger.OnMove();
+            case "on_hurt" -> new GeneAbility.Trigger.OnHurt();
+            case "on_owner_hurt" -> new GeneAbility.Trigger.OnOwnerHurt();
             case "interval" -> {
                 int ticks = (int) asNumber(v, where + " interval");
                 if (ticks < 1) {
@@ -801,7 +806,8 @@ public final class GeneSpecParser {
             }
             case "on_interact" -> new GeneAbility.Trigger.OnInteract(v == null ? "" : asString(v, where + " on_interact"));
             default -> throw new IllegalArgumentException(where + ": unknown trigger '" + kind
-                    + "'; allowed are [continuous, on_move, interval, on_interact]");
+                    + "'; allowed are [continuous, on_move, interval, on_interact, on_hurt, "
+                    + "on_owner_hurt]");
         };
     }
 

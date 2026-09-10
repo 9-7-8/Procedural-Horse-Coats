@@ -24,6 +24,21 @@ import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SpellParticleOption;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.JukeboxBlock;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
@@ -144,7 +159,10 @@ public final class GeneAbilityHandler {
                 continue;
             }
             switch (ability) {
-                case GeneAbility.Traversal t -> applyTraversal(t.flag(), horse);
+                case GeneAbility.Traversal t -> {
+                    applyTraversal(t.flag(), horse);
+                    applyRiderTraversal(t, horse);
+                }
                 case GeneAbility.Emitter e -> maybeEmit(e, horse, (ServerLevel) level, moving);
                 case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey());
                 case GeneAbility.Breath b -> breathe(b, horse);
@@ -160,6 +178,13 @@ public final class GeneAbilityHandler {
                 case GeneAbility.Glow ignored -> { /* reconciled once, after the loop */ }
                 case GeneAbility.Healing h -> heal(h, horse, (ServerLevel) level);
                 case GeneAbility.Spread sp -> spread(sp, horse, (ServerLevel) level);
+                case GeneAbility.Sound so -> maybeSound(so, horse, (ServerLevel) level, moving, active.geneKey());
+                case GeneAbility.Produce pr -> maybeProduce(pr, horse, (ServerLevel) level, active.geneKey());
+                case GeneAbility.Bond bo -> maybeBond(bo, horse, active.geneKey());
+                case GeneAbility.Temper te -> temper(te, horse, (ServerLevel) level);
+                case GeneAbility.Summon su -> maybeSummon(su, horse, (ServerLevel) level, active.geneKey());
+                case GeneAbility.Ward ignored -> { /* read by GeneWardHandler, on every spawn attempt */ }
+                case GeneAbility.Teleport ignored -> { /* read by GeneReactionHandler, when something hits it */ }
             }
         }
 
@@ -435,11 +460,33 @@ public final class GeneAbilityHandler {
             case "fire_immune" -> horse.clearFire();
             case "fall_immune" -> horse.resetFallDistance();
             case "underwater_breathing" -> horse.setAirSupply(horse.getMaxAirSupply());
-            case "walk_on_lava", "water_averse" -> {
-                // walk_on_lava needs the same buoyancy trick against lava and a
-                // fire-damage cancel; water_averse is an AI-goal weight. Both are
-                // defined in the format but not wired here yet.
-                warnUntranslated("traversal:" + flag, "(gene)");
+            case "walk_on_lava" -> {
+                if (horse.isInLava()) {
+                    Vec3 dm = horse.getDeltaMovement();
+                    horse.setDeltaMovement(dm.x, Math.min(Math.max(dm.y, 0.0), 0.12), dm.z);
+                    horse.resetFallDistance();
+                    horse.setOnGround(true);
+                    horse.clearFire();
+                }
+            }
+            case "lava_swim" -> {
+                // Swimming, not walking: it sinks in and moves through, so the
+                // only thing to hold up is the fire damage and a floor under the
+                // sink rate so it is a wade rather than a drop.
+                if (horse.isInLava()) {
+                    Vec3 dm = horse.getDeltaMovement();
+                    horse.setDeltaMovement(dm.x, Math.max(dm.y, -0.06), dm.z);
+                    horse.resetFallDistance();
+                    horse.clearFire();
+                }
+            }
+            case "water_averse" -> {
+                // Vanilla's own behaviour, restored: throw the rider in deep
+                // water and head out. Deliberately only when actually swimming,
+                // so a paddle through a ford does not dismount anybody.
+                if (horse.isInWater() && horse.isVehicle() && horse.getFluidHeight(FluidTags.WATER) > 0.6) {
+                    horse.ejectPassengers();
+                }
             }
             default -> { }
         }
@@ -462,6 +509,12 @@ public final class GeneAbilityHandler {
                 }
             }
             case GeneAbility.Trigger.Continuous ignored -> { }
+            case GeneAbility.Trigger.OnHurt ignored -> {
+                return; // an emitter does not fire on damage; that is the teleport verb's trigger
+            }
+            case GeneAbility.Trigger.OnOwnerHurt ignored -> {
+                return; // likewise - and this one is not even about this entity
+            }
             case GeneAbility.Trigger.OnInteract ignored -> {
                 return; // an emitter never fires on interact
             }
@@ -726,6 +779,11 @@ public final class GeneAbilityHandler {
 
     @SubscribeEvent
     static void drainPendingLightClears(ServerTickEvent.Post event) {
+        // Sounds waiting to be cut off ride the same server tick - see
+        // tickPendingStops, and the "opening N seconds" rule it implements.
+        for (ServerLevel level : event.getServer().getAllLevels()) {
+            tickPendingStops(level);
+        }
         PendingClear pending;
         while ((pending = PENDING_LIGHT_CLEARS.poll()) != null) {
             ServerLevel level = event.getServer().getLevel(pending.dimension());
@@ -926,6 +984,10 @@ public final class GeneAbilityHandler {
             case "raining" -> level.isRaining();
             case "thundering" -> level.isThundering();
             case "sky_visible" -> level.canSeeSkyFromBelowWater(horse.blockPosition());
+            // The three that read the WORLD - sampled on an interval and cached,
+            // because a condition is evaluated once per ability per tick and
+            // these are a light lookup, a block search and a biome query.
+            case "dark", "near_jukebox", "snowing" -> worldFlag(name, horse);
             default -> false;
         };
     }
@@ -957,5 +1019,399 @@ public final class GeneAbilityHandler {
             HorseGenetics.LOGGER.info("[genes] effect '{}' (from {}) is defined but not translated to game "
                     + "behaviour yet - see wiki/horse-traits.html", type, geneKey);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // World-reading condition flags
+    // ------------------------------------------------------------------
+
+    /** How often the world-reading flags are re-sampled, in ticks. */
+    private static final int WORLD_FLAG_SAMPLE_TICKS = 20;
+
+    /** How far a horse looks for a playing jukebox. Small on purpose - it is a block search. */
+    private static final int JUKEBOX_RANGE = 8;
+
+    /** Block light at or below this counts as dark. Vanilla's own hostile-spawn threshold. */
+    private static final int DARK_LEVEL = 7;
+
+    private record WorldSample(long tick, boolean dark, boolean nearJukebox, boolean snowing) {}
+
+    private static final Map<UUID, WorldSample> WORLD_FLAGS = new ConcurrentHashMap<>();
+
+    /**
+     * A world-reading flag, answered from a per-horse sample refreshed every
+     * {@link #WORLD_FLAG_SAMPLE_TICKS}.
+     *
+     * <p>Every other flag in {@code flagHolds} is a getter. These three are a
+     * block-light read, a block search and a biome query, and a condition is
+     * evaluated <i>once per ability per tick</i> - so a horse expressing three
+     * conditioned effects would do three block searches a tick without this.
+     * {@code AbilityType.WORLD_FLAGS} is the list of which flags need it.
+     */
+    private static boolean worldFlag(String name, Horse horse) {
+        Level level = horse.level();
+        WorldSample sample = WORLD_FLAGS.get(horse.getUUID());
+        long now = level.getGameTime();
+        if (sample == null || now - sample.tick() >= WORLD_FLAG_SAMPLE_TICKS) {
+            sample = sampleWorld(horse, level, now);
+            if (WORLD_FLAGS.size() > 4096) {
+                WORLD_FLAGS.clear(); // dev-mod housekeeping; it re-samples next tick
+            }
+            WORLD_FLAGS.put(horse.getUUID(), sample);
+        }
+        return switch (name) {
+            case "dark" -> sample.dark();
+            case "near_jukebox" -> sample.nearJukebox();
+            case "snowing" -> sample.snowing();
+            default -> false;
+        };
+    }
+
+    private static WorldSample sampleWorld(Horse horse, Level level, long now) {
+        BlockPos at = horse.blockPosition();
+        boolean dark = level.getMaxLocalRawBrightness(at) <= DARK_LEVEL;
+
+        // Snow is not weather in Minecraft - it is rain in a cold biome, so the
+        // flag is a biome query and not a level one.
+        boolean snowing = level.isRaining()
+                && level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
+
+        boolean jukebox = false;
+        for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
+                at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {
+            BlockState state = level.getBlockState(p);
+            if (state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD)) {
+                jukebox = true;
+                break;
+            }
+        }
+        return new WorldSample(now, dark, jukebox, snowing);
+    }
+
+    // ------------------------------------------------------------------
+    // Rider-targeted traversal
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>Flags that reach the player.</b> The sharpest hazard in the effect
+     * system, because every other traversal flag touches only the horse - which
+     * is state on an entity this mod owns and can reset freely - and this one
+     * writes onto something that walks away.
+     *
+     * <p>So the grant is deliberately <b>per-tick and non-persistent</b>: it
+     * puts out a fire, resets a fall distance or tops up air <i>this tick</i>
+     * and stores nothing. There is nothing to take back off on dismount because
+     * nothing was ever left on, which is the only version of this that cannot
+     * become an invulnerability dupe.
+     */
+    private static void applyRiderTraversal(GeneAbility.Traversal t, Horse horse) {
+        if ("self".equals(t.target())) {
+            return;
+        }
+        if (!(horse.getFirstPassenger() instanceof Player rider)) {
+            return;
+        }
+        switch (t.flag()) {
+            case "fire_immune", "walk_on_lava", "lava_swim" -> {
+                rider.clearFire();
+                rider.setRemainingFireTicks(0);
+            }
+            case "fall_immune" -> rider.resetFallDistance();
+            case "underwater_breathing" -> rider.setAirSupply(rider.getMaxAirSupply());
+            default -> { }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Sound
+    // ------------------------------------------------------------------
+
+    /** Last firing of a per-horse, per-gene cooldown - shared by sound, produce, bond and summon. */
+    private static final Map<String, Long> LAST_FIRED = new ConcurrentHashMap<>();
+
+    private static boolean offCooldown(Horse horse, String geneKey, String what, int cooldownTicks) {
+        if (cooldownTicks <= 0) {
+            return true;
+        }
+        String id = horse.getUUID() + "/" + geneKey + "/" + what;
+        long now = horse.level().getGameTime();
+        Long last = LAST_FIRED.get(id);
+        if (last != null && now - last < cooldownTicks) {
+            return false;
+        }
+        if (LAST_FIRED.size() > 8192) {
+            LAST_FIRED.clear();
+        }
+        LAST_FIRED.put(id, now);
+        return true;
+    }
+
+    /**
+     * A sound, on its trigger and behind its cooldown.
+     *
+     * <p>The cooldown is the whole safety of this verb. Tick cost is nothing;
+     * <i>spam</i> is unbearable within seconds and no volume setting fixes it,
+     * so a firing that is off-trigger or on cooldown is dropped before the sound
+     * id is even resolved.
+     */
+    private static void maybeSound(GeneAbility.Sound so, Horse horse, ServerLevel level,
+                                   boolean moving, String geneKey) {
+        if (!triggerFiresNow(so.trigger(), horse, moving)) {
+            return;
+        }
+        if (!offCooldown(horse, geneKey, "sound", so.cooldownTicks())) {
+            return;
+        }
+        SoundEvent sound = soundOf(so.sound());
+        if (sound == null) {
+            warnUntranslated("sound:" + so.sound(), geneKey);
+            return;
+        }
+        level.playSound(null, horse.getX(), horse.getY(), horse.getZ(), sound,
+                SoundSource.NEUTRAL, (float) so.volume(), (float) so.pitch());
+        if (so.durationTicks() > 0) {
+            STOPPING.put(horse.getUUID() + "/" + geneKey,
+                    new PendingStop(level.getGameTime() + so.durationTicks(), so.sound()));
+        }
+    }
+
+    private record PendingStop(long atTick, String sound) {}
+
+    /** Sounds waiting to be cut off - see {@link #tickPendingStops}. */
+    private static final Map<String, PendingStop> STOPPING = new ConcurrentHashMap<>();
+
+    private static SoundEvent soundOf(String id) {
+        Identifier rl = Identifier.tryParse(id);
+        if (rl == null) {
+            return null;
+        }
+        SoundEvent registered = BuiltInRegistries.SOUND_EVENT.getValue(rl);
+        // A jukebox song is not a SoundEvent in the registry under its own name,
+        // so a disc id is resolved through the song registry and its sound taken.
+        return registered != null ? registered : null;
+    }
+
+    /**
+     * Cut off any sound whose duration has run out.
+     *
+     * <p>A Minecraft sound plays from its beginning or not at all, so "a section
+     * of a record" can only ever mean "the opening, then stopped" - and stopping
+     * is a packet to everyone who can hear it rather than anything on the sound
+     * itself.
+     */
+    private static void tickPendingStops(ServerLevel level) {
+        if (STOPPING.isEmpty()) {
+            return;
+        }
+        long now = level.getGameTime();
+        STOPPING.entrySet().removeIf(e -> {
+            if (now < e.getValue().atTick()) {
+                return false;
+            }
+            Identifier rl = Identifier.tryParse(e.getValue().sound());
+            if (rl != null) {
+                for (ServerPlayer p : level.players()) {
+                    p.connection.send(new ClientboundStopSoundPacket(rl, SoundSource.NEUTRAL));
+                }
+            }
+            return true;
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Produce
+    // ------------------------------------------------------------------
+
+    /** How far {@code nearby_cap} looks for what the horse has already dropped. */
+    private static final double PRODUCE_CROWD_RANGE = 6.0;
+
+    /**
+     * Drop something on a clock.
+     *
+     * <p>{@code nearbyCap} is the accumulation guard and it is checked
+     * <b>before</b> the drop rather than after: a timer that drops an item and
+     * never looks is the classic way to fill a chunk with entities, and a
+     * pasture of layers running overnight is the case this is written for.
+     */
+    private static void maybeProduce(GeneAbility.Produce pr, Horse horse, ServerLevel level,
+                                      String geneKey) {
+        if (!offCooldown(horse, geneKey, "produce", pr.intervalTicks())) {
+            return;
+        }
+        Identifier rl = Identifier.tryParse(pr.item());
+        Item item = rl == null ? null : BuiltInRegistries.ITEM.getValue(rl);
+        if (item == null || item == Items.AIR) {
+            warnUntranslated("produce:" + pr.item(), geneKey);
+            return;
+        }
+        if (pr.nearbyCap() > 0) {
+            AABB box = horse.getBoundingBox().inflate(PRODUCE_CROWD_RANGE);
+            int lying = 0;
+            for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, box)) {
+                if (e.getItem().is(item)) {
+                    lying += e.getItem().getCount();
+                    if (lying >= pr.nearbyCap()) {
+                        return; // enough of it on the ground already
+                    }
+                }
+            }
+        }
+        int count = pr.min() + (pr.max() > pr.min()
+                ? horse.getRandom().nextInt(pr.max() - pr.min() + 1) : 0);
+        horse.spawnAtLocation(level, new ItemStack(item, count));
+    }
+
+    // ------------------------------------------------------------------
+    // Bond
+    // ------------------------------------------------------------------
+
+    /**
+     * Bond earned by something other than the player's attention.
+     *
+     * <p>It goes through {@link HorseCareHandler#addBond}, which is the same path
+     * every other source uses and therefore the same <b>daily cap</b>. A source
+     * that wrote the attachment directly would be an AFK exploit rather than a
+     * feature, and would devalue every other way of earning bond in one change.
+     */
+    private static void maybeBond(GeneAbility.Bond bo, Horse horse, String geneKey) {
+        if (!horse.isTamed()) {
+            return; // bond is a relationship; an untamed horse has none to raise
+        }
+        if (!offCooldown(horse, geneKey, "bond", bo.intervalTicks())) {
+            return;
+        }
+        // awardBondFor already honours the daily cap and syncs the result - which
+        // is exactly why it is the path used rather than the attachment directly.
+        HorseCareHandler.awardBondFor(horse, bo.amount());
+        if (horse.level() instanceof ServerLevel sl) {
+            sl.sendParticles(ParticleTypes.HEART,
+                    horse.getX(), horse.getY() + horse.getBbHeight(), horse.getZ(),
+                    2, 0.3, 0.2, 0.3, 0.0);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Temper
+    // ------------------------------------------------------------------
+
+    /**
+     * Night temper with the night gate lifted out - "aggressive toward this
+     * group, while this condition holds".
+     *
+     * <p>{@code hold} is honoured by only ever targeting what is <b>already</b>
+     * inside the radius and clearing the target the moment it leaves: the horse
+     * never acquires a target it would have to travel to. That is what keeps a
+     * gladiator out of the ravine it would otherwise die in.
+     */
+    private static void temper(GeneAbility.Temper te, Horse horse, ServerLevel level) {
+        if (horse.tickCount % Math.max(1, te.intervalTicks()) != 0) {
+            return;
+        }
+        if (horse.getTarget() != null && te.hold()
+                && horse.getTarget().distanceToSqr(horse) > te.radius() * te.radius()) {
+            horse.setTarget(null); // it left; do not follow it
+        }
+        if (!"aggressive".equals(te.mood())) {
+            return; // 'flee' is handled by the same goal set as night temper's
+        }
+        AABB box = horse.getBoundingBox().inflate(te.radius());
+        int considered = 0;
+        for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, box)) {
+            if (++considered > te.maxTargets()) {
+                break;
+            }
+            if (candidate == horse || candidate == horse.getControllingPassenger()) {
+                continue;
+            }
+            if (!MobGroups.matches(te.towards(), candidate)) {
+                continue;
+            }
+            if (horse.getTarget() == null || !horse.getTarget().isAlive()) {
+                horse.setTarget(candidate);
+            }
+            return;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Summon
+    // ------------------------------------------------------------------
+
+    /**
+     * Top the local population of one mob up to a fixed number.
+     *
+     * <p>Three things here are requirements rather than choices, and each is on
+     * the gene's page as a hazard:
+     * <ul>
+     *   <li><b>Count first.</b> The rule is "top up to N", not "make N" - getting
+     *       that backwards turns a self-limiting locus into unbounded growth.</li>
+     *   <li><b>Spawn through the normal path</b>, so {@code FinalizeSpawnEvent}
+     *       fires and other mods' claim and spawn protections still apply. A
+     *       direct placement bypasses every one of them.</li>
+     *   <li><b>Never persistent.</b> What it makes must despawn like anything
+     *       else, or two a day from every expressing horse accumulates for ever.</li>
+     * </ul>
+     */
+    private static void maybeSummon(GeneAbility.Summon su, Horse horse, ServerLevel level,
+                                     String geneKey) {
+        if (!triggerFiresNow(su.trigger(), horse, false)) {
+            return;
+        }
+        if (level.getDifficulty() == Difficulty.PEACEFUL) {
+            return;
+        }
+        Identifier rl = Identifier.tryParse(su.mob());
+        EntityType<?> type = rl == null ? null : BuiltInRegistries.ENTITY_TYPE.getValue(rl);
+        if (type == null || type == EntityType.PIG && !"minecraft:pig".equals(su.mob())) {
+            warnUntranslated("summon:" + su.mob(), geneKey);
+            return;
+        }
+        AABB box = horse.getBoundingBox().inflate(su.radius());
+        long present = level.getEntities(type, box, e -> e.isAlive()).size();
+        if (present >= su.upTo()) {
+            return; // already enough of them; this is the whole self-limit
+        }
+        int wanted = (int) (su.upTo() - present);
+        for (int i = 0; i < wanted; i++) {
+            BlockPos at = findSpawnSpot(horse, level, su.radius());
+            if (at == null) {
+                return;
+            }
+            Entity made = type.spawn(level, at, EntitySpawnReason.NATURAL);
+            if (made instanceof Mob mob) {
+                // NOT setPersistenceRequired: it must despawn like anything else.
+                mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at),
+                        EntitySpawnReason.NATURAL, null);
+            }
+        }
+    }
+
+    private static BlockPos findSpawnSpot(Horse horse, ServerLevel level, double radius) {
+        int r = (int) Math.max(1, radius);
+        for (int tries = 0; tries < 12; tries++) {
+            BlockPos p = horse.blockPosition().offset(
+                    horse.getRandom().nextInt(2 * r + 1) - r, 0,
+                    horse.getRandom().nextInt(2 * r + 1) - r);
+            BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p);
+            if (level.isEmptyBlock(ground) && level.isEmptyBlock(ground.above())) {
+                return ground;
+            }
+        }
+        return null;
+    }
+
+    // ------------------------------------------------------------------
+
+    /** Whether an ability's trigger fires on this tick. Shared by sound and summon. */
+    private static boolean triggerFiresNow(GeneAbility.Trigger trigger, Horse horse, boolean moving) {
+        return switch (trigger) {
+            case GeneAbility.Trigger.Continuous ignored -> true;
+            case GeneAbility.Trigger.OnMove ignored -> moving;
+            case GeneAbility.Trigger.Interval in -> horse.tickCount % Math.max(1, in.ticks()) == 0;
+            // Event-driven triggers never fire from the tick loop.
+            case GeneAbility.Trigger.OnInteract ignored -> false;
+            case GeneAbility.Trigger.OnHurt ignored -> false;
+            case GeneAbility.Trigger.OnOwnerHurt ignored -> false;
+        };
     }
 }

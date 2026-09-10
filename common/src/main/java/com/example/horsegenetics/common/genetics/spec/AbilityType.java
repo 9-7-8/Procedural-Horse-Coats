@@ -60,14 +60,52 @@ public final class AbilityType {
     public static final List<String> CONDITION_FLAGS = List.of(
             "sex_female", "sex_male", "tamed", "untamed", "adult", "baby",
             "full_health", "has_rider", "in_water", "submerged", "on_ground", "on_fire",
-            "day", "night", "raining", "thundering", "sky_visible");
+            "day", "night", "raining", "thundering", "sky_visible",
+            // The three that read the WORLD rather than a field on the horse -
+            // see WORLD_FLAGS below, and the interval sampling in the translator.
+            "dark", "near_jukebox", "snowing");
+
+    /**
+     * The flags whose answer comes from a <b>world lookup</b> rather than a
+     * field read on the horse: a block-light sample, a block search, a biome
+     * query.
+     *
+     * <p>Every other flag is a getter and costs nothing to ask every tick. These
+     * three are not, and a condition is evaluated once per ability per tick - so
+     * a horse expressing three conditioned effects would do three block searches
+     * a tick if they were treated alike. The translator samples them on an
+     * interval and caches; this list is what tells it which ones to treat that
+     * way, so that adding a fourth world-reading flag is one line here rather
+     * than a performance bug nobody notices.
+     */
+    public static final List<String> WORLD_FLAGS = List.of("dark", "near_jukebox", "snowing");
+
+    /**
+     * <b>Which creatures a radius effect is about.</b> Shared by
+     * {@link #MOB_AURA}, {@link #HEALING} and {@link #TEMPER}, deliberately: five
+     * genes want to name a set of mobs and three verbs would otherwise grow three
+     * different vocabularies for it.
+     *
+     * <p>The translator is required to resolve these against <b>entity type
+     * tags</b> rather than a hardcoded list of vanilla mobs. A hardcoded list
+     * makes every modded creature invisible to all five genes at once, and the
+     * failure is silent - the aura simply never fires on anything from another
+     * mod.
+     *
+     * <p>{@code non_horse} is the odd one out and earns its place: several genes
+     * are about everything <i>except</i> the horse's own kind, and expressing
+     * that as a negation would need a combinator the vocabulary does not have.
+     */
+    public static final List<String> MOB_GROUPS = List.of(
+            "players", "passive", "hostile", "undead", "animals", "non_horse", "all");
 
     /**
      * Trigger names. {@code continuous} / {@code on_move} take no argument (and
      * may be written as a bare string); {@code interval} takes a tick count and
      * {@code on_interact} an item id, so those must be an object.
      */
-    public static final List<String> TRIGGERS = List.of("continuous", "on_move", "interval", "on_interact");
+    public static final List<String> TRIGGERS = List.of("continuous", "on_move", "interval", "on_interact",
+            "on_hurt", "on_owner_hurt");
 
     // ================================================================
     // A parameter, and the parsed bag handed to a builder
@@ -226,11 +264,15 @@ public final class AbilityType {
 
     /** Movement / survival flag held up while {@code when} is true. */
     public static final AbilityType TRAVERSAL = register(new AbilityType("traversal",
-            List.of(Param.requiredChoice("flag", List.of(
-                            "walk_on_water", "walk_on_lava", "fire_immune", "fall_immune",
-                            "underwater_breathing", "water_averse"),
-                    "the movement / survival flag to grant")),
-            v -> new GeneAbility.Traversal(v.str("flag"), v.when, v.minDose)));
+            List.of(
+                    Param.requiredChoice("flag", List.of(
+                                    "walk_on_water", "walk_on_lava", "lava_swim", "fire_immune",
+                                    "fall_immune", "underwater_breathing", "water_averse"),
+                            "the movement / survival flag to grant"),
+                    Param.choice("target", List.of("self", "rider", "both"), "self",
+                            "who the flag protects - 'rider' and 'both' reach the PLAYER, which "
+                                    + "the translator must take back off on dismount")),
+            v -> new GeneAbility.Traversal(v.str("flag"), v.str("target"), v.when, v.minDose)));
 
     /** Temporary attribute modifier, present while {@code when} holds. */
     public static final AbilityType ATTRIBUTE = register(new AbilityType("attribute",
@@ -342,14 +384,27 @@ public final class AbilityType {
                     Param.str("denied_message", "", "message shown when 'when' fails, or \"\" for silent"),
                     Param.str("kind", "",
                             "a name for what sort of yield this is, so a 'charges' effect on some "
-                                    + "OTHER gene can grant extra uses of it. \"\" opts out")),
+                                    + "OTHER gene can grant extra uses of it. \"\" opts out"),
+                    Param.str("potion_effect", "",
+                            "a mob effect id to attach to what is produced, or \"\" for a plain "
+                                    + "item. Two yields of the same 'kind' that both name one are "
+                                    + "MERGED into a single item carrying both - which is what "
+                                    + "makes a compound heterozygote hand back one bottle rather "
+                                    + "than the first of two"),
+                    Param.num("potion_amplifier", 0, "0-based amplifier for potion_effect"),
+                    Param.num("potion_duration", 900, "duration of potion_effect, in ticks")),
             v -> {
                 if (!(v.trigger("trigger") instanceof Trigger.OnInteract onInteract)) {
                     throw v.bad("a yield fires on 'on_interact' only");
                 }
+                int duration = v.intOf("potion_duration");
+                if (duration < 1) {
+                    throw v.bad("potion_duration must be at least 1 tick, got " + duration);
+                }
                 return new GeneAbility.Yield(onInteract, v.str("consumes"), v.str("produces"),
                         v.intOf("cooldown"), v.num("denied_damage"), v.str("denied_message"),
-                        v.str("kind"), v.when, v.minDose);
+                        v.str("kind"), v.str("potion_effect"), v.intOf("potion_amplifier"), duration,
+                        v.when, v.minDose);
             }));
 
     /**
@@ -381,8 +436,12 @@ public final class AbilityType {
      */
     public static final AbilityType HEALING = register(new AbilityType("healing",
             List.of(
-                    Param.choice("target", List.of("players", "rider", "self", "animals"), "players",
-                            "who the aura heals"),
+                    Param.choice("target", List.of("players", "rider", "self", "animals", "group"),
+                            "players",
+                            "who the aura reaches; 'group' defers to the 'group' parameter below"),
+                    Param.choice("group", MOB_GROUPS, "animals",
+                            "used when target is 'group' - notably 'undead', which with a negative "
+                                    + "amount is a damaging aura rather than a healing one"),
                     Param.num("radius", 3, "reach in blocks, 1-16"),
                     Param.num("amount", 1, "health points restored per beat (two per heart)"),
                     Param.num("interval", 40, "ticks between beats (at least 1)"),
@@ -400,7 +459,7 @@ public final class AbilityType {
                 if (maxTargets < 1 || maxTargets > 64) {
                     throw v.bad("max_targets must be 1-64, got " + maxTargets);
                 }
-                return new GeneAbility.Healing(v.str("target"), radius, v.num("amount"), interval,
+                return new GeneAbility.Healing(v.str("target"), v.str("group"), radius, v.num("amount"), interval,
                         maxTargets, v.when, v.minDose);
             }));
 
@@ -413,8 +472,11 @@ public final class AbilityType {
      */
     public static final AbilityType SPREAD = register(new AbilityType("spread",
             List.of(
-                    Param.requiredChoice("cover", List.of("mycelium", "moss", "grass"),
-                            "which ground cover spreads from the horse"),
+                    Param.requiredChoice("cover", List.of("mycelium", "moss", "grass", "sapling", "melt"),
+                            "what spreads from the horse. 'sapling' plants one; 'melt' takes snow "
+                                    + "and ice away. Both are vocabulary words, not block ids - "
+                                    + "which blocks may be converted stays with the translator, and "
+                                    + "is what stops either eating a block somebody placed"),
                     Param.num("radius", 2, "reach in blocks, 1-8"),
                     Param.num("chance", 0.5, "per-beat probability, in (0, 1]"),
                     Param.num("interval", 40, "ticks between beats (at least 1)")),
@@ -521,9 +583,12 @@ public final class AbilityType {
     /** How mobs feel about the horse. */
     public static final AbilityType MOB_AURA = register(new AbilityType("mob_aura",
             List.of(
-                    Param.requiredChoice("mode", List.of("repel", "attract"),
+                    Param.requiredChoice("mode", List.of("repel", "attract", "follow"),
                             "'repel' keeps mobs outside the radius; 'attract' makes hostiles "
-                                    + "inside it prefer the horse to anything else"),
+                                    + "inside it prefer the horse to anything else; 'follow' "
+                                    + "makes them trail it"),
+                    Param.choice("group", MOB_GROUPS, "hostile", "which creatures it is about"),
+                    Param.str("mob", "", "a single mob id instead of a group, or \"\" to use the group"),
                     Param.num("radius", 8, "reach in blocks, 1-32"),
                     Param.num("interval", 20, "ticks between beats (at least 1)"),
                     Param.num("max_targets", 12, "most entities one beat may reach, 1-64")),
@@ -540,12 +605,13 @@ public final class AbilityType {
                 if (maxTargets < 1 || maxTargets > 64) {
                     throw v.bad("max_targets must be 1-64, got " + maxTargets);
                 }
-                return new GeneAbility.MobAura(v.str("mode"), radius, interval, maxTargets,
-                        v.when, v.minDose);
+                return new GeneAbility.MobAura(v.str("mode"), v.str("group"), v.str("mob"),
+                        radius, interval, maxTargets, v.when, v.minDose);
             }));
 
     /** Who a {@link #NIGHT_TEMPER} feels something about. */
     public static final List<String> NIGHT_TARGETS = List.of("players", "passive", "hostile", "all");
+
 
     /**
      * <b>How the horse feels about other creatures after dark.</b>
@@ -630,5 +696,224 @@ public final class AbilityType {
                     throw v.bad("damage must be in [0, " + MAX_COMBAT_DAMAGE + "], got " + damage);
                 }
                 return new GeneAbility.Combat(damage, v.when, v.minDose);
+            }));
+
+    /**
+     * <b>A sound the horse makes.</b> The verb four genes were waiting on -
+     * singer, meowing, echolocate and base alarm.
+     *
+     * <p>{@code duration} is the stop, and it is why this is a verb rather than
+     * a parameter on something else: a Minecraft sound plays from its beginning
+     * or not at all, so "a section of a record" can only mean "the opening, then
+     * stopped".
+     */
+    public static final AbilityType SOUND = register(new AbilityType("sound",
+            List.of(
+                    Param.required("sound", "sound id, e.g. 'minecraft:entity.cat.ambient'"),
+                    Param.trigger("trigger", new Trigger.Interval(200), "when it fires"),
+                    Param.num("volume", 1.0, "volume, in (0, 4]"),
+                    Param.num("pitch", 1.0, "pitch, in [0.5, 2]"),
+                    Param.num("duration", 0, "stop it after N ticks; 0 = let it run to its own end"),
+                    Param.num("cooldown", 100,
+                            "minimum ticks between firings. The hazard on every sound gene is spam, "
+                                    + "not tick cost - a firing per beat per target is unbearable "
+                                    + "within seconds")),
+            v -> {
+                double volume = v.num("volume");
+                if (volume <= 0 || volume > 4) {
+                    throw v.bad("volume must be in (0, 4], got " + volume);
+                }
+                double pitch = v.num("pitch");
+                if (pitch < 0.5 || pitch > 2) {
+                    throw v.bad("pitch must be in [0.5, 2], got " + pitch);
+                }
+                int duration = v.intOf("duration");
+                if (duration < 0) {
+                    throw v.bad("duration must not be negative, got " + duration);
+                }
+                int cooldown = v.intOf("cooldown");
+                if (cooldown < 0) {
+                    throw v.bad("cooldown must not be negative, got " + cooldown);
+                }
+                return new GeneAbility.Sound(v.str("sound"), v.trigger("trigger"), volume, pitch,
+                        duration, cooldown, v.when, v.minDose);
+            }));
+
+    /** The most items one firing of a {@link #PRODUCE} may drop. A guard against a typo, not a balance number. */
+    public static final int MAX_PRODUCE = 16;
+
+    /**
+     * <b>Something the horse produces on a clock.</b> The third leg of a pattern
+     * that already had two - {@code item_drop} on death, {@code yield} on
+     * interaction, this on an interval.
+     *
+     * <p>{@code nearby_cap} is the accumulation guard, and it is not optional in
+     * spirit: a timer that drops an item and never looks is how a chunk fills
+     * with entities.
+     */
+    public static final AbilityType PRODUCE = register(new AbilityType("produce",
+            List.of(
+                    Param.required("item", "item id to drop; resolved live, and an id this game "
+                            + "has never heard of simply never lays"),
+                    Param.num("interval", 6000, "ticks between firings (at least 20)"),
+                    Param.num("min", 1, "fewest items one firing drops"),
+                    Param.num("max", 1, "most items one firing drops"),
+                    Param.num("nearby_cap", 8,
+                            "skip the drop when this many of the same item are already lying "
+                                    + "within a short radius. 0 disables the guard, which is "
+                                    + "almost always wrong")),
+            v -> {
+                int interval = v.intOf("interval");
+                if (interval < 20) {
+                    throw v.bad("interval must be at least 20 ticks, got " + interval);
+                }
+                int min = v.intOf("min");
+                int max = v.intOf("max");
+                if (min < 1 || max < min || max > MAX_PRODUCE) {
+                    throw v.bad("need 1 <= min <= max <= " + MAX_PRODUCE + ", got " + min + ".." + max);
+                }
+                int cap = v.intOf("nearby_cap");
+                if (cap < 0) {
+                    throw v.bad("nearby_cap must not be negative, got " + cap);
+                }
+                return new GeneAbility.Produce(v.str("item"), interval, min, max, cap,
+                        v.when, v.minDose);
+            }));
+
+    /** The furthest one {@link #TELEPORT} may move a horse. Beyond this it stops being a dodge and becomes transport. */
+    public static final double MAX_TELEPORT = 32.0;
+
+    /**
+     * <b>The horse blinks somewhere else.</b> Built for ender echo, and the one
+     * verb here whose difficulty is entirely in the translator rather than in the
+     * vocabulary - destination validation and the client-authoritative move.
+     */
+    public static final AbilityType TELEPORT = register(new AbilityType("teleport",
+            List.of(
+                    Param.num("distance", 8, "how far one blink may go, in blocks, (0, 32]"),
+                    Param.bool("with_rider", true, "whether a rider comes along"),
+                    Param.trigger("trigger", new Trigger.OnHurt(), "what fires it"),
+                    Param.num("cooldown", 40, "minimum ticks between blinks")),
+            v -> {
+                double distance = v.num("distance");
+                if (distance <= 0 || distance > MAX_TELEPORT) {
+                    throw v.bad("distance must be in (0, " + MAX_TELEPORT + "], got " + distance);
+                }
+                int cooldown = v.intOf("cooldown");
+                if (cooldown < 0) {
+                    throw v.bad("cooldown must not be negative, got " + cooldown);
+                }
+                return new GeneAbility.Teleport(distance, v.bool("with_rider"),
+                        v.trigger("trigger"), cooldown, v.when, v.minDose);
+            }));
+
+    /** The largest local population a {@link #SUMMON} may top up to. */
+    public static final int MAX_SUMMON_POPULATION = 8;
+
+    /**
+     * <b>The horse makes creatures.</b> {@code up_to} rather than "how many" is
+     * the whole design: it counts what is already there first, so a horse in a
+     * stocked field does nothing at all and the ceiling lives in the definition
+     * rather than in a cooldown.
+     */
+    public static final AbilityType SUMMON = register(new AbilityType("summon",
+            List.of(
+                    Param.required("mob", "mob id to spawn; resolved live against the registry"),
+                    Param.num("radius", 32, "how far it looks and places, in blocks, 1-64"),
+                    Param.num("up_to", 2, "top the local population up to this many, 1-8"),
+                    Param.trigger("trigger", new Trigger.Interval(24000), "when it fires")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 64) {
+                    throw v.bad("radius must be 1-64 blocks, got " + radius);
+                }
+                int upTo = v.intOf("up_to");
+                if (upTo < 1 || upTo > MAX_SUMMON_POPULATION) {
+                    throw v.bad("up_to must be 1-" + MAX_SUMMON_POPULATION + ", got " + upTo);
+                }
+                return new GeneAbility.Summon(v.str("mob"), radius, upTo, v.trigger("trigger"),
+                        v.when, v.minDose);
+            }));
+
+    /**
+     * <b>How the horse feels about other creatures</b> - {@link #NIGHT_TEMPER}
+     * with the night gate lifted into an ordinary {@code when}.
+     *
+     * <p>{@code hold} defaults true and is the safety rail: attack what comes
+     * into reach and return, rather than pursue. Both genes using this verb
+     * settled on holding, and a horse that chases is a horse that dies forty
+     * blocks from its owner.
+     */
+    public static final AbilityType TEMPER = register(new AbilityType("temper",
+            List.of(
+                    Param.requiredChoice("mood", List.of("aggressive", "flee"),
+                            "whether the horse goes for them or runs from them"),
+                    Param.choice("towards", MOB_GROUPS, "hostile", "who it feels that about"),
+                    Param.num("radius", 16, "how far it notices, in blocks, 1-48"),
+                    Param.num("interval", 20, "ticks between scans (at least 1)"),
+                    Param.num("max_targets", 8, "most entities one scan may consider, 1-64"),
+                    Param.bool("hold", true,
+                            "hold a radius and return, rather than pursuing. Turning this off is a "
+                                    + "gameplay decision, not a tuning one"),
+                    Param.trigger("trigger", new Trigger.Continuous(), "what fires it")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 48) {
+                    throw v.bad("radius must be 1-48 blocks, got " + radius);
+                }
+                int interval = v.intOf("interval");
+                if (interval < 1) {
+                    throw v.bad("interval must be at least 1 tick, got " + interval);
+                }
+                int maxTargets = v.intOf("max_targets");
+                if (maxTargets < 1 || maxTargets > 64) {
+                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
+                }
+                return new GeneAbility.Temper(v.str("mood"), v.str("towards"), radius, interval,
+                        maxTargets, v.bool("hold"), v.trigger("trigger"), v.when, v.minDose);
+            }));
+
+    /**
+     * <b>Bond earned by something other than the player's attention.</b> The
+     * translator must put it through the same daily cap as every other bond
+     * source - a source that ignores the cap is an AFK exploit, not a feature.
+     */
+    public static final AbilityType BOND = register(new AbilityType("bond",
+            List.of(
+                    Param.num("amount", 1, "bond points per beat, 1-10"),
+                    Param.num("interval", 200, "ticks between beats (at least 20)")),
+            v -> {
+                int amount = v.intOf("amount");
+                if (amount < 1 || amount > 10) {
+                    throw v.bad("amount must be 1-10, got " + amount);
+                }
+                int interval = v.intOf("interval");
+                if (interval < 20) {
+                    throw v.bad("interval must be at least 20 ticks, got " + interval);
+                }
+                return new GeneAbility.Bond(amount, interval, v.when, v.minDose);
+            }));
+
+    /** The furthest a {@link #WARD} may suppress spawning. Above this it stops being a camp and becomes a world setting. */
+    public static final double MAX_WARD_RADIUS = 16.0;
+
+    /**
+     * <b>Nothing hostile spawns near the horse.</b> Deliberately not a
+     * {@link #MOB_AURA} mode: every other radius effect runs on the horse's tick
+     * and looks outward, and this one runs on somebody else's event and looks
+     * inward.
+     */
+    public static final AbilityType WARD = register(new AbilityType("ward",
+            List.of(Param.num("radius", 8,
+                    "how far spawning is suppressed, in blocks, 1-16. The ceiling is a balance "
+                            + "decision: uncapped, a well-bred horse is a permanent peaceful-mode "
+                            + "bubble over a whole base and every other defensive gene stops "
+                            + "mattering")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > MAX_WARD_RADIUS) {
+                    throw v.bad("radius must be 1-" + MAX_WARD_RADIUS + " blocks, got " + radius);
+                }
+                return new GeneAbility.Ward(radius, v.when, v.minDose);
             }));
 }

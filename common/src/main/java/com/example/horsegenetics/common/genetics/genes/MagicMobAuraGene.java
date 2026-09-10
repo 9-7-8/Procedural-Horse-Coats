@@ -104,8 +104,10 @@ public final class MagicMobAuraGene implements Gene, AbilityContribution {
     private final List<GeneAbility> bait = one("attract", BAIT_RADIUS);
 
     private static List<GeneAbility> one(String mode, double radius) {
-        return List.of(new GeneAbility.MobAura(mode, radius, INTERVAL_TICKS, MAX_TARGETS,
-                GeneAbility.Condition.ALWAYS, 1));
+        // "hostile" and no specific mob: this locus has always been about monsters,
+        // and the group parameter simply makes that explicit rather than implied.
+        return List.of(new GeneAbility.MobAura(mode, "hostile", "", radius, INTERVAL_TICKS,
+                MAX_TARGETS, GeneAbility.Condition.ALWAYS, 1));
     }
 
     @Override public String key() { return KEY; }

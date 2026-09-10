@@ -56,7 +56,7 @@ public sealed interface GeneAbility {
      * {@code walk_on_water} with {@code "when": {"flag": "adult"}} only holds up
      * grown horses.
      */
-    record Traversal(String flag, Condition when, int minDose) implements GeneAbility {}
+    record Traversal(String flag, String target, Condition when, int minDose) implements GeneAbility {}
 
     /**
      * A temporary attribute modifier - {@code attribute} and {@code op} are the
@@ -132,7 +132,8 @@ public sealed interface GeneAbility {
      * key and a spec author passes literal text - both render.
      */
     record Yield(Trigger.OnInteract trigger, String consumes, String produces, int cooldownTicks,
-                 double deniedDamage, String deniedMessage, String kind,
+                 double deniedDamage, String deniedMessage, String kind, String potionEffect,
+                 int potionAmplifier, int potionDurationTicks,
                  Condition when, int minDose) implements GeneAbility {}
 
     /**
@@ -198,8 +199,8 @@ public sealed interface GeneAbility {
      * <p>{@code maxTargets} caps how many entities one beat may touch, which
      * every radius effect here is required to do.
      */
-    record MobAura(String mode, double radius, int intervalTicks, int maxTargets,
-                   Condition when, int minDose) implements GeneAbility {}
+    record MobAura(String mode, String group, String mob, double radius, int intervalTicks,
+                   int maxTargets, Condition when, int minDose) implements GeneAbility {}
 
     /**
      * <b>How the horse feels about other creatures after dark</b> -
@@ -259,7 +260,7 @@ public sealed interface GeneAbility {
      * combat from across a field - and {@code maxTargets} caps how many entities
      * one beat may reach, which every radius effect is required to do.
      */
-    record Healing(String target, double radius, double amount, int intervalTicks,
+    record Healing(String target, String group, double radius, double amount, int intervalTicks,
                    int maxTargets, Condition when, int minDose) implements GeneAbility {}
 
     /**
@@ -276,6 +277,133 @@ public sealed interface GeneAbility {
      */
     record Spread(String cover, double radius, double chance, int intervalTicks,
                   Condition when, int minDose) implements GeneAbility {}
+
+
+    /**
+     * <b>A sound the horse makes.</b> {@code sound} is a sound id
+     * ({@code "minecraft:entity.cat.ambient"}, a music disc, a whinny);
+     * {@code volume} and {@code pitch} are the usual Minecraft scales.
+     *
+     * <p>{@code durationTicks} is the <b>stop</b>, and it is the field that makes
+     * this verb worth having rather than being a special case of an emitter: a
+     * Minecraft sound can only be played from its beginning, so "a section of a
+     * record" can only ever mean "the opening, then stopped". {@code 0} means
+     * let it run to its own end.
+     *
+     * <p>{@code cooldownTicks} is not optional in spirit even though it has a
+     * default. The hazard on every gene using this verb is not tick cost, it is
+     * <i>spam</i> - a firing per beat per target in range is unbearable within
+     * seconds, and there is no volume that fixes it. Effects fire on an event or
+     * a state change and then hold off.
+     */
+    record Sound(String sound, Trigger trigger, double volume, double pitch,
+                 int durationTicks, int cooldownTicks, Condition when, int minDose)
+            implements GeneAbility {}
+
+    /**
+     * <b>Something the horse produces on a clock</b>, with nobody asking - an
+     * egg, or in principle any item at all.
+     *
+     * <p>It completes a pattern that was already two thirds built:
+     * {@link ItemDrop} produces on death, {@link Yield} produces on interaction,
+     * and this produces on an interval. That symmetry is the argument that it is
+     * a real verb rather than a special case - it is the missing corner of a
+     * table, not a new table.
+     *
+     * <p>{@code nearbyCap} is the <b>accumulation guard</b> and the reason this
+     * verb cannot be a one-line emitter: a timer that drops an item and never
+     * looks is the classic way to fill a chunk with entities. When at least
+     * {@code nearbyCap} of the same item are already lying within a short radius,
+     * the drop is skipped entirely. A pasture of layers left running overnight is
+     * the case this is designed for, not a single horse.
+     */
+    record Produce(String item, int intervalTicks, int min, int max, int nearbyCap,
+                   Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>The horse blinks somewhere else.</b> {@code maxDistance} is how far it
+     * may travel in one jump and {@code withRider} whether anybody aboard comes
+     * along.
+     *
+     * <p>Two things the translator is required to do, both of which are the
+     * whole difficulty of the verb. <b>Validate the destination</b> - never into
+     * blocks, never into the void, never past a world border, and refuse the
+     * teleport rather than moving the horse somewhere illegal. And
+     * <b>respect the authoritative side</b>: a ridden horse's movement is owned
+     * by the controlling client, so a server-side move must reach that client as
+     * a position it accepts or the rider rubber-bands straight back.
+     */
+    record Teleport(double maxDistance, boolean withRider, Trigger trigger, int cooldownTicks,
+                    Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>The horse makes creatures.</b> {@code mob} is a mob id resolved against
+     * the live registry; {@code radius} is how far it looks and places;
+     * {@code upTo} is the population it tops the local count <i>up to</i>.
+     *
+     * <p>{@code upTo} rather than "how many to make" is the entire design.
+     * Almost every spawning gene is a lag machine because almost every one counts
+     * <i>time</i> and not <i>population</i>: this one counts what is already
+     * there first, so a horse in a stocked field does nothing at all, for ever,
+     * and only acts when something has been lost. The ceiling is in the
+     * definition rather than bolted on as a cooldown.
+     *
+     * <p>The translator must go through the <b>normal spawn path</b> so that
+     * other mods' spawn protections still fire, must never mark what it spawns
+     * persistent, and must respect the world's difficulty.
+     */
+    record Summon(String mob, double radius, int upTo, Trigger trigger,
+                  Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>How the horse feels about other creatures</b> - {@link NightTemper}
+     * with the night gate lifted out into an ordinary {@link #when()}.
+     *
+     * <p>{@code NightTemper}'s own note defends welding night into the verb, and
+     * that argument holds for that locus: the one thing it is <i>about</i> is
+     * that the animal changes after dark. It stops holding the moment a second
+     * gene wants the same behaviour on a different gate - "aggressive unless
+     * ridden", "aggressive at whatever hurt my owner" - so this is the general
+     * version and the two coexist.
+     *
+     * <p>{@code hold} is the safety rail and defaults true: the horse attacks
+     * what comes within {@code radius} and returns, rather than pursuing. A horse
+     * that chases is a horse that dies forty blocks from its owner, and the owner
+     * blames the gene - correctly.
+     */
+    record Temper(String mood, String towards, double radius, int intervalTicks,
+                  int maxTargets, boolean hold, Trigger trigger, Condition when, int minDose)
+            implements GeneAbility {}
+
+    /**
+     * <b>Bond, earned by something other than the player.</b> {@code amount} is
+     * added every {@code intervalTicks} while {@link #when()} holds.
+     *
+     * <p>The translator is required to put this through the <b>same daily cap</b>
+     * as every other bond source. A source that ignores the cap is an AFK exploit
+     * rather than a feature, and it devalues every other way of earning bond in
+     * one change.
+     */
+    record Bond(int amount, int intervalTicks, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>Nothing hostile appears near the horse.</b> Not pushed away - never
+     * spawned, within {@code radius}.
+     *
+     * <p>It is deliberately <b>not</b> a {@link MobAura} mode. Every other radius
+     * effect in the format runs on the horse's own tick and looks outward; this
+     * one runs on somebody else's event and looks inward, and folding it into
+     * {@code mob_aura} would put a global event handler behind a verb whose whole
+     * contract is "a beat, a radius, a cap".
+     *
+     * <p>Two requirements on the translator, and both are load-bearing.
+     * <b>Cancel natural spawns only</b> - cancelling spawner-block, spawn-egg,
+     * breeding or structure spawns breaks mob farms, the player's and other
+     * mods', and breaks them invisibly because nothing errors. And <b>cache</b>:
+     * the handler runs on every spawn attempt in the world, so iterating horses
+     * per attempt is a real tick cost.
+     */
+    record Ward(double radius, Condition when, int minDose) implements GeneAbility {}
 
     // ------------------------------------------------------------------
     // Triggers
@@ -295,6 +423,29 @@ public sealed interface GeneAbility {
 
         /** A player right-clicks the horse holding {@code item} (an item id, or {@code ""} = anything). */
         record OnInteract(String item) implements Trigger {}
+
+        /**
+         * <b>The horse itself took damage.</b> Fires once per damage event, on
+         * the server, before the effect decides whether it cares what hit it.
+         *
+         * <p>It is a trigger rather than an {@code on_hurt} condition flag
+         * because being hurt is an <i>event</i> with no duration: a condition
+         * would have to be polled, and the tick a poll would run on is already
+         * the tick after the arrow landed.
+         */
+        record OnHurt() implements Trigger {}
+
+        /**
+         * <b>The horse's owner took damage</b>, anywhere in the world.
+         *
+         * <p>Unlike every other trigger here this one does not start at the
+         * horse, which is the whole reason it is worth its own entry: it is the
+         * only way a gene can react to something that happened to the
+         * <i>player</i>. The translator is required to establish cheaply that
+         * the hurt player owns any horse at all before it looks anything up -
+         * the event fires on every hit anyone in the world takes.
+         */
+        record OnOwnerHurt() implements Trigger {}
     }
 
     // ------------------------------------------------------------------

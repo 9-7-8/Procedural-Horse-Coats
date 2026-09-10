@@ -224,7 +224,7 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
      */
     private static GeneAbility bucketOf(String produces, int cooldown, Condition when) {
         return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
-                "minecraft:bucket", produces, cooldown, 0.0, "", YIELD_KIND, when, 1);
+                "minecraft:bucket", produces, cooldown, 0.0, "", YIELD_KIND, "", 0, 0, when, 1);
     }
 
     /**
@@ -235,7 +235,7 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
         // No kind: a refusal is not a filling, and granting it extra charges
         // would mean a high-volume stallion could be kicked more often.
         return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
-                "", "", 0, damage, messageKey, "", when, 1);
+                "", "", 0, damage, messageKey, "", "", 0, 0, when, 1);
     }
 
     private static Condition flag(String name) {

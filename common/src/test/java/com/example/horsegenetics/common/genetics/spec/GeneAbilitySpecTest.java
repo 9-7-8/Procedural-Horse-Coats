@@ -225,14 +225,20 @@ class GeneAbilitySpecTest {
         assertTrue(e.getMessage().contains("is_hungry"), e.getMessage());
     }
 
+    /**
+     * The placeholder here has to be a verb that does <b>not</b> exist, and it
+     * has been rewritten once already: it used to say {@code teleport}, which
+     * became a real verb when ender echo was built. Pick something no gene would
+     * ever plausibly want.
+     */
     @Test
     void rejectsAnUnknownEffectType() {
         String json = base("""
-                "effects": [ { "type": "teleport", "to": "home" } ]
+                "effects": [ { "type": "reticulate_splines", "to": "home" } ]
                 """);
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> GeneSpecParser.parse(json, "bad.json"));
-        assertTrue(e.getMessage().contains("teleport"), e.getMessage());
+        assertTrue(e.getMessage().contains("reticulate_splines"), e.getMessage());
     }
 
     @Test
