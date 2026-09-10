@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.genetics.spec;
 
 import com.example.horsegenetics.common.CommonMaps;
+import com.example.horsegenetics.common.coat.pattern.SvgPath;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.AlleleSpec;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Combine;
@@ -969,7 +970,49 @@ public final class GeneSpecParser {
         Params params = readParams(o, SpecSchema.maskParams(type), SpecSchema.maskParamNames(type),
                 where + " '" + type + "'", knobs, knobIndex, "type", "combine", "invert");
         checkBandNotReversed(type, params, knobs, where);
+        if (type == MaskType.SVG) {
+            params = flattenSvg(params, where);
+        }
         return new Mask(type, params, combine, invert);
+    }
+
+    /**
+     * Replace an {@code SVG} mask's {@code d} string with the polylines the
+     * painter walks, and fill in the {@code viewBox} the file left out.
+     *
+     * <p>It happens here rather than in {@link #readParams} because flattening
+     * needs the {@code transform} too, and that loop sees one parameter at a
+     * time. Doing it at load rather than per texel is the whole performance
+     * story of the mask; doing it <b>eagerly</b> rather than on first paint is
+     * what turns a malformed path into a startup error that names the character
+     * it choked on, instead of a horse that quietly has no marking.
+     *
+     * <p>A file with no {@code viewBox} gets the drawing's own bounding box,
+     * which is right for a single mark and wrong for one of a set: two marks
+     * that shared a canvas in the drawing program each fill their own viewport
+     * here and lose the positions that related them. That is why the parameter
+     * exists and why the importer always writes it.
+     */
+    private static Params flattenSvg(Params params, String where) {
+        String d = params.text("d", null);
+        if (d == null || d.trim().isEmpty()) {
+            throw new IllegalArgumentException(where + " SVG: needs a 'd' - the path data. It is the "
+                    + "one parameter with no useful default, since there is no such thing as an "
+                    + "empty drawing");
+        }
+        SvgPath.Shape shape;
+        try {
+            shape = SvgPath.parse(d, params.text("transform", null));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(where + " SVG 'd': " + e.getMessage(), e);
+        }
+        Map<String, Object> out = new LinkedHashMap<>(params.raw());
+        out.put("d", shape);
+        if (!params.has("viewBox")) {
+            out.put("viewBox", new double[]{shape.box()[0], shape.box()[1],
+                    Math.max(1e-9, shape.width()), Math.max(1e-9, shape.height())});
+        }
+        return new Params(CommonMaps.copyOf(out));
     }
 
     /**
@@ -1109,9 +1152,42 @@ public final class GeneSpecParser {
                 case COLOR -> readColor(raw, where + " '" + p.name() + "'");
                 case COLORS -> readColors(raw, where + " '" + p.name() + "'");
                 case POINTS -> readPoints(raw, where + " '" + p.name() + "'");
+                case TEXT -> asString(raw, where + " '" + p.name() + "'");
+                case BOX -> readBox(raw, where + " '" + p.name() + "'");
+                // Held as the source string here and flattened in readMask,
+                // which is the only place that can also see the 'transform'
+                // this path has to be flattened under.
+                case SVG -> asString(raw, where + " '" + p.name() + "'");
             });
         }
         return new Params(CommonMaps.copyOf(out));
+    }
+
+    /**
+     * An SVG {@code viewBox}: {@code [minU, minV, width, height]}, in that
+     * order and with both extents positive - the same four numbers, in the same
+     * meaning, as the attribute it is copied from.
+     */
+    private static double[] readBox(Object raw, String where) {
+        double[] box;
+        if (raw instanceof String s) {
+            box = com.example.horsegenetics.common.coat.pattern.SvgPath.numbers(s);
+        } else {
+            List<Object> a = asArray(raw, where);
+            box = new double[a.size()];
+            for (int i = 0; i < a.size(); i++) {
+                box[i] = asNumber(a.get(i), where + " [" + i + "]");
+            }
+        }
+        if (box.length != 4) {
+            throw new IllegalArgumentException(where + ": a viewBox is exactly four numbers - "
+                    + "minU, minV, width, height - but got " + box.length);
+        }
+        if (box[2] <= 0 || box[3] <= 0) {
+            throw new IllegalArgumentException(where + ": a viewBox's width and height must both be "
+                    + "above 0, got " + trim(box[2]) + " and " + trim(box[3]));
+        }
+        return box;
     }
 
     /**

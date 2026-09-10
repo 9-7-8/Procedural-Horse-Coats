@@ -64,6 +64,20 @@ public final class HorseSkinGeometry {
             return normal;
         }
 
+        /**
+         * Whether this face sits at the box's <b>high</b> end on its normal
+         * axis - which is to say which of the two ways along that axis the
+         * surface actually points.
+         *
+         * <p>{@link #normal} alone is the axis and not the direction, and the
+         * two faces that share an axis face opposite ways: a wash on the
+         * upward-pointing planes has to include TOP and exclude BOTTOM, and
+         * without this it cannot tell them apart.
+         */
+        public boolean atMax() {
+            return atMax;
+        }
+
         public Axis spanA() {
             return normal == Axis.X ? Axis.Z : Axis.X;
         }

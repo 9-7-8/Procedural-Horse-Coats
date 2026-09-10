@@ -179,6 +179,17 @@ window.HG = window.HG || {};
     // one starts as a visible shape on the flank rather than as an empty box:
     // a shallow arc across the barrel, in normalised body space.
     if (type === "PATH") mask.points = [0.25, 0.45, 0.45, 0.6, 0.65, 0.55, 0.8, 0.4];
+    // Likewise an SVG mask: an empty 'd' is a load error rather than a blank
+    // shape, so a fresh one carries a drawing. A rounded teardrop, written with
+    // an arc and a curve so the first thing anybody sees exercises both.
+    if (type === "SVG") {
+      mask.d = "M 50 8 C 78 34 92 56 92 70 A 42 42 0 0 1 8 70 C 8 56 22 34 50 8 Z";
+      mask.viewBox = [0, 0, 100, 100];
+      mask.originU = 0.35;
+      mask.originV = 0.36;
+      mask.sizeU = 0.2;
+      mask.sizeV = 0.2;
+    }
     schema.MASKS[type].params.forEach(function (p) {
       if (p.kind === "VALUE" && !(p.ui && p.ui.seedRef)) mask[p.name] = initial(p);
       if (p.kind === "CHOICE") mask[p.name] = p.fallback;
@@ -442,14 +453,22 @@ window.HG = window.HG || {};
       if (p.kind === "VALUE" && isDefault(v, p.fallback)) return;
       if (p.kind === "CHOICE" && v === p.fallback) return;
       if (p.kind === "FLAG") {
-        // false IS the fallback, so an unticked box writes nothing at all -
-        // otherwise every mask carrying a flag exports it whether or not the
-        // author ever touched it.
-        if (v) out[p.name] = true;
+        // Write it only when it differs from what the game assumes, so a mask
+        // does not export every flag its author never touched. For the SVG
+        // mask's two true-by-default flags that means the UNticked box is the
+        // one that writes - which is the whole reason the fallback moved out of
+        // this function and into the table.
+        if (!!v !== !!p.fallback) out[p.name] = !!v;
         return;
       }
-      if (p.kind === "POINTS") {
+      if (p.kind === "POINTS" || p.kind === "BOX") {
         if (v.length >= 4) out[p.name] = v.slice();
+        return;
+      }
+      if (p.kind === "SVG" || p.kind === "TEXT") {
+        // Strings, written verbatim - and never trimmed to a default, since
+        // there is no such thing as a default drawing.
+        if (String(v).trim()) out[p.name] = String(v);
         return;
       }
       out[p.name] = tidyValue(v);

@@ -25,11 +25,21 @@ window.HG = window.HG || {};
     };
   }
   function parts(name, doc) { return { name: name, kind: "PARTS", doc: doc }; }
-  function flag(name, doc) { return { name: name, kind: "FLAG", fallback: false, doc: doc }; }
+  // `on` is the value the GAME uses when the key is absent - false for every
+  // flag but the SVG mask's two, where a <path> with no stroke is filled and a
+  // pasted drawing has to be flipped. tidy() writes a flag out whenever it
+  // differs from this, which is the only way a true default survives export.
+  function flag(name, doc, on) { return { name: name, kind: "FLAG", fallback: !!on, doc: doc }; }
   function choice(name, choices, doc) { return { name: name, kind: "CHOICE", choices: choices, fallback: choices[0], doc: doc }; }
   function color(name, doc) { return { name: name, kind: "COLOR", fallback: "#ffffff", doc: doc }; }
   function colors(name, doc) { return { name: name, kind: "COLORS", doc: doc }; }
   function points(name, doc) { return { name: name, kind: "POINTS", doc: doc }; }
+  // SVG path data, an SVG transform list, and a four-number viewBox. The first
+  // is flattened once when the gene loads (see spec-engine's svgShape), which
+  // is why the mask costs what PATH costs however long the string is.
+  function svg(name, doc) { return { name: name, kind: "SVG", doc: doc }; }
+  function text(name, doc) { return { name: name, kind: "TEXT", fallback: "", doc: doc }; }
+  function box(name, doc) { return { name: name, kind: "BOX", doc: doc }; }
 
   // The three that turn any colour op into an epigenetic one. They repeat on
   // four ops, so they are built rather than retyped - a hue that drifts between
@@ -238,6 +248,15 @@ window.HG = window.HG || {};
         choice("axis", ["X", "Y", "Z"], "the axis the oval is stretched along"),
         choice("shape", ["round", "heart"], "'heart' swaps the disc for a heart, point down"),
         flag("mirror", "draw on |z|, so the two sides of the horse match"),
+        v("arc", 1.0, "share of each mark's circumference drawn - below 1 clips every mark in the "
+          + "field to the same crescent, which is what makes a tiling read as shingled scales "
+          + "rather than as a closed net"),
+        v("angle", 0.0, "degrees the drawn arc is centred on; read only when 'arc' is below 1",
+          { min: 0, max: 360, step: 5 }),
+        v("offsetX", 0.0, "shift where THIS mask measures the cell centre, without moving the cell - "
+          + "the off-centre glint inside an eyespot", { min: -4, max: 4, step: 0.05 }),
+        v("offsetY", 0.0, "the same, on Y", { min: -4, max: 4, step: 0.05 }),
+        v("offsetZ", 0.0, "the same, on Z", { min: -4, max: 4, step: 0.05 }),
         v("softness", 0.25, "edge fade, body units", { min: 0, max: 3, step: 0.05 })
       ]
     },
@@ -252,6 +271,10 @@ window.HG = window.HG || {};
         v("vary", 0.4, "how much the radius varies ring to ring"),
         v("chance", 1.0, "share of lattice cells that carry a ring at all"),
         v("arc", 1.0, "share of the circumference drawn - below 1 gives a crescent"),
+        v("offsetX", 0.0, "shift where THIS mask measures the cell centre, without moving the cell",
+          { min: -4, max: 4, step: 0.05 }),
+        v("offsetY", 0.0, "the same, on Y", { min: -4, max: 4, step: 0.05 }),
+        v("offsetZ", 0.0, "the same, on Z", { min: -4, max: 4, step: 0.05 }),
         v("softness", 0.2, "edge fade, body units", { min: 0, max: 3, step: 0.05 })
       ]
     },
@@ -323,7 +346,100 @@ window.HG = window.HG || {};
         v("gap", 0.5, "width of the channel between two polygons", { min: 0.05, max: 4, step: 0.05 }),
         v("warp", 0.35, "how far the polygons are pushed out of true"),
         v("chance", 1.0, "share of polygons that are filled at all"),
-        v("softness", 0.08, "edge fade, body units", { min: 0, max: 2, step: 0.01 })
+        v("softness", 0.08, "edge fade, body units", { min: 0, max: 2, step: 0.01 }),
+        choice("measure", ["wall", "centroid"],
+          "'wall' is the crack between two polygons; 'centroid' is distance from a texel to its "
+          + "OWN polygon's middle, on the same tessellation - the only way to shade or band each "
+          + "irregular cell independently and stay concentric with the outline"),
+        v("vertexWeight", 0.0,
+          "blend the wall distance toward distance to the nearest three-way CORNER. A threshold "
+          + "on the blend pools where cracks meet and thins between them - a vein network, which "
+          + "an even channel cannot be. Read under 'wall' only")
+      ]
+    },
+    SVG: {
+      blurb: "An SVG path, drawn. PATH with the whole of the grammar behind it - every command, "
+        + "subpaths and their holes, the fill rule, a transform list, viewBox and "
+        + "preserveAspectRatio, and a stroke with real caps, joins and dashes. Paste a 'd' out of "
+        + "a drawing program and it lands on the horse.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        svg("d", "the SVG path data, verbatim: M m L l H h V v C c S s Q q T t A a Z z, absolute "
+          + "and relative, as many subpaths as you like"),
+        text("transform", "an SVG transform list applied before anything else - matrix, translate, "
+          + "scale, rotate, skewX, skewY, composed left to right"),
+        box("viewBox", "the drawing's own coordinate box, [minU, minV, width, height]. Omit and "
+          + "the path's own bounding box is used - right for a single mark, wrong for one of a set"),
+        choice("plane", ["side", "top", "front"],
+          "which two axes the drawing lies in - 'side' (x,y) appears on both flanks, 'top' (x,z) "
+          + "straddles the spine, 'front' (z,y) runs round the barrel"),
+        choice("space", ["body", "units"],
+          "how the viewport is measured. Stroke width, softness and the dash lengths are body "
+          + "units either way"),
+        v("originU", 0.0, "the viewport's near corner along the plane's first axis",
+          { min: -1, max: 2, step: 0.01 }),
+        v("originV", 0.0, "the viewport's near corner along its second axis",
+          { min: -1, max: 2, step: 0.01 }),
+        v("sizeU", 1.0, "the viewport's extent along the first axis", { min: 0.01, max: 2, step: 0.01 }),
+        v("sizeV", 1.0, "the viewport's extent along the second axis", { min: 0.01, max: 2, step: 0.01 }),
+        choice("fit", ["meet", "slice", "none"],
+          "preserveAspectRatio: 'meet' fits the drawing in and leaves slack, 'slice' fills and "
+          + "overflows, 'none' stretches to fill"),
+        choice("align", ["xMidYMid", "xMinYMin", "xMidYMin", "xMaxYMin", "xMinYMid", "xMaxYMid",
+          "xMinYMax", "xMidYMax", "xMaxYMax"], "where the drawing sits in the slack 'fit' left"),
+        flag("flipY", "SVG's y runs down the page and the horse's runs up, so this is ON unless "
+          + "you turn it off - a pasted drawing lands the right way up", true),
+        flag("fill", "fill the enclosed area rather than stroking the outline. ON unless you turn "
+          + "it off, as a <path> with no stroke is. Width, cap, join and the dashes are then unread",
+          true),
+        choice("fillRule", ["nonzero", "evenodd"],
+          "which subpath is a hole and which is a blob - copy it from the file's fill-rule"),
+        v("width", 1.0, "stroke width, body units - a texel is about 0.5", { min: 0, max: 8, step: 0.05 }),
+        choice("cap", ["butt", "round", "square"], "how an open subpath's free ends finish"),
+        choice("join", ["miter", "round", "bevel"], "how the stroke turns a corner"),
+        v("miterLimit", 4.0, "how many widths a miter may reach before it bevels", { min: 1, max: 20, step: 0.5 }),
+        v("dash", 0.0, "length of one dash, body units; 0 is a solid stroke", { min: 0, max: 12, step: 0.1 }),
+        v("gap", 0.0, "space between dashes; 0 means the same as 'dash'", { min: 0, max: 12, step: 0.1 }),
+        v("dashOffset", 0.0, "shift the pattern along the path, body units", { min: -12, max: 12, step: 0.1 }),
+        v("softness", 0.25, "edge fade, body units", { min: 0, max: 4, step: 0.05 })
+      ]
+    },
+    FAN: {
+      blurb: "Bars that radiate from a point, widening as they go - a sunburst, the gills under a "
+        + "mushroom cap, the bars on a butterfly's wing. WAVES takes its phase from a straight "
+        + "line and so its bars are parallel forever; this takes it from an angle.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        choice("plane", ["side", "top", "front"], "which two axes the angle is measured in"),
+        choice("space", ["body", "units"],
+          "how the origin is measured; the radii and 'spacing' are body units either way"),
+        v("originU", 0.5, "the pivot every bar radiates from, first axis", { min: -1, max: 2, step: 0.01 }),
+        v("originV", 0.5, "the pivot, second axis", { min: -1, max: 2, step: 0.01 }),
+        v("spacing", 2.0, "the angular period, as the arc length one cycle covers at ONE body unit "
+          + "out - so bars widen with distance", { min: 0.1, max: 12, step: 0.05 }),
+        v("duty", 0.5, "share of each cycle that is bar rather than gap"),
+        v("twist", 0.0, "degrees the fan's zero rotates per body unit out - 0 is a sunburst, "
+          + "anything else a pinwheel", { min: -90, max: 90, step: 1 }),
+        v("inner", 0.0, "body units from the pivot where the fan starts", { min: 0, max: 30, step: 0.5 }),
+        v("outer", 0.0, "body units where it stops; 0 means it never does", { min: 0, max: 40, step: 0.5 }),
+        v("softness", 0.15, "edge fade, as a share of the bar's own width")
+      ]
+    },
+    NORMAL: {
+      blurb: "Which way the surface faces, dotted with a body axis - a rim light along the "
+        + "topline, a wash that only takes on the upward planes, a shell's curvature sheen. The "
+        + "second mask after EDGE that asks about the model rather than about position.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        choice("axis", ["Y", "X", "Z"], "the direction the surface is compared against"),
+        choice("space", ["body", "local"],
+          "'body' takes the box's own facing, so a pitched neck's top is not level; 'local' takes "
+          + "the pitch out first"),
+        v("round", 0.0, "0 reads the FLAT face normal, which on boxes takes three values and gives "
+          + "hard faceted zones; above 0 blends toward the normal an ellipsoid of the same box "
+          + "would have, which is continuous and is what a sheen needs"),
+        v("from", -1.0, "the dot product that reads as coverage 0", { min: -1, max: 1, step: 0.05 }),
+        v("to", 1.0, "the dot product that reads as coverage 1", { min: -1, max: 1, step: 0.05 })
       ]
     }
   };
@@ -391,12 +507,21 @@ window.HG = window.HG || {};
       ].concat(hueParams(HUE_DOC + " On a ramp it names the first stop."), [
         v("hueSpan", 60, "degrees of hue the ramp travels; negative runs the other way",
           { min: -360, max: 360, step: 5 }),
-        choice("axis", ["X", "Y", "Z"], "the axis the ramp runs along"),
+        choice("axis", ["X", "Y", "Z", "noise", "cell", "cellId"],
+          "X, Y or Z is a straight line and so sweeps ONCE. 'noise' reads a smooth field, so the "
+          + "colour wanders and doubles back with no hard edge; 'cell' reads distance to the middle "
+          + "of the texel's own cell, so every cell fades on its own; 'cellId' reads one number per "
+          + "cell, so neighbours take unrelated colours"),
         choice("space", ["part", "body", "units", "local"],
           "'part' runs the ramp inside each part - what a mane wants; 'local' runs it "
-          + "along a pitched part's own length"),
+          + "along a pitched part's own length. Read by the three spatial axes only"),
         v("from", 0.0, "axis position the first stop sits at"),
         v("to", 1.0, "axis position the last stop sits at"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default. Read by the 'noise', "
+          + "'cell' and 'cellId' axes only", { seedRef: true }),
+        v("scale", 5.0, "body units per feature of the field - one wavelength, or one cell across. "
+          + "Point it at the mask's own scale and the colour lines up with the shape",
+          { min: 0.5, max: 20, step: 0.1 }),
         v("strength", 100, "percent of the way to the ramp colour", { min: 0, max: 100, step: 1 }),
         v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
       ])

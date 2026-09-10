@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.ColorField;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.pattern.SpecPainter;
+import com.example.horsegenetics.common.coat.pattern.SvgPath;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
@@ -142,6 +143,7 @@ public final class SpecFixtureTool {
         sb.append("    \"pathCurveSamples\": ").append(SpecSchema.PATH_CURVE_SAMPLES)
                 .append(",\n");
         sb.append(composerSection());
+        sb.append(svgSection());
         sb.append(geometrySection());
         sb.append("  },\n");
         return sb.toString();
@@ -305,6 +307,13 @@ public final class SpecFixtureTool {
             if (p.kind() == SpecSchema.Kind.VALUE) {
                 sb.append(", \"fallback\": ").append(num(p.fallback()));
             }
+            // A flag's default used to be false everywhere, so nothing compared
+            // it. The SVG mask has two that default true, and a creator that
+            // disagreed about one of those would export a filled shape as a
+            // stroked one - silently, and only in the file.
+            if (p.kind() == SpecSchema.Kind.FLAG) {
+                sb.append(", \"fallback\": ").append(p.fallback() != 0);
+            }
             if (!p.choices().isEmpty()) {
                 sb.append(", \"choices\": [");
                 for (int i = 0; i < p.choices().size(); i++) {
@@ -431,6 +440,121 @@ public final class SpecFixtureTool {
             }
         }
         return out;
+    }
+
+    /**
+     * <b>The SVG mask's geometry, as answer tables</b> - the same shape as
+     * {@link #composerSection}, and for the same reason.
+     *
+     * <p>The probe cases sample four texels per part. A drawing placed on the
+     * flank is a few dozen texels; the chance those two sets intersect is not
+     * something to rest a port on, and a mask that is never reached makes the
+     * parity check <i>green by definition</i> about it - which is exactly the
+     * failure {@code expected.json} being stale once caused, in the other
+     * direction.
+     *
+     * <p>So the path grammar is compared directly: parse a handful of strings
+     * that each exercise one thing that is easy to get subtly wrong, and record
+     * the point count, the bounds, the fill rule's answers, the distance under
+     * each cap, and the transform and fit arithmetic. If the two parsers
+     * disagree about any of it, they disagree here rather than on a horse
+     * somebody is looking at.
+     */
+    /** A JSON string. The cases below carry no quote and no backslash, and must not. */
+    private static String quote(String s) {
+        return "\"" + s + "\"";
+    }
+
+    private static String svgSection() {
+        String[][] paths = {
+                // absolute, relative, shorthand, and a moveto's repeated pairs
+                {"square", "M 0 0 L 10 0 L 10 10 L 0 10 Z", ""},
+                {"relative", "m 0 0 l 10 0 l 0 10 l -10 0 z", ""},
+                {"shorthand", "M 0 0 H 10 V 10 H 0 Z", ""},
+                // the number grammar: a run-on minus, a run-on dot, an exponent
+                {"runOnNumbers", "M0 0L10-5L1e1 5Z", ""},
+                {"dottedNumbers", "M.5.5L2.5.5L2.5 3Z", ""},
+                // the reflected control points
+                {"smoothCubic", "M 0 0 C 5 -8 15 -8 20 0 S 35 8 40 0", ""},
+                {"smoothQuad", "M 0 0 Q 10 -12 20 0 T 40 0", ""},
+                // the arc, both sweeps and a large-arc, plus a radius correction
+                {"arcs", "M 0 0 A 10 10 0 0 1 20 0 A 6 6 0 1 0 20 12 A 1 1 0 0 1 0 12 Z", ""},
+                // subpaths and a hole
+                {"hole", "M 0 0 H 30 V 30 H 0 Z M 10 10 H 20 V 20 H 10 Z", ""},
+                // a closepath with no moveto after it
+                {"chained", "M 0 0 H 10 V 10 Z L -10 0 L -10 10 Z", ""},
+                // and the transform list, composed left to right
+                {"transformed", "M 0 0 H 5 V 5", "translate(10 4) rotate(30 2 2) scale(2 1.5)"}
+        };
+        double[][] probes = {{5, 5}, {15, 5}, {-3, 5}, {12, 12}, {0.5, 0.5}, {22, 3}, {8, 24}};
+        String[] caps = {"round", "butt", "square"};
+
+        StringBuilder sb = new StringBuilder("    \"svg\": {\n      \"maxPoints\": ")
+                .append(SvgPath.MAX_POINTS)
+                .append(",\n      \"curveSamples\": ").append(SvgPath.CURVE_SAMPLES)
+                .append(",\n      \"arcSamplesPerTurn\": ").append(SvgPath.ARC_SAMPLES_PER_TURN)
+                .append(",\n      \"paths\": {");
+        double[] hit = new double[3];
+        for (int i = 0; i < paths.length; i++) {
+            SvgPath.Shape shape = SvgPath.parse(paths[i][1], paths[i][2].isEmpty() ? null : paths[i][2]);
+            sb.append(i > 0 ? "," : "").append("\n        \"").append(paths[i][0]).append("\": { \"d\": ")
+                    .append(quote(paths[i][1]));
+            if (!paths[i][2].isEmpty()) {
+                sb.append(", \"transform\": ").append(quote(paths[i][2]));
+            }
+            sb.append(", \"points\": ").append(shape.xs().length)
+                    .append(", \"subpaths\": ").append(shape.subpaths())
+                    .append(", \"box\": [").append(num(shape.box()[0])).append(", ")
+                    .append(num(shape.box()[1])).append(", ").append(num(shape.box()[2]))
+                    .append(", ").append(num(shape.box()[3])).append("]");
+            sb.append(", \"length\": ").append(num(shape.cum()[shape.cum().length - 1]));
+            sb.append(", \"nonzero\": [");
+            for (int k = 0; k < probes.length; k++) {
+                sb.append(k > 0 ? ", " : "").append(SvgPath.inside(shape, probes[k][0], probes[k][1], false));
+            }
+            sb.append("], \"evenodd\": [");
+            for (int k = 0; k < probes.length; k++) {
+                sb.append(k > 0 ? ", " : "").append(SvgPath.inside(shape, probes[k][0], probes[k][1], true));
+            }
+            sb.append("]");
+            for (String cap : caps) {
+                sb.append(", \"").append(cap).append("\": [");
+                for (int k = 0; k < probes.length; k++) {
+                    SvgPath.distance(shape, probes[k][0], probes[k][1], cap, 0.5, hit);
+                    sb.append(k > 0 ? ", " : "").append(num(hit[0])).append(", ").append(num(hit[1]));
+                }
+                sb.append("]");
+            }
+            sb.append(", \"miter\": [");
+            for (int k = 0; k < probes.length; k++) {
+                double d = SvgPath.miterDistance(shape, probes[k][0], probes[k][1], 0.5, 4.0);
+                sb.append(k > 0 ? ", " : "").append(num(Math.min(d, 99)));
+            }
+            sb.append("] }");
+        }
+        sb.append("\n      },\n      \"probes\": [");
+        for (int k = 0; k < probes.length; k++) {
+            sb.append(k > 0 ? ", " : "").append("[").append(num(probes[k][0])).append(", ")
+                    .append(num(probes[k][1])).append("]");
+        }
+        sb.append("],\n      \"fits\": {");
+        String[] modes = {"meet", "slice", "none"};
+        String[] aligns = {"xMidYMid", "xMinYMin", "xMaxYMax"};
+        double[] viewBox = {-10, 5, 100, 50};
+        boolean firstFit = true;
+        for (String mode : modes) {
+            for (String align : aligns) {
+                double[] f = SvgPath.fit(viewBox, 3, 7, 40, 20, mode, align);
+                sb.append(firstFit ? "" : ",").append("\n        \"").append(mode).append(" ").append(align)
+                        .append("\": [").append(num(f[0])).append(", ").append(num(f[1])).append(", ")
+                        .append(num(f[2])).append(", ").append(num(f[3])).append("]");
+                firstFit = false;
+            }
+        }
+        sb.append("\n      },\n      \"viewBox\": [").append(num(viewBox[0])).append(", ")
+                .append(num(viewBox[1])).append(", ").append(num(viewBox[2])).append(", ")
+                .append(num(viewBox[3])).append("]\n    },\n");
+        return sb.toString();
     }
 
     private static String num(double v) {

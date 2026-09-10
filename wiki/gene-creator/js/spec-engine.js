@@ -14,6 +14,7 @@ window.HG = window.HG || {};
 
   var geo = HG.geometry;
   var noise = HG.noise;
+  var svg = HG.svgPath;
   var smoothstep = noise.smoothstep;
   var LEG_COUNT = 4;
 
@@ -465,9 +466,26 @@ window.HG = window.HG || {};
         if (c4.pick >= get(values, mask.chance, 1.0, legIndex)) return 0;
         var vary4 = clamp01(get(values, mask.vary, 0.5, legIndex));
         var rad4 = get(values, mask.radius, 0.9, legIndex) * (1 - vary4 + 2 * vary4 * c4.size);
-        if ((mask.shape || "round") === "heart") rad4 *= heartRadius(Math.atan2(c4.dy, c4.dx));
+        // The offsets move where THIS mask measures from, not where the cell is,
+        // so a second mask on the same seed still finds the same centres.
+        var ox4 = get(values, mask.offsetX, 0.0, legIndex) / spacing4;
+        var oy4 = get(values, mask.offsetY, 0.0, legIndex) / spacing4;
+        var oz4 = get(values, mask.offsetZ, 0.0, legIndex) / spacing4;
+        var dx4 = c4.dx - ox4, dy4 = c4.dy - oy4, dz4 = c4.dz - oz4;
+        var dist4 = (ox4 === 0 && oy4 === 0 && oz4 === 0) ? c4.distance
+          : Math.sqrt(dx4 * dx4 + dy4 * dy4 + dz4 * dz4);
+        if ((mask.shape || "round") === "heart") rad4 *= heartRadius(Math.atan2(dy4, dx4));
+        var arc4 = clamp01(get(values, mask.arc, 1.0, legIndex));
+        if (arc4 < 1) {
+          // Every element clipped to the SAME wedge, which is what makes a
+          // tiling read as shingled rather than as a closed net.
+          var a4 = la === "X" ? Math.atan2(dy4, dz4)
+            : (la === "Y" ? Math.atan2(dz4, dx4) : Math.atan2(dy4, dx4));
+          var turn4 = a4 / (2 * Math.PI) - get(values, mask.angle, 0.0, legIndex) / 360 + 0.5;
+          if ((((turn4 % 1) + 1) % 1) > arc4) return 0;
+        }
         var soft4 = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
-        return 1 - smoothstep(rad4, rad4 + soft4, c4.distance * spacing4);
+        return 1 - smoothstep(rad4, rad4 + soft4, dist4 * spacing4);
       }
       case "RINGS": {
         var sr = getSeed(values, mask.seed, seedBase);
@@ -478,10 +496,16 @@ window.HG = window.HG || {};
         var rad5 = get(values, mask.radius, 2.0, legIndex) * (1 - vary5 + 2 * vary5 * c5.size);
         var half5 = Math.max(1e-6, get(values, mask.thickness, 0.6, legIndex)) / 2;
         var soft5 = Math.max(1e-6, get(values, mask.softness, 0.2, legIndex));
-        var ring = 1 - smoothstep(half5, half5 + soft5, Math.abs(c5.distance * spacing5 - rad5));
+        var ox5 = get(values, mask.offsetX, 0.0, legIndex) / spacing5;
+        var oy5 = get(values, mask.offsetY, 0.0, legIndex) / spacing5;
+        var oz5 = get(values, mask.offsetZ, 0.0, legIndex) / spacing5;
+        var dx5 = c5.dx - ox5, dy5 = c5.dy - oy5, dz5 = c5.dz - oz5;
+        var dist5 = (ox5 === 0 && oy5 === 0 && oz5 === 0) ? c5.distance
+          : Math.sqrt(dx5 * dx5 + dy5 * dy5 + dz5 * dz5);
+        var ring = 1 - smoothstep(half5, half5 + soft5, Math.abs(dist5 * spacing5 - rad5));
         var arc = clamp01(get(values, mask.arc, 1.0, legIndex));
         if (arc >= 1) return ring;
-        var theta5 = Math.atan2(c5.dy, c5.dz) / (2 * Math.PI) + 0.5;
+        var theta5 = Math.atan2(dy5, dz5) / (2 * Math.PI) + 0.5;
         return ((((theta5 - c5.angle) % 1) + 1) % 1) <= arc ? ring : 0;
       }
       case "SPECKLE": {
@@ -586,11 +610,169 @@ window.HG = window.HG || {};
         if (chanceC < 1 && noise.cell(sc, wx, wy, wz).pick >= chanceC) return 0;
         var halfC = Math.max(1e-4, get(values, mask.gap, 0.5, legIndex)) / 2;
         var softC = Math.max(1e-6, get(values, mask.softness, 0.08, legIndex));
-        return smoothstep(halfC, halfC + softC, noise.cellEdge(sc, wx, wy, wz) * scaleC);
+        if ((mask.measure || "wall") === "centroid") {
+          // The SAME tessellation, read from the middle out - the only per-cell
+          // radial coordinate a crackle outline is guaranteed concentric with.
+          return smoothstep(halfC, halfC + softC, noise.cellDistance(sc, wx, wy, wz) * scaleC);
+        }
+        var edgeC = noise.cellEdge(sc, wx, wy, wz) * scaleC;
+        var vwC = clamp01(get(values, mask.vertexWeight, 0.0, legIndex));
+        if (vwC > 0) {
+          edgeC = edgeC * (1 - vwC) + noise.cellVertex(sc, wx, wy, wz) * scaleC * vwC;
+        }
+        return smoothstep(halfC, halfC + softC, edgeC);
+      }
+      case "SVG": {
+        var shape = svgShape(mask);
+        var viewBox = svgViewBox(mask, shape);
+        if (!shape || !viewBox) return 0;
+        var wholeS = geo.bodyBounds(skin);
+        var plS = mask.plane || "side";
+        var uAxisS = plS === "front" ? "Z" : "X";
+        var vAxisS = plS === "top" ? "Z" : "Y";
+        var normS = (mask.space || "body") !== "units";
+        var uMinS = normS ? wholeS.min(uAxisS) : 0;
+        var uSpanS = normS ? Math.max(1e-6, wholeS.span(uAxisS)) : 1;
+        var vMinS = normS ? wholeS.min(vAxisS) : 0;
+        var vSpanS = normS ? Math.max(1e-6, wholeS.span(vAxisS)) : 1;
+        var vwS = get(values, mask.sizeU, 1.0, legIndex) * uSpanS;
+        var vhS = get(values, mask.sizeV, 1.0, legIndex) * vSpanS;
+        if (Math.abs(vwS) < 1e-9 || Math.abs(vhS) < 1e-9) return 0;
+        var fitS = svg.fit(viewBox,
+          uMinS + get(values, mask.originU, 0.0, legIndex) * uSpanS,
+          vMinS + get(values, mask.originV, 0.0, legIndex) * vSpanS,
+          vwS, vhS, mask.fit || "meet", mask.align || "xMidYMid");
+        var puS = uAxisS === "X" ? point.x : point.z;
+        var pvS = vAxisS === "Z" ? point.z : point.y;
+        var xS = (puS - fitS[2]) / fitS[0];
+        var yS = (pvS - fitS[3]) / fitS[1];
+        // SVG's y runs down the page and the horse's runs up.
+        if (mask.flipY !== false) yS = 2 * viewBox[1] + viewBox[3] - yS;
+        var toBodyS = Math.sqrt(Math.abs(fitS[0] * fitS[1]));
+        var softS = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
+        if (mask.fill !== false) {
+          if (svg.inside(shape, xS, yS, (mask.fillRule || "nonzero") === "evenodd")) return 1;
+          svg.distance(shape, xS, yS, "round", 0, SVG_HIT);
+          return 1 - smoothstep(0, softS, SVG_HIT[0] * toBodyS);
+        }
+        var halfS = Math.max(0, get(values, mask.width, 1.0, legIndex)) / 2;
+        var halfUserS = toBodyS < 1e-9 ? 0 : halfS / toBodyS;
+        svg.distance(shape, xS, yS, mask.cap || "butt", halfUserS, SVG_HIT);
+        var dS = SVG_HIT[0];
+        if ((mask.join || "miter") === "miter") {
+          dS = Math.min(dS, svg.miterDistance(shape, xS, yS, halfUserS,
+            Math.max(1, get(values, mask.miterLimit, 4.0, legIndex))));
+        }
+        var dashS = get(values, mask.dash, 0.0, legIndex);
+        if (dashS > 0) {
+          var gapS = get(values, mask.gap, 0.0, legIndex);
+          var periodS = dashS + (gapS > 0 ? gapS : dashS);
+          var alongS = SVG_HIT[1] * toBodyS + get(values, mask.dashOffset, 0.0, legIndex);
+          if ((((alongS % periodS) + periodS) % periodS) > dashS) return 0;
+        }
+        return 1 - smoothstep(halfS, halfS + softS, dS * toBodyS);
+      }
+      case "FAN": {
+        var wholeF = geo.bodyBounds(skin);
+        var plF = mask.plane || "side";
+        var uAxisF = plF === "front" ? "Z" : "X";
+        var vAxisF = plF === "top" ? "Z" : "Y";
+        var normF = (mask.space || "body") !== "units";
+        var ouF = normF
+          ? wholeF.min(uAxisF) + get(values, mask.originU, 0.5, legIndex) * wholeF.span(uAxisF)
+          : get(values, mask.originU, 0.5, legIndex);
+        var ovF = normF
+          ? wholeF.min(vAxisF) + get(values, mask.originV, 0.5, legIndex) * wholeF.span(vAxisF)
+          : get(values, mask.originV, 0.5, legIndex);
+        var duF = (uAxisF === "X" ? point.x : point.z) - ouF;
+        var dvF = (vAxisF === "Z" ? point.z : point.y) - ovF;
+        var rF = Math.sqrt(duF * duF + dvF * dvF);
+        var innerF = get(values, mask.inner, 0.0, legIndex);
+        var outerF = get(values, mask.outer, 0.0, legIndex);
+        if (rF < innerF || (outerF > 0 && rF > outerF) || rF < 1e-6) return 0;
+        // The phase is an ANGLE and the period an arc length at one unit out, so
+        // the bars widen with distance - what a linear coordinate cannot do.
+        var spacingF = Math.max(1e-4, get(values, mask.spacing, 2.0, legIndex));
+        var twistF = get(values, mask.twist, 0.0, legIndex) * rF / 360;
+        var turnsF = (Math.atan2(dvF, duF) / (2 * Math.PI) + twistF) * (2 * Math.PI / spacingF);
+        var fF = turnsF - Math.floor(turnsF);
+        var dutyF = clamp01(get(values, mask.duty, 0.5, legIndex));
+        var softF = Math.max(1e-6, clamp01(get(values, mask.softness, 0.15, legIndex)) * dutyF);
+        return Math.max(band(fF, 0, dutyF, softF), band(fF - 1, 0, dutyF, softF));
+      }
+      case "NORMAL": {
+        var axisN = (mask.axis || "Y").toUpperCase();
+        var bN = geo.bounds(skin, part);
+        var faceN = geo.FACES[face];
+        var nN = faceN.normal === axisN ? (faceN.atMax ? 1 : -1) : 0;
+        var roundN = clamp01(get(values, mask.round, 0.0, legIndex));
+        if (roundN > 0 && bN) {
+          // The normal the part would have if its box were an ellipsoid -
+          // continuous, where a flat face normal takes three values.
+          var localN = (mask.space || "body") === "local";
+          var atN = localN ? geo.local(skin, part, point) : point;
+          var exN = localN ? (atN.x - 0.5) * 2 : ellipsoid(atN, bN, "X");
+          var eyN = localN ? (atN.y - 0.5) * 2 : ellipsoid(atN, bN, "Y");
+          var ezN = localN ? (atN.z - 0.5) * 2 : ellipsoid(atN, bN, "Z");
+          var lenN = Math.sqrt(exN * exN + eyN * eyN + ezN * ezN);
+          if (lenN > 1e-9) {
+            var roundedN = axisN === "X" ? exN / lenN : (axisN === "Y" ? eyN / lenN : ezN / lenN);
+            nN = nN * (1 - roundN) + roundedN * roundN;
+          }
+        }
+        var fromN = get(values, mask.from, -1.0, legIndex);
+        var toN = get(values, mask.to, 1.0, legIndex);
+        return toN === fromN ? (nN >= toN ? 1 : 0) : clamp01((nN - fromN) / (toN - fromN));
       }
       default:
         return 0;
     }
+  }
+
+  /**
+   * One component of the normal a part's box would have if it were an ellipsoid.
+   * Mirrors SpecPainter.ellipsoid.
+   */
+  function ellipsoid(point, bounds, axis) {
+    var half = Math.max(1e-6, bounds.span(axis) / 2);
+    var coord = axis === "X" ? point.x : (axis === "Y" ? point.y : point.z);
+    return (coord - (bounds.min(axis) + half)) / half;
+  }
+
+  // Scratch for svg.distance - three numbers, reused rather than allocated per
+  // texel. Single-threaded here, unlike the Java, which needs a thread local.
+  var SVG_HIT = [0, 0, 0];
+
+  /**
+   * An SVG mask's flattened path, cached ON THE MASK.
+   *
+   * The Java flattens at parse time and hands the painter a Shape; here the
+   * mask is a plain object the editor rewrites on every keystroke, so the cache
+   * is keyed on the two strings that produce it. A bad `d` caches the failure
+   * too - otherwise a typo re-parses eight thousand times per preview.
+   */
+  function svgShape(mask) {
+    var key = String(mask.d || "") + "\u0000" + String(mask.transform || "");
+    if (mask.__svgKey !== key) {
+      mask.__svgKey = key;
+      try {
+        mask.__svg = mask.d ? svg.parse(mask.d, mask.transform) : null;
+      } catch (e) {
+        mask.__svg = null;
+        mask.__svgError = e.message;
+      }
+      if (mask.__svg) mask.__svgError = null;
+    }
+    return mask.__svg;
+  }
+
+  /** The declared viewBox, or the drawing's own bounds when the file left it out. */
+  function svgViewBox(mask, shape) {
+    if (mask.viewBox && mask.viewBox.length === 4) return mask.viewBox;
+    if (!shape) return null;
+    return [shape.box[0], shape.box[1],
+      Math.max(1e-9, shape.box[2] - shape.box[0]),
+      Math.max(1e-9, shape.box[3] - shape.box[1])];
   }
 
   /** One cycle of a WAVES displacement, in [-1, 1] - the port of SpecPainter.waveform. */
@@ -855,7 +1037,26 @@ window.HG = window.HG || {};
     return axis === "X" ? p.x : axis === "Y" ? p.y : p.z;
   }
 
-  function axisPosition(op, values, legIndex, skin, part, point) {
+  function axisPosition(op, values, legIndex, skin, part, point, seedBase) {
+    var axisName = op.axis || "X";
+    if (axisName !== "X" && axisName !== "Y" && axisName !== "Z") {
+      // Three of the six answers are not axes. A straight line is monotonic by
+      // construction; a colour that wanders, or is decided per cell, is not a
+      // tuning of that. Mirrors SpecPainter.axisPosition.
+      var sR = getSeed(values, op.seed, seedBase);
+      var scaleR = Math.max(0.05, get(values, op.scale, 5.0, legIndex));
+      if (axisName === "noise") {
+        return clamp01(noise.value(sR, point.x / scaleR, point.y / scaleR, point.z / scaleR));
+      }
+      if (axisName === "cell") {
+        return clamp01(noise.cellDistance(sR, point.x / scaleR, point.y / scaleR, point.z / scaleR));
+      }
+      return clamp01(noise.cell(sR, point.x / scaleR, point.y / scaleR, point.z / scaleR).pick);
+    }
+    return spatialAxisPosition(op, values, legIndex, skin, part, point);
+  }
+
+  function spatialAxisPosition(op, values, legIndex, skin, part, point) {
     var axis = (op.axis || "X").toUpperCase();
     var coord = axis === "X" ? point.x : axis === "Y" ? point.y : point.z;
     var space = op.space || "part";
@@ -914,7 +1115,8 @@ window.HG = window.HG || {};
         break;
       case "RAMP":
         towardColour(delta, colour, op, values, legIndex, px, py, k,
-          rampColour(op, values, legIndex, axisPosition(op, values, legIndex, skin, part, point)));
+          rampColour(op, values, legIndex,
+            axisPosition(op, values, legIndex, skin, part, point, seedBase)));
         break;
       case "PALETTE":
         towardColour(delta, colour, op, values, legIndex, px, py, k,

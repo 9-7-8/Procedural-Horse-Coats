@@ -560,7 +560,70 @@ public record GeneSpec(
          * measures to the wall between two cells, which is what makes the edges
          * straight and the corners meet three at a time.
          */
-        CRACKLE
+        CRACKLE,
+        /**
+         * <b>An SVG path, drawn.</b> {@link #PATH} with the whole of the
+         * grammar behind it instead of a polyline.
+         *
+         * <p>{@code PATH} was the admission that some shapes are not made of a
+         * rule - that a marking somebody <i>drew</i> has to arrive as points.
+         * This is the admission that follows from it: markings that get drawn
+         * get drawn in a drawing program, and what comes out is a {@code d}
+         * string of cubics, arcs and subpaths inside a {@code viewBox}. Turning
+         * one of those into sixty-four normalised control points by hand is
+         * where the drawing stops being the drawing - the holes close up, the
+         * arcs become chords, and the author spends an evening on arithmetic
+         * that {@link com.example.horsegenetics.common.coat.pattern.SvgPath}
+         * does exactly.
+         *
+         * <p>So this mask takes the file's own vocabulary and keeps the parts of
+         * it that carry meaning: subpaths (so a letter O has a hole), the fill
+         * rule (so the author says <i>which</i> hole), the transform list, the
+         * {@code viewBox} and its aspect-ratio behaviour, and a stroke with
+         * real caps, joins and a dash pattern. Everything is flattened once at
+         * load; per texel it costs what {@code PATH} costs.
+         *
+         * <p>Like {@code PATH} it carries a shape rather than a rule for one,
+         * so it is the same on every horse - which is the point, and is also
+         * the reason to reach for a field mask first if what you want is
+         * variety.
+         */
+        SVG,
+        /**
+         * <b>Bars that radiate from a point</b> - a periodic angular field, the
+         * polar twin of {@link #WAVES}.
+         *
+         * <p>{@code WAVES} takes its phase from a linear coordinate, so its
+         * bars are parallel, evenly spaced and all pointed the same way
+         * everywhere in the region: that is the measurement it makes, and no
+         * setting of it recovers a fan. A sunburst, the gills under a mushroom
+         * cap and the black bars on a butterfly's wing all share one origin,
+         * and their angle <i>and</i> their gap both grow with distance from it,
+         * which is an angle around a pivot rather than a distance along a line.
+         *
+         * <p>{@code twist} rotates the fan's zero with distance, which is the
+         * difference between a sunburst and a pinwheel.
+         */
+        FAN,
+        /**
+         * <b>Which way the surface faces</b> - the model's own normal, dotted
+         * with a body axis.
+         *
+         * <p>The second mask, after {@link #EDGE}, that asks about the model
+         * rather than about body space, and it asks the other question: not
+         * where a box stops but which way its face is pointed. A shell's sheen,
+         * a rim light along the topline, a wash that only takes on the
+         * upward-facing planes - all of them are functions of facing, and every
+         * other mask here would have to fake them with a position band that
+         * gets it wrong the moment the geometry turns.
+         *
+         * <p><b>It is not iridescence.</b> The coat is a baked texture and this
+         * class never learns where a camera is, so a colour run through this
+         * mask is fixed on the horse: it shifts with the <i>surface</i>, not
+         * with the viewer. That is a structural sheen, and it is the honest
+         * half of the effect.
+         */
+        NORMAL
     }
 
     // ------------------------------------------------------------------
@@ -681,6 +744,23 @@ public record GeneSpec(
         public double[] points(String name) {
             Object o = raw.get(name);
             return o == null ? EMPTY_POINTS : (double[]) o;
+        }
+
+        /**
+         * An {@code SVG} mask's path data, <b>already flattened</b>; null when
+         * absent.
+         *
+         * <p>The only parameter whose parsed form is not the thing the file
+         * wrote. Flattening a {@code d} string means walking a grammar and
+         * sampling every curve in it, and doing that per texel would cost more
+         * than painting the horse; doing it at load costs it once. The source
+         * string rides along on {@link com.example.horsegenetics.common.coat.pattern.SvgPath.Shape#d()}
+         * so nothing that wants to write the file back out has to reconstruct
+         * it.
+         */
+        public com.example.horsegenetics.common.coat.pattern.SvgPath.Shape svg(String name) {
+            Object o = raw.get(name);
+            return o == null ? null : (com.example.horsegenetics.common.coat.pattern.SvgPath.Shape) o;
         }
     }
 }

@@ -787,12 +787,17 @@ window.HG = window.HG || {};
         // number/knob/per-dose control - so SPOTS' `mirror` offered to be
         // driven by a knob and could not simply be ticked. There is no such
         // thing as a per-dose boolean; it is a checkbox.
-        card.appendChild(field(p.name, checkbox(!!mask[p.name], function (v) {
+        var flagOn = mask[p.name] === undefined ? !!p.fallback : !!mask[p.name];
+        card.appendChild(field(p.name, checkbox(flagOn, function (v) {
           mask[p.name] = v;
           changed();
         }), p.doc));
       } else if (p.kind === "POINTS") {
         card.appendChild(field(p.name, pointsEditor(mask, p.name), p.doc));
+      } else if (p.kind === "SVG" || p.kind === "TEXT") {
+        card.appendChild(field(p.name, svgTextEditor(mask, p.name, p, changed), p.doc));
+      } else if (p.kind === "BOX") {
+        card.appendChild(field(p.name, boxEditor(mask, p.name, changed), p.doc));
       } else {
         card.appendChild(field(p.name, valueEditor(mask, p.name, p, changed), p.doc));
       }
@@ -861,6 +866,87 @@ window.HG = window.HG || {};
     }
     area.addEventListener("input", reread);
     wrap.appendChild(area);
+    wrap.appendChild(note);
+    reread();
+    return wrap;
+  }
+
+  /**
+   * <b>An SVG mask's path data, or its transform list</b> - a textarea, and a
+   * line underneath saying whether it parsed.
+   *
+   * <p>The note is the whole value of this control. A {@code d} string is a
+   * thing people paste rather than type, and the two ways it goes wrong -
+   * a stray character from the surrounding XML, and a path that flattens past
+   * the point ceiling - both produce a mask that simply paints nothing. Saying
+   * "84 points, 3 subpaths" or naming the character it choked on turns a blank
+   * horse into a one-line fix.
+   */
+  function svgTextEditor(mask, name, p, changed) {
+    var wrap = el("div", { class: "stack" });
+    var area = el("textarea", { rows: name === "d" ? 5 : 2, value: mask[name] || "" });
+    var note = el("span", { class: "hint" });
+    function reread() {
+      mask[name] = area.value;
+      changed();
+      if (!mask.d) {
+        note.textContent = "no path data yet";
+        return;
+      }
+      try {
+        var shape = HG.svgPath.parse(mask.d, mask.transform);
+        note.textContent = shape.xs.length + " points in " + shape.closed.length
+          + " subpath(s), " + fmt(shape.box[0]) + " " + fmt(shape.box[1]) + " to "
+          + fmt(shape.box[2]) + " " + fmt(shape.box[3]);
+        note.classList.remove("bad");
+      } catch (e) {
+        note.textContent = e.message;
+        note.classList.add("bad");
+      }
+    }
+    function fmt(n) { return Math.round(n * 100) / 100; }
+    area.addEventListener("input", reread);
+    wrap.appendChild(area);
+    wrap.appendChild(note);
+    reread();
+    return wrap;
+  }
+
+  /**
+   * A {@code viewBox}: four numbers, taken the way the attribute writes them so
+   * one can be pasted straight across. Blank means "use the drawing's own
+   * bounds", which is what the game does with the key absent.
+   */
+  function boxEditor(mask, name, changed) {
+    var wrap = el("div", { class: "stack" });
+    var box = mask[name];
+    var input = el("input", {
+      type: "text",
+      value: box && box.length === 4 ? box.join(" ") : "",
+      placeholder: "minU minV width height - blank fits the drawing's own bounds"
+    });
+    var note = el("span", { class: "hint" });
+    function reread() {
+      if (!input.value.trim()) {
+        delete mask[name];
+        note.textContent = "using the drawing's own bounding box";
+        note.classList.remove("bad");
+        changed();
+        return;
+      }
+      var nums = HG.svgPath.numbers(input.value);
+      if (nums.length !== 4 || nums[2] <= 0 || nums[3] <= 0) {
+        note.textContent = "four numbers, and the last two above 0";
+        note.classList.add("bad");
+        return;
+      }
+      mask[name] = nums;
+      note.textContent = "";
+      note.classList.remove("bad");
+      changed();
+    }
+    input.addEventListener("input", reread);
+    wrap.appendChild(input);
     wrap.appendChild(note);
     reread();
     return wrap;

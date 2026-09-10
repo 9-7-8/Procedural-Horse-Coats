@@ -183,7 +183,8 @@ public final class SpecPainter {
             }
             case TOWARD -> towardColour(delta, colour, p, v, leg, px, py, k, solidColour(op, v, leg));
             case RAMP -> {
-                int rgb = rampColour(op, v, leg, axisPosition(op, v, leg, skin, bounds, part, point));
+                int rgb = rampColour(op, v, leg,
+                        axisPosition(op, v, leg, skin, bounds, part, point, seedBase));
                 towardColour(delta, colour, p, v, leg, px, py, k, rgb);
             }
             case PALETTE -> {
@@ -256,11 +257,49 @@ public final class SpecPainter {
                 v.get(p.value("lightness", 0.55), leg));
     }
 
-    /** Where along a {@code RAMP}'s axis this texel sits, as a 0..1 position between its stops. */
+    /**
+     * Where along a {@code RAMP}'s axis this texel sits, as a 0..1 position
+     * between its stops.
+     *
+     * <p>Three of the six answers are not axes at all. A straight line through
+     * the horse is monotonic by construction - the colour sweeps once and never
+     * comes back - and a marking whose colour <b>wanders</b>, or is decided per
+     * cell, is not a tuning of that. So {@code noise}, {@code cell} and
+     * {@code cellId} read a field here in the same place a coordinate would go,
+     * which is all it takes: everything downstream of this method only ever saw
+     * a number between 0 and 1.
+     *
+     * <p>They read {@code seed} and {@code scale} and ignore {@code space},
+     * {@code from} and {@code to} - those three describe a spatial axis and
+     * have nothing to say about a field.
+     */
     private static double axisPosition(Op op, SpecValues v, int leg, Skin skin,
-                                       Map<Part, Bounds> bounds, Part part, BodyPoint point) {
+                                       Map<Part, Bounds> bounds, Part part, BodyPoint point,
+                                       long seedBase) {
         Params p = op.params();
-        Axis axis = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
+        String axisName = p.text("axis", "X");
+        if (!"X".equalsIgnoreCase(axisName) && !"Y".equalsIgnoreCase(axisName)
+                && !"Z".equalsIgnoreCase(axisName)) {
+            long seed = v.seed(p.value("seed", 0), seedBase);
+            double scale = Math.max(0.05, v.get(p.value("scale", 5.0), leg));
+            if ("noise".equals(axisName)) {
+                return clamp01(BodyNoise.value(seed,
+                        point.x() / scale, point.y() / scale, point.z() / scale));
+            }
+            if ("cell".equals(axisName)) {
+                // 0 at a cell's middle, 1 at the boundary it shares with its
+                // nearest neighbour - so every cell fades independently and all
+                // of them stay reproducible from the one seed.
+                return clamp01(BodyNoise.cellDistance(seed,
+                        point.x() / scale, point.y() / scale, point.z() / scale));
+            }
+            // cellId: one draw per cell, constant across it. Neighbours land on
+            // unrelated stops, which is the difference between iridescence and
+            // a gradient - and the only RAMP that has a hard edge in it.
+            return clamp01(BodyNoise.cell(seed,
+                    point.x() / scale, point.y() / scale, point.z() / scale).pick());
+        }
+        Axis axis = Axis.valueOf(axisName.toUpperCase(java.util.Locale.ROOT));
         double coord = point.along(axis);
         Bounds partBounds = bounds.get(part);
         double t = switch (p.text("space", "part")) {
@@ -649,11 +688,40 @@ public final class SpecPainter {
                 }
                 double vary = clamp01(v.get(p.value("vary", 0.5), leg));
                 double radius = v.get(p.value("radius", 0.9), leg) * (1 - vary + 2 * vary * cell.size());
+                // The offsets move where THIS mask measures from, not where the
+                // cell is: the lattice is untouched, so a second mask on the
+                // same seed still finds the same centres and the two stay
+                // related. That is the whole point - an off-centre glint has to
+                // sit inside a concentric set rather than replace it.
+                double ox = v.get(p.value("offsetX", 0.0), leg) / spacing;
+                double oy = v.get(p.value("offsetY", 0.0), leg) / spacing;
+                double oz = v.get(p.value("offsetZ", 0.0), leg) / spacing;
+                double dx = cell.dx() - ox;
+                double dy = cell.dy() - oy;
+                double dz = cell.dz() - oz;
+                double distance = ox == 0 && oy == 0 && oz == 0
+                        ? cell.distance()
+                        : Math.sqrt(dx * dx + dy * dy + dz * dz);
                 if ("heart".equals(p.text("shape", "round"))) {
-                    radius *= heartRadius(Math.atan2(cell.dy(), cell.dx()));
+                    radius *= heartRadius(Math.atan2(dy, dx));
+                }
+                double arc = clamp01(v.get(p.value("arc", 1.0), leg));
+                if (arc < 1) {
+                    // Every element clipped to the SAME angular wedge, measured
+                    // in the plane the long axis is not in. A tiling of those
+                    // reads as SHINGLED - scales, feathers, roof tiles - because
+                    // the hidden half of each mark is the half its neighbour
+                    // laps over, and that is one direction for the whole field
+                    // rather than one per cell the way a RINGS crescent is.
+                    double a = longAxis == Axis.X ? Math.atan2(dy, dz)
+                            : (longAxis == Axis.Y ? Math.atan2(dz, dx) : Math.atan2(dy, dx));
+                    double turn = a / (2 * Math.PI) - v.get(p.value("angle", 0.0), leg) / 360.0 + 0.5;
+                    if (((turn % 1) + 1) % 1 > arc) {
+                        return 0;
+                    }
                 }
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
-                return 1.0 - BodyStripes.smoothstep(radius, radius + soft, cell.distance() * spacing);
+                return 1.0 - BodyStripes.smoothstep(radius, radius + soft, distance * spacing);
             }
             case RINGS: {
                 long seed = v.seed(p.value("seed", 0), seedBase);
@@ -667,8 +735,17 @@ public final class SpecPainter {
                 double radius = v.get(p.value("radius", 2.0), leg) * (1 - vary + 2 * vary * cell.size());
                 double half = Math.max(1e-6, v.get(p.value("thickness", 0.6), leg)) / 2;
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.2), leg));
+                double ox = v.get(p.value("offsetX", 0.0), leg) / spacing;
+                double oy = v.get(p.value("offsetY", 0.0), leg) / spacing;
+                double oz = v.get(p.value("offsetZ", 0.0), leg) / spacing;
+                double dx = cell.dx() - ox;
+                double dy = cell.dy() - oy;
+                double dz = cell.dz() - oz;
+                double distance = ox == 0 && oy == 0 && oz == 0
+                        ? cell.distance()
+                        : Math.sqrt(dx * dx + dy * dy + dz * dz);
                 double ring = 1.0 - BodyStripes.smoothstep(half, half + soft,
-                        Math.abs(cell.distance() * spacing - radius));
+                        Math.abs(distance * spacing - radius));
                 double arc = clamp01(v.get(p.value("arc", 1.0), leg));
                 if (arc >= 1) {
                     return ring;
@@ -676,7 +753,7 @@ public final class SpecPainter {
                 // A crescent is a ring with a wedge missing. The wedge opens at
                 // the ring's own angle, so every crescent on the horse faces a
                 // different way instead of all of them pointing at one corner.
-                double theta = Math.atan2(cell.dy(), cell.dz()) / (2 * Math.PI) + 0.5;
+                double theta = Math.atan2(dy, dz) / (2 * Math.PI) + 0.5;
                 return (((theta - cell.angle()) % 1) + 1) % 1 <= arc ? ring : 0;
             }
             case SPECKLE: {
@@ -816,13 +893,211 @@ public final class SpecPainter {
                 }
                 double half = Math.max(1e-4, v.get(p.value("gap", 0.5), leg)) / 2;
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.08), leg));
-                return BodyStripes.smoothstep(half, half + soft,
-                        BodyNoise.cellEdge(seed, wx, wy, wz) * scale);
+                if ("centroid".equals(p.text("measure", SpecSchema.CRACKLE_MEASURES.get(0)))) {
+                    // The SAME tessellation, read from the middle out instead of
+                    // from the wall in. Nothing else gives a per-cell radial
+                    // coordinate a crackle outline is guaranteed concentric
+                    // with, because every other lattice mask lays down its own
+                    // centres and those have never known where a wall fell.
+                    return BodyStripes.smoothstep(half, half + soft,
+                            BodyNoise.cellDistance(seed, wx, wy, wz) * scale);
+                }
+                double edge = BodyNoise.cellEdge(seed, wx, wy, wz) * scale;
+                double vertexWeight = clamp01(v.get(p.value("vertexWeight", 0.0), leg));
+                if (vertexWeight > 0) {
+                    // Blending in the distance to the three-way CORNERS is what
+                    // lets a threshold on this field pool at the junctions and
+                    // thin between them. An even channel cannot vary its own
+                    // width; a vein network has to.
+                    edge = edge * (1 - vertexWeight)
+                            + BodyNoise.cellVertex(seed, wx, wy, wz) * scale * vertexWeight;
+                }
+                return BodyStripes.smoothstep(half, half + soft, edge);
+            }
+            case SVG: {
+                SvgPath.Shape shape = p.svg("d");
+                double[] viewBox = p.points("viewBox");
+                if (shape == null || viewBox.length != 4) {
+                    return 0;   // the parser refuses both; a hand-built Params could still reach here
+                }
+                Bounds whole = HorseSkinGeometry.bodyBounds(skin);
+                String plane = p.text("plane", SpecSchema.PATH_PLANES.get(0));
+                Axis uAxis = "front".equals(plane) ? Axis.Z : Axis.X;
+                Axis vAxis = "top".equals(plane) ? Axis.Z : Axis.Y;
+                boolean normalised = !"units".equals(p.text("space", SpecSchema.PATH_SPACES.get(0)));
+                double uMin = normalised ? whole.min(uAxis) : 0;
+                double uSpan = normalised ? Math.max(1e-6, whole.span(uAxis)) : 1;
+                double vMin = normalised ? whole.min(vAxis) : 0;
+                double vSpan = normalised ? Math.max(1e-6, whole.span(vAxis)) : 1;
+
+                // The viewport: the rectangle in BODY UNITS that the drawing's
+                // own viewBox is fitted into. Everything below this line is in
+                // body units - the stroke, the softness, the dashes - so no
+                // number here means two things depending on 'space', which is
+                // the mistake WAVES' amplitude is a standing monument to.
+                double vw = v.get(p.value("sizeU", 1.0), leg) * uSpan;
+                double vh = v.get(p.value("sizeV", 1.0), leg) * vSpan;
+                if (Math.abs(vw) < 1e-9 || Math.abs(vh) < 1e-9) {
+                    return 0;
+                }
+                double[] fit = SvgPath.fit(viewBox,
+                        uMin + v.get(p.value("originU", 0.0), leg) * uSpan,
+                        vMin + v.get(p.value("originV", 0.0), leg) * vSpan,
+                        vw, vh,
+                        p.text("fit", SpecSchema.SVG_FITS.get(0)),
+                        p.text("align", SpecSchema.SVG_ALIGNMENTS.get(0)));
+
+                // Measure in the DRAWING's own space rather than the horse's:
+                // one inverse map per texel beats transforming every point of
+                // the path, and it loses nothing, because the map is affine.
+                double x = (point.along(uAxis) - fit[2]) / fit[0];
+                double y = (point.along(vAxis) - fit[3]) / fit[1];
+                if (p.flag("flipY", true)) {
+                    // SVG's y runs DOWN the page and the horse's runs up. Without
+                    // this every pasted drawing lands upside down, and it is the
+                    // kind of upside down that looks deliberate.
+                    y = 2 * viewBox[1] + viewBox[3] - y;
+                }
+                // One scale back to body units. Equal on both axes unless 'fit'
+                // is "none", where the drawing was deliberately stretched and a
+                // stroke has no single width any more; the geometric mean is the
+                // honest compromise and is exact in every other case.
+                double toBody = Math.sqrt(Math.abs(fit[0] * fit[1]));
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
+                double[] hit = SVG_HIT.get();
+
+                if (p.flag("fill", true)) {
+                    if (SvgPath.inside(shape, x, y,
+                            "evenodd".equals(p.text("fillRule", SpecSchema.SVG_FILL_RULES.get(0))))) {
+                        return 1.0;
+                    }
+                    // Solid inside, fading outward over 'softness' - the same
+                    // choice PATH's fill makes, and for the same reason: a
+                    // filled shape's edge is its outline, and adding half a
+                    // stroke to it would quietly resize what was drawn.
+                    SvgPath.distance(shape, x, y, "round", 0, hit);
+                    return 1.0 - BodyStripes.smoothstep(0, soft, hit[0] * toBody);
+                }
+
+                double halfWidth = Math.max(0.0, v.get(p.value("width", 1.0), leg)) / 2.0;
+                double halfUser = toBody < 1e-9 ? 0 : halfWidth / toBody;
+                SvgPath.distance(shape, x, y, p.text("cap", SpecSchema.SVG_CAPS.get(0)), halfUser, hit);
+                double d = hit[0];
+                if ("miter".equals(p.text("join", SpecSchema.SVG_JOINS.get(0)))) {
+                    // A round join is what the plain segment distance already
+                    // draws, and a bevel is close enough to it at these widths
+                    // to be the same texels; a miter genuinely reaches further,
+                    // so it is the only one that costs a second pass.
+                    d = Math.min(d, SvgPath.miterDistance(shape, x, y, halfUser,
+                            Math.max(1.0, v.get(p.value("miterLimit", 4.0), leg))));
+                }
+                double dash = v.get(p.value("dash", 0.0), leg);
+                if (dash > 0) {
+                    // Measured ALONG the path, the way a stroke-dasharray is, so
+                    // a broken outline breaks in the places the drawing program
+                    // it came from broke it.
+                    double gap = v.get(p.value("gap", 0.0), leg);
+                    double period = dash + (gap > 0 ? gap : dash);
+                    double along = hit[1] * toBody + v.get(p.value("dashOffset", 0.0), leg);
+                    if (((along % period) + period) % period > dash) {
+                        return 0;
+                    }
+                }
+                return 1.0 - BodyStripes.smoothstep(halfWidth, halfWidth + soft, d * toBody);
+            }
+            case FAN: {
+                Bounds whole = HorseSkinGeometry.bodyBounds(skin);
+                String plane = p.text("plane", SpecSchema.PATH_PLANES.get(0));
+                Axis uAxis = "front".equals(plane) ? Axis.Z : Axis.X;
+                Axis vAxis = "top".equals(plane) ? Axis.Z : Axis.Y;
+                boolean normalised = !"units".equals(p.text("space", SpecSchema.PATH_SPACES.get(0)));
+                double ou = normalised
+                        ? whole.min(uAxis) + v.get(p.value("originU", 0.5), leg) * whole.span(uAxis)
+                        : v.get(p.value("originU", 0.5), leg);
+                double ov = normalised
+                        ? whole.min(vAxis) + v.get(p.value("originV", 0.5), leg) * whole.span(vAxis)
+                        : v.get(p.value("originV", 0.5), leg);
+                double du = point.along(uAxis) - ou;
+                double dv = point.along(vAxis) - ov;
+                double r = Math.sqrt(du * du + dv * dv);
+                double inner = v.get(p.value("inner", 0.0), leg);
+                double outer = v.get(p.value("outer", 0.0), leg);
+                if (r < inner || (outer > 0 && r > outer) || r < 1e-6) {
+                    return 0;
+                }
+                // The phase is an ANGLE and the period is an arc length taken at
+                // one body unit out, so a cycle covers 'spacing' units of arc
+                // there and proportionally more further away. That is what makes
+                // the bars widen as they travel and converge as they return -
+                // the measurement a linear coordinate cannot make, whatever its
+                // wavelength.
+                double spacing = Math.max(1e-4, v.get(p.value("spacing", 2.0), leg));
+                double twist = v.get(p.value("twist", 0.0), leg) * r / 360.0;
+                double turns = (Math.atan2(dv, du) / (2 * Math.PI) + twist) * (2 * Math.PI / spacing);
+                double f = turns - Math.floor(turns);
+                double duty = clamp01(v.get(p.value("duty", 0.5), leg));
+                double soft = Math.max(1e-6, clamp01(v.get(p.value("softness", 0.15), leg)) * duty);
+                // The bar that straddles the wrap is one bar; testing f - 1 as
+                // well is what stops a seam appearing at whatever angle the
+                // cycle happens to start on.
+                return Math.max(band(f, 0, duty, soft), band(f - 1, 0, duty, soft));
+            }
+            case NORMAL: {
+                Axis axis = Axis.valueOf(p.text("axis", "Y").toUpperCase(java.util.Locale.ROOT));
+                Bounds b = bounds.get(part);
+                double n = face.normal() == axis ? (face.atMax() ? 1 : -1) : 0;
+                double round = clamp01(v.get(p.value("round", 0.0), leg));
+                if (round > 0 && b != null) {
+                    // The normal the part would have if its box were an
+                    // ellipsoid: the offset from the centre, divided by each
+                    // half-span so a leg is not read as a sphere. Continuous,
+                    // where the flat face normal takes exactly three values -
+                    // which is the difference between faceted zones and the
+                    // curvature sheen on a shell.
+                    boolean local = "local".equals(p.text("space", "body"));
+                    BodyPoint at = local ? HorseSkinGeometry.local(skin, part, point) : point;
+                    double ex = local ? (at.x() - 0.5) * 2 : ellipsoid(at, b, Axis.X);
+                    double ey = local ? (at.y() - 0.5) * 2 : ellipsoid(at, b, Axis.Y);
+                    double ez = local ? (at.z() - 0.5) * 2 : ellipsoid(at, b, Axis.Z);
+                    double len = Math.sqrt(ex * ex + ey * ey + ez * ez);
+                    if (len > 1e-9) {
+                        double rounded = switch (axis) {
+                            case X -> ex / len;
+                            case Y -> ey / len;
+                            case Z -> ez / len;
+                        };
+                        n = n * (1 - round) + rounded * round;
+                    }
+                }
+                double from = v.get(p.value("from", -1.0), leg);
+                double to = v.get(p.value("to", 1.0), leg);
+                return to == from ? (n >= to ? 1 : 0) : clamp01((n - from) / (to - from));
             }
             default:
                 throw new IllegalStateException("unhandled mask " + mask.type());
         }
     }
+
+    /**
+     * One component of the normal a part's box would have if it were an
+     * ellipsoid - the offset from the box centre, divided by the half-span, so
+     * the long axis of a leg is not read as the long axis of a sphere.
+     */
+    private static double ellipsoid(BodyPoint point, Bounds b, Axis axis) {
+        double half = Math.max(1e-6, b.span(axis) / 2);
+        return (point.along(axis) - (b.min(axis) + half)) / half;
+    }
+
+    /**
+     * Scratch for {@link SvgPath#distance} - three doubles, reused rather than
+     * allocated per texel.
+     *
+     * <p>A thread local rather than a plain field because the pipeline bakes
+     * skins in parallel, and a shared scratch array is the classic way to end up
+     * with a horse whose markings depend on what another horse was doing at the
+     * time.
+     */
+    private static final ThreadLocal<double[]> SVG_HIT = ThreadLocal.withInitial(() -> new double[3]);
 
     /**
      * One cycle of a {@code WAVES} displacement, in {@code [-1, 1]}, at

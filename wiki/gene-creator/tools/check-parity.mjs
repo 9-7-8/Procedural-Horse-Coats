@@ -30,7 +30,8 @@ const repo = join(creator, "..", "..");
 const sandbox = { window: {}, console };
 sandbox.window.window = sandbox.window;
 vm.createContext(sandbox);
-for (const file of ["geometry.js", "noise.js", "fields.js", "schema.js", "spec-engine.js", "parity.js"]) {
+for (const file of ["geometry.js", "noise.js", "svg-path.js", "fields.js", "schema.js",
+                    "spec-engine.js", "parity.js"]) {
   vm.runInContext(readFileSync(join(creator, "js", file), "utf8"), sandbox, { filename: file });
 }
 const HG = sandbox.window.HG;

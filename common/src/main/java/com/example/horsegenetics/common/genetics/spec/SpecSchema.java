@@ -48,7 +48,31 @@ public final class SpecSchema {
          * made of and lets the horse decide where it lands; this one carries
          * the shape itself.
          */
-        POINTS
+        POINTS,
+        /**
+         * <b>SVG path data</b> - a {@code d} string, flattened by
+         * {@link com.example.horsegenetics.common.coat.pattern.SvgPath} at load
+         * into the polylines the painter walks.
+         *
+         * <p>The one kind whose parsed form is not the shape the file wrote,
+         * and the reason is cost: walking the path grammar and sampling every
+         * cubic and arc in it is a hundred times what measuring one texel
+         * against the result costs, so it happens once. The source string is
+         * kept on the flattened shape, so writing the file back out is exact.
+         */
+        SVG,
+        /**
+         * A free string - an SVG {@code transform} list, and nothing else so
+         * far. Unlike {@link #CHOICE} there is no fixed set to check it
+         * against, so whatever validation there is happens in the thing that
+         * reads it.
+         */
+        TEXT,
+        /**
+         * Four numbers read as {@code [minU, minV, width, height]} - an SVG
+         * {@code viewBox}, in the order and the meaning that file writes them.
+         */
+        BOX
     }
 
     /**
@@ -74,6 +98,24 @@ public final class SpecSchema {
             return new Param(name, Kind.FLAG, 0, List.of(), doc);
         }
 
+        /**
+         * A flag the painter reads as <b>true</b> when the file leaves it out.
+         *
+         * <p>Every flag in the format was false-by-default until the SVG mask,
+         * and there the two that matter are both true: a {@code <path>} with no
+         * stroke is filled, and a pasted drawing whose y is not flipped lands
+         * upside down. Making the author write those out on every mask would be
+         * the tool disagreeing with the format it is importing from.
+         *
+         * <p>It costs the creator a real change rather than a cast, because its
+         * exporter drops any setting equal to its default: a flag whose default
+         * is true has to be <i>written</i> when it is unticked. That is why the
+         * fallback is compared by the parity check now and was not before.
+         */
+        static Param flagOn(String name, String doc) {
+            return new Param(name, Kind.FLAG, 1, List.of(), doc);
+        }
+
         static Param color(String name, String doc) {
             return new Param(name, Kind.COLOR, 0, List.of(), doc);
         }
@@ -84,6 +126,18 @@ public final class SpecSchema {
 
         static Param points(String name, String doc) {
             return new Param(name, Kind.POINTS, 0, List.of(), doc);
+        }
+
+        static Param svg(String name, String doc) {
+            return new Param(name, Kind.SVG, 0, List.of(), doc);
+        }
+
+        static Param text(String name, String doc) {
+            return new Param(name, Kind.TEXT, 0, List.of(), doc);
+        }
+
+        static Param box(String name, String doc) {
+            return new Param(name, Kind.BOX, 0, List.of(), doc);
         }
     }
 
@@ -135,6 +189,49 @@ public final class SpecSchema {
      * when a length changes meaning with a space setting.
      */
     public static final List<String> PATH_SPACES = List.of("body", "units");
+
+    /**
+     * How an {@code SVG} mask's {@code viewBox} is fitted into the viewport the
+     * mask places it in - SVG's {@code preserveAspectRatio}, under its own
+     * name.
+     *
+     * <p>It is a parameter and not a convenience because the three answers are
+     * genuinely different pictures and the file cannot tell you which one was
+     * meant. {@code meet} fits the whole drawing inside the viewport and leaves
+     * slack on one axis - nothing is lost, and a square drawing in a long
+     * viewport ends up small. {@code slice} fills the viewport and lets the
+     * drawing run off the other axis - nothing is small, and the corners are
+     * gone. {@code none} stretches to fill, which is the only one that changes
+     * the shape, and is exactly what a marking meant to wrap a barrel usually
+     * wants.
+     */
+    public static final List<String> SVG_FITS = List.of("meet", "slice", "none");
+
+    /**
+     * Where a drawing sits inside its viewport when {@code fit} left slack -
+     * SVG's nine {@code preserveAspectRatio} alignments, spelled the way that
+     * attribute spells them so a value can be copied straight out of the file.
+     */
+    public static final List<String> SVG_ALIGNMENTS =
+            com.example.horsegenetics.common.coat.pattern.SvgPath.ALIGNMENTS;
+
+    /**
+     * Which area an {@code SVG} fill counts as inside.
+     *
+     * <p>The hole in a letter O is a second subpath, and whether it is a hole
+     * at all depends entirely on this: two subpaths wound the same way are one
+     * solid blob under {@code nonzero} and a ring under {@code evenodd}. Which
+     * the artist meant is written in their file and is not recoverable from the
+     * geometry, so it is asked for rather than guessed - and the default is
+     * {@code nonzero} because that is SVG's own.
+     */
+    public static final List<String> SVG_FILL_RULES = List.of("nonzero", "evenodd");
+
+    /** How an open {@code SVG} subpath's two free ends are finished. */
+    public static final List<String> SVG_CAPS = List.of("butt", "round", "square");
+
+    /** How an {@code SVG} stroke turns a corner. */
+    public static final List<String> SVG_JOINS = List.of("miter", "round", "bevel");
 
     /**
      * How many straight sub-segments each span of a smoothed {@code PATH} is
@@ -215,6 +312,45 @@ public final class SpecSchema {
 
     /** Which outline a {@code SPOTS} element is drawn with. */
     public static final List<String> SPOT_SHAPES = List.of("round", "heart");
+
+    /**
+     * Which distance a {@code CRACKLE} mask reports.
+     *
+     * <p>Both readings come off the <b>same tessellation</b>, and that is the
+     * whole value of the second one: a layer measuring {@code wall} and a layer
+     * measuring {@code centroid} on the same seed and scale are talking about
+     * the same polygons, so a colour banded by the second lands concentric
+     * inside the cells outlined by the first. Nothing else in the vocabulary
+     * can promise that - {@code SPOTS} and {@code DAPPLES} lay down their own
+     * centres, and those have never had anything to do with where a crackle
+     * wall fell.
+     *
+     * <p>The first entry is the default, so it has to be the one
+     * {@code SpecPainter} falls back to.
+     */
+    public static final List<String> CRACKLE_MEASURES = List.of("wall", "centroid");
+
+    /**
+     * Where a {@code RAMP} reads the position it looks its colour up at.
+     *
+     * <p>The three axes are a straight line through the horse, and a straight
+     * line is monotonic by construction: whatever the stops are, the colour
+     * sweeps once from one end to the other and never comes back. The other
+     * three are the answer to markings that are not like that.
+     *
+     * <p>{@code noise} is a smooth field, so the colour <b>wanders</b> - it
+     * doubles back, pools and thins the way an oil slick does, with no cell
+     * walls anywhere. {@code cell} is the distance from a texel to the middle of
+     * its own cell, so every cell gets its own independent radial fade at once.
+     * {@code cellId} is one number drawn per cell and constant across it, so
+     * neighbours take unrelated colours - the difference between "iridescent"
+     * and "a gradient", and the only one of the three that has hard edges.
+     *
+     * <p>All three read {@code seed} and {@code scale} and ignore
+     * {@code space}, {@code from} and {@code to}, which measure a spatial axis
+     * and have nothing to say about a field.
+     */
+    public static final List<String> RAMP_AXES = List.of("X", "Y", "Z", "noise", "cell", "cellId");
 
     /**
      * What a {@code FRACTAL} mask does with the field once the octaves are
@@ -430,6 +566,24 @@ public final class SpecSchema {
                         "'round' is the spot field; 'heart' swaps the disc for a heart, point down, "
                                 + "upright on the flank"),
                 Param.flag("mirror", MIRROR_DOC),
+                Param.value("arc", 1.0,
+                        "share of each element's own circumference that is drawn, measured around "
+                                + "that element's centre. Below 1 clips every mark in the field to "
+                                + "the same one-sided crescent, which is what makes a tiling read as "
+                                + "SHINGLED - overlapping scales, feathers, roof tiles - instead of "
+                                + "as a closed net. RINGS has the same parameter and can only ever "
+                                + "apply it to one placed instance"),
+                Param.value("angle", 0.0,
+                        "degrees the drawn arc is centred on, in the plane of the two axes the long "
+                                + "axis is not. 0 points toward the nose. Read only when 'arc' is "
+                                + "below 1"),
+                Param.value("offsetX", 0.0,
+                        "shift THIS mask's reading of the cell centre, body units, without moving the "
+                                + "cell. Several masks on one seed and spacing stay concentric - that "
+                                + "is rule 14 - and this is how one of them deliberately does not: "
+                                + "the off-centre glint inside an eyespot, the highlight on a bead"),
+                Param.value("offsetY", 0.0, "the same, on Y"),
+                Param.value("offsetZ", 0.0, "the same, on Z"),
                 Param.value("softness", 0.25, "edge fade, body units")));
 
         MASKS.put(MaskType.RINGS, List.of(
@@ -441,6 +595,11 @@ public final class SpecSchema {
                 Param.value("vary", 0.4, "how much the radius varies ring to ring, 0 to 1"),
                 Param.value("chance", 1.0, "share of lattice cells that carry a ring at all"),
                 Param.value("arc", 1.0, "share of the circumference drawn - below 1 gives a crescent"),
+                Param.value("offsetX", 0.0,
+                        "shift THIS mask's reading of the cell centre, body units, without moving the "
+                                + "cell - exactly as on SPOTS, and for the same reason"),
+                Param.value("offsetY", 0.0, "the same, on Y"),
+                Param.value("offsetZ", 0.0, "the same, on Z"),
                 Param.value("softness", 0.2, "edge fade, body units")));
 
         MASKS.put(MaskType.SPECKLE, List.of(
@@ -508,7 +667,111 @@ public final class SpecSchema {
                 Param.value("chance", 1.0, "share of polygons that are filled at all"),
                 Param.value("softness", 0.08,
                         "edge fade, body units - small on purpose, because the point of this mask "
-                                + "is the one hard edge in the vocabulary")));
+                                + "is the one hard edge in the vocabulary"),
+                Param.choice("measure", CRACKLE_MEASURES,
+                        "'wall' is distance to the boundary between two polygons - the crack. "
+                                + "'centroid' is distance from the texel to ITS OWN polygon's centre, "
+                                + "normalised so 0 is the middle and 1 the rim, which is the only way "
+                                + "to shade or band each irregular cell independently. Under "
+                                + "'centroid' the 'gap' and 'softness' numbers stop meaning a channel "
+                                + "width and become a radius"),
+                Param.value("vertexWeight", 0.0,
+                        "0 to 1, how far the wall distance is blended toward distance to the nearest "
+                                + "three-way CORNER of the tiling. 0 is the even channel; at 1 the "
+                                + "field is only near zero at the junctions. In between, a threshold "
+                                + "on it gives a network that POOLS where cracks meet and thins to a "
+                                + "hairline between them, which even walls cannot do. Read under "
+                                + "'wall' only")));
+
+        MASKS.put(MaskType.SVG, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.svg("d", "the SVG path data, verbatim: M m L l H h V v C c S s Q q T t A a Z z, "
+                        + "absolute and relative, as many subpaths as you like. Flattened at load, so "
+                        + "the cost per texel is the number of points it came to and not the number of "
+                        + "commands you wrote"),
+                Param.text("transform", "an SVG transform list applied to the path before anything "
+                        + "else - matrix, translate, scale, rotate, skewX, skewY, composed left to "
+                        + "right. Paste the one off the <path> or its <g>"),
+                Param.box("viewBox", "the drawing's own coordinate box, [minU, minV, width, height], "
+                        + "exactly as the <svg> writes it. Omit and the path's own bounding box is "
+                        + "used, which is what you want for a single mark and wrong for one mark out "
+                        + "of a set that has to keep its position among the others"),
+                Param.choice("plane", SpecSchema.PATH_PLANES,
+                        "which two axes the drawing lies in, and so which one it is extruded along - "
+                                + "as on PATH. 'side' appears on BOTH flanks"),
+                Param.choice("space", SpecSchema.PATH_SPACES,
+                        "how the viewport below is measured - 'body' normalises each axis over the "
+                                + "whole horse, 'units' is raw body units. Stroke 'width', 'softness' "
+                                + "and the dash lengths are body units either way"),
+                Param.value("originU", 0.0, "the viewport's near corner along the plane's first axis"),
+                Param.value("originV", 0.0, "the viewport's near corner along its second axis"),
+                Param.value("sizeU", 1.0, "the viewport's extent along the first axis"),
+                Param.value("sizeV", 1.0, "the viewport's extent along the second axis"),
+                Param.choice("fit", SVG_FITS,
+                        "preserveAspectRatio: 'meet' fits the whole drawing in and leaves slack, "
+                                + "'slice' fills the viewport and overflows, 'none' stretches to fill"),
+                Param.choice("align", SVG_ALIGNMENTS, "where the drawing sits in the slack 'fit' left"),
+                Param.flagOn("flipY",
+                        "SVG's y runs DOWN the page and the horse's runs up, so this is true by "
+                                + "default and a pasted drawing lands the right way up. Set it false "
+                                + "for one authored in body space"),
+                Param.flagOn("fill",
+                        "fill the enclosed area rather than stroking the outline. True by default, "
+                                + "because that is what a <path> with no stroke does and it is what "
+                                + "nearly every drawing means. 'width', 'cap', 'join' and the dashes "
+                                + "are then unread"),
+                Param.choice("fillRule", SVG_FILL_RULES,
+                        "'nonzero' or 'evenodd' - which is a hole and which is a blob. Copy it from "
+                                + "the file's fill-rule; the geometry cannot tell you"),
+                Param.value("width", 1.0, "stroke width, body units - a texel is about 0.5"),
+                Param.choice("cap", SVG_CAPS, "how an open subpath's free ends finish"),
+                Param.choice("join", SVG_JOINS, "how the stroke turns a corner"),
+                Param.value("miterLimit", 4.0,
+                        "how many stroke widths a miter may reach before it falls back to a bevel, "
+                                + "as in SVG. A shallow corner spikes without it"),
+                Param.value("dash", 0.0,
+                        "length of one dash, body units. 0 is a solid stroke; above 0 turns the "
+                                + "outline into a broken one, measured along the path the way a "
+                                + "stroke-dasharray is"),
+                Param.value("gap", 0.0, "length of the space between dashes; 0 means the same as 'dash'"),
+                Param.value("dashOffset", 0.0, "shift the pattern along the path, body units"),
+                Param.value("softness", 0.25, "edge fade, body units")));
+
+        MASKS.put(MaskType.FAN, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.choice("plane", SpecSchema.PATH_PLANES,
+                        "which two axes the angle is measured in - as on PATH. 'side' fans on both flanks"),
+                Param.choice("space", SpecSchema.PATH_SPACES,
+                        "how the origin is measured; the radii and 'spacing' are body units either way"),
+                Param.value("originU", 0.5, "the pivot every bar radiates from, first axis"),
+                Param.value("originV", 0.5, "the pivot, second axis"),
+                Param.value("spacing", 2.0,
+                        "the angular period, given as the arc length one cycle covers at ONE BODY UNIT "
+                                + "from the pivot. Bars therefore widen with distance, which is the "
+                                + "whole difference from WAVES"),
+                Param.value("duty", 0.5, "share of each cycle that is bar rather than gap"),
+                Param.value("twist", 0.0,
+                        "degrees the fan's zero rotates per body unit of distance from the pivot. "
+                                + "0 is a sunburst; anything else is a pinwheel"),
+                Param.value("inner", 0.0, "body units from the pivot where the fan starts"),
+                Param.value("outer", 0.0, "body units where it stops; 0 means it never does"),
+                Param.value("softness", 0.15, "edge fade, as a share of the bar's own width")));
+
+        MASKS.put(MaskType.NORMAL, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.choice("axis", List.of("Y", "X", "Z"),
+                        "the direction the surface is compared against - Y up, X toward the nose, "
+                                + "Z toward the horse's right"),
+                Param.choice("space", List.of("body", "local"),
+                        "'body' takes the box's own facing, so a pitched neck's top face is not level; "
+                                + "'local' takes the pitch out first, so 'up' means up the part"),
+                Param.value("round", 0.0,
+                        "0 reads the FLAT face normal, which on boxes takes exactly three values and "
+                                + "gives hard, faceted zones. Above 0 it blends toward the normal the "
+                                + "part would have if its box were an ellipsoid, which is continuous "
+                                + "and is what a shell's sheen or a rim light needs. 1 is fully rounded"),
+                Param.value("from", -1.0, "the dot product that reads as coverage 0"),
+                Param.value("to", 1.0, "the dot product that reads as coverage 1")));
 
         OPS.put(OpType.DILUTE, List.of(
                 Param.value("keepRed", 1.0, "share of red pigment kept"),
@@ -559,12 +822,26 @@ public final class SpecSchema {
                 Param.value("hueSpan", 60.0, "degrees of hue the ramp travels; negative runs the other way"),
                 Param.value("saturation", 0.8, SATURATION_DOC),
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
-                Param.choice("axis", List.of("X", "Y", "Z"), "the body axis the ramp runs along"),
+                Param.choice("axis", RAMP_AXES,
+                        "X, Y or Z is a straight line through the horse and so sweeps ONCE. 'noise' "
+                                + "reads a smooth field instead, so the colour wanders and doubles "
+                                + "back with no hard edge anywhere; 'cell' reads distance to the "
+                                + "middle of the texel's own cell, so every cell fades independently; "
+                                + "'cellId' reads one number per cell, constant across it, so "
+                                + "neighbours take unrelated colours"),
                 Param.choice("space", AXIS_SPACES,
                         "as on an AXIS mask - 'part' runs the ramp inside each part, which is what a mane "
-                                + "wants, and 'local' runs it along a pitched part's own length"),
+                                + "wants, and 'local' runs it along a pitched part's own length. Read "
+                                + "only by the three spatial axes"),
                 Param.value("from", 0.0, "axis position the first stop sits at"),
                 Param.value("to", 1.0, "axis position the last stop sits at"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default. Read only by "
+                        + "the 'noise', 'cell' and 'cellId' axes"),
+                Param.value("scale", 5.0,
+                        "body units per feature of the field - one wavelength of the noise, or one "
+                                + "cell across. Read only by the 'noise', 'cell' and 'cellId' axes. "
+                                + "Point it at the same knob as the mask's own scale and the colour "
+                                + "lines up with the shape"),
                 Param.value("strength", 100.0, "percent of the way to the ramp colour"),
                 Param.value("opacity", 100.0, "percent opacity the texel ends at")));
 

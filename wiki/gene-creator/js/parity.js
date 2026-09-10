@@ -80,6 +80,13 @@ window.HG = window.HG || {};
         fail(kind + " " + type + "." + name + ": default " + jp.fallback + " in Java, "
           + p.fallback + " in the creator");
       }
+      // A flag used to be false everywhere and so was never compared. The SVG
+      // mask has two that are true, and disagreeing about one of those exports
+      // a filled shape as a stroked one with nothing going red.
+      if (jp.kind === "FLAG" && "fallback" in jp && !!jp.fallback !== !!p.fallback) {
+        fail(kind + " " + type + "." + name + ": default " + jp.fallback + " in Java, "
+          + p.fallback + " in the creator");
+      }
       if (jp.choices && String(jp.choices) !== String(p.choices || [])) {
         fail(kind + " " + type + "." + name + ": choices [" + jp.choices + "] in Java, ["
           + p.choices + "] in the creator");
@@ -252,6 +259,102 @@ window.HG = window.HG || {};
             fail("liftShadows(#" + hex + "): the game gives #" + want
               + ", the creator #" + got);
           }
+          count();
+        });
+      }
+
+      // ---- the SVG path grammar -------------------------------------------
+      //
+      // Compared directly rather than through a horse, because the probe cases
+      // sample four texels per part and a drawing on the flank is a few dozen
+      // texels: the chance they intersect is not something to rest a port on,
+      // and a mask nothing reaches makes this check green BY DEFINITION about
+      // it. Each string below exercises one thing that is easy to get subtly
+      // wrong and impossible to see - a reflected control point, an arc's
+      // sweep, a fill rule, the transform list's order.
+      if (schema.svg && HG.svgPath) {
+        var sv = schema.svg;
+        [["MAX_POINTS", "maxPoints"], ["CURVE_SAMPLES", "curveSamples"],
+          ["ARC_SAMPLES_PER_TURN", "arcSamplesPerTurn"]].forEach(function (pair) {
+          if (HG.svgPath[pair[0]] !== sv[pair[1]]) {
+            fail("SvgPath." + pair[0] + ": the game has " + sv[pair[1]]
+              + ", the creator " + HG.svgPath[pair[0]]);
+          }
+          count();
+        });
+
+        Object.keys(sv.paths || {}).forEach(function (name) {
+          var want = sv.paths[name];
+          var shape;
+          try {
+            shape = HG.svgPath.parse(want.d, want.transform);
+          } catch (e) {
+            fail("svg " + name + ": the creator refuses a path the game parses - " + e.message);
+            count();
+            return;
+          }
+          if (shape.xs.length !== want.points) {
+            fail("svg " + name + ": " + want.points + " points in the game, "
+              + shape.xs.length + " in the creator");
+          }
+          if (shape.closed.length !== want.subpaths) {
+            fail("svg " + name + ": " + want.subpaths + " subpaths in the game, "
+              + shape.closed.length + " in the creator");
+          }
+          count();
+          ["box"].forEach(function (key) {
+            want[key].forEach(function (w, i) {
+              if (Math.abs(w - shape[key][i]) > TOLERANCE) {
+                fail("svg " + name + " " + key + "[" + i + "]: the game gives " + w
+                  + ", the creator " + shape[key][i]);
+              }
+            });
+            count();
+          });
+          if (Math.abs(want.length - shape.cum[shape.cum.length - 1]) > TOLERANCE) {
+            fail("svg " + name + " length: the game gives " + want.length
+              + ", the creator " + shape.cum[shape.cum.length - 1]);
+          }
+          count();
+
+          sv.probes.forEach(function (probe, i) {
+            [["nonzero", false], ["evenodd", true]].forEach(function (rule) {
+              var got = HG.svgPath.inside(shape, probe[0], probe[1], rule[1]);
+              if (got !== want[rule[0]][i]) {
+                fail("svg " + name + " " + rule[0] + " at (" + probe + "): the game says "
+                  + want[rule[0]][i] + ", the creator " + got);
+              }
+              count();
+            });
+            ["round", "butt", "square"].forEach(function (cap) {
+              var hit = [0, 0, 0];
+              HG.svgPath.distance(shape, probe[0], probe[1], cap, 0.5, hit);
+              [0, 1].forEach(function (k) {
+                var w = want[cap][i * 2 + k];
+                if (Math.abs(w - hit[k]) > TOLERANCE) {
+                  fail("svg " + name + " " + cap + (k ? " arc length" : " distance")
+                    + " at (" + probe + "): the game gives " + w + ", the creator " + hit[k]);
+                }
+              });
+              count();
+            });
+            var miter = Math.min(HG.svgPath.miterDistance(shape, probe[0], probe[1], 0.5, 4), 99);
+            if (Math.abs(want.miter[i] - miter) > TOLERANCE) {
+              fail("svg " + name + " miter at (" + probe + "): the game gives " + want.miter[i]
+                + ", the creator " + miter);
+            }
+            count();
+          });
+        });
+
+        Object.keys(sv.fits || {}).forEach(function (key) {
+          var bits = key.split(" ");
+          var got = HG.svgPath.fit(sv.viewBox, 3, 7, 40, 20, bits[0], bits[1]);
+          sv.fits[key].forEach(function (w, i) {
+            if (Math.abs(w - got[i]) > TOLERANCE) {
+              fail("svg fit " + key + "[" + i + "]: the game gives " + w + ", the creator " + got[i]);
+            }
+          });
           count();
         });
       }

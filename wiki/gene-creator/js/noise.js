@@ -186,6 +186,33 @@ window.HG = window.HG || {};
     return (Math.sqrt(second) - Math.sqrt(best)) / 2;
   }
 
+  /**
+   * Distance to the nearest CORNER of the jittered lattice - where three cells
+   * meet - as half the gap between the first and third centre distances. What
+   * CRACKLE's vertexWeight blends in to make a vein network pool at its
+   * junctions; the port of BodyNoise.cellVertex.
+   */
+  function cellVertex(seed, x, y, z) {
+    var cache = cacheFor(seed);
+    var cx = floor(x), cy = floor(y), cz = floor(z);
+    var best = Infinity, second = Infinity, third = Infinity;
+    for (var dx = -1; dx <= 1; dx++) {
+      for (var dy = -1; dy <= 1; dy++) {
+        for (var dz = -1; dz <= 1; dz++) {
+          var lx = cx + dx, ly = cy + dy, lz = cz + dz;
+          var px = lx + hash01(cache, seed, lx, ly, lz, 1);
+          var py = ly + hash01(cache, seed, lx, ly, lz, 2);
+          var pz = lz + hash01(cache, seed, lx, ly, lz, 3);
+          var d = (px - x) * (px - x) + (py - y) * (py - y) + (pz - z) * (pz - z);
+          if (d < best) { third = second; second = best; best = d; }
+          else if (d < second) { third = second; second = d; }
+          else if (d < third) { third = d; }
+        }
+      }
+    }
+    return (Math.sqrt(third) - Math.sqrt(best)) / 2;
+  }
+
   /** Smooth value noise in [0, 1] on a unit lattice. */
   function value(seed, x, y, z) {
     var cache = cacheFor(seed);
@@ -239,6 +266,7 @@ window.HG = window.HG || {};
     cellDistance: cellDistance,
     cell: cell,
     cellEdge: cellEdge,
+    cellVertex: cellVertex,
     ridge: ridge,
     value: value,
     stripeCoverage: stripeCoverage,

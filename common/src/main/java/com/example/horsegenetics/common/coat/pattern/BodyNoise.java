@@ -101,6 +101,56 @@ public final class BodyNoise {
     }
 
     /**
+     * Distance from {@code (x, y, z)} to the nearest <b>corner</b> of the
+     * jittered lattice - the point where three cells meet - in lattice units.
+     *
+     * <p>{@link #cellEdge} measures to the nearest wall, which draws a channel
+     * of even width because that is what an even distance to a plane is. A vein
+     * network is not that: it pools where cracks meet and thins to a hairline
+     * between the junctions, and no threshold on a wall distance recovers it,
+     * because the wall distance does not know a junction is nearby.
+     *
+     * <p>A corner is where the <b>third</b>-nearest centre is as close as the
+     * first two, so the same walk that finds the wall finds this by keeping one
+     * more candidate: half the gap between the first and third distances is
+     * near zero at a three-way corner and grows along a wall away from one.
+     * Approximate for the reason {@code cellEdge} is approximate, and in the
+     * same places.
+     */
+    public static double cellVertex(long seed, double x, double y, double z) {
+        int cx = floor(x);
+        int cy = floor(y);
+        int cz = floor(z);
+        double best = Double.MAX_VALUE;
+        double second = Double.MAX_VALUE;
+        double third = Double.MAX_VALUE;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    int lx = cx + dx;
+                    int ly = cy + dy;
+                    int lz = cz + dz;
+                    double px = lx + hash01(seed, lx, ly, lz, 1);
+                    double py = ly + hash01(seed, lx, ly, lz, 2);
+                    double pz = lz + hash01(seed, lx, ly, lz, 3);
+                    double d = (px - x) * (px - x) + (py - y) * (py - y) + (pz - z) * (pz - z);
+                    if (d < best) {
+                        third = second;
+                        second = best;
+                        best = d;
+                    } else if (d < second) {
+                        third = second;
+                        second = d;
+                    } else if (d < third) {
+                        third = d;
+                    }
+                }
+            }
+        }
+        return (Math.sqrt(third) - Math.sqrt(best)) / 2.0;
+    }
+
+    /**
      * The nearest jittered lattice point to {@code (x, y, z)}, and two numbers
      * drawn off <b>that point</b> rather than off the sample position.
      *
