@@ -29,6 +29,34 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="spawn-button-2026-09-09">The spawn screen ran out of column, and the fix was to stop using it.</h3>
+
+<p>
+    <a href="known-gaps.html#gap-139">Gap 139</a> was written the day the right-hand
+    column was widened, saying in as many words that the top and bottom groups would
+    still meet on a short window. They did, and it was reported: &ldquo;Clear genes&rdquo;
+    and &ldquo;Make egg&rdquo; overlapping.
+</p>
+
+<p>
+    The owner&rsquo;s fix is better than the two I had written down. Both of mine
+    (scroll the column, split the column) treated the column as the place buttons go;
+    <strong>moving Spawn under the preview</strong> asks why the one button that
+    <em>does the thing</em> was queued up with Copy, Paste and Cancel in the first place.
+    The strip between the preview panel and the bottom of the window was empty and always
+    had been. So the bottom group is three rows now instead of four, which is 24 pixels
+    the column no longer has to find.
+</p>
+
+<p>
+    <strong>And this time the threshold is measured rather than asserted.</strong> The
+    top group ends at 208 and the bottom starts at <code>height&nbsp;&minus;&nbsp;74</code>;
+    they clear at 290, and once <code>rightStep()</code> squeezes to its 20-pixel floor
+    they clear at 270 &mdash; a 1080p screen at GUI scale 4, which is where the report
+    came from. Below about 258 they still meet, because seven 20-high buttons need 140
+    pixels even touching. That is written down rather than claimed fixed.
+</p>
+
 <h3 id="getting-started-2026-09-09">A page that opens first, a copy that takes a minute, and a browser that remembers.</h3>
 
 <p>
