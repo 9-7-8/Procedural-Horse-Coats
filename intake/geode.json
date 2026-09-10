@@ -1,0 +1,441 @@
+{
+  "format": 3,
+  "key": "ixora.geode",
+  "name": "Geode",
+  "phase": "magical",
+  "priority": 148,
+  "blurb": "Straight-sided crystal shards grow up out of the hooves and the lower barrel, faceted, lit along their upward faces and glinting at the tips.",
+  "rarity": "legendary",
+  "notes": [
+    "No black form. A crystal's colour is the gene here, and a grey version of it is just rock.",
+    "WAVES shape=saw is the only thing in the vocabulary that gives an edge made of straight lines all raked one way. Everything noise-derived rounds its corners off however far the softness is wound down, and a crystal with rounded corners is a pebble. triangle would give symmetric teeth; saw ramps and cuts back square, which is what a shard cluster actually looks like.",
+    "wavelength 3.4 at amplitude 2.6 puts the shard tips around y 9.6 and the hollows around y 4.4 - a five-unit skyline over an eleven-unit leg. amplitude is in whatever space says and wavelength never is; both are in units here so they can be read against each other.",
+    "The three shard layers share one wavelength and one amplitude and differ only in to and phase, so the lit faces sit inside the bodies rather than beside them. Changing the wavelength on one layer alone splits the cluster into two unrelated skylines.",
+    "The sheen is NORMAL, not a light. Nothing in this pipeline knows where a camera is - the coat is one texture baked per horse - so this shifts with the surface and not with the viewer. It is the structural half of the effect and it is the honest half.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene."
+  ],
+  "alleles": [
+    {
+      "token": "P",
+      "label": "Quartz (P)"
+    },
+    {
+      "token": "C",
+      "label": "Geode (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "shardSeed",
+      "type": "seed"
+    },
+    {
+      "name": "glintSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Quartz",
+      "description": "Colourless crystal growing up the legs, white-faced and glinting.",
+      "when": [
+        "P/P",
+        "P/C",
+        "P/n"
+      ],
+      "layers": [
+        {
+          "name": "the shard bodies",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 7.0,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.0,
+              "softness": 0.09
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e9e9e9",
+            "strength": 100
+          }
+        },
+        {
+          "name": "the lit faces",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 5.6,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.37,
+              "softness": 0.07
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f7f7f7",
+            "strength": 100
+          }
+        },
+        {
+          "name": "facet sheen on the upward planes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 6.4,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.18,
+              "softness": 0.07
+            },
+            {
+              "type": "NORMAL",
+              "axis": "Y",
+              "space": "body",
+              "round": 0.7,
+              "from": 0.15,
+              "to": 1.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        },
+        {
+          "name": "glints",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 7.0,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.0,
+              "softness": 0.09
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$glintSeed",
+              "spacing": 1.2,
+              "size": 0.42,
+              "density": 0.11,
+              "clumping": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Geode",
+      "description": "Crystal in the line's own colour, deepest in the shard bodies and brightest along their lit faces.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the shard bodies",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 7.0,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.0,
+              "softness": 0.09
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.16,
+            "strength": 100
+          }
+        },
+        {
+          "name": "the lit faces",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 5.6,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.37,
+              "softness": 0.07
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.31,
+            "strength": 100
+          }
+        },
+        {
+          "name": "facet sheen on the upward planes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 6.4,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.18,
+              "softness": 0.07
+            },
+            {
+              "type": "NORMAL",
+              "axis": "Y",
+              "space": "body",
+              "round": 0.7,
+              "from": 0.15,
+              "to": 1.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.47,
+            "strength": 100
+          }
+        },
+        {
+          "name": "glints",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS",
+                "BARREL"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 0.0,
+              "to": 11.5,
+              "softness": 2.2
+            },
+            {
+              "type": "WAVES",
+              "seed": "$shardSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "units",
+              "from": 0.0,
+              "to": 7.0,
+              "wavelength": 3.4,
+              "amplitude": 2.6,
+              "phase": 0.0,
+              "softness": 0.09
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$glintSeed",
+              "spacing": 1.2,
+              "size": 0.42,
+              "density": 0.11,
+              "clumping": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.62,
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "P/P": 0.003,
+    "P/C": 0.006,
+    "P/n": 0.3,
+    "C/C": 0.008,
+    "n/n": 99.683
+  }
+}

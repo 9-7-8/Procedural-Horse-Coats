@@ -4,14 +4,15 @@
   "phase": "magical",
   "priority": 124,
   "rarity": "RARE",
-  "blurb": "Heavy ink rings with solid pupils are scattered over a pale ground, each one trailing a drip straight down, with loose dots thrown between them.",
+  "blurb": "A scatter of ringed marks across the barrel and down the legs, each with a drip hanging under it, and long runs of ink drawn down toward the hooves as though the whole thing were still wet. The coloured form does the same in one saturated ink instead of black.",
   "notes": [
     "The source was an SVG: two flat colours, near-black on off-white, about 12 KB - the smallest of the set and the only one already at poster weight. Rings with solid centres, small solid dots, and thick drips running down off the larger marks.",
     "The ring and its pupil are RINGS and SPOTS on one seed, one spacing and one vary, which is what should put the pupil in the middle of its own ring - RINGS is documented as the same scatter drawn hollow. That is the one assumption in this file worth checking with coverage.mjs before trusting it: if the pupils land beside the rings rather than inside them, the two masks do not share a lattice and the pupil has to be built as a second RINGS at a small radius instead.",
     "The drip is three SPOTS draws on that same lattice at growing offsetY, MAXed together. offsetY moves where a mask reads the cell centre from WITHOUT moving the cell, so all three stay attached to the mark they hang from rather than becoming their own scatter. Softness at 0.16 is what fuses the three into a continuous run rather than a dotted line - wind it much lower and the drip beads.",
     "No stretch anywhere, deliberately. A stretched drip would read better, but stretch divides the sample before the lattice walk, so a draw with a different stretch is on a DIFFERENT lattice - and the drip would come apart from its own ring. Every layer of one compound element shares its stretch or the element scatters.",
     "Sizing against the wiki's floors: the ring is radius 2.4 on thickness 0.9 with softness 0.12, all clear of the 1.3 / 0.7 / half-the-thickness minimums. markSpacing bottoms out at 6.2 against an outer radius of about 2.85, so there is over a body unit of clear ground between neighbouring rings even at the tightest roll.",
-    "The loose dots run on their own seed and spacing because in the source they have nothing to do with where the rings fell - they are thrown, not placed."
+    "The loose dots run on their own seed and spacing because in the source they have nothing to do with where the rings fell - they are thrown, not placed.",
+    "Three changes off looking at it. The white ground is gone - it covered the whole horse at 84% opacity and turned every base coat into the same pale grey, which is a lot of horse to spend on a backdrop for a scatter of small marks. The marks are on the BODY and the LEGS only rather than everywhere, and there are fewer of them: chance 0.7 down to 0.4 on the ringed marks and the loose dots from spacing 4 at chance 0.35 to spacing 7.5 at 0.18. And the runs are new - STROKES on Y, weighted to the lower half of the body by an inverted AXIS, which is what makes them read as ink running down rather than as a stripe pattern."
   ],
   "preview": {
     "base": "chestnut",
@@ -49,6 +50,10 @@
       "name": "inkHue",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "runSeed",
+      "type": "seed"
     }
   ],
   "expressions": [
@@ -66,20 +71,6 @@
       ],
       "layers": [
         {
-          "name": "the pale ground the graphic sits on",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fbfbfb",
-            "strength": 74,
-            "opacity": 84
-          }
-        },
-        {
           "name": "the drip hanging under each mark",
           "masks": [
             {
@@ -90,7 +81,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             },
             {
               "type": "SPOTS",
@@ -101,7 +96,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             },
             {
               "type": "SPOTS",
@@ -112,7 +107,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             }
           ],
           "op": {
@@ -134,7 +129,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -155,7 +154,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -172,11 +175,50 @@
             {
               "type": "SPOTS",
               "seed": "$dotSeed",
-              "spacing": 4.0,
+              "spacing": 7.5,
               "radius": 0.72,
               "vary": 0.5,
-              "chance": 0.35,
-              "softness": 0.16
+              "chance": 0.18,
+              "softness": 0.16,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": -200,
+            "green": -200,
+            "blue": -200,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "and the ink running down toward the hooves",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "LEGS"
+              ],
+              "seed": "$runSeed",
+              "axis": "Y",
+              "spacing": 5.4,
+              "length": 16.0,
+              "width": 0.32,
+              "curl": 0.12,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "body",
+              "from": -0.4,
+              "to": 0.44,
+              "softness": 0.22,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -201,20 +243,6 @@
       ],
       "layers": [
         {
-          "name": "the pale ground the graphic sits on",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fbfbfb",
-            "strength": 74,
-            "opacity": 84
-          }
-        },
-        {
           "name": "the drip hanging under each mark",
           "masks": [
             {
@@ -225,7 +253,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             },
             {
               "type": "SPOTS",
@@ -236,7 +268,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             },
             {
               "type": "SPOTS",
@@ -247,7 +279,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             }
           ],
           "op": {
@@ -270,7 +302,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -292,7 +328,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -310,11 +350,51 @@
             {
               "type": "SPOTS",
               "seed": "$dotSeed",
-              "spacing": 4.0,
+              "spacing": 7.5,
               "radius": 0.72,
               "vary": 0.5,
-              "chance": 0.35,
-              "softness": 0.16
+              "chance": 0.18,
+              "softness": 0.16,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.78,
+            "lightness": 0.18,
+            "strength": 97,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "and the ink running down toward the hooves",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "LEGS"
+              ],
+              "seed": "$runSeed",
+              "axis": "Y",
+              "spacing": 5.4,
+              "length": 16.0,
+              "width": 0.32,
+              "curl": 0.12,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "body",
+              "from": -0.4,
+              "to": 0.44,
+              "softness": 0.22,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {

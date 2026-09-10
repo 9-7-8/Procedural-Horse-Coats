@@ -21,7 +21,7 @@
 <h1>Dripwork</h1>
 
 <p class="lede">
-    Heavy ink rings with solid pupils are scattered over a pale ground, each one trailing a drip straight down, with loose dots thrown between them.
+    A scatter of ringed marks across the barrel and down the legs, each with a drip hanging under it, and long runs of ink drawn down toward the hooves as though the whole thing were still wet. The coloured form does the same in one saturated ink instead of black.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -100,8 +100,8 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>124 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Dw</code> &middot; <code>Dx</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>ALL, RINGS, SPOTS, TINT, TOWARD</td></tr>
+<tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Built from</th><td>AXIS, RINGS, SPOTS, STROKES, TINT, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
@@ -120,6 +120,8 @@
 
 <p>The loose dots run on their own seed and spacing because in the source they have nothing to do with where the rings fell - they are thrown, not placed.</p>
 
+<p>Three changes off looking at it. The white ground is gone - it covered the whole horse at 84% opacity and turned every base coat into the same pale grey, which is a lot of horse to spend on a backdrop for a scatter of small marks. The marks are on the BODY and the LEGS only rather than everywhere, and there are fewer of them: chance 0.7 down to 0.4 on the ringed marks and the loose dots from spacing 4 at chance 0.35 to spacing 7.5 at 0.18. And the runs are new - STROKES on Y, weighted to the lower half of the body by an inverted AXIS, which is what makes them read as ink running down rather than as a stripe pattern.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -136,11 +138,11 @@
 <p>Layer order puts the drip UNDER the ring: the drip's top draw overlaps the ring's lower edge, and painting it second would leave a visible seam across the ring where two nominally identical inks met at different coverages.</p>
 
 <ol>
-<li>the pale ground the graphic sits on &mdash; <code>ALL</code>, painted with <code>TOWARD</code></li>
 <li>the drip hanging under each mark &mdash; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TINT</code></li>
 <li>the ring &mdash; <code>RINGS</code>, painted with <code>TINT</code></li>
 <li>the pupil inside the ring &mdash; <code>SPOTS</code>, painted with <code>TINT</code></li>
 <li>the loose dots between the rings &mdash; <code>SPOTS</code>, painted with <code>TINT</code></li>
+<li>and the ink running down toward the hooves &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TINT</code></li>
 </ol>
 
 <h3>Coloured dripwork</h3>
@@ -150,11 +152,11 @@
 <p>The recessive coloured half of the usual pair. The ground stays near-white: the whole graphic depends on the ink being much darker than what it sits on, and a hue knob on the ground can roll a value that leaves the rings invisible. Lightness 0.18 on the ink for the same reason.</p>
 
 <ol>
-<li>the pale ground the graphic sits on &mdash; <code>ALL</code>, painted with <code>TOWARD</code></li>
 <li>the drip hanging under each mark &mdash; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
 <li>the ring &mdash; <code>RINGS</code>, painted with <code>TOWARD</code></li>
 <li>the pupil inside the ring &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
 <li>the loose dots between the rings &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>and the ink running down toward the hooves &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Wild type</h3>

@@ -1,0 +1,388 @@
+{
+  "format": 3,
+  "key": "ixora.maelstrom",
+  "name": "Maelstrom",
+  "phase": "magical",
+  "priority": 144,
+  "blurb": "A whirlpool of tapering arms winds into a tight spiral on each flank, with a scatter of pale flecks caught in the sweep.",
+  "rarity": "legendary",
+  "notes": [
+    "twist is the whole trick. A FAN with twist 0 is a sunburst - straight bars out of a pivot. At 0.26 the fan's zero rotates as it travels and the bars come out as curved arms, which is the difference between a star and a vortex.",
+    "The SPIRAL takes its centre from the BODY bounds, which lands at about (18.5, 16) - the same point the FAN pivots on. Those two numbers are written to match and must move together, or the arms sweep past a core that is somewhere else.",
+    "inner 2.5 rather than 0: at the pivot an arm is arbitrarily thin, and anything under 0.5 units averages away. Starting at 2.5 the narrowest part of an arm is about 0.7 units, and the SPIRAL fills the middle that the fan leaves bare.",
+    "The flecks are a SPECKLE multiplied into the arm mask rather than laid over the whole flank, so they only appear where there is something for them to be torn out of.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene."
+  ],
+  "alleles": [
+    {
+      "token": "W",
+      "label": "Pale maelstrom (W)"
+    },
+    {
+      "token": "B",
+      "label": "Black maelstrom (B)"
+    },
+    {
+      "token": "C",
+      "label": "Coloured maelstrom (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "eyeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "fleckSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Pale maelstrom",
+      "description": "A silver-white whirlpool on each flank, flecked with brighter grit.",
+      "when": [
+        "W/W",
+        "W/B",
+        "W/C",
+        "W/n"
+      ],
+      "layers": [
+        {
+          "name": "the sweeping arms",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.62,
+              "duty": 0.46,
+              "twist": 0.26,
+              "inner": 2.5,
+              "outer": 9.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "the wound core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPIRAL",
+              "seed": "$eyeSeed",
+              "axis": "Z",
+              "radius": 4.6,
+              "turns": 2.3,
+              "width": 0.85,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#bcbcbc"
+          }
+        },
+        {
+          "name": "flecks torn out of the arms",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.62,
+              "duty": 0.46,
+              "twist": 0.26,
+              "inner": 2.5,
+              "outer": 9.0,
+              "softness": 0.3
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$fleckSeed",
+              "spacing": 1.5,
+              "size": 0.5,
+              "density": 0.16,
+              "clumping": 0.45,
+              "clumpScale": 6.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Black maelstrom",
+      "description": "The reference form - a black vortex winding to a tight eye, flecked with grey.",
+      "when": [
+        "B/B",
+        "B/C",
+        "B/n"
+      ],
+      "layers": [
+        {
+          "name": "the sweeping arms",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.62,
+              "duty": 0.46,
+              "twist": 0.26,
+              "inner": 2.5,
+              "outer": 9.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "the wound core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPIRAL",
+              "seed": "$eyeSeed",
+              "axis": "Z",
+              "radius": 4.6,
+              "turns": 2.3,
+              "width": 0.85,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#3e3e3e"
+          }
+        },
+        {
+          "name": "flecks torn out of the arms",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.62,
+              "duty": 0.46,
+              "twist": 0.26,
+              "inner": 2.5,
+              "outer": 9.0,
+              "softness": 0.3
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$fleckSeed",
+              "spacing": 1.5,
+              "size": 0.5,
+              "density": 0.16,
+              "clumping": 0.45,
+              "clumpScale": 6.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#707070"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured maelstrom",
+      "description": "The whirl takes the line's own colour, darkest in the arms and brightest in the flecks.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the sweeping arms",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.62,
+              "duty": 0.46,
+              "twist": 0.26,
+              "inner": 2.5,
+              "outer": 9.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "the wound core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPIRAL",
+              "seed": "$eyeSeed",
+              "axis": "Z",
+              "radius": 4.6,
+              "turns": 2.3,
+              "width": 0.85,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "flecks torn out of the arms",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.62,
+              "duty": 0.46,
+              "twist": 0.26,
+              "inner": 2.5,
+              "outer": 9.0,
+              "softness": 0.3
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$fleckSeed",
+              "spacing": 1.5,
+              "size": 0.5,
+              "density": 0.16,
+              "clumping": 0.45,
+              "clumpScale": 6.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "W/W": 0.002,
+    "W/B": 0.0035,
+    "W/C": 0.0045,
+    "W/n": 0.26,
+    "B/B": 0.003,
+    "B/C": 0.005,
+    "B/n": 0.22,
+    "C/C": 0.006,
+    "n/n": 99.496
+  }
+}

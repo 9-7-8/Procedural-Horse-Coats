@@ -21,7 +21,7 @@
 <h1>Dorsal Wing</h1>
 
 <p class="lede">
-    A butterfly lies along the horse's back with its wings spread either side of the spine - dark, edged in teal, with rust squiggles across the wings and hot pink cells inside them. Both halves are identical.
+    A butterfly lies along the horse's back with its wings spread either side of the spine and the wingtips folded down over the barrel - dark, edged in teal, with rust squiggles across the wings and hot pink cells inside them. Both halves are identical.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -125,6 +125,10 @@
 <p>The rust and the pink share seed, spacing, stretch, vary and chance and differ only in radius, which is what keeps each pink cell inside its own rust patch. At radius 2.2 and 1.1 the rust surviving around the pink is 0.55 body units - a hair over a texel - and spacing 6.0 leaves 1.6 units of dark between neighbouring marks. Closing that spacing packs them until the wing reads as solid rust.</p>
 
 <p>The four layers are DISJOINT and have to be. A magical gene's layers each measure their delta against the colour the gene started from, and the deltas are summed - so a TINT of -200 on every channel under a TOWARD teal does not give teal, it gives teal minus 200. As imported the ground was painted over the whole butterfly with the margin, the squiggles and the cells on top of it, and the horse came out solid near-black: 484 texels moved on a bay and not one of them teal, rust or pink. The ground now paints the inner shape MINUS the rust patches, and the rust paints its patches MINUS the pink cells, which is the nesting the notes above already describe - it just has to be written as subtraction rather than as stacking.</p>
+
+<p>The wings are drawn HALF AGAIN as wide as the horse and centred on the spine - sizeV 1.5, originV -0.25 - so the outer part of each wing falls off the edge of the back and onto the flank instead of stopping at the top. The NORMAL mask was opened up to match, from 0.15 down to -0.75 at round 0.85, which carries it to about halfway down the barrel. Both numbers move together: widening the drawing without opening the NORMAL just clips more of the wing away, and opening the NORMAL without widening the drawing puts bare flank in the vertical bands the note above warns about.</p>
+
+<p>What is on the FLANK is an extrusion and not a drawing, and it is worth knowing which is which. A top-plane shape is read at (x, z), and a flank face has one constant z - so the whole side shows a single vertical slice of the butterfly, stretched downward. On the back you are looking at the drawing; on the sides you are looking at its cross-section running down. That reads as wings folding over the barrel, which is what it is for, and it is the honest cost of the plane that makes the mirror line the spine.</p>
 
 <h2 id="layers">What it paints</h2>
 

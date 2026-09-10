@@ -291,6 +291,71 @@
     with a different <code>is</code> makes exactly one fire.</li>
 </ul>
 
+<h2 id="coverage">Coverage and priority &mdash; a rule of thumb, not a rule</h2>
+
+<p>
+    <strong>The more of a horse a gene covers, the lower its priority should be.</strong>
+    A gene that repaints the whole coat goes near the bottom of the paint order; a gene
+    that draws one small mark goes near the top; everything else sorts itself in between
+    by roughly how much horse it claims.
+</p>
+
+<p>
+    The reasoning is one sentence long. Priority is the order the genes paint in, and a
+    later gene paints over an earlier one &mdash; so a gene that covers everything and
+    paints late erases every gene under it, and a gene that covers a hand's width and
+    paints early gets erased by anything that covers more. Sorted by coverage, a horse
+    carrying five markings shows five markings. Sorted at random, it shows whichever one
+    happened to be biggest and last.
+</p>
+
+<div class="note">
+    <span class="label">It is a rule of thumb and it is meant to be broken</span>
+    <p>
+        This is not a contract, nothing checks it, and violating it deliberately is a
+        normal thing to do &mdash; say so in the gene's <code>notes</code> and move on.
+        <a href="gene-rising-sun.html">Rising sun</a> is the standing example: it covers
+        the entire horse in ribbons and sits at priority 620, in the top third of the
+        order and above nearly everything. That is exactly backwards by this rule and it
+        is right, because a rising sun is a poster printed <em>on</em> the horse rather
+        than a marking the horse has, and a poster that other markings draw over is not
+        a poster.
+    </p>
+    <p>
+        The other honest reason to break it: a gene that <em>reads</em> the coat rather
+        than just painting on it &mdash; anything using
+        <a href="#masks"><code>LUMA</code></a> or <code>PIGMENT</code> &mdash; has to
+        run after whatever it is reading, however much or little it covers.
+        <a href="gene-fielded.html">Fielded</a> draws wisps out of the edges of existing
+        white and is at 600 for that reason, not because of its coverage.
+    </p>
+</div>
+
+<p>
+    The bands the mod already uses are the rule of thumb made concrete, and a new gene
+    is usually best slotted next to whatever it most resembles rather than reasoned out
+    from scratch:
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<thead><tr><th>Roughly</th><th>Covers</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><code>100&ndash;199</code></td><td>the whole coat, as a replacement ground</td><td><a href="gene-nymphaline.html">nymphaline</a>, <a href="gene-contour.html">contour</a>, <a href="gene-suit.html">suit</a></td></tr>
+<tr><td><code>200&ndash;299</code></td><td>large fields and regions &mdash; half a horse, a saddle, a shroud</td><td><a href="gene-moonwing.html">moonwing</a>, <a href="gene-dragon-shroud.html">dragon shroud</a></td></tr>
+<tr><td><code>300&ndash;399</code></td><td>repeating figures over a region &mdash; rosettes, scales, veins</td><td><a href="gene-iridescent-rosette.html">iridescent rosette</a>, <a href="gene-fish-scales.html">fish scales</a></td></tr>
+<tr><td><code>400&ndash;499</code></td><td>fine overlays &mdash; dust, speckle, sheen</td><td><a href="gene-oil-sheen.html">oil sheen</a>, <a href="gene-frostfall.html">frostfall</a></td></tr>
+<tr><td><code>600+</code></td><td>anything that reads the coat, and the deliberate exceptions</td><td><a href="gene-fielded.html">fielded</a>, <a href="gene-invert.html">invert</a>, <a href="gene-rising-sun.html">rising sun</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<p class="muted">
+    Priorities are unique per gene and the number itself means nothing beyond its place
+    in the order, so leave gaps. Every band above has room in it, and a gene that lands
+    between two others is doing the only thing the number is for.
+</p>
+
 <h2 id="scale">Scale &mdash; the thing that wastes an evening</h2>
 
 <p>
@@ -4165,6 +4230,14 @@ the gene and on any expression, an array of paragraphs - is for whoever opens
 the file next: why a number is that number, which layers must stay in order,
 and anything the description asked for that you did something else about.
 Write that down rather than dropping it; it is printed on the gene's wiki page.
+
+PRIORITY, a rule of thumb: the MORE of a horse a gene covers, the LOWER its
+priority. Later paints over earlier, so a whole-coat gene late erases
+everything under it and a small mark early gets erased. Roughly: 100-199
+whole-coat grounds, 200-299 large fields, 300-399 repeating figures over a
+region, 400-499 fine overlays, 600+ anything reading the coat with LUMA or
+PIGMENT. Leave gaps. Break it on purpose when the marking is meant to sit on
+top of everything, and say so in "notes" - it is a rule of thumb, not a rule.
 
 NOW: read the attached image and the description below, decide what KIND of
 shape each element is, and write the file. Prefer composing existing masks.

@@ -27,6 +27,126 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10d">2026-09-10</h2>
+
+<h3>Four genes retuned off looking at them, and the coverage rule of thumb written
+    down.</h3>
+
+<p>Four notes from the owner on yesterday's intake, and the interesting thing is
+    that two of the four turned out to be <b>the same defect wearing a different
+    complaint</b>.</p>
+
+<h4>&ldquo;Contour doesn't have enough colour&rdquo; was not a palette problem</h4>
+
+<p><a href="gene-contour.html">Contour</a> draws a topographic map: six bands of a
+    landscape, each a threshold on one <code>FRACTAL</code> field. Band 0.38 therefore
+    sits entirely <em>inside</em> band 0.30 &mdash; the bands are <b>nested</b>. And a
+    magical gene's layers each measure their delta against the colour the gene started
+    from and then <em>sum</em>, so six nested <code>TOWARD</code>s do not paint six
+    bands. They paint one colour, which is whatever six deltas add up to, and six of
+    them add up to white.</p>
+
+<p>Which is what shipped: an almost-white horse with a brown patch. The pastel palette
+    it was given &mdash; <code>#e2d5b8</code>, <code>#e8c8e5</code>,
+    <code>#c8eeec</code> &mdash; was the author compensating for a wash whose cause they
+    could not see, and adding saturation to those colours would have made the wash
+    worse rather than better. Every band now subtracts the threshold above it and paints
+    only the ring between the two. Once they are disjoint the colours can be what a
+    contour map actually looks like, so they are: a hypsometric ramp from deep green
+    through gold and orange to red-brown.</p>
+
+<p>The coloured form gets a second hue knob rather than more saturation on one.
+    <code>inkHue</code> runs the low ground and <code>highHue</code> the high ground,
+    and they are <em>independent draws</em> &mdash; a knob cannot be offset by a
+    constant in this format (<a href="known-gaps.html#gap-164">gap 164</a>), so a horse
+    can roll two hues that sit next to each other and come out nearly monochrome. That
+    is the honest cost of the missing arithmetic, and it is a good deal less bad than
+    one flat hue.</p>
+
+<div class="note warn">
+    <span class="label">Three genes in two days, same cause</span>
+    <p>
+        Dorsal wing painted a solid black horse, contour painted a white one, and both
+        were layers summing where the author expected them to stack. It is
+        <a href="known-gaps.html#gap-169">gap 169</a>, and the thing that makes it hard
+        to see is that <em>the symptom does not look like the cause</em>: dorsal wing
+        looked like a mask that was not firing, and contour looked like a palette that
+        was too pale. Neither looks like an arithmetic problem, so neither sends you to
+        the rule that explains it.
+    </p>
+</div>
+
+<h4>Dorsal wing wraps down the sides now</h4>
+
+<p>The butterfly is drawn half again as wide as the horse and centred on the spine
+    (<code>sizeV</code> 1.5, <code>originV</code> -0.25), so the outer part of each wing
+    falls off the edge of the back and lands on the flank, and the <code>NORMAL</code>
+    mask was opened from 0.15 down to -0.75 at <code>round</code> 0.85 to let it get
+    there. The two numbers have to move together: widening the drawing without opening
+    the <code>NORMAL</code> just clips more of the wing away, and opening the
+    <code>NORMAL</code> without widening the drawing puts bare flank into vertical
+    bands.</p>
+
+<p>Worth being precise about what is on the sides, because it is not a drawing. A
+    top-plane shape is read at <code>(x, z)</code> and a flank face has one constant
+    <code>z</code>, so the whole side shows a single vertical <em>slice</em> of the
+    butterfly stretched downward. On the back you are looking at the drawing; on the
+    flank you are looking at its cross-section running down. It reads as wings folding
+    over the barrel, which is what it is for.</p>
+
+<h4>Dripwork: no ground, fewer marks, and runs down the legs</h4>
+
+<p>The white ground went first &mdash; an <code>ALL</code> layer at 86% opacity, which
+    turned every base coat into the same pale grey before the gene drew anything. That
+    is a lot of horse to spend on a backdrop for a scatter of small marks, and the same
+    argument took the white out of <a href="gene-rising-sun.html">rising sun</a>. The
+    marks are on the <code>BODY</code> and the <code>LEGS</code> now rather than
+    everywhere, and there are fewer of them. The runs are new: <code>STROKES</code> on
+    Y, weighted to the lower half by an <code>AXIS</code> mask, which is what makes them
+    read as ink running toward the hooves rather than as a stripe pattern.</p>
+
+<p class="muted">The <code>AXIS</code> went in inverted the first time, which selected
+    everything <em>above</em> the barrel &mdash; on a gene restricted to the body and
+    the legs, that is nothing at all, and the layer rendered as though it were not there.
+    Caught by looking at it, which is the only thing that catches it.</p>
+
+<h4>Rising sun goes to the top of the order</h4>
+
+<p>Priority 123 to <strong>620</strong>, which is the top third and above every other
+    marking except <a href="gene-invert.html">invert</a> and <a href="gene-tron.html">tron</a>.
+    It covers the whole horse, so by the rule of thumb below it should be near the
+    <em>bottom</em>. It is at the top on purpose: a rising sun is a poster printed
+    <em>on</em> the horse rather than a marking the horse has, and a poster that other
+    markings draw over is not a poster.</p>
+
+<h4>The rule of thumb it breaks</h4>
+
+<p><a href="making-a-gene.html#coverage">Coverage and priority</a> is new and is
+    deliberately not a rule: <b>the more of a horse a gene covers, the lower its
+    priority should be.</b> Later paints over earlier, so a whole-coat gene painting
+    late erases everything under it and a small mark painting early gets erased by
+    anything bigger. Sorted by coverage, a horse carrying five markings shows five
+    markings.</p>
+
+<p>It ships with its own counter-examples attached, which is the point of writing it
+    as a rule of thumb: rising sun breaks it for the reason above, and
+    <a href="gene-fielded.html">fielded</a> breaks it because a gene that <em>reads</em>
+    the coat with <code>LUMA</code> or <code>PIGMENT</code> has to run after whatever it
+    is reading however little it covers. The five priority bands the mod already uses
+    are written out beside it, because slotting a new gene next to whatever it most
+    resembles beats reasoning it out from scratch. The prompt carries a four-line
+    version.</p>
+
+<h4>What was regenerated</h4>
+
+<p>Icons, the bundle, 157 gene pages, the designer wasm, both goldens. The bake golden
+    moved exactly eight rows &mdash; the two alleles of each of the four genes &mdash;
+    and nothing was added or lost. Every genotype code in the pipeline golden changed
+    and <em>no</em> horse did, which is rising sun's priority moving it up the code
+    order and nothing else.</p>
+
+<p class="muted">The intake folder was empty this session; nothing new to import.</p>
+
 <h2 id="d2026-09-10c">2026-09-10</h2>
 
 <h3>Fourteen genes out of intake, two drawings that were traced photographs, one

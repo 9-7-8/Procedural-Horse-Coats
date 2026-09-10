@@ -45,7 +45,6 @@ crazework
 magic_zebra
 dorsal_wing
 contour
-rising_sun
 dripwork
 light
 lut
@@ -188,5 +187,6 @@ voided
 nyxborn
 bloodstained
 shadowcreature
+rising_sun
 invert
 tron

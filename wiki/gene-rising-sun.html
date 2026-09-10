@@ -16,12 +16,12 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow magical">Magical gene <span class="sep">/</span> magical coat genes</p>
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> colour modifiers</p>
 
 <h1>Rising Sun</h1>
 
 <p class="lede">
-    Heavy black ribbons roll across a white coat in even waves, each shadowed a little below by grey, and a single red disc sits on either flank.
+    Black ribbons ripple across the horse in a bank of parallel waves, each shadowed by a grey one a half-step behind it, with a single burning disc sitting on either flank. It is painted over almost everything else the horse carries.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -98,10 +98,10 @@
 <tbody>
 <tr><th>Key</th><td><code>horsegenetics.rising_sun</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
-<tr><th>Priority</th><td>123 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
+<tr><th>Priority</th><td>620 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Rs</code> &middot; <code>Rc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>6 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>ALL, PATH, TINT, TOWARD, WAVES</td></tr>
+<tr><th>Built from</th><td>PATH, TINT, TOWARD, WAVES</td></tr>
 </tbody>
 </table>
 </div>
@@ -120,6 +120,10 @@
 
 <p>The disc is a PATH because it is ONE of them in ONE place, and plane: side gets 'either flank' for free - a shape drawn in the (x, y) plane is extruded along z. In that space the topline is 0.62 and not 1.0, so the disc sits at v 0.53 on the upper flank; at 0.7 it would be floating above the back and nothing would appear on the barrel. Twelve points on an ellipse rather than a circle because u and v normalise against different spans - 41 body units against 33.7 - so a circle in that space is an oval on the horse.</p>
 
+<p>No white ground any more. It was an ALL layer at 86% opacity, so the gene repainted the entire horse before it drew anything - which made every rising sun horse the same horse underneath, and threw away the base coat the rest of the genome had just worked out. The ribbons and the disc are opaque enough to carry themselves on any coat.</p>
+
+<p>Priority 620, up from 123, which puts it in the top third of the paint order and above every other marking except invert and tron. That is deliberate and it is the opposite of what the coverage rule of thumb would say - see wiki/making-a-gene.html#coverage. A rising sun is a poster printed ON the horse rather than a marking the horse has, and a poster that other markings draw over is not a poster. The rule of thumb is a rule of thumb.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -136,7 +140,6 @@
 <p>Layer order is ground, shadow, ribbon, disc. The shadow must go under the black or it draws a grey line across the ribbon it is supposed to be cast by, and the disc goes last because in the poster it sits over everything.</p>
 
 <ol>
-<li>the white ground &mdash; <code>ALL</code>, painted with <code>TOWARD</code></li>
 <li>the grey shadow, one ribbon offset off the black &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
 <li>the black ribbons &mdash; <code>WAVES</code>, painted with <code>TINT</code></li>
 <li>the disc, one on either flank &mdash; <code>PATH</code>, painted with <code>TOWARD</code></li>
@@ -149,7 +152,6 @@
 <p>The recessive coloured half of the usual pair, on two hues, because in the poster the disc is doing the opposite job to the ribbons rather than a quieter version of it. The ground stays near-white and the shadow stays grey: both are the value scaffolding the two hues are read against, and colouring either can roll a horse where the ribbons vanish.</p>
 
 <ol>
-<li>the white ground &mdash; <code>ALL</code>, painted with <code>TOWARD</code></li>
 <li>the grey shadow, one ribbon offset off the black &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
 <li>the black ribbons &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
 <li>the disc, one on either flank &mdash; <code>PATH</code>, painted with <code>TOWARD</code></li>

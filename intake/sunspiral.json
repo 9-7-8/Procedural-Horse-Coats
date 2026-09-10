@@ -1,0 +1,551 @@
+{
+  "format": 3,
+  "key": "ixora.sunspiral",
+  "name": "Sunspiral",
+  "phase": "magical",
+  "priority": 146,
+  "blurb": "A tight spiral sits centred on each flank with three rings of short dashes thrown out around it, gathered into five points like a rock-carved sun.",
+  "rarity": "epic",
+  "notes": [
+    "Two FANs on one pivot, multiplied. The fine one at spacing 0.36 makes about seventeen rays; the coarse one at spacing 1.257 makes five, and using it as a gate leaves three or four fine rays alive inside each of the five arms. That is where the star comes from, and neither FAN alone would have given it - FAN has one periodicity around the pivot and this needs two.",
+    "The dashes are three separate FAN layers bounded by inner and outer rather than one long ray broken up, because nothing in the vocabulary measures distance from a placed point except FAN's own bounds. Each ring is one unit deep with 0.6 of bare coat between - both above a texel.",
+    "The fine ray is 0.72 units wide at inner 4.0. Winding spacing below about 0.36 takes the inner ring under a texel and the innermost dashes silently disappear while the outer two stay, which reads as a tuning problem and is not one.",
+    "The SPIRAL centres itself on the BODY bounds and the FANs are written to the same point, (18.5, 16). Those numbers have to move together.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace is a photo-trace: 800 to 4500 path commands across dozens to hundreds of subpaths, most of them trace noise. That is well past the point ceiling, which exists precisely to keep a traced photograph out of a gene file. It would also have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks instead. If a hand-drawn, low-node version of the source ever exists, the SVG mask with its d string pasted verbatim is the better gene."
+  ],
+  "alleles": [
+    {
+      "token": "W",
+      "label": "Chalk sun (W)"
+    },
+    {
+      "token": "B",
+      "label": "Carved sun (B)"
+    },
+    {
+      "token": "C",
+      "label": "Coloured sun (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "sunSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Chalk sun",
+      "description": "A chalk-white spiral inside three rings of dashes, gathered into five points.",
+      "when": [
+        "W/W",
+        "W/B",
+        "W/C",
+        "W/n"
+      ],
+      "layers": [
+        {
+          "name": "the wound centre",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPIRAL",
+              "seed": "$sunSeed",
+              "axis": "Z",
+              "radius": 3.1,
+              "turns": 2.4,
+              "width": 0.8,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "dash ring 4.0-5.0",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 4.0,
+              "outer": 5.0,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 4.0,
+              "outer": 5.0,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#a6a6a6"
+          }
+        },
+        {
+          "name": "dash ring 5.6-6.6",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 5.6,
+              "outer": 6.6,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 5.6,
+              "outer": 6.6,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#d3d3d3"
+          }
+        },
+        {
+          "name": "dash ring 7.2-8.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 7.2,
+              "outer": 8.2,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 7.2,
+              "outer": 8.2,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Carved sun",
+      "description": "The petroglyph form - a black spiral and five points of dashes cut into each flank.",
+      "when": [
+        "B/B",
+        "B/C",
+        "B/n"
+      ],
+      "layers": [
+        {
+          "name": "the wound centre",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPIRAL",
+              "seed": "$sunSeed",
+              "axis": "Z",
+              "radius": 3.1,
+              "turns": 2.4,
+              "width": 0.8,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "dash ring 4.0-5.0",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 4.0,
+              "outer": 5.0,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 4.0,
+              "outer": 5.0,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#2e2e2e"
+          }
+        },
+        {
+          "name": "dash ring 5.6-6.6",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 5.6,
+              "outer": 6.6,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 5.6,
+              "outer": 6.6,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#4f4f4f"
+          }
+        },
+        {
+          "name": "dash ring 7.2-8.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 7.2,
+              "outer": 8.2,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 7.2,
+              "outer": 8.2,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#707070"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured sun",
+      "description": "The sun takes the line's own colour, darkest at the spiral and brightest at the outer dashes.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the wound centre",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "SPIRAL",
+              "seed": "$sunSeed",
+              "axis": "Z",
+              "radius": 3.1,
+              "turns": 2.4,
+              "width": 0.8,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "dash ring 4.0-5.0",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 4.0,
+              "outer": 5.0,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 4.0,
+              "outer": 5.0,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.47
+          }
+        },
+        {
+          "name": "dash ring 5.6-6.6",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 5.6,
+              "outer": 6.6,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 5.6,
+              "outer": 6.6,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.63
+          }
+        },
+        {
+          "name": "dash ring 7.2-8.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 0.36,
+              "duty": 0.5,
+              "inner": 7.2,
+              "outer": 8.2,
+              "softness": 0.16
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "units",
+              "originU": 18.5,
+              "originV": 16.0,
+              "spacing": 1.257,
+              "duty": 0.5,
+              "inner": 7.2,
+              "outer": 8.2,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "W/W": 0.002,
+    "W/B": 0.0035,
+    "W/C": 0.0045,
+    "W/n": 0.26,
+    "B/B": 0.003,
+    "B/C": 0.005,
+    "B/n": 0.22,
+    "C/C": 0.006,
+    "n/n": 99.496
+  }
+}

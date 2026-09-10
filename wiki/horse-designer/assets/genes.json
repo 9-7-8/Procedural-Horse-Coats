@@ -6642,14 +6642,12 @@
   "phase": "magical",
   "priority": 122,
   "rarity": "RARE",
-  "blurb": "The coat reads as a contour map - lobed masses ringed by nested bands that step from cream through pink and mint to near-black, with a drawn line following one level all the way round.",
+  "blurb": "The coat reads as a contour map: six bands of a landscape stacked one inside the next, from deep green at the low ground through yellow and gold to a red-brown at the summits, with a drawn contour line ruled through the middle level. The coloured form runs the low ground and the high ground off two independent hues instead.",
   "notes": [
-    "The source was an SVG: eight posterised colours traced off a photograph of banded rock, about 360 KB of path data. A field, not an outline - rebuilt as a rule.",
-    "Reading of the source: wandering lobed masses, each ringed by several nested bands that step in value from the outside in, with a hard dark line following one of those steps all the way round. It is a topographic map made of stone.",
-    "The mechanism is one FRACTAL field read at six thresholds. Every band here shares $landSeed, $landScale, octaves and warp and differs ONLY in threshold, which is what makes them nest: they are level sets of one function, so a higher threshold is strictly inside a lower one and no arithmetic is needed to keep them concentric. Change scale or warp on one band and it stops being the same landscape.",
-    "Do not raise octaves to sharpen it. This field divides by the root of the summed squares rather than by the total amplitude, so octaves preserves coverage and buys detail only - which is the good news - but a texel is half a body unit, so by the fourth octave at this scale the finest detail is under the sheet's resolution and the crisp band edges break into stipple. Three is the number.",
-    "softness is 0.05 rather than the 0.12 default because a map's bands are printed, not shaded. The trade is that the band WIDTH in body units is not a number this file sets - it falls out of how steep the field is where each level crosses, so a band is wide on a shallow slope and a hairline on a steep one, exactly as on a real contour map. If the bands come out too thin to read, lower $landScale rather than moving the thresholds: a larger feature has gentler slopes.",
-    "The dark line is the one place two thresholds appear in one layer - 0.52 and 0.56, the second inverted - which is a band between two adjacent levels rather than a stroke of any set width. Same caveat: its width tracks the slope."
+    "THE BANDS ARE DISJOINT AND HAVE TO BE. Each band is a threshold on one FRACTAL field, so band 0.38 sits entirely INSIDE band 0.30 - and a magical gene's layers each measure their delta against the colour the gene started from and then sum, so six nested TOWARDs do not paint six bands. They paint one colour, which is whatever six deltas add up to, and six pale deltas add up to white. That is exactly how this gene shipped: an almost-white horse with a brown patch, and the pastel palette it was given was the author compensating for a wash they could not see the cause of.",
+    "So every band now subtracts the threshold above it and paints only the ring between the two. Once they are disjoint the colours can be what a contour map actually looks like - a hypsometric ramp with real chroma in it - rather than six tints chosen to survive being added together.",
+    "The 0.52 band is missing on purpose: that is where the drawn contour line goes. The line is 0.52 minus 0.56, so the band above it starts at 0.56 and the two do not overlap either.",
+    "TWO hue knobs, not one plus an offset. The coloured form wants the low ground and the high ground to be different colours, and a knob cannot be offset by a constant in this format - there is no '$inkHue + 120'. inkHue and highHue are therefore INDEPENDENT draws, which means a horse can roll two hues that sit next to each other and come out nearly monochrome. That is the honest cost of the missing arithmetic and it is a good deal less bad than one flat hue."
   ],
   "preview": {
     "base": "bay",
@@ -6683,6 +6681,11 @@
       "name": "inkHue",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "highHue",
+      "min": 0,
+      "max": 360
     }
   ],
   "expressions": [
@@ -6700,7 +6703,7 @@
       ],
       "layers": [
         {
-          "name": "the band above 0.3",
+          "name": "the band from 0.30 to 0.38",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6710,17 +6713,27 @@
               "warp": 0.5,
               "threshold": 0.3,
               "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.38,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#e2d5b8",
+            "color": "#1f6b3f",
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.38",
+          "name": "the band from 0.38 to 0.44",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6730,17 +6743,27 @@
               "warp": 0.5,
               "threshold": 0.38,
               "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.44,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#e8c8e5",
+            "color": "#4f9c33",
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.44",
+          "name": "the band from 0.44 to 0.52",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6750,18 +6773,7 @@
               "warp": 0.5,
               "threshold": 0.44,
               "softness": 0.05
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#c8eeec",
-            "strength": 93,
-            "opacity": 100
-          }
-        },
-        {
-          "name": "the band above 0.52",
-          "masks": [
+            },
             {
               "type": "FRACTAL",
               "seed": "$landSeed",
@@ -6769,18 +6781,49 @@
               "octaves": 3,
               "warp": 0.5,
               "threshold": 0.52,
-              "softness": 0.05
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#a3b5b8",
+            "color": "#b5bd2e",
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.6",
+          "name": "the band from 0.56 to 0.60",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.56,
+              "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.6,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e0a026",
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band from 0.60 to 0.68",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6790,17 +6833,27 @@
               "warp": 0.5,
               "threshold": 0.6,
               "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.68,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#8f888a",
+            "color": "#c85f22",
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.68",
+          "name": "the band from 0.68 to the top",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6814,7 +6867,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#443f38",
+            "color": "#8e2b18",
             "strength": 93,
             "opacity": 100
           }
@@ -6844,7 +6897,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#201a12",
+            "color": "#14100a",
             "strength": 97,
             "opacity": 100
           }
@@ -6863,7 +6916,7 @@
       ],
       "layers": [
         {
-          "name": "the band above 0.3",
+          "name": "the band from 0.30 to 0.38",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6873,19 +6926,29 @@
               "warp": 0.5,
               "threshold": 0.3,
               "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.38,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
             "hue": "$inkHue",
-            "saturation": 0.34,
-            "lightness": 0.86,
+            "saturation": 0.7,
+            "lightness": 0.3,
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.38",
+          "name": "the band from 0.38 to 0.44",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6895,19 +6958,29 @@
               "warp": 0.5,
               "threshold": 0.38,
               "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.44,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
             "hue": "$inkHue",
-            "saturation": 0.34,
-            "lightness": 0.84,
+            "saturation": 0.74,
+            "lightness": 0.42,
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.44",
+          "name": "the band from 0.44 to 0.52",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6917,20 +6990,7 @@
               "warp": 0.5,
               "threshold": 0.44,
               "softness": 0.05
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$inkHue",
-            "saturation": 0.34,
-            "lightness": 0.88,
-            "strength": 93,
-            "opacity": 100
-          }
-        },
-        {
-          "name": "the band above 0.52",
-          "masks": [
+            },
             {
               "type": "FRACTAL",
               "seed": "$landSeed",
@@ -6938,20 +6998,53 @@
               "octaves": 3,
               "warp": 0.5,
               "threshold": 0.52,
-              "softness": 0.05
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
             "hue": "$inkHue",
-            "saturation": 0.34,
-            "lightness": 0.7,
+            "saturation": 0.8,
+            "lightness": 0.56,
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.6",
+          "name": "the band from 0.56 to 0.60",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.56,
+              "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.6,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$highHue",
+            "saturation": 0.8,
+            "lightness": 0.58,
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band from 0.60 to 0.68",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6961,19 +7054,29 @@
               "warp": 0.5,
               "threshold": 0.6,
               "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.68,
+              "softness": 0.05,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
             "type": "TOWARD",
-            "hue": "$inkHue",
-            "saturation": 0.5,
-            "lightness": 0.55,
+            "hue": "$highHue",
+            "saturation": 0.82,
+            "lightness": 0.45,
             "strength": 93,
             "opacity": 100
           }
         },
         {
-          "name": "the band above 0.68",
+          "name": "the band from 0.68 to the top",
           "masks": [
             {
               "type": "FRACTAL",
@@ -6987,9 +7090,9 @@
           ],
           "op": {
             "type": "TOWARD",
-            "hue": "$inkHue",
-            "saturation": 0.5,
-            "lightness": 0.24,
+            "hue": "$highHue",
+            "saturation": 0.85,
+            "lightness": 0.31,
             "strength": 93,
             "opacity": 100
           }
@@ -7020,8 +7123,8 @@
           "op": {
             "type": "TOWARD",
             "hue": "$inkHue",
-            "saturation": 0.55,
-            "lightness": 0.1,
+            "saturation": 0.6,
+            "lightness": 0.08,
             "strength": 97,
             "opacity": 100
           }
@@ -9669,7 +9772,7 @@
   "phase": "magical",
   "priority": 121,
   "rarity": "EPIC",
-  "blurb": "A butterfly lies along the horse's back with its wings spread either side of the spine - dark, edged in teal, with rust squiggles across the wings and hot pink cells inside them. Both halves are identical.",
+  "blurb": "A butterfly lies along the horse's back with its wings spread either side of the spine and the wingtips folded down over the barrel - dark, edged in teal, with rust squiggles across the wings and hot pink cells inside them. Both halves are identical.",
   "notes": [
     "The source was an SVG: four flat colours traced off a photograph of a butterfly - a near-black ground, rust patches across the wings, hot pink lobed cells inside those patches, and a teal band along the outer margin. About 60 KB of path data. The colours and the three-deep nesting come from it; the outline does not, for the reason below.",
     "The source butterfly is photographed at an angle with its wings at different sweeps, so it is not symmetric and mirroring one half of it gives a lump rather than a butterfly - that was tried and thrown away. The silhouette here is drawn instead: a body spindle and four wings, with each wing mirrored across the centreline by construction, so the symmetry is exact rather than approximate.",
@@ -9679,7 +9782,9 @@
     "fillRule is nonzero and every subpath is wound the same way, which is what makes the body and four wings union into one shape. They were opposite-wound at first and the overlaps CANCELLED, leaving white slivers between each wing and the body. If the butterfly comes out with gaps where the wings meet the body, that is what happened.",
     "The squiggles are SPOTS with mirror: true, and that flag is doing the other half of the symmetry. Body space has a SIGNED z, so an ordinary scatter is independent on the two sides - correct for a paint marking, wrong for anything that reads as a design. mirror samples the lattice at |z|, so the far side of the spine gets the near side's marks in the same places. It is also why the squiggles are SPOTS stretched along X rather than STROKES: STROKES would squiggle better and has no mirror, and on a design that has to match across the spine that is not a trade worth making.",
     "The rust and the pink share seed, spacing, stretch, vary and chance and differ only in radius, which is what keeps each pink cell inside its own rust patch. At radius 2.2 and 1.1 the rust surviving around the pink is 0.55 body units - a hair over a texel - and spacing 6.0 leaves 1.6 units of dark between neighbouring marks. Closing that spacing packs them until the wing reads as solid rust.",
-    "The four layers are DISJOINT and have to be. A magical gene's layers each measure their delta against the colour the gene started from, and the deltas are summed - so a TINT of -200 on every channel under a TOWARD teal does not give teal, it gives teal minus 200. As imported the ground was painted over the whole butterfly with the margin, the squiggles and the cells on top of it, and the horse came out solid near-black: 484 texels moved on a bay and not one of them teal, rust or pink. The ground now paints the inner shape MINUS the rust patches, and the rust paints its patches MINUS the pink cells, which is the nesting the notes above already describe - it just has to be written as subtraction rather than as stacking."
+    "The four layers are DISJOINT and have to be. A magical gene's layers each measure their delta against the colour the gene started from, and the deltas are summed - so a TINT of -200 on every channel under a TOWARD teal does not give teal, it gives teal minus 200. As imported the ground was painted over the whole butterfly with the margin, the squiggles and the cells on top of it, and the horse came out solid near-black: 484 texels moved on a bay and not one of them teal, rust or pink. The ground now paints the inner shape MINUS the rust patches, and the rust paints its patches MINUS the pink cells, which is the nesting the notes above already describe - it just has to be written as subtraction rather than as stacking.",
+    "The wings are drawn HALF AGAIN as wide as the horse and centred on the spine - sizeV 1.5, originV -0.25 - so the outer part of each wing falls off the edge of the back and onto the flank instead of stopping at the top. The NORMAL mask was opened up to match, from 0.15 down to -0.75 at round 0.85, which carries it to about halfway down the barrel. Both numbers move together: widening the drawing without opening the NORMAL just clips more of the wing away, and opening the NORMAL without widening the drawing puts bare flank in the vertical bands the note above warns about.",
+    "What is on the FLANK is an extrusion and not a drawing, and it is worth knowing which is which. A top-plane shape is read at (x, z), and a flank face has one constant z - so the whole side shows a single vertical slice of the butterfly, stretched downward. On the back you are looking at the drawing; on the sides you are looking at its cross-section running down. That reads as wings folding over the barrel, which is what it is for, and it is the honest cost of the plane that makes the mirror line the spine."
   ],
   "preview": {
     "base": "black",
@@ -9748,8 +9853,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -9772,8 +9877,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -9799,8 +9904,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -9817,8 +9922,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -9829,8 +9934,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -9855,8 +9960,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -9891,8 +9996,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -9917,8 +10022,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -9940,8 +10045,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -9979,8 +10084,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -10003,8 +10108,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -10030,8 +10135,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -10048,8 +10153,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -10060,8 +10165,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -10088,8 +10193,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -10124,8 +10229,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -10152,8 +10257,8 @@
               "viewBox": "0 0 1000 620",
               "originU": 0.17,
               "sizeU": "$spanU",
-              "originV": 0.0,
-              "sizeV": 1.0,
+              "originV": -0.25,
+              "sizeV": 1.5,
               "fit": "none",
               "fill": true,
               "fillRule": "nonzero",
@@ -10175,8 +10280,8 @@
               "type": "NORMAL",
               "axis": "Y",
               "space": "body",
-              "round": 0.6,
-              "from": 0.15,
+              "round": 0.85,
+              "from": -0.75,
               "to": 1.0
             }
           ],
@@ -10660,14 +10765,15 @@
   "phase": "magical",
   "priority": 124,
   "rarity": "RARE",
-  "blurb": "Heavy ink rings with solid pupils are scattered over a pale ground, each one trailing a drip straight down, with loose dots thrown between them.",
+  "blurb": "A scatter of ringed marks across the barrel and down the legs, each with a drip hanging under it, and long runs of ink drawn down toward the hooves as though the whole thing were still wet. The coloured form does the same in one saturated ink instead of black.",
   "notes": [
     "The source was an SVG: two flat colours, near-black on off-white, about 12 KB - the smallest of the set and the only one already at poster weight. Rings with solid centres, small solid dots, and thick drips running down off the larger marks.",
     "The ring and its pupil are RINGS and SPOTS on one seed, one spacing and one vary, which is what should put the pupil in the middle of its own ring - RINGS is documented as the same scatter drawn hollow. That is the one assumption in this file worth checking with coverage.mjs before trusting it: if the pupils land beside the rings rather than inside them, the two masks do not share a lattice and the pupil has to be built as a second RINGS at a small radius instead.",
     "The drip is three SPOTS draws on that same lattice at growing offsetY, MAXed together. offsetY moves where a mask reads the cell centre from WITHOUT moving the cell, so all three stay attached to the mark they hang from rather than becoming their own scatter. Softness at 0.16 is what fuses the three into a continuous run rather than a dotted line - wind it much lower and the drip beads.",
     "No stretch anywhere, deliberately. A stretched drip would read better, but stretch divides the sample before the lattice walk, so a draw with a different stretch is on a DIFFERENT lattice - and the drip would come apart from its own ring. Every layer of one compound element shares its stretch or the element scatters.",
     "Sizing against the wiki's floors: the ring is radius 2.4 on thickness 0.9 with softness 0.12, all clear of the 1.3 / 0.7 / half-the-thickness minimums. markSpacing bottoms out at 6.2 against an outer radius of about 2.85, so there is over a body unit of clear ground between neighbouring rings even at the tightest roll.",
-    "The loose dots run on their own seed and spacing because in the source they have nothing to do with where the rings fell - they are thrown, not placed."
+    "The loose dots run on their own seed and spacing because in the source they have nothing to do with where the rings fell - they are thrown, not placed.",
+    "Three changes off looking at it. The white ground is gone - it covered the whole horse at 84% opacity and turned every base coat into the same pale grey, which is a lot of horse to spend on a backdrop for a scatter of small marks. The marks are on the BODY and the LEGS only rather than everywhere, and there are fewer of them: chance 0.7 down to 0.4 on the ringed marks and the loose dots from spacing 4 at chance 0.35 to spacing 7.5 at 0.18. And the runs are new - STROKES on Y, weighted to the lower half of the body by an inverted AXIS, which is what makes them read as ink running down rather than as a stripe pattern."
   ],
   "preview": {
     "base": "chestnut",
@@ -10705,6 +10811,10 @@
       "name": "inkHue",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "runSeed",
+      "type": "seed"
     }
   ],
   "expressions": [
@@ -10722,20 +10832,6 @@
       ],
       "layers": [
         {
-          "name": "the pale ground the graphic sits on",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fbfbfb",
-            "strength": 74,
-            "opacity": 84
-          }
-        },
-        {
           "name": "the drip hanging under each mark",
           "masks": [
             {
@@ -10746,7 +10842,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             },
             {
               "type": "SPOTS",
@@ -10757,7 +10857,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             },
             {
               "type": "SPOTS",
@@ -10768,7 +10868,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             }
           ],
           "op": {
@@ -10790,7 +10890,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -10811,7 +10915,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -10828,11 +10936,50 @@
             {
               "type": "SPOTS",
               "seed": "$dotSeed",
-              "spacing": 4.0,
+              "spacing": 7.5,
               "radius": 0.72,
               "vary": 0.5,
-              "chance": 0.35,
-              "softness": 0.16
+              "chance": 0.18,
+              "softness": 0.16,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": -200,
+            "green": -200,
+            "blue": -200,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "and the ink running down toward the hooves",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "LEGS"
+              ],
+              "seed": "$runSeed",
+              "axis": "Y",
+              "spacing": 5.4,
+              "length": 16.0,
+              "width": 0.32,
+              "curl": 0.12,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "body",
+              "from": -0.4,
+              "to": 0.44,
+              "softness": 0.22,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -10857,20 +11004,6 @@
       ],
       "layers": [
         {
-          "name": "the pale ground the graphic sits on",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fbfbfb",
-            "strength": 74,
-            "opacity": 84
-          }
-        },
-        {
           "name": "the drip hanging under each mark",
           "masks": [
             {
@@ -10881,7 +11014,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             },
             {
               "type": "SPOTS",
@@ -10892,7 +11029,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             },
             {
               "type": "SPOTS",
@@ -10903,7 +11040,7 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4
             }
           ],
           "op": {
@@ -10926,7 +11063,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -10948,7 +11089,11 @@
               "seed": "$markSeed",
               "spacing": "$markSpacing",
               "vary": 0.35,
-              "chance": 0.7
+              "chance": 0.4,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
             }
           ],
           "op": {
@@ -10966,11 +11111,51 @@
             {
               "type": "SPOTS",
               "seed": "$dotSeed",
-              "spacing": 4.0,
+              "spacing": 7.5,
               "radius": 0.72,
               "vary": 0.5,
-              "chance": 0.35,
-              "softness": 0.16
+              "chance": 0.18,
+              "softness": 0.16,
+              "parts": [
+                "BODY",
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.78,
+            "lightness": 0.18,
+            "strength": 97,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "and the ink running down toward the hooves",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "LEGS"
+              ],
+              "seed": "$runSeed",
+              "axis": "Y",
+              "spacing": 5.4,
+              "length": 16.0,
+              "width": 0.32,
+              "curl": 0.12,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "body",
+              "from": -0.4,
+              "to": 0.44,
+              "softness": 0.22,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -36876,16 +37061,18 @@
   "key": "horsegenetics.rising_sun",
   "name": "Rising Sun",
   "phase": "magical",
-  "priority": 123,
+  "priority": 620,
   "rarity": "EPIC",
-  "blurb": "Heavy black ribbons roll across a white coat in even waves, each shadowed a little below by grey, and a single red disc sits on either flank.",
+  "blurb": "Black ribbons ripple across the horse in a bank of parallel waves, each shadowed by a grey one a half-step behind it, with a single burning disc sitting on either flank. It is painted over almost everything else the horse carries.",
   "notes": [
     "The source was an SVG: four flat colours traced off a poster - black ribbons waving across white, each carrying a grey shadow offset down and left, and one flat red-orange disc laid over them. About 29 KB.",
     "This is the one file in the set that wants WAVES, and the reason is that the ribbons REPEAT. Everything noise-derived in this vocabulary wanders and never comes back to the same place twice; a poster's waves are periodic on purpose, and spacing is what turns one WAVES band into a set of parallel ribbons rising and falling together.",
     "space is units and every length in the layer is therefore in body units - from, to, amplitude and spacing all of them. That is deliberate and it is the standing trap here: amplitude is in whatever space says while wavelength never is, and six shipped genes once copied a saw-wave trick into space: part and displaced their band forty normalised spans off the horse, selecting nothing at all. If this gene ever comes out blank, that is the first thing to check.",
     "Ribbon thickness is to minus from, so 1.2 body units - two and a half texels - against a spacing that bottoms out at 2.2, leaving a full unit of white between ribbons at the tightest roll. Raising waveAmp does not eat that gap, because the ribbons rise and fall together and stay parallel; only lowering ribbonSpacing does.",
     "The grey shadow is the same wave shifted, not a blur: from and to are both up by 0.42 units and the phase is off by 0.35, which reproduces the poster's offset drop shadow. Nothing in this vocabulary offsets a mask, so a shadow has to be a second copy of the shape moved by hand - which is only possible here because WAVES is the one mask with a phase.",
-    "The disc is a PATH because it is ONE of them in ONE place, and plane: side gets 'either flank' for free - a shape drawn in the (x, y) plane is extruded along z. In that space the topline is 0.62 and not 1.0, so the disc sits at v 0.53 on the upper flank; at 0.7 it would be floating above the back and nothing would appear on the barrel. Twelve points on an ellipse rather than a circle because u and v normalise against different spans - 41 body units against 33.7 - so a circle in that space is an oval on the horse."
+    "The disc is a PATH because it is ONE of them in ONE place, and plane: side gets 'either flank' for free - a shape drawn in the (x, y) plane is extruded along z. In that space the topline is 0.62 and not 1.0, so the disc sits at v 0.53 on the upper flank; at 0.7 it would be floating above the back and nothing would appear on the barrel. Twelve points on an ellipse rather than a circle because u and v normalise against different spans - 41 body units against 33.7 - so a circle in that space is an oval on the horse.",
+    "No white ground any more. It was an ALL layer at 86% opacity, so the gene repainted the entire horse before it drew anything - which made every rising sun horse the same horse underneath, and threw away the base coat the rest of the genome had just worked out. The ribbons and the disc are opaque enough to carry themselves on any coat.",
+    "Priority 620, up from 123, which puts it in the top third of the paint order and above every other marking except invert and tron. That is deliberate and it is the opposite of what the coverage rule of thumb would say - see wiki/making-a-gene.html#coverage. A rising sun is a poster printed ON the horse rather than a marking the horse has, and a poster that other markings draw over is not a poster. The rule of thumb is a rule of thumb."
   ],
   "preview": {
     "base": "black",
@@ -36950,20 +37137,6 @@
         "Rs/n"
       ],
       "layers": [
-        {
-          "name": "the white ground",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fefefe",
-            "strength": 78,
-            "opacity": 86
-          }
-        },
         {
           "name": "the grey shadow, one ribbon offset off the black",
           "masks": [
@@ -37079,20 +37252,6 @@
         "Rc/Rc"
       ],
       "layers": [
-        {
-          "name": "the white ground",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fefefe",
-            "strength": 78,
-            "opacity": 86
-          }
-        },
         {
           "name": "the grey shadow, one ribbon offset off the black",
           "masks": [

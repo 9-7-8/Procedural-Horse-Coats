@@ -2,16 +2,18 @@
   "key": "horsegenetics.rising_sun",
   "name": "Rising Sun",
   "phase": "magical",
-  "priority": 123,
+  "priority": 620,
   "rarity": "EPIC",
-  "blurb": "Heavy black ribbons roll across a white coat in even waves, each shadowed a little below by grey, and a single red disc sits on either flank.",
+  "blurb": "Black ribbons ripple across the horse in a bank of parallel waves, each shadowed by a grey one a half-step behind it, with a single burning disc sitting on either flank. It is painted over almost everything else the horse carries.",
   "notes": [
     "The source was an SVG: four flat colours traced off a poster - black ribbons waving across white, each carrying a grey shadow offset down and left, and one flat red-orange disc laid over them. About 29 KB.",
     "This is the one file in the set that wants WAVES, and the reason is that the ribbons REPEAT. Everything noise-derived in this vocabulary wanders and never comes back to the same place twice; a poster's waves are periodic on purpose, and spacing is what turns one WAVES band into a set of parallel ribbons rising and falling together.",
     "space is units and every length in the layer is therefore in body units - from, to, amplitude and spacing all of them. That is deliberate and it is the standing trap here: amplitude is in whatever space says while wavelength never is, and six shipped genes once copied a saw-wave trick into space: part and displaced their band forty normalised spans off the horse, selecting nothing at all. If this gene ever comes out blank, that is the first thing to check.",
     "Ribbon thickness is to minus from, so 1.2 body units - two and a half texels - against a spacing that bottoms out at 2.2, leaving a full unit of white between ribbons at the tightest roll. Raising waveAmp does not eat that gap, because the ribbons rise and fall together and stay parallel; only lowering ribbonSpacing does.",
     "The grey shadow is the same wave shifted, not a blur: from and to are both up by 0.42 units and the phase is off by 0.35, which reproduces the poster's offset drop shadow. Nothing in this vocabulary offsets a mask, so a shadow has to be a second copy of the shape moved by hand - which is only possible here because WAVES is the one mask with a phase.",
-    "The disc is a PATH because it is ONE of them in ONE place, and plane: side gets 'either flank' for free - a shape drawn in the (x, y) plane is extruded along z. In that space the topline is 0.62 and not 1.0, so the disc sits at v 0.53 on the upper flank; at 0.7 it would be floating above the back and nothing would appear on the barrel. Twelve points on an ellipse rather than a circle because u and v normalise against different spans - 41 body units against 33.7 - so a circle in that space is an oval on the horse."
+    "The disc is a PATH because it is ONE of them in ONE place, and plane: side gets 'either flank' for free - a shape drawn in the (x, y) plane is extruded along z. In that space the topline is 0.62 and not 1.0, so the disc sits at v 0.53 on the upper flank; at 0.7 it would be floating above the back and nothing would appear on the barrel. Twelve points on an ellipse rather than a circle because u and v normalise against different spans - 41 body units against 33.7 - so a circle in that space is an oval on the horse.",
+    "No white ground any more. It was an ALL layer at 86% opacity, so the gene repainted the entire horse before it drew anything - which made every rising sun horse the same horse underneath, and threw away the base coat the rest of the genome had just worked out. The ribbons and the disc are opaque enough to carry themselves on any coat.",
+    "Priority 620, up from 123, which puts it in the top third of the paint order and above every other marking except invert and tron. That is deliberate and it is the opposite of what the coverage rule of thumb would say - see wiki/making-a-gene.html#coverage. A rising sun is a poster printed ON the horse rather than a marking the horse has, and a poster that other markings draw over is not a poster. The rule of thumb is a rule of thumb."
   ],
   "preview": {
     "base": "black",
@@ -76,20 +78,6 @@
         "Rs/n"
       ],
       "layers": [
-        {
-          "name": "the white ground",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fefefe",
-            "strength": 78,
-            "opacity": 86
-          }
-        },
         {
           "name": "the grey shadow, one ribbon offset off the black",
           "masks": [
@@ -205,20 +193,6 @@
         "Rc/Rc"
       ],
       "layers": [
-        {
-          "name": "the white ground",
-          "masks": [
-            {
-              "type": "ALL"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#fefefe",
-            "strength": 78,
-            "opacity": 86
-          }
-        },
         {
           "name": "the grey shadow, one ribbon offset off the black",
           "masks": [
