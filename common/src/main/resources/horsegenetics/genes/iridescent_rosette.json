@@ -7,7 +7,8 @@
   "blurb": "Dark rosettes speckle the coat, each rimmed in bands of colour that shift like the shell of a jewel beetle.",
   "notes": [
     "The import wrote the coloured form as one RAMP running RADIALLY out from each rosette's own centre. There is no radial axis on RAMP and adding one would need the op to know which cell it was in, so the three colour bands are written as three concentric SPOTS pairs instead - the same recipe the pale form uses, on the same seed, spacing, stretch and vary. The visible difference is that the bands step rather than blend; the registration, which is what the import was protecting, is exactly as tight.",
-    "Every radius here is a knob, and every band's outer edge is the next band's inner edge, so the rosette stays in proportion however the knobs are bred - and 'vary' scales the whole set of them by one per-cell factor, so a big rosette is big all the way through."
+    "Every radius here is a knob, and every band's outer edge is the next band's inner edge, so the rosette stays in proportion however the knobs are bred - and 'vary' scales the whole set of them by one per-cell factor, so a big rosette is big all the way through.",
+    "The pale form is the SAME three concentric bands as the coloured one, on the same radii and the same knobs, with the three hues replaced by three greys. It was a single flat ivory ring and read as a smudge at coat scale, because a ring with no interior structure has nothing to tell the eye where its edges are; three steps of grey give it the depth the coloured form gets from its hues, and keep the two forms recognisably the same marking."
   ],
   "alleles": [
     {
@@ -73,7 +74,7 @@
     {
       "id": "pale",
       "name": "Iridescent Rosette, pale",
-      "description": "Faint ivory ring-spots ghost the coat, the same size and spacing as the true rosettes with the colour taken out of the band.",
+      "description": "Ring-spots ghost the coat in three steps of grey - an almost-white outer band, a mid grey inside it and a near-charcoal ring round the hollow - the same size and spacing as the true rosettes with the colour taken out of the band.",
       "when": [
         "Irw/Irw",
         "Irw/Irc",
@@ -81,7 +82,7 @@
       ],
       "layers": [
         {
-          "name": "the ring",
+          "name": "the outer band, palest",
           "masks": [
             {
               "type": "PARTS",
@@ -119,6 +120,106 @@
               "stretch": "$stretch",
               "vary": "$vary",
               "mirror": true,
+              "radius": 2.1,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e7e2d8",
+            "strength": 92
+          }
+        },
+        {
+          "name": "a mid grey inside it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 2.1,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#aeaaa2",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the darkest grey round the hollow",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
               "radius": 0.9,
               "softness": "$holeSoft",
               "combine": "SUBTRACT"
@@ -126,7 +227,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ede6d6",
+            "color": "#6d6961",
             "strength": 92
           }
         }

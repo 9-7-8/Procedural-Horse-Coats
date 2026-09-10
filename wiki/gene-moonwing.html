@@ -21,7 +21,7 @@
 <h1>Moonwing</h1>
 
 <p class="lede">
-    A pearl-white wing sweeps back across each side of the barrel, dusted with a faint shimmer of blue, violet and pink and bound at the edge by a thick band of gold. Rare foals carry it reversed - the wing itself coloured, the gold unchanged.
+    A pearl-white wing sweeps up over the topline and down both sides of the barrel, dusted with a faint shimmer of blue, violet and pink and bound at the edge by a thick band of gold; the pearl form gilds and dusts every other white marking the horse carries to match. Rare foals carry it reversed - the wing itself coloured, the gold unchanged.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -49,6 +49,8 @@
 <h2 id="about">About this gene</h2>
 
 <p>The wing is an SVG path, and it is the first gene in the mod that carries an actual drawing. The import shipped it as one big soft SPOTS blob per side and said so: a blob is round and a wing is pointed, and no radius or stretch makes a lattice cell into a silhouette. A drawn outline is the answer to that, and 'plane': 'side' extrudes it through the horse so one drawing appears on both flanks without either being placed by hand.</p>
+
+<p>The extrusion is also what puts it over the TOPLINE. A side-plane SVG ignores z entirely, so the drawing is a function of x and y alone: raise the viewport past the top of the barrel and the same outline that covers the flanks covers the back between them, with no seam and nothing placed twice. The viewport is deliberately taller than the barrel for that reason - the top of the wing is clipped off by the horse, which is what makes it wrap.</p>
 
 <p>The gold trim is the SAME path stroked instead of filled, so the band cannot drift off the edge it is meant to bind however the viewport is tuned. The import built its trim by growing the blob and subtracting the blob back out, which works and which no longer has to.</p>
 
@@ -111,7 +113,7 @@
 <tr><th>Priority</th><td>283 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Mnw</code> &middot; <code>Mnc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>2 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>PALETTE, PARTS, SPECKLE, SVG, TOWARD</td></tr>
+<tr><th>Built from</th><td>LUMA, PALETTE, PARTS, SPECKLE, SVG, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
@@ -127,9 +129,15 @@
 
 <h3>Moonwing, pearl</h3>
 
-<p>Twin pearl-white wings sweep back across the ribs, glimmering with a faint blue-violet-pink dust and bound at the edge by a thick band of gold.</p>
+<p>Twin pearl-white wings sweep up over the topline and down both flanks, glimmering with a faint blue-violet-pink dust and bound at the edge by a thick band of gold - and every other white marking the horse carries is gilded and dusted to match.</p>
+
+<p>The two gilding layers run FIRST, before the wing is laid down. LUMA reads the coat as it stands when the layer runs, so a wing painted first would be read back as another white marking and edged twice.</p>
+
+<p>The gold edge is the white selection intersected with the same selection inverted and grown 1.3 units. Growing the NOT-white eats that far into the white, so the intersection is a rim just inside every white border - which is where the wing's own stroked band sits too, and is why the two read as one trait rather than as a gene and a side effect.</p>
 
 <ol>
+<li>the same dust over any other white the horse carries &mdash; <code>LUMA</code> &times; <code>SPECKLE</code>, painted with <code>PALETTE</code></li>
+<li>and a gold edge run round the inside of it &mdash; <code>LUMA</code> &times; <code>LUMA inverted</code>, painted with <code>TOWARD</code></li>
 <li>the wing &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
 <li>the dust over it &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SPECKLE</code>, painted with <code>PALETTE</code></li>
 <li>and the gold band round its edge &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>

@@ -1,0 +1,134 @@
+{
+  "format": 3,
+  "key": "horsegenetics.overcast",
+  "name": "Overcast",
+  "phase": "magical",
+  "priority": 116,
+  "rarity": "rare",
+  "blurb": "Banks of grey cloud drift across the horse - rounded blobs packed shoulder to shoulder, each shaded darker at its middle, with thin bright channels of sky between them.",
+  "notes": [
+    "The source was an SVG: eight posterised greys traced off a photograph of a mackerel sky, about 330 KB of path data across eight subpath-heavy layers. Past the SVG mask's point ceiling, and the wrong kind of thing anyway - it is a field, not an outline, so there is nothing to place and every horse should get its own. Rebuilt as a rule.",
+    "Reading of the source: rounded blobs at a fairly even pitch, packed close but never merged, each with a darker core inside a mid-grey body; a thin pale channel of sky between every pair; the blobs slightly drawn out along one diagonal; and the whole field clumping - dense and dark over part of the frame, open and washed out over the rest.",
+    "The three greys are three SPOTS draws on ONE seed, spacing, stretch and vary, differing only in radius. That is what keeps them concentric: stretch divides the sample before the lattice walk, so a single mismatched value is a different lattice and the cores scatter out of their own blobs. If the shading ever lands beside a cloud instead of inside it, that is the parameter that drifted.",
+    "Radius is set against spacing rather than picked: the pale channel between blobs is roughly spacing minus twice the radius, so at spacing 3.6 a radius of 1.4 leaves about 0.8 body units of sky - a hair over a texel and a half, which is the thinnest a channel can be and still read. Push the radius up and the field closes into a flat grey horse; the channel is the whole reason it reads as cloud.",
+    "The clouds do not cover the horse. A soft FRACTAL decides where the banks sit and everything is multiplied by it, so there are open stretches of bare coat between them, and the haze layer runs on the same seed and scale at a lower threshold - the same banks, drawn larger - which is what gives each one a pale halo instead of a cut edge.",
+    "The vary of 0.35 is doing more work than it looks. It scales each cell by its own factor, so neighbouring blobs come out unequal and the big ones crowd their neighbours into clumps, which is the half of the source that a regular lattice cannot say."
+  ],
+  "preview": { "base": "bay", "expression": "overcast" },
+  "alleles": [
+    { "token": "Cu", "label": "Overcast (Cu)" },
+    { "token": "Cc", "label": "Coloured sky (Cc)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "cloudSeed", "type": "seed" },
+    { "name": "bankSeed", "type": "seed" },
+    { "name": "driftSeed", "type": "seed" },
+    { "name": "cloudSpacing", "min": 3.2, "max": 4.2 },
+    { "name": "cover", "min": 0.38, "max": 0.5 },
+    { "name": "skyHue", "min": 0, "max": 360 }
+  ],
+  "expressions": [
+    {
+      "id": "overcast",
+      "name": "Overcast",
+      "description": "Banks of grey cloud lie across the coat in packed rounded blobs, each one shaded darker through its middle, with thin channels of bright sky running between them.",
+      "when": [ "Cu/Cu", "Cu/Cc", "Cu/n" ],
+      "notes": [
+        "Layer order is the value order: haze, body, shade, core, brightest first and darkest last. Each is painted over the one before, so the darker draws sit inside the paler ones rather than beside them."
+      ],
+      "layers": [
+        {
+          "name": "the haze - the same banks drawn larger, for a halo",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": 0.31, "softness": 0.26 }
+          ],
+          "op": { "type": "TOWARD", "color": "#dee2e6", "strength": 52, "opacity": 68 }
+        },
+        {
+          "name": "the cloud body",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": "$cover", "softness": 0.22 },
+            { "type": "SPOTS", "seed": "$cloudSeed", "spacing": "$cloudSpacing", "radius": 1.4, "vary": 0.35, "stretch": 1.6, "axis": "X", "softness": 0.4 },
+            { "type": "NOISE", "seed": "$driftSeed", "scale": 13.0, "low": 0.5, "high": 1.0 }
+          ],
+          "op": { "type": "TOWARD", "color": "#adb2bb", "strength": 84, "opacity": 92 }
+        },
+        {
+          "name": "the shaded middle of each blob",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": "$cover", "softness": 0.22 },
+            { "type": "SPOTS", "seed": "$cloudSeed", "spacing": "$cloudSpacing", "radius": 0.98, "vary": 0.35, "stretch": 1.6, "axis": "X", "softness": 0.35 },
+            { "type": "NOISE", "seed": "$driftSeed", "scale": 13.0, "low": 0.45, "high": 1.0 }
+          ],
+          "op": { "type": "TOWARD", "color": "#787e88", "strength": 88, "opacity": 95 }
+        },
+        {
+          "name": "the deep core, on some blobs only",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": "$cover", "softness": 0.22 },
+            { "type": "SPOTS", "seed": "$cloudSeed", "spacing": "$cloudSpacing", "radius": 0.6, "vary": 0.35, "chance": 0.6, "stretch": 1.6, "axis": "X", "softness": 0.3 }
+          ],
+          "op": { "type": "TOWARD", "color": "#575e69", "strength": 92, "opacity": 100 }
+        }
+      ]
+    },
+    {
+      "id": "stormlight",
+      "name": "Coloured sky",
+      "description": "The same cloud, lit from somewhere else - the banks carry a colour this line of horses runs to, still shading from a washed-out rim down to a deep core.",
+      "when": [ "Cc/Cc" ],
+      "notes": [
+        "The recessive coloured half of the usual pair. Identical masks and identical knobs, so a foal that changes form keeps its parents' cloud shapes; only the four colours move, and they move together on one hue. The lightness ladder - 0.88, 0.66, 0.5, 0.36 - is the greyscale of the source read off as values, which is what stops a saturated hue from flattening the shading."
+      ],
+      "layers": [
+        {
+          "name": "the haze - the same banks drawn larger, for a halo",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": 0.31, "softness": 0.26 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$skyHue", "saturation": 0.22, "lightness": 0.88, "strength": 52, "opacity": 68 }
+        },
+        {
+          "name": "the cloud body",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": "$cover", "softness": 0.22 },
+            { "type": "SPOTS", "seed": "$cloudSeed", "spacing": "$cloudSpacing", "radius": 1.4, "vary": 0.35, "stretch": 1.6, "axis": "X", "softness": 0.4 },
+            { "type": "NOISE", "seed": "$driftSeed", "scale": 13.0, "low": 0.5, "high": 1.0 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$skyHue", "saturation": 0.36, "lightness": 0.66, "strength": 84, "opacity": 92 }
+        },
+        {
+          "name": "the shaded middle of each blob",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": "$cover", "softness": 0.22 },
+            { "type": "SPOTS", "seed": "$cloudSeed", "spacing": "$cloudSpacing", "radius": 0.98, "vary": 0.35, "stretch": 1.6, "axis": "X", "softness": 0.35 },
+            { "type": "NOISE", "seed": "$driftSeed", "scale": 13.0, "low": 0.45, "high": 1.0 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$skyHue", "saturation": 0.44, "lightness": 0.5, "strength": 88, "opacity": 95 }
+        },
+        {
+          "name": "the deep core, on some blobs only",
+          "masks": [
+            { "type": "FRACTAL", "seed": "$bankSeed", "scale": 11.0, "octaves": 2, "warp": 0.4, "threshold": "$cover", "softness": 0.22 },
+            { "type": "SPOTS", "seed": "$cloudSeed", "spacing": "$cloudSpacing", "radius": 0.6, "vary": 0.35, "chance": 0.6, "stretch": 1.6, "axis": "X", "softness": 0.3 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$skyHue", "saturation": 0.52, "lightness": 0.36, "strength": 92, "opacity": 100 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Clear.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Cu/Cu": 0.002,
+    "Cu/Cc": 0.0015,
+    "Cu/n": 0.19,
+    "Cc/Cc": 0.006,
+    "n/n": 99.8005
+  }
+}

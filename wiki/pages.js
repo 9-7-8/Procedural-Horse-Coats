@@ -184,6 +184,7 @@ window.HG.pages = {
                 { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-mane-color.html", text: "Mane colour", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-nymphaline.html", text: "Nymphaline", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-suit.html", text: "Suit", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-synort.html", text: "Synort", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] }

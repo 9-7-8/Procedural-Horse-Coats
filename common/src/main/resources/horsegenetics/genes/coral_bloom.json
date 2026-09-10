@@ -4,11 +4,12 @@
   "phase": "magical",
   "priority": 279,
   "rarity": "RARE",
-  "blurb": "The coat ruffles into overlapping coral lobes, each rimmed in bright orange and shading from deep sea-blue to a pale crown, flecked all over with gold.",
+  "blurb": "The coat ruffles into overlapping coral lobes, each shading from deep sea-blue at the rim to a pale crown, with the horse's own colour left showing in the seams between them, and gold flecks over the whole of it.",
   "notes": [
-    "The three zones of a lobe are three readings of ONE tessellation - the same seed, scale and warp, with only the 'gap' moved - so the rim, the fill and the crown share a wall rather than each finding their own and opening seams between them. A band is the wider reading multiplied in and the narrower one subtracted out; the rim is the narrowest reading inverted, which is the crack itself.",
+    "The two zones of a lobe are two readings of ONE tessellation - the same seed, scale and warp, with only the 'gap' moved - so the fill and the crown share a wall rather than each finding their own and opening seams between them. The band is the wider reading multiplied in and the narrower one subtracted out.",
+    "Nothing is painted in the seam. The gene used to lay a bright orange rim there, and at coat scale that rim was not a rim: the walls of a tessellation this fine cover more of a horse than the cells do, so the orange read as the GROUND and the coral as blobs floating on it. Leaving the wall bare puts the base coat in the seam instead, which is a colour that already belongs to the horse and cannot take the picture over.",
     "The warp is what turns CRACKLE's naturally straight facets into rounded, ruffled lobes. Under close inspection the tessellation is still a Voronoi cell with flat sides; at coat scale it reads as coral, which is the whole of what it was tuned for.",
-    "No hue knob. The orange rim over blue fill IS the coral idea rather than a setting on it, and a horse wanting a different palette wants a different gene."
+    "No hue knob. Blue lobe, pale crown, gold fleck IS the coral idea rather than a setting on it, and a horse wanting a different palette wants a different gene."
   ],
   "alleles": [
     {
@@ -44,41 +45,12 @@
     {
       "id": "coral",
       "name": "Coral Bloom",
-      "description": "The coat breaks into overlapping ruffled lobes, each rimmed in bright orange, shading from deep sea-blue at the rim to a pale crown at the middle, and flecked with tiny gold specks.",
+      "description": "The coat breaks into overlapping ruffled lobes, deep sea-blue at the rim and shading to a pale crown at the middle, divided by seams of the horse's own colour and flecked with tiny gold specks.",
       "when": [
         "Crb/Crb",
         "Crb/n"
       ],
       "layers": [
-        {
-          "name": "the orange rim in every seam",
-          "masks": [
-            {
-              "type": "PARTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "MUZZLE"
-              ]
-            },
-            {
-              "type": "CRACKLE",
-              "seed": "$cellSeed",
-              "scale": "$cellSpacing",
-              "gap": 1.2,
-              "warp": "$cellWarp",
-              "softness": 0.12,
-              "combine": "MULTIPLY",
-              "invert": true
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#e8791e",
-            "strength": 95
-          }
-        },
         {
           "name": "the deep blue field inside it",
           "masks": [
