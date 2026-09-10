@@ -84,7 +84,7 @@ public final class StallionSeedJarHandler {
                 consume(event, client ? InteractionResult.SUCCESS
                         : result(collectFromStallion(horse, player, event.getHand(), stack)));
             } else {
-                if (!client) message(player, who + " is recorded as a mare - collect seed from a stallion.");
+                if (!client) message(player, wrongEnd(horse, who));
                 consume(event, InteractionResult.FAIL);
             }
         } else {
@@ -144,6 +144,25 @@ public final class StallionSeedJarHandler {
     }
 
     /** @return true if a foal was bred. */
+    /**
+     * <b>An empty stallion jar, held out to a mare.</b> The refusal that used to
+     * be here explained the mistake, which nobody needed: a player who has just
+     * done this knows what a mare is and has simply grabbed the wrong horse.
+     * What it did not do was make the mod any fun to be wrong in front of.
+     *
+     * <p>Rotated on the horse's own randomness, so the same mare is not sarcastic
+     * in the same way twice running.
+     */
+    private static String wrongEnd(Horse horse, String who) {
+        String[] lines = {
+                who + " is a mare. She has nothing to give you, and she is aware of what you asked.",
+                "The jar says stallion. " + who + " is not one. Between the two of you, one can read.",
+                who + " declines, on the grounds of not being a stallion.",
+                "You hold an empty jar under a mare and wait. Nothing about this is going to work.",
+        };
+        return lines[horse.getRandom().nextInt(lines.length)];
+    }
+
     private static boolean impregnateMare(Horse mare, Player player, ItemStack jar) {
         StoredGenome stored = jar.get(ModDataComponents.STORED_GENOME.get());
         if (stored == null) {

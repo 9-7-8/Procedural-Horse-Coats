@@ -42,8 +42,10 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *       assisted-reproduction vessels. Items only; no collection / pregnancy
  *       mechanic (owner: IVF is out of scope for now).</li>
  *   <li><b>Tickets</b> ({@link #BLANK_TICKET}, {@link #BASIC_TICKET},
- *       {@link #BOUND_TICKET}, {@link #INTERDIMENSIONAL_TICKET}) - intended to
- *       teleport a horse back to its stall. Inert placeholders.</li>
+ *       {@link #BOUND_TICKET}, {@link #INTERDIMENSIONAL_TICKET}) -
+ *       {@link TicketItem}: right-click your horse to send it to its stall, one
+ *       use, the tier setting how far apart the two may be. The blank is the
+ *       crafting base and does nothing.</li>
  *   <li><b>Stall signs</b> ({@link #STALL_SIGN} / {@link #BOUND_STALL_SIGN}) -
  *       {@link StallSignItem}: bind to a horse, place on the outside wall of an
  *       enclosed area to define that horse's stall.</li>
@@ -145,11 +147,16 @@ public final class ModItems {
     public static final DeferredItem<SeedJarItem> EMPTY_SEED_JAR = register("empty_seed_jar", SeedJarItem::new);
     public static final DeferredItem<SeedJarItem> STALLION_SEED_JAR = register("stallion_seed_jar", SeedJarItem::new);
 
-    // --- tickets (roadmap §11) - stall teleport, not built ---------------
+    // --- tickets (roadmap §11) - send a horse to its stall ----------------
+    // The blank is the crafting base and stays inert; the other three are one
+    // use each and differ only in reach. See TicketItem / server.TicketHandler.
     public static final DeferredItem<Item> BLANK_TICKET = simple("blank_ticket");
-    public static final DeferredItem<Item> BASIC_TICKET = simple("basic_ticket");
-    public static final DeferredItem<Item> BOUND_TICKET = simple("bound_ticket");
-    public static final DeferredItem<Item> INTERDIMENSIONAL_TICKET = simple("interdimensional_ticket");
+    public static final DeferredItem<TicketItem> BASIC_TICKET =
+            register("basic_ticket", p -> new TicketItem(p, TicketItem.Tier.BASIC));
+    public static final DeferredItem<TicketItem> BOUND_TICKET =
+            register("bound_ticket", p -> new TicketItem(p, TicketItem.Tier.BOUND));
+    public static final DeferredItem<TicketItem> INTERDIMENSIONAL_TICKET =
+            register("interdimensional_ticket", p -> new TicketItem(p, TicketItem.Tier.INTERDIMENSIONAL));
 
     // --- stall signs (roadmap §11) - bind a horse, place on a stall wall ---
     public static final DeferredItem<StallSignItem> STALL_SIGN = register("stall_sign", StallSignItem::new);

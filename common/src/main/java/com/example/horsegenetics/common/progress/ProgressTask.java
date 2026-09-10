@@ -36,6 +36,10 @@ public enum ProgressTask {
             "The same, for a horse with a blue symbol. You need one of each to breed."),
     NAME_HORSE(Group.FIRST_STEPS, "Name a horse",
             "Right-click one of yours with a name tag. Horses come with names already; this makes one yours."),
+    BARN_NAME(Group.FIRST_STEPS, "Give a horse a barn name",
+            "Open a tamed horse's inventory, click the i hanging off the left of the window, and type "
+                    + "into the box on Overview. A barn name is what you actually call it; its real "
+                    + "name stays as it is."),
     SHEAR_HORSE(Group.FIRST_STEPS, "Shear a horse for hair",
             "Right-click one with shears. Horse hair is the base material for nearly everything "
                     + "this mod adds, and it grows back."),
@@ -87,6 +91,12 @@ public enum ProgressTask {
     // ---- living with horses ------------------------------------------
     BOND_HORSE(Group.CARE, "Bond with a horse",
             "Ride it, feed it and keep it well. Bond builds slowly and unlocks how it behaves around you."),
+    BOND_ATTENTIVE(Group.CARE, "Bond a horse to attentive",
+            "Bond 31. It starts turning its head to watch you from across the paddock."),
+    BOND_APPROACHES(Group.CARE, "Bond a horse to approaching",
+            "Bond 61. It walks over to you of its own accord, when it can find a way round."),
+    BOND_FOLLOWS(Group.CARE, "Bond a horse to following",
+            "Bond 81. It follows you at a walk and stops a few paces off. The top of the scale."),
     BUILD_STALL(Group.CARE, "Give a horse a stall",
             "Hang a stall sign bound to that horse on the wall of a room it can stand in."),
     WHISTLE_BASIC(Group.CARE, "Use a basic whistle",

@@ -367,6 +367,12 @@ public final class ModNetworking {
         Entity target = serverPlayer.level().getEntity(payload.entityId());
         if (target instanceof Horse horse && horse.closerThan(serverPlayer, 8.0)) {
             HorseRecords.setBarnName(horse, payload.barnName());
+            // Clearing the box sends a blank through here too, and unnaming a
+            // horse is not the task - so tick on a name, not on the packet.
+            if (!payload.barnName().strip().isEmpty()) {
+                com.example.horsegenetics.neoforge.server.HorseProgress.complete(serverPlayer,
+                        com.example.horsegenetics.common.progress.ProgressTask.BARN_NAME);
+            }
         }
     }
 

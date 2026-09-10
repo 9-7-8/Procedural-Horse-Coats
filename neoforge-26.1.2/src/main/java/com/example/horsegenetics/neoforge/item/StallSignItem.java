@@ -4,9 +4,10 @@ import com.example.horsegenetics.neoforge.data.BoundHorse;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.StallData;
 import com.example.horsegenetics.neoforge.data.StallRecord;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import com.example.horsegenetics.neoforge.server.StallDebug;
 import com.example.horsegenetics.neoforge.server.StallDetector;
-import java.util.Optional;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -71,15 +72,9 @@ public class StallSignItem extends Item {
             return InteractionResult.FAIL;
         }
 
-        // The stall is on the far side of the wall from the sign.
-        BlockPos seed = wall.relative(face.getOpposite());
-        Optional<StallDetector.Result> found = StallDetector.detect(level, seed);
-        if (found.isEmpty()) {
-            message(ctx, "No enclosed area behind that block - a stall must be walled in "
-                    + "(up to 3 blocks tall, at most " + StallDetector.MAX_BLOCKS + " open blocks).");
-            return InteractionResult.FAIL;
-        }
-        StallDetector.Result r = found.get();
+        // Whichever side of the wall is a room - see StallDetector, which
+        // measures the stall rather than passing judgement on it.
+        StallDetector.Result r = StallDetector.forSign(level, wall, face);
 
         BlockState signState = Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, face);
         level.setBlock(signPos, signState, Block.UPDATE_ALL);
@@ -96,12 +91,23 @@ public class StallSignItem extends Item {
         if (server != null) {
             StallData.get(server).assign(record);
         }
+        // The task is "give a horse a stall", so it ticks when the horse has
+        // one - not back when the sign was bound, which is a sign in a pocket.
+        HorseProgress.complete(ctx.getPlayer(), ProgressTask.BUILD_STALL);
 
         if (ctx.getPlayer() != null && !ctx.getPlayer().getAbilities().instabuild) {
             stack.shrink(1);
         }
         if (ctx.getPlayer() instanceof ServerPlayer sp) {
             StallDebug.showOne(sp, record);
+            // Say which of the two it got: a player who meant to build a room
+            // and got the fallback box should be able to tell from the message
+            // rather than from the particles.
+            sp.sendSystemMessage(Component.literal(r.enclosed()
+                    ? "Stall set for " + bound.name() + " - " + r.blockCount() + " blocks, "
+                            + r.sizeX() + "x" + r.sizeY() + "x" + r.sizeZ() + "."
+                    : "Stall set for " + bound.name() + " - no walls found, so it is the open "
+                            + "ground in front of the sign."));
         }
         return InteractionResult.SUCCESS;
     }
@@ -116,7 +122,7 @@ public class StallSignItem extends Item {
             adder.accept(Component.literal("Bound to: "
                     + (bound.name().isBlank() ? bound.id().toString().substring(0, 8) : bound.name()))
                     .withStyle(ChatFormatting.GRAY));
-            adder.accept(Component.literal("Place on the outside wall of an enclosed stall.")
+            adder.accept(Component.literal("Place on a stall wall, from either side.")
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
     }

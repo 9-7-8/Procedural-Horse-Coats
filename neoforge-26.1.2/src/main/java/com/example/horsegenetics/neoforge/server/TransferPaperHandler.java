@@ -92,8 +92,6 @@ public final class TransferPaperHandler {
 
     @SubscribeEvent
     static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        // Signing or redeeming both count - either way a paper changed hands.
-        HorseProgress.complete(event.getEntity(), ProgressTask.TRANSFER_PAPER);
         if (!(event.getTarget() instanceof Horse horse)) {
             return;
         }
@@ -169,6 +167,10 @@ public final class TransferPaperHandler {
         say(player, Component.translatable(
                 "message.horsegenetics.transfer.signed",
                 Component.literal(record.displayName())));
+        // Signing or redeeming both count - either way a paper changed hands.
+        // It is ticked here rather than on the interaction because every
+        // refusal above is a reason it did not.
+        HorseProgress.complete(player, ProgressTask.TRANSFER_PAPER);
     }
 
     private static void redeem(Player player, Horse horse, ItemStack paper) {
@@ -212,6 +214,7 @@ public final class TransferPaperHandler {
         say(player, Component.translatable(
                 "message.horsegenetics.transfer.redeemed",
                 Component.literal(record.displayName())));
+        HorseProgress.complete(player, ProgressTask.TRANSFER_PAPER);
     }
 
     /** Is {@code playerId} this horse's current owner? */

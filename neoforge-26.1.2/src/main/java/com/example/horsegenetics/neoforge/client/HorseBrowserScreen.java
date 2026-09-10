@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.DoubleConsumer;
 
 /**
  * The <b>Horse Browser</b> - opened with the browser key (default <kbd>H</kbd>).
@@ -145,6 +146,28 @@ public final class HorseBrowserScreen extends Screen {
     private static final int BAD = 0xFFF08C8C;
     private static final int HEAD_BG = 0xFF23232E;
     private static final int DIVIDER = 0x18FFFFFF;
+    private static final int TRACK = 0x33FFFFFF;
+    private static final int THUMB = 0xAAFFFFFF;
+    private static final int THUMB_HOT = 0xFFFFFFFF;
+
+    /**
+     * How far outside the drawn bar a click still counts as grabbing it. The
+     * bars are three pixels wide because that is what looks right; three pixels
+     * is not something anybody can reliably hit with a mouse, so the target is
+     * quietly wider than the paint.
+     */
+    private static final int GRAB_PAD = 6;
+
+    /**
+     * ...and how far <i>inward</i>, which is much less. Every vertical bar here
+     * sits on the right edge of a list, so the pad going right is over a gutter
+     * and the pad going left is over the rows - and a list whose last few pixels
+     * scroll instead of selecting is its own small bug.
+     */
+    private static final int GRAB_PAD_IN = 2;
+
+    /** The Getting Started contents column, when there is room to pin one. */
+    private static final int TOC_W = 150;
 
     /** The Recipes tab's detail panel, centred by {@link #panelLeft()}. */
     private static final int IMG_W = 262;
@@ -189,11 +212,162 @@ public final class HorseBrowserScreen extends Screen {
     private static float detailScroll = 0f;
     private static float tutorialScroll = 0f;
     private static float tutorialMaxScroll = 0f;
+    /** The pinned contents column's own scroll - it can be taller than the window. */
+    private static float tocScroll = 0f;
+    private float tocMaxScroll = 0f;
+    /** Right edge of the pinned contents column, or 0 when it is inline. */
+    private int tocColumnRight = 0;
+    /**
+     * <b>Which section of Getting Started is open.</b> A step index, or
+     * {@code steps + g} for the checklist's group {@code g} - see
+     * {@link #sectionCount()}.
+     *
+     * <p>The tab used to be one article with a contents list that scrolled you
+     * into it. It is a section at a time now, on the owner's call: fifteen
+     * chapters and a thirty-item checklist end to end is a page you can only be
+     * <i>somewhere in</i>, and picking a heading should answer that heading
+     * rather than aim at it.
+     */
+    private static int tutorialSection = 0;
     private static float alleleScroll = 0f;
     private static float alleleMaxScroll = 0f;
     /** How far the tab strip is pushed left, in pixels. Only used when it overflows. */
     private static int tabScroll = 0;
     private float detailMaxScroll = 0f;
+
+    // ------------------------------------------------------------------
+    // Scrollbars
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>A scrollbar drawn this frame, and how to move it.</b>
+     *
+     * <p>Every bar on this screen is drawn where its own panel happens to be,
+     * from numbers that panel already had - the track is a couple of
+     * {@code fill} calls at the end of a draw method. That made them pictures of
+     * the scroll position rather than a control of it: the wheel worked and the
+     * bar did not, which is the one thing every player tries first.
+     *
+     * <p>Rather than hoist nine different layouts into a widget, each bar
+     * <i>registers</i> itself as it paints - where its track is, how long its
+     * thumb came out, and a setter for whichever field it is a picture of. The
+     * list is rebuilt every frame and input reads the last frame's, which is
+     * exactly the geometry the player is looking at when they click.
+     */
+    private record ScrollBar(boolean horizontal, int hitL, int hitT, int hitR, int hitB,
+                             int trackStart, int trackLen, int thumbLen, float value, float max,
+                             DoubleConsumer set) {
+
+        boolean contains(double mx, double my) {
+            return mx >= hitL && mx <= hitR && my >= hitT && my <= hitB;
+        }
+
+        /** Where the thumb starts, along the scroll axis. */
+        int thumbAt() {
+            return trackStart + (max <= 0f ? 0 : Math.round(value * (trackLen - thumbLen) / max));
+        }
+
+        /** The scroll value that would put the thumb's near edge at {@code pos}. */
+        float valueFor(double pos) {
+            int span = trackLen - thumbLen;
+            if (span <= 0) {
+                return 0f;
+            }
+            return (float) Math.max(0d, Math.min(max, (pos - trackStart) * max / span));
+        }
+    }
+
+    /**
+     * One clickable line of the Getting Started contents list. {@code index} is
+     * into {@link TutorialPage#headings()}; one past the end is the checklist,
+     * which is part of the same article but not part of the same page object.
+     *
+     * <p>The scroll target is worked out when it is clicked rather than when it
+     * is drawn: the offsets it needs are measured by the draw that happens
+     * <i>after</i> this one, and a target stored here would always be one
+     * layout behind.
+     */
+    private record TocEntry(int x0, int y0, int x1, int y1, int index) {
+    }
+
+    private final List<TocEntry> tocEntries = new ArrayList<>();
+
+    /** Rebuilt every frame by the draw methods; read by the mouse handlers. */
+    private final List<ScrollBar> bars = new ArrayList<>();
+    /** The bar being dragged, and where inside its thumb the pointer took hold. */
+    private ScrollBar dragging;
+    private int dragGrab;
+    /** The last mouse position the screen drew with - the draw methods that hover a bar do not all take it. */
+    private int lastMouseX;
+    private int lastMouseY;
+
+    /**
+     * Draw a vertical bar between {@code xL} and {@code xR} and register it.
+     * {@code thumbH} is the caller's, because a row list sizes its thumb by rows
+     * and a scrolling article sizes it by pixels.
+     */
+    private void scrollBarV(GuiGraphicsExtractor g, int xL, int xR, int top, int bottom,
+                            float value, float max, int thumbH, DoubleConsumer set) {
+        if (max <= 0f) {
+            return;
+        }
+        ScrollBar bar = new ScrollBar(false, xL - GRAB_PAD_IN, top, xR + GRAB_PAD, bottom,
+                top, bottom - top, thumbH, Math.max(0f, Math.min(value, max)), max, set);
+        g.fill(xL, top, xR, bottom, TRACK);
+        int thumbY = bar.thumbAt();
+        boolean hot = dragging != null ? sameBar(dragging, bar) : bar.contains(lastMouseX, lastMouseY);
+        g.fill(xL, thumbY, xR, thumbY + thumbH, hot ? THUMB_HOT : THUMB);
+        bars.add(bar);
+    }
+
+    /** The tab strip's bar - the only horizontal one. */
+    private void scrollBarH(GuiGraphicsExtractor g, int left, int right, int y,
+                            float value, float max, int thumbW, DoubleConsumer set) {
+        if (max <= 0f) {
+            return;
+        }
+        // No upward padding: the tabs themselves end where this begins, and a
+        // grab zone reaching into them would eat the bottom of every tab.
+        ScrollBar bar = new ScrollBar(true, left, y, right, y + 8,
+                left, right - left, thumbW, Math.max(0f, Math.min(value, max)), max, set);
+        g.fill(left, y, right, y + 2, TRACK);
+        int thumbX = bar.thumbAt();
+        boolean hot = dragging != null ? sameBar(dragging, bar) : bar.contains(lastMouseX, lastMouseY);
+        g.fill(thumbX, y, thumbX + thumbW, y + 2, hot ? THUMB_HOT : THUMB);
+        bars.add(bar);
+    }
+
+    /**
+     * Is this the same bar as the one being dragged? The list is rebuilt every
+     * frame, so identity is no use - the track is what identifies a bar, and a
+     * drag that outlives a relayout is a drag on whatever is in that place now.
+     */
+    private static boolean sameBar(ScrollBar a, ScrollBar b) {
+        return a.horizontal() == b.horizontal() && a.hitL() == b.hitL() && a.hitT() == b.hitT()
+                && a.trackLen() == b.trackLen();
+    }
+
+    /** A press on a bar: grab the thumb, or jump to where the track was clicked. */
+    private boolean grabScrollBar(double mx, double my) {
+        for (ScrollBar bar : bars) {
+            if (!bar.contains(mx, my)) {
+                continue;
+            }
+            double pos = bar.horizontal() ? mx : my;
+            int thumb = bar.thumbAt();
+            if (pos < thumb || pos > thumb + bar.thumbLen()) {
+                // Clicked the bare track: put the thumb under the pointer and
+                // carry on as if it had been grabbed in the middle.
+                dragGrab = bar.thumbLen() / 2;
+                bar.set().accept(bar.valueFor(pos - dragGrab));
+            } else {
+                dragGrab = (int) Math.round(pos - thumb);
+            }
+            dragging = bar;
+            return true;
+        }
+        return false;
+    }
 
     private EditBox searchBox;
     private EditBox horseFilterBox;
@@ -569,6 +743,17 @@ public final class HorseBrowserScreen extends Screen {
         if (recipeMenuClicked(event.x(), event.y())) {
             return true;
         }
+        if (event.button() == 0) {
+            // Before the lists and the tabs: a bar drawn over a panel takes the
+            // click, which is what makes its couple of pixels of overhang
+            // grabbable at all.
+            if (grabScrollBar(event.x(), event.y())) {
+                return true;
+            }
+            if (tab == Tab.GETTING_STARTED && contentsClicked(event.x(), event.y())) {
+                return true;
+            }
+        }
         Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
             if (hit != tab) {
@@ -635,6 +820,25 @@ public final class HorseBrowserScreen extends Screen {
             return true;
         }
         return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (dragging != null) {
+            double pos = dragging.horizontal() ? event.x() : event.y();
+            dragging.set().accept(dragging.valueFor(pos - dragGrab));
+            return true;
+        }
+        return super.mouseDragged(event, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (dragging != null && event.button() == 0) {
+            dragging = null;
+            return true;
+        }
+        return super.mouseReleased(event);
     }
 
     /** Every tab laid end to end, including the gap after the last one. */
@@ -720,6 +924,10 @@ public final class HorseBrowserScreen extends Screen {
             return true;
         }
         if (tab == Tab.GETTING_STARTED) {
+            if (tocMaxScroll > 0f && tocColumnRight > 0 && mx <= tocColumnRight) {
+                tocScroll = Math.max(0f, Math.min(tocScroll - (float) sy * 18f, tocMaxScroll));
+                return true;
+            }
             tutorialScroll = Math.max(0f, Math.min(tutorialScroll - (float) sy * 18f, tutorialMaxScroll));
             return true;
         }
@@ -777,6 +985,13 @@ public final class HorseBrowserScreen extends Screen {
      */
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        // The bars and the contents list are rebuilt from scratch every frame;
+        // the mouse handlers read the last frame's, which is the geometry the
+        // player is actually pointing at.
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+        bars.clear();
+        tocEntries.clear();
         drawChrome(g, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (tab == Tab.RECIPES) {
@@ -851,10 +1066,8 @@ public final class HorseBrowserScreen extends Screen {
         // only thing telling a player there are tabs off the side.
         int barY = TAB_TOP + TAB_H;
         int total = tabStripWidth();
-        g.fill(viewL, barY, viewL + viewW, barY + 2, 0x33FFFFFF);
-        int thumbW = Math.max(20, viewW * viewW / total);
-        int thumbX = viewL + Math.round((viewW - thumbW) * (tabScroll / (float) max));
-        g.fill(thumbX, barY, thumbX + thumbW, barY + 2, 0xAAFFFFFF);
+        scrollBarH(g, viewL, viewL + viewW, barY, tabScroll, max,
+                Math.max(20, viewW * viewW / total), v -> tabScroll = (int) Math.round(v));
     }
 
     private void drawGeneList(GuiGraphicsExtractor g, int mouseX, int mouseY, int bottom) {
@@ -884,12 +1097,9 @@ public final class HorseBrowserScreen extends Screen {
 
         int max = maxListScroll();
         if (max > 0) {
-            int trackH = bottom - top;
-            int x1 = l + w;
-            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, trackH * visibleRows() / filtered.size());
-            int thumbY = top + (trackH - thumbH) * listScroll / max;
-            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, l + w - 3, l + w, top, bottom, listScroll, max,
+                    Math.max(16, (bottom - top) * visibleRows() / filtered.size()),
+                    v -> listScroll = (int) Math.round(v));
         }
     }
 
@@ -1003,11 +1213,9 @@ public final class HorseBrowserScreen extends Screen {
         detailScroll = Math.max(0f, Math.min(detailScroll, detailMaxScroll));
         if (detailMaxScroll > 0f) {
             int trackH = bottom - top;
-            int x1 = r + 1;
-            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, (int) ((long) trackH * trackH / contentH));
-            int thumbY = top + Math.round(detailScroll * (trackH - thumbH) / detailMaxScroll);
-            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, r - 2, r + 1, top, bottom, detailScroll, detailMaxScroll,
+                    Math.max(16, (int) ((long) trackH * trackH / contentH)),
+                    v -> detailScroll = (float) v);
         }
     }
 
@@ -1200,25 +1408,187 @@ public final class HorseBrowserScreen extends Screen {
         int r = fsRight();
         int top = contentTop();
         int bottom = contentBottom();
-        int w = Math.min(r - l, 420); // a readable measure, not the whole monitor
 
         g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
-        g.enableScissor(l - 4, top, r, bottom);
+
+        // The article is a long read and the prose is capped at a readable
+        // measure, so on any normal window there is room beside it for the
+        // contents to stay put. Pinned is the better list - a place to come back
+        // to, rather than something you have to scroll to the top to use - but
+        // it is only worth having if the prose is still readable once it has
+        // taken its column, so a narrow window gets the list inline instead.
+        boolean pinned = r - l >= TOC_W + 260;
+        int textL = pinned ? l + TOC_W + 14 : l;
+        int w = Math.min(r - textL, 420); // a readable measure, not the whole monitor
+        tocColumnRight = pinned ? l + TOC_W : 0;
+
+        if (pinned) {
+            drawContents(g, l, top, TOC_W - 8, bottom, mouseX, mouseY, true);
+            g.fill(l + TOC_W + 8, top, l + TOC_W + 9, bottom, DIVIDER);
+        }
+
+        g.enableScissor(textL - 4, top, r, bottom);
         int y = top - (int) tutorialScroll;
-        int height = TutorialPage.draw(g, this.font, l, y, w, mouseX, mouseY, HEADING, DESC, TAG);
-        height += drawChecklist(g, l, y + height + 12, w) + 12;
+        int height = pinned ? 0 : drawContents(g, textL, y, w, bottom, mouseX, mouseY, false);
+        height += drawSection(g, textL, y + height, w, mouseX, mouseY);
         g.disableScissor();
 
         tutorialMaxScroll = Math.max(0f, height - (bottom - top));
         tutorialScroll = Math.max(0f, Math.min(tutorialScroll, tutorialMaxScroll));
         if (tutorialMaxScroll > 0) {
             int trackH = bottom - top;
-            int x1 = r + 1;
-            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, (int) ((long) trackH * trackH / height));
-            int thumbY = top + Math.round(tutorialScroll * (trackH - thumbH) / tutorialMaxScroll);
-            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, r - 2, r + 1, top, bottom, tutorialScroll, tutorialMaxScroll,
+                    Math.max(16, (int) ((long) trackH * trackH / height)),
+                    v -> tutorialScroll = (float) v);
         }
+    }
+
+    /** Every section the contents list offers: the prose steps, then the checklist by group. */
+    private static int sectionCount() {
+        return TutorialPage.headings().size() + ProgressTask.Group.values().length;
+    }
+
+    /**
+     * <b>The open section, and nothing else.</b> One chapter of the tutorial, or
+     * one group of the checklist under the running total.
+     */
+    private int drawSection(GuiGraphicsExtractor g, int x, int y, int w, int mouseX, int mouseY) {
+        List<TutorialPage.Step> steps = TutorialPage.steps();
+        int section = Math.max(0, Math.min(tutorialSection, sectionCount() - 1));
+        if (section < steps.size()) {
+            int h = TutorialPage.drawStep(g, this.font, steps.get(section), x, y, w,
+                    mouseX, mouseY, HEADING, DESC);
+            h += drawSectionFooter(g, x, y + h + 8, w, mouseX, mouseY, section) + 8;
+            return h;
+        }
+        ProgressTask.Group group = ProgressTask.Group.values()[section - steps.size()];
+        int h = drawChecklist(g, x, y, w, group);
+        h += drawSectionFooter(g, x, y + h + 8, w, mouseX, mouseY, section) + 8;
+        return h;
+    }
+
+    /**
+     * <b>The way on.</b> A sectioned page still has to be readable straight
+     * through - somebody meeting the mod reads it in order, and hunting the next
+     * chapter in the contents list every time would be a worse walkthrough than
+     * the scroll it replaced. So the last line of every section is the next one,
+     * and the last section of all signs off instead.
+     */
+    private int drawSectionFooter(GuiGraphicsExtractor g, int x, int y, int w,
+                                  int mouseX, int mouseY, int section) {
+        if (section >= sectionCount() - 1) {
+            // A last line, so the end of the page does not look like a cut.
+            g.text(this.font, Component.literal("\u2014 good luck."), x, y, TAG, false);
+            return this.font.lineHeight;
+        }
+        String label = "Next:  " + sectionLabel(section + 1) + "  \u203a";
+        int wLine = Math.min(w, this.font.width(label) + 8);
+        boolean hover = mouseX >= x - 3 && mouseX < x + wLine && mouseY >= y - 2
+                && mouseY < y + this.font.lineHeight + 2;
+        g.fill(x - 3, y - 3, x + wLine, y + this.font.lineHeight + 2, hover ? ROW_HOVER : DIVIDER);
+        g.text(this.font, Component.literal(label), x, y, hover ? HEADING : NAME_DIM, false);
+        // Registered with the contents list, so one hit test serves both.
+        tocEntries.add(new TocEntry(x - 3, y - 3, x + wLine, y + this.font.lineHeight + 2, section + 1));
+        return this.font.lineHeight + 4;
+    }
+
+    /** What the contents list calls a section. */
+    private static String sectionLabel(int section) {
+        List<String> headings = TutorialPage.headings();
+        if (section < headings.size()) {
+            return headings.get(section);
+        }
+        int g = section - headings.size();
+        ProgressTask.Group[] groups = ProgressTask.Group.values();
+        return g >= 0 && g < groups.length ? groups[g].title() : "";
+    }
+
+    /**
+     * <b>The contents list.</b> Fifteen-odd sections of prose and then a
+     * checklist is a lot of page to arrive at with only a mouse wheel, and the
+     * tab reopens where you left it - so the one thing it was missing was a way
+     * to say "the bit about the horseman" and be taken there.
+     *
+     * <p>Every line is the step's own heading, so the list needs no maintaining
+     * as the page changes, and the section you are in is lit - which makes it a
+     * position indicator as well as a control.
+     *
+     * @param pinned pinned in its own column, fixed and scrolled separately, or
+     *               laid inline at the top of the article
+     * @return the height it used - what the inline layout has to advance past
+     */
+    private int drawContents(GuiGraphicsExtractor g, int x, int y, int w, int bottom,
+                             int mouseX, int mouseY, boolean pinned) {
+        int steps = TutorialPage.headings().size();
+        int lineH = this.font.lineHeight + 3;
+        int active = Math.max(0, Math.min(tutorialSection, sectionCount() - 1));
+
+        if (pinned) {
+            g.enableScissor(x - 3, y, x + w + 6, bottom);
+        }
+        int cy = pinned ? y - Math.round(tocScroll) : y;
+        int start = cy;
+        g.text(this.font, Component.literal("Contents"), x, cy, HEADING, false);
+        cy += this.font.lineHeight + 4;
+
+        for (int i = 0; i < sectionCount(); i++) {
+            // The checklist's groups are sections in their own right - thirty
+            // tasks under one heading is the same wall the prose was.
+            boolean checklist = i >= steps;
+            if (i == steps) {
+                cy += 4;
+                if (!pinned || (cy + lineH > y && cy < bottom)) {
+                    g.text(this.font, Component.literal("Checklist"), x, cy, HEADING, false);
+                }
+                cy += this.font.lineHeight + 4;
+            }
+            int lx = checklist ? x + 8 : x;
+            if (!pinned || (cy + lineH > y && cy < bottom)) {
+                boolean hover = mouseX >= x - 3 && mouseX < x + w + 2
+                        && mouseY >= cy - 1 && mouseY < cy + lineH - 2
+                        && (!pinned || (mouseY >= y && mouseY < bottom));
+                if (i == active) {
+                    g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_SEL);
+                } else if (hover) {
+                    g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_HOVER);
+                }
+                drawFitted(g, sectionLabel(i), lx, cy, w - (lx - x),
+                        i == active ? NAME : (hover ? HEADING : NAME_DIM));
+                tocEntries.add(new TocEntry(x - 3, cy - 1, x + w + 2, cy + lineH - 2, i));
+            }
+            cy += lineH;
+        }
+        cy += 6;
+
+        if (pinned) {
+            g.disableScissor();
+            int used = cy - start;
+            tocMaxScroll = Math.max(0f, used - (bottom - y));
+            tocScroll = Math.max(0f, Math.min(tocScroll, tocMaxScroll));
+            int trackH = bottom - y;
+            scrollBarV(g, x + w + 3, x + w + 6, y, bottom, tocScroll, tocMaxScroll,
+                    Math.max(16, (int) ((long) trackH * trackH / Math.max(1, used))),
+                    v -> tocScroll = (float) v);
+        } else {
+            tocMaxScroll = 0f;
+            g.fill(x, cy - 5, x + w, cy - 4, DIVIDER);
+        }
+        return cy - start;
+    }
+
+    /** A click on a contents line, or on the next-section link: open that section. */
+    private boolean contentsClicked(double mx, double my) {
+        for (TocEntry e : tocEntries) {
+            if (mx < e.x0() || mx > e.x1() || my < e.y0() || my > e.y1()) {
+                continue;
+            }
+            if (e.index() != tutorialSection) {
+                tutorialSection = e.index();
+                tutorialScroll = 0f; // a new section is read from its own top
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1231,13 +1601,15 @@ public final class HorseBrowserScreen extends Screen {
      * first day ticks two boxes at once and is not stopped - the moment a
      * checklist gates content it stops being advice and starts being homework.
      */
-    private int drawChecklist(GuiGraphicsExtractor g, int x, int y, int w) {
+    private int drawChecklist(GuiGraphicsExtractor g, int x, int y, int w, ProgressTask.Group group) {
         int start = y;
         int total = ProgressTask.values().length;
         int done = ClientProgress.count();
 
+        // The running total stays on every group's page: it is the one number
+        // somebody opening the checklist wants, and it is not this group's.
         g.text(this.font, Component.literal("Checklist  " + done + " / " + total),
-                x, y, HEADING, false);
+                x, y, LABEL, false);
         y += this.font.lineHeight + 2;
         // A bar, because "17 of 30" is a number and a bar is a feeling.
         int barW = Math.min(w, 260);
@@ -1245,28 +1617,25 @@ public final class HorseBrowserScreen extends Screen {
         if (total > 0 && done > 0) {
             g.fill(x, y, x + Math.max(1, barW * done / total), y + 3, GOOD);
         }
-        y += 12;
+        y += 14;
 
-        for (ProgressTask.Group group : ProgressTask.Group.values()) {
-            g.text(this.font, Component.literal(group.title()), x, y, NAME, false);
-            y += this.font.lineHeight + 3;
-            for (ProgressTask task : ProgressTask.inGroup(group)) {
-                boolean ticked = ClientProgress.isDone(task);
-                g.text(this.font, Component.literal(ticked ? "\u2714" : "\u2610"),
-                        x + 2, y, ticked ? GOOD : TAG, false);
-                drawFitted(g, task.title(), x + 14, y, w - 16, ticked ? EXPR_ON : NAME_DIM);
-                y += this.font.lineHeight + 1;
-                // The hint is what a player looking at an empty box actually
-                // wants; a ticked one no longer needs telling.
-                if (!ticked) {
-                    for (String line : GuiText.wrap(this.font, task.hint(), w - 16)) {
-                        g.text(this.font, Component.literal(line), x + 14, y, TAG, false);
-                        y += this.font.lineHeight;
-                    }
+        g.text(this.font, Component.literal(group.title()), x, y, HEADING, false);
+        y += this.font.lineHeight + 6;
+        for (ProgressTask task : ProgressTask.inGroup(group)) {
+            boolean ticked = ClientProgress.isDone(task);
+            g.text(this.font, Component.literal(ticked ? "\u2714" : "\u2610"),
+                    x + 2, y, ticked ? GOOD : TAG, false);
+            drawFitted(g, task.title(), x + 14, y, w - 16, ticked ? EXPR_ON : NAME_DIM);
+            y += this.font.lineHeight + 1;
+            // The hint is what a player looking at an empty box actually
+            // wants; a ticked one no longer needs telling.
+            if (!ticked) {
+                for (String line : GuiText.wrap(this.font, task.hint(), w - 16)) {
+                    g.text(this.font, Component.literal(line), x + 14, y, TAG, false);
+                    y += this.font.lineHeight;
                 }
-                y += 3;
             }
-            y += 6;
+            y += 4;
         }
         return y - start;
     }
@@ -1348,11 +1717,9 @@ public final class HorseBrowserScreen extends Screen {
         alleleScroll = Math.max(0f, Math.min(alleleScroll, alleleMaxScroll));
         if (alleleMaxScroll > 0) {
             int trackH = bottom - top;
-            int x1 = r + 1;
-            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, (int) ((long) trackH * trackH / Math.max(1, height)));
-            int thumbY = top + Math.round(alleleScroll * (trackH - thumbH) / alleleMaxScroll);
-            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, r - 2, r + 1, top, bottom, alleleScroll, alleleMaxScroll,
+                    Math.max(16, (int) ((long) trackH * trackH / Math.max(1, height))),
+                    v -> alleleScroll = (float) v);
         }
     }
 
@@ -1382,12 +1749,9 @@ public final class HorseBrowserScreen extends Screen {
 
         int max = maxListScroll();
         if (max > 0) {
-            int trackH = bottom - top;
-            int x1 = l + w;
-            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, trackH * visibleRows() / recipeRows.size());
-            int thumbY = top + (trackH - thumbH) * listScroll / max;
-            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, l + w - 3, l + w, top, bottom, listScroll, max,
+                    Math.max(16, (bottom - top) * visibleRows() / recipeRows.size()),
+                    v -> listScroll = (int) Math.round(v));
         }
     }
 
@@ -1650,11 +2014,9 @@ public final class HorseBrowserScreen extends Screen {
 
         int max = Math.max(0, horseRows.size() - horseVisibleRows());
         if (max > 0) {
-            int trackH = bottom - top;
-            g.fill(r - 1, top, r + 2, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, trackH * horseVisibleRows() / horseRows.size());
-            int thumbY = top + (trackH - thumbH) * horseScroll / max;
-            g.fill(r - 1, thumbY, r + 2, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, r - 1, r + 2, top, bottom, horseScroll, max,
+                    Math.max(16, (bottom - top) * horseVisibleRows() / horseRows.size()),
+                    v -> horseScroll = (int) Math.round(v));
         }
 
         drawHorseFooter(g, l, r, bottom + 6);
@@ -1884,12 +2246,16 @@ public final class HorseBrowserScreen extends Screen {
 
         int max = Math.max(0, list.size() - visible);
         if (max > 0) {
-            int trackH = bottom - top;
-            int x1 = l + w;
-            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, trackH * visible / list.size());
-            int thumbY = top + (trackH - thumbH) * scroll / max;
-            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, l + w - 3, l + w, top, bottom, scroll, max,
+                    Math.max(16, (bottom - top) * visible / list.size()),
+                    v -> {
+                        int to = (int) Math.round(v);
+                        if (mares) {
+                            mareScroll = to;
+                        } else {
+                            stallionScroll = to;
+                        }
+                    });
         }
     }
 
@@ -1995,11 +2361,9 @@ public final class HorseBrowserScreen extends Screen {
         detailScroll = Math.max(0f, Math.min(detailScroll, detailMaxScroll));
         if (detailMaxScroll > 0f) {
             int trackH = bottom - top;
-            int x1 = r + 1;
-            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
-            int thumbH = Math.max(16, (int) ((long) trackH * trackH / contentH));
-            int thumbY = top + Math.round(detailScroll * (trackH - thumbH) / detailMaxScroll);
-            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+            scrollBarV(g, r - 2, r + 1, top, bottom, detailScroll, detailMaxScroll,
+                    Math.max(16, (int) ((long) trackH * trackH / contentH)),
+                    v -> detailScroll = (float) v);
         }
     }
 

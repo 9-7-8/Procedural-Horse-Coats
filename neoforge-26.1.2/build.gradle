@@ -62,6 +62,18 @@ processResources {
     from(project(":common").file("src/main/resources")) {
         include "assets/**"
     }
+
+    // The mod version lived twice - here as `mod_version`, and again as a
+    // literal in neoforge.mods.toml - and a release shipped a jar named 0.3.7
+    // that told the game it was 0.3.6, because bumping one is not bumping the
+    // other. Templated so gradle.properties is the only place it is written.
+    // Only this one file is expanded: `expand` on the whole tree would try to
+    // read every $ in every JSON as a Groovy reference.
+    def props = [mod_version: project.version.toString()]
+    inputs.properties(props)
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand(props)
+    }
 }
 
 dependencies {

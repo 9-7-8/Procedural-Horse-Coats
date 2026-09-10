@@ -47,8 +47,23 @@ public final class TutorialPage {
 
     private static List<Step> steps;
 
+    private static List<String> headings;
+
     private TutorialPage() {
     }
+
+    /** Every step's heading, in page order - the contents list. Cached: it is read every frame. */
+    public static List<String> headings() {
+        if (headings == null) {
+            List<String> out = new ArrayList<>();
+            for (Step step : steps()) {
+                out.add(step.heading());
+            }
+            headings = List.copyOf(out);
+        }
+        return headings;
+    }
+
 
     /** Built once per session; item stacks need the registry, so not at class-init. */
     public static List<Step> steps() {
@@ -61,6 +76,7 @@ public final class TutorialPage {
     /** Dropped with the rest of the per-world client state. */
     public static void clear() {
         steps = null;
+        headings = null;
     }
 
     private static List<Step> build() {
@@ -107,7 +123,7 @@ public final class TutorialPage {
                                 + "switch in the client config.)"),
                 List.of(), Art.NONE));
 
-        out.add(new Step("4. Feed them both a golden carrot",
+        out.add(new Step("4. Feed a golden carrot",
                 List.of("Tame a mare and a stallion, put them together, and feed each of them a "
                                 + "golden carrot. Hearts, and then a foal.",
                         "The foal is not a copy of either parent. Each parent passes on one of its "
@@ -127,7 +143,39 @@ public final class TutorialPage {
                 List.of(new ItemStack(Items.BUCKET), new ItemStack(Items.MILK_BUCKET)),
                 Art.NONE));
 
-        out.add(new Step("6. Take a gene off a horse, with a book",
+        out.add(new Step("Bonding",
+                List.of("Every horse you tame keeps a private opinion of you: a number from 0 to 100, "
+                                + "its bond. Taming only makes a horse yours - bond is whether it "
+                                + "likes you, and the two are not the same thing. It is not genetic, "
+                                + "it is not inherited, and it is kept per horse and per owner. You "
+                                + "can read it on the horse's information screen: open its inventory "
+                                + "and click the small i hanging off the left of the window.",
+                        "It goes up by you being there. A horse within about ten blocks of its "
+                                + "owner gains a point every couple of minutes, and one you are "
+                                + "riding gains a point every forty seconds or so. Feeding it by "
+                                + "hand is worth two at once, or four if you hit on the food that "
+                                + "particular horse actually wants; shearing it is worth five. "
+                                + "Nothing takes bond away again.",
+                        "There is a ceiling of fifteen a day, and it is deliberate. Filling the "
+                                + "bar takes a week or so of a horse's life however hard you work "
+                                + "at it, because bonding is meant to be the thing that happens "
+                                + "while you play rather than an afternoon of standing still. A "
+                                + "foal in a herd learns you twice as fast.",
+                        "What it buys is behaviour, in three steps. Under 31 it is wary and behaves "
+                                + "like any other horse. At 31 it turns attentive: it watches you, "
+                                + "turning its head to follow you around the paddock. At 61 it "
+                                + "approaches - it will walk over to you when it can find a route. "
+                                + "At 81 it follows you at a walk and stops a few paces short.",
+                        "A following horse is really walking, not teleporting. A fence holds it, a "
+                                + "closed gate holds it, and it needs a path it can actually take - "
+                                + "so a horse that has lost you will stop and wait rather than swim "
+                                + "a river after you. Past about thirty blocks it gives up and "
+                                + "stands. A horse being ridden or led is doing what it is told "
+                                + "instead, so none of this applies until you get off."),
+                List.of(new ItemStack(Items.WHEAT), new ItemStack(Items.SUGAR),
+                        new ItemStack(Items.SHEARS)), Art.NONE));
+
+        out.add(new Step("6. Take a gene with a book",
                 List.of("Hold a book and right-click a horse. The book grabs one of that "
                                 + "horse's genes at random and becomes a research paper naming it. "
                                 + "You cannot pick which.",
@@ -138,7 +186,7 @@ public final class TutorialPage {
                 List.of(new ItemStack(Items.BOOK), new ItemStack(ModItems.RESEARCH_PAPER.get())),
                 Art.NONE));
 
-        out.add(new Step("Your gene database is earned, not read",
+        out.add(new Step("Genes are earned, not read",
                 List.of("A gene joins your database when you have owned a living horse that "
                                 + "carries it - tamed, bred, bought, or given to you. Not from "
                                 + "paper, and not from looking at one in a field. Knowing a "
@@ -163,7 +211,7 @@ public final class TutorialPage {
                         new ItemStack(Items.BOOK),
                         new ItemStack(ModItems.RESEARCH_PAPER.get())), Art.NONE));
 
-        out.add(new Step("8. The horseman sells papers",
+        out.add(new Step("8. The horseman",
                 List.of("The horseman is a villager with a job you will not have seen before. Put a "
                                 + "Horseman's Table down near one who has no work and he will take "
                                 + "it.",
@@ -174,7 +222,7 @@ public final class TutorialPage {
                 List.of(new ItemStack(ModItems.HORSEMANS_TABLE.get()),
                         new ItemStack(Items.EMERALD)), Art.HORSEMAN));
 
-        out.add(new Step("9. The cowboy sells horses",
+        out.add(new Step("9. The cowboy",
                 List.of("The cowboy is not a villager at all. He keeps his own herd, and he will "
                                 + "sell you one outright if you would rather buy a bloodline than "
                                 + "breed one. A Cowboy Hitch is what brings him.",
@@ -201,7 +249,7 @@ public final class TutorialPage {
                         new ItemStack(Items.GOLD_INGOT),
                         new ItemStack(Items.DIAMOND)), Art.NONE));
 
-        out.add(new Step("11. Breed the herd you wanted",
+        out.add(new Step("11. Breed your own herd",
                 List.of("Now it is a loop. Meet horses, take what they will tell you, file it, copy "
                                 + "it, splice it, and breed the result into the next generation. "
                                 + "Every horse in the paddock gets a little more like the one you "
@@ -222,7 +270,7 @@ public final class TutorialPage {
                                 + "in them are better than anything wandering loose."),
                 List.of(), Art.NONE));
 
-        out.add(new Step("The shortcut: a door made of hay",
+        out.add(new Step("A door made of hay",
                 List.of("Build a frame of hay bales the way you would build a nether portal, light "
                                 + "it with a golden carrot, and stand in it for ten seconds.",
                         "On the other side is a corridor of two thousand pens, each holding a mare "
@@ -253,52 +301,49 @@ public final class TutorialPage {
     // ------------------------------------------------------------------
 
     /**
-     * Draw the page into {@code (x, y, w)} scrolled by {@code scroll}, and return
-     * the total height the content wants. The caller scissors and scrolls; this
-     * only lays out.
+     * <b>Draw one step</b> into {@code (x, y, w)} and return the height it
+     * wanted. The caller scissors and scrolls; this only lays out.
+     *
+     * <p>One step rather than the whole page, because the page is now read a
+     * section at a time from its contents list. Fifteen sections end to end was
+     * one scrollbar and no way to be anywhere in particular in it.
      */
-    public static int draw(GuiGraphicsExtractor g, Font font, int x, int y, int w,
-                           int mouseX, int mouseY, int headingColour, int bodyColour, int dimColour) {
+    public static int drawStep(GuiGraphicsExtractor g, Font font, Step step, int x, int y, int w,
+                               int mouseX, int mouseY, int headingColour, int bodyColour) {
         int cy = y;
-        for (Step step : steps()) {
-            g.text(font, Component.literal(step.heading()), x, cy, headingColour, false);
-            cy += font.lineHeight + 4;
+        g.text(font, Component.literal(step.heading()), x, cy, headingColour, false);
+        cy += font.lineHeight + 6;
 
-            int textW = step.art() == Art.NONE ? w : w - ART - 8;
-            int textTop = cy;
-            for (String paragraph : step.paragraphs()) {
-                for (String line : GuiText.wrap(font, paragraph, textW)) {
-                    g.text(font, Component.literal(line), x, cy, bodyColour, false);
-                    cy += font.lineHeight + 1;
-                }
-                cy += 4;
+        int textW = step.art() == Art.NONE ? w : w - ART - 8;
+        int textTop = cy;
+        for (String paragraph : step.paragraphs()) {
+            for (String line : GuiText.wrap(font, paragraph, textW)) {
+                g.text(font, Component.literal(line), x, cy, bodyColour, false);
+                cy += font.lineHeight + 1;
             }
-
-            if (step.art() != Art.NONE) {
-                int artX = x + w - ART;
-                switch (step.art()) {
-                    case HORSEMAN -> TutorialPortraits.drawHorseman(g, artX, textTop, ART, mouseX, mouseY);
-                    case COWBOY -> TutorialPortraits.drawCowboy(g, artX, textTop, ART, mouseX, mouseY);
-                    default -> {
-                    }
-                }
-                cy = Math.max(cy, textTop + ART + 4);
-            }
-
-            if (!step.icons().isEmpty()) {
-                int ix = x;
-                for (ItemStack stack : step.icons()) {
-                    g.fill(ix - 1, cy - 1, ix + 17, cy + 17, 0x33FFFFFF);
-                    g.fakeItem(stack, ix, cy);
-                    ix += ICON + 4;
-                }
-                cy += ICON + 6;
-            }
-            cy += 8;
+            cy += 6;
         }
-        // A last line, so the end of the page does not look like a cut.
-        g.text(font, Component.literal("— good luck."), x, cy, dimColour, false);
-        cy += font.lineHeight;
+
+        if (step.art() != Art.NONE) {
+            int artX = x + w - ART;
+            switch (step.art()) {
+                case HORSEMAN -> TutorialPortraits.drawHorseman(g, artX, textTop, ART, mouseX, mouseY);
+                case COWBOY -> TutorialPortraits.drawCowboy(g, artX, textTop, ART, mouseX, mouseY);
+                default -> {
+                }
+            }
+            cy = Math.max(cy, textTop + ART + 4);
+        }
+
+        if (!step.icons().isEmpty()) {
+            int ix = x;
+            for (ItemStack stack : step.icons()) {
+                g.fill(ix - 1, cy - 1, ix + 17, cy + 17, 0x33FFFFFF);
+                g.fakeItem(stack, ix, cy);
+                ix += ICON + 4;
+            }
+            cy += ICON + 6;
+        }
         return cy - y;
     }
 }

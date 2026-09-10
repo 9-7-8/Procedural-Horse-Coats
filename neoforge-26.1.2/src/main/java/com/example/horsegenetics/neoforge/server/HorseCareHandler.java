@@ -350,5 +350,32 @@ public final class HorseCareHandler {
     private static void syncCare(Horse horse, HorseCareAttachment care) {
         PacketDistributor.sendToPlayersTrackingEntity(horse,
                 new HorseCareSyncPayload(horse.getId(), care.bond(), care.inHerd()));
+        creditBondTiers(horse, care);
+    }
+
+    /**
+     * <b>The three bond tiers, ticked off as a horse reaches them.</b>
+     *
+     * <p>Hung on the sync rather than on any one award, because every path that
+     * moves bond - the proximity scan, riding, a hand-feed, a favourite food, a
+     * shearing - ends here, and a new one will too. It credits the <i>state</i>
+     * rather than the event: a tier is a fact about the horse, so this cannot
+     * miss one the way crediting a crossing would if a single award jumped two
+     * thresholds at once.
+     */
+    private static void creditBondTiers(Horse horse, HorseCareAttachment care) {
+        if (!(horse.getOwner() instanceof Player owner)) {
+            return;
+        }
+        int tier = care.behaviourTier();
+        if (tier >= 1) {
+            HorseProgress.complete(owner, ProgressTask.BOND_ATTENTIVE);
+        }
+        if (tier >= 2) {
+            HorseProgress.complete(owner, ProgressTask.BOND_APPROACHES);
+        }
+        if (tier >= 3) {
+            HorseProgress.complete(owner, ProgressTask.BOND_FOLLOWS);
+        }
     }
 }
