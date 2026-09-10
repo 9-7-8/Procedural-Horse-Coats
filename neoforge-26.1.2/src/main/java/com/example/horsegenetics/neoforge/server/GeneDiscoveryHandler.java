@@ -42,6 +42,9 @@ public final class GeneDiscoveryHandler {
         if (event.getAnimal() instanceof Horse horse && event.getTamer() instanceof ServerPlayer player) {
             HorseProgress.complete(player, HorseRecords.of(horse).sex() == com.example.horsegenetics.common.horse.Sex.FEMALE
                     ? ProgressTask.TAME_MARE : ProgressTask.TAME_STALLION);
+            HorseRecords.of(horse).breed().ifPresent(id ->
+                    GeneDatabaseData.get(((net.minecraft.server.level.ServerLevel) player.level())
+                            .getServer()).discoverBreeds(player, java.util.List.of(id)));
             try {
                 discoverFrom(player, Genotype.parse(HorseRecords.of(horse).geneticCode()));
             } catch (RuntimeException ignored) {

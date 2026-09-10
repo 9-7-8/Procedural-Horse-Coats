@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
 import net.minecraft.client.model.animal.equine.HorseModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -61,7 +62,13 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 this,
                 context.getEquipmentRenderer(),
                 EquipmentClientInfo.LayerType.HORSE_SADDLE,
-                state -> state.saddle,
+                // A phantom saddle is how a top-bond horse is steered bare;
+                // it is not something the player put there and must not be
+                // drawn. See ModDataComponents.PHANTOM_SADDLE.
+                state -> state.saddle != null
+                        && state.saddle.has(ModDataComponents.PHANTOM_SADDLE.get())
+                        ? net.minecraft.world.item.ItemStack.EMPTY
+                        : state.saddle,
                 new EquineSaddleModel(context.bakeLayer(ModelLayers.HORSE_SADDLE)),
                 null,
                 2

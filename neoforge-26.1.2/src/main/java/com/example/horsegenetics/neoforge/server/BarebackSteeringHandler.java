@@ -2,12 +2,13 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
-import net.minecraft.util.Mth;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -15,104 +16,122 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 /**
  * <b>A horse that trusts you enough to be steered without a saddle.</b>
  *
- * <p>At the top bond tier ({@link HorseCareAttachment#behaviourTier()} 3, which
- * is where the horse already follows you around) its owner can climb on bare
- * and ride it. Below that tier, and for anyone who is not the owner, a bareback
+ * <p>At the top bond tier ({@link HorseCareAttachment#behaviourTier()} 3, where
+ * the horse already follows you around) its owner can climb on bare and ride
+ * it properly. Below that tier, and for anyone who is not the owner, a bareback
  * rider is a passenger and the horse goes where it likes - which is vanilla's
  * behaviour and stays the default.
  *
- * <h2>Why this is worth a whole handler</h2>
- * The obvious implementation does not exist. Vanilla decides who may steer in
+ * <h2>How, given vanilla will not be asked</h2>
+ * Vanilla decides who may steer inside
  * {@code AbstractHorse.getControllingPassenger()}, which hands control to a
- * player passenger <b>only if the horse is saddled</b>, and there is no event
- * or hook on that call - so from outside the class there is no way to say "this
- * one, too". This module has no mixins and is not adding one for a courtesy.
+ * player passenger <b>only if {@code isSaddled()}</b>. There is no event on
+ * that call and this module has no mixins.
  *
- * <p>So the horse is driven from the outside instead, on the entity tick, the
- * same way {@link HorseWaterRidingHandler} paddles a swimming one: read the
- * rider's own {@code zza}/{@code xxa}, point the horse where the rider is
- * looking, and push it. That is enough for it to be a mount. It deliberately
- * is <b>not</b> a full re-implementation - no jump, no sprint, no rearing -
- * because those are exactly the parts a saddle and a bridle are for.
+ * <p>The first version of this drove the horse from outside on the entity tick
+ * - read the rider's {@code zza}/{@code xxa}, point the animal, push it. It
+ * worked and it felt wrong: server-driven, so a beat behind the input, with no
+ * jump and none of vanilla's acceleration curve.
  *
- * <h2>What a saddle is still for</h2>
- * Speed and control. Bareback runs at {@link #BAREBACK_FRACTION} of the horse's
- * own speed attribute and cannot jump, so a saddle remains the right answer for
- * going anywhere in particular. What this buys is the thing a saddle cannot:
- * getting on a horse that simply lets you, because you have spent the time.
+ * <p>So it does the blunt thing instead and <b>puts a saddle on</b>. A real one,
+ * in the real slot, so every part of vanilla's mounted path runs exactly as it
+ * does for a saddled horse: client prediction, jumping, the lot. The saddle
+ * carries {@link ModDataComponents#PHANTOM_SADDLE}, which is what stops it
+ * being a lie:
  *
- * <p><b>Unverified:</b> {@code isLocalInstanceAuthoritative()} is true on the
- * server here rather than on the rider's client, because the rider is not the
- * <i>controlling</i> passenger - so this is server-driven and will feel a beat
- * behind a saddled horse. Whether that beat is tolerable is a question for a
- * play session, not for the compiler.
+ * <ul>
+ *   <li><b>It is never drawn.</b> {@code client/GeneticHorseRenderer} feeds the
+ *       saddle layer an empty stack when the component is present. The mod owns
+ *       the horse renderer, so this costs nothing.</li>
+ *   <li><b>It is taken back off</b> the moment the rider is gone, the bond
+ *       drops, or the rider turns out not to be the owner - checked every tick,
+ *       so the window in which a phantom saddle exists without an eligible
+ *       rider on it is one tick.</li>
+ *   <li><b>It cannot be kept.</b> A player <i>can</i> open a horse's inventory
+ *       while riding it, so {@link #reclaim} sweeps the rider's inventory for
+ *       phantom saddles and destroys them. Without that, "ride your best horse
+ *       bareback" would be a saddle duplicator.</li>
+ * </ul>
+ *
+ * <p><b>A horse the player has saddled themselves is never touched</b> - the
+ * component is the only thing that marks a saddle as ours, and it is set on
+ * exactly the stacks this class creates.
  */
 @EventBusSubscriber
 public final class BarebackSteeringHandler {
 
-    /** The bond tier at which a horse will take direction bare. The tier where it already follows you. */
+    /** The bond tier at which a horse will take direction bare - the tier where it already follows you. */
     private static final int TIER = 3;
-
-    /** Bareback is slower than a saddled trot, on purpose. */
-    private static final double BAREBACK_FRACTION = 0.72;
-
-    /** How fast the horse ramps toward the direction asked for. */
-    private static final double BLEND = 0.30;
 
     private BarebackSteeringHandler() {
     }
 
     @SubscribeEvent
     static void onHorseTick(EntityTickEvent.Post event) {
-        if (!(event.getEntity() instanceof AbstractHorse horse)) {
+        if (!(event.getEntity() instanceof AbstractHorse horse) || horse.level().isClientSide()) {
             return;
         }
-        if (!horse.isAlive() || !horse.isVehicle() || !horse.isTamed() || horse.isSaddled()) {
-            return; // saddled is vanilla's job and it does it better
-        }
-        if (!horse.isLocalInstanceAuthoritative()) {
-            return;
-        }
-        if (!(horse.getFirstPassenger() instanceof Player rider) || !ownedBy(horse, rider)) {
-            return;
-        }
-        HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
-        if (care.behaviourTier() < TIER) {
-            return;
-        }
+        boolean phantom = isPhantom(horse.getItemBySlot(EquipmentSlot.SADDLE));
+        Player rider = eligibleRider(horse);
 
-        // Point it where the rider is looking. This is the "steering" half, and
-        // it is what a rider notices first - a horse that turns under you reads
-        // as controlled even before it has moved anywhere.
-        horse.setYRot(rider.getYRot());
-        horse.yRotO = horse.getYRot();
-        horse.setYHeadRot(horse.getYRot());
-        horse.setYBodyRot(horse.getYRot());
-
-        float forward = rider.zza;
-        float strafe = rider.xxa;
-        if (forward == 0.0F && strafe == 0.0F) {
+        if (rider != null && !horse.isSaddled()) {
+            ItemStack saddle = new ItemStack(Items.SADDLE);
+            saddle.set(ModDataComponents.PHANTOM_SADDLE.get(), true);
+            horse.setItemSlot(EquipmentSlot.SADDLE, saddle);
             return;
         }
-        double speed = horse.getAttributeValue(Attributes.MOVEMENT_SPEED) * BAREBACK_FRACTION;
-        float yawRad = horse.getYRot() * ((float) Math.PI / 180.0F);
-        double sin = Mth.sin(yawRad);
-        double cos = Mth.cos(yawRad);
-        // the rotation vanilla's moveRelative uses for (xxa, _, zza)
-        double wishX = strafe * cos - forward * sin;
-        double wishZ = forward * cos + strafe * sin;
-        double len = Math.sqrt(wishX * wishX + wishZ * wishZ);
-        if (len <= 1.0E-4) {
-            return;
+        if (phantom && rider == null) {
+            horse.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
         }
-        wishX = wishX / len * speed;
-        wishZ = wishZ / len * speed;
-        Vec3 dm = horse.getDeltaMovement();
-        horse.setDeltaMovement(Mth.lerp(BLEND, dm.x, wishX), dm.y, Mth.lerp(BLEND, dm.z, wishZ));
+        if (phantom && rider != null) {
+            reclaim(rider);
+        }
     }
 
-    private static boolean ownedBy(AbstractHorse horse, Player player) {
+    /**
+     * The owner, riding, with the bond for it - or {@code null}.
+     *
+     * <p>{@code getFirstPassenger} rather than {@code getControllingPassenger},
+     * because on the tick the saddle goes on there is by definition no
+     * controlling passenger yet.
+     */
+    private static Player eligibleRider(AbstractHorse horse) {
+        if (!horse.isAlive() || !horse.isVehicle() || !horse.isTamed()) {
+            return null;
+        }
+        if (!(horse.getFirstPassenger() instanceof Player rider)) {
+            return null;
+        }
         LivingEntity owner = horse.getOwner();
-        return owner != null && owner.getUUID().equals(player.getUUID());
+        if (owner == null || !owner.getUUID().equals(rider.getUUID())) {
+            return null;
+        }
+        HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
+        return care.behaviourTier() >= TIER ? rider : null;
+    }
+
+    /**
+     * Destroy any phantom saddle that has found its way into a player's hands.
+     *
+     * <p>The only route in is opening the horse's inventory while mounted and
+     * dragging it out, which is a real thing a player can do and would otherwise
+     * mint a free saddle every time. Destroying rather than returning it to the
+     * horse keeps this from fighting the player over a slot: the tick after,
+     * they are still eligible, and the horse gets a fresh one.
+     */
+    private static void reclaim(Player rider) {
+        for (int i = 0; i < rider.getInventory().getContainerSize(); i++) {
+            ItemStack stack = rider.getInventory().getItem(i);
+            if (isPhantom(stack)) {
+                rider.getInventory().setItem(i, ItemStack.EMPTY);
+            }
+        }
+        if (isPhantom(rider.containerMenu.getCarried())) {
+            rider.containerMenu.setCarried(ItemStack.EMPTY);
+        }
+    }
+
+    private static boolean isPhantom(ItemStack stack) {
+        return !stack.isEmpty() && stack.has(ModDataComponents.PHANTOM_SADDLE.get());
     }
 }

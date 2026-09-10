@@ -79,7 +79,8 @@ public final class ModNetworking {
                 GeneDatabaseSyncPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         com.example.horsegenetics.neoforge.client.ClientGeneDatabase.accept(
-                                payload.seenByGene(), payload.carrotUnlocked(), payload.collected()))
+                                payload.seenByGene(), payload.carrotUnlocked(), payload.collected(),
+                                payload.breeds()))
         );
 
         registrar.playToClient(

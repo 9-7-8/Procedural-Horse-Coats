@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.client;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EditorRules;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -41,8 +42,13 @@ import java.util.Map;
  * <p>One shot per allele, homozygous. A recessive needs two copies to show at
  * all, and for everything else the homozygote is the loudest the gene gets;
  * showing the heterozygote too would double a row that is mostly duplicates.
- * The wild-type allele keeps its shot, because "no effect" is an outcome and
- * the row is the only place a player can see it side by side with the others.
+ *
+ * <p><b>The wild type gets a square only where it is a coat rather than an
+ * absence</b> - which is extension, agouti and shade, the three loci every
+ * horse has a real colour at ({@link EditorRules#alwaysCarried}). Everywhere
+ * else the baseline draws precisely the same horse as the row's own reference
+ * point, so it was a duplicate of the plain animal parked at the front of every
+ * entry, teaching nothing and taking the eye first. (Owner's call.)
  */
 public final class GenePreviews {
 
@@ -92,6 +98,9 @@ public final class GenePreviews {
             }
             if (gene.isPlaceholder(allele)) {
                 continue; // a slot reserved for an allele nobody has written yet
+            }
+            if (allele.equals(gene.defaultAllele()) && !EditorRules.alwaysCarried(gene)) {
+                continue; // "no effect" needs no picture
             }
             AllelePair pair = new AllelePair(allele, allele);
             if (!gene.canOccur(pair)) {

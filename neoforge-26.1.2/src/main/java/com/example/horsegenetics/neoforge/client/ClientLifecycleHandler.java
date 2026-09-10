@@ -30,6 +30,7 @@ public final class ClientLifecycleHandler {
         TutorialPortraits.clear();
         TutorialPage.clear();
         GenePreviews.clear();
+        BreedPreviews.clear();
         // The browser remembers where you were for the session; the parts of that
         // which name a *horse* are meaningless in the next world.
         HorseBrowserScreen.forgetWorld();

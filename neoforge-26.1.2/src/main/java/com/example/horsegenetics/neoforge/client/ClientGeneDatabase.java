@@ -23,17 +23,28 @@ public final class ClientGeneDatabase {
      * record, and a baseline allele belongs in the second and not the first.
      */
     private static volatile Set<String> collected = Set.of();
+    private static volatile Set<String> breeds = Set.of();
 
     public static void accept(Map<String, List<String>> seen, List<String> unlocked,
-                              List<String> collectedAlleles) {
+                              List<String> collectedAlleles, List<String> knownBreeds) {
         seenByGene = Map.copyOf(seen);
         carrotUnlocked = Set.copyOf(unlocked);
         collected = Set.copyOf(collectedAlleles);
+        breeds = Set.copyOf(knownBreeds);
     }
 
     /** Has this player ever seen this allele on a horse? */
     public static boolean hasAllele(String geneKey, String token) {
         return collected.contains(geneKey + "|" + token);
+    }
+
+    /** Has this player owned a horse of {@code breedId}? */
+    public static boolean hasBreed(String breedId) {
+        return breeds.contains(breedId);
+    }
+
+    public static int breedCount() {
+        return breeds.size();
     }
 
     public static int collectedCount() {
@@ -60,6 +71,7 @@ public final class ClientGeneDatabase {
         seenByGene = Map.of();
         carrotUnlocked = Set.of();
         collected = Set.of();
+        breeds = Set.of();
     }
 
     private ClientGeneDatabase() {

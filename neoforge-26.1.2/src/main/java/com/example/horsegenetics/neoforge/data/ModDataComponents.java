@@ -32,6 +32,25 @@ public final class ModDataComponents {
                     .networkSynchronized(StoredGenome.STREAM_CODEC)
                     .build());
 
+    /**
+     * <b>Marks a saddle the mod put on a horse, not the player.</b>
+     *
+     * <p>Bareback riding at the top bond tier works by quietly equipping a real
+     * saddle, because vanilla decides who may steer inside
+     * {@code AbstractHorse.getControllingPassenger()} and that check is
+     * {@code isSaddled()} - there is no hook on it and no mixins here. A real
+     * saddle therefore buys the real thing: client-predicted movement, jumping,
+     * the correct feel. This component is what keeps that from becoming a lie -
+     * the renderer skips drawing it, and
+     * {@code server/BarebackSteeringHandler} takes it back off the moment the
+     * rider is gone, so it never becomes a saddle the player owns.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> PHANTOM_SADDLE =
+            TYPES.register("phantom_saddle", () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL)
+                    .networkSynchronized(ByteBufCodecs.BOOL)
+                    .build());
+
     /** Which horse an item is bound to - a {@code bound_stall_sign} uses it. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<BoundHorse>> BOUND_HORSE =
             TYPES.register("bound_horse", () -> DataComponentType.<BoundHorse>builder()

@@ -82,6 +82,7 @@ public final class HorseRoster {
         // list, before MAX_ENTRIES cuts the packet down - what you can see in
         // the table and what you have met are different questions.
         collectAlleles(server, player, mine);
+        collectBreeds(server, player, mine);
 
         // Newest first: a breeding programme is nearly always about the horses
         // at the front of it, and this is also the sensible thing to keep when
@@ -98,6 +99,19 @@ public final class HorseRoster {
             out.add(entry(server, record));
         }
         return List.copyOf(out);
+    }
+
+    /** Every breed the player owns a horse of, in one batch. */
+    private static void collectBreeds(MinecraftServer server, ServerPlayer player,
+                                      List<HorseRecord> mine) {
+        List<String> ids = new ArrayList<>();
+        for (HorseRecord record : mine) {
+            record.breed().ifPresent(ids::add);
+        }
+        if (!ids.isEmpty()) {
+            com.example.horsegenetics.neoforge.data.GeneDatabaseData.get(server)
+                    .discoverBreeds(player, ids);
+        }
     }
 
     /** Hand every owned genotype to the collection in one batch. */

@@ -47,11 +47,13 @@ public final class GeneDatabaseData extends SavedData {
         }
     }
 
-    private record PlayerBook(UUID player, Map<String, Entry> byGene, List<String> collected) {
+    private record PlayerBook(UUID player, Map<String, Entry> byGene, List<String> collected,
+                              List<String> breeds) {
         static final Codec<PlayerBook> CODEC = RecordCodecBuilder.create(i -> i.group(
                 UUIDUtil.CODEC.fieldOf("player").forGetter(PlayerBook::player),
                 Codec.unboundedMap(Codec.STRING, Entry.CODEC).fieldOf("genes").forGetter(PlayerBook::byGene),
-                Codec.STRING.listOf().optionalFieldOf("collected", List.of()).forGetter(PlayerBook::collected)
+                Codec.STRING.listOf().optionalFieldOf("collected", List.of()).forGetter(PlayerBook::collected),
+            Codec.STRING.listOf().optionalFieldOf("breeds", List.of()).forGetter(PlayerBook::breeds)
         ).apply(i, PlayerBook::new));
     }
 
@@ -79,6 +81,16 @@ public final class GeneDatabaseData extends SavedData {
      * alleles would have unlocked every gene in the mod.
      */
     private final Map<UUID, Set<String>> collectedByPlayer = new LinkedHashMap<>();
+    /**
+     * Breeds each player has met, by id.
+     *
+     * <p>Same principle as the allele collection and for the same stated
+     * reason: every reference tab in this browser fills in as you play, so a
+     * new player is not handed forty-nine breeds they have never seen. Only
+     * Getting Started and Recipes are complete from the first minute, because
+     * those two are how you find out what to do at all. (Owner's call.)
+     */
+    private final Map<UUID, Set<String>> breedsByPlayer = new LinkedHashMap<>();
 
     private GeneDatabaseData() {
     }
@@ -87,6 +99,7 @@ public final class GeneDatabaseData extends SavedData {
         for (PlayerBook b : books) {
             byPlayer.put(b.player(), new LinkedHashMap<>(b.byGene()));
             collectedByPlayer.put(b.player(), new LinkedHashSet<>(b.collected()));
+            breedsByPlayer.put(b.player(), new LinkedHashSet<>(b.breeds()));
         }
     }
 
@@ -98,10 +111,12 @@ public final class GeneDatabaseData extends SavedData {
         List<PlayerBook> out = new ArrayList<>();
         Set<UUID> everyone = new LinkedHashSet<>(byPlayer.keySet());
         everyone.addAll(collectedByPlayer.keySet());
+        everyone.addAll(breedsByPlayer.keySet());
         for (UUID id : everyone) {
             out.add(new PlayerBook(id,
                     Map.copyOf(byPlayer.getOrDefault(id, Map.of())),
-                    List.copyOf(collectedByPlayer.getOrDefault(id, Set.of()))));
+                    List.copyOf(collectedByPlayer.getOrDefault(id, Set.of())),
+                    List.copyOf(breedsByPlayer.getOrDefault(id, Set.of()))));
         }
         return out;
     }
@@ -144,6 +159,28 @@ public final class GeneDatabaseData extends SavedData {
             setDirty();
             sync(player);
         }
+    }
+
+    /**
+     * <b>Record the breeds of a batch of horses.</b> Ids only - a breed the mod
+     * no longer ships stays in the set harmlessly and simply never matches a row.
+     */
+    public void discoverBreeds(ServerPlayer player, Iterable<String> breedIds) {
+        Set<String> mine = breedsByPlayer.computeIfAbsent(player.getUUID(), k -> new LinkedHashSet<>());
+        boolean changed = false;
+        for (String id : breedIds) {
+            if (id != null && !id.isBlank()) {
+                changed |= mine.add(id);
+            }
+        }
+        if (changed) {
+            setDirty();
+            sync(player);
+        }
+    }
+
+    public Set<String> breedsBy(UUID player) {
+        return breedsByPlayer.getOrDefault(player, Set.of());
     }
 
     public Set<String> collectedBy(UUID player) {
@@ -210,6 +247,7 @@ public final class GeneDatabaseData extends SavedData {
 
     public void sync(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player, GeneDatabaseSyncPayload.of(
-                bookOf(player.getUUID()), collectedBy(player.getUUID())));
+                bookOf(player.getUUID()), collectedBy(player.getUUID()),
+                breedsBy(player.getUUID())));
     }
 }

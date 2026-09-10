@@ -21,7 +21,8 @@ import net.minecraft.resources.Identifier;
  */
 public record GeneDatabaseSyncPayload(Map<String, List<String>> seenByGene,
                                       List<String> carrotUnlocked,
-                                      List<String> collected) implements CustomPacketPayload {
+                                      List<String> collected,
+                                      List<String> breeds) implements CustomPacketPayload {
 
     public static final Type<GeneDatabaseSyncPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "gene_database_sync"));
@@ -37,10 +38,14 @@ public record GeneDatabaseSyncPayload(Map<String, List<String>> seenByGene,
                     // the collection rather than the database - see GeneDatabaseData.
                     ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
                     GeneDatabaseSyncPayload::collected,
+                    // Every breed this player has owned a horse of.
+                    ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+                    GeneDatabaseSyncPayload::breeds,
                     GeneDatabaseSyncPayload::new);
 
     public static GeneDatabaseSyncPayload of(Map<String, GeneDatabaseData.Entry> book,
-                                             java.util.Set<String> collected) {
+                                             java.util.Set<String> collected,
+                                             java.util.Set<String> breeds) {
         Map<String, List<String>> seen = new HashMap<>();
         List<String> unlocked = new ArrayList<>();
         book.forEach((key, entry) -> {
@@ -49,7 +54,8 @@ public record GeneDatabaseSyncPayload(Map<String, List<String>> seenByGene,
                 unlocked.add(key);
             }
         });
-        return new GeneDatabaseSyncPayload(seen, unlocked, List.copyOf(collected));
+        return new GeneDatabaseSyncPayload(seen, unlocked, List.copyOf(collected),
+                List.copyOf(breeds));
     }
 
     @Override
