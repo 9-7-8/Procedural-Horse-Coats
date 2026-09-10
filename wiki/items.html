@@ -46,9 +46,9 @@
 <tr><td><a href="item-whistles.html"><strong>Whistles</strong></a> &mdash; basic, golden, echo</td>
     <td>Call every horse you own to you.</td></tr>
 <tr><td><a href="item-stall-signs.html"><strong>Stall signs</strong></a></td>
-    <td>Mark a room as one horse&rsquo;s stall. Nothing uses stalls yet.</td></tr>
+    <td>Mark a room as one horse&rsquo;s stall.</td></tr>
 <tr><td><a href="item-tickets.html"><strong>Tickets</strong></a> &mdash; four tiers</td>
-    <td>Craft correctly; do nothing yet.</td></tr>
+    <td>Send a horse to its stall. One use; the tier is how far it reaches.</td></tr>
 <tr><td><a href="item-transfer-papers.html"><strong>Transfer papers</strong></a></td>
     <td>How a horse changes hands. A signed one is drawn as the horse itself.</td></tr>
 <tr><td><a href="item-horsemans-table.html"><strong>Horseman&rsquo;s Table</strong></a></td>
@@ -87,9 +87,9 @@
 </p>
 
 <ul>
-    <li><a href="item-tickets.html">Tickets</a> do nothing at all.</li>
-    <li><a href="item-stall-signs.html">Stalls</a> are recorded but nothing consumes
-        them.</li>
+    <li><a href="item-tickets.html">Tickets</a> and
+        <a href="item-stall-signs.html">stalls</a> shipped together in 0.3.7 and
+        <strong>neither has been played</strong>.</li>
     <li>A sheared horse still looks unsheared, so you cannot tell by eye which of your
         horses you have already done today.</li>
 </ul>
@@ -121,8 +121,9 @@
         <code>hair_cloth</code> have recipes but no real textures. The blank
         <a href="item-transfer-papers.html">transfer paper</a> reuses the
         <a href="item-research-papers.html">research-paper</a> texture.</li>
-    <li><strong>The tickets do nothing</strong>, and the stall system they would consume
-        has no other consumer either.</li>
+    <li><strong>A stall is only ever read by a ticket.</strong> There is no
+        auto-return and no &ldquo;assigned pen&rdquo; behaviour, and only breaking the
+        exact sign block releases one.</li>
     <li><strong>The sheared look</strong> is unbuilt &mdash; see
         <a href="item-horse-hair.html">horse hair</a>.</li>
     <li>There is no <strong>double-wide gate</strong> block, which the design document

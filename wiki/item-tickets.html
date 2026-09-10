@@ -18,53 +18,101 @@
 <p class="eyebrow">Item <span class="sep">/</span> stabling</p>
 <h1>Tickets</h1>
 <p class="lede">
-    Four tiers of ticket that craft correctly and, at the moment, do nothing at
-    all.
+    A ticket sends a horse home. Right-click one of your horses with one and it
+    goes to its <a href="item-stall-signs.html">stall</a>; the ticket is spent.
+    The tier decides how far apart the two are allowed to be.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
-<div class="note warn">
-    <span class="label">These do not work yet</span>
+<div class="note">
+    <span class="label">The mirror of a whistle</span>
     <p>
-        All four tickets can be crafted and none of them has any effect. They are meant
-        to teleport a horse to its <a href="item-stall-signs.html">stall</a>, and that is
-        simply unbuilt. Craft them if you like collecting things; there is nothing to use
-        them on.
+        A <a href="item-whistles.html">whistle</a> brings a horse to <em>you</em>; a
+        ticket sends a horse to <em>its stall</em>. Two directions, two items, no
+        overlap &mdash; which is how the two were settled against each other.
     </p>
 </div>
 
-<h2 id="recipes">Recipes</h2>
+<h2 id="using">Using one</h2>
+
+<p>
+    Right-click your horse with the ticket. It has to be <strong>your</strong> horse,
+    it has to have a stall, and you have to be off its back. One use; nothing is
+    spent unless the horse actually moved, and every refusal says which of those
+    it was.
+</p>
+
+<p>
+    <strong>A ticket is not bound to a horse.</strong> The horse you click is the horse
+    that travels, so one in your pocket covers whichever animal has got itself stuck
+    on the wrong side of a river. The horse arrives standing in its stall &mdash; the
+    middle of the floor if that is standing room, otherwise the first spot in the
+    stall that is.
+</p>
+
+<h2 id="tiers">The four tiers</h2>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Item</th><th>Recipe (shapeless)</th></tr></thead>
+<thead><tr><th>Item</th><th>Reach</th><th>Recipe (shapeless)</th></tr></thead>
 <tbody>
-<tr><td><strong>Blank ticket</strong></td><td>paper + horse hair</td></tr>
-<tr><td><strong>Basic ticket</strong></td><td>blank ticket + horse hair</td></tr>
-<tr><td><strong>Bound ticket</strong></td><td>basic ticket + horse hair + ender pearl</td></tr>
-<tr><td><strong>Interdimensional ticket</strong></td><td>bound ticket + horse hair + eye of ender + blaze powder</td></tr>
+<tr><td><strong>Blank ticket</strong></td>
+    <td>None &mdash; it is the base the others are made from, and says so if you
+        try it on a horse.</td>
+    <td>paper + horse hair</td></tr>
+<tr><td><strong>Basic ticket</strong></td>
+    <td>Within the overworld. Both the horse and its stall have to be there.</td>
+    <td>blank ticket + horse hair</td></tr>
+<tr><td><strong>Bound ticket</strong></td>
+    <td>Within any one world, <a href="horse-dimension.html">the horse dimension</a>
+        included &mdash; but the stall must be in the same world as the horse.</td>
+    <td>basic ticket + horse hair + ender pearl</td></tr>
+<tr><td><strong>Interdimensional ticket</strong></td>
+    <td>Anywhere to anywhere. The only ticket that crosses between worlds.</td>
+    <td>bound ticket + horse hair + eye of ender + blaze powder</td></tr>
 </tbody>
 </table>
 </div>
+
+<p>
+    <strong>&ldquo;Bound&rdquo; is a name from when the tickets were going to be bound
+    to one horse each.</strong> They are not; the tier is reach, and the recipe ladder
+    is what says so &mdash; an ender pearl to leave the overworld, an eye and blaze
+    powder to leave the world you are in.
+</p>
 
 <p>All four share one texture.</p>
 </section>
 
 <section class="tab-panel" data-tab="coding">
-<h2 id="state">Registered, inert</h2>
+<h2 id="classes">Where it lives</h2>
 
 <p>
-    Four tiers craft correctly and do <strong>nothing</strong>. The stated intent is
-    &ldquo;teleport a bound horse to its stall&rdquo;, which is now possible
-    (<code>StallRecord.center()</code> exists) and simply unbuilt.
+    <code>item/TicketItem</code> is the item and its <code>Tier</code> &mdash; the tier
+    and the tooltip words, nothing else. The interaction is
+    <code>server/TicketHandler</code>, on <code>EntityInteract</code>, following the
+    same shape as every other horse interaction in the mod: cancelled on
+    <strong>both</strong> sides so the client does not predict a mount, and everything
+    done server-side (see <a href="api-notes.html">API notes</a>).
+</p>
+
+<p>
+    The destination comes from <code>StallData.forHorse</code>. The landing spot is
+    <em>not</em> <code>StallRecord.center()</code>: a stall may be
+    <a href="item-stall-signs.html">the detector's fallback box</a> rather than a real
+    room, so its middle is not known to be empty. <code>landingSpot</code> checks for
+    standing room, walks the volume if the middle is blocked, and falls back to the
+    sign position &mdash; the one block known to be somewhere a player stood.
 </p>
 
 <h2 id="gaps">Known gaps</h2>
 
 <ul>
-    <li><strong>The tickets do nothing</strong>, and the
-        <a href="item-stall-signs.html">stall system</a> they would consume has no other
-        consumer either.</li>
+    <li><strong>Never played.</strong> Shipped in 0.3.7 and not once used in-game
+        &mdash; see <a href="verification.html">To be verified</a>.</li>
+    <li>The cross-dimension <code>teleportTo</code> signature is the same one the
+        <a href="horse-dimension.html">hay portal</a> uses, which is itself listed as
+        unverified.</li>
     <li>All four share one texture.</li>
 </ul>
 </section>
@@ -72,13 +120,11 @@
 <div class="page-foot">
     <div class="seealso">
         <a href="item-stall-signs.html">Stall signs</a>
-        <a href="roadmap.html">Roadmap</a>
+        <a href="item-whistles.html">Whistles</a>
         <a href="items.html">All items</a>
     </div>
-    <code>item/ModItems.java</code>; intended consumer
-    <code>StallRecord.center()</code>.
+    <code>item/TicketItem.java</code>, <code>server/TicketHandler.java</code>.
 </div>
-
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>

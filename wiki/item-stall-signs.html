@@ -37,29 +37,34 @@
     <ol>
         <li><strong>Right-click a horse</strong> with a blank stall sign. The sign becomes
             bound to that horse and takes its name.</li>
-        <li><strong>Right-click the outside face of a wall</strong> with the bound sign. A
-            real sign is placed with the horse&rsquo;s name on it, and the enclosed space
-            behind that wall becomes that horse&rsquo;s stall &mdash; its outline flashes
-            with particles so you can see what was claimed.</li>
+        <li><strong>Hang it on the stall wall</strong>, from either side. A real sign
+            is placed with the horse&rsquo;s name on it, the room it names becomes that
+            horse&rsquo;s stall, and its outline flashes with particles so you can see
+            what was claimed.</li>
     </ol>
 </div>
 
 <p>
-    The space is found by filling outward through air behind the wall, up to 512 blocks,
-    so it needs to be genuinely enclosed. Breaking the sign block releases the stall.
+    <strong>It will not refuse you.</strong> It looks at both sides of the wall and takes
+    whichever is the room &mdash; if both close, the smaller one, because the bigger is
+    the building the stall is in. A torch, a lantern or a carpet is floor rather than
+    wall, there is headroom for a hay loft, and if nothing encloses at all &mdash; a sign
+    on a fence post in an open field &mdash; the stall is simply the ground in front of
+    the sign. The message tells you which of the two you got.
 </p>
 
-<div class="note warn">
-    <span class="label">Stalls do not do anything yet</span>
+<p>Breaking the sign block releases the stall.</p>
+
+<div class="note">
+    <span class="label">What a stall is for</span>
     <p>
-        A stall is recorded and drawn, and <strong>nothing uses it</strong>. There is no
-        teleport-to-stall and no auto-return; the
-        <a href="item-tickets.html">tickets</a> are the intended consumer and they are
-        inert too. Bind a sign if you want the room labelled, but not for an effect.
+        A stall is where a <a href="item-tickets.html">ticket</a> sends the horse. That is
+        the whole of what consumes one &mdash; there is no auto-return and no
+        &ldquo;assigned pen&rdquo; behaviour.
     </p>
     <p>
-        Cleanup is thin as well: only breaking the exact sign block releases a stall, so
-        rebuilding the wall elsewhere or removing the horse leaves a stale record behind.
+        Cleanup is thin: only breaking the exact sign block releases a stall, so rebuilding
+        the wall elsewhere or removing the horse leaves a stale record behind.
     </p>
 </div>
 </section>
@@ -70,17 +75,16 @@
 <p>
     <strong>Right-click a horse with a blank <code>stall_sign</code></strong> and it
     becomes a <code>bound_stall_sign</code> carrying that horse&rsquo;s UUID and name in a
-    <code>bound_horse</code> data component. <strong>Right-click the outside face of a
-    wall with the bound sign</strong> and three things happen at once
+    <code>bound_horse</code> data component. <strong>Right-click a wall with the bound
+    sign</strong>, from either side, and three things happen at once
     (<code>item/StallSignItem</code>):
 </p>
 
 <ol>
     <li>A real <code>oak_wall_sign</code> is placed, with the horse&rsquo;s name written
         on it.</li>
-    <li><code>server/StallDetector</code> flood-fills the air <em>behind</em> that wall
-        &mdash; this layer &plusmn;1, air only, capped at <strong>512 blocks</strong>. An
-        enclosed area becomes that horse&rsquo;s stall.</li>
+    <li><code>server/StallDetector</code> measures the stall. <strong>It cannot
+        fail</strong> &mdash; see below.</li>
     <li>The stall is stored in <code>data/StallData</code>, a server-global
         <code>SavedData</code> of <code>StallRecord</code>s, one per bound horse, and its
         outline is flashed with <code>HAPPY_VILLAGER</code> particles.</li>
@@ -92,14 +96,40 @@
     (<code>server/StallDebug</code>).
 </p>
 
+<h2 id="detector">The detector measures, it does not judge</h2>
+
+<p>
+    <strong>It used to be a gate, and the gate is what was broken.</strong> It required
+    the sign on the outside face of the wall, the room behind it sealed with nothing in
+    it but air, and the whole thing inside one block up and one block down of wherever
+    the sign happened to be &mdash; and if any of those was untrue it refused to make a
+    stall at all. Between a doorway, a roof beam, an open top, a torch on the wall and
+    hanging the sign from the inside, essentially every real stable failed one of them,
+    so the feature stalls exist for could never be reached.
+</p>
+
+<p>The flood fill stays, but only as a measurement:</p>
+
+<ul>
+    <li><strong>Both sides are tried.</strong> Which side of a wall the player meant is
+        not something they should have to know. If both close, the smaller is the stall.</li>
+    <li><strong>Anything a horse could walk through is open</strong>
+        (<code>!state.blocksMotion()</code>), not just air &mdash; torches, carpet, a
+        lantern, snow. A fence, a wall, a shut gate or a door still stops the fill,
+        because those are what a stall is made of.</li>
+    <li><strong>Five blocks of headroom</strong> rather than three, and the cap is
+        <code>MAX_BLOCKS</code> rather than a number written down here.</li>
+    <li><strong>If neither side closes it falls back</strong> to a plain box in front of
+        the sign, and <code>Result.enclosed</code> says so &mdash; which is what the
+        player&rsquo;s message is written from, and what
+        <code>TicketHandler.landingSpot</code> is careful about.</li>
+</ul>
+
 <div class="note warn">
-    <span class="label">Definition and storage only</span>
+    <span class="label">Stale records</span>
     <p>
-        <strong>Nothing consumes a stall yet.</strong> There is no teleport-to-stall, no
-        auto-return, no &ldquo;assigned pen&rdquo; behaviour &mdash; the
-        <a href="item-tickets.html">tickets</a> are the intended consumer and they are
-        inert. Cleanup is thin too: only breaking the exact sign block releases a stall, so
-        rebuilding the wall elsewhere or removing the horse leaves a stale record.
+        Only breaking the exact sign block releases a stall, so rebuilding the wall
+        elsewhere or removing the horse leaves a stale record.
     </p>
 </div>
 

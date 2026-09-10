@@ -29,6 +29,126 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="s0-3-7">0.3.7 &mdash; two things you could craft but not use, and two you could do that did nothing.</h3>
+
+<p>
+    A repair release, and the repairs came out of somebody playing it and saying what
+    happened. The shape of the day was the same as the last one: less building, more
+    being told.
+</p>
+
+<h4>The bug that had never worked once</h4>
+
+<p>
+    &ldquo;Sheers aren't working. They say that <i>the horse's coat hasn't grown back
+    yet</i>&rdquo; &mdash; on a horse that had never been sheared. Then the same for
+    milking. One cause:
+    <code>HorseCooldownsAttachment.last(key)</code> answers <code>Long.MIN_VALUE</code>
+    for a key that has never fired, and <code>ready</code> was
+    <code>now - last(key) &gt;= cooldown</code>, which <b>overflows</b> to a large
+    negative elapsed time. So the gate said &ldquo;not ready&rdquo; for every horse that
+    had never done the thing &mdash; and since the stamp is only written on success, that
+    is forever.
+</p>
+
+<p>
+    <strong>Shearing and every gene <code>yield</code> had therefore never worked on any
+    horse in any build</strong>, and the dhampir's bite gate was dead the same way without
+    anybody noticing. The fix is one absent check. The part worth keeping is
+    <a href="known-gaps.html#gap-151">why it survived</a>: the class is Minecraft-side, so
+    there is no test source set it could have been caught in. The same record in
+    <code>common/</code> would have been a five-line test.
+</p>
+
+<h4>Stalls: the gate was the broken part</h4>
+
+<p>
+    &ldquo;Binding a sign to a horse works, creating a stall / the interior detector
+    definitely doesn't.&rdquo; <code>StallDetector</code> demanded the sign on the outside
+    face, a room sealed with nothing in it but air, and everything within one block up or
+    down of wherever the sign happened to be. A doorway failed it, a roof beam failed it,
+    a wall torch failed it, hanging the sign from the inside failed it. And stalls are
+    read by exactly one thing &mdash; the ticket &mdash; so the gate was standing in front
+    of the only feature it existed to serve.
+</p>
+
+<p>
+    On the owner's call it <b>measures instead of judging</b>: both sides of the wall,
+    <code>!blocksMotion()</code> instead of <code>isAir()</code>, five blocks of headroom,
+    and a plain box in front of the sign when nothing encloses. It cannot refuse.
+    <a href="item-stall-signs.html">Stall signs</a> has the detail.
+</p>
+
+<h4>Tickets, built on top of it</h4>
+
+<p>
+    Inert since they were added. The owner's spec: one-time use, teleport a horse back to
+    its stall, and &mdash; against the original design &mdash; <b>not bound to a horse</b>.
+    You click the horse you want sent. The tier is reach: basic within the overworld,
+    bound within any one world, interdimensional across them.
+</p>
+
+<p>
+    The middle rung was <em>read off the recipe ladder</em> rather than specified &mdash;
+    the owner said outright they did not know what the third one should be, and an ender
+    pearl to leave the overworld / an eye and blaze powder to leave the world you are in is
+    what the recipes already said. <code>bound_ticket</code> is consequently named after a
+    design that no longer exists (<a href="known-gaps.html#gap-152">gap 152</a>).
+    <a href="item-tickets.html">Tickets</a>.
+</p>
+
+<h4>Getting Started is a book, not a scroll</h4>
+
+<p>
+    Asked for a table of contents; what it wanted was to stop being one long article.
+    It is a <b>section at a time</b> now, the contents list picks one, and the checklist
+    is split into its seven groups rather than thirty-odd boxes in a column. Every section
+    ends with a link to the next, so it still reads straight through &mdash; a tutorial you
+    cannot page through would have been a regression from the scroll.
+</p>
+
+<p>
+    New <b>Bonding</b> chapter, because none of it was written down where a player could
+    reach it: the rates, the fifteen-a-day ceiling and why it is there, and what each tier
+    changes about the animal. Four new checklist tasks &mdash; one per bond tier, credited
+    from <code>syncCare</code> so that every path that moves bond funnels through one
+    place, and one for giving a horse a barn name.
+</p>
+
+<h4>Two ticks that fired on the wrong thing</h4>
+
+<p>
+    <code>TRANSFER_PAPER</code> was completed at the <em>top</em> of
+    <code>onEntityInteract</code>, before the target was known to be a horse or the held
+    item to be a paper &mdash; so right-clicking anything with anything ticked it. Found
+    while reading a stack trace for something else. <code>BUILD_STALL</code> ticked when
+    the sign was bound to the horse, which is a sign in a pocket rather than a stall. Both
+    moved to the act they name.
+</p>
+
+<h4>And the jar was lying about its own version</h4>
+
+<p>
+    <code>mod_version</code> in <code>gradle.properties</code> names the jar;
+    <code>neoforge.mods.toml</code> carried a second, hand-edited copy that tells the
+    game. This release built as <code>horsegenetics-0.3.7.jar</code> announcing itself as
+    0.3.6, and was caught only because the file size came out identical to the previous
+    one. The toml is templated now and <code>processResources</code> declares the property
+    as an input, so there is one place to write it.
+</p>
+
+<h4>What the day cost that was nobody's fault</h4>
+
+<p>
+    &ldquo;Trying to use a nametag crashed my game&rdquo; &mdash; a
+    <code>ClassNotFoundException</code> for <code>HorseProgress</code>, one of our own
+    classes, whose <code>.class</code> file has an mtime of the exact second of the crash.
+    A <code>compileJava</code> run underneath a live <code>runClient</code>. Not a mod bug,
+    and the second time this pattern has cost a debugging session &mdash; check the jar or
+    class mtime against the crash timestamp <em>first</em>.
+</p>
+
+
 <h3 id="session-close-2026-09-09">Where the day ended.</h3>
 
 <p>

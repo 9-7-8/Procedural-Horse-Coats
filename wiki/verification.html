@@ -38,9 +38,12 @@
 <h2 id="checklist">&sect;0-BI &mdash; A checklist, an allele collection, and a shelf that looks like Minecraft (2026-09-09, NOT looked at)</h2>
 
 <ul>
-    <li><strong>Open Getting started and scroll to the bottom.</strong> Thirty tasks in
-        seven groups, with a progress bar. Then go and do one - taming a mare is the
-        easiest - and check it says so in chat <em>once</em> and the box fills in.</li>
+    <li><strong>Open Getting started and click through the contents list.</strong> The
+        checklist is seven entries at the bottom of it, one per group, each under the
+        running total. Then go and do one - taming a mare is the easiest - and check it
+        says so in chat <em>once</em> and the box fills in. (The task count is
+        <code>ProgressTask.values().length</code>; the sweep that proves each is wired is
+        <code>tools/check-progress-tasks.mjs</code>.)</li>
     <li><strong>Relog and check the ticks survive.</strong> Progress is a
         {@code SavedData} keyed by player and pushed on login; if it comes back empty,
         the login sync is not firing.</li>
@@ -57,6 +60,39 @@
         container now - grey bevelled face, sunken slots, dark text - and
         <b>nothing should overlap</b>, which was the report. Check both tabs, and check
         that the item in a slot lines up with the well drawn under it.</li>
+    <li id="tickets-0-3-7"><strong>Spend a ticket.</strong> Nothing about this has been
+        run. Bind a stall sign to a horse, hang it, then right-click that horse with a
+        <b>basic ticket</b> from a distance and check it arrives <em>standing in its
+        stall</em> rather than in a wall or under the floor. Then the awkward ones: a
+        stall whose chunk is <b>not loaded</b>, and an <b>interdimensional</b> ticket
+        used from the horse dimension. A horse that quietly fails to arrive looks
+        identical to a horse that was deleted (<a href="known-gaps.html#gap-153">gap
+        153</a>). Check too that a refused ticket is <b>not consumed</b> - try one on
+        somebody else's horse, on a horse with no stall, and while sitting on it.</li>
+    <li id="stalls-0-3-7"><strong>Hang a stall sign in a stable you actually built.</strong>
+        The detector cannot refuse any more, so the thing to check is whether it claims
+        the <em>right</em> room: hang one from the inside and from the outside of the same
+        wall and confirm both give the same stall. Then the two the new rule is a guess
+        about - a stall floored with <b>slabs or carpet</b> (should fill), and one whose
+        door is an <b>open fence gate</b> (will leak, and should say "no walls found").
+        The message after placing tells you which of the two you got; F7 flashes the
+        outline.</li>
+    <li id="bond-tiers-0-3-7"><strong>The three bond tiers tick.</strong> Ride and feed one
+        horse until its information screen says <i>attentive</i>, and check the checklist
+        says so at 31 rather than at some other number. The tiers are credited from
+        <code>syncCare</code>, so a tier reached while the horse is out of your sight is
+        the case to watch.</li>
+    <li id="shear-milk-0-3-7"><strong>Shear a horse, and milk a mare.</strong> Both were
+        broken for every horse that had never had it done - which was all of them
+        (<a href="known-gaps.html#gap-151">gap 151</a>). Check the <em>first</em> shear
+        works, then that a second one the same day is refused, then that it works again
+        the next day. The dhampir's bite was on the same timer and is worth a look for
+        the same reason.</li>
+    <li id="browser-scroll-0-3-7"><strong>The browser's scroll bars drag.</strong>
+        Confirmed by the owner on the gene list. The other eight have not been: the tab
+        strip's horizontal bar, both breeding-preview pickers, My horses, Recipes, the
+        Alleles page and the two detail panes. Clicking the bare track should jump the
+        thumb under the pointer.</li>
     <li><strong>The shelf's item icon.</strong> It was the missing-texture check pattern:
         the model was in <code>models/item/</code>, and 26.1.2 reads
         <code>items/</code>. It should be a bookshelf now, in hand and in the

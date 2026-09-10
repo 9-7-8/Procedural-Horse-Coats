@@ -1004,8 +1004,7 @@
 <table>
 <thead><tr><th>Thing</th><th>What is known</th><th>What is missing</th></tr></thead>
 <tbody>
-<tr><td><strong>Stalls and holding pens</strong></td><td>Stall <em>definition</em> is built &mdash; a sign bound to a horse, placed on a wall, flood-fills the enclosed area behind it and stores it.</td><td><strong>Nothing consumes a stall.</strong> No teleport-to-stall, no auto-return, no &ldquo;recalled to a pen&rdquo;. Cleanup beyond breaking the exact sign block &mdash; rebuilding a wall elsewhere, or removing the horse, leaves a stale record. Holding pens as distinct from stalls. A real stall-sign <em>block</em> instead of a repurposed <code>oak_wall_sign</code>. A persistent client wireframe rather than the F7 particle flash, which needs a <code>RenderLevelStageEvent</code> renderer against the changed 26.1.2 pipeline.</td></tr>
-<tr><td><strong>Tickets</strong> &mdash; blank, basic, bound, interdimensional</td><td>Four tiers, hair-based recipes, all crafting correctly.</td><td><strong>They are inert.</strong> The stated intent is &ldquo;teleport a bound horse to its stall&rdquo; &mdash; now possible (<code>StallRecord.center()</code> exists), just unbuilt. Whether &ldquo;interdimensional&rdquo; reaches <a href="horse-dimension.html">the horse dimension</a> is a decision (&sect;<a href="#decisions">3</a>).</td></tr>
+<tr><td><strong>Stalls and holding pens</strong></td><td>Definition and its consumer are both built &mdash; see <a href="item-stall-signs.html">stall signs</a> and <a href="item-tickets.html">tickets</a>.</td><td><strong>Auto-return</strong> &mdash; a horse that takes itself home, rather than one sent by a ticket. Cleanup beyond breaking the exact sign block: rebuilding a wall elsewhere, or removing the horse, leaves a stale record. Holding pens as distinct from stalls. A real stall-sign <em>block</em> instead of a repurposed <code>oak_wall_sign</code>. A persistent client wireframe rather than the F7 particle flash, which needs a <code>RenderLevelStageEvent</code> renderer against the changed 26.1.2 pipeline.</td></tr>
 <tr><td><strong>Whistles</strong></td><td>Built &mdash; recall your tamed horses within 16 / 32 / 64 blocks.</td><td>Bond gating (&sect;<a href="#bond">14</a>); whether they should path rather than teleport; and what &ldquo;echo&rdquo; adds <em>beyond</em> range. <strong>All three are answered by <a href="#callable-horses">callable horses</a>, below.</strong></td></tr>
 <tr><td><strong>Double-wide gate</strong></td><td>Crafted via braided rope.</td><td>Presumably a two-block-wide fence gate. A vanilla-shaped block problem, unrelated to the genetics.</td></tr>
 </tbody>
@@ -1105,12 +1104,11 @@
     &mdash; as a config that caps the usable tier, not as a distance in blocks.
 </p>
 <p>
-    It has to be settled against <a href="#items">the tickets</a>, which were specified as
-    &ldquo;teleport a bound horse to its stall&rdquo; and are still inert. The clean split,
-    and the one to take unless something argues against it: <strong>a whistle brings the
+    It had to be settled against the tickets, and it was: <strong>a whistle brings the
     horse to you; a ticket sends the horse to its stall.</strong> Two directions, two
     items, no overlap &mdash; and the interdimensional ticket and the echo whistle are the
-    same idea pointed opposite ways.
+    same idea pointed opposite ways. The <a href="item-tickets.html">tickets</a> shipped
+    on that reading in 0.3.7, with the tier as reach rather than as a binding.
 </p>
 
 <h4>Walk, then teleport &mdash; and gate it on bond</h4>

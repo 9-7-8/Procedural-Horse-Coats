@@ -19,8 +19,11 @@ import java.util.Map;
  * A checklist with an item nobody can tick is worse than a shorter checklist -
  * it reads as a bug, and the player cannot tell which. So the rule is that a
  * task exists here only once something calls
- * {@code HorseProgress.complete} for it, and {@code ProgressTaskWiringTest}
- * is the reason that stays true.
+ * {@code HorseProgress.complete} for it, and
+ * {@code neoforge-26.1.2/tools/check-progress-tasks.mjs} is the reason that
+ * stays true - run it after adding one. (It is a sweep of the call sites, not
+ * a test: it proves each task is reachable from somewhere, not that it fires at
+ * the right moment. See {@code wiki/known-gaps.html#gap-148}.)
  *
  * <h2>The hint is not flavour</h2>
  * A player looking at an unticked box wants to know what to <i>do</i>, and the
