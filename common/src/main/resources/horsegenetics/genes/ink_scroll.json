@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 372,
   "rarity": "RARE",
-  "blurb": "Scrollwork inked over the horse - a band of curls round the neck, a ringed medallion at the shoulder and the hip with lines running off them, and a smaller scroll on each cheek.",
+  "blurb": "Scrollwork inked over the horse - a band of curls round the neck, a ringed medallion at the shoulder and the hip with lines running off them, and a smaller scroll on each cheek. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. The source placed a medallion at the shoulder and one at the hip by coordinate. Coordinates are not addressable here, so the medallions are a SPOTS field with the spacing set wide enough that the barrel carries about two of them - which means WHERE they land is down to the seed. That is the same lottery auroraband lost (gap 108); the spacing here is well under the barrel's length, so it should not miss, but nothing checks it."
+    "Imported from the magic-gene intake, 2026-09-08. The source placed a medallion at the shoulder and one at the hip by coordinate. Coordinates are not addressable here, so the medallions are a SPOTS field with the spacing set wide enough that the barrel carries about two of them - which means WHERE they land is down to the seed. That is the same lottery auroraband lost (gap 108); the spacing here is well under the barrel's length, so it should not miss, but nothing checks it.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Isk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Isw",
       "label": "Ink Scroll, pale (Isw)"
+    },
+    {
+      "token": "Isk",
+      "label": "Ink Scroll, black (Isk)"
     },
     {
       "token": "Isc",
@@ -67,7 +72,8 @@
       "when": [
         "Isw/Isw",
         "Isw/Isc",
-        "Isw/n"
+        "Isw/n",
+        "Isw/Isk"
       ],
       "layers": [
         {
@@ -197,6 +203,148 @@
           "op": {
             "type": "TOWARD",
             "color": "#f2ede4",
+            "strength": 88.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Ink Scroll, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Isk/Isk",
+        "Isk/Isc",
+        "Isk/n"
+      ],
+      "layers": [
+        {
+          "name": "scrollwork banded round the neck",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "local",
+              "from": "$neckBandLow",
+              "to": "$neckBandHigh",
+              "softness": 0.1
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$seed",
+              "spacing": 4.5,
+              "length": 9.0,
+              "axis": "X",
+              "width": 0.6,
+              "curl": 0.7,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "a medallion at the shoulder and another at the hip",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$medallionSpacing",
+              "radius": "$medallionOuter",
+              "vary": 0.15,
+              "chance": 0.5,
+              "softness": 0.7
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$medallionSpacing",
+              "radius": "$medallionInner",
+              "vary": 0.15,
+              "chance": 0.5,
+              "softness": 0.2,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "curling strokes running off the medallions",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": 5.0,
+              "length": 11.0,
+              "axis": "X",
+              "width": 0.6,
+              "curl": 0.6,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "a smaller scroll on each cheek",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": 7.0,
+              "radius": 1.8,
+              "vary": 0.1,
+              "chance": 0.6,
+              "softness": 0.5
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": 7.0,
+              "radius": 0.7,
+              "vary": 0.1,
+              "chance": 0.6,
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 88.0
           }
         }
@@ -359,9 +507,13 @@
   ],
   "founders": {
     "Isw/Isw": 0.002,
-    "Isw/Isc": 0.008,
+    "Isw/Isk": 0.002667,
+    "Isw/Isc": 0.002667,
     "Isw/n": 0.038,
-    "Isc/Isc": 0.008,
+    "Isk/Isk": 0.002667,
+    "Isk/Isc": 0.002667,
+    "Isk/n": 0.002667,
+    "Isc/Isc": 0.002667,
     "n/n": 99.944
   }
 }

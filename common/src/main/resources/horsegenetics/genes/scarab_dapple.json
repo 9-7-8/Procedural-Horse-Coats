@@ -5,15 +5,21 @@
   "phase": "magical",
   "priority": 313,
   "rarity": "RARE",
-  "blurb": "Iridescent dapples over the topline, neck and face - each one a dark rim round a mid tone round a pale core, like the shell of a beetle. The legs, the croup and a patch at each shoulder stay clear of them.",
+  "blurb": "Iridescent dapples over the topline, neck and face - each one a dark rim round a mid tone round a pale core, like the shell of a beetle. The legs, the croup and a patch at each shoulder stay clear of them. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The source asked for the dapples to be cleared in a rump band and in a round patch at each shoulder, and gave the patches as circles at explicit body coordinates. There is no mask that draws a circle at a named point - SPOTS is a lattice - so the clearance here is two AXIS bands crossed instead: the barrel keeps its dapples only between x=15 and x=25.5. It reads as a saddle rather than as two roundels, which is a real difference and the one thing to look at first on a bake.",
-    "The three shells are drawn as three separate layers, largest first, each one with the next size down subtracted. Painting them the other way round would work too and would be wrong: the pale core has to go on last or the rim covers it."
+    "The three shells are drawn as three separate layers, largest first, each one with the next size down subtracted. Painting them the other way round would work too and would be wrong: the pale core has to go on last or the rim covers it.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Sck are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.",
+    "The white form was regraded at the same time. It spanned a much narrower range of lightness than the coloured form did - the same layers the coloured form separates were all landing on off-white - so its tones now follow the coloured form's own per-layer ordering, in greys. All three forms carry the same number of steps."
   ],
   "alleles": [
     {
       "token": "Scb",
       "label": "Scarab, pale (Scb)"
+    },
+    {
+      "token": "Sck",
+      "label": "Scarab, black (Sck)"
     },
     {
       "token": "Scc",
@@ -73,7 +79,8 @@
       "when": [
         "Scb/Scb",
         "Scb/Scc",
-        "Scb/n"
+        "Scb/n",
+        "Scb/Sck"
       ],
       "layers": [
         {
@@ -132,7 +139,7 @@
           ],
           "op": {
             "type": "FLAT",
-            "color": "#c8c8c8"
+            "color": "#6b6b6b"
           }
         },
         {
@@ -191,7 +198,7 @@
           ],
           "op": {
             "type": "FLAT",
-            "color": "#ffffff"
+            "color": "#ababab"
           }
         },
         {
@@ -236,7 +243,7 @@
           ],
           "op": {
             "type": "FLAT",
-            "color": "#f8f8ff"
+            "color": "#f7f7f7"
           }
         },
         {
@@ -275,7 +282,7 @@
           ],
           "op": {
             "type": "FLAT",
-            "color": "#c8c8c8"
+            "color": "#6b6b6b"
           }
         },
         {
@@ -314,7 +321,7 @@
           ],
           "op": {
             "type": "FLAT",
-            "color": "#ffffff"
+            "color": "#ababab"
           }
         },
         {
@@ -337,7 +344,283 @@
           ],
           "op": {
             "type": "FLAT",
-            "color": "#f8f8ff"
+            "color": "#f7f7f7"
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Scarab Dapple, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 3 steps, moved to the dark end of the scale.",
+      "when": [
+        "Sck/Sck",
+        "Sck/Scc",
+        "Sck/n"
+      ],
+      "layers": [
+        {
+          "name": "the dark outer rim of each dapple (barrel)",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rOuter",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rMid",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 15.0,
+              "to": 30.0,
+              "softness": 2.5,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 7.5,
+              "to": 25.5,
+              "softness": 1.8,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "the mid tone inside the rim (barrel)",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rMid",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rInner",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 15.0,
+              "to": 30.0,
+              "softness": 2.5,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 7.5,
+              "to": 25.5,
+              "softness": 1.8,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#3a3a3a"
+          }
+        },
+        {
+          "name": "the light core of each dapple (barrel)",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rInner",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 15.0,
+              "to": 30.0,
+              "softness": 2.5,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 7.5,
+              "to": 25.5,
+              "softness": 1.8,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#707070"
+          }
+        },
+        {
+          "name": "the dark outer rim of each dapple (neck and face)",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rOuter",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rMid",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "the mid tone inside the rim (neck and face)",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rMid",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rInner",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#3a3a3a"
+          }
+        },
+        {
+          "name": "the light core of each dapple (neck and face)",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$rInner",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#707070"
           }
         }
       ]
@@ -637,9 +920,13 @@
   ],
   "founders": {
     "Scb/Scb": 0.002,
-    "Scb/Scc": 0.008,
+    "Scb/Sck": 0.002667,
+    "Scb/Scc": 0.002667,
     "Scb/n": 0.038,
-    "Scc/Scc": 0.008,
+    "Sck/Sck": 0.002667,
+    "Sck/Scc": 0.002667,
+    "Sck/n": 0.002667,
+    "Scc/Scc": 0.002667,
     "n/n": 99.944
   }
 }

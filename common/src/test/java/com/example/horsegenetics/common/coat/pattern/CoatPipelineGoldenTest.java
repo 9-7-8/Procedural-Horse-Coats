@@ -272,8 +272,13 @@ class CoatPipelineGoldenTest {
             // Opalized reading black instead of white, and the Yalia that only
             // outlines somebody else's white. The last two are modifiers, so
             // each is on a horse that has something for it to modify.
-            override("agouti=A/a", "cleave=Wav/Wav"),
-            override("agouti=A/a", "cleave=Clv/Wav"),
+            //
+            // Cleave is now TWO loci - the colour on cleave, the half on
+            // cleave_side - so the reversed one is written as a Cleave plus a
+            // Wve rather than as its own allele, and the second horse is the
+            // proof that one copy of Wve is enough to turn the marking round.
+            override("agouti=A/a", "cleave=Clvw/Clvw", "cleave_side=Wve/Wve"),
+            override("agouti=A/a", "cleave=Clvw/Clvw", "cleave_side=Wve/n"),
             override("agouti=A/a", "opalized=Opb/Opb"),
             override("agouti=A/a", "tobiano=To/to", "yalia=Ylo/Ylo"),
             override("agouti=A/a", "tobiano=To/to", "opalized=Opl/Opb"));

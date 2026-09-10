@@ -21,7 +21,7 @@
 <h1>Beetle Pearl</h1>
 
 <p class="lede">
-    A hard black barrel scattered with pearls, a pale cap over the poll and a dark fork down the face - a pearl-spotted beetle rather than a spotted horse.
+    A hard black barrel scattered with pearls, a pale cap over the poll and a dark fork down the face - a pearl-spotted beetle rather than a spotted horse. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Beetle Pearl</th><td><code>Bpw/Bpw</code> &middot; <code>Bpw/Bpc</code> &middot; <code>Bpw/n</code></td></tr>
+<tr><th>Beetle Pearl</th><td><code>Bpw/Bpw</code> &middot; <code>Bpw/Bpc</code> &middot; <code>Bpw/n</code> &middot; <code>Bpw/Bpk</code></td></tr>
+<tr><th>Beetle Pearl, black</th><td><code>Bpk/Bpk</code> &middot; <code>Bpk/Bpc</code> &middot; <code>Bpk/n</code></td></tr>
 <tr><th>Beetle Pearl, coloured</th><td><code>Bpc/Bpc</code></td></tr>
 <tr><th>Wild type</th><td><code>Bpc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Bpw/Bpw</code></td><td>Beetle Pearl</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Bpw/Bpc</code></td><td>Beetle Pearl</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Bpw/Bpk</code></td><td>Beetle Pearl</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Bpw/Bpc</code></td><td>Beetle Pearl</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Bpw/n</code></td><td>Beetle Pearl</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Bpc/Bpc</code></td><td>Beetle Pearl, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Bpk/Bpk</code></td><td>Beetle Pearl, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Bpk/Bpc</code></td><td>Beetle Pearl, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Bpk/n</code></td><td>Beetle Pearl, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Bpc/Bpc</code></td><td>Beetle Pearl, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.beetle_pearl</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>221 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Bpw</code> &middot; <code>Bpc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Bpw</code> &middot; <code>Bpk</code> &middot; <code>Bpc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>6 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, CENTERLINE, PARTS, SPOTS, TOWARD</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08. The ground goes to black before anything else, which is why this reads the same on a chestnut as on a black. The source used perDose coverage to make the heterozygote fainter; that was dropped, because a perDose triple on an expression the first allele does not reach is silently zero (gap 105) and this locus is simple dominant.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Bpk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,18 @@
 <h3>Beetle Pearl</h3>
 
 <p>The ground goes to black before anything else, so the pearls have something to be pearls against - on a chestnut as much as on a black. The spot field is mirrored, so the two flanks match, which is what separates this from an ordinary appaloosa.</p>
+
+<ol>
+<li>the barrel taken to a hard black &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
+<li>pearls scattered over it, mirrored side to side &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>a pale cap over the poll &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>a dark fork down the face &mdash; <code>CENTERLINE</code>, painted with <code>TOWARD</code></li>
+<li>dark ear tips &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Beetle Pearl, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the barrel taken to a hard black &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>

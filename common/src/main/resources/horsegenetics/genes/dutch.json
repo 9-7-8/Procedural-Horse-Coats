@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 253,
   "rarity": "UNCOMMON",
-  "blurb": "A hard-edged white band right round the body at the shoulder, widest under the chest and narrowing over the withers, with white stockings and a white muzzle to match.",
+  "blurb": "A hard-edged white band right round the body at the shoulder, widest under the chest and narrowing over the withers, with white stockings and a white muzzle to match. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Dut",
       "label": "Dutch, white (Dut)"
+    },
+    {
+      "token": "Dtk",
+      "label": "Dutch, black (Dtk)"
     },
     {
       "token": "Dtc",
@@ -47,7 +51,8 @@
       "when": [
         "Dut/Dut",
         "Dut/Dtc",
-        "Dut/n"
+        "Dut/n",
+        "Dut/Dtk"
       ],
       "layers": [
         {
@@ -159,6 +164,130 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Dutch",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Dtk/Dtk",
+        "Dtk/Dtc",
+        "Dtk/n"
+      ],
+      "layers": [
+        {
+          "name": "the band round the shoulder and chest",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.03
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandWidth",
+              "softness": 0.05,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.6,
+              "to": 1.0,
+              "softness": 0.03,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 100
+          }
+        },
+        {
+          "name": "white forward along the underside of the neck",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.42,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 100
+          }
+        },
+        {
+          "name": "the muzzle and a stripe up the face",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "HEAD"
+              ],
+              "halfWidth": 1.1,
+              "softness": 0.15,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 100
+          }
+        },
+        {
+          "name": "stockings, uneven front to back",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$sock",
+              "softness": 0.03
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 100
           }
         }
@@ -303,9 +432,16 @@
   ],
   "founders": {
     "Dut/Dut": 0.004,
-    "Dut/Dtc": 0.016,
+    "Dut/Dtk": 0.005333,
+    "Dut/Dtc": 0.005333,
     "Dut/n": 0.076,
-    "Dtc/Dtc": 0.016,
+    "Dtk/Dtk": 0.005333,
+    "Dtk/Dtc": 0.005333,
+    "Dtk/n": 0.005333,
+    "Dtc/Dtc": 0.005333,
     "n/n": 99.888
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dtk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

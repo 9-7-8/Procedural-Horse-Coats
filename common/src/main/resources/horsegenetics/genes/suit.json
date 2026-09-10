@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 102,
   "rarity": "RARE",
-  "blurb": "A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat.",
+  "blurb": "A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Sut",
       "label": "Suit, white (Sut)"
+    },
+    {
+      "token": "Suk",
+      "label": "Suit, black (Suk)"
     },
     {
       "token": "Suc",
@@ -45,7 +49,8 @@
       "when": [
         "Sut/Sut",
         "Sut/Suc",
-        "Sut/n"
+        "Sut/n",
+        "Sut/Suk"
       ],
       "layers": [
         {
@@ -111,6 +116,84 @@
           "op": {
             "type": "TOWARD",
             "color": "#f2ede1",
+            "strength": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black suit",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Suk/Suk",
+        "Suk/Suc",
+        "Suk/n"
+      ],
+      "layers": [
+        {
+          "name": "everything behind the suit line",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandBack",
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$neckReach",
+              "softness": 1.1,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "combine": "SUBTRACT",
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.1571
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the legs coming back to the coat below the knee",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.42,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 84
           }
         }
@@ -205,9 +288,16 @@
   ],
   "founders": {
     "Sut/Sut": 0.002,
-    "Sut/Suc": 0.008,
+    "Sut/Suk": 0.002667,
+    "Sut/Suc": 0.002667,
     "Sut/n": 0.038,
-    "Suc/Suc": 0.008,
+    "Suk/Suk": 0.002667,
+    "Suk/Suc": 0.002667,
+    "Suk/n": 0.002667,
+    "Suc/Suc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Suk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

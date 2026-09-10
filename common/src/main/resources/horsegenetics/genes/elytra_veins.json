@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 371,
   "rarity": "RARE",
-  "blurb": "A net of veins over the barrel and neck, each one bright down its middle - the cell pattern of a beetle wing-case rather than a marking.",
+  "blurb": "A net of veins over the barrel and neck, each one bright down its middle - the cell pattern of a beetle wing-case rather than a marking. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. Two crackle fields on the SAME seed and the same cell size, with different channel widths, painted narrow-over-wide. That is the whole gene: because the lattice is identical, the second pass lands exactly inside the first, and every vein comes out dark-edged with a bright core. Change either seed and it falls apart."
+    "Imported from the magic-gene intake, 2026-09-08. Two crackle fields on the SAME seed and the same cell size, with different channel widths, painted narrow-over-wide. That is the whole gene: because the lattice is identical, the second pass lands exactly inside the first, and every vein comes out dark-edged with a bright core. Change either seed and it falls apart.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Elk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Elw",
       "label": "Elytra, pale (Elw)"
+    },
+    {
+      "token": "Elk",
+      "label": "Elytra, black (Elk)"
     },
     {
       "token": "Elc",
@@ -57,7 +62,8 @@
       "when": [
         "Elw/Elw",
         "Elw/Elc",
-        "Elw/n"
+        "Elw/n",
+        "Elw/Elk"
       ],
       "layers": [
         {
@@ -103,6 +109,64 @@
           "op": {
             "type": "TOWARD",
             "color": "#f4ecd2",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Elytra Veins, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Elk/Elk",
+        "Elk/Elc",
+        "Elk/n"
+      ],
+      "layers": [
+        {
+          "name": "the heavy veins between the wing cells",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$spacing",
+              "gap": "$veinWidth",
+              "warp": 0.18,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 85.0
+          }
+        },
+        {
+          "name": "a bright hairline down the middle of each vein",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$spacing",
+              "gap": "$hairlineWidth",
+              "warp": 0.18,
+              "softness": 0.05,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
             "strength": 90.0
           }
         }
@@ -177,9 +241,13 @@
   ],
   "founders": {
     "Elw/Elw": 0.002,
-    "Elw/Elc": 0.008,
+    "Elw/Elk": 0.002667,
+    "Elw/Elc": 0.002667,
     "Elw/n": 0.038,
-    "Elc/Elc": 0.008,
+    "Elk/Elk": 0.002667,
+    "Elk/Elc": 0.002667,
+    "Elk/n": 0.002667,
+    "Elc/Elc": 0.002667,
     "n/n": 99.944
   }
 }

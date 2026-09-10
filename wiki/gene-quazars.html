@@ -21,7 +21,7 @@
 <h1>Quazars</h1>
 
 <p class="lede">
-    Two to four long pale beams lying nose-to-tail across the shoulder, hip, thigh and legs, brightest along their middle and fading out with no edge at all.
+    Two to four long pale beams lying nose-to-tail across the shoulder, hip, thigh and legs, brightest along their middle and fading out with no edge at all. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Quazars</th><td><code>Qzr/Qzr</code> &middot; <code>Qzr/Qzc</code> &middot; <code>Qzr/n</code></td></tr>
+<tr><th>Quazars</th><td><code>Qzr/Qzr</code> &middot; <code>Qzr/Qzc</code> &middot; <code>Qzr/n</code> &middot; <code>Qzr/Qzk</code></td></tr>
+<tr><th>Black quazars</th><td><code>Qzk/Qzk</code> &middot; <code>Qzk/Qzc</code> &middot; <code>Qzk/n</code></td></tr>
 <tr><th>Coloured quazars</th><td><code>Qzc/Qzc</code></td></tr>
 <tr><th>Wild type</th><td><code>Qzc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Qzr/Qzr</code></td><td>Quazars</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Qzr/Qzc</code></td><td>Quazars</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Qzr/Qzk</code></td><td>Quazars</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Qzr/Qzc</code></td><td>Quazars</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Qzr/n</code></td><td>Quazars</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Qzc/Qzc</code></td><td>Coloured quazars</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Qzk/Qzk</code></td><td>Black quazars</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Qzk/Qzc</code></td><td>Black quazars</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Qzk/n</code></td><td>Black quazars</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Qzc/Qzc</code></td><td>Coloured quazars</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.quazars</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>257 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Qzr</code> &middot; <code>Qzc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Qzr</code> &middot; <code>Qzk</code> &middot; <code>Qzc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Qzk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,14 @@
 <h3>Quazars</h3>
 
 <p>Spindle-shaped beams, widest a little past halfway along and tapering both ways, laid roughly along the body axis and carrying on down the legs wherever one crosses a shoulder or a stifle. They have no boundary anywhere - the value peaks at the centre line of the beam and falls away steadily to nothing - which is what separates a quazar from a stripe. A beam that reaches the topline carries on down the other side at a little under its original width.</p>
+
+<ol>
+<li>the beams &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black quazars</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the beams &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>

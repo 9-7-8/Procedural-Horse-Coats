@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 209,
   "rarity": "UNCOMMON",
-  "blurb": "Tobiano and appaloosa at once: white gathered along the topline and thinning downward, spotting over the hindquarter, and a banded raccoon tail on every one of them.",
+  "blurb": "Tobiano and appaloosa at once: white gathered along the topline and thinning downward, spotting over the hindquarter, and a banded raccoon tail on every one of them. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Lac",
       "label": "Laciano, white (Lac)"
+    },
+    {
+      "token": "Lck",
+      "label": "Laciano, black (Lck)"
     },
     {
       "token": "Lcc",
@@ -48,7 +52,8 @@
       "when": [
         "Lac/Lac",
         "Lac/Lcc",
-        "Lac/n"
+        "Lac/n",
+        "Lac/Lck"
       ],
       "layers": [
         {
@@ -171,6 +176,141 @@
           "op": {
             "type": "TOWARD",
             "color": "#fbfbfb",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Laciano",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Lck/Lck",
+        "Lck/Lcc",
+        "Lck/n"
+      ],
+      "layers": [
+        {
+          "name": "white coming down from the back",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$patchSeed",
+              "scale": 6.5,
+              "threshold": "$spread",
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the appaloosa spotting over it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 3.2,
+              "radius": 0.85,
+              "vary": 0.5,
+              "chance": 0.4,
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.5,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the banded raccoon tail",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "TAIL"
+              ],
+              "seed": "$patchSeed",
+              "spacing": 2.4,
+              "length": 2.0,
+              "axis": "Y",
+              "width": 1.1,
+              "curl": 0.1,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 94
+          }
+        },
+        {
+          "name": "striped hooves",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$patchSeed",
+              "spacing": 1.2,
+              "length": 1.2,
+              "axis": "X",
+              "width": 0.5,
+              "curl": 0.1,
+              "softness": 0.04
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.12,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 90
           }
         }
@@ -326,9 +466,16 @@
   ],
   "founders": {
     "Lac/Lac": 0.004,
-    "Lac/Lcc": 0.016,
+    "Lac/Lck": 0.005333,
+    "Lac/Lcc": 0.005333,
     "Lac/n": 0.076,
-    "Lcc/Lcc": 0.016,
+    "Lck/Lck": 0.005333,
+    "Lck/Lcc": 0.005333,
+    "Lck/n": 0.005333,
+    "Lcc/Lcc": 0.005333,
     "n/n": 99.888
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Lck are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

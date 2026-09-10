@@ -21,7 +21,7 @@
 <h1>Dutch</h1>
 
 <p class="lede">
-    A hard-edged white band right round the body at the shoulder, widest under the chest and narrowing over the withers, with white stockings and a white muzzle to match.
+    A hard-edged white band right round the body at the shoulder, widest under the chest and narrowing over the withers, with white stockings and a white muzzle to match. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Dutch</th><td><code>Dut/Dut</code> &middot; <code>Dut/Dtc</code> &middot; <code>Dut/n</code></td></tr>
+<tr><th>Dutch</th><td><code>Dut/Dut</code> &middot; <code>Dut/Dtc</code> &middot; <code>Dut/n</code> &middot; <code>Dut/Dtk</code></td></tr>
+<tr><th>Black Dutch</th><td><code>Dtk/Dtk</code> &middot; <code>Dtk/Dtc</code> &middot; <code>Dtk/n</code></td></tr>
 <tr><th>Coloured Dutch</th><td><code>Dtc/Dtc</code></td></tr>
 <tr><th>Wild type</th><td><code>Dtc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Dut/Dut</code></td><td>Dutch</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Dut/Dtc</code></td><td>Dutch</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Dut/Dtk</code></td><td>Dutch</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dut/Dtc</code></td><td>Dutch</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>Dut/n</code></td><td>Dutch</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Dtc/Dtc</code></td><td>Coloured Dutch</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Dtk/Dtk</code></td><td>Black Dutch</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dtk/Dtc</code></td><td>Black Dutch</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dtk/n</code></td><td>Black Dutch</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dtc/Dtc</code></td><td>Coloured Dutch</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.dutch</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>253 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Dut</code> &middot; <code>Dtc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Dut</code> &middot; <code>Dtk</code> &middot; <code>Dtc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, CENTERLINE, PARTS, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dtk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,17 @@
 <h3>Dutch</h3>
 
 <p>The rabbit pattern. A band wraps the body at the shoulder and chest, front edge at the base of the neck and back edge at the girth, broadest underneath and pinching as it climbs to the withers - and on a minimal horse it fails to close over the topline at all, leaving a bridge of coat there. White runs forward along the underside of the neck to the throat, takes the muzzle, and often a stripe up the face. All four legs are stocked to somewhere between mid-cannon and the knee, and the front and hind heights rarely match. Every edge is hard - no roaning, no feathering - and every one of them is a smooth curve. The barrel, flank, hindquarters, mane and tail keep the coat entirely.</p>
+
+<ol>
+<li>the band round the shoulder and chest &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>white forward along the underside of the neck &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the muzzle and a stripe up the face &mdash; <code>PARTS</code> &times; <code>CENTERLINE</code>, painted with <code>TOWARD</code></li>
+<li>stockings, uneven front to back &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Dutch</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the band round the shoulder and chest &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

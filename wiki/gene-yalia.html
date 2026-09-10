@@ -21,7 +21,7 @@
 <h1>Yalia</h1>
 
 <p class="lede">
-    Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design. A third allele draws the outline and nothing else, so it is invisible on a horse with no white.
+    Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design. A third allele draws the outline and nothing else, so it is invisible on a horse with no white. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,10 +34,11 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Yalia</th><td><code>Yal/Yal</code> &middot; <code>Yal/Ylc</code> &middot; <code>Yal/Ylo</code> &middot; <code>Yal/n</code></td></tr>
-<tr><th>Coloured Yalia</th><td><code>Ylc/Ylc</code> &middot; <code>Ylc/Ylo</code></td></tr>
+<tr><th>Yalia</th><td><code>Yal/Yal</code> &middot; <code>Yal/Ylc</code> &middot; <code>Yal/Ylo</code> &middot; <code>Yal/n</code> &middot; <code>Yal/Ylk</code></td></tr>
+<tr><th>Black Yalia</th><td><code>Ylk/Ylk</code> &middot; <code>Ylk/Ylc</code> &middot; <code>Ylk/Ylo</code> &middot; <code>Ylk/n</code></td></tr>
+<tr><th>Coloured Yalia</th><td><code>Ylc/Ylc</code> &middot; <code>Ylc/Ylo</code> &middot; <code>Ylc/n</code></td></tr>
 <tr><th>Yalia outline</th><td><code>Ylo/Ylo</code> &middot; <code>Ylo/n</code></td></tr>
-<tr><th>Wild type</th><td><code>Ylc/n</code> &middot; <code>n/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
@@ -65,13 +66,19 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Yal/Yal</code></td><td>Yalia</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Yal/Ylc</code></td><td>Yalia</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
-<tr><td><code>Yal/Ylo</code></td><td>Yalia</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Yal/Ylk</code></td><td>Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Yal/Ylc</code></td><td>Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Yal/Ylo</code></td><td>Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Yal/n</code></td><td>Yalia</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Ylc/Ylc</code></td><td>Coloured Yalia</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
-<tr><td><code>Ylc/Ylo</code></td><td>Coloured Yalia</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
-<tr><td><code>Ylo/Ylo</code></td><td>Yalia outline</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
-<tr><td><code>Ylo/n</code></td><td>Yalia outline</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Ylk/Ylk</code></td><td>Black Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylk/Ylc</code></td><td>Black Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylk/Ylo</code></td><td>Black Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylk/n</code></td><td>Black Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylc/Ylc</code></td><td>Coloured Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylc/Ylo</code></td><td>Coloured Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylc/n</code></td><td>Coloured Yalia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylo/Ylo</code></td><td>Yalia outline</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ylo/n</code></td><td>Yalia outline</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -104,12 +111,16 @@
 <tr><th>Key</th><td><code>horsegenetics.yalia</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>601 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Yal</code> &middot; <code>Ylc</code> &middot; <code>Ylo</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Yal</code> &middot; <code>Ylk</code> &middot; <code>Ylc</code> &middot; <code>Ylo</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, LUMA, PATCHES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Ylk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -123,6 +134,20 @@
 <h3>Yalia</h3>
 
 <p>Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. Whatever white the horse already carries is taken into the design rather than left beside it: a tobiano patch, a splash, a blaze or a stocking is flattened to the same white and drawn round in the same outline colour, so the horse reads as one piece of architecture and not as two markings at once. There is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.</p>
+
+<ol>
+<li>the white fill &mdash; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
+<li>the outline round every zone &mdash; <code>PATCHES</code> &times; <code>PATCHES inverted</code>, painted with <code>TOWARD</code></li>
+<li>a band round every leg &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the outline of the leg band &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>hooves in the outline colour &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the horse's own white markings, filled flat like a zone &mdash; <code>LUMA</code>, painted with <code>TOWARD</code></li>
+<li>and drawn round in the same outline colour &mdash; <code>LUMA</code> &times; <code>LUMA</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Yalia</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the white fill &mdash; <code>PATCHES</code>, painted with <code>TOWARD</code></li>

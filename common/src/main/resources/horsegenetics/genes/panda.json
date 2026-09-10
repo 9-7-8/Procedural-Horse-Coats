@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 203,
   "rarity": "RARE",
-  "blurb": "A strong white band round the belly and barrel, carrying on over the neck, head and tail, with the shoulder, the butt and all four legs keeping the coat - and the ears, eye patches and muzzle of a giant panda.",
+  "blurb": "A strong white band round the belly and barrel, carrying on over the neck, head and tail, with the shoulder, the butt and all four legs keeping the coat - and the ears, eye patches and muzzle of a giant panda. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Pan",
       "label": "Panda, white (Pan)"
+    },
+    {
+      "token": "Pnk",
+      "label": "Panda, black (Pnk)"
     },
     {
       "token": "Pnc",
@@ -48,7 +52,8 @@
       "when": [
         "Pan/Pan",
         "Pan/Pnc",
-        "Pan/n"
+        "Pan/n",
+        "Pan/Pnk"
       ],
       "layers": [
         {
@@ -205,6 +210,174 @@
             "type": "TOWARD",
             "strength": -85,
             "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Panda",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Pnk/Pnk",
+        "Pnk/Pnc",
+        "Pnk/n"
+      ],
+      "layers": [
+        {
+          "name": "white over the whole horse",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 99,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "the coat kept on the shoulder, in front of the band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.7,
+              "to": 1.2,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "the coat kept on the butt and croup, behind the band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.2,
+              "to": 0.22,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "the coat kept on all four legs",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "the coat kept on the ears, eyes and muzzle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "EARS",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": 7.0,
+              "radius": 2.0,
+              "vary": 0.15,
+              "chance": 0.5,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.3,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "freckles of coat along the top of the band",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$freckleSeed",
+              "spacing": 1.8,
+              "radius": "$freckle",
+              "vary": 0.6,
+              "chance": 0.45,
+              "softness": 0.18
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.62,
+              "to": 1.0,
+              "softness": 0.28,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.22,
+              "to": 0.7,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -85,
+            "color": "#1f1f1f"
           }
         }
       ]
@@ -396,9 +569,16 @@
   ],
   "founders": {
     "Pan/Pan": 0.002,
-    "Pan/Pnc": 0.008,
+    "Pan/Pnk": 0.002667,
+    "Pan/Pnc": 0.002667,
     "Pan/n": 0.038,
-    "Pnc/Pnc": 0.008,
+    "Pnk/Pnk": 0.002667,
+    "Pnk/Pnc": 0.002667,
+    "Pnk/n": 0.002667,
+    "Pnc/Pnc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Pnk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

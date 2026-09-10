@@ -21,7 +21,7 @@
 <h1>Marble Tobiano</h1>
 
 <p class="lede">
-    Tobiano gone streaky and angular - hair-thin veins on a minimal horse, broad blocky zones on a heavily marked one, and nothing at all unless it is homozygous.
+    Tobiano gone streaky and angular - hair-thin veins on a minimal horse, broad blocky zones on a heavily marked one, and nothing at all unless it is homozygous. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,9 +34,10 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Marble Tobiano</th><td><code>Tmr/Tmr</code> &middot; <code>Tmr/Tmc</code></td></tr>
+<tr><th>Marble Tobiano</th><td><code>Tmr/Tmr</code> &middot; <code>Tmr/Tmc</code> &middot; <code>Tmr/Tmk</code> &middot; <code>Tmr/n</code></td></tr>
+<tr><th>Black Marble Tobiano</th><td><code>Tmk/Tmk</code> &middot; <code>Tmk/Tmc</code> &middot; <code>Tmk/n</code></td></tr>
 <tr><th>Coloured Marble Tobiano</th><td><code>Tmc/Tmc</code></td></tr>
-<tr><th>Marble Tobiano carrier</th><td><code>Tmr/n</code> &middot; <code>Tmc/n</code></td></tr>
+<tr><th>Marble Tobiano carrier</th><td><code>Tmc/n</code></td></tr>
 <tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
@@ -64,9 +65,14 @@
 <table class="facts">
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
-<tr><td><code>Tmr/Tmr</code></td><td>Marble Tobiano</td><td>0.08% &mdash; 1 in 1,250</td></tr>
-<tr><td><code>Tmr/Tmc</code></td><td>Marble Tobiano</td><td>0.016% &mdash; 1 in 6,250</td></tr>
-<tr><td><code>Tmc/Tmc</code></td><td>Coloured Marble Tobiano</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Tmr/Tmr</code></td><td>Marble Tobiano</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Tmr/Tmk</code></td><td>Marble Tobiano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tmr/Tmc</code></td><td>Marble Tobiano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tmr/n</code></td><td>Marble Tobiano</td><td>0.076% &mdash; 1 in 1,316</td></tr>
+<tr><td><code>Tmk/Tmk</code></td><td>Black Marble Tobiano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tmk/Tmc</code></td><td>Black Marble Tobiano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tmk/n</code></td><td>Black Marble Tobiano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tmc/Tmc</code></td><td>Coloured Marble Tobiano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,12 +105,16 @@
 <tr><th>Key</th><td><code>horsegenetics.marble_tobiano</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>205 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Tmr</code> &middot; <code>Tmc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Tmr</code> &middot; <code>Tmk</code> &middot; <code>Tmc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>CENTERLINE, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Tmk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +128,14 @@
 <h3>Marble Tobiano</h3>
 
 <p>A tobiano that never learned to make a round patch. At its most minimal it is a set of hair-thin white veins running vertically and diagonally down from the topline, translucent enough that the coat reads through them, with a narrow line down the face. At its most extensive it is blocky zones eight inches and more across, fully opaque, with sharp defined edges. In between it flows in body-contoured curves at a few inches wide. It only does this when homozygous; a single copy leaves a horse barely distinguishable from an ordinary one, which is how the whole thing stayed hidden for so long.</p>
+
+<ol>
+<li>angular white running down from the topline &mdash; <code>STROKES</code> &times; <code>CENTERLINE</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Marble Tobiano</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>angular white running down from the topline &mdash; <code>STROKES</code> &times; <code>CENTERLINE</code>, painted with <code>TOWARD</code></li>

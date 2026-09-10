@@ -5,15 +5,20 @@
   "phase": "magical",
   "priority": 380,
   "rarity": "RARE",
-  "blurb": "A full set of stripes - round the barrel, across the face, and down the spine - on a ground that is opal rather than white.",
+  "blurb": "A full set of stripes - round the barrel, across the face, and down the spine - on a ground that is opal rather than white. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The pale ground goes on first and the stripes over it, which is the honest way round: a zebra is a pale animal with dark stripes, and painting it the other way makes the stripe spacing the thing you notice.",
-    "Barrel strokes run along Z - round the horse rather than along it. On the face, Z is across the nose, which is the direction facial striping actually runs."
+    "Barrel strokes run along Z - round the horse rather than along it. On the face, Z is across the nose, which is the direction facial striping actually runs.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Opk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Opz",
       "label": "Opaline, white (Opz)"
+    },
+    {
+      "token": "Opk",
+      "label": "Opaline, black (Opk)"
     },
     {
       "token": "Opc",
@@ -63,7 +68,8 @@
       "when": [
         "Opz/Opz",
         "Opz/Opc",
-        "Opz/n"
+        "Opz/n",
+        "Opz/Opk"
       ],
       "layers": [
         {
@@ -156,6 +162,111 @@
           "op": {
             "type": "TOWARD",
             "color": "#101010",
+            "strength": 93.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Opaline Zebra, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Opk/Opk",
+        "Opk/Opc",
+        "Opk/n"
+      ],
+      "layers": [
+        {
+          "name": "the ground between the stripes",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "stripes round the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "wavelength": 14.0,
+              "amplitude": 0.9,
+              "spacing": "$spacing",
+              "phase": 0.0,
+              "softness": 0.12,
+              "from": 0.0,
+              "to": "$width"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "finer ones across the face",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "wavelength": 9.0,
+              "amplitude": 0.4,
+              "spacing": "$faceSpacing",
+              "phase": 0.0,
+              "softness": 0.08,
+              "from": 0.0,
+              "to": "$faceWidth"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 93.0
+          }
+        },
+        {
+          "name": "and a dorsal line down the spine",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY"
+              ],
+              "halfWidth": 0.4,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 93.0
           }
         }
@@ -275,9 +386,13 @@
   ],
   "founders": {
     "Opz/Opz": 0.002,
-    "Opz/Opc": 0.008,
+    "Opz/Opk": 0.002667,
+    "Opz/Opc": 0.002667,
     "Opz/n": 0.038,
-    "Opc/Opc": 0.008,
+    "Opk/Opk": 0.002667,
+    "Opk/Opc": 0.002667,
+    "Opk/n": 0.002667,
+    "Opc/Opc": 0.002667,
     "n/n": 99.944
   }
 }

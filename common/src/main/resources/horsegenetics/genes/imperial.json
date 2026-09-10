@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 206,
   "rarity": "UNCOMMON",
-  "blurb": "A white cape starting at the withers and working forward up the neck - reaching the poll at full coverage - with slivers of coat left showing between its branches.",
+  "blurb": "A white cape starting at the withers and working forward up the neck - reaching the poll at full coverage - with slivers of coat left showing between its branches. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Sbi",
       "label": "Imperial, white (Sbi)"
+    },
+    {
+      "token": "Sbk",
+      "label": "Imperial, black (Sbk)"
     },
     {
       "token": "Sbc",
@@ -44,7 +48,8 @@
       "when": [
         "Sbi/Sbi",
         "Sbi/Sbc",
-        "Sbi/n"
+        "Sbi/n",
+        "Sbi/Sbk"
       ],
       "layers": [
         {
@@ -99,6 +104,73 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Imperial",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Sbk/Sbk",
+        "Sbk/Sbc",
+        "Sbk/n"
+      ],
+      "layers": [
+        {
+          "name": "the cape over the withers and up the neck",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.78,
+              "to": 1.0,
+              "softness": 0.15,
+              "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$branchSeed",
+              "spacing": 2.2,
+              "length": 8.0,
+              "axis": "X",
+              "width": 1.3,
+              "curl": 0.8,
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 96
           }
         }
@@ -180,9 +252,16 @@
   ],
   "founders": {
     "Sbi/Sbi": 0.004,
-    "Sbi/Sbc": 0.016,
+    "Sbi/Sbk": 0.005333,
+    "Sbi/Sbc": 0.005333,
     "Sbi/n": 0.076,
-    "Sbc/Sbc": 0.016,
+    "Sbk/Sbk": 0.005333,
+    "Sbk/Sbc": 0.005333,
+    "Sbk/n": 0.005333,
+    "Sbc/Sbc": 0.005333,
     "n/n": 99.888
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Sbk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

@@ -21,7 +21,7 @@
 <h1>Dorsal Shield</h1>
 
 <p class="lede">
-    A plate laid over the back from withers to croup, studded with haloed marks - armour rather than a blanket.
+    A plate laid over the back from withers to croup, studded with haloed marks - armour rather than a blanket. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Dorsal Shield</th><td><code>Dsh/Dsh</code> &middot; <code>Dsh/Dsc</code> &middot; <code>Dsh/n</code></td></tr>
+<tr><th>Dorsal Shield</th><td><code>Dsh/Dsh</code> &middot; <code>Dsh/Dsc</code> &middot; <code>Dsh/n</code> &middot; <code>Dsh/Dsk</code></td></tr>
+<tr><th>Dorsal Shield, black</th><td><code>Dsk/Dsk</code> &middot; <code>Dsk/Dsc</code> &middot; <code>Dsk/n</code></td></tr>
 <tr><th>Dorsal Shield, coloured</th><td><code>Dsc/Dsc</code></td></tr>
 <tr><th>Wild type</th><td><code>Dsc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Dsh/Dsh</code></td><td>Dorsal Shield</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Dsh/Dsc</code></td><td>Dorsal Shield</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Dsh/Dsk</code></td><td>Dorsal Shield</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dsh/Dsc</code></td><td>Dorsal Shield</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>Dsh/n</code></td><td>Dorsal Shield</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Dsc/Dsc</code></td><td>Dorsal Shield, coloured</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Dsk/Dsk</code></td><td>Dorsal Shield, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dsk/Dsc</code></td><td>Dorsal Shield, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dsk/n</code></td><td>Dorsal Shield, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Dsc/Dsc</code></td><td>Dorsal Shield, coloured</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.dorsal_shield</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>265 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Dsh</code> &middot; <code>Dsc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Dsh</code> &middot; <code>Dsk</code> &middot; <code>Dsc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, SPOTS, TOWARD</td></tr>
 </tbody>
@@ -111,6 +116,8 @@
 <p>Imported from the magic-gene intake, 2026-09-08. The plate is defined in BODY UNITS rather than in part space on purpose: it has to sit at a fixed place on the animal, and a fraction of the barrel would slide as the barrel changes. Every stud layer repeats the same two bands so nothing can escape the plate.</p>
 
 <p>The source used `spread` on a paint op to make the halo. spread is a PIGMENT mask parameter, not an op one; the halo here is the usual big-soft-disc-minus-small-sharp-disc instead.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -124,6 +131,16 @@
 <h3>Dorsal Shield</h3>
 
 <p>Two crossed AXIS bands in body units make the plate, so it sits at a fixed place on the horse rather than at a fixed fraction of it - which is what keeps the front and back edges off the shoulder and the croup. Every stud layer carries the same two bands, so nothing escapes the plate.</p>
+
+<ol>
+<li>the shield itself, a plate over the back &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>haloed studs set into it &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>and the stud at the centre of each &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Dorsal Shield, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the shield itself, a plate over the back &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

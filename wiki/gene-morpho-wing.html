@@ -21,7 +21,7 @@
 <h1>Morpho Wing</h1>
 
 <p class="lede">
-    A patch of iridescent light gathers low on the haunch like a wing folded against the flank, cut through with dark bars that rake toward the tail.
+    A patch of iridescent light gathers low on the haunch like a wing folded against the flank, cut through with dark bars that rake toward the tail. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Morpho Wing, pale</th><td><code>Mow/Mow</code> &middot; <code>Mow/Moc</code> &middot; <code>Mow/n</code></td></tr>
+<tr><th>Morpho Wing, pale</th><td><code>Mow/Mow</code> &middot; <code>Mow/Moc</code> &middot; <code>Mow/n</code> &middot; <code>Mow/Mok</code></td></tr>
+<tr><th>Morpho Wing, black</th><td><code>Mok/Mok</code> &middot; <code>Mok/Moc</code> &middot; <code>Mok/n</code></td></tr>
 <tr><th>Morpho Wing, coloured</th><td><code>Moc/Moc</code></td></tr>
 <tr><th>Wild type</th><td><code>Moc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -53,7 +54,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 3,571</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 3,572</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Mow/Mow</code></td><td>Morpho Wing, pale</td><td>0.001% &mdash; 1 in 100,000</td></tr>
-<tr><td><code>Mow/Moc</code></td><td>Morpho Wing, pale</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Mow/Mok</code></td><td>Morpho Wing, pale</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Mow/Moc</code></td><td>Morpho Wing, pale</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>Mow/n</code></td><td>Morpho Wing, pale</td><td>0.019% &mdash; 1 in 5,263</td></tr>
-<tr><td><code>Moc/Moc</code></td><td>Morpho Wing, coloured</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Mok/Mok</code></td><td>Morpho Wing, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Mok/Moc</code></td><td>Morpho Wing, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Mok/n</code></td><td>Morpho Wing, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Moc/Moc</code></td><td>Morpho Wing, coloured</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.972%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.morpho_wing</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>278 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Mow</code> &middot; <code>Moc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Mow</code> &middot; <code>Mok</code> &middot; <code>Moc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>1 value drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>FAN, PARTS, PATH, TOWARD, emissive</td></tr>
 </tbody>
@@ -114,6 +119,8 @@
 
 <p>FAN's spacing is an ANGLE - the arc one cycle covers a single body unit from the pivot - so the bars here are 0.17, not the 1.5 that reads like 'one and a half units apart'. At 1.5 the whole patch is inside one bar. It is the one number on this gene worth checking against a render rather than against intuition.</p>
 
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Mok are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -126,6 +133,15 @@
 <h3>Morpho Wing, pale</h3>
 
 <p>A soft silver-white sheen pools low on the haunch, banded with a few dark bars raking back toward the tail.</p>
+
+<ol>
+<li>the wing &mdash; <code>PARTS</code> &times; <code>PATH</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
+<li>and the bars across it &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>FAN</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Morpho Wing, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the wing &mdash; <code>PARTS</code> &times; <code>PATH</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>

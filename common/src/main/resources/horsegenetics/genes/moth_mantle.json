@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 224,
   "rarity": "RARE",
-  "blurb": "A pale mantle over the barrel crossed by a wing net, with a banded tail, a pair of spots at its tip, and a mark on each cheek - a tiger moth at rest.",
+  "blurb": "A pale mantle over the barrel crossed by a wing net, with a banded tail, a pair of spots at its tip, and a mark on each cheek - a tiger moth at rest. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Mmw",
       "label": "Mantle, white (Mmw)"
+    },
+    {
+      "token": "Mmk",
+      "label": "Mantle, black (Mmk)"
     },
     {
       "token": "Mmc",
@@ -64,7 +68,8 @@
       "when": [
         "Mmw/Mmw",
         "Mmw/Mmc",
-        "Mmw/n"
+        "Mmw/n",
+        "Mmw/Mmk"
       ],
       "layers": [
         {
@@ -187,6 +192,141 @@
           "op": {
             "type": "TOWARD",
             "color": "#141210",
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Moth Mantle, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Mmk/Mmk",
+        "Mmk/Mmc",
+        "Mmk/n"
+      ],
+      "layers": [
+        {
+          "name": "a mantle over the barrel",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the wing net drawn across it",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$netCell",
+              "gap": "$netWidth",
+              "warp": 0.35,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "bands down the tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Z",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": 6.0,
+              "amplitude": 0.06,
+              "spacing": "$bandSpacing",
+              "phase": 0.0,
+              "softness": 0.05,
+              "from": 0.0,
+              "to": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a pair of spots at its tip",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "TAIL"
+              ],
+              "seed": "$seed",
+              "spacing": 4.0,
+              "radius": "$spotSize",
+              "vary": 0.2,
+              "mirror": true,
+              "softness": 0.15
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.15,
+              "combine": "MULTIPLY",
+              "from": -0.1,
+              "to": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "and a mark on each cheek",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": 6.0,
+              "radius": "$cheekSpotSize",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 92.0
           }
         }
@@ -336,9 +476,16 @@
   ],
   "founders": {
     "Mmw/Mmw": 0.002,
-    "Mmw/Mmc": 0.008,
+    "Mmw/Mmk": 0.002667,
+    "Mmw/Mmc": 0.002667,
     "Mmw/n": 0.038,
-    "Mmc/Mmc": 0.008,
+    "Mmk/Mmk": 0.002667,
+    "Mmk/Mmc": 0.002667,
+    "Mmk/n": 0.002667,
+    "Mmc/Mmc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Mmk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

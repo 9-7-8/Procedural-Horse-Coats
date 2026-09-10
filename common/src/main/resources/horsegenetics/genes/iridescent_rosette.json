@@ -4,16 +4,21 @@
   "phase": "magical",
   "priority": 323,
   "rarity": "RARE",
-  "blurb": "Dark rosettes speckle the coat, each rimmed in bands of colour that shift like the shell of a jewel beetle.",
+  "blurb": "Dark rosettes speckle the coat, each rimmed in bands of colour that shift like the shell of a jewel beetle. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "The import wrote the coloured form as one RAMP running RADIALLY out from each rosette's own centre. There is no radial axis on RAMP and adding one would need the op to know which cell it was in, so the three colour bands are written as three concentric SPOTS pairs instead - the same recipe the pale form uses, on the same seed, spacing, stretch and vary. The visible difference is that the bands step rather than blend; the registration, which is what the import was protecting, is exactly as tight.",
     "Every radius here is a knob, and every band's outer edge is the next band's inner edge, so the rosette stays in proportion however the knobs are bred - and 'vary' scales the whole set of them by one per-cell factor, so a big rosette is big all the way through.",
-    "The pale form is the SAME three concentric bands as the coloured one, on the same radii and the same knobs, with the three hues replaced by three greys. It was a single flat ivory ring and read as a smudge at coat scale, because a ring with no interior structure has nothing to tell the eye where its edges are; three steps of grey give it the depth the coloured form gets from its hues, and keep the two forms recognisably the same marking."
+    "The pale form is the SAME three concentric bands as the coloured one, on the same radii and the same knobs, with the three hues replaced by three greys. It was a single flat ivory ring and read as a smudge at coat scale, because a ring with no interior structure has nothing to tell the eye where its edges are; three steps of grey give it the depth the coloured form gets from its hues, and keep the two forms recognisably the same marking.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Irk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Irw",
       "label": "Iridescent Rosette, pale (Irw)"
+    },
+    {
+      "token": "Irk",
+      "label": "Iridescent Rosette, black (Irk)"
     },
     {
       "token": "Irc",
@@ -78,7 +83,8 @@
       "when": [
         "Irw/Irw",
         "Irw/Irc",
-        "Irw/n"
+        "Irw/n",
+        "Irw/Irk"
       ],
       "layers": [
         {
@@ -228,6 +234,168 @@
           "op": {
             "type": "TOWARD",
             "color": "#6d6961",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Iridescent Rosette, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 3 steps, moved to the dark end of the scale.",
+      "when": [
+        "Irk/Irk",
+        "Irk/Irc",
+        "Irk/n"
+      ],
+      "layers": [
+        {
+          "name": "the outer band, palest",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 3.2,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 2.1,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 92
+          }
+        },
+        {
+          "name": "a mid grey inside it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 2.1,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#424242",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the darkest grey round the hollow",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 0.9,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 92
           }
         }
@@ -408,9 +576,13 @@
   ],
   "founders": {
     "Irw/Irw": 0.002,
-    "Irw/Irc": 0.008,
+    "Irw/Irk": 0.002667,
+    "Irw/Irc": 0.002667,
     "Irw/n": 0.038,
-    "Irc/Irc": 0.008,
+    "Irk/Irk": 0.002667,
+    "Irk/Irc": 0.002667,
+    "Irk/n": 0.002667,
+    "Irc/Irc": 0.002667,
     "n/n": 99.944
   },
   "format": 3

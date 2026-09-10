@@ -21,7 +21,7 @@
 <h1>Qular</h1>
 
 <p class="lede">
-    White over most of the horse, left open in straight-sided polygons of coat separated by even white channels - a giraffe read backwards, with the mane untouched.
+    White over most of the horse, left open in straight-sided polygons of coat separated by even white channels - a giraffe read backwards, with the mane untouched. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Qular</th><td><code>Qul/Qul</code> &middot; <code>Qul/Quc</code> &middot; <code>Qul/n</code></td></tr>
+<tr><th>Qular</th><td><code>Qul/Qul</code> &middot; <code>Qul/Quc</code> &middot; <code>Qul/n</code> &middot; <code>Qul/Quk</code></td></tr>
+<tr><th>Black Qular</th><td><code>Quk/Quk</code> &middot; <code>Quk/Quc</code> &middot; <code>Quk/n</code></td></tr>
 <tr><th>Coloured Qular</th><td><code>Quc/Quc</code></td></tr>
 <tr><th>Wild type</th><td><code>Quc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Qul/Qul</code></td><td>Qular</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Qul/Quc</code></td><td>Qular</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Qul/Quk</code></td><td>Qular</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Qul/Quc</code></td><td>Qular</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Qul/n</code></td><td>Qular</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Quc/Quc</code></td><td>Coloured Qular</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Quk/Quk</code></td><td>Black Qular</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Quk/Quc</code></td><td>Black Qular</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Quk/n</code></td><td>Black Qular</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Quc/Quc</code></td><td>Coloured Qular</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.qular</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>200 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Qul</code> &middot; <code>Quc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Qul</code> &middot; <code>Quk</code> &middot; <code>Quc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, CRACKLE, PARTS, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Quk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,16 @@
 <h3>Qular</h3>
 
 <p>Nearly the whole horse goes white, and what is left of the coat reads as panels laid on top of it rather than as gaps cut out - big irregular polygons with straight sides and corners that meet three at a time, scattered over the neck, shoulder, ribcage, barrel, hindquarter and upper legs. Between them runs an even white channel a finger or two wide, which is what makes it a giraffe rather than a paint. The head is mostly white with panels round the eyes and muzzle; the lower legs keep a dark boot. Every panel edge is crisp - how big the panels are and how wide the channels between them run varies a great deal from horse to horse, but none of them feathers. The mane and tail are not touched by any of it.</p>
+
+<ol>
+<li>white over almost the whole horse &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
+<li>the giraffe panels the white is left out of &mdash; <code>CRACKLE</code>, painted with <code>TOWARD</code></li>
+<li>the dark boot the white is left out of &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Qular</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>white over almost the whole horse &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>

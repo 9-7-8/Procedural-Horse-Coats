@@ -21,7 +21,7 @@
 <h1>Diamond Scutes</h1>
 
 <p class="lede">
-    A lattice of hollow diamonds crossing the back, running up the crest of the neck, down the tail and round the forelegs - a dragon's wing-scutes rather than a horse's coat.
+    A lattice of hollow diamonds crossing the back, running up the crest of the neck, down the tail and round the forelegs - a dragon's wing-scutes rather than a horse's coat. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Diamond Scutes</th><td><code>Dsw/Dsw</code> &middot; <code>Dsw/Dsc</code> &middot; <code>Dsw/n</code></td></tr>
+<tr><th>Diamond Scutes</th><td><code>Dsw/Dsw</code> &middot; <code>Dsw/Dsc</code> &middot; <code>Dsw/n</code> &middot; <code>Dsw/Dsk</code></td></tr>
+<tr><th>Diamond Scutes, black</th><td><code>Dsk/Dsk</code> &middot; <code>Dsk/Dsc</code> &middot; <code>Dsk/n</code></td></tr>
 <tr><th>Diamond Scutes, coloured</th><td><code>Dsc/Dsc</code></td></tr>
 <tr><th>Wild type</th><td><code>Dsc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Dsw/Dsw</code></td><td>Diamond Scutes</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Dsw/Dsc</code></td><td>Diamond Scutes</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Dsw/Dsk</code></td><td>Diamond Scutes</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Dsw/Dsc</code></td><td>Diamond Scutes</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Dsw/n</code></td><td>Diamond Scutes</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Dsc/Dsc</code></td><td>Diamond Scutes, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Dsk/Dsk</code></td><td>Diamond Scutes, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Dsk/Dsc</code></td><td>Diamond Scutes, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Dsk/n</code></td><td>Diamond Scutes, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Dsc/Dsc</code></td><td>Diamond Scutes, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.diamond_scutes</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>370 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Dsw</code> &middot; <code>Dsc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Dsw</code> &middot; <code>Dsk</code> &middot; <code>Dsc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, TOWARD, WAVES</td></tr>
 </tbody>
@@ -111,6 +116,8 @@
 <p>Imported from the magic-gene intake, 2026-09-08. A diamond is two triangle waves crossing, and the format cannot intersect two bands in one mask - so each is its own WAVES entry combined with MAX, which unions the two zigzags into a lattice. The source file expected a STROKES pass to outline them; strokes on top of a wave lattice came out as noise at this scale and were dropped.</p>
 
 <p>The neck chain is a band in the neck's own frame (`'space': 'local', 'axis': 'X'`), which is the crest side of it. It used to be the 90/77.94 saw-wave trick - the neck's geometry written out by hand in eleven gene files - and in this one that trick was in `part` space, where the amplitude is in normalised units, so the band was displaced clean off the horse and the chain painted nothing at all. See wiki/making-a-gene.html#local-space.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -124,6 +131,17 @@
 <h3>Diamond Scutes</h3>
 
 <p>Two triangle waves running the length of the barrel and crossing, which is what makes a row of diamonds rather than a row of teeth. The same trick, tighter, gives the tail and the forelegs their smaller chain, and a saw wave lays a single band along the crest of the neck rather than round it. Every edge is straight - this is one of the two genes in the mod that is not made of curves.</p>
+
+<ol>
+<li>the scute lattice down the barrel &mdash; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>the chain along the neck crest &mdash; <code>AXIS</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>the smaller chain down the tail &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>the trim round the forelegs &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Diamond Scutes, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the scute lattice down the barrel &mdash; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>

@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 318,
   "rarity": "RARE",
-  "blurb": "A butterfly wing laid over the barrel - a soft-edged field crossed by veins and rimmed in dark.",
+  "blurb": "A butterfly wing laid over the barrel - a soft-edged field crossed by veins and rimmed in dark. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. The wing, its veins and its rim are the same mirrored spot field read three times, so the veins cannot run off the wing and the rim cannot come adrift from it. The source placed the wing at an explicit centre; a mirrored SPOTS field with the spacing set near the barrel's length is the addressable version of that, and it means WHERE it lands is down to the seed."
+    "Imported from the magic-gene intake, 2026-09-08. The wing, its veins and its rim are the same mirrored spot field read three times, so the veins cannot run off the wing and the rim cannot come adrift from it. The source placed the wing at an explicit centre; a mirrored SPOTS field with the spacing set near the barrel's length is the addressable version of that, and it means WHERE it lands is down to the seed.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Plk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Plw",
       "label": "Wingmark, white (Plw)"
+    },
+    {
+      "token": "Plk",
+      "label": "Wingmark, black (Plk)"
     },
     {
       "token": "Plc",
@@ -67,7 +72,8 @@
       "when": [
         "Plw/Plw",
         "Plw/Plc",
-        "Plw/n"
+        "Plw/n",
+        "Plw/Plk"
       ],
       "layers": [
         {
@@ -173,6 +179,124 @@
           "op": {
             "type": "TOWARD",
             "color": "#12100e",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Painted Lady Wingmark, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Plk/Plk",
+        "Plk/Plc",
+        "Plk/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing itself",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "veins across it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            },
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "scale": "$veinScale",
+              "gap": "$veinWidth",
+              "warp": 0.3,
+              "softness": 0.05,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "and a dark rim round its edge",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingRadius",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.8
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$veinSeed",
+              "spacing": "$wingSpacing",
+              "radius": "$wingInner",
+              "stretch": 1.6,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "softness": 0.6,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 90.0
           }
         }
@@ -305,9 +429,13 @@
   ],
   "founders": {
     "Plw/Plw": 0.002,
-    "Plw/Plc": 0.008,
+    "Plw/Plk": 0.002667,
+    "Plw/Plc": 0.002667,
     "Plw/n": 0.038,
-    "Plc/Plc": 0.008,
+    "Plk/Plk": 0.002667,
+    "Plk/Plc": 0.002667,
+    "Plk/n": 0.002667,
+    "Plc/Plc": 0.002667,
     "n/n": 99.944
   }
 }

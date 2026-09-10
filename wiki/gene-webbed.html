@@ -21,7 +21,7 @@
 <h1>Webbed</h1>
 
 <p class="lede">
-    A polygonal net of veins over the barrel and neck - the venation of a tiger-moth wing, and nothing else.
+    A polygonal net of veins over the barrel and neck - the venation of a tiger-moth wing, and nothing else. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Webbed</th><td><code>Web/Web</code> &middot; <code>Web/Wec</code> &middot; <code>Web/n</code></td></tr>
+<tr><th>Webbed</th><td><code>Web/Web</code> &middot; <code>Web/Wec</code> &middot; <code>Web/n</code> &middot; <code>Web/Wek</code></td></tr>
+<tr><th>Webbed, black</th><td><code>Wek/Wek</code> &middot; <code>Wek/Wec</code> &middot; <code>Wek/n</code></td></tr>
 <tr><th>Webbed, coloured</th><td><code>Wec/Wec</code></td></tr>
 <tr><th>Wild type</th><td><code>Wec/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Web/Web</code></td><td>Webbed</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Web/Wec</code></td><td>Webbed</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Web/Wek</code></td><td>Webbed</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Web/Wec</code></td><td>Webbed</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>Web/n</code></td><td>Webbed</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Wec/Wec</code></td><td>Webbed, coloured</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Wek/Wek</code></td><td>Webbed, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Wek/Wec</code></td><td>Webbed, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Wek/n</code></td><td>Webbed, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Wec/Wec</code></td><td>Webbed, coloured</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.webbed</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>381 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Web</code> &middot; <code>Wec</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Web</code> &middot; <code>Wek</code> &middot; <code>Wec</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>CRACKLE, TOWARD</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08. One crackle field drawn as its channels. It is the simplest gene in this batch and the clearest demonstration of what CRACKLE is for: a tiling of polygons with a genuinely hard edge, which nothing else in the vocabulary gives.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Wek are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,14 @@
 <h3>Webbed</h3>
 
 <p>One crackle field, drawn as its channels rather than its cells. It is the simplest gene in this family and the one that shows most clearly what CRACKLE is for: a tiling of polygons with a genuinely hard edge, which nothing else in the vocabulary can give.</p>
+
+<ol>
+<li>the venation net over the barrel and neck &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Webbed, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the venation net over the barrel and neck &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>

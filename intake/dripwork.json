@@ -1,0 +1,346 @@
+{
+  "format": 3,
+  "key": "horsegenetics.dripwork",
+  "name": "Dripwork",
+  "phase": "magical",
+  "priority": 124,
+  "rarity": "rare",
+  "blurb": "Heavy ink rings with solid pupils are scattered over a pale ground, each one trailing a drip straight down, with loose dots thrown between them.",
+  "notes": [
+    "The source was an SVG: two flat colours, near-black on off-white, about 12 KB - the smallest of the set and the only one already at poster weight. Rings with solid centres, small solid dots, and thick drips running down off the larger marks.",
+    "The ring and its pupil are RINGS and SPOTS on one seed, one spacing and one vary, which is what should put the pupil in the middle of its own ring - RINGS is documented as the same scatter drawn hollow. That is the one assumption in this file worth checking with coverage.mjs before trusting it: if the pupils land beside the rings rather than inside them, the two masks do not share a lattice and the pupil has to be built as a second RINGS at a small radius instead.",
+    "The drip is three SPOTS draws on that same lattice at growing offsetY, MAXed together. offsetY moves where a mask reads the cell centre from WITHOUT moving the cell, so all three stay attached to the mark they hang from rather than becoming their own scatter. Softness at 0.16 is what fuses the three into a continuous run rather than a dotted line - wind it much lower and the drip beads.",
+    "No stretch anywhere, deliberately. A stretched drip would read better, but stretch divides the sample before the lattice walk, so a draw with a different stretch is on a DIFFERENT lattice - and the drip would come apart from its own ring. Every layer of one compound element shares its stretch or the element scatters.",
+    "Sizing against the wiki's floors: the ring is radius 2.4 on thickness 0.9 with softness 0.12, all clear of the 1.3 / 0.7 / half-the-thickness minimums. markSpacing bottoms out at 6.2 against an outer radius of about 2.85, so there is over a body unit of clear ground between neighbouring rings even at the tightest roll.",
+    "The loose dots run on their own seed and spacing because in the source they have nothing to do with where the rings fell - they are thrown, not placed."
+  ],
+  "preview": {
+    "base": "chestnut",
+    "expression": "dripwork"
+  },
+  "alleles": [
+    {
+      "token": "Dw",
+      "label": "Dripwork (Dw)"
+    },
+    {
+      "token": "Dx",
+      "label": "Coloured dripwork (Dx)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "markSeed",
+      "type": "seed"
+    },
+    {
+      "name": "dotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "markSpacing",
+      "min": 6.2,
+      "max": 8.0
+    },
+    {
+      "name": "inkHue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "dripwork",
+      "name": "Dripwork",
+      "description": "Black rings with solid centres sit on a near-white ground, each trailing a drip downward, with smaller solid dots scattered between them.",
+      "notes": [
+        "Layer order puts the drip UNDER the ring: the drip's top draw overlaps the ring's lower edge, and painting it second would leave a visible seam across the ring where two nominally identical inks met at different coverages."
+      ],
+      "when": [
+        "Dw/Dw",
+        "Dw/Dx",
+        "Dw/n"
+      ],
+      "layers": [
+        {
+          "name": "the pale ground the graphic sits on",
+          "masks": [
+            {
+              "type": "ALL"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fbfbfb",
+            "strength": 74,
+            "opacity": 84
+          }
+        },
+        {
+          "name": "the drip hanging under each mark",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "radius": 0.55,
+              "softness": 0.16,
+              "offsetY": -2.6,
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            },
+            {
+              "type": "SPOTS",
+              "radius": 0.55,
+              "softness": 0.16,
+              "offsetY": -4.2,
+              "combine": "MAX",
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            },
+            {
+              "type": "SPOTS",
+              "radius": 0.5,
+              "softness": 0.16,
+              "offsetY": -5.8,
+              "combine": "MAX",
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": -200,
+            "green": -200,
+            "blue": -200,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the ring",
+          "masks": [
+            {
+              "type": "RINGS",
+              "radius": 2.4,
+              "thickness": 0.9,
+              "softness": 0.12,
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": -200,
+            "green": -200,
+            "blue": -200,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the pupil inside the ring",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "radius": 0.95,
+              "softness": 0.14,
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": -200,
+            "green": -200,
+            "blue": -200,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the loose dots between the rings",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "seed": "$dotSeed",
+              "spacing": 4.0,
+              "radius": 0.72,
+              "vary": 0.5,
+              "chance": 0.35,
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": -200,
+            "green": -200,
+            "blue": -200,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured dripwork",
+      "description": "The same rings and drips in an ink this line of horses carries.",
+      "notes": [
+        "The recessive coloured half of the usual pair. The ground stays near-white: the whole graphic depends on the ink being much darker than what it sits on, and a hue knob on the ground can roll a value that leaves the rings invisible. Lightness 0.18 on the ink for the same reason."
+      ],
+      "when": [
+        "Dx/Dx"
+      ],
+      "layers": [
+        {
+          "name": "the pale ground the graphic sits on",
+          "masks": [
+            {
+              "type": "ALL"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fbfbfb",
+            "strength": 74,
+            "opacity": 84
+          }
+        },
+        {
+          "name": "the drip hanging under each mark",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "radius": 0.55,
+              "softness": 0.16,
+              "offsetY": -2.6,
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            },
+            {
+              "type": "SPOTS",
+              "radius": 0.55,
+              "softness": 0.16,
+              "offsetY": -4.2,
+              "combine": "MAX",
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            },
+            {
+              "type": "SPOTS",
+              "radius": 0.5,
+              "softness": 0.16,
+              "offsetY": -5.8,
+              "combine": "MAX",
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.78,
+            "lightness": 0.18,
+            "strength": 97,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the ring",
+          "masks": [
+            {
+              "type": "RINGS",
+              "radius": 2.4,
+              "thickness": 0.9,
+              "softness": 0.12,
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.78,
+            "lightness": 0.18,
+            "strength": 97,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the pupil inside the ring",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "radius": 0.95,
+              "softness": 0.14,
+              "seed": "$markSeed",
+              "spacing": "$markSpacing",
+              "vary": 0.35,
+              "chance": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.78,
+            "lightness": 0.18,
+            "strength": 97,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the loose dots between the rings",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "seed": "$dotSeed",
+              "spacing": 4.0,
+              "radius": 0.72,
+              "vary": 0.5,
+              "chance": 0.35,
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.78,
+            "lightness": 0.18,
+            "strength": 97,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unmarked.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Dw/Dw": 0.0016,
+    "Dw/Dx": 0.00112,
+    "Dw/n": 0.16,
+    "Dx/Dx": 0.00512,
+    "n/n": 99.83216
+  }
+}

@@ -1,0 +1,344 @@
+{
+  "format": 3,
+  "key": "horsegenetics.rising_sun",
+  "name": "Rising Sun",
+  "phase": "magical",
+  "priority": 123,
+  "rarity": "epic",
+  "blurb": "Heavy black ribbons roll across a white coat in even waves, each shadowed a little below by grey, and a single red disc sits on either flank.",
+  "notes": [
+    "The source was an SVG: four flat colours traced off a poster - black ribbons waving across white, each carrying a grey shadow offset down and left, and one flat red-orange disc laid over them. About 29 KB.",
+    "This is the one file in the set that wants WAVES, and the reason is that the ribbons REPEAT. Everything noise-derived in this vocabulary wanders and never comes back to the same place twice; a poster's waves are periodic on purpose, and spacing is what turns one WAVES band into a set of parallel ribbons rising and falling together.",
+    "space is units and every length in the layer is therefore in body units - from, to, amplitude and spacing all of them. That is deliberate and it is the standing trap here: amplitude is in whatever space says while wavelength never is, and six shipped genes once copied a saw-wave trick into space: part and displaced their band forty normalised spans off the horse, selecting nothing at all. If this gene ever comes out blank, that is the first thing to check.",
+    "Ribbon thickness is to minus from, so 1.2 body units - two and a half texels - against a spacing that bottoms out at 2.2, leaving a full unit of white between ribbons at the tightest roll. Raising waveAmp does not eat that gap, because the ribbons rise and fall together and stay parallel; only lowering ribbonSpacing does.",
+    "The grey shadow is the same wave shifted, not a blur: from and to are both up by 0.42 units and the phase is off by 0.35, which reproduces the poster's offset drop shadow. Nothing in this vocabulary offsets a mask, so a shadow has to be a second copy of the shape moved by hand - which is only possible here because WAVES is the one mask with a phase.",
+    "The disc is a PATH because it is ONE of them in ONE place, and plane: side gets 'either flank' for free - a shape drawn in the (x, y) plane is extruded along z. In that space the topline is 0.62 and not 1.0, so the disc sits at v 0.53 on the upper flank; at 0.7 it would be floating above the back and nothing would appear on the barrel. Twelve points on an ellipse rather than a circle because u and v normalise against different spans - 41 body units against 33.7 - so a circle in that space is an oval on the horse."
+  ],
+  "preview": {
+    "base": "black",
+    "expression": "sun"
+  },
+  "alleles": [
+    {
+      "token": "Rs",
+      "label": "Rising sun (Rs)"
+    },
+    {
+      "token": "Rc",
+      "label": "Coloured sun (Rc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "waveSeed",
+      "type": "seed"
+    },
+    {
+      "name": "ribbonSpacing",
+      "min": 2.2,
+      "max": 3.2
+    },
+    {
+      "name": "waveAmp",
+      "min": 1.2,
+      "max": 2.4
+    },
+    {
+      "name": "waveLength",
+      "min": 7.0,
+      "max": 12.0
+    },
+    {
+      "name": "sunHue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "inkHue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "sun",
+      "name": "Rising Sun",
+      "description": "Black ribbons roll in even waves across a white coat, each shadowed below in grey, with one flat red disc on either flank.",
+      "notes": [
+        "Layer order is ground, shadow, ribbon, disc. The shadow must go under the black or it draws a grey line across the ribbon it is supposed to be cast by, and the disc goes last because in the poster it sits over everything."
+      ],
+      "when": [
+        "Rs/Rs",
+        "Rs/Rc",
+        "Rs/n"
+      ],
+      "layers": [
+        {
+          "name": "the white ground",
+          "masks": [
+            {
+              "type": "ALL"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fefefe",
+            "strength": 78,
+            "opacity": 86
+          }
+        },
+        {
+          "name": "the grey shadow, one ribbon offset off the black",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$waveSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 0.42,
+              "to": 1.72,
+              "wavelength": "$waveLength",
+              "amplitude": "$waveAmp",
+              "spacing": "$ribbonSpacing",
+              "phase": 0.35,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#767170",
+            "strength": 76,
+            "opacity": 88
+          }
+        },
+        {
+          "name": "the black ribbons",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$waveSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 0.0,
+              "to": 1.2,
+              "wavelength": "$waveLength",
+              "amplitude": "$waveAmp",
+              "spacing": "$ribbonSpacing",
+              "phase": 0.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": -200,
+            "green": -200,
+            "blue": -200,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the disc, one on either flank",
+          "masks": [
+            {
+              "type": "PATH",
+              "parts": [
+                "BODY"
+              ],
+              "plane": "side",
+              "space": "body",
+              "points": [
+                0.499,
+                0.53,
+                0.4924,
+                0.5595,
+                0.4745,
+                0.5811,
+                0.45,
+                0.589,
+                0.4255,
+                0.5811,
+                0.4076,
+                0.5595,
+                0.401,
+                0.53,
+                0.4076,
+                0.5005,
+                0.4255,
+                0.4789,
+                0.45,
+                0.471,
+                0.4745,
+                0.4789,
+                0.4924,
+                0.5005
+              ],
+              "curve": true,
+              "closed": true,
+              "fill": true,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fb3206",
+            "strength": 97,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured sun",
+      "description": "The same ribbons and disc in two colours this line of horses carries.",
+      "notes": [
+        "The recessive coloured half of the usual pair, on two hues, because in the poster the disc is doing the opposite job to the ribbons rather than a quieter version of it. The ground stays near-white and the shadow stays grey: both are the value scaffolding the two hues are read against, and colouring either can roll a horse where the ribbons vanish."
+      ],
+      "when": [
+        "Rc/Rc"
+      ],
+      "layers": [
+        {
+          "name": "the white ground",
+          "masks": [
+            {
+              "type": "ALL"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fefefe",
+            "strength": 78,
+            "opacity": 86
+          }
+        },
+        {
+          "name": "the grey shadow, one ribbon offset off the black",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$waveSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 0.42,
+              "to": 1.72,
+              "wavelength": "$waveLength",
+              "amplitude": "$waveAmp",
+              "spacing": "$ribbonSpacing",
+              "phase": 0.35,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#767170",
+            "strength": 76,
+            "opacity": 88
+          }
+        },
+        {
+          "name": "the black ribbons",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$waveSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": 0.0,
+              "to": 1.2,
+              "wavelength": "$waveLength",
+              "amplitude": "$waveAmp",
+              "spacing": "$ribbonSpacing",
+              "phase": 0.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.7,
+            "lightness": 0.16,
+            "strength": 97,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the disc, one on either flank",
+          "masks": [
+            {
+              "type": "PATH",
+              "parts": [
+                "BODY"
+              ],
+              "plane": "side",
+              "space": "body",
+              "points": [
+                0.499,
+                0.53,
+                0.4924,
+                0.5595,
+                0.4745,
+                0.5811,
+                0.45,
+                0.589,
+                0.4255,
+                0.5811,
+                0.4076,
+                0.5595,
+                0.401,
+                0.53,
+                0.4076,
+                0.5005,
+                0.4255,
+                0.4789,
+                0.45,
+                0.471,
+                0.4745,
+                0.4789,
+                0.4924,
+                0.5005
+              ],
+              "curve": true,
+              "closed": true,
+              "fill": true,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$sunHue",
+            "saturation": 0.95,
+            "lightness": 0.52,
+            "strength": 97,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unmarked.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Rs/Rs": 0.0011,
+    "Rs/Rc": 0.00077,
+    "Rs/n": 0.11,
+    "Rc/Rc": 0.00352,
+    "n/n": 99.88461
+  }
+}

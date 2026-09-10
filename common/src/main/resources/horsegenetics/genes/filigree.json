@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 367,
   "rarity": "RARE",
-  "blurb": "White metalwork over the muscle masses - long arcs following the body's contours and broken tracks of short dashes between them - carrying onto the head and legs as a hairline.",
+  "blurb": "White metalwork over the muscle masses - long arcs following the body's contours and broken tracks of short dashes between them - carrying onto the head and legs as a hairline. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Flg",
       "label": "Filigree, white (Flg)"
+    },
+    {
+      "token": "Flk",
+      "label": "Filigree, black (Flk)"
     },
     {
       "token": "Flc",
@@ -44,7 +48,8 @@
       "when": [
         "Flg/Flg",
         "Flg/Flc",
-        "Flg/n"
+        "Flg/n",
+        "Flg/Flk"
       ],
       "layers": [
         {
@@ -160,6 +165,134 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black filigree",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Flk/Flk",
+        "Flk/Flc",
+        "Flk/n"
+      ],
+      "layers": [
+        {
+          "name": "long arcs along the contours",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 2.6,
+              "length": 20.0,
+              "axis": "X",
+              "width": "$arcWidth",
+              "curl": 0.8,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 95
+          }
+        },
+        {
+          "name": "dash fields between and along the arcs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 2.6,
+              "length": 9.0,
+              "axis": "X",
+              "width": 0.624,
+              "curl": 0.8,
+              "softness": 0.1
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.1,
+              "size": 0.5,
+              "density": 0.4,
+              "softness": 0.25
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.2,
+              "to": 1.0,
+              "softness": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the same work at a hairline, down the legs and over the head",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.16,
+              "to": 1.1,
+              "softness": 0.14
+            },
+            {
+              "type": "PARTS",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.7,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.7,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 88
           }
         }
@@ -307,9 +440,16 @@
   ],
   "founders": {
     "Flg/Flg": 0.002,
-    "Flg/Flc": 0.008,
+    "Flg/Flk": 0.002667,
+    "Flg/Flc": 0.002667,
     "Flg/n": 0.038,
-    "Flc/Flc": 0.008,
+    "Flk/Flk": 0.002667,
+    "Flk/Flc": 0.002667,
+    "Flk/n": 0.002667,
+    "Flc/Flc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Flk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

@@ -5,15 +5,20 @@
   "phase": "magical",
   "priority": 217,
   "rarity": "EPIC",
-  "blurb": "Soft-edged plumage laid over the whole horse and piped in steel grey, breaking into streamers down the mane and tail - with the coat underneath showing through as scattered windows.",
+  "blurb": "Soft-edged plumage laid over the whole horse and piped in steel grey, breaking into streamers down the mane and tail - with the coat underneath showing through as scattered windows. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The piping round each plume was specified as a `spread` on the plume's own spot field. `spread` is a PIGMENT parameter and does not exist on SPOTS, so the rim is built the way every other rim in this mod is: a slightly larger disc with the disc itself taken out of it, on the same seed and spacing so the two line up exactly.",
-    "The coloured form deliberately has no piping. One tone reads as a different gene at a glance, which is what a recessive form is for."
+    "The coloured form deliberately has no piping. One tone reads as a different gene at a glance, which is what a recessive form is for.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Drsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Drsw",
       "label": "Shroud, white (Drsw)"
+    },
+    {
+      "token": "Drsk",
+      "label": "Shroud, black (Drsk)"
     },
     {
       "token": "Drsc",
@@ -91,7 +96,8 @@
       "when": [
         "Drsw/Drsw",
         "Drsw/Drsc",
-        "Drsw/n"
+        "Drsw/n",
+        "Drsw/Drsk"
       ],
       "layers": [
         {
@@ -211,6 +217,132 @@
       ]
     },
     {
+      "id": "black",
+      "name": "Dragon Shroud, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Drsk/Drsk",
+        "Drsk/Drsc",
+        "Drsk/n"
+      ],
+      "layers": [
+        {
+          "name": "the plumage, with windows of coat left in it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": "$fieldSpacing",
+              "radius": "$fieldRadius",
+              "vary": "$vary",
+              "softness": 0.9
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$holeSeed",
+              "spacing": "$holeSpacing",
+              "radius": "$holeRadius",
+              "vary": "$vary",
+              "softness": 0.35,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 97.0
+          }
+        },
+        {
+          "name": "the steel piping round each plume",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": "$fieldSpacing",
+              "radius": "$fieldOuter",
+              "vary": "$vary",
+              "softness": 0.4
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": "$fieldSpacing",
+              "radius": "$fieldRadius",
+              "vary": "$vary",
+              "softness": 0.4,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "streamers down the mane and tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "HAIR"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "part",
+              "seed": "$plumeSeed",
+              "wavelength": "$plumeWavelength",
+              "amplitude": 0.3,
+              "softness": 0.1,
+              "from": 0.25,
+              "to": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 97.0
+          }
+        }
+      ]
+    },
+    {
       "id": "coloured",
       "name": "Dragon Shroud, coloured",
       "description": "The same plumage in a colour the line carries, and without the piping - a coloured shroud is one tone, which is the difference a person will notice first. Fully recessive.",
@@ -303,9 +435,13 @@
   ],
   "founders": {
     "Drsw/Drsw": 0.001,
-    "Drsw/Drsc": 0.004,
+    "Drsw/Drsk": 0.001333,
+    "Drsw/Drsc": 0.001333,
     "Drsw/n": 0.019,
-    "Drsc/Drsc": 0.004,
+    "Drsk/Drsk": 0.001333,
+    "Drsk/Drsc": 0.001333,
+    "Drsk/n": 0.001333,
+    "Drsc/Drsc": 0.001333,
     "n/n": 99.972
   }
 }

@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 205,
   "rarity": "UNCOMMON",
-  "blurb": "Tobiano gone streaky and angular - hair-thin veins on a minimal horse, broad blocky zones on a heavily marked one, and nothing at all unless it is homozygous.",
+  "blurb": "Tobiano gone streaky and angular - hair-thin veins on a minimal horse, broad blocky zones on a heavily marked one, and nothing at all unless it is homozygous. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Tmr",
       "label": "Marble Tobiano, white (Tmr)"
+    },
+    {
+      "token": "Tmk",
+      "label": "Marble Tobiano, black (Tmk)"
     },
     {
       "token": "Tmc",
@@ -53,7 +57,9 @@
       "description": "A tobiano that never learned to make a round patch. At its most minimal it is a set of hair-thin white veins running vertically and diagonally down from the topline, translucent enough that the coat reads through them, with a narrow line down the face. At its most extensive it is blocky zones eight inches and more across, fully opaque, with sharp defined edges. In between it flows in body-contoured curves at a few inches wide. It only does this when homozygous; a single copy leaves a horse barely distinguishable from an ordinary one, which is how the whole thing stayed hidden for so long.",
       "when": [
         "Tmr/Tmr",
-        "Tmr/Tmc"
+        "Tmr/Tmc",
+        "Tmr/Tmk",
+        "Tmr/n"
       ],
       "layers": [
         {
@@ -87,6 +93,52 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": "$opacity"
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Marble Tobiano",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Tmk/Tmk",
+        "Tmk/Tmc",
+        "Tmk/n"
+      ],
+      "layers": [
+        {
+          "name": "angular white running down from the topline",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$marbleSeed",
+              "spacing": "$pitch",
+              "length": 4.0,
+              "axis": "Y",
+              "width": "$vein",
+              "curl": 0.5,
+              "softness": 0.06
+            },
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "HEAD"
+              ],
+              "halfWidth": 0.9,
+              "softness": 0.1,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": "$opacity"
           }
         }
@@ -155,9 +207,17 @@
     }
   ],
   "founders": {
-    "Tmr/Tmr": 0.08,
-    "Tmr/Tmc": 0.016,
-    "Tmc/Tmc": 0.016,
+    "Tmr/Tmr": 0.004,
+    "Tmr/Tmk": 0.005333,
+    "Tmr/Tmc": 0.005333,
+    "Tmr/n": 0.076,
+    "Tmk/Tmk": 0.005333,
+    "Tmk/Tmc": 0.005333,
+    "Tmk/n": 0.005333,
+    "Tmc/Tmc": 0.005333,
     "n/n": 99.888
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Tmk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

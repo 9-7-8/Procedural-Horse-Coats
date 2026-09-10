@@ -21,7 +21,7 @@
 <h1>Ink Scroll</h1>
 
 <p class="lede">
-    Scrollwork inked over the horse - a band of curls round the neck, a ringed medallion at the shoulder and the hip with lines running off them, and a smaller scroll on each cheek.
+    Scrollwork inked over the horse - a band of curls round the neck, a ringed medallion at the shoulder and the hip with lines running off them, and a smaller scroll on each cheek. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Ink Scroll</th><td><code>Isw/Isw</code> &middot; <code>Isw/Isc</code> &middot; <code>Isw/n</code></td></tr>
+<tr><th>Ink Scroll</th><td><code>Isw/Isw</code> &middot; <code>Isw/Isc</code> &middot; <code>Isw/n</code> &middot; <code>Isw/Isk</code></td></tr>
+<tr><th>Ink Scroll, black</th><td><code>Isk/Isk</code> &middot; <code>Isk/Isc</code> &middot; <code>Isk/n</code></td></tr>
 <tr><th>Ink Scroll, coloured</th><td><code>Isc/Isc</code></td></tr>
 <tr><th>Wild type</th><td><code>Isc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Isw/Isw</code></td><td>Ink Scroll</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Isw/Isc</code></td><td>Ink Scroll</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Isw/Isk</code></td><td>Ink Scroll</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Isw/Isc</code></td><td>Ink Scroll</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Isw/n</code></td><td>Ink Scroll</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Isc/Isc</code></td><td>Ink Scroll, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Isk/Isk</code></td><td>Ink Scroll, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Isk/Isc</code></td><td>Ink Scroll, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Isk/n</code></td><td>Ink Scroll, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Isc/Isc</code></td><td>Ink Scroll, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.ink_scroll</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>372 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Isw</code> &middot; <code>Isc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Isw</code> &middot; <code>Isk</code> &middot; <code>Isc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>7 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, SPOTS, STROKES, TOWARD</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08. The source placed a medallion at the shoulder and one at the hip by coordinate. Coordinates are not addressable here, so the medallions are a SPOTS field with the spacing set wide enough that the barrel carries about two of them - which means WHERE they land is down to the seed. That is the same lottery auroraband lost (gap 108); the spacing here is well under the barrel's length, so it should not miss, but nothing checks it.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Isk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,17 @@
 <h3>Ink Scroll</h3>
 
 <p>A medallion is a big soft disc with a small sharp one taken out of it, which is a ring with a thick edge and a hole - and at this spacing the barrel carries about two of them. The neck band is a saw wave along the crest with strokes multiplied into it, so the curls sit inside the band rather than wandering off it.</p>
+
+<ol>
+<li>scrollwork banded round the neck &mdash; <code>AXIS</code> &times; <code>STROKES</code>, painted with <code>TOWARD</code></li>
+<li>a medallion at the shoulder and another at the hip &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
+<li>curling strokes running off the medallions &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
+<li>a smaller scroll on each cheek &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Ink Scroll, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>scrollwork banded round the neck &mdash; <code>AXIS</code> &times; <code>STROKES</code>, painted with <code>TOWARD</code></li>

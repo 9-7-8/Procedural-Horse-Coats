@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 312,
   "rarity": "COMMON",
-  "blurb": "A soft-edged darkened topline with a single flowing line of small round spots running along it, neck to rump, and a pale underside to the tail.",
+  "blurb": "A soft-edged darkened topline with a single flowing line of small round spots running along it, neck to rump, and a pale underside to the tail. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Fwn",
       "label": "Fawn, white (Fwn)"
+    },
+    {
+      "token": "Fwk",
+      "label": "Fawn, black (Fwk)"
     },
     {
       "token": "Fwc",
@@ -48,7 +52,8 @@
       "when": [
         "Fwn/Fwn",
         "Fwn/Fwc",
-        "Fwn/n"
+        "Fwn/n",
+        "Fwn/Fwk"
       ],
       "layers": [
         {
@@ -177,6 +182,147 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Fawn",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Fwk/Fwk",
+        "Fwk/Fwc",
+        "Fwk/n"
+      ],
+      "layers": [
+        {
+          "name": "the darkened topline the run sits on",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.58,
+              "to": 1.0,
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 52
+          }
+        },
+        {
+          "name": "the flowing line of spots",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.0,
+              "radius": "$spotSize",
+              "vary": 0.3,
+              "chance": 0.6,
+              "stretch": 1.4,
+              "axis": "X",
+              "softness": 0.14
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 12.0,
+              "length": 26.0,
+              "axis": "X",
+              "width": 5.0,
+              "curl": 0.8,
+              "softness": 1.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.68,
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 94
+          }
+        },
+        {
+          "name": "eyeliner",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 7.0,
+              "radius": 1.6,
+              "vary": 0.2,
+              "chance": 0.5,
+              "stretch": 2.2,
+              "axis": "X",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.45,
+              "to": 0.8,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 90
+          }
+        },
+        {
+          "name": "the underside of the tail",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Z",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.45,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
             "strength": 88
           }
         }
@@ -336,9 +482,16 @@
   ],
   "founders": {
     "Fwn/Fwn": 0.006,
-    "Fwn/Fwc": 0.024,
+    "Fwn/Fwk": 0.008,
+    "Fwn/Fwc": 0.008,
     "Fwn/n": 0.114,
-    "Fwc/Fwc": 0.024,
+    "Fwk/Fwk": 0.008,
+    "Fwk/Fwc": 0.008,
+    "Fwk/n": 0.008,
+    "Fwc/Fwc": 0.008,
     "n/n": 99.832
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Fwk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

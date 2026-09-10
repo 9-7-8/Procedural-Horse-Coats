@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 201,
   "rarity": "RARE",
-  "blurb": "Overo read backwards - a white horse with the coat colour breaking through it in hard-edged, unpredictable blocks and streaks.",
+  "blurb": "Overo read backwards - a white horse with the coat colour breaking through it in hard-edged, unpredictable blocks and streaks. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Fdf",
       "label": "Fracture, white (Fdf)"
+    },
+    {
+      "token": "Fdk",
+      "label": "Fracture, black (Fdk)"
     },
     {
       "token": "Fdc",
@@ -48,7 +52,9 @@
       "description": "Instead of white appearing on a coloured horse, the colour appears on a white one - and it does it in bold uneven blocks and streaks with jagged edges, anywhere at all: neck, shoulder, barrel, hindquarter, legs, face. There is no symmetry to it and no pattern to predict; two Fracture horses out of the same parents look nothing like each other. The head usually keeps a distinct area of coat, and the mane and tail follow whatever is underneath them. It takes two copies - a single copy is carried and shows nothing.",
       "when": [
         "Fdf/Fdf",
-        "Fdf/Fdc"
+        "Fdf/Fdc",
+        "Fdf/Fdk",
+        "Fdf/n"
       ],
       "layers": [
         {
@@ -112,6 +118,82 @@
           "op": {
             "type": "TOWARD",
             "color": "#fcfbf7",
+            "strength": -96
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Fracture",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Fdk/Fdk",
+        "Fdk/Fdc",
+        "Fdk/n"
+      ],
+      "layers": [
+        {
+          "name": "white over most of the horse",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "LEGS",
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the coat breaking back through it in blocks",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$breakSeed",
+              "scale": "$blockScale",
+              "threshold": "$howMuch",
+              "softness": 0.02,
+              "invert": true
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$breakSeed",
+              "spacing": 6.0,
+              "length": 5.0,
+              "axis": "X",
+              "width": 2.5,
+              "curl": 1.2,
+              "softness": 0.05,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": -96
           }
         }
@@ -212,9 +294,17 @@
     }
   ],
   "founders": {
-    "Fdf/Fdf": 0.04,
-    "Fdf/Fdc": 0.008,
-    "Fdc/Fdc": 0.008,
+    "Fdf/Fdf": 0.002,
+    "Fdf/Fdk": 0.002667,
+    "Fdf/Fdc": 0.002667,
+    "Fdf/n": 0.038,
+    "Fdk/Fdk": 0.002667,
+    "Fdk/Fdc": 0.002667,
+    "Fdk/n": 0.002667,
+    "Fdc/Fdc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Fdk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

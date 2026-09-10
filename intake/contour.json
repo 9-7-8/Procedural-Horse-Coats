@@ -1,0 +1,408 @@
+{
+  "format": 3,
+  "key": "horsegenetics.contour",
+  "name": "Contour",
+  "phase": "magical",
+  "priority": 122,
+  "rarity": "rare",
+  "blurb": "The coat reads as a contour map - lobed masses ringed by nested bands that step from cream through pink and mint to near-black, with a drawn line following one level all the way round.",
+  "notes": [
+    "The source was an SVG: eight posterised colours traced off a photograph of banded rock, about 360 KB of path data. A field, not an outline - rebuilt as a rule.",
+    "Reading of the source: wandering lobed masses, each ringed by several nested bands that step in value from the outside in, with a hard dark line following one of those steps all the way round. It is a topographic map made of stone.",
+    "The mechanism is one FRACTAL field read at six thresholds. Every band here shares $landSeed, $landScale, octaves and warp and differs ONLY in threshold, which is what makes them nest: they are level sets of one function, so a higher threshold is strictly inside a lower one and no arithmetic is needed to keep them concentric. Change scale or warp on one band and it stops being the same landscape.",
+    "Do not raise octaves to sharpen it. This field divides by the root of the summed squares rather than by the total amplitude, so octaves preserves coverage and buys detail only - which is the good news - but a texel is half a body unit, so by the fourth octave at this scale the finest detail is under the sheet's resolution and the crisp band edges break into stipple. Three is the number.",
+    "softness is 0.05 rather than the 0.12 default because a map's bands are printed, not shaded. The trade is that the band WIDTH in body units is not a number this file sets - it falls out of how steep the field is where each level crosses, so a band is wide on a shallow slope and a hairline on a steep one, exactly as on a real contour map. If the bands come out too thin to read, lower $landScale rather than moving the thresholds: a larger feature has gentler slopes.",
+    "The dark line is the one place two thresholds appear in one layer - 0.52 and 0.56, the second inverted - which is a band between two adjacent levels rather than a stroke of any set width. Same caveat: its width tracks the slope."
+  ],
+  "preview": {
+    "base": "bay",
+    "expression": "contour"
+  },
+  "alleles": [
+    {
+      "token": "Ct",
+      "label": "Contour (Ct)"
+    },
+    {
+      "token": "Cx",
+      "label": "Coloured contour (Cx)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "landSeed",
+      "type": "seed"
+    },
+    {
+      "name": "landScale",
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "name": "inkHue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "contour",
+      "name": "Contour",
+      "description": "Lobed masses ringed by nested bands stepping from cream through pink and mint down to near-black, with a hard dark line tracing one level.",
+      "notes": [
+        "Layer order is lowest threshold first, and it has to be: each band is painted over the whole of the one below it and survives only as the ring the next one does not cover. Reverse any pair and the outer of the two disappears."
+      ],
+      "when": [
+        "Ct/Ct",
+        "Ct/Cx",
+        "Ct/n"
+      ],
+      "layers": [
+        {
+          "name": "the band above 0.3",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.3,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e2d5b8",
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.38",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.38,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e8c8e5",
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.44",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.44,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c8eeec",
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.52",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.52,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#a3b5b8",
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.6",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.6,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#8f888a",
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.68",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.68,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#443f38",
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the drawn contour line at the middle level",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.52,
+              "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.56,
+              "softness": 0.05,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#201a12",
+            "strength": 97,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured contour",
+      "description": "The same map in one colour this line of horses runs to, the levels separated by lightness alone.",
+      "notes": [
+        "The recessive coloured half of the usual pair, on a single hue. The source's six colours are not six decisions - they are one value ramp with a pink and a mint sitting on it - so the ladder 0.86, 0.84, 0.88, 0.70, 0.55, 0.24 carries the map and the hue is free. Note the first three are nearly level: on a real map the outer bands separate by hue rather than by value, and flattening them into a monotonic ramp loses the thing that makes the middle levels read."
+      ],
+      "when": [
+        "Cx/Cx"
+      ],
+      "layers": [
+        {
+          "name": "the band above 0.3",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.3,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.34,
+            "lightness": 0.86,
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.38",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.38,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.34,
+            "lightness": 0.84,
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.44",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.44,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.34,
+            "lightness": 0.88,
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.52",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.52,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.34,
+            "lightness": 0.7,
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.6",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.6,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.5,
+            "lightness": 0.55,
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the band above 0.68",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.68,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.5,
+            "lightness": 0.24,
+            "strength": 93,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the drawn contour line at the middle level",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.52,
+              "softness": 0.05
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$landSeed",
+              "scale": "$landScale",
+              "octaves": 3,
+              "warp": 0.5,
+              "threshold": 0.56,
+              "softness": 0.05,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$inkHue",
+            "saturation": 0.55,
+            "lightness": 0.1,
+            "strength": 97,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unmarked.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ct/Ct": 0.0016,
+    "Ct/Cx": 0.00112,
+    "Ct/n": 0.16,
+    "Cx/Cx": 0.00512,
+    "n/n": 99.83216
+  }
+}

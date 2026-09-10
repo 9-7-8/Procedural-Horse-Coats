@@ -21,7 +21,7 @@
 <h1>Ehretia</h1>
 
 <p class="lede">
-    Haloed spots over the barrel and neck, a dorsal stripe, dark socks, and a fine speckled bloom laid over the lot.
+    Haloed spots over the barrel and neck, a dorsal stripe, dark socks, and a fine speckled bloom laid over the lot. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Ehretia</th><td><code>Ehr/Ehr</code> &middot; <code>Ehr/Ehc</code> &middot; <code>Ehr/n</code></td></tr>
+<tr><th>Ehretia</th><td><code>Ehr/Ehr</code> &middot; <code>Ehr/Ehc</code> &middot; <code>Ehr/n</code> &middot; <code>Ehr/Ehk</code></td></tr>
+<tr><th>Ehretia, black</th><td><code>Ehk/Ehk</code> &middot; <code>Ehk/Ehc</code> &middot; <code>Ehk/n</code></td></tr>
 <tr><th>Ehretia, coloured</th><td><code>Ehc/Ehc</code></td></tr>
 <tr><th>Wild type</th><td><code>Ehc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Ehr/Ehr</code></td><td>Ehretia</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Ehr/Ehc</code></td><td>Ehretia</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Ehr/Ehk</code></td><td>Ehretia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ehr/Ehc</code></td><td>Ehretia</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Ehr/n</code></td><td>Ehretia</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Ehc/Ehc</code></td><td>Ehretia, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Ehk/Ehk</code></td><td>Ehretia, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ehk/Ehc</code></td><td>Ehretia, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ehk/n</code></td><td>Ehretia, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Ehc/Ehc</code></td><td>Ehretia, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.ehretia</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>315 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Ehr</code> &middot; <code>Ehc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Ehr</code> &middot; <code>Ehk</code> &middot; <code>Ehc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>11 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, CENTERLINE, SPECKLE, SPOTS, TOWARD</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08. The source drew the socks and the dorsal stripe with a pigment op - it wanted to darken the coat rather than paint on it. This is a magical gene and the two phases cannot be mixed in one gene, so both are painted toward a near-black instead. On a dark horse that is nearly the same picture; on a pale one it is flatter than a real pigment restriction would be.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Ehk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,18 @@
 <h3>Ehretia</h3>
 
 <p>Each spot is drawn twice - a pale ring where the outer disc survives the inner one, and then the spot itself inside it - so it reads as a mark with a light rim rather than as a blob. Under that, the coat keeps a dorsal stripe and four dark socks; over it, a fine speckle blooms across the barrel and blurs the whole arrangement together.</p>
+
+<ol>
+<li>dark socks running up into a feathered edge &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>a dorsal stripe from withers to tail &mdash; <code>CENTERLINE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>a pale halo round each spot &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
+<li>the spot itself inside the halo &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>a speckled bloom over the whole pattern &mdash; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Ehretia, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 4 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>dark socks running up into a feathered edge &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>

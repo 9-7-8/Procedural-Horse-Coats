@@ -21,7 +21,7 @@
 <h1>Painted Lady Wingmark</h1>
 
 <p class="lede">
-    A butterfly wing laid over the barrel - a soft-edged field crossed by veins and rimmed in dark.
+    A butterfly wing laid over the barrel - a soft-edged field crossed by veins and rimmed in dark. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Painted Lady Wingmark</th><td><code>Plw/Plw</code> &middot; <code>Plw/Plc</code> &middot; <code>Plw/n</code></td></tr>
+<tr><th>Painted Lady Wingmark</th><td><code>Plw/Plw</code> &middot; <code>Plw/Plc</code> &middot; <code>Plw/n</code> &middot; <code>Plw/Plk</code></td></tr>
+<tr><th>Painted Lady Wingmark, black</th><td><code>Plk/Plk</code> &middot; <code>Plk/Plc</code> &middot; <code>Plk/n</code></td></tr>
 <tr><th>Painted Lady Wingmark, coloured</th><td><code>Plc/Plc</code></td></tr>
 <tr><th>Wild type</th><td><code>Plc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Plw/Plw</code></td><td>Painted Lady Wingmark</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Plw/Plc</code></td><td>Painted Lady Wingmark</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Plw/Plk</code></td><td>Painted Lady Wingmark</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Plw/Plc</code></td><td>Painted Lady Wingmark</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Plw/n</code></td><td>Painted Lady Wingmark</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Plc/Plc</code></td><td>Painted Lady Wingmark, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Plk/Plk</code></td><td>Painted Lady Wingmark, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Plk/Plc</code></td><td>Painted Lady Wingmark, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Plk/n</code></td><td>Painted Lady Wingmark, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Plc/Plc</code></td><td>Painted Lady Wingmark, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.painted_lady_wing</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>318 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Plw</code> &middot; <code>Plc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Plw</code> &middot; <code>Plk</code> &middot; <code>Plc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>7 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>CRACKLE, SPOTS, TOWARD</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08. The wing, its veins and its rim are the same mirrored spot field read three times, so the veins cannot run off the wing and the rim cannot come adrift from it. The source placed the wing at an explicit centre; a mirrored SPOTS field with the spacing set near the barrel's length is the addressable version of that, and it means WHERE it lands is down to the seed.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Plk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,16 @@
 <h3>Painted Lady Wingmark</h3>
 
 <p>The wing, its veins and its rim are all the same mirrored spot field, read three times - so the veins cannot run off the wing and the rim cannot come adrift from it. The rim is the wing with a smaller copy of itself subtracted, which is the same trick every rim in this mod uses.</p>
+
+<ol>
+<li>the wing itself &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>veins across it &mdash; <code>SPOTS</code> &times; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+<li>and a dark rim round its edge &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Painted Lady Wingmark, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the wing itself &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>

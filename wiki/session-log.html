@@ -27,6 +27,128 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10b">2026-09-10</h2>
+
+<h3>A black allele for forty-two markings, the rule that produced them written
+    down on the gene page, and Cleave split into two loci.</h3>
+
+<p>Every magical marking here that had a <em>white</em> form and a
+    <em>coloured</em> form now has a <b>black</b> one as well &mdash; 42 forms
+    across 41 genes. That is not 42 judgement calls; it is one rule applied 42
+    times, and the rule is the part worth keeping.</p>
+
+<h4>White and coloured are two points on one axis with the far end unused</h4>
+
+<p>The convention these genes were written to is a white form on
+    <code>allele[0]</code> and a recessive coloured one that draws the same layers
+    with <code>"hue": "$hue"</code> where the white one names
+    <code>#ffffff</code>. Every one of them therefore already knew how to draw
+    itself in a single flat tone, and the whole dark end of the scale was
+    unoccupied. The black form costs one allele and no new vocabulary, and it
+    lands on a set of horses the white form has never read well on &mdash; the
+    palominos, cremellos, greys and dominant whites, where a white marking on a
+    white coat is a marking nobody can see.</p>
+
+<h4>Re-tone, do not repaint &mdash; and measure achromatic as chroma</h4>
+
+<p>The black expression is the white one with every <b>achromatic</b> target
+    moved into the dark end of the scale, <em>keeping the order and the spacing of
+    the tones it had</em>, and every <b>saturated</b> target left alone: that
+    colour is the gene rather than its lightness. <a href="gene-moonwing.html">Moonwing</a>
+    is the clearest result &mdash; a graphite wing carrying the same iridescent
+    dust and the same gold binding, because only the wing itself was ever white.</p>
+
+<div class="note warn">
+    <span class="label">The measurement that has to be chroma</span>
+    <p>
+        Achromatic is <code>max(r,g,b) - min(r,g,b)</code> under about
+        <strong>0.12</strong>, not HLS <em>saturation</em>. Saturation reads
+        backwards at exactly the values that matter, because its denominator
+        collapses near white: <code>#f4f0e8</code>, a pearl six counts off the top
+        of the scale, scores <strong>0.35</strong> and gets protected as though it
+        were a colour. The first pass of this change used saturation and shipped a
+        black moonwing byte-for-byte identical to the pearl one, along with six
+        other genes whose black form was a copy of their white form. It was caught
+        by the transformer printing how many grey steps each gene came out with and
+        seven of them saying zero &mdash; which is the argument for making a bulk
+        edit report what it did rather than how many files it touched.
+    </p>
+</div>
+
+<h4>The half that is easy to skip: both achromatic forms get the same depth</h4>
+
+<p>A coloured form that separates its layers into a dark ring, a mid field and a
+    bright core, against a white form that paints all three off-white, is not two
+    versions of one marking &mdash; it is the good one and the flat one. Where the
+    coloured form spanned a noticeably wider range of lightness, the white form was
+    regraded onto the coloured form's own per-layer ordering, in greys. Three genes
+    qualified. <a href="gene-pavonem.html">Pavonem</a> is the one that shows why:
+    its coloured form makes the peacock eye's <em>pupil</em> the darkest thing on
+    the horse, and its white form had been painting that pupil the same white as
+    the spots around it, so the eye had no pupil at all.</p>
+
+<h4>Dominance: nothing that existed moved</h4>
+
+<p>Black sits directly under white and above coloured, in <em>declaration</em>
+    order. Written that way, adding an allele to an existing gene changes nothing
+    that already existed &mdash; every pair that had an outcome keeps it, and only
+    the pairs carrying the new token are new. The new pairs were handed out by one
+    rule, <b>an unclaimed pair belongs to whatever its more dominant allele's own
+    homozygote shows</b>, which reproduces the series each file already had and is
+    the only rule that got Cleave's two independent pairs right without anybody
+    typing out 28 combinations.</p>
+
+<p>The proof is the bake golden: <strong>42 rows added, 3 rows moved, none
+    removed</strong> &mdash; and the three that moved are the three regraded white
+    forms. The pipeline golden did not move at all.</p>
+
+<h4>The rule is now on the page, not just in the files</h4>
+
+<p><a href="making-a-gene.html#three-forms">Three forms, where the palette is
+    narrow</a> is the whole of it &mdash; the dominance table, the token
+    convention, the re-toning rule with the chroma warning, the depth rule, and
+    <em>when not to</em>. It is a recommendation and it says so: where the colour
+    <b>is</b> the gene, <a href="gene-coral-bloom.html">coral bloom</a>'s sea-blue
+    and gold or anything whose whole idea is that it is ember, a grey version is a
+    different marking wearing its name. The prompt's CONVENTION block says the same
+    thing to a model, with the slot order and the tone targets spelled out.</p>
+
+<h4>And Cleave became two genes</h4>
+
+<p>Cleave carried four alleles that crossed two questions together:
+    <code>Clv</code> and <code>Clc</code> for a front-half split, <code>Wav</code>
+    and <code>Wac</code> for a back-half one. So "the same marking in the other
+    colour" and "the same marking on the other half" were the same kind of thing,
+    and adding the black form to it had to add <em>two</em> alleles. They are
+    separate questions and they are two loci now:
+    <a href="gene-cleave.html">horsegenetics.cleave</a> says whether there is a
+    cleave and what colour, and <a href="gene-cleave-side.html">cleave_side</a>
+    says which half, wild type being the front.
+    <code>Clvw/Clvw&nbsp;n/n</code> is a white front half;
+    <code>Clvw/Clvw&nbsp;Wve/Wve</code> is the same marking on the back.</p>
+
+<p>It is modelled on <a href="gene-accretion.html">accretion</a> +
+    <a href="gene-accretion-field.html">accretion field</a>, which is the same
+    shape already in the mod: the modifier locus has no layers, every horse carries
+    it, and the painting gene asks for it with <code>needs</code>. Two things about
+    it are load-bearing and are written into the file's notes. The conditional
+    expressions must be listed <em>before</em> the unconditional ones, because
+    <code>SpecGene</code> walks the conditionals in file order and only falls
+    through to the plain combination table when none is satisfied. And
+    <code>Wve</code> is dominant &mdash; <code>needs</code> asks for one copy &mdash;
+    so a foal out of one back-half parent takes the back half.</p>
+
+<p>The old back-half drawing survived the split byte-for-byte: of the six golden
+    rows that moved, all six are the new <em>heterozygous</em> <code>Wve/n</code>
+    horse, and the <code>Wve/Wve</code> one hashes exactly as the old
+    <code>Wav/Wav</code> did.</p>
+
+<h4>What was regenerated</h4>
+
+<p>Gene bundle, icons, all 143 gene pages, the designer wasm, both goldens, the
+    search index. Links, gene tabs, parity and recipes green;
+    <code>:neoforge-26.1.2:build</code> green.</p>
+
 <h2 id="d2026-09-10">2026-09-10</h2>
 
 <h3>Four genes retuned off looking at them, one new gene out of intake, and the gene

@@ -21,7 +21,7 @@
 <h1>Dust</h1>
 
 <p class="lede">
-    Fine stipple with no boundary anywhere - up from the pasterns, along the belly, a cap on the muzzle, and a band beside the mane.
+    Fine stipple with no boundary anywhere - up from the pasterns, along the belly, a cap on the muzzle, and a band beside the mane. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Dust</th><td><code>Dst/Dst</code> &middot; <code>Dst/Dsc</code> &middot; <code>Dst/n</code></td></tr>
+<tr><th>Dust</th><td><code>Dst/Dst</code> &middot; <code>Dst/Dsc</code> &middot; <code>Dst/n</code> &middot; <code>Dst/Dsk</code></td></tr>
+<tr><th>Black Dust</th><td><code>Dsk/Dsk</code> &middot; <code>Dsk/Dsc</code> &middot; <code>Dsk/n</code></td></tr>
 <tr><th>Coloured Dust</th><td><code>Dsc/Dsc</code></td></tr>
 <tr><th>Wild type</th><td><code>Dsc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Dst/Dst</code></td><td>Dust</td><td>0.006% &mdash; 1 in 16,667</td></tr>
-<tr><td><code>Dst/Dsc</code></td><td>Dust</td><td>0.024% &mdash; 1 in 4,167</td></tr>
+<tr><td><code>Dst/Dsk</code></td><td>Dust</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Dst/Dsc</code></td><td>Dust</td><td>0.008% &mdash; 1 in 12,500</td></tr>
 <tr><td><code>Dst/n</code></td><td>Dust</td><td>0.114% &mdash; 1 in 877</td></tr>
-<tr><td><code>Dsc/Dsc</code></td><td>Coloured Dust</td><td>0.024% &mdash; 1 in 4,167</td></tr>
+<tr><td><code>Dsk/Dsk</code></td><td>Black Dust</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Dsk/Dsc</code></td><td>Black Dust</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Dsk/n</code></td><td>Black Dust</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Dsc/Dsc</code></td><td>Coloured Dust</td><td>0.008% &mdash; 1 in 12,500</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.832%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.dust</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>342 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Dst</code> &middot; <code>Dsc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Dst</code> &middot; <code>Dsk</code> &middot; <code>Dsc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, SPECKLE, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,17 @@
 <h3>Dust</h3>
 
 <p>Four fields, and not one of them has an edge - the particles simply thin out until there are none. One rises from the pastern and fetlock and dies away between the mid-cannon and just below the knee. One runs the belly from the elbow back to the flank. One caps the muzzle from the upper lip and dissolves at the nasal bone. The last is a narrow band lying alongside the mane down the crest.</p>
+
+<ol>
+<li>up from the pasterns &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>along the belly &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the muzzle cap &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the band beside the mane &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Dust</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>up from the pasterns &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

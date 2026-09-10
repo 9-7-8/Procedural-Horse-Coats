@@ -21,7 +21,7 @@
 <h1>Moth Mantle</h1>
 
 <p class="lede">
-    A pale mantle over the barrel crossed by a wing net, with a banded tail, a pair of spots at its tip, and a mark on each cheek - a tiger moth at rest.
+    A pale mantle over the barrel crossed by a wing net, with a banded tail, a pair of spots at its tip, and a mark on each cheek - a tiger moth at rest. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Moth Mantle</th><td><code>Mmw/Mmw</code> &middot; <code>Mmw/Mmc</code> &middot; <code>Mmw/n</code></td></tr>
+<tr><th>Moth Mantle</th><td><code>Mmw/Mmw</code> &middot; <code>Mmw/Mmc</code> &middot; <code>Mmw/n</code> &middot; <code>Mmw/Mmk</code></td></tr>
+<tr><th>Moth Mantle, black</th><td><code>Mmk/Mmk</code> &middot; <code>Mmk/Mmc</code> &middot; <code>Mmk/n</code></td></tr>
 <tr><th>Moth Mantle, coloured</th><td><code>Mmc/Mmc</code></td></tr>
 <tr><th>Wild type</th><td><code>Mmc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Mmw/Mmw</code></td><td>Moth Mantle</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Mmw/Mmc</code></td><td>Moth Mantle</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Mmw/Mmk</code></td><td>Moth Mantle</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Mmw/Mmc</code></td><td>Moth Mantle</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Mmw/n</code></td><td>Moth Mantle</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Mmc/Mmc</code></td><td>Moth Mantle, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Mmk/Mmk</code></td><td>Moth Mantle, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Mmk/Mmc</code></td><td>Moth Mantle, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Mmk/n</code></td><td>Moth Mantle, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Mmc/Mmc</code></td><td>Moth Mantle, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.moth_mantle</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>224 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Mmw</code> &middot; <code>Mmc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Mmw</code> &middot; <code>Mmk</code> &middot; <code>Mmc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>7 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, CRACKLE, PARTS, SPOTS, TOWARD, WAVES</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Mmk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,18 @@
 <h3>Moth Mantle</h3>
 
 <p>The mantle goes on as a solid ground and the net is drawn into it, so the pattern is the same whatever the horse underneath is doing. Everything else on the animal - tail bands, tail tip, cheeks - is drawn in the same ink as the net, which is what ties a set of unrelated marks into one moth.</p>
+
+<ol>
+<li>a mantle over the barrel &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
+<li>the wing net drawn across it &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+<li>bands down the tail &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>a pair of spots at its tip &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>and a mark on each cheek &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Moth Mantle, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>a mantle over the barrel &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>

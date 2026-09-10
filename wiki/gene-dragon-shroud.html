@@ -21,7 +21,7 @@
 <h1>Dragon Shroud</h1>
 
 <p class="lede">
-    Soft-edged plumage laid over the whole horse and piped in steel grey, breaking into streamers down the mane and tail - with the coat underneath showing through as scattered windows.
+    Soft-edged plumage laid over the whole horse and piped in steel grey, breaking into streamers down the mane and tail - with the coat underneath showing through as scattered windows. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Dragon Shroud</th><td><code>Drsw/Drsw</code> &middot; <code>Drsw/Drsc</code> &middot; <code>Drsw/n</code></td></tr>
+<tr><th>Dragon Shroud</th><td><code>Drsw/Drsw</code> &middot; <code>Drsw/Drsc</code> &middot; <code>Drsw/n</code> &middot; <code>Drsw/Drsk</code></td></tr>
+<tr><th>Dragon Shroud, black</th><td><code>Drsk/Drsk</code> &middot; <code>Drsk/Drsc</code> &middot; <code>Drsk/n</code></td></tr>
 <tr><th>Dragon Shroud, coloured</th><td><code>Drsc/Drsc</code></td></tr>
 <tr><th>Wild type</th><td><code>Drsc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -53,7 +54,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 3,571</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 3,572</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Drsw/Drsw</code></td><td>Dragon Shroud</td><td>0.001% &mdash; 1 in 100,000</td></tr>
-<tr><td><code>Drsw/Drsc</code></td><td>Dragon Shroud</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Drsw/Drsk</code></td><td>Dragon Shroud</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Drsw/Drsc</code></td><td>Dragon Shroud</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>Drsw/n</code></td><td>Dragon Shroud</td><td>0.019% &mdash; 1 in 5,263</td></tr>
-<tr><td><code>Drsc/Drsc</code></td><td>Dragon Shroud, coloured</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Drsk/Drsk</code></td><td>Dragon Shroud, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Drsk/Drsc</code></td><td>Dragon Shroud, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Drsk/n</code></td><td>Dragon Shroud, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Drsc/Drsc</code></td><td>Dragon Shroud, coloured</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.972%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.dragon_shroud</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>217 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Drsw</code> &middot; <code>Drsc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Drsw</code> &middot; <code>Drsk</code> &middot; <code>Drsc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>12 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>SPOTS, TOWARD, WAVES</td></tr>
 </tbody>
@@ -111,6 +116,8 @@
 <p>Imported from the magic-gene intake, 2026-09-08. The piping round each plume was specified as a `spread` on the plume's own spot field. `spread` is a PIGMENT parameter and does not exist on SPOTS, so the rim is built the way every other rim in this mod is: a slightly larger disc with the disc itself taken out of it, on the same seed and spacing so the two line up exactly.</p>
 
 <p>The coloured form deliberately has no piping. One tone reads as a different gene at a glance, which is what a recessive form is for.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Drsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -124,6 +131,16 @@
 <h3>Dragon Shroud</h3>
 
 <p>Overlapping white plumes cover almost the whole horse, each one outlined in a thin steel grey drawn as a slightly larger disc with the plume taken out of it. A second, much finer spot field is subtracted out of them, and that is what leaves the windows of ordinary coat scattered through the white. The mane and tail take saw waves instead, which read as feathered streamers rather than as hair.</p>
+
+<ol>
+<li>the plumage, with windows of coat left in it &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
+<li>the steel piping round each plume &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
+<li>streamers down the mane and tail &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Dragon Shroud, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the plumage, with windows of coat left in it &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>

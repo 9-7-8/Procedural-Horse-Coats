@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 310,
   "rarity": "RARE",
-  "blurb": "Peacock eyes - a dark pupil inside a ring of bare coat inside a broad faint leaf, upright and a little taller than wide, with ordinary spots scattered around them.",
+  "blurb": "Peacock eyes - a dark pupil inside a ring of bare coat inside a broad faint leaf, upright and a little taller than wide, with ordinary spots scattered around them. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Pv",
       "label": "Pavonem, white (Pv)"
+    },
+    {
+      "token": "Pvk",
+      "label": "Pavonem, black (Pvk)"
     },
     {
       "token": "Pvc",
@@ -48,7 +52,8 @@
       "when": [
         "Pv/Pv",
         "Pv/Pvc",
-        "Pv/n"
+        "Pv/n",
+        "Pv/Pvk"
       ],
       "layers": [
         {
@@ -88,7 +93,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#f4f1ea",
+            "color": "#dbdbdb",
             "strength": 52
           }
         },
@@ -113,7 +118,7 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
+            "color": "#6b6b6b",
             "strength": 96
           }
         },
@@ -136,7 +141,108 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
+            "color": "#f7f7f7",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Pavonem",
+      "description": "The same marking as the white form with the light taken out of it: the same 3 steps, moved to the dark end of the scale.",
+      "when": [
+        "Pvk/Pvk",
+        "Pvk/Pvc",
+        "Pvk/n"
+      ],
+      "layers": [
+        {
+          "name": "the outer leaf, with the eye left out of it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": 4.0,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
+              "axis": "Y",
+              "softness": 0.15
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": 2.2,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
+              "axis": "Y",
+              "softness": 0.15,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#5c5c5c",
+            "strength": 52
+          }
+        },
+        {
+          "name": "the pupil at the centre of the eye",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$eyeSpacing",
+              "radius": 0.8,
+              "vary": 0.25,
+              "chance": 0.75,
+              "stretch": 1.2,
+              "axis": "Y",
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the ordinary spots that always surround them",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 3.2,
+              "radius": 0.5,
+              "vary": 0.5,
+              "chance": 0.22,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
             "strength": 88
           }
         }
@@ -256,9 +362,17 @@
   ],
   "founders": {
     "Pv/Pv": 0.002,
-    "Pv/Pvc": 0.008,
+    "Pv/Pvk": 0.002667,
+    "Pv/Pvc": 0.002667,
     "Pv/n": 0.038,
-    "Pvc/Pvc": 0.008,
+    "Pvk/Pvk": 0.002667,
+    "Pvk/Pvc": 0.002667,
+    "Pvk/n": 0.002667,
+    "Pvc/Pvc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Pvk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.",
+    "The white form was regraded at the same time. It spanned a much narrower range of lightness than the coloured form did - the same layers the coloured form separates were all landing on off-white - so its tones now follow the coloured form's own per-layer ordering, in greys. All three forms carry the same number of steps."
+  ]
 }

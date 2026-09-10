@@ -21,7 +21,7 @@
 <h1>Concentric Eyespots</h1>
 
 <p class="lede">
-    Butterfly-wing eyespots - nested rings around a pale glinting core - scatter down the neck and all four legs.
+    Butterfly-wing eyespots - nested rings around a pale glinting core - scatter down the neck and all four legs. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Concentric Eyespots, pale</th><td><code>Cew/Cew</code> &middot; <code>Cew/Cec</code> &middot; <code>Cew/n</code></td></tr>
+<tr><th>Concentric Eyespots, pale</th><td><code>Cew/Cew</code> &middot; <code>Cew/Cec</code> &middot; <code>Cew/n</code> &middot; <code>Cew/Cek</code></td></tr>
+<tr><th>Concentric Eyespots, black</th><td><code>Cek/Cek</code> &middot; <code>Cek/Cec</code> &middot; <code>Cek/n</code></td></tr>
 <tr><th>Concentric Eyespots, coloured</th><td><code>Cec/Cec</code></td></tr>
 <tr><th>Wild type</th><td><code>Cec/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Cew/Cew</code></td><td>Concentric Eyespots, pale</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Cew/Cec</code></td><td>Concentric Eyespots, pale</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Cew/Cek</code></td><td>Concentric Eyespots, pale</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Cew/Cec</code></td><td>Concentric Eyespots, pale</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Cew/n</code></td><td>Concentric Eyespots, pale</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Cec/Cec</code></td><td>Concentric Eyespots, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Cek/Cek</code></td><td>Concentric Eyespots, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Cek/Cec</code></td><td>Concentric Eyespots, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Cek/n</code></td><td>Concentric Eyespots, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Cec/Cec</code></td><td>Concentric Eyespots, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.concentric_eyespots</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>321 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Cew</code> &middot; <code>Cec</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Cew</code> &middot; <code>Cek</code> &middot; <code>Cec</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>7 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>PARTS, SPOTS, TOWARD</td></tr>
 </tbody>
@@ -116,6 +121,10 @@
 
 <p>The band radii are wider than the import's by roughly double, and that is not taste. A texel is half a body unit; the original leg rings were 0.28 and 0.26 units from one edge to the next, so every band on every leg was under a texel wide and resolved to nothing at all. The import's own note said a FOURTH band would do that - it was already happening at three. Anything with structure inside it needs several units, and the spacing went up with the radii so the eyespots still do not touch.</p>
 
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Cek are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
+
+<p>The white form was regraded at the same time. It spanned a much narrower range of lightness than the coloured form did - the same layers the coloured form separates were all landing on off-white - so its tones now follow the coloured form's own per-layer ordering, in greys. All three forms carry the same number of steps.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -128,6 +137,20 @@
 <h3>Concentric Eyespots, pale</h3>
 
 <p>A faint ivory echo of the rings ghosts along the neck and legs - the same shape as the coloured form, with the colour taken out.</p>
+
+<ol>
+<li>the leg eyespots, band at 1.9 &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the leg eyespots, band at 1.25 &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the leg eyespots, band at 0.62 &mdash; <code>PARTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the neck eyespots, band at 3.0 &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the neck eyespots, band at 2.2 &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the neck eyespots, band at 1.5 &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the neck eyespots, band at 0.8 &mdash; <code>PARTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Concentric Eyespots, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 5 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the leg eyespots, band at 1.9 &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>

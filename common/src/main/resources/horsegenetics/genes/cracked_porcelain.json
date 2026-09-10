@@ -5,15 +5,20 @@
   "phase": "magical",
   "priority": 216,
   "rarity": "EPIC",
-  "blurb": "A glaze laid over the whole horse and then crazed - the coat underneath shows through only as the hairline cracks between the plates.",
+  "blurb": "A glaze laid over the whole horse and then crazed - the coat underneath shows through only as the hairline cracks between the plates. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. CRACKLE is the only mask in the vocabulary with a genuinely hard edge, which is why this gene is drawn with it rather than with a patch field - a crazed glaze whose cracks are soft is a marbled horse, not a broken pot.",
-    "The gene paints the plates and leaves the channels, rather than the other way round. That is worth knowing when reading the layer: the coat you can see IS the crack."
+    "The gene paints the plates and leaves the channels, rather than the other way round. That is worth knowing when reading the layer: the coat you can see IS the crack.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Cpk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Cpw",
       "label": "Porcelain, white (Cpw)"
+    },
+    {
+      "token": "Cpk",
+      "label": "Porcelain, black (Cpk)"
     },
     {
       "token": "Cpc",
@@ -56,7 +61,8 @@
       "when": [
         "Cpw/Cpw",
         "Cpw/Cpc",
-        "Cpw/n"
+        "Cpw/n",
+        "Cpw/Cpk"
       ],
       "layers": [
         {
@@ -82,6 +88,43 @@
           "op": {
             "type": "FLAT",
             "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Cracked Porcelain, glazed, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Cpk/Cpk",
+        "Cpk/Cpc",
+        "Cpk/n"
+      ],
+      "layers": [
+        {
+          "name": "the porcelain glaze over everything but the cracks",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS"
+              ],
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$lineWidth",
+              "warp": 0.35,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "FLAT",
+            "color": "#1f1f1f"
           }
         }
       ]
@@ -132,9 +175,13 @@
   ],
   "founders": {
     "Cpw/Cpw": 0.001,
-    "Cpw/Cpc": 0.004,
+    "Cpw/Cpk": 0.001333,
+    "Cpw/Cpc": 0.001333,
     "Cpw/n": 0.019,
-    "Cpc/Cpc": 0.004,
+    "Cpk/Cpk": 0.001333,
+    "Cpk/Cpc": 0.001333,
+    "Cpk/n": 0.001333,
+    "Cpc/Cpc": 0.001333,
     "n/n": 99.972
   }
 }

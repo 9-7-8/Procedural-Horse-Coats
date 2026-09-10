@@ -5,16 +5,21 @@
   "phase": "magical",
   "priority": 219,
   "rarity": "EPIC",
-  "blurb": "Snow lying over the horse in drifts, with the coat showing through where none settled - and dark points clustered high on the croup, round the ankles and across the face in front of the ears.",
+  "blurb": "Snow lying over the horse in drifts, with the coat showing through where none settled - and dark points clustered high on the croup, round the ankles and across the face in front of the ears. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. White goes on first over everything, and the three clouds of points are painted back over it. Clumping on the speckle fields is what makes them clouds rather than an even dusting.",
     "The points are subtler on a bake than the source description suggests. If they want to be louder the knob to move is the speckle size rather than the density - denser small points still read as grey from a distance.",
-    "The white used to be a flat PARTS mask over every part, so the horse went entirely white and the only thing the base coat could do was not be seen. It now runs through a large-scale PATCHES mask (owner's call), so there are bare drifts the coat shows through - which is what the gene's own name describes and what makes a snow-cloud chestnut and a snow-cloud black different animals. The three point clusters are untouched; where a cluster lands on a bare drift it simply has less white to sit on."
+    "The white used to be a flat PARTS mask over every part, so the horse went entirely white and the only thing the base coat could do was not be seen. It now runs through a large-scale PATCHES mask (owner's call), so there are bare drifts the coat shows through - which is what the gene's own name describes and what makes a snow-cloud chestnut and a snow-cloud black different animals. The three point clusters are untouched; where a cluster lands on a bare drift it simply has less white to sit on.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Snk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Snw",
       "label": "Snow Cloud, dark points (Snw)"
+    },
+    {
+      "token": "Snk",
+      "label": "Snow Cloud, black points (Snk)"
     },
     {
       "token": "Snc",
@@ -96,7 +101,8 @@
       "when": [
         "Snw/Snw",
         "Snw/Snc",
-        "Snw/n"
+        "Snw/n",
+        "Snw/Snk"
       ],
       "layers": [
         {
@@ -253,6 +259,175 @@
           "op": {
             "type": "TOWARD",
             "color": "#191919",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Snow Cloud, black points",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Snk/Snk",
+        "Snk/Snc",
+        "Snk/n"
+      ],
+      "layers": [
+        {
+          "name": "snow over the horse, with bare drifts the coat shows through",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS",
+                "HAIR"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "EARS",
+                "HAIR"
+              ],
+              "seed": "$driftSeed",
+              "scale": "$driftScale",
+              "threshold": "$settled",
+              "softness": 0.09,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 99.0
+          }
+        },
+        {
+          "name": "points clustered high on the croup",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$rumpSeed",
+              "spacing": "$rumpSpacing",
+              "size": "$rumpSize",
+              "density": 0.6,
+              "clumping": 0.4,
+              "clumpScale": 5.0,
+              "softness": 0.3
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 2.0,
+              "combine": "MULTIPLY",
+              "from": 6.0,
+              "to": 15.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.25,
+              "combine": "MULTIPLY",
+              "from": 0.55,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "points round the ankles",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$ankleSeed",
+              "spacing": "$ankleSpacing",
+              "size": "$ankleSize",
+              "density": 0.6,
+              "clumping": 0.3,
+              "clumpScale": 3.0,
+              "softness": 0.3
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.18,
+              "combine": "MULTIPLY",
+              "from": -0.1,
+              "to": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "points across the face, forward of the ears",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$faceSeed",
+              "spacing": "$faceSpacing",
+              "size": "$faceSize",
+              "density": 0.6,
+              "clumping": 0.3,
+              "clumpScale": 3.0,
+              "softness": 0.3
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": -0.1,
+              "to": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 90.0
           }
         }
@@ -440,9 +615,13 @@
   ],
   "founders": {
     "Snw/Snw": 0.001,
-    "Snw/Snc": 0.004,
+    "Snw/Snk": 0.001333,
+    "Snw/Snc": 0.001333,
     "Snw/n": 0.019,
-    "Snc/Snc": 0.004,
+    "Snk/Snk": 0.001333,
+    "Snk/Snc": 0.001333,
+    "Snk/n": 0.001333,
+    "Snc/Snc": 0.001333,
     "n/n": 99.972
   }
 }

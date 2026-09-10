@@ -21,7 +21,7 @@
 <h1>Snow Cloud</h1>
 
 <p class="lede">
-    Snow lying over the horse in drifts, with the coat showing through where none settled - and dark points clustered high on the croup, round the ankles and across the face in front of the ears.
+    Snow lying over the horse in drifts, with the coat showing through where none settled - and dark points clustered high on the croup, round the ankles and across the face in front of the ears. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Snow Cloud</th><td><code>Snw/Snw</code> &middot; <code>Snw/Snc</code> &middot; <code>Snw/n</code></td></tr>
+<tr><th>Snow Cloud</th><td><code>Snw/Snw</code> &middot; <code>Snw/Snc</code> &middot; <code>Snw/n</code> &middot; <code>Snw/Snk</code></td></tr>
+<tr><th>Snow Cloud, black points</th><td><code>Snk/Snk</code> &middot; <code>Snk/Snc</code> &middot; <code>Snk/n</code></td></tr>
 <tr><th>Snow Cloud, coloured points</th><td><code>Snc/Snc</code></td></tr>
 <tr><th>Wild type</th><td><code>Snc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -53,7 +54,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 3,571</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 3,572</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Snw/Snw</code></td><td>Snow Cloud</td><td>0.001% &mdash; 1 in 100,000</td></tr>
-<tr><td><code>Snw/Snc</code></td><td>Snow Cloud</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Snw/Snk</code></td><td>Snow Cloud</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Snw/Snc</code></td><td>Snow Cloud</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>Snw/n</code></td><td>Snow Cloud</td><td>0.019% &mdash; 1 in 5,263</td></tr>
-<tr><td><code>Snc/Snc</code></td><td>Snow Cloud, coloured points</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Snk/Snk</code></td><td>Snow Cloud, black points</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Snk/Snc</code></td><td>Snow Cloud, black points</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Snk/n</code></td><td>Snow Cloud, black points</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Snc/Snc</code></td><td>Snow Cloud, coloured points</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.972%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.snow_cloud</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>219 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Snw</code> &middot; <code>Snc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Snw</code> &middot; <code>Snk</code> &middot; <code>Snc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>13 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, PARTS, PATCHES, SPECKLE, TOWARD</td></tr>
 </tbody>
@@ -114,6 +119,8 @@
 
 <p>The white used to be a flat PARTS mask over every part, so the horse went entirely white and the only thing the base coat could do was not be seen. It now runs through a large-scale PATCHES mask (owner's call), so there are bare drifts the coat shows through - which is what the gene's own name describes and what makes a snow-cloud chestnut and a snow-cloud black different animals. The three point clusters are untouched; where a cluster lands on a bare drift it simply has less white to sit on.</p>
 
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Snk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -126,6 +133,17 @@
 <h3>Snow Cloud</h3>
 
 <p>Snow lies over the horse in drifts with the coat showing through where none settled, and three clouds of dark points are laid over the top - each a speckle field pinned to one part of the body: high on the croup, round the ankles, and across the face in front of the ears.</p>
+
+<ol>
+<li>snow over the horse, with bare drifts the coat shows through &mdash; <code>PARTS</code> &times; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
+<li>points clustered high on the croup &mdash; <code>SPECKLE</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>points round the ankles &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>points across the face, forward of the ears &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Snow Cloud, black points</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>snow over the horse, with bare drifts the coat shows through &mdash; <code>PARTS</code> &times; <code>PATCHES</code>, painted with <code>TOWARD</code></li>

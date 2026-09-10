@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 257,
   "rarity": "RARE",
-  "blurb": "Two to four long pale beams lying nose-to-tail across the shoulder, hip, thigh and legs, brightest along their middle and fading out with no edge at all.",
+  "blurb": "Two to four long pale beams lying nose-to-tail across the shoulder, hip, thigh and legs, brightest along their middle and fading out with no edge at all. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Qzr",
       "label": "Quazars, white (Qzr)"
+    },
+    {
+      "token": "Qzk",
+      "label": "Quazars, black (Qzk)"
     },
     {
       "token": "Qzc",
@@ -44,7 +48,8 @@
       "when": [
         "Qzr/Qzr",
         "Qzr/Qzc",
-        "Qzr/n"
+        "Qzr/n",
+        "Qzr/Qzk"
       ],
       "layers": [
         {
@@ -69,6 +74,43 @@
           "op": {
             "type": "TOWARD",
             "color": "#fdfaf0",
+            "strength": 74
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black quazars",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Qzk/Qzk",
+        "Qzk/Qzc",
+        "Qzk/n"
+      ],
+      "layers": [
+        {
+          "name": "the beams",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$beamSeed",
+              "spacing": 9.0,
+              "length": 30.0,
+              "axis": "X",
+              "width": "$beamWidth",
+              "curl": 0.4,
+              "softness": 2.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 74
           }
         }
@@ -120,9 +162,16 @@
   ],
   "founders": {
     "Qzr/Qzr": 0.002,
-    "Qzr/Qzc": 0.008,
+    "Qzr/Qzk": 0.002667,
+    "Qzr/Qzc": 0.002667,
     "Qzr/n": 0.038,
-    "Qzc/Qzc": 0.008,
+    "Qzk/Qzk": 0.002667,
+    "Qzk/Qzc": 0.002667,
+    "Qzk/n": 0.002667,
+    "Qzc/Qzc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Qzk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

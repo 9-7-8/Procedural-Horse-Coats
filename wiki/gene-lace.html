@@ -21,7 +21,7 @@
 <h1>Lace</h1>
 
 <p class="lede">
-    A thread-fine net of white veining over the horse - lace, or a crazed glaze, rather than the broad blotches of Marble Tobiano.
+    A thread-fine net of white veining over the horse - lace, or a crazed glaze, rather than the broad blotches of Marble Tobiano. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Lace</th><td><code>Lac/Lac</code> &middot; <code>Lac/Lah</code> &middot; <code>Lac/n</code></td></tr>
+<tr><th>Lace</th><td><code>Lac/Lac</code> &middot; <code>Lac/Lah</code> &middot; <code>Lac/n</code> &middot; <code>Lac/Lak</code></td></tr>
+<tr><th>Lace, black</th><td><code>Lak/Lak</code> &middot; <code>Lak/Lah</code> &middot; <code>Lak/n</code></td></tr>
 <tr><th>Lace, coloured</th><td><code>Lah/Lah</code></td></tr>
 <tr><th>Wild type</th><td><code>Lah/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Lac/Lac</code></td><td>Lace</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Lac/Lah</code></td><td>Lace</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Lac/Lak</code></td><td>Lace</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Lac/Lah</code></td><td>Lace</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Lac/n</code></td><td>Lace</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Lah/Lah</code></td><td>Lace, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Lak/Lak</code></td><td>Lace, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Lak/Lah</code></td><td>Lace, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Lak/n</code></td><td>Lace, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Lah/Lah</code></td><td>Lace, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.lace</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>377 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Lac</code> &middot; <code>Lah</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Lac</code> &middot; <code>Lak</code> &middot; <code>Lah</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>7 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>CRACKLE, TOWARD</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08 (from the second Marble Tobiano sketch, which asked to be a distinct locus rather than an allele). The fine net is kept off the legs on purpose - a leg is four units wide, and two crackle nets on it resolve as a wash rather than as lace.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Lak are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,15 @@
 <h3>Lace</h3>
 
 <p>Two crackle nets at different cell sizes, both drawn as the channels rather than the cells, so what you get is line rather than patch. The finer of the two runs over the barrel, the neck and the head only - the legs keep the coarse net alone, which stops the pattern turning to a wash where the parts are narrow.</p>
+
+<ol>
+<li>the lace ground - a fine net over most of the horse &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+<li>a second, tighter net threaded through the first &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Lace, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the lace ground - a fine net over most of the horse &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>

@@ -5,15 +5,20 @@
   "phase": "magical",
   "priority": 370,
   "rarity": "RARE",
-  "blurb": "A lattice of hollow diamonds crossing the back, running up the crest of the neck, down the tail and round the forelegs - a dragon's wing-scutes rather than a horse's coat.",
+  "blurb": "A lattice of hollow diamonds crossing the back, running up the crest of the neck, down the tail and round the forelegs - a dragon's wing-scutes rather than a horse's coat. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. A diamond is two triangle waves crossing, and the format cannot intersect two bands in one mask - so each is its own WAVES entry combined with MAX, which unions the two zigzags into a lattice. The source file expected a STROKES pass to outline them; strokes on top of a wave lattice came out as noise at this scale and were dropped.",
-    "The neck chain is a band in the neck's own frame (`'space': 'local', 'axis': 'X'`), which is the crest side of it. It used to be the 90/77.94 saw-wave trick - the neck's geometry written out by hand in eleven gene files - and in this one that trick was in `part` space, where the amplitude is in normalised units, so the band was displaced clean off the horse and the chain painted nothing at all. See wiki/making-a-gene.html#local-space."
+    "The neck chain is a band in the neck's own frame (`'space': 'local', 'axis': 'X'`), which is the crest side of it. It used to be the 90/77.94 saw-wave trick - the neck's geometry written out by hand in eleven gene files - and in this one that trick was in `part` space, where the amplitude is in normalised units, so the band was displaced clean off the horse and the chain painted nothing at all. See wiki/making-a-gene.html#local-space.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Dsw",
       "label": "Scutes, white (Dsw)"
+    },
+    {
+      "token": "Dsk",
+      "label": "Scutes, black (Dsk)"
     },
     {
       "token": "Dsc",
@@ -58,7 +63,8 @@
       "when": [
         "Dsw/Dsw",
         "Dsw/Dsc",
-        "Dsw/n"
+        "Dsw/n",
+        "Dsw/Dsk"
       ],
       "layers": [
         {
@@ -186,6 +192,146 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": 96.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Diamond Scutes, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Dsk/Dsk",
+        "Dsk/Dsc",
+        "Dsk/n"
+      ],
+      "layers": [
+        {
+          "name": "the scute lattice down the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": 0.22,
+              "softness": 0.04,
+              "from": 0.42,
+              "to": 0.5
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$meshWavelength",
+              "amplitude": -0.22,
+              "softness": 0.04,
+              "combine": "MAX",
+              "from": 0.42,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the chain along the neck crest",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": -0.2,
+              "softness": 0.1
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "X",
+              "shape": "triangle",
+              "space": "local",
+              "wavelength": "$meshWavelength",
+              "amplitude": 0.12,
+              "softness": 0.04,
+              "combine": "MULTIPLY",
+              "from": -0.9,
+              "to": -0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the smaller chain down the tail",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$tailWavelength",
+              "amplitude": 0.3,
+              "softness": 0.05,
+              "from": 0.35,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 96.0
+          }
+        },
+        {
+          "name": "the trim round the forelegs",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "FRONT_LEGS"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$tailWavelength",
+              "amplitude": 0.28,
+              "softness": 0.05,
+              "from": 0.36,
+              "to": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 96.0
           }
         }
@@ -346,9 +492,13 @@
   ],
   "founders": {
     "Dsw/Dsw": 0.002,
-    "Dsw/Dsc": 0.008,
+    "Dsw/Dsk": 0.002667,
+    "Dsw/Dsc": 0.002667,
     "Dsw/n": 0.038,
-    "Dsc/Dsc": 0.008,
+    "Dsk/Dsk": 0.002667,
+    "Dsk/Dsc": 0.002667,
+    "Dsk/n": 0.002667,
+    "Dsc/Dsc": 0.002667,
     "n/n": 99.944
   }
 }

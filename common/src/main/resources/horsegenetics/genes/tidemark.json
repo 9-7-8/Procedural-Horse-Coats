@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 258,
   "rarity": "UNCOMMON",
-  "blurb": "The belly and lower barrel filled to an arched waterline, with the line picked out in a second colour and a row of dots riding along it.",
+  "blurb": "The belly and lower barrel filled to an arched waterline, with the line picked out in a second colour and a row of dots riding along it. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. One sine wave read three times - the fill below it, the line at it, and a band just above it broken into dots by a spot field. Because all three read the SAME wave, the dots follow the waterline exactly however the arch knob is drawn, which three independent masks could not promise."
+    "Imported from the magic-gene intake, 2026-09-08. One sine wave read three times - the fill below it, the line at it, and a band just above it broken into dots by a spot field. Because all three read the SAME wave, the dots follow the waterline exactly however the arch knob is drawn, which three independent masks could not promise.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Tdk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Tdm",
       "label": "Tidemark, pale (Tdm)"
+    },
+    {
+      "token": "Tdk",
+      "label": "Tidemark, black (Tdk)"
     },
     {
       "token": "Tdc",
@@ -77,7 +82,8 @@
       "when": [
         "Tdm/Tdm",
         "Tdm/Tdc",
-        "Tdm/n"
+        "Tdm/n",
+        "Tdm/Tdk"
       ],
       "layers": [
         {
@@ -102,6 +108,105 @@
           "op": {
             "type": "TOWARD",
             "color": "#f6f0e2",
+            "strength": 80.0
+          }
+        },
+        {
+          "name": "the waterline itself, drawn as a line",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.03,
+              "from": "$reach",
+              "to": "$lineTop"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9b48a",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "a row of dots riding along it",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.05,
+              "from": "$reach",
+              "to": "$dotTop"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$dotSpacing",
+              "radius": "$dotSize",
+              "vary": 0.3,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9b48a",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Tidemark, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone, and the coloured accents unchanged.",
+      "when": [
+        "Tdk/Tdk",
+        "Tdk/Tdc",
+        "Tdk/n"
+      ],
+      "layers": [
+        {
+          "name": "the belly filled to an arched waterline",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 44.0,
+              "amplitude": "$archHeight",
+              "softness": 0.14,
+              "from": -0.1,
+              "to": "$reach"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 80.0
           }
         },
@@ -281,9 +386,13 @@
   ],
   "founders": {
     "Tdm/Tdm": 0.004,
-    "Tdm/Tdc": 0.016,
+    "Tdm/Tdk": 0.005333,
+    "Tdm/Tdc": 0.005333,
     "Tdm/n": 0.076,
-    "Tdc/Tdc": 0.016,
+    "Tdk/Tdk": 0.005333,
+    "Tdk/Tdc": 0.005333,
+    "Tdk/n": 0.005333,
+    "Tdc/Tdc": 0.005333,
     "n/n": 99.888
   }
 }

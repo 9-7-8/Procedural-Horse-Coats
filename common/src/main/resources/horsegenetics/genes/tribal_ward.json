@@ -5,17 +5,22 @@
   "phase": "magical",
   "priority": 220,
   "rarity": "EPIC",
-  "blurb": "A painted ward - coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, laid straight onto the horse's own colour.",
+  "blurb": "A painted ward - coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, laid straight onto the horse's own colour. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The bare throat and chest are subtracted out of the ground rather than painted back over it, so what shows through is whatever the horse actually is - a bay reveals bay, a grey reveals grey. Painting them back would have needed a colour, and any colour would have been a lie about the horse underneath.",
     "SPIRAL draws one spiral per named part, so 'a swirl at each hip and each shoulder' is two layers at different offsets along the body rather than four placements. On a bake the pair reads as hip and shoulder; it is not four independent motifs.",
     "The pale ground was removed (owner's call). It is worth knowing that this layer is the one the invert/parts fix of 2026-09-08 briefly deleted and then restored, because the restore is what made it visible enough to judge - and the judgement was that the ward reads better as paint on a horse than as paint on a white field.",
-    "The old note here said the ink stays black because 'it is the ink that makes it a ward', and the coloured allele varied the pale ground instead. With the ground gone that reasoning left the allele with nothing at all to do - the two expressions came out identical - so the ink is what varies now. The earlier argument was about a design that no longer exists rather than about the ink."
+    "The old note here said the ink stays black because 'it is the ink that makes it a ward', and the coloured allele varied the pale ground instead. With the ground gone that reasoning left the allele with nothing at all to do - the two expressions came out identical - so the ink is what varies now. The earlier argument was about a design that no longer exists rather than about the ink.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Twk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Twd",
       "label": "Ward, white (Twd)"
+    },
+    {
+      "token": "Twk",
+      "label": "Ward, black (Twk)"
     },
     {
       "token": "Twc",
@@ -75,7 +80,8 @@
       "when": [
         "Twd/Twd",
         "Twd/Twc",
-        "Twd/n"
+        "Twd/n",
+        "Twd/Twk"
       ],
       "layers": [
         {
@@ -216,6 +222,159 @@
           "op": {
             "type": "TOWARD",
             "color": "#141210",
+            "strength": 94.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Tribal Ward, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Twk/Twk",
+        "Twk/Twc",
+        "Twk/n"
+      ],
+      "layers": [
+        {
+          "name": "a coiled swirl at each hip",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "radius": "$hipSwirl",
+              "turns": 2.0,
+              "width": "$lineWidth",
+              "axis": "Z",
+              "offset": -0.3,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "a smaller one at each shoulder",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "radius": "$shoulderSwirl",
+              "turns": 1.6,
+              "width": "$lineWidth",
+              "axis": "Z",
+              "offset": 0.35,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "chevrons banded down the back",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$chevronWavelength",
+              "amplitude": 0.16,
+              "softness": 0.04,
+              "from": 0.74,
+              "to": 0.82
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "bands round the neck",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "part",
+              "wavelength": "$neckBandWidth",
+              "amplitude": 0.1,
+              "softness": 0.05,
+              "from": 0.38,
+              "to": 0.48
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 94.0
+          }
+        },
+        {
+          "name": "rings round the legs",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "from": 0.18,
+              "to": 0.28
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "combine": "MAX",
+              "from": 0.46,
+              "to": 0.56
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.05,
+              "combine": "MAX",
+              "from": 0.74,
+              "to": 0.84
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 94.0
           }
         }
@@ -394,9 +553,13 @@
   ],
   "founders": {
     "Twd/Twd": 0.001,
-    "Twd/Twc": 0.004,
+    "Twd/Twk": 0.001333,
+    "Twd/Twc": 0.001333,
     "Twd/n": 0.019,
-    "Twc/Twc": 0.004,
+    "Twk/Twk": 0.001333,
+    "Twk/Twc": 0.001333,
+    "Twk/n": 0.001333,
+    "Twc/Twc": 0.001333,
     "n/n": 99.972
   }
 }

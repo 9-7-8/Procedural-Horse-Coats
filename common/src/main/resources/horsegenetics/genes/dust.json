@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 342,
   "rarity": "COMMON",
-  "blurb": "Fine stipple with no boundary anywhere - up from the pasterns, along the belly, a cap on the muzzle, and a band beside the mane.",
+  "blurb": "Fine stipple with no boundary anywhere - up from the pasterns, along the belly, a cap on the muzzle, and a band beside the mane. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Dst",
       "label": "Dust, white (Dst)"
+    },
+    {
+      "token": "Dsk",
+      "label": "Dust, black (Dsk)"
     },
     {
       "token": "Dsc",
@@ -44,7 +48,8 @@
       "when": [
         "Dst/Dst",
         "Dst/Dsc",
-        "Dst/n"
+        "Dst/n",
+        "Dst/Dsk"
       ],
       "layers": [
         {
@@ -174,6 +179,148 @@
           "op": {
             "type": "TOWARD",
             "color": "#f6f3ec",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Dust",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Dsk/Dsk",
+        "Dsk/Dsc",
+        "Dsk/n"
+      ],
+      "layers": [
+        {
+          "name": "up from the pasterns",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.35,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88
+          }
+        },
+        {
+          "name": "along the belly",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.28,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the muzzle cap",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "MUZZLE",
+                "HEAD"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MUZZLE",
+                "HEAD"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.82,
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the band beside the mane",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.0,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 88
           }
         }
@@ -336,9 +483,16 @@
   ],
   "founders": {
     "Dst/Dst": 0.006,
-    "Dst/Dsc": 0.024,
+    "Dst/Dsk": 0.008,
+    "Dst/Dsc": 0.008,
     "Dst/n": 0.114,
-    "Dsc/Dsc": 0.024,
+    "Dsk/Dsk": 0.008,
+    "Dsk/Dsc": 0.008,
+    "Dsk/n": 0.008,
+    "Dsc/Dsc": 0.008,
     "n/n": 99.832
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

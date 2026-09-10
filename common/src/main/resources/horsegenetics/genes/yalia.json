@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 601,
   "rarity": "UNCOMMON",
-  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design. A third allele draws the outline and nothing else, so it is invisible on a horse with no white.",
+  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design. A third allele draws the outline and nothing else, so it is invisible on a horse with no white. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Yal",
       "label": "Yalia, white fill (Yal)"
+    },
+    {
+      "token": "Ylk",
+      "label": "Yalia, black fill (Ylk)"
     },
     {
       "token": "Ylc",
@@ -54,7 +58,8 @@
         "Yal/Yal",
         "Yal/Ylc",
         "Yal/Ylo",
-        "Yal/n"
+        "Yal/n",
+        "Yal/Ylk"
       ],
       "layers": [
         {
@@ -270,12 +275,236 @@
       ]
     },
     {
+      "id": "black",
+      "name": "Black Yalia",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Ylk/Ylk",
+        "Ylk/Ylc",
+        "Ylk/Ylo",
+        "Ylk/n"
+      ],
+      "layers": [
+        {
+          "name": "the white fill",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR",
+                "LEGS"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.55,
+              "softness": 0.01
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 98
+          }
+        },
+        {
+          "name": "the outline round every zone",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR",
+                "LEGS"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.52,
+              "softness": 0.01
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR",
+                "LEGS"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.58,
+              "softness": 0.01,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        },
+        {
+          "name": "a band round every leg",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.14,
+              "to": 0.34,
+              "softness": 0.01
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 98
+          }
+        },
+        {
+          "name": "the outline of the leg band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.12,
+              "to": 0.16,
+              "softness": 0.005
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.32,
+              "to": 0.36,
+              "softness": 0.005,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        },
+        {
+          "name": "hooves in the outline colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.12,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the horse's own white markings, filled flat like a zone",
+          "masks": [
+            {
+              "type": "LUMA",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 97
+          }
+        },
+        {
+          "name": "and drawn round in the same outline colour",
+          "masks": [
+            {
+              "type": "LUMA",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
+              "spread": 0.7
+            },
+            {
+              "type": "LUMA",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
       "id": "coloured",
       "name": "Coloured Yalia",
       "description": "The same architecture in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. Unlike the white form it leaves the horse's own white markings alone - there is nothing for them to match - so a coloured Yalia over a tobiano is genuinely two markings on one horse. It never gives blue eyes.",
       "when": [
         "Ylc/Ylc",
-        "Ylc/Ylo"
+        "Ylc/Ylo",
+        "Ylc/n"
       ],
       "layers": [
         {
@@ -490,13 +719,22 @@
   ],
   "founders": {
     "Yal/Yal": 0.004,
-    "Yal/Ylc": 0.005333,
-    "Yal/Ylo": 0.005333,
+    "Yal/Ylk": 0.002667,
+    "Yal/Ylc": 0.002667,
+    "Yal/Ylo": 0.002667,
     "Yal/n": 0.076,
-    "Ylc/Ylc": 0.005333,
-    "Ylc/Ylo": 0.005333,
-    "Ylo/Ylo": 0.005333,
-    "Ylo/n": 0.005333,
+    "Ylk/Ylk": 0.002667,
+    "Ylk/Ylc": 0.002667,
+    "Ylk/Ylo": 0.002667,
+    "Ylk/n": 0.002667,
+    "Ylc/Ylc": 0.002667,
+    "Ylc/Ylo": 0.002667,
+    "Ylc/n": 0.002667,
+    "Ylo/Ylo": 0.002667,
+    "Ylo/n": 0.002667,
     "n/n": 99.888
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Ylk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

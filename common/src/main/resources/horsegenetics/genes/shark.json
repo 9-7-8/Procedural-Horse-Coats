@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 259,
   "rarity": "RARE",
-  "blurb": "A single fin-shaped pale field standing on the withers and on the top of the base of the neck, with a tapering band running on up the crest to the poll.",
+  "blurb": "A single fin-shaped pale field standing on the withers and on the top of the base of the neck, with a tapering band running on up the crest to the poll. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Shk",
       "label": "Shark, white (Shk)"
+    },
+    {
+      "token": "Shbk",
+      "label": "Shark, black (Shbk)"
     },
     {
       "token": "Shc",
@@ -49,7 +53,8 @@
       "when": [
         "Shk/Shk",
         "Shk/Shc",
-        "Shk/n"
+        "Shk/n",
+        "Shk/Shbk"
       ],
       "layers": [
         {
@@ -162,6 +167,131 @@
           "op": {
             "type": "TOWARD",
             "color": "#f4efe2",
+            "strength": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black shark",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Shbk/Shbk",
+        "Shbk/Shc",
+        "Shbk/n"
+      ],
+      "layers": [
+        {
+          "name": "the fin on the withers",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.6,
+              "to": 0.95,
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": "$height",
+              "to": 1.0,
+              "softness": 0.14
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$finSeed",
+              "scale": 5.0,
+              "low": 0.6,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the base of the neck the fin stands on, clear of the throat",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$collar",
+              "softness": 1.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.8499,
+              "softness": 0.3214
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$finSeed",
+              "scale": 5.0,
+              "low": 0.6,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the band on up the crest",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "NECK"
+              ],
+              "halfWidth": 1.2,
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.7,
+              "to": 1.0,
+              "softness": 0.14
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 80
           }
         }
@@ -305,9 +435,16 @@
   ],
   "founders": {
     "Shk/Shk": 0.002,
-    "Shk/Shc": 0.008,
+    "Shk/Shbk": 0.002667,
+    "Shk/Shc": 0.002667,
     "Shk/n": 0.038,
-    "Shc/Shc": 0.008,
+    "Shbk/Shbk": 0.002667,
+    "Shbk/Shc": 0.002667,
+    "Shbk/n": 0.002667,
+    "Shc/Shc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Shbk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

@@ -21,7 +21,7 @@
 <h1>Laciano</h1>
 
 <p class="lede">
-    Tobiano and appaloosa at once: white gathered along the topline and thinning downward, spotting over the hindquarter, and a banded raccoon tail on every one of them.
+    Tobiano and appaloosa at once: white gathered along the topline and thinning downward, spotting over the hindquarter, and a banded raccoon tail on every one of them. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Laciano</th><td><code>Lac/Lac</code> &middot; <code>Lac/Lcc</code> &middot; <code>Lac/n</code></td></tr>
+<tr><th>Laciano</th><td><code>Lac/Lac</code> &middot; <code>Lac/Lcc</code> &middot; <code>Lac/n</code> &middot; <code>Lac/Lck</code></td></tr>
+<tr><th>Black Laciano</th><td><code>Lck/Lck</code> &middot; <code>Lck/Lcc</code> &middot; <code>Lck/n</code></td></tr>
 <tr><th>Coloured Laciano</th><td><code>Lcc/Lcc</code></td></tr>
 <tr><th>Wild type</th><td><code>Lcc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Lac/Lac</code></td><td>Laciano</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Lac/Lcc</code></td><td>Laciano</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Lac/Lck</code></td><td>Laciano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Lac/Lcc</code></td><td>Laciano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>Lac/n</code></td><td>Laciano</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Lcc/Lcc</code></td><td>Coloured Laciano</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Lck/Lck</code></td><td>Black Laciano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Lck/Lcc</code></td><td>Black Laciano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Lck/n</code></td><td>Black Laciano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Lcc/Lcc</code></td><td>Coloured Laciano</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.laciano</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>209 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Lac</code> &middot; <code>Lcc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Lac</code> &middot; <code>Lck</code> &middot; <code>Lcc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, PATCHES, SPOTS, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Lck are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,17 @@
 <h3>Laciano</h3>
 
 <p>A spontaneous combination of tobiano and appaloosa, and mistakeable for either on its own. The white patches vary a great deal in size and number but are always gathered along the topline and thin out going down - solid over the crest, the withers, the back and the croup, breaking up over the ribs, and rarely anywhere near the belly. The legs are not white unless something else on the horse makes them so. Spotting sits over the hindquarter. The tail is banded - the raccoon tail - and every Laciano has one, which is the only reliable way to name the marking. Striped hooves are common and a white sclera is possible.</p>
+
+<ol>
+<li>white coming down from the back &mdash; <code>PATCHES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the appaloosa spotting over it &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the banded raccoon tail &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
+<li>striped hooves &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Laciano</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>white coming down from the back &mdash; <code>PATCHES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

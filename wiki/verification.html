@@ -35,6 +35,61 @@
     </p>
 </div>
 
+<h2 id="black-alleles">&sect;0-BO &mdash; Forty-two black alleles and a split Cleave (2026-09-10, NOT looked at)</h2>
+
+<p>This is the largest single change to what the coat engine can draw since the
+    import, and almost none of it has been looked at. What <em>is</em> established
+    is narrow and worth separating from what is not.</p>
+
+<div class="note">
+    <span class="label">Confirmed by measurement, not by eye</span>
+    <p>
+        <strong>Nothing that existed changed, except three white forms on purpose.</strong>
+        The bake golden gained 42 rows, lost none, and moved exactly three &mdash;
+        <a href="gene-pavonem.html">pavonem</a>,
+        <a href="gene-concentric-eyespots.html">concentric eyespots</a> and
+        <a href="gene-scarab-dapple.html">scarab dapple</a>, the three whose white
+        form was regraded. The pipeline golden moved six rows, all of them the one
+        genuinely new Cleave horse.
+    </p>
+</div>
+
+<p><strong>Looked at, on a bay, in a render:</strong> moonwing black (a graphite
+    wing with the dust and the gold intact &mdash; the best of them), snow cloud
+    black, pavonem black and its regraded white, concentric eyespots both ways, and
+    all four Cleave combinations including the heterozygous <code>Wve/n</code>.
+    That is six genes out of forty-two.</p>
+
+<p><strong>Not looked at at all:</strong> the other thirty-six black forms. They
+    were produced by one transformation rather than one at a time, so they are
+    likely to be right or wrong <em>together</em> rather than individually &mdash;
+    but the failure mode that matters is per-gene and cannot be measured:
+    <strong>a near-black marking on a dark coat is a marking nobody can see</strong>.
+    Every black form was rendered against a bay by the icon baker and none is
+    blank, which is the floor, not the bar. The horses to look at are the
+    <em>black</em> and <em>seal brown</em> ones, and nobody has.</p>
+
+<ul>
+    <li><strong>The regraded white forms are a visible change to genes that already
+        shipped.</strong> Pavonem's outer leaf went from warm ivory to a light grey
+        and its pupil from white to mid-grey; concentric eyespots' outer band went
+        from off-white to a dark grey. Both are more legible in a render than what
+        they replaced and both are <em>different</em>. If either reads worse in
+        game, the band to move is <code>LIGHT_LO</code> in the transformer's
+        docstring, and the fix is a hand edit &mdash; the transformer is not meant
+        to be run twice.</li>
+    <li><strong>Cleave's founders are thin.</strong> The colour locus shares one
+        RARE budget across nine expressing pairs, so every one except
+        <code>Clvw/n</code> is under 0.002%. Wild-caught Cleaves will nearly all be
+        white front halves; the black and back-half ones are breeding projects. That
+        is the founder budget working as designed, and it is worth knowing before
+        somebody reports the back half as missing.</li>
+    <li><strong>A breed cannot make a back-half Cleave.</strong>
+        <code>BreedFounder</code> forces a named modifier wild unless the breed
+        lists it, so every breed horse's <code>cleave_side</code> is
+        <code>n/n</code>. Same as accretion field, and untested there too.</li>
+</ul>
+
 <h2 id="gene-tuning">&sect;0-BN &mdash; Four genes retuned and one new one (2026-09-10, NOT looked at)</h2>
 
 <p>All five were checked the way <a href="known-gaps.html#gap-13">this project keeps having to

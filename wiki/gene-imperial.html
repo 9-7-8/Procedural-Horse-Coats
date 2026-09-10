@@ -21,7 +21,7 @@
 <h1>Imperial</h1>
 
 <p class="lede">
-    A white cape starting at the withers and working forward up the neck - reaching the poll at full coverage - with slivers of coat left showing between its branches.
+    A white cape starting at the withers and working forward up the neck - reaching the poll at full coverage - with slivers of coat left showing between its branches. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Imperial</th><td><code>Sbi/Sbi</code> &middot; <code>Sbi/Sbc</code> &middot; <code>Sbi/n</code></td></tr>
+<tr><th>Imperial</th><td><code>Sbi/Sbi</code> &middot; <code>Sbi/Sbc</code> &middot; <code>Sbi/n</code> &middot; <code>Sbi/Sbk</code></td></tr>
+<tr><th>Black Imperial</th><td><code>Sbk/Sbk</code> &middot; <code>Sbk/Sbc</code> &middot; <code>Sbk/n</code></td></tr>
 <tr><th>Coloured Imperial</th><td><code>Sbc/Sbc</code></td></tr>
 <tr><th>Wild type</th><td><code>Sbc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Sbi/Sbi</code></td><td>Imperial</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Sbi/Sbc</code></td><td>Imperial</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Sbi/Sbk</code></td><td>Imperial</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Sbi/Sbc</code></td><td>Imperial</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>Sbi/n</code></td><td>Imperial</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Sbc/Sbc</code></td><td>Coloured Imperial</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Sbk/Sbk</code></td><td>Black Imperial</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Sbk/Sbc</code></td><td>Black Imperial</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Sbk/n</code></td><td>Black Imperial</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Sbc/Sbc</code></td><td>Coloured Imperial</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.imperial</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>206 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Sbi</code> &middot; <code>Sbc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Sbi</code> &middot; <code>Sbk</code> &middot; <code>Sbc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, PARTS, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Sbk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,14 @@
 <h3>Imperial</h3>
 
 <p>A cape or blanket shape: it originates at the withers and extends up and forward, broad across the neck and shoulder and running as far as the poll when the coverage is maximal. Its edges are defined but irregular, and it is never solid - slivers of the coat beneath must show through between the branches, and a horse whose neck is simply white is not an Imperial. The branches always join up somewhere: a full wrap around the neck on a heavily marked horse, or a narrower connection dipping into the chest and under the elbow on a lightly marked one. It only ever expresses as white, which is what separates it from brindle and every other stripe-adjacent marking.</p>
+
+<ol>
+<li>the cape over the withers and up the neck &mdash; <code>PARTS</code> &times; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>STROKES inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Imperial</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the cape over the withers and up the neck &mdash; <code>PARTS</code> &times; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>STROKES inverted</code>, painted with <code>TOWARD</code></li>

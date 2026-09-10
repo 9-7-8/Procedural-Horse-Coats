@@ -21,7 +21,7 @@
 <h1>Suit</h1>
 
 <p class="lede">
-    A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat.
+    A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Suit</th><td><code>Sut/Sut</code> &middot; <code>Sut/Suc</code> &middot; <code>Sut/n</code></td></tr>
+<tr><th>Suit</th><td><code>Sut/Sut</code> &middot; <code>Sut/Suc</code> &middot; <code>Sut/n</code> &middot; <code>Sut/Suk</code></td></tr>
+<tr><th>Black suit</th><td><code>Suk/Suk</code> &middot; <code>Suk/Suc</code> &middot; <code>Suk/n</code></td></tr>
 <tr><th>Coloured suit</th><td><code>Suc/Suc</code></td></tr>
 <tr><th>Wild type</th><td><code>Suc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Sut/Sut</code></td><td>Suit</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Sut/Suc</code></td><td>Suit</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Sut/Suk</code></td><td>Suit</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Sut/Suc</code></td><td>Suit</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Sut/n</code></td><td>Suit</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Suc/Suc</code></td><td>Coloured suit</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Suk/Suk</code></td><td>Black suit</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Suk/Suc</code></td><td>Black suit</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Suk/n</code></td><td>Black suit</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Suc/Suc</code></td><td>Coloured suit</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.suit</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>102 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Sut</code> &middot; <code>Suc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Sut</code> &middot; <code>Suk</code> &middot; <code>Suc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Suk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,15 @@
 <h3>Suit</h3>
 
 <p>The suit line wraps the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself - but it passes under the crest rather than over it, so the topline of the neck keeps its colour the whole way. Everything behind the band goes pale, roughly half the animal, while the head, the upper neck and the crest keep theirs. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.</p>
+
+<ol>
+<li>everything behind the suit line &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the legs coming back to the coat below the knee &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black suit</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>everything behind the suit line &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>

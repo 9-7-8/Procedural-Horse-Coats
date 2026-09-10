@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 314,
   "rarity": "RARE",
-  "blurb": "Two curved bands sweeping round the barrel one inside the other, like the bands on a moth's wing.",
+  "blurb": "Two curved bands sweeping round the barrel one inside the other, like the bands on a moth's wing. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. The source drew the two bands as RINGS at explicit centres with an arc range; this build has no centred-ring mask, so each band is a narrow WAVES band on a wavelength longer than the barrel - which gives one long curve across the flank rather than a closed circle. The look is close and the mechanism is not the same."
+    "Imported from the magic-gene intake, 2026-09-08. The source drew the two bands as RINGS at explicit centres with an arc range; this build has no centred-ring mask, so each band is a narrow WAVES band on a wavelength longer than the barrel - which gives one long curve across the flank rather than a closed circle. The look is close and the mechanism is not the same.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dwk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Dwb",
       "label": "Duskwing, pale (Dwb)"
+    },
+    {
+      "token": "Dwk",
+      "label": "Duskwing, black (Dwk)"
     },
     {
       "token": "Dwc",
@@ -72,7 +77,8 @@
       "when": [
         "Dwb/Dwb",
         "Dwb/Dwc",
-        "Dwb/n"
+        "Dwb/n",
+        "Dwb/Dwk"
       ],
       "layers": [
         {
@@ -122,6 +128,68 @@
           "op": {
             "type": "TOWARD",
             "color": "#f3efd8",
+            "strength": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Duskwing Bands, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Dwk/Dwk",
+        "Dwk/Dwc",
+        "Dwk/n"
+      ],
+      "layers": [
+        {
+          "name": "the outer band sweeping round the barrel",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 26.0,
+              "amplitude": "$bandArch",
+              "softness": "$edgeSoftness",
+              "from": "$outerLow",
+              "to": "$outerHigh"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "the inner band, thicker and tighter in",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "wavelength": 26.0,
+              "amplitude": "$bandArch",
+              "softness": "$edgeSoftness",
+              "from": "$innerLow",
+              "to": "$innerHigh"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 92.0
           }
         }
@@ -200,9 +268,13 @@
   ],
   "founders": {
     "Dwb/Dwb": 0.002,
-    "Dwb/Dwc": 0.008,
+    "Dwb/Dwk": 0.002667,
+    "Dwb/Dwc": 0.002667,
     "Dwb/n": 0.038,
-    "Dwc/Dwc": 0.008,
+    "Dwk/Dwk": 0.002667,
+    "Dwk/Dwc": 0.002667,
+    "Dwk/n": 0.002667,
+    "Dwc/Dwc": 0.002667,
     "n/n": 99.944
   }
 }

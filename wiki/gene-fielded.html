@@ -21,7 +21,7 @@
 <h1>Fielded</h1>
 
 <p class="lede">
-    Grass-like tendrils drawn out of the edges of the horse's white markings - and nothing at all on a horse that has none.
+    Grass-like tendrils drawn out of the edges of the horse's white markings - and nothing at all on a horse that has none. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Fielded</th><td><code>Fld/Fld</code> &middot; <code>Fld/Flw</code> &middot; <code>Fld/n</code></td></tr>
+<tr><th>Fielded</th><td><code>Fld/Fld</code> &middot; <code>Fld/Flw</code> &middot; <code>Fld/n</code> &middot; <code>Fld/Flk</code></td></tr>
+<tr><th>Black Fielded</th><td><code>Flk/Flk</code> &middot; <code>Flk/Flw</code> &middot; <code>Flk/n</code></td></tr>
 <tr><th>Coloured Fielded</th><td><code>Flw/Flw</code></td></tr>
 <tr><th>Wild type</th><td><code>Flw/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Fld/Fld</code></td><td>Fielded</td><td>0.006% &mdash; 1 in 16,667</td></tr>
-<tr><td><code>Fld/Flw</code></td><td>Fielded</td><td>0.024% &mdash; 1 in 4,167</td></tr>
+<tr><td><code>Fld/Flk</code></td><td>Fielded</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Fld/Flw</code></td><td>Fielded</td><td>0.008% &mdash; 1 in 12,500</td></tr>
 <tr><td><code>Fld/n</code></td><td>Fielded</td><td>0.114% &mdash; 1 in 877</td></tr>
-<tr><td><code>Flw/Flw</code></td><td>Coloured Fielded</td><td>0.024% &mdash; 1 in 4,167</td></tr>
+<tr><td><code>Flk/Flk</code></td><td>Black Fielded</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Flk/Flw</code></td><td>Black Fielded</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Flk/n</code></td><td>Black Fielded</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Flw/Flw</code></td><td>Coloured Fielded</td><td>0.008% &mdash; 1 in 12,500</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.832%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.fielded</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>600 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Fld</code> &middot; <code>Flw</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Fld</code> &middot; <code>Flk</code> &middot; <code>Flw</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>LUMA, NOISE, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Flk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,15 @@
 <h3>Fielded</h3>
 
 <p>Thin wispy streaks with an organic, wind-blown quality - never zebra bars, never tiger stripes. They run out of the edges of whatever white the horse already has: a tobiano patch, a splash, a blaze, a stocking, a snip. On a horse with no white anywhere there is nothing to run out of and Fielded shows nothing at all, however many copies it carries. At the quiet end there may be a couple of lines off a facial marking; at the loud end they cover the horse, interweaving across the ribs and hindquarter, and where one crosses the topline it carries on into the mane or tail. It can put blue in an eye without going anywhere near it. One copy looks exactly like two.</p>
+
+<ol>
+<li>wispy streaks running out of the white &mdash; <code>STROKES</code> &times; <code>NOISE</code> &times; <code>LUMA</code>, painted with <code>TOWARD</code></li>
+<li>the streaks carrying on into the mane and tail &mdash; <code>STROKES</code> &times; <code>NOISE</code> &times; <code>LUMA</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Fielded</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>wispy streaks running out of the white &mdash; <code>STROKES</code> &times; <code>NOISE</code> &times; <code>LUMA</code>, painted with <code>TOWARD</code></li>

@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 363,
   "rarity": "UNCOMMON",
-  "blurb": "Thin white strokes following the skeleton - down the neck, along the rib arcs, over the scapula and hip - and set as rings around the legs.",
+  "blurb": "Thin white strokes following the skeleton - down the neck, along the rib arcs, over the scapula and hip - and set as rings around the legs. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Rib",
       "label": "Riblines, white (Rib)"
+    },
+    {
+      "token": "Rbk",
+      "label": "Riblines, black (Rbk)"
     },
     {
       "token": "Rbc",
@@ -44,7 +48,8 @@
       "when": [
         "Rib/Rib",
         "Rib/Rbc",
-        "Rib/n"
+        "Rib/n",
+        "Rib/Rbk"
       ],
       "layers": [
         {
@@ -102,6 +107,76 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black riblines",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Rbk/Rbk",
+        "Rbk/Rbc",
+        "Rbk/n"
+      ],
+      "layers": [
+        {
+          "name": "strokes down the neck and along the ribs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$lineSeed",
+              "spacing": 5.0,
+              "length": 16.0,
+              "axis": "Y",
+              "width": "$lineWidth",
+              "curl": 0.7,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 94
+          }
+        },
+        {
+          "name": "rings set around the legs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$lineSeed",
+              "spacing": 3.4,
+              "length": 2.6,
+              "axis": "Z",
+              "width": "$lineWidth",
+              "curl": 0.15,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.12,
+              "to": 1.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 92
           }
         }
@@ -188,9 +263,16 @@
   ],
   "founders": {
     "Rib/Rib": 0.004,
-    "Rib/Rbc": 0.016,
+    "Rib/Rbk": 0.005333,
+    "Rib/Rbc": 0.005333,
     "Rib/n": 0.076,
-    "Rbc/Rbc": 0.016,
+    "Rbk/Rbk": 0.005333,
+    "Rbk/Rbc": 0.005333,
+    "Rbk/n": 0.005333,
+    "Rbc/Rbc": 0.005333,
     "n/n": 99.888
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Rbk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }

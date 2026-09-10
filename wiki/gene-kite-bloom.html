@@ -21,7 +21,7 @@
 <h1>Kite Bloom</h1>
 
 <p class="lede">
-    Angular, jewel-toned panels tile the coat like a stained-glass leaf, each one salted with pale flecks and seamed with the coat beneath.
+    Angular, jewel-toned panels tile the coat like a stained-glass leaf, each one salted with pale flecks and seamed with the coat beneath. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Kite Bloom, pale</th><td><code>Kbw/Kbw</code> &middot; <code>Kbw/n</code></td></tr>
+<tr><th>Kite Bloom, pale</th><td><code>Kbw/Kbw</code> &middot; <code>Kbw/n</code> &middot; <code>Kbw/Kbk</code></td></tr>
+<tr><th>Kite Bloom, black</th><td><code>Kbk/Kbk</code> &middot; <code>Kbk/Kbc</code> &middot; <code>Kbk/n</code></td></tr>
 <tr><th>Kite Bloom, washed</th><td><code>Kbw/Kbc</code></td></tr>
 <tr><th>Kite Bloom, coloured</th><td><code>Kbc/Kbc</code></td></tr>
 <tr><th>Wild type</th><td><code>Kbc/n</code> &middot; <code>n/n</code></td></tr>
@@ -65,9 +66,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Kbw/Kbw</code></td><td>Kite Bloom, pale</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Kbw/Kbc</code></td><td>Kite Bloom, washed</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Kbw/Kbk</code></td><td>Kite Bloom, pale</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Kbw/Kbc</code></td><td>Kite Bloom, washed</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Kbw/n</code></td><td>Kite Bloom, pale</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Kbc/Kbc</code></td><td>Kite Bloom, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Kbk/Kbk</code></td><td>Kite Bloom, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Kbk/Kbc</code></td><td>Kite Bloom, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Kbk/n</code></td><td>Kite Bloom, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Kbc/Kbc</code></td><td>Kite Bloom, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -100,7 +105,7 @@
 <tr><th>Key</th><td><code>horsegenetics.kite_bloom</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>282 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Kbw</code> &middot; <code>Kbc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Kbw</code> &middot; <code>Kbk</code> &middot; <code>Kbc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>6 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>CRACKLE, PARTS, RAMP, SPOTS, TOWARD</td></tr>
 </tbody>
@@ -115,6 +120,8 @@
 
 <p>The seam between panels is left unpainted rather than drawn, so what shows there is the horse's own coat - which is what makes the panels read as laid over the horse rather than as the horse.</p>
 
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Kbk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -127,6 +134,14 @@
 <h3>Kite Bloom, pale</h3>
 
 <p>A faint silvery lattice of panels ghosts over the coat, catching the light without much colour in it.</p>
+
+<ol>
+<li>the panels &mdash; <code>PARTS</code> &times; <code>CRACKLE</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Kite Bloom, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>the panels &mdash; <code>PARTS</code> &times; <code>CRACKLE</code>, painted with <code>TOWARD</code></li>

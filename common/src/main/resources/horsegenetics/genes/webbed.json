@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 381,
   "rarity": "UNCOMMON",
-  "blurb": "A polygonal net of veins over the barrel and neck - the venation of a tiger-moth wing, and nothing else.",
+  "blurb": "A polygonal net of veins over the barrel and neck - the venation of a tiger-moth wing, and nothing else. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. One crackle field drawn as its channels. It is the simplest gene in this batch and the clearest demonstration of what CRACKLE is for: a tiling of polygons with a genuinely hard edge, which nothing else in the vocabulary gives."
+    "Imported from the magic-gene intake, 2026-09-08. One crackle field drawn as its channels. It is the simplest gene in this batch and the clearest demonstration of what CRACKLE is for: a tiling of polygons with a genuinely hard edge, which nothing else in the vocabulary gives.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Wek are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Web",
       "label": "Webbed, white (Web)"
+    },
+    {
+      "token": "Wek",
+      "label": "Webbed, black (Wek)"
     },
     {
       "token": "Wec",
@@ -52,7 +57,8 @@
       "when": [
         "Web/Web",
         "Web/Wec",
-        "Web/n"
+        "Web/n",
+        "Web/Wek"
       ],
       "layers": [
         {
@@ -75,6 +81,41 @@
           "op": {
             "type": "TOWARD",
             "color": "#f6f6f2",
+            "strength": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Webbed, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Wek/Wek",
+        "Wek/Wec",
+        "Wek/n"
+      ],
+      "layers": [
+        {
+          "name": "the venation net over the barrel and neck",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$lineWidth",
+              "warp": 0.4,
+              "softness": 0.07,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 90.0
           }
         }
@@ -124,9 +165,13 @@
   ],
   "founders": {
     "Web/Web": 0.004,
-    "Web/Wec": 0.016,
+    "Web/Wek": 0.005333,
+    "Web/Wec": 0.005333,
     "Web/n": 0.076,
-    "Wec/Wec": 0.016,
+    "Wek/Wek": 0.005333,
+    "Wek/Wec": 0.005333,
+    "Wek/n": 0.005333,
+    "Wec/Wec": 0.005333,
     "n/n": 99.888
   }
 }

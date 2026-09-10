@@ -21,7 +21,7 @@
 <h1>Iridescent Rosette</h1>
 
 <p class="lede">
-    Dark rosettes speckle the coat, each rimmed in bands of colour that shift like the shell of a jewel beetle.
+    Dark rosettes speckle the coat, each rimmed in bands of colour that shift like the shell of a jewel beetle. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Iridescent Rosette, pale</th><td><code>Irw/Irw</code> &middot; <code>Irw/Irc</code> &middot; <code>Irw/n</code></td></tr>
+<tr><th>Iridescent Rosette, pale</th><td><code>Irw/Irw</code> &middot; <code>Irw/Irc</code> &middot; <code>Irw/n</code> &middot; <code>Irw/Irk</code></td></tr>
+<tr><th>Iridescent Rosette, black</th><td><code>Irk/Irk</code> &middot; <code>Irk/Irc</code> &middot; <code>Irk/n</code></td></tr>
 <tr><th>Iridescent Rosette, coloured</th><td><code>Irc/Irc</code></td></tr>
 <tr><th>Wild type</th><td><code>Irc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Irw/Irw</code></td><td>Iridescent Rosette, pale</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Irw/Irc</code></td><td>Iridescent Rosette, pale</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Irw/Irk</code></td><td>Iridescent Rosette, pale</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Irw/Irc</code></td><td>Iridescent Rosette, pale</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Irw/n</code></td><td>Iridescent Rosette, pale</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Irc/Irc</code></td><td>Iridescent Rosette, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Irk/Irk</code></td><td>Iridescent Rosette, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Irk/Irc</code></td><td>Iridescent Rosette, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Irk/n</code></td><td>Iridescent Rosette, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Irc/Irc</code></td><td>Iridescent Rosette, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.iridescent_rosette</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>323 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Irw</code> &middot; <code>Irc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Irw</code> &middot; <code>Irk</code> &middot; <code>Irc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>9 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>PARTS, SPOTS, TOWARD</td></tr>
 </tbody>
@@ -114,6 +119,8 @@
 
 <p>The pale form is the SAME three concentric bands as the coloured one, on the same radii and the same knobs, with the three hues replaced by three greys. It was a single flat ivory ring and read as a smudge at coat scale, because a ring with no interior structure has nothing to tell the eye where its edges are; three steps of grey give it the depth the coloured form gets from its hues, and keep the two forms recognisably the same marking.</p>
 
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Irk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -126,6 +133,16 @@
 <h3>Iridescent Rosette, pale</h3>
 
 <p>Ring-spots ghost the coat in three steps of grey - an almost-white outer band, a mid grey inside it and a near-charcoal ring round the hollow - the same size and spacing as the true rosettes with the colour taken out of the band.</p>
+
+<ol>
+<li>the outer band, palest &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>a mid grey inside it &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>and the darkest grey round the hollow &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Iridescent Rosette, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 3 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the outer band, palest &mdash; <code>PARTS</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>

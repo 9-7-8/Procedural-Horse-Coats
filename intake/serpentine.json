@@ -1,0 +1,402 @@
+{
+  "format": 3,
+  "key": "horsegenetics.serpentine",
+  "name": "Serpentine",
+  "phase": "magical",
+  "priority": 108,
+  "rarity": "uncommon",
+  "blurb": "The coat runs in long streaky bands of taupe, sage and blue-grey with dark seams between them, and bright green ore is scattered through it in chips and dust.",
+  "notes": [
+    "The source was an SVG: twelve posterised colours traced off a photograph of a cut mineral slab, about 210 KB of path data across thirteen layers. A field, not an outline - rebuilt as a rule.",
+    "Reading of the source: long bands running the length of the slab, muted and close in value, each pair separated by a much darker seam; a slate wash drifting across the whole thing independently of the bands; and bright green mineral scattered through it in two grades, coarse chips and fine dust.",
+    "The bands are STROKES rather than STRIPES. STRIPES gives parallel bands with an even pitch, which is a zebra; these wander, vary in width along their run and pinch out, and that is what the level set of a noise field does. Three fields on three seeds so the sage, the blue-grey and the seams do not sit on top of each other.",
+    "width against spacing is the constraint. 1.4 on a spacing that bottoms out at 3.2 is a ratio of 0.44, and the seams at 0.7 on 5.2 are far under - the seams have to stay thin because they are the only high-contrast element and a wash of them would eat the bands. Zebra's Coat is the standing lesson: ten wide on a three pitch and it rendered as a solid white neck.",
+    "The ore is two SPECKLEs on different seeds and different spacings, not one. A single scatter at one size reads as noise; a coarse grade at 1.1 and a fine one at 0.8, each with its own clumping drift, reads as mineral - which is a fact about grain rather than about density.",
+    "The slate drift and the stone ground share $mistSeed at different scales on purpose: the pale ground and the violet wash then pool in the same places, which is what stops the wash reading as a separate marking laid over the top."
+  ],
+  "preview": {
+    "base": "black",
+    "expression": "serpentine"
+  },
+  "alleles": [
+    {
+      "token": "Sp",
+      "label": "Serpentine (Sp)"
+    },
+    {
+      "token": "So",
+      "label": "Coloured ore (So)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "bandSeed",
+      "type": "seed"
+    },
+    {
+      "name": "veinSeed",
+      "type": "seed"
+    },
+    {
+      "name": "seamSeed",
+      "type": "seed"
+    },
+    {
+      "name": "chipSeed",
+      "type": "seed"
+    },
+    {
+      "name": "dustSeed",
+      "type": "seed"
+    },
+    {
+      "name": "mistSeed",
+      "type": "seed"
+    },
+    {
+      "name": "bandSpacing",
+      "min": 3.2,
+      "max": 4.4
+    },
+    {
+      "name": "chipDensity",
+      "min": 0.22,
+      "max": 0.45
+    },
+    {
+      "name": "oreHue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "serpentine",
+      "name": "Serpentine",
+      "description": "Streaky bands of taupe, sage and blue-grey run the length of the coat, seamed with dark red-brown, with bright green ore scattered through them.",
+      "when": [
+        "Sp/Sp",
+        "Sp/So",
+        "Sp/n"
+      ],
+      "layers": [
+        {
+          "name": "the stone ground",
+          "masks": [
+            {
+              "type": "NOISE",
+              "seed": "$mistSeed",
+              "scale": 11.0,
+              "low": 0.25,
+              "high": 1.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#b2a58f",
+            "strength": 66,
+            "opacity": 80
+          }
+        },
+        {
+          "name": "the sage bands",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$bandSeed",
+              "spacing": "$bandSpacing",
+              "length": 17.0,
+              "axis": "X",
+              "width": 1.4,
+              "curl": 0.3,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#a9c0ab",
+            "strength": 80,
+            "opacity": 92
+          }
+        },
+        {
+          "name": "the blue-grey bands",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$veinSeed",
+              "spacing": 4.4,
+              "length": 15.0,
+              "axis": "X",
+              "width": 1.1,
+              "curl": 0.36,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#84a8a5",
+            "strength": 78,
+            "opacity": 90
+          }
+        },
+        {
+          "name": "the slate drift",
+          "masks": [
+            {
+              "type": "NOISE",
+              "seed": "$mistSeed",
+              "scale": 6.0,
+              "low": 0.0,
+              "high": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6d657e",
+            "strength": 42,
+            "opacity": 58
+          }
+        },
+        {
+          "name": "the dark seams between bands",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$seamSeed",
+              "spacing": 5.2,
+              "length": 18.0,
+              "axis": "X",
+              "width": 0.7,
+              "curl": 0.3,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#3a1a19",
+            "strength": 88,
+            "opacity": 96
+          }
+        },
+        {
+          "name": "the ore, coarse chips",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "seed": "$chipSeed",
+              "spacing": 1.1,
+              "size": 0.46,
+              "density": "$chipDensity",
+              "clumping": 0.75,
+              "clumpScale": 8.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#5eec9d",
+            "strength": 95,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the ore, fine dust",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "seed": "$dustSeed",
+              "spacing": 0.8,
+              "size": 0.4,
+              "density": 0.3,
+              "clumping": 0.6,
+              "clumpScale": 12.0,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#a4e5bf",
+            "strength": 88,
+            "opacity": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "ore",
+      "name": "Coloured ore",
+      "description": "The same stone, with the ore running a colour this line of horses carries instead of green.",
+      "notes": [
+        "The recessive coloured half of the usual pair, and the only thing it moves is the ore. The stone stays stone: its five colours are a value structure in muted earth, and putting a hue knob on them makes a horse the colour of a highlighter rather than a horse cut out of rock. The two ore grades share one hue and differ in lightness, 0.62 and 0.82, so the fine dust still reads as a paler grade of the same mineral."
+      ],
+      "when": [
+        "So/So"
+      ],
+      "layers": [
+        {
+          "name": "the stone ground",
+          "masks": [
+            {
+              "type": "NOISE",
+              "seed": "$mistSeed",
+              "scale": 11.0,
+              "low": 0.25,
+              "high": 1.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#b2a58f",
+            "strength": 66,
+            "opacity": 80
+          }
+        },
+        {
+          "name": "the sage bands",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$bandSeed",
+              "spacing": "$bandSpacing",
+              "length": 17.0,
+              "axis": "X",
+              "width": 1.4,
+              "curl": 0.3,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#a9c0ab",
+            "strength": 80,
+            "opacity": 92
+          }
+        },
+        {
+          "name": "the blue-grey bands",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$veinSeed",
+              "spacing": 4.4,
+              "length": 15.0,
+              "axis": "X",
+              "width": 1.1,
+              "curl": 0.36,
+              "softness": 0.28
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#84a8a5",
+            "strength": 78,
+            "opacity": 90
+          }
+        },
+        {
+          "name": "the slate drift",
+          "masks": [
+            {
+              "type": "NOISE",
+              "seed": "$mistSeed",
+              "scale": 6.0,
+              "low": 0.0,
+              "high": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6d657e",
+            "strength": 42,
+            "opacity": 58
+          }
+        },
+        {
+          "name": "the dark seams between bands",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$seamSeed",
+              "spacing": 5.2,
+              "length": 18.0,
+              "axis": "X",
+              "width": 0.7,
+              "curl": 0.3,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#3a1a19",
+            "strength": 88,
+            "opacity": 96
+          }
+        },
+        {
+          "name": "the ore, coarse chips",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "seed": "$chipSeed",
+              "spacing": 1.1,
+              "size": 0.46,
+              "density": "$chipDensity",
+              "clumping": 0.75,
+              "clumpScale": 8.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$oreHue",
+            "saturation": 0.8,
+            "lightness": 0.62,
+            "strength": 95,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the ore, fine dust",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "seed": "$dustSeed",
+              "spacing": 0.8,
+              "size": 0.4,
+              "density": 0.3,
+              "clumping": 0.6,
+              "clumpScale": 12.0,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$oreHue",
+            "saturation": 0.45,
+            "lightness": 0.82,
+            "strength": 88,
+            "opacity": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unmarked.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Sp/Sp": 0.0042,
+    "Sp/So": 0.00294,
+    "Sp/n": 0.42,
+    "So/So": 0.01344,
+    "n/n": 99.55942
+  }
+}

@@ -5,23 +5,19 @@
   "phase": "magical",
   "priority": 202,
   "rarity": "RARE",
-  "blurb": "The horse split about half and half along a boundary made of interlocking spears - long narrow triangles driven into each field from the other, never a curve anywhere - edged in a half-opaque outline where the two meet. Which half the split claims is the allele: Cleave takes the front of the horse, Waves the back.",
+  "blurb": "The horse is split clean across the barrel, one half taken to a flat field with straight-sided teeth driven into the other and a few spears floating clear of the line. This locus decides whether there is a split and what colour it is - white, black or coloured. WHICH half it takes is a second gene, Cleave Side, and the wild type there is the front.",
   "alleles": [
     {
-      "token": "Clv",
-      "label": "Cleave, white (Clv)"
+      "token": "Clvw",
+      "label": "Cleave, white (Clvw)"
     },
     {
-      "token": "Clc",
-      "label": "Cleave, coloured (Clc)"
+      "token": "Clvk",
+      "label": "Cleave, black (Clvk)"
     },
     {
-      "token": "Wav",
-      "label": "Waves - the same split, reversed, white (Wav)"
-    },
-    {
-      "token": "Wac",
-      "label": "Waves - the same split, reversed, coloured (Wac)"
+      "token": "Clvc",
+      "label": "Cleave, coloured (Clvc)"
     },
     {
       "token": "n",
@@ -56,15 +52,269 @@
   ],
   "expressions": [
     {
-      "id": "cleave",
-      "name": "Cleave",
-      "description": "White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the front: the head, the front and underside of the neck, the chest, the forelegs and the front of the shoulder; the coat keeps the withers, back, croup, hindquarters and hind legs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Where the two meet, a half-opaque outline in the same colour runs along the whole edge - the one soft thing on the horse. Everything else is hard: no gradient, no roaning, no feathering anywhere.",
+      "id": "white-back",
+      "name": "Cleave, back half",
+      "description": "The horse is split across the barrel and it is the BACK half that carries the marking, teeth and all - the same split as the front form, reversed, because the horse carries Wve at the side locus.",
       "when": [
-        "Clv/Clv",
-        "Clv/Clc",
-        "Clv/Wav",
-        "Clv/Wac",
-        "Clv/n"
+        "Clvw/Clvw",
+        "Clvw/Clvk",
+        "Clvw/Clvc",
+        "Clvw/n"
+      ],
+      "layers": [
+        {
+          "name": "the back half, and the straight-sided teeth it drives into the other",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "a half-opaque outline where the back half meets the coat",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
+              "axis": "X",
+              "softness": 0.02
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$split",
+              "to": "$far",
+              "softness": 0.02,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        }
+      ],
+      "needs": {
+        "horsegenetics.cleave_side": {
+          "Wve": 1
+        }
+      }
+    },
+    {
+      "id": "white-front",
+      "name": "Cleave, front half",
+      "description": "The horse is split across the barrel and the FRONT half carries the marking, driven into the back half by straight-sided teeth, with a few spears floating clear of the line.",
+      "when": [
+        "Clvw/Clvw",
+        "Clvw/Clvk",
+        "Clvw/Clvc",
+        "Clvw/n"
       ],
       "layers": [
         {
@@ -334,14 +584,801 @@
       ]
     },
     {
-      "id": "cleave-coloured",
-      "name": "Coloured Cleave",
-      "description": "The same front-half interlock, with the near half in a colour the line carries rather than in white. Recessive to the white form but dominant over both Waves alleles: two copies, or one beside a Waves copy, and it is the Cleave side that shows. It never gives blue eyes.",
+      "id": "black-back",
+      "name": "Black Cleave, back half",
+      "description": "The horse is split across the barrel and it is the BACK half that carries the marking, teeth and all - the same split as the front form, reversed, because the horse carries Wve at the side locus.",
       "when": [
-        "Clc/Clc",
-        "Clc/Wav",
-        "Clc/Wac",
-        "Clc/n"
+        "Clvk/Clvk",
+        "Clvk/Clvc",
+        "Clvk/n"
+      ],
+      "layers": [
+        {
+          "name": "the back half, and the straight-sided teeth it drives into the other",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "a half-opaque outline where the back half meets the coat",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
+              "axis": "X",
+              "softness": 0.02
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$split",
+              "to": "$far",
+              "softness": 0.02,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#1f1f1f"
+          }
+        }
+      ],
+      "needs": {
+        "horsegenetics.cleave_side": {
+          "Wve": 1
+        }
+      }
+    },
+    {
+      "id": "black-front",
+      "name": "Black Cleave, front half",
+      "description": "The horse is split across the barrel and the FRONT half carries the marking, driven into the back half by straight-sided teeth, with a few spears floating clear of the line.",
+      "when": [
+        "Clvk/Clvk",
+        "Clvk/Clvc",
+        "Clvk/n"
+      ],
+      "layers": [
+        {
+          "name": "the front half, and the straight-sided teeth it drives into the other",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "a half-opaque outline where the front half meets the coat",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "color": "#1f1f1f"
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
+              "axis": "X",
+              "softness": 0.02
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$reach",
+              "to": "$split",
+              "softness": 0.02,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#1f1f1f"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured-back",
+      "name": "Coloured Cleave, back half",
+      "description": "The horse is split across the barrel and it is the BACK half that carries the marking, teeth and all - the same split as the front form, reversed, because the horse carries Wve at the side locus.",
+      "when": [
+        "Clvc/Clvc",
+        "Clvc/n"
+      ],
+      "layers": [
+        {
+          "name": "the back half, and the straight-sided teeth it drives into the other, in colour",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "a half-opaque outline where the back half meets the coat, in colour",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 2.8,
+              "radius": 0.55,
+              "vary": 0.45,
+              "chance": 0.22,
+              "stretch": 4.2,
+              "axis": "X",
+              "softness": 0.02
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$split",
+              "to": "$far",
+              "softness": 0.02,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ],
+      "needs": {
+        "horsegenetics.cleave_side": {
+          "Wve": 1
+        }
+      }
+    },
+    {
+      "id": "coloured-front",
+      "name": "Coloured Cleave, front half",
+      "description": "The horse is split across the barrel and the FRONT half carries the marking, driven into the back half by straight-sided teeth, with a few spears floating clear of the line.",
+      "when": [
+        "Clvc/Clvc",
+        "Clvc/n"
       ],
       "layers": [
         {
@@ -617,536 +1654,31 @@
       ]
     },
     {
-      "id": "waves",
-      "name": "Waves",
-      "description": "The identical split, reversed end for end - which is the whole of what used to be a second gene. White has the back: the croup, the hindquarters, the hind legs and the tail; the coat keeps the shoulder, the neck, the head and the forelegs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Where the two meet, a half-opaque outline in the same colour runs along the whole edge - the one soft thing on the horse. Everything else is hard: no gradient, no roaning, no feathering anywhere.",
-      "when": [
-        "Wav/Wav",
-        "Wav/Wac",
-        "Wav/n"
-      ],
-      "layers": [
-        {
-          "name": "the back half, and the straight-sided teeth it drives into the other",
-          "masks": [
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 4.2,
-              "amplitude": 0.075,
-              "softness": 0.004
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Z",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 3.1,
-              "amplitude": 0.06,
-              "softness": 0.004,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "saw",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 1.6,
-              "amplitude": 0.035,
-              "softness": 0.004,
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 100,
-            "color": "#ffffff"
-          }
-        },
-        {
-          "name": "a half-opaque outline where the back half meets the coat",
-          "masks": [
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 4.2,
-              "amplitude": 0.075,
-              "softness": 0.085
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Z",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 3.1,
-              "amplitude": 0.06,
-              "softness": 0.085,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "saw",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 1.6,
-              "amplitude": 0.035,
-              "softness": 0.085,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 4.2,
-              "amplitude": 0.075,
-              "softness": 0.004,
-              "combine": "SUBTRACT"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Z",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 3.1,
-              "amplitude": 0.06,
-              "softness": 0.004,
-              "combine": "SUBTRACT"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "saw",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 1.6,
-              "amplitude": 0.035,
-              "softness": 0.004,
-              "combine": "SUBTRACT"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 50,
-            "color": "#ffffff"
-          }
-        },
-        {
-          "name": "detached spears floating clear of the line",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "EARS",
-                "MUZZLE",
-                "FRONT_LEGS",
-                "HIND_LEGS"
-              ],
-              "seed": "$toothSeed",
-              "spacing": 2.8,
-              "radius": 0.55,
-              "vary": 0.45,
-              "chance": 0.22,
-              "stretch": 4.2,
-              "axis": "X",
-              "softness": 0.02
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "EARS",
-                "MUZZLE",
-                "FRONT_LEGS",
-                "HIND_LEGS"
-              ],
-              "axis": "X",
-              "space": "body",
-              "from": "$split",
-              "to": "$far",
-              "softness": 0.02,
-              "combine": "MULTIPLY"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 100,
-            "color": "#ffffff"
-          }
-        }
-      ]
-    },
-    {
-      "id": "waves-coloured",
-      "name": "Coloured Waves",
-      "description": "The reversed split with the caudal half in a colour the line carries rather than in white. The most recessive of the four: it takes two copies. It never gives blue eyes.",
-      "when": [
-        "Wac/Wac",
-        "Wac/n"
-      ],
-      "layers": [
-        {
-          "name": "the back half, and the straight-sided teeth it drives into the other, in colour",
-          "masks": [
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 4.2,
-              "amplitude": 0.075,
-              "softness": 0.004
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Z",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 3.1,
-              "amplitude": 0.06,
-              "softness": 0.004,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "saw",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 1.6,
-              "amplitude": 0.035,
-              "softness": 0.004,
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 100,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
-          }
-        },
-        {
-          "name": "a half-opaque outline where the back half meets the coat, in colour",
-          "masks": [
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 4.2,
-              "amplitude": 0.075,
-              "softness": 0.085
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Z",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 3.1,
-              "amplitude": 0.06,
-              "softness": 0.085,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "saw",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 1.6,
-              "amplitude": 0.035,
-              "softness": 0.085,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 4.2,
-              "amplitude": 0.075,
-              "softness": 0.004,
-              "combine": "SUBTRACT"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Z",
-              "across": "X",
-              "shape": "triangle",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 3.1,
-              "amplitude": 0.06,
-              "softness": 0.004,
-              "combine": "SUBTRACT"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY",
-                "HIND_LEGS",
-                "TAIL"
-              ],
-              "seed": "$toothSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "saw",
-              "space": "body",
-              "from": -0.6,
-              "to": "$split",
-              "wavelength": 1.6,
-              "amplitude": 0.035,
-              "softness": 0.004,
-              "combine": "SUBTRACT"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 50,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
-          }
-        },
-        {
-          "name": "detached spears floating clear of the line, in colour",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "EARS",
-                "MUZZLE",
-                "FRONT_LEGS",
-                "HIND_LEGS"
-              ],
-              "seed": "$toothSeed",
-              "spacing": 2.8,
-              "radius": 0.55,
-              "vary": 0.45,
-              "chance": 0.22,
-              "stretch": 4.2,
-              "axis": "X",
-              "softness": 0.02
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD",
-                "EARS",
-                "MUZZLE",
-                "FRONT_LEGS",
-                "HIND_LEGS"
-              ],
-              "axis": "X",
-              "space": "body",
-              "from": "$split",
-              "to": "$far",
-              "softness": 0.02,
-              "combine": "MULTIPLY"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 100,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
-          }
-        }
-      ]
-    },
-    {
       "id": "wild",
       "name": "Wild type",
       "description": "No split.",
-      "wildType": true,
       "when": [
         "n/n"
-      ]
+      ],
+      "wildType": true
     }
   ],
   "founders": {
-    "Clv/Clv": 0.002,
-    "Clv/Clc": 0.001333,
-    "Clv/Wav": 0.001333,
-    "Clv/Wac": 0.001333,
-    "Clv/n": 0.038,
-    "Clc/Clc": 0.001333,
-    "Clc/Wav": 0.001333,
-    "Clc/Wac": 0.001333,
-    "Clc/n": 0.001333,
-    "Wav/Wav": 0.001333,
-    "Wav/Wac": 0.001333,
-    "Wav/n": 0.001333,
-    "Wac/Wac": 0.001333,
-    "Wac/n": 0.001333,
-    "n/n": 99.944
+    "Clvw/Clvw": 0.002,
+    "Clvw/Clvk": 0.001143,
+    "Clvw/Clvc": 0.001143,
+    "Clvw/n": 0.038,
+    "Clvk/Clvk": 0.001143,
+    "Clvk/Clvc": 0.001143,
+    "Clvk/n": 0.001143,
+    "Clvc/Clvc": 0.001143,
+    "Clvc/n": 0.001143,
+    "n/n": 99.952
   },
   "notes": [
-    "The detached spears used to be fat ovals (radius 1.3, stretch 2.4) scattered over a band up to 42% of the horse long, which read as random white splotches loose on the far half rather than as spears thrown clear of the boundary (owner's call). They are now long and thin (radius 0.55, stretch 4.2) and the band they sit in is tied close behind the line, because 'reach' was narrowed to 0.30-0.40 against a split of 0.42-0.60. 'reach' stays strictly below the split's minimum so the band can never invert its own from/to."
+    "Two loci, not one. Cleave used to carry four alleles that crossed two questions together - Clv and Clc for a front-half split, Wav and Wac for a back-half one - so 'the same marking in the other colour' and 'the same marking on the other half' were the same kind of thing, and every colour added had to be added twice. They are separate questions and they are separate genes now: this one says whether there is a cleave and what colour, horsegenetics.cleave_side says which half.",
+    "This locus is the one that decides whether anything is painted at all. A horse can carry Wve/Wve and show nothing, because the side gene has no layers of its own; Clvw/Clvw n/n is a white front half and Clvw/Clvw Wve/Wve is the same white marking on the back half.",
+    "The back-half expressions are listed BEFORE the front-half ones on purpose. SpecGene walks the conditional expressions in file order and only falls through to the plain combination table when none of them is satisfied, so the half that carries the 'needs' has to come first or it can never win.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every saturated one is left alone."
   ]
 }

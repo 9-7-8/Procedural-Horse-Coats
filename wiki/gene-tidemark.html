@@ -21,7 +21,7 @@
 <h1>Tidemark</h1>
 
 <p class="lede">
-    The belly and lower barrel filled to an arched waterline, with the line picked out in a second colour and a row of dots riding along it.
+    The belly and lower barrel filled to an arched waterline, with the line picked out in a second colour and a row of dots riding along it. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Tidemark</th><td><code>Tdm/Tdm</code> &middot; <code>Tdm/Tdc</code> &middot; <code>Tdm/n</code></td></tr>
+<tr><th>Tidemark</th><td><code>Tdm/Tdm</code> &middot; <code>Tdm/Tdc</code> &middot; <code>Tdm/n</code> &middot; <code>Tdm/Tdk</code></td></tr>
+<tr><th>Tidemark, black</th><td><code>Tdk/Tdk</code> &middot; <code>Tdk/Tdc</code> &middot; <code>Tdk/n</code></td></tr>
 <tr><th>Tidemark, coloured</th><td><code>Tdc/Tdc</code></td></tr>
 <tr><th>Wild type</th><td><code>Tdc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Tdm/Tdm</code></td><td>Tidemark</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Tdm/Tdc</code></td><td>Tidemark</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Tdm/Tdk</code></td><td>Tidemark</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tdm/Tdc</code></td><td>Tidemark</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>Tdm/n</code></td><td>Tidemark</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Tdc/Tdc</code></td><td>Tidemark, coloured</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Tdk/Tdk</code></td><td>Tidemark, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tdk/Tdc</code></td><td>Tidemark, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tdk/n</code></td><td>Tidemark, black</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Tdc/Tdc</code></td><td>Tidemark, coloured</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.tidemark</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>258 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Tdm</code> &middot; <code>Tdc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Tdm</code> &middot; <code>Tdk</code> &middot; <code>Tdc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>9 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>SPOTS, TOWARD, WAVES</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08. One sine wave read three times - the fill below it, the line at it, and a band just above it broken into dots by a spot field. Because all three read the SAME wave, the dots follow the waterline exactly however the arch knob is drawn, which three independent masks could not promise.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Tdk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,16 @@
 <h3>Tidemark</h3>
 
 <p>One sine wave, three times over: the fill below it, the line at it, and a band just above it with a spot field multiplied in to break the band into dots. Because all three read the same wave, the dots follow the line exactly however the arch is drawn - which is the point, and is not something three separate masks could promise.</p>
+
+<ol>
+<li>the belly filled to an arched waterline &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>the waterline itself, drawn as a line &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>a row of dots riding along it &mdash; <code>WAVES</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Tidemark, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone, and the coloured accents unchanged.</p>
 
 <ol>
 <li>the belly filled to an arched waterline &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>

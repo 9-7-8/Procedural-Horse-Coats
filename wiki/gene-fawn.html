@@ -21,7 +21,7 @@
 <h1>Fawn</h1>
 
 <p class="lede">
-    A soft-edged darkened topline with a single flowing line of small round spots running along it, neck to rump, and a pale underside to the tail.
+    A soft-edged darkened topline with a single flowing line of small round spots running along it, neck to rump, and a pale underside to the tail. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Fawn</th><td><code>Fwn/Fwn</code> &middot; <code>Fwn/Fwc</code> &middot; <code>Fwn/n</code></td></tr>
+<tr><th>Fawn</th><td><code>Fwn/Fwn</code> &middot; <code>Fwn/Fwc</code> &middot; <code>Fwn/n</code> &middot; <code>Fwn/Fwk</code></td></tr>
+<tr><th>Black Fawn</th><td><code>Fwk/Fwk</code> &middot; <code>Fwk/Fwc</code> &middot; <code>Fwk/n</code></td></tr>
 <tr><th>Coloured Fawn</th><td><code>Fwc/Fwc</code></td></tr>
 <tr><th>Wild type</th><td><code>Fwc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Fwn/Fwn</code></td><td>Fawn</td><td>0.006% &mdash; 1 in 16,667</td></tr>
-<tr><td><code>Fwn/Fwc</code></td><td>Fawn</td><td>0.024% &mdash; 1 in 4,167</td></tr>
+<tr><td><code>Fwn/Fwk</code></td><td>Fawn</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Fwn/Fwc</code></td><td>Fawn</td><td>0.008% &mdash; 1 in 12,500</td></tr>
 <tr><td><code>Fwn/n</code></td><td>Fawn</td><td>0.114% &mdash; 1 in 877</td></tr>
-<tr><td><code>Fwc/Fwc</code></td><td>Coloured Fawn</td><td>0.024% &mdash; 1 in 4,167</td></tr>
+<tr><td><code>Fwk/Fwk</code></td><td>Black Fawn</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Fwk/Fwc</code></td><td>Black Fawn</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Fwk/n</code></td><td>Black Fawn</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Fwc/Fwc</code></td><td>Coloured Fawn</td><td>0.008% &mdash; 1 in 12,500</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.832%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.fawn</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>312 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Fwn</code> &middot; <code>Fwc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Fwn</code> &middot; <code>Fwk</code> &middot; <code>Fwc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, SPOTS, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Fwk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,17 @@
 <h3>Fawn</h3>
 
 <p>A darkened topline in the manner of sooty - a soft band down the crest, back and croup with no edge to it at either end - and, sitting on that dark band and nowhere else, one consecutive run of small round spots somewhere between the neck and the rump. Never two clusters with a gap between them, never a spiral or a pattern, just a flowing line of them, and all of them small. They keep off the face, the belly and the legs. Most fawn horses also carry a stylised eyeliner, a pangare-like lightening underneath, and a pale underside to the tail.</p>
+
+<ol>
+<li>the darkened topline the run sits on &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the flowing line of spots &mdash; <code>SPOTS</code> &times; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>eyeliner &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the underside of the tail &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Fawn</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the darkened topline the run sits on &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>

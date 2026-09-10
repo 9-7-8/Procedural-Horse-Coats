@@ -5,15 +5,20 @@
   "phase": "magical",
   "priority": 265,
   "rarity": "UNCOMMON",
-  "blurb": "A plate laid over the back from withers to croup, studded with haloed marks - armour rather than a blanket.",
+  "blurb": "A plate laid over the back from withers to croup, studded with haloed marks - armour rather than a blanket. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The plate is defined in BODY UNITS rather than in part space on purpose: it has to sit at a fixed place on the animal, and a fraction of the barrel would slide as the barrel changes. Every stud layer repeats the same two bands so nothing can escape the plate.",
-    "The source used `spread` on a paint op to make the halo. spread is a PIGMENT mask parameter, not an op one; the halo here is the usual big-soft-disc-minus-small-sharp-disc instead."
+    "The source used `spread` on a paint op to make the halo. spread is a PIGMENT mask parameter, not an op one; the halo here is the usual big-soft-disc-minus-small-sharp-disc instead.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Dsk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Dsh",
       "label": "Shield, pale (Dsh)"
+    },
+    {
+      "token": "Dsk",
+      "label": "Shield, black (Dsk)"
     },
     {
       "token": "Dsc",
@@ -58,7 +63,8 @@
       "when": [
         "Dsh/Dsh",
         "Dsh/Dsc",
-        "Dsh/n"
+        "Dsh/n",
+        "Dsh/Dsk"
       ],
       "layers": [
         {
@@ -183,6 +189,143 @@
           "op": {
             "type": "TOWARD",
             "color": "#efe9dd",
+            "strength": 70.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Dorsal Shield, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Dsk/Dsk",
+        "Dsk/Dsc",
+        "Dsk/n"
+      ],
+      "layers": [
+        {
+          "name": "the shield itself, a plate over the back",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 70.0
+          }
+        },
+        {
+          "name": "haloed studs set into it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$studSpacing",
+              "radius": "$studOuter",
+              "stretch": 1.2,
+              "vary": 0.3,
+              "softness": 0.4,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 88.0
+          }
+        },
+        {
+          "name": "and the stud at the centre of each",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.4,
+              "from": 15.0,
+              "to": 21.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "units",
+              "softness": 1.6,
+              "combine": "MULTIPLY",
+              "from": 12.0,
+              "to": 28.0
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$studSpacing",
+              "radius": "$studInner",
+              "stretch": 1.2,
+              "vary": 0.3,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 70.0
           }
         }
@@ -338,9 +481,13 @@
   ],
   "founders": {
     "Dsh/Dsh": 0.004,
-    "Dsh/Dsc": 0.016,
+    "Dsh/Dsk": 0.005333,
+    "Dsh/Dsc": 0.005333,
     "Dsh/n": 0.076,
-    "Dsc/Dsc": 0.016,
+    "Dsk/Dsk": 0.005333,
+    "Dsk/Dsc": 0.005333,
+    "Dsk/n": 0.005333,
+    "Dsc/Dsc": 0.005333,
     "n/n": 99.888
   }
 }

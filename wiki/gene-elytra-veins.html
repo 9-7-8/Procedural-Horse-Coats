@@ -21,7 +21,7 @@
 <h1>Elytra Veins</h1>
 
 <p class="lede">
-    A net of veins over the barrel and neck, each one bright down its middle - the cell pattern of a beetle wing-case rather than a marking.
+    A net of veins over the barrel and neck, each one bright down its middle - the cell pattern of a beetle wing-case rather than a marking. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Elytra Veins</th><td><code>Elw/Elw</code> &middot; <code>Elw/Elc</code> &middot; <code>Elw/n</code></td></tr>
+<tr><th>Elytra Veins</th><td><code>Elw/Elw</code> &middot; <code>Elw/Elc</code> &middot; <code>Elw/n</code> &middot; <code>Elw/Elk</code></td></tr>
+<tr><th>Elytra Veins, black</th><td><code>Elk/Elk</code> &middot; <code>Elk/Elc</code> &middot; <code>Elk/n</code></td></tr>
 <tr><th>Elytra Veins, coloured</th><td><code>Elc/Elc</code></td></tr>
 <tr><th>Wild type</th><td><code>Elc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Elw/Elw</code></td><td>Elytra Veins</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Elw/Elc</code></td><td>Elytra Veins</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Elw/Elk</code></td><td>Elytra Veins</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Elw/Elc</code></td><td>Elytra Veins</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Elw/n</code></td><td>Elytra Veins</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Elc/Elc</code></td><td>Elytra Veins, coloured</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Elk/Elk</code></td><td>Elytra Veins, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Elk/Elc</code></td><td>Elytra Veins, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Elk/n</code></td><td>Elytra Veins, black</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Elc/Elc</code></td><td>Elytra Veins, coloured</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.elytra_veins</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>371 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Elw</code> &middot; <code>Elc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Elw</code> &middot; <code>Elk</code> &middot; <code>Elc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>CRACKLE, TOWARD</td></tr>
 </tbody>
@@ -109,6 +114,8 @@
 <h2 id="about">Why it is built this way</h2>
 
 <p>Imported from the magic-gene intake, 2026-09-08. Two crackle fields on the SAME seed and the same cell size, with different channel widths, painted narrow-over-wide. That is the whole gene: because the lattice is identical, the second pass lands exactly inside the first, and every vein comes out dark-edged with a bright core. Change either seed and it falls apart.</p>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Elk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,6 +129,15 @@
 <h3>Elytra Veins</h3>
 
 <p>Two crackle fields on the same seed and the same cell size, one with a wide channel and one with a narrow one, painted in that order - so the second sits exactly down the middle of the first, and every vein comes out dark-edged with a bright core. The cells themselves keep the coat.</p>
+
+<ol>
+<li>the heavy veins between the wing cells &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+<li>a bright hairline down the middle of each vein &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Elytra Veins, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the heavy veins between the wing cells &mdash; <code>CRACKLE inverted</code>, painted with <code>TOWARD</code></li>

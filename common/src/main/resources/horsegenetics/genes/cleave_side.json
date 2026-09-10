@@ -1,0 +1,36 @@
+{
+  "key": "horsegenetics.cleave_side",
+  "name": "Cleave Side",
+  "phase": "magical",
+  "priority": 211,
+  "rarity": "COMMON",
+  "blurb": "Half of Cleave, and the half that decides its shape: whether the split takes the front of the horse or the back. On its own it paints nothing at all, and every horse alive carries it.",
+  "notes": [
+    "A modifier locus in the same shape as horsegenetics.accretion_field: no layers, one wild-type catch-all expression, and a founder table that gives founders one homozygote or the other and never a heterozygote. It exists so that Cleave's colour and Cleave's side are two questions instead of one allele list crossing them together.",
+    "Wve is DOMINANT - horsegenetics.cleave asks for one copy, not two - so a foal out of a back-half parent and a front-half one takes the back half. The wild type is the front, which is the half the marking was originally written for.",
+    "Its priority is a code-order slot and nothing else. The gene paints nothing, so where it sits in the paint order cannot matter."
+  ],
+  "alleles": [
+    {
+      "token": "Wve",
+      "label": "Back half (Wve)"
+    },
+    {
+      "token": "n",
+      "label": "Front half, wild type (n)"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "side",
+      "name": "Cleave side",
+      "description": "Nothing on its own. It decides which half a Cleave takes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Wve/Wve": 0.12,
+    "n/n": 99.88
+  },
+  "format": 3
+}

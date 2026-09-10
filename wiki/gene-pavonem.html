@@ -21,7 +21,7 @@
 <h1>Pavonem</h1>
 
 <p class="lede">
-    Peacock eyes - a dark pupil inside a ring of bare coat inside a broad faint leaf, upright and a little taller than wide, with ordinary spots scattered around them.
+    Peacock eyes - a dark pupil inside a ring of bare coat inside a broad faint leaf, upright and a little taller than wide, with ordinary spots scattered around them. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Pavonem</th><td><code>Pv/Pv</code> &middot; <code>Pv/Pvc</code> &middot; <code>Pv/n</code></td></tr>
+<tr><th>Pavonem</th><td><code>Pv/Pv</code> &middot; <code>Pv/Pvc</code> &middot; <code>Pv/n</code> &middot; <code>Pv/Pvk</code></td></tr>
+<tr><th>Black Pavonem</th><td><code>Pvk/Pvk</code> &middot; <code>Pvk/Pvc</code> &middot; <code>Pvk/n</code></td></tr>
 <tr><th>Coloured Pavonem</th><td><code>Pvc/Pvc</code></td></tr>
 <tr><th>Wild type</th><td><code>Pvc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Pv/Pv</code></td><td>Pavonem</td><td>0.002% &mdash; 1 in 50,000</td></tr>
-<tr><td><code>Pv/Pvc</code></td><td>Pavonem</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Pv/Pvk</code></td><td>Pavonem</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Pv/Pvc</code></td><td>Pavonem</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>Pv/n</code></td><td>Pavonem</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>Pvc/Pvc</code></td><td>Coloured Pavonem</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Pvk/Pvk</code></td><td>Black Pavonem</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Pvk/Pvc</code></td><td>Black Pavonem</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Pvk/n</code></td><td>Black Pavonem</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Pvc/Pvc</code></td><td>Coloured Pavonem</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,18 @@
 <tr><th>Key</th><td><code>horsegenetics.pavonem</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>310 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Pv</code> &middot; <code>Pvc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Pv</code> &middot; <code>Pvk</code> &middot; <code>Pvc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>SPOTS, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Pvk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
+
+<p>The white form was regraded at the same time. It spanned a much narrower range of lightness than the coloured form did - the same layers the coloured form separates were all landing on off-white - so its tones now follow the coloured form's own per-layer ordering, in greys. All three forms carry the same number of steps.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +129,16 @@
 <h3>Pavonem</h3>
 
 <p>Peacock eyes, and built the way one is: a small dark pupil, a ring of the horse's own coat around it left completely alone, and a broad outer leaf around that - each zone about a fifth, a half and the whole of the width, and every one of them a little taller than it is wide. The ring is the part that makes it read: paint the middle and it stops being an eye and becomes a spot. The leaf is the same colour as the pupil but much weaker, so the three zones go strong, bare, faint from the centre out. It is never alone - ordinary small spots always ring the eyes - and it works on any base, stacking happily with tobiano and the rest.</p>
+
+<ol>
+<li>the outer leaf, with the eye left out of it &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
+<li>the pupil at the centre of the eye &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the ordinary spots that always surround them &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Pavonem</h3>
+
+<p>The same marking as the white form with the light taken out of it: the same 3 steps, moved to the dark end of the scale.</p>
 
 <ol>
 <li>the outer leaf, with the eye left out of it &mdash; <code>SPOTS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>

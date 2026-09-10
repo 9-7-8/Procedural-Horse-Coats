@@ -21,7 +21,7 @@
 <h1>Tribal Ward</h1>
 
 <p class="lede">
-    A painted ward - coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, laid straight onto the horse's own colour.
+    A painted ward - coiled swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs, laid straight onto the horse's own colour. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Tribal Ward</th><td><code>Twd/Twd</code> &middot; <code>Twd/Twc</code> &middot; <code>Twd/n</code></td></tr>
+<tr><th>Tribal Ward</th><td><code>Twd/Twd</code> &middot; <code>Twd/Twc</code> &middot; <code>Twd/n</code> &middot; <code>Twd/Twk</code></td></tr>
+<tr><th>Tribal Ward, black</th><td><code>Twk/Twk</code> &middot; <code>Twk/Twc</code> &middot; <code>Twk/n</code></td></tr>
 <tr><th>Tribal Ward, coloured</th><td><code>Twc/Twc</code></td></tr>
 <tr><th>Wild type</th><td><code>Twc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -53,7 +54,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 3,571</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 3,572</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Twd/Twd</code></td><td>Tribal Ward</td><td>0.001% &mdash; 1 in 100,000</td></tr>
-<tr><td><code>Twd/Twc</code></td><td>Tribal Ward</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Twd/Twk</code></td><td>Tribal Ward</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Twd/Twc</code></td><td>Tribal Ward</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>Twd/n</code></td><td>Tribal Ward</td><td>0.019% &mdash; 1 in 5,263</td></tr>
-<tr><td><code>Twc/Twc</code></td><td>Tribal Ward, coloured</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Twk/Twk</code></td><td>Tribal Ward, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Twk/Twc</code></td><td>Tribal Ward, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Twk/n</code></td><td>Tribal Ward, black</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
+<tr><td><code>Twc/Twc</code></td><td>Tribal Ward, coloured</td><td>0.0013% &mdash; 1 in 75,019</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.972%</td></tr>
 </tbody>
 </table>
@@ -99,7 +104,7 @@
 <tr><th>Key</th><td><code>horsegenetics.tribal_ward</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>220 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Twd</code> &middot; <code>Twc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Twd</code> &middot; <code>Twk</code> &middot; <code>Twc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>8 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, SPIRAL, TOWARD, WAVES</td></tr>
 </tbody>
@@ -116,6 +121,8 @@
 
 <p>The old note here said the ink stays black because 'it is the ink that makes it a ward', and the coloured allele varied the pale ground instead. With the ground gone that reasoning left the allele with nothing at all to do - the two expressions came out identical - so the ink is what varies now. The earlier argument was about a design that no longer exists rather than about the ink.</p>
 
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Twk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
+
 <h2 id="layers">What it paints</h2>
 
 <p>
@@ -128,6 +135,18 @@
 <h3>Tribal Ward</h3>
 
 <p>The ward inked straight onto the horse in near-black - swirls at hip and shoulder, chevrons down the back, bands round the neck and rings round the legs.</p>
+
+<ol>
+<li>a coiled swirl at each hip &mdash; <code>SPIRAL</code>, painted with <code>TOWARD</code></li>
+<li>a smaller one at each shoulder &mdash; <code>SPIRAL</code>, painted with <code>TOWARD</code></li>
+<li>chevrons banded down the back &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>bands round the neck &mdash; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>rings round the legs &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Tribal Ward, black</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>a coiled swirl at each hip &mdash; <code>SPIRAL</code>, painted with <code>TOWARD</code></li>

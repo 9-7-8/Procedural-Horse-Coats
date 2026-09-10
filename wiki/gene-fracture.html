@@ -21,7 +21,7 @@
 <h1>Fracture</h1>
 
 <p class="lede">
-    Overo read backwards - a white horse with the coat colour breaking through it in hard-edged, unpredictable blocks and streaks.
+    Overo read backwards - a white horse with the coat colour breaking through it in hard-edged, unpredictable blocks and streaks. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,9 +34,10 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Fracture</th><td><code>Fdf/Fdf</code> &middot; <code>Fdf/Fdc</code></td></tr>
+<tr><th>Fracture</th><td><code>Fdf/Fdf</code> &middot; <code>Fdf/Fdc</code> &middot; <code>Fdf/Fdk</code> &middot; <code>Fdf/n</code></td></tr>
+<tr><th>Black Fracture</th><td><code>Fdk/Fdk</code> &middot; <code>Fdk/Fdc</code> &middot; <code>Fdk/n</code></td></tr>
 <tr><th>Coloured Fracture</th><td><code>Fdc/Fdc</code></td></tr>
-<tr><th>Fracture carrier</th><td><code>Fdf/n</code> &middot; <code>Fdc/n</code></td></tr>
+<tr><th>Fracture carrier</th><td><code>Fdc/n</code></td></tr>
 <tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
@@ -64,9 +65,14 @@
 <table class="facts">
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
-<tr><td><code>Fdf/Fdf</code></td><td>Fracture</td><td>0.04% &mdash; 1 in 2,500</td></tr>
-<tr><td><code>Fdf/Fdc</code></td><td>Fracture</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>Fdc/Fdc</code></td><td>Coloured Fracture</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Fdf/Fdf</code></td><td>Fracture</td><td>0.002% &mdash; 1 in 50,000</td></tr>
+<tr><td><code>Fdf/Fdk</code></td><td>Fracture</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Fdf/Fdc</code></td><td>Fracture</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Fdf/n</code></td><td>Fracture</td><td>0.038% &mdash; 1 in 2,632</td></tr>
+<tr><td><code>Fdk/Fdk</code></td><td>Black Fracture</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Fdk/Fdc</code></td><td>Black Fracture</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Fdk/n</code></td><td>Black Fracture</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
+<tr><td><code>Fdc/Fdc</code></td><td>Coloured Fracture</td><td>0.0027% &mdash; 1 in 37,495</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
 </tbody>
 </table>
@@ -99,12 +105,16 @@
 <tr><th>Key</th><td><code>horsegenetics.fracture</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>201 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Fdf</code> &middot; <code>Fdc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Fdf</code> &middot; <code>Fdk</code> &middot; <code>Fdc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>PARTS, PATCHES, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Fdk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +128,15 @@
 <h3>Fracture</h3>
 
 <p>Instead of white appearing on a coloured horse, the colour appears on a white one - and it does it in bold uneven blocks and streaks with jagged edges, anywhere at all: neck, shoulder, barrel, hindquarter, legs, face. There is no symmetry to it and no pattern to predict; two Fracture horses out of the same parents look nothing like each other. The head usually keeps a distinct area of coat, and the mane and tail follow whatever is underneath them. It takes two copies - a single copy is carried and shows nothing.</p>
+
+<ol>
+<li>white over most of the horse &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
+<li>the coat breaking back through it in blocks &mdash; <code>PATCHES inverted</code> &times; <code>STROKES</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black Fracture</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>white over most of the horse &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>

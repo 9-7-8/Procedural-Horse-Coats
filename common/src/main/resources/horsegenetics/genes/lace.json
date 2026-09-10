@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 377,
   "rarity": "RARE",
-  "blurb": "A thread-fine net of white veining over the horse - lace, or a crazed glaze, rather than the broad blotches of Marble Tobiano.",
+  "blurb": "A thread-fine net of white veining over the horse - lace, or a crazed glaze, rather than the broad blotches of Marble Tobiano. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08 (from the second Marble Tobiano sketch, which asked to be a distinct locus rather than an allele). The fine net is kept off the legs on purpose - a leg is four units wide, and two crackle nets on it resolve as a wash rather than as lace."
+    "Imported from the magic-gene intake, 2026-09-08 (from the second Marble Tobiano sketch, which asked to be a distinct locus rather than an allele). The fine net is kept off the legs on purpose - a leg is four units wide, and two crackle nets on it resolve as a wash rather than as lace.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Lak are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Lac",
       "label": "Lace, white (Lac)"
+    },
+    {
+      "token": "Lak",
+      "label": "Lace, black (Lak)"
     },
     {
       "token": "Lah",
@@ -67,7 +72,8 @@
       "when": [
         "Lac/Lac",
         "Lac/Lah",
-        "Lac/n"
+        "Lac/n",
+        "Lac/Lak"
       ],
       "layers": [
         {
@@ -116,6 +122,67 @@
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
+            "strength": 72.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Lace, black",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Lak/Lak",
+        "Lak/Lah",
+        "Lak/n"
+      ],
+      "layers": [
+        {
+          "name": "the lace ground - a fine net over most of the horse",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$seed",
+              "scale": "$spacing",
+              "gap": "$lineWidth",
+              "warp": "$vary",
+              "softness": 0.05,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a second, tighter net threaded through the first",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "scale": "$fineSpacing",
+              "gap": "$fineWidth",
+              "warp": "$vary",
+              "softness": 0.05,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": 72.0
           }
         }
@@ -193,9 +260,13 @@
   ],
   "founders": {
     "Lac/Lac": 0.002,
-    "Lac/Lah": 0.008,
+    "Lac/Lak": 0.002667,
+    "Lac/Lah": 0.002667,
     "Lac/n": 0.038,
-    "Lah/Lah": 0.008,
+    "Lak/Lak": 0.002667,
+    "Lak/Lah": 0.002667,
+    "Lak/n": 0.002667,
+    "Lah/Lah": 0.002667,
     "n/n": 99.944
   }
 }

@@ -4,16 +4,21 @@
   "phase": "magical",
   "priority": 278,
   "rarity": "EPIC",
-  "blurb": "A patch of iridescent light gathers low on the haunch like a wing folded against the flank, cut through with dark bars that rake toward the tail.",
+  "blurb": "A patch of iridescent light gathers low on the haunch like a wing folded against the flank, cut through with dark bars that rake toward the tail. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
     "The bars are a FAN, and FAN exists because of this gene. The reference's bars share a common origin near the body and both widen and turn as they travel out from it; WAVES takes its phase from a straight line, so its bars are parallel, evenly spaced and all pointed the same way everywhere in the region, whatever its wavelength. That is a different measurement, not different tuning, and it is the one the mask was added for.",
     "Both layers re-declare the same PARTS and PATH region rather than the second reading the first's paint - a layer cannot see what the layer above it painted.",
-    "FAN's spacing is an ANGLE - the arc one cycle covers a single body unit from the pivot - so the bars here are 0.17, not the 1.5 that reads like 'one and a half units apart'. At 1.5 the whole patch is inside one bar. It is the one number on this gene worth checking against a render rather than against intuition."
+    "FAN's spacing is an ANGLE - the arc one cycle covers a single body unit from the pivot - so the bars here are 0.17, not the 1.5 that reads like 'one and a half units apart'. At 1.5 the whole patch is inside one bar. It is the one number on this gene worth checking against a render rather than against intuition.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Mok are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Mow",
       "label": "Morpho Wing, pale (Mow)"
+    },
+    {
+      "token": "Mok",
+      "label": "Morpho Wing, black (Mok)"
     },
     {
       "token": "Moc",
@@ -39,7 +44,8 @@
       "when": [
         "Mow/Mow",
         "Mow/Moc",
-        "Mow/n"
+        "Mow/n",
+        "Mow/Mok"
       ],
       "layers": [
         {
@@ -120,6 +126,99 @@
           "op": {
             "type": "TOWARD",
             "color": "#0a0a0a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Morpho Wing, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Mok/Mok",
+        "Mok/Moc",
+        "Mok/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the bars across it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "body",
+              "originU": 0.16,
+              "originV": 0.34,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "twist": 40.0,
+              "inner": 1.5,
+              "outer": 13.0,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 95
           }
         }
@@ -227,9 +326,13 @@
   ],
   "founders": {
     "Mow/Mow": 0.001,
-    "Mow/Moc": 0.004,
+    "Mow/Mok": 0.001333,
+    "Mow/Moc": 0.001333,
     "Mow/n": 0.019,
-    "Moc/Moc": 0.004,
+    "Mok/Mok": 0.001333,
+    "Mok/Moc": 0.001333,
+    "Mok/n": 0.001333,
+    "Moc/Moc": 0.001333,
     "n/n": 99.972
   },
   "format": 3

@@ -21,7 +21,7 @@
 <h1>Riblines</h1>
 
 <p class="lede">
-    Thin white strokes following the skeleton - down the neck, along the rib arcs, over the scapula and hip - and set as rings around the legs.
+    Thin white strokes following the skeleton - down the neck, along the rib arcs, over the scapula and hip - and set as rings around the legs. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Riblines</th><td><code>Rib/Rib</code> &middot; <code>Rib/Rbc</code> &middot; <code>Rib/n</code></td></tr>
+<tr><th>Riblines</th><td><code>Rib/Rib</code> &middot; <code>Rib/Rbc</code> &middot; <code>Rib/n</code> &middot; <code>Rib/Rbk</code></td></tr>
+<tr><th>Black riblines</th><td><code>Rbk/Rbk</code> &middot; <code>Rbk/Rbc</code> &middot; <code>Rbk/n</code></td></tr>
 <tr><th>Coloured riblines</th><td><code>Rbc/Rbc</code></td></tr>
 <tr><th>Wild type</th><td><code>Rbc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
@@ -64,9 +65,13 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Rib/Rib</code></td><td>Riblines</td><td>0.004% &mdash; 1 in 25,000</td></tr>
-<tr><td><code>Rib/Rbc</code></td><td>Riblines</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Rib/Rbk</code></td><td>Riblines</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Rib/Rbc</code></td><td>Riblines</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>Rib/n</code></td><td>Riblines</td><td>0.076% &mdash; 1 in 1,316</td></tr>
-<tr><td><code>Rbc/Rbc</code></td><td>Coloured riblines</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Rbk/Rbk</code></td><td>Black riblines</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Rbk/Rbc</code></td><td>Black riblines</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Rbk/n</code></td><td>Black riblines</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
+<tr><td><code>Rbc/Rbc</code></td><td>Coloured riblines</td><td>0.0053% &mdash; 1 in 18,751</td></tr>
 <tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
@@ -99,12 +104,16 @@
 <tr><th>Key</th><td><code>horsegenetics.riblines</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>363 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Rib</code> &middot; <code>Rbc</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Rib</code> &middot; <code>Rbk</code> &middot; <code>Rbc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Rbk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -118,6 +127,15 @@
 <h3>Riblines</h3>
 
 <p>Sharp-edged white strokes that taper to points at both ends and hold one value along their whole length - no gradient inside a stroke. They run dorso-ventrally on the neck, along the rib arcs on the barrel, down the scapular spine, out from the point of hip, and around the legs rather than along them. Twenty to fifty a side, parallel within a zone and turning as the zone does.</p>
+
+<ol>
+<li>strokes down the neck and along the ribs &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
+<li>rings set around the legs &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Black riblines</h3>
+
+<p>The same marking as the white form with the light taken out of it: a single near-black tone.</p>
 
 <ol>
 <li>strokes down the neck and along the ribs &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>

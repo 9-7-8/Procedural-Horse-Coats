@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 315,
   "rarity": "RARE",
-  "blurb": "Haloed spots over the barrel and neck, a dorsal stripe, dark socks, and a fine speckled bloom laid over the lot.",
+  "blurb": "Haloed spots over the barrel and neck, a dorsal stripe, dark socks, and a fine speckled bloom laid over the lot. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. The source drew the socks and the dorsal stripe with a pigment op - it wanted to darken the coat rather than paint on it. This is a magical gene and the two phases cannot be mixed in one gene, so both are painted toward a near-black instead. On a dark horse that is nearly the same picture; on a pale one it is flatter than a real pigment restriction would be."
+    "Imported from the magic-gene intake, 2026-09-08. The source drew the socks and the dorsal stripe with a pigment op - it wanted to darken the coat rather than paint on it. This is a magical gene and the two phases cannot be mixed in one gene, so both are painted toward a near-black instead. On a dark horse that is nearly the same picture; on a pale one it is flatter than a real pigment restriction would be.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Ehk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Ehr",
       "label": "Ehretia, pale (Ehr)"
+    },
+    {
+      "token": "Ehk",
+      "label": "Ehretia, black (Ehk)"
     },
     {
       "token": "Ehc",
@@ -86,7 +91,8 @@
       "when": [
         "Ehr/Ehr",
         "Ehr/Ehc",
-        "Ehr/n"
+        "Ehr/n",
+        "Ehr/Ehk"
       ],
       "layers": [
         {
@@ -221,6 +227,153 @@
           "op": {
             "type": "TOWARD",
             "color": "#efe7d8",
+            "strength": 45.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Ehretia, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 4 steps, moved to the dark end of the scale.",
+      "when": [
+        "Ehk/Ehk",
+        "Ehk/Ehc",
+        "Ehk/n"
+      ],
+      "layers": [
+        {
+          "name": "dark socks running up into a feathered edge",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.12,
+              "from": -0.1,
+              "to": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 75.0
+          }
+        },
+        {
+          "name": "a dorsal stripe from withers to tail",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY",
+                "TAIL"
+              ],
+              "halfWidth": "$stripeHalfWidth",
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.2,
+              "combine": "MULTIPLY",
+              "from": 0.72,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 80.0
+          }
+        },
+        {
+          "name": "a pale halo round each spot",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r1",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.3
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r2",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.2,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 90.0
+          }
+        },
+        {
+          "name": "the spot itself inside the halo",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": "$spotSpacing",
+              "radius": "$r3",
+              "vary": "$spotVary",
+              "stretch": "$spotStretch",
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#232323",
+            "strength": 70.0
+          }
+        },
+        {
+          "name": "a speckled bloom over the whole pattern",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$speckleSeed",
+              "spacing": "$speckleSpacing",
+              "size": 0.4,
+              "density": 0.35,
+              "softness": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6b6b6b",
             "strength": 45.0
           }
         }
@@ -384,9 +537,13 @@
   ],
   "founders": {
     "Ehr/Ehr": 0.002,
-    "Ehr/Ehc": 0.008,
+    "Ehr/Ehk": 0.002667,
+    "Ehr/Ehc": 0.002667,
     "Ehr/n": 0.038,
-    "Ehc/Ehc": 0.008,
+    "Ehk/Ehk": 0.002667,
+    "Ehk/Ehc": 0.002667,
+    "Ehk/n": 0.002667,
+    "Ehc/Ehc": 0.002667,
     "n/n": 99.944
   }
 }

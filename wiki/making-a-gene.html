@@ -751,6 +751,127 @@
     exist in real life.
 </p>
 
+<h2 id="three-forms">Three forms, where the palette is narrow</h2>
+
+<p>
+    The common shape of a magical marking here is <strong>a white form and a
+    recessive coloured one</strong> &mdash; the same layers twice, with
+    <code>"hue": "$hue"</code> where the white one names <code>#ffffff</code>. It
+    is a good shape and it is one form short. A marking whose palette is narrow
+    &mdash; one or two fixed colours, or an idea that is really a
+    <em>shape</em> &mdash; should ship <strong>three</strong>: white, black,
+    coloured.
+</p>
+
+<div class="note">
+    <span class="label">Why the third one earns its place</span>
+    <p>
+        White and coloured are not opposites, they are two points on one axis with
+        the whole of the other end unused. Every one of these markings already knows
+        how to draw itself in a single flat tone; the black form is that same
+        drawing with the light taken out of it, and it costs one allele and no new
+        vocabulary. It also lands on a set of horses the white form never reads well
+        on &mdash; the palominos, cremellos, greys and dominant whites, where a
+        white marking on a white coat is a marking nobody can see.
+    </p>
+</div>
+
+<h3>The dominance series</h3>
+
+<p>
+    Black sits <strong>directly under white and above coloured</strong>, in
+    <em>declaration</em> order, which is the order these files already read as a
+    series. Put that way, adding one to an existing gene changes nothing that
+    already existed &mdash; every pair that had an outcome keeps it, and only the
+    pairs carrying the new token are new.
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<thead><tr><th>Slot</th><th>Allele</th><th>Shows on</th></tr></thead>
+<tbody>
+<tr><td><code>alleles[0]</code></td><td>white / pale</td><td>every pair carrying it</td></tr>
+<tr><td><code>alleles[1]</code></td><td><strong>black</strong></td><td>every pair carrying it and no white</td></tr>
+<tr><td><code>alleles[2]</code></td><td>coloured</td><td>the recessive &mdash; usually the homozygote alone</td></tr>
+<tr><td><code>alleles[3]</code></td><td><code>n</code></td><td>wild type</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The token convention is the coloured one with its last letter swapped for
+    <code>k</code> &mdash; <code>Bpc</code> &rarr; <code>Bpk</code>,
+    <code>Mnc</code> &rarr; <code>Mnk</code>. <code>b</code> is not used because
+    it reads as &ldquo;bay&rdquo; in a genotype string full of real allele names.
+</p>
+
+<h3>Writing the black form: re-tone, do not repaint</h3>
+
+<p>
+    Copy the white expression and move every <strong>achromatic</strong> target
+    into the dark end of the scale, <em>keeping the order and the spacing of the
+    tones it had</em>. Leave every <strong>saturated</strong> target alone: that
+    colour is the gene rather than its lightness, and greying it is deleting the
+    gene instead of darkening it. <a href="gene-moonwing.html">Moonwing</a> is the
+    clearest case &mdash; the black form is a graphite wing carrying the same
+    iridescent dust and the same gold binding, because only the wing itself was
+    ever white.
+</p>
+
+<div class="note warn">
+    <span class="label">Measure achromatic as CHROMA, not saturation</span>
+    <p>
+        <code>max(r,g,b) - min(r,g,b)</code>, and the line is about
+        <strong>0.12</strong>. HLS <em>saturation</em> reads backwards at exactly the
+        values that matter here, because its denominator collapses near white: a
+        pearl six counts off the top of the scale, <code>#f4f0e8</code>, scores 0.35
+        and would be protected as though it were a colour. That is not hypothetical
+        &mdash; it is how the first pass of this change shipped a black moonwing
+        byte-for-byte identical to the pearl one.
+    </p>
+</div>
+
+<h3>Both achromatic forms get as many steps as the coloured one</h3>
+
+<p>
+    This is the half that is easy to skip. A coloured form that separates its
+    layers into a dark ring, a mid field and a bright core, against a white form
+    that paints all three off-white, is not two versions of one marking &mdash; it
+    is the good one and the flat one. Where the coloured form spans a noticeably
+    wider range of lightness than the white form does, <strong>regrade the white
+    form onto the coloured form&rsquo;s own per-layer ordering, in greys</strong>,
+    and then derive the black form from that. <a href="gene-pavonem.html">Pavonem</a>
+    is the example: its coloured form makes the eye&rsquo;s pupil the darkest thing
+    on the horse, and its white form had painted the pupil the same white as the
+    spots around it, so the eye had no pupil at all.
+</p>
+
+<p class="muted">
+    A ring with no interior structure has nothing to tell the eye where its edges
+    are &mdash; which is the same finding as
+    <a href="gene-iridescent-rosette.html">iridescent rosette</a>&rsquo;s, and the
+    reason this is written down rather than left to taste.
+</p>
+
+<h3>When not to</h3>
+
+<p>
+    <strong>Not every gene wants this.</strong> Where the colour <em>is</em> the
+    gene &mdash; <a href="gene-coral-bloom.html">coral bloom</a>&rsquo;s sea-blue
+    and gold, a marking whose whole idea is that it is ember, or gold, or
+    verdigris &mdash; a grey version is a different marking wearing its name. The
+    test is the one in the heading of this section: is the palette narrow? If the
+    gene names one or two fixed colours and the rest is shape, it wants three
+    forms. If it names a palette and the palette is the point, it wants two.
+</p>
+
+<p>
+    Founders are not a judgement call either way: declare the
+    <a href="#founders">rarity tier</a> and let the budget be shared out. A third
+    allele takes a share of the gene&rsquo;s existing budget rather than adding to
+    it, so three forms are not three times as many magical horses.
+</p>
+
 <h2 id="knobs">Numbers that vary per horse</h2>
 
 <p>
@@ -2726,6 +2847,11 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
         scales to a thirty-allele <code>KIT</code> without a special case, because
         you declare an outcome per <em>combination</em> rather than a dominance
         label per gene.</li>
+    <li><strong>A narrow palette wants three forms, not two</strong> &mdash; white,
+        black, coloured, in that declaration order. It is a recommendation rather
+        than a rule and it has a shape worth following exactly;
+        <a href="#three-forms">Three forms, where the palette is narrow</a> is the
+        whole of it.</li>
     <li><strong>The <code>alleles()</code> order is bookkeeping, not biology.</strong>
         It fixes which allele lands in which slot of an <code>AllelePair</code>, so
         a pair equals its reverse and a code string round-trips &mdash; and it must
@@ -4005,9 +4131,33 @@ derive and budget the table, because the rates compound across eighty-odd
 genes. If you write a table anyway it must be percentages over every
 combination summing to 100, with carrier-only pairs omitted entirely.
 
-CONVENTION: most magical markings ship as a pair - a white form on allele[0]
-and a fully recessive "coloured" form on allele[1] that draws the same shape
-with "hue": "$hue" instead of "color".
+CONVENTION - THREE FORMS, NOT TWO. Most magical markings ship as a white form
+on allele[0] and a recessive "coloured" form that draws the same shape with
+"hue": "$hue" instead of "color". If the marking's palette is NARROW - it names
+one or two fixed colours, or its whole idea is a shape rather than a colour -
+give it a BLACK form too, as allele[1], between the two:
+
+  allele[0] white / pale     shows on every pair that carries it
+  allele[1] black            shows on every pair that carries it and no white
+  allele[2] coloured         the recessive; usually the homozygote alone
+  allele[3] n                wild type
+
+  Write the black form by copying the white one and re-toning it: every
+  ACHROMATIC target moves into the dark end of the scale, keeping the ORDER
+  and the SPACING of the tones it had, and every SATURATED target is left
+  alone, because that colour is the gene rather than its lightness. One tone
+  becomes one near-black around #1f1f1f; three tones become three steps
+  between about #0d0d0d and #707070.
+
+  This is a RECOMMENDATION and not a rule. Skip it where the colour IS the
+  gene - a marking whose whole idea is that it is gold, or coral, or ember -
+  because a grey version of that is a different marking wearing its name.
+
+  And give BOTH achromatic forms as many steps as the coloured form has. A
+  coloured form that separates its layers into a dark ring, a mid field and a
+  bright core, against a white form that paints all three off-white, is not
+  two versions of one marking - it is the good one and the flat one. Grade the
+  white form onto the coloured form's own per-layer ordering, in greys.
 
 PROSE: "blurb" is one to three sentences for a PLAYER; an expression's
 "description" is what THAT outcome looks like, also for a player. "notes" - on

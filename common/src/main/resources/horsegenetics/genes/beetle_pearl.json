@@ -5,14 +5,19 @@
   "phase": "magical",
   "priority": 221,
   "rarity": "RARE",
-  "blurb": "A hard black barrel scattered with pearls, a pale cap over the poll and a dark fork down the face - a pearl-spotted beetle rather than a spotted horse.",
+  "blurb": "A hard black barrel scattered with pearls, a pale cap over the poll and a dark fork down the face - a pearl-spotted beetle rather than a spotted horse. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "notes": [
-    "Imported from the magic-gene intake, 2026-09-08. The ground goes to black before anything else, which is why this reads the same on a chestnut as on a black. The source used perDose coverage to make the heterozygote fainter; that was dropped, because a perDose triple on an expression the first allele does not reach is silently zero (gap 105) and this locus is simple dominant."
+    "Imported from the magic-gene intake, 2026-09-08. The ground goes to black before anything else, which is why this reads the same on a chestnut as on a black. The source used perDose coverage to make the heterozygote fainter; that was dropped, because a perDose triple on an expression the first allele does not reach is silently zero (gap 105) and this locus is simple dominant.",
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Bpk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
   ],
   "alleles": [
     {
       "token": "Bpw",
       "label": "Pearl, white (Bpw)"
+    },
+    {
+      "token": "Bpk",
+      "label": "Pearl, black (Bpk)"
     },
     {
       "token": "Bpc",
@@ -62,7 +67,8 @@
       "when": [
         "Bpw/Bpw",
         "Bpw/Bpc",
-        "Bpw/n"
+        "Bpw/n",
+        "Bpw/Bpk"
       ],
       "layers": [
         {
@@ -164,6 +170,120 @@
           "op": {
             "type": "TOWARD",
             "color": "#111111",
+            "strength": 95.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Beetle Pearl, black",
+      "description": "The same marking as the white form with the light taken out of it: the same 2 steps, moved to the dark end of the scale.",
+      "when": [
+        "Bpk/Bpk",
+        "Bpk/Bpc",
+        "Bpk/n"
+      ],
+      "layers": [
+        {
+          "name": "the barrel taken to a hard black",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "pearls scattered over it, mirrored side to side",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$seed",
+              "spacing": "$spotSpacing",
+              "radius": "$spotRadius",
+              "stretch": "$spotStretch",
+              "vary": "$spotVary",
+              "mirror": true,
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a pale cap over the poll",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 92.0
+          }
+        },
+        {
+          "name": "a dark fork down the face",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "halfWidth": 0.6,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
+            "strength": 95.0
+          }
+        },
+        {
+          "name": "dark ear tips",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "EARS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "softness": 0.15,
+              "from": 0.5,
+              "to": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0d0d",
             "strength": 95.0
           }
         }
@@ -294,9 +414,13 @@
   ],
   "founders": {
     "Bpw/Bpw": 0.002,
-    "Bpw/Bpc": 0.008,
+    "Bpw/Bpk": 0.002667,
+    "Bpw/Bpc": 0.002667,
     "Bpw/n": 0.038,
-    "Bpc/Bpc": 0.008,
+    "Bpk/Bpk": 0.002667,
+    "Bpk/Bpc": 0.002667,
+    "Bpk/n": 0.002667,
+    "Bpc/Bpc": 0.002667,
     "n/n": 99.944
   }
 }

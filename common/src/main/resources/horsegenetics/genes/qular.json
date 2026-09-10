@@ -5,11 +5,15 @@
   "phase": "magical",
   "priority": 200,
   "rarity": "RARE",
-  "blurb": "White over most of the horse, left open in straight-sided polygons of coat separated by even white channels - a giraffe read backwards, with the mane untouched.",
+  "blurb": "White over most of the horse, left open in straight-sided polygons of coat separated by even white channels - a giraffe read backwards, with the mane untouched. A third allele carries the same marking worked in greys instead of white - dark where the pale form is light, and the same number of steps.",
   "alleles": [
     {
       "token": "Qul",
       "label": "Qular, white (Qul)"
+    },
+    {
+      "token": "Quk",
+      "label": "Qular, black (Quk)"
     },
     {
       "token": "Quc",
@@ -54,7 +58,8 @@
       "when": [
         "Qul/Qul",
         "Qul/Quc",
-        "Qul/n"
+        "Qul/n",
+        "Qul/Quk"
       ],
       "layers": [
         {
@@ -120,6 +125,84 @@
           "op": {
             "type": "TOWARD",
             "color": "#fdfdfb",
+            "strength": -97
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Black Qular",
+      "description": "The same marking as the white form with the light taken out of it: a single near-black tone.",
+      "when": [
+        "Quk/Quk",
+        "Quk/Quc",
+        "Quk/n"
+      ],
+      "layers": [
+        {
+          "name": "white over almost the whole horse",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": 97
+          }
+        },
+        {
+          "name": "the giraffe panels the white is left out of",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$panelSeed",
+              "scale": "$panelScale",
+              "gap": "$panelEdge",
+              "warp": 0.26,
+              "chance": "$openness",
+              "softness": 0.035
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
+            "strength": -97
+          }
+        },
+        {
+          "name": "the dark boot the white is left out of",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.26,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1f1f1f",
             "strength": -97
           }
         }
@@ -216,9 +299,16 @@
   ],
   "founders": {
     "Qul/Qul": 0.002,
-    "Qul/Quc": 0.008,
+    "Qul/Quk": 0.002667,
+    "Qul/Quc": 0.002667,
     "Qul/n": 0.038,
-    "Quc/Quc": 0.008,
+    "Quk/Quk": 0.002667,
+    "Quk/Quc": 0.002667,
+    "Quk/n": 0.002667,
+    "Quc/Quc": 0.002667,
     "n/n": 99.944
-  }
+  },
+  "notes": [
+    "The black allele is the white one with the light taken out of it, and it sits one rung under white in the dominance series - so every combination that existed before it keeps the outcome it had, and only the pairs carrying Quk are new. The re-toning is a mapping rather than a repaint: every achromatic target moves into the dark end of the scale keeping its order and its spacing, and every SATURATED one is left alone, because that colour is the gene rather than its lightness."
+  ]
 }
