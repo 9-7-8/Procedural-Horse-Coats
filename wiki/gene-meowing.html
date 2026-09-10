@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meowing &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Meowing</h1>
+
+<p class="lede">
+    The horse meows. Not often, not loudly, and with no explanation available
+    anywhere in the genome &mdash; but creepers hear it and keep their distance,
+    which turns out to be worth a great deal.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Mew/Mew</code></td><td>meows occasionally; creepers stay outside the radius</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="use">Why it matters more than it sounds</h2>
+
+<p>
+    Creepers are the mob that costs you a horse. A meowing horse you leave in a
+    pasture is a horse that is still there in the morning, and the radius is
+    epigenetic so a line can be bred wider.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. It is protection, and it costs nothing.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.meowing</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Mew</code> meowing, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>sound</code> effect and a filtered <code>mob_aura</code> repel</dd></div>
+    <div><dt>Epigenetic</dt><dd>radius</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note good">
+    <span class="label">It rides entirely on machinery built for other genes</span>
+    <p>
+        The <code>sound</code> verb is wanted by <a href="gene-singer.html">singer</a>, <a href="gene-base-alarm.html">base alarm</a> and <a href="gene-echolocate.html">echolocate</a>; the group filter is wanted by four other genes. This one adds nothing of its own, which makes it a good gene to build <em>last</em> in the batch &mdash; it is free by then.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">One meow per detection, with a cooldown</span>
+    <p>
+        The hazard on every sound gene is not tick cost, it is spam. A firing per beat per creeper in range is unbearable within seconds. The sound fires on a state change &mdash; something entered the radius &mdash; and then holds off.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The repel is capped like every radius effect</span>
+    <p>
+        Same <code>max_targets</code> discipline as <a href="gene-intimidating.html">intimidating</a>, and for the same reason. The format requires every radius effect to state a cap.
+    </p>
+</div>
+
+<h2 id="filter">A narrow filter on a general verb</h2>
+
+<p>
+    Creeper-only is the narrowest use of the shared group filter, and it is a
+    useful test of it: if the filter can express &ldquo;one entity type&rdquo; as
+    cleanly as it expresses &ldquo;all undead&rdquo;, it is the right shape. If
+    it cannot, better to find out on this gene than on
+    <a href="gene-cleansing-light.html">cleansing light</a>.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="why">A joke that pays rent</h2>
+
+<p>
+    The gene exists because a meowing horse is funny. It survived design review
+    because vanilla already establishes that creepers fear cats, so the joke has
+    a rule behind it &mdash; and because the resulting effect, a horse that
+    protects itself from the one mob that reliably kills horses, is genuinely
+    worth breeding. Silly and useful is a better combination than either alone.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-intimidating.html">Intimidating</a>
+        <a href="gene-singer.html">Singer</a>
+        <a href="gene-base-alarm.html">Base alarm</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/MeowingGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

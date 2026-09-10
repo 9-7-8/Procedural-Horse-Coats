@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ender echo &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Ender echo</h1>
+
+<p class="lede">
+    Shoot at it and it is not there any more. The horse blinks about eight blocks
+    away from an incoming projectile, carrying whoever is riding it &mdash; which
+    is either the best thing about it or the worst, depending on what is eight
+    blocks away.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>End/End</code></td><td>teleports ~8 blocks from an incoming projectile, rider included</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="ride">It takes you with it</h2>
+
+<p>
+    You keep your seat and arrive somewhere else. Against skeletons this is
+    close to immunity. Against a skeleton on the far side of a ravine it is a
+    short trip you did not plan. Eight blocks is deliberately small &mdash; far
+    enough to break a line of fire, not far enough to be transport.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    Strongly protective against ranged attackers, and neutral otherwise. The
+    danger is the terrain, not the gene.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.ender_echo</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>End</code> echoing, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>teleport</code> effect on an <code>on_hurt</code> trigger</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Teleporting a vehicle with passengers is a desync classic</span>
+    <p>
+        A ridden horse&rsquo;s movement is <strong>client-authoritative</strong> &mdash; <code>HorseWaterRidingHandler</code> gates on <code>isLocalInstanceAuthoritative</code> for exactly this reason, and <code>BarebackSteeringHandler</code> records that driving a ridden horse from the server tick &ldquo;worked and it felt wrong&rdquo;. A server-side teleport must reach the riding client as a position it accepts, or the rider rubber-bands straight back and the gene appears to do nothing intermittently.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Validate the destination, and refuse rather than move</span>
+    <p>
+        Never into blocks, never into the void, never past a world border. A teleport verb that trusts its destination will eventually suffocate a horse inside a mountain with its owner on top. Failing to find a legal landing spot must mean <em>no teleport this time</em>.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">The eight-block cap is load-bearing</span>
+    <p>
+        Uncapped, this is free combat mobility and the best movement item in the mod attached to an animal. The range is a balance decision, not a placeholder.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The trigger is shared</span>
+    <p>
+        <code>on_hurt</code> is a new entry in a closed set of four triggers. <a href="gene-guardian.html">Guardian</a> needs the closely-related <code>on_owner_hurt</code>, so the two should land together and the trigger machinery gets paid for twice.
+    </p>
+</div>
+
+<h2 id="trigger">Why a trigger and not a condition</h2>
+
+<p>
+    Teleporting away from projectiles is an <em>event</em>, and the trigger set
+    exists precisely so that event-driven effects do not have to be written as
+    per-tick conditions that poll for something that already happened. The set is
+    closed at four on purpose; adding to it is a real change and wants a second
+    user, which is why this gene and
+    <a href="gene-guardian.html">guardian</a> are scheduled together.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="wild">A survival trait, borrowed</h2>
+
+<p>
+    The mod&rsquo;s magical loci mostly grant things no animal has. This one grants
+    something another mob in the same world plainly does, which makes it the
+    easiest magical gene to believe in &mdash; the question it raises is not
+    &ldquo;how&rdquo; but &ldquo;where did a horse get enderman in it&rdquo;,
+    and that is a much better question for a breeding game to leave open.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-guardian.html">Guardian</a>
+        <a href="gene-magic-fighter.html">Magic fighter</a>
+        <a href="api-notes.html">API notes</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/EnderEchoGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

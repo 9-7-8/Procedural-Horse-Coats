@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holy ward &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Holy ward</h1>
+
+<p class="lede">
+    Hostile mobs do not appear near this horse. Not pushed away &mdash; they never
+    spawn in the first place, out to a radius written on the allele copy, at least
+    eight blocks and never more than sixteen.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Hly/Hly</code></td><td>hostile mobs cannot spawn within the radius</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="use">A camp that walks</h2>
+
+<p>
+    This is the most straightforwardly useful gene in the magical set. Anywhere
+    the horse is standing is somewhere nothing appears &mdash; a mining camp, an
+    overnight stop, a half-built base with no lighting yet.
+</p>
+
+<h2 id="cap">Sixteen blocks, and no further</h2>
+
+<p>
+    The radius is epigenetic and drifts with breeding, but it is capped.
+    Uncapped, a well-bred horse would be a permanent peaceful-mode bubble over a
+    whole base and every other defensive gene would stop mattering.
+</p>
+
+<h2 id="intimidating">It is not the same as intimidating</h2>
+
+<p>
+    <a href="gene-intimidating.html">Intimidating</a> pushes out what is already
+    there. This stops anything arriving. A horse with both is genuinely safe
+    ground.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. It protects and costs nothing.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.holy_ward</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Hly</code> warding, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a spawn-suppression aura</dd></div>
+    <div><dt>Epigenetic</dt><dd>radius, minimum 8, <strong>capped at 16</strong></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Cancel natural spawns only, or it silently breaks mob farms</span>
+    <p>
+        <strong>Check the spawn reason.</strong> Cancelling spawner-block, spawn-egg, breeding, structure or command spawns breaks the player&rsquo;s mob farm, other mods&rsquo; spawners, and any quest or event that places a mob &mdash; and it breaks them <em>invisibly</em>, because nothing errors. Only natural spawning is this gene&rsquo;s business.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">The handler runs on every spawn attempt in the world</span>
+    <p>
+        This is the only effect in the mod that hooks a global, high-frequency event rather than the horse tick. Iterating horses per spawn attempt is a genuine tick cost on a busy server. <strong>Cache the warding positions per level per tick and early-out on an AABB test</strong> before doing anything else.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">The cap is a balance decision, not a placeholder</span>
+    <p>
+        Sixteen blocks was chosen so the ward covers a camp and not a base. Raising it later is a gameplay change that quietly retires every other defensive gene.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">It interacts with spawner, deliberately</span>
+    <p>
+        Because <a href="gene-spawner.html">spawner</a> is required to go through the normal spawn path, a warding horse standing next to a spawning one suppresses it. That is the correct behaviour and it falls out for free &mdash; provided spawner does not shortcut the event.
+    </p>
+</div>
+
+<h2 id="not-aura">Why this is not a mob_aura mode</h2>
+
+<p>
+    Every other radius effect in the format runs on the horse&rsquo;s own tick and
+    looks outward. This one runs on somebody else&rsquo;s event and looks inward, and
+    folding it into <code>mob_aura</code> would put a global event handler behind
+    a verb whose whole contract is &ldquo;a beat, a radius, a cap&rdquo;. Keeping
+    it separate keeps that contract honest.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="best">The gene that justifies the family</h2>
+
+<p>
+    A player who has never cared about invisible loci understands this one
+    immediately, and it is the strongest argument the behaviour family has for
+    existing: a horse worth breeding for something that is not its coat and not
+    its speed. It is also why the cap matters &mdash; the gene is at its best
+    when it makes a camp safe, and at its worst when it makes the world safe.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-intimidating.html">Intimidating</a>
+        <a href="gene-spawner.html">Spawner</a>
+        <a href="gene-cleansing-light.html">Cleansing light</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/HolyWardGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

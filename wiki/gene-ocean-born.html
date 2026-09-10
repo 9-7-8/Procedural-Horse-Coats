@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ocean-born &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Ocean-born</h1>
+
+<p class="lede">
+    Neither the horse nor its rider can drown. That is all it does, and it is
+    deliberately all it does &mdash; the four other water loci are staying
+    separate, and this is the one piece none of them covered.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Ocn/Ocn</code></td><td>horse and rider never drown</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="family">It is one of five, not a replacement for them</h2>
+
+<p>
+    The water side of the mod is deliberately spread across separate loci, and
+    breeding a genuinely amphibious horse means collecting all of them:
+</p>
+
+<ul>
+    <li><a href="gene-waterborn.html">Waterborn</a> &mdash; walks on the surface, and can be milked for water.</li>
+    <li><a href="gene-magic-swim-speed.html">Magic swim speed</a> &mdash; how fast it crosses.</li>
+    <li><a href="gene-magic-water-breathing.html">Magic water breathing</a> &mdash; how long it lasts under, as a dial.</li>
+    <li><strong>Ocean-born</strong> &mdash; whether drowning happens at all, for both of you.</li>
+</ul>
+
+<h2 id="health">Health</h2>
+
+<p>
+    Removes drowning entirely for horse and rider. No cost.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.ocean_born</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Ocn</code> ocean-born, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>traversal</code> effect &mdash; <code>underwater_breathing</code> with <code>target: both</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">A flag granted to the rider must come off on dismount</span>
+    <p>
+        This is the sharpest hazard in the whole behaviour batch. Traversal flags currently only ever touch the horse, which is disposable state on an entity the mod owns. Granting one to a <em>player</em> writes state onto something that walks away. <strong>If the grant is not reconciled off the tick the rider dismounts, it is an invulnerability duplication</strong> &mdash; ride the horse, step off, keep the immunity. The removal path must be written in the same change as the grant, the way <code>clearAttributes</code> already does for attributes.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Do not merge the water loci. This was decided, and the reason matters</span>
+    <p>
+        The original proposal was to fold waterborn, swim speed, water breathing and this into one <em>Ocean-born</em> locus. It was rejected: <strong>merging changes the genotype of every horse already bred</strong>, and it destroys the ability to have a horse that swims fast and still drowns. Crossing a river quickly and surviving the bottom of a lake are different problems &mdash; the argument is written out on <a href="gene-magic-water-breathing.html">water breathing</a>. If a later session wants them merged, that is a decision to reopen deliberately, not a tidy-up.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">It composes with the graded locus rather than fighting it</span>
+    <p>
+        A horse that cannot drown does not care how slowly it would have. <code>underwater_breathing</code> is the absolute flag and <a href="gene-magic-water-breathing.html">water breathing</a> is the dial; the two stack in the obvious direction and neither needs to know about the other.
+    </p>
+</div>
+
+<h2 id="only">Why this locus is so small</h2>
+
+<p>
+    Everything else a water horse might want already ships. Rider drowning
+    immunity was the one genuinely missing piece, so that is the whole gene. A
+    locus that does one thing nobody else does is worth more than a locus that
+    re-states four existing ones under a better name.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="split">The case for keeping four loci</h2>
+
+<p>
+    One combined water gene would be easier to explain and much easier to breed
+    &mdash; and that is the objection, not the argument for it. Four loci mean
+    four independent things to find, four partial successes, and a horse that is
+    good at water in a way that is specifically <em>yours</em>. Collapsing them
+    would trade the whole breeding project for a single yes-or-no.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-waterborn.html">Waterborn</a>
+        <a href="gene-magic-water-breathing.html">Magic water breathing</a>
+        <a href="gene-magic-swim-speed.html">Magic swim speed</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/OceanBornGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

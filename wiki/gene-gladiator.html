@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gladiator &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Gladiator</h1>
+
+<p class="lede">
+    It picks fights. Any hostile mob that comes close enough gets attacked, with no
+    prompting and no target from you &mdash; <strong>unless you are riding it</strong>,
+    at which point it is a horse again.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Gld/Gld</code>, unridden</td><td>attacks hostile mobs that come within reach</td></tr>
+        <tr><td><code>Gld/Gld</code>, ridden</td><td>nothing &mdash; it stops the moment you mount</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="hold">It stands its ground</h2>
+
+<p>
+    It does not chase. Anything that walks into range is a problem it will
+    solve; anything that stays away is not its business. That is what makes it
+    safe to leave in a paddock, and it is the difference between a guard horse
+    and a horse you find dead in a ravine.
+</p>
+
+<h2 id="damage">It needs teeth</h2>
+
+<p>
+    A vanilla horse has no attack at all. This locus makes it willing; how hard
+    it hits is <a href="gene-magic-fighter.html">magic fighter</a>, and a
+    gladiator without one is a horse that bravely inconveniences a zombie.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    It picks fights, so it takes damage. Pair with
+    <a href="gene-magic-health.html">magic health</a> or expect losses.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.gladiator</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Gld</code> gladiator, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>temper</code> effect with <code>when: not has_rider</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">It holds a radius. It must never chase</span>
+    <p>
+        A horse that pursues is a horse that dies forty blocks from its owner, and the owner blames the gene &mdash; correctly. <strong>Attack what comes within reach and return.</strong> Full pursuit and owner-leashed pursuit were both specified and both rejected in design; if a later session wants either, it is reopening a settled call, not filling a gap.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Re-check the condition every beat</span>
+    <p>
+        <code>has_rider</code> already exists as a condition flag, but a temper that is evaluated once when the fight starts leaves a horse still swinging after someone mounts it. The check belongs on every beat, not on engagement.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Classify hostiles the way night temper already does</span>
+    <p>
+        A hardcoded list makes every modded hostile invisible to the gene. <a href="gene-magic-night-temper.html">Night temper</a> already answers this question; reuse its answer rather than writing a second one that will drift.
+    </p>
+</div>
+
+<h2 id="verb">The verb this gene exists to justify</h2>
+
+<p>
+    <code>night_temper</code> is the right machine with the wrong switch. Its own
+    javadoc defends welding night into the verb &mdash; and that argument holds
+    for that locus and stops holding the moment a second gene wants the same
+    behaviour on a different gate. <code>temper</code> is
+    <code>night_temper</code> with the gate lifted out into an ordinary
+    <code>when</code>, which makes this gene and
+    <a href="gene-guardian.html">guardian</a> data rather than code.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="ridden">Why it stops when you get on</h2>
+
+<p>
+    A war horse that fights while you are steering it is a horse fighting your
+    steering. The gate is what makes the gene usable: it is a guard when you are
+    away and a mount when you are there, and those are the two states a horse is
+    ever actually in.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-guardian.html">Guardian</a>
+        <a href="gene-magic-fighter.html">Magic fighter</a>
+        <a href="gene-magic-night-temper.html">Magic night temper</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/GladiatorGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

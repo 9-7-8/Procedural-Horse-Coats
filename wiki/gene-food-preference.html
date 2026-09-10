@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food preference &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Food preference</h1>
+
+<p class="lede">
+    Every horse with this gene has one food it would rather have than anything
+    else. Feed it that, and you get a short buff and a great deal more bond than
+    the food deserves. It may be a food the horse&rsquo;s own
+    <a href="gene-diet.html">diet</a> forbids &mdash; and the preference wins.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td>one or two copies</td><td>a favourite food, a temporary buff and a larger bond gain</td></tr>
+        <tr><td><code>n/n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<p>
+    It is <strong>dominant</strong>, so one copy is enough, and a horse can be
+    heterozygous for a favourite it passes on to half its foals.
+</p>
+
+<h2 id="contradiction">A carnivore that loves carrots</h2>
+
+<p>
+    The favourite is drawn independently of the diet locus, so a meat-eating
+    horse can have an inexplicable weakness for something it is otherwise
+    supposed to refuse. It will accept it, every time. That is the most
+    interesting thing the gene does and it is not an accident.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. The buff is short and modest; the bond is the real reward.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.food_preference</code></dd></div>
+    <div><dt>Alleles</dt><dd>one per food item, plus <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>dominant</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>bond</code> effect and a <code>mob_effect</code> on self</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">It deliberately overrides another locus, so the override point must exist</span>
+    <p>
+        The preference beats <a href="gene-diet.html">diet</a> &mdash; settled in design. That means the feeding code must ask <em>this</em> locus first and diet second. Two genes writing one answer is exactly the silent-drift shape the <a href="making-a-gene.html#contracts">contracts list</a> exists for: build the override in the same change as the gene, or one of the two will quietly stop mattering.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">It must count against the daily bond cap</span>
+    <p>
+        <code>HorseCareAttachment</code> carries <code>bondToday</code> precisely so no single source can run bond from nothing to the top tier overnight. A bond source that ignores it is an AFK exploit rather than a feature &mdash; and it devalues every other way of earning bond in one change.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">No performance hazard at all</span>
+    <p>
+        It fires on an interaction that already happens. Unusually for this batch, there is nothing here to tick, scan or cache.
+    </p>
+</div>
+
+<h2 id="order">Which locus is asked first</h2>
+
+<p>
+    Diet currently answers &ldquo;will this horse eat that&rdquo; on its own. After
+    this gene, the question is asked in two steps: is this the horse&rsquo;s favourite,
+    and if not, what does its diet say. Writing it in that order once, in the
+    feeding path, is what keeps the two loci from fighting.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="breed">The most breed-defining invisible gene in the batch</h2>
+
+<p>
+    A breed is temperament and husbandry far more than it is statistics, and
+    &ldquo;this line will do anything for apples&rdquo; is the kind of detail that
+    makes a <a href="breeds.html">breed</a> feel like one. It is also cheap for a
+    breed author to use: a preference allele is a single line in a breed file and
+    it changes how the animal is kept.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-diet.html">Diet</a>
+        <a href="horse-care.html">Bond and horse care</a>
+        <a href="breeds.html">Breeds</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/FoodPreferenceGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

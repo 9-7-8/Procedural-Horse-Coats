@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Potion milk &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Potion milk</h1>
+
+<p class="lede">
+    A mare who can be milked into a glass bottle rather than a bucket, and hands
+    back a potion. One allele per effect. It does not touch the ordinary
+    <a href="gene-milk.html">milk</a> locus &mdash; a horse can have both, and
+    which you get depends on what you are holding.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<p>
+    Right-click a tamed, grown mare with an <strong>empty glass bottle</strong>.
+    A horse expressing this locus hands back a potion of whatever its alleles
+    say. A bucket still gets you milk, if it has the milk gene; a bottle on a
+    horse without this gene does nothing.
+</p>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td>two copies of one effect</td><td>that potion, at the stronger grade</td></tr>
+        <tr><td>one copy of one effect</td><td>that potion, weak</td></tr>
+        <tr><td>two <em>different</em> effects</td><td><strong>both effects, both weak, in one bottle</strong></td></tr>
+        <tr><td>anything with an <code>n</code></td><td>the single effect, weak</td></tr>
+    </tbody>
+</table>
+
+<h2 id="volume">How often</h2>
+
+<p>
+    Governed by the same <a href="gene-magic-milk-volume.html">milk volume</a>
+    locus that governs everything else the horse can be milked for, without
+    either gene knowing about the other.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. Milking a mare who is below her own maximum health gets you a refusal
+    rather than a potion, the same as every other yield.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.potion_milk</code></dd></div>
+    <div><dt>Alleles</dt><dd>one per mob effect, plus <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>incomplete dominance &mdash; one copy weak, two copies strong</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>yield</code> effect consuming <code>minecraft:glass_bottle</code></dd></div>
+    <div><dt>Yield kind</dt><dd><code>potion</code> &mdash; so milk volume governs it</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Same-kind yields must merge, or the gene silently lies</span>
+    <p>
+        A compound heterozygote carries <em>two</em> <code>yield</code> abilities, both triggered by a glass bottle. Today the first matching yield fires and the second is ignored &mdash; which would hand back a single-effect potion while this page promises two. <strong>The translator needs to merge yields of the same <code>kind</code> into one item before producing it.</strong> This is the one part of the gene that is not already built, and it is the part that will be forgotten.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">Everything else already exists</span>
+    <p>
+        <code>yield</code> already takes <code>consumes</code>, so <code>minecraft:glass_bottle</code> is expressible today. <code>minDose</code> already gates the stronger half on two copies &mdash; its javadoc names incomplete dominance as the reason it exists. And declaring <code>kind: potion</code> hands governance to <a href="gene-magic-milk-volume.html">milk volume</a> for free.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Unknown effect ids must be skipped, not produced</span>
+    <p>
+        Effect ids are resolved against the live registry, following <a href="gene-lycan.html">lycan</a>'s rule that an id this game version has never heard of simply does nothing. <strong>An unrecognised id must make the yield not fire at all</strong> &mdash; producing a potion with no contents is worse than producing nothing, because it consumes the bottle.
+    </p>
+</div>
+
+<h2 id="both">Why the compound gives both</h2>
+
+<p>
+    The alternative was <a href="gene-lycan.html">lycan</a>'s rule &mdash; a
+    mismatched pair yields nothing &mdash; and it was considered and rejected
+    here. Lycan needs mismatch to bite because a shifting horse is a whole
+    animal and picking one of two shapes is incoherent. A potion is not a shape;
+    two effects in one bottle is a thing that already exists in the game, so the
+    honest reading of two half-doses is two half-doses.
+</p>
+
+<h2 id="separate">Two milk loci, deliberately</h2>
+
+<p>
+    This gene does not extend or override <a href="gene-milk.html">milk</a>. They
+    are different loci with different alleles and different containers, and a
+    horse may express both. The container is the disambiguator, which is why the
+    trigger carries the item rather than the gene carrying a mode.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="dose">Incomplete dominance without an expression language</h2>
+
+<p>
+    This locus is the clearest demonstration of what <code>minDose</code> is
+    for. A gene file has no way to write &ldquo;if homozygous&rdquo;, so the
+    format gives every effect a minimum dose instead: the weak potion declares
+    <code>1</code>, the strong one declares <code>2</code>, and the horse&rsquo;s own
+    genotype decides which is active. No expression language, no per-gene Java,
+    and the same trick is available to anyone writing a gene file.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-milk.html">Milk</a>
+        <a href="gene-magic-milk-volume.html">Magic milk volume</a>
+        <a href="gene-lycan.html">Lycan</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/PotionMilkGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

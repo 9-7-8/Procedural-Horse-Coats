@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eyesight locus &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Eyesight locus</h1>
+
+<p class="lede">
+    Whether the horse was built for the dark or for the daylight. A caveborn horse
+    moves better in the gloom and worse in the light; a daywalker is the opposite;
+    the wild type does not care. It reads the <strong>actual light level</strong>,
+    so a cave at noon counts &mdash; and so do your own torches.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Cav/Cav</code></td><td>caveborn &mdash; faster in the dark, slower in the light</td></tr>
+        <tr><td><code>Day/Day</code></td><td>daywalker &mdash; faster in the light, slower in the dark</td></tr>
+        <tr><td><code>Cav/Day</code></td><td>nothing &mdash; the two cancel out</td></tr>
+        <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="torches">Your torches slow your caveborn horse down</h2>
+
+<p>
+    This is the consequence of reading light rather than the clock, and it is
+    kept rather than fixed. A mining horse bred for the dark gets worse the more
+    you light the tunnel, which is a genuine trade-off in a game where lighting
+    a tunnel is also how you stop things spawning in it.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. It is a trade, not a cost &mdash; whichever way it falls, the horse is
+    better somewhere and worse somewhere else.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.eyesight</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Cav</code> caveborn, <code>Day</code> daywalker, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>recessive; both variants recessive to <code>n</code> and to each other</dd></div>
+    <div><dt>Reaches the game as</dt><dd>two <code>attribute</code> effects on <code>movement_speed</code>, oppositely gated on <code>light_level</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Needs one new condition flag, and it does a world lookup</span>
+    <p>
+        <code>light_level</code> is a new entry in <code>CONDITION_FLAGS</code> and a new branch in <code>flagHolds</code> &mdash; two files, added in the same change as the list says. <strong>It reads block light at the horse&rsquo;s position, so it must be interval-sampled and cached rather than evaluated per tick per horse.</strong> Every other flag in the list is a field read; this one is the first that touches the world.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">The compound heterozygote needs no rule</span>
+    <p>
+        <code>Cav/Day</code> cancels by arithmetic, not by a special case: they are opposite-signed modifiers on one attribute, gated on opposite conditions, so exactly one is ever active and the two average out across a day. Nothing in the translator has to know.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Removal is already solved</span>
+    <p>
+        A modifier gated on a condition that stops holding would otherwise stay on the horse for ever. <code>clearAttributes</code> already takes off every gene modifier the horse is not currently asking for, which is why this gene needs no cleanup code of its own.
+    </p>
+</div>
+
+<h2 id="light">Why light level and not the clock</h2>
+
+<p>
+    &ldquo;Caveborn&rdquo; that keys off <code>night</code> is a horse which is
+    no faster in a cave, and that reads as a bug on the first mining trip. The
+    existing <code>night</code> and <code>sky_visible</code> flags could be
+    combined to approximate &ldquo;underground&rdquo;, and that was the cheaper
+    design; it was rejected because it cannot tell a lit tunnel from a dark one,
+    and the lit tunnel is where the interesting trade-off lives.
+</p>
+
+<h2 id="cheap">The cheapest gene on the behaviour list</h2>
+
+<p>
+    One condition flag and a gene file. Everything else &mdash; the attribute
+    verb, its per-gene modifier scoping, the reconcile, the removal &mdash;
+    already ships. It is the sensible first build of the batch for exactly that
+    reason.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="tradeoff">A locus with no wrong answer</h2>
+
+<p>
+    Most magical loci are ladders: one allele is better and the breeding project
+    is to find it. This one has two alleles that are each better somewhere, so
+    the question a breeder faces is not &ldquo;which is stronger&rdquo; but
+    &ldquo;what is this horse <em>for</em>&rdquo;. The mod has very few of those
+    and wants more.
+</p>
+
+<h2 id="cancel">Cancelling as a statement</h2>
+
+<p>
+    A <code>Cav/Day</code> horse is not a broken horse or a compromise horse. It
+    is a horse whose two answers to the same question happen to sum to the wild
+    type &mdash; which is what a real incompletely-dominant pair of
+    opposite-effect alleles does, and it costs nothing to represent honestly.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-speed.html">Magic speed</a>
+        <a href="gene-weather-sensitive-speed.html">Weather sensitive (speed)</a>
+        <a href="making-a-gene.html#block">The effects block</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/EyesightGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

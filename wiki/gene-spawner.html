@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spawner &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> a faint head and mane tint</p>
+
+<h1>Spawner</h1>
+
+<p class="lede">
+    At first light the horse looks around, and if there are fewer than two of a
+    particular creature nearby, there are two now. Which creature depends on the
+    allele, and there is one for every mob in the game. The only outward sign is
+    a pink tinge through the head and mane.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td>two copies of one allele</td><td>at sunrise, tops the local population of that mob up to two</td></tr>
+        <tr><td>two different alleles</td><td>nothing</td></tr>
+        <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="two">Exactly two, and no more</h2>
+
+<p>
+    It counts what is already there first. A horse whose two sheep are still
+    alive does nothing at all; a horse whose sheep have wandered off makes two
+    more. It cannot run away with itself, which is the whole reason the rule is
+    written this way.
+</p>
+
+<h2 id="hostile">Some of the alleles are not friendly</h2>
+
+<p>
+    There is an allele for every mob, hostile ones included. A horse that
+    produces two creepers every dawn is a real thing this locus can express
+    &mdash; and it is never something you will catch, because no wild horse is
+    ever homozygous here. Somebody has to make it.
+</p>
+
+<h2 id="colour">The colour of what it makes</h2>
+
+<p>
+    Epigenetic, so a line breeds its own shade &mdash; but only for the mobs
+    that <em>have</em> colours. Sheep, cats, wolves, llamas, parrots, rabbits and
+    a handful of others. A spawned zombie is a zombie.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None to the horse. What it makes may be another matter.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.spawner</code></dd></div>
+    <div><dt>Alleles</dt><dd>one per mob including hostiles, plus <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive, matched pair; <strong>no homozygous founders</strong></dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>summon</code> effect at dawn</dd></div>
+    <div><dt>Epigenetic</dt><dd>spawned colour, where the mob has one</dd></div>
+    <div><dt>Coat effect</dt><dd>a faint pink tint on head and mane</dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Spawn through the normal path, or other mods&rsquo; protections are bypassed</span>
+    <p>
+        <strong>This is the compatibility break to avoid.</strong> Placing a mob directly skips <code>FinalizeSpawnEvent</code>, and with it every claim mod, spawn-blocker and region protection in the pack &mdash; a horse in someone&rsquo;s protected base would spawn mobs the region explicitly forbids. Go through the normal spawn path and let the event fire, including the mod&rsquo;s own <a href="gene-holy-ward.html">holy ward</a>.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Never mark what it spawns persistent</span>
+    <p>
+        A persistent mob never despawns. Two a day, every day, from every expressing horse, is unbounded growth &mdash; and the count-to-two rule does not save you, because it counts only what is nearby. What it makes must despawn like anything else.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Count first, or it spawns two more every day</span>
+    <p>
+        The rule is &ldquo;top up to two&rdquo;, not &ldquo;make two&rdquo;. The scan for existing mobs is the gene, and getting it backwards turns a self-limiting locus into the worst thing in the mod.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Sunrise is one tick; stagger the firing</span>
+    <p>
+        Every expressing horse in the world wants to scan a two-chunk radius on the same tick. A stable of fifty is a visible spike. Offset each horse off its own <code>tickCount</code> &mdash; the same trick every radius effect in the format already uses.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Respect difficulty</span>
+    <p>
+        Nothing hostile on Peaceful, and nothing at all if the server has turned the relevant spawning off. A gene that ignores the difficulty setting is a gene that gets the mod blamed.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The epigenetic colour is a no-op for most alleles</span>
+    <p>
+        Only about ten vanilla mobs have colour variants. That is a property of <em>some</em> alleles rather than of the locus, and the gameplay tab says so &mdash; otherwise it reads as broken on the other seventy.
+    </p>
+</div>
+
+<h2 id="verb">The only genuinely new verb in its group</h2>
+
+<p>
+    <code>summon</code> was originally specified to cover this gene and
+    <a href="gene-leader-of-the-pack.html">leader of the pack</a> together. They
+    turned out not to be the same thing at all &mdash; following is
+    <code>mob_aura</code> with a third mode, and only spawning needs a verb.
+    Narrowing it to one user made it much easier to bound.
+</p>
+
+<h2 id="findable">A locus almost nobody will find by accident</h2>
+
+<div class="note">
+    <span class="label">Worth deciding before this ships</span>
+    <p>
+        With no homozygous founders and an allele per mob, a player must find two
+        carriers of the <em>same</em> allele out of eighty, with no way to see
+        either. <a href="gene-lycan.html">Lycan</a> escapes this because wild
+        shifters exist. If spawner should be findable rather than purely
+        engineered, the mechanism is already here: a herd could roll one allele
+        and hand it to its members, so two carriers from one herd match.
+        <code>FounderContext</code> would need a herd seed passed in &mdash;
+        small, and it stays Minecraft-free.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="cap">Self-limiting by construction</h2>
+
+<p>
+    Almost every design for a spawning gene is a lag machine, because almost
+    every design counts <em>time</em> and not <em>population</em>. Topping up to
+    a fixed local number instead means a horse in a stocked field does nothing at
+    all, for ever, and only acts when something has been lost. The gene has a
+    ceiling built into its definition rather than bolted on as a cooldown.
+</p>
+
+<h2 id="visible">The one behaviour gene that paints</h2>
+
+<p>
+    Everything else in this family is invisible. This one carries a faint pink
+    tint on the head and mane, and it should: a horse that manufactures
+    creatures at dawn is the one case where a player deserves a warning they can
+    see before they buy it.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-lycan.html">Lycan</a>
+        <a href="gene-leader-of-the-pack.html">Leader of the pack</a>
+        <a href="gene-holy-ward.html">Holy ward</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/SpawnerGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

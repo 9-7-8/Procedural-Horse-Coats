@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bird boned &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Bird boned</h1>
+
+<p class="lede">
+    Hollow-boned and light with it. Neither the horse nor its rider takes falling
+    damage, from any height. The cheapest possible description of a gene that
+    changes how you use the terrain.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Brd/Brd</code></td><td>no fall damage, horse or rider, at any height</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="use">What it changes</h2>
+
+<p>
+    Mountains stop having a wrong side. A ravine becomes a shortcut. It pairs
+    obviously with <a href="gene-magic-jump.html">magic jump</a>, and the pairing
+    is the point &mdash; jump is dangerous alone, and this makes the danger go
+    away.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    Pure benefit, with one caveat worth knowing: it removes fall damage, not
+    falling. A horse that falls into a ravine is unhurt and still in a ravine.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.bird_boned</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Brd</code> bird-boned, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>traversal</code> effect &mdash; <code>fall_immune</code> with <code>target: both</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">A flag granted to the rider must come off on dismount</span>
+    <p>
+        This is the sharpest hazard in the whole behaviour batch. Traversal flags currently only ever touch the horse, which is disposable state on an entity the mod owns. Granting one to a <em>player</em> writes state onto something that walks away. <strong>If the grant is not reconciled off the tick the rider dismounts, it is an invulnerability duplication</strong> &mdash; ride the horse, step off, keep the immunity. The removal path must be written in the same change as the grant, the way <code>clearAttributes</code> already does for attributes.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">The horse half already works</span>
+    <p>
+        <code>fall_immune</code> is translated today &mdash; it resets the horse&rsquo;s fall distance every tick. The only new work here is the rider, which is the shared <code>target</code> parameter, not anything specific to this gene.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Prefer the attribute to the reset, if either will do</span>
+    <p>
+        <code>safe_fall_distance</code> is already in the attribute table and reconciles itself off. Where an effect can be expressed as an attribute rather than a per-tick reset, the attribute path gets removal for free &mdash; which matters more than usual here, because the grant reaches a player.
+    </p>
+</div>
+
+<h2 id="cheap">Nearly nothing to build</h2>
+
+<p>
+    Of the three genes wanting rider-targeted traversal, this is the one with no
+    other moving parts. If the shared <code>target</code> parameter is built
+    against this gene first, the dangerous half of the change gets tested in the
+    simplest possible setting before <a href="gene-fireproof.html">fireproof</a>
+    and <a href="gene-ocean-born.html">ocean-born</a> depend on it.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="enabler">A gene whose value is entirely in another locus</h2>
+
+<p>
+    On its own this is a safety net you rarely notice. Bred alongside
+    <a href="gene-magic-jump.html">magic jump</a>, it turns a stat that mostly
+    kills horses into one worth pushing. The mod has several of these
+    &mdash; <a href="gene-magic-mob-aura.html">baiting</a> beside health and
+    fighting is the other clear one &mdash; and they are what make a stable a
+    strategy rather than a collection.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-jump.html">Magic jump</a>
+        <a href="gene-fireproof.html">Fireproof</a>
+        <a href="gene-ocean-born.html">Ocean-born</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/BirdBonedGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

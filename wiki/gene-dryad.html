@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dryad &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Dryad</h1>
+
+<p class="lede">
+    Once a day, roughly, a sapling appears where the horse has been. Left in one
+    place for long enough it will grow a small wood around itself, one tree at a
+    time and entirely without hurrying.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Dry/Dry</code></td><td>plants a sapling nearby, about once a day</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="rate">The rate is epigenetic</h2>
+
+<p>
+    Once a day is the default; the interval is written on the allele copy and
+    drifts with breeding, so a line can be pushed faster. Not much faster
+    &mdash; the cap is deliberate.
+</p>
+
+<h2 id="not-bonemeal">It plants; it does not fertilise</h2>
+
+<p>
+    An earlier specification had it bone-mealing the surrounding area. That would
+    make it a farm, which is a far bigger thing than this gene is asking to be.
+    It plants saplings and nothing else.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.dryad</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Dry</code> dryad, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>spread</code> effect with a sapling cover word</dd></div>
+    <div><dt>Epigenetic</dt><dd>interval</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note good">
+    <span class="label">The daily cap does the safety work</span>
+    <p>
+        One block change a day is nothing. Of the two <code>spread</code> genes in this batch this is by far the cheaper, and the epigenetic interval is bounded so breeding cannot turn it into a per-tick effect.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Bone meal was rejected, and the reason should survive</span>
+    <p>
+        &ldquo;Occasionally activates a bone-meal effect on the surrounding area&rdquo; makes a horse that auto-farms every crop you own, which is an economy lever nobody asked for and very hard to walk back once players have it. <strong>Saplings only.</strong> Recorded here so it is not quietly &ldquo;improved&rdquo; later.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Do not plant on anything somebody built</span>
+    <p>
+        Same rule as <a href="gene-hot-blooded.html">hot blooded</a>: the vocabulary word keeps &ldquo;what may be converted&rdquo; in the translator. A sapling through a stable floor is the failure to avoid.
+    </p>
+</div>
+
+<h2 id="cheap">The cheapest world-editing gene</h2>
+
+<p>
+    One vocabulary word on an existing verb, one bounded interval, one block a
+    day. If <code>spread</code>'s new words are being built in one pass, this is
+    the one to do first &mdash; it exercises the whole path at a rate where
+    nothing can go wrong quickly.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="slow">A gene you notice a week later</h2>
+
+<p>
+    Almost everything in the mod expresses immediately or not at all. This one
+    expresses across sessions: you stable a horse, and later there are trees
+    there. That is a different relationship to a gene than any other locus
+    offers, and it is worth having one.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-hot-blooded.html">Hot blooded</a>
+        <a href="gene-verdant.html">Verdant</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/DryadGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

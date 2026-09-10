@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guardian &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Guardian</h1>
+
+<p class="lede">
+    It does not start anything. But whatever hurts you, within sixteen blocks, has
+    a horse to deal with &mdash; and it holds its ground rather than chasing.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Grd/Grd</code>, tamed</td><td>attacks whatever damaged its owner, within 16 blocks</td></tr>
+        <tr><td><code>Grd/Grd</code>, untamed</td><td>nothing &mdash; it has no owner to defend</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="difference">How it differs from a gladiator</h2>
+
+<p>
+    <a href="gene-gladiator.html">Gladiator</a> attacks anything hostile that
+    comes close, whether or not it concerns you, and stops when you mount. This
+    attacks only what has actually hurt <em>you</em>, and works while you are
+    riding. One is a guard dog; this is a bodyguard.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    It fights on your behalf, so it takes damage on your behalf. The same
+    pairing with <a href="gene-magic-health.html">magic health</a> applies.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.guardian</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Grd</code> guardian, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>temper</code> effect on an <code>on_owner_hurt</code> trigger</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">The trigger fires on every damage event to every player in the world</span>
+    <p>
+        <code>on_owner_hurt</code> is not a horse-tick effect &mdash; it hooks a global event, and on a populated server that event is constant. <strong>Early-out before any lookup:</strong> check cheaply whether this player owns any horse at all before touching genotypes, abilities or entity searches. Getting this wrong costs on every hit anyone takes anywhere.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">PvP is a real behaviour change</span>
+    <p>
+        A horse that retaliates against a <em>player</em> attacker changes what a fight is on a PvP server, and does it without either player agreeing to it. Gate the retaliation on the server&rsquo;s PvP setting, and treat player targets as a separate decision from mob targets.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">It holds a radius. It must never chase</span>
+    <p>
+        A horse that pursues is a horse that dies forty blocks from its owner, and the owner blames the gene &mdash; correctly. <strong>Attack what comes within reach and return.</strong> Full pursuit and owner-leashed pursuit were both specified and both rejected in design; if a later session wants either, it is reopening a settled call, not filling a gap.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The trigger is shared with ender echo</span>
+    <p>
+        <code>on_hurt</code> and <code>on_owner_hurt</code> are two new entries in a closed set of four. <a href="gene-ender-echo.html">Ender echo</a> wants the first; scheduling the two genes together means the trigger machinery is paid for twice.
+    </p>
+</div>
+
+<h2 id="owner">Owner, not rider</h2>
+
+<p>
+    It defends whoever tamed it, whether or not they are on it. A horse standing
+    in a paddock that comes for the skeleton shooting at its owner across the
+    fence is the behaviour people will remember, and gating on rider instead
+    would throw it away for no gain.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="best">The gene most likely to be somebody&rsquo;s favourite</h2>
+
+<p>
+    Of everything in the behaviour family, this is the one that reads least like
+    a mechanic and most like a relationship &mdash; and it is the only locus in
+    the mod whose trigger is something that happens to the <em>player</em>. It is
+    worth the new trigger for that alone.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-gladiator.html">Gladiator</a>
+        <a href="gene-ender-echo.html">Ender echo</a>
+        <a href="horse-care.html">Bond and horse care</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/GuardianGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

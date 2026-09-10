@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fireproof &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Fireproof</h1>
+
+<p class="lede">
+    A horse that does not burn, and neither do you while you are on it. It
+    <strong>swims through lava</strong> rather than walking on top of it &mdash;
+    submerged, slow, and entirely unbothered.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Frp/Frp</code></td><td>horse and rider immune to fire; swims in lava</td></tr>
+        <tr><td>anything else</td><td>nothing &mdash; it burns like any horse</td></tr>
+    </tbody>
+</table>
+
+<h2 id="lava">Lava is a route, not a wall</h2>
+
+<p>
+    The horse sinks into lava and swims through it the way an ordinary horse
+    swims through water: slowly, at the surface, with its rider safe. That is
+    the whole reason to breed one. A lava lake stops being a detour.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    Strictly an improvement. It costs nothing and removes an entire category of
+    death. It is homozygous recessive and absent from wild horses as a
+    homozygote, so you will be breeding for it rather than finding it.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.fireproof</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Frp</code> fireproof, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd><code>traversal</code> effects &mdash; <code>fire_immune</code> and a lava-swim flag, both with <code>target: both</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">A flag granted to the rider must come off on dismount</span>
+    <p>
+        This is the sharpest hazard in the whole behaviour batch. Traversal flags currently only ever touch the horse, which is disposable state on an entity the mod owns. Granting one to a <em>player</em> writes state onto something that walks away. <strong>If the grant is not reconciled off the tick the rider dismounts, it is an invulnerability duplication</strong> &mdash; ride the horse, step off, keep the immunity. The removal path must be written in the same change as the grant, the way <code>clearAttributes</code> already does for attributes.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">It finishes a flag that currently does nothing</span>
+    <p>
+        <code>walk_on_lava</code> is declared in the gene format and falls straight into <code>warnUntranslated</code> at <code>GeneAbilityHandler.java:438</code> &mdash; it parses, validates, and silently has no effect. This gene wants <em>swimming</em> rather than walking, so the stub is either repurposed or joined by a sibling; either way the dead branch stops being debt in the same change.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Use the damage-type tag, not a fire-only check</span>
+    <p>
+        A check against vanilla fire and lava damage leaves the rider dying to every modded heat source while the page promises immunity. Test the fire damage-type tag so other mods&rsquo; burn damage is covered by the same grant.
+    </p>
+</div>
+
+<h2 id="swim">Swimming, not walking</h2>
+
+<p>
+    Walking on lava is the cheaper build &mdash; the <code>walk_on_water</code>
+    branch already does the buoyancy trick and pointing it at lava is a few
+    lines. It was rejected because a horse trotting across a lava lake reads as
+    a bug in someone else&rsquo;s mod, whereas a horse wading <em>through</em> it
+    reads as a horse that belongs there. The extra cost is a fire-damage cancel
+    for the rider and a movement speed in lava.
+</p>
+
+<h2 id="shared">One shared change, three genes</h2>
+
+<p>
+    The <code>target: self | rider | both</code> parameter on
+    <code>traversal</code> is wanted by this gene, by
+    <a href="gene-bird-boned.html">bird boned</a> and by
+    <a href="gene-ocean-born.html">ocean-born</a>. Build it once, with the
+    removal path included, and all three are safe.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="pair">Why it is not two loci</h2>
+
+<p>
+    Fire immunity and lava swimming could have been separate genes, the way
+    swimming and breathing are separate on the water side. They are one here
+    because lava immunity without lava swimming is a horse that stands in fire
+    unharmed and can do nothing with it &mdash; there is no interesting horse in
+    between, so there is no reason to make a breeder find two.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-bird-boned.html">Bird boned</a>
+        <a href="gene-ocean-born.html">Ocean-born</a>
+        <a href="gene-waterborn.html">Waterborn</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/FireproofGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

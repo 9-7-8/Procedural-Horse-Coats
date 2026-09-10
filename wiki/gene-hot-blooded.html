@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hot blooded &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Hot blooded</h1>
+
+<p class="lede">
+    Snow will not lie near it and ice does not last. A hot-blooded horse leaves a
+    thawed circle wherever it stands, which is charming in a paddock and a
+    genuine nuisance on a frozen lake.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Hot/Hot</code></td><td>melts snow and ice within a short radius</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="lake">On a frozen lake</h2>
+
+<p>
+    It melts the ice it is standing on, and then it is in the water. This is
+    funny rather than broken, and it is the reason a hot-blooded horse is a
+    liability in exactly one biome.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None directly &mdash; but see above, and note that it does not make the horse
+    immune to anything cold.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.hot_blooded</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Hot</code> hot-blooded, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>spread</code> effect with a melting cover word</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Melting ice makes flowing water, and flowing water is a known tick cost</span>
+    <p>
+        Worse, in a snowy biome the snow re-forms and is melted again &mdash; a permanent melt/refreeze loop under any stabled horse, running for as long as the chunk is loaded. <strong>Cap the rate hard, and consider melting to air rather than to water.</strong> This is the highest ongoing cost of any <code>spread</code> gene.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Do not eat placed blocks</span>
+    <p>
+        The <code>spread</code> verb takes a vocabulary word rather than a block id precisely so the judgement about what may be converted stays with the translator that knows the game&rsquo;s blocks. Packed ice and blue ice in a build are somebody&rsquo;s floor.
+    </p>
+</div>
+
+<h2 id="word">One new vocabulary word</h2>
+
+<p>
+    No new verb. <code>spread</code> already converts ground within a radius on a
+    beat with a probability; this adds a word to its vocabulary the way
+    <a href="gene-dryad.html">dryad</a> does. Two genes, two words, one existing
+    machine.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="terrain">A gene that edits the world</h2>
+
+<p>
+    Only two loci in this batch change blocks rather than entities, and both are
+    <code>spread</code>. That is a deliberately small category: a gene that
+    rewrites terrain is the kind that gets a mod uninstalled, and keeping the
+    world-editing surface to one verb with a closed vocabulary is what makes it
+    safe to have at all.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-dryad.html">Dryad</a>
+        <a href="gene-verdant.html">Verdant</a>
+        <a href="gene-fireproof.html">Fireproof</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/HotBloodedGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

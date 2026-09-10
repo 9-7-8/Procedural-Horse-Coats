@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader of the pack &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Leader of the pack</h1>
+
+<p class="lede">
+    Something follows this horse. Which something depends on the allele &mdash;
+    there is one for every non-hostile mob in the game &mdash; and they trail it
+    within sixteen blocks wherever it goes. <strong>Two copies of the same allele
+    or nothing</strong>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td>two copies of one allele</td><td>that mob follows the horse within 16 blocks</td></tr>
+        <tr><td>two <em>different</em> alleles</td><td>nothing &mdash; it settles on neither</td></tr>
+        <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="alleles">One allele per mob</h2>
+
+<p>
+    The list is exactly <a href="gene-lycan.html">lycan</a>'s: every vanilla mob
+    in a non-hostile spawn category, minus the horse family. That is a
+    mechanical rule rather than a taste, which is why it contains a pufferfish
+    and a wandering trader without anyone having to defend either.
+</p>
+
+<h2 id="find">What you can catch</h2>
+
+<p>
+    Carriers, and only carriers. No wild horse is ever homozygous here, so the
+    first pack leader in a world is one somebody bred. Two carriers of
+    <em>different</em> alleles produce nothing, which is most crosses.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None &mdash; though a horse trailed by twelve chickens is a horse you can
+    hear coming.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.pack_leader</code></dd></div>
+    <div><dt>Alleles</dt><dd>one per non-hostile mob, plus <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive, and recessive to each other &mdash; a matched pair or nothing</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>mob_aura</code> effect in <code>follow</code> mode</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Continuous pathfinding for the followers is the real cost</span>
+    <p>
+        Every follower recalculates a path on its own schedule, and pathfinding is the most expensive thing a mob does. <strong>A long interval and a low <code>max_targets</code> are not tuning, they are the design.</strong> Followers also drag chunks busy as they cross boundaries behind the horse.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Do not inject a goal into another mod&rsquo;s mob</span>
+    <p>
+        A goal added to an arbitrary mob has to be taken off again, and a horse that dies, despawns or stops expressing leaves it behind on every creature it ever met &mdash; the exact lifecycle failure <a href="gene-magic-mob-aura.html">mob aura</a> already avoids by shoving rather than adding an avoidance goal. Nudge navigation per beat instead; it is stateless and it cannot leak.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">The allele set is free</span>
+    <p>
+        <a href="gene-lycan.html">Lycan</a> already derives this exact list from spawn categories, with mob ids as plain strings resolved against the live registry. Reuse the derivation rather than writing a second list that will drift from it.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">The group filter must use entity type tags</span>
+    <p>
+        Five genes share this filter. A hardcoded list makes every modded creature invisible to all five at once, and the failure is silent &mdash; the aura simply never fires on anything from another mod. Build it on tags in the change that introduces it.
+    </p>
+</div>
+
+<h2 id="mode">A third mode, not a new verb</h2>
+
+<p>
+    <code>mob_aura</code> already has <code>repel</code> and <code>attract</code>.
+    Following is <code>follow</code>, on the same verb, with the same cap and the
+    same beat. A <code>summon</code> verb was specified early in design and
+    folded into this instead once it became clear that
+    <a href="gene-spawner.html">spawner</a> was the only gene that genuinely
+    needed one.
+</p>
+
+<h2 id="matched">Why a matched pair</h2>
+
+<p>
+    Same reasoning as <a href="gene-lycan.html">lycan</a>: a locus with dozens of
+    alleles where any one showed would be a slot machine, and a locus where you
+    must find the same allele twice is a search with a target.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="reuse">One allele list, two genes</h2>
+
+<p>
+    Lycan turns the horse into the mob; this makes the mob follow the horse. The
+    same list serving two opposite ideas is a good sign the list was derived from
+    the right rule &mdash; and it means adding a mob to the game adds an allele
+    to both loci without anybody deciding to.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-lycan.html">Lycan</a>
+        <a href="gene-magic-mob-aura.html">Magic mob aura</a>
+        <a href="gene-spawner.html">Spawner</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/PackLeaderGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

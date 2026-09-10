@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music enjoyer &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Music enjoyer</h1>
+
+<p class="lede">
+    Play a record near this horse and it will stand there giving off hearts and
+    slowly deciding it likes you. One of the few ways to build bond that does not
+    involve feeding, riding or waiting.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Msc/Msc</code></td><td>bond rises near a playing jukebox, with hearts</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="cap">It still respects the daily limit</h2>
+
+<p>
+    Bond has a cap per day, and this counts against it like every other source.
+    Leaving a jukebox running overnight will not hand you a tier-three horse by
+    morning &mdash; it will hand you the same day&rsquo;s worth of bond you could have
+    earned another way, for less effort.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.music_enjoyer</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Msc</code> music-loving, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>bond</code> effect gated on <code>near_jukebox</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">It must count against the daily bond cap</span>
+    <p>
+        <code>HorseCareAttachment</code> carries <code>bondToday</code> precisely so no single source can run bond from nothing to the top tier overnight. A bond source that ignores it is an AFK exploit rather than a feature &mdash; and it devalues every other way of earning bond in one change.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">near_jukebox is a block search, and block searches are the expensive shape</span>
+    <p>
+        Every existing condition flag is a field read off the horse. This one has to look at the world, and a naive implementation scans blocks per horse per tick. <strong>Interval-sampled, small radius, cached between samples.</strong>
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">It is a bond source, which the backlog already wanted</span>
+    <p>
+        &sect;<a href="roadmap.html#bond">15</a> lists more bond sources as open work. The <code>bond</code> verb built here is the one <a href="gene-food-preference.html">food preference</a> needs too, and the one a future grooming or sleeping source would reuse.
+    </p>
+</div>
+
+<h2 id="verb">A small verb with more users than it looks</h2>
+
+<p>
+    &ldquo;Raise bond by an amount, on an interval, while a condition holds&rdquo;
+    is enough to express this gene, food preference, and every bond source the
+    backlog has asked for. Building it here rather than hard-coding a jukebox
+    check is what makes the next one free.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="care">Bond as something a gene can touch</h2>
+
+<p>
+    <a href="horse-care.html">Bond</a> has so far been entirely about what the
+    player does. This is the first locus where the <em>horse</em> has an opinion
+    about how it would like to be won over, and it opens a category the mod has
+    not used: genes that change the husbandry rather than the animal.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-care.html">Bond and horse care</a>
+        <a href="gene-food-preference.html">Food preference</a>
+        <a href="gene-singer.html">Singer</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/MusicEnjoyerGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

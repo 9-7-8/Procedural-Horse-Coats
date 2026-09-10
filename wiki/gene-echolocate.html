@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echolocate &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Echolocate</h1>
+
+<p class="lede">
+    Every so often the horse makes a sound no horse should make, and for a moment
+    you can see everything alive around you &mdash; through the walls, through
+    the dark, out to a radius written on the allele copy.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Ech/Ech</code></td><td>a bat cry, and everything living nearby outlined for a while</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="use">What it is for</h2>
+
+<p>
+    Caves. A horse you ride underground that tells you what is round the corner
+    before you meet it is worth a great deal, and it highlights
+    <em>everything</em> alive, not only what is dangerous &mdash; so it finds the
+    animals you lost as readily as the skeleton you did not.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.echolocate</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Ech</code> echoing, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>sound</code> effect and a group-targeted glowing aura</dd></div>
+    <div><dt>Epigenetic</dt><dd>radius</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Effect packets are the hazard, not the entity scan</span>
+    <p>
+        Glowing is a mob effect, and every application syncs to every client tracking that entity. Re-applying it to <em>every living thing</em> in radius on a short refresh is a packet flood in a busy cave &mdash; the expensive part is the network, which is exactly the cost that does not show up when testing with one horse in a field. <strong>Long refresh, hard target cap, and let the effect lapse rather than re-applying every beat.</strong>
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">&ldquo;Everything alive&rdquo; was chosen deliberately, so the cap carries the weight</span>
+    <p>
+        Hostiles-only was the cheaper and quieter design and was rejected &mdash; finding lost animals is half the appeal. That decision moves the entire burden onto <code>max_targets</code>, which is therefore not a tuning knob.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">One firing per event, with a cooldown</span>
+    <p>
+        The hazard on every gene using the <code>sound</code> verb is not tick cost, it is spam. A firing per beat per target in range is unbearable within seconds and there is no setting that makes it pleasant. Fire on a state change and then hold off.
+    </p>
+</div>
+
+<h2 id="shared">Two shared pieces, nothing of its own</h2>
+
+<p>
+    The <code>sound</code> verb and the group-targeted aura are both built for
+    other genes. Like <a href="gene-meowing.html">meowing</a>, this is a good
+    gene to schedule late in the batch, when it costs almost nothing.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="sense">A gene that changes what the player can see</h2>
+
+<p>
+    Almost every locus in the mod changes the horse. This one changes the
+    <em>rider&rsquo;s</em> information, which is a category the mod has barely touched
+    and probably should &mdash; a horse bred for what it tells you is a different
+    kind of animal from one bred for what it can do.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-meowing.html">Meowing</a>
+        <a href="gene-singer.html">Singer</a>
+        <a href="gene-eyesight-locus.html">Eyesight locus</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/EcholocateGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spontaneous breeding &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Spontaneous breeding</h1>
+
+<p class="lede">
+    Two of these horses in a field will breed without being asked, and without
+    being fed anything. <strong>It takes two</strong> &mdash; one expressing horse
+    and an ordinary one does nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Spb/Spb</code>, with another <code>Spb/Spb</code> nearby</td><td>they breed on their own, on a long cycle</td></tr>
+        <tr><td><code>Spb/Spb</code> alone</td><td>nothing &mdash; it needs a partner that also expresses</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="find">You will not find one</h2>
+
+<p>
+    Wild horses carry it and never express it. Two carriers must meet, and one
+    foal in four of that cross expresses &mdash; and then <em>that</em> foal
+    needs another one like it before anything happens. This is a deliberate
+    breeding project, not a discovery, and the <a href="carrots.html">gene
+    database</a> is the only practical way to hunt it.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. The risk is to your pasture, not to the horse.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.spontaneous_breeding</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Spb</code> spontaneous, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive; carriers in the wild, <strong>never homozygous founders</strong></dd></div>
+    <div><dt>Reaches the game as</dt><dd>a breeding-system hook, <strong>not</strong> an <code>effects</code> verb</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">The most game-breaking item in the behaviour batch</span>
+    <p>
+        Uncapped automatic animal breeding is the classic way to kill a server, and this one runs while the player is asleep and not watching. <strong>A local population cap and a cooldown are not polish &mdash; they are the first thing to build, before the gene does anything at all.</strong> Count horses in radius, stop at a ceiling, and honour the ordinary breeding cooldown on top.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Adults only, and the usual breeding rules still apply</span>
+    <p>
+        Everything the normal breeding path checks &mdash; age, cooldown, the mod&rsquo;s own pedigree and stat inheritance &mdash; must still run. This gene decides <em>whether the pair is willing</em>; it must not become a second breeding implementation.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Not an effects verb</span>
+    <p>
+        Every verb in <code>AbilityType</code> is something the horse does on a tick. This is something the breeding system <em>asks about</em>, the way <code>DietContribution</code> is asked about food. Building it as an effect would put breeding logic in the ability translator, where nothing else about breeding lives.
+    </p>
+</div>
+
+<h2 id="pair">Why it takes two</h2>
+
+<p>
+    A single expressing horse that bred with anything would spread itself through
+    a herd in a few generations and stop being rare. Requiring both parents to
+    express makes the trait self-limiting genetically as well as mechanically:
+    the population of spontaneous breeders can only grow where somebody has
+    already gathered two.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="reward">A gene the testing layer exists for</h2>
+
+<p>
+    Invisible in the wild, invisible in a carrier, and only observable once you
+    have already succeeded. That makes it close to unfindable by looking &mdash;
+    which is the point. The <a href="carrots.html">gene database</a> and the
+    research papers are the intended route, and this locus is one of the clearest
+    arguments for their existing at all.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="breeding.html">Breeding</a>
+        <a href="carrots.html">Carrots and the gene database</a>
+        <a href="horse-care.html">Horse care</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/SpontaneousBreedingGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

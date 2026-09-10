@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrophobic &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Hydrophobic</h1>
+
+<p class="lede">
+    It will not be ridden into water. Take one in past its knees and it throws you
+    and makes for the nearest shore &mdash; which is what every horse in vanilla
+    Minecraft does, and which this mod otherwise quietly fixed for you.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Hyd/Hyd</code></td><td>bucks its rider in water and heads for land</td></tr>
+        <tr><td>anything else</td><td>nothing &mdash; it swims like any other horse here</td></tr>
+    </tbody>
+</table>
+
+<h2 id="default">Why this is the odd one out</h2>
+
+<p>
+    In this mod a tamed horse gets a swimming assist and will carry you across a
+    river. That is a deliberate improvement on vanilla. This gene takes it away
+    again for the horses that have it &mdash; so it is a defect to breed out
+    rather than a trait to breed for.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None to the horse. Being thrown into deep water is a hazard to you.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.hydrophobic</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Hyd</code> hydrophobic, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>the <code>water_averse</code> traversal flag</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">It finishes the other flag that currently does nothing</span>
+    <p>
+        <code>water_averse</code> is declared in the gene format and falls into <code>warnUntranslated</code> at <code>GeneAbilityHandler.java:438</code>, described there as &ldquo;an AI-goal weight&rdquo; and never wired. Like <a href="gene-fireproof.html">fireproof</a>'s lava flag, this gene turns a dead branch into a feature.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Recessive, not dominant &mdash; and that was the whole decision</span>
+    <p>
+        The original specification made it dominant. Dominant would mean <em>most</em> horses revert to vanilla water behaviour, silently changing how every horse already bred behaves, and quietly retiring <code>HorseWaterRidingHandler</code>. Recessive keeps the swimming assist universal and makes this a rare defect. <strong>Nothing existing changes behaviour.</strong>
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Do not dismount the rider into a drowning loop</span>
+    <p>
+        Bucking someone off in deep water and then swimming away from them is a death. The dismount needs to leave the player somewhere they can act &mdash; low cost to get right, very high annoyance to get wrong.
+    </p>
+</div>
+
+<h2 id="inverted">A gene that removes a feature</h2>
+
+<p>
+    Unusually, the wild type here is the <em>improved</em> behaviour and the
+    allele restores the vanilla one. That is worth stating plainly on the page,
+    because a reader who knows Minecraft will assume the opposite and conclude
+    the gene does nothing.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="defect">A defect in the magical family</h2>
+
+<p>
+    The natural side of the mod has disorders; the magical side has almost
+    nothing a breeder actively wants to remove. This is one, and it is a useful
+    shape to have: a locus whose entire breeding project is getting rid of it.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-waterborn.html">Waterborn</a>
+        <a href="gene-ocean-born.html">Ocean-born</a>
+        <a href="gene-magic-swim-speed.html">Magic swim speed</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/HydrophobicGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

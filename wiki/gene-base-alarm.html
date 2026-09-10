@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base alarm &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Base alarm</h1>
+
+<p class="lede">
+    It whinnies when something hostile comes near. Not near your base &mdash; near
+    <em>the horse</em>, which is why where you stable one is the whole of how you
+    use it.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td>one or two copies</td><td>whinnies when a hostile enters about 16 blocks</td></tr>
+        <tr><td><code>n/n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>Dominant</strong>, so it spreads readily and a stable will end up
+    with several.
+</p>
+
+<h2 id="place">Put it by the door</h2>
+
+<p>
+    The radius is measured from the horse, so an alarm horse is a thing you
+    place. One in the paddock by the entrance warns you about the entrance; one
+    you ride warns you about wherever you are.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. It announces the danger; it does nothing about it.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.base_alarm</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Alm</code> alarm, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>dominant</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>sound</code> effect on a detection beat</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">There is no &ldquo;base&rdquo; in this mod, and inventing one was rejected</span>
+    <p>
+        The original specification said &ldquo;your base radius&rdquo;. No such concept exists &mdash; there are <a href="items.html">stall signs</a>, the barn and pens, and nothing that means home. Measuring from the horse was chosen over measuring from a stall sign, which would silently do nothing for any horse without one.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">One whinny per detection, with a cooldown</span>
+    <p>
+        Fire when something enters the radius, not once per beat per mob in it. Dominant inheritance makes this worse than it sounds &mdash; several alarm horses in one paddock all noticing the same skeleton is the normal case, not the edge case.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Interval scan with a cap, like every radius effect</span>
+    <p>
+        Nothing new: the same <code>max_targets</code> and tick-offset discipline the format already requires of every radius effect.
+    </p>
+</div>
+
+<h2 id="from">Measured from the horse</h2>
+
+<p>
+    It makes the gene work everywhere with no setup, no binding item and no
+    concept to invent &mdash; and it turns stabling into the interface. Where you
+    put the horse <em>is</em> the configuration.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="dominant">Dominant on purpose</h2>
+
+<p>
+    Most of the behaviour family is recessive and rare. An alarm is only useful
+    if you happen to have one, so this is one of the few that should turn up
+    without being hunted &mdash; a common, mildly useful gene that makes an
+    ordinary stable slightly safer.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-meowing.html">Meowing</a>
+        <a href="gene-holy-ward.html">Holy ward</a>
+        <a href="gene-singer.html">Singer</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/BaseAlarmGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

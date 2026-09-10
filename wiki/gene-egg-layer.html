@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Egg layer &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Egg layer</h1>
+
+<p class="lede">
+    The horse lays. An egg, at first &mdash; but the locus is built to take an
+    allele for any item in the game, and the egg is only the one everybody
+    thinks of first. It drops on the ground where the horse is standing, on a
+    timer.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td>two copies of one allele</td><td>that item, dropped on an interval</td></tr>
+        <tr><td>two different alleles</td><td>nothing</td></tr>
+        <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="third">The third way a horse gives you something</h2>
+
+<p>
+    <a href="gene-magic-item-drop.html">Item drop</a> is what it leaves when it
+    dies. <a href="gene-milk.html">Milk</a> and
+    <a href="gene-potion-milk.html">potion milk</a> are what it gives when you
+    ask. This is what it produces while you are not watching, and it is the only
+    one of the three that needs nothing from you at all.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. It lays whether or not it is well, tamed, or paying attention.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.egg_layer</code></dd></div>
+    <div><dt>Alleles</dt><dd>one per item, plus <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive, matched pair</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>produce</code> effect on an interval</dd></div>
+    <div><dt>Epigenetic</dt><dd>interval</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note danger">
+    <span class="label">Item entities accumulate, and that is a real server cost</span>
+    <p>
+        A timer that drops an item and never checks is the classic way to fill a chunk with entities. <strong>Skip the drop when enough of that item is already lying nearby</strong>, and never extend the despawn timer on what it produces. A pasture of layers left running overnight is the case to design for, not a single horse.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Open item ids mean a diamond-laying horse is expressible</span>
+    <p>
+        The locus deliberately accepts any item id. That is the right call for expressiveness and it puts the balance burden entirely on the founder table: <strong>high-value alleles must never be rollable in the wild</strong>, and should be reachable only through the <a href="carrots.html">splice</a> layer.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Unknown ids do nothing, loudly once</span>
+    <p>
+        Following <a href="gene-lycan.html">lycan</a>: an item id this game version has never heard of simply never lays. Resolve against the live registry, warn once through <code>warnUntranslated</code>, and never log per firing.
+    </p>
+</div>
+
+<h2 id="verb">The new verb, and why it is shaped like this</h2>
+
+<p>
+    <code>produce</code> completes a pattern that was already two thirds built:
+    <a href="gene-magic-item-drop.html">item drop</a> produces on death,
+    <code>yield</code> produces on interaction, and this produces on a clock. That
+    symmetry is the argument that it is a real verb rather than a special case
+    &mdash; it is the missing corner of a table, not a new table.
+</p>
+
+<h2 id="ground">On the ground, not into a chest</h2>
+
+<p>
+    Laying into the horse&rsquo;s inventory was considered. It is tidier and it makes
+    the accumulation hazard disappear, and it was rejected because it silently
+    does nothing on a horse with no chest &mdash; and a gene you cannot see
+    working is the failure mode this mod already tracks.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="open">Opening the vocabulary</h2>
+
+<p>
+    Every other effect that names a thing &mdash; <code>item_drop</code>,
+    <code>spread</code> &mdash; uses a closed vocabulary, deliberately, so the
+    judgement about what a word means stays with the translator that knows the
+    game. This locus is the first to take raw ids instead, and the precedent
+    that made it safe is <a href="gene-lycan.html">lycan</a>, which has stored
+    mob ids as plain strings since it shipped. The rule that makes it work is
+    the same one: an id the game does not know does nothing, quietly.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-item-drop.html">Magic item drop</a>
+        <a href="gene-milk.html">Milk</a>
+        <a href="gene-lycan.html">Lycan</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/EggLayerGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Molten hooves &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> an emission, no coat effect</p>
+
+<h1>Molten hooves</h1>
+
+<p class="lede">
+    Flame trails from the hooves that fade behind the horse as it moves. The
+    colour is written on the allele copy and inherited with it, so a line breeds
+    true to its own fire. It is <strong>light and particles only</strong> &mdash;
+    nothing it runs over catches.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Mlt/Mlt</code></td><td>burning hoofprints, both copies&rsquo; colours in the trail</td></tr>
+        <tr><td><code>Mlt/n</code></td><td>burning hoofprints in that copy&rsquo;s colour</td></tr>
+        <tr><td><code>n/n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<p>
+    It is <strong>dominant</strong>, so one copy is enough and it is common
+    wherever it exists at all. That is the whole character of the gene: a herd
+    with molten hooves in it is visible from a long way off at night.
+</p>
+
+<h2 id="fire">It does not set anything on fire</h2>
+
+<p>
+    Worth saying plainly, because the name promises otherwise. The hoofprints
+    are particles and a brief glow. Grass, crops, wooden stables and the horse
+    itself are all safe, and you can ride one through a forest.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. It costs the horse nothing and protects it from nothing.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.molten_hooves</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Mlt</code> molten, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>dominant &mdash; one copy expresses</dd></div>
+    <div><dt>Reaches the game as</dt><dd>an <code>emitter</code> effect</dd></div>
+    <div><dt>Epigenetic</dt><dd>trail colour, per allele copy</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note good">
+    <span class="label">No new machinery at all</span>
+    <p>
+        This is the cheapest gene on the behaviour list: an <code>emitter</code> anchored at <code>hooves</code> with an epigenetic colour, which is exactly what <a href="gene-particle.html">particle</a> and <a href="gene-rainbow-dust.html">rainbow dust</a> already do. No verb, no trigger, no flag &mdash; a gene file and a bake.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Dominant, so the particle budget matters more here than anywhere else</span>
+    <p>
+        Every other emitter locus in the mod is recessive or rare. This one expresses on a single copy, so a populated stable can have a dozen horses all emitting on <code>on_move</code> at once. Keep the shipped <code>count</code> and <code>chance</code> defaults rather than tuning them up for looks &mdash; the fix for &ldquo;not dramatic enough&rdquo; is a brighter colour, not more particles.
+    </p>
+</div>
+
+<div class="note danger">
+    <span class="label">Real fire was considered and rejected</span>
+    <p>
+        The first specification placed actual fire blocks. On a <em>dominant</em> gene that burns down the stable, the forest and the horse. If a later session wants the mechanic back, it must come with a demotion to recessive &mdash; the two decisions are one decision.
+    </p>
+</div>
+
+<h2 id="colour">Where the colour lives</h2>
+
+<p>
+    On the allele copy, not on the horse. Two molten copies carry two colours and
+    the trail draws from both, which is why a heterozygote and a homozygote look
+    different even though the gene is dominant and the <em>behaviour</em> is
+    identical. That is the same arrangement
+    <a href="gene-particle.html">particle</a> uses, and reusing it means the
+    epigenetic drift on breeding already works with no extra code.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="dominant">Why dominant, when almost nothing else is</h2>
+
+<p>
+    The magical emission loci are nearly all recessive, which makes them a
+    reward for breeding and invisible until you get there. One of them ought not
+    to be. A dominant emission gene spreads through a herd on its own, so a
+    player who catches a single molten horse and crosses it into their line sees
+    the result immediately &mdash; and that is a different kind of pleasure from
+    the long recessive hunt, worth having once.
+</p>
+
+<h2 id="honesty">A cosmetic gene that admits it</h2>
+
+<p>
+    The mod has a standing problem with genes that promise a mechanic and
+    deliver a look. This one is a look on purpose and says so on the first tab,
+    which is cheaper and more honest than a fire mechanic nobody dares breed.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-particle.html">Particle</a>
+        <a href="gene-rainbow-dust.html">Rainbow dust</a>
+        <a href="making-a-gene.html#block">The effects block</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/MoltenHoovesGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

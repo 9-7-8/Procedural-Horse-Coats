@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather sensitive (jump) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Weather sensitive (jump)</h1>
+
+<p class="lede">
+    The same idea as the speed locus and a completely separate gene: a positive
+    and a negative allele per weather type, moving how high the horse jumps while
+    that weather holds. <strong>Unlinked</strong> &mdash; inheriting one tells
+    you nothing about the other.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<p>
+    A positive allele and a negative one for each kind of weather. One copy
+    moves jump strength by the percentage written on that copy while its weather
+    holds; two copies add both percentages. One of each very nearly cancels.
+</p>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td>two positive copies</td><td>both percentages, added &mdash; a real difference</td></tr>
+        <tr><td>one positive copy</td><td>that copy&rsquo;s percentage</td></tr>
+        <tr><td>one of each</td><td>near enough nothing</td></tr>
+        <tr><td>one negative copy</td><td>that copy&rsquo;s percentage, off</td></tr>
+        <tr><td>two negative copies</td><td>both, off &mdash; noticeable and annoying</td></tr>
+    </tbody>
+</table>
+
+<h2 id="feel">What it is like to own</h2>
+
+<p>
+    Nothing at all, most of the time. Then it rains, and the horse you have
+    ridden for a week is a different animal. It is the only locus in the mod
+    whose expression you cannot check on demand &mdash; you wait for weather.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None directly. A badly weather-sensitive horse is slower or shorter in the
+    jump when it rains, which is a hazard only if you were relying on
+    it.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.weather_jump</code></dd></div>
+    <div><dt>Alleles</dt><dd>a positive and a negative per weather type, plus <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>incomplete dominance &mdash; copies add</dd></div>
+    <div><dt>Reaches the game as</dt><dd>an <code>attribute</code> effect on <code>jump_strength</code>, gated on <code>raining</code> / <code>thundering</code></dd></div>
+    <div><dt>Epigenetic</dt><dd>the magnitude, per allele copy</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note good">
+    <span class="label">Almost entirely existing machinery</span>
+    <p>
+        <code>AbstractMagicFactorGene</code> &mdash; the base class behind <a href="gene-magic-swim-speed.html">swim speed</a> and <a href="gene-magic-water-breathing.html">water breathing</a> &mdash; already implements this exact inheritance: a positive allele, a negative allele, one copy giving that copy&rsquo;s epigenetic percentage and two copies adding both. The <code>raining</code> and <code>thundering</code> condition flags already exist and already work. No new verb.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Snow is not weather in Minecraft</span>
+    <p>
+        There is no snowfall state to test &mdash; snow is rain in a cold biome. A <code>snowing</code> flag is therefore a <em>biome</em> lookup, not a weather one, and belongs on an interval sample rather than in a per-tick condition check.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Removal is already handled</span>
+    <p>
+        The attribute path reconciles every tick and <code>clearAttributes</code> takes off any modifier the horse is no longer asking for &mdash; which is the half that would otherwise leave a rain bonus stuck on a horse standing in sunshine. Nothing new to write.
+    </p>
+</div>
+
+<h2 id="same">Built as a copy, on purpose</h2>
+
+<p>
+    This gene and <a href="gene-weather-sensitive-speed.html">weather sensitive
+    (speed)</a> are the same class with a different attribute and a different
+    key. Resisting the urge to make one parameterised locus with two outputs is
+    deliberate: one locus would inherit as one unit, and the whole point is that
+    they do not.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="why-two">Two loci rather than one gene with two effects</h2>
+
+<p>
+    A single weather locus moving both stats would make &ldquo;good in the
+    rain&rdquo; a single thing to breed for, and one selection pressure produces
+    one kind of horse. Two independent loci give four corners &mdash; fast and
+    springy in a storm, fast and flat, and so on &mdash; which is four lines a
+    breeder can keep apart.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-weather-sensitive-speed.html">Weather sensitive (speed)</a>
+        <a href="gene-magic-jump.html">Magic jump</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/WeatherJumpGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

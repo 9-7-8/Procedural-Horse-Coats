@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intimidating &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Intimidating</h1>
+
+<p class="lede">
+    Nothing wants to be near it. Passive animals and hostile mobs alike keep
+    outside a radius written on the allele copy &mdash; at least eight blocks,
+    often more. Standing next to one is the quietest place in the world.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">Not built yet &mdash; this page is the specification</span>
+    <p>
+        This gene does not exist in the mod. The page is written first, as the
+        settled design, so that building it is transcription rather than
+        invention. Until it is registered by <code>Genes</code> it is absent
+        from the sidebar and the landing page. Its slot on the backlog is
+        &sect;<a href="roadmap.html#behaviour-genes">12.2</a>.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Itm/Itm</code></td><td>passive and hostile mobs both pushed out of the radius</td></tr>
+        <tr><td>anything else</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="cost">The catch</h2>
+
+<p>
+    It repels <em>everything</em> that is not a horse, which includes your cows,
+    your sheep and your chickens. An intimidating horse cannot be kept in a farm
+    without emptying it. That is not a bug, and it is the reason the gene is
+    worth thinking about rather than simply wanting.
+</p>
+
+<h2 id="ward">It is not the same as holy ward</h2>
+
+<p>
+    <a href="gene-holy-ward.html">Holy ward</a> stops hostiles
+    <strong>spawning</strong>. This pushes out the ones that are already there.
+    A horse with both is genuinely safe ground &mdash; nothing appears, and
+    nothing that wandered in stays.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None to the horse. The cost is entirely to the farm around it.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.intimidating</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Itm</code> intimidating, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>mob_aura</code> repel effect with a group filter</dd></div>
+    <div><dt>Epigenetic</dt><dd>radius, minimum 8 blocks</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note good">
+    <span class="label">Existing verb, already capped</span>
+    <p>
+        <code>mob_aura</code> repel ships and is already bounded &mdash; <code>max_targets</code> per beat, counted off the horse&rsquo;s own <code>tickCount</code> so a field of them does not do all its work on one tick. This gene inherits all of that and adds only the group filter.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">The group filter must use entity type tags</span>
+    <p>
+        A hardcoded list of passive and hostile mobs makes every modded creature invisible to this gene, and to the four others sharing the filter (<a href="gene-leader-of-the-pack.html">leader of the pack</a>, <a href="gene-meowing.html">meowing</a>, <a href="gene-cleansing-light.html">cleansing light</a>, <a href="gene-holy-ward.html">holy ward</a>). Build it on tags once.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Repel is a shove, not a wall</span>
+    <p>
+        It reuses the existing implementation: clear the mob&rsquo;s target if it was the horse or its rider, then push outward. Deliberately weaker than an avoidance goal, because a goal would have to be added to and removed from every mob that ever walked past &mdash; and a horse that stopped expressing would leave it behind on everything it had met.
+    </p>
+</div>
+
+<h2 id="scope">Widened from passive-only during design</h2>
+
+<p>
+    The first specification repelled passive animals only, which made it a
+    drawback with no upside &mdash; a gene whose entire effect was emptying your
+    farm. Extending it to hostiles gives it a reason to exist, and the overlap
+    with <a href="gene-holy-ward.html">holy ward</a> turned out to be
+    complementary rather than redundant once the two were stated precisely.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="drawback">Keeping the cost</h2>
+
+<p>
+    It would have been easy to make this repel only hostiles and become a
+    straightforwardly good gene. The passive half is kept because a magical
+    locus with a real, concrete, everyday cost is rarer in this mod than one
+    without, and &ldquo;you cannot pasture this horse with your animals&rdquo;
+    is a cost a player meets on the first day rather than in a spreadsheet.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-holy-ward.html">Holy ward</a>
+        <a href="gene-magic-mob-aura.html">Magic mob aura</a>
+        <a href="gene-meowing.html">Meowing</a>
+        <a href="roadmap.html#behaviour-genes">Backlog entry</a>
+    </div>
+    Planned source: <code>common/genetics/genes/IntimidatingGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
