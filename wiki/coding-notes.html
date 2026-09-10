@@ -477,6 +477,41 @@
     <code>b4galt7</code> correctly untouched.
 </p>
 
+
+<h2 id="rebuild-under-client">A <code>ClassNotFoundException</code> for our own class is almost never real</h2>
+
+<p>
+    A Gradle build replaces <code>common/build/libs/common.jar</code> <b>in place</b>, and
+    a running <code>runClient</code> holds that jar on its classpath. The JVM keeps every
+    class it has already loaded, so the game carries on quite happily &mdash; until it
+    needs one it has <em>not</em> loaded yet, and then throws
+    <code>ClassNotFoundException</code> for a class that is sitting right there in the
+    source tree and in the jar.
+</p>
+
+<p>
+    It happened on 2026-09-09: jar rewritten at 18:40:13, crash at 18:40:43,
+    <code>ClassNotFoundException: com.example.horsegenetics.common.trait.Viability</code>
+    in a horse tick. That class had not been edited in weeks and was present in both the
+    common jar and the built mod jar. Nothing was wrong.
+</p>
+
+<div class="note">
+    <span class="label">Check the timestamps before hunting</span>
+    <p>
+        The failure looks exactly like a packaging bug, and the obvious next move is to go
+        looking for one that does not exist. <strong>Compare the jar's mtime against the
+        crash time first.</strong> If the jar is newer, that is the whole answer.
+    </p>
+    <p>
+        The other half is not to cause it: building while somebody is mid-play will do
+        this to them. It is the same family as
+        <a href="architecture.html#running">runServer refusing to start</a> while their
+        client holds the world's <code>DirectoryLock</code> &mdash; their game and this
+        build share files.
+    </p>
+</div>
+
 </article>
 </main>
 </body>
