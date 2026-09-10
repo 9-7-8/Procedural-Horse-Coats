@@ -27,6 +27,156 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-09b">2026-09-09</h2>
+
+<h3>The engine learns to read SVG, and twenty-two genes land with the ten masks they
+    asked for.</h3>
+
+<p>The intake folder held twenty-two gene files and every one of them was written against
+    a vocabulary that does not exist &mdash; <code>PAINT</code> ops, <code>CRACKLE</code>
+    with a stretch, <code>DAPPLES</code> with a radius, <code>SPOTS</code> with a count and
+    a centre. That is not a complaint about the files. What each one <em>did</em> carry,
+    and what made the batch worth a day, was a <b>TOOL GAP</b> section saying which
+    measurement its reference needed and why no arrangement of the masks that exist
+    reached it. Ten of those were real, and the session ran in that order: build the tools
+    first, then write the genes that use them.</p>
+
+<h4>The SVG mask, which is the one that was not in any tool gap</h4>
+
+<p><code>PATH</code> was the admission that some shapes are not made of a rule &mdash;
+    that a marking somebody <em>drew</em> has to arrive as points. This is the admission
+    that follows from it: markings that get drawn get drawn in a drawing program, and what
+    comes out is a <code>d</code> string of cubics, arcs and subpaths inside a
+    <code>viewBox</code>. Re-typing one as sixty-four normalised control points is the step
+    where the drawing stops being the drawing &mdash; the holes close up, the arcs become
+    chords, and an evening goes on arithmetic.</p>
+
+<p>So <a href="making-a-gene.html#svg"><code>SVG</code></a> is deliberately the whole of
+    the grammar rather than the convenient part of it. Every path command, including the
+    reflected control point an <code>S</code> and a <code>T</code> carry and the
+    endpoint-parameterised elliptical arc that every exported circle is made of. Subpaths,
+    so a letter O has a hole &mdash; and a fill rule, because <em>whether</em> that hole is
+    a hole is written in the artist&rsquo;s file and cannot be recovered from the geometry.
+    The transform list. <code>viewBox</code> and <code>preserveAspectRatio</code>. A stroke
+    with real caps, joins, a miter limit and a dash pattern measured along the path.
+    <code>SvgPath</code> flattens it <em>once</em>, at load, so per texel it costs what
+    <code>PATH</code> costs however long the string is.</p>
+
+<p><code>node intake/tools/svg-to-mask.mjs</code> reads an actual <code>.svg</code> and
+    writes the mask blocks: nested <code>&lt;g transform&gt;</code>s flattened into each
+    element, <code>rect</code>/<code>circle</code>/<code>ellipse</code>/<code>line</code>/<code>polyline</code>/<code>polygon</code>
+    converted to path data the way the specification defines them, the presentation
+    attributes carried across, and a warning printed for everything it cannot see &mdash; a
+    CSS class, a <code>&lt;use&gt;</code>, an element both filled and stroked. Moonwing is
+    the first gene in the mod that carries a drawing.</p>
+
+<h4>Nine more measurements, each because a reference needed one</h4>
+
+<ul>
+<li><b><code>FAN</code></b> &mdash; an angular phase around a pivot, so bars widen as they
+    radiate. <code>WAVES</code> takes its phase from a straight line, so its bars are
+    parallel, evenly spaced and all pointed the same way <em>everywhere</em> in the region,
+    whatever the wavelength. Morpho Wing and Gill Bloom both asked for it independently.</li>
+<li><b><code>NORMAL</code></b> &mdash; which way the surface faces, dotted with a body
+    axis, with a <code>round</code> knob that blends toward the normal an ellipsoid of the
+    same box would have. Carapace Sheen and Kite Bloom both asked for view-angle
+    iridescence; see below for why that half is refused.</li>
+<li><b><code>CRACKLE.vertexWeight</code></b> &mdash; blends in the distance to the three-way
+    corners, so a thresholded network <em>pools</em> where cracks meet and thins between
+    them. An even channel is what a distance to a plane is; a vein is not that. Emberveins.</li>
+<li><b><code>CRACKLE.measure: "centroid"</code></b> &mdash; the same tessellation read from
+    each cell&rsquo;s middle out. Three separate files asked for a version of this, and it
+    turned out to be one parameter: it is the only per-cell radial coordinate a crackle
+    outline is <em>guaranteed</em> concentric with. Tidefoam, Opaline and Iris Bloom.</li>
+<li><b><code>SPOTS.arc</code> + <code>angle</code></b> &mdash; clips every mark in a tiled
+    field to the same wedge, which is the difference between a shingled roof and a closed
+    net. Fish Scales.</li>
+<li><b><code>SPOTS</code>/<code>RINGS.offsetX/Y/Z</code></b> &mdash; move where <em>one</em>
+    mask reads the cell centre without moving the cell, so an off-centre glint sits inside
+    a concentric set instead of replacing it. Moth Eyes.</li>
+<li><b><code>RAMP.axis</code> gains <code>noise</code>, <code>cell</code> and
+    <code>cellId</code></b> &mdash; three colour sources that are not straight lines: a
+    field that wanders, a per-cell radial fade, and one key per cell so neighbours land on
+    unrelated stops. Oil Sheen, Opaline and Opal Crackle.</li>
+<li>Moth Eyes also asked for a LUMA channel measuring how far a colour sits from grey. It
+    was already there, called <code>saturation</code>; inverted, it is exactly &ldquo;black
+    or grey and nothing else&rdquo;.</li>
+</ul>
+
+<h4>Two requests refused rather than deferred</h4>
+
+<p><strong>Nothing here will ever vary colour by the angle to the camera.</strong> The coat
+    is a texture baked once per horse and no mask or op will ever see a viewer, so true
+    iridescence is out of reach and will stay out of reach while the coat is a PNG.
+    <code>NORMAL</code> is the structural half of it &mdash; the sheen sits on the planes
+    that turn into the light and stays there &mdash; and that is the honest approximation.
+    <strong>And a knob cannot be offset by a constant.</strong> Agate&rsquo;s import wanted
+    each cell&rsquo;s heart to be its rim&rsquo;s complement, 180 degrees round the wheel;
+    a hue knob is a number the horse drew and there is no way in the format to say
+    &ldquo;that number plus 180&rdquo;. Both are now stated in the prompt so the next batch
+    does not spend a section proposing them.</p>
+
+<h4>Four things the imports got wrong that would have shipped silently</h4>
+
+<p>This is the part worth reading, because none of the four would have gone red.</p>
+
+<ul>
+<li><b>Opaline</b> gave each cell one of three tints with a <code>CHOICE</code> mask.
+    <code>CHOICE</code> is a coin flip made <em>once per horse</em> and returns the same
+    answer on every texel, so all three layers would have painted the entire marking one
+    colour &mdash; and which one depended on the seed. That is now the
+    <code>cellId</code> ramp, and rule 11 in the prompt says out loud what
+    <code>CHOICE</code> cannot do.</li>
+<li><b>Concentric Eyespots</b> had leg bands 0.28 and 0.26 body units wide. A texel is 0.5.
+    Every ring on every leg was under a texel and averaged away to nothing. The
+    import&rsquo;s own note said a <em>fourth</em> band would do that; it was already
+    happening at three. There is a new rule 15 about sizing against a texel before
+    shipping.</li>
+<li><b>Iris Bloom Diamonds</b> bet that <code>CRACKLE</code> and <code>SPOTS</code> agree
+    about where a cell&rsquo;s centre is when given the same seed and spacing, and wrote a
+    note saying it was a bet. They do not agree. That is what
+    <code>measure: "centroid"</code> is for.</li>
+<li><b><code>FAN</code>&rsquo;s <code>spacing</code> is an angle</b>, and the first draft of
+    the schema defaulted it to about three bars per full turn. Three genes shipped with
+    numbers that read like body-unit spacings and drew a single bar across the whole
+    marking. Caught by looking at the contact sheet, which is the only way it could have
+    been caught.</li>
+</ul>
+
+<h4>Two smaller things</h4>
+
+<p><b><code>wing_cloak.json</code> is missing from <code>genes/index.json</code> on
+    purpose, and this session regenerated the index from the folder and put it back.</b>
+    The absence <em>is</em> the killswitch &mdash;
+    <a href="known-gaps.html#gap-129">gap 129</a> parked the gene until it is retooled, and
+    the whole switch is that one line not being there. Rebuilding the list by walking the
+    directory is the obvious move, is what the
+    <a href="making-a-gene.html#contract-gene-file">contract</a>&rsquo;s warning about a
+    hand-kept list invites, and re-enabled it silently: nothing went red, because the gene
+    loads perfectly. It was caught while writing the gaps page and reverted, which moved
+    the bake golden by exactly its three lines and no other hash. The real gap is that the
+    file carries two kinds of information &mdash; &ldquo;these exist&rdquo;, which a script
+    can derive, and &ldquo;this one is off&rdquo;, which it cannot &mdash; with nothing
+    telling them apart. <a href="known-gaps.html#gap-162">Gap 162</a>. Until that is fixed:
+    <strong>add to the index by hand, never regenerate it</strong>.</p>
+
+<p><strong>Flags can default true</strong>, which the SVG mask needs twice: a
+    <code>&lt;path&gt;</code> with no stroke is filled, and a pasted drawing has to be
+    flipped. That is a real change to the creator rather than a cast, because its exporter
+    drops any setting equal to its default &mdash; a true default has to be written when it
+    is <em>un</em>ticked. The parity check compares flag fallbacks now; it never did when
+    they were all false.</p>
+
+<p><code>founders.py</code> was re-run over the whole set, as it is designed to be: it
+    budgets the tiers together, so twenty-two new genes moved twenty-two old tables.
+    9.70% of founder horses now express some magical gene.</p>
+
+<p>Sources: <code>common/coat/pattern/SvgPath.java</code>,
+    <code>SpecPainter</code>, <code>SpecSchema</code>,
+    <code>wiki/gene-creator/js/svg-path.js</code>,
+    <code>intake/tools/svg-to-mask.mjs</code>, and the twenty-two files in
+    <code>horsegenetics/genes/</code>.</p>
+
 <h2 id="d2026-09-09">2026-09-09</h2>
 
 <h3>Four pages about making a gene become one, and the prompt is allowed to say a shape

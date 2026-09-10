@@ -124,6 +124,8 @@ Two rules about the backlog page, both learned the hard way:
 6. **No legacy or back-compat code.** Dev only, single tester, no saves worth
    keeping - when a format changes, change it and move on. No genotype-code
    padding, no attachment field fallbacks.
+   **Never regenerate `genes/index.json` from the folder** - an absence in it is
+   a killswitch, and a rebuild turns a parked gene back on. Gap 162.
 7. **The wiki has one page list.** A new page goes in the `SECTIONS` array in
    `wiki/pages.js` - which the sidebar *and* the landing page both read - and
    nowhere else, with the `views` it belongs in. (`wiki/gene-creator/`,
@@ -227,8 +229,7 @@ mod.
 Deliberately a set of pointers - the numbers live in the code and the detail
 lives on a page.
 
-- **`common/`** compiles and the suite is **fully green** - the golden coat file was
-  regenerated at 0.3.0, so it is guarding again. **`neoforge-26.1.2/`** assembles,
+- **`common/`** compiles, the suite is green, **`neoforge-26.1.2/`** assembles,
   **`runServer`** boots clean, **creator parity** green. Confirm, don't trust.
 - **What has actually been seen in-game is a small fraction of what is built.**
   `wiki/verification.html` is the authority on which is which, and is the first

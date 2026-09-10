@@ -299,7 +299,6 @@ window.HG.pages = {
                 { href: "gene-tidefoam-sash.html", text: "Tidefoam Sash", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-tidemark.html", text: "Tidemark", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-war-mask.html", text: "War Mask", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-wing-cloak.html", text: "Wing Cloak", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-xuke.html", text: "Xuke", kind: "magical", views: ["gameplay","coding"] }
             ]
         },

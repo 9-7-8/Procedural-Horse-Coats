@@ -35,6 +35,90 @@
     </p>
 </div>
 
+<h2 id="svg-intake">&sect;0-BL &mdash; An SVG mask, three new masks, and twenty-two genes (2026-09-09, NOT looked at)</h2>
+
+<p>The largest single addition to the drawing vocabulary since it existed, and
+    <strong>none of it has been seen on a horse in the game</strong>. It has been seen on
+    the icon baker&rsquo;s contact sheet, which is a render of the real engine and is how
+    four defects in it were caught, and that is all.</p>
+
+<h3>The engine</h3>
+
+<ul>
+    <li><strong>Does an <code>SVG</code> mask land where it says?</strong> Moonwing is the
+        one to look at &mdash; a drawn wing on both flanks, filled, with the same path
+        stroked in gold round its edge. The three things that would each look deliberate
+        while being wrong: <em>upside down</em> (the y flip), <em>mirrored the wrong way</em>
+        (the plane), and <em>the gold band not following the fill&rsquo;s edge</em> (the
+        stroke and the fill disagreeing about the viewport). A unit test asserts all three
+        against body coordinates; none of them has been looked at by a person.</li>
+    <li><strong>How long does a horse take to make?</strong> The point ceiling is 1024 and
+        every mapped texel walks every segment. Moonwing&rsquo;s wing flattens to a couple
+        of hundred, and there is a per-subpath early-out, so it should be free &mdash; but
+        the number to watch is a horse carrying Moonwing <em>and</em> several other magical
+        genes, and the place to see it is the coat-bake time in the log rather than a
+        stopwatch.</li>
+    <li><strong><code>FAN</code>: are the bars the right size?</strong> Its
+        <code>spacing</code> is an <em>angle</em>, and the first draft of the schema
+        defaulted it to about three bars per full turn. Morpho Wing and Gill Bloom were
+        both retuned after the contact sheet showed a single bar covering the whole
+        marking. On a horse, check the bars <em>widen</em> as they leave the pivot &mdash;
+        that is the whole reason the mask exists, and a parallel-looking fan means the
+        pivot is somewhere the marking is not.</li>
+    <li><strong><code>NORMAL</code>: is the sheen continuous or faceted?</strong> Carapace
+        Sheen runs it at <code>round: 0.85</code>. At 0 a Minecraft horse is boxes and the
+        sheen would read as three hard zones; the blend toward an ellipsoid normal is what
+        makes it a curve. Look at the shoulder and the point of the hip, where the box
+        corners are, and check the transition does not band.</li>
+    <li><strong><code>CRACKLE measure: "centroid"</code>: is the core inside its cell?</strong>
+        Iris Bloom Diamonds, Nacre and Tidefoam Sash all depend on it. The failure to look
+        for is a core or a highlight sitting <em>across</em> a wall rather than in the
+        middle of a polygon &mdash; which is exactly what the import was worried about and
+        the parameter was added to prevent, so if it is happening the parameter does not
+        work.</li>
+</ul>
+
+<h3>The twenty-two genes</h3>
+
+<p>All present in the world at their tiered founder rates, all reachable in the
+    <a href="horse-designer/">designer</a> and the spawn screen. Spawn each one rather than
+    breeding for it. The four that were retuned after a render, and so are the least
+    settled: <a href="gene-morpho-wing.html">Morpho Wing</a>,
+    <a href="gene-gill-bloom.html">Gill Bloom</a>,
+    <a href="gene-concentric-eyespots.html">Concentric Eyespots</a> and
+    <a href="gene-fish-scales.html">Fish Scales</a>.</p>
+
+<ul>
+    <li><strong>Is anything invisible?</strong> The rule is half a body unit &mdash; a texel
+        &mdash; and Concentric Eyespots shipped from the import with bands half that wide,
+        which drew nothing at all. Its bands are roughly doubled now. Any gene whose
+        marking you cannot find is that failure until proved otherwise; check it against
+        <a href="making-a-gene.html#scale">the scale rule</a> before assuming anything
+        else.</li>
+    <li><strong>Do the recessive/coloured pairs actually differ?</strong> Fifteen of the
+        twenty-two ship as a pale dominant and a coloured recessive drawing the same shape.
+        Breed the recessive out on one line and look at the two side by side; if they are
+        indistinguishable, the hue knob is not reaching the layer that was supposed to
+        carry it.</li>
+    <li><strong>Moth Eyes only shows on black or grey.</strong> That is two LUMA readings
+        &mdash; darkness <em>and</em> how far the colour sits from grey. Try it on a liver
+        chestnut (should stay clear) and a pale dapple grey (should take it). Those are the
+        two the brightness reading alone gets wrong, and they are the reason the second
+        reading is there.</li>
+    <li><strong>Orchid Frost is supposed to do nothing on a pale coat.</strong> Not a region
+        exclusion &mdash; the blotches are drawn, and there is nothing left for them to take.
+        On a cremello or a grey it should be invisible; on a black or a liver chestnut it
+        should be obvious.</li>
+    <li><strong>Emissive: five of them glow.</strong> Emberveins, Morpho Wing, Moonwing,
+        Nightbloom Shroud and Opal Crackle. Look at one at night and one in a lit stable.</li>
+</ul>
+
+<p class="note"><strong>The one thing that is confirmed</strong> is that all 22 register,
+    parse, take a genotype slot, appear on the landing page and bake an icon &mdash; and
+    that no existing gene&rsquo;s coat moved: 57 rows joined the bake golden and not one
+    existing hash changed. Everything above is about whether the markings are any good,
+    which no test can answer.</p>
+
 <h2 id="gene-page-merge">&sect;0-BK &mdash; One page for making a gene, in eight tabs (2026-09-09, NOT looked at)</h2>
 
 <p>Documentation only &mdash; no behaviour changed, and the eight Java edits in it are
