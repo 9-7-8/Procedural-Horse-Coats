@@ -46,14 +46,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>The import wanted adjacent seams to show UNRELATED hues and could only reach a whole-horse ramp, which drifts smoothly nose to tail and makes two cracks a hand's width apart nearly the same colour. The colour here comes off RAMP's 'cellId' axis instead: one key drawn per cell of a lattice sharing this mask's own seed and scale, constant across that cell, so neighbours land on unrelated stops.</p>
-
-<p>It is a per-CELL key, not a per-SEAM one, and the difference is visible if you look for it: a seam runs between two cells, so its colour changes where three cells meet rather than staying constant along its whole length. That reads as fire moving along the crack, which is close to the reference and is not the same claim as 'each seam is one colour'.</p>
-
-<p>cellSize and veinWidth are shared verbatim between the seam layer and the fleck layer's subtractive mask. Change one and check the flecks still avoid the seams.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.opal_crackle"></div>
@@ -113,6 +105,14 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The import wanted adjacent seams to show UNRELATED hues and could only reach a whole-horse ramp, which drifts smoothly nose to tail and makes two cracks a hand's width apart nearly the same colour. The colour here comes off RAMP's 'cellId' axis instead: one key drawn per cell of a lattice sharing this mask's own seed and scale, constant across that cell, so neighbours land on unrelated stops.</p>
+
+<p>It is a per-CELL key, not a per-SEAM one, and the difference is visible if you look for it: a seam runs between two cells, so its colour changes where three cells meet rather than staying constant along its whole length. That reads as fire moving along the crack, which is close to the reference and is not the same claim as 'each seam is one colour'.</p>
+
+<p>cellSize and veinWidth are shared verbatim between the seam layer and the fleck layer's subtractive mask. Change one and check the flecks still avoid the seams.</p>
 
 <h2 id="layers">What it paints</h2>
 

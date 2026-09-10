@@ -45,16 +45,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>The gills are a FAN, and this gene is half the reason that mask exists. A ridged FRACTAL gives lines that fork and taper like cracks or roots; real gills all meet at one point, which is an angle around a pivot and not a noise threshold. FAN measures exactly that, and its 'spacing' being an arc length at one unit out is what makes the spokes widen as they travel - a gill fans, it does not run parallel.</p>
-
-<p>One pivot, not one per patch. FAN takes a single origin, so a horse whose FRACTAL puts two patches on the barrel gets spokes radiating from the same point for both, which reads correctly on the patch nearest the pivot and as a raked comb on the other. The pivot sits at the middle of the barrel, where the patch usually lands. A per-patch pivot would need the mask to know which blob a texel is in, which nothing here measures.</p>
-
-<p>The rim and the interior are two thresholds of ONE fractal on one seed, so the gold rim is always the outside of the maroon rather than a second patch that happens to overlap it.</p>
-
-<p>gillSpacing is an angle in radians, not a distance: at 0.15 a full turn holds about forty spokes, which is what the underside of a cap looks like. A number that reads like a body-unit spacing puts three bars on the whole horse.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.gill_bloom"></div>
@@ -111,6 +101,16 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The gills are a FAN, and this gene is half the reason that mask exists. A ridged FRACTAL gives lines that fork and taper like cracks or roots; real gills all meet at one point, which is an angle around a pivot and not a noise threshold. FAN measures exactly that, and its 'spacing' being an arc length at one unit out is what makes the spokes widen as they travel - a gill fans, it does not run parallel.</p>
+
+<p>One pivot, not one per patch. FAN takes a single origin, so a horse whose FRACTAL puts two patches on the barrel gets spokes radiating from the same point for both, which reads correctly on the patch nearest the pivot and as a raked comb on the other. The pivot sits at the middle of the barrel, where the patch usually lands. A per-patch pivot would need the mask to know which blob a texel is in, which nothing here measures.</p>
+
+<p>The rim and the interior are two thresholds of ONE fractal on one seed, so the gold rim is always the outside of the maroon rather than a second patch that happens to overlap it.</p>
+
+<p>gillSpacing is an angle in radians, not a distance: at 0.15 a full turn holds about forty spokes, which is what the underside of a cap looks like. A number that reads like a body-unit spacing puts three bars on the whole horse.</p>
 
 <h2 id="layers">What it paints</h2>
 

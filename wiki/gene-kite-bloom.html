@@ -47,14 +47,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>The import asked for a RAMP whose colour came from the angle between the surface and the CAMERA, so a panel would shift hue as the horse turned. That is not a tuning gap and it is not going to be built: the coat is a texture baked once per horse, and nothing in this module ever learns where a viewer is. What did get built is the NORMAL mask, which reads the direction the SURFACE faces - see Carapace Sheen, where the same request landed - and here the per-panel colour comes off the panel instead, which is the other honest reading of 'iridescent'.</p>
-
-<p>The colour is a RAMP on axis 'cellId', sharing the panels' own seed and scale: one key drawn per cell and constant across it, so neighbouring panels take unrelated colours and meet at the seam. That is the difference between a stained-glass leaf and a gradient.</p>
-
-<p>The seam between panels is left unpainted rather than drawn, so what shows there is the horse's own coat - which is what makes the panels read as laid over the horse rather than as the horse.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.kite_bloom"></div>
@@ -114,6 +106,14 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The import asked for a RAMP whose colour came from the angle between the surface and the CAMERA, so a panel would shift hue as the horse turned. That is not a tuning gap and it is not going to be built: the coat is a texture baked once per horse, and nothing in this module ever learns where a viewer is. What did get built is the NORMAL mask, which reads the direction the SURFACE faces - see Carapace Sheen, where the same request landed - and here the per-panel colour comes off the panel instead, which is the other honest reading of 'iridescent'.</p>
+
+<p>The colour is a RAMP on axis 'cellId', sharing the panels' own seed and scale: one key drawn per cell and constant across it, so neighbouring panels take unrelated colours and meet at the seam. That is the difference between a stained-glass leaf and a gradient.</p>
+
+<p>The seam between panels is left unpainted rather than drawn, so what shows there is the horse's own coat - which is what makes the panels read as laid over the horse rather than as the horse.</p>
 
 <h2 id="layers">What it paints</h2>
 

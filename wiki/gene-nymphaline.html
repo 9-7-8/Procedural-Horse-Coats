@@ -46,20 +46,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>The source was an SVG: eight posterised colour layers traced off a close photograph of a green-and-pink wing, about 300 KB of path data. That is exactly the traced photograph the SVG mask's point ceiling exists to keep out, and it is also the wrong shape of thing - the picture is a patch of membrane, not an outline, so there was nothing to place. It is rebuilt here as a rule.</p>
-
-<p>Reading of the source, in the order the layers restate it: a thick dark spar down one edge; veins radiating off it and widening as they travel; a pale cream ridge running alongside every vein on both sides; rose membrane between them in two values that pool into each other rather than banding; and a darker margin at the far edge where the venation breaks down into a fine net of small cells.</p>
-
-<p>FAN is the whole of the radiating half, and the origin is the number that decides whether it works. Put the pivot above the back and the barrel subtends about 74 degrees of it, so a spacing wide enough to give veins a texel of width leaves three of them on the whole flank. The pivot therefore sits ON the flank, at the point of the shoulder (u 0.68, v 0.58), where the barrel subtends nearer 100 degrees and a spacing of 0.29 puts six veins across it at about 0.75 body units wide out at mid-flank. Moving the root is the first thing to check if the vein count comes out wrong.</p>
-
-<p>spacing is an angle, so vein width scales with distance from the root: about a third of a unit at r=5 and nearly two units at the tail end. That is what a wing does, and it is also why inner is 3.5 - inside that radius the veins are under a texel and would break into stipple, and the spar layer covers the root anyway.</p>
-
-<p>The cream ridge is two FAN masks on one origin and one spacing, the narrow one inverted: a wide bar minus the vein core is a band either side of it. They must stay on the same knobs or the ridge walks off the vein.</p>
-
-<p>The lower-rear net is CRACKLE rather than a finer FAN, and deliberately: a second fan fine enough to read as secondary venation comes out under half a texel wide at every radius on the barrel. CRACKLE with vertexWeight up pools where channels meet and thins between them, which is what a vein network does and what the source shows in that corner.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.nymphaline"></div>
@@ -119,6 +105,20 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The source was an SVG: eight posterised colour layers traced off a close photograph of a green-and-pink wing, about 300 KB of path data. That is exactly the traced photograph the SVG mask's point ceiling exists to keep out, and it is also the wrong shape of thing - the picture is a patch of membrane, not an outline, so there was nothing to place. It is rebuilt here as a rule.</p>
+
+<p>Reading of the source, in the order the layers restate it: a thick dark spar down one edge; veins radiating off it and widening as they travel; a pale cream ridge running alongside every vein on both sides; rose membrane between them in two values that pool into each other rather than banding; and a darker margin at the far edge where the venation breaks down into a fine net of small cells.</p>
+
+<p>FAN is the whole of the radiating half, and the origin is the number that decides whether it works. Put the pivot above the back and the barrel subtends about 74 degrees of it, so a spacing wide enough to give veins a texel of width leaves three of them on the whole flank. The pivot therefore sits ON the flank, at the point of the shoulder (u 0.68, v 0.58), where the barrel subtends nearer 100 degrees and a spacing of 0.29 puts six veins across it at about 0.75 body units wide out at mid-flank. Moving the root is the first thing to check if the vein count comes out wrong.</p>
+
+<p>spacing is an angle, so vein width scales with distance from the root: about a third of a unit at r=5 and nearly two units at the tail end. That is what a wing does, and it is also why inner is 3.5 - inside that radius the veins are under a texel and would break into stipple, and the spar layer covers the root anyway.</p>
+
+<p>The cream ridge is two FAN masks on one origin and one spacing, the narrow one inverted: a wide bar minus the vein core is a band either side of it. They must stay on the same knobs or the ridge walks off the vein.</p>
+
+<p>The lower-rear net is CRACKLE rather than a finer FAN, and deliberately: a second fan fine enough to read as secondary venation comes out under half a texel wide at every radius on the barrel. CRACKLE with vertexWeight up pools where channels meet and thins between them, which is what a vein network does and what the source shows in that corner.</p>
 
 <h2 id="layers">What it paints</h2>
 

@@ -45,12 +45,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>This is the gene the NORMAL mask was added for, and it is worth being plain about what the mask does and does not deliver. True iridescence is a function of the angle between the surface and the VIEWER, and the coat here is a baked texture: nothing in this module ever learns where a camera is, so a colour that shifts as the horse turns is out of reach and will stay out of reach while the coat is a PNG. What NORMAL measures instead is which way the surface itself faces, which is the structural half of the effect - the sheen sits on the planes that turn up into the light and thins on the ones that turn away, and it stays there. The import shipped a vertical RAMP standing in for this; a ramp is a position band and gets it wrong the moment the geometry turns.</p>
-
-<p>'round' is at 0.85 rather than 0: a Minecraft horse is boxes, so the FLAT face normal takes exactly three values on any axis and a sheen keyed to it reads as three hard zones. Blending toward the normal an ellipsoid of the same box would have is what makes it continuous.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.carapace_sheen"></div>
@@ -108,6 +102,12 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>This is the gene the NORMAL mask was added for, and it is worth being plain about what the mask does and does not deliver. True iridescence is a function of the angle between the surface and the VIEWER, and the coat here is a baked texture: nothing in this module ever learns where a camera is, so a colour that shifts as the horse turns is out of reach and will stay out of reach while the coat is a PNG. What NORMAL measures instead is which way the surface itself faces, which is the structural half of the effect - the sheen sits on the planes that turn up into the light and thins on the ones that turn away, and it stays there. The import shipped a vertical RAMP standing in for this; a ramp is a position band and gets it wrong the moment the geometry turns.</p>
+
+<p>'round' is at 0.85 rather than 0: a Minecraft horse is boxes, so the FLAT face normal takes exactly three values on any axis and a sheen keyed to it reads as three hard zones. Blending toward the normal an ellipsoid of the same box would have is what makes it continuous.</p>
 
 <h2 id="layers">What it paints</h2>
 

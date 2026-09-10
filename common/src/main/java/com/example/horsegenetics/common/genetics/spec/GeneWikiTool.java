@@ -769,7 +769,6 @@ public final class GeneWikiTool {
         sb.append("></div>\n\n");
 
         sb.append(outcomeSummary(gene));
-        sb.append(notes(gene.spec().notes(), "about", "About this gene"));
 
         sb.append("<h2 id=\"inheritance\">Crossing two of them</h2>\n\n");
         sb.append("<div class=\"gene-inheritance\" data-gene=\"").append(gene.key())
@@ -812,6 +811,14 @@ public final class GeneWikiTool {
         sb.append("<tr><th>Built from</th><td>")
                 .append(esc(String.join(", ", vocabulary(gene)))).append("</td></tr>\n");
         sb.append("</tbody>\n</table>\n</div>\n\n");
+
+        // The gene file's own notes. They were on the GAMEPLAY tab and are
+        // implementation reasoning to the last line - why FAN and not a
+        // second SVG, which mask the registration hangs off, what the import
+        // asked for and was refused. A player who does not want the model has
+        // no use for any of it, which is the same call already made about the
+        // outcome prose in outcomeSummary.
+        sb.append(notes(gene.spec().notes(), "about", "Why it is built this way"));
 
         sb.append(layers(gene));
         sb.append("</section>\n\n");

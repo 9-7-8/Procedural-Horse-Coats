@@ -46,18 +46,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>The wing is an SVG path, and it is the first gene in the mod that carries an actual drawing. The import shipped it as one big soft SPOTS blob per side and said so: a blob is round and a wing is pointed, and no radius or stretch makes a lattice cell into a silhouette. A drawn outline is the answer to that, and 'plane': 'side' extrudes it through the horse so one drawing appears on both flanks without either being placed by hand.</p>
-
-<p>The extrusion is also what puts it over the TOPLINE. A side-plane SVG ignores z entirely, so the drawing is a function of x and y alone: raise the viewport past the top of the barrel and the same outline that covers the flanks covers the back between them, with no seam and nothing placed twice. The viewport is deliberately taller than the barrel for that reason - the top of the wing is clipped off by the horse, which is what makes it wrap.</p>
-
-<p>The gold trim is the SAME path stroked instead of filled, so the band cannot drift off the edge it is meant to bind however the viewport is tuned. The import built its trim by growing the blob and subtracting the blob back out, which works and which no longer has to.</p>
-
-<p>'fit': 'none' - the drawing is deliberately stretched to fill its viewport rather than fitted inside it, because the wing is meant to be as long as the ribcage and a proportional fit would leave it a small square mark in the middle of the flank.</p>
-
-<p>The dust is a static three-colour stipple. The reference's shimmer is a viewing-angle effect and the coat is a baked texture; the honest half of that is a fixed iridescent speckle, and it is what this ships.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.moonwing"></div>
@@ -117,6 +105,18 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The wing is an SVG path, and it is the first gene in the mod that carries an actual drawing. The import shipped it as one big soft SPOTS blob per side and said so: a blob is round and a wing is pointed, and no radius or stretch makes a lattice cell into a silhouette. A drawn outline is the answer to that, and 'plane': 'side' extrudes it through the horse so one drawing appears on both flanks without either being placed by hand.</p>
+
+<p>The extrusion is also what puts it over the TOPLINE. A side-plane SVG ignores z entirely, so the drawing is a function of x and y alone: raise the viewport past the top of the barrel and the same outline that covers the flanks covers the back between them, with no seam and nothing placed twice. The viewport is deliberately taller than the barrel for that reason - the top of the wing is clipped off by the horse, which is what makes it wrap.</p>
+
+<p>The gold trim is the SAME path stroked instead of filled, so the band cannot drift off the edge it is meant to bind however the viewport is tuned. The import built its trim by growing the blob and subtracting the blob back out, which works and which no longer has to.</p>
+
+<p>'fit': 'none' - the drawing is deliberately stretched to fill its viewport rather than fitted inside it, because the wing is meant to be as long as the ribcage and a proportional fit would leave it a small square mark in the middle of the flank.</p>
+
+<p>The dust is a static three-colour stipple. The reference's shimmer is a viewing-angle effect and the coat is a baked texture; the honest half of that is a fixed iridescent speckle, and it is what this ships.</p>
 
 <h2 id="layers">What it paints</h2>
 

@@ -46,16 +46,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>The import gave each cell one of three tints with a CHOICE mask. CHOICE is a coin flip made ONCE PER HORSE - it returns the same answer on every texel - so all three layers would have painted the entire marking one colour, or nothing at all, and which one depended on the seed. The tint is a RAMP on axis 'cellId' instead: a key drawn per cell of a lattice, constant across that cell, which is what the import was describing.</p>
-
-<p>Every mask runs in the whole-horse frame, so the cell lattice carries across the body/neck/head/leg seams instead of restarting at each part boundary. That is the difference between one sheet of cracked glass and eleven.</p>
-
-<p>The rim is an annulus - the wider wall reading minus the narrower one, both inverted - so the near-black band and the pale vein it surrounds share an edge exactly rather than leaving a seam or overlapping.</p>
-
-<p>Mane, tail and ears are excluded. This is a skin effect, and hair keeps whatever colour the genes that govern hair gave it.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.opaline"></div>
@@ -115,6 +105,16 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The import gave each cell one of three tints with a CHOICE mask. CHOICE is a coin flip made ONCE PER HORSE - it returns the same answer on every texel - so all three layers would have painted the entire marking one colour, or nothing at all, and which one depended on the seed. The tint is a RAMP on axis 'cellId' instead: a key drawn per cell of a lattice, constant across that cell, which is what the import was describing.</p>
+
+<p>Every mask runs in the whole-horse frame, so the cell lattice carries across the body/neck/head/leg seams instead of restarting at each part boundary. That is the difference between one sheet of cracked glass and eleven.</p>
+
+<p>The rim is an annulus - the wider wall reading minus the narrower one, both inverted - so the near-black band and the pale vein it surrounds share an edge exactly rather than leaving a seam or overlapping.</p>
+
+<p>Mane, tail and ears are excluded. This is a skin effect, and hair keeps whatever colour the genes that govern hair gave it.</p>
 
 <h2 id="layers">What it paints</h2>
 

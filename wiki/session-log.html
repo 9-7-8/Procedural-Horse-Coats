@@ -27,6 +27,120 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10">2026-09-10</h2>
+
+<h3>Four genes retuned off looking at them, one new gene out of intake, and the gene
+    files&rsquo; notes moved to the tab they were always about.</h3>
+
+<p>A short session, and every change in it came from the same place: somebody opened the
+    icon sheet and said what was wrong. That is worth saying because three of the four
+    fixes are things no test could have raised &mdash; the goldens were green, the parity
+    was green, and every gene was painting exactly what its file said.</p>
+
+<h4>Coral bloom&rsquo;s rim was not a rim</h4>
+
+<p><a href="gene-coral-bloom.html">Coral bloom</a> was written as three concentric zones of
+    one tessellation: a bright orange rim in the seam, a deep blue field inside it, a pale
+    crown at the middle. On the horse it was an <strong>orange horse with blue blobs</strong>.
+    The arithmetic is the whole explanation and it is worth writing down, because the same
+    trap is waiting in every other <code>CRACKLE</code> gene: a wall of width <em>w</em>
+    through cells of size <em>s</em> takes roughly <em>2w/s</em> of the surface, so at
+    <code>gap: 1.2</code> in cells of 5.5 to 9.5 the seam is not a hairline round a cell, it
+    is most of the horse, and the cells are the things floating in it. <b>A rim colour is
+    load-bearing in a way a fill colour is not</b> &mdash; a fill can be wrong and the picture
+    survives it; a rim being wrong inverts figure and ground.</p>
+
+<p>The fix is to paint <em>nothing</em> in the seam. The base coat shows there instead, which
+    is a colour the horse already owns and which therefore cannot take the picture over
+    however much of the surface it covers. Blue band and pale crown are untouched.</p>
+
+<h4>Moonwing, four times the size, and over the back</h4>
+
+<p><a href="gene-moonwing.html">Moonwing</a>&rsquo;s viewport went from 0.30&times;0.20 of the
+    body to 0.62&times;0.44 and, more to the point, is now <strong>deliberately taller than
+    the barrel</strong>. That last part is the whole of how it wraps: a <code>side</code>-plane
+    <code>SVG</code> ignores <em>z</em> entirely, so the drawing is a function of <em>x</em>
+    and <em>y</em> and nothing else. Raise its top edge past the barrel&rsquo;s and the same
+    outline that covers both flanks covers the back between them &mdash; no seam, no second
+    placement, and the top of the wing simply clipped off by the horse. The extrusion that was
+    already doing symmetry for free turns out to do wrapping for free as well.</p>
+
+<h4>And a gene that reads the coat underneath it</h4>
+
+<p>The other half of the moonwing ask was that the pearl allele give <em>other</em> white
+    markings the same treatment &mdash; the gold edge and the coloured dust. That is
+    <code>LUMA</code>&rsquo;s <code>white</code> channel, which is why it exists: not
+    &ldquo;the pale parts&rdquo; but the achromatic floor, so a splash reads 1 and a palomino
+    reads near 0.</p>
+
+<p>The rim is the move worth remembering. There is no erode operator and there does not need
+    to be one: <b>the white selection, intersected with the same selection inverted and grown
+    by 1.3 units</b>, is a band exactly that far inside every white border. Growing the
+    NOT-white eats into the white, and the intersection is what was eaten. Both layers run
+    <em>first</em>, before the wing &mdash; <code>LUMA</code> reads the coat as it stands when
+    the layer runs, so a wing laid down first would be read back as one of the markings it is
+    supposed to be matching, and edged twice.</p>
+
+<p>Measuring that turned up <a href="known-gaps.html#gap-166">gap 166</a>, which is
+    <em>not</em> this session&rsquo;s doing: on a horse that is white everywhere, the pearl
+    form&rsquo;s gold band comes out grey. Four warm texels against 589 on a bay, and 692 for
+    the coloured allele on the same white horse. It reproduces with the new layers stripped
+    back out, so it predates them; the cause is unestablished and is written down rather than
+    chased.</p>
+
+<h4>Three greys instead of one ivory</h4>
+
+<p><a href="gene-iridescent-rosette.html">Iridescent rosette</a>&rsquo;s pale allele was a
+    single flat ivory annulus and it read as a smudge: <b>a ring with no interior structure
+    has nothing to tell the eye where its edges are.</b> It is now the same three concentric
+    bands the coloured form uses &mdash; same radii, same knobs, same registration &mdash; with
+    three greys where that one has three hues. The side effect is that the gene&rsquo;s wiki
+    icon flipped to the coloured allele, because <code>CoatVisibility</code> photographs
+    whichever allele moves the most texels and the darkest grey sits close enough to a bay to
+    lose the count. Noted on <a href="verification.html#gene-tuning">verification</a> so it is
+    not reported later as a bug.</p>
+
+<h4>Nymphaline</h4>
+
+<p>New, out of the intake folder, and the first arrival since the SVG engine landed &mdash;
+    which makes its most interesting property that <strong>it does not use the SVG mask</strong>.
+    Its source was eight posterised colour layers traced off a photograph of a butterfly wing,
+    about 300&nbsp;KB of path data: past <code>MAX_PATH_POINTS</code> by three orders of
+    magnitude, and the wrong <em>shape</em> of thing regardless, because a traced photograph is
+    a patch of membrane and not an outline, so there is nothing in it to place. It is rebuilt as
+    rules. <code>FAN</code> is the radiating venation, on a pivot that sits <em>on</em> the flank
+    rather than above the back &mdash; from above, the barrel subtends about 74 degrees and any
+    spacing wide enough to give a vein a texel of width leaves three veins on the whole side;
+    from the point of the shoulder it subtends nearer 100 and the same spacing gives six.
+    <code>CRACKLE</code> with <code>vertexWeight</code> up is the fine net where the venation
+    breaks down, because a second fan fine enough to read as secondary venation comes out under
+    half a texel wide at every radius on the barrel. Priority 118, with the other whole-coat
+    genes.</p>
+
+<h4>The notes were on the wrong tab</h4>
+
+<p>Every generated gene page put the gene file&rsquo;s <code>notes</code> under &ldquo;About
+    this gene&rdquo; on the <em>gameplay</em> tab. They are implementation reasoning to the last
+    line &mdash; why <code>FAN</code> and not a second <code>SVG</code>, which mask the
+    registration hangs off, what the import asked for and was refused &mdash; and the gameplay
+    tab is defined as the one written for a player who does not want the model. They are on the
+    coding tab now, under &ldquo;Why it is built this way&rdquo;, which is the same call
+    <code>outcomeSummary</code> already made about the outcome prose, for the same reason. 56
+    pages moved.</p>
+
+<h4>What was regenerated</h4>
+
+<p>Both goldens: eleven rows in <code>coat-bake-golden.txt</code>, and every line of
+    <code>coat-golden.txt</code> gained a nymphaline segment. Worth being explicit that
+    <strong>no rendered horse in the pipeline golden moved</strong> &mdash; all 1056 hashes are
+    unchanged and only the genotype codes grew, which is what adding a locus does, and is also
+    the check that the four edited genes are on none of those 39 horses. Then the gene bundle,
+    the icons, the pages, the designer wasm, the search index and links.</p>
+
+<p>The intake folder&rsquo;s twenty-two markdown sources are deleted &mdash; each was checked
+    against the gene it became before anything was removed, and all twenty-two ship.
+    <code>intake/overcast.json</code> arrived during the session and is untouched.</p>
+
 <h2 id="d2026-09-09b">2026-09-09</h2>
 
 <h3>The engine learns to read SVG, and twenty-two genes land with the ten masks they

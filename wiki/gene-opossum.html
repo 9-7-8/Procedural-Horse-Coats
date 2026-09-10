@@ -46,10 +46,6 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="about">About this gene</h2>
-
-<p>The rear edge is DITHERED rather than faded (owner's call), and the difference is worth stating because the format makes it easy to get wrong. Coverage scales an op's strength, so an AXIS ramp multiplied by a SPECKLE gives you *faded dots* - every dot present, each one weaker - which reads as a gradient with texture in it rather than as roan running out. Dots that get rarer is a density change, and density is a SPECKLE parameter that no mask can drive. So the falloff is three bands with hard edges and falling densities (0.82, 0.42, 0.16), which is the format's way of writing a density gradient. The band edges are separate knobs kept strictly below 'extent' so no band can invert its own from/to - a reversed pair is smoothstep's degenerate hard step (gap 106), and it would put a solid block where the fringe should be.</p>
-
 <h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.opossum"></div>
@@ -109,6 +105,10 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The rear edge is DITHERED rather than faded (owner's call), and the difference is worth stating because the format makes it easy to get wrong. Coverage scales an op's strength, so an AXIS ramp multiplied by a SPECKLE gives you *faded dots* - every dot present, each one weaker - which reads as a gradient with texture in it rather than as roan running out. Dots that get rarer is a density change, and density is a SPECKLE parameter that no mask can drive. So the falloff is three bands with hard edges and falling densities (0.82, 0.42, 0.16), which is the format's way of writing a density gradient. The band edges are separate knobs kept strictly below 'extent' so no band can invert its own from/to - a reversed pair is smoothstep's degenerate hard step (gap 106), and it would put a solid block where the fringe should be.</p>
 
 <h2 id="layers">What it paints</h2>
 

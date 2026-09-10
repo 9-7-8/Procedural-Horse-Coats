@@ -1,0 +1,173 @@
+{
+  "format": 3,
+  "key": "horsegenetics.crazework",
+  "name": "Crazework",
+  "phase": "magical",
+  "priority": 119,
+  "rarity": "rare",
+  "blurb": "The coat crazes into tiled plates, each one dark with a blue centre and a cyan spark inside that, separated by grey channels that pool pale gold where three of them meet. Toward the forehand the tiling breaks up and the plates drift apart into islands.",
+  "notes": [
+    "The source was an SVG: five flat colours - near-black navy, grey, pale gold, blue, cyan - traced off a photograph, about 270 KB of path data. Past the SVG mask's point ceiling and a field rather than an outline, so it is rebuilt as a rule.",
+    "Reading of the source: polygons that tile with a channel of even width between them; each polygon dark, with a blue core inside it and, on some, a cyan core inside that; the channels grey but pooling pale gold at the three-way corners; and, across one side of the frame, the whole tiling breaking down - channels widening, plates shrinking, until they are isolated islands on the gold ground.",
+    "This is the same CRACKLE wall-and-centroid pairing as [ringwork], for the same reason: measure: centroid is the only per-cell radial coordinate in the vocabulary and the only one guaranteed concentric with the wall layer. One seed, one scale, one warp across every CRACKLE mask here, and the plate, its blue core, its cyan spark and the channel around it are all talking about the same polygons. Change warp on one and the cores walk out of their plates.",
+    "gap under centroid carries the same open question as it does in [ringwork]: this file reads it as a fraction of the cell, 0 at the middle and 1 at the boundary. If the cores come out as whole plates or as nothing, that reading is wrong and every centroid gap wants rescaling into body units.",
+    "The plates are much coarser than the source and that is forced, not chosen. The source has maybe twenty-five cells across its frame; at scale 4.5 a horse gets about five across the barrel. The arithmetic: a plate's half-width is roughly half the scale, so at 4.5 it is 2.25 body units, and the 0.30 slice between the navy and the blue is 0.67 units - a hair over a texel. Halve the scale to match the source's density and every one of those slices goes under a texel and the layering collapses into flat dark plates.",
+    "The gold at the junctions is a second wall layer at vertexWeight 0.95 rather than a separate mask. vertexWeight blends the wall distance toward the distance to the nearest three-way corner, so wound almost all the way up it selects the corners and almost nothing of the channel between them. The grey channel underneath runs at 0.15 instead, which is nearly the even width a distance-to-a-plane gives.",
+    "The break-up is two masks in front of every layer, not a gradient: a soft AXIS band on X that fades toward the nose, times a FRACTAL. The AXIS alone would fade the plates out evenly and read as a wash; the product tears the fading edge into islands, which is the half of the source that a gradient cannot say. Both terms are repeated verbatim on all five layers - they have to stay identical or the plates, cores and channels break up at different rates and the tiling comes apart before it dissolves."
+  ],
+  "preview": { "base": "bay", "expression": "crazework" },
+  "alleles": [
+    { "token": "Cw", "label": "Crazework (Cw)" },
+    { "token": "Cq", "label": "Coloured crazework (Cq)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "plateSeed", "type": "seed" },
+    { "name": "breakSeed", "type": "seed" },
+    { "name": "plateScale", "min": 4.0, "max": 5.5 },
+    { "name": "plateHue", "min": 0, "max": 360 },
+    { "name": "groundHue", "min": 0, "max": 360 }
+  ],
+  "expressions": [
+    {
+      "id": "crazework",
+      "name": "Crazework",
+      "description": "Dark tiled plates with blue centres and cyan sparks, set in grey channels that pool gold at every junction, breaking apart into islands toward the front of the horse.",
+      "when": [ "Cw/Cw", "Cw/Cq", "Cw/n" ],
+      "notes": [
+        "Layer order is inside-out and the channels go last: ground, plate, core, spark, channel, junction. Painting the grey channel after the plates rather than before is what keeps its width even - a centroid draw at 0.92 stops just inside the boundary, and whether that leaves a gap or an overlap depends on the scale, so the channel is drawn over the top and the question does not arise."
+      ],
+      "layers": [
+        {
+          "name": "the gold ground the tiling sits on",
+          "masks": [
+            { "type": "ALL" }
+          ],
+          "op": { "type": "TOWARD", "color": "#fdfab2", "strength": 70, "opacity": 80 }
+        },
+        {
+          "name": "the plates",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.92, "warp": 0.35, "softness": 0.08, "measure": "centroid" }
+          ],
+          "op": { "type": "TOWARD", "color": "#1b202d", "strength": 95, "opacity": 100 }
+        },
+        {
+          "name": "the blue core of each plate",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.62, "warp": 0.35, "softness": 0.08, "measure": "centroid" }
+          ],
+          "op": { "type": "TOWARD", "color": "#152a92", "strength": 92, "opacity": 100 }
+        },
+        {
+          "name": "the cyan spark, on some plates only",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.3, "warp": 0.35, "chance": 0.45, "softness": 0.1, "measure": "centroid" }
+          ],
+          "op": { "type": "TOWARD", "color": "#67def7", "strength": 94, "opacity": 100 }
+        },
+        {
+          "name": "the grey channel between plates",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.6, "warp": 0.35, "softness": 0.08, "measure": "wall", "vertexWeight": 0.15 }
+          ],
+          "op": { "type": "TOWARD", "color": "#7a7e7a", "strength": 93, "opacity": 100 }
+        },
+        {
+          "name": "gold pooling where three channels meet",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.55, "warp": 0.35, "softness": 0.12, "measure": "wall", "vertexWeight": 0.95 }
+          ],
+          "op": { "type": "TOWARD", "color": "#fdfab2", "strength": 90, "opacity": 100 }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured crazework",
+      "description": "The same tiling in two colours this line of horses runs to - one carrying the plates and their cores, the other the ground and the junctions.",
+      "when": [ "Cq/Cq" ],
+      "notes": [
+        "The recessive coloured half of the usual pair, on two independent hue knobs like [shallows] rather than one. The source pairs a blue plate against a gold ground, near enough opposite sides of the wheel, and a single hue driving both would collapse the contrast that makes the tiling read as tiling. The grey channel stays achromatic on purpose: it is the value the two hues are separated by, and colouring it puts three hues in a pattern built on two.",
+        "The three plate lightnesses - 0.14, 0.36, 0.72 - are the source's navy, blue and cyan read off as values. They matter more than the hue does: the layering is legible because the cores get lighter inward, and a flat lightness across the three makes one plate-coloured blob however saturated it is."
+      ],
+      "layers": [
+        {
+          "name": "the ground the tiling sits on",
+          "masks": [
+            { "type": "ALL" }
+          ],
+          "op": { "type": "TOWARD", "hue": "$groundHue", "saturation": 0.55, "lightness": 0.84, "strength": 70, "opacity": 80 }
+        },
+        {
+          "name": "the plates",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.92, "warp": 0.35, "softness": 0.08, "measure": "centroid" }
+          ],
+          "op": { "type": "TOWARD", "hue": "$plateHue", "saturation": 0.45, "lightness": 0.14, "strength": 95, "opacity": 100 }
+        },
+        {
+          "name": "the core of each plate",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.62, "warp": 0.35, "softness": 0.08, "measure": "centroid" }
+          ],
+          "op": { "type": "TOWARD", "hue": "$plateHue", "saturation": 0.78, "lightness": 0.36, "strength": 92, "opacity": 100 }
+        },
+        {
+          "name": "the spark, on some plates only",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.3, "warp": 0.35, "chance": 0.45, "softness": 0.1, "measure": "centroid" }
+          ],
+          "op": { "type": "TOWARD", "hue": "$plateHue", "saturation": 0.7, "lightness": 0.72, "strength": 94, "opacity": 100 }
+        },
+        {
+          "name": "the grey channel between plates",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.6, "warp": 0.35, "softness": 0.08, "measure": "wall", "vertexWeight": 0.15 }
+          ],
+          "op": { "type": "TOWARD", "color": "#7a7e7a", "strength": 93, "opacity": 100 }
+        },
+        {
+          "name": "the ground pooling where three channels meet",
+          "masks": [
+            { "type": "AXIS", "axis": "X", "space": "body", "from": -0.1, "to": 0.62, "softness": 0.4 },
+            { "type": "FRACTAL", "seed": "$breakSeed", "scale": 8.0, "octaves": 2, "warp": 0.5, "threshold": 0.34, "softness": 0.3 },
+            { "type": "CRACKLE", "seed": "$plateSeed", "scale": "$plateScale", "gap": 0.55, "warp": 0.35, "softness": 0.12, "measure": "wall", "vertexWeight": 0.95 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$groundHue", "saturation": 0.55, "lightness": 0.84, "strength": 90, "opacity": 100 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unbroken.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Cw/Cw": 0.0016,
+    "Cw/Cq": 0.0011,
+    "Cw/n": 0.16,
+    "Cq/Cq": 0.0055,
+    "n/n": 99.8318
+  }
+}
