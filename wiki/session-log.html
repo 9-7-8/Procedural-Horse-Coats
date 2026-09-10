@@ -29,6 +29,94 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="getting-started-2026-09-09">A page that opens first, a copy that takes a minute, and a browser that remembers.</h3>
+
+<p>
+    The mod had no way in. Everything it does is documented somewhere on this wiki, which
+    is no help at all to somebody who has just installed it and is standing in a field
+    looking at a horse. So the browser has a <strong>Getting Started</strong> tab, it is
+    the first thing that opens on a fresh install, and it is the first tab in the strip.
+</p>
+
+<p>
+    Thirteen sections, in the order a player actually needs them: tame one, notice that
+    you need a mare <em>and</em> a stallion, feed them both a golden carrot, take a gene
+    off a horse with a book, file it on a shelf, buy one from the horseman if you would
+    rather, splice it into a foal, and repeat until the paddock looks the way you
+    pictured. Then the horse dimension, because a door made of hay is worth knowing
+    about.
+</p>
+
+<p>
+    <strong>The pictures are entities and items, not art.</strong> Item stacks go through
+    the item renderer and the horseman and the cowboy are built as real entities and
+    drawn the way the roster's horses are - never added to a level, made once, kept.
+    Nothing has to be exported, nothing goes stale when a texture changes, and a resource
+    pack the player has on is reflected. That matters most for the case the page exists
+    for: recognising a villager you have never seen.
+</p>
+
+<h4>The flavour is not decoration</h4>
+
+<p>
+    &ldquo;Some horses are magic&rdquo; and &ldquo;breeds belong to biomes&rdquo; are the
+    two facts that make somebody go and look at a horse rather than walk past it, and
+    both read better as an aside than as a heading. The horseman and the cowboy are
+    written as a pair who built their posts side by side and are, the villages say,
+    married - which is flavour the code half-suggested already, since the two
+    workstations share a texture set on purpose.
+</p>
+
+<h4>One number I did not write down</h4>
+
+<p>
+    The brief said a gene carrot gives &ldquo;a 25% chance of getting that gene&rdquo;.
+    <strong>That is not what the code does.</strong> A Known Gene Splice sets the fed
+    parent's gamete outright, so that parent passes the gene on with certainty; what is
+    uncertain is whether the foal <em>shows</em> it, which depends on the other parent
+    and on whether the gene needs two copies. For a recessive against an unrelated mate
+    the visible rate lands near a quarter, which is very likely where the number came
+    from. The tab was written to the code rather than to the number, and
+    <a href="known-gaps.html#gap-145">gap 145</a> puts the choice back where it belongs:
+    a flat 25% roll is easier to explain and makes the carrot a gamble, at the cost of
+    the one real virtue the current design has, which is that you can plan a breeding
+    around it.
+</p>
+
+<h4>Copying costs time now</h4>
+
+<p>
+    A shelf copy is one iron ingot's smelt - 200 ticks - per rarity tier, so ten seconds
+    for a common gene and a minute for a mythic one. The progress rides on a
+    <code>ContainerData</code>, vanilla's furnace pattern, because the menu already syncs
+    those every tick and a progress bar that lags is worse than no bar. The work is ticked
+    <em>per open menu</em> rather than per block, which is what lets two players at one
+    shelf each copy their own gene onto their own book.
+</p>
+
+<h4>And the browser stays where you left it</h4>
+
+<p>
+    It was a fresh <code>Screen</code> every time the key was pressed, so it forgot
+    everything the moment you closed it - you came back to the top of the first tab
+    however deep you had been reading. The remembered position is now static state, which
+    is to say per session: the tab, both scroll positions, both search boxes, the sort,
+    the selections. Only the parts that name a <em>horse</em> are dropped, and only on
+    disconnect, so a UUID from one save can never select something in another.
+</p>
+
+<h4>Stables in mountains</h4>
+
+<p>
+    Reported against 0.3.2. The three stables were <code>beard_thin</code>, which lays a
+    skirt of material under a piece without clearing what is above it - so a rigid
+    86-block building projected onto a slope comes out with one end inside the hill. They
+    carve their whole bounding box now. What is <em>not</em> fixed is the other half of
+    the cause: <code>meadow</code> and <code>savanna_plateau</code> are in the biome tag
+    and are mountains in all but name, and no terrain adaptation makes a flat-bottomed
+    stable sit well on a 40-block slope (<a href="known-gaps.html#gap-147">gap 147</a>).
+</p>
+
 <h3 id="research-shelf-2026-09-09">A bookshelf that remembers genes, and a portal that finally notices its frame.</h3>
 
 <p>

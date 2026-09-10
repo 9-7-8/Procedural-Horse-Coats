@@ -36,6 +36,54 @@
     </p>
 </div>
 
+<h2 id="v0-3-4">0.3.4</h2>
+
+<p class="lede">
+    The mod finally tells you how to play it: a <strong>Getting Started</strong> tab that
+    opens first on a fresh install and walks the whole loop, with pictures.
+</p>
+
+<h3 id="v0-3-4-start">Getting started</h3>
+
+<p>
+    Thirteen sections in the order you need them &mdash; tame one, notice you need a mare
+    <em>and</em> a stallion, feed them both a golden carrot, take a gene off a horse with a
+    book, file it on a shelf, buy one from the horseman instead if you would rather, splice
+    it into a foal, and repeat. Then the hay portal, because a door made of hay is worth
+    knowing about.
+</p>
+
+<p>
+    The pictures are the game&rsquo;s own: item icons through the item renderer, and the
+    <strong>horseman and the cowboy drawn as live entities</strong>, so you can recognise
+    the villager you are looking for rather than read a sentence about his hat.
+</p>
+
+<h3 id="v0-3-4-rest">Also</h3>
+
+<ul>
+    <li><strong>The browser reopens where you left it</strong> &mdash; tab, scroll, search,
+        sort and selection, all of it. It used to come back to the top of the first tab
+        however deep you had been reading.</li>
+    <li><strong>Copying a gene on the shelf takes time</strong>: one iron ingot&rsquo;s
+        smelt per rarity tier, so about ten seconds for a common gene and a minute for a
+        mythic one. The arrow fills as it goes and the line underneath counts down.</li>
+    <li><strong>Stables stopped generating inside mountains.</strong> They carve their
+        whole footprint clear now instead of laying a thin skirt underneath. Needs a new
+        world &mdash; an already-generated stable will not move.</li>
+</ul>
+
+<div class="note">
+    <span class="label">One thing the tab does not say</span>
+    <p>
+        A gene carrot is often described as &ldquo;a 25% chance&rdquo;, and that is not
+        what the code does &mdash; it makes the fed parent pass the gene on
+        <em>with certainty</em>, and what is uncertain is whether the foal shows it. The
+        tab is written to the code. Which behaviour is actually wanted is
+        <a href="known-gaps.html#gap-145">gap 145</a>.
+    </p>
+</div>
+
 <h2 id="v0-3-3">0.3.3</h2>
 
 <p class="lede">

@@ -35,6 +35,41 @@
     </p>
 </div>
 
+<h2 id="getting-started">&sect;0-BG &mdash; A Getting Started tab, a copy that takes time, and stables out of the mountains (2026-09-09, NOT looked at)</h2>
+
+<ul>
+    <li><strong>Open the browser on a fresh install.</strong> It should land on
+        <b>Getting started</b>, once. Switch away and it should never open there
+        again &mdash; that is a client config (<code>tutorial.seen</code>), so set it
+        back to false to test the first-run path twice.</li>
+    <li><strong>Read the whole page.</strong> Thirteen sections, and the two things to
+        look at are the <b>pictures</b>: a horseman villager and a cowboy, drawn as
+        live entities. <b>The horseman is the risky one</b> &mdash; if he renders in
+        plain villager clothes with no profession, the picture is worthless and should
+        become the Horseman's Table block instead
+        (<a href="known-gaps.html#gap-146">gap 146</a>). Check the scroll bar matches
+        the content, too; its length is computed from the page's own height.</li>
+    <li><strong>Close the browser mid-page and reopen it.</strong> It should come back
+        to the same tab, the same scroll position, the same selected gene, the same
+        search text and the same sort. That is now session-wide state; only the
+        horse-specific selections are dropped, and only on disconnect.</li>
+    <li><strong>Copy a gene on the shelf and watch the bar.</strong> The arrow between
+        the book and the result fills up, and the line underneath counts down in
+        seconds. A common gene is about ten seconds and a mythic one about a minute
+        &mdash; one iron ingot's smelt per rarity tier. Pull the book out mid-copy and
+        progress should reset to zero rather than pause.</li>
+    <li><strong>Two players at one shelf</strong> should each be able to copy their own
+        gene onto their own book: the work is ticked per open menu, not per block.
+        Untested and worth one look if anybody has a second client.</li>
+    <li><strong>Find a generated stable.</strong> They were turning up buried in
+        hillsides; the three structures now carve their whole bounding box clear
+        instead of laying a thin skirt underneath
+        (<a href="known-gaps.html#gap-147">gap 147</a>). <b>This needs a new world</b> -
+        an already-generated stable will not move. If they still sit badly, the next
+        thing to try is dropping <code>meadow</code> and <code>savanna_plateau</code>
+        from the biome tag, since those are mountains in all but name.</li>
+</ul>
+
 <h2 id="research-shelf">&sect;0-BF &mdash; The Equine Research Shelf, and three smaller things (2026-09-09, NOT looked at)</h2>
 
 <div class="note">
