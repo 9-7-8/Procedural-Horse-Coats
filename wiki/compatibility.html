@@ -209,11 +209,11 @@
     <strong>not</strong> to touch our classes. It is to add a gene:
 </p>
 <ul>
-    <li>a <a href="gene-format.html">gene file</a> dropped in
+    <li>a <a href="making-a-gene.html#the-shape">gene file</a> dropped in
         <code>config/horsegenetics/genes/</code>, or shipped on the classpath in a mod's
         own <code>horsegenetics/genes/index.json</code> &mdash; no Java, no rebuild;</li>
     <li>or, for something the file format cannot express, a Java
-        <a href="modding.html"><code>Gene</code></a> registered from a mod constructor.</li>
+        <a href="making-a-gene.html#java-when"><code>Gene</code></a> registered from a mod constructor.</li>
 </ul>
 <p>
     Both interleave into the registry by <a href="genetics-model.html">priority</a>, so a
@@ -283,7 +283,7 @@
     <code>Genes.codeOrder()</code> loci with inherited per-allele epigenetics, a
     <a href="pipeline.html">three-phase paint pipeline</a>, a body-space projection so
     every pattern is a function of anatomy rather than of texture coordinates, and a
-    <a href="gene-format.html">data-driven gene format</a> that lets a pattern be written
+    <a href="making-a-gene.html#the-shape">data-driven gene format</a> that lets a pattern be written
     without Java. What it does <em>not</em> bring, and what most of the mods below have,
     is tack, carts, animation, riding feel, storage, and detailed models. Those are almost
     perfectly complementary. The conflicts are nearly all seam 3, and seam 3 is

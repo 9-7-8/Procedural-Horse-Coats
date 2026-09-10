@@ -116,7 +116,7 @@
 <tr><td><strong>Unknown Epigenetic Splice</strong></td><td>Every allele copy this parent passes on gets <strong>freshly rolled values</strong> instead of the parent copy&rsquo;s own. The alleles are untouched &mdash; the foal has the same genotype an un-fed pairing would give, only re-rolled bay-point heights / grey dapples / splash edges. The re-roll runs in a <em>second pass</em>, after every allele is locked, so it can never move a foal&rsquo;s genotype. (<code>CarrotEffect.EpigeneticSplice</code>.)</td></tr>
 <tr><td><strong>Stabilizer</strong></td><td>At every <strong>heterozygous</strong> locus, contribute the <em>earlier-declared</em> allele (the variant / dominant one) rather than the 50/50 coin. A no-op at a homozygous locus &mdash; which is the &ldquo;does nothing when the parent has no dominant allele&rdquo; the carrot is documented to have; the feed handler says so.</td></tr>
 <tr><td><strong>Magnifier</strong></td><td>The mirror &mdash; contribute the later-declared (baseline / recessive) copy. Same no-op rule.</td></tr>
-<tr><td><strong>Unknown Gene Splice</strong></td><td>Pick <strong>one random gene</strong> and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="gene-format.html">splice distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. The pool is <a href="#blacklist">filtered</a>: never the sex locus, and never a locus that could kill the foal or cost it hearts. (<code>CarrotEffect.GeneSplice</code>.)</td></tr>
+<tr><td><strong>Unknown Gene Splice</strong></td><td>Pick <strong>one random gene</strong> and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="making-a-gene.html#the-shape">splice distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. The pool is <a href="#blacklist">filtered</a>: never the sex locus, and never a locus that could kill the foal or cost it hearts. (<code>CarrotEffect.GeneSplice</code>.)</td></tr>
 </tbody>
 </table>
 </div>
@@ -286,7 +286,7 @@
     gene name an ingredient that <em>reads</em> as it. The recipe now requires
     exactly the four, and per-gene flavour lists are still unwritten &mdash; a
     <code>carrot.flavour</code> block exists in the
-    <a href="gene-format.html">gene format</a> and no built-in fills it. See
+    <a href="making-a-gene.html#the-shape">gene format</a> and no built-in fills it. See
     <a href="roadmap.html">the roadmap</a>.
 </p>
 
@@ -417,7 +417,7 @@
 <p>
     Everything above reads fields that no gene had before this pass (roadmap
     &sect;19). They are three defaults on <code>Gene</code> plus a spec format
-    bump &mdash; full shapes on <a href="gene-format.html">the gene format
+    bump &mdash; full shapes on <a href="making-a-gene.html#the-shape">the gene format
     page</a>:
 </p>
 
@@ -464,7 +464,7 @@
     <div class="seealso">
         <a href="items.html">Items &amp; recipes</a>
         <a href="breeding.html">Breeding &amp; pedigree</a>
-        <a href="gene-format.html">The gene file format</a>
+        <a href="making-a-gene.html#the-shape">The gene file format</a>
         <a href="verification.html">To be verified</a>
         <a href="roadmap.html">Roadmap</a>
     </div>

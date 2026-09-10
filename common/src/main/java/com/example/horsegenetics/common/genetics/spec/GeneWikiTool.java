@@ -788,7 +788,7 @@ public final class GeneWikiTool {
         sb.append("<section class=\"tab-panel\" data-tab=\"coding\">\n\n");
         sb.append("<h2 id=\"file\">The file</h2>\n\n");
         sb.append("<p>\n    <code>common/src/main/resources/horsegenetics/genes/").append(slug)
-                .append(".json</code> &mdash; a\n    <a href=\"gene-format.html\">data-driven gene</a>,"
+                .append(".json</code> &mdash; a\n    <a href=\"making-a-gene.html#the-shape\">data-driven gene</a>,"
                         + " not a Java class. It is listed in the\n    <code>index.json</code> beside"
                         + " it and registered by <code>Genes</code>' class\n    initialiser at"
                         + " startup.\n</p>\n\n");

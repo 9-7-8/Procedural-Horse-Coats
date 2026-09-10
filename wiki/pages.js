@@ -67,7 +67,7 @@ window.HG.pages = {
         {
             title: "For modders",
             items: [
-                { href: "modding.html", text: "Writing a gene", kind: "core", views: ["coding"] },
+                { href: "making-a-gene.html", text: "Making a gene", kind: "core", views: ["coding"] },
                 { href: "api-reference.html", text: "Class abstractions", kind: "core", views: ["coding"] },
                 { href: "horse-traits.html", text: "Trait & effect architecture", kind: "magical", views: ["coding"] }
             ]
@@ -79,10 +79,7 @@ window.HG.pages = {
                 { href: "horse-designer/index.html", text: "Horse designer", kind: "tool", views: ["gameplay","coding"] },
                 { href: "breed-designer/index.html", text: "Breed designer", kind: "tool", views: ["coding"] },
                 { href: "gene-lut.html?view=lab", text: "LUT lab", kind: "tool", views: ["gameplay","coding"] },
-                { href: "creating-a-gene.html", text: "Creating a gene", kind: "core", views: ["gameplay","coding"] },
-                { href: "gene-format.html", text: "Gene file format", kind: "tool", views: ["coding"] },
-                { href: "breed-format.html", text: "Breed file format", kind: "tool", views: ["coding"] },
-                { href: "gene-effects.html", text: "Gene effects", kind: "tool", views: ["coding"] }
+                { href: "breed-format.html", text: "Breed file format", kind: "tool", views: ["coding"] }
             ]
         },
         {

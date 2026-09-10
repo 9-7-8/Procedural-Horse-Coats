@@ -26,7 +26,7 @@
 
 <p>
     &ldquo;Gene&rdquo; below means anything in the registry &mdash; a hand-written class
-    or a <a href="gene-format.html">gene loaded from a JSON file</a>. A data-driven gene
+    or a <a href="making-a-gene.html#the-shape">gene loaded from a JSON file</a>. A data-driven gene
     goes through <code>SpecPainter</code>, which is an ordinary caller of the two hooks
     described here; nothing in this page is special-cased for it.
 </p>
@@ -627,7 +627,7 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
 <div class="note rule">
     <span class="label">Why a texel mask and not a part list</span>
     <p>
-        A data-driven gene&rsquo;s <a href="gene-effects.html#glow"><code>glow</code>
+        A data-driven gene&rsquo;s <a href="making-a-gene.html#glow"><code>glow</code>
         effect</a> names body <em>parts</em>, so the finest region it can light is a
         whole leg. <a href="gene-light.html">Light</a> needs to glow four
         <strong>hooves</strong> and two <strong>eyes</strong> &mdash; neither of which
@@ -686,7 +686,7 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
 </p>
 
 <p>
-    A <a href="gene-effects.html#glow"><code>glow</code></a> gene adds a second
+    A <a href="making-a-gene.html#glow"><code>glow</code></a> gene adds a second
     consumer: <code>getOrCreateEmissive</code> re-runs <code>compose</code>, copies
     the resulting colour on the gene's emissive parts into a fresh mask (transparent
     elsewhere), and caches it under <code>coat_glow/&lt;hash&gt;</code>.
@@ -1063,7 +1063,7 @@ double snipSize  = epi.get(SNIP_SIZE);</code></pre>
 <div class="page-foot">
     <div class="seealso">
         <a href="body-space.html">Body space &amp; regions</a>
-        <a href="modding.html">Writing a gene</a>
+        <a href="making-a-gene.html#java-when">Writing a gene</a>
         <a href="api-reference.html">Class abstractions</a>
         <a href="genetics-model.html">The genetics model</a>
     </div>

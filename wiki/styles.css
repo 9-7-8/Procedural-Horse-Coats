@@ -756,6 +756,10 @@ html[data-view="science"] {
 
 .tab-bar {
     display: flex;
+    /* A page may carry topical tabs of its own rather than the three views -
+       making-a-gene.html has eight - and eight buttons overflow a narrow
+       column. Wrapping never triggers on a three-tab bar at any width. */
+    flex-wrap: wrap;
     gap: 0.4rem;
     margin: 0 0 1.9rem 0;
     border-bottom: 1px solid var(--border);

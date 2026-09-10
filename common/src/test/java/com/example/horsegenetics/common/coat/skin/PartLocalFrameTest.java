@@ -131,7 +131,7 @@ class PartLocalFrameTest {
                 "the 60-degree trick is no longer the neck's own depth axis - worst residual "
                         + worst + " over " + n + " texels. Either the neck's geometry moved or "
                         + "local() is wrong; the eleven genes that used to hard-code this are "
-                        + "listed on wiki/gene-format.html#local-space.");
+                        + "listed on wiki/making-a-gene.html#local-space.");
 
         // The scale is the depth of the box, doubled - the trick measured in
         // body units and this measures in fractions of a 7-unit edge.

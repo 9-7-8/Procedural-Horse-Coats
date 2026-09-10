@@ -49,7 +49,7 @@ import java.util.Map;
  * - not a block id, and the translator decides what that means: which blocks
  * convert to what, and which it leaves alone. That judgement needs to know the
  * game's blocks, so it lives on the game side; the gene only says which of the
- * three a horse carries. See {@code wiki/gene-effects.html}'s {@code spread}
+ * three a horse carries. See {@code wiki/making-a-gene.html}'s {@code spread}
  * verb.
  */
 public final class VerdantGene implements Gene, AbilityContribution {

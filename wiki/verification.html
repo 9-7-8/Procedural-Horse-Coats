@@ -596,7 +596,7 @@
         exactly as they were, because nothing about the genotype was ever touched.</li>
     <li><strong>The <code>scale</code> effect verb.</strong> No shipped gene uses it, so
         this one needs a hand-written gene to test: an
-        <a href="gene-effects.html#attribute"><code>attribute</code></a> effect naming
+        <a href="making-a-gene.html#attribute"><code>attribute</code></a> effect naming
         <code>scale</code> should be inert with the setting off, and a modifier already
         standing should come <em>off</em> on the next reconcile rather than staying frozen
         on the horse.</li>
@@ -1091,7 +1091,7 @@
 <h3>The third pass, and the new page</h3>
 
 <ul>
-<li><a href="creating-a-gene.html">Creating a gene</a> is new and has <strong>two tab panels</strong>, which is the thing to check on it: the Gameplay tab should read as prose for a person and the Coding tab as a reference plus a paste-able prompt. Nobody has opened it in a browser.</li>
+<li><a href="making-a-gene.html#what">Creating a gene</a> is new and has <strong>two tab panels</strong>, which is the thing to check on it: the Gameplay tab should read as prose for a person and the Coding tab as a reference plus a paste-able prompt. Nobody has opened it in a browser.</li>
 <li><a href="gene-voided.html">Voided</a> is <strong>deterministic</strong> now - its lightness knob is gone, so every voided horse with the same markings should share one baked texture. Worth confirming two of them look identical rather than merely similar.</li>
 <li><a href="gene-circuit.html">Circuit</a>&rsquo;s core and <a href="gene-gudial.html">Gudial</a>&rsquo;s gradient are new per-horse colours: catch or spawn several and check the colours actually differ between lines and are <em>inherited</em> by foals.</li>
 <li><a href="gene-striped-mane-tail.html">Striped mane and tail</a> gained a coloured allele (<code>Smc/Smc</code>), which needs spawning - it will not turn up by accident.</li>
@@ -5459,9 +5459,9 @@
     A big multi-system pass &mdash; milking rules, shearing, the carrot family, the
     gene database and gene metadata. Nothing
     here has been seen in-game. Reference: <a href="carrots.html">the carrot
-    family</a>, <a href="gene-effects.html">gene effects</a> (the yield
+    family</a>, <a href="making-a-gene.html#block">gene effects</a> (the yield
     else-branch + the <code>full_health</code> flag),
-    <a href="gene-format.html">the gene format</a> (format&nbsp;3).
+    <a href="making-a-gene.html#the-shape">the gene format</a> (format&nbsp;3).
 </p>
 
 <h3>Determinism &mdash; the thing to check first</h3>
@@ -5973,7 +5973,7 @@ the <a href="session-log.html">session log</a>.</em></p>
     48 cases, <code>runServer</code> boots clean (<code>19 segments</code> then,
     <code>20</code> since the sex locus). Machinery:
     <a href="genetics-model.html#combinations">Genetics model</a>,
-    <a href="gene-format.html">the gene file format</a>,
+    <a href="making-a-gene.html#the-shape">the gene file format</a>,
     <a href="gene-matp.html">MATP</a>.
 </p>
 
@@ -6562,7 +6562,7 @@ the <a href="session-log.html">session log</a>.</em></p>
 <h3 id="effects">13. Gene <code>effects</code> &mdash; the Waterborn &amp; Suntouched genes</h3>
 
 <p>
-    New 2026-09-02, and the proof that the data-driven <a href="gene-effects.html">
+    New 2026-09-02, and the proof that the data-driven <a href="making-a-gene.html#block">
     effects</a> pipeline works in a running game. <strong>Waterborn and Suntouched
     ship loaded</strong> (classpath index in the NeoForge module) &mdash; boot log
     shows <code>[genes] loaded 2 data-driven gene(s)</code> / <code>13 segments</code>

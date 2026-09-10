@@ -792,7 +792,7 @@ horse. <code>plane</code> picks the two axes &mdash; <code>side</code> is the fl
 appears on <em>both</em> of them, which is what a marking drawn on a side view should do.
 <code>space: "body"</code> normalises the points over the horse, so a shape drawn for the
 adult lands in the same anatomical place on the foal. Full documentation, which is the source
-of truth, is on <a href="gene-format.html#path">the gene file format</a>.</p>
+of truth, is on <a href="making-a-gene.html#path">the gene file format</a>.</p>
 
 <p><strong>Points rather than a baked stencil</strong> was the owner's call from the previous
 session, and building it confirmed the reasoning: the shape stays procedural, stays legible in
@@ -889,7 +889,7 @@ counts it): value noise summed over
 <code>octaves</code> with <code>lacunarity</code>, <code>gain</code> and a domain
 <code>warp</code>, and a <code>shape</code> that reads the summed field as
 <code>fbm</code>, <code>ridged</code> or <code>billow</code>. It is documented on
-<a href="gene-format.html#fractal">the gene file format</a>, which is the source of truth
+<a href="making-a-gene.html#fractal">the gene file format</a>, which is the source of truth
 for it.</p>
 
 <p><strong>Two things in it are deliberately not the textbook recipe</strong>, and the
@@ -1230,7 +1230,7 @@ across its depth (low is the crest, which is the face the mane box sits on) and
 <code>axis: "Y"</code> is along its length, so a band there is a <em>collar square to the
 neck</em> rather than to the world &mdash; which is what ink scroll and wyrmwood sigils
 described all along. Details on <a href="body-space.html#local-frame">body space</a> and
-<a href="gene-format.html#local-space">the gene format</a>.</p>
+<a href="making-a-gene.html#local-space">the gene format</a>.</p>
 
 <p><strong>The old trick turns out to be exactly that coordinate.</strong> The fit is
 affine with a maximum residual of 0.0002 over the whole neck, which is what made the
@@ -1939,7 +1939,7 @@ nothing until a gradient chart turns them into a colour. &ldquo;Black&rdquo; and
 <a href="gene-lut.html">LUT locus</a> can hand a horse a chart whose black corner is
 violet. Such a horse has identical pigment everywhere and is no longer black anywhere.</p>
 
-<p>So <a href="gene-format.html">the format</a> gained <code>LUMA</code>, which thresholds
+<p>So <a href="making-a-gene.html#the-shape">the format</a> gained <code>LUMA</code>, which thresholds
 the <em>resolved</em> colour &mdash; what phase 2 got out of the chart, plus whatever the
 magical genes before this one painted. Magical genes only: the natural phase is what
 <em>decides</em> the pigment the chart is handed, and the overlay pass has already spent the
@@ -2096,8 +2096,8 @@ so everything an author actually knew (why the wavelength is 90, which two layer
 in that order, what the source description asked for and where the build knowingly does
 something else) used to go on a hand-written page and drift from the gene the first time
 either moved. It lives beside the layers now. See
-<a href="gene-format.html#header">the format</a> and
-<a href="creating-a-gene.html#prose">creating a gene</a>, which spells out which of the
+<a href="making-a-gene.html#header">the format</a> and
+<a href="making-a-gene.html#prose">creating a gene</a>, which spells out which of the
 three prose fields a sentence belongs in.</p>
 
 <p>Then <strong>thirty-two genes</strong> off the intake folder, in three waves as they
@@ -2120,7 +2120,7 @@ the first real use of the field and the reason it was added.</p>
 <li><strong><code>index.json</code> is hand-kept and nothing says so.</strong> A gene file
     dropped in the folder loads perfectly in a dev run and is <em>absent from a built
     jar</em>, because a jar has no directory to walk. That is now a
-    <a href="modding.html#contract-gene-file">contract</a> of its own next to the four-file
+    <a href="making-a-gene.html#contract-gene-file">contract</a> of its own next to the four-file
     ones.</li>
 <li><strong>Four things the format cannot do</strong>, learned one rejection at a time and
     all four recorded in the genes that met them: no arithmetic in a value, no addressing a
@@ -2338,11 +2338,11 @@ one.</li>
 
 <h3 id="creating-a-gene-2026-09-08">Built 2026-09-08: a &ldquo;Creating a gene&rdquo; page, written twice - once for a person and once for a model.</h3>
 
-<p>Owner-driven. <a href="creating-a-gene.html">The page</a> carries two tab panels rather than two pages, so the sidebar has one entry and a reader picks the register they want.</p>
+<p>Owner-driven. <a href="making-a-gene.html#what">The page</a> carries two tab panels rather than two pages, so the sidebar has one entry and a reader picks the register they want.</p>
 
 <ul>
 
-<li><strong>The Gameplay tab is about the part that is hard, which is not the format.</strong> <a href="gene-format.html">The gene file format</a> already documents every field; what it does not say is that you are not drawing, you are writing a rule that is true at every point on a horse and then finding out what it looks like. So the human tab is a decision table (what KIND of thing is this marking - region, countable marks, wandering lines, something periodic?), the argument for composing before inventing, and the traps in the order they actually catch people.</li>
+<li><strong>The Gameplay tab is about the part that is hard, which is not the format.</strong> <a href="making-a-gene.html#the-shape">The gene file format</a> already documents every field; what it does not say is that you are not drawing, you are writing a rule that is true at every point on a horse and then finding out what it looks like. So the human tab is a decision table (what KIND of thing is this marking - region, countable marks, wandering lines, something periodic?), the argument for composing before inventing, and the traps in the order they actually catch people.</li>
 
 <li><strong>The Coding tab ends in a paste-able prompt.</strong> Ten numbered rules that are not optional, the body-space extents, the part names, a full template, and the instruction to output JSON only - so an owner with a reference image and two sentences can hand the whole job to a model. Every rule in it is one this session learned the hard way: region-first-shape-last, width-under-spacing, PALETTE has walls, RAMP varies colour and not coverage, reversed smoothstep edges are a hard step, which PIGMENT channel actually discriminates, and the neck&rsquo;s two tilts with their calibrated constants.</li>
 
@@ -2410,7 +2410,7 @@ one.</li>
 
 <h3 id="gene-review-2026-09-08">Built 2026-09-08: the owner reviewed the whole registry gene by gene, and the review found more than the fixes did.</h3>
 
-<p>Owner-driven, roughly thirty notes taken while reading the gene pages, arriving as a running commentary rather than a list. Written up on each gene's page; the two engine changes are on <a href="gene-format.html#masks">the gene format</a>.</p>
+<p>Owner-driven, roughly thirty notes taken while reading the gene pages, arriving as a running commentary rather than a list. Written up on each gene's page; the two engine changes are on <a href="making-a-gene.html#masks">the gene format</a>.</p>
 
 <ul>
 
@@ -2436,7 +2436,7 @@ one.</li>
 
 <h3 id="gene-fixes-2026-09-08">Built 2026-09-08: twenty-four gene fixes, four new painters, one polygenic locus &mdash; and a mask bug that had been eating half of fifteen genes.</h3>
 
-<p>Owner-driven, a list of twenty-four notes taken from looking at the horses. Written up on each gene's own page; the vocabulary additions are on <a href="gene-format.html#masks">the gene format</a> and the cross-locus block on <a href="genetics-model.html#combinations">the genetics model</a>.</p>
+<p>Owner-driven, a list of twenty-four notes taken from looking at the horses. Written up on each gene's own page; the vocabulary additions are on <a href="making-a-gene.html#masks">the gene format</a> and the cross-locus block on <a href="genetics-model.html#combinations">the genetics model</a>.</p>
 
 <ul>
 
@@ -2573,7 +2573,7 @@ one.</li>
 
 
 
-<li><strong>The format grew before any gene was written, and that was the whole trick.</strong> Reading all seven source files first turned up perhaps a dozen shapes described over and over: countable spots, hollow rings, fine stipple, tapering strokes, a spiral, a colour running along an axis, a colour drawn per cell. Building those as <strong>five masks and two ops</strong> &mdash; <code>SPOTS</code>, <code>RINGS</code>, <code>SPECKLE</code>, <code>STROKES</code>, <code>SPIRAL</code>, <code>RAMP</code>, <code>PALETTE</code> &mdash; is what let eighty-four genes be data instead of eighty-four classes. See <a href="gene-format.html#masks">the format</a>.</li>
+<li><strong>The format grew before any gene was written, and that was the whole trick.</strong> Reading all seven source files first turned up perhaps a dozen shapes described over and over: countable spots, hollow rings, fine stipple, tapering strokes, a spiral, a colour running along an axis, a colour drawn per cell. Building those as <strong>five masks and two ops</strong> &mdash; <code>SPOTS</code>, <code>RINGS</code>, <code>SPECKLE</code>, <code>STROKES</code>, <code>SPIRAL</code>, <code>RAMP</code>, <code>PALETTE</code> &mdash; is what let eighty-four genes be data instead of eighty-four classes. See <a href="making-a-gene.html#masks">the format</a>.</li>
 
 <li><strong>Every colour op can now take a hue instead of a colour.</strong> The single most valuable addition, and the least obvious: <code>color</code> is a constant, and a constant cannot be the thing a <em>horse</em> drew for itself. <code>hue</code> is an ordinary number parameter, so it can point at a knob &mdash; and one knob is the difference between a gene that paints teal spots and a gene that paints spots of whatever colour this line of horses runs to. It is a negative sentinel rather than "is the key present", because the gene creator carries every parameter whether or not you touched it, and a presence test would preview one colour and export another.</li>
 

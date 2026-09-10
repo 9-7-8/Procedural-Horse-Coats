@@ -50,7 +50,7 @@
 
 <p>Imported from the magic-gene intake, 2026-09-08. A diamond is two triangle waves crossing, and the format cannot intersect two bands in one mask - so each is its own WAVES entry combined with MAX, which unions the two zigzags into a lattice. The source file expected a STROKES pass to outline them; strokes on top of a wave lattice came out as noise at this scale and were dropped.</p>
 
-<p>The neck chain is a band in the neck's own frame (`'space': 'local', 'axis': 'X'`), which is the crest side of it. It used to be the 90/77.94 saw-wave trick - the neck's geometry written out by hand in eleven gene files - and in this one that trick was in `part` space, where the amplitude is in normalised units, so the band was displaced clean off the horse and the chain painted nothing at all. See wiki/gene-format.html#local-space.</p>
+<p>The neck chain is a band in the neck's own frame (`'space': 'local', 'axis': 'X'`), which is the crest side of it. It used to be the 90/77.94 saw-wave trick - the neck's geometry written out by hand in eleven gene files - and in this one that trick was in `part` space, where the amplitude is in normalised units, so the band was displaced clean off the horse and the chain painted nothing at all. See wiki/making-a-gene.html#local-space.</p>
 
 <h2 id="inheritance">Crossing two of them</h2>
 
@@ -94,7 +94,7 @@
 
 <p>
     <code>common/src/main/resources/horsegenetics/genes/diamond_scutes.json</code> &mdash; a
-    <a href="gene-format.html">data-driven gene</a>, not a Java class. It is listed in the
+    <a href="making-a-gene.html#the-shape">data-driven gene</a>, not a Java class. It is listed in the
     <code>index.json</code> beside it and registered by <code>Genes</code>' class
     initialiser at startup.
 </p>

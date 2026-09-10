@@ -147,6 +147,6 @@ class GeneFilesTest {
                 "a WAVES amplitude far above 1 in a normalised space displaces the band clean off "
                         + "the part, so the mask selects nothing at all and does it silently. If "
                         + "you want a band that follows a pitched part, use space 'local' - see "
-                        + "wiki/gene-format.html#local-space.");
+                        + "wiki/making-a-gene.html#local-space.");
     }
 }

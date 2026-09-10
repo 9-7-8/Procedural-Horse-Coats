@@ -70,11 +70,10 @@ the same change as the code, and never copy it back into here.
 | The cowboy, the horseman, transfer papers, the barn | `wiki/villagers.html` |
 | Hay portals, the horse dimension, the pens | `wiki/horse-dimension.html` |
 | **Generated stables - and who made each building** | `wiki/stables.html` |
-| The data-driven gene file format (masks, ops, header) | `wiki/gene-format.html` |
 | The breed file format - a breed is JSON, not Java | `wiki/breed-format.html` |
-| The `effects` block - every verb, trigger, flag, and how to add one | `wiki/gene-effects.html` |
 | The wider (mostly unbuilt) trait / effect architecture | `wiki/horse-traits.html` |
-| Writing a gene; the class-by-class API reference | `wiki/modding.html`, `wiki/api-reference.html` |
+| **Making a gene - ALL of it.** Shapes, the file format, masks and ops, the `effects` block, the Java path, the prompt, what to re-bake | `wiki/making-a-gene.html` |
+| The class-by-class API reference | `wiki/api-reference.html` |
 | **Module split, packages, data flow, build setup, running the game** | `wiki/architecture.html` |
 | **NeoForge 26.1.2 API quirks** - read before touching an unfamiliar system | `wiki/api-notes.html` |
 | **Technique** - how to find things out here; traps between two pages | `wiki/coding-notes.html` |
@@ -144,7 +143,7 @@ Two rules about the backlog page, both learned the hard way:
 
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
 files each, and the game and the tools drift silently if you miss one.** The
-four lists are on `wiki/modding.html#contracts` - read it before you start, not
+four lists are on `wiki/making-a-gene.html#contracts` - read it before you start, not
 after.
 
 - **A gene or item page is three tabs** - `<section class="tab-panel"

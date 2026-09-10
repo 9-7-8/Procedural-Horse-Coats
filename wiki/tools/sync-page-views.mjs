@@ -43,7 +43,14 @@ function tabsOf(href) {
         if (tab) { found.add(tab[1]); }
     }
     if (!found.size) { return null; }
-    return ORDER.filter((t) => found.has(t));
+    const views = ORDER.filter((t) => found.has(t));
+    // A page may carry TOPICAL tabs instead of the wiki's three audience views -
+    // wiki/tabs.js gives any other data-tab its own button (making-a-gene.html is
+    // eight of them). Such a page is claiming nothing about who it is for, so its
+    // `views` is a hand-set editorial decision exactly as an untabbed page's is.
+    // Returning [] here instead would have hidden it from every view at once.
+    if (!views.length) { return null; }
+    return views;
 }
 
 const path = join(WIKI, "pages.js");

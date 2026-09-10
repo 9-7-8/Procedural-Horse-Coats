@@ -25,7 +25,7 @@
     slow drift of gold sparks as it stands or moves. Suntouched is a data-driven
     gene &mdash; a JSON file, not a Java class &mdash; and it is the
     <strong>worked example for the <code>glow</code>
-    <a href="gene-effects.html#glow">effect verb</a></strong>.
+    <a href="making-a-gene.html#glow">effect verb</a></strong>.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,7 +34,7 @@
 
 <p>
     The behaviour half is an <code>effects</code> block &mdash; two of the
-    <a href="gene-effects.html">six effect verbs</a>. <code>common/</code> parses it;
+    <a href="making-a-gene.html#block">six effect verbs</a>. <code>common/</code> parses it;
     the NeoForge translator and the client renderer run it.
 </p>
 
@@ -93,7 +93,7 @@
         <code>minecraft:glowing</code> only draws the entity outline through walls
         &mdash; it doesn&rsquo;t light anything and it isn&rsquo;t gold. Suntouched
         wants real illumination and a mane that reads as molten metal in a cave, so
-        it uses the <a href="gene-effects.html#glow"><code>glow</code></a> verb, whose
+        it uses the <a href="making-a-gene.html#glow"><code>glow</code></a> verb, whose
         two halves (a world light level, a set of full-bright coat parts) are exactly
         those two asks. The <code>mob_effect</code> verb is still there for auras like
         <code>dolphins_grace</code>; it just isn&rsquo;t the right tool for &ldquo;this
@@ -219,10 +219,10 @@
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="gene-effects.html#glow">glow verb reference</a>
+        <a href="making-a-gene.html#glow">glow verb reference</a>
         <a href="gene-waterborn.html">Waterborn (the other shipped gene)</a>
         <a href="horse-traits.html">Trait &amp; effect architecture</a>
-        <a href="gene-format.html">The gene file format</a>
+        <a href="making-a-gene.html#the-shape">The gene file format</a>
         <a href="verification.html#effects">What to check in-game</a>
     </div>
     Source: <code>common/src/main/resources/horsegenetics/example-genes/suntouched.json</code>

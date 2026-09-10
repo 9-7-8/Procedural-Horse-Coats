@@ -37,7 +37,7 @@
 <ul>
 <li>What a session built &rarr; <a href="session-log.html">session log</a>.</li>
 <li>A defect or an unchecked assumption &rarr; <a href="known-gaps.html">known gaps</a>.</li>
-<li>How a mask, op or header field behaves &rarr; <a href="gene-format.html">gene format</a>.</li>
+<li>How a mask, op or header field behaves &rarr; <a href="making-a-gene.html#the-shape">gene format</a>.</li>
 <li>An API quirk of this SDK &rarr; <a href="api-notes.html">API notes</a>.</li>
 <li>What the phases do &rarr; <a href="pipeline.html">the pipeline</a>.</li>
 </ul>
@@ -253,7 +253,7 @@
     <code>TEXELS_PER_UNIT</code> is 2, so anything under about half a body unit does not
     survive to the sheet. This is the commonest way a gene comes out blank and it never
     looks like a scale problem. It has a proper treatment on
-    <a href="gene-format.html#scale">the gene format page</a>; it is listed here only
+    <a href="making-a-gene.html#scale">the gene format page</a>; it is listed here only
     because it is the first thing to rule out when a new gene draws nothing.
 </p>
 
@@ -322,7 +322,7 @@
 <h2 id="mirrors">The mirrors, and how much of each is actually gated</h2>
 
 <p>
-    <a href="modding.html#contracts">The four-file contracts</a> say which files to
+    <a href="making-a-gene.html#contracts">The four-file contracts</a> say which files to
     edit together. This is the complementary question, which is easier to get wrong:
     <strong>of the hand-written JavaScript ports of <code>common/</code>, which ones
     does anything check?</strong> The answer has been &ldquo;fewer than it looks&rdquo;

@@ -384,7 +384,7 @@ public final class GeneAbilityHandler {
         int touched = 0;
         for (Mob mob : level.getEntitiesOfClass(Mob.class, box, Mob::isAlive)) {
             if (touched >= aura.maxTargets()) {
-                break; // every radius effect is capped - see wiki/gene-effects.html
+                break; // every radius effect is capped - see wiki/making-a-gene.html
             }
             if (mob == horse || !(mob instanceof Enemy)) {
                 continue;
@@ -756,7 +756,7 @@ public final class GeneAbilityHandler {
         int healed = 0;
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (healed >= h.maxTargets()) {
-                break; // every radius effect is capped - see wiki/gene-effects.html
+                break; // every radius effect is capped - see wiki/making-a-gene.html
             }
             if (!matchesHealTarget(h.target(), target, horse)) {
                 continue;

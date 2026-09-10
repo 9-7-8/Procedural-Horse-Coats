@@ -16,7 +16,7 @@ import java.util.Map;
  * shapes below needs no code at all. Drop the JSON in the genes folder, restart,
  * and the horse population carries it. A gene that <i>doesn't</i> fit still
  * writes a class against {@code Gene} - nothing here takes that away (see
- * {@code wiki/modding.html}).
+ * {@code wiki/making-a-gene.html}).
  *
  * <h2>Shape</h2>
  * A spec is a header (key, alleles, priority) plus two tables:

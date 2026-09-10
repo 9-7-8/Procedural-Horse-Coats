@@ -70,7 +70,7 @@
     <p>
         <strong>Resume at the canvas</strong> &mdash; item 1 below, and
         &sect;<a href="#designer">10</a> for what it is. Before writing any of it, read
-        <a href="gene-format.html#path">the <code>PATH</code> format</a>: the canvas is a
+        <a href="making-a-gene.html#path">the <code>PATH</code> format</a>: the canvas is a
         different <em>control</em> over an array that already exists and already works, so
         the job is entirely UI and touches no format, no engine and no parity fixture.
     </p>
@@ -446,7 +446,7 @@
 <h3>7.2 The rest of the effect architecture</h3>
 
 <p>
-    A first slice is built &mdash; eight <a href="gene-effects.html"><code>effects</code></a>
+    A first slice is built &mdash; eight <a href="making-a-gene.html#block"><code>effects</code></a>
     verbs with boolean <code>when</code> conditions, usable from a gene file and from a
     built-in Java gene through the same vocabulary. What is left is
     <strong>everything else on <a href="horse-traits.html">the trait &amp; effect
@@ -472,7 +472,7 @@
 
 <p>
     A gene that fits the format is already a <strong>JSON file</strong> &mdash; no
-    Java, no rebuild (<a href="gene-format.html">the format</a>,
+    Java, no rebuild (<a href="making-a-gene.html#the-shape">the format</a>,
     <a href="gene-creator/index.html">the creator</a>). That covers the common case, so
     this is not urgent; it pays for itself on the next hand-written gene, and there are
     a lot of those still to come (&sect;&sect;<a href="#natural-genes">10</a>&ndash;<a href="#magical-genes">12</a>).
@@ -528,7 +528,7 @@
 
 <p class="muted">
     The <strong>allele rules</strong> and the <strong>contract</strong> a modder must
-    honour are already live on <a href="modding.html">Writing a gene</a>. One thing a
+    honour are already live on <a href="making-a-gene.html#java-when">Writing a gene</a>. One thing a
     third-party gene still stresses: <code>CoatTextureId</code> encodes the whole
     genotype into an <code>Identifier</code> path, so more genes means longer paths
     &mdash; see &sect;<a href="#scale">21</a>.
@@ -559,7 +559,7 @@
         lacunarity, gain, a domain warp, and a <code>shape</code> that reads the summed
         field as <code>fbm</code>, <code>ridged</code> or <code>billow</code>. Peacock
         and laced tobiano have their primitive. It is documented on
-        <a href="gene-format.html#fractal">the gene file format</a> &mdash; including
+        <a href="making-a-gene.html#fractal">the gene file format</a> &mdash; including
         why <code>octaves</code> is safe to turn, which is the one thing about it that
         is not the textbook recipe.</li>
     <li><strong>The pipeline already has the scalar channel</strong> &mdash; this entry
@@ -577,7 +577,7 @@
         extruded through the horse; <code>curve</code> smooths them with a spline that
         passes through every point, because the creator is going to draw those points as
         draggable handles. Documented on
-        <a href="gene-format.html#path">the gene file format</a>, including the trap that
+        <a href="making-a-gene.html#path">the gene file format</a>, including the trap that
         <code>body</code> space runs to the ear tips so the topline is 0.62.
         <strong>The format is settled and the engine is done, both sides.</strong></li>
     <li><strong>What is left is the drawing surface itself.</strong> The creator edits a
@@ -654,7 +654,7 @@
 <p class="muted">
     The constraint that does not move: it has to keep working from
     <code>file://</code>. That is why every script is a classic one and every asset is
-    inlined &mdash; see <a href="gene-format.html">the format</a>. A UI framework that
+    inlined &mdash; see <a href="making-a-gene.html#the-shape">the format</a>. A UI framework that
     needs a bundler or a dev server is out.
 </p>
 
@@ -914,7 +914,7 @@
 
 <p>
     A family that changes what a horse <em>does</em> rather than how it looks, riding
-    the <a href="gene-effects.html"><code>effects</code></a> path plus whatever new verbs
+    the <a href="making-a-gene.html#block"><code>effects</code></a> path plus whatever new verbs
     each needs. Open-ended and deliberately silly in places; the owner wants a batch.
 </p>
 
@@ -2017,7 +2017,7 @@
         a real, famous pattern that genuinely works that way; the capability exists for
         the built-ins and is not a recommended pattern. <strong>A gene file can reach it
         now</strong> (2026-09-08) through
-        <a href="gene-format.html#needs"><code>needs</code></a>, which
+        <a href="making-a-gene.html#needs"><code>needs</code></a>, which
         <a href="gene-accretion.html">accretion</a> uses to split &ldquo;is there a pale
         field, and what colour&rdquo; from &ldquo;which half of the horse&rdquo;. That
         does not change the advice: it makes the discouraged thing <em>possible</em> from
@@ -2029,7 +2029,7 @@
         <a href="philosophy.html">Philosophy &mdash; the why</a>
         <a href="verification.html">To be verified</a>
         <a href="genetics-model.html">The genetics model</a>
-        <a href="modding.html">Writing a gene</a>
+        <a href="making-a-gene.html#java-when">Writing a gene</a>
     </div>
     When something here ships, write it up on its own page and
     <strong>delete it from this one</strong>. A section marked shipped is a second

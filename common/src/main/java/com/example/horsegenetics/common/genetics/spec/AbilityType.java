@@ -28,7 +28,7 @@ import java.util.Map;
  *   <li>a branch in the NeoForge translator ({@code server/GeneAbilityHandler}
  *       for tick/triggered effects, {@code server/GeneYieldHandler} for
  *       interaction effects);</li>
- *   <li>a section in {@code wiki/gene-effects.html}.</li>
+ *   <li>a section in {@code wiki/making-a-gene.html}.</li>
  * </ol>
  *
  * <p>This class also owns the two vocabularies <b>shared by every effect</b>:
@@ -204,7 +204,7 @@ public final class AbilityType {
         return type;
     }
 
-    /** Every registered effect type, in declaration order - what {@code wiki/gene-effects.html} lists. */
+    /** Every registered effect type, in declaration order - what {@code wiki/making-a-gene.html} lists. */
     public static Collection<AbilityType> all() {
         return BY_NAME.values();
     }

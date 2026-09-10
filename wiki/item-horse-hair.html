@@ -103,7 +103,7 @@
     mod-wide rule for every time-gated action. The gate is a stored game-time stamp under
     the key <code>"shear"</code> on <code>data/HorseCooldownsAttachment</code> &mdash; a
     plain <code>Map&lt;String,&nbsp;Long&gt;</code> on the horse, shared with the
-    <a href="gene-effects.html"><code>yield</code></a> verb&rsquo;s per-gene cooldowns
+    <a href="making-a-gene.html#block"><code>yield</code></a> verb&rsquo;s per-gene cooldowns
     (<code>"yield:&lt;geneKey&gt;"</code>). Because it is stored on the horse rather than
     in a static map, it survives a reload and cannot leak between worlds.
 </p>

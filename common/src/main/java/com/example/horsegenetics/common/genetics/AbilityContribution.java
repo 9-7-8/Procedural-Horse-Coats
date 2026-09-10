@@ -22,7 +22,7 @@ import java.util.List;
  * choice, and the alternative (a second vocabulary for built-ins) was worse in
  * every direction: the NeoForge translator would have had to be written twice,
  * a behaviour available to a Java gene would silently not be available to a gene
- * file, and {@code wiki/gene-effects.html} would have stopped being the single
+ * file, and {@code wiki/making-a-gene.html} would have stopped being the single
  * description of what a gene can do. Sharing the vocabulary means a new verb
  * lands once and both kinds of gene get it.
  *

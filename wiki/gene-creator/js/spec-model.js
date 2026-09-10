@@ -14,7 +14,7 @@ window.HG = window.HG || {};
   // The creator authors a two-allele gene with ONE visible outcome plus a wild
   // type. That is what its single layer list can describe, and saying so out
   // loud is better than pretending otherwise: the format allows any number of
-  // alleles and any number of outcomes (wiki/gene-format.html), and a gene that
+  // alleles and any number of outcomes (wiki/making-a-gene.html), and a gene that
   // needs them is hand-edited JSON for now.
   //
   // visible(spec) is the outcome the forms edit; wild(spec) is the silent one.

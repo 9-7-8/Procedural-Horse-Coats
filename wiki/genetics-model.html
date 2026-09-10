@@ -46,7 +46,7 @@
 <tr><td><code>GeneRarity</code></td><td>Six tiers. <code>Gene.rarity()</code> (default <code>UNCOMMON</code>), <code>hasGeneCarrot()</code> and <code>spliceTable()</code> are the &sect;19 metadata the carrot economy and the gene database read.</td></tr>
 <tr><td><code>Genes</code></td><td>The registry. Three orderings: <code>codeOrder()</code>, <code>naturalOrder()</code>, <code>magicalOrder()</code>.</td></tr>
 <tr><td><code>GenotypeCatalog</code></td><td>Every <em>visually distinct</em> genotype the registry can produce, in a stable order.</td></tr>
-<tr><td><code>GeneSpec</code> / <code>SpecGene</code></td><td>A gene described as <a href="gene-format.html">a JSON file</a> rather than a class, and the <code>Gene</code> that answers everything from it. Indistinguishable from a hand-written gene everywhere below this table.</td></tr>
+<tr><td><code>GeneSpec</code> / <code>SpecGene</code></td><td>A gene described as <a href="making-a-gene.html#the-shape">a JSON file</a> rather than a class, and the <code>Gene</code> that answers everything from it. Indistinguishable from a hand-written gene everywhere below this table.</td></tr>
 </tbody>
 </table>
 </div>
@@ -74,7 +74,7 @@
     <code>Blupnk</code> &mdash; not single letters. The <code>=</code>,
     <code>/</code> and <code>-</code> separators (and the gene key, which
     contains none of them) keep that unambiguous. The forward-looking rule for
-    third-party genes is stricter: <a href="modding.html#alleles">alphanumeric
+    third-party genes is stricter: <a href="making-a-gene.html#alleles">alphanumeric
     tokens, 1&ndash;128 characters, wild type named <code>n</code></a>.
 </p>
 
@@ -222,7 +222,7 @@ public Expression expressionOf(AllelePair pair) {
 
 <p>
     <strong>A data-driven gene can do this too now.</strong> An expression in a
-    <a href="gene-format.html#needs">gene file</a> may carry a <code>needs</code> block
+    <a href="making-a-gene.html#needs">gene file</a> may carry a <code>needs</code> block
     naming another locus and a copy count, and <code>SpecGene</code> implements
     <code>expressionIn</code> and <code>coatDependsOn</code> off it. That is the whole of
     the addition: no new concept, just a way to reach the hook the leopard complex has
@@ -819,7 +819,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     <code>codeOrder()</code>, each gene&rsquo;s allele list and each gene&rsquo;s
     expression table, so registering a gene widens it on its own &mdash; the catalogue is
     built lazily and thrown away whenever the registry changes, which is what makes a
-    <a href="gene-format.html">drop-in gene</a> show up in the catalogue without
+    <a href="making-a-gene.html#the-shape">drop-in gene</a> show up in the catalogue without
     anything else being told about it.
 </p>
 
@@ -868,7 +868,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
         <a href="breeding.html">Breeding &amp; pedigree</a>
         <a href="pipeline.html">Three-phase pipeline</a>
         <a href="api-reference.html">Class abstractions</a>
-        <a href="modding.html">Writing a gene</a>
+        <a href="making-a-gene.html#java-when">Writing a gene</a>
     </div>
     Source: <code>common/src/main/java/com/example/horsegenetics/common/genetics/</code>
 </div>
