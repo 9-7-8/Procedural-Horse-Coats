@@ -72,6 +72,18 @@ public final class ModBlocks {
     public static final DeferredBlock<net.minecraft.world.level.block.Block> COWBOY_HITCH =
             BLOCKS.registerSimpleBlock("cowboy_hitch", ModBlocks::workPost);
 
+    /**
+     * The <b>Equine Research Shelf</b> - a bookshelf that files research papers
+     * and copies them onto blank books. See {@link EquineResearchShelfBlock}.
+     * Properties are a full copy of vanilla's bookshelf, because it is one:
+     * same hardness, same wood sound, same flammability, and the shelf's own
+     * {@code getEnchantPowerBonus} keeps it feeding an enchanting table.
+     */
+    public static final DeferredBlock<EquineResearchShelfBlock> RESEARCH_SHELF = BLOCKS.registerBlock(
+            "equine_research_shelf",
+            EquineResearchShelfBlock::new,
+            EquineResearchShelfBlock::shelfProperties);
+
     /** Shared properties: both posts are plain, breakable, flammable wood. */
     private static BlockBehaviour.Properties workPost() {
         return BlockBehaviour.Properties.of()

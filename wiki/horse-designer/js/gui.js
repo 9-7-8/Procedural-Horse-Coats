@@ -33,8 +33,13 @@ window.HG = window.HG || {};
   var LIST_TOP = 40;
   var ALLELE_W = 38;
   var REMOVE_W = 14;
-  var RIGHT_W = 96;
-  var RIGHT_STEP = 22;
+  var RIGHT_W = 128;      // was 96 - several labels were wider than the button
+  var RIGHT_STEP = 24;    // 20-high buttons with a 4px gutter (was 22, i.e. 2px)
+  var RIGHT_STEP_MIN = 20;    // the tightest gutter, i.e. buttons touching
+  var RIGHT_ROWS = 7;     // Age, Sex, Breed, Randomize, Add, Rnd health, Clear
+  var BLURB_W = 176;      // the hover blurb panel - see drawGeneBlurb
+  var BLURB_LINE_H = 10;
+  var BLURB_PAD = 5;
   var DD_ROW_H = 12;
   var DD_VISIBLE = 8;
   var DD_W = 76;
@@ -96,6 +101,15 @@ window.HG = window.HG || {};
     function listWidth() { return Math.max(150, Math.min(240, vw - RIGHT_W - 130)); }
     function listBottom() { return vh - 44; }
     function rightX() { return vw - RIGHT_W - 8; }
+    // The group pinned to the bottom of the right column, and the gutter the
+    // top group gets. Both verbatim from CustomHorseSpawnScreen - see
+    // bottomStackTop() / rightStep() there for why the spacing can give.
+    function bottomStackTop() { return vh - 26 - 3 * RIGHT_STEP; }
+    function rightStep() {
+      var available = bottomStackTop() - 8 - (LIST_TOP + 4);
+      var fits = Math.floor((available - 20) / (RIGHT_ROWS - 1));
+      return Math.max(RIGHT_STEP_MIN, Math.min(RIGHT_STEP, fits));
+    }
     function previewLeft() { return LIST_X + listWidth() + 8; }
     function previewRight() { return rightX() - 8; }
     function visibleRows() { return Math.max(1, Math.floor((listBottom() - LIST_TOP) / ROW_H)); }
@@ -118,12 +132,26 @@ window.HG = window.HG || {};
       }
     }
 
-    /** The gene index under a point, or -1. Rows are addressed through the view. */
-    function rowAt(mx, my) {
+    /**
+     * The <b>view slot</b> under a point, or -1 - i.e. which drawn row, which is
+     * what positions anything anchored to a row. This is what the screen's
+     * rowAt() returns; rowAt() here returns the gene index instead, because the
+     * screen's rows carry their own gene and these are bare indices into
+     * genes[]. Keeping both named separately is the point: they differ whenever
+     * a family filter is on, and confusing them puts a panel beside the wrong
+     * row.
+     */
+    function rowSlotAt(mx, my) {
       if (mx < LIST_X - 4 || mx > LIST_X + listWidth()
         || my < LIST_TOP || my >= LIST_TOP + visibleRows() * ROW_H) return -1;
       var k = scroll + Math.floor((my - LIST_TOP) / ROW_H);
-      return k < view.length ? view[k] : -1;
+      return k < view.length ? k : -1;
+    }
+
+    /** The gene index under a point, or -1. Rows are addressed through the view. */
+    function rowAt(mx, my) {
+      var k = rowSlotAt(mx, my);
+      return k < 0 ? -1 : view[k];
     }
 
     /** Where the horse should be framed, in CSS pixels - the screen's preview box. */
@@ -246,6 +274,10 @@ window.HG = window.HG || {};
       drawRows(hovered);
       drawRightColumn();
       drawGenomeLine();
+      // Last but one, so it sits over the preview and the genome line - but not
+      // over an open dropdown, which is the thing you are actually pointing at.
+      // (hovered is already -1 while a dropdown is open.)
+      if (hovered >= 0) drawGeneBlurb(genes[hovered], rowSlotAt(mouse.x, mouse.y));
       if (dd) drawDropdown();
     }
 
@@ -400,10 +432,61 @@ window.HG = window.HG || {};
       };
     }
 
+    /**
+     * What this gene does, while you are pointing at it - the screen's
+     * drawGeneBlurb, fill for fill. It sits to the right of the list, which is
+     * empty space on both, and is pushed back inside the window rather than
+     * being allowed to run off the edge. A gene whose description is empty
+     * draws no panel at all: Gene.description() is documented as possibly
+     * empty, and an empty box is worse than nothing.
+     */
+    function drawGeneBlurb(gene, hoveredIndex) {
+      var blurb = gene.description;
+      if (!blurb) return;
+      var lines = wrap(blurb, BLURB_W - 2 * BLURB_PAD);
+
+      var h = BLURB_PAD * 2 + BLURB_LINE_H + 2 + lines.length * BLURB_LINE_H;
+      var x = LIST_X + listWidth() + 6;
+      var y = LIST_TOP + (hoveredIndex - scroll) * ROW_H - 2;
+      x = Math.max(4, Math.min(x, vw - BLURB_W - 4));
+      y = Math.max(4, Math.min(y, vh - h - 4));
+
+      fill(x - 1, y - 1, x + BLURB_W + 1, y + h + 1, "rgba(14,14,22,0.94)");
+      fill(x - 1, y - 1, x + BLURB_W + 1, y, "#5A6478");
+      fitted(gene.name, x + BLURB_PAD, y + BLURB_PAD, BLURB_W - 2 * BLURB_PAD, "#FFFFFF");
+      var ty = y + BLURB_PAD + BLURB_LINE_H + 2;
+      for (var i = 0; i < lines.length; i++) {
+        text(lines[i], x + BLURB_PAD, ty, "#C0C4D0");
+        ty += BLURB_LINE_H;
+      }
+    }
+
+    /**
+     * Greedy word wrap to a pixel width - the screen's wrap(). A single word
+     * longer than the line is left long rather than broken mid-word.
+     */
+    function wrap(s, maxW) {
+      var lines = [], line = "";
+      var words = s.split(" ");
+      for (var i = 0; i < words.length; i++) {
+        if (!words[i]) continue;
+        var candidate = line ? line + " " + words[i] : words[i];
+        if (widthOf(candidate) <= maxW || !line) {
+          line = candidate;
+        } else {
+          lines.push(line);
+          line = words[i];
+        }
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
     function drawRightColumn() {
       var rx = rightX();
       var ry = LIST_TOP + 4;
-      var step = function () { ry += RIGHT_STEP; };
+      var rs = rightStep();
+      var step = function () { ry += rs; };
 
       button(rx, ry, RIGHT_W, 20, state.baby ? "Age: Foal" : "Age: Adult",
         function () { opts.edit("setBaby", !state.baby); });
@@ -411,8 +494,9 @@ window.HG = window.HG || {};
       button(rx, ry, RIGHT_W, 20, state.female ? "Sex: Mare" : "Sex: Stallion",
         function () { opts.edit("setSex", !state.female); });
       step();
+      // No fixed character cut: button() fits its label to the width, which is
+      // what the screen's truncate() now does too.
       var breedName = breeds[state.breedIndex] || "(none)";
-      if (breedName.length > 12) breedName = breedName.slice(0, 11) + "…";
       var by = ry;
       button(rx, ry, RIGHT_W, 20, "Breed: " + breedName + " ▾", function () {
         dd = {
@@ -443,17 +527,17 @@ window.HG = window.HG || {};
       // Where the screen has Spawn / Cancel there is nothing to spawn - the
       // horse is already standing in the field. These are the browser's own,
       // and the only controls here with no counterpart in game.
-      button(rx, vh - 92, RIGHT_W, 20, "Reroll name",
+      button(rx, bottomStackTop(), RIGHT_W, 20, "Reroll name",
         function () { opts.edit("rerollName", 3); }, true);
       // Export and Import share a row - two halves of one idea, and the column
       // has no space to spare. They sit in the slot the screen gives Copy horse
       // and Paste horse, which write the same format to the clipboard.
       var halfW = (RIGHT_W - 4) / 2;
-      button(rx, vh - 70, halfW, 20, "Export", function () { opts.exportJson(); }, true);
-      button(rx + halfW + 4, vh - 70, halfW, 20, "Import", function () { opts.importJson(); }, true);
-      button(rx, vh - 48, RIGHT_W, 20, state.wander ? "Wander: on" : "Wander: off",
+      button(rx, bottomStackTop() + RIGHT_STEP, halfW, 20, "Export", function () { opts.exportJson(); }, true);
+      button(rx + halfW + 4, bottomStackTop() + RIGHT_STEP, halfW, 20, "Import", function () { opts.importJson(); }, true);
+      button(rx, bottomStackTop() + 2 * RIGHT_STEP, RIGHT_W, 20, state.wander ? "Wander: on" : "Wander: off",
         function () { opts.toggleWander(); }, true);
-      button(rx, vh - 26, RIGHT_W, 20, "Reset view", function () { opts.resetView(); }, true);
+      button(rx, bottomStackTop() + 3 * RIGHT_STEP, RIGHT_W, 20, "Reset view", function () { opts.resetView(); }, true);
     }
 
     function drawGenomeLine() {

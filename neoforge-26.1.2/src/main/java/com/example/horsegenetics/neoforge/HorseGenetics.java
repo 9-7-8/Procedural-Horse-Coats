@@ -36,11 +36,11 @@ public final class HorseGenetics {
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        com.example.horsegenetics.neoforge.menu.ModMenus.register(modEventBus);
         ModItems.register(modEventBus);
         com.example.horsegenetics.neoforge.entity.ModEntities.register(modEventBus);
         com.example.horsegenetics.neoforge.village.ModPoiTypes.register(modEventBus);
         com.example.horsegenetics.neoforge.village.ModVillagerProfessions.register(modEventBus);
-        com.example.horsegenetics.neoforge.menu.ModMenus.register(modEventBus);
         com.example.horsegenetics.neoforge.server.recipe.ModRecipes.register(modEventBus);
         com.example.horsegenetics.neoforge.data.loot.ModLootModifiers.register(modEventBus);
         com.example.horsegenetics.neoforge.data.loot.ModLootFunctions.register(modEventBus);

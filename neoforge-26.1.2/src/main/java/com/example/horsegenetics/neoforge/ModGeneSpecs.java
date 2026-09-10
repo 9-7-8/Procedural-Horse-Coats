@@ -66,21 +66,29 @@ public final class ModGeneSpecs {
         Path dir = FMLPaths.CONFIGDIR.get().resolve(FOLDER);
         ensureFolder(dir);
 
-        int before = Genes.loaded().size();
+        // Reading this triggers Genes' class initialiser, which is what loads
+        // the gene files shipped in the jar. So `shipped` is the count of those,
+        // and everything loadAndRegister adds on top is a player's own.
+        int shipped = Genes.loaded().size();
         List<String> errors = GeneSpecLoader.loadAndRegister(dir);
-        int added = Genes.loaded().size() - before;
+        int added = Genes.loaded().size() - shipped;
 
         for (String error : errors) {
             HorseGenetics.LOGGER.error("[genes] {}", error);
         }
+        // Said every launch, not only when a drop-in was found. It is two lines,
+        // and it is the first thing worth knowing from a log somebody pasted:
+        // how many genes this build has, and therefore what shape a genotype
+        // code from it is.
+        HorseGenetics.LOGGER.info("[genes] {} shipped gene file(s), {} dropped in from {}",
+                shipped, added, dir);
+        HorseGenetics.LOGGER.info("[genes] the genotype code has {} segments", Genes.codeOrder().size());
         if (added > 0) {
             StringBuilder names = new StringBuilder();
             for (SpecGene gene : Genes.loaded()) {
                 names.append(names.isEmpty() ? "" : ", ").append(gene.key());
             }
-            HorseGenetics.LOGGER.info("[genes] loaded {} data-driven gene(s): {} "
-                    + "(shipped on the classpath and/or dropped in {})", added, names, dir);
-            HorseGenetics.LOGGER.info("[genes] the genotype code now has {} segments", Genes.codeOrder().size());
+            HorseGenetics.LOGGER.info("[genes] data-driven genes: {}", names);
         }
         return added;
     }

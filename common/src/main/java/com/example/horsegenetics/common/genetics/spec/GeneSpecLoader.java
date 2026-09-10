@@ -152,9 +152,29 @@ public final class GeneSpecLoader {
         return List.copyOf(errors);
     }
 
-    /** The whole job: built-in gene files, then the drop-in folder. */
+    /**
+     * <b>The drop-in folder only.</b> The gene files shipped on the classpath
+     * are already registered by the time anybody can call this - {@code Genes}
+     * loads them from its own class initialiser, deliberately, so that no
+     * caller can read {@code codeOrder()} and get a shorter answer than the one
+     * the genotype code is written against.
+     *
+     * <p>This used to register {@code fromClasspath().merge(...)}, which re-read
+     * those same files and handed every one of them to {@code Genes.register} a
+     * second time. Each threw, and the caller logged each throw at ERROR: a
+     * normal launch printed <b>one "a gene is already registered" line per
+     * shipped gene file</b> - 121 of them in 0.3.2, before the game had finished
+     * loading. Nothing was actually wrong (the first registration is the one
+     * that counts, so the registry was always correct), which is the bad part:
+     * it trained the log's reader to scroll past a wall of red, and a real
+     * collision would have been sitting in the middle of it.
+     *
+     * <p>A drop-in whose key collides with a shipped gene still throws and is
+     * still reported, because that one <i>is</i> a mistake somebody needs to
+     * hear about.
+     */
     public static List<String> loadAndRegister(Path dropInDirectory) {
-        return register(fromClasspath().merge(fromDirectory(dropInDirectory)));
+        return register(fromDirectory(dropInDirectory));
     }
 
     private static String readResource(String resource) {

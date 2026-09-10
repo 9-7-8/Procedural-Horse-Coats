@@ -5,36 +5,59 @@
   "phase": "magical",
   "priority": 210,
   "alleles": [
-    { "token": "Sntch", "label": "Suntouched (Sntch)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "Sntch",
+      "label": "Suntouched (Sntch)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "expressions": [
     {
       "id": "suntouched",
       "name": "Suntouched",
       "description": "The mane and tail burn molten gold, bright enough to read by in the dark, and the horse casts light on the ground around it as it moves. A haze of gold dust drifts off its body.",
-      "when": [ "Sntch/Sntch", "Sntch/n" ],
+      "when": [
+        "Sntch/Sntch",
+        "Sntch/n"
+      ],
       "layers": [
         {
           "name": "molten-gold glow through the mane and tail",
           "masks": [
-            { "type": "PARTS", "parts": [ "HAIR" ] }
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#ffcf47", "strength": 88, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffcf47",
+            "strength": 88,
+            "opacity": 100
+          }
         }
       ],
       "effects": [
         {
           "type": "glow",
           "light": 12,
-          "parts": [ "HAIR" ]
+          "parts": [
+            "HAIR"
+          ]
         },
         {
           "type": "emitter",
           "kind": "particle",
           "shape": "point",
           "anchor": "body",
-          "trigger": { "interval": 6 },
+          "trigger": {
+            "interval": 6
+          },
           "particle": "minecraft:dust",
           "color": "#ffcf47",
           "chance": 0.35
@@ -50,7 +73,8 @@
   ],
   "founders": {
     "Sntch/Sntch": 0.0061035,
-    "Sntch/n": 1.5502930,
+    "Sntch/n": 1.550293,
     "n/n": 98.4436035
-  }
+  },
+  "blurb": "A horse lit from within - molten-gold mane and tail that stay bright in the dark, and a body that casts light like a torch. It sheds a slow drift of gold sparks as it stands or moves."
 }

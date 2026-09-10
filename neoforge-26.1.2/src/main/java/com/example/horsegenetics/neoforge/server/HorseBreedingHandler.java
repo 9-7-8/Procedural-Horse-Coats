@@ -20,6 +20,8 @@ import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
 import com.example.horsegenetics.common.name.HorseNames;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
@@ -80,6 +82,8 @@ public final class HorseBreedingHandler {
         HorseRecord recordB = ensureParentRecord(parentB);
 
         if (recordA.sex() == recordB.sex()) {
+            sameSexAttempt(recordA.sex(), damOrSireName(recordA), damOrSireName(recordB),
+                    event.getCausedByPlayer(), child);
             event.setCanceled(true);
             return;
         }
@@ -274,6 +278,45 @@ public final class HorseBreedingHandler {
      * without one. There is nothing to backfill any more - a record's stats
      * are derived from the genetic code it already carries.
      */
+    /**
+     * <b>Two mares, or two stallions, and a player who wants to know why nothing
+     * happened.</b> Vanilla does not know horses have a sex, so a same-sex pair
+     * fed breeding carrots goes through the whole courtship and reaches this
+     * event like any other pair - and the foal is then cancelled here. That is
+     * correct, and until now it was also <i>silent</i>: the carrots were spent,
+     * the hearts appeared, and nothing came of it with no explanation anywhere.
+     *
+     * <p>So the attempt is left exactly as it is - they still try - and it now
+     * says so. The line is deliberately light rather than an error: nothing has
+     * gone wrong, and a red warning for two horses being the same sex would read
+     * as a bug in the mod rather than a fact about horses.
+     *
+     * <p>Only the player who caused it is told. A pair courting in the corner of
+     * somebody else's paddock is not everyone's business, and
+     * {@code BabyEntitySpawnEvent} hands us exactly the player who fed them.
+     */
+    private static void sameSexAttempt(Sex sex, String nameA, String nameB,
+                                       Player player, Horse child) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return; // nobody fed them, or we are on the client - nothing to say
+        }
+        String key = sex == Sex.FEMALE
+                ? "message.horsegenetics.breed.same_sex.mares"
+                : "message.horsegenetics.breed.same_sex.stallions";
+        // One of three, so the joke does not wear out on the second telling.
+        // Seeded off the child entity, which is discarded a moment later and is
+        // as good a coin as any - and it keeps the choice off the main RNG.
+        int variant = Math.floorMod(child.getId(), 3) + 1;
+        serverPlayer.sendSystemMessage(Component.translatable(key + "." + variant,
+                Component.literal(nameA), Component.literal(nameB)));
+    }
+
+    /** A parent's name for a chat line - the barn name if it has one. */
+    private static String damOrSireName(HorseRecord record) {
+        String name = record.displayName();
+        return name == null || name.isBlank() ? "This horse" : name;
+    }
+
     static HorseRecord ensureParentRecord(Horse parent) {
         if (!HorseRecords.hasRealRecord(parent)) {
             HorseRecord founder = HorseRecords.newFounder(parent, HorseRecords.rng(parent));

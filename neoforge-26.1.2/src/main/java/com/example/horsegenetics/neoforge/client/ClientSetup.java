@@ -10,7 +10,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT)
@@ -56,15 +55,16 @@ public final class ClientSetup {
      * The generated coats are composed from pack resources, so a resource
      * reload has to be able to throw them away - see {@link CoatAssetReload}.
      */
+    /** The one menu this mod has: the Equine Research Shelf's. */
     @SubscribeEvent
-    static void registerReloadListeners(AddClientReloadListenersEvent event) {
-        event.addListener(CoatAssetReload.ID, new CoatAssetReload());
+    static void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
+        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.RESEARCH_SHELF.get(),
+                ResearchShelfScreen::new);
     }
 
     @SubscribeEvent
-    static void registerMenuScreens(RegisterMenuScreensEvent event) {
-        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.HORSE_BROWSER.get(),
-                HorseBrowserScreen::new);
+    static void registerReloadListeners(AddClientReloadListenersEvent event) {
+        event.addListener(CoatAssetReload.ID, new CoatAssetReload());
     }
 
     private ClientSetup() {

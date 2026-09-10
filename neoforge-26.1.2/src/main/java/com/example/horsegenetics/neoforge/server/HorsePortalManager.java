@@ -147,12 +147,22 @@ public final class HorsePortalManager {
                 : new BlockPos(rect.constCoord(), y, hc);
     }
 
+    /**
+     * <b>Flag 18, not 2 - and the 16 is load-bearing.</b> Bit 16 is
+     * {@code UPDATE_KNOWN_SHAPE}, which suppresses the neighbour <i>shape</i>
+     * updates {@code Level.setBlock} otherwise runs on every placement. Without
+     * it, each portal block placed here would ask its neighbours to re-check
+     * themselves while the rest of the sheet is still air - and
+     * {@link HayPortalBlock#updateShape}, which turns an unenclosed portal block
+     * into air, would eat the portal as it was being lit. Vanilla's
+     * {@code PortalShape.createPortalBlocks} passes 18 for exactly this reason.
+     */
     private static void fill(ServerLevel level, Rect rect, Direction.Axis axis) {
         BlockState portal = ModBlocks.HAY_PORTAL.get().defaultBlockState()
                 .setValue(HayPortalBlock.AXIS, axis);
         for (int hc = rect.minH(); hc < rect.minH() + rect.w(); hc++) {
             for (int y = rect.minV(); y < rect.minV() + rect.h(); y++) {
-                level.setBlock(cell(rect, axis, hc, y), portal, 2);
+                level.setBlock(cell(rect, axis, hc, y), portal, 18);
             }
         }
     }

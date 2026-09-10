@@ -178,6 +178,11 @@ public final class ModItems {
             registerBlockItem("horsemans_table",
                     com.example.horsegenetics.neoforge.block.ModBlocks.HORSEMANS_TABLE);
 
+    /** The Equine Research Shelf, as an item you can carry and place. */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> EQUINE_RESEARCH_SHELF =
+            registerBlockItem("equine_research_shelf",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF);
+
     // --- whistles (roadmap §11) - recall your tamed horses in a radius ---
     public static final DeferredItem<WhistleItem> BASIC_WHISTLE =
             register("basic_whistle", p -> new WhistleItem(p, 16));

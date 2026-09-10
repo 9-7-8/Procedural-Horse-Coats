@@ -1,0 +1,322 @@
+{
+  "recipes": [
+    {
+      "id": "basic_ticket",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:blank_ticket",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:basic_ticket",
+      "count": 1
+    },
+    {
+      "id": "basic_whistle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:horse_hair",
+        "minecraft:iron_nugget",
+        "minecraft:stick"
+      ],
+      "out": "horsegenetics:basic_whistle",
+      "count": 1
+    },
+    {
+      "id": "blank_ticket",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:paper",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:blank_ticket",
+      "count": 1
+    },
+    {
+      "id": "blank_transfer_paper",
+      "kind": "shaped",
+      "grid": [
+        "minecraft:paper",
+        "minecraft:paper",
+        "minecraft:paper",
+        "minecraft:paper",
+        "horsegenetics:horse_hair",
+        "minecraft:paper",
+        "minecraft:paper",
+        "minecraft:paper",
+        "minecraft:paper"
+      ],
+      "out": "horsegenetics:blank_transfer_paper",
+      "count": 1
+    },
+    {
+      "id": "bound_ticket",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:basic_ticket",
+        "horsegenetics:horse_hair",
+        "minecraft:ender_pearl"
+      ],
+      "out": "horsegenetics:bound_ticket",
+      "count": 1
+    },
+    {
+      "id": "braided_rope",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:horse_hair_bundle",
+        "horsegenetics:horse_hair_bundle",
+        "horsegenetics:horse_hair_bundle"
+      ],
+      "out": "horsegenetics:braided_rope",
+      "count": 1
+    },
+    {
+      "id": "braided_rope_to_bundles",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:braided_rope"
+      ],
+      "out": "horsegenetics:horse_hair_bundle",
+      "count": 3
+    },
+    {
+      "id": "carrot_combine",
+      "kind": "custom",
+      "type": "horsegenetics:carrot_combine"
+    },
+    {
+      "id": "cowboy_hitch",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:hair_cloth",
+        "horsegenetics:hair_cloth",
+        "horsegenetics:braided_rope",
+        "horsegenetics:braided_rope",
+        "horsegenetics:braided_rope",
+        "#minecraft:fences",
+        "#minecraft:fences"
+      ],
+      "out": "horsegenetics:cowboy_hitch",
+      "count": 1
+    },
+    {
+      "id": "dilution_gene_splice_carrot",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:unknown_gene_splice_carrot",
+        "minecraft:light_gray_dye"
+      ],
+      "out": "horsegenetics:dilution_gene_splice_carrot",
+      "count": 1
+    },
+    {
+      "id": "echo_whistle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:golden_whistle",
+        "minecraft:echo_shard"
+      ],
+      "out": "horsegenetics:echo_whistle",
+      "count": 1
+    },
+    {
+      "id": "empty_seed_jar",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:glass_bottle",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:empty_seed_jar",
+      "count": 1
+    },
+    {
+      "id": "equine_research_shelf",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:bookshelf",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:equine_research_shelf",
+      "count": 1
+    },
+    {
+      "id": "golden_whistle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:basic_whistle",
+        "minecraft:gold_ingot"
+      ],
+      "out": "horsegenetics:golden_whistle",
+      "count": 1
+    },
+    {
+      "id": "hair_cloth",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:horse_hair_bundle",
+        "horsegenetics:horse_hair_bundle",
+        "horsegenetics:horse_hair_bundle",
+        "horsegenetics:horse_hair_bundle"
+      ],
+      "out": "horsegenetics:hair_cloth",
+      "count": 1
+    },
+    {
+      "id": "hair_cloth_to_bundles",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:hair_cloth"
+      ],
+      "out": "horsegenetics:horse_hair_bundle",
+      "count": 4
+    },
+    {
+      "id": "horse_hair_bundle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:horse_hair_bundle",
+      "count": 1
+    },
+    {
+      "id": "horse_hair_from_bundle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:horse_hair_bundle"
+      ],
+      "out": "horsegenetics:horse_hair",
+      "count": 4
+    },
+    {
+      "id": "horsemans_table",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:hair_cloth",
+        "horsegenetics:hair_cloth",
+        "horsegenetics:hair_cloth",
+        "minecraft:leather",
+        "minecraft:leather",
+        "#minecraft:fences",
+        "#minecraft:fences"
+      ],
+      "out": "horsegenetics:horsemans_table",
+      "count": 1
+    },
+    {
+      "id": "interdimensional_ticket",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:bound_ticket",
+        "horsegenetics:horse_hair",
+        "minecraft:ender_eye",
+        "minecraft:blaze_powder"
+      ],
+      "out": "horsegenetics:interdimensional_ticket",
+      "count": 1
+    },
+    {
+      "id": "known_gene_splice_carrot",
+      "kind": "custom",
+      "type": "horsegenetics:known_gene_splice"
+    },
+    {
+      "id": "magical_gene_splice_carrot",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:unknown_gene_splice_carrot",
+        "minecraft:amethyst_shard"
+      ],
+      "out": "horsegenetics:magical_gene_splice_carrot",
+      "count": 1
+    },
+    {
+      "id": "magnifier_carrot",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:golden_carrot",
+        "horsegenetics:horse_hair",
+        "minecraft:glowstone_dust"
+      ],
+      "out": "horsegenetics:magnifier_carrot",
+      "count": 1
+    },
+    {
+      "id": "marking_gene_splice_carrot",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:unknown_gene_splice_carrot",
+        "minecraft:ink_sac"
+      ],
+      "out": "horsegenetics:marking_gene_splice_carrot",
+      "count": 1
+    },
+    {
+      "id": "performance_gene_splice_carrot",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:unknown_gene_splice_carrot",
+        "minecraft:rabbit_foot"
+      ],
+      "out": "horsegenetics:performance_gene_splice_carrot",
+      "count": 1
+    },
+    {
+      "id": "stabilizer_carrot",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:golden_carrot",
+        "horsegenetics:horse_hair",
+        "minecraft:quartz"
+      ],
+      "out": "horsegenetics:stabilizer_carrot",
+      "count": 1
+    },
+    {
+      "id": "stall_sign",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:oak_sign",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:stall_sign",
+      "count": 1
+    },
+    {
+      "id": "unknown_epigenetic_splice_carrot",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:golden_carrot",
+        "horsegenetics:horse_hair",
+        "minecraft:fermented_spider_eye"
+      ],
+      "out": "horsegenetics:unknown_epigenetic_splice_carrot",
+      "count": 1
+    },
+    {
+      "id": "unknown_gene_splice_carrot",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:golden_carrot",
+        "horsegenetics:horse_hair",
+        "minecraft:gunpowder"
+      ],
+      "out": "horsegenetics:unknown_gene_splice_carrot",
+      "count": 1
+    },
+    {
+      "id": "white_gene_splice_carrot",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:unknown_gene_splice_carrot",
+        "minecraft:bone_meal"
+      ],
+      "out": "horsegenetics:white_gene_splice_carrot",
+      "count": 1
+    }
+  ]
+}

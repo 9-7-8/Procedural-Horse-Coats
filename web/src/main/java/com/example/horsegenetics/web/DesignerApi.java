@@ -234,6 +234,10 @@ public final class DesignerApi {
             j.obj()
                     .kv("key", g.key())
                     .kv("name", g.name())
+                    // The hover blurb, the same string CustomHorseSpawnScreen
+                    // shows. Possibly empty by contract - the page treats an
+                    // empty one as "draw no panel", as the screen does.
+                    .kv("description", g.description())
                     .kv("natural", g.isNatural())
                     .kv("priority", g.priority())
                     .kv("paints", g.affectsCoat())

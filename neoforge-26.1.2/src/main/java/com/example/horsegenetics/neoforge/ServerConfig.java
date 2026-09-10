@@ -3,11 +3,12 @@ package com.example.horsegenetics.neoforge;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * Server-side settings. Both of them are the same kind of setting: the genetics
- * are always built and always inherited, and what a world may switch off is
- * only whether a gene is allowed to <b>touch the animal standing in front of
- * you</b> - its hearts ({@code health.mode}) or its body size
- * ({@code body.size}).
+ * Server-side settings. Two of the three are the same kind of setting: the
+ * genetics are always built and always inherited, and what a world may switch
+ * off is only whether a gene is allowed to <b>touch the animal standing in
+ * front of you</b> - its hearts ({@code health.mode}) or its body size
+ * ({@code body.size}). The third ({@code debug.announce}) governs nothing about
+ * a horse at all, only whether the mod narrates itself.
  *
  * <p>{@link ClientConfig} is the wrong side for both. Whether a foal dies has
  * to be the same answer for everyone on a server, and it has to be the same
@@ -40,7 +41,22 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * panel and the paper both keep reporting what the genotype says, because that
  * has not changed.
  *
- * <h2>What neither setting can change</h2>
+ * <h2>debug.announce</h2>
+ * <b>On in a dev run, off in a normal install.</b> This mod says what it is
+ * doing - a cowboy founding, a villager taking the horseman job, a stable being
+ * filled - in chat and in the log, because most of it happens where nobody is
+ * looking. That is a development tool and it shipped switched on: the owner's
+ * friends played 0.3.2 and got <code>[Cowboy]</code> and <code>[Horseman]</code>
+ * lines in their chat, which is noise to a player and looks like a bug.
+ *
+ * <p>It is a setting rather than a bare {@code isProduction()} check because
+ * turning it back on is exactly what you want from someone who is reporting a
+ * bug, and because a gate you cannot read is how a whole session once went by
+ * unable to tell "the gate is shut" from "the code never ran". See
+ * {@code server/DebugAnnounce}, which logs which answer it got, once, at
+ * startup.
+ *
+ * <h2>What none of them can change</h2>
  * <b>All the health genetics are built and inherited regardless.</b> The genes
  * are registered in every world, they occupy the same slots in the genotype
  * code, they are drawn from the same founder tables and they pass to foals the
@@ -78,6 +94,8 @@ public final class ServerConfig {
 
     public static final ModConfigSpec.BooleanValue BODY_SIZE;
 
+    public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         HEALTH_MODE = builder
@@ -103,6 +121,16 @@ public final class ServerConfig {
                         "Like health.mode, a change reaches horses already in the world when",
                         "they next load - each horse re-resolves its body once per level load.")
                 .define("body.size", true);
+        DEBUG_ANNOUNCE = builder
+                .comment("Whether this mod prints its own diagnostics to chat and the log.",
+                        "  A cowboy founding, a villager taking the horseman job, a stable",
+                        "  being filled - the [Cowboy] / [Horseman] / [Stables] lines.",
+                        "Defaults to ON in a development run and OFF in a normal install,",
+                        "which is what the line below actually reports, so this file says",
+                        "what this build decided rather than what it usually decides.",
+                        "Turn it on in a normal install when you are chasing a bug and want",
+                        "something to paste into a report.")
+                .define("debug.announce", !production());
         SPEC = builder.build();
     }
 
@@ -136,6 +164,35 @@ public final class ServerConfig {
     /** Shorthand: may a lethal genotype actually kill a foal, or refuse a pairing? */
     public static boolean lethalsActive() {
         return healthMode().deathsEnabled();
+    }
+
+    /**
+     * <b>May this mod say what it is doing, in chat and in the log?</b> See
+     * {@code server/DebugAnnounce} for what those lines are and why they exist.
+     */
+    public static boolean debugAnnounce() {
+        try {
+            return DEBUG_ANNOUNCE.get();
+        } catch (IllegalStateException notLoaded) {
+            // Before the config file is read - the mod constructor, mostly.
+            // Match the default rather than guessing true, or a normal install
+            // gets the lines it is about to be told it does not want.
+            return !production();
+        }
+    }
+
+    /**
+     * {@code FMLEnvironment.isProduction()}, but never fatal: it throws when no
+     * loader is active (a unit test, a tool), and a config default is not worth
+     * a crash. Unknown counts as production, so the quiet answer is the one a
+     * strange environment gets.
+     */
+    private static boolean production() {
+        try {
+            return net.neoforged.fml.loading.FMLEnvironment.isProduction();
+        } catch (Throwable notLoaded) {
+            return true;
+        }
     }
 
     private ServerConfig() {

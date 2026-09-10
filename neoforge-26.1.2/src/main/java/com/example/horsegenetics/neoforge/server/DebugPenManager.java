@@ -661,8 +661,8 @@ public final class DebugPenManager {
         for (int y = gy + 1; y <= gy + 3; y++) {
             fastSet(level, new BlockPos(px, y, -1), hay);
             fastSet(level, new BlockPos(px, y, 2), hay);
-            fastSet(level, new BlockPos(px, y, 0), portal);
-            fastSet(level, new BlockPos(px, y, 1), portal);
+            fastSetPortal(level, new BlockPos(px, y, 0), portal);
+            fastSetPortal(level, new BlockPos(px, y, 1), portal);
         }
         plot.exitPortal = new BlockPos(px, gy + 1, 0);
     }
@@ -752,6 +752,21 @@ public final class DebugPenManager {
 
     private static void fastSet(ServerLevel level, BlockPos pos, BlockState state) {
         level.setBlock(pos, state, 2); // UPDATE_CLIENTS only - bulk terrain, skip neighbour updates
+    }
+
+    /**
+     * Like {@link #fastSet}, plus bit 16 ({@code UPDATE_KNOWN_SHAPE}) to suppress
+     * neighbour <b>shape</b> updates - which flag 2 does <i>not</i>.
+     *
+     * <p>Only the portal cells need it, and they genuinely do:
+     * {@link HayPortalBlock#updateShape} turns an unenclosed portal block into
+     * air, and this method builds the frame a row at a time, so a portal block
+     * placed before the hay above it would ask itself whether it is enclosed,
+     * find air, and delete itself. Same reason {@code HorsePortalManager.fill}
+     * passes 18.
+     */
+    private static void fastSetPortal(ServerLevel level, BlockPos pos, BlockState state) {
+        level.setBlock(pos, state, 18);
     }
 
     private DebugPenManager() {

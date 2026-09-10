@@ -9,20 +9,18 @@ import com.example.horsegenetics.common.horse.HorseListing;
 import com.example.horsegenetics.common.horse.HorseQuery;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HorseTraits;
-import com.example.horsegenetics.neoforge.menu.HorseBrowserMenu;
+import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
 import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
-import com.example.horsegenetics.neoforge.network.SelectBrowserGenePayload;
-import com.example.horsegenetics.neoforge.network.WriteResearchPaperPayload;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.Screen;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ContainerInput;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.ArrayList;
@@ -33,8 +31,9 @@ import java.util.UUID;
 
 /**
  * The <b>Horse Browser</b> - opened with the browser key (default <kbd>H</kbd>).
- * An {@link AbstractContainerScreen} over {@link HorseBrowserMenu}, with four
- * tabs drawn from a strip at the top of the window:
+ * A plain {@link Screen} with four tabs drawn from a strip at the top of the
+ * window. <b>It holds nothing and crafts nothing</b> - see the Recipes note
+ * below.
  *
  * <ul>
  *   <li><b>My horses</b> - every horse the player owns as one sortable,
@@ -54,11 +53,26 @@ import java.util.UUID;
  *       so the loci that pull on one trait arrive together. The roster comes
  *       from the server on opening the tab ({@code HorseRosterPayload}), and is
  *       the same roster the My horses table reads.</li>
- *   <li><b>Crafting</b> - a compact centered panel: a 3x3 grid + result slot that
- *       only makes this mod's recipes (see {@code HorseBrowserRecipes}), the
- *       gene list reused on the left to pick which gene a book becomes a paper
- *       for, and the player inventory.</li>
+ *   <li><b>Recipes</b> - a <b>reference</b>: every recipe this mod adds, drawn
+ *       as its grid and its result, plus one entry per gene for the
+ *       gene-parameterised splice carrot. You read it here and you craft it at
+ *       a crafting table.</li>
  * </ul>
+ *
+ * <h2>Why there is no crafting here any more</h2>
+ * There used to be a real 3x3 grid, a result slot and the player's inventory on
+ * that last tab, which made this an {@code AbstractContainerScreen} over a
+ * server-synced menu. It was removed on the owner's call, and the reason is
+ * worth keeping: <i>"putting crafting in the H menu breaks the flow of normal
+ * Minecraft so much it's confusing people"</i>. A window bound to a key, that
+ * is not a block, that nonetheless crafts, is a fifth thing to learn for no
+ * gain - every one of those recipes already works at a crafting table.
+ *
+ * <p>Losing the container is the point rather than a side effect: with no slots
+ * there is nothing to drag, nothing to lose on close, and no server menu to keep
+ * in step. What the grid could uniquely do - turn a book into a research paper
+ * for a chosen gene - moved to the <b>Equine Research Shelf</b>, a real block in
+ * the world.
  *
  * <h2>Drawing order</h2>
  * All custom drawing is done in screen coordinates, from
@@ -69,17 +83,35 @@ import java.util.UUID;
  * which is what had happened to the Crafting tab's own button. Chrome under,
  * widgets and slots over.
  */
-public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrowserMenu> {
+public final class HorseBrowserScreen extends Screen {
 
     private enum Tab {
         MY_HORSES("My horses"),
         GENE_DATABASE("Gene database"),
         BREEDING_PREVIEW("Breeding preview"),
-        CRAFTING("Crafting");
+        RECIPES("Recipes");
 
         final String label;
 
         Tab(String label) {
+            this.label = label;
+        }
+    }
+
+    /**
+     * <b>Which half of the Recipes tab you are looking at.</b> One row per
+     * discovered gene means the splice carrots outnumber every other recipe in
+     * the mod several times over, and they buried the 27 that are not gene
+     * carrots. Two categories is all it needs, and the default is the small
+     * half - the one you are looking for when you open the tab at all.
+     */
+    private enum RecipeCategory {
+        OTHER("Everything else"),
+        GENE_CARROTS("Gene carrots");
+
+        final String label;
+
+        RecipeCategory(String label) {
             this.label = label;
         }
     }
@@ -110,8 +142,16 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private static final int HEAD_BG = 0xFF23232E;
     private static final int DIVIDER = 0x18FFFFFF;
 
-    private static final int IMG_W = 262; // the Crafting panel; leftPos/topPos centre it
+    /** The Recipes tab's detail panel, centred by {@link #panelLeft()}. */
+    private static final int IMG_W = 262;
     private static final int IMG_H = 210;
+
+    // Slot geometry inside that panel. These were HorseBrowserMenu's, back when
+    // they positioned real slots; they now position drawn ones.
+    private static final int GRID_X = 30;
+    private static final int GRID_Y = 34;
+    private static final int RESULT_X = 108;
+    private static final int RESULT_Y = 52;
     private static final int TAB_TOP = 6;
     private static final int TAB_H = 18;
     private static final int ROW_H = 12;
@@ -134,7 +174,9 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     private EditBox searchBox;
     private EditBox horseFilterBox;
-    private Button craftPaperButton;
+    private Button recipeCategoryButton;
+    private RecipeCategory recipeCategory = RecipeCategory.OTHER;
+    private boolean recipeMenuOpen;
     private Button refreshRosterButton;
     private Button settledToggle;
 
@@ -161,14 +203,26 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private final List<Gene> allGenes;
     private List<Gene> filtered = List.of();
 
-    public HorseBrowserScreen(HorseBrowserMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, IMG_W, IMG_H);
+    public HorseBrowserScreen() {
+        super(Component.translatable("gui.horsegenetics.horse_browser"));
         List<Gene> genes = new ArrayList<>(Genes.codeOrder());
         genes.sort(Comparator.comparing(Gene::name, String.CASE_INSENSITIVE_ORDER));
         this.allGenes = List.copyOf(genes);
         if (!allGenes.isEmpty()) {
             this.selectedKey = allGenes.get(0).key();
         }
+    }
+
+    /**
+     * <b>Reading the browser does not pause the world.</b> A plain
+     * {@link Screen} pauses singleplayer by default and an
+     * {@code AbstractContainerScreen} does not - so dropping the container
+     * would have quietly changed this, and a horse you were watching would stop
+     * moving whenever you checked its gene. Kept as it was.
+     */
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 
     private boolean creative() {
@@ -186,6 +240,15 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     // ------------------------------------------------------------------
     // Full-window (Gene database) geometry, in screen coords
     // ------------------------------------------------------------------
+
+    /** The Recipes tab's detail panel, pinned right of the list and centred vertically. */
+    private int panelLeft() {
+        return Math.max(listX() + listW() + 12, (this.width - IMG_W) / 2);
+    }
+
+    private int panelTop() {
+        return contentTop();
+    }
 
     private int contentTop() {
         return TAB_TOP + TAB_H + 8;
@@ -227,8 +290,13 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         return Math.max(1, (contentBottom() - listTop()) / ROW_H);
     }
 
+    /** How many rows the active tab's left-hand list has. */
+    private int listSize() {
+        return tab == Tab.RECIPES ? recipeRows.size() : filtered.size();
+    }
+
     private int maxListScroll() {
-        return Math.max(0, filtered.size() - visibleRows());
+        return Math.max(0, listSize() - visibleRows());
     }
 
     // --- widgets ---
@@ -236,8 +304,6 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     @Override
     protected void init() {
         super.init();
-        this.titleLabelX = -9999;
-        this.inventoryLabelX = -9999;
 
         searchBox = new EditBox(this.font, listX() + 1, contentTop(), listW() - 2, 16,
                 Component.literal("Filter"));
@@ -246,11 +312,11 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         searchBox.setValue(search);
         addRenderableWidget(searchBox);
 
-        craftPaperButton = Button.builder(Component.translatable("gui.horsegenetics.craft_paper"), b -> craftPaper())
-                .bounds(detailX(), contentBottom() - 22, 120, 18)
+        recipeCategoryButton = Button.builder(recipeCategoryLabel(), b -> recipeMenuOpen = !recipeMenuOpen)
+                .bounds(listX(), contentTop() + 17, listW() - 2, 16)
                 .build();
-        craftPaperButton.visible = false;
-        addRenderableWidget(craftPaperButton);
+        recipeCategoryButton.visible = false;
+        addRenderableWidget(recipeCategoryButton);
 
         horseFilterBox = new EditBox(this.font, fsLeft() + 1, contentTop(),
                 Math.max(160, (fsRight() - fsLeft()) / 2), 16, Component.literal("Filter"));
@@ -299,21 +365,6 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         ClientPacketDistributor.sendToServer(HorseRosterRequestPayload.INSTANCE);
     }
 
-    private void craftPaper() {
-        Gene g = selected();
-        if (g != null && g.hasGeneCarrot()) {
-            // The server re-checks discovery and that a book is in the inventory,
-            // and messages the player if not - better than a dead button.
-            ClientPacketDistributor.sendToServer(new WriteResearchPaperPayload(g.key()));
-        }
-    }
-
-    /** The Known Gene Splice recipe stacks shown as ghosts for the selected gene, or empty. */
-    private java.util.List<net.minecraft.world.item.ItemStack> spliceGhosts() {
-        Gene sel = selected();
-        return sel != null && sel.hasGeneCarrot() ? SpliceRecipeDisplay.forGene(sel) : java.util.List.of();
-    }
-
     /**
      * Show, hide and place the per-tab buttons.
      *
@@ -323,7 +374,21 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
      * the bottom 26 pixels of the detail pane, which is the one part of that tab
      * that is short of room. One button, on the tab that is about crafting.
      */
+    private Component recipeCategoryLabel() {
+        return Component.literal(recipeCategory.label + "  \u25be");
+    }
+
     private void layoutGeneButtons() {
+        if (recipeCategoryButton != null) {
+            boolean show = tab == Tab.RECIPES;
+            recipeCategoryButton.visible = show;
+            recipeCategoryButton.active = show;
+            recipeCategoryButton.setMessage(recipeCategoryLabel());
+            recipeCategoryButton.setRectangle(listW() - 2, 16, listX(), contentTop() + 17);
+            if (!show) {
+                recipeMenuOpen = false;
+            }
+        }
         boolean breeding = tab == Tab.BREEDING_PREVIEW;
         boolean mine = tab == Tab.MY_HORSES;
         int refreshW = buttonW("Refresh");
@@ -353,34 +418,55 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                 horseFilterBox.setFocused(false);
             }
         }
-        if (craftPaperButton == null) {
-            return;
+    }
+
+    /**
+     * <b>A focused text box owns the keyboard.</b> Without this, typing
+     * &ldquo;speed&rdquo; into the gene search closed the window and opened the
+     * player's inventory on the <kbd>e</kbd>.
+     *
+     * <p>It is a vanilla trap rather than a mistake here.
+     * {@link net.minecraft.client.gui.components.EditBox#keyPressed} handles the
+     * <i>control</i> keys - backspace, the arrows, ctrl+A/C/V - and returns
+     * {@code false} for an ordinary letter, because letters arrive separately
+     * through {@code charTyped}. So the letter falls out of
+     * {@code super.keyPressed}, and the next thing
+     * {@link AbstractContainerScreen#keyPressed} does is test it against
+     * {@code keyInventory} and call {@code onClose()}. Any screen with a text
+     * field and a container behind it has this bug until it says otherwise.
+     *
+     * <p>The fix is to <b>swallow</b> every key that is not Escape while a box
+     * has focus, after giving the box its go. Swallowing {@code keyPressed} does
+     * not cost the letter: GLFW's character callback is a separate one, so
+     * {@code charTyped} still delivers it and the text still types.
+     */
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
+            return true;
         }
-        Gene sel = selected();
-        boolean carrot = tab == Tab.CRAFTING && sel != null && sel.hasGeneCarrot();
-        craftPaperButton.visible = carrot;
-        craftPaperButton.active = carrot;
-        if (carrot) {
-            int x = leftPos + HorseBrowserMenu.RESULT_X + 22;
-            int w = Math.min(buttonW(craftPaperButton.getMessage().getString()),
-                    leftPos + IMG_W - 8 - x);
-            // Below the note beside the grid, not through it.
-            craftPaperButton.setRectangle(w, 16, x, topPos + 104);
+        if (event.key() != InputConstants.KEY_ESCAPE && typingInABox()) {
+            return true;
         }
+        return false;
+    }
+
+    /** Is a text field focused, i.e. is the player mid-word? */
+    private boolean typingInABox() {
+        return (searchBox != null && searchBox.isFocused() && searchBox.isActive())
+                || (horseFilterBox != null && horseFilterBox.isFocused() && horseFilterBox.isActive());
     }
 
     private void applyFilter() {
         String q = search.trim().toLowerCase(Locale.ROOT);
         List<Gene> out = new ArrayList<>();
         for (Gene g : allGenes) {
-            if (tab == Tab.CRAFTING && !craftable(g)) {
-                continue;
-            }
             if (q.isEmpty() || matches(g, q)) {
                 out.add(g);
             }
         }
         filtered = out;
+        rebuildRecipes();
         listScroll = Math.max(0, Math.min(listScroll, maxListScroll()));
         if (filtered.stream().noneMatch(g -> g.key().equals(selectedKey)) && !filtered.isEmpty()) {
             select(filtered.get(0).key());
@@ -413,16 +499,18 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
             selectedKey = key;
             detailScroll = 0f;
         }
-        ClientPacketDistributor.sendToServer(new SelectBrowserGenePayload(key));
     }
 
     // --- input ---
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (recipeMenuClicked(event.x(), event.y())) {
+            return true;
+        }
         Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
-            if (hit != tab && menu.getCarried().isEmpty()) {
+            if (hit != tab) {
                 tab = hit;
                 listScroll = 0;
                 detailScroll = 0f;
@@ -472,7 +560,11 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         }
         int row = rowAt(event.x(), event.y());
         if (row >= 0) {
-            select(filtered.get(row).key());
+            if (tab == Tab.RECIPES) {
+                selectedRecipe = row;
+            } else {
+                select(filtered.get(row).key());
+            }
             return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -507,7 +599,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
             return -1;
         }
         int i = listScroll + (int) ((my - listTop()) / ROW_H);
-        return i >= 0 && i < filtered.size() ? i : -1;
+        return i >= 0 && i < listSize() ? i : -1;
     }
 
     @Override
@@ -546,60 +638,30 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         return super.mouseScrolled(mx, my, sx, sy);
     }
 
-    /** No slot interaction on the Gene database tab (its slots are inactive anyway). */
-    @Override
-    protected void slotClicked(Slot slot, int slotId, int buttonNum, ContainerInput input) {
-        if (tab != Tab.CRAFTING && slot != null && slotId >= 0) {
-            return;
-        }
-        super.slotClicked(slot, slotId, buttonNum, input);
-    }
-
-    /** Real slot tooltips, plus a real-item tooltip for a hovered recipe ghost. */
-    @Override
-    protected void extractTooltip(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        super.extractTooltip(g, mouseX, mouseY);
-        if (tab != Tab.CRAFTING || (hoveredSlot != null && hoveredSlot.hasItem())) {
-            return;
-        }
-        java.util.List<net.minecraft.world.item.ItemStack> ghosts = spliceGhosts();
-        for (int i = 0; i < 9 && i < ghosts.size(); i++) {
-            net.minecraft.world.item.ItemStack ghost = ghosts.get(i);
-            if (ghost.isEmpty() || !menu.slots.get(HorseBrowserMenu.GRID_START + i).getItem().isEmpty()) {
-                continue;
-            }
-            int gx = leftPos + HorseBrowserMenu.GRID_X + (i % 3) * 18;
-            int gy = topPos + HorseBrowserMenu.GRID_Y + (i / 3) * 18;
-            if (mouseX >= gx && mouseX < gx + 16 && mouseY >= gy && mouseY < gy + 16) {
-                g.setTooltipForNextFrame(this.font, ghost, mouseX, mouseY);
-                return;
-            }
-        }
-    }
-
     // --- drawing ---
 
     @Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
-        menu.setCraftingVisible(tab == Tab.CRAFTING);
         super.extractBackground(g, mouseX, mouseY, partialTick);
         g.fill(0, 0, this.width, this.height, DIM);
     }
 
     /**
-     * Everything this screen draws, in screen coordinates and <b>under</b> the
-     * widgets and slots that {@code super} goes on to draw. See the class note
-     * on drawing order.
+     * Everything this screen draws, in screen coordinates and <b>before</b> the
+     * {@code super} call that draws the widgets. See the class note on drawing
+     * order: this screen paints near-opaque panels across the window, so
+     * anything of ours that overlapped a widget would wash it out.
      */
     @Override
-    public void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         drawChrome(g, mouseX, mouseY);
-        super.extractContents(g, mouseX, mouseY, partialTick);
-    }
-
-    /** Vanilla's "Horse Browser" / "Inventory" captions; this screen draws its own. */
-    @Override
-    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        if (tab == Tab.RECIPES) {
+            drawRecipeMenu(g, mouseX, mouseY);
+            if (!recipeMenuOpen) {
+                recipeCellTooltip(g, mouseX, mouseY);
+            }
+        }
     }
 
     private void drawChrome(GuiGraphicsExtractor g, int mouseX, int mouseY) {
@@ -612,7 +674,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
             // roster tabs are about horses, and reusing one box for two
             // different lists reads as a bug the first time it clears itself.
             // My horses has its own box, with its own query language.
-            boolean showSearch = tab == Tab.GENE_DATABASE || tab == Tab.CRAFTING;
+            boolean showSearch = tab == Tab.GENE_DATABASE || tab == Tab.RECIPES;
             searchBox.visible = showSearch;
             searchBox.active = showSearch;
         }
@@ -631,7 +693,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                 drawGeneDetail(g);
             }
             case BREEDING_PREVIEW -> drawBreedingPreview(g, mouseX, mouseY);
-            case CRAFTING -> drawCraftingPanel(g, mouseX, mouseY);
+            case RECIPES -> drawRecipes(g, mouseX, mouseY);
         }
     }
 
@@ -690,7 +752,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         int l = detailX();
         int r = detailR();
         int top = contentTop();
-        int bottom = contentBottom() - (craftPaperButton != null && craftPaperButton.visible ? 26 : 0);
+        int bottom = contentBottom();
         int w = r - l;
 
         g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
@@ -803,73 +865,296 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         }
     }
 
-    private void drawCraftingPanel(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        int px = leftPos;
-        int py = topPos;
+    // ------------------------------------------------------------------
+    // Recipes - a reference, not a workbench
+    // ------------------------------------------------------------------
+    //
+    // Every recipe this mod adds, drawn as its grid and its result. You read it
+    // here and you craft it at a crafting table; see the class note for why
+    // there is no grid on this screen any more.
+    //
+    // The static recipes come from RecipeReference, which is generated from the
+    // real recipe files. The gene-splice carrot is the one recipe that cannot
+    // be: its ingredients depend on which gene, so it contributes one row per
+    // gene the player has discovered, built by SpliceRecipeDisplay - the same
+    // class the old ghost grid used.
 
-        // the gene list on the left (full-window position, but a shorter run)
-        int listBottom = Math.min(contentBottom(), py + IMG_H);
-        drawGeneList(g, mouseX, mouseY, listBottom);
+    /** One row of the reference: what it makes, and what it takes. */
+    private record RecipeRow(String label, List<ItemStack> grid, ItemStack result,
+                             boolean shapeless, String note, boolean geneCarrot, String blurb) {
+    }
 
-        // the centered crafting panel
+    /**
+     * <b>What the thing you are about to make is for.</b> One line per recipe,
+     * out of the lang file under {@code recipe.horsegenetics.&lt;id&gt;.desc} -
+     * so it is translatable, and so a recipe that converts <i>between</i> two
+     * items can say which direction it goes (unpacking a bundle and making one
+     * share an output but not a purpose).
+     *
+     * <p>A recipe with no entry gets an empty line rather than a raw key on
+     * screen, which is what an untranslated {@code Component.translatable}
+     * would show.
+     */
+    private String recipeBlurb(String recipeId) {
+        String key = "recipe.horsegenetics." + recipeId + ".desc";
+        String text = Component.translatable(key).getString();
+        return text.equals(key) ? "" : text;
+    }
+
+    private List<RecipeRow> recipeRows = List.of();
+
+    private int selectedRecipe = 0;
+
+    /**
+     * Rebuild the reference list against the current search and the player's
+     * discoveries. Called from {@link #applyFilter()}, so it tracks the search
+     * box; item stacks are resolved here rather than cached across screens
+     * because the registry can change between worlds.
+     */
+    private void rebuildRecipes() {
+        List<RecipeRow> rows = new ArrayList<>();
+        for (RecipeReference.Entry e : RecipeReference.all()) {
+            if (e.kind() == RecipeReference.Kind.CUSTOM) {
+                continue; // described below, where their inputs are known
+            }
+            ItemStack result = e.resultStack();
+            if (result.isEmpty()) {
+                continue; // an id this build does not have - say nothing rather than draw a hole
+            }
+            rows.add(new RecipeRow(result.getHoverName().getString(), e.gridStacks(), result,
+                    e.kind() == RecipeReference.Kind.SHAPELESS,
+                    e.kind() == RecipeReference.Kind.SHAPELESS
+                            ? "Shapeless - the arrangement does not matter."
+                            : "Shaped - lay it out exactly like this.",
+                    false, recipeBlurb(e.id())));
+        }
+        // Combining two breeding carrots: a CustomRecipe, so it has no fixed
+        // ingredients to draw. Said in words instead of drawn wrongly.
+        rows.add(new RecipeRow("Combine breeding carrots", blankGrid(),
+                new ItemStack(ModItems.MAGNIFIER_CARROT.get()), true,
+                "Shapeless - the arrangement does not matter.",
+                false,
+                "Any two breeding carrots together make one carrot carrying both their "
+                        + "effects. What comes out depends on what you put in."));
+        // One row per gene, for the parameterised splice.
+        for (Gene gene : allGenes) {
+            if (!craftable(gene)) {
+                continue;
+            }
+            List<ItemStack> grid = SpliceRecipeDisplay.forGene(gene);
+            // Formulaic on purpose: there are as many of these as there are
+            // genes, and the only thing that changes between them is the gene.
+            rows.add(new RecipeRow(gene.name() + " splice carrot", grid,
+                    new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get()), true,
+                    "Needs that gene's research paper. The rarity ingot is set by "
+                            + "the gene's own rarity, so a rarer gene costs more.",
+                    true,
+                    "Feed a parent to aim its contribution at " + gene.name()
+                            + ", instead of the coin flip it would otherwise be."));
+        }
+        // Category first, then the search box - so searching inside "Gene
+        // carrots" stays inside it rather than quietly showing you the rest.
+        boolean wantCarrots = recipeCategory == RecipeCategory.GENE_CARROTS;
+        List<RecipeRow> inCategory = new ArrayList<>();
+        for (RecipeRow row : rows) {
+            if (row.geneCarrot() == wantCarrots) {
+                inCategory.add(row);
+            }
+        }
+        rows = inCategory;
+
+        String q = search.trim().toLowerCase(Locale.ROOT);
+        if (!q.isEmpty()) {
+            List<RecipeRow> hits = new ArrayList<>();
+            for (RecipeRow row : rows) {
+                if (row.label().toLowerCase(Locale.ROOT).contains(q)) {
+                    hits.add(row);
+                }
+            }
+            rows = hits;
+        }
+        recipeRows = List.copyOf(rows);
+        selectedRecipe = Math.max(0, Math.min(selectedRecipe, recipeRows.size() - 1));
+    }
+
+    private static List<ItemStack> blankGrid() {
+        List<ItemStack> out = new ArrayList<>(9);
+        for (int i = 0; i < 9; i++) {
+            out.add(ItemStack.EMPTY);
+        }
+        return out;
+    }
+
+    private void drawRecipes(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        drawRecipeList(g, mouseX, mouseY);
+
+        int px = panelLeft();
+        int py = panelTop();
         g.fill(px, py, px + IMG_W, py + IMG_H, PANEL);
         g.fill(px, py, px + IMG_W, py + 1, BORDER);
         g.fill(px, py + IMG_H - 1, px + IMG_W, py + IMG_H, BORDER);
         g.fill(px, py, px + 1, py + IMG_H, BORDER);
         g.fill(px + IMG_W - 1, py, px + IMG_W, py + IMG_H, BORDER);
 
-        // grid + result slot backdrops (slots render on top of these)
-        java.util.List<net.minecraft.world.item.ItemStack> ghosts = spliceGhosts();
+        if (recipeRows.isEmpty()) {
+            g.text(this.font, Component.literal("No recipes match \"" + search + "\"."),
+                    px + 10, py + 12, NAME_DIM, false);
+            return;
+        }
+        RecipeRow row = recipeRows.get(selectedRecipe);
+
+        drawFitted(g, row.label(), px + 10, py + 10, IMG_W - 20, HEADING);
+
+        // the grid, its arrow, and the result
         for (int i = 0; i < 9; i++) {
-            int gx = px + HorseBrowserMenu.GRID_X + (i % 3) * 18;
-            int gy = py + HorseBrowserMenu.GRID_Y + (i / 3) * 18;
+            int gx = px + GRID_X + (i % 3) * 18;
+            int gy = py + GRID_Y + (i / 3) * 18;
             cell(g, gx, gy, SLOT_BG);
-            // The selected gene's splice recipe, ghosted into any empty grid slot.
-            // Drawn before the real slots, so a slot the player fills hides its ghost.
-            if (i < ghosts.size()) {
-                net.minecraft.world.item.ItemStack ghost = ghosts.get(i);
-                if (!ghost.isEmpty() && menu.slots.get(HorseBrowserMenu.GRID_START + i).getItem().isEmpty()) {
-                    g.fakeItem(ghost, gx, gy);
-                    g.fill(gx, gy, gx + 16, gy + 16, 0xA6202028); // knock it back to a placeholder
-                }
+            ItemStack stack = i < row.grid().size() ? row.grid().get(i) : ItemStack.EMPTY;
+            if (!stack.isEmpty()) {
+                g.fakeItem(stack, gx, gy);
             }
         }
-        cell(g, px + HorseBrowserMenu.RESULT_X, py + HorseBrowserMenu.RESULT_Y, SLOT_RESULT_BG);
-        g.fill(px + HorseBrowserMenu.RESULT_X - 22, py + HorseBrowserMenu.RESULT_Y + 7,
-                px + HorseBrowserMenu.RESULT_X - 6, py + HorseBrowserMenu.RESULT_Y + 9, 0xFF6A6A78);
-
-        // player-inventory backdrops
-        for (int i = 0; i < 27; i++) {
-            cell(g, px + HorseBrowserMenu.INV_X + (i % 9) * 18, py + HorseBrowserMenu.INV_Y + (i / 9) * 18, SLOT_BG);
+        cell(g, px + RESULT_X, py + RESULT_Y, SLOT_RESULT_BG);
+        if (!row.result().isEmpty()) {
+            g.fakeItem(row.result(), px + RESULT_X, py + RESULT_Y);
         }
-        for (int i = 0; i < 9; i++) {
-            cell(g, px + HorseBrowserMenu.INV_X + i * 18, py + HorseBrowserMenu.INV_Y + 58, SLOT_BG);
-        }
-        g.text(this.font, Component.translatable("container.inventory"),
-                px + HorseBrowserMenu.INV_X, py + HorseBrowserMenu.INV_Y - 11, LABEL, false);
+        g.fill(px + RESULT_X - 22, py + RESULT_Y + 7, px + RESULT_X - 6, py + RESULT_Y + 9, 0xFF6A6A78);
 
-        // selected-gene note, right of the grid
-        int tx = px + HorseBrowserMenu.RESULT_X + 22;
-        int ty = py + 8;
-        int tw = px + IMG_W - 8 - tx;
-        Gene sel = selected();
-        g.text(this.font, Component.literal("Gene paper"), tx, ty, LABEL, false);
-        ty += this.font.lineHeight + 2;
-        if (sel == null) {
-            g.text(this.font, Component.literal("pick a gene"), tx, ty, NAME_DIM, false);
-        } else {
-            boolean ok = sel.hasGeneCarrot() && discovered(sel);
-            drawFitted(g, sel.name(), tx, ty, tw, ok ? EXPR_ON : EXPR_OFF);
-            ty += this.font.lineHeight + 2;
-            String note = !sel.hasGeneCarrot() ? "no gene carrot for this gene"
-                    : !discovered(sel) ? "not discovered yet"
-                    : "add a book to the grid";
-            for (String line : GuiText.wrap(this.font, note, tw)) {
-                g.text(this.font, Component.literal(line), tx, ty, DESC, false);
+        int ty = py + GRID_Y + 3 * 18 + 10;
+        int tw = IMG_W - 20;
+        // What it is for, first - it is the thing you came to the tab to learn.
+        if (!row.blurb().isEmpty()) {
+            for (String line : GuiText.wrap(this.font, row.blurb(), tw)) {
+                g.text(this.font, Component.literal(line), px + 10, ty, NAME, false);
                 ty += this.font.lineHeight + 1;
             }
+            ty += 4;
+        }
+        for (String line : GuiText.wrap(this.font, row.note(), tw)) {
+            g.text(this.font, Component.literal(line), px + 10, ty, DESC, false);
+            ty += this.font.lineHeight + 1;
+        }
+        ty += 4;
+        // The one line this whole tab exists to say.
+        for (String line : GuiText.wrap(this.font,
+                "Craft this at a crafting table - this window is a reference.", tw)) {
+            g.text(this.font, Component.literal(line), px + 10, ty, LABEL, false);
+            ty += this.font.lineHeight + 1;
         }
     }
+
+    private void drawRecipeList(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int l = listX();
+        int w = listW();
+        int top = listTop();
+        int bottom = Math.min(contentBottom(), panelTop() + IMG_H);
+
+        g.text(this.font, Component.literal(recipeRows.size()
+                        + (recipeRows.size() == 1 ? " recipe" : " recipes")),
+                l, top - 12, LABEL, false);
+        g.fill(l - 2, top - 2, l + w + 2, bottom + 2, PANEL_SOFT);
+        g.enableScissor(l, top, l + w, bottom);
+        int hovered = rowAt(mouseX, mouseY);
+        for (int i = listScroll; i < recipeRows.size() && i < listScroll + visibleRows(); i++) {
+            int ry = top + (i - listScroll) * ROW_H;
+            boolean sel = i == selectedRecipe;
+            if (sel) {
+                g.fill(l - 2, ry, l + w, ry + ROW_H, ROW_SEL);
+            } else if (i == hovered) {
+                g.fill(l - 2, ry, l + w, ry + ROW_H, ROW_HOVER);
+            }
+            drawFitted(g, recipeRows.get(i).label(), l + 4, ry + 2, w - 12, sel ? NAME : NAME_DIM);
+        }
+        g.disableScissor();
+
+        int max = maxListScroll();
+        if (max > 0) {
+            int trackH = bottom - top;
+            int x1 = l + w;
+            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
+            int thumbH = Math.max(16, trackH * visibleRows() / recipeRows.size());
+            int thumbY = top + (trackH - thumbH) * listScroll / max;
+            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+        }
+    }
+
+    /**
+     * The category menu, drawn <b>after</b> the widgets rather than with the
+     * rest of the chrome - it has to sit over the button that opened it, and
+     * chrome goes under.
+     */
+    private void drawRecipeMenu(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (!recipeMenuOpen) {
+            return;
+        }
+        int x = listX();
+        int w = listW() - 2;
+        int y = contentTop() + 17 + 16;
+        RecipeCategory[] all = RecipeCategory.values();
+        g.fill(x - 1, y - 1, x + w + 1, y + all.length * 14 + 1, 0xF00E0E16);
+        g.fill(x - 1, y - 1, x + w + 1, y, BORDER);
+        for (int i = 0; i < all.length; i++) {
+            int ry = y + i * 14;
+            boolean hov = mouseX >= x && mouseX < x + w && mouseY >= ry && mouseY < ry + 14;
+            if (all[i] == recipeCategory) {
+                g.fill(x, ry, x + w, ry + 14, ROW_SEL);
+            } else if (hov) {
+                g.fill(x, ry, x + w, ry + 14, ROW_HOVER);
+            }
+            drawFitted(g, all[i].label, x + 5, ry + 3, w - 10,
+                    all[i] == recipeCategory ? NAME : NAME_DIM);
+        }
+    }
+
+    /** The menu eats the next click wherever it lands - open menus always do. */
+    private boolean recipeMenuClicked(double mx, double my) {
+        if (!recipeMenuOpen) {
+            return false;
+        }
+        int x = listX();
+        int w = listW() - 2;
+        int y = contentTop() + 17 + 16;
+        RecipeCategory[] all = RecipeCategory.values();
+        recipeMenuOpen = false;
+        if (mx >= x && mx < x + w && my >= y && my < y + all.length * 14) {
+            RecipeCategory picked = all[(int) ((my - y) / 14)];
+            if (picked != recipeCategory) {
+                recipeCategory = picked;
+                listScroll = 0;
+                selectedRecipe = 0;
+                applyFilter();
+            }
+        }
+        return true;
+    }
+
+    /** A real item tooltip for whichever reference cell the mouse is over. */
+    private void recipeCellTooltip(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (recipeRows.isEmpty()) {
+            return;
+        }
+        RecipeRow row = recipeRows.get(selectedRecipe);
+        int px = panelLeft();
+        int py = panelTop();
+        for (int i = 0; i < 9 && i < row.grid().size(); i++) {
+            ItemStack stack = row.grid().get(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            int gx = px + GRID_X + (i % 3) * 18;
+            int gy = py + GRID_Y + (i / 3) * 18;
+            if (mouseX >= gx && mouseX < gx + 16 && mouseY >= gy && mouseY < gy + 16) {
+                g.setTooltipForNextFrame(this.font, stack, mouseX, mouseY);
+                return;
+            }
+        }
+        if (!row.result().isEmpty() && mouseX >= px + RESULT_X && mouseX < px + RESULT_X + 16
+                && mouseY >= py + RESULT_Y && mouseY < py + RESULT_Y + 16) {
+            g.setTooltipForNextFrame(this.font, row.result(), mouseX, mouseY);
+        }
+    }
+
 
     // ------------------------------------------------------------------
     // My horses - the whole stable as one sortable, filterable table

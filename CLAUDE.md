@@ -209,6 +209,7 @@ and fails *silently* when stale:
 | `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages) | `wiki/search-index.js` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
+| any file in `data/horsegenetics/recipe/` | `node neoforge-26.1.2/tools/bake-recipe-reference.mjs` | `assets/horsegenetics/recipe_reference.json` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
 | any `tools/stables/*.source.nbt`, **or `bake-stables.py` itself** | `python neoforge-26.1.2/tools/stables/bake-stables.py` | the regenerated `data/horsegenetics/structure/*.nbt` |
 

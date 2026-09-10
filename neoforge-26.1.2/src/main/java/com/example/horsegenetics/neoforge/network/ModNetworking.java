@@ -148,24 +148,32 @@ public final class ModNetworking {
                 })
         );
 
-        registrar.playToServer(
-                WriteResearchPaperPayload.TYPE,
-                WriteResearchPaperPayload.STREAM_CODEC,
+        registrar.playToClient(
+                ShelfSyncPayload.TYPE,
+                ShelfSyncPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
-                    if (context.player() instanceof ServerPlayer serverPlayer) {
-                        com.example.horsegenetics.neoforge.server.ResearchPaperWriter.write(serverPlayer, payload.geneKey());
+                    if (net.minecraft.client.Minecraft.getInstance().player != null
+                            && net.minecraft.client.Minecraft.getInstance().player.containerMenu
+                                    instanceof com.example.horsegenetics.neoforge.menu.ResearchShelfMenu menu) {
+                        menu.acceptStored(payload.geneKeys());
                     }
                 })
         );
 
         registrar.playToServer(
-                OpenHorseBrowserPayload.TYPE,
-                OpenHorseBrowserPayload.STREAM_CODEC,
+                ShelfActionPayload.TYPE,
+                ShelfActionPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
-                    if (context.player() instanceof ServerPlayer serverPlayer) {
-                        serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
-                                (id, inv, p) -> new com.example.horsegenetics.neoforge.menu.HorseBrowserMenu(id, inv),
-                                Component.translatable("gui.horsegenetics.horse_browser")));
+                    // The menu is the authority on which shelf, and it re-checks
+                    // the gene against the block entity - so a forged packet can
+                    // only ask for something absent, and get nothing.
+                    if (context.player() instanceof ServerPlayer serverPlayer
+                            && serverPlayer.containerMenu
+                                    instanceof com.example.horsegenetics.neoforge.menu.ResearchShelfMenu menu) {
+                        switch (payload.action()) {
+                            case SELECT -> menu.selectGene(payload.geneKey());
+                            case WITHDRAW -> menu.withdraw(payload.geneKey());
+                        }
                     }
                 })
         );
@@ -226,17 +234,6 @@ public final class ModNetworking {
                     if (context.player() instanceof ServerPlayer serverPlayer) {
                         com.example.horsegenetics.neoforge.server.HorseInspectHold.set(
                                 serverPlayer, payload.entityId(), payload.watching());
-                    }
-                })
-        );
-
-        registrar.playToServer(
-                SelectBrowserGenePayload.TYPE,
-                SelectBrowserGenePayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() -> {
-                    if (context.player() instanceof ServerPlayer serverPlayer
-                            && serverPlayer.containerMenu instanceof com.example.horsegenetics.neoforge.menu.HorseBrowserMenu menu) {
-                        menu.selectGene(payload.geneKey());
                     }
                 })
         );

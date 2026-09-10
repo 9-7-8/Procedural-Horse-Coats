@@ -390,7 +390,85 @@ public final class GeneDescriptions {
             Map.entry("horsegenetics.gys1",
                     "GYS1 (PSSM1), tying-up - a dominant disorder, so every copy shows and there is "
                             + "no carrier. Neither combination is lethal, which makes it the mildest "
-                            + "and by far the commonest disorder a player will actually meet."));
+                            + "and by far the commonest disorder a player will actually meet."),
+            Map.entry("horsegenetics.tiger_eye",
+                    "A bright amber iris in a horse whose coat is entirely ordinary. It is the first "
+                            + "gene in the mod that changes only the eyes, and the reason the "
+                            + "eye-colour channel exists at all. Essentially confined to the Puerto "
+                            + "Rican Paso Fino, in life and here."),
+            Map.entry("horsegenetics.leopard",
+                    "The leopard complex (TRPM1), and the only gene in the model that reads other "
+                            + "loci to decide what it paints. LP alone gives the appaloosa "
+                            + "characteristics - roaning that spares the bony parts, a scatter of "
+                            + "white spots, striped hooves, a white-rimmed eye. The bold patterns - "
+                            + "leopard, fewspot, blanket, snowcap - come from the PATN1 and PATN2 "
+                            + "modifiers, which do nothing at all on a horse without LP."),
+            Map.entry("horsegenetics.patn1",
+                    "A pure modifier of the leopard complex: it pushes an LP horse toward the "
+                            + "spotted end - one LP copy plus PATN1 gives a full-body leopard, and "
+                            + "LP/LP plus PATN1 a nearly white fewspot. On a horse with no LP it "
+                            + "does nothing whatever and cannot be seen, and no founder rolls it "
+                            + "unless it already rolled LP."),
+            Map.entry("horsegenetics.patn2",
+                    "The second leopard-complex pattern modifier, and a pure modifier like PATN1: "
+                            + "on an LP horse it gives the blanket patterns - a white sheet over the "
+                            + "hips, spotted or not - and carrying both modifiers gives the "
+                            + "semi-leopard between the two. Invisible on a horse without LP."),
+            Map.entry("horsegenetics.magic_milk_volume",
+                    "How many times a day the horse can be filled from. Wild type is once; the milky "
+                            + "allele is worth one to three more, and the copies add. Because it "
+                            + "governs a yield kind rather than a gene, it reaches milk, water and "
+                            + "lava alike."),
+            Map.entry("horsegenetics.magic_meat",
+                    "How much meat the horse leaves. Additive rather than exclusive - a meaty horse "
+                            + "still drops whatever magic item drop says, and the meat is on top of "
+                            + "it. How much is a number written on the allele copy rather than on "
+                            + "the allele, so two meaty horses differ."),
+            Map.entry("horsegenetics.magic_item_drop",
+                    "What the horse leaves behind - diamonds, a spawn egg that puts this horse back, "
+                            + "or an enchanted sword. Every variant takes two copies and none of them "
+                            + "shows on the living animal, which is the point: worth breeding a line "
+                            + "for, and impossible to spot in a field."),
+            Map.entry("horsegenetics.magic_on_death",
+                    "What happens to the world where the horse died - a lava source, a water source, "
+                            + "or a creeper-sized explosion. It says nothing about items; that is "
+                            + "magic item drop, and the two are kept apart on purpose."),
+            Map.entry("horsegenetics.magic_mob_aura",
+                    "How everything else in the world feels about the horse. A warding horse keeps "
+                            + "mobs about ten blocks off; a baiting one makes every hostile that can "
+                            + "see it pick it over anything else in range, including its rider. Both "
+                            + "take two copies, and one of each cancels outright."),
+            Map.entry("horsegenetics.magic_night_temper",
+                    "What the horse becomes after dark. Eight variants in two families: one hunts and "
+                            + "the other runs, and each names who it feels that about - riders, "
+                            + "passive animals, monsters, or everything. By day every one of them is "
+                            + "an ordinary horse."),
+            Map.entry("horsegenetics.magic_night_watch",
+                    "What the horse does about you after dark. Five variants that are a progression "
+                            + "rather than a list, each one a little closer and a little worse - from "
+                            + "staring through walls to standing directly behind you. Any of them, "
+                            + "homozygous, also makes the horse silent on its feet at night."),
+            Map.entry("horsegenetics.magic_swim_speed",
+                    "How fast the horse moves in water, and nothing else. It is unrelated to magic "
+                            + "speed - not related-but-separate, unrelated - so a horse can be the "
+                            + "slowest thing in the paddock and still cross a river faster than a "
+                            + "boat."),
+            Map.entry("horsegenetics.magic_water_breathing",
+                    "How long the horse lasts under water before it starts to drown. The graded "
+                            + "counterpart of the underwater-breathing traversal flag, which is "
+                            + "absolute - and independent of magic swim speed, because crossing a "
+                            + "river quickly and surviving the bottom of a lake are different "
+                            + "problems."),
+            Map.entry("horsegenetics.magic_fighter",
+                    "What the horse hits for. Wild type is 3 points - a heart and a half. The "
+                            + "gladiator allele adds a percentage of that and the wimp allele takes "
+                            + "one off, and both copies are added with opposite signs, so a wimp copy "
+                            + "really does count against a gladiator one."),
+            Map.entry("horsegenetics.shadowcreature",
+                    "A gene that takes the front third of the horse away. The head, muzzle, ears and "
+                            + "whole neck go flat black, the eyes burn gold with no white around "
+                            + "them, and where the black meets the barrel it does not stop in a line "
+                            + "but runs out into tapering tentacles over the shoulder."));
 
     /** The summary for {@code geneKey}, or {@code ""} if there is no entry. */
     public static String of(String geneKey) {

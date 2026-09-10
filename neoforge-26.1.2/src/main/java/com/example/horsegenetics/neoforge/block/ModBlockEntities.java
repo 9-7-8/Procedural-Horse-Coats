@@ -16,6 +16,12 @@ public final class ModBlockEntities {
             BLOCK_ENTITIES.register("hay_portal",
                     () -> new BlockEntityType<>(HayPortalBlockEntity::new, ModBlocks.HAY_PORTAL.get()));
 
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<EquineResearchShelfBlockEntity>> RESEARCH_SHELF =
+            BLOCK_ENTITIES.register("equine_research_shelf",
+                    () -> new BlockEntityType<>(EquineResearchShelfBlockEntity::new,
+                            ModBlocks.RESEARCH_SHELF.get()));
+
     public static void register(IEventBus modEventBus) {
         BLOCK_ENTITIES.register(modEventBus);
     }

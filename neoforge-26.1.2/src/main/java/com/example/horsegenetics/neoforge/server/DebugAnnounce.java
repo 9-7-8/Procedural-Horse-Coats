@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -22,29 +23,35 @@ import net.minecraft.server.level.ServerPlayer;
  * report afterwards, and it survives the chat scrolling away. A line that only
  * went to one of them always turned out to be the line that mattered.
  *
- * <h2>{@link #ENABLED} is a constant, and deliberately not an environment check</h2>
- * It used to be {@code !FMLEnvironment.isProduction()}. That is almost certainly
- * correct - a dev run logs {@code DEV} at startup - but "almost certainly" is
- * how a whole session went by with the owner reporting that no debug line ever
- * printed, and no way to tell whether that meant the gate was shut or the code
- * path was never reached. Those are opposite bugs and they looked identical.
+ * <h2>The gate is a config flag, and it reports itself</h2>
+ * It was once {@code !FMLEnvironment.isProduction()}, and that was replaced by a
+ * hard-coded {@code true} because a whole session went by with the owner
+ * reporting that no debug line ever printed and no way to tell whether the gate
+ * was shut or the code path was never reached - opposite bugs that looked
+ * identical.
  *
- * <p>So the gate is now a boolean you can read. This mod is a dev build with one
- * tester and is not shipped; when it is, this becomes a config flag or these
- * lines go away with {@code wiki/known-gaps.html} gap 59.
+ * <p>Then the mod shipped, and the hard-coded {@code true} shipped with it:
+ * players who were handed 0.3.2 got {@code [Cowboy]} and {@code [Horseman]}
+ * lines in their chat, which is noise to somebody who is just playing. So it is
+ * now {@link ServerConfig#debugAnnounce()} - <b>on in a dev run, off in a normal
+ * install, and switchable in either</b>, which is what you want from someone
+ * who has a bug to report.
+ *
+ * <p>The lesson from the middle of that story is kept: the static block below
+ * still says, once, what the gate decided <i>and</i> what the environment check
+ * says, so "no debug lines printed" is answerable from the log rather than by
+ * guessing.
  */
 public final class DebugAnnounce {
 
-    /** Flip to {@code false} to silence every line below. See the class comment. */
-    public static final boolean ENABLED = true;
-
     static {
-        // Says, once, both what this class decided and what the old gate would
-        // have decided. If a future report is "no debug lines printed", this line
-        // is the first thing to look for: present means the class loaded and the
-        // switch is on, absent means nothing here ever ran.
-        HorseGenetics.LOGGER.info("[Debug] chat+log diagnostics ENABLED={}, FMLEnvironment.isProduction()={}",
-                ENABLED, productionOrUnknown());
+        // Says, once, both what the gate decided and what the environment check
+        // says. If a future report is "no debug lines printed", this line is the
+        // first thing to look for: present means the class loaded and tells you
+        // which way the switch went, absent means nothing here ever ran.
+        HorseGenetics.LOGGER.info("[Debug] chat+log diagnostics enabled={} (config debug.announce), "
+                        + "FMLEnvironment.isProduction()={}",
+                enabled(), productionOrUnknown());
     }
 
     /** {@code isProduction()} throws if no loader is active; never let that break loading. */
@@ -59,14 +66,17 @@ public final class DebugAnnounce {
     private DebugAnnounce() {
     }
 
-    /** Is this a build where the lines below do anything? */
+    /**
+     * Is this a build where the lines below do anything? Off by default in a
+     * normal install; {@code debug.announce} in the server config turns it on.
+     */
     public static boolean enabled() {
-        return ENABLED;
+        return ServerConfig.debugAnnounce();
     }
 
     /** One line to everyone in this level, and one to the log: {@code [tag] message}. */
     public static void say(ServerLevel level, String tag, String message, ChatFormatting colour) {
-        if (!ENABLED) {
+        if (!enabled()) {
             return;
         }
         HorseGenetics.LOGGER.info("[{}] {}", tag, message);
@@ -87,7 +97,7 @@ public final class DebugAnnounce {
      * in a chat box but are exactly what you want in a pasted log.
      */
     public static void log(String tag, String message) {
-        if (ENABLED) {
+        if (enabled()) {
             HorseGenetics.LOGGER.info("[{}] {}", tag, message);
         }
     }

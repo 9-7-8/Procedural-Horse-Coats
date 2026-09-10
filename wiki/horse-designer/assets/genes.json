@@ -27163,36 +27163,59 @@
   "phase": "magical",
   "priority": 210,
   "alleles": [
-    { "token": "Sntch", "label": "Suntouched (Sntch)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "Sntch",
+      "label": "Suntouched (Sntch)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "expressions": [
     {
       "id": "suntouched",
       "name": "Suntouched",
       "description": "The mane and tail burn molten gold, bright enough to read by in the dark, and the horse casts light on the ground around it as it moves. A haze of gold dust drifts off its body.",
-      "when": [ "Sntch/Sntch", "Sntch/n" ],
+      "when": [
+        "Sntch/Sntch",
+        "Sntch/n"
+      ],
       "layers": [
         {
           "name": "molten-gold glow through the mane and tail",
           "masks": [
-            { "type": "PARTS", "parts": [ "HAIR" ] }
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#ffcf47", "strength": 88, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffcf47",
+            "strength": 88,
+            "opacity": 100
+          }
         }
       ],
       "effects": [
         {
           "type": "glow",
           "light": 12,
-          "parts": [ "HAIR" ]
+          "parts": [
+            "HAIR"
+          ]
         },
         {
           "type": "emitter",
           "kind": "particle",
           "shape": "point",
           "anchor": "body",
-          "trigger": { "interval": 6 },
+          "trigger": {
+            "interval": 6
+          },
           "particle": "minecraft:dust",
           "color": "#ffcf47",
           "chance": 0.35
@@ -27208,9 +27231,10 @@
   ],
   "founders": {
     "Sntch/Sntch": 0.0061035,
-    "Sntch/n": 1.5502930,
+    "Sntch/n": 1.550293,
     "n/n": 98.4436035
-  }
+  },
+  "blurb": "A horse lit from within - molten-gold mane and tail that stay bright in the dark, and a body that casts light like a torch. It sheds a slow drift of gold sparks as it stands or moves."
 },
 {
   "format": 3,
@@ -28969,52 +28993,96 @@
   "phase": "magical",
   "priority": 215,
   "alleles": [
-    { "token": "Wtb", "label": "Waterborn (Wtb)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "Wtb",
+      "label": "Waterborn (Wtb)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "knobs": [
-    { "name": "stripeSeed", "type": "seed" },
-    { "name": "stripeSpacing", "min": 1.6, "max": 2.8 }
+    {
+      "name": "stripeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "stripeSpacing",
+      "min": 1.6,
+      "max": 2.8
+    }
   ],
   "expressions": [
     {
       "id": "waterborn",
       "name": "Waterborn",
       "description": "Neon-blue streaks run through the mane and tail, blue dust trails from the hooves on the move, a grown horse walks over water instead of sinking into it, and a tamed mare can be milked for a bucket of water.",
-      "when": [ "Wtb/Wtb", "Wtb/n" ],
+      "when": [
+        "Wtb/Wtb",
+        "Wtb/n"
+      ],
       "layers": [
         {
           "name": "neon blue stripes down the mane and tail",
           "masks": [
-            { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
-              "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+            {
+              "type": "STRIPES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": "$stripeSpacing",
+              "duty": 0.4,
+              "warp": 0.8
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#1ec8ff",
+            "strength": 92,
+            "opacity": 100
+          }
         }
       ],
       "effects": [
         {
           "type": "traversal",
           "flag": "walk_on_water",
-          "when": { "flag": "adult" }
+          "when": {
+            "flag": "adult"
+          }
         },
         {
           "type": "emitter",
           "kind": "particle",
           "shape": "trail",
           "anchor": "feet",
-          "trigger": { "on_move": {} },
+          "trigger": {
+            "on_move": {}
+          },
           "particle": "minecraft:dust",
           "color": "#1ec8ff",
           "chance": 0.7
         },
         {
           "type": "yield",
-          "trigger": { "on_interact": "minecraft:bucket" },
+          "trigger": {
+            "on_interact": "minecraft:bucket"
+          },
           "consumes": "minecraft:bucket",
           "produces": "minecraft:water_bucket",
           "cooldown": 2400,
-          "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
+          "when": {
+            "all": [
+              {
+                "flag": "sex_female"
+              },
+              {
+                "flag": "tamed"
+              }
+            ]
+          }
         }
       ]
     },
@@ -29029,7 +29097,8 @@
     "Wtb/Wtb": 0.0123457,
     "Wtb/n": 2.1975309,
     "n/n": 97.7901234
-  }
+  },
+  "blurb": "Neon-blue streaks through the mane and tail, and a horse that walks on the surface of water instead of wading. It leaves a trail of blue sparks where it treads, and a tamed mare can be milked with an empty bucket for a bucket of water."
 },
 {
   "format": 3,

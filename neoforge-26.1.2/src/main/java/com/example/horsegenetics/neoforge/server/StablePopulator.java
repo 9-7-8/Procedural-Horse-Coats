@@ -15,7 +15,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.equine.Horse;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
@@ -100,6 +99,19 @@ public final class StablePopulator {
     private StablePopulator() {
     }
 
+    /** Already waiting? Same structure, same corner - the key claim() uses. */
+    private static boolean queued(Identifier structure, BoundingBox box) {
+        for (Pending p : QUEUE) {
+            if (p.structure().equals(structure)
+                    && p.box().minX() == box.minX()
+                    && p.box().minY() == box.minY()
+                    && p.box().minZ() == box.minZ()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ------------------------------------------------------------------
     // Noticing a stable
     // ------------------------------------------------------------------
@@ -122,10 +134,27 @@ public final class StablePopulator {
                 continue;
             }
             BoundingBox box = start.getBoundingBox();
-            // Only the chunk holding the structure's own start queues it, so a
-            // piece spanning six chunks is queued once rather than six times.
-            if (new ChunkPos(box.minX() >> 4, box.minZ() >> 4).equals(chunk.getPos())) {
+            // Deduped by identity, NOT by position. This used to queue a stable
+            // only when the chunk being loaded was the one containing the box's
+            // minimum corner - which is not the same chunk as the one holding
+            // the start. A jigsaw start piece is placed at its chunk's corner
+            // and then rotated, and three of the four rotations carry the box
+            // into -x or -z, i.e. into the previous chunk. So three stables in
+            // four were never queued at all and generated empty, which is
+            // exactly how it was reported: the buildings are there, the horses
+            // are not. StablePopulationData.claim() is what makes this happen
+            // once per world, and it is per (structure, corner), so queueing
+            // the same stable more than once is harmless.
+            if (!queued(id, box)) {
                 QUEUE.add(new Pending(id, box, now + SETTLE_TICKS));
+                // Log, not DebugAnnounce: this is once per stable per world and
+                // it is the line that answers "the building is there and the
+                // horses are not", so it must survive debug.announce being off.
+                // Its partner is the "filled ... with N horse(s)" line below;
+                // one without the other tells you which half broke.
+                HorseGenetics.LOGGER.info("[Stables] queued {} box {},{},{} to {},{},{}",
+                        id, box.minX(), box.minY(), box.minZ(),
+                        box.maxX(), box.maxY(), box.maxZ());
             }
         }
     }

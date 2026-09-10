@@ -188,8 +188,28 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final int LIST_TOP = 40;
     private static final int ALLELE_W = 38;
     private static final int REMOVE_W = 14;
-    private static final int RIGHT_W = 96;
-    private static final int RIGHT_STEP = 22;
+    /**
+     * <b>Wide enough for the widest label the column actually carries.</b> It
+     * was 96, and several labels were simply wider than that: "Spawn (creative
+     * only)" measures 111px, and "Breed: " plus a truncated name and its arrow
+     * ran past 120. A vanilla button does not shrink or wrap its label, so they
+     * were drawn straight over the edges - reported, accurately, as the buttons
+     * being "WAY too cramped".
+     */
+    private static final int RIGHT_W = 128;
+
+    /** 20-high buttons with a 4px gutter. Was 22, i.e. a 2px gutter. */
+    private static final int RIGHT_STEP = 24;
+
+    /**
+     * The tightest gutter {@link #rightStep()} will squeeze to - buttons
+     * touching, no gap at all. Below this it stops giving and lets the two
+     * groups meet, because there is nothing left to give.
+     */
+    private static final int RIGHT_STEP_MIN = 20;
+
+    /** Rows in the top group: Age, Sex, Breed, Randomize, Add, Rnd health, Clear. */
+    private static final int RIGHT_ROWS = 7;
     private static final int PANEL = 0x90000000;
     /** The padlock column down the left of the gene list. */
     private static final int LOCK_W = 10;
@@ -199,6 +219,11 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final int ARROW_W = 14;
 
     /** Many-allele genes (particle, KIT, ...) get a scrollable list instead of a cycle button. */
+    /** The hover blurb's panel: width, its text's line height, and its margin. */
+    private static final int BLURB_W = 176;
+    private static final int BLURB_LINE_H = 10;
+    private static final int BLURB_PAD = 5;
+
     private static final int DD_ROW_H = 12;
     private static final int DD_VISIBLE = 8;
     private static final int DD_W = 76;
@@ -747,6 +772,35 @@ public final class CustomHorseSpawnScreen extends Screen {
         return this.width - RIGHT_W - 8;
     }
 
+    /**
+     * Top of the group pinned to the bottom of the column - Make egg, Copy /
+     * Paste, Spawn, Cancel, each {@link #RIGHT_STEP} apart, with Cancel landing
+     * 26 from the bottom edge.
+     */
+    private int bottomStackTop() {
+        return this.height - 26 - 3 * RIGHT_STEP;
+    }
+
+    /**
+     * The top group grows down and the bottom group is pinned up, so on a short
+     * window they meet. The gutter is what gives: the roomy {@link #RIGHT_STEP}
+     * whenever it fits, otherwise the largest step that does, down to
+     * {@link #RIGHT_STEP_MIN}. Labels never truncate at any size - only the
+     * spacing between rows changes.
+     *
+     * <p><b>It cannot save every size.</b> Seven 20-high buttons need 140px
+     * even touching, and a 1080p screen at GUI scale 4 leaves about 120 - so
+     * the two groups still overlap below roughly 290px of window, exactly as
+     * they did before this existed. Fixing that means the column scrolls or
+     * splits, which is a bigger change than the one asked for; it is written
+     * down in {@code wiki/known-gaps.html} rather than half-done here.
+     */
+    private int rightStep() {
+        int available = bottomStackTop() - 8 - (LIST_TOP + 4);
+        int fits = (available - 20) / (RIGHT_ROWS - 1);
+        return Math.max(RIGHT_STEP_MIN, Math.min(RIGHT_STEP, fits));
+    }
+
     private int previewLeft() {
         return LIST_X + listWidth() + 8;
     }
@@ -878,6 +932,7 @@ public final class CustomHorseSpawnScreen extends Screen {
 
         int rx = rightX();
         int ry = LIST_TOP + 4;
+        final int rightStep = rightStep();
         addRenderableWidget(Button.builder(
                         Component.literal(baby ? "Age: Foal" : "Age: Adult"),
                         b -> {
@@ -885,7 +940,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                             rebuildWidgets();
                         })
                 .bounds(rx, ry, RIGHT_W, 20).build());
-        ry += RIGHT_STEP;
+        ry += rightStep;
         addRenderableWidget(Button.builder(
                         Component.literal(female ? "Sex: Mare" : "Sex: Stallion"),
                         b -> {
@@ -893,18 +948,20 @@ public final class CustomHorseSpawnScreen extends Screen {
                             rebuildWidgets();
                         })
                 .bounds(rx, ry, RIGHT_W, 20).build());
-        ry += RIGHT_STEP;
+        ry += rightStep;
+        // Fitted to the button, not cut at a fixed character count. Twelve
+        // characters was a guess at what fitted a 96px button and was wrong in
+        // both directions - it truncated names that would have fitted and let
+        // through ones that did not. truncate() measures.
         String breedName = breedIndex == 0 ? "(none)" : breedChoices.get(breedIndex - 1).name();
-        if (breedName.length() > 12) {
-            breedName = breedName.substring(0, 11) + "…";
-        }
+        breedName = truncate(breedName, RIGHT_W - this.font.width("Breed:  ▾") - 8);
         final int breedBtnX = rx;
         final int breedBtnY = ry;
         addRenderableWidget(Button.builder(
                         Component.literal("Breed: " + breedName + " ▾"),
                         b -> openDropdown(Dd.BREED, breedBtnX, breedBtnY))
                 .bounds(rx, ry, RIGHT_W, 20).build());
-        ry += RIGHT_STEP;
+        ry += rightStep;
         // Two split buttons. The face does the thing; the arrow picks which
         // thing it is, and the choice sticks - the label always says what will
         // happen next.
@@ -918,7 +975,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("▾"),
                         b -> openDropdown(Dd.RANDOMIZE, rx, randY + 20))
                 .bounds(rx + RIGHT_W - ARROW_W, ry, ARROW_W, 20).build());
-        ry += RIGHT_STEP;
+        ry += rightStep;
         final int addY = ry;
         addRenderableWidget(Button.builder(
                         Component.literal(addScope.shortLabel()), b -> addRandom())
@@ -930,7 +987,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("▾"),
                         b -> openDropdown(Dd.ADD, rx, addY + 20))
                 .bounds(rx + RIGHT_W - ARROW_W, ry, ARROW_W, 20).build());
-        ry += RIGHT_STEP;
+        ry += rightStep;
         addRenderableWidget(Button.builder(
                         Component.literal(randomizeInvisible ? "Rnd health: on" : "Rnd health: off"),
                         b -> {
@@ -943,7 +1000,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                                 + "genes - so rolling a coat cannot quietly roll a lethal. On: it "
                                 + "rolls those too.")))
                 .bounds(rx, ry, RIGHT_W, 20).build());
-        ry += RIGHT_STEP;
+        ry += rightStep;
         addRenderableWidget(Button.builder(Component.literal("Clear genes"), b -> reset())
                 .bounds(rx, ry, RIGHT_W, 20).build());
 
@@ -956,7 +1013,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                 && Minecraft.getInstance().player.getAbilities().instabuild;
         Button spawnButton = Button.builder(Component.literal(creative ? "Spawn" : "Spawn (creative only)"),
                         b -> spawn())
-                .bounds(rx, this.height - 48, RIGHT_W, 20)
+                .bounds(rx, bottomStackTop() + 2 * RIGHT_STEP, RIGHT_W, 20)
                 .tooltip(creative ? null : net.minecraft.client.gui.components.Tooltip.create(
                         Component.literal("The custom spawn egg builds a horse from scratch, so it is a "
                                 + "creative-mode tool. Switch to creative to spawn what you have built; "
@@ -975,15 +1032,15 @@ public final class CustomHorseSpawnScreen extends Screen {
                         Component.literal("Put this whole horse on the clipboard - alleles, "
                                 + "epigenetics, name, sex, age and breed. The horse designer's "
                                 + "Import reads the same text.")))
-                .bounds(rx, this.height - 70, halfW, 20).build());
+                .bounds(rx, bottomStackTop() + RIGHT_STEP, halfW, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Paste"), b -> pasteHorse())
                 .tooltip(net.minecraft.client.gui.components.Tooltip.create(
                         Component.literal("Read a horse off the clipboard. Tolerant: a gene this "
                                 + "build does not have is dropped, an epigenome that will not "
                                 + "parse is re-rolled, an unknown breed loses its label.")))
-                .bounds(rx + halfW + 4, this.height - 70, halfW, 20).build());
+                .bounds(rx + halfW + 4, bottomStackTop() + RIGHT_STEP, halfW, 20).build());
         Button eggButton = Button.builder(Component.literal("Make egg"), b -> makeEgg())
-                .bounds(rx, this.height - 92, RIGHT_W, 20)
+                .bounds(rx, bottomStackTop(), RIGHT_W, 20)
                 .tooltip(net.minecraft.client.gui.components.Tooltip.create(
                         Component.literal(creative
                                 ? "Put this exact horse into a preset spawn egg instead of "
@@ -995,7 +1052,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         eggButton.active = creative;
         addRenderableWidget(eggButton);
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
-                .bounds(rx, this.height - 26, RIGHT_W, 20).build());
+                .bounds(rx, bottomStackTop() + 3 * RIGHT_STEP, RIGHT_W, 20).build());
     }
 
     /**
@@ -1544,6 +1601,13 @@ public final class CustomHorseSpawnScreen extends Screen {
         drawFitted(g, "epigenetics #" + Long.toHexString(epigenome.visibleFingerprint(genotype)),
                 LIST_X, this.height - 26, listW - 4, 0xFF8890A8);
 
+        // Last, so it sits over the preview and the genome line - but not over an
+        // open dropdown, which is drawn after this and is the thing you are
+        // actually pointing at.
+        if (dd == Dd.NONE && hovered >= 0) {
+            drawGeneBlurb(g, view.get(hovered).gene, hovered);
+        }
+
         if (dd != Dd.NONE) {
             drawDropdown(g, mouseX, mouseY);
         }
@@ -1631,6 +1695,80 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     /** Left-aligned at {@code (x, y)}, scaled down (never up) so the whole string fits {@code maxW}. */
+    /**
+     * <b>What this gene does, while you are pointing at it.</b> Drawn as a panel
+     * rather than a vanilla {@code Tooltip} for two reasons: a list row is not a
+     * widget here (an unadded row takes its click in {@code mouseClicked}), and
+     * the browser twin has no vanilla tooltip to mirror - a panel built out of
+     * fills and text exists identically in both.
+     *
+     * <p>It sits to the right of the list, which is empty space on this screen,
+     * so it never covers the thing you are reading. It is pushed back inside the
+     * window on both axes rather than being allowed to run off the edge.
+     *
+     * <p>{@link Gene#description()} is documented as possibly empty - callers
+     * are told to treat that as "no summary available" - so this draws nothing
+     * at all rather than an empty box. Every registered gene has one today, and
+     * {@code GeneDescriptionCoverageTest} keeps it that way; a drop-in gene with
+     * no blurb is the case this guards.
+     */
+    private void drawGeneBlurb(GuiGraphicsExtractor g, Gene gene, int hoveredIndex) {
+        String blurb = gene.description();
+        if (blurb == null || blurb.isBlank()) {
+            return;
+        }
+        List<String> lines = wrap(blurb, BLURB_W - 2 * BLURB_PAD);
+        String heading = gene.name();
+
+        int h = BLURB_PAD * 2 + BLURB_LINE_H + 2 + lines.size() * BLURB_LINE_H;
+        int x = LIST_X + listWidth() + 6;
+        int y = LIST_TOP + (hoveredIndex - scroll) * ROW_H - 2;
+        x = Math.min(x, this.width - BLURB_W - 4);
+        x = Math.max(4, x);
+        y = Math.min(y, this.height - h - 4);
+        y = Math.max(4, y);
+
+        g.fill(x - 1, y - 1, x + BLURB_W + 1, y + h + 1, 0xF00E0E16);
+        g.fill(x - 1, y - 1, x + BLURB_W + 1, y, 0xFF5A6478);
+        drawFitted(g, heading, x + BLURB_PAD, y + BLURB_PAD, BLURB_W - 2 * BLURB_PAD, 0xFFFFFFFF);
+        int ty = y + BLURB_PAD + BLURB_LINE_H + 2;
+        for (String line : lines) {
+            g.text(this.font, Component.literal(line), x + BLURB_PAD, ty, 0xFFC0C4D0);
+            ty += BLURB_LINE_H;
+        }
+    }
+
+    /**
+     * Greedy word wrap to a pixel width. Vanilla's {@code font.split} would do
+     * this, but it returns {@code FormattedCharSequence}s and the browser twin
+     * has to wrap the same string to the same width with its own measurer - so
+     * this is written out, in plain words, once per side. A single word longer
+     * than the line is left long rather than broken mid-word; nothing in a gene
+     * blurb is, and a hyphenated break reads worse than a slightly wide line.
+     */
+    private List<String> wrap(String text, int maxW) {
+        List<String> lines = new ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split(" ")) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            String candidate = line.isEmpty() ? word : line + " " + word;
+            if (this.font.width(candidate) <= maxW || line.isEmpty()) {
+                line.setLength(0);
+                line.append(candidate);
+            } else {
+                lines.add(line.toString());
+                line.setLength(0);
+                line.append(word);
+            }
+        }
+        if (!line.isEmpty()) {
+            lines.add(line.toString());
+        }
+        return lines;
+    }
+
     private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int color) {
         float w = this.font.width(text);
         if (w <= maxW || w <= 0) {
