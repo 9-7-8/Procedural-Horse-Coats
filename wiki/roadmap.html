@@ -204,6 +204,36 @@
 
 <hr>
 
+<h3 id="layer-over">An <code>"over"</code> flag, so a layer can say it paints on top</h3>
+
+<p>
+    <strong>The root cause behind <a href="known-gaps.html#gap-169">gap 169</a>, and
+    the only thing that would actually stop it recurring.</strong> A magical gene's
+    layers each measure their delta against the colour the <em>gene</em> started from
+    and the deltas are summed. Authors &mdash; human and model &mdash; write files as
+    though each layer painted over the one above it, because that is what layers mean
+    everywhere else, and the format gives them no way to say it. So they write the
+    thing that looks like stacking and get summing, and the result is a solid black
+    horse (dorsal wing), a white one (contour), or a star with no core (starburst).
+</p>
+
+<p>
+    The proposal is one optional per-layer flag: <code>"over": true</code> applies the
+    delta accumulated so far before this layer measures. Everything without the flag
+    behaves exactly as it does now, so <strong>no existing gene moves</strong> &mdash;
+    which is the property that makes it worth doing rather than changing the default.
+    Dorsal wing's original file would have been correct as written.
+</p>
+
+<p>
+    The cost is why it is here and not done: it is a format change, so it is the
+    <a href="making-a-gene.html#contracts">five-file contract</a> &mdash; the engine,
+    <code>SpecSchema</code>, the fixtures, the creator's JS twin and the designer
+    &mdash; plus a decision about whether <code>expected.json</code> and the goldens
+    move. <code>DeadLayerTest</code> is the cheap half and is already in; this is the
+    expensive half and wants the owner's call.
+</p>
+
 <h2 id="resizing">2. What horse resizing broke</h2>
 
 <p>

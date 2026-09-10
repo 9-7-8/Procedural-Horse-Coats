@@ -206,7 +206,7 @@ and fails *silently* when stale:
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs`; geometry also moves `:common:bakeGeneIcons` | `wiki/gene-creator/fixtures/expected.json`, `wiki/assets/gene-icons/` |
 | the coat PNGs, the name tables, **or `example-genes/`** | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets, incl. `wiki/gene-creator/js/examples.js` |
-| a gene's layers or masks | `*DeadLayerTest` (23s) - a layer that paints nothing fails it; fix the gene, then **delete its line** | `common/src/test/resources/dead-layers.txt` |
+| a gene's layers or masks | `*DeadLayerTest` (seconds) - a layer that paints nothing fails it; fix the gene, then **delete its line** | `common/src/test/resources/dead-layers.txt` |
 | **any file in `horsegenetics/genes/`, or any gene page's `<h1>` or tabs** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, the gene's `wiki/gene-*.html` **and the generated spans of `wiki/pages.js` and `index.html`** |
 | `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages) | `wiki/search-index.js` |
