@@ -1,10 +1,9 @@
 {
-  "format": 3,
   "key": "horsegenetics.dripwork",
   "name": "Dripwork",
   "phase": "magical",
   "priority": 124,
-  "rarity": "rare",
+  "rarity": "RARE",
   "blurb": "Heavy ink rings with solid pupils are scattered over a pale ground, each one trailing a drip straight down, with loose dots thrown between them.",
   "notes": [
     "The source was an SVG: two flat colours, near-black on off-white, about 12 KB - the smallest of the set and the only one already at poster weight. Rings with solid centres, small solid dots, and thick drips running down off the larger marks.",
@@ -337,10 +336,11 @@
     }
   ],
   "founders": {
-    "Dw/Dw": 0.0016,
-    "Dw/Dx": 0.00112,
-    "Dw/n": 0.16,
-    "Dx/Dx": 0.00512,
-    "n/n": 99.83216
-  }
+    "Dw/Dw": 0.002,
+    "Dw/Dx": 0.008,
+    "Dw/n": 0.038,
+    "Dx/Dx": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
 }

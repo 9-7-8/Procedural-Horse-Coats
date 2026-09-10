@@ -1,10 +1,9 @@
 {
-  "format": 3,
   "key": "horsegenetics.coastline",
   "name": "Coastline",
   "phase": "magical",
   "priority": 109,
-  "rarity": "uncommon",
+  "rarity": "UNCOMMON",
   "blurb": "A rust landmass lies across a sage sea with a pale grey coastline drawn all the way round it, and small rust islands, each with its own shore, scattered off it.",
   "notes": [
     "The source was an SVG: four flat colours traced off a photograph of a lichened seed pod, about 59 KB. A rust mass against dark sage, a pale grey line following the boundary between them, and small rust islands out in the sage, each ringed by the same pale grey.",
@@ -387,10 +386,11 @@
     }
   ],
   "founders": {
-    "Cl/Cl": 0.0042,
-    "Cl/Cm": 0.00294,
-    "Cl/n": 0.42,
-    "Cm/Cm": 0.01344,
-    "n/n": 99.55942
-  }
+    "Cl/Cl": 0.004,
+    "Cl/Cm": 0.016,
+    "Cl/n": 0.076,
+    "Cm/Cm": 0.016,
+    "n/n": 99.888
+  },
+  "format": 3
 }

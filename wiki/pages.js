@@ -175,8 +175,15 @@ window.HG.pages = {
         {
             title: "Magical coat genes",
             items: [
+                { href: "gene-blackwork.html", text: "Blackwork", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-coastline.html", text: "Coastline", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-contour.html", text: "Contour", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-crazework.html", text: "Crazework", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-cutie-mark.html", text: "Cutie mark", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-dhampir.html", text: "Dhampir", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-dorsal-wing.html", text: "Dorsal Wing", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-dripwork.html", text: "Dripwork", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-dustfall.html", text: "Dustfall", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-healer.html", text: "Healer", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-hood.html", text: "Hood", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-light.html", text: "Light", kind: "magical", views: ["gameplay","coding","science"] },
@@ -185,9 +192,16 @@ window.HG.pages = {
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-mane-color.html", text: "Mane colour", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-nymphaline.html", text: "Nymphaline", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-overcast.html", text: "Overcast", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-ringwork.html", text: "Ringwork", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-rising-sun.html", text: "Rising Sun", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-serpentine.html", text: "Serpentine", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-shallows.html", text: "Shallows", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-squiggle.html", text: "Squiggle", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-suit.html", text: "Suit", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-synort.html", text: "Synort", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] }
+                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-teardrop.html", text: "Teardrop", kind: "magical", views: ["gameplay","coding"] }
             ]
         },
         {

@@ -1,10 +1,9 @@
 {
-  "format": 3,
   "key": "horsegenetics.rising_sun",
   "name": "Rising Sun",
   "phase": "magical",
   "priority": 123,
-  "rarity": "epic",
+  "rarity": "EPIC",
   "blurb": "Heavy black ribbons roll across a white coat in even waves, each shadowed a little below by grey, and a single red disc sits on either flank.",
   "notes": [
     "The source was an SVG: four flat colours traced off a poster - black ribbons waving across white, each carrying a grey shadow offset down and left, and one flat red-orange disc laid over them. About 29 KB.",
@@ -335,10 +334,11 @@
     }
   ],
   "founders": {
-    "Rs/Rs": 0.0011,
-    "Rs/Rc": 0.00077,
-    "Rs/n": 0.11,
-    "Rc/Rc": 0.00352,
-    "n/n": 99.88461
-  }
+    "Rs/Rs": 0.001,
+    "Rs/Rc": 0.004,
+    "Rs/n": 0.019,
+    "Rc/Rc": 0.004,
+    "n/n": 99.972
+  },
+  "format": 3
 }

@@ -325,6 +325,39 @@ put them on are the black and seal-brown ones, and the honest fix if a form turn
 invisible is a hand edit to that gene rather than another sweep - the transformer bands
 were chosen for the set and are wrong for individuals by construction.</li>
 
+<li id="gap-168"><strong>The SVG mask flattens every curve to a fixed sixteen segments,
+so a drawing's cost is its <em>command count</em> rather than its size.</strong> Opened
+2026-09-10. <code>SvgPath.CURVE_SAMPLES</code> is 16 regardless of how long the span is,
+which is right for a hand-drawn outline of seven big cubics and wrong by two orders of
+magnitude for a traced one of two hundred and seventy tiny ones: blackwork's ornament
+flattened to <strong>4368</strong> points and dorsal wing's butterfly to <strong>1637</strong>,
+both over the 1024 ceiling, for drawings that need a few hundred. Both were simplified
+by hand into polylines and both ship, so nothing is broken - what is <em>missing</em> is
+that an author cannot tell in advance whether a drawing will fit, and the number they
+would have to predict is not the one they can see. <strong>The fix is adaptive
+flattening</strong>: subdivide a span until its chord error is under a tolerance instead
+of always sixteen, which costs a traced outline what it is actually worth and costs
+moonwing nothing. It is not done here because it moves every existing SVG gene's bake
+golden, <code>expected.json</code>, and the creator's JS twin, which is a
+<a href="making-a-gene.html#contracts">five-file change</a> and not something to do on
+the way past an intake.</li>
+
+<li id="gap-169"><strong>Nothing warns an author that a gene's layers SUM rather than
+stack.</strong> Opened 2026-09-10, after dorsal wing shipped from intake painting a
+solid black horse. Every layer of a magical gene measures its delta against the colour
+the <em>gene</em> started from and the deltas are added, so a <code>TINT</code> of -200
+under a <code>TOWARD</code> teal gives teal minus 200. The rule is written down - the
+prompt's rule 8, and <a href="making-a-gene.html">making a gene</a> says it too - and it
+is still the easiest thing in this format to get wrong, because <em>every gene that
+works does so by having disjoint masks</em> and so never demonstrates the cost. It is
+also invisible to every check that exists: the file is valid, the layers are valid, the
+gene paints plenty of texels, and it comes out one flat colour. <strong>A loader check
+is possible and would be cheap</strong>: a layer whose mask set is a superset of a later
+layer's, where the earlier op is a large negative <code>TINT</code> or a
+<code>TOWARD</code> far from the later one, is a recognisable shape and is nearly always
+this mistake rather than a deliberate wash. Worth building the next time an import
+arrives with it.</li>
+
 <li id="gap-129"><strong><a href="gene-wing-cloak.html">Wing cloak</a> is killswitched until it is retooled.</strong> Opened and parked 2026-09-09. It paints fewer than <code>CoatVisibility.MIN_TEXELS</code> (24) out of roughly five thousand mapped texels &mdash; enough that the engine can tell it apart from a plain horse, not enough that a person could. The <a href="#gap-44">seed scramble</a> did not cause that; it only decided which side of the line this particular draw fell on, and the gene was marginal well before. What made it visible was the icon baker refusing it an icon on every staged backdrop, taking the icon count from 156 to 155. <strong>Owner&rsquo;s call: it wants rewriting rather than the threshold lowering</strong>, so it is switched off rather than left in the world in a state nobody can see. <strong>The killswitch is one line</strong>: <code>"wing_cloak.json"</code> is out of <code>horsegenetics/genes/index.json</code>, so nothing registers the gene &mdash; no horse carries it, it has no carrot, it is in neither gene editor, and it is off the wiki&rsquo;s page list. <strong>Every file still exists</strong>, including the gene JSON and the wiki page, which now carries a banner saying so and is reachable by direct link. Putting the line back and re-running the three bake tasks restores it &mdash; and <strong>regenerating the index from the folder does the same thing by accident</strong>, which happened on 2026-09-09 and is <a href="#gap-162">gap 162</a>. <strong>Switching it off changed no horse</strong>: all 1056 composed-coat hashes in the pipeline golden are byte-identical and only the <code>wing_cloak=n/n</code> segment left the genotype code, while the bake golden lost exactly its three lines and nothing else &mdash; which is also a clean demonstration of <a href="#gap-47">gap 47</a>&rsquo;s fix, since removing a locus no longer disturbs any other gene&rsquo;s epigenetics. When it is retooled, check it against <a href="making-a-gene.html#scale">the scale rule</a> first: under half a body unit is sub-texel, and that is the commonest reason a gene comes out almost invisible.</li>
 
 <li id="gap-128"><strong>Closed 2026-09-09 as soon as it was found: the pipeline golden&rsquo;s documented regeneration path did not work, and failed by restoring a stale file.</strong> <code>CoatPipelineGoldenTest</code>&rsquo;s javadoc has always said &ldquo;run the test, copy the file it writes to <code>common/build/coat-golden.txt</code> back into place&rdquo;. It only ever wrote that file when the golden was <em>missing</em> from the classpath, never on a mismatch - so a red run left <code>build/coat-golden.txt</code> holding whatever an earlier run had put there. <strong>Copying it back therefore silently reinstated an old golden</strong>, and the test went green having compared nothing new. That happened once during this session and was caught only because the file &ldquo;moved&rdquo; by zero lines while the test still failed. It now writes the actual on a mismatch too, the way <code>CoatBakeGoldenTest</code> already did, and the javadoc no longer tells you to delete the golden first - which was itself a destructive step to put in front of someone who only wants to see what changed.</li>

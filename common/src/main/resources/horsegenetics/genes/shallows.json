@@ -1,10 +1,9 @@
 {
-  "format": 3,
   "key": "horsegenetics.shallows",
   "name": "Shallows",
   "phase": "magical",
   "priority": 115,
-  "rarity": "rare",
+  "rarity": "RARE",
   "blurb": "Ripples spread across the coat in rings of short blue flecks over a pale ground, with irregular lime splotches lying over them and a black depth flooding down from the topline in lobed fingers.",
   "notes": [
     "The source was an SVG: four flat colours - a near-white ground, a strong blue, a lime and a near-black - traced off a photograph, about 130 KB of path data. Too many points for the SVG mask, and a field rather than an outline, so it is rebuilt as a rule.",
@@ -14,27 +13,67 @@
     "The flecks are the spiral multiplied by a SPECKLE, which is what breaks a continuous ring into dashes. Pitch is set against width: radius 9 over 5 turns is a 1.8-unit pitch, and a 0.6-unit line leaves 1.2 units of pale between rings. Winding turns past about 7 closes that gap and the whole field resolves as a blue wash.",
     "The black flood is AXIS first and FRACTAL second on purpose - the band is the region and the fractal cuts the fingers into it. Its softness is 0.06 rather than the usual 0.12 because the source's boundary is hard-edged, and a soft one there reads as a shadow instead of as depth."
   ],
-  "preview": { "base": "bay", "expression": "shallows" },
+  "preview": {
+    "base": "bay",
+    "expression": "shallows"
+  },
   "alleles": [
-    { "token": "Sh", "label": "Shallows (Sh)" },
-    { "token": "Sc", "label": "Coloured shallows (Sc)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "Sh",
+      "label": "Shallows (Sh)"
+    },
+    {
+      "token": "Sc",
+      "label": "Coloured shallows (Sc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "knobs": [
-    { "name": "rippleSeed", "type": "seed" },
-    { "name": "fleckSeed", "type": "seed" },
-    { "name": "splotchSeed", "type": "seed" },
-    { "name": "floodSeed", "type": "seed" },
-    { "name": "turns", "min": 4.0, "max": 6.5 },
-    { "name": "waterHue", "min": 0, "max": 360 },
-    { "name": "splotchHue", "min": 0, "max": 360 }
+    {
+      "name": "rippleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "fleckSeed",
+      "type": "seed"
+    },
+    {
+      "name": "splotchSeed",
+      "type": "seed"
+    },
+    {
+      "name": "floodSeed",
+      "type": "seed"
+    },
+    {
+      "name": "turns",
+      "min": 4.0,
+      "max": 6.5
+    },
+    {
+      "name": "waterHue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "splotchHue",
+      "min": 0,
+      "max": 360
+    }
   ],
   "expressions": [
     {
       "id": "shallows",
       "name": "Shallows",
       "description": "A pale wet ground carrying rings of short blue flecks that spread from a centre on each part, lime splotches scattered over them, and a black depth reaching down from the back in lobed fingers.",
-      "when": [ "Sh/Sh", "Sh/Sc", "Sh/n" ],
+      "when": [
+        "Sh/Sh",
+        "Sh/Sc",
+        "Sh/n"
+      ],
       "notes": [
         "Layer order is the source's stacking order and it matters: ground, flecks, splotches, flood. The lime sits over the blue with no relation to the arcs, which is what stops the splotches reading as part of the ripple, and the black goes last because in the source it covers everything it reaches."
       ],
@@ -42,32 +81,98 @@
         {
           "name": "the pale wet ground",
           "masks": [
-            { "type": "ALL" }
+            {
+              "type": "ALL"
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#eff1f2", "strength": 72, "opacity": 82 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#eff1f2",
+            "strength": 72,
+            "opacity": 82
+          }
         },
         {
           "name": "the ripple, broken into flecks",
           "masks": [
-            { "type": "SPIRAL", "seed": "$rippleSeed", "radius": 9.0, "turns": "$turns", "width": 0.6, "axis": "Z", "softness": 0.15 },
-            { "type": "SPECKLE", "seed": "$fleckSeed", "spacing": 1.3, "size": 0.55, "density": 0.66, "clumping": 0.5, "clumpScale": 8.0, "softness": 0.25 }
+            {
+              "type": "SPIRAL",
+              "seed": "$rippleSeed",
+              "radius": 9.0,
+              "turns": "$turns",
+              "width": 0.6,
+              "axis": "Z",
+              "softness": 0.15
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$fleckSeed",
+              "spacing": 1.3,
+              "size": 0.55,
+              "density": 0.66,
+              "clumping": 0.5,
+              "clumpScale": 8.0,
+              "softness": 0.25
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#2929bd", "strength": 94, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#2929bd",
+            "strength": 94,
+            "opacity": 100
+          }
         },
         {
           "name": "the lime splotches over the top",
           "masks": [
-            { "type": "FRACTAL", "seed": "$splotchSeed", "scale": 7.0, "octaves": 2, "warp": 0.5, "threshold": 0.66, "softness": 0.1 }
+            {
+              "type": "FRACTAL",
+              "seed": "$splotchSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.5,
+              "threshold": 0.66,
+              "softness": 0.1
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#bfe84d", "strength": 95, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#bfe84d",
+            "strength": 95,
+            "opacity": 100
+          }
         },
         {
           "name": "the black depth, fingering down from the topline",
           "masks": [
-            { "type": "AXIS", "axis": "Y", "space": "part", "parts": [ "BODY", "NECK" ], "from": 0.5, "to": 1.25, "softness": 0.42 },
-            { "type": "FRACTAL", "seed": "$floodSeed", "scale": 10.0, "octaves": 2, "warp": 0.75, "threshold": 0.44, "softness": 0.06 }
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "from": 0.5,
+              "to": 1.25,
+              "softness": 0.42
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$floodSeed",
+              "scale": 10.0,
+              "octaves": 2,
+              "warp": 0.75,
+              "threshold": 0.44,
+              "softness": 0.06
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#0b120b", "strength": 97, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b120b",
+            "strength": 97,
+            "opacity": 100
+          }
         }
       ]
     },
@@ -75,7 +180,9 @@
       "id": "coloured",
       "name": "Coloured shallows",
       "description": "The same water and the same splotches in two colours this line of horses runs to, which need not agree with each other.",
-      "when": [ "Sc/Sc" ],
+      "when": [
+        "Sc/Sc"
+      ],
       "notes": [
         "The recessive coloured half of the usual pair, and the one place this gene carries two independent hue knobs rather than one. The source's own pairing is a blue water under a yellow-green splotch - near enough opposite sides of the wheel - so a single hue driving both would collapse the thing that makes it read. The ground and the depth stay achromatic: they are the value floor and ceiling the two hues are judged against."
       ],
@@ -83,32 +190,102 @@
         {
           "name": "the pale wet ground",
           "masks": [
-            { "type": "ALL" }
+            {
+              "type": "ALL"
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#eff1f2", "strength": 72, "opacity": 82 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#eff1f2",
+            "strength": 72,
+            "opacity": 82
+          }
         },
         {
           "name": "the ripple, broken into flecks",
           "masks": [
-            { "type": "SPIRAL", "seed": "$rippleSeed", "radius": 9.0, "turns": "$turns", "width": 0.6, "axis": "Z", "softness": 0.15 },
-            { "type": "SPECKLE", "seed": "$fleckSeed", "spacing": 1.3, "size": 0.55, "density": 0.66, "clumping": 0.5, "clumpScale": 8.0, "softness": 0.25 }
+            {
+              "type": "SPIRAL",
+              "seed": "$rippleSeed",
+              "radius": 9.0,
+              "turns": "$turns",
+              "width": 0.6,
+              "axis": "Z",
+              "softness": 0.15
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$fleckSeed",
+              "spacing": 1.3,
+              "size": 0.55,
+              "density": 0.66,
+              "clumping": 0.5,
+              "clumpScale": 8.0,
+              "softness": 0.25
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$waterHue", "saturation": 0.82, "lightness": 0.45, "strength": 94, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$waterHue",
+            "saturation": 0.82,
+            "lightness": 0.45,
+            "strength": 94,
+            "opacity": 100
+          }
         },
         {
           "name": "the splotches over the top",
           "masks": [
-            { "type": "FRACTAL", "seed": "$splotchSeed", "scale": 7.0, "octaves": 2, "warp": 0.5, "threshold": 0.66, "softness": 0.1 }
+            {
+              "type": "FRACTAL",
+              "seed": "$splotchSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "warp": 0.5,
+              "threshold": 0.66,
+              "softness": 0.1
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$splotchHue", "saturation": 0.72, "lightness": 0.68, "strength": 95, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$splotchHue",
+            "saturation": 0.72,
+            "lightness": 0.68,
+            "strength": 95,
+            "opacity": 100
+          }
         },
         {
           "name": "the black depth, fingering down from the topline",
           "masks": [
-            { "type": "AXIS", "axis": "Y", "space": "part", "parts": [ "BODY", "NECK" ], "from": 0.5, "to": 1.25, "softness": 0.42 },
-            { "type": "FRACTAL", "seed": "$floodSeed", "scale": 10.0, "octaves": 2, "warp": 0.75, "threshold": 0.44, "softness": 0.06 }
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "from": 0.5,
+              "to": 1.25,
+              "softness": 0.42
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$floodSeed",
+              "scale": 10.0,
+              "octaves": 2,
+              "warp": 0.75,
+              "threshold": 0.44,
+              "softness": 0.06
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#0b120b", "strength": 97, "opacity": 100 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b120b",
+            "strength": 97,
+            "opacity": 100
+          }
         }
       ]
     },
@@ -120,10 +297,11 @@
     }
   ],
   "founders": {
-    "Sh/Sh": 0.0018,
-    "Sh/Sc": 0.0012,
-    "Sh/n": 0.17,
-    "Sc/Sc": 0.006,
-    "n/n": 99.821
-  }
+    "Sh/Sh": 0.002,
+    "Sh/Sc": 0.008,
+    "Sh/n": 0.038,
+    "Sc/Sc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
 }

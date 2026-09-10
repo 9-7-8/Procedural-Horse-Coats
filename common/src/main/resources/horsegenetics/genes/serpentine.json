@@ -1,10 +1,9 @@
 {
-  "format": 3,
   "key": "horsegenetics.serpentine",
   "name": "Serpentine",
   "phase": "magical",
   "priority": 108,
-  "rarity": "uncommon",
+  "rarity": "UNCOMMON",
   "blurb": "The coat runs in long streaky bands of taupe, sage and blue-grey with dark seams between them, and bright green ore is scattered through it in chips and dust.",
   "notes": [
     "The source was an SVG: twelve posterised colours traced off a photograph of a cut mineral slab, about 210 KB of path data across thirteen layers. A field, not an outline - rebuilt as a rule.",
@@ -393,10 +392,11 @@
     }
   ],
   "founders": {
-    "Sp/Sp": 0.0042,
-    "Sp/So": 0.00294,
-    "Sp/n": 0.42,
-    "So/So": 0.01344,
-    "n/n": 99.55942
-  }
+    "Sp/Sp": 0.004,
+    "Sp/So": 0.016,
+    "Sp/n": 0.076,
+    "So/So": 0.016,
+    "n/n": 99.888
+  },
+  "format": 3
 }

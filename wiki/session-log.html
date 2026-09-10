@@ -27,6 +27,139 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10c">2026-09-10</h2>
+
+<h3>Fourteen genes out of intake, two drawings that were traced photographs, one
+    that painted itself black, and fourteen founder tables that were four times
+    over budget.</h3>
+
+<p>The whole intake folder went in: blackwork, coastline, contour, crazework,
+    dorsal wing, dripwork, dustfall, overcast, ringwork, rising sun, serpentine,
+    shallows, squiggle and teardrop. Priorities 108&ndash;124, no clashes, and the
+    batch was hashed before anything was opened (two files once arrived holding a
+    third's content). Twelve of the fourteen needed nothing but installing. The
+    other two, and one thing wrong with all fourteen, are the session.</p>
+
+<h4>Two drawings were over the SVG point ceiling</h4>
+
+<p>Blackwork's ornament flattens to <strong>4368</strong> points and dorsal
+    wing's butterfly to <strong>1637</strong>, against a ceiling of
+    <code>SvgPath.MAX_POINTS</code> = 1024. The ceiling is a <em>cost</em> ceiling
+    &mdash; every mapped texel of every skin walks every segment &mdash; and it is
+    the guard that exists to stop a traced photograph going into a gene file.
+    These are traced photographs.</p>
+
+<p>What makes them expensive is not the drawing, it is the flattening rule: the
+    engine gives every cubic a fixed sixteen sub-segments, which is right for
+    <a href="gene-moonwing.html">moonwing</a>'s seven big curves and wildly wrong
+    for an outline of two hundred and seventy tiny ones. The drawings do not need
+    them. The viewBox is 1000 wide and a horse is about 150 pixels, so a point
+    every 1.5 units is already finer than a texel by an order of magnitude. Both
+    were flattened the way the engine flattens, run through
+    Ramer&ndash;Douglas&ndash;Peucker at whatever tolerance hit a 700-point budget,
+    and re-emitted as polylines &mdash; one point per vertex where a cubic costs
+    sixteen, and the silhouette identical to well under a texel.</p>
+
+<p class="muted">The engine-side alternative is adaptive flattening &mdash;
+    subdivide until the chord error is under a tolerance instead of always sixteen
+    &mdash; which would let a traced outline in at its natural cost and would also
+    move every existing SVG gene's golden, the spec fixtures and the creator's JS
+    twin. It is <a href="known-gaps.html#gap-168">gap 168</a> rather than something
+    to do on the way past.</p>
+
+<h4>Dorsal wing painted itself solid black, and the reason is worth knowing</h4>
+
+<p>The gene draws a butterfly along the spine: a near-black ground over the whole
+    silhouette, a teal margin band, rust squiggles, hot pink cells inside those.
+    On a horse it was <strong>a black horse</strong>. 484 texels moved on a bay and
+    not one of them was teal, rust or pink.</p>
+
+<div class="note warn">
+    <span class="label">A gene's layers do not stack, they SUM</span>
+    <p>
+        Every layer of a magical gene measures its delta against the colour the
+        <em>gene</em> started from &mdash; not against what the layer above it left
+        &mdash; and the deltas are added together. So a <code>TINT</code> of
+        <code>-200</code> on every channel under a <code>TOWARD</code> teal does not
+        give teal. It gives teal minus 200, which is black. Confirmed by deleting
+        the ground layer from the built resources and re-measuring: teal, rust and
+        pink all appear at once.
+    </p>
+    <p>
+        The prompt has said this since the import &mdash; rule 8, &ldquo;a layer
+        cannot see what the layer above it painted&rdquo; &mdash; and it is still
+        the easiest thing in this format to get wrong, because every gene that
+        <em>does</em> work does so by having disjoint masks and so never shows the
+        author what the rule costs.
+    </p>
+</div>
+
+<p>The fix is the decomposition the gene's own notes already describe, written as
+    subtraction instead of as stacking: the ground paints the inner shape
+    <em>minus</em> the rust patches, and the rust paints its patches <em>minus</em>
+    the pink cells. Nothing about the drawing, the colours or the nesting moved.</p>
+
+<h4>All fourteen founder tables were between three and six times over</h4>
+
+<p>The prompt tells an author to declare a rarity tier and let the budget derive
+    the table, precisely because the rates compound across a hundred and sixty
+    genes. All fourteen declared a tier <em>and</em> wrote a table anyway, and every
+    table was 2.9&times; to 6.3&times; the tier it declared. Together they claimed
+    <strong>2.87%</strong> of founders against a budget of <strong>0.62%</strong>
+    &mdash; which is not a rounding error, it is another two percentage points of
+    wild horses carrying something magical, on top of what the existing hundred and
+    forty-odd already spend. All fourteen were re-derived from their declared
+    tiers.</p>
+
+<h4>The three-form rule, applied for the first time as a rule</h4>
+
+<p>These arrived before <a href="making-a-gene.html#three-forms">the rule</a> was
+    written down, and every one of them is a white-or-pale form plus a coloured
+    one. Exactly <strong>one</strong> qualified: <a href="gene-overcast.html">overcast</a>,
+    whose pale form is a four-step grey ramp from <code>#dee2e6</code> down to
+    <code>#575e69</code> against the same four steps in one hue &mdash; the dark
+    half of the scale simply unused. It has a <code>Ck</code> black sky now, the
+    same four steps between <code>#0d0d0d</code> and <code>#707070</code>.</p>
+
+<p>The other thirteen were judged out, and the judgement is the rule's own
+    &ldquo;when not to&rdquo; rather than taste. <a href="gene-dripwork.html">Dripwork</a>'s
+    ink is <em>already</em> black &mdash; its <code>#fbfbfb</code> is the ground the
+    graphic sits on, not the marking. <a href="gene-ringwork.html">Ringwork</a> is
+    achromatic already and runs from <code>#d1d5d6</code> to <code>#17181b</code>,
+    so there is no unused end to move into, which is the whole premise. The rest
+    &mdash; coastline, contour, crazework, dorsal wing, dustfall, serpentine,
+    shallows, teardrop and the others &mdash; name three to seven fixed colours,
+    and the palette <em>is</em> the marking.</p>
+
+<h4>And four expressions had picked up a pair they should not have</h4>
+
+<p>Yesterday's black-allele sweep handed out unclaimed combinations by the rule
+    &ldquo;a pair belongs to whatever its more dominant allele's homozygote
+    shows&rdquo;, which is right for the pairs the new allele created and
+    over-reaches on pairs that were <em>deliberately</em> left to the wild-type
+    catch-all. It caught four: <code>Fdf/n</code> on fracture,
+    <code>Tmr/n</code> on marble tobiano, <code>Ylc/n</code> on yalia and
+    <code>Cc/n</code> on overcast, each of which had been wild-type by the author's
+    choice and had quietly started expressing. All four are back, and their founder
+    tables with them &mdash; fracture and marble tobiano are recessive genes again,
+    so the whole budget sits on the homozygote where it belongs.</p>
+
+<h4>Versioning</h4>
+
+<p>Recorded on <a href="releases.html">releases</a> rather than left in a commit
+    message: <strong>the next release is 0.5.000, and after that only the last
+    number moves.</strong> Three digits, on purpose. The middle number does not
+    move without the owner saying so explicitly &mdash; not for a big feature, not
+    for a batch of genes. 0.2.0 to 0.4.1 in two days is what the rule is a reaction
+    to.</p>
+
+<h4>What was regenerated</h4>
+
+<p>Gene bundle, icons, 157 gene pages, the designer wasm, both goldens (43 rows
+    added to the bake golden, none moved, none removed; the pipeline golden's codes
+    all grew by fourteen loci with no horse moving), the search index. Links, gene
+    tabs, parity and recipes green; <code>:neoforge-26.1.2:build</code> green.</p>
+
 <h2 id="d2026-09-10b">2026-09-10</h2>
 
 <h3>A black allele for forty-two markings, the rule that produced them written

@@ -1,0 +1,295 @@
+{
+  "key": "horsegenetics.squiggle",
+  "name": "Squiggle",
+  "phase": "magical",
+  "priority": 111,
+  "rarity": "RARE",
+  "blurb": "Broad squiggling lanes wander the length of the horse, forking and pinching out, each one white down its middle and running out through yellow to a pink rim, with small holes of bare coat punched through them.",
+  "notes": [
+    "The source was an SVG: four flat colours traced off a photograph of a beetle - a dark brown ground with pale squiggling lanes across the elytra, each lane cream at its middle, edged olive-yellow, and rimmed pink. About 85 KB of path data. The beetle is not taken from it; the lanes and their three colours are.",
+    "STROKES is the mask for the squiggle. It is the level set of a noise field sampled in a frame stretched along an axis, which is why its lines end in points and wander rather than sitting parallel like a comb - and wandering, forking and pinching out is exactly what the source's lanes do. FRACTAL shape: ridged is the other candidate and was not used: it draws the outlines of blobs, which comes out as lace at a consistent hairline width, and these lanes are broad and vary along their run.",
+    "The gradient is three STROKES draws, not a RAMP. RAMP varies colour along an axis and would sweep the whole horse from white at one end to pink at the other; what the source has is a gradient ACROSS each lane, from its own middle outward, which is a different thing and is three concentric widths on one field. seed, spacing, length, axis and curl are identical on all three so they share centrelines; only width differs.",
+    "Ring width is the number that constrains everything else. A texel is half a body unit, so each colour band needs about half a unit per side to survive - which means the widths have to step by a whole unit at a time. 3.2, 2.1 and 1.0 gives a 0.55-unit pink rim, a 0.55-unit yellow band and a 1.0-unit white core. Step them any closer and the middle colour vanishes and the lane reads as pink around white.",
+    "That forces the spacing, and this is the trap the file is closest to. width must stay well under spacing or neighbouring strokes touch and the whole field resolves as a wash - Zebra's Coat shipped at a width of ten against a spacing of three and came out as a solid white neck. The widest draw here is 3.2 and laneSpacing bottoms out at 6.2, so there are at least three body units of bare coat between lanes. Do not lower that floor to fit more lanes on the horse; widen the horse's share by raising length instead.",
+    "The holes are one inverted SPOTS mask repeated verbatim on all three layers. They have to be byte-identical or the hole punched through the white will not line up with the hole punched through the pink, and the lanes come out ringed rather than perforated. Because all three layers carry it, a hole goes all the way down to whatever coat the horse already had, which is what the source's dark spots are."
+  ],
+  "preview": {
+    "base": "black",
+    "expression": "squiggle"
+  },
+  "alleles": [
+    {
+      "token": "Sq",
+      "label": "Squiggle (Sq)"
+    },
+    {
+      "token": "Sc",
+      "label": "Coloured squiggle (Sc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "laneSeed",
+      "type": "seed"
+    },
+    {
+      "name": "holeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "laneSpacing",
+      "min": 6.2,
+      "max": 7.8
+    },
+    {
+      "name": "laneCurl",
+      "min": 0.35,
+      "max": 0.58
+    },
+    {
+      "name": "laneHue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "squiggle",
+      "name": "Squiggle",
+      "description": "Wandering lanes run the length of the coat, white through their middles and fading out through yellow to a pink edge, perforated with small holes of bare coat.",
+      "when": [
+        "Sq/Sq",
+        "Sq/Sc",
+        "Sq/n"
+      ],
+      "notes": [
+        "Layer order is outside-in: pink at 3.2 units, yellow painted over its middle 2.1, white over the middle 1.0 of that. Each colour survives only as the part of itself the next one does not cover, so reversing the order gives a white lane with nothing else visible."
+      ],
+      "layers": [
+        {
+          "name": "the pink rim",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$laneSeed",
+              "spacing": "$laneSpacing",
+              "length": 14.0,
+              "axis": "X",
+              "width": 3.2,
+              "curl": "$laneCurl",
+              "softness": 0.22
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$holeSeed",
+              "spacing": 3.0,
+              "radius": 0.85,
+              "vary": 0.4,
+              "chance": 0.45,
+              "softness": 0.2,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ee8e83",
+            "strength": 92,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the yellow band",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$laneSeed",
+              "spacing": "$laneSpacing",
+              "length": 14.0,
+              "axis": "X",
+              "width": 2.1,
+              "curl": "$laneCurl",
+              "softness": 0.2
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$holeSeed",
+              "spacing": 3.0,
+              "radius": 0.85,
+              "vary": 0.4,
+              "chance": 0.45,
+              "softness": 0.2,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#dedb8b",
+            "strength": 94,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the white core",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$laneSeed",
+              "spacing": "$laneSpacing",
+              "length": 14.0,
+              "axis": "X",
+              "width": 1.0,
+              "curl": "$laneCurl",
+              "softness": 0.18
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$holeSeed",
+              "spacing": 3.0,
+              "radius": 0.85,
+              "vary": 0.4,
+              "chance": 0.45,
+              "softness": 0.2,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f9faf0",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured squiggle",
+      "description": "The same lanes running out from a pale middle through a colour this line of horses carries.",
+      "when": [
+        "Sc/Sc"
+      ],
+      "notes": [
+        "The recessive coloured half of the usual pair, on one hue. The source's three colours are one warm sweep with a lightness ramp under it rather than three separate decisions, so a single hue at 0.96, 0.78 and 0.62 lightness reproduces the structure and three independent hues would not. The saturation climbs outward as the lightness falls, which is what keeps a near-white core from reading as a blown-out hole."
+      ],
+      "layers": [
+        {
+          "name": "the rim",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$laneSeed",
+              "spacing": "$laneSpacing",
+              "length": 14.0,
+              "axis": "X",
+              "width": 3.2,
+              "curl": "$laneCurl",
+              "softness": 0.22
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$holeSeed",
+              "spacing": 3.0,
+              "radius": 0.85,
+              "vary": 0.4,
+              "chance": 0.45,
+              "softness": 0.2,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$laneHue",
+            "saturation": 0.66,
+            "lightness": 0.62,
+            "strength": 92,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the mid band",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$laneSeed",
+              "spacing": "$laneSpacing",
+              "length": 14.0,
+              "axis": "X",
+              "width": 2.1,
+              "curl": "$laneCurl",
+              "softness": 0.2
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$holeSeed",
+              "spacing": 3.0,
+              "radius": 0.85,
+              "vary": 0.4,
+              "chance": 0.45,
+              "softness": 0.2,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$laneHue",
+            "saturation": 0.42,
+            "lightness": 0.78,
+            "strength": 94,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the pale core",
+          "masks": [
+            {
+              "type": "STROKES",
+              "seed": "$laneSeed",
+              "spacing": "$laneSpacing",
+              "length": 14.0,
+              "axis": "X",
+              "width": 1.0,
+              "curl": "$laneCurl",
+              "softness": 0.18
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$holeSeed",
+              "spacing": 3.0,
+              "radius": 0.85,
+              "vary": 0.4,
+              "chance": 0.45,
+              "softness": 0.2,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$laneHue",
+            "saturation": 0.14,
+            "lightness": 0.96,
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unmarked.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Sq/Sq": 0.002,
+    "Sq/Sc": 0.008,
+    "Sq/n": 0.038,
+    "Sc/Sc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+}

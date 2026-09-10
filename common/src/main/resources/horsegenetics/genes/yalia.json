@@ -503,8 +503,7 @@
       "description": "The same architecture in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. Unlike the white form it leaves the horse's own white markings alone - there is nothing for them to match - so a coloured Yalia over a tobiano is genuinely two markings on one horse. It never gives blue eyes.",
       "when": [
         "Ylc/Ylc",
-        "Ylc/Ylo",
-        "Ylc/n"
+        "Ylc/Ylo"
       ],
       "layers": [
         {
@@ -719,19 +718,18 @@
   ],
   "founders": {
     "Yal/Yal": 0.004,
-    "Yal/Ylk": 0.002667,
-    "Yal/Ylc": 0.002667,
-    "Yal/Ylo": 0.002667,
+    "Yal/Ylk": 0.002909,
+    "Yal/Ylc": 0.002909,
+    "Yal/Ylo": 0.002909,
     "Yal/n": 0.076,
-    "Ylk/Ylk": 0.002667,
-    "Ylk/Ylc": 0.002667,
-    "Ylk/Ylo": 0.002667,
-    "Ylk/n": 0.002667,
-    "Ylc/Ylc": 0.002667,
-    "Ylc/Ylo": 0.002667,
-    "Ylc/n": 0.002667,
-    "Ylo/Ylo": 0.002667,
-    "Ylo/n": 0.002667,
+    "Ylk/Ylk": 0.002909,
+    "Ylk/Ylc": 0.002909,
+    "Ylk/Ylo": 0.002909,
+    "Ylk/n": 0.002909,
+    "Ylc/Ylc": 0.002909,
+    "Ylc/Ylo": 0.002909,
+    "Ylo/Ylo": 0.002909,
+    "Ylo/n": 0.002909,
     "n/n": 99.888
   },
   "notes": [

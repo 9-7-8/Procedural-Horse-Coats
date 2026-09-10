@@ -53,8 +53,7 @@
       "when": [
         "Fdf/Fdf",
         "Fdf/Fdc",
-        "Fdf/Fdk",
-        "Fdf/n"
+        "Fdf/Fdk"
       ],
       "layers": [
         {
@@ -294,10 +293,9 @@
     }
   ],
   "founders": {
-    "Fdf/Fdf": 0.002,
+    "Fdf/Fdf": 0.04,
     "Fdf/Fdk": 0.002667,
     "Fdf/Fdc": 0.002667,
-    "Fdf/n": 0.038,
     "Fdk/Fdk": 0.002667,
     "Fdk/Fdc": 0.002667,
     "Fdk/n": 0.002667,

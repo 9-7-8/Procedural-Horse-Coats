@@ -58,8 +58,7 @@
       "when": [
         "Tmr/Tmr",
         "Tmr/Tmc",
-        "Tmr/Tmk",
-        "Tmr/n"
+        "Tmr/Tmk"
       ],
       "layers": [
         {
@@ -207,10 +206,9 @@
     }
   ],
   "founders": {
-    "Tmr/Tmr": 0.004,
+    "Tmr/Tmr": 0.08,
     "Tmr/Tmk": 0.005333,
     "Tmr/Tmc": 0.005333,
-    "Tmr/n": 0.076,
     "Tmk/Tmk": 0.005333,
     "Tmk/Tmc": 0.005333,
     "Tmk/n": 0.005333,
