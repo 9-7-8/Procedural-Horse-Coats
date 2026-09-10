@@ -35,6 +35,37 @@
     </p>
 </div>
 
+<h2 id="checklist">&sect;0-BI &mdash; A checklist, an allele collection, and a shelf that looks like Minecraft (2026-09-09, NOT looked at)</h2>
+
+<ul>
+    <li><strong>Open Getting started and scroll to the bottom.</strong> Thirty tasks in
+        seven groups, with a progress bar. Then go and do one - taming a mare is the
+        easiest - and check it says so in chat <em>once</em> and the box fills in.</li>
+    <li><strong>Relog and check the ticks survive.</strong> Progress is a
+        {@code SavedData} keyed by player and pushed on login; if it comes back empty,
+        the login sync is not firing.</li>
+    <li><strong>Watch which tasks tick when you breed one foal.</strong> All three
+        zygosity boxes will very likely tick at once, because the check walks every
+        locus (<a href="known-gaps.html#gap-148">gap 148</a>). Whether that is the right
+        amount of teaching is a judgement only playing it can make.</li>
+    <li><strong>The Alleles tab.</strong> Every allele in the mod; the ones you have met
+        named and lit, the rest under question marks. Tame a horse and watch a batch of
+        them light up. <b>Note what does <em>not</em> count</b>
+        (<a href="known-gaps.html#gap-149">gap 149</a>): a horse you buy or are given
+        contributes nothing, because the hook is on taming and breeding.</li>
+    <li><strong>The research shelf's window.</strong> It should look like a Minecraft
+        container now - grey bevelled face, sunken slots, dark text - and
+        <b>nothing should overlap</b>, which was the report. Check both tabs, and check
+        that the item in a slot lines up with the well drawn under it.</li>
+    <li><strong>The shelf's item icon.</strong> It was the missing-texture check pattern:
+        the model was in <code>models/item/</code>, and 26.1.2 reads
+        <code>items/</code>. It should be a bookshelf now, in hand and in the
+        inventory.</li>
+    <li><strong>Spawn an unattached signed transfer paper in creative.</strong> It should
+        look like a blank transfer paper rather than nothing at all - the item model is a
+        <code>minecraft:condition</code> on whether the deed component is there.</li>
+</ul>
+
 <h2 id="spawn-button">&sect;0-BH &mdash; Spawn moved under the horse (2026-09-09, NOT looked at)</h2>
 
 <p>

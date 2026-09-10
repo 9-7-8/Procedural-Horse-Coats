@@ -29,6 +29,87 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="checklist-2026-09-09">A checklist that teaches the mod, and a collection that makes you want to find one more horse.</h3>
+
+<p>
+    The mod now says what there is to do and keeps score. <strong>Thirty tasks</strong>
+    under the Getting Started prose, in the order somebody learning would meet them, and
+    every unticked one carries a line saying what to actually do &mdash; a player staring
+    at an empty box wants an instruction, not a title.
+</p>
+
+<p>
+    <strong>It gates nothing, deliberately.</strong> Nothing in the mod asks whether a
+    task is done; somebody who reads the wiki and builds a shelf on their first day ticks
+    two boxes at once and is not stopped. The moment a checklist gates content it stops
+    being advice and starts being homework.
+</p>
+
+<h4>The rule that made it real work</h4>
+
+<p>
+    A checklist with an item nobody can tick is worse than a shorter checklist: it reads
+    as a bug and the player cannot tell which one is broken. So every task exists only
+    once something completes it &mdash; which meant hooks in thirteen files, each one
+    line, next to whatever event already existed. The enum is in <code>common/</code> and
+    the hooks are not, so nothing but a sweep can prove they all connect;
+    <code>tools/check-progress-tasks.mjs</code> is that sweep and it fails by name.
+</p>
+
+<p>
+    It also caught its own bug immediately. Written through a shell heredoc, the check's
+    <code>\b</code> word boundary arrived in the file as a literal <b>backspace</b>, so
+    the regex matched nothing and it cheerfully reported all thirty tasks unwired. A check
+    that silently matches nothing is worse than no check; it is a plain
+    <code>indexOf</code> now, with a comment saying why.
+</p>
+
+<h4>The collection was half-built already</h4>
+
+<p>
+    The Alleles tab is every allele in the mod with the unmet ones under question marks,
+    and most of what it needed already existed: the gene database has recorded
+    <em>seen tokens</em> per gene for a long time. What it could not do is record a
+    <b>baseline</b> allele, because an entry in that book is what <code>knows()</code>
+    tests, and creating one off an ordinary horse would have unlocked every gene in the
+    mod.
+</p>
+
+<p>
+    So the collection is a second set beside the book &mdash; a flat
+    <code>geneKey|token</code> per player &mdash; and the distinction is the interesting
+    part. <strong>Discovering a gene is a gameplay gate; collecting an allele is a
+    record.</strong> A plain wild-type allele belongs absolutely in the second and must
+    never be in the first. Sharing one map would have made one of those two behaviours
+    quietly become the other.
+</p>
+
+<h4>And the shelf stopped looking like a different mod</h4>
+
+<p>
+    Reported: the craft page's icons overlapped its text and the whole thing looked rough.
+    Both halves were the same mistake &mdash; placing things by eye. The list ran to y=96
+    and the slots sat at y=40, straight through it.
+</p>
+
+<p>
+    The layout constants now live on the <em>menu</em>, because that is where
+    <code>addSlot</code> needs them, and the screen reads every one; a slot and the well
+    drawn under it can no longer disagree. And the window is drawn in vanilla's idiom
+    rather than the browser's: mid-grey face, white highlight up and left, dark shadow
+    down and right, slots with the bevel inverted, dark text. <b>Drawn, not blitted</b>
+    &mdash; the thing that reads as Minecraft is the bevel, not the texture, and four
+    fills mean the window is whatever size the layout needs with no art to keep in step.
+</p>
+
+<p>
+    Two smaller things while in there. The shelf's item was the classic 26.1.2 trap: its
+    model was in <code>models/item/</code>, which this version ignores in favour of
+    <code>items/</code>, so it drew the missing texture. And an unattached signed transfer
+    paper now falls back to the blank paper's model through a
+    <code>minecraft:condition</code> on the deed component, instead of rendering nothing.
+</p>
+
 <h3 id="spawn-button-2026-09-09">The spawn screen ran out of column, and the fix was to stop using it.</h3>
 
 <p>

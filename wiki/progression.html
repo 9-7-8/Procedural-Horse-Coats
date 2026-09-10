@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The checklist &amp; the collection &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Gameplay <span class="sep">/</span> progression</p>
+<h1>The checklist &amp; the collection</h1>
+<p class="lede">
+    Two answers to &ldquo;what do I do now?&rdquo; &mdash; a checklist that walks you
+    through everything the mod can do, and a collection of every allele in it with the
+    ones you have never met still under fog.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="checklist">The checklist</h2>
+
+<p>
+    At the bottom of the <strong>Getting started</strong> tab, under the prose it
+    explains. Thirty-one tasks in seven groups, from taming your first mare to signing a
+    transfer paper, and each unticked one carries a line saying what to actually do.
+</p>
+
+<p>
+    <strong>It gates nothing.</strong> Nothing in the mod asks whether a task is done.
+    A player who reads this wiki and builds a research shelf on their first day ticks two
+    boxes at once and is not stopped &mdash; the moment a checklist gates content it
+    stops being advice and starts being homework.
+</p>
+
+<p>
+    Ticking one says so in chat, once, with a running count. The groups are:
+</p>
+
+<ul>
+    <li><strong>First steps</strong> &mdash; tame a mare, tame a stallion, shear one for
+        hair, name one, breed a foal.</li>
+    <li><strong>Reading a horse</strong> &mdash; take a gene off one with a book, build
+        a shelf, file a paper, copy one.</li>
+    <li><strong>Putting a gene into a horse</strong> &mdash; craft a gene carrot, feed
+        one, and use each of the four general breeding carrots.</li>
+    <li><strong>What breeding can produce</strong> &mdash; a foal carrying something it
+        does not show, one homozygous for a non-baseline allele, one homozygous for the
+        baseline. These arrive on their own; they are there so the words mean something
+        the first time you read them.</li>
+    <li><strong>The horse dimension</strong> &mdash; light a hay portal, go through it,
+        bring a horse back.</li>
+    <li><strong>Living with horses</strong> &mdash; bond with one, milk a mare, give one
+        a stall, use each of the three whistles, fill a seed jar.</li>
+    <li><strong>Other people</strong> &mdash; trade with a horseman, meet a cowboy, sign
+        a transfer paper.</li>
+</ul>
+
+<h2 id="alleles">The collection</h2>
+
+<p>
+    The <strong>Alleles</strong> tab is every allele of every gene in the mod. The ones
+    you have met are named and lit; the ones you have not are
+    <strong>???</strong> and a row of question marks the right length. Each gene shows
+    how many of its alleles you have, and the header counts the lot.
+</p>
+
+<div class="note">
+    <span class="label">Meeting an allele is not the same as discovering a gene</span>
+    <p>
+        <strong>Every allele on any horse you tame or breed joins the collection</strong>
+        &mdash; both copies, at every locus, baseline alleles included. That is a record
+        of what you have laid eyes on, and the plain wild-type alleles count exactly as
+        much as the strange ones.
+    </p>
+    <p>
+        <a href="carrots.html#database">Discovering a gene</a> is the other thing and is
+        deliberately harder: it takes <strong>owning a living horse</strong> that carries
+        something other than the plain baseline there &mdash; tamed, bred, bought or given
+        &mdash; and that is also what unlocks the gene's carrot recipe. A research paper
+        will not do it; papers are components, not lessons. An ordinary horse fills in a
+        lot of your collection and discovers nothing.
+    </p>
+</div>
+
+<p>
+    So the two tabs answer different questions. The gene database is <em>what can I
+    make?</em>; the collection is <em>what is left out there?</em>
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="tasks">Tasks are an enum in <code>common/</code></h2>
+
+<p>
+    <code>common/progress/ProgressTask</code> is the vocabulary: an id, a title, a hint
+    and a group, with no Minecraft in it, so it is testable without a game and it survives
+    the version port. The hooks that complete a task are necessarily Minecraft-side and
+    live next to whatever event already existed &mdash; taming in the tame handler, foals
+    in the breeding handler, whistles in the whistle item.
+</p>
+
+<div class="note">
+    <span class="label">Every task is wired, and a check says so</span>
+    <p>
+        A checklist with an item nobody can tick is worse than a shorter checklist: it
+        reads as a bug and the player cannot tell which one. Because the enum is in one
+        module and the hooks are scattered across another by design, nothing but a sweep
+        can prove they are all reachable &mdash;
+        <code>node neoforge-26.1.2/tools/check-progress-tasks.mjs</code> is that sweep,
+        and it fails by name.
+    </p>
+</div>
+
+<p>
+    <code>HorseProgress.complete(player, task)</code> is the whole API a handler uses. It
+    swallows a client-side player, a null and a server-less world, because it is called
+    from a dozen files and the twelfth call site will be careless.
+    <code>HorseProgressData</code> is the {@code SavedData} behind it, keyed by player
+    UUID beside the gene database, and completing is idempotent - it says something in
+    chat exactly once.
+</p>
+
+<h2 id="collection-storage">The collection is a second set, on purpose</h2>
+
+<p>
+    <code>GeneDatabaseData</code> holds two things per player now: the <em>book</em> of
+    discovered genes, and a flat set of <code>geneKey|token</code> for alleles seen. They
+    are separate because sharing one map would have made one behaviour quietly become the
+    other &mdash; an entry in the book is what <code>knows()</code> tests, so recording
+    baseline alleles there would have unlocked every gene in the mod off one ordinary
+    horse.
+</p>
+
+<p>
+    Both ride the same <code>GeneDatabaseSyncPayload</code>, which grew a third field, and
+    both are mirrored client-side in <code>ClientGeneDatabase</code>.
+    <code>collect()</code> is called from <code>GeneDiscoveryHandler.discoverFrom</code>,
+    which is already the one place that sees a genotype the player has earned.
+</p>
+
+</section>
+
+</article>
+</main>
+</body>
+</html>
