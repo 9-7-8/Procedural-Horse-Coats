@@ -1,0 +1,162 @@
+{
+  "key": "horsegenetics.fish_scales",
+  "name": "Fish Scales",
+  "phase": "magical",
+  "priority": 322,
+  "rarity": "RARE",
+  "blurb": "The barrel raises into overlapping fish scales, each one rimmed in a warm colour this line of horses carries, with a darker line traced along its outer edge.",
+  "notes": [
+    "'arc' and 'angle' on SPOTS exist because of this gene. Drawing every scale as a closed ring gives a NET - a lattice of complete outlines - and a shingled surface is the opposite of that: the nose-facing half of each scale's boundary is hidden under the scale in front of it and shows no line at all. RINGS could already clip one instance to a crescent; nothing could clip every cell of a tiled field to the same crescent, which is the difference between a net and a roof.",
+    "'angle' is 180, so the drawn half of every scale faces the TAIL. Turn it toward 0 and the scales read as lying the other way, which on a horse looks like fur brushed backwards.",
+    "The colour is carried entirely on the hue knob rather than a fixed orange, so each horse draws its own scale colour at birth and passes it to its foals with the allele.",
+    "The hue knob runs 8 to 48 rather than the whole wheel. The marking is described as warm orange and the colour is the only thing a horse gets to draw for itself here; letting it reach green would make the blurb a lie on two horses in three."
+  ],
+  "alleles": [
+    {
+      "token": "Scl",
+      "label": "Fish Scales (Scl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 8.0,
+      "max": 48.0
+    },
+    {
+      "name": "scaleSize",
+      "min": 2.6,
+      "max": 4.2
+    },
+    {
+      "name": "scaleArc",
+      "min": 0.45,
+      "max": 0.62
+    }
+  ],
+  "expressions": [
+    {
+      "id": "scaled",
+      "name": "Fish Scales",
+      "description": "The barrel is patterned in overlapping scales, each rim a bright warm band with a thinner, darker line along its outer edge.",
+      "when": [
+        "Scl/Scl",
+        "Scl/n"
+      ],
+      "layers": [
+        {
+          "name": "the bright rim of each scale",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 1.7,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 0.95,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.56,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the darker line along its edge",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 1.7,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 1.4,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.28,
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Scl/Scl": 0.002,
+    "Scl/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+}

@@ -1,0 +1,261 @@
+{
+  "key": "horsegenetics.tidefoam_sash",
+  "name": "Tidefoam Sash",
+  "phase": "magical",
+  "priority": 289,
+  "rarity": "RARE",
+  "blurb": "A sinuous sash of deep tidewater teal sweeps diagonally across the barrel, its surface laced with a fine white net of foam cells and the occasional larger bubble.",
+  "notes": [
+    "The water is one RAMP driven off a noise field rather than a paint layer with a darkening layer over it - a second layer could not have seen the first one's paint, and the marbling has to vary continuously rather than in steps. RAMP's 'noise' axis is what makes that one layer; before it existed the colour could only sweep once along an axis.",
+    "Each foam cell now carries its own whirl. The import shipped a single marbling field across the whole sash and said plainly that it ignored the cell walls drawn on top of it; the highlight layer here reads the SAME tessellation from each cell's centre out ('measure': 'centroid'), so the swirl belongs to the cell it sits in rather than wandering across three of them.",
+    "The foam net is CRACKLE because the reference is defined by the walls BETWEEN cells, not by distance to a cell centre. That distinction is the whole reason the mask exists.",
+    "The teal is fixed by concept rather than carried on a hue knob. Per-horse variety comes off the noise seed instead, which keeps the marking reading as water on every carrier."
+  ],
+  "alleles": [
+    {
+      "token": "Tfs",
+      "label": "Tidefoam Sash (Tfs)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSize",
+      "min": 2.6,
+      "max": 4.4
+    },
+    {
+      "name": "bubbleSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "sash",
+      "name": "Tidefoam Sash",
+      "description": "A diagonal sash of marbled sea-teal crosses the ribcage, its surface broken by a fine white network of foam cells with occasional larger bubbles caught in it.",
+      "when": [
+        "Tfs/Tfs",
+        "Tfs/n"
+      ],
+      "layers": [
+        {
+          "name": "the water",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$seed",
+            "scale": 5.0,
+            "colors": [
+              "#0d4f4d",
+              "#1f8a86",
+              "#5fd1c9"
+            ],
+            "strength": 94
+          }
+        },
+        {
+          "name": "a whirl inside each foam cell",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$cellSize",
+              "warp": 0.4,
+              "softness": 0.9,
+              "measure": "centroid",
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#9fe8e2",
+            "strength": 55
+          }
+        },
+        {
+          "name": "the foam net",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": {
+                "perDose": [
+                  0.55,
+                  0.55,
+                  0.8
+                ]
+              },
+              "warp": 0.4,
+              "softness": 0.1,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe2",
+            "strength": 94
+          }
+        },
+        {
+          "name": "and the larger bubbles",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": {
+                "perDose": [
+                  8.5,
+                  8.5,
+                  6.0
+                ]
+              },
+              "radius": 1.8,
+              "vary": 0.4,
+              "softness": 0.6,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe2",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Tfs/Tfs": 0.002,
+    "Tfs/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+}

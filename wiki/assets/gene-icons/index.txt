@@ -58,6 +58,7 @@ coccinella
 iridescent_jewel
 moth_mantle
 opal_wing_veins
+carapace_sheen
 cosmic
 goth
 masked
@@ -84,6 +85,19 @@ quarter
 flametouched
 patina
 ladybug_saddle
+agate
+morpho_wing
+coral_bloom
+gill_bloom
+iris_bloom_diamonds
+kite_bloom
+moonwing
+nightbloom_shroud
+opal_crackle
+opaline
+orchid_frost
+petaled
+tidefoam_sash
 aurorae
 glow
 angler
@@ -105,6 +119,10 @@ harlequin_shield
 painted_lady_wing
 shieldback
 ocular
+concentric_eyespots
+fish_scales
+iridescent_rosette
+moth_eyes
 stars
 duskfall_speckle
 speckling
@@ -133,6 +151,8 @@ moth_wings
 opaline_zebra
 webbed
 stained_glass
+emberveins
+lacevein
 fade
 frostfall
 prismtail
@@ -144,6 +164,8 @@ auroraband
 gamma
 nebula_light
 spectrum_light
+oil_sheen
+nacre
 fielded
 yalia
 opalized

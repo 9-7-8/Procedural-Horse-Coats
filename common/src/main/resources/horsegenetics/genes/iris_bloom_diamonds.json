@@ -1,0 +1,281 @@
+{
+  "key": "horsegenetics.iris_bloom_diamonds",
+  "name": "Iris Bloom Diamonds",
+  "phase": "magical",
+  "priority": 281,
+  "rarity": "MYTHIC",
+  "blurb": "Dark royal-blue diamonds unfold across the barrel like a fan of iris petals, each rimmed in ink, dappled white, and lit at the middle by radiating amber veins.",
+  "notes": [
+    "The import bet that a CRACKLE and a SPOTS mask given the same seed and spacing would agree about where a cell's centre is, and wrote a note saying it was a bet. It was a bad one - the two masks derive their points differently and the white dapple field would have drifted off the diamond it belonged to on some horses. CRACKLE now reads its own tessellation from the middle out ('measure': 'centroid'), so the amber core is GUARANTEED concentric with the rim, on the same seed and the same scale, rather than concentric by coincidence.",
+    "The outline and the fill are two readings of one wall distance, subtracted, so the ink rim can never open a seam or double-paint against the blue it edges.",
+    "The diamonds are CRACKLE rather than SPOTS because they have straight sides. CRACKLE and WAVES are the only two masks in the vocabulary that do; everything else rounds off.",
+    "'scale' is per-dose - 5 units on one copy, 3 on two - so a homozygote carries a denser fan of smaller diamonds. That is legal here because the expression claims combinations with different copy counts of the first allele; it would be a silent constant if it did not."
+  ],
+  "alleles": [
+    {
+      "token": "Ibd",
+      "label": "Iris Bloom Diamonds (Ibd)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "dotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "tearSeed",
+      "type": "seed"
+    },
+    {
+      "name": "jitter",
+      "min": 0.4,
+      "max": 0.7
+    },
+    {
+      "name": "insetGap",
+      "min": 0.6,
+      "max": 1.2
+    },
+    {
+      "name": "insetOutline",
+      "min": 1.4,
+      "max": 2.0
+    },
+    {
+      "name": "coreWidth",
+      "min": 1.6,
+      "max": 2.6
+    },
+    {
+      "name": "vary",
+      "min": 0.2,
+      "max": 0.4
+    }
+  ],
+  "expressions": [
+    {
+      "id": "diamonds",
+      "name": "Iris Bloom Diamonds",
+      "description": "Dark royal-blue diamonds spread across the barrel, denser and smaller with a second copy. Each is rimmed in near-black, dappled white through its outer half, and lit at the middle by radiating amber veins.",
+      "when": [
+        "Ibd/Ibd",
+        "Ibd/n"
+      ],
+      "layers": [
+        {
+          "name": "the blue of each diamond",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1c2f82",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the ink rim round it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetOutline",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d1247",
+            "strength": 96
+          }
+        },
+        {
+          "name": "white dapples over the outer half",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$coreWidth",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "SUBTRACT",
+              "measure": "centroid",
+              "invert": true
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$dotSeed",
+              "spacing": 0.85,
+              "size": 0.4,
+              "density": 0.4,
+              "softness": 0.25,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fbfbf6",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the amber veins at the middle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$coreWidth",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY",
+              "measure": "centroid",
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "seed": "$tearSeed",
+              "scale": 2.0,
+              "octaves": 2,
+              "warp": 0.35,
+              "threshold": 0.72,
+              "softness": 0.09,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e2891f",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ibd/Ibd": 0.00025,
+    "Ibd/n": 0.00475,
+    "n/n": 99.995
+  },
+  "format": 3
+}

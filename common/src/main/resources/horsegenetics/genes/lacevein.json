@@ -1,0 +1,203 @@
+{
+  "key": "horsegenetics.lacevein",
+  "name": "Lacevein",
+  "phase": "magical",
+  "priority": 384,
+  "rarity": "RARE",
+  "blurb": "Fine branching lace etches across the coat, rooted in two deep jewel-toned blooms at the withers and the poll.",
+  "notes": [
+    "Named Lacevein rather than Lace: there is already a gene called Lace, and two entries a letter apart in the same list is a trap for whoever reads the genotype next.",
+    "The heterozygote is not a thinner version of the homozygote - it covers fewer PARTS and runs two octaves at a higher threshold, so it reads as a smaller, simpler marking rather than a faded one, and it carries one bloom instead of two.",
+    "The lace and the blooms are co-located, not connected. The reference shows veins BRANCHING OUT of the two deep centres, and nothing in this vocabulary measures connectivity back to a root: a ridged FRACTAL is unrooted global noise and a PATH carries one prescribed curve, so a vein here will sometimes pass near a bloom without visibly joining it. That is a different question - 'is this texel joined by an unbroken branch to that point' - and it is not a threshold away from any of the masks that exist."
+  ],
+  "alleles": [
+    {
+      "token": "Lvn",
+      "label": "Lacevein (Lvn)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 240.0,
+      "max": 320.0
+    },
+    {
+      "name": "density",
+      "min": 0.62,
+      "max": 0.78
+    }
+  ],
+  "expressions": [
+    {
+      "id": "full",
+      "name": "Lacevein",
+      "description": "Dense black lace forks and tapers across the body, neck, head and muzzle, rooted in two deep jewel-toned blooms at the withers and poll.",
+      "when": {
+        "Lvn": 2
+      },
+      "layers": [
+        {
+          "name": "the lace",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "seed": "$seed",
+              "scale": 6.0,
+              "octaves": 3,
+              "warp": 0.12,
+              "threshold": "$density",
+              "softness": 0.05,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#151016",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the bloom at the withers",
+          "masks": [
+            {
+              "type": "PATH",
+              "space": "body",
+              "points": [
+                0.55,
+                0.6,
+                0.58,
+                0.68
+              ],
+              "width": 2.5,
+              "softness": 1.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.14,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the bloom at the poll",
+          "masks": [
+            {
+              "type": "PATH",
+              "space": "body",
+              "points": [
+                0.66,
+                0.85,
+                0.7,
+                0.92
+              ],
+              "width": 2.0,
+              "softness": 1.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.14,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparse",
+      "name": "Lacevein, sparse",
+      "description": "A sparser web of black lace crosses the body and neck, fading around a single faint bloom at the withers.",
+      "when": [
+        "Lvn/n"
+      ],
+      "layers": [
+        {
+          "name": "the lace",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "seed": "$seed",
+              "scale": 6.0,
+              "octaves": 2,
+              "warp": 0.08,
+              "threshold": 0.82,
+              "softness": 0.05,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#151016",
+            "strength": 90
+          }
+        },
+        {
+          "name": "and one faint bloom",
+          "masks": [
+            {
+              "type": "PATH",
+              "space": "body",
+              "points": [
+                0.55,
+                0.6,
+                0.58,
+                0.68
+              ],
+              "width": 1.8,
+              "softness": 1.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.35,
+            "lightness": 0.18,
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Lvn/Lvn": 0.002,
+    "Lvn/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+}

@@ -364,9 +364,9 @@
   ],
   "founders": {
     "Acr/Acr": 0.006,
-    "Acr/Acc": 0.008,
-    "Acr/n": 0.12,
-    "Acc/Acc": 0.01,
+    "Acr/Acc": 0.012,
+    "Acr/n": 0.114,
+    "Acc/Acc": 0.012,
     "n/n": 99.856
   }
 },
@@ -397,10 +397,247 @@
     }
   ],
   "founders": {
-    "Atp/Atp": 3.0,
-    "Atp/Abt": 23.0,
-    "Abt/Abt": 74.0
+    "Atp/Atp": 0.12,
+    "Abt/Abt": 99.88
   }
+},
+{
+  "key": "horsegenetics.agate",
+  "name": "Agate",
+  "phase": "magical",
+  "priority": 277,
+  "rarity": "RARE",
+  "blurb": "The coat splits into cracked, jewel-toned cells, each one softening to a pale rim and deepening at its heart - agate split open in the light.",
+  "notes": [
+    "The core and the rim are the SAME tessellation read two ways: one CRACKLE measuring to the wall, one measuring to the middle of the cell the texel is in, on one seed and one scale. That is the only arrangement in the vocabulary that guarantees the heart of a cell lands inside the cell it belongs to - a SPOTS or DAPPLES field on the same numbers lays down its own centres, and those have never known where a crackle wall fell. Change either mask's seed or scale and the marking comes apart.",
+    "The import asked for the core to be the rim's COMPLEMENT - the opposite hue, 180 degrees round the wheel. It is not written that way because it cannot be: a hue knob is a number the horse drew, and there is no way in the file format to say 'that number plus 180'. Both layers therefore run the same hue knob and separate on saturation and lightness, so a cell's heart is a deeper version of its rim rather than its opposite. Recorded as a gap rather than quietly dropped.",
+    "The import also fixed a 1.15 stretch along X on every mask here so the cells came out slightly long. CRACKLE has no stretch, and adding one would have to squash the sample before the lattice walk on a mask whose whole point is that its walls are straight - so the cells are round-ish and the stretch is gone."
+  ],
+  "alleles": [
+    {
+      "token": "Agt",
+      "label": "Agate, opal (Agt)"
+    },
+    {
+      "token": "Agc",
+      "label": "Agate, chroma (Agc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "cellSeed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSize",
+      "min": 3.5,
+      "max": 6.0
+    },
+    {
+      "name": "wallWidth",
+      "min": 0.4,
+      "max": 0.7
+    },
+    {
+      "name": "wallSoftness",
+      "min": 0.1,
+      "max": 0.25
+    },
+    {
+      "name": "coreWidth",
+      "min": 2.0,
+      "max": 3.6
+    },
+    {
+      "name": "coreSoftness",
+      "min": 0.6,
+      "max": 1.0
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "opal",
+      "name": "Agate, opal",
+      "description": "A pearly cracked-opal sheen - pale cells rimmed faintly in lilac-white, brightening to a milky glow at each cell's heart.",
+      "when": [
+        "Agt/Agt",
+        "Agt/Agc",
+        "Agt/n"
+      ],
+      "layers": [
+        {
+          "name": "the cells",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ede7f6",
+            "strength": 88
+          }
+        },
+        {
+          "name": "and the heart of each one",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$coreWidth",
+              "warp": 0.3,
+              "measure": "centroid",
+              "softness": "$coreSoftness",
+              "combine": "MULTIPLY",
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "chroma",
+      "name": "Agate, chroma",
+      "description": "The same cracked mosaic, but every cell takes its own colour - pastel at the rim, deepening toward the middle, veined through with dark cracks.",
+      "when": {
+        "Agc": 2
+      },
+      "notes": [
+        "Both RAMPs read axis 'cellId' on the SAME seed and scale as the masks, which is what makes a cell's heart the same hue as its rim: the key is drawn per cell and is constant across it, so the two layers cannot disagree about which cell they are in."
+      ],
+      "layers": [
+        {
+          "name": "one colour per cell",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSize",
+            "hue": "$hue",
+            "hueSpan": 130,
+            "saturation": 0.34,
+            "lightness": 0.82,
+            "strength": 90
+          }
+        },
+        {
+          "name": "deepening at the heart",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$coreWidth",
+              "warp": 0.3,
+              "measure": "centroid",
+              "softness": "$coreSoftness",
+              "combine": "MULTIPLY",
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSize",
+            "hue": "$hue",
+            "hueSpan": 130,
+            "saturation": 0.62,
+            "lightness": 0.5,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Agt/Agt": 0.002,
+    "Agt/Agc": 0.008,
+    "Agt/n": 0.038,
+    "Agc/Agc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -997,9 +1234,8 @@
     }
   ],
   "founders": {
-    "Bsk/Bsk": 0.4,
-    "Bsk/n": 0.4,
-    "n/n": 99.2
+    "Bsk/Bsk": 0.12,
+    "n/n": 99.88
   }
 },
 {
@@ -1297,11 +1533,11 @@
     }
   ],
   "founders": {
-    "Bpw/Bpw": 0.004,
-    "Bpw/Bpc": 0.012,
-    "Bpw/n": 0.06,
-    "Bpc/Bpc": 0.012,
-    "n/n": 99.912
+    "Bpw/Bpw": 0.002,
+    "Bpw/Bpc": 0.008,
+    "Bpw/n": 0.038,
+    "Bpc/Bpc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -1596,8 +1832,8 @@
     }
   ],
   "founders": {
-    "Bst/Bst": 0.09,
-    "n/n": 99.91
+    "Bst/Bst": 0.04,
+    "n/n": 99.96
   }
 },
 {
@@ -2242,6 +2478,153 @@
     "Bt/n": 0.016,
     "n/n": 99.832
   }
+},
+{
+  "key": "horsegenetics.carapace_sheen",
+  "name": "Carapace Sheen",
+  "phase": "magical",
+  "priority": 226,
+  "rarity": "RARE",
+  "blurb": "The coat gleams like a beetle's shell - glassy and deep where the body turns toward the light, paling underneath, with a bright ridge down the spine and a few pale blazes on each flank.",
+  "notes": [
+    "This is the gene the NORMAL mask was added for, and it is worth being plain about what the mask does and does not deliver. True iridescence is a function of the angle between the surface and the VIEWER, and the coat here is a baked texture: nothing in this module ever learns where a camera is, so a colour that shifts as the horse turns is out of reach and will stay out of reach while the coat is a PNG. What NORMAL measures instead is which way the surface itself faces, which is the structural half of the effect - the sheen sits on the planes that turn up into the light and thins on the ones that turn away, and it stays there. The import shipped a vertical RAMP standing in for this; a ramp is a position band and gets it wrong the moment the geometry turns.",
+    "'round' is at 0.85 rather than 0: a Minecraft horse is boxes, so the FLAT face normal takes exactly three values on any axis and a sheen keyed to it reads as three hard zones. Blending toward the normal an ellipsoid of the same box would have is what makes it continuous."
+  ],
+  "alleles": [
+    {
+      "token": "Csh",
+      "label": "Carapace Sheen (Csh)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "blazeSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "sheen",
+      "name": "Carapace Sheen",
+      "description": "A glassy shell-sheen over the whole coat, deepest on the planes that face the light and palest underneath, with a bright line along the spine and three pale blazes on each flank.",
+      "when": [
+        "Csh/Csh",
+        "Csh/n"
+      ],
+      "layers": [
+        {
+          "name": "the shell wash",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "NORMAL",
+              "axis": "Y",
+              "round": 0.85,
+              "from": -0.55,
+              "to": 1.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "body",
+            "from": 0.3,
+            "to": 0.95,
+            "hue": "$hue",
+            "hueSpan": 44,
+            "saturation": 0.62,
+            "lightness": 0.42,
+            "strength": 82
+          }
+        },
+        {
+          "name": "the ridge along the spine",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "NORMAL",
+              "axis": "Y",
+              "round": 0.4,
+              "from": 0.35,
+              "to": 1.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CENTERLINE",
+              "halfWidth": 1.2,
+              "softness": 0.4,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 90
+          }
+        },
+        {
+          "name": "and the blazes on each flank",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$blazeSeed",
+              "spacing": 7.0,
+              "radius": 3.5,
+              "vary": 0.25,
+              "chance": 0.5,
+              "mirror": true,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 62
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Csh/Csh": 0.002,
+    "Csh/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -3610,21 +3993,21 @@
     }
   ],
   "founders": {
-    "Clv/Clv": 0.004,
-    "Clv/Clc": 0.004,
-    "Clv/Wav": 0.004,
-    "Clv/Wac": 0.004,
+    "Clv/Clv": 0.002,
+    "Clv/Clc": 0.001333,
+    "Clv/Wav": 0.001333,
+    "Clv/Wac": 0.001333,
     "Clv/n": 0.038,
-    "Clc/Clc": 0.004,
-    "Clc/Wav": 0.004,
-    "Clc/Wac": 0.004,
-    "Clc/n": 0.019,
-    "Wav/Wav": 0.004,
-    "Wav/Wac": 0.004,
-    "Wav/n": 0.038,
-    "Wac/Wac": 0.004,
-    "Wac/n": 0.019,
-    "n/n": 99.846
+    "Clc/Clc": 0.001333,
+    "Clc/Wav": 0.001333,
+    "Clc/Wac": 0.001333,
+    "Clc/n": 0.001333,
+    "Wav/Wav": 0.001333,
+    "Wav/Wac": 0.001333,
+    "Wav/n": 0.001333,
+    "Wac/Wac": 0.001333,
+    "Wac/n": 0.001333,
+    "n/n": 99.944
   },
   "notes": [
     "The detached spears used to be fat ovals (radius 1.3, stretch 2.4) scattered over a band up to 42% of the horse long, which read as random white splotches loose on the far half rather than as spears thrown clear of the boundary (owner's call). They are now long and thin (radius 0.55, stretch 4.2) and the band they sit in is tied close behind the line, because 'reach' was narrowed to 0.30-0.40 against a split of 0.42-0.60. 'reach' stays strictly below the split's minimum so the band can never invert its own from/to."
@@ -3945,12 +4328,926 @@
     }
   ],
   "founders": {
-    "Ccr/Ccr": 0.004,
-    "Ccr/Ccv": 0.012,
-    "Ccr/n": 0.06,
-    "Ccv/Ccv": 0.012,
-    "n/n": 99.912
+    "Ccr/Ccr": 0.002,
+    "Ccr/Ccv": 0.008,
+    "Ccr/n": 0.038,
+    "Ccv/Ccv": 0.008,
+    "n/n": 99.944
   }
+},
+{
+  "key": "horsegenetics.concentric_eyespots",
+  "name": "Concentric Eyespots",
+  "phase": "magical",
+  "priority": 321,
+  "rarity": "RARE",
+  "blurb": "Butterfly-wing eyespots - nested rings around a pale glinting core - scatter down the neck and all four legs.",
+  "notes": [
+    "Every band is a pair of SPOTS masks on ONE seed, spacing, stretch and vary, differing only in radius, with the smaller one subtracted out. That is what keeps the rings concentric AND in proportion: 'vary' scales every band of a given eyespot by the same per-cell factor, so a big one is a big one all the way through rather than a big rim round an average core.",
+    "The legs get three bands and the neck four. A leg is about four body units across and a texel is half a unit; a fourth band there would be under a texel wide and read as mush, so the leg version is deliberately simpler rather than every band being shrunk.",
+    "The rim and the core are fixed colours on both forms. They are the eyespot's structural dark edge and its glint, and they read as those whatever accent the horse carries - only the middle bands take the hue knob.",
+    "The band radii are wider than the import's by roughly double, and that is not taste. A texel is half a body unit; the original leg rings were 0.28 and 0.26 units from one edge to the next, so every band on every leg was under a texel wide and resolved to nothing at all. The import's own note said a FOURTH band would do that - it was already happening at three. Anything with structure inside it needs several units, and the spacing went up with the radii so the eyespots still do not touch."
+  ],
+  "alleles": [
+    {
+      "token": "Cew",
+      "label": "Concentric Eyespots, pale (Cew)"
+    },
+    {
+      "token": "Cec",
+      "label": "Concentric Eyespots, coloured (Cec)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "legSeed",
+      "type": "seed"
+    },
+    {
+      "name": "neckSeed",
+      "type": "seed"
+    },
+    {
+      "name": "legSpacing",
+      "min": 4.2,
+      "max": 6.0
+    },
+    {
+      "name": "neckSpacing",
+      "min": 6.5,
+      "max": 9.0
+    },
+    {
+      "name": "stretch",
+      "min": 1.0,
+      "max": 1.8
+    },
+    {
+      "name": "vary",
+      "min": 0.1,
+      "max": 0.5
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Concentric Eyespots, pale",
+      "description": "A faint ivory echo of the rings ghosts along the neck and legs - the same shape as the coloured form, with the colour taken out.",
+      "when": [
+        "Cew/Cew",
+        "Cew/Cec",
+        "Cew/n"
+      ],
+      "layers": [
+        {
+          "name": "the leg eyespots, band at 1.9",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.9,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d9d4c9",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 1.25",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe9df",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 0.62",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f8f5ee",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 3.0",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 3.0,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d9d4c9",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 2.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e3ddd0",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 1.5",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe9df",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 0.8",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f8f5ee",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Concentric Eyespots, coloured",
+      "description": "Vivid eyespots - a near-black rim, a warm coloured band, and a pale glinting core - down the neck and every leg.",
+      "when": {
+        "Cec": 2
+      },
+      "layers": [
+        {
+          "name": "the leg eyespots, band at 1.9",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.9,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0f1a",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 1.25",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.78,
+            "lightness": 0.42,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 0.62",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#bfe9f2",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 3.0",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 3.0,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0f1a",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 2.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.4,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 1.5",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.4,
+            "lightness": 0.68,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 0.8",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#bfe9f2",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Cew/Cew": 0.002,
+    "Cew/Cec": 0.008,
+    "Cew/n": 0.038,
+    "Cec/Cec": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+},
+{
+  "key": "horsegenetics.coral_bloom",
+  "name": "Coral Bloom",
+  "phase": "magical",
+  "priority": 279,
+  "rarity": "RARE",
+  "blurb": "The coat ruffles into overlapping coral lobes, each rimmed in bright orange and shading from deep sea-blue to a pale crown, flecked all over with gold.",
+  "notes": [
+    "The three zones of a lobe are three readings of ONE tessellation - the same seed, scale and warp, with only the 'gap' moved - so the rim, the fill and the crown share a wall rather than each finding their own and opening seams between them. A band is the wider reading multiplied in and the narrower one subtracted out; the rim is the narrowest reading inverted, which is the crack itself.",
+    "The warp is what turns CRACKLE's naturally straight facets into rounded, ruffled lobes. Under close inspection the tessellation is still a Voronoi cell with flat sides; at coat scale it reads as coral, which is the whole of what it was tuned for.",
+    "No hue knob. The orange rim over blue fill IS the coral idea rather than a setting on it, and a horse wanting a different palette wants a different gene."
+  ],
+  "alleles": [
+    {
+      "token": "Crb",
+      "label": "Coral Bloom (Crb)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "cellSeed",
+      "type": "seed"
+    },
+    {
+      "name": "speckleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSpacing",
+      "min": 5.5,
+      "max": 9.5
+    },
+    {
+      "name": "cellWarp",
+      "min": 0.35,
+      "max": 0.75
+    }
+  ],
+  "expressions": [
+    {
+      "id": "coral",
+      "name": "Coral Bloom",
+      "description": "The coat breaks into overlapping ruffled lobes, each rimmed in bright orange, shading from deep sea-blue at the rim to a pale crown at the middle, and flecked with tiny gold specks.",
+      "when": [
+        "Crb/Crb",
+        "Crb/n"
+      ],
+      "layers": [
+        {
+          "name": "the orange rim in every seam",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": 1.2,
+              "warp": "$cellWarp",
+              "softness": 0.12,
+              "combine": "MULTIPLY",
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e8791e",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the deep blue field inside it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": 1.2,
+              "warp": "$cellWarp",
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": 3.6,
+              "warp": "$cellWarp",
+              "softness": 0.12,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1e3e9e",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the pale crown at the middle of each lobe",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": 3.6,
+              "warp": "$cellWarp",
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#8fc3ef",
+            "strength": 90
+          }
+        },
+        {
+          "name": "gold flecks over the whole lobe",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": 1.2,
+              "warp": "$cellWarp",
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$speckleSeed",
+              "spacing": 1.3,
+              "size": 0.42,
+              "density": 0.35,
+              "softness": 0.25,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f7b23b",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Crb/Crb": 0.002,
+    "Crb/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -4686,11 +5983,11 @@
     }
   ],
   "founders": {
-    "Cpw/Cpw": 0.002,
-    "Cpw/Cpc": 0.006,
-    "Cpw/n": 0.03,
-    "Cpc/Cpc": 0.006,
-    "n/n": 99.956
+    "Cpw/Cpw": 0.001,
+    "Cpw/Cpc": 0.004,
+    "Cpw/n": 0.019,
+    "Cpc/Cpc": 0.004,
+    "n/n": 99.972
   }
 },
 {
@@ -5186,9 +6483,9 @@
   "founders": {
     "Dsw/Dsw": 0.002,
     "Dsw/Dsc": 0.008,
-    "Dsw/n": 0.04,
+    "Dsw/n": 0.038,
     "Dsc/Dsc": 0.008,
-    "n/n": 99.942
+    "n/n": 99.944
   }
 },
 {
@@ -5530,11 +6827,11 @@
     }
   ],
   "founders": {
-    "Dsh/Dsh": 0.02,
-    "Dsh/Dsc": 0.06,
-    "Dsh/n": 0.3,
-    "Dsc/Dsc": 0.06,
-    "n/n": 99.56
+    "Dsh/Dsh": 0.004,
+    "Dsh/Dsc": 0.016,
+    "Dsh/n": 0.076,
+    "Dsc/Dsc": 0.016,
+    "n/n": 99.888
   }
 },
 {
@@ -5841,11 +7138,11 @@
     }
   ],
   "founders": {
-    "Drsw/Drsw": 0.002,
-    "Drsw/Drsc": 0.006,
-    "Drsw/n": 0.03,
-    "Drsc/Drsc": 0.006,
-    "n/n": 99.956
+    "Drsw/Drsw": 0.001,
+    "Drsw/Drsc": 0.004,
+    "Drsw/n": 0.019,
+    "Drsc/Drsc": 0.004,
+    "n/n": 99.972
   }
 },
 {
@@ -6146,11 +7443,11 @@
     }
   ],
   "founders": {
-    "Dfs/Dfs": 0.02,
-    "Dfs/Dfe": 0.06,
-    "Dfs/n": 0.3,
-    "Dfe/Dfe": 0.06,
-    "n/n": 99.56
+    "Dfs/Dfs": 0.004,
+    "Dfs/Dfe": 0.016,
+    "Dfs/n": 0.076,
+    "Dfe/Dfe": 0.016,
+    "n/n": 99.888
   }
 },
 {
@@ -6354,11 +7651,11 @@
     }
   ],
   "founders": {
-    "Dwb/Dwb": 0.004,
-    "Dwb/Dwc": 0.012,
-    "Dwb/n": 0.06,
-    "Dwc/Dwc": 0.012,
-    "n/n": 99.912
+    "Dwb/Dwb": 0.002,
+    "Dwb/Dwc": 0.008,
+    "Dwb/n": 0.038,
+    "Dwc/Dwc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -7401,11 +8698,11 @@
     }
   ],
   "founders": {
-    "Ehr/Ehr": 0.004,
-    "Ehr/Ehc": 0.012,
-    "Ehr/n": 0.06,
-    "Ehc/Ehc": 0.012,
-    "n/n": 99.912
+    "Ehr/Ehr": 0.002,
+    "Ehr/Ehc": 0.008,
+    "Ehr/n": 0.038,
+    "Ehc/Ehc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -7766,12 +9063,298 @@
     }
   ],
   "founders": {
-    "Elw/Elw": 0.004,
-    "Elw/Elc": 0.012,
-    "Elw/n": 0.06,
-    "Elc/Elc": 0.012,
-    "n/n": 99.912
+    "Elw/Elw": 0.002,
+    "Elw/Elc": 0.008,
+    "Elw/n": 0.038,
+    "Elc/Elc": 0.008,
+    "n/n": 99.944
   }
+},
+{
+  "key": "horsegenetics.emberveins",
+  "name": "Emberveins",
+  "phase": "magical",
+  "priority": 383,
+  "rarity": "LEGENDARY",
+  "blurb": "Fine seams trace the coat like cracked stone about to give way - molten orange in the glowing form, a quiet rust vein-work in the other - with drifting embers and one wandering thread of light caught along the flank.",
+  "notes": [
+    "'vertexWeight' on the CRACKLE mask exists because of this gene. A crack read purely as distance-to-wall is a channel of EVEN width - that is what a distance to a plane is - and the reference's veins pool where cracks meet and thin to a hairline between the junctions. Blending in the distance to the three-way corners is what lets one threshold do both, and no arrangement of the other masks reaches it: SPOTS and DAPPLES measure to a cell's centre and know nothing about where its corners fell.",
+    "Both alleles draw the identical geometry from the same three seeds, so littermates of either genotype share a recognisable vein layout and only the paint differs. The recessive filament is fainter rather than absent - the same creature with the light turned down.",
+    "The reference image's three broad tones are the horse's base coat showing through the cracks, not part of this marking. It draws the network, the embers and the filament, and nothing else."
+  ],
+  "alleles": [
+    {
+      "token": "Emb",
+      "label": "Emberveins, glowing (Emb)"
+    },
+    {
+      "token": "Emr",
+      "label": "Emberveins, rust (Emr)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "emberSeed",
+      "type": "seed"
+    },
+    {
+      "name": "filamentSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 40.0
+    },
+    {
+      "name": "cellSize",
+      "min": 3.5,
+      "max": 8.0
+    },
+    {
+      "name": "veinWidth",
+      "min": 0.3,
+      "max": 0.9
+    },
+    {
+      "name": "vertexWeight",
+      "min": 0.35,
+      "max": 0.7
+    },
+    {
+      "name": "emberSpacing",
+      "min": 2.0,
+      "max": 5.0
+    },
+    {
+      "name": "emberSize",
+      "min": 0.15,
+      "max": 0.5
+    },
+    {
+      "name": "filamentWarp",
+      "min": 0.2,
+      "max": 0.6
+    }
+  ],
+  "expressions": [
+    {
+      "id": "glowing",
+      "name": "Emberveins, glowing",
+      "description": "Molten seams glow along the coat wherever the hide would naturally crease, brightest at a scatter of ember points and one thin drifting thread of light across the flank.",
+      "when": [
+        "Emb/Emb",
+        "Emb/Emr",
+        "Emb/n"
+      ],
+      "layers": [
+        {
+          "name": "the vein network",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.3,
+              "vertexWeight": "$vertexWeight",
+              "softness": 0.1,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ff5a1f",
+            "strength": 96
+          }
+        },
+        {
+          "name": "embers scattered along it",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$emberSeed",
+              "spacing": "$emberSpacing",
+              "radius": "$emberSize",
+              "vary": 0.3,
+              "chance": 0.6,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ff8a3d",
+            "strength": 96
+          }
+        },
+        {
+          "name": "and one thread of light along the flank",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filamentSeed",
+              "shape": "ridged",
+              "scale": 7.0,
+              "octaves": 3,
+              "warp": "$filamentWarp",
+              "threshold": 0.85,
+              "softness": 0.04,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffd9c2",
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "rust",
+      "name": "Emberveins, rust",
+      "description": "The same cracked seams as quiet rust-dark vein-work, with a scatter of ash-dark freckling and one faint hairline on the flank - no glow to any of it.",
+      "when": {
+        "Emr": 2
+      },
+      "layers": [
+        {
+          "name": "the vein network",
+          "emissive": false,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.3,
+              "vertexWeight": "$vertexWeight",
+              "softness": 0.1,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.24,
+            "strength": 88
+          }
+        },
+        {
+          "name": "embers scattered along it",
+          "emissive": false,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$emberSeed",
+              "spacing": "$emberSpacing",
+              "radius": "$emberSize",
+              "vary": 0.3,
+              "chance": 0.6,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.3,
+            "lightness": 0.14,
+            "strength": 85
+          }
+        },
+        {
+          "name": "and one thread of light along the flank",
+          "emissive": false,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filamentSeed",
+              "shape": "ridged",
+              "scale": 7.0,
+              "octaves": 3,
+              "warp": "$filamentWarp",
+              "threshold": 0.92,
+              "softness": 0.04,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.4,
+            "lightness": 0.4,
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Emb/Emb": 0.0005,
+    "Emb/Emr": 0.002,
+    "Emb/n": 0.0095,
+    "Emr/Emr": 0.002,
+    "n/n": 99.986
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -9034,6 +10617,168 @@
   }
 },
 {
+  "key": "horsegenetics.fish_scales",
+  "name": "Fish Scales",
+  "phase": "magical",
+  "priority": 322,
+  "rarity": "RARE",
+  "blurb": "The barrel raises into overlapping fish scales, each one rimmed in a warm colour this line of horses carries, with a darker line traced along its outer edge.",
+  "notes": [
+    "'arc' and 'angle' on SPOTS exist because of this gene. Drawing every scale as a closed ring gives a NET - a lattice of complete outlines - and a shingled surface is the opposite of that: the nose-facing half of each scale's boundary is hidden under the scale in front of it and shows no line at all. RINGS could already clip one instance to a crescent; nothing could clip every cell of a tiled field to the same crescent, which is the difference between a net and a roof.",
+    "'angle' is 180, so the drawn half of every scale faces the TAIL. Turn it toward 0 and the scales read as lying the other way, which on a horse looks like fur brushed backwards.",
+    "The colour is carried entirely on the hue knob rather than a fixed orange, so each horse draws its own scale colour at birth and passes it to its foals with the allele.",
+    "The hue knob runs 8 to 48 rather than the whole wheel. The marking is described as warm orange and the colour is the only thing a horse gets to draw for itself here; letting it reach green would make the blurb a lie on two horses in three."
+  ],
+  "alleles": [
+    {
+      "token": "Scl",
+      "label": "Fish Scales (Scl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 8.0,
+      "max": 48.0
+    },
+    {
+      "name": "scaleSize",
+      "min": 2.6,
+      "max": 4.2
+    },
+    {
+      "name": "scaleArc",
+      "min": 0.45,
+      "max": 0.62
+    }
+  ],
+  "expressions": [
+    {
+      "id": "scaled",
+      "name": "Fish Scales",
+      "description": "The barrel is patterned in overlapping scales, each rim a bright warm band with a thinner, darker line along its outer edge.",
+      "when": [
+        "Scl/Scl",
+        "Scl/n"
+      ],
+      "layers": [
+        {
+          "name": "the bright rim of each scale",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 1.7,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 0.95,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.56,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the darker line along its edge",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 1.7,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": "$scaleSize",
+              "radius": 1.4,
+              "stretch": 1.3,
+              "axis": "X",
+              "vary": 0.15,
+              "mirror": true,
+              "arc": "$scaleArc",
+              "angle": 180.0,
+              "softness": 0.12,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.28,
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Scl/Scl": 0.002,
+    "Scl/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+},
+{
   "format": 3,
   "key": "horsegenetics.flametouched",
   "name": "Flametouched",
@@ -9987,6 +11732,164 @@
     "Gam/n": 0.0095,
     "n/n": 99.99
   }
+},
+{
+  "key": "horsegenetics.gill_bloom",
+  "name": "Gill Bloom",
+  "phase": "magical",
+  "priority": 280,
+  "rarity": "EPIC",
+  "blurb": "A fungal-touched marking: one or two fan-shaped patches on the barrel, each rimmed in dull gold and hollowed to a deep maroon interior spoked like the underside of a mushroom cap.",
+  "notes": [
+    "The gills are a FAN, and this gene is half the reason that mask exists. A ridged FRACTAL gives lines that fork and taper like cracks or roots; real gills all meet at one point, which is an angle around a pivot and not a noise threshold. FAN measures exactly that, and its 'spacing' being an arc length at one unit out is what makes the spokes widen as they travel - a gill fans, it does not run parallel.",
+    "One pivot, not one per patch. FAN takes a single origin, so a horse whose FRACTAL puts two patches on the barrel gets spokes radiating from the same point for both, which reads correctly on the patch nearest the pivot and as a raked comb on the other. The pivot sits at the middle of the barrel, where the patch usually lands. A per-patch pivot would need the mask to know which blob a texel is in, which nothing here measures.",
+    "The rim and the interior are two thresholds of ONE fractal on one seed, so the gold rim is always the outside of the maroon rather than a second patch that happens to overlap it.",
+    "gillSpacing is an angle in radians, not a distance: at 0.15 a full turn holds about forty spokes, which is what the underside of a cap looks like. A number that reads like a body-unit spacing puts three bars on the whole horse."
+  ],
+  "alleles": [
+    {
+      "token": "Gbl",
+      "label": "Gill Bloom (Gbl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "patchSeed",
+      "type": "seed"
+    },
+    {
+      "name": "patchScale",
+      "min": 4.5,
+      "max": 9.0
+    },
+    {
+      "name": "patchWarp",
+      "min": 0.2,
+      "max": 0.7
+    },
+    {
+      "name": "gillSpacing",
+      "min": 0.1,
+      "max": 0.22
+    }
+  ],
+  "expressions": [
+    {
+      "id": "bloom",
+      "name": "Gill Bloom",
+      "description": "One to a few fan-shaped patches across the barrel, each with a matte gold rim opening onto a deep maroon centre spoked with dark gills.",
+      "when": {
+        "Gbl": 2
+      },
+      "layers": [
+        {
+          "name": "the gold rim",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$patchSeed",
+              "octaves": 1,
+              "scale": "$patchScale",
+              "warp": "$patchWarp",
+              "threshold": 0.55,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e7a83a",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the maroon interior",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$patchSeed",
+              "octaves": 1,
+              "scale": "$patchScale",
+              "warp": "$patchWarp",
+              "threshold": 0.7,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#5a1420",
+            "strength": 95
+          }
+        },
+        {
+          "name": "and the gills spoking out of it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$patchSeed",
+              "octaves": 1,
+              "scale": "$patchScale",
+              "warp": "$patchWarp",
+              "threshold": 0.7,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "body",
+              "originU": 0.45,
+              "originV": 0.5,
+              "spacing": "$gillSpacing",
+              "duty": 0.4,
+              "inner": 1.0,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#230810",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Gbl/Gbl": 0.02,
+    "n/n": 99.98
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -11202,11 +13105,11 @@
     }
   ],
   "founders": {
-    "Hqs/Hqs": 0.004,
-    "Hqs/Hqc": 0.012,
-    "Hqs/n": 0.06,
-    "Hqc/Hqc": 0.012,
-    "n/n": 99.912
+    "Hqs/Hqs": 0.002,
+    "Hqs/Hqc": 0.008,
+    "Hqs/n": 0.038,
+    "Hqc/Hqc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -11870,11 +13773,11 @@
     }
   ],
   "founders": {
-    "Isw/Isw": 0.004,
-    "Isw/Isc": 0.012,
-    "Isw/n": 0.06,
-    "Isc/Isc": 0.012,
-    "n/n": 99.912
+    "Isw/Isw": 0.002,
+    "Isw/Isc": 0.008,
+    "Isw/n": 0.038,
+    "Isc/Isc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -12717,12 +14620,609 @@
     }
   ],
   "founders": {
-    "Ijw/Ijw": 0.002,
-    "Ijw/Ijm": 0.008,
-    "Ijw/n": 0.04,
-    "Ijm/Ijm": 0.008,
-    "n/n": 99.942
+    "Ijw/Ijw": 0.001,
+    "Ijw/Ijm": 0.004,
+    "Ijw/n": 0.019,
+    "Ijm/Ijm": 0.004,
+    "n/n": 99.972
   }
+},
+{
+  "key": "horsegenetics.iridescent_rosette",
+  "name": "Iridescent Rosette",
+  "phase": "magical",
+  "priority": 323,
+  "rarity": "RARE",
+  "blurb": "Dark rosettes speckle the coat, each rimmed in bands of colour that shift like the shell of a jewel beetle.",
+  "notes": [
+    "The import wrote the coloured form as one RAMP running RADIALLY out from each rosette's own centre. There is no radial axis on RAMP and adding one would need the op to know which cell it was in, so the three colour bands are written as three concentric SPOTS pairs instead - the same recipe the pale form uses, on the same seed, spacing, stretch and vary. The visible difference is that the bands step rather than blend; the registration, which is what the import was protecting, is exactly as tight.",
+    "Every radius here is a knob, and every band's outer edge is the next band's inner edge, so the rosette stays in proportion however the knobs are bred - and 'vary' scales the whole set of them by one per-cell factor, so a big rosette is big all the way through."
+  ],
+  "alleles": [
+    {
+      "token": "Irw",
+      "label": "Iridescent Rosette, pale (Irw)"
+    },
+    {
+      "token": "Irc",
+      "label": "Iridescent Rosette, coloured (Irc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "spacing",
+      "min": 3.5,
+      "max": 6.0
+    },
+    {
+      "name": "stretch",
+      "min": 0.9,
+      "max": 1.25
+    },
+    {
+      "name": "vary",
+      "min": 0.15,
+      "max": 0.5
+    },
+    {
+      "name": "holeSoft",
+      "min": 0.1,
+      "max": 0.35
+    },
+    {
+      "name": "outerSoft",
+      "min": 0.15,
+      "max": 0.4
+    },
+    {
+      "name": "hueInner",
+      "min": 80.0,
+      "max": 160.0
+    },
+    {
+      "name": "hueMid",
+      "min": 30.0,
+      "max": 60.0
+    },
+    {
+      "name": "hueOuter",
+      "min": 280.0,
+      "max": 340.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Iridescent Rosette, pale",
+      "description": "Faint ivory ring-spots ghost the coat, the same size and spacing as the true rosettes with the colour taken out of the band.",
+      "when": [
+        "Irw/Irw",
+        "Irw/Irc",
+        "Irw/n"
+      ],
+      "layers": [
+        {
+          "name": "the ring",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 3.2,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 0.9,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ede6d6",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Iridescent Rosette, coloured",
+      "description": "Each rosette opens into a dark hollow ringed by green, then gold, then a wide band of magenta before the coat returns - a beetle-shell shimmer across the whole barrel.",
+      "when": {
+        "Irc": 2
+      },
+      "layers": [
+        {
+          "name": "the outer magenta band",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 3.2,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 2.1,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hueOuter",
+            "saturation": 0.55,
+            "lightness": 0.62,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the gold band inside it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 2.1,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hueMid",
+            "saturation": 0.72,
+            "lightness": 0.55,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the green ring round the hollow",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 0.9,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hueInner",
+            "saturation": 0.55,
+            "lightness": 0.42,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Irw/Irw": 0.002,
+    "Irw/Irc": 0.008,
+    "Irw/n": 0.038,
+    "Irc/Irc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+},
+{
+  "key": "horsegenetics.iris_bloom_diamonds",
+  "name": "Iris Bloom Diamonds",
+  "phase": "magical",
+  "priority": 281,
+  "rarity": "MYTHIC",
+  "blurb": "Dark royal-blue diamonds unfold across the barrel like a fan of iris petals, each rimmed in ink, dappled white, and lit at the middle by radiating amber veins.",
+  "notes": [
+    "The import bet that a CRACKLE and a SPOTS mask given the same seed and spacing would agree about where a cell's centre is, and wrote a note saying it was a bet. It was a bad one - the two masks derive their points differently and the white dapple field would have drifted off the diamond it belonged to on some horses. CRACKLE now reads its own tessellation from the middle out ('measure': 'centroid'), so the amber core is GUARANTEED concentric with the rim, on the same seed and the same scale, rather than concentric by coincidence.",
+    "The outline and the fill are two readings of one wall distance, subtracted, so the ink rim can never open a seam or double-paint against the blue it edges.",
+    "The diamonds are CRACKLE rather than SPOTS because they have straight sides. CRACKLE and WAVES are the only two masks in the vocabulary that do; everything else rounds off.",
+    "'scale' is per-dose - 5 units on one copy, 3 on two - so a homozygote carries a denser fan of smaller diamonds. That is legal here because the expression claims combinations with different copy counts of the first allele; it would be a silent constant if it did not."
+  ],
+  "alleles": [
+    {
+      "token": "Ibd",
+      "label": "Iris Bloom Diamonds (Ibd)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "dotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "tearSeed",
+      "type": "seed"
+    },
+    {
+      "name": "jitter",
+      "min": 0.4,
+      "max": 0.7
+    },
+    {
+      "name": "insetGap",
+      "min": 0.6,
+      "max": 1.2
+    },
+    {
+      "name": "insetOutline",
+      "min": 1.4,
+      "max": 2.0
+    },
+    {
+      "name": "coreWidth",
+      "min": 1.6,
+      "max": 2.6
+    },
+    {
+      "name": "vary",
+      "min": 0.2,
+      "max": 0.4
+    }
+  ],
+  "expressions": [
+    {
+      "id": "diamonds",
+      "name": "Iris Bloom Diamonds",
+      "description": "Dark royal-blue diamonds spread across the barrel, denser and smaller with a second copy. Each is rimmed in near-black, dappled white through its outer half, and lit at the middle by radiating amber veins.",
+      "when": [
+        "Ibd/Ibd",
+        "Ibd/n"
+      ],
+      "layers": [
+        {
+          "name": "the blue of each diamond",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#1c2f82",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the ink rim round it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetOutline",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d1247",
+            "strength": 96
+          }
+        },
+        {
+          "name": "white dapples over the outer half",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$coreWidth",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "SUBTRACT",
+              "measure": "centroid",
+              "invert": true
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$dotSeed",
+              "spacing": 0.85,
+              "size": 0.4,
+              "density": 0.4,
+              "softness": 0.25,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fbfbf6",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the amber veins at the middle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$insetGap",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": {
+                "perDose": [
+                  5.0,
+                  5.0,
+                  3.0
+                ]
+              },
+              "gap": "$coreWidth",
+              "warp": "$jitter",
+              "softness": 0.1,
+              "combine": "MULTIPLY",
+              "measure": "centroid",
+              "invert": true
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "seed": "$tearSeed",
+              "scale": 2.0,
+              "octaves": 2,
+              "warp": 0.35,
+              "threshold": 0.72,
+              "softness": 0.09,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e2891f",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ibd/Ibd": 0.00025,
+    "Ibd/n": 0.00475,
+    "n/n": 99.995
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -13019,6 +15519,244 @@
   }
 },
 {
+  "key": "horsegenetics.kite_bloom",
+  "name": "Kite Bloom",
+  "phase": "magical",
+  "priority": 282,
+  "rarity": "RARE",
+  "blurb": "Angular, jewel-toned panels tile the coat like a stained-glass leaf, each one salted with pale flecks and seamed with the coat beneath.",
+  "notes": [
+    "The import asked for a RAMP whose colour came from the angle between the surface and the CAMERA, so a panel would shift hue as the horse turned. That is not a tuning gap and it is not going to be built: the coat is a texture baked once per horse, and nothing in this module ever learns where a viewer is. What did get built is the NORMAL mask, which reads the direction the SURFACE faces - see Carapace Sheen, where the same request landed - and here the per-panel colour comes off the panel instead, which is the other honest reading of 'iridescent'.",
+    "The colour is a RAMP on axis 'cellId', sharing the panels' own seed and scale: one key drawn per cell and constant across it, so neighbouring panels take unrelated colours and meet at the seam. That is the difference between a stained-glass leaf and a gradient.",
+    "The seam between panels is left unpainted rather than drawn, so what shows there is the horse's own coat - which is what makes the panels read as laid over the horse rather than as the horse."
+  ],
+  "alleles": [
+    {
+      "token": "Kbw",
+      "label": "Kite Bloom, pale (Kbw)"
+    },
+    {
+      "token": "Kbc",
+      "label": "Kite Bloom, coloured (Kbc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "patchSize",
+      "min": 4.0,
+      "max": 7.5
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "dotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "dotRadius",
+      "min": 0.3,
+      "max": 0.7
+    },
+    {
+      "name": "dotSpacing",
+      "min": 1.3,
+      "max": 2.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Kite Bloom, pale",
+      "description": "A faint silvery lattice of panels ghosts over the coat, catching the light without much colour in it.",
+      "when": [
+        "Kbw/Kbw",
+        "Kbw/n"
+      ],
+      "layers": [
+        {
+          "name": "the panels",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#edefe8",
+            "strength": 72
+          }
+        }
+      ]
+    },
+    {
+      "id": "washed",
+      "name": "Kite Bloom, washed",
+      "description": "The lattice shows through more clearly, each panel tinted with a muted wash of colour under the pale overlay.",
+      "when": [
+        "Kbw/Kbc"
+      ],
+      "layers": [
+        {
+          "name": "the panels, each its own colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$seed",
+            "scale": "$patchSize",
+            "hue": "$hue",
+            "hueSpan": 96,
+            "saturation": 0.34,
+            "lightness": 0.62,
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Kite Bloom, coloured",
+      "description": "Bold facets tile the coat edge to edge, every panel its own deep colour and every one dusted with small pale flecks.",
+      "when": {
+        "Kbc": 2
+      },
+      "layers": [
+        {
+          "name": "the panels, each its own colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$seed",
+            "scale": "$patchSize",
+            "hue": "$hue",
+            "hueSpan": 110,
+            "saturation": 0.58,
+            "lightness": 0.42,
+            "strength": 94
+          }
+        },
+        {
+          "name": "and the flecks salted over them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$dotSeed",
+              "radius": "$dotRadius",
+              "spacing": "$dotSpacing",
+              "vary": 0.4,
+              "chance": 0.7,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f8f8f2",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Kbw/Kbw": 0.002,
+    "Kbw/Kbc": 0.008,
+    "Kbw/n": 0.038,
+    "Kbc/Kbc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+},
+{
   "format": 3,
   "key": "horsegenetics.koi",
   "name": "Koi",
@@ -13299,13 +16037,13 @@
     }
   ],
   "founders": {
-    "Koi/Koi": 0.006,
-    "Koi/Kob": 0.006,
-    "Koi/Kow": 0.006,
-    "Koi/n": 0.03,
-    "Kob/Kob": 0.006,
-    "Kow/Kow": 0.006,
-    "n/n": 99.94
+    "Koi/Koi": 0.001,
+    "Koi/Kob": 0.002,
+    "Koi/Kow": 0.002,
+    "Koi/n": 0.019,
+    "Kob/Kob": 0.002,
+    "Kow/Kow": 0.002,
+    "n/n": 99.972
   }
 },
 {
@@ -13502,12 +16240,215 @@
     }
   ],
   "founders": {
-    "Lac/Lac": 0.01,
-    "Lac/Lah": 0.03,
-    "Lac/n": 0.16,
-    "Lah/Lah": 0.03,
-    "n/n": 99.77
+    "Lac/Lac": 0.002,
+    "Lac/Lah": 0.008,
+    "Lac/n": 0.038,
+    "Lah/Lah": 0.008,
+    "n/n": 99.944
   }
+},
+{
+  "key": "horsegenetics.lacevein",
+  "name": "Lacevein",
+  "phase": "magical",
+  "priority": 384,
+  "rarity": "RARE",
+  "blurb": "Fine branching lace etches across the coat, rooted in two deep jewel-toned blooms at the withers and the poll.",
+  "notes": [
+    "Named Lacevein rather than Lace: there is already a gene called Lace, and two entries a letter apart in the same list is a trap for whoever reads the genotype next.",
+    "The heterozygote is not a thinner version of the homozygote - it covers fewer PARTS and runs two octaves at a higher threshold, so it reads as a smaller, simpler marking rather than a faded one, and it carries one bloom instead of two.",
+    "The lace and the blooms are co-located, not connected. The reference shows veins BRANCHING OUT of the two deep centres, and nothing in this vocabulary measures connectivity back to a root: a ridged FRACTAL is unrooted global noise and a PATH carries one prescribed curve, so a vein here will sometimes pass near a bloom without visibly joining it. That is a different question - 'is this texel joined by an unbroken branch to that point' - and it is not a threshold away from any of the masks that exist."
+  ],
+  "alleles": [
+    {
+      "token": "Lvn",
+      "label": "Lacevein (Lvn)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 240.0,
+      "max": 320.0
+    },
+    {
+      "name": "density",
+      "min": 0.62,
+      "max": 0.78
+    }
+  ],
+  "expressions": [
+    {
+      "id": "full",
+      "name": "Lacevein",
+      "description": "Dense black lace forks and tapers across the body, neck, head and muzzle, rooted in two deep jewel-toned blooms at the withers and poll.",
+      "when": {
+        "Lvn": 2
+      },
+      "layers": [
+        {
+          "name": "the lace",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "seed": "$seed",
+              "scale": 6.0,
+              "octaves": 3,
+              "warp": 0.12,
+              "threshold": "$density",
+              "softness": 0.05,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#151016",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the bloom at the withers",
+          "masks": [
+            {
+              "type": "PATH",
+              "space": "body",
+              "points": [
+                0.55,
+                0.6,
+                0.58,
+                0.68
+              ],
+              "width": 2.5,
+              "softness": 1.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.14,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the bloom at the poll",
+          "masks": [
+            {
+              "type": "PATH",
+              "space": "body",
+              "points": [
+                0.66,
+                0.85,
+                0.7,
+                0.92
+              ],
+              "width": 2.0,
+              "softness": 1.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.14,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparse",
+      "name": "Lacevein, sparse",
+      "description": "A sparser web of black lace crosses the body and neck, fading around a single faint bloom at the withers.",
+      "when": [
+        "Lvn/n"
+      ],
+      "layers": [
+        {
+          "name": "the lace",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "seed": "$seed",
+              "scale": 6.0,
+              "octaves": 2,
+              "warp": 0.08,
+              "threshold": 0.82,
+              "softness": 0.05,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#151016",
+            "strength": 90
+          }
+        },
+        {
+          "name": "and one faint bloom",
+          "masks": [
+            {
+              "type": "PATH",
+              "space": "body",
+              "points": [
+                0.55,
+                0.6,
+                0.58,
+                0.68
+              ],
+              "width": 1.8,
+              "softness": 1.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.35,
+            "lightness": 0.18,
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Lvn/Lvn": 0.002,
+    "Lvn/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -14240,11 +17181,11 @@
     }
   ],
   "founders": {
-    "Lbs/Lbs": 0.004,
-    "Lbs/Lbc": 0.012,
-    "Lbs/n": 0.06,
-    "Lbc/Lbc": 0.012,
-    "n/n": 99.912
+    "Lbs/Lbs": 0.002,
+    "Lbs/Lbc": 0.008,
+    "Lbs/n": 0.038,
+    "Lbc/Lbc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -15003,6 +17944,913 @@
   }
 },
 {
+  "key": "horsegenetics.moonwing",
+  "name": "Moonwing",
+  "phase": "magical",
+  "priority": 283,
+  "rarity": "LEGENDARY",
+  "blurb": "A pearl-white wing sweeps back across each side of the barrel, dusted with a faint shimmer of blue, violet and pink and bound at the edge by a thick band of gold. Rare foals carry it reversed - the wing itself coloured, the gold unchanged.",
+  "notes": [
+    "The wing is an SVG path, and it is the first gene in the mod that carries an actual drawing. The import shipped it as one big soft SPOTS blob per side and said so: a blob is round and a wing is pointed, and no radius or stretch makes a lattice cell into a silhouette. A drawn outline is the answer to that, and 'plane': 'side' extrudes it through the horse so one drawing appears on both flanks without either being placed by hand.",
+    "The gold trim is the SAME path stroked instead of filled, so the band cannot drift off the edge it is meant to bind however the viewport is tuned. The import built its trim by growing the blob and subtracting the blob back out, which works and which no longer has to.",
+    "'fit': 'none' - the drawing is deliberately stretched to fill its viewport rather than fitted inside it, because the wing is meant to be as long as the ribcage and a proportional fit would leave it a small square mark in the middle of the flank.",
+    "The dust is a static three-colour stipple. The reference's shimmer is a viewing-angle effect and the coat is a baked texture; the honest half of that is a fixed iridescent speckle, and it is what this ships."
+  ],
+  "alleles": [
+    {
+      "token": "Mnw",
+      "label": "Moonwing, pearl (Mnw)"
+    },
+    {
+      "token": "Mnc",
+      "label": "Moonwing, coloured (Mnc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "dustSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pearl",
+      "name": "Moonwing, pearl",
+      "description": "Twin pearl-white wings sweep back across the ribs, glimmering with a faint blue-violet-pink dust and bound at the edge by a thick band of gold.",
+      "when": [
+        "Mnw/Mnw",
+        "Mnw/Mnc",
+        "Mnw/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SVG",
+              "parts": [
+                "BARREL"
+              ],
+              "d": "M 6 46 C 22 16 56 8 88 18 C 96 21 97 30 90 36 C 80 45 66 50 54 52 C 68 58 80 68 86 80 C 90 88 84 95 75 92 C 44 82 16 66 6 46 Z",
+              "viewBox": [
+                0,
+                0,
+                100,
+                100
+              ],
+              "plane": "side",
+              "space": "body",
+              "originU": 0.3,
+              "originV": 0.4,
+              "sizeU": 0.3,
+              "sizeV": 0.2,
+              "fit": "none",
+              "softness": 0.9,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4f0e8",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the dust over it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SVG",
+              "parts": [
+                "BARREL"
+              ],
+              "d": "M 6 46 C 22 16 56 8 88 18 C 96 21 97 30 90 36 C 80 45 66 50 54 52 C 68 58 80 68 86 80 C 90 88 84 95 75 92 C 44 82 16 66 6 46 Z",
+              "viewBox": [
+                0,
+                0,
+                100,
+                100
+              ],
+              "plane": "side",
+              "space": "body",
+              "originU": 0.3,
+              "originV": 0.4,
+              "sizeU": 0.3,
+              "sizeV": 0.2,
+              "fit": "none",
+              "softness": 0.9,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$dustSeed",
+              "spacing": 1.1,
+              "size": 0.35,
+              "density": 0.5,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#bfe0ff",
+              "#d6c2ff",
+              "#ffd1e8"
+            ],
+            "seed": "$dustSeed",
+            "scale": 1.1,
+            "strength": 85
+          }
+        },
+        {
+          "name": "and the gold band round its edge",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SVG",
+              "parts": [
+                "BARREL"
+              ],
+              "d": "M 6 46 C 22 16 56 8 88 18 C 96 21 97 30 90 36 C 80 45 66 50 54 52 C 68 58 80 68 86 80 C 90 88 84 95 75 92 C 44 82 16 66 6 46 Z",
+              "viewBox": [
+                0,
+                0,
+                100,
+                100
+              ],
+              "plane": "side",
+              "space": "body",
+              "originU": 0.3,
+              "originV": 0.4,
+              "sizeU": 0.3,
+              "sizeV": 0.2,
+              "fit": "none",
+              "softness": 0.35,
+              "combine": "MULTIPLY",
+              "fill": false,
+              "width": 1.1,
+              "join": "round"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9932e",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Moonwing, coloured",
+      "description": "The same wings, but the field itself carries deep colour instead of white - the same dust, the same gold binding.",
+      "when": {
+        "Mnc": 2
+      },
+      "layers": [
+        {
+          "name": "the wing",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SVG",
+              "parts": [
+                "BARREL"
+              ],
+              "d": "M 6 46 C 22 16 56 8 88 18 C 96 21 97 30 90 36 C 80 45 66 50 54 52 C 68 58 80 68 86 80 C 90 88 84 95 75 92 C 44 82 16 66 6 46 Z",
+              "viewBox": [
+                0,
+                0,
+                100,
+                100
+              ],
+              "plane": "side",
+              "space": "body",
+              "originU": 0.3,
+              "originV": 0.4,
+              "sizeU": 0.3,
+              "sizeV": 0.2,
+              "fit": "none",
+              "softness": 0.9,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.4,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the dust over it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SVG",
+              "parts": [
+                "BARREL"
+              ],
+              "d": "M 6 46 C 22 16 56 8 88 18 C 96 21 97 30 90 36 C 80 45 66 50 54 52 C 68 58 80 68 86 80 C 90 88 84 95 75 92 C 44 82 16 66 6 46 Z",
+              "viewBox": [
+                0,
+                0,
+                100,
+                100
+              ],
+              "plane": "side",
+              "space": "body",
+              "originU": 0.3,
+              "originV": 0.4,
+              "sizeU": 0.3,
+              "sizeV": 0.2,
+              "fit": "none",
+              "softness": 0.9,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$dustSeed",
+              "spacing": 1.1,
+              "size": 0.35,
+              "density": 0.5,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#bfe0ff",
+              "#d6c2ff",
+              "#ffd1e8"
+            ],
+            "seed": "$dustSeed",
+            "scale": 1.1,
+            "strength": 85
+          }
+        },
+        {
+          "name": "and the gold band round its edge",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SVG",
+              "parts": [
+                "BARREL"
+              ],
+              "d": "M 6 46 C 22 16 56 8 88 18 C 96 21 97 30 90 36 C 80 45 66 50 54 52 C 68 58 80 68 86 80 C 90 88 84 95 75 92 C 44 82 16 66 6 46 Z",
+              "viewBox": [
+                0,
+                0,
+                100,
+                100
+              ],
+              "plane": "side",
+              "space": "body",
+              "originU": 0.3,
+              "originV": 0.4,
+              "sizeU": 0.3,
+              "sizeV": 0.2,
+              "fit": "none",
+              "softness": 0.35,
+              "combine": "MULTIPLY",
+              "fill": false,
+              "width": 1.1,
+              "join": "round"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9932e",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Mnw/Mnw": 0.0005,
+    "Mnw/Mnc": 0.002,
+    "Mnw/n": 0.0095,
+    "Mnc/Mnc": 0.002,
+    "n/n": 99.986
+  },
+  "format": 3
+},
+{
+  "key": "horsegenetics.morpho_wing",
+  "name": "Morpho Wing",
+  "phase": "magical",
+  "priority": 278,
+  "rarity": "EPIC",
+  "blurb": "A patch of iridescent light gathers low on the haunch like a wing folded against the flank, cut through with dark bars that rake toward the tail.",
+  "notes": [
+    "The bars are a FAN, and FAN exists because of this gene. The reference's bars share a common origin near the body and both widen and turn as they travel out from it; WAVES takes its phase from a straight line, so its bars are parallel, evenly spaced and all pointed the same way everywhere in the region, whatever its wavelength. That is a different measurement, not different tuning, and it is the one the mask was added for.",
+    "Both layers re-declare the same PARTS and PATH region rather than the second reading the first's paint - a layer cannot see what the layer above it painted.",
+    "FAN's spacing is an ANGLE - the arc one cycle covers a single body unit from the pivot - so the bars here are 0.17, not the 1.5 that reads like 'one and a half units apart'. At 1.5 the whole patch is inside one bar. It is the one number on this gene worth checking against a render rather than against intuition."
+  ],
+  "alleles": [
+    {
+      "token": "Mow",
+      "label": "Morpho Wing, pale (Mow)"
+    },
+    {
+      "token": "Moc",
+      "label": "Morpho Wing, coloured (Moc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Morpho Wing, pale",
+      "description": "A soft silver-white sheen pools low on the haunch, banded with a few dark bars raking back toward the tail.",
+      "when": [
+        "Mow/Mow",
+        "Mow/Moc",
+        "Mow/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e9eaf2",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the bars across it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "body",
+              "originU": 0.16,
+              "originV": 0.34,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "twist": 40.0,
+              "inner": 1.5,
+              "outer": 13.0,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Morpho Wing, coloured",
+      "description": "The same folded wing, but the light in it is the colour this line of horses runs to - still barred in black.",
+      "when": {
+        "Moc": 2
+      },
+      "layers": [
+        {
+          "name": "the wing",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.62,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the bars across it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "body",
+              "originU": 0.16,
+              "originV": 0.34,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "twist": 40.0,
+              "inner": 1.5,
+              "outer": 13.0,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Mow/Mow": 0.001,
+    "Mow/Moc": 0.004,
+    "Mow/n": 0.019,
+    "Moc/Moc": 0.004,
+    "n/n": 99.972
+  },
+  "format": 3
+},
+{
+  "key": "horsegenetics.moth_eyes",
+  "name": "Moth Eyes",
+  "phase": "magical",
+  "priority": 324,
+  "rarity": "EPIC",
+  "blurb": "Fine black vein-work threads the coat like an insect's wing membrane, broken by dark, gold-ringed eyespots along the flank - but only where the coat beneath is already black or grey.",
+  "notes": [
+    "'black or grey, and nothing else' is TWO readings and the import only had one. Brightness alone lets a pale dapple grey out and lets a liver chestnut in, because what the condition is really about is how far the colour sits from grey. The second LUMA here reads 'saturation' - which was already in the vocabulary under that name, so the 'chroma' channel the import asked for did not need building - inverted, so coverage is 1 on anything achromatic and 0 on a saturated hue.",
+    "The glint is off-centre, which is what SPOTS' offsetX and offsetY were added for. Every other band of the eyespot measures from the true cell centre; this one measures from a point shifted a third of a unit up and forward, WITHOUT moving the cell - so the highlight sits inside the concentric set as a comma rather than replacing it with a second, unrelated field.",
+    "The vein network is a ridged FRACTAL rather than STROKES because it forks. STROKES cannot fork - they run, wander and pinch out - and a wing membrane is a branching structure.",
+    "The neck copy of the vein layer runs in the fractal's own body frame like the body copy; the neck is pitched, so the veins there cross it at a slight angle rather than following its length. That is a tuning simplification and it looks like membrane either way."
+  ],
+  "alleles": [
+    {
+      "token": "Mte",
+      "label": "Moth Eyes (Mte)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 40.0,
+      "max": 65.0
+    },
+    {
+      "name": "patternSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSpacing",
+      "min": 5.0,
+      "max": 8.5
+    },
+    {
+      "name": "spotRadius",
+      "min": 1.8,
+      "max": 2.6
+    },
+    {
+      "name": "spotVary",
+      "min": 0.0,
+      "max": 0.4
+    },
+    {
+      "name": "veinScale",
+      "min": 2.0,
+      "max": 4.5
+    }
+  ],
+  "expressions": [
+    {
+      "id": "eyes",
+      "name": "Moth Eyes",
+      "description": "Fine black vein-lines web the neck and body, and dark, gold-ringed eyespots scatter along the flank - both only where the coat under them is black or grey.",
+      "when": {
+        "Mte": 2
+      },
+      "layers": [
+        {
+          "name": "the vein membrane over the body",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "threshold": 0.78,
+              "softness": 0.05,
+              "octaves": 3,
+              "warp": 0.35,
+              "scale": "$veinScale",
+              "seed": "$patternSeed",
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#050505",
+            "strength": 95
+          }
+        },
+        {
+          "name": "and over the neck",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "threshold": 0.78,
+              "softness": 0.05,
+              "octaves": 3,
+              "warp": 0.35,
+              "scale": "$veinScale",
+              "seed": "$patternSeed",
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#050505",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the black rim of each eyespot",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "RINGS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": "$spotRadius",
+              "thickness": 0.4,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#000000",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the gold ring inside it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "RINGS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": 1.6,
+              "thickness": 1.0,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the dark core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": 0.8,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#000000",
+            "strength": 96
+          }
+        },
+        {
+          "name": "and the glint, deliberately off centre",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": 0.24,
+              "softness": 0.06,
+              "combine": "MULTIPLY",
+              "offsetX": 0.3,
+              "offsetY": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f5f0e6",
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Mte/Mte": 0.02,
+    "n/n": 99.98
+  },
+  "format": 3
+},
+{
   "format": 3,
   "key": "horsegenetics.moth_mantle",
   "name": "Moth Mantle",
@@ -15339,11 +19187,11 @@
     }
   ],
   "founders": {
-    "Mmw/Mmw": 0.004,
-    "Mmw/Mmc": 0.012,
-    "Mmw/n": 0.06,
-    "Mmc/Mmc": 0.012,
-    "n/n": 99.912
+    "Mmw/Mmw": 0.002,
+    "Mmw/Mmc": 0.008,
+    "Mmw/n": 0.038,
+    "Mmc/Mmc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -15702,12 +19550,302 @@
     }
   ],
   "founders": {
-    "Mwa/Mwa": 0.004,
-    "Mwa/Mwc": 0.012,
-    "Mwa/n": 0.06,
-    "Mwc/Mwc": 0.012,
-    "n/n": 99.912
+    "Mwa/Mwa": 0.002,
+    "Mwa/Mwc": 0.008,
+    "Mwa/n": 0.038,
+    "Mwc/Mwc": 0.008,
+    "n/n": 99.944
   }
+},
+{
+  "key": "horsegenetics.nacre",
+  "name": "Nacre",
+  "phase": "magical",
+  "priority": 436,
+  "rarity": "RARE",
+  "blurb": "The coat breaks into hard-edged plates like a cracked shell, each one paler at its gold seams and richer toward its middle.",
+  "notes": [
+    "The plate colour, the darkening at its middle and the seam between plates are three readings of ONE tessellation on one seed and one scale. The middle is CRACKLE measuring from the centre of the cell out rather than from its wall in - the only per-cell radial coordinate in the vocabulary that a crackle outline is guaranteed concentric with, and the reason the core cannot slide off the plate it belongs to.",
+    "Hard walls between colours are usually the thing to avoid, and here they are the point: a plate edge is meant to be sharp, because that is exactly where the gold seam is drawn on top of it.",
+    "Per-dose on the core layer, not on the plates: one copy of the pale form darkens the middles at a little over half strength, two copies take them all the way. The plates themselves are the same either way, so a heterozygote reads as the same shell with less depth in it."
+  ],
+  "alleles": [
+    {
+      "token": "Nco",
+      "label": "Nacre, opal (Nco)"
+    },
+    {
+      "token": "Ncg",
+      "label": "Nacre, glaze (Ncg)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "cellSeed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSpacing",
+      "min": 6.0,
+      "max": 12.0
+    },
+    {
+      "name": "cellJitter",
+      "min": 0.4,
+      "max": 0.75
+    },
+    {
+      "name": "crackWidth",
+      "min": 0.4,
+      "max": 0.8
+    },
+    {
+      "name": "coreWidth",
+      "min": 3.0,
+      "max": 6.0
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "opal",
+      "name": "Nacre, opal",
+      "description": "Pale irregular plates of blush pink and sky blue, each deepening toward a flamingo-pink heart, all of it seamed with fine cracks of pale gold.",
+      "when": [
+        "Nco/Nco",
+        "Nco/Ncg",
+        "Nco/n"
+      ],
+      "layers": [
+        {
+          "name": "the plates",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSpacing",
+            "colors": [
+              "#f7d6e3",
+              "#dce7f7"
+            ],
+            "strength": 94
+          }
+        },
+        {
+          "name": "deepening toward each plate's middle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$coreWidth",
+              "warp": "$cellJitter",
+              "softness": 1.2,
+              "measure": "centroid",
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ee6fa0",
+            "strength": {
+              "perDose": [
+                55,
+                55,
+                100
+              ]
+            }
+          }
+        },
+        {
+          "name": "and the gold seam between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4e48a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "glaze",
+      "name": "Nacre, glaze",
+      "description": "The same cracked plating, but every plate and its darkened middle run in one rich colour instead of pastel on pastel - a horse that looks poured rather than shelled.",
+      "when": {
+        "Ncg": 2
+      },
+      "layers": [
+        {
+          "name": "the plates",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSpacing",
+            "hue": "$hue",
+            "hueSpan": 18,
+            "saturation": 0.4,
+            "lightness": 0.81,
+            "strength": 94
+          }
+        },
+        {
+          "name": "deepening toward each plate's middle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$coreWidth",
+              "warp": "$cellJitter",
+              "softness": 1.2,
+              "measure": "centroid",
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.45,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the gold seam between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4e48a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Nco/Nco": 0.002,
+    "Nco/Ncg": 0.008,
+    "Nco/n": 0.038,
+    "Ncg/Ncg": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -16241,12 +20379,173 @@
     }
   ],
   "founders": {
-    "Nbg/Nbg": 0.002,
-    "Nbg/Nbp": 0.008,
-    "Nbg/n": 0.04,
-    "Nbp/Nbp": 0.008,
-    "n/n": 99.942
+    "Nbg/Nbg": 0.001,
+    "Nbg/Nbp": 0.004,
+    "Nbg/n": 0.019,
+    "Nbp/Nbp": 0.004,
+    "n/n": 99.972
   }
+},
+{
+  "key": "horsegenetics.nightbloom_shroud",
+  "name": "Nightbloom Shroud",
+  "phase": "magical",
+  "priority": 284,
+  "rarity": "LEGENDARY",
+  "blurb": "A marking said to fall on horses touched by fungal fae magic in old-growth forest: the crest and skull glow deep abyssal blue, and ribbons of gold-to-violet gill striping fan down the neck and barrel before fading out over the legs.",
+  "notes": [
+    "Both layers hang off ONE five-point line running from the underline forward to the throat, inverted so coverage is zero on the line itself and grows away from it. The only difference between them is softness - ten body units for the gills, five for the mantle - which is what makes the mantle a tighter band along the topline inside the wider bloom.",
+    "The mantle's PARTS list names the head; its PATH mask's own parts list does not. A later mask outside its own parts is SKIPPED rather than zeroing, so the head takes the mantle whole while the body and neck take it graded. That is the one place in the format where a mask's parts list means 'where this term applies' rather than 'where the layer is'.",
+    "The legs are never named in either mask. The fade over them is the PATH softness running out before the leg boundary rather than a cut, which is why the marking stops rather than ends.",
+    "No hue knob: the blue-gold-violet is a specific bioluminescent identity, not a palette setting. The seed and the gill spacing vary the placement, and that is all a horse gets to choose."
+  ],
+  "alleles": [
+    {
+      "token": "Nbs",
+      "label": "Nightbloom Shroud (Nbs)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "gillSpacing",
+      "min": 1.3,
+      "max": 1.9
+    }
+  ],
+  "expressions": [
+    {
+      "id": "shroud",
+      "name": "Nightbloom Shroud",
+      "description": "The crest, poll and skull glow deep abyssal blue, and ribbons of gold-to-violet gill striping fan down the neck and barrel, dimming to the ordinary coat above the legs.",
+      "when": [
+        "Nbs/Nbs",
+        "Nbs/n"
+      ],
+      "layers": [
+        {
+          "name": "the gill striping",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "curve": true,
+              "points": [
+                0.1951,
+                0.3264,
+                0.439,
+                0.3264,
+                0.6585,
+                0.3858,
+                0.7317,
+                0.5045,
+                0.8049,
+                0.6528
+              ],
+              "width": 0.5,
+              "softness": 10.0,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "STROKES",
+              "seed": "$seed",
+              "axis": "Y",
+              "spacing": "$gillSpacing",
+              "length": 9.0,
+              "width": 0.35,
+              "curl": 0.2,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "space": "body",
+            "axis": "Y",
+            "from": 0.3,
+            "to": 0.82,
+            "hue": 285,
+            "hueSpan": -237,
+            "saturation": 0.88,
+            "lightness": 0.62,
+            "strength": 95
+          }
+        },
+        {
+          "name": "and the mantle over crest and skull",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "curve": true,
+              "points": [
+                0.1951,
+                0.3264,
+                0.439,
+                0.3264,
+                0.6585,
+                0.3858,
+                0.7317,
+                0.5045,
+                0.8049,
+                0.6528
+              ],
+              "width": 0.5,
+              "softness": 5.0,
+              "invert": true,
+              "combine": "MULTIPLY",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141e6e",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Nbs/Nbs": 0.0005,
+    "Nbs/n": 0.0095,
+    "n/n": 99.99
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -16603,8 +20902,8 @@
     }
   ],
   "founders": {
-    "Nyx/Nyx": 0.05,
-    "n/n": 99.95
+    "Nyx/Nyx": 0.02,
+    "n/n": 99.98
   },
   "notes": [
     "The stars land on BLACK, not merely on dark (owner's call), and telling those apart needs two readings rather than one. On the shipped gradient a black horse reads 0.807 on LUMA's 'dark' channel and a bay reads 0.782 - close enough that no threshold separates them without also losing half the black. What does separate them is SATURATION: black sits at 0.02 and a bay's red at 0.556, because the difference between them is colour and not brightness. So the star masks are dark AND unsaturated, and a bay keeps its brown shoulder unstarred.\n\nThat is also why the white-to-black layer paints a neutral #0c0c0c rather than the blue-black it used to: a tinted void reads as saturated, and the gene would have refused to star the very black it had just made.",
@@ -16897,10 +21196,441 @@
     }
   ],
   "founders": {
-    "Ocu/Ocu": 0.01,
-    "Ocu/n": 0.14,
-    "n/n": 99.85
+    "Ocu/Ocu": 0.001,
+    "Ocu/n": 0.019,
+    "n/n": 99.98
   }
+},
+{
+  "key": "horsegenetics.oil_sheen",
+  "name": "Oil Sheen",
+  "phase": "magical",
+  "priority": 435,
+  "rarity": "LEGENDARY",
+  "blurb": "The coat looks like a soap film caught in light: a cracked, iridescent web of veins running the length of the horse, pooling over the barrel into a dense, bubble-pitted slick whose colour wanders instead of sweeping.",
+  "notes": [
+    "RAMP's 'noise' axis exists because of this gene. A ramp along X, Y or Z is monotonic by construction - the colour sweeps once from one end of the horse to the other and never comes back - and an oil slick's colour WANDERS: it doubles back, pools and thins. PALETTE could vary it without sweeping but only in hard-walled cells, which is the one thing a soap film has none of. Reading a smooth field where the coordinate used to go is the whole change, and it is the only one that gets both.",
+    "All three layers share the one hue knob, so a horse's whole coat rotates through the spectrum together instead of each layer picking its own mismatched rainbow.",
+    "Anatomy does the 'spiky' shape of the reference for free: the barrel is the dense hub and the neck, head, legs and hair are already the radiating limbs, so the vein layer only needs an isotropic field over everything.",
+    "The barrel's solid-looking mass is one oversized SPOTS instance - a spacing bigger than the horse, so the lattice produces a single cell rather than a field of them. Same tool as the bubbles, tuned the other way."
+  ],
+  "alleles": [
+    {
+      "token": "Osn",
+      "label": "Oil Sheen (Osn)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hueShift",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "satBase",
+      "min": 0.16,
+      "max": 0.34
+    },
+    {
+      "name": "veinSeed",
+      "type": "seed"
+    },
+    {
+      "name": "veinScale",
+      "min": 3.2,
+      "max": 6.5
+    },
+    {
+      "name": "veinWarp",
+      "min": 0.4,
+      "max": 0.6
+    },
+    {
+      "name": "blobSeed",
+      "type": "seed"
+    },
+    {
+      "name": "blobRadius",
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "name": "bubbleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "bubbleSpacing",
+      "min": 1.6,
+      "max": 2.4
+    }
+  ],
+  "expressions": [
+    {
+      "id": "sheen",
+      "name": "Oil Sheen",
+      "description": "The coat is laced with a cracked, glassy web of colour running nose to tail, densest and almost solid over the barrel, where it is pitted with bubbles of every size and rimmed in a paler shade of the same wander.",
+      "when": [
+        "Osn/Osn",
+        "Osn/n"
+      ],
+      "layers": [
+        {
+          "name": "the vein film",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$veinSeed",
+              "scale": "$veinScale",
+              "gap": 1.1,
+              "warp": "$veinWarp",
+              "softness": 0.35,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$veinSeed",
+            "scale": "$veinScale",
+            "hue": "$hueShift",
+            "hueSpan": 155,
+            "saturation": "$satBase",
+            "lightness": 0.46,
+            "strength": 88
+          }
+        },
+        {
+          "name": "the slick over the barrel, pitted with bubbles",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$blobSeed",
+              "spacing": 40.0,
+              "radius": "$blobRadius",
+              "vary": 0.2,
+              "softness": 3.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": 0.5,
+              "vary": 0.85,
+              "softness": 0.12,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$blobSeed",
+            "scale": 5.0,
+            "hue": "$hueShift",
+            "hueSpan": -125,
+            "saturation": "$satBase",
+            "lightness": 0.4,
+            "strength": 88
+          }
+        },
+        {
+          "name": "and the rim round every bubble",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "RINGS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": 0.5,
+              "vary": 0.85,
+              "thickness": 0.18,
+              "softness": 0.08,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$bubbleSeed",
+            "scale": 3.0,
+            "hue": "$hueShift",
+            "hueSpan": 150,
+            "saturation": 0.42,
+            "lightness": 0.66,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Osn/Osn": 0.0005,
+    "Osn/n": 0.0095,
+    "n/n": 99.99
+  },
+  "format": 3
+},
+{
+  "key": "horsegenetics.opal_crackle",
+  "name": "Opal Crackle",
+  "phase": "magical",
+  "priority": 285,
+  "rarity": "LEGENDARY",
+  "blurb": "A coat shot through with fine dark seams, each one catching light in its own colour - the fire you would find cracked out of a boulder opal.",
+  "notes": [
+    "The import wanted adjacent seams to show UNRELATED hues and could only reach a whole-horse ramp, which drifts smoothly nose to tail and makes two cracks a hand's width apart nearly the same colour. The colour here comes off RAMP's 'cellId' axis instead: one key drawn per cell of a lattice sharing this mask's own seed and scale, constant across that cell, so neighbours land on unrelated stops.",
+    "It is a per-CELL key, not a per-SEAM one, and the difference is visible if you look for it: a seam runs between two cells, so its colour changes where three cells meet rather than staying constant along its whole length. That reads as fire moving along the crack, which is close to the reference and is not the same claim as 'each seam is one colour'.",
+    "cellSize and veinWidth are shared verbatim between the seam layer and the fleck layer's subtractive mask. Change one and check the flecks still avoid the seams."
+  ],
+  "alleles": [
+    {
+      "token": "Ocr",
+      "label": "Opal Crackle, iridescent (Ocr)"
+    },
+    {
+      "token": "Ocp",
+      "label": "Opal Crackle, pigmented (Ocp)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSize",
+      "min": 2.2,
+      "max": 4.5
+    },
+    {
+      "name": "veinWidth",
+      "min": 0.3,
+      "max": 0.9
+    },
+    {
+      "name": "goldSeed",
+      "type": "seed"
+    },
+    {
+      "name": "flecksSpacing",
+      "min": 1.6,
+      "max": 3.2
+    },
+    {
+      "name": "flecksRadius",
+      "min": 0.2,
+      "max": 0.5
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "iridescent",
+      "name": "Opal Crackle, iridescent",
+      "description": "A network of dark, thin-walled cracks runs the length of the coat, every seam lit from within and none of them agreeing about the colour.",
+      "when": [
+        "Ocr/Ocr",
+        "Ocr/Ocp",
+        "Ocr/n"
+      ],
+      "layers": [
+        {
+          "name": "the seams",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.55,
+              "softness": 0.08,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$seed",
+            "scale": "$cellSize",
+            "colors": [
+              "#00e5ff",
+              "#2244ff",
+              "#8a2be2",
+              "#e619b0",
+              "#ff3d9a"
+            ],
+            "strength": 96
+          }
+        },
+        {
+          "name": "and gold flecks between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$goldSeed",
+              "spacing": "$flecksSpacing",
+              "radius": "$flecksRadius",
+              "vary": 0.5,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.55,
+              "softness": 0.08,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d9a441",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "pigmented",
+      "name": "Opal Crackle, pigmented",
+      "description": "The same cracked network, but the seams glow one steady colour instead of shifting cell to cell.",
+      "when": {
+        "Ocp": 2
+      },
+      "layers": [
+        {
+          "name": "the seams",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.55,
+              "softness": 0.08,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "and gold flecks between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$goldSeed",
+              "spacing": "$flecksSpacing",
+              "radius": "$flecksRadius",
+              "vary": 0.5,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.55,
+              "softness": 0.08,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d9a441",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ocr/Ocr": 0.0005,
+    "Ocr/Ocp": 0.002,
+    "Ocr/n": 0.0095,
+    "Ocp/Ocp": 0.002,
+    "n/n": 99.986
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -17154,12 +21884,515 @@
     }
   ],
   "founders": {
-    "Owv/Owv": 0.002,
-    "Owv/Owm": 0.008,
-    "Owv/n": 0.04,
-    "Owm/Owm": 0.008,
-    "n/n": 99.942
+    "Owv/Owv": 0.001,
+    "Owv/Owm": 0.004,
+    "Owv/n": 0.019,
+    "Owm/Owm": 0.004,
+    "n/n": 99.972
   }
+},
+{
+  "key": "horsegenetics.opaline",
+  "name": "Opaline",
+  "phase": "magical",
+  "priority": 286,
+  "rarity": "RARE",
+  "blurb": "A network of raised glassy veins divides the coat into a mosaic of small irregular cells - pale-on-pale in the common form, and in the rare one blazing blue and violet, each cell rimmed near-black and starred with tiny bubbles.",
+  "notes": [
+    "The import gave each cell one of three tints with a CHOICE mask. CHOICE is a coin flip made ONCE PER HORSE - it returns the same answer on every texel - so all three layers would have painted the entire marking one colour, or nothing at all, and which one depended on the seed. The tint is a RAMP on axis 'cellId' instead: a key drawn per cell of a lattice, constant across that cell, which is what the import was describing.",
+    "Every mask runs in the whole-horse frame, so the cell lattice carries across the body/neck/head/leg seams instead of restarting at each part boundary. That is the difference between one sheet of cracked glass and eleven.",
+    "The rim is an annulus - the wider wall reading minus the narrower one, both inverted - so the near-black band and the pale vein it surrounds share an edge exactly rather than leaving a seam or overlapping.",
+    "Mane, tail and ears are excluded. This is a skin effect, and hair keeps whatever colour the genes that govern hair gave it."
+  ],
+  "alleles": [
+    {
+      "token": "Opw",
+      "label": "Opaline, white (Opw)"
+    },
+    {
+      "token": "Opd",
+      "label": "Opaline, deep (Opd)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "tintSeed",
+      "type": "seed"
+    },
+    {
+      "name": "bubbleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSize",
+      "min": 2.4,
+      "max": 4.0
+    },
+    {
+      "name": "veinWidth",
+      "min": 0.2,
+      "max": 0.45
+    },
+    {
+      "name": "rimWidth",
+      "min": 0.5,
+      "max": 0.9
+    },
+    {
+      "name": "bubbleSpacing",
+      "min": 0.9,
+      "max": 1.5
+    },
+    {
+      "name": "bubbleOuterRadius",
+      "min": 0.12,
+      "max": 0.22
+    },
+    {
+      "name": "bubbleInnerRadius",
+      "min": 0.06,
+      "max": 0.12
+    },
+    {
+      "name": "bubbleCoreRadius",
+      "min": 0.03,
+      "max": 0.07
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Opaline, white",
+      "description": "A faint webbing of pale glassy veins divides the coat into soft cream-on-cream cells, like frost on a window.",
+      "when": [
+        "Opw/Opw",
+        "Opw/Opd",
+        "Opw/n"
+      ],
+      "layers": [
+        {
+          "name": "the cells, each its own tint",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$tintSeed",
+            "scale": "$cellSize",
+            "colors": [
+              "#f1ece0",
+              "#e3deea",
+              "#e6ecef"
+            ],
+            "strength": 92
+          }
+        },
+        {
+          "name": "the rim inside every wall",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": true,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9c2b3",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the glassy vein itself",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fbf9f5",
+            "strength": 95
+          }
+        },
+        {
+          "name": "bubbles caught in the cells",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": "$bubbleOuterRadius",
+              "vary": 0.3,
+              "softness": 0.03,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": "$bubbleInnerRadius",
+              "vary": 0.3,
+              "softness": 0.02,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d8d2c2",
+            "strength": 90
+          }
+        },
+        {
+          "name": "and the light in each bubble",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": "$bubbleCoreRadius",
+              "vary": 0.3,
+              "softness": 0.03,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "deep",
+      "name": "Opaline, deep",
+      "description": "The coat breaks into a stained-glass mosaic of blue and violet cells, each ringed in near-black and lit with tiny pale bubbles where the veins meet.",
+      "when": {
+        "Opd": 2
+      },
+      "layers": [
+        {
+          "name": "the cells, each its own tint",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$tintSeed",
+            "scale": "$cellSize",
+            "colors": [
+              "#2569a1",
+              "#584a82",
+              "#dce4e8"
+            ],
+            "strength": 92
+          }
+        },
+        {
+          "name": "the rim inside every wall",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": true,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#20233a",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the glassy vein itself",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f5f1e8",
+            "strength": 95
+          }
+        },
+        {
+          "name": "bubbles caught in the cells",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": "$bubbleOuterRadius",
+              "vary": 0.3,
+              "softness": 0.03,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": "$bubbleInnerRadius",
+              "vary": 0.3,
+              "softness": 0.02,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#181b2c",
+            "strength": 90
+          }
+        },
+        {
+          "name": "and the light in each bubble",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": "$bubbleCoreRadius",
+              "vary": 0.3,
+              "softness": 0.03,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$rimWidth",
+              "warp": 0.5,
+              "softness": 0.07,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fbf8f2",
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Opw/Opw": 0.002,
+    "Opw/Opd": 0.008,
+    "Opw/n": 0.038,
+    "Opd/Opd": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
 },
 {
   "format": 3,
@@ -17437,11 +22670,11 @@
     }
   ],
   "founders": {
-    "Opz/Opz": 0.004,
-    "Opz/Opc": 0.012,
-    "Opz/n": 0.06,
-    "Opc/Opc": 0.012,
-    "n/n": 99.912
+    "Opz/Opz": 0.002,
+    "Opz/Opc": 0.008,
+    "Opz/n": 0.038,
+    "Opc/Opc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -17606,11 +22839,11 @@
   ],
   "founders": {
     "Opl/Opl": 0.002,
-    "Opl/Opb": 0.004,
+    "Opl/Opb": 0.005333,
     "Opl/n": 0.038,
-    "Opb/Opb": 0.002,
-    "Opb/n": 0.038,
-    "n/n": 99.916
+    "Opb/Opb": 0.005333,
+    "Opb/n": 0.005333,
+    "n/n": 99.944
   }
 },
 {
@@ -18087,6 +23320,117 @@
   ]
 },
 {
+  "key": "horsegenetics.orchid_frost",
+  "name": "Orchid Frost",
+  "phase": "magical",
+  "priority": 287,
+  "rarity": "RARE",
+  "blurb": "Cold, soft-edged blotches settle over the coat, bleaching its black and plum toward candy pink wherever they land - and finding nothing to bite into on a coat already that pale.",
+  "notes": [
+    "'no effect on a coat lighter than the pink' is not a region this gene excludes. It is the LUMA mask's coverage genuinely reaching zero once the resolved colour is as light as #f7a8c4 is. The blotches are still drawn there; there is simply nothing left for them to take. That is why the condition is written as a reading rather than as a parts list - a parts list could not know what colour a horse turned out.",
+    "One SPOTS field with a high 'vary' and a generous softness, not several. The reference's ellipses are wildly mixed in size and their edges sink into the surrounding colour rather than cutting it, and both of those are one field tuned loosely rather than a stack of tight ones.",
+    "Density and strength are both per-dose on the one expression: a single copy scatters sparse blotches at a little over half strength, two copies fill in. That is legal here because the two combinations this expression claims carry different numbers of copies - a per-dose value on an expression where they did not would be a constant with decoration, and the loader refuses it."
+  ],
+  "alleles": [
+    {
+      "token": "Frs",
+      "label": "Orchid Frost (Frs)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "stretch",
+      "min": 1.15,
+      "max": 1.75
+    },
+    {
+      "name": "vary",
+      "min": 0.45,
+      "max": 0.75
+    }
+  ],
+  "expressions": [
+    {
+      "id": "frost",
+      "name": "Orchid Frost",
+      "description": "Pale, soft-edged blotches spread over the coat, bleaching the darker parts toward pink and passing over anything already that light. Two copies frost it heavily; one leaves a scatter.",
+      "when": [
+        "Frs/Frs",
+        "Frs/n"
+      ],
+      "layers": [
+        {
+          "name": "the frost",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$seed",
+              "spacing": {
+                "perDose": [
+                  7.5,
+                  7.5,
+                  4.5
+                ]
+              },
+              "radius": 2.2,
+              "vary": "$vary",
+              "stretch": "$stretch",
+              "axis": "X",
+              "softness": 1.3,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.73,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f7a8c4",
+            "strength": {
+              "perDose": [
+                55,
+                55,
+                100
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Frs/Frs": 0.002,
+    "Frs/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+},
+{
   "format": 3,
   "key": "horsegenetics.oscar",
   "name": "Oscar",
@@ -18538,11 +23882,11 @@
     }
   ],
   "founders": {
-    "Plw/Plw": 0.004,
-    "Plw/Plc": 0.012,
-    "Plw/n": 0.06,
-    "Plc/Plc": 0.012,
-    "n/n": 99.912
+    "Plw/Plw": 0.002,
+    "Plw/Plc": 0.008,
+    "Plw/n": 0.038,
+    "Plc/Plc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -20281,6 +25625,211 @@
   }
 },
 {
+  "key": "horsegenetics.petaled",
+  "name": "Petaled",
+  "phase": "magical",
+  "priority": 288,
+  "rarity": "RARE",
+  "blurb": "The coat breaks into overlapping petals, each rimmed in dark rose and then in black, veined across a pale blush field like a flower caught mid-bloom.",
+  "notes": [
+    "The four zones are four readings of one tessellation with only the wall distance moved, so the rose rim, the black line, the blush field and the veins over it all share the same petal edges. Give any of them a different seed or scale and the flower comes apart into four unrelated markings that happen to overlap.",
+    "CRACKLE's walls are straight polygon facets by nature; the warp knob is what bends them into petal curves. Under close inspection it is still a Voronoi cell, and at coat scale it reads as a flower - which is what it was tuned against.",
+    "The vein scale and warp are fixed rather than knobs. Only the seed is heritable, so vein placement varies horse to horse without vein density drifting into a wash on some lines."
+  ],
+  "alleles": [
+    {
+      "token": "Ptl",
+      "label": "Petaled (Ptl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "petalSeed",
+      "type": "seed"
+    },
+    {
+      "name": "veinSeed",
+      "type": "seed"
+    },
+    {
+      "name": "petalSpacing",
+      "min": 5.5,
+      "max": 9.5
+    },
+    {
+      "name": "petalWarp",
+      "min": 0.35,
+      "max": 0.75
+    }
+  ],
+  "expressions": [
+    {
+      "id": "petaled",
+      "name": "Petaled",
+      "description": "The coat over the body, neck, head and muzzle breaks into overlapping petals - a thin dark rose edge, then a thick black line, then a pale blush field veined in rose toward the middle.",
+      "when": [
+        "Ptl/Ptl",
+        "Ptl/n"
+      ],
+      "layers": [
+        {
+          "name": "the blush field of each petal",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$petalSeed",
+              "scale": "$petalSpacing",
+              "gap": 3.2,
+              "warp": "$petalWarp",
+              "softness": 0.12,
+              "invert": false,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f7e3e0",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the rose veins across it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$petalSeed",
+              "scale": "$petalSpacing",
+              "gap": 3.2,
+              "warp": "$petalWarp",
+              "softness": 0.12,
+              "invert": false,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "seed": "$veinSeed",
+              "scale": 2.2,
+              "octaves": 3,
+              "warp": 0.3,
+              "threshold": 0.8,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c2416b",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the black line round the rim",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$petalSeed",
+              "scale": "$petalSpacing",
+              "gap": 1.1,
+              "warp": "$petalWarp",
+              "softness": 0.12,
+              "invert": false,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$petalSeed",
+              "scale": "$petalSpacing",
+              "gap": 3.2,
+              "warp": "$petalWarp",
+              "softness": 0.12,
+              "invert": false,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141414",
+            "strength": 95
+          }
+        },
+        {
+          "name": "and the dark rose edge outside that",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$petalSeed",
+              "scale": "$petalSpacing",
+              "gap": 1.1,
+              "warp": "$petalWarp",
+              "softness": 0.12,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#a52f52",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ptl/Ptl": 0.002,
+    "Ptl/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+},
+{
   "format": 3,
   "key": "horsegenetics.picasso_marking",
   "name": "Picasso Marking",
@@ -20416,9 +25965,8 @@
     }
   ],
   "founders": {
-    "Pic/Pic": 0.15,
-    "Pic/n": 0.15,
-    "n/n": 99.7
+    "Pic/Pic": 0.04,
+    "n/n": 99.96
   }
 },
 {
@@ -23347,11 +28895,11 @@
     }
   ],
   "founders": {
-    "Scb/Scb": 0.004,
-    "Scb/Scc": 0.012,
-    "Scb/n": 0.05,
-    "Scc/Scc": 0.012,
-    "n/n": 99.922
+    "Scb/Scb": 0.002,
+    "Scb/Scc": 0.008,
+    "Scb/n": 0.038,
+    "Scc/Scc": 0.008,
+    "n/n": 99.944
   }
 },
 {
@@ -24187,11 +29735,11 @@
     }
   ],
   "founders": {
-    "Shb/Shb": 0.002,
-    "Shb/Shc": 0.008,
-    "Shb/n": 0.04,
-    "Shc/Shc": 0.008,
-    "n/n": 99.942
+    "Shb/Shb": 0.001,
+    "Shb/Shc": 0.004,
+    "Shb/n": 0.019,
+    "Shc/Shc": 0.004,
+    "n/n": 99.972
   }
 },
 {
@@ -24751,11 +30299,11 @@
     }
   ],
   "founders": {
-    "Snw/Snw": 0.002,
-    "Snw/Snc": 0.008,
-    "Snw/n": 0.04,
-    "Snc/Snc": 0.008,
-    "n/n": 99.942
+    "Snw/Snw": 0.001,
+    "Snw/Snc": 0.004,
+    "Snw/n": 0.019,
+    "Snc/Snc": 0.004,
+    "n/n": 99.972
   }
 },
 {
@@ -25609,10 +31157,13 @@
     }
   ],
   "founders": {
-    "Sgv/Sgv": 0.06,
-    "Sgm/Sgm": 0.06,
-    "Sgg/Sgg": 0.06,
-    "n/n": 99.82
+    "Sgv/Sgv": 0.04,
+    "Sgv/Sgm": 0.0032,
+    "Sgv/Sgg": 0.0032,
+    "Sgm/Sgm": 0.0032,
+    "Sgm/Sgg": 0.0032,
+    "Sgg/Sgg": 0.0032,
+    "n/n": 99.944
   },
   "notes": [
     "The palette is the ALLELE here, not an epigenetic value, which is unique in the registry - every other gene that varies its colour writes a hue on the allele copy. It is deliberate: a stained-glass window is a made object with a chosen palette, and a horse whose window drifted hue by hue down the generations would be a different idea. The consequence is that mixing two lines gives a window with both trays in it rather than an average of the two."
@@ -26937,10 +32488,10 @@
   ],
   "founders": {
     "Smt/Smt": 0.006,
-    "Smt/Smc": 0.01,
+    "Smt/Smc": 0.024,
     "Smt/n": 0.114,
-    "Smc/Smc": 0.01,
-    "n/n": 99.86
+    "Smc/Smc": 0.024,
+    "n/n": 99.832
   }
 },
 {
@@ -27428,6 +32979,267 @@
   }
 },
 {
+  "key": "horsegenetics.tidefoam_sash",
+  "name": "Tidefoam Sash",
+  "phase": "magical",
+  "priority": 289,
+  "rarity": "RARE",
+  "blurb": "A sinuous sash of deep tidewater teal sweeps diagonally across the barrel, its surface laced with a fine white net of foam cells and the occasional larger bubble.",
+  "notes": [
+    "The water is one RAMP driven off a noise field rather than a paint layer with a darkening layer over it - a second layer could not have seen the first one's paint, and the marbling has to vary continuously rather than in steps. RAMP's 'noise' axis is what makes that one layer; before it existed the colour could only sweep once along an axis.",
+    "Each foam cell now carries its own whirl. The import shipped a single marbling field across the whole sash and said plainly that it ignored the cell walls drawn on top of it; the highlight layer here reads the SAME tessellation from each cell's centre out ('measure': 'centroid'), so the swirl belongs to the cell it sits in rather than wandering across three of them.",
+    "The foam net is CRACKLE because the reference is defined by the walls BETWEEN cells, not by distance to a cell centre. That distinction is the whole reason the mask exists.",
+    "The teal is fixed by concept rather than carried on a hue knob. Per-horse variety comes off the noise seed instead, which keeps the marking reading as water on every carrier."
+  ],
+  "alleles": [
+    {
+      "token": "Tfs",
+      "label": "Tidefoam Sash (Tfs)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSize",
+      "min": 2.6,
+      "max": 4.4
+    },
+    {
+      "name": "bubbleSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "sash",
+      "name": "Tidefoam Sash",
+      "description": "A diagonal sash of marbled sea-teal crosses the ribcage, its surface broken by a fine white network of foam cells with occasional larger bubbles caught in it.",
+      "when": [
+        "Tfs/Tfs",
+        "Tfs/n"
+      ],
+      "layers": [
+        {
+          "name": "the water",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$seed",
+            "scale": 5.0,
+            "colors": [
+              "#0d4f4d",
+              "#1f8a86",
+              "#5fd1c9"
+            ],
+            "strength": 94
+          }
+        },
+        {
+          "name": "a whirl inside each foam cell",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$cellSize",
+              "warp": 0.4,
+              "softness": 0.9,
+              "measure": "centroid",
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#9fe8e2",
+            "strength": 55
+          }
+        },
+        {
+          "name": "the foam net",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": {
+                "perDose": [
+                  0.55,
+                  0.55,
+                  0.8
+                ]
+              },
+              "warp": 0.4,
+              "softness": 0.1,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe2",
+            "strength": 94
+          }
+        },
+        {
+          "name": "and the larger bubbles",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "parts": [
+                "BARREL"
+              ],
+              "curve": true,
+              "points": [
+                0.68,
+                0.6,
+                0.5,
+                0.5,
+                0.32,
+                0.42,
+                0.2,
+                0.34
+              ],
+              "width": 6.5,
+              "softness": 1.6,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": {
+                "perDose": [
+                  8.5,
+                  8.5,
+                  6.0
+                ]
+              },
+              "radius": 1.8,
+              "vary": 0.4,
+              "softness": 0.6,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe2",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Tfs/Tfs": 0.002,
+    "Tfs/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+},
+{
   "format": 3,
   "key": "horsegenetics.tidemark",
   "name": "Tidemark",
@@ -27709,11 +33521,11 @@
     }
   ],
   "founders": {
-    "Tdm/Tdm": 0.02,
-    "Tdm/Tdc": 0.06,
-    "Tdm/n": 0.3,
-    "Tdc/Tdc": 0.06,
-    "n/n": 99.56
+    "Tdm/Tdm": 0.004,
+    "Tdm/Tdc": 0.016,
+    "Tdm/n": 0.076,
+    "Tdc/Tdc": 0.016,
+    "n/n": 99.888
   }
 },
 {
@@ -28111,11 +33923,11 @@
     }
   ],
   "founders": {
-    "Twd/Twd": 0.002,
-    "Twd/Twc": 0.008,
-    "Twd/n": 0.04,
-    "Twc/Twc": 0.008,
-    "n/n": 99.942
+    "Twd/Twd": 0.001,
+    "Twd/Twc": 0.004,
+    "Twd/n": 0.019,
+    "Twc/Twc": 0.004,
+    "n/n": 99.972
   }
 },
 {
@@ -28410,12 +34222,12 @@
     }
   ],
   "founders": {
-    "Trs/Trs": 0.004,
-    "Trs/n": 0.09,
-    "Trg/Trg": 0.004,
-    "Trg/n": 0.09,
-    "Trs/Trg": 0.012,
-    "n/n": 99.8
+    "Trs/Trs": 0.001,
+    "Trs/Trg": 0.002667,
+    "Trs/n": 0.019,
+    "Trg/Trg": 0.002667,
+    "Trg/n": 0.002667,
+    "n/n": 99.972
   }
 },
 {
@@ -29225,11 +35037,333 @@
     }
   ],
   "founders": {
-    "Web/Web": 0.02,
-    "Web/Wec": 0.06,
-    "Web/n": 0.3,
-    "Wec/Wec": 0.06,
-    "n/n": 99.56
+    "Web/Web": 0.004,
+    "Web/Wec": 0.016,
+    "Web/n": 0.076,
+    "Wec/Wec": 0.016,
+    "n/n": 99.888
+  }
+},
+{
+  "format": 3,
+  "key": "horsegenetics.wing_cloak",
+  "name": "Wing Cloak",
+  "phase": "magical",
+  "priority": 276,
+  "rarity": "UNCOMMON",
+  "blurb": "A pair of ghost wings folded over the barrel - broad soft arcs with a darker line along the leading edge, as though the horse were wearing them rather than growing them.",
+  "notes": [
+    "Imported from the magic-gene intake, 2026-09-08. The source placed four wings by centre and angle. RINGS has no centre and no angle, but it does have `arc` - and a ring with an arc well under 1 is a sweep rather than a circle. Two radii give a forewing and a hindwing; a third pass at a much harder edge lands as the dark leading edge.",
+    "This one is the furthest from its source of the batch. The wings are placed by the lattice rather than by hand, so a horse gets however many the spacing puts on it - look at several before deciding it is right."
+  ],
+  "alleles": [
+    {
+      "token": "Wcw",
+      "label": "Cloak, white (Wcw)"
+    },
+    {
+      "token": "Wcc",
+      "label": "Cloak, coloured (Wcc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "wingSpacing",
+      "min": 13.0,
+      "max": 18.0
+    },
+    {
+      "name": "foreRadius",
+      "min": 6.0,
+      "max": 8.0
+    },
+    {
+      "name": "hindRadius",
+      "min": 7.0,
+      "max": 9.0
+    },
+    {
+      "name": "wingThickness",
+      "min": 3.0,
+      "max": 5.0
+    },
+    {
+      "name": "vary",
+      "min": 0.85,
+      "max": 1.15
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Wing Cloak",
+      "description": "A ring with an arc well under 1 is not a ring at all - it is a sweep, and two of them at different radii read as a folded forewing and hindwing. A third pass draws the same sweep with a much harder edge, which lands as the dark line along the front of the wing.",
+      "when": [
+        "Wcw/Wcw",
+        "Wcw/Wcc",
+        "Wcw/n"
+      ],
+      "layers": [
+        {
+          "name": "the forewing, swept forward",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$wingSpacing",
+              "radius": "$foreRadius",
+              "thickness": "$wingThickness",
+              "vary": "$vary",
+              "chance": 0.5,
+              "arc": 0.3,
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.5,
+              "combine": "MULTIPLY",
+              "from": 14.0,
+              "to": 21.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2f0e6",
+            "strength": 82.0
+          }
+        },
+        {
+          "name": "the hindwing behind it",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$wingSpacing",
+              "radius": "$hindRadius",
+              "thickness": "$wingThickness",
+              "vary": "$vary",
+              "chance": 0.5,
+              "arc": 0.34,
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.5,
+              "combine": "MULTIPLY",
+              "from": 14.0,
+              "to": 21.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2f0e6",
+            "strength": 82.0
+          }
+        },
+        {
+          "name": "a darker line along the leading edge",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$wingSpacing",
+              "radius": "$foreRadius",
+              "thickness": "$wingThickness",
+              "vary": "$vary",
+              "chance": 0.5,
+              "arc": 0.3,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.5,
+              "combine": "MULTIPLY",
+              "from": 14.0,
+              "to": 21.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#3a352c",
+            "strength": 80.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Wing Cloak, coloured",
+      "description": "The same wings in a colour the line carries. Fully recessive.",
+      "when": {
+        "Wcc": 2
+      },
+      "layers": [
+        {
+          "name": "the forewing, swept forward",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$wingSpacing",
+              "radius": "$foreRadius",
+              "thickness": "$wingThickness",
+              "vary": "$vary",
+              "chance": 0.5,
+              "arc": 0.3,
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.5,
+              "combine": "MULTIPLY",
+              "from": 14.0,
+              "to": 21.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.45,
+            "lightness": 0.72,
+            "strength": 82.0
+          }
+        },
+        {
+          "name": "the hindwing behind it",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$wingSpacing",
+              "radius": "$hindRadius",
+              "thickness": "$wingThickness",
+              "vary": "$vary",
+              "chance": 0.5,
+              "arc": 0.34,
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.5,
+              "combine": "MULTIPLY",
+              "from": 14.0,
+              "to": 21.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.45,
+            "lightness": 0.72,
+            "strength": 82.0
+          }
+        },
+        {
+          "name": "a darker line along the leading edge",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$seed",
+              "spacing": "$wingSpacing",
+              "radius": "$foreRadius",
+              "thickness": "$wingThickness",
+              "vary": "$vary",
+              "chance": 0.5,
+              "arc": 0.3,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "softness": 1.5,
+              "combine": "MULTIPLY",
+              "from": 14.0,
+              "to": 21.0
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.28,
+            "strength": 80.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No cloak.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Wcw/Wcw": 0.004,
+    "Wcw/Wcc": 0.016,
+    "Wcw/n": 0.076,
+    "Wcc/Wcc": 0.016,
+    "n/n": 99.888
   }
 },
 {
@@ -30244,11 +36378,11 @@
     }
   ],
   "founders": {
-    "Wys/Wys": 0.002,
-    "Wys/Wyd": 0.008,
-    "Wys/n": 0.04,
-    "Wyd/Wyd": 0.008,
-    "n/n": 99.942
+    "Wys/Wys": 0.001,
+    "Wys/Wyd": 0.004,
+    "Wys/n": 0.019,
+    "Wyd/Wyd": 0.004,
+    "n/n": 99.972
   }
 },
 {
@@ -30917,14 +37051,14 @@
   ],
   "founders": {
     "Yal/Yal": 0.004,
-    "Yal/Ylc": 0.016,
-    "Yal/Ylo": 0.016,
+    "Yal/Ylc": 0.005333,
+    "Yal/Ylo": 0.005333,
     "Yal/n": 0.076,
-    "Ylc/Ylc": 0.016,
-    "Ylc/Ylo": 0.016,
-    "Ylo/Ylo": 0.016,
-    "Ylo/n": 0.076,
-    "n/n": 99.764
+    "Ylc/Ylc": 0.005333,
+    "Ylc/Ylo": 0.005333,
+    "Ylo/Ylo": 0.005333,
+    "Ylo/n": 0.005333,
+    "n/n": 99.888
   }
 },
 {

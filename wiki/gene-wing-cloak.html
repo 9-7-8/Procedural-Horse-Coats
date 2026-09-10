@@ -24,33 +24,6 @@
     A pair of ghost wings folded over the barrel - broad soft arcs with a darker line along the leading edge, as though the horse were wearing them rather than growing them.
 </p>
 
-<div class="note danger">
-<span class="label">Switched off &mdash; this gene is not in the game</span>
-<p>
-    <strong>Wing cloak is killswitched.</strong> Its file is still in
-    <code>horsegenetics/genes/</code> and everything below still describes what it was
-    written to do, but it is <em>not listed in</em> <code>index.json</code>, so nothing
-    registers it: no horse can carry it, it has no gene carrot, it does not appear in either
-    gene editor, and it is off the wiki&rsquo;s own page list. This page is reachable only by
-    a direct link.
-</p>
-<p>
-    <strong>Why:</strong> it paints fewer than two dozen texels out of roughly five thousand
-    &mdash; enough that the engine can tell it apart from a plain horse, not enough that a
-    person could. It fell below the icon baker&rsquo;s visibility floor and lost its wiki
-    icon, which is how it came to light; see
-    <a href="known-gaps.html#gap-129">gap 129</a>. It was marginal well before that, so this
-    is a retool rather than a repair, and it is parked until then.
-</p>
-<p>
-    <strong>To bring it back:</strong> put <code>"wing_cloak.json"</code> back into
-    <code>common/src/main/resources/horsegenetics/genes/index.json</code> and re-run
-    <code>:common:bakeGeneBundle</code>, <code>:common:bakeGeneIcons</code> and
-    <code>:common:bakeGeneWikiPages</code>. Nothing else was removed &mdash; deleting the line
-    was the whole of the killswitch.
-</p>
-</div>
-
 <section class="tab-panel" data-tab="gameplay">
 
 <div class="gene-preview" data-gene="horsegenetics.wing_cloak"></div>
@@ -86,7 +59,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 227</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 893</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -96,11 +69,11 @@
 <table class="facts">
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
-<tr><td><code>Wcw/Wcw</code></td><td>Wing Cloak</td><td>0.02% &mdash; 1 in 5,000</td></tr>
-<tr><td><code>Wcw/Wcc</code></td><td>Wing Cloak</td><td>0.06% &mdash; 1 in 1,667</td></tr>
-<tr><td><code>Wcw/n</code></td><td>Wing Cloak</td><td>0.3% &mdash; 1 in 333</td></tr>
-<tr><td><code>Wcc/Wcc</code></td><td>Wing Cloak, coloured</td><td>0.06% &mdash; 1 in 1,667</td></tr>
-<tr><td><code>n/n</code></td><td>Wild type</td><td>99.56%</td></tr>
+<tr><td><code>Wcw/Wcw</code></td><td>Wing Cloak</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Wcw/Wcc</code></td><td>Wing Cloak</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>Wcw/n</code></td><td>Wing Cloak</td><td>0.076% &mdash; 1 in 1,316</td></tr>
+<tr><td><code>Wcc/Wcc</code></td><td>Wing Cloak, coloured</td><td>0.016% &mdash; 1 in 6,250</td></tr>
+<tr><td><code>n/n</code></td><td>Wild type</td><td>99.888%</td></tr>
 </tbody>
 </table>
 </div>

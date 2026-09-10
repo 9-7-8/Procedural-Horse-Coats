@@ -1,0 +1,161 @@
+{
+  "key": "horsegenetics.nightbloom_shroud",
+  "name": "Nightbloom Shroud",
+  "phase": "magical",
+  "priority": 284,
+  "rarity": "LEGENDARY",
+  "blurb": "A marking said to fall on horses touched by fungal fae magic in old-growth forest: the crest and skull glow deep abyssal blue, and ribbons of gold-to-violet gill striping fan down the neck and barrel before fading out over the legs.",
+  "notes": [
+    "Both layers hang off ONE five-point line running from the underline forward to the throat, inverted so coverage is zero on the line itself and grows away from it. The only difference between them is softness - ten body units for the gills, five for the mantle - which is what makes the mantle a tighter band along the topline inside the wider bloom.",
+    "The mantle's PARTS list names the head; its PATH mask's own parts list does not. A later mask outside its own parts is SKIPPED rather than zeroing, so the head takes the mantle whole while the body and neck take it graded. That is the one place in the format where a mask's parts list means 'where this term applies' rather than 'where the layer is'.",
+    "The legs are never named in either mask. The fade over them is the PATH softness running out before the leg boundary rather than a cut, which is why the marking stops rather than ends.",
+    "No hue knob: the blue-gold-violet is a specific bioluminescent identity, not a palette setting. The seed and the gill spacing vary the placement, and that is all a horse gets to choose."
+  ],
+  "alleles": [
+    {
+      "token": "Nbs",
+      "label": "Nightbloom Shroud (Nbs)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "gillSpacing",
+      "min": 1.3,
+      "max": 1.9
+    }
+  ],
+  "expressions": [
+    {
+      "id": "shroud",
+      "name": "Nightbloom Shroud",
+      "description": "The crest, poll and skull glow deep abyssal blue, and ribbons of gold-to-violet gill striping fan down the neck and barrel, dimming to the ordinary coat above the legs.",
+      "when": [
+        "Nbs/Nbs",
+        "Nbs/n"
+      ],
+      "layers": [
+        {
+          "name": "the gill striping",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "curve": true,
+              "points": [
+                0.1951,
+                0.3264,
+                0.439,
+                0.3264,
+                0.6585,
+                0.3858,
+                0.7317,
+                0.5045,
+                0.8049,
+                0.6528
+              ],
+              "width": 0.5,
+              "softness": 10.0,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "STROKES",
+              "seed": "$seed",
+              "axis": "Y",
+              "spacing": "$gillSpacing",
+              "length": 9.0,
+              "width": 0.35,
+              "curl": 0.2,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "space": "body",
+            "axis": "Y",
+            "from": 0.3,
+            "to": 0.82,
+            "hue": 285,
+            "hueSpan": -237,
+            "saturation": 0.88,
+            "lightness": 0.62,
+            "strength": 95
+          }
+        },
+        {
+          "name": "and the mantle over crest and skull",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "curve": true,
+              "points": [
+                0.1951,
+                0.3264,
+                0.439,
+                0.3264,
+                0.6585,
+                0.3858,
+                0.7317,
+                0.5045,
+                0.8049,
+                0.6528
+              ],
+              "width": 0.5,
+              "softness": 5.0,
+              "invert": true,
+              "combine": "MULTIPLY",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141e6e",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Nbs/Nbs": 0.0005,
+    "Nbs/n": 0.0095,
+    "n/n": 99.99
+  },
+  "format": 3
+}

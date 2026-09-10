@@ -1,0 +1,286 @@
+{
+  "key": "horsegenetics.emberveins",
+  "name": "Emberveins",
+  "phase": "magical",
+  "priority": 383,
+  "rarity": "LEGENDARY",
+  "blurb": "Fine seams trace the coat like cracked stone about to give way - molten orange in the glowing form, a quiet rust vein-work in the other - with drifting embers and one wandering thread of light caught along the flank.",
+  "notes": [
+    "'vertexWeight' on the CRACKLE mask exists because of this gene. A crack read purely as distance-to-wall is a channel of EVEN width - that is what a distance to a plane is - and the reference's veins pool where cracks meet and thin to a hairline between the junctions. Blending in the distance to the three-way corners is what lets one threshold do both, and no arrangement of the other masks reaches it: SPOTS and DAPPLES measure to a cell's centre and know nothing about where its corners fell.",
+    "Both alleles draw the identical geometry from the same three seeds, so littermates of either genotype share a recognisable vein layout and only the paint differs. The recessive filament is fainter rather than absent - the same creature with the light turned down.",
+    "The reference image's three broad tones are the horse's base coat showing through the cracks, not part of this marking. It draws the network, the embers and the filament, and nothing else."
+  ],
+  "alleles": [
+    {
+      "token": "Emb",
+      "label": "Emberveins, glowing (Emb)"
+    },
+    {
+      "token": "Emr",
+      "label": "Emberveins, rust (Emr)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "emberSeed",
+      "type": "seed"
+    },
+    {
+      "name": "filamentSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 40.0
+    },
+    {
+      "name": "cellSize",
+      "min": 3.5,
+      "max": 8.0
+    },
+    {
+      "name": "veinWidth",
+      "min": 0.3,
+      "max": 0.9
+    },
+    {
+      "name": "vertexWeight",
+      "min": 0.35,
+      "max": 0.7
+    },
+    {
+      "name": "emberSpacing",
+      "min": 2.0,
+      "max": 5.0
+    },
+    {
+      "name": "emberSize",
+      "min": 0.15,
+      "max": 0.5
+    },
+    {
+      "name": "filamentWarp",
+      "min": 0.2,
+      "max": 0.6
+    }
+  ],
+  "expressions": [
+    {
+      "id": "glowing",
+      "name": "Emberveins, glowing",
+      "description": "Molten seams glow along the coat wherever the hide would naturally crease, brightest at a scatter of ember points and one thin drifting thread of light across the flank.",
+      "when": [
+        "Emb/Emb",
+        "Emb/Emr",
+        "Emb/n"
+      ],
+      "layers": [
+        {
+          "name": "the vein network",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.3,
+              "vertexWeight": "$vertexWeight",
+              "softness": 0.1,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ff5a1f",
+            "strength": 96
+          }
+        },
+        {
+          "name": "embers scattered along it",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$emberSeed",
+              "spacing": "$emberSpacing",
+              "radius": "$emberSize",
+              "vary": 0.3,
+              "chance": 0.6,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ff8a3d",
+            "strength": 96
+          }
+        },
+        {
+          "name": "and one thread of light along the flank",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filamentSeed",
+              "shape": "ridged",
+              "scale": 7.0,
+              "octaves": 3,
+              "warp": "$filamentWarp",
+              "threshold": 0.85,
+              "softness": 0.04,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffd9c2",
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "rust",
+      "name": "Emberveins, rust",
+      "description": "The same cracked seams as quiet rust-dark vein-work, with a scatter of ash-dark freckling and one faint hairline on the flank - no glow to any of it.",
+      "when": {
+        "Emr": 2
+      },
+      "layers": [
+        {
+          "name": "the vein network",
+          "emissive": false,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$cellSize",
+              "gap": "$veinWidth",
+              "warp": 0.3,
+              "vertexWeight": "$vertexWeight",
+              "softness": 0.1,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.55,
+            "lightness": 0.24,
+            "strength": 88
+          }
+        },
+        {
+          "name": "embers scattered along it",
+          "emissive": false,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$emberSeed",
+              "spacing": "$emberSpacing",
+              "radius": "$emberSize",
+              "vary": 0.3,
+              "chance": 0.6,
+              "softness": 0.2,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.3,
+            "lightness": 0.14,
+            "strength": 85
+          }
+        },
+        {
+          "name": "and one thread of light along the flank",
+          "emissive": false,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$filamentSeed",
+              "shape": "ridged",
+              "scale": 7.0,
+              "octaves": 3,
+              "warp": "$filamentWarp",
+              "threshold": 0.92,
+              "softness": 0.04,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.4,
+            "lightness": 0.4,
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Emb/Emb": 0.0005,
+    "Emb/Emr": 0.002,
+    "Emb/n": 0.0095,
+    "Emr/Emr": 0.002,
+    "n/n": 99.986
+  },
+  "format": 3
+}

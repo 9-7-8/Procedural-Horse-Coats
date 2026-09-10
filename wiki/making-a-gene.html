@@ -937,7 +937,73 @@
 <tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
 <tr><td><code>FRACTAL</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>octaves</code> 3, <code>lacunarity</code> 2.13, <code>gain</code> 0.5, <code>warp</code> 0, <code>shape</code> (<strong>fbm</strong>/ridged/billow), <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td><strong>The same field as <code>PATCHES</code>, at several scales at once.</strong> One octave <em>is</em> <code>PATCHES</code>; each further octave adds finer detail to the same shapes. <code>shape: "ridged"</code> is what makes it worth having &mdash; it turns the blob outlines into lines that fork, taper and pinch out, which at a high <code>threshold</code> is lace. See <a href="#fractal">the note below</a>.</td></tr>
 <tr><td><code>PATH</code></td><td><code>plane</code> (<strong>side</strong>/top/front), <code>space</code> (<strong>body</strong>/units), <code>points</code>, <code>curve</code>, <code>closed</code>, <code>fill</code>, <code>width</code> 1.0, <code>softness</code> 0.25</td><td><strong>A shape you drew.</strong> Control points in a plane, stroked as a line or filled as an outline, extruded through the horse. The only mask that carries a shape instead of a rule for making one &mdash; for a bolt, a crescent, a brand, a curl on a particular shoulder. See <a href="#path">the note below</a>.</td></tr>
+<tr><td><code>SVG</code></td><td><code>d</code>, <code>transform</code>, <code>viewBox</code>, <code>plane</code> (<strong>side</strong>/top/front), <code>space</code> (<strong>body</strong>/units), <code>originU</code>/<code>originV</code> 0, <code>sizeU</code>/<code>sizeV</code> 1, <code>fit</code> (<strong>meet</strong>/slice/none), <code>align</code> (<strong>xMidYMid</strong>&hellip;), <code>flipY</code> <strong>true</strong>, <code>fill</code> <strong>true</strong>, <code>fillRule</code> (<strong>nonzero</strong>/evenodd), <code>width</code> 1.0, <code>cap</code> (<strong>butt</strong>/round/square), <code>join</code> (<strong>miter</strong>/round/bevel), <code>miterLimit</code> 4, <code>dash</code> 0, <code>gap</code> 0, <code>dashOffset</code> 0, <code>softness</code> 0.25</td><td><strong>An SVG path, drawn.</strong> <code>PATH</code> with the whole grammar behind it instead of a polyline. See <a href="#svg">the note below</a>.</td></tr>
+<tr><td><code>FAN</code></td><td><code>plane</code>, <code>space</code>, <code>originU</code> 0.5, <code>originV</code> 0.5, <code>spacing</code> 0.4, <code>duty</code> 0.5, <code>twist</code> 0, <code>inner</code> 0, <code>outer</code> 0, <code>softness</code> 0.15</td><td><strong>Bars that radiate from a point</strong>, widening as they travel &mdash; a sunburst, the gills under a mushroom cap, the bars on a butterfly&rsquo;s wing. <code>WAVES</code> takes its phase from a straight line, so its bars are parallel, evenly spaced and all pointed the same way everywhere in the region, whatever its wavelength; this takes it from the <em>angle</em> around a pivot, so both the direction and the gap grow with distance from it. <strong><code>spacing</code> is an angle</strong> &mdash; the arc one cycle covers a single body unit out, so a full turn holds <code>2&pi;/spacing</code> bars and 0.4 is about sixteen of them. A number that reads like a body-unit spacing puts three bars on the whole horse. <code>twist</code> rotates the fan&rsquo;s zero with distance, which is the difference between a sunburst and a pinwheel; <code>inner</code> and <code>outer</code> bound it in body units, and <code>outer: 0</code> means it never stops.</td></tr>
+<tr><td><code>NORMAL</code></td><td><code>axis</code> (Y/X/Z), <code>space</code> (<strong>body</strong>/local), <code>round</code> 0, <code>from</code> -1, <code>to</code> 1</td><td><strong>Which way the surface faces</strong>, dotted with a body axis &mdash; a rim light along the topline, a wash that only takes on the upward planes, the curvature sheen on a shell. The second mask after <code>EDGE</code> that asks about the <em>model</em> rather than about position, and it asks the other question: not where a box stops but which way its face is pointed. <strong><code>round</code> is the parameter that matters.</strong> A Minecraft horse is boxes, so the flat face normal takes exactly three values on any axis and a sheen keyed to it reads as three hard zones; above 0 it blends toward the normal an <em>ellipsoid</em> of the same box would have, which is continuous. <strong>It is not iridescence</strong> &mdash; the coat is a baked texture and nothing here knows where a camera is, so a colour run through this mask shifts with the <em>surface</em> and not with the viewer. That is the structural half of the effect and it is the honest half. Carapace Sheen is the gene it was added for.</td></tr>
 <tr><td><code>CHOICE</code></td><td><code>seed</code>, <code>options</code> 2, <code>is</code> 0</td><td><strong>A choice made once per horse</strong> &mdash; constant across the whole body, and fully on or fully off.</td></tr>
+<tr><td colspan="3"><div class="note" id="svg">
+<span class="label">The <code>SVG</code> mask, and why it is not just a longer <code>PATH</code></span>
+<p>
+    <code>PATH</code> was the admission that some shapes are not made of a rule &mdash; that a
+    marking somebody <em>drew</em> has to arrive as points. This is the admission that follows from
+    it: markings that get drawn get drawn in a drawing program, and what comes out is a
+    <code>d</code> string of cubics, arcs and subpaths inside a <code>viewBox</code>. Re-typing one
+    of those as sixty-four normalised control points is the step where the drawing stops being the
+    drawing &mdash; the holes close up, the arcs become chords, and an evening goes on arithmetic.
+</p>
+<p>
+    So the mask takes the file&rsquo;s own vocabulary and keeps the parts of it that carry meaning.
+    <strong>Every path command</strong>: <code>M m L l H h V v C c S s Q q T t A a Z z</code>,
+    absolute and relative, including the reflected control point an <code>S</code> and a
+    <code>T</code> carry and the endpoint-parameterised elliptical arc that every exported circle
+    is made of. <strong>Subpaths</strong>, so a letter O has a hole &mdash; and
+    <code>fillRule</code>, because <em>whether</em> that hole is a hole is written in the artist&rsquo;s
+    file and is not recoverable from the geometry. The <strong>transform list</strong>
+    (<code>matrix translate scale rotate skewX skewY</code>, composed left to right). The
+    <strong><code>viewBox</code></strong> and its aspect-ratio behaviour. And a real stroke:
+    <code>width</code> in body units, <code>cap</code>, <code>join</code> with a
+    <code>miterLimit</code>, and a <code>dash</code> pattern measured along the path the way a
+    <code>stroke-dasharray</code> is.
+</p>
+<p>
+    <strong>It costs what <code>PATH</code> costs.</strong> The string is flattened <em>once</em>,
+    when the gene loads: curves and arcs become polylines, the transform is folded into the points,
+    and the painter then walks segments exactly as <code>PATH</code> does. Only the
+    <code>viewBox</code> fit is left to paint time, because the viewport it lands in is written in
+    body units and those can come off a knob. The point ceiling is a cost ceiling, and it is what
+    stops a traced photograph going in a gene file.
+</p>
+<p>
+    <strong>The two flags that default <em>on</em>.</strong> <code>fill</code>, because a
+    <code>&lt;path&gt;</code> with no stroke is filled and that is what nearly every drawing means;
+    and <code>flipY</code>, because SVG&rsquo;s y runs down the page and the horse&rsquo;s runs up,
+    so without it every pasted drawing lands upside down in a way that looks deliberate. They are
+    the only two flags in the format that work this way.
+</p>
+<p>
+    <strong>Placing it.</strong> <code>originU</code>/<code>originV</code> and
+    <code>sizeU</code>/<code>sizeV</code> are the viewport in the plane&rsquo;s own two axes; in
+    <code>space: "body"</code> those are fractions of the whole horse, so the flank is u 0.18&ndash;0.72,
+    v 0.33&ndash;0.62 exactly as for <code>PATH</code>. <code>fit</code> is
+    <code>preserveAspectRatio</code>: <code>meet</code> fits the drawing in and leaves slack,
+    <code>slice</code> fills and overflows, <code>none</code> stretches &mdash; and
+    <code>none</code> is usually what a marking meant to run the length of the ribcage wants.
+</p>
+<p>
+    <strong>Getting a drawing in.</strong> <code>node intake/tools/svg-to-mask.mjs drawing.svg</code>
+    reads an actual <code>.svg</code> and writes the mask blocks: it flattens nested
+    <code>&lt;g transform&gt;</code>s into each element, converts
+    <code>rect</code>/<code>circle</code>/<code>ellipse</code>/<code>line</code>/<code>polyline</code>/<code>polygon</code>
+    into path data the way the specification defines them, carries the presentation attributes
+    across, and says out loud when it meets something it cannot see &mdash; a CSS class, a
+    <code>&lt;use&gt;</code>, an element that is both filled and stroked.
+</p>
+<p>
+    Like <code>PATH</code>, it carries a shape rather than a rule for one, so it is the
+    <strong>same on every horse</strong>. That is the point, and it is also the reason to reach for
+    a field mask first if what you actually want is variety. Moonwing is the gene it was added for.
+</p>
+</div></td></tr>
 <tr><td colspan="3"><div class="note" id="fractal">
 <span class="label"><code>octaves</code> buys detail and nothing else &mdash; on purpose</span>
 <p>
@@ -1123,7 +1189,9 @@
 <p><strong>A layer cannot see what the layer above it painted.</strong> Phase 3 hands every layer of a gene the same accumulator &mdash; the coat as it was <em>before this gene started</em> &mdash; so a <code>LUMA</code> mask reads the horse the gene inherited, not the horse it is making. (Phase 1 is the other way round: <code>restrict</code> re-reads the pigment between layers, which is what lets a <code>PIGMENT</code> mask chain.) So &ldquo;paint X, then mask on X&rdquo; does not work in the obvious order. Write the second mask as the union of the two conditions instead &mdash; <a href="gene-nyxborn.html">Nyxborn</a> masks on &ldquo;wherever it is dark, <em>or</em> wherever it was white&rdquo;, which is the same set once its first layer has run. See <a href="known-gaps.html#gap-125">gap 125</a>.</p></td></tr>
 <tr><td><code>EDGE</code></td><td><code>width</code> 0.6, <code>softness</code> 0.25</td><td>The <strong>rim of each body part&rsquo;s box</strong>, on the face the texel sits on &mdash; a wireframe of the horse. It is the one mask that asks about the <em>model</em> rather than about body space: every other shape here is a field sampled at a point, and a field has no idea where the horse stops. A Minecraft horse is a handful of boxes, and the line where two of a box&rsquo;s faces meet is the only thing in this geometry that reads as an <strong>edge</strong> to a viewer. So this measures, in the two axes that span the face, how far the texel is from the nearest of that face&rsquo;s four boundaries &mdash; the third axis is the face&rsquo;s own normal and is constant across it, so measuring against it would make every texel equally &ldquo;on the edge&rdquo;.
 <p>Know before using it: it outlines <strong>every</strong> box, not the silhouette. A leg gets a rectangle round each of its faces, including the one buried in the barrel. That is the honest thing for a mask with no visibility test, and on a boxy model it is also what a wireframe is supposed to look like.</p></td></tr>
-<tr><td><code>SPOTS</code></td><td><code>seed</code>, <code>spacing</code> 4.0, <code>radius</code> 0.9, <code>vary</code> 0.5, <code>chance</code> 1.0, <code>stretch</code> 1.0, <code>axis</code> (X/Y/Z), <code>shape</code> (round/heart), <code>mirror</code> false, <code>softness</code> 0.25</td><td>Countable round or oval marks with bare coat between them &mdash; freckles, stars, leopard spots. <code>DAPPLES</code> fills the horse with cells and leaves a web; this leaves most of it bare and puts marks on it. Drop <code>chance</code> to thin the field out, raise <code>stretch</code> to turn the marks into ovals along <code>axis</code>. <code>shape: "heart"</code> swaps the disc for a heart standing upright with its point down &mdash; measured in the <code>(x, y)</code> plane, so it is right way up on the flank and reads as a lozenge seen edge-on over the topline. <code>mirror</code> samples the lattice at <code>|z|</code> instead of <code>z</code>, so the far flank gets the near flank&rsquo;s spots in the same places: body space has a <em>signed</em> z, so without it a scatter is independent on the two sides, which is right for a paint marking and wrong for anything that reads as a design. Angler&rsquo;s string of lights is the case for it.
+<tr><td><code>SPOTS</code></td><td><code>seed</code>, <code>spacing</code> 4.0, <code>radius</code> 0.9, <code>vary</code> 0.5, <code>chance</code> 1.0, <code>stretch</code> 1.0, <code>axis</code> (X/Y/Z), <code>shape</code> (round/heart), <code>mirror</code> false, <code>arc</code> 1.0, <code>angle</code> 0, <code>offsetX</code>/<code>offsetY</code>/<code>offsetZ</code> 0, <code>softness</code> 0.25</td><td>Countable round or oval marks with bare coat between them &mdash; freckles, stars, leopard spots. <code>DAPPLES</code> fills the horse with cells and leaves a web; this leaves most of it bare and puts marks on it. Drop <code>chance</code> to thin the field out, raise <code>stretch</code> to turn the marks into ovals along <code>axis</code>. <code>shape: "heart"</code> swaps the disc for a heart standing upright with its point down &mdash; measured in the <code>(x, y)</code> plane, so it is right way up on the flank and reads as a lozenge seen edge-on over the topline. <code>mirror</code> samples the lattice at <code>|z|</code> instead of <code>z</code>, so the far flank gets the near flank&rsquo;s spots in the same places: body space has a <em>signed</em> z, so without it a scatter is independent on the two sides, which is right for a paint marking and wrong for anything that reads as a design. Angler&rsquo;s string of lights is the case for it.
+<p><strong><code>arc</code> below 1 clips <em>every</em> mark in the field to the same one-sided crescent, centred on <code>angle</code> degrees.</strong> That is what turns a tiling from a <em>net</em> into a <em>roof</em>: on a shingled surface - scales, feathers, roof tiles - the leading half of each element&rsquo;s boundary is hidden under the element in front of it and shows no line at all, and drawing every cell closed is the one thing that makes the whole field read wrong. <code>RINGS</code> has had the same parameter for one placed instance since it shipped; this is it applied per cell across a lattice. Fish Scales is the gene it was added for.</p>
+<p>The three <code>offset</code>s move where <em>this</em> mask reads the cell centre from, <strong>without moving the cell</strong>. Several masks on one seed and spacing stay concentric - that is <a href="#prompt">rule 14</a> - and this is how exactly one of them deliberately does not: the off-centre glint inside an eyespot, the highlight on a bead. A second mask on the same seed still finds the unshifted centres, which is what keeps the shifted one <em>inside</em> the set rather than replacing it. <code>RINGS</code> takes the same three.</p>
 <p><strong>Every layer of one compound element must share its <code>stretch</code>.</strong>
 It divides the sample <em>before</em> the lattice walk, so a different value is a different
 lattice &mdash; and the parts of the thing you are drawing scatter. An eye built as four
@@ -1132,12 +1200,14 @@ moment one of them stretches differently: the iris lands beside the white rather
 it, which is what <a href="gene-ocular.html">ocular</a> did until it was looked at.
 <code>seed</code>, <code>spacing</code> and <code>stretch</code> together are what make two
 draws concentric; <code>radius</code> is the only one that may differ.</p></td></tr>
-<tr><td><code>RINGS</code></td><td><code>seed</code>, <code>spacing</code> 6.0, <code>radius</code> 2.0, <code>thickness</code> 0.6, <code>vary</code> 0.4, <code>chance</code> 1.0, <code>arc</code> 1.0, <code>softness</code> 0.2</td><td>The same scatter drawn hollow &mdash; rosettes, wormholes, halos. <code>arc</code> below 1 opens the ring into a crescent, and each ring opens a different way, so a field of them does not read as printed.</td></tr>
+<tr><td><code>RINGS</code></td><td><code>seed</code>, <code>spacing</code> 6.0, <code>radius</code> 2.0, <code>thickness</code> 0.6, <code>vary</code> 0.4, <code>chance</code> 1.0, <code>arc</code> 1.0, <code>offsetX</code>/<code>offsetY</code>/<code>offsetZ</code> 0, <code>softness</code> 0.2</td><td>The same scatter drawn hollow &mdash; rosettes, wormholes, halos. <code>arc</code> below 1 opens the ring into a crescent, and each ring opens a different way, so a field of them does not read as printed.</td></tr>
 <tr><td><code>SPECKLE</code></td><td><code>seed</code>, <code>spacing</code> 0.7, <code>size</code> 0.45, <code>density</code> 0.5, <code>clumping</code> 0, <code>clumpScale</code> 7.0, <code>softness</code> 0.3</td><td>Fine stipple with no boundary anywhere &mdash; dust, ticking, speckling. A texel is about 0.5 body units, so <code>spacing</code> under that is scattered single pixels. <code>clumping</code> lets a slow field push the density around, which is the difference between even static and drifts of it.</td></tr>
 <tr><td><code>STROKES</code></td><td><code>seed</code>, <code>spacing</code> 3.0, <code>length</code> 12.0, <code>axis</code> (X/Y/Z), <code>width</code> 0.8, <code>curl</code> 0.35, <code>softness</code> 0.25</td><td><strong><code>width</code> has to stay well under <code>spacing</code></strong>, or neighbouring strokes touch and the field resolves as a wash rather than as lines &mdash; Zebra&rsquo;s Coat shipped with a width of up to 10 body units against a spacing of 3 and came out as a solid white neck. Tapering, curving lines that fork and pinch out &mdash; scratches, riblines, brindle bars, wisps. It is the <em>level set</em> of the noise field sampled in a frame stretched along <code>axis</code>, which is why the strokes end in points and wander rather than sitting parallel like a comb. <code>width</code> and <code>softness</code> are in body units, not fractions: the mask divides by the field\u2019s own gradient so a stroke is the width you asked for everywhere along its run, rather than a hairline where the noise is steep and a blot where it is flat.</td></tr>
 <tr><td><code>SPIRAL</code></td><td><code>seed</code>, <code>radius</code> 4.0, <code>turns</code> 2.0, <code>width</code> 0.5, <code>axis</code> (Z/X/Y), <code>offset</code> 0, <code>softness</code> 0.2</td><td>One closed spiral per named part &mdash; the filigree curl. The only mask that draws a <em>figure</em> rather than a field, so it takes its centre from the part's bounds; <code>offset</code> slides it along the part's long axis.</td></tr>
 <tr><td><code>WAVES</code></td><td><code>seed</code>, <code>axis</code> (X/Y/Z), <code>across</code> (Y/X/Z), <code>shape</code> (sine/triangle/saw), <code>space</code> (part/body/units/local), <code>from</code> 0, <code>to</code> 1.0, <code>wavelength</code> 8.0, <code>amplitude</code> 0.5, <code>spacing</code> 0, <code>phase</code> 0, <code>softness</code> 0.15</td><td>An <code>AXIS</code> band whose edges are displaced by a <b>periodic wave</b> running along another axis &mdash; a boundary scalloped into even lobes. It is the one shape in this vocabulary that repeats on purpose: everything else that curves here curves because noise bent it, and noise never comes back to the same place twice. <code>from</code>, <code>to</code>, <code>amplitude</code> and <code>spacing</code> are in whatever <code>space</code> says, exactly as on <code>AXIS</code>; <code>wavelength</code> is always in body units. Leave <code>spacing</code> at 0 for one edge (Waves&rsquo; lobed field), or raise it to repeat the band into parallel ribbons that rise and fall together (Angler&rsquo;s strings of lights), and then <code>phase</code> decides whether they stay in step. <code>shape</code> picks the waveform: <code>sine</code> scallops, <code>triangle</code> folds the edge into teeth with <em>straight</em> sides, and <code>saw</code> ramps and then cuts back square into a row of spears all raked one way. Those two are the only way to ask this vocabulary for an edge made of straight lines &mdash; everything noise-derived rounds off however far the softness is wound down, which is why Cleave&rsquo;s boundary could not be drawn before.</td></tr>
-<tr><td><code>CRACKLE</code></td><td><code>seed</code>, <code>scale</code> 5.0, <code>gap</code> 0.5, <code>warp</code> 0.35, <code>chance</code> 1.0, <code>softness</code> 0.08</td><td>Polygons that tile, each filled solid, separated by a channel of even width &mdash; a giraffe, a cracked glaze, a dry lake bed. <code>DAPPLES</code> and <code>SPOTS</code> both draw round marks however hard they are pushed, because both measure to a cell&rsquo;s <em>centre</em>; this measures to the wall <em>between</em> two cells, which is what makes the edges straight and the corners meet three at a time. <code>warp</code> pushes the polygons out of true (0 is a regular tiling), <code>gap</code> is the channel width, and <code>softness</code> is small by default because the point of the mask is the one hard edge in the set. Qular is the gene built on it.</td></tr>
+<tr><td><code>CRACKLE</code></td><td><code>seed</code>, <code>scale</code> 5.0, <code>gap</code> 0.5, <code>warp</code> 0.35, <code>chance</code> 1.0, <code>softness</code> 0.08, <code>measure</code> (<strong>wall</strong>/centroid), <code>vertexWeight</code> 0</td><td>Polygons that tile, each filled solid, separated by a channel of even width &mdash; a giraffe, a cracked glaze, a dry lake bed. <code>DAPPLES</code> and <code>SPOTS</code> both draw round marks however hard they are pushed, because both measure to a cell&rsquo;s <em>centre</em>; this measures to the wall <em>between</em> two cells, which is what makes the edges straight and the corners meet three at a time. <code>warp</code> pushes the polygons out of true (0 is a regular tiling), <code>gap</code> is the channel width, and <code>softness</code> is small by default because the point of the mask is the one hard edge in the set. Qular is the gene built on it.
+<p><strong><code>measure: "centroid"</code> reads the same tessellation from the middle of a cell out instead of from its wall in</strong> &mdash; 0 at the centre, 1 at the boundary. It is the only per-cell radial coordinate in the vocabulary, and the only one a crackle outline is <em>guaranteed</em> concentric with: <code>SPOTS</code> and <code>DAPPLES</code> lay down their own centres from their own seed, and those have never had anything to do with where a wall fell. A layer measuring <code>wall</code> and a layer measuring <code>centroid</code> on one seed and one scale are talking about the same polygons. Under <code>centroid</code>, <code>gap</code> stops being a channel width and becomes a radius.</p>
+<p><code>vertexWeight</code> blends the wall distance toward the distance to the nearest <em>three-way corner</em>. At 0 the channel is the even width a distance-to-a-plane always is; wind it up and a threshold on the field <strong>pools where cracks meet and thins to a hairline between them</strong>, which is what a vein network does and a crack does not. Emberveins is the gene it was added for.</p></td></tr>
 </tbody>
 </table>
 
@@ -1186,7 +1256,8 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 <tr><td><code>TINT</code></td><td><code>red</code>, <code>green</code>, <code>blue</code> (percent, signed), <code>opacity</code> 100</td><td>Adds signed colour. The accumulator is an uncapped <code>int</code>, so <code>-200</code> on all three channels reads black over <em>any</em> coat and <code>+300</code> on blue is blue whatever else the horse carries. That headroom is the point: your gene never has to know what else is there.</td></tr>
 <tr><td><code>TOWARD</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>strength</code> 100, <code>opacity</code> 100</td><td>Walks the texel toward a colour, reading what it already <em>looks</em> like &mdash; so one number lands the same on a black mane and a cremello one, and keeps the strand shading. The pink-hair move.</td></tr>
 <tr><td><code>FLAT</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>masks</code> expression that must look identical on any base.</td></tr>
-<tr><td><code>RAMP</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpan</code> 60), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>axis</code> (X/Y/Z), <code>space</code> (part/body/units/local), <code>from</code> 0, <code>to</code> 1, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour running <em>along an axis</em> &mdash; a spectral tail, an aurora band, a mane fading root to tip. Give it <code>colors</code> for named stops (it interpolates between them, so the result is continuous rather than banded), or leave <code>colors</code> out and it sweeps <code>hueSpan</code> degrees of the wheel from <code>hue</code>.</td></tr>
+<tr><td><code>RAMP</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpan</code> 60), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>axis</code> (X/Y/Z/<strong>noise</strong>/<strong>cell</strong>/<strong>cellId</strong>), <code>space</code> (part/body/units/local), <code>from</code> 0, <code>to</code> 1, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour running <em>along an axis</em> &mdash; a spectral tail, an aurora band, a mane fading root to tip. Give it <code>colors</code> for named stops (it interpolates between them, so the result is continuous rather than banded), or leave <code>colors</code> out and it sweeps <code>hueSpan</code> degrees of the wheel from <code>hue</code>.
+<p><strong>Three of the six axes are not axes.</strong> A straight line through the horse is monotonic by construction &mdash; the colour sweeps once from one end to the other and never comes back &mdash; and several markings are simply not like that. <code>axis: "noise"</code> reads a smooth field instead, so the colour <em>wanders</em>, doubles back and pools with no hard edge anywhere: an oil slick, marbling, a soap film. <code>axis: "cell"</code> reads the distance from a texel to the middle of its own cell, so every cell of a lattice gets its own independent radial fade at once. <code>axis: "cellId"</code> reads one number drawn <em>per cell</em> and constant across it, so neighbours take unrelated colours and meet at a wall &mdash; which is the difference between iridescence and a gradient, and the only one of the three that has a hard edge in it. All three read <code>seed</code> and <code>scale</code> and ignore <code>space</code>, <code>from</code> and <code>to</code>. <strong>Point <code>scale</code> and <code>seed</code> at the same knobs the layer&rsquo;s mask uses and the colour lines up with the shape</strong>; point them anywhere else and it does not.</p></td></tr>
 <tr><td><code>PALETTE</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpread</code> 40), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour drawn <em>per cell</em> &mdash; opal, nebula, galaxy. Adjacent cells take unrelated entries and meet at a wall, which is exactly what separates "iridescent" from "gradient"; <code>RAMP</code> is the other one.</td></tr>
 <tr><td><code>INVERT</code></td><td><code>amount</code> 100, <code>opacity</code> 100</td><td>The photographic negative of whatever the texel already looks like - white to black, orange to blue, <code>amount: 50</code> to flat grey. The only colour op that is a <em>function of the texel</em> rather than a walk toward a colour, which is why it is also the only one whose place in the paint order really matters: put it late, or it inverts a horse that is not finished yet.</td></tr>
 </tbody>
@@ -3630,13 +3701,16 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
 <tr><td><code>PIGMENT</code></td><td><code>parts:parts channel(darkness|red|black|total) from=0.5 to=1 spread=0 spreadFrom(any|above|below|ahead|behind)</code></td><td>reads the PIGMENT LEVELS. channel=black tells a bay's points (0.85+) from its barrel (0.2-0.45); channel=darkness SATURATES on a bay (barrel 0.84, points 0.95). spread grows what the mask selected, after invert, in body units; spreadFrom=above grows the selection DOWNWARD (a drip), any is the isotropic disc</td></tr>
 <tr><td><code>LUMA</code></td><td><code>parts:parts channel(dark|light|white|saturation|red|green|blue) from=0.5 to=1 spread=0 spreadFrom(any|above|below|ahead|behind)</code></td><td>reads the RESOLVED COLOUR - after the gradient chart and after every magical gene before this one. white is NOT light: it is the achromatic floor, so bald white reads 1 and a palomino's gold near 0. prefer dark over light+invert, because invert also inverts what spread grows. MAGICAL genes only, never emissive - the parser refuses both</td></tr>
 <tr><td><code>EDGE</code></td><td><code>parts:parts width=0.6 softness=0.25</code></td><td>the rim of each part's box, on the face the texel is on - a wireframe. the one mask that asks about the MODEL rather than about body space</td></tr>
-<tr><td><code>SPOTS</code></td><td><code>parts:parts seed=0 spacing=4 radius=0.9 vary=0.5 chance=1 stretch=1 axis(X|Y|Z) shape(round|heart) mirror=false softness=0.25</code></td><td>countable marks. shape=heart. mirror=true samples |z|, the only way to get the same marks on both sides</td></tr>
-<tr><td><code>RINGS</code></td><td><code>parts:parts seed=0 spacing=6 radius=2 thickness=0.6 vary=0.4 chance=1 arc=1 softness=0.2</code></td><td>annuli; arc&lt;1 opens them</td></tr>
+<tr><td><code>SPOTS</code></td><td><code>parts:parts seed=0 spacing=4 radius=0.9 vary=0.5 chance=1 stretch=1 axis(X|Y|Z) shape(round|heart) mirror=false arc=1 angle=0 offsetX=0 offsetY=0 offsetZ=0 softness=0.25</code></td><td>countable marks. shape=heart. mirror=true samples |z|, the only way to get the same marks on both sides. arc&lt;1 clips EVERY mark in the field to the same wedge centred on angle degrees - a tiling of those reads as SHINGLED (scales, feathers, tiles) rather than as a closed net. offsetX/Y/Z move where THIS mask reads the cell centre WITHOUT moving the cell, so one band of a concentric set can sit off-centre while the rest stay put</td></tr>
+<tr><td><code>RINGS</code></td><td><code>parts:parts seed=0 spacing=6 radius=2 thickness=0.6 vary=0.4 chance=1 arc=1 offsetX=0 offsetY=0 offsetZ=0 softness=0.2</code></td><td>annuli; arc&lt;1 opens them. offsetX/Y/Z as on SPOTS</td></tr>
 <tr><td><code>SPECKLE</code></td><td><code>parts:parts seed=0 spacing=0.7 size=0.45 density=0.5 clumping=0 clumpScale=7 softness=0.3</code></td><td>fine stipple</td></tr>
 <tr><td><code>STROKES</code></td><td><code>parts:parts seed=0 spacing=3 length=12 axis(X|Y|Z) width=0.8 curl=0.35 softness=0.25</code></td><td>tapering wandering lines. width MUST stay well under spacing</td></tr>
 <tr><td><code>SPIRAL</code></td><td><code>parts:parts seed=0 radius=4 turns=2 width=0.5 axis(Z|X|Y) offset=0 softness=0.2</code></td><td>one figure per part, centred on its box - reads as a decal, avoid</td></tr>
 <tr><td><code>WAVES</code></td><td><code>parts:parts seed=0 axis(X|Y|Z) across(Y|X|Z) shape(sine|triangle|saw) space(part|body|units|local) from=0 to=1 wavelength=8 amplitude=0.5 spacing=0 phase=0 softness=0.15</code></td><td>the only PERIODIC shape. spacing=0 is one edge; >0 repeats into ribbons. shape=triangle|saw gives STRAIGHT edges. wavelength is ALWAYS body units while amplitude is in whatever space says - which is how six genes displaced their band off the horse</td></tr>
-<tr><td><code>CRACKLE</code></td><td><code>parts:parts seed=0 scale=5 gap=0.5 warp=0.35 chance=1 softness=0.08</code></td><td>tiling polygons with an even channel - straight sides, 3-way corners</td></tr>
+<tr><td><code>CRACKLE</code></td><td><code>parts:parts seed=0 scale=5 gap=0.5 warp=0.35 chance=1 softness=0.08 measure(wall|centroid) vertexWeight=0</code></td><td>tiling polygons with an even channel - straight sides, 3-way corners. measure=centroid reads the SAME tessellation from each cell&#39;s middle out (0 centre, 1 boundary) - the only per-cell radial coordinate a crackle outline is GUARANTEED concentric with, and the answer to "shade/band each irregular cell independently". vertexWeight blends in distance to the 3-way corners, so a threshold on the field pools at the junctions and thins between them - a vein network, which an even channel cannot be. A band of wall distance [a,b] is CRACKLE(gap=2a) MULTIPLY then CRACKLE(gap=2b) SUBTRACT; the crack itself is CRACKLE(gap=2a) inverted</td></tr>
+<tr><td><code>SVG</code></td><td><code>parts:parts d:svg transform:text viewBox:box plane(side|top|front) space(body|units) originU=0 originV=0 sizeU=1 sizeV=1 fit(meet|slice|none) align(xMidYMid|...) flipY=TRUE fill=TRUE fillRule(nonzero|evenodd) width=1 cap(butt|round|square) join(miter|round|bevel) miterLimit=4 dash=0 gap=0 dashOffset=0 softness=0.25</code></td><td>an SVG path, drawn. The whole grammar: every command incl. S/T reflection and the elliptical arc, subpaths (so a letter O has a hole), fill rule, transform list, viewBox + preserveAspectRatio, and a stroke with caps, joins and dashes. Flattened once at load, so it costs what PATH costs. fill and flipY are the only two flags in the format that default TRUE - a &lt;path&gt; with no stroke is filled, and SVG&#39;s y runs DOWN. originU/V + sizeU/V are the viewport in the plane&#39;s own axes; fit=none stretches, which is what a marking meant to span the ribcage usually wants. Same on every horse, like PATH. Get one in with node intake/tools/svg-to-mask.mjs</td></tr>
+<tr><td><code>FAN</code></td><td><code>parts:parts plane(side|top|front) space(body|units) originU=0.5 originV=0.5 spacing=0.4 duty=0.5 twist=0 inner=0 outer=0 softness=0.15</code></td><td>bars radiating from a point, WIDENING as they go - sunburst, gills under a cap, wing bars. The polar twin of WAVES: WAVES takes its phase from a straight line so its bars are parallel forever, whatever the wavelength. spacing is an ANGLE (the arc one cycle covers ONE body unit out), so a full turn holds 2*pi/spacing bars and 0.4 is about sixteen - a number that reads like a body-unit spacing puts three bars on the whole horse. twist rotates the zero with distance (sunburst vs pinwheel); inner/outer bound it, outer=0 never stops</td></tr>
+<tr><td><code>NORMAL</code></td><td><code>parts:parts axis(Y|X|Z) space(body|local) round=0 from=-1 to=1</code></td><td>which way the SURFACE faces, dotted with a body axis - rim light, upward-plane wash, shell sheen. The 2nd mask after EDGE that asks about the model. round=0 is the FLAT face normal, which on boxes takes 3 values and gives hard zones; above 0 it blends toward the normal an ellipsoid of the same box would have, which is continuous - use 0.7-0.9 for a sheen. NOT iridescence: the coat is a baked texture and nothing here knows where a camera is, so it shifts with the surface, never with the viewer</td></tr>
 </tbody>
 </table>
 </div>
@@ -3653,7 +3727,7 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
 <tr><td><code>TINT</code> <em>magical</em></td><td><code>red=0 green=0 blue=0 opacity=100</code></td><td>signed RGB percent</td></tr>
 <tr><td><code>TOWARD</code> <em>magical</em></td><td><code>color:color hue=-1 saturation=0.8 lightness=0.55 strength=100 opacity=100</code></td><td>walk the VISIBLE colour toward one colour. negative strength = away</td></tr>
 <tr><td><code>FLAT</code> <em>magical</em></td><td><code>color:color hue=-1 saturation=0.8 lightness=0.55 opacity=100</code></td><td>replace</td></tr>
-<tr><td><code>RAMP</code> <em>magical</em></td><td><code>colors:colors hue=0 hueSpan=60 saturation=0.8 lightness=0.55 axis(X|Y|Z) space(part|body|units|local) from=0 to=1 strength=100 opacity=100</code></td><td>sweep along an axis. varies COLOUR, never coverage. space=local runs it along a pitched part's own length</td></tr>
+<tr><td><code>RAMP</code> <em>magical</em></td><td><code>colors:colors hue=0 hueSpan=60 saturation=0.8 lightness=0.55 axis(X|Y|Z|noise|cell|cellId) space(part|body|units|local) from=0 to=1 seed=0 scale=5 strength=100 opacity=100</code></td><td>sweep along an axis. varies COLOUR, never coverage. space=local runs it along a pitched part's own length. THREE OF THE SIX AXES ARE NOT AXES: X/Y/Z are a straight line and so monotonic - the colour sweeps ONCE and never comes back. noise reads a smooth field, so it wanders and doubles back with no hard edge (oil slick, marbling); cell reads distance to the middle of the texel's OWN cell, so every cell fades independently; cellId reads one key per cell, constant across it, so neighbours take unrelated stops (the difference between iridescent and a gradient). All three read seed+scale and ignore space/from/to - point them at the mask's own seed and scale and the colour lines up with the shape</td></tr>
 <tr><td><code>PALETTE</code> <em>magical</em></td><td><code>colors:colors hue=0 hueSpread=40 saturation=0.8 lightness=0.55 seed=0 scale=5 strength=100 opacity=100</code></td><td>one colour per cell of its OWN lattice - cells meet at a WALL. a hard edge no mask softness can remove</td></tr>
 <tr><td><code>INVERT</code> <em>magical</em></td><td><code>amount=100 opacity=100</code></td><td>negate the visible colour</td></tr>
 </tbody>
@@ -3805,6 +3879,13 @@ x 7.5-11.5. The barrel is 22 units long. A texel is 0.5 units.
 PARTS: BODY NECK HEAD MUZZLE MANE TAIL LEFT_EAR RIGHT_EAR and the four legs.
 Groups: ALL LEGS FRONT_LEGS HIND_LEGS EARS HAIR FACE POINTS BARREL.
 
+IF YOU HAVE AN SVG. Use the SVG mask and paste the d string verbatim - every
+command, both cases, as many subpaths as it has. Do not re-type it as PATH
+points: that is where the holes close up and the arcs become chords. Copy the
+viewBox and any transform across too; place it with originU/originV +
+sizeU/sizeV in the plane's own axes, and reach for fit=none when the marking is
+meant to span a whole region rather than sit proportionally inside it.
+
 A LAYER IS "where x what": its masks fold into one coverage value 0-1 (the fold
 starts at 1; the first mask multiplies into it, later ones combine by
 MULTIPLY|MAX|MIN|ADD|SUBTRACT, each optionally "invert": true), and its op
@@ -3851,14 +3932,21 @@ RULES THAT ARE NOT OPTIONAL
    square to the neck). Fractions run outside 0..1 on a pitched part, so a
    crest band starts at -1.0.
 10. Size things in body units: structure inside a shape needs several units.
-11. Each of these is the ONLY way to get what it gets. WAVES repeats evenly.
+11. Each of these is the ONLY way to get what it gets. WAVES repeats evenly
+    ALONG A LINE; FAN repeats evenly AROUND A POINT, and its bars widen with
+    distance - a sunburst, gills, wing bars, anything with a shared origin.
     WAVES shape=triangle|saw and CRACKLE give straight edges. FRACTAL
     shape=ridged gives lines that fork, taper and pinch out (lace: threshold
     0.85 softness 0.04 for a filament, 0.7/0.1 for a ribbon; 2-3 octaves, since
     past that the detail is under a texel and stipples). PATH carries a shape
-    you choose rather than a rule for making one. CHOICE is the only branch.
-    EDGE is the only mask that asks about the model rather than about position.
-    Everything else is noise-derived and wanders.
+    you choose rather than a rule for making one, and SVG carries a shape
+    somebody DREW - paste the d string, do not re-type it as points. CHOICE is
+    the only branch, and it is PER HORSE: it returns the same answer on every
+    texel, so it can never give one cell of a lattice a different colour from
+    the next (that is RAMP axis=cellId). EDGE and NORMAL are the only two masks
+    that ask about the model rather than about position - EDGE where a box
+    stops, NORMAL which way its surface faces. Everything else is noise-derived
+    and wanders.
 12. FRACTAL's "octaves" is a DETAIL knob and nothing else - the sum is
     RMS-normalised, so raising it does not move how much of the horse clears
     "threshold". One octave is exactly a PATCHES mask. Use "warp" for an edge
@@ -3871,7 +3959,34 @@ RULES THAT ARE NOT OPTIONAL
     = big soft SPOTS x small sharp SPOTS inverted. Concentric zones = several
     SPOTS on ONE seed+spacing+stretch+vary, which keeps them concentric AND in
     proportion because vary scales them all by the same per-cell factor.
-    Symmetry down both flanks = SPOTS "mirror": true.
+    Symmetry down both flanks = SPOTS "mirror": true. A shingled tiling (scales,
+    feathers, roof tiles) = SPOTS arc&lt;1 + angle, which clips every cell of the
+    field to the same wedge - drawing them closed gives a NET, which is the
+    wrong picture. One band of a concentric set sitting deliberately off-centre
+    = that band's offsetX/offsetY, which moves where it MEASURES from without
+    moving the cell. A band of a CRACKLE cell between two wall distances a and b
+    = CRACKLE(gap=2a) MULTIPLY then CRACKLE(gap=2b) SUBTRACT, all other numbers
+    identical; the crack itself is the narrowest reading inverted. Anything
+    per-cell that has to line up with a CRACKLE - a radial fade, a core, a
+    colour - is CRACKLE measure=centroid or RAMP axis=cell/cellId on the SAME
+    seed and scale, and is the only arrangement that is guaranteed to line up:
+    SPOTS and DAPPLES lay down their own centres and have never known where a
+    crackle wall fell.
+
+15. SIZE IT AGAINST A TEXEL BEFORE YOU SHIP IT. A texel is 0.5 body units. Any
+    band, ring, gap or stroke narrower than that averages away to nothing, and
+    it does it silently - the file loads, the gene registers, and the horse has
+    no marking on it. Concentric rings 0.25 units apart is the commonest way to
+    write a gene that draws nothing.
+
+16. TWO THINGS THIS FORMAT CANNOT DO, so do not propose them. It cannot vary
+    anything by the angle to the CAMERA: the coat is a texture baked once per
+    horse, and no mask or op will ever see a viewer. True iridescence is
+    therefore out of reach; NORMAL reads the direction the SURFACE faces, which
+    is the structural half of it, and that is the honest approximation. And it
+    cannot offset a knob by a constant - there is no "$hue + 180" - so a
+    complement, an opposite, or a second colour a fixed distance round the wheel
+    has to be a second knob or a fixed colour.
 
 KNOBS are the per-horse values, stored on the allele copy and inherited.
 Reference one as "$name" in any numeric field. type "seed" for noise seeds;
@@ -3926,6 +4041,23 @@ what it is in "notes", and then, after the JSON, add:
             that one cannot. If it is really a new PARAMETER on an existing
             mask, propose it that way instead - it is a smaller change and it is
             the more common answer.
+
+Before you write one, check it against the list in rule 16 and against these,
+which came back from the last batch and are now BUILT - proposing them again
+costs somebody an afternoon reading a page they already wrote:
+  angle around a pivot, bars that widen        -> FAN
+  which way the surface faces                  -> NORMAL (round&gt;0)
+  a drawn shape with holes, arcs and a stroke  -> SVG
+  a vein that pools at its junctions           -> CRACKLE vertexWeight
+  a per-cell radial coordinate aligned to a
+    CRACKLE, or a core inside its own cell     -> CRACKLE measure=centroid
+  one cell of a lattice differing from the next
+    in COLOUR                                  -> RAMP axis=cellId
+  colour that wanders instead of sweeping      -> RAMP axis=noise
+  one band of a concentric set off-centre      -> SPOTS/RINGS offsetX/Y/Z
+  a tiled field clipped to a shingle           -> SPOTS arc + angle
+  "black or grey, not other colours"           -> LUMA channel=saturation,
+                                                  inverted (it was already there)
 
 At most two of these, for the two worst gaps. No commentary of any other kind:
 not on the JSON, not a summary of what you drew, not alternatives you rejected
@@ -3986,11 +4118,12 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     usually a number.
 </p>
 
-<h2 id="contracts">The four-file contracts</h2>
+<h2 id="contracts">The spread-out contracts</h2>
 
 <p>
-    Four things in this codebase are <strong>spread across four files each</strong>, and
-    every one of them fails <em>silently</em> when you miss one: the game and the tools
+    Four things in this codebase are <strong>spread across four or five files each</strong>
+    (a new mask is five now, and six if it carries a parameter kind the format has not seen
+    before), and every one of them fails <em>silently</em> when you miss one: the game and the tools
     simply start describing different genes, and nothing goes red. They moved here out of
     <code>CLAUDE.md</code>, which is standing rules rather than reference &mdash; but
     read the relevant one <em>before</em> you start, not after.
@@ -4034,15 +4167,55 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     If the mask needs a <em>new field</em> out of <code>BodyNoise</code> rather than one
     of the ones already there, that is a fifth file &mdash;
     <code>wiki/gene-creator/js/noise.js</code>, which is where the hash arithmetic is
-    ported, and where <code>CRACKLE</code>'s <code>cellEdge</code> had to go.</li>
-<li><a href="#masks">wiki/making-a-gene.html</a>, the <strong>Masks &amp; ops</strong> tab &mdash; the table a gene author reads.</li>
+    ported, and where <code>CRACKLE</code>'s <code>cellEdge</code> and
+    <code>cellVertex</code> both had to go.</li>
+<li><a href="#masks">wiki/making-a-gene.html</a>, the <strong>Masks &amp; ops</strong> tab
+    &mdash; the table a gene author reads &mdash; <em>and</em> the two terse tables on the
+    <a href="#schema">Prompt</a> tab, which are what a model is handed. Those are separate
+    tables saying the same thing to different readers, and a mask that reaches only one of
+    them is invisible to the other.</li>
 </ol>
+
+<div class="note">
+<span class="label">Two things that are not on the list and cost a day each anyway</span>
+<p>
+    <strong>A mask that carries something other than numbers and words needs a
+    <code>Kind</code>.</strong> <code>SVG</code> needed three &mdash; the path data itself,
+    a free string for the transform list, and a four-number box for the
+    <code>viewBox</code> &mdash; and each one has to be read in
+    <code>GeneSpecParser.readParams</code>, mirrored in <code>spec-model.js</code>'s
+    exporter (which decides what gets written back out), and given a control in
+    <code>ui.js</code>. A kind the exporter does not know about is silently dropped from
+    every file the creator writes.
+</p>
+<p>
+    <strong>A flag that defaults <em>true</em> is not the same change as a flag.</strong>
+    The creator omits any setting equal to its default, so a true-by-default flag has to be
+    written out when it is <em>un</em>ticked &mdash; which means the fallback has to live in
+    the table rather than in the exporter, and it has to be compared by the parity check.
+    It was not compared at all until <code>SVG</code>'s <code>fill</code> and
+    <code>flipY</code> arrived, because until then every flag in the format was false.
+</p>
+</div>
 
 <p>
     Then re-bake the fixtures and re-run parity, and <strong>make sure something in
     <code>example-genes/prismatic.json</code> uses the new thing</strong>. That file
     exists to exercise every mask and op once; without a case that reaches your addition,
     <code>check-parity.mjs</code> is green about it by definition.
+</p>
+
+<p>
+    <strong>And check that a probe case actually reaches it.</strong> The parity fixtures
+    sample four texels per part. A mask that covers most of the horse will be hit by one of
+    them; a drawing placed on the flank is a few dozen texels and will not, so a
+    <code>prismatic</code> layer using it can be green for the wrong reason. Where the new
+    thing is a self-contained piece of arithmetic &mdash; a path grammar, a fit, a distance
+    &mdash; bake it as an <strong>answer table</strong> in
+    <code>SpecFixtureTool</code> and compare it directly in <code>parity.js</code>, the way
+    the composer's numbers and the posed mesh already are. That is what
+    <code>schema.svg</code> in <code>expected.json</code> is: eleven path strings, each
+    exercising one thing that is easy to get subtly wrong, compared point for point.
 </p>
 
 <h3 id="contract-verb">A new <code>effects</code> verb</h3>

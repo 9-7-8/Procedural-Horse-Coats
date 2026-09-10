@@ -363,9 +363,9 @@
   ],
   "founders": {
     "Acr/Acr": 0.006,
-    "Acr/Acc": 0.008,
-    "Acr/n": 0.12,
-    "Acc/Acc": 0.01,
+    "Acr/Acc": 0.012,
+    "Acr/n": 0.114,
+    "Acc/Acc": 0.012,
     "n/n": 99.856
   }
 }

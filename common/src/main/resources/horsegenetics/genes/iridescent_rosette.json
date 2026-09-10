@@ -1,0 +1,316 @@
+{
+  "key": "horsegenetics.iridescent_rosette",
+  "name": "Iridescent Rosette",
+  "phase": "magical",
+  "priority": 323,
+  "rarity": "RARE",
+  "blurb": "Dark rosettes speckle the coat, each rimmed in bands of colour that shift like the shell of a jewel beetle.",
+  "notes": [
+    "The import wrote the coloured form as one RAMP running RADIALLY out from each rosette's own centre. There is no radial axis on RAMP and adding one would need the op to know which cell it was in, so the three colour bands are written as three concentric SPOTS pairs instead - the same recipe the pale form uses, on the same seed, spacing, stretch and vary. The visible difference is that the bands step rather than blend; the registration, which is what the import was protecting, is exactly as tight.",
+    "Every radius here is a knob, and every band's outer edge is the next band's inner edge, so the rosette stays in proportion however the knobs are bred - and 'vary' scales the whole set of them by one per-cell factor, so a big rosette is big all the way through."
+  ],
+  "alleles": [
+    {
+      "token": "Irw",
+      "label": "Iridescent Rosette, pale (Irw)"
+    },
+    {
+      "token": "Irc",
+      "label": "Iridescent Rosette, coloured (Irc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "spacing",
+      "min": 3.5,
+      "max": 6.0
+    },
+    {
+      "name": "stretch",
+      "min": 0.9,
+      "max": 1.25
+    },
+    {
+      "name": "vary",
+      "min": 0.15,
+      "max": 0.5
+    },
+    {
+      "name": "holeSoft",
+      "min": 0.1,
+      "max": 0.35
+    },
+    {
+      "name": "outerSoft",
+      "min": 0.15,
+      "max": 0.4
+    },
+    {
+      "name": "hueInner",
+      "min": 80.0,
+      "max": 160.0
+    },
+    {
+      "name": "hueMid",
+      "min": 30.0,
+      "max": 60.0
+    },
+    {
+      "name": "hueOuter",
+      "min": 280.0,
+      "max": 340.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Iridescent Rosette, pale",
+      "description": "Faint ivory ring-spots ghost the coat, the same size and spacing as the true rosettes with the colour taken out of the band.",
+      "when": [
+        "Irw/Irw",
+        "Irw/Irc",
+        "Irw/n"
+      ],
+      "layers": [
+        {
+          "name": "the ring",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 3.2,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 0.9,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ede6d6",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Iridescent Rosette, coloured",
+      "description": "Each rosette opens into a dark hollow ringed by green, then gold, then a wide band of magenta before the coat returns - a beetle-shell shimmer across the whole barrel.",
+      "when": {
+        "Irc": 2
+      },
+      "layers": [
+        {
+          "name": "the outer magenta band",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 3.2,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 2.1,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hueOuter",
+            "saturation": 0.55,
+            "lightness": 0.62,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the gold band inside it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 2.1,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hueMid",
+            "saturation": 0.72,
+            "lightness": 0.55,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the green ring round the hollow",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 1.4,
+              "softness": "$outerSoft",
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$seed",
+              "spacing": "$spacing",
+              "stretch": "$stretch",
+              "vary": "$vary",
+              "mirror": true,
+              "radius": 0.9,
+              "softness": "$holeSoft",
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hueInner",
+            "saturation": 0.55,
+            "lightness": 0.42,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Irw/Irw": 0.002,
+    "Irw/Irc": 0.008,
+    "Irw/n": 0.038,
+    "Irc/Irc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+}

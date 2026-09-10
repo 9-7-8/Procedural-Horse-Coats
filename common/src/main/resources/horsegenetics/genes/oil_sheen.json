@@ -1,0 +1,197 @@
+{
+  "key": "horsegenetics.oil_sheen",
+  "name": "Oil Sheen",
+  "phase": "magical",
+  "priority": 435,
+  "rarity": "LEGENDARY",
+  "blurb": "The coat looks like a soap film caught in light: a cracked, iridescent web of veins running the length of the horse, pooling over the barrel into a dense, bubble-pitted slick whose colour wanders instead of sweeping.",
+  "notes": [
+    "RAMP's 'noise' axis exists because of this gene. A ramp along X, Y or Z is monotonic by construction - the colour sweeps once from one end of the horse to the other and never comes back - and an oil slick's colour WANDERS: it doubles back, pools and thins. PALETTE could vary it without sweeping but only in hard-walled cells, which is the one thing a soap film has none of. Reading a smooth field where the coordinate used to go is the whole change, and it is the only one that gets both.",
+    "All three layers share the one hue knob, so a horse's whole coat rotates through the spectrum together instead of each layer picking its own mismatched rainbow.",
+    "Anatomy does the 'spiky' shape of the reference for free: the barrel is the dense hub and the neck, head, legs and hair are already the radiating limbs, so the vein layer only needs an isotropic field over everything.",
+    "The barrel's solid-looking mass is one oversized SPOTS instance - a spacing bigger than the horse, so the lattice produces a single cell rather than a field of them. Same tool as the bubbles, tuned the other way."
+  ],
+  "alleles": [
+    {
+      "token": "Osn",
+      "label": "Oil Sheen (Osn)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hueShift",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "satBase",
+      "min": 0.16,
+      "max": 0.34
+    },
+    {
+      "name": "veinSeed",
+      "type": "seed"
+    },
+    {
+      "name": "veinScale",
+      "min": 3.2,
+      "max": 6.5
+    },
+    {
+      "name": "veinWarp",
+      "min": 0.4,
+      "max": 0.6
+    },
+    {
+      "name": "blobSeed",
+      "type": "seed"
+    },
+    {
+      "name": "blobRadius",
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "name": "bubbleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "bubbleSpacing",
+      "min": 1.6,
+      "max": 2.4
+    }
+  ],
+  "expressions": [
+    {
+      "id": "sheen",
+      "name": "Oil Sheen",
+      "description": "The coat is laced with a cracked, glassy web of colour running nose to tail, densest and almost solid over the barrel, where it is pitted with bubbles of every size and rimmed in a paler shade of the same wander.",
+      "when": [
+        "Osn/Osn",
+        "Osn/n"
+      ],
+      "layers": [
+        {
+          "name": "the vein film",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$veinSeed",
+              "scale": "$veinScale",
+              "gap": 1.1,
+              "warp": "$veinWarp",
+              "softness": 0.35,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$veinSeed",
+            "scale": "$veinScale",
+            "hue": "$hueShift",
+            "hueSpan": 155,
+            "saturation": "$satBase",
+            "lightness": 0.46,
+            "strength": 88
+          }
+        },
+        {
+          "name": "the slick over the barrel, pitted with bubbles",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$blobSeed",
+              "spacing": 40.0,
+              "radius": "$blobRadius",
+              "vary": 0.2,
+              "softness": 3.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": 0.5,
+              "vary": 0.85,
+              "softness": 0.12,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$blobSeed",
+            "scale": 5.0,
+            "hue": "$hueShift",
+            "hueSpan": -125,
+            "saturation": "$satBase",
+            "lightness": 0.4,
+            "strength": 88
+          }
+        },
+        {
+          "name": "and the rim round every bubble",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "RINGS",
+              "seed": "$bubbleSeed",
+              "spacing": "$bubbleSpacing",
+              "radius": 0.5,
+              "vary": 0.85,
+              "thickness": 0.18,
+              "softness": 0.08,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "noise",
+            "seed": "$bubbleSeed",
+            "scale": 3.0,
+            "hue": "$hueShift",
+            "hueSpan": 150,
+            "saturation": 0.42,
+            "lightness": 0.66,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Osn/Osn": 0.0005,
+    "Osn/n": 0.0095,
+    "n/n": 99.99
+  },
+  "format": 3
+}

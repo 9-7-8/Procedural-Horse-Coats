@@ -1,0 +1,158 @@
+{
+  "key": "horsegenetics.gill_bloom",
+  "name": "Gill Bloom",
+  "phase": "magical",
+  "priority": 280,
+  "rarity": "EPIC",
+  "blurb": "A fungal-touched marking: one or two fan-shaped patches on the barrel, each rimmed in dull gold and hollowed to a deep maroon interior spoked like the underside of a mushroom cap.",
+  "notes": [
+    "The gills are a FAN, and this gene is half the reason that mask exists. A ridged FRACTAL gives lines that fork and taper like cracks or roots; real gills all meet at one point, which is an angle around a pivot and not a noise threshold. FAN measures exactly that, and its 'spacing' being an arc length at one unit out is what makes the spokes widen as they travel - a gill fans, it does not run parallel.",
+    "One pivot, not one per patch. FAN takes a single origin, so a horse whose FRACTAL puts two patches on the barrel gets spokes radiating from the same point for both, which reads correctly on the patch nearest the pivot and as a raked comb on the other. The pivot sits at the middle of the barrel, where the patch usually lands. A per-patch pivot would need the mask to know which blob a texel is in, which nothing here measures.",
+    "The rim and the interior are two thresholds of ONE fractal on one seed, so the gold rim is always the outside of the maroon rather than a second patch that happens to overlap it.",
+    "gillSpacing is an angle in radians, not a distance: at 0.15 a full turn holds about forty spokes, which is what the underside of a cap looks like. A number that reads like a body-unit spacing puts three bars on the whole horse."
+  ],
+  "alleles": [
+    {
+      "token": "Gbl",
+      "label": "Gill Bloom (Gbl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "patchSeed",
+      "type": "seed"
+    },
+    {
+      "name": "patchScale",
+      "min": 4.5,
+      "max": 9.0
+    },
+    {
+      "name": "patchWarp",
+      "min": 0.2,
+      "max": 0.7
+    },
+    {
+      "name": "gillSpacing",
+      "min": 0.1,
+      "max": 0.22
+    }
+  ],
+  "expressions": [
+    {
+      "id": "bloom",
+      "name": "Gill Bloom",
+      "description": "One to a few fan-shaped patches across the barrel, each with a matte gold rim opening onto a deep maroon centre spoked with dark gills.",
+      "when": {
+        "Gbl": 2
+      },
+      "layers": [
+        {
+          "name": "the gold rim",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$patchSeed",
+              "octaves": 1,
+              "scale": "$patchScale",
+              "warp": "$patchWarp",
+              "threshold": 0.55,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e7a83a",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the maroon interior",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$patchSeed",
+              "octaves": 1,
+              "scale": "$patchScale",
+              "warp": "$patchWarp",
+              "threshold": 0.7,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#5a1420",
+            "strength": 95
+          }
+        },
+        {
+          "name": "and the gills spoking out of it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "FRACTAL",
+              "seed": "$patchSeed",
+              "octaves": 1,
+              "scale": "$patchScale",
+              "warp": "$patchWarp",
+              "threshold": 0.7,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "body",
+              "originU": 0.45,
+              "originV": 0.5,
+              "spacing": "$gillSpacing",
+              "duty": 0.4,
+              "inner": 1.0,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#230810",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Gbl/Gbl": 0.02,
+    "n/n": 99.98
+  },
+  "format": 3
+}

@@ -415,8 +415,9 @@ window.HG = window.HG || {};
           "how the origin is measured; the radii and 'spacing' are body units either way"),
         v("originU", 0.5, "the pivot every bar radiates from, first axis", { min: -1, max: 2, step: 0.01 }),
         v("originV", 0.5, "the pivot, second axis", { min: -1, max: 2, step: 0.01 }),
-        v("spacing", 2.0, "the angular period, as the arc length one cycle covers at ONE body unit "
-          + "out - so bars widen with distance", { min: 0.1, max: 12, step: 0.05 }),
+        v("spacing", 0.4, "the angular period, as the arc length one cycle covers at ONE body unit "
+          + "out - so it is an angle in radians, and a full turn holds 2*pi/spacing bars. Bars "
+          + "widen with distance", { min: 0.05, max: 3, step: 0.01 }),
         v("duty", 0.5, "share of each cycle that is bar rather than gap"),
         v("twist", 0.0, "degrees the fan's zero rotates per body unit out - 0 is a sunburst, "
           + "anything else a pinwheel", { min: -90, max: 90, step: 1 }),

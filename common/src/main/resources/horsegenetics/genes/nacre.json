@@ -1,0 +1,290 @@
+{
+  "key": "horsegenetics.nacre",
+  "name": "Nacre",
+  "phase": "magical",
+  "priority": 436,
+  "rarity": "RARE",
+  "blurb": "The coat breaks into hard-edged plates like a cracked shell, each one paler at its gold seams and richer toward its middle.",
+  "notes": [
+    "The plate colour, the darkening at its middle and the seam between plates are three readings of ONE tessellation on one seed and one scale. The middle is CRACKLE measuring from the centre of the cell out rather than from its wall in - the only per-cell radial coordinate in the vocabulary that a crackle outline is guaranteed concentric with, and the reason the core cannot slide off the plate it belongs to.",
+    "Hard walls between colours are usually the thing to avoid, and here they are the point: a plate edge is meant to be sharp, because that is exactly where the gold seam is drawn on top of it.",
+    "Per-dose on the core layer, not on the plates: one copy of the pale form darkens the middles at a little over half strength, two copies take them all the way. The plates themselves are the same either way, so a heterozygote reads as the same shell with less depth in it."
+  ],
+  "alleles": [
+    {
+      "token": "Nco",
+      "label": "Nacre, opal (Nco)"
+    },
+    {
+      "token": "Ncg",
+      "label": "Nacre, glaze (Ncg)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "cellSeed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSpacing",
+      "min": 6.0,
+      "max": 12.0
+    },
+    {
+      "name": "cellJitter",
+      "min": 0.4,
+      "max": 0.75
+    },
+    {
+      "name": "crackWidth",
+      "min": 0.4,
+      "max": 0.8
+    },
+    {
+      "name": "coreWidth",
+      "min": 3.0,
+      "max": 6.0
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "opal",
+      "name": "Nacre, opal",
+      "description": "Pale irregular plates of blush pink and sky blue, each deepening toward a flamingo-pink heart, all of it seamed with fine cracks of pale gold.",
+      "when": [
+        "Nco/Nco",
+        "Nco/Ncg",
+        "Nco/n"
+      ],
+      "layers": [
+        {
+          "name": "the plates",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSpacing",
+            "colors": [
+              "#f7d6e3",
+              "#dce7f7"
+            ],
+            "strength": 94
+          }
+        },
+        {
+          "name": "deepening toward each plate's middle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$coreWidth",
+              "warp": "$cellJitter",
+              "softness": 1.2,
+              "measure": "centroid",
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ee6fa0",
+            "strength": {
+              "perDose": [
+                55,
+                55,
+                100
+              ]
+            }
+          }
+        },
+        {
+          "name": "and the gold seam between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4e48a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "glaze",
+      "name": "Nacre, glaze",
+      "description": "The same cracked plating, but every plate and its darkened middle run in one rich colour instead of pastel on pastel - a horse that looks poured rather than shelled.",
+      "when": {
+        "Ncg": 2
+      },
+      "layers": [
+        {
+          "name": "the plates",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSpacing",
+            "hue": "$hue",
+            "hueSpan": 18,
+            "saturation": 0.4,
+            "lightness": 0.81,
+            "strength": 94
+          }
+        },
+        {
+          "name": "deepening toward each plate's middle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$coreWidth",
+              "warp": "$cellJitter",
+              "softness": 1.2,
+              "measure": "centroid",
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.45,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the gold seam between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSpacing",
+              "gap": "$crackWidth",
+              "warp": "$cellJitter",
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4e48a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Nco/Nco": 0.002,
+    "Nco/Ncg": 0.008,
+    "Nco/n": 0.038,
+    "Ncg/Ncg": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+}

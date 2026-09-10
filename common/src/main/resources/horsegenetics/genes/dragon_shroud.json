@@ -302,10 +302,10 @@
     }
   ],
   "founders": {
-    "Drsw/Drsw": 0.002,
-    "Drsw/Drsc": 0.006,
-    "Drsw/n": 0.03,
-    "Drsc/Drsc": 0.006,
-    "n/n": 99.956
+    "Drsw/Drsw": 0.001,
+    "Drsw/Drsc": 0.004,
+    "Drsw/n": 0.019,
+    "Drsc/Drsc": 0.004,
+    "n/n": 99.972
   }
 }

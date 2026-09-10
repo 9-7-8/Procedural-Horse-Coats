@@ -1,0 +1,715 @@
+{
+  "key": "horsegenetics.concentric_eyespots",
+  "name": "Concentric Eyespots",
+  "phase": "magical",
+  "priority": 321,
+  "rarity": "RARE",
+  "blurb": "Butterfly-wing eyespots - nested rings around a pale glinting core - scatter down the neck and all four legs.",
+  "notes": [
+    "Every band is a pair of SPOTS masks on ONE seed, spacing, stretch and vary, differing only in radius, with the smaller one subtracted out. That is what keeps the rings concentric AND in proportion: 'vary' scales every band of a given eyespot by the same per-cell factor, so a big one is a big one all the way through rather than a big rim round an average core.",
+    "The legs get three bands and the neck four. A leg is about four body units across and a texel is half a unit; a fourth band there would be under a texel wide and read as mush, so the leg version is deliberately simpler rather than every band being shrunk.",
+    "The rim and the core are fixed colours on both forms. They are the eyespot's structural dark edge and its glint, and they read as those whatever accent the horse carries - only the middle bands take the hue knob.",
+    "The band radii are wider than the import's by roughly double, and that is not taste. A texel is half a body unit; the original leg rings were 0.28 and 0.26 units from one edge to the next, so every band on every leg was under a texel wide and resolved to nothing at all. The import's own note said a FOURTH band would do that - it was already happening at three. Anything with structure inside it needs several units, and the spacing went up with the radii so the eyespots still do not touch."
+  ],
+  "alleles": [
+    {
+      "token": "Cew",
+      "label": "Concentric Eyespots, pale (Cew)"
+    },
+    {
+      "token": "Cec",
+      "label": "Concentric Eyespots, coloured (Cec)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "legSeed",
+      "type": "seed"
+    },
+    {
+      "name": "neckSeed",
+      "type": "seed"
+    },
+    {
+      "name": "legSpacing",
+      "min": 4.2,
+      "max": 6.0
+    },
+    {
+      "name": "neckSpacing",
+      "min": 6.5,
+      "max": 9.0
+    },
+    {
+      "name": "stretch",
+      "min": 1.0,
+      "max": 1.8
+    },
+    {
+      "name": "vary",
+      "min": 0.1,
+      "max": 0.5
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Concentric Eyespots, pale",
+      "description": "A faint ivory echo of the rings ghosts along the neck and legs - the same shape as the coloured form, with the colour taken out.",
+      "when": [
+        "Cew/Cew",
+        "Cew/Cec",
+        "Cew/n"
+      ],
+      "layers": [
+        {
+          "name": "the leg eyespots, band at 1.9",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.9,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d9d4c9",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 1.25",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe9df",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 0.62",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f8f5ee",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 3.0",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 3.0,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d9d4c9",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 2.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e3ddd0",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 1.5",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe9df",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 0.8",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f8f5ee",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Concentric Eyespots, coloured",
+      "description": "Vivid eyespots - a near-black rim, a warm coloured band, and a pale glinting core - down the neck and every leg.",
+      "when": {
+        "Cec": 2
+      },
+      "layers": [
+        {
+          "name": "the leg eyespots, band at 1.9",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.9,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0f1a",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 1.25",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.25,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.78,
+            "lightness": 0.42,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the leg eyespots, band at 0.62",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEFT_FRONT_LEG",
+                "RIGHT_FRONT_LEG",
+                "LEFT_HIND_LEG",
+                "RIGHT_HIND_LEG"
+              ],
+              "seed": "$legSeed",
+              "spacing": "$legSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.62,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#bfe9f2",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 3.0",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 3.0,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0f1a",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 2.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 2.2,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.4,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 1.5",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 1.5,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.4,
+            "lightness": 0.68,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the neck eyespots, band at 0.8",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$neckSeed",
+              "spacing": "$neckSpacing",
+              "stretch": "$stretch",
+              "axis": "Y",
+              "vary": "$vary",
+              "radius": 0.8,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#bfe9f2",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Cew/Cew": 0.002,
+    "Cew/Cec": 0.008,
+    "Cew/n": 0.038,
+    "Cec/Cec": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+}

@@ -745,10 +745,13 @@ public final class SpecSchema {
                         "how the origin is measured; the radii and 'spacing' are body units either way"),
                 Param.value("originU", 0.5, "the pivot every bar radiates from, first axis"),
                 Param.value("originV", 0.5, "the pivot, second axis"),
-                Param.value("spacing", 2.0,
-                        "the angular period, given as the arc length one cycle covers at ONE BODY UNIT "
-                                + "from the pivot. Bars therefore widen with distance, which is the "
-                                + "whole difference from WAVES"),
+                Param.value("spacing", 0.4,
+                        "the angular period, given as the arc length one cycle covers at ONE BODY "
+                                + "UNIT from the pivot - so it is an ANGLE, in radians, and a full "
+                                + "turn holds 2*pi/spacing bars. The default is about sixteen of "
+                                + "them. Bars widen with distance from the pivot, which is the whole "
+                                + "difference from WAVES, and it is also why a number tuned at one "
+                                + "radius still reads at another"),
                 Param.value("duty", 0.5, "share of each cycle that is bar rather than gap"),
                 Param.value("twist", 0.0,
                         "degrees the fan's zero rotates per body unit of distance from the pivot. "

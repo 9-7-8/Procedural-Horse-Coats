@@ -1,0 +1,328 @@
+{
+  "key": "horsegenetics.moth_eyes",
+  "name": "Moth Eyes",
+  "phase": "magical",
+  "priority": 324,
+  "rarity": "EPIC",
+  "blurb": "Fine black vein-work threads the coat like an insect's wing membrane, broken by dark, gold-ringed eyespots along the flank - but only where the coat beneath is already black or grey.",
+  "notes": [
+    "'black or grey, and nothing else' is TWO readings and the import only had one. Brightness alone lets a pale dapple grey out and lets a liver chestnut in, because what the condition is really about is how far the colour sits from grey. The second LUMA here reads 'saturation' - which was already in the vocabulary under that name, so the 'chroma' channel the import asked for did not need building - inverted, so coverage is 1 on anything achromatic and 0 on a saturated hue.",
+    "The glint is off-centre, which is what SPOTS' offsetX and offsetY were added for. Every other band of the eyespot measures from the true cell centre; this one measures from a point shifted a third of a unit up and forward, WITHOUT moving the cell - so the highlight sits inside the concentric set as a comma rather than replacing it with a second, unrelated field.",
+    "The vein network is a ridged FRACTAL rather than STROKES because it forks. STROKES cannot fork - they run, wander and pinch out - and a wing membrane is a branching structure.",
+    "The neck copy of the vein layer runs in the fractal's own body frame like the body copy; the neck is pitched, so the veins there cross it at a slight angle rather than following its length. That is a tuning simplification and it looks like membrane either way."
+  ],
+  "alleles": [
+    {
+      "token": "Mte",
+      "label": "Moth Eyes (Mte)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 40.0,
+      "max": 65.0
+    },
+    {
+      "name": "patternSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSpacing",
+      "min": 5.0,
+      "max": 8.5
+    },
+    {
+      "name": "spotRadius",
+      "min": 1.8,
+      "max": 2.6
+    },
+    {
+      "name": "spotVary",
+      "min": 0.0,
+      "max": 0.4
+    },
+    {
+      "name": "veinScale",
+      "min": 2.0,
+      "max": 4.5
+    }
+  ],
+  "expressions": [
+    {
+      "id": "eyes",
+      "name": "Moth Eyes",
+      "description": "Fine black vein-lines web the neck and body, and dark, gold-ringed eyespots scatter along the flank - both only where the coat under them is black or grey.",
+      "when": {
+        "Mte": 2
+      },
+      "layers": [
+        {
+          "name": "the vein membrane over the body",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "threshold": 0.78,
+              "softness": 0.05,
+              "octaves": 3,
+              "warp": 0.35,
+              "scale": "$veinScale",
+              "seed": "$patternSeed",
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#050505",
+            "strength": 95
+          }
+        },
+        {
+          "name": "and over the neck",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FRACTAL",
+              "shape": "ridged",
+              "threshold": 0.78,
+              "softness": 0.05,
+              "octaves": 3,
+              "warp": 0.35,
+              "scale": "$veinScale",
+              "seed": "$patternSeed",
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#050505",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the black rim of each eyespot",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "RINGS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": "$spotRadius",
+              "thickness": 0.4,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#000000",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the gold ring inside it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "RINGS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": 1.6,
+              "thickness": 1.0,
+              "softness": 0.15,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the dark core",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": 0.8,
+              "softness": 0.12,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#000000",
+            "strength": 96
+          }
+        },
+        {
+          "name": "and the glint, deliberately off centre",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.0,
+              "to": 0.55,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "LUMA",
+              "channel": "saturation",
+              "from": 0.0,
+              "to": 0.18,
+              "invert": true,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$patternSeed",
+              "spacing": "$spotSpacing",
+              "vary": "$spotVary",
+              "radius": 0.24,
+              "softness": 0.06,
+              "combine": "MULTIPLY",
+              "offsetX": 0.3,
+              "offsetY": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f5f0e6",
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Mte/Mte": 0.02,
+    "n/n": 99.98
+  },
+  "format": 3
+}

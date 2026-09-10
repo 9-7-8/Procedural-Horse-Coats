@@ -469,10 +469,13 @@
     }
   ],
   "founders": {
-    "Sgv/Sgv": 0.06,
-    "Sgm/Sgm": 0.06,
-    "Sgg/Sgg": 0.06,
-    "n/n": 99.82
+    "Sgv/Sgv": 0.04,
+    "Sgv/Sgm": 0.0032,
+    "Sgv/Sgg": 0.0032,
+    "Sgm/Sgm": 0.0032,
+    "Sgm/Sgg": 0.0032,
+    "Sgg/Sgg": 0.0032,
+    "n/n": 99.944
   },
   "notes": [
     "The palette is the ALLELE here, not an epigenetic value, which is unique in the registry - every other gene that varies its colour writes a hue on the allele copy. It is deliberate: a stained-glass window is a made object with a chosen palette, and a horse whose window drifted hue by hue down the generations would be a different idea. The consequence is that mixing two lines gives a window with both trays in it rather than an average of the two."

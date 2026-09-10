@@ -1,0 +1,238 @@
+{
+  "key": "horsegenetics.kite_bloom",
+  "name": "Kite Bloom",
+  "phase": "magical",
+  "priority": 282,
+  "rarity": "RARE",
+  "blurb": "Angular, jewel-toned panels tile the coat like a stained-glass leaf, each one salted with pale flecks and seamed with the coat beneath.",
+  "notes": [
+    "The import asked for a RAMP whose colour came from the angle between the surface and the CAMERA, so a panel would shift hue as the horse turned. That is not a tuning gap and it is not going to be built: the coat is a texture baked once per horse, and nothing in this module ever learns where a viewer is. What did get built is the NORMAL mask, which reads the direction the SURFACE faces - see Carapace Sheen, where the same request landed - and here the per-panel colour comes off the panel instead, which is the other honest reading of 'iridescent'.",
+    "The colour is a RAMP on axis 'cellId', sharing the panels' own seed and scale: one key drawn per cell and constant across it, so neighbouring panels take unrelated colours and meet at the seam. That is the difference between a stained-glass leaf and a gradient.",
+    "The seam between panels is left unpainted rather than drawn, so what shows there is the horse's own coat - which is what makes the panels read as laid over the horse rather than as the horse."
+  ],
+  "alleles": [
+    {
+      "token": "Kbw",
+      "label": "Kite Bloom, pale (Kbw)"
+    },
+    {
+      "token": "Kbc",
+      "label": "Kite Bloom, coloured (Kbc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "seed",
+      "type": "seed"
+    },
+    {
+      "name": "patchSize",
+      "min": 4.0,
+      "max": 7.5
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "dotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "dotRadius",
+      "min": 0.3,
+      "max": 0.7
+    },
+    {
+      "name": "dotSpacing",
+      "min": 1.3,
+      "max": 2.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Kite Bloom, pale",
+      "description": "A faint silvery lattice of panels ghosts over the coat, catching the light without much colour in it.",
+      "when": [
+        "Kbw/Kbw",
+        "Kbw/n"
+      ],
+      "layers": [
+        {
+          "name": "the panels",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#edefe8",
+            "strength": 72
+          }
+        }
+      ]
+    },
+    {
+      "id": "washed",
+      "name": "Kite Bloom, washed",
+      "description": "The lattice shows through more clearly, each panel tinted with a muted wash of colour under the pale overlay.",
+      "when": [
+        "Kbw/Kbc"
+      ],
+      "layers": [
+        {
+          "name": "the panels, each its own colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$seed",
+            "scale": "$patchSize",
+            "hue": "$hue",
+            "hueSpan": 96,
+            "saturation": 0.34,
+            "lightness": 0.62,
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Kite Bloom, coloured",
+      "description": "Bold facets tile the coat edge to edge, every panel its own deep colour and every one dusted with small pale flecks.",
+      "when": {
+        "Kbc": 2
+      },
+      "layers": [
+        {
+          "name": "the panels, each its own colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$seed",
+            "scale": "$patchSize",
+            "hue": "$hue",
+            "hueSpan": 110,
+            "saturation": 0.58,
+            "lightness": 0.42,
+            "strength": 94
+          }
+        },
+        {
+          "name": "and the flecks salted over them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$seed",
+              "scale": "$patchSize",
+              "gap": 0.45,
+              "warp": 0.18,
+              "softness": 0.06,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$dotSeed",
+              "radius": "$dotRadius",
+              "spacing": "$dotSpacing",
+              "vary": 0.4,
+              "chance": 0.7,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f8f8f2",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Kbw/Kbw": 0.002,
+    "Kbw/Kbc": 0.008,
+    "Kbw/n": 0.038,
+    "Kbc/Kbc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+}

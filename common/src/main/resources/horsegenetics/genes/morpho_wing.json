@@ -1,0 +1,236 @@
+{
+  "key": "horsegenetics.morpho_wing",
+  "name": "Morpho Wing",
+  "phase": "magical",
+  "priority": 278,
+  "rarity": "EPIC",
+  "blurb": "A patch of iridescent light gathers low on the haunch like a wing folded against the flank, cut through with dark bars that rake toward the tail.",
+  "notes": [
+    "The bars are a FAN, and FAN exists because of this gene. The reference's bars share a common origin near the body and both widen and turn as they travel out from it; WAVES takes its phase from a straight line, so its bars are parallel, evenly spaced and all pointed the same way everywhere in the region, whatever its wavelength. That is a different measurement, not different tuning, and it is the one the mask was added for.",
+    "Both layers re-declare the same PARTS and PATH region rather than the second reading the first's paint - a layer cannot see what the layer above it painted.",
+    "FAN's spacing is an ANGLE - the arc one cycle covers a single body unit from the pivot - so the bars here are 0.17, not the 1.5 that reads like 'one and a half units apart'. At 1.5 the whole patch is inside one bar. It is the one number on this gene worth checking against a render rather than against intuition."
+  ],
+  "alleles": [
+    {
+      "token": "Mow",
+      "label": "Morpho Wing, pale (Mow)"
+    },
+    {
+      "token": "Moc",
+      "label": "Morpho Wing, coloured (Moc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Morpho Wing, pale",
+      "description": "A soft silver-white sheen pools low on the haunch, banded with a few dark bars raking back toward the tail.",
+      "when": [
+        "Mow/Mow",
+        "Mow/Moc",
+        "Mow/n"
+      ],
+      "layers": [
+        {
+          "name": "the wing",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e9eaf2",
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the bars across it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "body",
+              "originU": 0.16,
+              "originV": 0.34,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "twist": 40.0,
+              "inner": 1.5,
+              "outer": 13.0,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Morpho Wing, coloured",
+      "description": "The same folded wing, but the light in it is the colour this line of horses runs to - still barred in black.",
+      "when": {
+        "Moc": 2
+      },
+      "layers": [
+        {
+          "name": "the wing",
+          "emissive": true,
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.62,
+            "strength": 92
+          }
+        },
+        {
+          "name": "and the bars across it",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATH",
+              "space": "body",
+              "plane": "side",
+              "points": [
+                0.2,
+                0.4,
+                0.26,
+                0.52,
+                0.32,
+                0.6
+              ],
+              "curve": true,
+              "width": 8.0,
+              "softness": 4.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "FAN",
+              "plane": "side",
+              "space": "body",
+              "originU": 0.16,
+              "originV": 0.34,
+              "spacing": 0.17,
+              "duty": 0.42,
+              "twist": 40.0,
+              "inner": 1.5,
+              "outer": 13.0,
+              "softness": 0.3,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0a",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Mow/Mow": 0.001,
+    "Mow/Moc": 0.004,
+    "Mow/n": 0.019,
+    "Moc/Moc": 0.004,
+    "n/n": 99.972
+  },
+  "format": 3
+}

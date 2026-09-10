@@ -142,9 +142,9 @@ Two rules about the backlog page, both learned the hard way:
    page in the same change.**
 
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
-files each, and the game and the tools drift silently if you miss one.** The
-four lists are on `wiki/making-a-gene.html#contracts` - read it before you start, not
-after.
+or five files each, and the game and the tools drift silently if you miss one.**
+The four lists are on `wiki/making-a-gene.html#contracts` - read it before you
+start, not after.
 
 - **A gene or item page is three tabs** - `<section class="tab-panel"
   data-tab="gameplay|coding|science">` inside `article.doc`, per

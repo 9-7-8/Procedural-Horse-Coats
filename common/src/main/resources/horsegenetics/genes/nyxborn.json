@@ -161,8 +161,8 @@
     }
   ],
   "founders": {
-    "Nyx/Nyx": 0.05,
-    "n/n": 99.95
+    "Nyx/Nyx": 0.02,
+    "n/n": 99.98
   },
   "notes": [
     "The stars land on BLACK, not merely on dark (owner's call), and telling those apart needs two readings rather than one. On the shipped gradient a black horse reads 0.807 on LUMA's 'dark' channel and a bay reads 0.782 - close enough that no threshold separates them without also losing half the black. What does separate them is SATURATION: black sits at 0.02 and a bay's red at 0.556, because the difference between them is colour and not brightness. So the star masks are dark AND unsaturated, and a bay keeps its brown shoulder unstarred.\n\nThat is also why the white-to-black layer paints a neutral #0c0c0c rather than the blue-black it used to: a tinted void reads as saturated, and the gene would have refused to star the very black it had just made.",

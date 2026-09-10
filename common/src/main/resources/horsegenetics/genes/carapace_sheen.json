@@ -1,0 +1,147 @@
+{
+  "key": "horsegenetics.carapace_sheen",
+  "name": "Carapace Sheen",
+  "phase": "magical",
+  "priority": 226,
+  "rarity": "RARE",
+  "blurb": "The coat gleams like a beetle's shell - glassy and deep where the body turns toward the light, paling underneath, with a bright ridge down the spine and a few pale blazes on each flank.",
+  "notes": [
+    "This is the gene the NORMAL mask was added for, and it is worth being plain about what the mask does and does not deliver. True iridescence is a function of the angle between the surface and the VIEWER, and the coat here is a baked texture: nothing in this module ever learns where a camera is, so a colour that shifts as the horse turns is out of reach and will stay out of reach while the coat is a PNG. What NORMAL measures instead is which way the surface itself faces, which is the structural half of the effect - the sheen sits on the planes that turn up into the light and thins on the ones that turn away, and it stays there. The import shipped a vertical RAMP standing in for this; a ramp is a position band and gets it wrong the moment the geometry turns.",
+    "'round' is at 0.85 rather than 0: a Minecraft horse is boxes, so the FLAT face normal takes exactly three values on any axis and a sheen keyed to it reads as three hard zones. Blending toward the normal an ellipsoid of the same box would have is what makes it continuous."
+  ],
+  "alleles": [
+    {
+      "token": "Csh",
+      "label": "Carapace Sheen (Csh)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "blazeSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "sheen",
+      "name": "Carapace Sheen",
+      "description": "A glassy shell-sheen over the whole coat, deepest on the planes that face the light and palest underneath, with a bright line along the spine and three pale blazes on each flank.",
+      "when": [
+        "Csh/Csh",
+        "Csh/n"
+      ],
+      "layers": [
+        {
+          "name": "the shell wash",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "ALL"
+              ]
+            },
+            {
+              "type": "NORMAL",
+              "axis": "Y",
+              "round": 0.85,
+              "from": -0.55,
+              "to": 1.0,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "body",
+            "from": 0.3,
+            "to": 0.95,
+            "hue": "$hue",
+            "hueSpan": 44,
+            "saturation": 0.62,
+            "lightness": 0.42,
+            "strength": 82
+          }
+        },
+        {
+          "name": "the ridge along the spine",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "NORMAL",
+              "axis": "Y",
+              "round": 0.4,
+              "from": 0.35,
+              "to": 1.0,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "CENTERLINE",
+              "halfWidth": 1.2,
+              "softness": 0.4,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 90
+          }
+        },
+        {
+          "name": "and the blazes on each flank",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BARREL"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$blazeSeed",
+              "spacing": 7.0,
+              "radius": 3.5,
+              "vary": 0.25,
+              "chance": 0.5,
+              "mirror": true,
+              "softness": 0.35,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 62
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Csh/Csh": 0.002,
+    "Csh/n": 0.038,
+    "n/n": 99.96
+  },
+  "format": 3
+}

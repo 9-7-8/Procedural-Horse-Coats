@@ -1,0 +1,238 @@
+{
+  "key": "horsegenetics.agate",
+  "name": "Agate",
+  "phase": "magical",
+  "priority": 277,
+  "rarity": "RARE",
+  "blurb": "The coat splits into cracked, jewel-toned cells, each one softening to a pale rim and deepening at its heart - agate split open in the light.",
+  "notes": [
+    "The core and the rim are the SAME tessellation read two ways: one CRACKLE measuring to the wall, one measuring to the middle of the cell the texel is in, on one seed and one scale. That is the only arrangement in the vocabulary that guarantees the heart of a cell lands inside the cell it belongs to - a SPOTS or DAPPLES field on the same numbers lays down its own centres, and those have never known where a crackle wall fell. Change either mask's seed or scale and the marking comes apart.",
+    "The import asked for the core to be the rim's COMPLEMENT - the opposite hue, 180 degrees round the wheel. It is not written that way because it cannot be: a hue knob is a number the horse drew, and there is no way in the file format to say 'that number plus 180'. Both layers therefore run the same hue knob and separate on saturation and lightness, so a cell's heart is a deeper version of its rim rather than its opposite. Recorded as a gap rather than quietly dropped.",
+    "The import also fixed a 1.15 stretch along X on every mask here so the cells came out slightly long. CRACKLE has no stretch, and adding one would have to squash the sample before the lattice walk on a mask whose whole point is that its walls are straight - so the cells are round-ish and the stretch is gone."
+  ],
+  "alleles": [
+    {
+      "token": "Agt",
+      "label": "Agate, opal (Agt)"
+    },
+    {
+      "token": "Agc",
+      "label": "Agate, chroma (Agc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "cellSeed",
+      "type": "seed"
+    },
+    {
+      "name": "cellSize",
+      "min": 3.5,
+      "max": 6.0
+    },
+    {
+      "name": "wallWidth",
+      "min": 0.4,
+      "max": 0.7
+    },
+    {
+      "name": "wallSoftness",
+      "min": 0.1,
+      "max": 0.25
+    },
+    {
+      "name": "coreWidth",
+      "min": 2.0,
+      "max": 3.6
+    },
+    {
+      "name": "coreSoftness",
+      "min": 0.6,
+      "max": 1.0
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "opal",
+      "name": "Agate, opal",
+      "description": "A pearly cracked-opal sheen - pale cells rimmed faintly in lilac-white, brightening to a milky glow at each cell's heart.",
+      "when": [
+        "Agt/Agt",
+        "Agt/Agc",
+        "Agt/n"
+      ],
+      "layers": [
+        {
+          "name": "the cells",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ede7f6",
+            "strength": 88
+          }
+        },
+        {
+          "name": "and the heart of each one",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$coreWidth",
+              "warp": 0.3,
+              "measure": "centroid",
+              "softness": "$coreSoftness",
+              "combine": "MULTIPLY",
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "chroma",
+      "name": "Agate, chroma",
+      "description": "The same cracked mosaic, but every cell takes its own colour - pastel at the rim, deepening toward the middle, veined through with dark cracks.",
+      "when": {
+        "Agc": 2
+      },
+      "notes": [
+        "Both RAMPs read axis 'cellId' on the SAME seed and scale as the masks, which is what makes a cell's heart the same hue as its rim: the key is drawn per cell and is constant across it, so the two layers cannot disagree about which cell they are in."
+      ],
+      "layers": [
+        {
+          "name": "one colour per cell",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSize",
+            "hue": "$hue",
+            "hueSpan": 130,
+            "saturation": 0.34,
+            "lightness": 0.82,
+            "strength": 90
+          }
+        },
+        {
+          "name": "deepening at the heart",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ],
+              "invert": true
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$wallWidth",
+              "warp": 0.3,
+              "softness": "$wallSoftness"
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": "$cellSize",
+              "gap": "$coreWidth",
+              "warp": 0.3,
+              "measure": "centroid",
+              "softness": "$coreSoftness",
+              "combine": "MULTIPLY",
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$cellSeed",
+            "scale": "$cellSize",
+            "hue": "$hue",
+            "hueSpan": 130,
+            "saturation": 0.62,
+            "lightness": 0.5,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Agt/Agt": 0.002,
+    "Agt/Agc": 0.008,
+    "Agt/n": 0.038,
+    "Agc/Agc": 0.008,
+    "n/n": 99.944
+  },
+  "format": 3
+}

@@ -279,12 +279,12 @@
     }
   ],
   "founders": {
-    "Koi/Koi": 0.006,
-    "Koi/Kob": 0.006,
-    "Koi/Kow": 0.006,
-    "Koi/n": 0.03,
-    "Kob/Kob": 0.006,
-    "Kow/Kow": 0.006,
-    "n/n": 99.94
+    "Koi/Koi": 0.001,
+    "Koi/Kob": 0.002,
+    "Koi/Kow": 0.002,
+    "Koi/n": 0.019,
+    "Kob/Kob": 0.002,
+    "Kow/Kow": 0.002,
+    "n/n": 99.972
   }
 }
