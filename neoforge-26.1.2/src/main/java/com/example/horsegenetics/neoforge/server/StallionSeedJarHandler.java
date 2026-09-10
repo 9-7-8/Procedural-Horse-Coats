@@ -9,6 +9,7 @@ import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.StoredGenome;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -124,6 +125,7 @@ public final class StallionSeedJarHandler {
 
         ItemStack filled = new ItemStack(ModItems.STALLION_SEED_JAR.get());
         filled.set(ModDataComponents.STORED_GENOME.get(), stored);
+        HorseProgress.complete(player, ProgressTask.FILL_SEED_JAR);
 
         // Transform the jar in the player's hand - even in creative: this is an
         // item transform, not a cost, and leaving the empty jar in hand reads as

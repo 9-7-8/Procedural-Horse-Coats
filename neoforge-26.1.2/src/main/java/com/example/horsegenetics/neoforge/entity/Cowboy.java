@@ -368,6 +368,8 @@ public class Cowboy extends AbstractVillager {
                 return InteractionResult.CONSUME;
             }
             setTradingPlayer(player);
+            com.example.horsegenetics.neoforge.server.HorseProgress.complete(player,
+                    com.example.horsegenetics.common.progress.ProgressTask.MEET_COWBOY);
             openTradingScreen(player, getDisplayName(), 1);
         }
         return InteractionResult.SUCCESS;

@@ -7,6 +7,8 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.neoforge.data.GeneDatabaseData;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
@@ -38,6 +40,8 @@ public final class GeneDiscoveryHandler {
     @SubscribeEvent
     static void onTame(AnimalTameEvent event) {
         if (event.getAnimal() instanceof Horse horse && event.getTamer() instanceof ServerPlayer player) {
+            HorseProgress.complete(player, HorseRecords.of(horse).sex() == com.example.horsegenetics.common.horse.Sex.FEMALE
+                    ? ProgressTask.TAME_MARE : ProgressTask.TAME_STALLION);
             try {
                 discoverFrom(player, Genotype.parse(HorseRecords.of(horse).geneticCode()));
             } catch (RuntimeException ignored) {
@@ -52,6 +56,9 @@ public final class GeneDiscoveryHandler {
             return;
         }
         GeneDatabaseData db = GeneDatabaseData.get(((net.minecraft.server.level.ServerLevel) serverPlayer.level()).getServer());
+        // Every allele on the animal joins the collection, baseline included -
+        // which is a different question from whether the gene is discovered.
+        db.collect(serverPlayer, genotype);
         for (Gene gene : Genes.codeOrder()) {
             AllelePair pair = genotype.pair(gene);
             if (pair.homozygousFor(gene.defaultAllele())) {

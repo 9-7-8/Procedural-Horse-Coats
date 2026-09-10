@@ -11,6 +11,8 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
@@ -122,6 +124,7 @@ public final class BreedingCarrotHandler {
             window = CarrotWindowAttachment.EMPTY;
         }
         horse.setData(ModAttachments.CARROT_WINDOW.get(), window.plus(tokens, now));
+        tickCarrotTasks(player, tokens);
 
         // A carrot also puts the horse in breeding mode, like a golden one.
         horse.setInLove(player);
@@ -152,6 +155,28 @@ public final class BreedingCarrotHandler {
         }
         String base = baseTokenOf(stack.getItem());
         return base == null ? List.of() : List.of(base);
+    }
+
+    /**
+     * One checklist task per kind of carrot fed. Reads the effect ids the carrot
+     * actually carries rather than the item, so a combined carrot ticks
+     * everything it is made of - which is right, because feeding one really did
+     * do all of those things.
+     */
+    private static void tickCarrotTasks(Player player, List<String> tokens) {
+        for (String token : tokens) {
+            if (token.startsWith("known:")) {
+                HorseProgress.complete(player, ProgressTask.USE_GENE_CARROT);
+            } else if (token.equals("stabilizer")) {
+                HorseProgress.complete(player, ProgressTask.CARROT_STABILIZER);
+            } else if (token.equals("magnifier")) {
+                HorseProgress.complete(player, ProgressTask.CARROT_MAGNIFIER);
+            } else if (token.equals("epigenetic_splice")) {
+                HorseProgress.complete(player, ProgressTask.CARROT_UNKNOWN_EPIGENETIC);
+            } else if (token.startsWith("gene_splice")) {
+                HorseProgress.complete(player, ProgressTask.CARROT_UNKNOWN_GENE);
+            }
+        }
     }
 
     private static boolean allHomozygous(Horse horse) {

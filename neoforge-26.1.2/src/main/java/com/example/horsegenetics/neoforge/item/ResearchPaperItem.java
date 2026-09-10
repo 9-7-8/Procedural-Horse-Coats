@@ -8,6 +8,8 @@ import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -42,25 +44,18 @@ public class ResearchPaperItem extends Item {
         return key == null ? null : Genes.byKeyOrNull(key);
     }
 
-    @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        Gene gene = geneOf(stack);
-        if (gene == null) {
-            return InteractionResult.PASS;
-        }
-        if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
-            boolean added = GeneDatabaseData.get(serverLevel.getServer())
-                    .read(serverPlayer, gene);
-            serverPlayer.sendSystemMessage(Component.translatable(
-                    added ? "message.horsegenetics.paper.read" : "message.horsegenetics.paper.known",
-                    Component.literal(gene.name())));
-            if (!player.getAbilities().instabuild) {
-                stack.shrink(1);
-            }
-        }
-        return InteractionResult.SUCCESS;
-    }
+    // A research paper is not something you read any more, and right-clicking
+    // one does nothing at all.
+    //
+    // It used to add its gene to your database and unlock that gene's carrot,
+    // which made a paper a shortcut past the horses: find one in a chest, read
+    // it, and you knew a gene you had never met. The database is now earned
+    // only by keeping a living example - tamed, bred, or owned any other way -
+    // so a paper is a *component* rather than a lesson. It goes in a shelf to be
+    // copied, and it goes in a gene carrot to be spent.
+    //
+    // Deliberately no "you cannot read this" message: an item that says nothing
+    // when clicked reads as an ingredient, and one that refuses reads as broken.
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,

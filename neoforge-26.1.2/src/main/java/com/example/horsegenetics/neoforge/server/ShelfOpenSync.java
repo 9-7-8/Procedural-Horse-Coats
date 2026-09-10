@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.menu.ResearchShelfMenu;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
@@ -30,6 +31,9 @@ public final class ShelfOpenSync {
     static void onOpen(PlayerContainerEvent.Open event) {
         if (event.getContainer() instanceof ResearchShelfMenu shelf) {
             shelf.syncOnOpen();
+            // Opening one is proof enough of having built one, and it needs no
+            // hook in the block-placement path to say so.
+            HorseProgress.complete(event.getEntity(), ProgressTask.BUILD_SHELF);
         }
     }
 }

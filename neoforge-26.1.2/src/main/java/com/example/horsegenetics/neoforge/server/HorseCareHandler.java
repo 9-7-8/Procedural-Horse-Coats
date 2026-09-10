@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.network.HorseCareSyncPayload;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -213,6 +214,9 @@ public final class HorseCareHandler {
         if (!after.equals(before)) {
             horse.setData(ModAttachments.HORSE_CARE.get(), after);
             syncCare(horse, after);
+            // Feeding by hand is the deliberate half of bonding - the rest
+            // accrues from riding and care, with no player to credit.
+            HorseProgress.complete(event.getEntity(), ProgressTask.BOND_HORSE);
         }
         // deliberately not cancelled - vanilla feeding (heal / temper / love) proceeds
     }

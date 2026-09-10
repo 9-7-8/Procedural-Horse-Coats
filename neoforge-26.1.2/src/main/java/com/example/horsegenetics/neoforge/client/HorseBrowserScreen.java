@@ -9,6 +9,7 @@ import com.example.horsegenetics.common.horse.HorseListing;
 import com.example.horsegenetics.common.horse.HorseQuery;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
@@ -90,6 +91,7 @@ public final class HorseBrowserScreen extends Screen {
         GETTING_STARTED("Getting started"),
         MY_HORSES("My horses"),
         GENE_DATABASE("Gene database"),
+        ALLELES("Alleles"),
         BREEDING_PREVIEW("Breeding preview"),
         RECIPES("Recipes");
 
@@ -187,6 +189,10 @@ public final class HorseBrowserScreen extends Screen {
     private static float detailScroll = 0f;
     private static float tutorialScroll = 0f;
     private static float tutorialMaxScroll = 0f;
+    private static float alleleScroll = 0f;
+    private static float alleleMaxScroll = 0f;
+    /** How far the tab strip is pushed left, in pixels. Only used when it overflows. */
+    private static int tabScroll = 0;
     private float detailMaxScroll = 0f;
 
     private EditBox searchBox;
@@ -326,8 +332,20 @@ public final class HorseBrowserScreen extends Screen {
         return fsRight();
     }
 
+    /**
+     * <b>Where the left-hand list actually stops.</b> On Recipes it is clipped
+     * to the detail panel's bottom edge rather than the window's, and
+     * {@link #visibleRows()} has to agree - counting rows against the window
+     * while scissoring against the panel is what left the last row half drawn.
+     */
+    private int listBottomForTab() {
+        return tab == Tab.RECIPES
+                ? Math.min(contentBottom(), panelTop() + IMG_H)
+                : contentBottom();
+    }
+
     private int visibleRows() {
-        return Math.max(1, (contentBottom() - listTop()) / ROW_H);
+        return Math.max(1, (listBottomForTab() - listTop()) / ROW_H);
     }
 
     /** How many rows the active tab's left-hand list has. */
@@ -604,8 +622,8 @@ public final class HorseBrowserScreen extends Screen {
             }
             return super.mouseClicked(event, doubleClick);
         }
-        if (tab == Tab.GETTING_STARTED) {
-            return super.mouseClicked(event, doubleClick); // no list on this tab
+        if (tab == Tab.GETTING_STARTED || tab == Tab.ALLELES) {
+            return super.mouseClicked(event, doubleClick); // neither has a list
         }
         int row = rowAt(event.x(), event.y());
         if (row >= 0) {
@@ -619,16 +637,60 @@ public final class HorseBrowserScreen extends Screen {
         return super.mouseClicked(event, doubleClick);
     }
 
-    private int tabStripLeft() {
+    /** Every tab laid end to end, including the gap after the last one. */
+    private int tabStripWidth() {
         int total = 0;
         for (Tab t : Tab.values()) {
             total += this.font.width(t.label) + 24 + 4;
         }
-        return this.width / 2 - total / 2;
+        return total;
+    }
+
+    /** The window the strip is drawn inside, with a margin at each end. */
+    private int tabViewportLeft() {
+        return 8;
+    }
+
+    private int tabViewportWidth() {
+        return Math.max(40, this.width - 16);
+    }
+
+    /** How far the strip can be pushed left before its end is on screen. */
+    private int maxTabScroll() {
+        return Math.max(0, tabStripWidth() - tabViewportWidth());
+    }
+
+    /**
+     * <b>Where the strip starts drawing.</b> Centred while it fits, which is how
+     * it has always looked; scrolled once it does not.
+     *
+     * <p>There are six tabs now and they ran off the edge of the window - and a
+     * tab you cannot see is a tab that does not exist, which is a bad way to
+     * lose a feature.
+     */
+    private int tabStripLeft() {
+        int total = tabStripWidth();
+        if (total <= tabViewportWidth()) {
+            tabScroll = 0;
+            return this.width / 2 - total / 2;
+        }
+        tabScroll = Math.max(0, Math.min(tabScroll, maxTabScroll()));
+        return tabViewportLeft() - tabScroll;
+    }
+
+    /** Is the pointer over the strip? Wheel there scrolls it. */
+    private boolean overTabStrip(double mx, double my) {
+        return my >= TAB_TOP && my <= TAB_TOP + TAB_H + 4
+                && mx >= tabViewportLeft() && mx <= tabViewportLeft() + tabViewportWidth();
     }
 
     private Tab tabAt(double mx, double my) {
         if (my < TAB_TOP || my > TAB_TOP + TAB_H) {
+            return null;
+        }
+        // Outside the viewport a tab is scrolled off, not clickable - otherwise
+        // the half of a tab hanging past the edge would still take clicks.
+        if (mx < tabViewportLeft() || mx > tabViewportLeft() + tabViewportWidth()) {
             return null;
         }
         int tx = tabStripLeft();
@@ -653,8 +715,16 @@ public final class HorseBrowserScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (sy != 0 && overTabStrip(mx, my) && maxTabScroll() > 0) {
+            tabScroll = Math.max(0, Math.min(tabScroll - (int) (sy * 24), maxTabScroll()));
+            return true;
+        }
         if (tab == Tab.GETTING_STARTED) {
             tutorialScroll = Math.max(0f, Math.min(tutorialScroll - (float) sy * 18f, tutorialMaxScroll));
+            return true;
+        }
+        if (tab == Tab.ALLELES) {
+            alleleScroll = Math.max(0f, Math.min(alleleScroll - (float) sy * 18f, alleleMaxScroll));
             return true;
         }
         if (tab == Tab.MY_HORSES) {
@@ -727,7 +797,8 @@ public final class HorseBrowserScreen extends Screen {
             // roster tabs are about horses, and reusing one box for two
             // different lists reads as a bug the first time it clears itself.
             // My horses has its own box, with its own query language.
-            boolean showSearch = tab == Tab.GENE_DATABASE || tab == Tab.RECIPES;
+            boolean showSearch = tab == Tab.GENE_DATABASE || tab == Tab.RECIPES
+                    || tab == Tab.ALLELES;
             searchBox.visible = showSearch;
             searchBox.active = showSearch;
         }
@@ -747,12 +818,19 @@ public final class HorseBrowserScreen extends Screen {
             }
             case BREEDING_PREVIEW -> drawBreedingPreview(g, mouseX, mouseY);
             case GETTING_STARTED -> drawGettingStarted(g, mouseX, mouseY);
+            case ALLELES -> drawAlleles(g, mouseX, mouseY);
             case RECIPES -> drawRecipes(g, mouseX, mouseY);
         }
     }
 
     private void drawTabStrip(GuiGraphicsExtractor g) {
+        int viewL = tabViewportLeft();
+        int viewW = tabViewportWidth();
         int tx = tabStripLeft();
+
+        // Scissored, so a tab scrolled half off is cut cleanly at the margin
+        // rather than running under the window's edge.
+        g.enableScissor(viewL, TAB_TOP, viewL + viewW, TAB_TOP + TAB_H);
         for (Tab t : Tab.values()) {
             int w = this.font.width(t.label) + 24;
             boolean on = t == tab;
@@ -763,6 +841,20 @@ public final class HorseBrowserScreen extends Screen {
                     on ? TAB_TEXT_ON : TAB_TEXT_OFF, false);
             tx += w + 4;
         }
+        g.disableScissor();
+
+        int max = maxTabScroll();
+        if (max <= 0) {
+            return;
+        }
+        // A bar under the strip, and only when it means something. It is the
+        // only thing telling a player there are tabs off the side.
+        int barY = TAB_TOP + TAB_H;
+        int total = tabStripWidth();
+        g.fill(viewL, barY, viewL + viewW, barY + 2, 0x33FFFFFF);
+        int thumbW = Math.max(20, viewW * viewW / total);
+        int thumbX = viewL + Math.round((viewW - thumbW) * (tabScroll / (float) max));
+        g.fill(thumbX, barY, thumbX + thumbW, barY + 2, 0xAAFFFFFF);
     }
 
     private void drawGeneList(GuiGraphicsExtractor g, int mouseX, int mouseY, int bottom) {
@@ -1112,8 +1204,9 @@ public final class HorseBrowserScreen extends Screen {
 
         g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
         g.enableScissor(l - 4, top, r, bottom);
-        int height = TutorialPage.draw(g, this.font, l, top - (int) tutorialScroll, w,
-                mouseX, mouseY, HEADING, DESC, TAG);
+        int y = top - (int) tutorialScroll;
+        int height = TutorialPage.draw(g, this.font, l, y, w, mouseX, mouseY, HEADING, DESC, TAG);
+        height += drawChecklist(g, l, y + height + 12, w) + 12;
         g.disableScissor();
 
         tutorialMaxScroll = Math.max(0f, height - (bottom - top));
@@ -1128,11 +1221,146 @@ public final class HorseBrowserScreen extends Screen {
         }
     }
 
+    /**
+     * <b>The checklist, under the prose it explains.</b> One page rather than
+     * two tabs on purpose: somebody who has just read "take a gene off a horse"
+     * should find the box for it directly underneath, not on a tab they have to
+     * know to look at.
+     *
+     * <p>It gates nothing. A player who read the wiki and built a shelf on their
+     * first day ticks two boxes at once and is not stopped - the moment a
+     * checklist gates content it stops being advice and starts being homework.
+     */
+    private int drawChecklist(GuiGraphicsExtractor g, int x, int y, int w) {
+        int start = y;
+        int total = ProgressTask.values().length;
+        int done = ClientProgress.count();
+
+        g.text(this.font, Component.literal("Checklist  " + done + " / " + total),
+                x, y, HEADING, false);
+        y += this.font.lineHeight + 2;
+        // A bar, because "17 of 30" is a number and a bar is a feeling.
+        int barW = Math.min(w, 260);
+        g.fill(x, y, x + barW, y + 3, 0xFF2B2B36);
+        if (total > 0 && done > 0) {
+            g.fill(x, y, x + Math.max(1, barW * done / total), y + 3, GOOD);
+        }
+        y += 12;
+
+        for (ProgressTask.Group group : ProgressTask.Group.values()) {
+            g.text(this.font, Component.literal(group.title()), x, y, NAME, false);
+            y += this.font.lineHeight + 3;
+            for (ProgressTask task : ProgressTask.inGroup(group)) {
+                boolean ticked = ClientProgress.isDone(task);
+                g.text(this.font, Component.literal(ticked ? "\u2714" : "\u2610"),
+                        x + 2, y, ticked ? GOOD : TAG, false);
+                drawFitted(g, task.title(), x + 14, y, w - 16, ticked ? EXPR_ON : NAME_DIM);
+                y += this.font.lineHeight + 1;
+                // The hint is what a player looking at an empty box actually
+                // wants; a ticked one no longer needs telling.
+                if (!ticked) {
+                    for (String line : GuiText.wrap(this.font, task.hint(), w - 16)) {
+                        g.text(this.font, Component.literal(line), x + 14, y, TAG, false);
+                        y += this.font.lineHeight;
+                    }
+                }
+                y += 3;
+            }
+            y += 6;
+        }
+        return y - start;
+    }
+
+    /**
+     * <b>Every allele in the mod, and whether you have met it.</b> A collection,
+     * and the fog is the point: an allele you have never seen shows as its gene
+     * and a row of question marks, so the tab is a map of what is still out
+     * there rather than a spoiler for it.
+     *
+     * <p>It reads {@code ClientGeneDatabase.hasAllele}, which is fed by a set
+     * that records <em>both copies at every locus of every horse you tame or
+     * breed</em> - baseline alleles included. Discovering a <i>gene</i> is a
+     * gameplay gate and deliberately harder; collecting an <i>allele</i> is just
+     * a record of what you have laid eyes on.
+     */
+    private void drawAlleles(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int l = listX();
+        int r = fsRight();
+        // listTop(), not contentTop(): the search box lives at contentTop() and
+        // was drawn straight over the first row.
+        int top = listTop();
+        int bottom = contentBottom();
+        int w = r - l - 8;
+
+        String q = search.trim().toLowerCase(Locale.ROOT);
+        int have = 0;
+        int total = 0;
+        for (Gene gene : allGenes) {
+            for (Allele a : gene.alleles()) {
+                total++;
+                if (ClientGeneDatabase.hasAllele(gene.key(), a.token())) {
+                    have++;
+                }
+            }
+        }
+
+        g.text(this.font, Component.literal("Alleles collected  " + have + " / " + total),
+                l, top - 12, LABEL, false);
+        g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
+        g.enableScissor(l - 4, top, r, bottom);
+
+        int y = top - (int) alleleScroll;
+        int start = y;
+        for (Gene gene : allGenes) {
+            if (!q.isEmpty() && !gene.name().toLowerCase(Locale.ROOT).contains(q)
+                    && !gene.key().toLowerCase(Locale.ROOT).contains(q)) {
+                continue;
+            }
+            int mine = 0;
+            for (Allele a : gene.alleles()) {
+                if (ClientGeneDatabase.hasAllele(gene.key(), a.token())) {
+                    mine++;
+                }
+            }
+            drawFitted(g, gene.name() + "   " + mine + "/" + gene.alleles().size(),
+                    l, y, w, mine == gene.alleles().size() ? EXPR_ON : NAME);
+            y += this.font.lineHeight + 2;
+
+            int cx = l + 10;
+            for (Allele a : gene.alleles()) {
+                boolean got = ClientGeneDatabase.hasAllele(gene.key(), a.token());
+                String label = got ? a.label() : "??? (" + a.token().replaceAll(".", "?") + ")";
+                int tw = this.font.width(label) + 8;
+                if (cx + tw > l + w) {
+                    cx = l + 10;
+                    y += this.font.lineHeight + 3;
+                }
+                g.fill(cx - 3, y - 1, cx + tw - 5, y + this.font.lineHeight, got ? 0x3355A0E0 : 0x18FFFFFF);
+                g.text(this.font, Component.literal(label), cx, y, got ? ALLELE_TOK : TAG, false);
+                cx += tw;
+            }
+            y += this.font.lineHeight + 8;
+        }
+        g.disableScissor();
+
+        int height = y - start;
+        alleleMaxScroll = Math.max(0f, height - (bottom - top));
+        alleleScroll = Math.max(0f, Math.min(alleleScroll, alleleMaxScroll));
+        if (alleleMaxScroll > 0) {
+            int trackH = bottom - top;
+            int x1 = r + 1;
+            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
+            int thumbH = Math.max(16, (int) ((long) trackH * trackH / Math.max(1, height)));
+            int thumbY = top + Math.round(alleleScroll * (trackH - thumbH) / alleleMaxScroll);
+            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+        }
+    }
+
     private void drawRecipeList(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int l = listX();
         int w = listW();
         int top = listTop();
-        int bottom = Math.min(contentBottom(), panelTop() + IMG_H);
+        int bottom = listBottomForTab();
 
         g.text(this.font, Component.literal(recipeRows.size()
                         + (recipeRows.size() == 1 ? " recipe" : " recipes")),

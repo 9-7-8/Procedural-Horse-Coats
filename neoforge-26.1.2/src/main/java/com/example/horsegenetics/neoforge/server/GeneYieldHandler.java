@@ -7,6 +7,7 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -136,8 +137,16 @@ public final class GeneYieldHandler {
         return total;
     }
 
+    /** A filled bucket off a mare is the milk task - the other yields are their own thing. */
+    private static void tickYieldTask(Player player, ItemStack held) {
+        if (held.is(net.minecraft.world.item.Items.BUCKET)) {
+            HorseProgress.complete(player, ProgressTask.MILK_MARE);
+        }
+    }
+
     private static void fulfil(Horse horse, Player player, ItemStack held, GeneAbility.Yield yield,
                                String geneKey, int charges) {
+        tickYieldTask(player, held);
         long now = horse.level().getGameTime();
         String key = "yield:" + geneKey;
         HorseCooldownsAttachment cooldowns = horse.getData(ModAttachments.HORSE_COOLDOWNS.get());

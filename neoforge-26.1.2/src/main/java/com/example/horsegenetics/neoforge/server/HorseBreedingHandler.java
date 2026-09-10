@@ -4,7 +4,10 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.genetics.SpliceOutcome;
 import com.example.horsegenetics.common.genetics.CarrotEffect;
+import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.GameteBias;
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -20,6 +23,7 @@ import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
 import com.example.horsegenetics.common.name.HorseNames;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -146,6 +150,7 @@ public final class HorseBreedingHandler {
                                  GameteBias damBias,
                                  GameteBias sireBias) {
         Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng, damBias, sireBias);
+        tickBreedingTasks(breeder, childGenome.genotype());
 
         // The foal's breed label: same-breed -> that breed, two breeds -> a
         // "A x B cross", cross-of-the-same-pair stays that cross, anything
@@ -315,6 +320,38 @@ public final class HorseBreedingHandler {
     private static String damOrSireName(HorseRecord record) {
         String name = record.displayName();
         return name == null || name.isBlank() ? "This horse" : name;
+    }
+
+    /**
+     * <b>What this foal is, as three checklist boxes.</b> Every locus is one of
+     * three things - two of the same non-baseline allele, two of the baseline,
+     * or one of each - and a player learning the model needs to have <i>seen</i>
+     * each before the words mean anything.
+     *
+     * <p>"Homozygous dominant" is read as two copies of the same non-baseline
+     * allele, and "homozygous recessive" as two of the gene's own default. That
+     * is the distinction a player can actually observe: the first is the one
+     * that breeds true and shows, the second is the one that hides for a
+     * generation and then appears. Dominance in the model is per-gene and richer
+     * than two words, and the hint on each task says what it really means.
+     */
+    private static void tickBreedingTasks(@Nullable Player breeder, Genotype foal) {
+        if (breeder == null) {
+            return;
+        }
+        HorseProgress.complete(breeder, ProgressTask.BREED_FOAL);
+        for (Gene gene : Genes.codeOrder()) {
+            AllelePair pair = foal.pair(gene);
+            boolean same = pair.first().token().equals(pair.second().token());
+            boolean baseline = pair.homozygousFor(gene.defaultAllele());
+            if (!same) {
+                HorseProgress.complete(breeder, ProgressTask.FOAL_HETEROZYGOUS);
+            } else if (baseline) {
+                HorseProgress.complete(breeder, ProgressTask.FOAL_HOM_RECESSIVE);
+            } else {
+                HorseProgress.complete(breeder, ProgressTask.FOAL_HOM_DOMINANT);
+            }
+        }
     }
 
     static HorseRecord ensureParentRecord(Horse parent) {

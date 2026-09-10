@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.neoforge.data.HorseCooldownsAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -84,6 +85,7 @@ public final class HorseShearHandler {
         }
 
         int count = 1 + horse.getRandom().nextInt(3);
+        HorseProgress.complete(player, ProgressTask.SHEAR_HORSE);
         ItemStack hair = new ItemStack(ModItems.HORSE_HAIR.get(), count);
         ItemEntity drop = new ItemEntity(level,
                 horse.getX(), horse.getY() + horse.getBbHeight() * 0.5, horse.getZ(), hair);

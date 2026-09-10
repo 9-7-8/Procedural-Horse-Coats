@@ -1,9 +1,18 @@
 {
   "model": {
-    "type": "minecraft:special",
-    "base": "horsegenetics:item/signed_transfer_paper",
-    "model": {
-      "type": "horsegenetics:transfer_deed_horse"
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "horsegenetics:horse_deed",
+    "on_true": {
+      "type": "minecraft:special",
+      "base": "horsegenetics:item/signed_transfer_paper",
+      "model": {
+        "type": "horsegenetics:transfer_deed_horse"
+      }
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "horsegenetics:item/blank_transfer_paper"
     }
   }
 }

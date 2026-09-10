@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -85,6 +86,7 @@ public final class GeneBookFromHorse {
         }
         player.sendSystemMessage(Component.translatable("message.horsegenetics.gene_book.written",
                 Component.literal(gene.name())));
+        HorseProgress.complete(player, ProgressTask.GENE_BOOK);
     }
 
     /** Every locus this horse carries off-baseline - what it has to teach. */

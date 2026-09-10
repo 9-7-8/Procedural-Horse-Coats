@@ -79,7 +79,7 @@ public final class ModNetworking {
                 GeneDatabaseSyncPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         com.example.horsegenetics.neoforge.client.ClientGeneDatabase.accept(
-                                payload.seenByGene(), payload.carrotUnlocked()))
+                                payload.seenByGene(), payload.carrotUnlocked(), payload.collected()))
         );
 
         registrar.playToClient(
@@ -146,6 +146,13 @@ public final class ModNetworking {
                         com.example.horsegenetics.neoforge.server.DebugHighlightHandler.toggle(serverPlayer);
                     }
                 })
+        );
+
+        registrar.playToClient(
+                ProgressSyncPayload.TYPE,
+                ProgressSyncPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientProgress.accept(payload.done()))
         );
 
         registrar.playToClient(
@@ -393,6 +400,8 @@ public final class ModNetworking {
             return;
         }
         HorseRecords.rename(horse, first, last);
+        com.example.horsegenetics.neoforge.server.HorseProgress.complete(serverPlayer,
+                com.example.horsegenetics.common.progress.ProgressTask.NAME_HORSE);
         if (!serverPlayer.getAbilities().instabuild) {
             serverPlayer.getItemInHand(tagHand).shrink(1);
         }

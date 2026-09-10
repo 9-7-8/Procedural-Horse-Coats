@@ -10,6 +10,8 @@ import com.example.horsegenetics.neoforge.item.SignedTransferPaperItem;
 import com.example.horsegenetics.neoforge.item.TransferPaperItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityReference;
@@ -90,6 +92,8 @@ public final class TransferPaperHandler {
 
     @SubscribeEvent
     static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        // Signing or redeeming both count - either way a paper changed hands.
+        HorseProgress.complete(event.getEntity(), ProgressTask.TRANSFER_PAPER);
         if (!(event.getTarget() instanceof Horse horse)) {
             return;
         }

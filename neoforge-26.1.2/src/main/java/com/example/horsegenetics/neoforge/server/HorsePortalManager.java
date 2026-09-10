@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.block.HayPortalBlock;
 import com.example.horsegenetics.neoforge.block.ModBlocks;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
@@ -197,11 +198,20 @@ public final class HorsePortalManager {
                 mob.dropLeash();
             }
             if (entity instanceof AbstractHorse horse) {
+                // Somebody brought a horse out of the dimension. Credit whoever
+                // owns it - a led or ridden horse is not its own achievement.
+                if (horse.getOwnerReference() != null
+                        && server.getPlayerList().getPlayer(horse.getOwnerReference().getUUID()) != null) {
+                    HorseProgress.complete(
+                            server.getPlayerList().getPlayer(horse.getOwnerReference().getUUID()),
+                            ProgressTask.BRING_HORSE_HOME);
+                }
                 placeReturningHorse(horse, target, to, new ArrayList<>());
             } else {
                 placeAt(entity, target, to);
             }
         } else if (entity instanceof ServerPlayer player) {
+            HorseProgress.complete(player, ProgressTask.ENTER_DIMENSION);
             DebugPenManager.enter(player, portalLevel.dimension(), portalPos.above());
         }
         // non-player entities in a non-debug portal: nothing (documented limitation)

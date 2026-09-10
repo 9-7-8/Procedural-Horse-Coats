@@ -20,7 +20,8 @@ import net.minecraft.resources.Identifier;
  * re-checked on the server.
  */
 public record GeneDatabaseSyncPayload(Map<String, List<String>> seenByGene,
-                                      List<String> carrotUnlocked) implements CustomPacketPayload {
+                                      List<String> carrotUnlocked,
+                                      List<String> collected) implements CustomPacketPayload {
 
     public static final Type<GeneDatabaseSyncPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "gene_database_sync"));
@@ -32,9 +33,14 @@ public record GeneDatabaseSyncPayload(Map<String, List<String>> seenByGene,
                     GeneDatabaseSyncPayload::seenByGene,
                     ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
                     GeneDatabaseSyncPayload::carrotUnlocked,
+                    // Every allele this player has seen, as geneKey|token. This is
+                    // the collection rather than the database - see GeneDatabaseData.
+                    ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+                    GeneDatabaseSyncPayload::collected,
                     GeneDatabaseSyncPayload::new);
 
-    public static GeneDatabaseSyncPayload of(Map<String, GeneDatabaseData.Entry> book) {
+    public static GeneDatabaseSyncPayload of(Map<String, GeneDatabaseData.Entry> book,
+                                             java.util.Set<String> collected) {
         Map<String, List<String>> seen = new HashMap<>();
         List<String> unlocked = new ArrayList<>();
         book.forEach((key, entry) -> {
@@ -43,7 +49,7 @@ public record GeneDatabaseSyncPayload(Map<String, List<String>> seenByGene,
                 unlocked.add(key);
             }
         });
-        return new GeneDatabaseSyncPayload(seen, unlocked);
+        return new GeneDatabaseSyncPayload(seen, unlocked, List.copyOf(collected));
     }
 
     @Override

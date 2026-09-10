@@ -16,9 +16,28 @@ public final class ClientGeneDatabase {
     private static volatile Map<String, List<String>> seenByGene = Map.of();
     private static volatile Set<String> carrotUnlocked = Set.of();
 
-    public static void accept(Map<String, List<String>> seen, List<String> unlocked) {
+    /**
+     * Every allele this player has laid eyes on, as {@code geneKey|token} -
+     * what the Alleles tab greys out from. Separate from {@link #seenByGene} on
+     * purpose: discovering a gene is a gameplay gate, collecting an allele is a
+     * record, and a baseline allele belongs in the second and not the first.
+     */
+    private static volatile Set<String> collected = Set.of();
+
+    public static void accept(Map<String, List<String>> seen, List<String> unlocked,
+                              List<String> collectedAlleles) {
         seenByGene = Map.copyOf(seen);
         carrotUnlocked = Set.copyOf(unlocked);
+        collected = Set.copyOf(collectedAlleles);
+    }
+
+    /** Has this player ever seen this allele on a horse? */
+    public static boolean hasAllele(String geneKey, String token) {
+        return collected.contains(geneKey + "|" + token);
+    }
+
+    public static int collectedCount() {
+        return collected.size();
     }
 
     public static boolean knows(String geneKey) {
@@ -40,6 +59,7 @@ public final class ClientGeneDatabase {
     public static void clear() {
         seenByGene = Map.of();
         carrotUnlocked = Set.of();
+        collected = Set.of();
     }
 
     private ClientGeneDatabase() {

@@ -47,10 +47,11 @@ public final class GeneDatabaseData extends SavedData {
         }
     }
 
-    private record PlayerBook(UUID player, Map<String, Entry> byGene) {
+    private record PlayerBook(UUID player, Map<String, Entry> byGene, List<String> collected) {
         static final Codec<PlayerBook> CODEC = RecordCodecBuilder.create(i -> i.group(
                 UUIDUtil.CODEC.fieldOf("player").forGetter(PlayerBook::player),
-                Codec.unboundedMap(Codec.STRING, Entry.CODEC).fieldOf("genes").forGetter(PlayerBook::byGene)
+                Codec.unboundedMap(Codec.STRING, Entry.CODEC).fieldOf("genes").forGetter(PlayerBook::byGene),
+                Codec.STRING.listOf().optionalFieldOf("collected", List.of()).forGetter(PlayerBook::collected)
         ).apply(i, PlayerBook::new));
     }
 
@@ -65,12 +66,27 @@ public final class GeneDatabaseData extends SavedData {
 
     private final Map<UUID, Map<String, Entry>> byPlayer = new LinkedHashMap<>();
 
+    /**
+     * <b>Every allele this player has actually laid eyes on</b>, as
+     * {@code geneKey|token}. This is the collection, and it is deliberately
+     * <i>not</i> the same thing as the gene database above.
+     *
+     * <p>Discovering a gene is a gameplay gate - it unlocks a recipe, and an
+     * ordinary horse must not hand it to you. Collecting an allele is a record
+     * of what you have seen, and a plain wild-type allele is exactly as much a
+     * part of the set as a mythic one. Sharing one map would have meant one of
+     * those two behaviours quietly becoming the other; a horse full of baseline
+     * alleles would have unlocked every gene in the mod.
+     */
+    private final Map<UUID, Set<String>> collectedByPlayer = new LinkedHashMap<>();
+
     private GeneDatabaseData() {
     }
 
     private GeneDatabaseData(List<PlayerBook> books) {
         for (PlayerBook b : books) {
             byPlayer.put(b.player(), new LinkedHashMap<>(b.byGene()));
+            collectedByPlayer.put(b.player(), new LinkedHashSet<>(b.collected()));
         }
     }
 
@@ -80,31 +96,68 @@ public final class GeneDatabaseData extends SavedData {
 
     private List<PlayerBook> snapshot() {
         List<PlayerBook> out = new ArrayList<>();
-        byPlayer.forEach((id, m) -> out.add(new PlayerBook(id, Map.copyOf(m))));
+        Set<UUID> everyone = new LinkedHashSet<>(byPlayer.keySet());
+        everyone.addAll(collectedByPlayer.keySet());
+        for (UUID id : everyone) {
+            out.add(new PlayerBook(id,
+                    Map.copyOf(byPlayer.getOrDefault(id, Map.of())),
+                    List.copyOf(collectedByPlayer.getOrDefault(id, Set.of()))));
+        }
         return out;
+    }
+
+    /** The id one allele is collected under. */
+    public static String allele(String geneKey, String token) {
+        return geneKey + "|" + token;
+    }
+
+    /**
+     * <b>Record every allele on this horse.</b> Both copies at every locus,
+     * baseline included - the point of a collection is that the common ones
+     * count too, and a player who has never met a plain wild-type allele has
+     * genuinely not met it.
+     */
+    public void collect(ServerPlayer player, com.example.horsegenetics.common.genetics.Genotype genotype) {
+        Set<String> mine = collectedByPlayer.computeIfAbsent(player.getUUID(), k -> new LinkedHashSet<>());
+        boolean changed = false;
+        for (Gene gene : com.example.horsegenetics.common.genetics.Genes.codeOrder()) {
+            var pair = genotype.pair(gene);
+            changed |= mine.add(allele(gene.key(), pair.first().token()));
+            changed |= mine.add(allele(gene.key(), pair.second().token()));
+        }
+        if (changed) {
+            setDirty();
+            sync(player);
+        }
+    }
+
+    public Set<String> collectedBy(UUID player) {
+        return collectedByPlayer.getOrDefault(player, Set.of());
     }
 
     // ------------------------------------------------------------------
 
-    /** Read a paper: discover the gene, unlock its carrot recipe. True if anything changed. */
-    public boolean read(ServerPlayer player, Gene gene) {
-        boolean changed = discoverInternal(player.getUUID(), gene, allTokens(gene), player.level().getGameTime());
-        Map<String, Entry> book = byPlayer.get(player.getUUID());
+    /**
+     * <b>Discover a gene by owning a horse that carries it.</b> Taming, breeding
+     * or otherwise coming to own one is the only way in - and discovering it
+     * unlocks its carrot recipe at the same moment, because there is no longer a
+     * second step to take.
+     *
+     * <p>There used to be one: a research paper could be <i>read</i>, which
+     * discovered the gene and unlocked the carrot. That made a paper a shortcut
+     * past the animals - find one in a chest and you knew a gene you had never
+     * met - so it is gone. A paper is a component now, not a lesson.
+     */
+    public void discover(ServerPlayer player, Gene gene, List<String> seenTokens) {
+        UUID id = player.getUUID();
+        boolean changed = discoverInternal(id, gene, seenTokens, player.level().getGameTime());
+        Map<String, Entry> book = byPlayer.get(id);
         Entry e = book.get(gene.key());
         if (!e.carrotUnlocked()) {
             book.put(gene.key(), new Entry(e.seenTokens(), true, e.discoveredAt()));
             changed = true;
         }
         if (changed) {
-            setDirty();
-            sync(player);
-        }
-        return changed;
-    }
-
-    /** Discover a gene from meeting a horse that carries a non-baseline allele at it. */
-    public void discover(ServerPlayer player, Gene gene, List<String> seenTokens) {
-        if (discoverInternal(player.getUUID(), gene, seenTokens, player.level().getGameTime())) {
             setDirty();
             sync(player);
         }
@@ -140,13 +193,8 @@ public final class GeneDatabaseData extends SavedData {
         return byPlayer.getOrDefault(player, Map.of());
     }
 
-    private static List<String> allTokens(Gene gene) {
-        List<String> out = new ArrayList<>();
-        gene.alleles().forEach(a -> out.add(a.token()));
-        return out;
-    }
-
     public void sync(ServerPlayer player) {
-        PacketDistributor.sendToPlayer(player, GeneDatabaseSyncPayload.of(bookOf(player.getUUID())));
+        PacketDistributor.sendToPlayer(player, GeneDatabaseSyncPayload.of(
+                bookOf(player.getUUID()), collectedBy(player.getUUID())));
     }
 }

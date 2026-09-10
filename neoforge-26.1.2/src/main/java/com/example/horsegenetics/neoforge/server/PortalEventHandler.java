@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.block.HayPortalBlock;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
@@ -93,6 +94,7 @@ public final class PortalEventHandler {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
             if (HorsePortalManager.tryLightPortal(level, pos)) {
+                HorseProgress.complete(event.getEntity(), ProgressTask.LIGHT_PORTAL);
                 if (!player.getAbilities().instabuild) {
                     held.shrink(1);
                 }

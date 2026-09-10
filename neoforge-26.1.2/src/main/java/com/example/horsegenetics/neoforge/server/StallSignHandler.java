@@ -7,6 +7,8 @@ import com.example.horsegenetics.neoforge.item.ModItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
@@ -63,6 +65,7 @@ public final class StallSignHandler {
             player.sendSystemMessage(Component.literal("Stall sign bound to " + name + "."));
         }
         event.setCanceled(true);
+        HorseProgress.complete(player, ProgressTask.BUILD_STALL);
         event.setCancellationResult(InteractionResult.SUCCESS);
     }
 

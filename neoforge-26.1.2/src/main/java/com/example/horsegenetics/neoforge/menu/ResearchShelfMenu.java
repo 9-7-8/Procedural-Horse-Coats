@@ -4,6 +4,8 @@ import com.example.horsegenetics.neoforge.block.EquineResearchShelfBlockEntity;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.network.ShelfSyncPayload;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -56,6 +58,34 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     public static final int RESULT_SLOT = 1;
     public static final int FILE_SLOT = 2;
     private static final int SLOT_COUNT = 3;
+
+    // ------------------------------------------------------------------
+    // The window's layout, in one place
+    // ------------------------------------------------------------------
+    //
+    // These live on the MENU rather than the screen because addSlot needs them
+    // here, and a slot is the one thing that must agree with the drawing
+    // exactly - an item sitting where no well was drawn is the bug this screen
+    // shipped with the first time. The screen reads every one of them.
+
+    public static final int WIDTH = 176;
+    public static final int HEIGHT = 200;
+    public static final int MARGIN = 8;
+
+    public static final int LIST_Y = 20;
+    public static final int LIST_W = 160;
+    /** Four 12px rows, so the list ends at 68 and the slots start clear of it. */
+    private static final int LIST_H = 4 * 12;
+
+    public static final int SLOT_Y = LIST_Y + LIST_H + 8;
+    public static final int BOOK_X = 44;
+    public static final int RESULT_X = 116;
+    public static final int FILE_X = 80;
+
+    public static final int NOTE_Y = SLOT_Y + 22;
+    public static final int INV_LABEL_Y = 108;
+    public static final int INV_Y = 118;
+    public static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
 
     private final Player player;
     private final @Nullable EquineResearchShelfBlockEntity shelf;
@@ -114,7 +144,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         this.player = inventory.player;
         this.shelf = shelf;
 
-        addSlot(new Slot(input, 0, 44, 40) {
+        addSlot(new Slot(input, 0, BOOK_X, SLOT_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return stack.is(Items.BOOK);
@@ -125,7 +155,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
                 return !storeTab;
             }
         });
-        addSlot(new Slot(result, 0, 116, 40) {
+        addSlot(new Slot(result, 0, RESULT_X, SLOT_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -143,7 +173,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
                 super.onTake(taker, taken);
             }
         });
-        addSlot(new Slot(filing, 0, 80, 64) {
+        addSlot(new Slot(filing, 0, FILE_X, SLOT_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return stack.is(ModItems.RESEARCH_PAPER.get());
@@ -159,11 +189,11 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 102 + row * 18));
+                addSlot(new Slot(inventory, col + row * 9 + 9, MARGIN + col * 18, INV_Y + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inventory, col, 8 + col * 18, 160));
+            addSlot(new Slot(inventory, col, MARGIN + col * 18, HOTBAR_Y));
         }
     }
 
@@ -258,6 +288,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
             stack.shrink(1);
             filing.setChanged();
             sync();
+            HorseProgress.complete(player, ProgressTask.FILE_PAPER);
         }
     }
 
@@ -312,6 +343,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         paper.set(ModDataComponents.RESEARCH_GENE.get(), selectedGene);
         result.setItem(0, paper);
         broadcastChanges();
+        HorseProgress.complete(player, ProgressTask.COPY_PAPER);
     }
 
     /** Ticks done, and ticks needed - both 0 when nothing is being copied. */

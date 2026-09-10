@@ -7,6 +7,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,9 +46,22 @@ public class WhistleItem extends Item {
         this.radius = radius;
     }
 
+    /**
+     * Which checklist task this tier ticks. Keyed off the radius rather than a
+     * fourth constructor argument, because the radius is already the thing that
+     * distinguishes the three and a second parallel field could disagree with it.
+     */
+    private ProgressTask task() {
+        if (radius <= 16) {
+            return ProgressTask.WHISTLE_BASIC;
+        }
+        return radius <= 32 ? ProgressTask.WHISTLE_GOLDEN : ProgressTask.WHISTLE_ECHO;
+    }
+
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (level instanceof ServerLevel serverLevel) {
+            HorseProgress.complete(player, task());
             int moved = recall(serverLevel, player);
             player.sendSystemMessage(Component.literal(moved == 0
                     ? "No tamed horses of yours within " + radius + " blocks."
