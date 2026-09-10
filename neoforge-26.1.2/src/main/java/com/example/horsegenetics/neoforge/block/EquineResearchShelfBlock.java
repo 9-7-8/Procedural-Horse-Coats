@@ -80,6 +80,14 @@ public class EquineResearchShelfBlock extends BaseEntityBlock {
         return InteractionResult.CONSUME;
     }
 
+    @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        return level.isClientSide() ? null
+                : createTickerHelper(type, ModBlockEntities.RESEARCH_SHELF.get(),
+                        EquineResearchShelfBlockEntity::tick);
+    }
+
     /**
      * <b>Give the books back.</b> Called when the block stops being this block -
      * broken, replaced, exploded. Without it a shelf full of a season's

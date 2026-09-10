@@ -24,6 +24,13 @@ public final class ClientLifecycleHandler {
         ClientHorseCoats.clear();
         ClientOffspring.clear();
         HorsePortrait.clear();
+        // The tutorial's villager and cowboy belong to that client level too, and
+        // its item stacks were built against that world's registries.
+        TutorialPortraits.clear();
+        TutorialPage.clear();
+        // The browser remembers where you were for the session; the parts of that
+        // which name a *horse* are meaningless in the next world.
+        HorseBrowserScreen.forgetWorld();
         GeneticCoatTextureFactory.clear();
         FlatItemCatalog.clear();
     }

@@ -3,7 +3,7 @@
   "biomes": "#horsegenetics:has_stable",
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "beard_thin",
+  "terrain_adaptation": "beard_box",
   "start_pool": "horsegenetics:horse_stable",
   "size": 1,
   "start_height": {

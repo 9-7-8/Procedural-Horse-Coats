@@ -9,8 +9,13 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.GeneRarity;
+import com.example.horsegenetics.common.genetics.Genes;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -55,6 +60,23 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     private final Player player;
     private final @Nullable EquineResearchShelfBlockEntity shelf;
 
+    /**
+     * <b>Copying takes time, and how much is the gene's rarity.</b> One iron
+     * ingot's smelt - 200 ticks, ten seconds - per rarity tier, so a common gene
+     * is ten seconds and a mythic one a minute. Long enough that a copy is a
+     * thing you set going rather than a thing that simply happens; short enough
+     * that filling a shelf is not an evening.
+     *
+     * <p>Tiers count from one, not zero: {@link GeneRarity#COMMON} is the first
+     * tier, not the free one.
+     */
+    public static final int TICKS_PER_RARITY_TIER = 200;
+
+    /** {@link ContainerData} slots - vanilla's furnace pattern, synced by the menu itself. */
+    public static final int DATA_PROGRESS = 0;
+    public static final int DATA_TOTAL = 1;
+    private static final int DATA_COUNT = 2;
+
     private final Container input = new SimpleContainer(1);
     private final Container filing = new SimpleContainer(1);
     private final ResultContainer result = new ResultContainer();
@@ -73,6 +95,13 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
 
     /** Client-side mirror of the shelf's contents; the server reads the block entity. */
     private List<String> clientStored = List.of();
+
+    /**
+     * Progress and its target, in ticks. A {@link ContainerData} rather than a
+     * payload of our own because the menu already syncs these every tick for
+     * free, and a progress bar that lags is worse than no bar - see the furnace.
+     */
+    private final ContainerData data = new SimpleContainerData(DATA_COUNT);
 
     /** Client constructor - {@code MenuType} hands us no block entity. */
     public ResearchShelfMenu(int containerId, Inventory inventory) {
@@ -126,6 +155,8 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
             }
         });
 
+        addDataSlots(data);
+
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 102 + row * 18));
@@ -143,6 +174,11 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     /** Server: the block entity. Client: whatever it was last told. */
     public List<String> storedGenes() {
         return shelf != null ? shelf.storedGenes() : clientStored;
+    }
+
+    /** Is this menu looking at that shelf? Used by the block's ticker. */
+    public boolean isFor(EquineResearchShelfBlockEntity candidate) {
+        return shelf != null && shelf == candidate;
     }
 
     public void acceptStored(List<String> genes) {
@@ -226,25 +262,81 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     }
 
     /**
-     * The result is a copy of the selected gene's paper, and exists only while a
-     * book is in and the shelf still holds that gene. Recomputed rather than
-     * remembered, so removing the book or withdrawing the original clears it.
+     * Is everything in place for a copy? The gene is picked, the shelf still has
+     * it, and there is a book to write on.
+     */
+    private boolean canCopy() {
+        return shelf != null
+                && !selectedGene.isEmpty()
+                && shelf.stores(selectedGene)
+                && input.getItem(0).is(Items.BOOK);
+    }
+
+    /** How long this gene takes to copy - see {@link #TICKS_PER_RARITY_TIER}. */
+    public static int copyTicks(String geneKey) {
+        Gene gene = Genes.byKeyOrNull(geneKey);
+        GeneRarity rarity = gene == null ? GeneRarity.DEFAULT : gene.rarity();
+        return (rarity.ordinal() + 1) * TICKS_PER_RARITY_TIER;
+    }
+
+    /**
+     * <b>One tick of copying.</b> Driven by the block entity's ticker, so the
+     * work continues whether or not anybody has the screen open - a copy you set
+     * going and walked away from is the point of it taking time at all.
+     *
+     * <p>Anything that invalidates the job resets progress to zero rather than
+     * pausing it: pulling the book out, or withdrawing the original mid-copy,
+     * means the copy did not happen, and a half-finished job that resumes an
+     * hour later on a different gene would be worse than starting again.
+     */
+    public void tickCopy() {
+        if (shelf == null) {
+            return;
+        }
+        if (!canCopy() || !result.getItem(0).isEmpty()) {
+            // nothing to do, or the finished paper is still sitting there
+            if (data.get(DATA_PROGRESS) != 0) {
+                data.set(DATA_PROGRESS, 0);
+            }
+            return;
+        }
+        int total = copyTicks(selectedGene);
+        data.set(DATA_TOTAL, total);
+        int progress = data.get(DATA_PROGRESS) + 1;
+        if (progress < total) {
+            data.set(DATA_PROGRESS, progress);
+            return;
+        }
+        data.set(DATA_PROGRESS, 0);
+        ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
+        paper.set(ModDataComponents.RESEARCH_GENE.get(), selectedGene);
+        result.setItem(0, paper);
+        broadcastChanges();
+    }
+
+    /** Ticks done, and ticks needed - both 0 when nothing is being copied. */
+    public int copyProgress() {
+        return data.get(DATA_PROGRESS);
+    }
+
+    public int copyTotal() {
+        int total = data.get(DATA_TOTAL);
+        return total <= 0 ? TICKS_PER_RARITY_TIER : total;
+    }
+
+    /**
+     * Clear the result and restart the clock whenever the job changes. The paper
+     * itself is produced by {@link #tickCopy}; this only ever takes it away.
      */
     private void recomputeResult() {
         if (shelf == null) {
             return; // client-side; the server sends the answer
         }
-        boolean ready = !selectedGene.isEmpty()
-                && shelf.stores(selectedGene)
-                && input.getItem(0).is(Items.BOOK);
-        if (!ready) {
+        if (!canCopy()) {
             result.setItem(0, ItemStack.EMPTY);
-            broadcastChanges();
-            return;
         }
-        ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
-        paper.set(ModDataComponents.RESEARCH_GENE.get(), selectedGene);
-        result.setItem(0, paper);
+        data.set(DATA_PROGRESS, 0);
+        data.set(DATA_TOTAL, selectedGene.isEmpty() ? 0 : copyTicks(selectedGene));
         broadcastChanges();
     }
 

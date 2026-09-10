@@ -240,14 +240,35 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
 
         cell(g, leftPos + 44, topPos + 40, SLOT_BG);
         cell(g, leftPos + 116, topPos + 40, SLOT_RESULT_BG);
-        // the arrow between them
-        g.fill(leftPos + 74, topPos + 47, leftPos + 108, topPos + 49, 0xFF6A6A78);
+
+        // The arrow between them fills up as the copy is written - the furnace's
+        // idea, and the only honest way to say "this takes a while" to somebody
+        // who has just put a book in and is waiting for something to happen.
+        int barX = leftPos + 74;
+        int barY = topPos + 47;
+        int barW = 34;
+        g.fill(barX, barY, barX + barW, barY + 2, 0xFF3A3A46);
+        int total = this.menu.copyTotal();
+        int done = this.menu.copyProgress();
+        if (done > 0 && total > 0) {
+            g.fill(barX, barY, barX + Math.min(barW, barW * done / total), barY + 2, 0xFF9BE08A);
+        }
 
         String note = selected.isEmpty()
                 ? "No gene picked."
                 : EquineResearchShelfBlockEntity.displayName(selected);
         g.text(this.font, Component.literal(note), leftPos + 8, topPos + 88,
                 selected.isEmpty() ? NAME_DIM : NAME, false);
+        if (!selected.isEmpty()) {
+            // Seconds, not ticks: nobody thinks in ticks, and the number is the
+            // whole point of the rarity rule being visible at all.
+            int seconds = Math.max(1, total / 20);
+            String time = done > 0
+                    ? "Copying - " + Math.max(1, (total - done) / 20) + "s left"
+                    : "Takes " + seconds + "s with a book in";
+            g.text(this.font, Component.literal(time), leftPos + 8, topPos + 88 + this.font.lineHeight + 1,
+                    LABEL, false);
+        }
     }
 
     private void drawStore(GuiGraphicsExtractor g, int mouseX, int mouseY) {

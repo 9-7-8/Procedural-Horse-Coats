@@ -29,6 +29,12 @@ public final class ClientConfig {
      */
     public static final ModConfigSpec.BooleanValue NAMEPLATE_SEX_SYMBOL;
 
+    /**
+     * <b>Has this player been shown the Getting Started tab?</b> Set the first
+     * time they leave it, so the browser opens on it once and never again.
+     */
+    public static final ModConfigSpec.BooleanValue TUTORIAL_SEEN;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         FAMILY_TREE_SCROLLBAR = builder
@@ -44,6 +50,11 @@ public final class ClientConfig {
                         "the symbol never reaches a transfer paper, the browser or a rename",
                         "box - and two players on one server may disagree about it.")
                 .define("nameplate.sexSymbol", true);
+        TUTORIAL_SEEN = builder
+                .comment("Whether the Horse Browser has already opened on its Getting Started",
+                        "tab. It does that once, and sets this the first time you leave the tab.",
+                        "Set it back to false to be shown the introduction again.")
+                .define("tutorial.seen", false);
         SPEC = builder.build();
     }
 
@@ -62,6 +73,27 @@ public final class ClientConfig {
             return NAMEPLATE_SEX_SYMBOL.get();
         } catch (IllegalStateException notLoaded) {
             return true;
+        }
+    }
+
+    /** Has the introduction already been shown? Defaults to "no" for a fresh install. */
+    public static boolean tutorialSeen() {
+        try {
+            return TUTORIAL_SEEN.get();
+        } catch (IllegalStateException notLoaded) {
+            return false;
+        }
+    }
+
+    /** Remember that it has. Written to disk, so it survives a restart. */
+    public static void markTutorialSeen() {
+        try {
+            if (!TUTORIAL_SEEN.get()) {
+                TUTORIAL_SEEN.set(true);
+                TUTORIAL_SEEN.save();
+            }
+        } catch (IllegalStateException notLoaded) {
+            // Config not up yet - it will simply be shown once more.
         }
     }
 

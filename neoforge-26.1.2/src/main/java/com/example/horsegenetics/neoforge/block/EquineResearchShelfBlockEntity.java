@@ -82,6 +82,29 @@ public class EquineResearchShelfBlockEntity extends BlockEntity {
         return gene == null ? geneKey : gene.name();
     }
 
+    /**
+     * <b>Drive the copy for whoever has this shelf open.</b> The work lives on
+     * the menu (it needs the selected gene and the book slot, neither of which
+     * is block state), so the ticker's whole job is to find the menus looking at
+     * this block and tick them.
+     *
+     * <p>Ticking the <i>menu</i> rather than the block is what lets two players
+     * at one shelf each copy their own gene onto their own book, which is the
+     * behaviour that falls out of the menu owning the slots.
+     */
+    public static void tick(net.minecraft.world.level.Level level, BlockPos pos,
+                            BlockState state, EquineResearchShelfBlockEntity shelf) {
+        if (level.isClientSide()) {
+            return;
+        }
+        for (net.minecraft.world.entity.player.Player player : level.players()) {
+            if (player.containerMenu instanceof com.example.horsegenetics.neoforge.menu.ResearchShelfMenu menu
+                    && menu.isFor(shelf)) {
+                menu.tickCopy();
+            }
+        }
+    }
+
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);

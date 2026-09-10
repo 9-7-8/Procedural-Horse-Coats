@@ -9,6 +9,7 @@ import com.example.horsegenetics.common.horse.HorseListing;
 import com.example.horsegenetics.common.horse.HorseQuery;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
 import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
@@ -86,6 +87,7 @@ import java.util.UUID;
 public final class HorseBrowserScreen extends Screen {
 
     private enum Tab {
+        GETTING_STARTED("Getting started"),
         MY_HORSES("My horses"),
         GENE_DATABASE("Gene database"),
         BREEDING_PREVIEW("Breeding preview"),
@@ -165,36 +167,51 @@ public final class HorseBrowserScreen extends Screen {
     /** Square, at the left of a roster row. */
     private static final int PORTRAIT_W = 30;
 
-    private Tab tab = Tab.MY_HORSES;
-    private String search = "";
-    private String selectedKey = "";
-    private int listScroll = 0;
-    private float detailScroll = 0f;
+    /**
+     * <b>Everything below is static, and that is the feature.</b> The browser is
+     * a fresh {@code Screen} every time the key is pressed, so anything held on
+     * the instance is forgotten the moment you close it - you came back to the
+     * top of the first tab, every time, however deep you had been reading.
+     *
+     * <p>Static means "for this session": the tab, the scroll positions, the
+     * search boxes, the sort, the selections. {@link #forgetWorld()} drops the
+     * parts that are about <i>this</i> world when the client disconnects, so a
+     * horse UUID from one save never selects something in another.
+     *
+     * <p>The first tab is the exception, and only once - see {@link #initialTab}.
+     */
+    private static Tab tab;
+    private static String search = "";
+    private static String selectedKey = "";
+    private static int listScroll = 0;
+    private static float detailScroll = 0f;
+    private static float tutorialScroll = 0f;
+    private static float tutorialMaxScroll = 0f;
     private float detailMaxScroll = 0f;
 
     private EditBox searchBox;
     private EditBox horseFilterBox;
     private Button recipeCategoryButton;
-    private RecipeCategory recipeCategory = RecipeCategory.OTHER;
+    private static RecipeCategory recipeCategory = RecipeCategory.OTHER;
     private boolean recipeMenuOpen;
     private Button refreshRosterButton;
     private Button settledToggle;
 
     // --- My horses tab ---
-    private String horseFilter = "";
-    private HorseQuery.Sort sort = HorseQuery.Sort.NAME;
-    private boolean sortDescending = false;
-    private int horseScroll = 0;
-    private UUID selectedHorseId;
+    private static String horseFilter = "";
+    private static HorseQuery.Sort sort = HorseQuery.Sort.NAME;
+    private static boolean sortDescending = false;
+    private static int horseScroll = 0;
+    private static UUID selectedHorseId;
     /** Recomputed when the filter, the sort or the roster changes - never per frame. */
     private List<HorseListing> horseRows = List.of();
     private int horseRowsVersion = -1;
     private String horseRowsQuery = null;
 
     // --- Breeding preview tab ---
-    private UUID damId;
-    private UUID sireId;
-    private boolean showSettled = false;
+    private static UUID damId;
+    private static UUID sireId;
+    private static boolean showSettled = false;
     private int mareScroll = 0;
     private int stallionScroll = 0;
     /** Recomputed only when the pair or the toggle changes - the walk is not free. */
@@ -223,6 +240,29 @@ public final class HorseBrowserScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    /**
+     * <b>Getting Started, the first time and only the first time.</b>
+     * {@code tutorial.seen} is a client config, so "first" means the first world
+     * on this installation rather than the first world ever - which is the
+     * honest reading of "when you first start a new world" for a page that is
+     * about the mod rather than about the save.
+     *
+     * <p>It is marked seen the moment the player <i>leaves</i> the tab, not the
+     * moment they arrive: opening the browser and immediately closing it again
+     * should not count as having read it.
+     */
+    private static Tab initialTab() {
+        return ClientConfig.tutorialSeen() ? Tab.MY_HORSES : Tab.GETTING_STARTED;
+    }
+
+    /** Drop the parts of the remembered position that belong to one world. */
+    public static void forgetWorld() {
+        selectedHorseId = null;
+        damId = null;
+        sireId = null;
+        horseScroll = 0;
     }
 
     private boolean creative() {
@@ -304,6 +344,9 @@ public final class HorseBrowserScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        if (tab == null) {
+            tab = initialTab();
+        }
 
         searchBox = new EditBox(this.font, listX() + 1, contentTop(), listW() - 2, 16,
                 Component.literal("Filter"));
@@ -511,6 +554,9 @@ public final class HorseBrowserScreen extends Screen {
         Tab hit = tabAt(event.x(), event.y());
         if (hit != null) {
             if (hit != tab) {
+                if (tab == Tab.GETTING_STARTED) {
+                    ClientConfig.markTutorialSeen();
+                }
                 tab = hit;
                 listScroll = 0;
                 detailScroll = 0f;
@@ -558,6 +604,9 @@ public final class HorseBrowserScreen extends Screen {
             }
             return super.mouseClicked(event, doubleClick);
         }
+        if (tab == Tab.GETTING_STARTED) {
+            return super.mouseClicked(event, doubleClick); // no list on this tab
+        }
         int row = rowAt(event.x(), event.y());
         if (row >= 0) {
             if (tab == Tab.RECIPES) {
@@ -604,6 +653,10 @@ public final class HorseBrowserScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (tab == Tab.GETTING_STARTED) {
+            tutorialScroll = Math.max(0f, Math.min(tutorialScroll - (float) sy * 18f, tutorialMaxScroll));
+            return true;
+        }
         if (tab == Tab.MY_HORSES) {
             int max = Math.max(0, horseRows.size() - horseVisibleRows());
             horseScroll = Math.max(0, Math.min(max, horseScroll - (int) Math.signum(sy) * 3));
@@ -693,6 +746,7 @@ public final class HorseBrowserScreen extends Screen {
                 drawGeneDetail(g);
             }
             case BREEDING_PREVIEW -> drawBreedingPreview(g, mouseX, mouseY);
+            case GETTING_STARTED -> drawGettingStarted(g, mouseX, mouseY);
             case RECIPES -> drawRecipes(g, mouseX, mouseY);
         }
     }
@@ -903,7 +957,7 @@ public final class HorseBrowserScreen extends Screen {
 
     private List<RecipeRow> recipeRows = List.of();
 
-    private int selectedRecipe = 0;
+    private static int selectedRecipe = 0;
 
     /**
      * Rebuild the reference list against the current search and the player's
@@ -1041,6 +1095,36 @@ public final class HorseBrowserScreen extends Screen {
                 "Craft this at a crafting table - this window is a reference.", tw)) {
             g.text(this.font, Component.literal(line), px + 10, ty, LABEL, false);
             ty += this.font.lineHeight + 1;
+        }
+    }
+
+    /**
+     * The whole window, as one scrolling article. It is the only tab with no
+     * list down the left: it is meant to be read, and a 30% column to read it in
+     * would be a worse page for no gain.
+     */
+    private void drawGettingStarted(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int l = listX();
+        int r = fsRight();
+        int top = contentTop();
+        int bottom = contentBottom();
+        int w = Math.min(r - l, 420); // a readable measure, not the whole monitor
+
+        g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
+        g.enableScissor(l - 4, top, r, bottom);
+        int height = TutorialPage.draw(g, this.font, l, top - (int) tutorialScroll, w,
+                mouseX, mouseY, HEADING, DESC, TAG);
+        g.disableScissor();
+
+        tutorialMaxScroll = Math.max(0f, height - (bottom - top));
+        tutorialScroll = Math.max(0f, Math.min(tutorialScroll, tutorialMaxScroll));
+        if (tutorialMaxScroll > 0) {
+            int trackH = bottom - top;
+            int x1 = r + 1;
+            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
+            int thumbH = Math.max(16, (int) ((long) trackH * trackH / height));
+            int thumbY = top + Math.round(tutorialScroll * (trackH - thumbH) / tutorialMaxScroll);
+            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
         }
     }
 
