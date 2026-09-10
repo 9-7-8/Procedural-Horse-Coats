@@ -47,10 +47,12 @@
 <p>
     <strong>It will not refuse you.</strong> It looks at both sides of the wall and takes
     whichever is the room &mdash; if both close, the smaller one, because the bigger is
-    the building the stall is in. A torch, a lantern or a carpet is floor rather than
-    wall, there is headroom for a hay loft, and if nothing encloses at all &mdash; a sign
-    on a fence post in an open field &mdash; the stall is simply the ground in front of
-    the sign. The message tells you which of the two you got.
+    the building the stall is in. It walks the <strong>floor</strong>, so a fence across
+    the front of a stall is a wall even though you can see over it, and a slab, a carpet
+    or a one-block step is still the same room. <strong>A gate or a doorway is the edge
+    of the stall whether it is open or shut.</strong> If nothing encloses at all &mdash; a
+    sign on a fence post in an open field &mdash; the stall is simply the ground in front
+    of the sign. The message tells you which of the two you got.
 </p>
 
 <p>Breaking the sign block releases the stall.</p>
@@ -108,22 +110,43 @@
     so the feature stalls exist for could never be reached.
 </p>
 
-<p>The flood fill stays, but only as a measurement:</p>
+<p>The fill stays, but only as a measurement &mdash; and it measures the
+    <strong>floor</strong> rather than the air, which is the correction that came out of a
+    dead horse (<a href="known-gaps.html#gap-153">gap 153</a>):</p>
 
 <ul>
     <li><strong>Both sides are tried.</strong> Which side of a wall the player meant is
-        not something they should have to know. If both close, the smaller is the stall.</li>
-    <li><strong>Anything a horse could walk through is open</strong>
-        (<code>!state.blocksMotion()</code>), not just air &mdash; torches, carpet, a
-        lantern, snow. A fence, a wall, a shut gate or a door still stops the fill,
-        because those are what a stall is made of.</li>
-    <li><strong>Five blocks of headroom</strong> rather than three, and the cap is
-        <code>MAX_BLOCKS</code> rather than a number written down here.</li>
-    <li><strong>If neither side closes it falls back</strong> to a plain box in front of
-        the sign, and <code>Result.enclosed</code> says so &mdash; which is what the
-        player&rsquo;s message is written from, and what
-        <code>TicketHandler.landingSpot</code> is careful about.</li>
+        not something they should have to know. If both close, the smaller is the stall.
+        If neither does, the fallback box goes on the side the player was standing on,
+        because clicking from there is the only statement of intent available.</li>
+    <li><strong>It walks columns of floor and never rises.</strong> The version before
+        this filled air up to three blocks above the sign, and a fence is one block tall
+        &mdash; so it climbed over the front rail of every stall anyone actually builds,
+        spilled into the aisle and reported &ldquo;not a room&rdquo;. A column counts if a
+        horse could stand in it: something underfoot, two cells clear above. Neighbouring
+        columns may differ by one block, so a slab, a carpet or an uneven floor is one
+        room and a two-block drop is not.</li>
+    <li><strong>A door, trapdoor or gate is the edge, in every state.</strong> By block
+        identity, deliberately, not by whether a horse could squeeze past &mdash; a rule
+        based on collision measures a different stall depending on which way the gate
+        happens to be swinging, and a stall is not a thing that should change size when
+        somebody leaves a gate open.</li>
+    <li><strong>Everything else a stall really contains is passable</strong> &mdash; a
+        torch, a lantern, a flower, snow, a water trough. Requiring bare air is most of
+        why the first version never worked at all.</li>
+    <li><strong>The result carries the floor tiles themselves</strong>, not just a
+        bounding box. A box around an L-shaped room contains the wall between the arms,
+        and choosing a landing spot from that box is what put a horse inside one.
+        <code>StallDetector.landingSpot</code> walks the tiles, and returns
+        <code>null</code> rather than guessing &mdash; a ticket with nowhere to put the
+        horse refuses and is not spent.</li>
 </ul>
+
+<p>The search itself is <code>common/&hellip;/stable/StallFill</code>, behind a one-method
+    interface the game implements, so it has tests: <code>StallFillTest</code> builds
+    stalls out of ASCII, including the open-gate leak and the L-shaped room. It lived on
+    the Minecraft side before, where nothing could test it, which is the same reason the
+    cooldown sentinel survived a release.</p>
 
 <div class="note warn">
     <span class="label">Stale records</span>

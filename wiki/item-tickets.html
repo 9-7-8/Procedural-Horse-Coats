@@ -97,12 +97,23 @@
 </p>
 
 <p>
-    The destination comes from <code>StallData.forHorse</code>. The landing spot is
-    <em>not</em> <code>StallRecord.center()</code>: a stall may be
-    <a href="item-stall-signs.html">the detector's fallback box</a> rather than a real
-    room, so its middle is not known to be empty. <code>landingSpot</code> checks for
-    standing room, walks the volume if the middle is blocked, and falls back to the
-    sign position &mdash; the one block known to be somewhere a player stood.
+    The destination comes from <code>StallData.forHorse</code>, but the <strong>stall is
+    measured again, live, from the sign</strong> rather than read back from the record.
+    Two reasons, and the first one cost a horse: the stored span is a bounding box, and a
+    box around any room that is not a plain cuboid contains the walls inside it. The
+    second is that people rebuild stalls, so re-running
+    <a href="item-stall-signs.html">the detector</a> means a stall that has been widened
+    or re-fenced since the sign went up is the stall the horse arrives in. The chunk is
+    pulled in first, because a horse teleported into unloaded terrain is the failure that
+    looks exactly like a horse that was deleted.
+</p>
+
+<p>
+    <strong>If there is nowhere to stand, the ticket refuses and is not spent.</strong>
+    The version before this scanned the bounding volume and, finding nothing, fell through
+    to the sign&rsquo;s own block &mdash; flush against a wall, with wall material at head
+    height, and the one position in the routine never checked for anything. The horse
+    suffocated. A refusal the player can read beats a horse in a wall.
 </p>
 
 <h2 id="gaps">Known gaps</h2>

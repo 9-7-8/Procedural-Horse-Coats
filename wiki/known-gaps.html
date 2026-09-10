@@ -59,17 +59,136 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
-<li id="gap-153"><strong>Tickets and the rebuilt stall detector shipped together and neither has been played.</strong> Opened 2026-09-09 with 0.3.7. A ticket right-clicked on a horse looks up its stall, checks the tier's reach, and teleports &mdash; <b>none of which has been run once</b>. The parts a compiler cannot see: whether the cross-dimension <code>teleportTo(ServerLevel, &hellip;)</code> signature works for an entity that is not a player (it is the same call <a href="horse-dimension.html">the hay portal</a> uses, and that is itself listed as unverified); whether <code>landingSpot</code> actually finds standing room in a real stall rather than dropping the horse in a wall; and whether the horse arrives <em>loaded</em> &mdash; a stall in an unloaded chunk in another dimension is the case most likely to misbehave, and the one hardest to notice, because the horse will look like it simply vanished. On the detector side, the new rule is <code>!blocksMotion()</code>, which is a guess about which blocks players build stalls out of: a stall floored with <b>slabs or a carpet</b> should now fill correctly, but a stall whose only door is an <b>open fence gate</b> will leak out of it and take the fallback box instead. That is arguably right and definitely undiscussed.</li>
+<li id="gap-154"><strong>The Breeds tab does not fill in when you tame a horse, and ignores creative.</strong>
+    Opened 2026-09-09 with 0.4.0, reported the same evening: &ldquo;the breeds tab should be
+    fully filled in on creative, and when I tested it just now, it did not fill in when I
+    tamed a breed horse.&rdquo; <b>Two separate faults.</b> The creative one is certain and
+    small: every other gated tab asks <code>discovered(gene)</code>, which is
+    <code>creative() || ClientGeneDatabase.knows(...)</code>, and the breed rows ask
+    <code>ClientGeneDatabase.hasBreed(id)</code> with no creative clause at all - so a
+    creative player sees forty-nine question marks. The taming one is not yet diagnosed and
+    the <b>prime suspect is a token mismatch</b>: <code>HorseRecord.breed()</code> holds a
+    <code>BreedLineage</code> token, and the tab matches it against <code>Breed.id()</code>. If a
+    lineage token is anything but the bare id for a pure-bred horse - a prefix, a cross
+    form, a label - then <code>discoverBreeds</code> is storing strings that no row will
+    ever match, and it would look exactly like this. Check that first. Two other
+    possibilities worth ruling out after it: a lone wild horse may carry no breed at all
+    (only herd members are stamped), so the horse tamed may genuinely have had nothing to
+    record; and the tab reads a client mirror that only refreshes when the sync payload
+    arrives, so a tame that fires <code>discoverBreeds</code> with no change makes no
+    packet and the tab would not move until something else did.</li>
+
+<li id="gap-155"><strong>Taming by hand, hearts on bond, and the foal's inherited bond have not been played.</strong>
+    Opened 2026-09-09 with 0.3.8. <code>CrouchFeedGoal</code> is a new AI goal on every
+    untamed adult horse and none of it has run: the four conditions are re-tested every
+    tick, so the failure mode nobody will notice is the goal <em>starting</em> too easily
+    and pulling horses out of a herd at a distance whenever somebody walks past crouched
+    with wheat. The tuning is all guesses - a 12-block search, a 25-degree gaze cone, a
+    2-block tolerance on standing still, 45 ticks a mouthful. The taming roll itself is
+    vanilla's own and is the one part not in doubt. Separately: hearts now fire from
+    <code>awardBond</code> whenever a point is actually granted, which means they also
+    <b>stop</b> at the daily cap - that is deliberate and is the only signal a player has
+    that the cap exists, but nobody has watched it happen. And a foal born to a tamed dam
+    starts at a quarter of her bond, written straight onto the attachment rather than
+    through <code>awardBond</code>; if that number reads as too generous it is one
+    division to change.</li>
+
+<li id="gap-156"><strong>The phantom saddle is a real saddle, and the only thing stopping it being a duplicator is a sweep.</strong>
+    Opened 2026-09-09 with 0.4.0. Bareback steering at bond tier 3 works by equipping an
+    actual <code>Items.SADDLE</code> carrying a <code>PHANTOM_SADDLE</code> component, because
+    vanilla decides who may steer inside
+    <code>AbstractHorse.getControllingPassenger()</code>, that check is
+    <code>isSaddled()</code>, there is no hook on it and this module has no mixins. Doing it
+    for real buys the whole vanilla mounted path - client prediction, jumping, the correct
+    acceleration - and the first version, which drove the horse from outside on the tick,
+    had none of that. <b>The risk is that the saddle is genuine.</b> A player can open a
+    horse's inventory while mounted, so <code>reclaim</code> sweeps the rider's inventory
+    and their held-cursor stack every tick and destroys anything carrying the component.
+    That closes the route <em>known</em> about; a hopper, a dispenser, a death drop, another
+    mod's inventory-moving block or a second player reaching into the same horse screen are
+    all unexamined. If a phantom saddle ever escapes, it is an ordinary saddle with an
+    invisible texture, which is worse than a free saddle. None of this has been played.</li>
+
+<li id="gap-157"><strong>The custom spawn egg makes horses with identical bodies, and that is by design nobody chose.</strong>
+    Opened 2026-09-09 from a report that every horse in a stable had the same speed, health,
+    jump and size. It was true and it is not a defect: the egg starts every locus at
+    <code>Gene.defaultAllele()</code>, and an all-baseline genotype resolves to exactly
+    <code>HorseTraits.baseline()</code> every time - the rolled epigenome cannot vary it,
+    because epigenetic numbers ride on allele copies and a baseline locus contributes
+    nothing for them to modulate. <code>BodyStatSpreadTest</code> pins both halves.
+    <b>The open question is whether that is the right default.</b> A player using the egg to
+    stock a world gets clones unless they know to add body genes or press Randomize, and
+    nothing on the screen says so. The options are to seed the four body loci on open, to
+    seed them only on Randomize, or to say so in the screen's own text; nobody has
+    decided.</li>
+
+<li id="gap-158"><strong>A breed has no temperament, so &ldquo;disposition&rdquo; in the new breed entry is assembled prose.</strong>
+    Opened 2026-09-09 with 0.4.0. The breed entry was asked to show disposition alongside
+    biomes, body and health. There is no such field: a <code>Breed</code> has hardiness, a
+    spawn weight and a magical flag, and the line is built from those three. It is honest
+    about what the data supports and it is not what was asked for. Making temperament real
+    is a <a href="breed-format.html">breed-format</a> change - a field, a schema entry, the
+    writer, forty-nine files - and it would want to mean something mechanically rather than
+    only reading well, or it is flavour text with a schema attached. Not started.</li>
+
+<li id="gap-159"><strong>The gene preview row silently truncates at eight, and a gene with more alleles loses the rest.</strong>
+    Opened 2026-09-09 with 0.3.8. <code>GenePreviews.MAX_SHOTS</code> is 8, chosen so a row
+    cannot turn an entry into a stable, and a locus with more collectable alleles than that
+    simply stops - with no ellipsis, no count, and no indication that what you are looking
+    at is a subset. Which loci this actually bites is a question for
+    <code>Genes.codeOrder()</code> rather than for this page, and the honest fixes are a
+    second row or a &ldquo;+3 more&rdquo; tile rather than a bigger constant.</li>
+
+<li id="gap-153"><strong>The stall detector was rewritten after it got a horse killed, and the
+    rewrite has not been played.</strong> Opened 2026-09-09 with 0.3.7, rewritten
+    2026-09-09 with 0.3.8. The ticket half is <b>confirmed working</b> - the owner bound
+    a sign, spent a ticket and the horse came home. The detector half was wrong twice
+    over and the two compounded: the fill walked <b>air</b>, three blocks above the sign,
+    and a fence is one block tall, so it climbed over the front rail of every real stall,
+    spilled into the aisle, blew its budget and reported &ldquo;not a room&rdquo;;
+    then <code>landingSpot</code>, having found nothing standable in the fallback box,
+    fell through to <code>return stall.signPos()</code> - the block the sign itself
+    occupies, flush against a wall, with wall material at head height, and the one
+    position in the routine never checked for anything. The horse suffocated.
+    The search now walks <b>floor columns</b>, never rises, and steps at most one block
+    between neighbours; a door, trapdoor or gate is the edge of the room <b>in every
+    state</b>, because judging a doorway by whether a horse could squeeze through it
+    measures a different stall depending on which way the gate is swinging. Landing is
+    measured live from the sign rather than read back from the record, the chunk is
+    pulled in first, and <b>a stall with nowhere to stand refuses the ticket and does
+    not consume it</b>. <strong>What is still unproven:</strong> none of it has been
+    played. The doorway-by-identity rule is a judgement about what a player means by
+    &ldquo;this stall&rdquo; and could be wrong for a stall whose gate is its only wall;
+    the one-block step limit is a guess about how uneven a real stable floor gets; and
+    the live re-measure means a stall the player has since rebuilt silently becomes a
+    different stall, which is right but will surprise somebody. The graph search itself
+    is now in <code>common/</code> as <code>StallFill</code> with tests, which is the cooldown
+    sentinel’s lesson applied rather than restated: a piece of pure logic parked on the
+    Minecraft side is a piece of logic nobody can write a five-line test for.</li>
 
 <li id="gap-152"><strong>&ldquo;Bound ticket&rdquo; is named after a design that was abandoned.</strong> Opened 2026-09-09. The four tickets were specified as binding to one horse each; the owner's call is that they do not bind at all &mdash; you click the horse you want sent, and the tier is <b>reach</b>. Three of the four names survived that fine (blank, basic, interdimensional); <code>bound_ticket</code> did not, and it now means &ldquo;within any one world&rdquo;, which nobody would guess from the word. The tier itself was also picked by <em>reading the recipe ladder</em> rather than by being told &mdash; the owner said outright they did not know what the third one should be &mdash; so both the name and the rung are open to being changed. Renaming the item is not free: the id is in a recipe, the lang file, a model, and the baked recipe reference.</li>
 
-<li id="gap-151"><strong>A sentinel was being subtracted from, and it killed three features silently.</strong> Opened <em>and</em> closed 2026-09-09, from &ldquo;sheers aren't working&rdquo;. <code>HorseCooldownsAttachment.last(key)</code> returns <code>Long.MIN_VALUE</code> for a key that has never fired, and <code>ready</code> was written as <code>now - last(key) &gt;= cooldown</code> &mdash; which <b>overflows</b> to a large negative number, so the gate answered &ldquo;not ready&rdquo; for a horse that had never done the thing at all. Permanently, because the stamp is only written on success. <b>Shearing and every gene <code>yield</code> (milking included) had therefore never worked on any horse, ever</b>, and the dhampir's bite cooldown was dead the same way and had not been noticed. <code>ready</code> checks for absence now instead of doing arithmetic on the sentinel, and <code>last</code> carries a comment saying not to subtract from it. <strong>The general lesson is the one worth keeping</strong>: this class is Minecraft-side, so there is no test source set it could have been caught in &mdash; a pure-Java cooldown record in <code>common/</code> would have been a five-line test.</li>
 
 <li id="gap-148"><strong>The checklist hooks are swept, not watched.</strong> Opened 2026-09-09 with the checklist. A sweep proves every task is <em>reachable</em> from some call site (<code>tools/check-progress-tasks.mjs</code>), which is a much weaker claim than that each fires at the right moment. The ones most likely to be wrong are the ones whose hook is a guess at what the player did rather than a direct observation: <b>bonding</b> ticks on a hand-feed that moved the bond, which is the deliberate half of bonding but not all of it; <b>the transfer paper</b> was worse than described here and is fixed &mdash; it ticked at the <em>top</em> of <code>onEntityInteract</code>, before the target was known to be a horse or the held item to be a paper, so right-clicking anything with anything ticked it; it now ticks at the successful end of <code>sign</code> and <code>redeem</code>, so every refusal above it is a reason it did not; <b>bringing a horse home</b> credits the horse's owner rather than whoever led it through, which is right when they are the same person and silent when they are not; and <b>the three zygosity tasks</b> walk every locus of every foal, so all three will very likely tick on the first foal anybody breeds - which may be the correct amount of teaching or may make them worthless. None of that is knowable without playing it.</li>
 
-<li id="gap-149"><strong>The allele collection records alleles from taming and breeding only.</strong> Opened 2026-09-09. <code>collect()</code> hangs off <code>GeneDiscoveryHandler.discoverFrom</code>, which runs on a tame and on a bred foal - so a horse you buy from the cowboy, a horse someone gives you, and every wild horse you look at but never tame contribute <b>nothing</b> to the collection. That is defensible (it is a record of horses that were yours) and it is not what a player will assume from a tab that says &ldquo;alleles collected&rdquo;. The alternative is to collect from any horse whose info panel you open, which is far more generous and makes the number climb without effort. Nobody has decided; the narrow version is in because it needed no new hook.</li>
 
-<li id="gap-150"><strong>Closed 2026-09-09: the research shelf's window overlapped itself and looked like a different mod.</strong> Reported plainly - &ldquo;the icons on the craft page overlapping with the text and the whole thing just looks rough&rdquo;. Both halves were the same mistake, which was placing things by eye: the list ran from y=36 to y=96 and the slots sat at y=40, straight through it. <strong>The layout constants now live on the menu</strong> (<code>ResearchShelfMenu.LIST_Y</code>, <code>SLOT_Y</code>, <code>INV_Y</code> &hellip;) because that is where <code>addSlot</code> needs them, and the screen reads every one - so a slot and the well drawn under it cannot disagree again. The window is drawn in vanilla's own idiom now (<code>client/VanillaPanel</code>): mid-grey face, white highlight up and left, dark shadow down and right, slots with the bevel inverted, and <b>dark text</b>, because white on a light panel is unreadable. It is drawn rather than blitted so it can be any size the layout needs with no art to keep in step.</li>
+<li id="gap-150"><strong>Closed 2026-09-09, on the second attempt - and the first attempt is the
+    lesson.</strong> The research shelf's window was reported rough, fixed, written up
+    as closed, and was <b>still rough</b> when the owner next opened it: &ldquo;the
+    research shelf still has text all over the place and you still can't put items in
+    it&rdquo;. Two separate faults, neither of which the first pass had looked for.
+    <b>Four of the fixed captions were wider than the 176px window</b> and drawn with
+    raw <code>g.text</code> rather than the fitter that existed three methods away, so
+    they ran out through the frame. And the <b>filing slot had been inactive on the
+    server for the life of the block</b>: its <code>isActive()</code> read a
+    <code>storeTab</code> field that only the client ever sets, so the server sat on the
+    field's default of <code>false</code> forever and every filed paper snapped back to
+    the cursor. Every caption goes through <code>drawFitted</code> now and slot activity
+    is side-aware. <strong>What is worth keeping is why it was written up as closed:</strong>
+    the layout constants had been moved onto the menu, which was the <i>described</i>
+    fix, and nobody had opened the window. A repair that is reasoned about rather than
+    looked at is a repair that has not happened - and this page is where that keeps
+    being rediscovered (see also <a href="#gap-13">gap 13</a>).</li>
 
 <li id="gap-145"><strong>The gene carrot does not roll 25%, and the owner thinks it does.</strong> Opened 2026-09-09 while writing the Getting Started tab. Asked for prose saying a gene carrot gives &ldquo;a 25% chance of getting that gene&rdquo; &mdash; but that is not the mechanic. A Known Gene Splice sets the <em>fed parent's gamete</em> to <code>n/G</code> or <code>G/G</code> outright, so that parent contributes the gene with certainty; what is uncertain is only whether the foal <em>shows</em> it, which depends on the other parent and on whether the gene needs two copies. For a recessive gene against an unrelated mate the visible rate is nearer a quarter, which is probably where the number came from &mdash; but for a dominant one it is effectively certain, and the carrot never simply fails. <strong>The tab was written to the code, not to the number</strong>, and says the parent will pass it on and that showing it depends on the other side. Which of the two is <em>wanted</em> is an open call: a flat 25% roll would be simpler to explain and would make the carrot a gamble rather than a guarantee, at the cost of the current design's one real virtue - that a splice is deterministic enough to plan a breeding around.</li>
 

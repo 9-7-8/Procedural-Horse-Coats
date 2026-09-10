@@ -29,6 +29,146 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3>0.3.8 &ndash; 0.4.0 &mdash; the stall that killed a horse, and a long evening of the owner playing while I worked.</h3>
+
+<p>An unusual session in shape: the owner was in the game the whole time, so almost
+    everything here came from a report rather than from a plan, and three things were
+    confirmed working within minutes of shipping. The releases run together because they
+    were handed over one at a time as the reports arrived.</p>
+
+<h4>The one that mattered</h4>
+
+<p><strong>A horse was teleported into a wall and suffocated</strong>, and the cause was two
+    bugs that only killed anything together. The stall detector flood-filled <em>air</em>,
+    three blocks above the sign - and a fence is one block tall, so it climbed over the
+    front rail of every real stall, spilled into the aisle, exhausted its cell budget and
+    reported &ldquo;not a room&rdquo;. That dropped it into a fallback box straddling the
+    wall. Then <code>landingSpot</code> scanned that box, found nothing standable, and fell
+    through to <code>return stall.signPos()</code> &mdash; the block the sign itself
+    occupies, flush against the wall, with wall material at head height. It was the only
+    position in the whole routine never checked for anything, and it was reached exactly
+    when the stall was least understood.</p>
+
+<p>The search now walks <strong>floor columns</strong> rather than air: it never rises, so
+    it cannot climb a fence, and it steps at most one block between neighbours, so a slab or
+    a carpet is still one room. A door, trapdoor or gate is the edge of the room
+    <strong>in every state</strong> &mdash; judging a doorway by whether a horse could
+    squeeze through it measures a different stall depending on which way the gate happens to
+    be swinging, which is not a property a stall should have. Landing is measured live from
+    the sign instead of read back from the record, so a rebuilt stall is the stall the horse
+    arrives in; the chunk is pulled in first; and a stall with nowhere to stand
+    <strong>refuses the ticket without consuming it</strong>. A refusal the player can read
+    beats a horse in a wall.</p>
+
+<p>The graph search moved to <code>common/</code> as <code>StallFill</code>, behind a
+    one-method interface the game implements, with <code>StallFillTest</code> building
+    stalls out of ASCII. That is the cooldown sentinel's lesson applied rather than
+    restated: a piece of pure logic parked on the Minecraft side is a piece of logic nobody
+    can write a five-line test for. The test that would have caught this is six lines and
+    draws an L-shaped room.</p>
+
+<h4>Confirmed by the owner, in play</h4>
+
+<p>Shearing and milking both work &mdash; which closes the cooldown-sentinel gap, since
+    those two had never worked on any horse, ever. Binding a stall sign works. Spending a
+    ticket brings a horse home. Research papers off a book work. The Alleles tab collects.
+    The gene previews turn in 3D and the owner likes them. The cowboy and the horseman read
+    correctly as they/them.</p>
+
+<h4>Reports that turned out to be something else</h4>
+
+<p><strong>&ldquo;All of my horses have the exact same speed, health, jump, and size.&rdquo;</strong>
+    True, and not a defect. The custom spawn egg starts every locus at
+    <code>Gene.defaultAllele()</code>, and an all-baseline genotype resolves to exactly
+    <code>HorseTraits.baseline()</code> every time &mdash; the rolled epigenome cannot vary
+    it, because epigenetic numbers ride on allele copies and a baseline locus contributes
+    nothing for them to modulate. <code>BodyStatSpreadTest</code> pins both halves so the
+    question is answerable in seconds rather than by reading six gene classes. Whether that
+    is the right <em>default</em> for the egg is now
+    <a href="known-gaps.html#gap-157">gap 157</a> and nobody has decided.</p>
+
+<p><strong>&ldquo;Milking does not work.&rdquo;</strong> It did; the bucket had gone to the
+    inventory rather than the hotbar. Worth recording only because it is a water bucket:
+    there is no milk gene in the mod, the only bucket yield is waterborn, and the checklist
+    task is called &ldquo;Milk a mare&rdquo; without saying the mare needs the gene.</p>
+
+<p><strong>The research shelf was written up as fixed and was not.</strong> Two faults the
+    first pass had not looked for: four fixed captions were wider than the 176px window and
+    drawn with raw <code>g.text</code> rather than the fitter three methods away, and the
+    filing slot had been <em>inactive on the server for the life of the block</em> because
+    its <code>isActive()</code> read a field only the client ever sets. Every paper filed
+    had been snapping back to the cursor. The layout constants had been moved, which was the
+    described fix; nobody had opened the window.</p>
+
+<h4>Built to order</h4>
+
+<p><strong>Taming by hand.</strong> Crouch, hold food the horse eats, look at it, stay still:
+    it walks over and eats out of your hand, and each mouthful is vanilla's own taming roll.
+    Deliberately the same odds as being thrown off &mdash; a second door in, not an easier
+    one &mdash; and diet-aware, so a carnivore wants meat and a dhampir does not come.</p>
+
+<p><strong>Bareback riding, twice.</strong> First it was made to <em>bond</em>, because
+    vanilla only calls a rider &ldquo;controlling&rdquo; once the horse is saddled and the
+    obvious test therefore paid a bareback rider nothing &mdash; and bareback is how you
+    talk a wild horse round in the first place. Then it was made to <em>steer</em>, at the
+    top bond tier. The first attempt drove the horse from outside on the tick and felt like
+    it; the owner's suggestion &mdash; fake a saddle and take it off on dismount &mdash; was
+    better, so it now equips a real saddle carrying a <code>PHANTOM_SADDLE</code> component.
+    The renderer feeds the saddle layer an empty stack, the saddle comes off the tick the
+    rider leaves, and the rider's inventory is swept, because you can open a horse's
+    inventory while mounted and this would otherwise mint saddles.</p>
+
+<p><strong>The breed book</strong> (<code>wiki/breed-book.html</code>) and a
+    <strong>Breeds tab</strong>. The page carries the mod's lore, set out by the owner: none
+    of these horses are native, every breed is an artefact of a collapsed civilisation,
+    gathered up and moved here by a race nobody has a name for, who then went away or
+    stopped coming or is still here and not introducing itself. The horses are thriving
+    without their masters and remain fond of people &mdash; which is the in-world reason a
+    wild Shetland will eat out of your hand. The hay portal and the breeding carrots are
+    that race's leftovers: they work, nobody knows why, and the mod never explains the
+    mechanism. The cowboy and the horseman may be the last of them or may have inherited the
+    instructions; the page leaves it open and argues that leaving it open is worth more.</p>
+
+<p>The in-game tab follows the browser's standing rule &mdash; it fills in as you meet
+    breeds, because every reference tab here is a record of <em>your</em> game rather than a
+    manual. Only Getting Started and Recipes are complete from the first minute, since those
+    are how you find out what to do at all.</p>
+
+<h4>Smaller</h4>
+
+<ul>
+    <li>The allele collection now sweeps every horse you own whenever the roster is
+        gathered, retroactively &mdash; it had only ever hooked taming and breeding, so a
+        bought or gifted horse counted for nothing and the tab read empty for a player with
+        a full stable.</li>
+    <li>The wild type left that tab: every horse carries it at nearly every locus, so it was
+        congratulating players for <em>not</em> having found the gene. Extension, agouti and
+        shade keep theirs, because at those three the baseline is a real coat rather than an
+        absence. Both ask <code>EditorRules.alwaysCarried</code>, which already existed for
+        the spawn screen, so neither keeps a list of its own.</li>
+    <li>Foals born to a tamed dam start at a quarter of her bond. Starting at zero made a
+        horse born in your own stable exactly as wary of you as one caught wild that
+        morning.</li>
+    <li>Shearing was worth more bond than a treat. It is 2 now, level with a hand-feed.</li>
+    <li>&ldquo;Take a gene off a horse&rdquo; is &ldquo;Research a gene with a book&rdquo;.
+        Taking implies the horse loses something; it does not.</li>
+    <li>The tutorial's contents lost their inconsistent numbering and its
+        &ldquo;Next:&rdquo; footer, which was a second control doing the contents list's
+        job.</li>
+    <li>The cowboy and the horseman are they/them across twenty-three Java files and two
+        wiki pages. Singular they takes a plural verb, so every third-person
+        <code>-s</code> beside those pronouns came back a step with it; pronouns about
+        stallions were left alone.</li>
+</ul>
+
+<h4>What the next session should pick up</h4>
+
+<p><a href="known-gaps.html#gap-154">Gap 154</a> &mdash; the Breeds tab ignores creative and
+    did not fill in on a tame. The creative half is certain and small; the taming half has a
+    named prime suspect (a <code>BreedLineage</code> token that is not a bare
+    <code>Breed.id()</code>) and should be checked there first.</p>
+
+
 <h3 id="s0-3-7">0.3.7 &mdash; two things you could craft but not use, and two you could do that did nothing.</h3>
 
 <p>
@@ -55,7 +195,7 @@
     <strong>Shearing and every gene <code>yield</code> had therefore never worked on any
     horse in any build</strong>, and the dhampir's bite gate was dead the same way without
     anybody noticing. The fix is one absent check. The part worth keeping is
-    <a href="known-gaps.html#gap-151">why it survived</a>: the class is Minecraft-side, so
+    why it survived: the class is Minecraft-side, so
     there is no test source set it could have been caught in. The same record in
     <code>common/</code> would have been a five-line test.
 </p>

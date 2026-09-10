@@ -133,6 +133,41 @@
     with an animal &mdash; a system that rewards you for buying leather first has
     the relationship backwards. The gate is <code>hasPassenger</code>.</p>
 
+<p id="hearts"><strong>Hearts show whenever the bond actually moves</strong>, and stop
+    when it cannot. They are emitted from <code>awardBond</code> &mdash; the one function
+    that knows whether a point was really granted &mdash; so every path that bonds a horse
+    gets the feedback without asking, and a horse that has hit the daily cap goes quiet.
+    That silence is the only signal a player has that the cap exists.</p>
+
+<p id="foal-bond"><strong>A foal born to a tamed dam starts at a quarter of her bond.</strong>
+    Starting every foal at zero made a horse born in your own stable, to your own mare,
+    exactly as wary of you as one caught wild that morning &mdash; which is backwards. A
+    quarter rather than all of it, because the bond is still the foal&rsquo;s own to earn:
+    this is the head start of having been born to somebody who trusts you, not an
+    inheritance. It is written straight onto the attachment rather than through
+    <code>awardBond</code>, whose job is metering against a daily cap a well-bonded dam
+    would blow straight through.</p>
+
+<h3 id="hand-taming">Taming by hand</h3>
+
+<p>Crouch, hold out something the horse eats, look at it and keep still. It comes over,
+    eats out of your hand, and <strong>each mouthful is one roll at taming &mdash; the same
+    roll as being thrown off its back</strong>. Deliberately the same odds: this is a
+    second door into taming, not an easier one, and each feed costs an item the way each
+    mount costs a fall.</p>
+
+<p>All four conditions are re-tested every tick, so breaking the pose stops the horse
+    mid-walk, which is what teaches the mechanic. Crouching is the gesture and the thing
+    that stops it firing whenever somebody walks past a herd holding wheat; looking picks
+    <em>which</em> horse without needing a click; and stillness is checked against where
+    you stood when it set off, so walking at the animal ends the approach and a little
+    shuffling does not.</p>
+
+<p>What counts as food is a genetic question rather than a vanilla one &mdash; a carnivore
+    is not coming over for a carrot, and a dhampir is not coming over at all. Foals are
+    left out for the same reason vanilla leaves them out of riding.
+    See <code>server/CrouchFeedGoal</code>.</p>
+
 <p>A saddle still buys you steering, and steering is what lets you go far enough
     for the proximity gain and the riding gain to stack for any length of time.
     So a saddle is worth having; it is simply not what the horse is counting.</p>
