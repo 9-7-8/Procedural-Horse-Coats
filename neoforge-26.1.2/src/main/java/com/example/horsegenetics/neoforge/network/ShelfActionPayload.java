@@ -8,22 +8,19 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 /**
- * Client &rarr; server: what the player did to an open Equine Research Shelf -
- * picked a gene to copy, or asked for a filed paper back.
+ * Client &rarr; server: the gene picked on an open Equine Research Shelf's Copy
+ * tab. The only packet the shelf still needs - storing and taking papers back
+ * are ordinary slot clicks now, which vanilla syncs.
  *
- * <p>One payload for both because they are the same shape and the same
- * re-check: the server looks the shelf up from the player's open menu and does
- * nothing at all if the gene is not on it. A forged packet can select something
- * absent (and get an empty result slot) or withdraw something absent (and get
- * nothing); neither reaches the world.
+ * <p>The server looks the shelf up from the player's open menu and checks the
+ * gene against the papers actually on it, so a forged packet can only pick
+ * something absent and get an empty result slot.
  */
 public record ShelfActionPayload(Action action, String geneKey) implements CustomPacketPayload {
 
     public enum Action {
         /** Copy this gene next, if the shelf holds it and a book is in. */
-        SELECT,
-        /** Take this gene's filed paper back out of the shelf. */
-        WITHDRAW
+        SELECT
     }
 
     public static final Type<ShelfActionPayload> TYPE =

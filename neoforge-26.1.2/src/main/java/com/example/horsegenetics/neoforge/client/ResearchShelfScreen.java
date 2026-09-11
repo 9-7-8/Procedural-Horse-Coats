@@ -14,38 +14,30 @@ import java.util.List;
 
 /**
  * <b>The Equine Research Shelf's screen.</b> Two tabs across the top:
- * <b>Craft</b> copies a gene the shelf holds onto a blank book, <b>Store</b> is
- * the shelf's own contents.
+ * <b>Store</b>, a chest of research papers, and <b>Craft</b>, which copies a
+ * gene the shelf holds onto a blank book.
+ *
+ * <h2>Store opens first, and it is a chest</h2>
+ * Six rows of nine, where a double chest's are. Put a paper in, take it out -
+ * nothing takes time and nothing is consumed. It replaced a single filing slot
+ * that swallowed the paper into a list, which the owner found did "nothing"
+ * (2026-09-10). A paper for a gene the shelf already holds will not go in.
  *
  * <h2>It is drawn as a Minecraft window</h2>
- * Face, bevel, sunken slots, dark text - see {@link VanillaPanel} for why that
- * is drawn rather than blitted from a texture. The first version of this screen
- * was a flat dark panel in the browser's own style, which looked like a
- * different mod bolted on; worse, its list and its slots were placed by eye and
- * <b>overlapped</b>. Everything here is now on one column of constants, laid out
- * top to bottom, with {@link ResearchShelfMenu}'s slot coordinates taken from
- * the same numbers.
+ * Face, bevel, sunken slots, dark text - see {@link VanillaPanel}. Every
+ * position comes from {@link ResearchShelfMenu}'s constants, the same numbers
+ * its slots are placed with.
  *
  * <h2>Which slots are live is the tab</h2>
- * The book and result slots belong to Craft and the filing slot to Store, and
- * the ones that do not belong go <b>inactive</b>: {@code Slot.x} and
- * {@code Slot.y} are final, and {@code Slot.isActive()} is what vanilla
- * consults for drawing <i>and</i> hit-testing - the pair that must never
- * disagree, because a slot you cannot see but can still click is the worst of
- * both.
- *
- * <h2>The list is drawn, not slotted</h2>
- * A shelf holds one paper per gene and there is no cap on how many, so the list
- * cannot be a grid of slots without inventing one. A row is a gene; on Craft it
- * selects, on Store it takes the paper back. Filing goes the other way through a
- * real slot, because putting an item <i>in</i> is a thing players already know
- * how to do and a list row is not.
+ * The paper grid belongs to Store and the book and result slots to Craft; the
+ * ones that do not belong go <b>inactive</b>, because {@code Slot.isActive()}
+ * is what vanilla consults for drawing <i>and</i> hit-testing.
  */
 public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchShelfMenu> {
 
     private enum Tab {
-        CRAFT("Craft"),
-        STORE("Store");
+        STORE("Store"),
+        CRAFT("Copy");
 
         final String label;
 
@@ -56,12 +48,9 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
 
     private static final int TAB_H = 16;
     private static final int TITLE_Y = 6;
-
     private static final int ROW_H = 12;
-    private static final int LIST_ROWS = 4;
-    private static final int LIST_H = LIST_ROWS * ROW_H;
 
-    private Tab tab = Tab.CRAFT;
+    private Tab tab = Tab.STORE;
     private int scroll;
 
     public ResearchShelfScreen(ResearchShelfMenu menu, Inventory inventory, Component title) {
@@ -75,6 +64,7 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         this.titleLabelY = TITLE_Y;
         this.inventoryLabelX = ResearchShelfMenu.MARGIN;
         this.inventoryLabelY = ResearchShelfMenu.INV_LABEL_Y;
+        this.menu.setStoreTab(tab == Tab.STORE);
     }
 
     // ------------------------------------------------------------------
@@ -92,22 +82,22 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
             }
             return true;
         }
-        int row = rowAt(event.x(), event.y());
-        if (row >= 0) {
-            // Craft: a row is the gene the next book becomes.
-            // Store: a row is a paper you can take back.
-            ClientPacketDistributor.sendToServer(new ShelfActionPayload(
-                    tab == Tab.STORE ? ShelfActionPayload.Action.WITHDRAW
-                            : ShelfActionPayload.Action.SELECT,
-                    stored().get(row)));
-            return true;
+        if (tab == Tab.CRAFT) {
+            int row = rowAt(event.x(), event.y());
+            if (row >= 0) {
+                String gene = stored().get(row);
+                this.menu.selectGene(gene); // the highlight, client-side
+                ClientPacketDistributor.sendToServer(
+                        new ShelfActionPayload(ShelfActionPayload.Action.SELECT, gene));
+                return true;
+            }
         }
         return super.mouseClicked(event, doubleClick);
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
-        if (sy != 0 && overList(mx, my)) {
+        if (tab == Tab.CRAFT && sy != 0 && overList(mx, my)) {
             scroll = Math.max(0, Math.min(scroll - (int) Math.signum(sy), maxScroll()));
             return true;
         }
@@ -119,13 +109,13 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
     }
 
     private int maxScroll() {
-        return Math.max(0, stored().size() - LIST_ROWS);
+        return Math.max(0, stored().size() - ResearchShelfMenu.LIST_ROWS);
     }
 
     private boolean overList(double mx, double my) {
         int l = leftPos + ResearchShelfMenu.MARGIN;
         int t = topPos + ResearchShelfMenu.LIST_Y;
-        return mx >= l && mx < l + ResearchShelfMenu.LIST_W && my >= t && my < t + LIST_H;
+        return mx >= l && mx < l + ResearchShelfMenu.LIST_W && my >= t && my < t + ResearchShelfMenu.LIST_H;
     }
 
     private int rowAt(double mx, double my) {
@@ -170,15 +160,15 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         }
 
         VanillaPanel.window(g, leftPos, topPos, ResearchShelfMenu.WIDTH, ResearchShelfMenu.HEIGHT);
-        drawList(g, mouseX, mouseY);
 
-        if (tab == Tab.CRAFT) {
-            drawCraft(g);
+        if (tab == Tab.STORE) {
+            for (int i = 0; i < EquineResearchShelfBlockEntity.SLOTS; i++) {
+                VanillaPanel.slot(g, leftPos + ResearchShelfMenu.MARGIN + (i % 9) * 18,
+                        topPos + ResearchShelfMenu.GRID_Y + (i / 9) * 18);
+            }
         } else {
-            VanillaPanel.slot(g, leftPos + ResearchShelfMenu.FILE_X, topPos + ResearchShelfMenu.SLOT_Y);
-            drawFitted(g, "File a research paper here",
-                    leftPos + ResearchShelfMenu.MARGIN, topPos + ResearchShelfMenu.NOTE_Y,
-                    ResearchShelfMenu.LIST_W, VanillaPanel.TEXT_DIM);
+            drawList(g, mouseX, mouseY);
+            drawCraft(g);
         }
 
         for (int i = 0; i < 27; i++) {
@@ -213,14 +203,12 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         String selected = this.menu.selectedGene();
         int noteX = leftPos + ResearchShelfMenu.MARGIN;
         int noteY = topPos + ResearchShelfMenu.NOTE_Y;
-        if (selected.isEmpty()) {
-            drawFitted(g, "Pick a gene, then add a book",
+        if (selected.isEmpty() || !stored().contains(selected)) {
+            drawFitted(g, "Pick a gene, then add a blank book",
                     noteX, noteY, ResearchShelfMenu.LIST_W, VanillaPanel.TEXT_DIM);
             return;
         }
         String name = EquineResearchShelfBlockEntity.displayName(selected);
-        // Seconds, not ticks - nobody thinks in ticks, and the number is the
-        // whole point of the rarity rule being visible at all.
         int seconds = Math.max(1, total / 20);
         String note = done > 0
                 ? name + " - " + Math.max(1, (total - done) / 20) + "s left"
@@ -232,23 +220,21 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         int l = leftPos + ResearchShelfMenu.MARGIN;
         int t = topPos + ResearchShelfMenu.LIST_Y;
         int w = ResearchShelfMenu.LIST_W;
-        VanillaPanel.well(g, l - 1, t - 1, w + 2, LIST_H + 2);
+        int h = ResearchShelfMenu.LIST_H;
+        VanillaPanel.well(g, l - 1, t - 1, w + 2, h + 2);
 
         List<String> genes = stored();
         if (genes.isEmpty()) {
-            drawFitted(g, "This shelf is empty.", l + 3, t + 2, w - 6, 0xFF3F3F3F);
-            drawFitted(g, tab == Tab.STORE
-                            ? "File a paper below to begin."
-                            : "Use the Store tab to file one.",
-                    l + 3, t + 2 + ROW_H, w - 6, 0xFF3F3F3F);
+            drawFitted(g, "No papers on this shelf yet.", l + 3, t + 2, w - 6, 0xFF3F3F3F);
+            drawFitted(g, "Put some in on the Store tab.", l + 3, t + 2 + ROW_H, w - 6, 0xFF3F3F3F);
             return;
         }
         scroll = Math.max(0, Math.min(scroll, maxScroll()));
         int hovered = rowAt(mouseX, mouseY);
         String selected = this.menu.selectedGene();
-        for (int i = scroll; i < genes.size() && i < scroll + LIST_ROWS; i++) {
+        for (int i = scroll; i < genes.size() && i < scroll + ResearchShelfMenu.LIST_ROWS; i++) {
             int ry = t + (i - scroll) * ROW_H;
-            boolean isSelected = tab == Tab.CRAFT && genes.get(i).equals(selected);
+            boolean isSelected = genes.get(i).equals(selected);
             if (isSelected) {
                 g.fill(l, ry, l + w, ry + ROW_H, VanillaPanel.SELECTED);
             } else if (i == hovered) {
@@ -259,25 +245,18 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         }
         if (maxScroll() > 0) {
             int x1 = l + w - 3;
-            int thumbH = Math.max(6, LIST_H * LIST_ROWS / genes.size());
-            int thumbY = t + (LIST_H - thumbH) * scroll / maxScroll();
-            g.fill(x1, t, x1 + 3, t + LIST_H, VanillaPanel.SHADOW);
+            int thumbH = Math.max(6, h * ResearchShelfMenu.LIST_ROWS / genes.size());
+            int thumbY = t + (h - thumbH) * scroll / maxScroll();
+            g.fill(x1, t, x1 + 3, t + h, VanillaPanel.SHADOW);
             g.fill(x1, thumbY, x1 + 3, thumbY + thumbH, VanillaPanel.FACE);
         }
     }
 
     /**
-     * Left-aligned, squeezed down (never up) so a long gene name still fits its
-     * row.
-     *
-     * <p><b>Every string this window draws goes through here</b>, not just the
-     * gene names it was written for. The window is
-     * {@link ResearchShelfMenu#WIDTH} wide, which leaves
-     * {@link ResearchShelfMenu#LIST_W} of usable measure - about thirty-two
-     * characters - and four of the fixed captions were longer than that and
-     * drawn raw, so they ran straight out through the frame and over whatever
-     * was beside it. They are shorter now <i>and</i> fitted: the first stops it
-     * looking squeezed, the second stops the next one being a bug.
+     * Left-aligned, squeezed down (never up) so a long string still fits.
+     * <b>Every string this window draws goes through here</b> - the window is
+     * {@link ResearchShelfMenu#WIDTH} wide and captions drawn raw once ran out
+     * through the frame.
      */
     private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int colour) {
         float w = this.font.width(text);

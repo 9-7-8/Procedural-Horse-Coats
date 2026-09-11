@@ -7,19 +7,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 
 /**
- * <b>Tell the client what the shelf holds, the moment it opens.</b>
+ * <b>Opening an Equine Research Shelf ticks "build a shelf".</b>
  *
- * <p>An Equine Research Shelf's contents are a set of gene keys on the block
- * entity, not items in slots, so none of it reaches the client through the
- * ordinary container sync - the menu has three slots and the list is not one of
- * them. Every <i>change</i> pushes a {@code ShelfSyncPayload} from the menu
- * itself; this is the one push that has no change behind it, and without it a
- * freshly opened shelf draws as empty until you touch something.
- *
- * <p>It is an event rather than a line in the menu's constructor because the
- * menu is built before the player is listening to it: {@code openMenu} creates
- * the menu, <i>then</i> sends the open packet. Sending from the constructor
- * would arrive first and be dropped.
+ * <p>It also used to push the shelf's contents at the client, because they
+ * were a set of gene keys rather than items in slots. They are slots now, and
+ * the ordinary container sync carries them, so only the checklist tick is left.
+ * Opening one is proof enough of having built one, and it needs no hook in the
+ * block-placement path to say so.
  */
 @EventBusSubscriber
 public final class ShelfOpenSync {
@@ -29,10 +23,7 @@ public final class ShelfOpenSync {
 
     @SubscribeEvent
     static void onOpen(PlayerContainerEvent.Open event) {
-        if (event.getContainer() instanceof ResearchShelfMenu shelf) {
-            shelf.syncOnOpen();
-            // Opening one is proof enough of having built one, and it needs no
-            // hook in the block-placement path to say so.
+        if (event.getContainer() instanceof ResearchShelfMenu) {
             HorseProgress.complete(event.getEntity(), ProgressTask.BUILD_SHELF);
         }
     }

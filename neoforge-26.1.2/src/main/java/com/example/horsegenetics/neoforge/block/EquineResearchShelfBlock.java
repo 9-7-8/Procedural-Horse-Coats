@@ -1,17 +1,13 @@
 package com.example.horsegenetics.neoforge.block;
 
-import com.example.horsegenetics.neoforge.data.ModDataComponents;
-import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.menu.ResearchShelfMenu;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -22,8 +18,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * <b>The Equine Research Shelf.</b> A bookshelf that holds research papers -
- * one of each gene - and will copy any of them onto a blank book for as long as
- * the original stays in it.
+ * one of each gene, in a chest's worth of slots - and will copy any of them
+ * onto a blank book for as long as the original stays in it.
  *
  * <h2>What it is for</h2>
  * It makes gene knowledge <b>physical</b>. A paper you found is a paper you can
@@ -88,24 +84,8 @@ public class EquineResearchShelfBlock extends BaseEntityBlock {
                         EquineResearchShelfBlockEntity::tick);
     }
 
-    /**
-     * <b>Give the books back.</b> Called when the block stops being this block -
-     * broken, replaced, exploded. Without it a shelf full of a season's
-     * collecting would vanish on a misplaced pickaxe, which is the kind of loss
-     * that makes people not use a feature at all.
-     */
-    @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level,
-                                               BlockPos pos, boolean movedByPiston) {
-        if (level.getBlockEntity(pos) instanceof EquineResearchShelfBlockEntity shelf) {
-            for (String geneKey : shelf.storedGenes()) {
-                ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
-                paper.set(ModDataComponents.RESEARCH_GENE.get(), geneKey);
-                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), paper);
-            }
-        }
-        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
-    }
+    // Breaking it drops the papers from EquineResearchShelfBlockEntity's
+    // preRemoveSideEffects, where vanilla's chests do it - see there.
 
     // No enchantment-power override: 26.1.2 has no getEnchantPowerBonus hook on
     // Block, and enchanting power is a block tag in this version. Adding this

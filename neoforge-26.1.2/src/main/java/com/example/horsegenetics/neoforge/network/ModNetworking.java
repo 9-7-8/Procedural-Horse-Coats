@@ -156,18 +156,6 @@ public final class ModNetworking {
                         com.example.horsegenetics.neoforge.client.ClientProgress.accept(payload.done()))
         );
 
-        registrar.playToClient(
-                ShelfSyncPayload.TYPE,
-                ShelfSyncPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() -> {
-                    if (net.minecraft.client.Minecraft.getInstance().player != null
-                            && net.minecraft.client.Minecraft.getInstance().player.containerMenu
-                                    instanceof com.example.horsegenetics.neoforge.menu.ResearchShelfMenu menu) {
-                        menu.acceptStored(payload.geneKeys());
-                    }
-                })
-        );
-
         registrar.playToServer(
                 ShelfActionPayload.TYPE,
                 ShelfActionPayload.STREAM_CODEC,
@@ -178,10 +166,7 @@ public final class ModNetworking {
                     if (context.player() instanceof ServerPlayer serverPlayer
                             && serverPlayer.containerMenu
                                     instanceof com.example.horsegenetics.neoforge.menu.ResearchShelfMenu menu) {
-                        switch (payload.action()) {
-                            case SELECT -> menu.selectGene(payload.geneKey());
-                            case WITHDRAW -> menu.withdraw(payload.geneKey());
-                        }
+                        menu.selectGene(payload.geneKey());
                     }
                 })
         );
