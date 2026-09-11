@@ -64,7 +64,10 @@ and mixes.
 **Genes beyond real biology.** Alongside the natural coat genes, there's a
 whole layer of magical genes with no real-world counterpart: particle
 trails, glowing manes, size and speed genes, water-walking, milk that isn't
-milk, and more - built to combine in ways nobody explicitly coded.
+milk, and more - built to combine in ways nobody explicitly coded. A breed
+carries only the magic (and the disorders) it was made with; stray magical
+traits turn up in unbred wild horses, and breeding them into a line is up to
+you.
 
 **Write your own genes with no code.** An in-browser
 [gene creator](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/gene-creator/)

@@ -1015,7 +1015,7 @@ record Breed(String id, String name, boolean magical, List&lt;String&gt; biomes,
              double spawnWeight, Set&lt;BreedSource&gt; sources,
              Map&lt;String, List&lt;Combo&gt;&gt; genePools, StatScores scores, BreedBands bands,
              double magicChance, Set&lt;String&gt; magicWhitelist, Set&lt;String&gt; magicBlacklist,
-             boolean hardy, List&lt;String&gt; notes, Optional&lt;PriceRange&gt; price) {
+             List&lt;String&gt; notes, Optional&lt;PriceRange&gt; price) {
     boolean constrains(String geneKey);
     boolean allows(BreedSource source);      // the four-way checklist
     boolean hasSpawnEgg();                   // == allows(SPAWN_EGG)

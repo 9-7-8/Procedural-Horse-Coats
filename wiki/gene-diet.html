@@ -127,7 +127,8 @@
     <li><strong>No named breed has any of it.</strong> <code>DietGene</code>
         returns true from <code>Gene.feralOnly()</code>, which is new with this
         gene: <code>BreedFounder</code> forces such a locus to its wild type on
-        every breed, and leaves it out of the geometric magic draw. A lava-eating
+        every breed. (Every magical gene a breed does not name is forced wild too
+        now; <code>feralOnly</code> predates that and says the same thing louder.) A lava-eating
         Shire is not a breed trait. A breed that genuinely wanted one could still
         name the locus in its own pool &mdash; that check runs first.</li>
     <li><strong>A founder is never a carrier.</strong> The founder table lists

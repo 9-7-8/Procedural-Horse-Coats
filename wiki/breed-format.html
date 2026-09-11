@@ -48,10 +48,6 @@
   "spawn_time": "any",
   "biomes": ["minecraft:forest", "minecraft:plains"],
   "price": [8, 14],
-  "hardy": false,
-  "magic_chance": 0.2,
-  "magic_whitelist": [],
-  "magic_blacklist": [],
   "stats": { "speed": 5, "jump": 5, "health": 7, "size": [0.95, 1.24] },
   "genes": {
     "horsegenetics.extension": [
@@ -139,23 +135,6 @@
     <td><code>HorsePrices.DEFAULT_PRICE</code>, which owns the number. What a signed
         transfer paper for one costs at the cowboy&rsquo;s, rolled per horse inside the
         range.</td>
-</tr>
-<tr>
-    <td><code>hardy</code></td>
-    <td><code>true</code> / <code>false</code></td>
-    <td><code>false</code> &mdash; the breed carries every disorder at the global founder
-        rate, so a bred line can still surface a carrier. <code>true</code> forces every
-        implemented disorder locus clear.</td>
-</tr>
-<tr>
-    <td><code>magic_chance</code></td>
-    <td>0&ndash;1</td>
-    <td><code>0.20</code>, halving per extra gene drawn (a geometric draw).</td>
-</tr>
-<tr>
-    <td><code>magic_whitelist</code> / <code>magic_blacklist</code></td>
-    <td>gene keys</td>
-    <td>no restriction. A non-empty whitelist restricts the draw to those genes.</td>
 </tr>
 <tr>
     <td><code>stats</code></td>
@@ -258,9 +237,13 @@
 <p>
     Every gene the breed does not name is handled for it. Coat genes and the modifiers a
     coat gene reads (<code>Gene.coatDependsOn()</code>) are forced <strong>wild</strong>, so
-    a breed cannot leak a pattern it never asked for; disorder genes keep their global
-    rates; the four body-stat genes come from <code>stats</code>; other magical genes come
-    from the <code>magic_chance</code> draw.
+    a breed cannot leak a pattern it never asked for. So is every <strong>magical</strong>
+    gene and every <strong>disorder</strong> (<code>HealthContribution</code>): a breed is
+    exactly its sheet, with no stray magic and no background disorder rate. A breed that
+    should sometimes carry a disorder names it, with the clear pair at the larger weight.
+    The four body-stat genes come from <code>stats</code>; the natural performance genes
+    keep their wild roll. Only <strong>Feral Mixed</strong>, the unbred population, rolls
+    everything at random.
 </p>
 
 <h2>Epigenetic bands</h2>

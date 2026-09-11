@@ -27,6 +27,86 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-11b">2026-09-11 &mdash; a breed is exactly its sheet; the designer draws, asks and explains</h2>
+
+<p>
+    The owner's fourteen-point list after walking the new designer, and one principle that
+    fell out of it: <strong>now that breeds are designed, magic in a breed is a design
+    decision</strong>. Everything is <a href="verification.html#breeds-exact">waiting in
+    game</a>.
+</p>
+
+<h3>No stray magic, no background disorders</h3>
+
+<ul>
+    <li><strong><code>BreedFounder</code> forces every magical gene and every disorder the
+        breed does not name to wild.</strong> The geometric magic draw, <code>magic_chance</code>,
+        the white/blacklists and <code>hardy</code> are gone from the record, parser, writer
+        and all 49 files; <code>BreedFounder.plate</code> went with them, since a founder is
+        now what the plate was. <strong>Feral Mixed</strong> - the unbred population - is the
+        only place random magic or an unlisted disorder comes from
+        (<a href="breeds.html#magic">breeds</a>).</li>
+    <li><strong>Nine breeds relied on the background rate for disorders their sheets
+        name</strong>, so they now list them at the wild carrier rates: HYPP, PSSM1 and HERDA
+        on the Quarter Horse and Paint, SCID, CA and LFS on the Arabian, GBED and HERDA on
+        both Mustangs, PSSM1 on the Percheron and Shire, ACAN on the Miniature and Friesian,
+        megaesophagus on the Friesian. Gap 68 (&ldquo;disorders are global&rdquo;) closed
+        by the same move.</li>
+    <li><strong>Stables were left alone</strong>: a generated stable still adds its own
+        extra magic to the breeds it places (<a href="stables.html">stables</a>). That is a
+        separate ladder, and whether it should go too is the owner's call.</li>
+    <li>The spawn egg's breed list starts at <strong>Feral Mixed</strong> instead of
+        &ldquo;(none)&rdquo;, in the screen and the horse designer. Drop-in breeds were
+        already in it - <code>Breeds.all()</code> includes them on the client.</li>
+</ul>
+
+<h3>The designer</h3>
+
+<ul>
+    <li><strong>Health, speed and jump are always asked</strong>, and every number on
+        those steps is the game's own curve (<code>BreedStatCurve.factor</code>, exported as
+        <code>statFactor</code>) turned into hearts, m/s and blocks, with a 1-10 table and
+        what each score means next to vanilla's range.</li>
+    <li><strong>The eye step is swatches</strong> (<code>eyeHuesJson</code>): iris, sclera,
+        wedge and wedge colour, glow and third eye, with &ldquo;same in both eyes&rdquo;.
+        Iris and sclera start named at brown and white. Above them, a strip of two dozen
+        rolled founders' eyes - <code>breedFounderJson</code> now returns what
+        <code>Eyes.resolve</code> paints - so champagne's amber and a white pattern's blue
+        appear on their own, and the gene responsible is named. The page does not know which
+        genes do that; <code>Eyes.force</code> already did it.</li>
+    <li><strong>Ticking a gene names one pair</strong>: the outcome measured to cover the
+        most, on its homozygote where it has one; eye genes at their wild type. Check / uncheck
+        all and &ldquo;every pair with X&rdquo; on genes of three or more alleles.</li>
+    <li><strong>Epigenetics are always open</strong> under a chosen gene, one row per
+        value: wild, within a range (two sliders) or the same on every horse. A colour triple
+        is one colour picker; a hue is a hue slider; a seed is &ldquo;same pattern&rdquo;
+        with a shuffle.</li>
+    <li><strong>Colour search</strong>: type any CSS colour and see only the genes whose
+        numbers can be a colour (<code>colourableJson</code>, derived from each schema - three
+        <code>_r/_g/_b</code> channels, or a hue scalar spanning 0-360); adding one names its
+        coloured form and locks the numbers to it.</li>
+    <li>Size is ticked by default; biomes are a grouped checklist plus a box for modded ids;
+        the last step's button is <strong>Export breed</strong>.</li>
+</ul>
+
+<h3>The jar</h3>
+
+<ul>
+    <li>The gene pictures go in as <strong>64-pixel copies written at build time</strong>
+        (<code>shrinkGeneIcons</code>), nearest-neighbour - a smooth resize made gradients PNG
+        compresses worse than the originals, and the jar grew. The <code>*Tool</code> classes
+        (wiki bakes) and the creator's example genes are no longer packed. 3.96 MB, of which
+        the pictures are half a megabyte. Nothing else from <code>wiki/</code> was ever in the
+        jar; the pictures are the one thing the game draws. Gap 187 closed.</li>
+</ul>
+
+<p class="muted">
+    Tests run: the breed classes (founder, plate, parser, breeds, stat curve), all green;
+    the designer driven in headless Chrome. The full <code>:common:test</code> was not run -
+    a full run would still need to confirm nothing outside the breed package rolled a founder
+    expecting stray magic. Gaps 68, 187 and 189 closed.
+</p>
+
 <h2 id="d2026-09-11a">2026-09-11 &mdash; breeds you can drop in, a designer that asks one thing at a time</h2>
 
 <p>
@@ -100,14 +180,13 @@
     <li><strong>The gene hover card has its picture</strong> - the baked icon at the left,
         text round it - in the spawn egg screen and the horse designer (one screen in two
         places, same constants) and in the breed designer. The icons reach the jar at build
-        time; <a href="known-gaps.html#gap-187">that doubled it</a>.</li>
+        time; that doubled it (gap 187, closed the next session).</li>
 </ul>
 
 <p class="muted">
     Tests run: every breed class, both goldens, the gene files, showcase and white-rate -
-    all green. The full <code>:common:test</code> was not run. New gaps
-    <a href="known-gaps.html#gap-187">187</a>&ndash;<a href="known-gaps.html#gap-189">189</a>;
-    gap 83 closed.
+    all green. The full <code>:common:test</code> was not run. New gaps 187&ndash;189
+    (<a href="known-gaps.html#gap-188">188</a> is still open); gap 83 closed.
 </p>
 
 <h2 id="d2026-09-10j">2026-09-10 (late) &mdash; twenty-four genes out of intake, and what only the renders caught</h2>

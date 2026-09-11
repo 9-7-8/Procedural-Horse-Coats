@@ -35,6 +35,57 @@
     </p>
 </div>
 
+<h2 id="breeds-exact">&sect;0-CB &mdash; Breeds are exactly their sheets; the breed designer's second pass (2026-09-11, NOT looked at in game)</h2>
+
+<p>The designer was driven in a headless browser again: all sixteen steps render, the eye strip
+    follows champagne and a white pattern, the colour search locks a hue, a range slider lands in
+    the file, the biome checklist and a modded id land in the file, and the last step's button
+    exports. The breed tests are green. <strong>Nothing below has been in the game.</strong>
+    Design: <a href="breeds.html#magic">where magic comes from</a>,
+    <a href="breed-format.html">the format</a>.</p>
+
+<h3>In the game</h3>
+
+<ul>
+    <li><strong>No stray magic on a breed.</strong> Find a few wild herds of natural breeds
+        (or roll founders from the spawn egg with a breed picked, and hit Randomize a dozen
+        times): no magical coat, particle or ability the breed does not list. A vanilla-spawned
+        horse (Feral Mixed) still can carry one - that is now the only place random magic comes
+        from.</li>
+    <li><strong>No surprise disorders.</strong> Tame a handful of Quarter Horses: some may
+        carry HYPP, PSSM1 or HERDA (the sheet lists them). Tame a handful of Thoroughbreds or
+        Friesians and nothing outside their lists should ever show. The Breeds tab's detail
+        line reads &ldquo;Carries no disorder but the ones listed below.&rdquo;</li>
+    <li><strong>Custom spawn egg: the Breed list starts at Feral Mixed</strong>, not
+        &ldquo;(none)&rdquo;. Picking it still leaves the genome alone. A drop-in breed from
+        <code>.minecraft/phc/breeds/</code> should be in the same list.</li>
+    <li><strong>Gene pictures in the hover card</strong> are now 64-pixel copies made at build
+        time (nearest-neighbour) instead of the wiki's full-size ones. Check they look right at
+        your GUI scale - if they are jagged, the fix is a larger copy in
+        <code>shrinkGeneIcons</code> (<code>neoforge-26.1.2/build.gradle</code>).</li>
+    <li><strong>The jar</strong> no longer carries the wiki tool classes or the example
+        genes. Nothing in the game used them; if anything in the log says a
+        <code>*Tool</code> class is missing, that assumption was wrong.</li>
+</ul>
+
+<h3>In the breed designer (the browser)</h3>
+
+<ul>
+    <li><strong>Walk a breed through all sixteen steps</strong> and note anything
+        confusing. The last step's button is <strong>Export breed</strong>.</li>
+    <li><strong>Eyes:</strong> brown and white from the start; click swatches. Add champagne
+        or a white pattern (KIT, splash) on the earlier steps and the strip at the top of the
+        eye step should show amber or blue eyes on some founders, naming the gene. With two
+        iris colours ticked and &ldquo;same in both eyes&rdquo;, some founders have one of
+        each - the two eyes are separate loci and a breed file draws each on its own.</li>
+    <li><strong>Colour search</strong> (markings, abilities, eyes): type
+        &ldquo;orange&rdquo; or a hex code; only genes whose numbers can be a colour are
+        listed; &ldquo;add in this colour&rdquo; names the gene and locks it.</li>
+    <li><strong>How it varies</strong> under every chosen gene: wild, within a range, or the
+        same on every horse. Watch the preview while moving a range - it should stay inside
+        it.</li>
+</ul>
+
 <h2 id="breeds-overhaul">&sect;0-CA &mdash; Drop-in breeds, the new breed designer, size by zygosity, hover pictures (2026-09-10, NOT looked at in game)</h2>
 
 <p>The designer itself was driven in a headless browser - every step renders, the preview and
@@ -88,8 +139,8 @@
     <li><strong>Custom spawn egg:</strong> hover a gene. The blurb panel is wider and
         carries the gene's baked picture at the left, text wrapping round it. A gene with no
         picture (the eye loci, the health genes) should show text only, not a
-        purple-and-black square. The pictures ship inside the jar from
-        <code>wiki/assets/gene-icons/</code>.</li>
+        purple-and-black square. The pictures ship inside the jar as small copies of
+        <code>wiki/assets/gene-icons/</code>, made at build time.</li>
     <li><strong>Horse designer:</strong> the same, on the canvas (seen in a headless
         browser).</li>
     <li><strong>Breed designer:</strong> any underlined gene name.</li>
@@ -98,13 +149,10 @@
 <h3>The breed designer</h3>
 
 <ul>
-    <li><strong>Walk a breed from step 1 to 14</strong> and note anything confusing -
-        that was the whole brief. The left pane is always the options, the right always the
-        horse; <strong>Chosen so far</strong> lists every step and jumps back to any.</li>
+    <li>The left pane is always the options, the right always the horse;
+        <strong>Chosen so far</strong> lists every step and jumps back to any.</li>
     <li><strong>Reroll example founder</strong> (top right of the horse) should only ever
-        show traits you picked: no stray magic. The herd strip under it is real founders and
-        may carry stray magic, at the rate the &ldquo;Price and stray magic&rdquo; step
-        sets.</li>
+        show traits you picked - and so should the six founders under it.</li>
     <li><strong>Magical markings filters</strong> are measured facts
         (<code>marking-facts.json</code>): check a few against your eye. &ldquo;Covers at
         most 5%&rdquo; should be small marks; &ldquo;white only&rdquo; should be white;
@@ -196,8 +244,8 @@
         she's healed."</em> Before, potion milk ignored health, and plain milk silently did
         nothing.</li>
     <li><strong>Breed plates carry no stray magic.</strong> The Breeds tab's horse is a real
-        founder roll minus every magical gene the breed does not name. None of the 49 should
-        show a magical coat.</li>
+        founder roll, and no founder carries a magical gene its breed does not name (&sect;0-CB).
+        None of the 49 should show a magical coat.</li>
     <li><strong>Crossbred horses never fill a Breeds row</strong> - only pure-breds do. That
         is how it already worked; it is now the rule, owner's call.</li>
 </ul>
@@ -5578,7 +5626,7 @@
         <strong>&ldquo;PATN1 (leopard pattern)&rdquo;</strong> and
         <strong>&ldquo;PATN2 (blanket pattern)&rdquo;</strong> rows.
         The <strong>Breed button is now a dropdown</strong> (was a cycle button) &mdash;
-        check it scrolls all 49 breeds + &ldquo;(none)&rdquo;, that a pick rolls that
+        check it scrolls all 49 breeds + &ldquo;Feral Mixed&rdquo;, that a pick rolls that
         breed into the editor, and that clicking off it dismisses it.</li>
     <li>Add Leopard complex &rarr; <code>LP/lp</code>; add PATN1 &rarr; <code>PATN1/n</code>
         &rarr; <strong>leopard</strong> (white body, round dark spots).</li>
@@ -6303,8 +6351,8 @@
         editor has a <code>Breed:</code> cycle button (right column, under
         Sex). Cycling to a breed should load a fresh wild individual of it -
         genes, epigenetics and sex all change - and the spawned horse&rsquo;s
-        panel should show that breed. Cycle to <code>(none)</code> and it spawns
-        Feral Mixed with whatever genome is in the editor.</li>
+        panel should show that breed. Pick <code>Feral Mixed</code> (the first entry) and it
+        spawns an unbred horse with whatever genome is in the editor.</li>
     <li><strong>Breed reads on the body &mdash; big horses are bigger now.</strong>
         A <b>Percheron / Shire / Clydesdale</b> should visibly <b>tower over the
         player</b> (scale ~1.2&ndash;1.4); a Quarter Horse should look ordinary
@@ -7370,7 +7418,7 @@ the <a href="session-log.html">session log</a>.</em></p>
         list is usable (was 41 clicks) and that the panel clamps on-screen for a
         gene low in the list.</li>
     <li><strong>Randomize</strong> button (new 2026-09-05, right column under
-        Breed). With <strong>Breed: (none)</strong> it rolls a fully random
+        Breed). With <strong>Breed: Feral Mixed</strong> it rolls a fully random
         genome (<code>Genome.random</code>); with a breed selected it rolls a
         fresh founder of that breed (<code>BreedFounder.roll</code>) so the
         alleles stay inside the breed's pools. The chosen Mare/Stallion is kept.

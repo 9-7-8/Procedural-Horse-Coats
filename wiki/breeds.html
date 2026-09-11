@@ -140,11 +140,11 @@
 <tr><td><strong>Coat genes</strong> (extension, agouti, the dilutions, every white-pattern locus)</td>
     <td>Forced to <strong>wild type</strong>. A breed is visually unified &mdash; a Friesian is jet black because nothing switches a pattern or dilution on. A breed that <em>should</em> have a pattern lists it with a rate.</td></tr>
 <tr><td><strong>Disorder genes</strong> (ACAN, PLOD1, MET&hellip;)</td>
-    <td>Keep their <strong>global</strong> founder rates, so any bred line can still surface a carrier &mdash; unless the breed is flagged <strong>hardy</strong> (&ldquo;generally sound&rdquo; on the sheet: Banker, Canadian, Cleveland Bay, Exmoor, Icelandic, and a few landraces), which clears every implemented disorder locus.</td></tr>
+    <td>Forced <strong>clear</strong>. A breed carries exactly the disorders its sheet lists &mdash; the Quarter Horse names HYPP, PSSM1 and HERDA at their carrier rates, the Arabian SCID, CA and LFS &mdash; and nothing else ever turns up on a founder. There is no background rate. A foal can still inherit one from a parent of another line.</td></tr>
 <tr><td><strong>The four magical body-stat genes</strong> (size, speed, health, jump)</td>
     <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder carry that gene&rsquo;s pushing allele <em>and</em> writes the target onto its copies - two copies for speed, health and jump; for size one copy between 0.7x and 1.3x and two outside it; an axis with no band is left wild. <a href="#founder-only">Founders only</a>.</td></tr>
 <tr><td><strong>Other magical genes</strong> (mane/tail colour, healer, zebra, milk, light, particle, verdant&hellip;)</td>
-    <td>Forced wild, then a <a href="#magic">geometric draw</a> switches a few back on.</td></tr>
+    <td>Forced <strong>wild</strong>. A breed has the magic it names and no other &mdash; see <a href="#magic">where magic comes from</a>.</td></tr>
 <tr><td><strong>Any gene&rsquo;s epigenetic numbers</strong> (how far a splash covers, how wide a dorsal stripe is)</td>
     <td>Rolled from the value&rsquo;s own design range. A breed that names a <a href="#bands-epi">band</a> for one gets every founder written inside it instead. <a href="#founder-only">Founders only</a>.</td></tr>
 </tbody>
@@ -250,18 +250,22 @@
     line to a standard is the player&rsquo;s job, not the game&rsquo;s.
 </p>
 
-<h2 id="magic">Magic-gene frequency</h2>
+<h2 id="magic">Where magic comes from</h2>
 <p>
-    Every breed defaults to a <strong>20%</strong> magic chance. The four
-    body-stat magic genes are excluded (they are on nearly every horse anyway);
-    every other magical gene starts off, and then a <strong>geometric</strong>
-    draw switches some on: with probability <em>p</em> (0.20) pick one eligible
-    magical gene at random and give it one variant copy; then again at
-    <em>p</em>/2 (0.10), then <em>p</em>/4 (0.05), halving each time, to a cap of
-    10. So about one wild breed horse in five carries a magical trait, one in
-    fifty carries two, and a horse trailing three is a genuine curiosity. A breed
-    may set its own chance or a whitelist / blacklist of gene keys; none of the
-    built-ins do yet.
+    <strong>A breed's founders carry exactly the magic the breed names.</strong> A
+    zombie breed is a set of genes that make it look rotted, a temper and a slow
+    speed score, and every founder is that; it never throws a galaxy coat or a
+    healer because a dice roll said so. Magic in a breed is a design decision, made
+    in the <a href="breed-designer/index.html">breed designer</a> or the file.
+</p>
+<p>
+    Random magic still exists, in one place: <strong>Feral Mixed</strong>, the unbred
+    population a vanilla horse spawn and a breedless custom egg belong to. It rolls
+    every gene from that gene's own founder table, magical ones included, so a feral
+    horse is where a stray magical trait turns up &mdash; and breeding it into a line
+    is how a player gets magic a breed was not designed with. (Generated stables
+    still add their own extra magic on top of the breeds they place &mdash; see
+    <a href="stables.html">stables</a>.)
 </p>
 
 <h2 id="sources">Where a breed may come from</h2>
@@ -357,8 +361,9 @@
     breed token rides along in <code>SpawnCustomHorsePayload</code> and is
     stamped on the spawned horse (<code>record.withBreed</code>) &mdash; but the
     label alone changes no number, so a horse whose genome you then hand-edited is
-    whatever you edited it into. <code>(none)</code> leaves the current genome alone
-    and spawns Feral Mixed.
+    whatever you edited it into. The first entry, <strong>Feral Mixed</strong>, is no
+    preset: it leaves the current genome alone and spawns an unbred horse. Drop-in
+    breeds from <code>.minecraft/phc/breeds/</code> are in the list with the rest.
 </p>
 
 <h2>Not modelled (yet)</h2>
@@ -403,18 +408,18 @@
 <tr><td>American Paint</td><td>plains, savanna, windswept savanna</td><td>14.2&ndash;16.0</td><td>7</td><td>5</td><td>6</td><td>Very common</td><td>tobiano + sabino + three <code>KIT</code> boosters (<code>W20</code>, <code>W35</code>, <code>W32</code>, <code>W34</code>) + frame overo + splash at <em>both</em> loci (<code>SW1</code> and <code>SW2</code>). <code>O/O</code> lethal white is the breeding hazard, and <a href="gene-scn4a.html">HYPP</a> is the other one.</td></tr>
 <tr><td>Andalusian</td><td>plains, forest, sunflower plains, meadow</td><td>15.0&ndash;16.2</td><td>6</td><td>8</td><td>5</td><td>Moderate</td><td>black-biased; often grey. Baroque mane not modelled.</td></tr>
 <tr><td>Appaloosa</td><td>taiga, forest, windswept hills</td><td>14.2&ndash;16.0</td><td>6</td><td>7</td><td>7</td><td>Moderate</td><td>the defining leopard-complex breed &mdash; ~75% carry <code>LP</code>, PATN1-dominant, so most of a herd shows leopard / fewspot / blanket. Light roan too, and the only breed carrying <code>SW4</code> &mdash; the splash allele described in one Appaloosa family.</td></tr>
-<tr><td>Arabian</td><td>desert, savanna, badlands, savanna plateau</td><td>14.2&ndash;15.3</td><td>7</td><td>6</td><td>9</td><td>Common</td><td>bay-biased; grey common; light sabino. Dished face not modelled. SCID/CA/LFS not built.</td></tr>
-<tr><td>Banker Horse</td><td>beach, stony shore, river</td><td>13.2&ndash;14.2</td><td>6</td><td>4</td><td>9</td><td>Rare</td><td>hardy feral Spanish stock; primitive marks, sabino, occasional cream.</td></tr>
+<tr><td>Arabian</td><td>desert, savanna, badlands, savanna plateau</td><td>14.2&ndash;15.3</td><td>7</td><td>6</td><td>9</td><td>Common</td><td>bay-biased; grey common; light sabino. Dished face not modelled. Carries SCID, CA and LFS at carrier rates.</td></tr>
+<tr><td>Banker Horse</td><td>beach, stony shore, river</td><td>13.2&ndash;14.2</td><td>6</td><td>4</td><td>9</td><td>Rare</td><td>feral Spanish stock; primitive marks, sabino, occasional cream.</td></tr>
 <tr><td>Belgian Draft</td><td>plains, forest, meadow</td><td>16.0&ndash;17.0</td><td>3</td><td>2</td><td>6</td><td>Common</td><td>chestnut; roan common; occasional cream/pearl. Flaxen not built.</td></tr>
 <tr><td>Camargue</td><td>swamp, mangrove swamp, river, beach</td><td>13.2&ndash;14.2</td><td>5</td><td>4</td><td>9</td><td>Uncommon</td><td>fixed grey &mdash; born dark, whitens with age (age not modelled, so effectively always grey).</td></tr>
-<tr><td>Canadian Horse</td><td>snowy taiga, grove, snowy plains</td><td>14.0&ndash;16.0</td><td>6</td><td>5</td><td>9</td><td>Rare</td><td>hardy; black-biased; some grey / roan.</td></tr>
+<tr><td>Canadian Horse</td><td>snowy taiga, grove, snowy plains</td><td>14.0&ndash;16.0</td><td>6</td><td>5</td><td>9</td><td>Rare</td><td>black-biased; some grey / roan.</td></tr>
 <tr><td>Caspian Pony</td><td>desert, badlands, savanna</td><td>9.0&ndash;11.2</td><td>5</td><td>4</td><td>7</td><td>Rare</td><td>bay-biased; minimal white. Fragile bones &rarr; low heartiness, not a lethal gene.</td></tr>
-<tr><td>Cleveland Bay</td><td>plains, forest, meadow</td><td>16.0&ndash;16.2</td><td>6</td><td>6</td><td>8</td><td>Rare</td><td>hardy; fixed <code>A_</code> + E-heavy extension &rarr; always bay with black points, minimal white.</td></tr>
+<tr><td>Cleveland Bay</td><td>plains, forest, meadow</td><td>16.0&ndash;16.2</td><td>6</td><td>6</td><td>8</td><td>Rare</td><td>fixed <code>A_</code> + E-heavy extension &rarr; always bay with black points, minimal white.</td></tr>
 <tr><td>Clydesdale</td><td>taiga, snowy taiga, grove, river</td><td>16.2&ndash;18.0</td><td>3</td><td>3</td><td>5</td><td>Uncommon</td><td>black-biased; tobiano; heavy sabino + splash &rarr; big white legs / face. Feathering not built.</td></tr>
 <tr><td>Connemara Pony</td><td>windswept hills / gravelly hills / forest, stony shore</td><td>13.0&ndash;14.2</td><td>5</td><td>8</td><td>8</td><td>Moderate</td><td>often grey; occasional cream / dun.</td></tr>
 <tr><td>Dales Pony</td><td>windswept hills / gravelly hills, taiga</td><td>13.2&ndash;14.2</td><td>5</td><td>6</td><td>9</td><td>Rare</td><td>black-biased; some grey / roan; occasional dun. Feathering not built.</td></tr>
 <tr><td>Dartmoor Pony</td><td>windswept hills, meadow, forest</td><td>11.2&ndash;12.2</td><td>4</td><td>5</td><td>8</td><td>Rare</td><td>any base; some grey / roan; occasional cream.</td></tr>
-<tr><td>Exmoor Pony</td><td>windswept hills, taiga, snowy slopes</td><td>11.2&ndash;12.3</td><td>4</td><td>4</td><td>10</td><td>Rare</td><td>hardy landrace; bay-biased; nd1 primitive marks, no white/dilution. Pangare not built.</td></tr>
+<tr><td>Exmoor Pony</td><td>windswept hills, taiga, snowy slopes</td><td>11.2&ndash;12.3</td><td>4</td><td>4</td><td>10</td><td>Rare</td><td>landrace; bay-biased; nd1 primitive marks, no white/dilution. Pangare not built.</td></tr>
 <tr><td>Falabella</td><td>plains, sunflower plains, meadow</td><td>6.0&ndash;8.0</td><td>2</td><td>1</td><td>3</td><td>Uncommon</td><td>every dilution + tobiano + sabino + splash. Smallest breed &mdash; size band at the minimum scale.</td></tr>
 <tr><td>Norwegian Fjord</td><td>snowy taiga, frozen river, snowy slopes, grove</td><td>13.2&ndash;14.2</td><td>4</td><td>3</td><td>9</td><td>Uncommon</td><td>E_ + <code>a/a</code> + near-fixed dun &rarr; brown dun with primitive stripes and the two-tone <a href="gene-dun.html#midtstol">midtstol</a> mane. Near-fixed pangare too.</td></tr>
 <tr><td>Friesian</td><td>plains, forest, meadow, river</td><td>15.0&ndash;17.0</td><td>5</td><td>4</td><td>4</td><td>Moderate</td><td>fixed <code>E/E</code> <code>a/a</code>, no white or dilution &mdash; always jet black. Feathering / wavy mane not built.</td></tr>
@@ -422,16 +427,16 @@
 <tr><td>Hackney</td><td>plains, sunflower plains, meadow</td><td>14.2&ndash;16.0</td><td>6</td><td>3</td><td>4</td><td>Uncommon</td><td>bay-biased; occasional roan; light splash. High knee action = gait, not built.</td></tr>
 <tr><td>Haflinger</td><td>cherry grove, meadow, windswept hills, grove</td><td>13.2&ndash;15.0</td><td>5</td><td>5</td><td>8</td><td>Common</td><td>fixed <code>e/e</code> &rarr; chestnut; occasional roan. Flaxen mane not built.</td></tr>
 <tr><td>Hanoverian</td><td>plains, forest, meadow, sunflower plains</td><td>15.3&ndash;17.1</td><td>7</td><td>9</td><td>5</td><td>Very common</td><td>bay-biased; some grey / roan; light splash. The jumping warmblood.</td></tr>
-<tr><td>Icelandic Horse</td><td>snowy plains, ice spikes, frozen / jagged peaks, snowy slopes</td><td>13.0&ndash;14.0</td><td>5</td><td>4</td><td>10</td><td>Moderate</td><td>hardy; every colour &mdash; grey, roan, dun, tobiano, splash. T&ouml;lt = gait, not built.</td></tr>
+<tr><td>Icelandic Horse</td><td>snowy plains, ice spikes, frozen / jagged peaks, snowy slopes</td><td>13.0&ndash;14.0</td><td>5</td><td>4</td><td>10</td><td>Moderate</td><td>every colour &mdash; grey, roan, dun, tobiano, splash. T&ouml;lt = gait, not built.</td></tr>
 <tr><td>Irish Draught</td><td>windswept hills / gravelly hills, taiga, forest</td><td>15.2&ndash;17.0</td><td>5</td><td>7</td><td>8</td><td>Uncommon</td><td>any base; grey / roan; occasional cream / dun. The sport-horse foundation.</td></tr>
-<tr><td>Karabakh</td><td>desert, savanna, badlands</td><td>14.0&ndash;15.0</td><td>7</td><td>5</td><td>8</td><td>Rare</td><td>hardy; bay-biased; grey; occasional cream. Golden sheen not modelled.</td></tr>
-<tr><td>Kiger Mustang</td><td>badlands, eroded / wooded badlands, savanna</td><td>13.0&ndash;14.2</td><td>7</td><td>5</td><td>10</td><td>Rare</td><td>hardy; strongly dun (dorsal + leg bars); occasional cream. Some carry the leopard complex. GBED not built.</td></tr>
+<tr><td>Karabakh</td><td>desert, savanna, badlands</td><td>14.0&ndash;15.0</td><td>7</td><td>5</td><td>8</td><td>Rare</td><td>bay-biased; grey; occasional cream. Golden sheen not modelled.</td></tr>
+<tr><td>Kiger Mustang</td><td>badlands, eroded / wooded badlands, savanna</td><td>13.0&ndash;14.2</td><td>7</td><td>5</td><td>10</td><td>Rare</td><td>strongly dun (dorsal + leg bars); occasional cream. Some carry the leopard complex; GBED and HERDA at carrier rates.</td></tr>
 <tr><td>Knabstrupper</td><td>plains, birch forest, forest, meadow</td><td>14.2&ndash;15.2</td><td>6</td><td>7</td><td>6</td><td>Uncommon</td><td>bred hard for bold leopard &mdash; ~82% carry <code>LP</code>, PATN1-heavy, so leopard and fewspot dominate. Occasional cream; <code>SW1</code> splash.</td></tr>
 <tr><td>Lipizzan</td><td>plains, windswept hills, meadow, sunflower plains</td><td>14.2&ndash;16.1</td><td>5</td><td>7</td><td>7</td><td>Uncommon</td><td>heavy grey &mdash; born dark, whitens. One of the three breeds carrying <code>SW2</code>. Roman nose not modelled.</td></tr>
 <tr><td>Lusitano</td><td>savanna, plains, savanna plateau</td><td>15.0&ndash;16.0</td><td>6</td><td>8</td><td>6</td><td>Moderate</td><td>black-biased; often grey. Convex profile not modelled.</td></tr>
 <tr><td>Marwari</td><td>jungle, sparse / bamboo jungle, savanna</td><td>14.2&ndash;15.2</td><td>7</td><td>5</td><td>9</td><td>Rare</td><td>any base; tobiano; grey; occasional cream / dun. Lyre-shaped ears NOT modelled.</td></tr>
 <tr><td>Morgan</td><td>plains, forest, taiga, meadow</td><td>14.1&ndash;15.2</td><td>6</td><td>6</td><td>8</td><td>Very common</td><td>any base; roan; sabino; <code>SW1</code> splash; occasional cream / dun. Versatile American foundation breed.</td></tr>
-<tr><td>Mustang</td><td>badlands, eroded / wooded badlands, savanna, windswept savanna</td><td>13.2&ndash;15.2</td><td>7</td><td>5</td><td>10</td><td>Moderate</td><td>hardy; wild-type diversity &mdash; every colour, dun, roan, tobiano, sabino, champagne. Some carry the leopard complex.</td></tr>
+<tr><td>Mustang</td><td>badlands, eroded / wooded badlands, savanna, windswept savanna</td><td>13.2&ndash;15.2</td><td>7</td><td>5</td><td>10</td><td>Moderate</td><td>wild-type diversity &mdash; every colour, dun, roan, tobiano, sabino, champagne. Some carry the leopard complex.</td></tr>
 <tr><td>New Forest Pony</td><td>forest, birch / old-growth birch, flower forest</td><td>12.0&ndash;14.2</td><td>5</td><td>6</td><td>8</td><td>Common</td><td>any base; some grey / roan; occasional dun.</td></tr>
 <tr><td>Paso Fino</td><td>savanna, jungle, sparse / bamboo jungle</td><td>13.0&ndash;15.2</td><td>5</td><td>4</td><td>6</td><td>Moderate</td><td>any base; roan; can carry dominant white / <code>W20</code> / <code>W35</code>. Smooth lateral gait not built.</td></tr>
 <tr><td>Percheron</td><td>plains, snowy plains, meadow, sunflower plains</td><td>15.2&ndash;17.3</td><td>4</td><td>3</td><td>6</td><td>Common</td><td>black-biased; heavy grey. Straight-profile draft.</td></tr>
@@ -474,7 +479,7 @@
 
 <h2>Code map</h2>
 <ul>
-    <li><code>common/breed/Breed</code> &mdash; the record: id, name, natural/magical, biomes, spawn weight, source checklist, per-gene pools (as allele tokens), stat scores, epigenetic bands, magic chance / lists, hardy flag, price, notes. A fluent <code>Builder</code>, used by the parser and by the Java escape hatch.</li>
+    <li><code>common/breed/Breed</code> &mdash; the record: id, name, natural/magical, biomes, spawn weight, source checklist, per-gene pools (as allele tokens), stat scores, epigenetic bands, price, notes. A fluent <code>Builder</code>, used by the parser and by the Java escape hatch.</li>
     <li><code>common/breed/Breeds</code> &mdash; the registry: the shipped files, the drop-in folder, <code>FERAL_MIXED</code>; <code>forBiome</code>, <code>from</code>, <code>get</code>, <code>displayName</code>, <code>registerJava</code>. The count is <code>Breeds.all().size()</code>.</li>
     <li><code>common/breed/BreedSource</code> &mdash; the four-way <a href="#sources">source checklist</a>.</li>
     <li><code>common/breed/BreedBands</code> &mdash; the <a href="#bands-epi">epigenetic bands</a> a breed pins.</li>

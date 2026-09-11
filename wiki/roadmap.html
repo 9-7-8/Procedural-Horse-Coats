@@ -895,19 +895,6 @@
         exception and the one to watch: every copy shows, so PSSM1 at 2.5% is the only
         disorder a player is likely to meet by accident, and it is the number most
         likely to want turning.</li>
-
-    <li><strong>Disorders are global, not per breed.</strong> The reference associates
-        each one with particular breeds &mdash; HYPP with Quarter Horses, HERDA with
-        their working lines, SCID and CA with Arabians &mdash; and the mod ignores
-        that: every non-<code>hardy()</code> breed draws every disorder at the same
-        rate. This is consistent with the seven that shipped first (B4GALT7 is
-        &ldquo;Friesian dwarfism&rdquo; and turns up everywhere), so it is a known
-        simplification rather than an oversight. <code>Breed.constrains(key)</code> and
-        <code>breed.founderTable(key)</code> are the machinery it would use; the cost
-        is that <em>every</em> breed would then have to name <em>every</em> disorder it
-        does <em>not</em> have, which is fifty breeds times sixteen loci of
-        boilerplate. Worth doing behind a &ldquo;disorders this breed is prone to&rdquo;
-        list with a global default, not before.</li>
     <li><strong>Nothing here has been play-tested</strong> &mdash; not a scaled horse,
         not a dying foal, not a refused pairing, not the config, and not a wild horse
         born sick. The
