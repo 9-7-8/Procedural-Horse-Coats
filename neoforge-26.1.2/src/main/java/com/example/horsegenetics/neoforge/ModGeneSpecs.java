@@ -13,8 +13,15 @@ import java.util.List;
 
 /**
  * Loads the player's own genes - the JSON files the gene creator
- * ({@code wiki/gene-creator/}) writes - out of
- * {@code config/horsegenetics/genes/} and into the {@link Genes} registry.
+ * ({@code wiki/gene-creator/}) writes - out of {@code .minecraft/phc/genes/}
+ * and into the {@link Genes} registry.
+ *
+ * <p><b>Beside the breeds and the settings</b>, in the mod's one folder
+ * ({@link ModBreedSpecs#ROOT}): {@code phc/genes/}, {@code phc/breeds/} and the
+ * three {@code .toml} files are everything a player is told to touch. It was
+ * {@code config/horsegenetics/genes/} through 0.5.000, and that folder is no
+ * longer read - a gene left there is not loaded, and a saved horse's segment
+ * for it is dropped on load like any unregistered gene's.
  *
  * <p>This is the "and then upload them to the game" half of the tool. Save the
  * file the creator hands you into that folder, restart, and wild horses carry
@@ -32,8 +39,13 @@ import java.util.List;
  */
 public final class ModGeneSpecs {
 
-    /** Relative to the instance's {@code config/} folder. */
-    public static final String FOLDER = "horsegenetics/genes";
+    /** Relative to the game directory - {@code .minecraft} for the vanilla launcher. */
+    public static final String FOLDER = ModBreedSpecs.ROOT + "/genes";
+
+    /** The drop-in folder on this machine. */
+    public static Path folder() {
+        return FMLPaths.GAMEDIR.get().resolve(FOLDER);
+    }
 
     private static final String README = """
             Horse Genetics - drop-in genes
@@ -43,9 +55,14 @@ public final class ModGeneSpecs {
             starts, in filename order. Wild horses will carry it, foals will
             inherit it, and it gets its own segment in the genotype code.
 
-            Make them with the gene creator: wiki/gene-creator/index.html in the
-            mod's repository. It previews the gene on a 3D horse and writes the
-            file for you.
+            Make them with the gene creator, which previews the gene on a 3D
+            horse and writes the file for you:
+
+              https://9-7-8.github.io/Procedural-Horse-Coats/wiki/gene-creator/
+
+            This folder sits beside the mod's others in .minecraft/phc/:
+            breeds/ for drop-in breeds, and breed-spawning.toml, server.toml
+            and client.toml for the settings.
 
             Notes:
               * A gene's "key" must be "<yourmodid>.<gene>" and must be unique.
@@ -63,7 +80,7 @@ public final class ModGeneSpecs {
 
     /** Find, parse and register. Returns how many genes were added. */
     public static int load() {
-        Path dir = FMLPaths.CONFIGDIR.get().resolve(FOLDER);
+        Path dir = folder();
         ensureFolder(dir);
 
         // Reading this triggers Genes' class initialiser, which is what loads

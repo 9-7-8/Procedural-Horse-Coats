@@ -41,8 +41,9 @@ public final class ModBreedSpecs {
 
     /**
      * The mod's own folder in the game directory - {@code .minecraft} for the
-     * vanilla launcher. It holds the breeds folder and the three settings
-     * files, so everything a player is told to touch is in one place.
+     * vanilla launcher. It holds the genes and breeds folders and the three
+     * settings files, so everything a player is told to touch is in one place.
+     * Nothing of this mod's is in {@code config/}.
      */
     public static final String ROOT = "phc";
 
@@ -104,7 +105,8 @@ public final class ModBreedSpecs {
             folder up: switch any of them off, move them to other biomes, make
             them rarer or commoner - or switch them all off, and Feral Mixed
             too, and your world has only the breeds in this folder. The mod's
-            other settings are beside it (server.toml, client.toml).
+            other settings are beside it (server.toml, client.toml), and so is
+            ../genes/, for drop-in genes.
 
             Notes:
               * A breed's "id" must be lower case and unique. A file whose id
