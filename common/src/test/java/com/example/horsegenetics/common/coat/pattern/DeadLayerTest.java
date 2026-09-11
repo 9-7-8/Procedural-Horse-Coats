@@ -43,8 +43,11 @@ import static org.junit.jupiter.api.Assertions.fail;
  *       -200 drives the texel to the clamp and everything painted inside it is
  *       thrown away by the byte. Dorsal wing shipped from intake that way: a
  *       teal band, rust squiggles and pink cells, and a solid black horse.</li>
- *   <li><b>A feature smaller than a texel.</b> Ringwork's two contour rings are
- *       annuli 0.1 body units wide, and a texel is 0.5.</li>
+ *   <li><b>A feature smaller than a texel</b> - or one that almost never reaches
+ *       the skin: a mark at the centre of a 3D lattice cell only shows where the
+ *       surface passes within its radius of the centre (gap 182). Ringwork's two
+ *       contour rings were first put down to width; they are in fact empty
+ *       folds, a centroid radius written as a fraction of the cell (gap 183).</li>
  * </ul>
  *
  * <p><b>Why removal rather than inspection.</b> Whether two masks overlap is

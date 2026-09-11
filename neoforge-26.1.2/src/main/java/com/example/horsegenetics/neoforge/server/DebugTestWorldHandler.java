@@ -35,6 +35,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -152,7 +153,8 @@ public final class DebugTestWorldHandler {
         put(inv, legend, 15, preset(player, "Test: potion foal", Sex.FEMALE, true,
                 "horsegenetics.potion_milk=Spd/Spd"), "bottle on her - 'a foal has no potion milk'");
         put(inv, legend, 16, new ItemStack(Items.GOLDEN_CARROT, 16), null);
-        put(inv, legend, 17, new ItemStack(Items.LEAD), null);
+        put(inv, legend, 17, intakeChest(player),
+                "intake chest - place it: one egg per new gene (checklist 0-BZ); the last three are other forms");
         // Row 2: the research shelf.
         put(inv, legend, 18, new ItemStack(ModItems.EQUINE_RESEARCH_SHELF.get(), 2),
                 "research shelf x2 - copy a gene, CLOSE the screen, come back: it kept going; break one: all drops");
@@ -185,6 +187,46 @@ public final class DebugTestWorldHandler {
         for (String line : legend) {
             tell(player, Component.literal(line).withStyle(ChatFormatting.WHITE));
         }
+    }
+
+    /**
+     * The evening intake's twenty-four genes, each homozygous for its first-listed
+     * allele - the form the gene's icon shows - in checklist order, then three of
+     * the other forms the install changed most. A chest because twenty-seven eggs
+     * do not fit beside the kit that is already waiting on the checklist.
+     */
+    private static final String[][] INTAKE = {
+            {"tidewave"}, {"trillium"}, {"barred_wing"}, {"uraniid"}, {"candelabra"},
+            {"taper_flame"}, {"inkcoil"}, {"foxglove"}, {"opal_fire"}, {"agate_eye"},
+            {"corolla"}, {"contour_cells"}, {"beadscale"}, {"scuted"}, {"sporefall"},
+            {"wishstar"}, {"tribal_claw"}, {"ooze_drip"}, {"rainbow_drip"}, {"datarain"},
+            {"rime"}, {"foamed"}, {"gilded_crackle"}, {"holo_flake"},
+            {"foxglove", "B"}, {"barred_wing", "Bwb"}, {"rainbow_drip", "Rdc"},
+    };
+
+    private static ItemStack intakeChest(ServerPlayer player) {
+        List<ItemStack> eggs = new ArrayList<>();
+        for (String[] entry : INTAKE) {
+            Gene gene = Genes.byKeyOrNull("horsegenetics." + entry[0]);
+            if (gene == null) {
+                HorseGenetics.LOGGER.warn("Test kit: no gene {} for the intake chest", entry[0]);
+                continue;
+            }
+            String token = entry.length > 1 ? entry[1] : gene.alleles().get(0).token();
+            ItemStack egg = preset(player, "Intake: " + gene.name() + " (" + token + "/" + token + ")",
+                    Sex.FEMALE, false, gene.key() + "=" + token + "/" + token);
+            if (egg != null) {
+                eggs.add(egg);
+            }
+        }
+        ItemStack chest = new ItemStack(Items.CHEST);
+        // CONTAINER on a chest item is what a picked-up chest carries and what
+        // placing it restores - checked against the 26.1.2 patched sources
+        // (ItemContainerContents.fromItems, DataComponents.CONTAINER), not yet
+        // seen in game.
+        chest.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(eggs));
+        chest.set(DataComponents.CUSTOM_NAME, Component.literal("Intake genes (checklist 0-BZ)"));
+        return chest;
     }
 
     /** Put a stack in a slot and, if it has a purpose worth saying, add it to the legend. */
