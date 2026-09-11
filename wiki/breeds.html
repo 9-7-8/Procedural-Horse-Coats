@@ -30,9 +30,9 @@
 <p class="note">
     <strong>A breed is a JSON file.</strong> Every breed here lives in
     <code>common/src/main/resources/horsegenetics/breeds/</code>, one file each, and a
-    breed you write yourself goes in <code>config/horsegenetics/breeds/</code> and needs
-    no rebuild &mdash; the same arrangement drop-in genes already had. The
-    <a href="breed-designer/index.html">breed designer</a> writes them and the
+    breed you write yourself goes in <code>.minecraft/phc/breeds/</code> and needs
+    nothing but the jar - the folder is made on first launch, and the Breeds tab of the H
+    menu opens it. The <a href="breed-designer/index.html">breed designer</a> writes them and the
     <a href="breed-format.html">breed file format</a> documents them. Java breeds are
     still possible for one that needs behaviour rather than numbers, and
     <strong>Feral Mixed</strong> is the only one shipping that way.
@@ -75,14 +75,26 @@
     stays Feral Mixed; breeding overrides that with the parents&rsquo; cross.
 </p>
 <p>
-    Which biomes spawn horses at all is data:
-    <code>data/horsegenetics/neoforge/biome_modifier/add_horse_herds.json</code>
-    adds herd-sized (weight 10, <b>3&ndash;6</b>) horse spawns to every
-    breed-assigned biome, and <code>add_horse_loners.json</code> adds a thin
-    weight-1 1&ndash;1 trickle to every overworld surface biome (a strong bias
-    to packs). So horses now appear in taiga, jungle, badlands,
-    swamp, the snowy biomes and mushroom fields, none of which spawn them in
-    vanilla.
+    Which biomes spawn horses at all is
+    <code>data/horsegenetics/neoforge/biome_modifier/add_horse_herds.json</code>, a
+    <code>horsegenetics:breed_herds</code> modifier (<code>BreedHerdsBiomeModifier</code>):
+    herd-sized (weight 10, <b>3&ndash;6</b>) horse spawns in the biomes it lists
+    <strong>and in every biome any wild breed names</strong> - once each, never twice.
+    The second half is what makes a drop-in breed spawn: a breed living in a dark forest
+    or a modded biome gets herds there on the next start, with nothing edited but its own
+    file. <code>add_horse_loners.json</code> adds a thin weight-1 1&ndash;1 trickle to every
+    overworld surface biome (a strong bias to packs). So horses appear in taiga, jungle,
+    badlands, swamp, the snowy biomes and mushroom fields, none of which spawn them in
+    vanilla. A horse still needs grass and light to spawn, so a breed that names a desert
+    or the Nether will rarely or never be seen wild.
+</p>
+<p>
+    <strong>Day and night.</strong> A breed's <code>spawn_time</code> (<code>any</code>,
+    <code>day</code> or <code>night</code>) is checked when a herd is founded: outside its
+    hours the breed is not a candidate, and the biome's other breeds share the draw
+    (<code>HerdManager.pickHerdBreed</code>). Vanilla will not spawn an animal in the dark
+    on a chunk near a player, so a night breed's herds mostly come from chunks generated
+    after dark.
 </p>
 
 <h2 id="bands">Traditional bands and bachelor bands</h2>
@@ -130,7 +142,7 @@
 <tr><td><strong>Disorder genes</strong> (ACAN, PLOD1, MET&hellip;)</td>
     <td>Keep their <strong>global</strong> founder rates, so any bred line can still surface a carrier &mdash; unless the breed is flagged <strong>hardy</strong> (&ldquo;generally sound&rdquo; on the sheet: Banker, Canadian, Cleveland Bay, Exmoor, Icelandic, and a few landraces), which clears every implemented disorder locus.</td></tr>
 <tr><td><strong>The four magical body-stat genes</strong> (size, speed, health, jump)</td>
-    <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder homozygous for that gene&rsquo;s pushing allele <em>and</em> writes the target onto its copies; an axis with no band is left wild. <a href="#founder-only">Founders only</a>.</td></tr>
+    <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder carry that gene&rsquo;s pushing allele <em>and</em> writes the target onto its copies - two copies for speed, health and jump; for size one copy between 0.7x and 1.3x and two outside it; an axis with no band is left wild. <a href="#founder-only">Founders only</a>.</td></tr>
 <tr><td><strong>Other magical genes</strong> (mane/tail colour, healer, zebra, milk, light, particle, verdant&hellip;)</td>
     <td>Forced wild, then a <a href="#magic">geometric draw</a> switches a few back on.</td></tr>
 <tr><td><strong>Any gene&rsquo;s epigenetic numbers</strong> (how far a splash covers, how wide a dorsal stripe is)</td>
@@ -170,22 +182,28 @@
 </tbody>
 </table>
 <p>
-    <strong>Height</strong> is not scored; it comes straight from the hands range.
-    The baseline horse is <strong>15.75&nbsp;hh</strong> (i.e. 15.3&nbsp;hh in
-    stable notation), so a breed whose mid-height is <em>h</em> gives a raw
-    ratio <code>h / 15.75</code>, and the low/high of its range become the
-    low/high of the band. Real horse heights barely differ &mdash; a Shire is
-    only ~10% over average &mdash; so the <b>above-baseline part of the ratio is
-    multiplied by <code>BIG_GAMMA = 3</code></b> (below-baseline is left alone; small
-    breeds already read fine). A Quarter Horse lands about &times;0.96, a
-    <b>Percheron &times;1.0&ndash;1.38</b> (avg ~1.19, taller than the player at
-    the top end), a Shire or Clydesdale &times;1.14&ndash;1.43. A Falabella is
-    still &times;0.4.
+    <strong>Size</strong> is not scored; a breed writes it as a <strong>multiple of an
+    ordinary horse</strong>, <code>"size": [lo, hi]</code>, and the range <em>is</em> the
+    band. A Quarter Horse runs about &times;0.92&ndash;1.05, a
+    <b>Percheron &times;0.98&ndash;1.38</b> (taller than the player at the top end), a Shire
+    or Clydesdale &times;1.14&ndash;1.43, a Falabella &times;0.38&ndash;0.51. The files were
+    written in hands until 2026-09-10 and were converted through the old curve - hands over
+    15.75, with the part above 1.0 tripled (<code>BreedStatCurve.sizeForHands</code>) -
+    so no breed changed size. Hands are still how a horse's size <em>reads</em>: the info
+    screen and the Breeds tab turn a scale back into them (<code>handsFor</code>).
+</p>
+<p>
+    <strong>Size decides the genes, founder by founder.</strong> A founder's size is drawn
+    inside the range first. Between <strong>0.7x and 1.3x</strong> it carries <strong>one</strong>
+    copy of the size allele and the wild type, with the whole distance on that copy; outside
+    it, <strong>two</strong>, sharing it. So a miniature or a draught horse breeds true for
+    size, and a breed of ordinary-sized horses throws some variety among its foals - which
+    is how most size variation is carried. A range across 1.3 (a Clydesdale's) produces both.
 </p>
 <p>
     Each axis becomes a <strong>target band</strong> (<code>BreedStatCurve</code>).
-    Every founder of the breed is made homozygous for the pushing allele, and
-    <code>BreedFounder</code> then picks a point inside the band and
+    Every founder of the breed is given the pushing allele (both copies, bar the size rule
+    above), and <code>BreedFounder</code> then picks a point inside the band and
     <strong>writes it onto that founder&rsquo;s two allele copies</strong> as
     ordinary epigenetic numbers. So a Thoroughbred reliably resolves near
     &times;2 speed even though two <code>Swift</code> copies on the ordinary
@@ -461,7 +479,8 @@
     <li><code>common/breed/BreedSource</code> &mdash; the four-way <a href="#sources">source checklist</a>.</li>
     <li><code>common/breed/BreedBands</code> &mdash; the <a href="#bands-epi">epigenetic bands</a> a breed pins.</li>
     <li><code>common/breed/spec/</code> &mdash; <code>BreedSpecParser</code>, <code>BreedSpecWriter</code>, <code>BreedSpecLoader</code>, <code>BreedFileTool</code>: the <a href="breed-format.html">file format</a>, both ways round.</li>
-    <li><code>neoforge/ModBreedSpecs</code> &mdash; loads <code>config/horsegenetics/breeds/</code>, after the drop-in genes.</li>
+    <li><code>neoforge/ModBreedSpecs</code> &mdash; loads <code>.minecraft/phc/breeds/</code>, after the drop-in genes; <code>folder()</code> is what the Breeds tab's button opens.</li>
+    <li><code>neoforge/world/BreedHerdsBiomeModifier</code> &mdash; herd spawns in every biome a wild breed names.</li>
     <li><code>common/breed/Commonness</code> &mdash; the rarity &rarr; weight ladder.</li>
     <li><code>common/breed/BreedStatCurve</code> &mdash; score / hands &rarr; <code>TargetBand</code>.</li>
     <li><code>common/breed/BreedFounder</code> &mdash; rolls a founder <code>Genome</code> for a breed (start from <code>Genotype.random</code>, override the constrained / coat / body-stat / magical genes).</li>

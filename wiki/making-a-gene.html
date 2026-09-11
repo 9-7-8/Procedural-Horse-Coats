@@ -4426,7 +4426,8 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
 <p>
     Then the regeneration table in <code>CLAUDE.md</code>: a gene file means
     <code>:common:bakeGeneBundle</code>, <code>:common:bakeGeneIcons</code>,
-    <code>:common:bakeGeneWikiPages</code>, <code>:web:bakeDesignerAssets</code>, and the
+    <code>:common:bakeGeneWikiPages</code>, <code>:common:bakeMarkingFacts</code>,
+    <code>:web:bakeDesignerAssets</code>, and the
     coat golden file moves &mdash; adding a gene changes the registry order, which changes
     every horse&rsquo;s epigenome slots, which changes every hash in the file.
 </p>
@@ -4530,12 +4531,16 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
 
 <p>
     Adding or changing a file in
-    <code>common/src/main/resources/horsegenetics/genes/</code> invalidates three baked
+    <code>common/src/main/resources/horsegenetics/genes/</code> invalidates four baked
     artefacts, all checked in: <code>:common:bakeGeneBundle</code> (the copy the browser
     fetches, since TeaVM cannot walk a classpath index),
-    <code>:common:bakeGeneIcons</code> (one snapshot per gene, for its own page and its
-    landing-page card) and <code>:common:bakeGeneWikiPages</code> (the gene page itself,
-    plus the generated spans of <code>wiki/pages.js</code> and the landing page). It also moves
+    <code>:common:bakeGeneIcons</code> (one snapshot per gene, for its own page, its
+    landing-page card, and the hover cards in the horse designer, the breed designer and
+    the spawn egg - the jar picks them up at build time),
+    <code>:common:bakeGeneWikiPages</code> (the gene page itself, plus the generated spans of
+    <code>wiki/pages.js</code> and the landing page) and <code>:common:bakeMarkingFacts</code>
+    (the breed designer's measured coverage, parts and colour for every outcome, which its
+    markings filters read). It also moves
     the coat golden file, because a new gene occupies a real position in the genotype
     code.
 </p>

@@ -35,6 +35,84 @@
     </p>
 </div>
 
+<h2 id="breeds-overhaul">&sect;0-CA &mdash; Drop-in breeds, the new breed designer, size by zygosity, hover pictures (2026-09-10, NOT looked at in game)</h2>
+
+<p>The designer itself was driven in a headless browser - every step renders, the preview and
+    herd roll, a random pick of markings lands in the file, export names an unnamed breed,
+    the Friesian imports, a phone-width window does not scroll sideways. <strong>Nothing below
+    has been in the game.</strong> Design: <a href="breed-format.html">the format</a>,
+    <a href="breeds.html">breeds</a>.</p>
+
+<h3>The drop-in folder - the thing a player with only the jar needs</h3>
+
+<ul>
+    <li><strong>Start the game once and look in <code>.minecraft/phc/breeds/</code></strong>
+        (the instance folder for any launcher but vanilla's). It should exist, with a
+        README. The old <code>config/horsegenetics/breeds/</code> is no longer read.</li>
+    <li><strong>H menu &rarr; Breeds &rarr; Open breeds folder</strong> (top right of the
+        breed pane). The OS file browser should open on that folder. Unverified: that
+        <code>Util.getPlatform().openPath</code> behaves on this machine as it does for the
+        resource-pack screen.</li>
+    <li><strong>Make a breed in the designer, export it, drop it in, restart.</strong> The
+        log says <code>[breeds] N breed(s) registered (1 from ...)</code>. Give it a biome no
+        shipped breed uses - <code>minecraft:dark_forest</code> - and go looking in new
+        chunks: its herds should appear there. That is the new
+        <code>horsegenetics:breed_herds</code> biome modifier, and nothing else has tested
+        it. Tame one and check the Breeds tab shows its <strong>About</strong> text.</li>
+    <li><strong>A night breed.</strong> <code>"spawn_time": "night"</code>, and explore
+        after dark: herds founded in the dark may be it, and ones founded by day never
+        are. Expect it to be rare near where you already are - vanilla spawns no animals
+        in the dark on existing chunks.</li>
+    <li><strong>Break one on purpose</strong> (carried over from &sect;0-AL): name a gene
+        that does not exist and check the breed still loads with a warning naming it; drop
+        in <code>"id": "friesian"</code> and check it is refused, not duplicated.</li>
+</ul>
+
+<h3>Size</h3>
+
+<ul>
+    <li><strong>Every breed's size should look as it did.</strong> The files moved from
+        hands to multiples through the same curve, so a Shire should tower and a Falabella
+        should not reach your waist exactly as before. The Breeds tab now reads
+        &ldquo;size 1.14-1.38x (16.2 hh to 17.3 hh)&rdquo;.</li>
+    <li><strong>One copy or two.</strong> A tamed Clydesdale founder (1.14-1.43x) is either
+        <code>Big/n</code> (smaller ones) or <code>Big/Big</code> (larger ones) at Magic
+        body size; a Falabella is always two <code>Small</code> copies; a pony breed
+        between 0.7 and 1.3 always one. Breed two one-copy horses and some foals should come
+        out ordinary-sized.</li>
+</ul>
+
+<h3>The gene hover picture - three places</h3>
+
+<ul>
+    <li><strong>Custom spawn egg:</strong> hover a gene. The blurb panel is wider and
+        carries the gene's baked picture at the left, text wrapping round it. A gene with no
+        picture (the eye loci, the health genes) should show text only, not a
+        purple-and-black square. The pictures ship inside the jar from
+        <code>wiki/assets/gene-icons/</code>.</li>
+    <li><strong>Horse designer:</strong> the same, on the canvas (seen in a headless
+        browser).</li>
+    <li><strong>Breed designer:</strong> any underlined gene name.</li>
+</ul>
+
+<h3>The breed designer</h3>
+
+<ul>
+    <li><strong>Walk a breed from step 1 to 14</strong> and note anything confusing -
+        that was the whole brief. The left pane is always the options, the right always the
+        horse; <strong>Chosen so far</strong> lists every step and jumps back to any.</li>
+    <li><strong>Reroll example founder</strong> (top right of the horse) should only ever
+        show traits you picked: no stray magic. The herd strip under it is real founders and
+        may carry stray magic, at the rate the &ldquo;Price and stray magic&rdquo; step
+        sets.</li>
+    <li><strong>Magical markings filters</strong> are measured facts
+        (<code>marking-facts.json</code>): check a few against your eye. &ldquo;Covers at
+        most 5%&rdquo; should be small marks; &ldquo;white only&rdquo; should be white;
+        &ldquo;Reaches: Tail, and nowhere else&rdquo; should be tail genes.</li>
+    <li><strong>Refresh the page mid-breed</strong> - it should come back where you left
+        it (browser storage, per browser). Export is still the only real save.</li>
+</ul>
+
 <h2 id="intake-evening">&sect;0-BZ &mdash; Twenty-four genes out of the evening intake (2026-09-10, NOT looked at in game)</h2>
 
 <p><strong>Where to look:</strong> the Spawn Test Horse World kit, inventory slot 9, is a
@@ -2507,43 +2585,8 @@
     </p>
 </div>
 
-<h3>The breed designer</h3>
-
-<ul>
-    <li><strong>Does <code>wiki/breed-designer/index.html</code> come up at all?</strong>
-        It needs a server (<code>python -m http.server</code>) &mdash; a
-        <code>file://</code> page cannot fetch the wasm, and the page says so rather than
-        failing silently. Watch the console: it warns per breed if the bundle disagrees
-        with the gene registry.</li>
-    <li><strong>Pick a base coat.</strong> Six presets; each one should fill the gene
-        pools on the right and change the herd below.</li>
-    <li><strong>Does the herd read as a breed?</strong> Nine founders from the real
-        <code>BreedFounder.roll</code>. The thing to look for is the failure a pool
-        actually has: not "this horse is wrong" but "they are all identical" or "one in
-        six is a colour this breed should not have".</li>
-    <li><strong>Open a built-in breed and check it round-trips.</strong> Open Friesian,
-        change nothing, download, and diff against
-        <code>common/src/main/resources/horsegenetics/breeds/friesian.json</code>. They
-        should be byte-identical &mdash; both come out of the same writer.</li>
-    <li><strong>Do the blank boxes read as blank?</strong> Every optional field shows
-        <code>DEFAULT</code> as a placeholder and says underneath what the game does with
-        an empty one. If that reads as an instruction to type the word DEFAULT, it is
-        wrong and needs saying differently.</li>
-</ul>
-
-<h3>Dropping a breed into a built jar</h3>
-
-<ul>
-    <li><strong>Save a designer file into
-        <code>config/horsegenetics/breeds/</code> and restart.</strong> The folder should
-        already exist with a README in it. The log says how many the folder added.</li>
-    <li><strong>Break one on purpose.</strong> Name a gene that does not exist and check
-        the breed still loads with a warning naming the gene &mdash; that degradation is
-        the whole point of the format, and it is easier to check now than to discover
-        later.</li>
-    <li><strong>Check an id collision is refused rather than duplicated</strong> &mdash;
-        drop in a file with <code>"id": "friesian"</code>.</li>
-</ul>
+<p class="muted">The breed designer and drop-in checks that stood here moved to
+    <a href="#breeds-overhaul">&sect;0-CA</a> when both were rebuilt.</p>
 
 <h3>The two eggs</h3>
 

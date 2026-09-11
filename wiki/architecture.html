@@ -137,6 +137,8 @@ node wiki/gene-creator/tools/bake-export-fixtures.mjs   # what the creator EXPOR
 # breed files (see wiki/breed-format.html)
 ./gradlew :common:bakeBreedFiles     # rewrite the shipped breed JSONs *and* the
                                      # single-array copy the wiki tools fetch
+./gradlew :common:bakeMarkingFacts   # the breed designer's measured facts per
+                                     # painting outcome (coverage, parts, colour)
 
 # horse-designer tooling (see the docs split)
 ./gradlew :web:generateWasmGC       # compile common/ to WebAssembly

@@ -20,10 +20,10 @@
 <p class="lede">
     A breed is a <strong>JSON file</strong>, not a Java class. Every breed the mod ships
     is one, in <code>common/src/main/resources/horsegenetics/breeds/</code>; a breed you
-    write goes in <code>config/horsegenetics/breeds/</code> and needs no rebuild. The
-    <a href="breed-designer/index.html">breed designer</a> writes these files, validates
-    them with the game&rsquo;s own parser and previews the herd they would make; this page
-    is what it is writing.
+    write goes in <code>.minecraft/phc/breeds/</code> and needs no rebuild &mdash; just the
+    jar. The <a href="breed-designer/index.html">breed designer</a> walks through a breed
+    one step at a time, validates the file with the game&rsquo;s own parser and shows the
+    horses it makes as you go; this page is what it is writing.
 </p>
 
 <p>
@@ -41,16 +41,18 @@
 <pre><code class="language-json">{
   "id": "friesian",
   "name": "Friesian",
+  "description": "Jet black, heavily feathered, and built to carry a knight.",
   "kind": "natural",
   "commonness": "uncommon",
   "spawn": ["wild", "cowboy", "spawn_egg", "stable"],
+  "spawn_time": "any",
   "biomes": ["minecraft:forest", "minecraft:plains"],
   "price": [8, 14],
   "hardy": false,
   "magic_chance": 0.2,
   "magic_whitelist": [],
   "magic_blacklist": [],
-  "stats": { "speed": 5, "jump": 5, "health": 7, "height": [15, 17] },
+  "stats": { "speed": 5, "jump": 5, "health": 7, "size": [0.95, 1.24] },
   "genes": {
     "horsegenetics.extension": [
       { "pair": "E/E", "weight": 62 },
@@ -59,7 +61,8 @@
     "horsegenetics.agouti": [ { "pair": "a/a", "weight": 100 } ]
   },
   "bands": {
-    "horsegenetics.ednrb": { "cover": [0.55, 0.80] }
+    "horsegenetics.ednrb": { "cover": [0.55, 0.80] },
+    "horsegenetics.agate": { "hue": 210, "cellSeed": "-4127755610044201371" }
   },
   "notes": ["Lower-leg feathering - not modelled."]
 }</code></pre>
@@ -90,6 +93,12 @@
     <td><strong>required.</strong></td>
 </tr>
 <tr>
+    <td><code>description</code></td>
+    <td>a sentence or two</td>
+    <td>none. What the in-game breed book (the <strong>Breeds</strong> tab of the H menu)
+        shows about the breed, under &ldquo;About&rdquo;.</td>
+</tr>
+<tr>
     <td><code>kind</code></td>
     <td><code>"natural"</code> or <code>"magical"</code></td>
     <td><code>natural</code>. A label, not a mechanic &mdash; what makes a breed magical in
@@ -114,8 +123,14 @@
         out.</td>
 </tr>
 <tr>
+    <td><code>spawn_time</code></td>
+    <td><code>"any"</code>, <code>"day"</code> or <code>"night"</code></td>
+    <td><code>any</code>. When its wild herds may be founded - see
+        <a href="#where">where a breed may come from</a>.</td>
+</tr>
+<tr>
     <td><code>biomes</code></td>
-    <td>namespaced biome ids</td>
+    <td>namespaced biome ids - any biome, modded ones included</td>
     <td>none, so the breed never heads a wild herd wherever <code>spawn</code> says.</td>
 </tr>
 <tr>
@@ -145,8 +160,8 @@
 <tr>
     <td><code>stats</code></td>
     <td><code>speed</code>, <code>jump</code>, <code>health</code> as 1&ndash;10 scores
-        (a number or <code>[lo, hi]</code>); <code>height</code> as <code>[lo, hi]</code>
-        in hands</td>
+        (a number or <code>[lo, hi]</code>); <code>size</code> as a multiple of an ordinary
+        horse, a number or <code>[lo, hi]</code> &mdash; see <a href="#size">size</a></td>
     <td>every axis <strong>wild</strong>, which is not the same as a score of 5 &mdash;
         see <code>BreedStatCurve</code>&rsquo;s near-baseline rule.</td>
 </tr>
@@ -158,7 +173,8 @@
 </tr>
 <tr>
     <td><code>bands</code></td>
-    <td>gene key &rarr; value name &rarr; <code>[lo, hi]</code></td>
+    <td>gene key &rarr; value name &rarr; <code>[lo, hi]</code>, a single number (a lock), or
+        for a seed a string of digits</td>
     <td>no number pinned; founders roll from the value&rsquo;s own design range.</td>
 </tr>
 <tr>
@@ -200,7 +216,36 @@
     A pool is a weighted table of allele pairs. Weights are <strong>relative</strong>, so
     <code>62 / 33 / 5</code> and <code>0.62 / 0.33 / 0.05</code> are the same breed; the
     designer shows the share each one works out to, because a weight of 44 means nothing
-    until you know what the others add up to.
+    until you know what the others add up to. (<code>Breed.founderTable</code> scales them
+    to the percentages a <code>FounderTable</code> takes, so any total is fine.)
+</p>
+
+<p>
+    <strong>A pool is exactly which pairs the breed may have.</strong> Name only
+    heterozygotes and every founder is a carrier; include the wild pair and its weight is
+    the share of founders that do not show the gene at all. The designer&rsquo;s gene card
+    is this table with a tick box per pair.
+</p>
+
+<h2 id="size">Size</h2>
+
+<p>
+    <code>stats.size</code> is a <strong>multiple of an ordinary horse</strong>:
+    <code>1.0</code> is a vanilla-sized horse (15.3 hands on the info screen), a Falabella
+    runs about <code>[0.38, 0.51]</code> and a Clydesdale <code>[1.14, 1.43]</code>. The range
+    <em>is</em> the body-scale band; nothing is converted. It was written in hands until
+    2026-09-10, and every shipped file was converted through the old curve
+    (<code>BreedStatCurve.sizeForHands</code>), so no breed changed size.
+</p>
+
+<p>
+    <strong>The genes follow from the size.</strong> Each founder's size is drawn inside the
+    range first, and then: <strong>between 0.7x and 1.3x it carries one copy</strong> of the
+    size allele and the wild type, with the whole distance on that copy; <strong>outside it,
+    two</strong>, sharing it. So the giants and the miniatures breed true, and a breed of
+    ordinary-ish horses throws some variety among its foals. A range across 1.3 produces both
+    kinds of founder. See <code>BreedStatCurve.heterozygousSize</code>; the rule applies to
+    every breed, shipped or dropped in.
 </p>
 
 <p class="note">
@@ -235,17 +280,26 @@
     standard is the player&rsquo;s job, not the game&rsquo;s.
 </p>
 
-<p class="note">
-    Three things a band will not do, each warned about rather than silently ignored.
-    <strong>The four body-stat genes</strong> are owned by <code>stats</code>, which knows
-    about scores and hands and which allele is the pushing one, so a band naming one of them
-    is refused. <strong>Seeds and categories</strong> have no &ldquo;slightly more&rdquo;
-    &mdash; a seed is the long behind a noise field, a category an index into a list the
-    gene owns &mdash; so only scalars can be banded. And <strong>a value the gene does not
-    declare</strong> is dropped the same way an unknown gene is.
+<p>
+    <strong>A single number is a lock</strong>: every founder is given exactly that value on
+    both copies. That is what a <strong>seed</strong> takes - a seed is the long behind a noise
+    field, and two neighbouring seeds draw unrelated fields, so there is no range to give;
+    locking one means every founder of the breed carries the <em>same pattern</em>. Write a
+    seed as a string of digits (<code>"-4127755610044201371"</code>), because a JSON number
+    is a double and cannot hold most seeds exactly; a small one may be a plain number. A
+    <strong>category</strong> - an index into a list the gene owns - is banded over whole
+    options, both ends included.
 </p>
 
-<h2>Where a breed may come from</h2>
+<p class="note">
+    Two things a band will not do, each warned about rather than silently ignored.
+    <strong>The four body-stat genes</strong> are owned by <code>stats</code>, which knows
+    about scores, sizes and which allele is the pushing one, so a band naming one of them
+    is refused. And <strong>a value the gene does not declare</strong> is dropped the same
+    way an unknown gene is.
+</p>
+
+<h2 id="where">Where a breed may come from</h2>
 
 <p>
     <code>spawn</code> is a checklist rather than a mode, because the four are genuinely
@@ -262,14 +316,33 @@
     turn up in dungeon loot, and the horseman never stocks one.
 </p>
 
+<p>
+    <strong>Wild herds turn up in every biome a wild breed names</strong>, modded ones
+    included. The mod's herd spawn is a biome modifier of its own
+    (<code>BreedHerdsBiomeModifier</code>) that adds the spawn to its listed vanilla biomes
+    <em>and</em> to every biome a registered breed lists - so a breed dropped into the folder
+    that lives in a dark forest or a modded biome gets herds there on the next start. A horse
+    still needs grass and light to spawn, so a desert or Nether breed will rarely or never be
+    seen wild.
+</p>
+
+<p>
+    <code>spawn_time</code> is checked when a herd is <em>founded</em>: outside its hours the
+    breed is not a candidate and the biome's other breeds share the draw. It only speaks for
+    <code>wild</code>. Vanilla will not spawn an animal in the dark on a chunk near a player,
+    so a night breed's herds mostly come from chunks generated at night.
+</p>
+
 <h2>Loading, and the order it happens in</h2>
 
 <p>
     The mod reads the files it ships (listed in <code>index.json</code>, because a jar has
-    no directory to walk) and then everything in
-    <code>config/horsegenetics/breeds/</code>, in filename order. A README is written into
-    that folder on first run. An id that collides with one already loaded is ignored, and
-    said so.
+    no directory to walk) and then everything in <code>.minecraft/phc/breeds/</code> (the
+    game directory - an instance folder, for any launcher but the vanilla one), in filename
+    order. The folder and a README in it are made the first time the game starts with the
+    mod installed, and the <strong>Breeds</strong> tab of the H menu has an
+    <strong>Open breeds folder</strong> button. An id that collides with one already loaded
+    is ignored, and said so.
 </p>
 
 <p>
@@ -310,8 +383,9 @@
     <li><code>BreedSpecParser</code> &mdash; reading it, including which blank means what.</li>
     <li><code>BreedSpecWriter</code> &mdash; writing it back, omitting the field when it is
         at its default. The two must agree or the round-trip test fails.</li>
-    <li><code>wiki/breed-designer/js/breed-designer.js</code> &mdash; the form, and the
-        note under the box saying what leaving it blank does.</li>
+    <li><code>wiki/breed-designer/js/</code> &mdash; <code>bd-core.js</code> (the state, which
+        is the file, and <code>toJson</code> / <code>fromJson</code>) and
+        <code>bd-steps.js</code> (the step that sets the field).</li>
     <li>this page.</li>
 </ul>
 

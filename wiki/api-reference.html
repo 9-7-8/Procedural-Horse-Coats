@@ -141,10 +141,11 @@ breed/
   Breed.java                one breed, parsed: pools, scores, bands, sources, price
   Breeds.java               the registry - shipped files, drop-ins, FERAL_MIXED
   BreedSource.java          WILD / COWBOY / SPAWN_EGG / STABLE - where a breed may come from
-  BreedBands.java           the epigenetic numbers a breed pins on its founders
+  BreedBands.java           the epigenetic numbers a breed pins or locks, seeds included
+  SpawnTime.java            ANY / DAY / NIGHT - when a breed's wild herds may be founded
   BreedFounder.java         roll a founder Genome for a breed
   BreedLineage.java         the label: PURE / CROSS / SPLICED / MIXED / FERAL, + combine
-  BreedStatCurve.java       a 1-10 score, or a height in hands, -&gt; a TargetBand
+  BreedStatCurve.java       a 1-10 score, or a size multiple, -&gt; a TargetBand; one size copy in 0.7-1.3x
   Commonness.java           the rarity -&gt; herd-weight ladder
   spec/BreedSpecParser.java  a breed JSON file -&gt; Breed (warns and skips what is missing)
   spec/BreedSpecWriter.java  ...and back, omitting every field at its default
@@ -1025,7 +1026,7 @@ record Breed(String id, String name, boolean magical, List&lt;String&gt; biomes,
 // The registry. Lazy, because a breed file names genes and the gene registry is
 // not complete until the host has loaded its own drop-ins.
 Breeds.loadBuiltins();                       // the classpath index
-Breeds.loadFrom(Path directory);             // config/horsegenetics/breeds/
+Breeds.loadFrom(Path directory);             // .minecraft/phc/breeds/
 Breeds.registerBundle(String json, String source);   // the browser's one-array copy
 Breeds.registerJava(Breed b);                // the escape hatch
 List&lt;Breed&gt; Breeds.forBiome(String biomeId, BreedSource source);
