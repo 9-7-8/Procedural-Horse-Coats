@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.breed.BreedStatCurve;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.EpigenomeReadout;
@@ -597,14 +598,15 @@ public final class HorseInfoScreen extends Screen {
                     cur < max * 0.4 ? BAD : cur >= max ? GOOD : VALUE);
             c.pair("Speed", String.format("%.3f", horse.getAttributeValue(Attributes.MOVEMENT_SPEED)));
             c.pair("Jump", String.format("%.2f", horse.getAttributeValue(Attributes.JUMP_STRENGTH)));
-            c.pair("Size", sizeWord(horse.getAttributeValue(Attributes.SCALE))
-                    + String.format("  (%.2f)", horse.getAttributeValue(Attributes.SCALE)));
+            double scale = horse.getAttributeValue(Attributes.SCALE);
+            c.pair("Size", sizeWord(scale) + "  " + heightText(scale, horse.isBaby())
+                    + String.format("  (%.2f)", scale));
         } else {
             Traits t = traits();
             c.pair("Health", String.format("%.1f", t.health()) + "  (from the genotype)");
             c.pair("Speed", String.format("%.3f", t.speed()));
             c.pair("Jump", String.format("%.2f", t.jump()));
-            c.pair("Size", sizeWord(t.scale()));
+            c.pair("Size", sizeWord(t.scale()) + "  " + heightText(t.scale(), false));
         }
 
         ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
@@ -666,6 +668,17 @@ public final class HorseInfoScreen extends Screen {
         if (scale <= 1.03) return "average";
         if (scale <= 1.12) return "large";
         return "draught";
+    }
+
+    /**
+     * Height at the withers in hands, off {@link BreedStatCurve#handsFor} - the
+     * inverse of how a breed's hands range becomes a scale, so the two agree. A
+     * foal's scale attribute is its adult one (age shrinks it separately), so
+     * for a foal this is the height it will grow to, and says so.
+     */
+    private static String heightText(double scale, boolean baby) {
+        String hh = BreedStatCurve.formatHands(BreedStatCurve.handsFor(scale));
+        return baby ? hh + " grown" : hh;
     }
 
     /**
@@ -779,7 +792,8 @@ public final class HorseInfoScreen extends Screen {
         c.pair("Jump", String.format("%.2f", t.jump())
                         + "   (baseline " + String.format("%.2f", HorseTraits.BASE_JUMP) + ")",
                 versusBaseline(t.jump(), HorseTraits.BASE_JUMP));
-        c.pair("Size", String.format("%.2f", t.scale()) + "   " + sizeWord(t.scale()));
+        c.pair("Size", String.format("%.2f", t.scale()) + "   " + sizeWord(t.scale())
+                + "   " + heightText(t.scale(), false));
         c.gap(3);
         c.wrapped("Every number above is the baseline plus what the genes below add. Nothing is "
                 + "rolled - two horses with the same alleles are the same horse.", DIM_TEXT, 0);

@@ -95,6 +95,28 @@ public final class BreedStatCurve {
         return ratio > 1.0 ? 1.0 + (ratio - 1.0) * BIG_GAMMA : ratio;
     }
 
+    /**
+     * <b>The inverse of the height curve</b>: a body scale back to hands, so a
+     * horse the breed sheet calls 17 hands reads as 17 hands on its own info
+     * screen. Undoes {@link #exaggerated} above 1.0 and scales by
+     * {@link #BASELINE_HH}, so the baseline horse is 15.75 hands (15.3 hh).
+     */
+    public static double handsFor(double scale) {
+        double ratio = scale > 1.0 ? 1.0 + (scale - 1.0) / BIG_GAMMA : scale;
+        return BASELINE_HH * ratio;
+    }
+
+    /**
+     * Hands written the horseman's way: {@code 15.3 hh} is fifteen hands and
+     * three <i>inches</i>, not fifteen and three tenths - a hand is four inches,
+     * so the digit after the point runs 0 to 3. Rounded to the nearest inch.
+     * (The breed files write decimal hands, {@code 15.75}; this is display only.)
+     */
+    public static String formatHands(double hands) {
+        long inches = Math.round(Math.max(0.0, hands) * 4.0);
+        return (inches / 4) + "." + (inches % 4) + " hh";
+    }
+
     /** The body-scale band from a hands range. Returns {@code null} when near-baseline. */
     public static TargetBand scaleBand(double loHh, double hiHh) {
         double lo = exaggerated(Math.min(loHh, hiHh) / BASELINE_HH);

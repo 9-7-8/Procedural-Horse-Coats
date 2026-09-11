@@ -426,6 +426,17 @@ public sealed interface GeneAbility {
         record OnInteract(String item) implements Trigger {}
 
         /**
+         * <b>A player hand-feeds the horse something it eats</b> - anything its
+         * diet accepts, or its favourite. Fires once per feeding, on the server.
+         *
+         * <p><b>Built-in genes only, for now.</b> {@code GeneSpecParser} and the
+         * gene creator do not know it, so a gene file cannot ask for it; adding
+         * it there is the five-file change on {@code making-a-gene.html#contracts}.
+         * The spawner is its one user.
+         */
+        record OnFeed() implements Trigger {}
+
+        /**
          * <b>The horse itself took damage.</b> Fires once per damage event, on
          * the server, before the effect decides whether it cares what hit it.
          *

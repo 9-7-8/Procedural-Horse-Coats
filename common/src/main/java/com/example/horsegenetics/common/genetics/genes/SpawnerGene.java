@@ -7,16 +7,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <b>Spawner</b> ({@code horsegenetics.spawner}) - at first light the horse
- * looks around, and if there are fewer than two of a particular creature nearby,
- * there are two now.
+ * <b>Spawner</b> ({@code horsegenetics.spawner}) - feed the horse, and it looks
+ * around; if there are fewer than two of a particular creature nearby, there are
+ * two now.
+ *
+ * <h2>Fed, not timed</h2>
+ * It used to fire once a Minecraft day, and in play it never fired at all: the
+ * day was counted on the horse's {@code tickCount}, which restarts at every
+ * load. The owner's call (2026-09-10) was to hand the trigger to the player
+ * instead - anything the horse eats, from the hand ({@code Trigger.OnFeed}). A
+ * spawner you can work beats one you wait for, and a horse left alone in a
+ * field now does nothing at all.
  *
  * <h2>Up to two, which is the whole design</h2>
  * Almost every design for a spawning gene is a lag machine, because almost every
  * one counts <i>time</i> and not <i>population</i>. This one counts what is
- * already there first, so a horse in a stocked field does nothing at all, for
- * ever, and only acts when something has been lost. The ceiling is in the
- * definition rather than bolted on as a cooldown.
+ * already there first, so feeding a horse in a stocked field does nothing, and
+ * it only makes anything when something has been lost or led away. The ceiling
+ * is in the definition rather than bolted on as a cooldown - which is also why a
+ * feeding trigger needs no cooldown of its own.
  *
  * <h2>It reaches the monsters, and only by being bred</h2>
  * The allele set is {@link MobRoster#all()} - every mob, hostile ones included,
@@ -47,9 +56,6 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
     /** The local population it tops up to. Not "how many to make" - see the class note. */
     public static final int UP_TO = 2;
 
-    /** A Minecraft day. The trigger fires once per day rather than at a wall-clock sunrise. */
-    public static final int DAY_TICKS = 24000;
-
     /** Carriers in a hundred. The largest roster in the mod, so the rate has to be generous. */
     public static final double WILD_CARRIER_PERCENT = 20.0;
 
@@ -67,10 +73,11 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
                     }
 
                     @Override public String description(Variant v) {
-                        return "Two matching copies. Once a day the horse looks around, and if "
-                                + "there are fewer than two " + v.label().toLowerCase() + "s "
-                                + "within about two chunks, it makes up the difference. If they "
-                                + "are all still there it does nothing, which is most days.";
+                        return "Two matching copies. Feed the horse anything it eats and it looks "
+                                + "around, and if there are fewer than two "
+                                + v.label().toLowerCase() + "s within about two chunks, it makes "
+                                + "up the difference. If they are all still there, the feeding is "
+                                + "just a meal.";
                     }
                 });
     }
@@ -91,6 +98,6 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
     @Override
     protected List<GeneAbility> abilitiesFor(Variant v, EpiValues epi) {
         return List.of(new GeneAbility.Summon(v.subject(), RADIUS, UP_TO,
-                new GeneAbility.Trigger.Interval(DAY_TICKS), GeneAbility.Condition.ALWAYS, 1));
+                new GeneAbility.Trigger.OnFeed(), GeneAbility.Condition.ALWAYS, 1));
     }
 }

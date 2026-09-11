@@ -3,12 +3,14 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.HorseDiet;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -61,11 +63,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -153,7 +157,7 @@ public final class GeneAbilityHandler {
             return;
         }
 
-        boolean moving = horse.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6;
+        boolean moving = isMoving(horse);
 
         for (HorseAbilities.Active active : abilities) {
             GeneAbility ability = active.ability();
@@ -281,6 +285,26 @@ public final class GeneAbilityHandler {
                 new AttributeModifier(attributeModifierId(geneKey, mod.attribute()), mod.amount(), op));
     }
 
+    /**
+     * <b>Lava buoyancy.</b> Vanilla lava travel pulls down by a quarter of the
+     * horse's {@code GRAVITY} attribute each tick and halves its velocity, so a
+     * gravity of {@code 0.08 + LAVA_FLOAT = -0.08} settles into a gentle rise of
+     * about 0.04 blocks a tick. It is held only while the lava is above the
+     * horse's fluid-jump threshold (knee-deep), so it bobs at the surface
+     * instead of flying out - the water float vanilla gives a ridden horse
+     * ({@code LivingEntity.floatInWaterWhileRidden}), which lava does not get.
+     *
+     * <p><b>Unverified in-game:</b> the attribute reaches the rider's client a
+     * tick or two late, so how much it bobs is a guess.
+     */
+    private static final Identifier LAVA_FLOAT_ID =
+            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "traversal/lava_float");
+    private static final double LAVA_FLOAT = -0.16;
+
+    private static boolean floatsInLava(Horse horse) {
+        return horse.isInLava() && horse.getFluidHeight(FluidTags.LAVA) > horse.getFluidJumpThreshold();
+    }
+
     /** A stable, gene-scoped id, so two genes may move one attribute without fighting. */
     private static Identifier attributeModifierId(String geneKey, String attribute) {
         return Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
@@ -303,6 +327,12 @@ public final class GeneAbilityHandler {
                     && attributeAllowed(mod.attribute())
                     && conditionHolds(mod.when(), horse, record)) {
                 keep.add(attributeModifierId(active.geneKey(), mod.attribute()));
+            }
+            if (active.ability() instanceof GeneAbility.Traversal t
+                    && "lava_swim".equals(t.flag())
+                    && conditionHolds(t.when(), horse, record)
+                    && floatsInLava(horse)) {
+                keep.add(LAVA_FLOAT_ID);
             }
         }
         for (Holder<Attribute> attribute : ATTRIBUTES.values()) {
@@ -411,7 +441,7 @@ public final class GeneAbilityHandler {
      */
     private static void mobAura(GeneAbility.MobAura aura, Horse horse, ServerLevel level) {
         int interval = Math.max(1, aura.intervalTicks());
-        if (horse.tickCount % interval != 0) {
+        if (!beat(horse, interval)) {
             return;
         }
         AABB box = horse.getBoundingBox().inflate(aura.radius());
@@ -516,14 +546,21 @@ public final class GeneAbilityHandler {
                 }
             }
             case "lava_swim" -> {
-                // Swimming, not walking: it sinks in and moves through, so the
-                // only thing to hold up is the fire damage and a floor under the
-                // sink rate so it is a wade rather than a drop.
+                // Swimming at the surface, the way a ridden horse swims in water.
+                // Buoyancy is a GRAVITY modifier rather than a velocity nudge: a
+                // ridden horse is simulated by the rider's client, which ignores
+                // server-side velocity, but attributes sync to it. See
+                // LAVA_FLOAT_ID; clearAttributes takes it off out of the lava.
                 if (horse.isInLava()) {
-                    Vec3 dm = horse.getDeltaMovement();
-                    horse.setDeltaMovement(dm.x, Math.max(dm.y, -0.06), dm.z);
                     horse.resetFallDistance();
                     horse.clearFire();
+                }
+                if (floatsInLava(horse)) {
+                    AttributeInstance gravity = horse.getAttribute(Attributes.GRAVITY);
+                    if (gravity != null) {
+                        gravity.addOrUpdateTransientModifier(new AttributeModifier(
+                                LAVA_FLOAT_ID, LAVA_FLOAT, AttributeModifier.Operation.ADD_VALUE));
+                    }
                 }
             }
             case "water_averse" -> {
@@ -542,6 +579,34 @@ public final class GeneAbilityHandler {
     // Emitters
     // ------------------------------------------------------------------
 
+    /** Where each horse was at the end of its last ability tick - see {@link #isMoving}. */
+    private static final Map<UUID, Vec3> LAST_POS = new ConcurrentHashMap<>();
+
+    /**
+     * <b>Is the horse moving - measured by where it went, not by its velocity.</b>
+     * A horse a player is steering is simulated on the rider's client; the
+     * server's copy is moved by position packets and {@code travelRidden} sets
+     * its velocity to exactly zero. So "velocity is non-zero" was false for every
+     * ridden horse, and every {@code on_move} effect - the molten hooves trail,
+     * the particle locus's trails, the moving sounds - was silent under a rider.
+     * Owner-observed 2026-09-10 on molten hooves. The packets land before the
+     * entity ticks, so {@code x - xo} is zero by the post-tick too; comparing with
+     * this handler's own previous sample is what sees the step.
+     */
+    private static boolean isMoving(Horse horse) {
+        Vec3 now = horse.position();
+        Vec3 before = LAST_POS.put(horse.getUUID(), now);
+        if (horse.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6) {
+            return true;
+        }
+        if (before == null) {
+            return false;
+        }
+        double dx = now.x - before.x;
+        double dz = now.z - before.z;
+        return dx * dx + dz * dz > 1.0E-4; // a hundredth of a block since last tick
+    }
+
     private static void maybeEmit(GeneAbility.Emitter e, Horse horse, ServerLevel level, boolean moving) {
         switch (e.trigger()) {
             case GeneAbility.Trigger.OnMove ignored -> {
@@ -550,7 +615,7 @@ public final class GeneAbilityHandler {
                 }
             }
             case GeneAbility.Trigger.Interval interval -> {
-                if (horse.tickCount % interval.ticks() != 0) {
+                if (!beat(horse, interval.ticks())) {
                     return;
                 }
             }
@@ -563,6 +628,9 @@ public final class GeneAbilityHandler {
             }
             case GeneAbility.Trigger.OnInteract ignored -> {
                 return; // an emitter never fires on interact
+            }
+            case GeneAbility.Trigger.OnFeed ignored -> {
+                return; // nor on a feeding - that is the summon's trigger
             }
         }
         if (level.getRandom().nextFloat() > e.chance()) {
@@ -817,6 +885,7 @@ public final class GeneAbilityHandler {
             return;
         }
         BREATH_DEBT.remove(horse.getUUID());
+        LAST_POS.remove(horse.getUUID());
         BlockPos pos = GLOW_LIGHT.remove(horse.getUUID());
         if (pos != null && event.getLevel() instanceof ServerLevel level) {
             PENDING_LIGHT_CLEARS.add(new PendingClear(level.dimension(), pos.immutable()));
@@ -851,7 +920,7 @@ public final class GeneAbilityHandler {
      */
     private static void heal(GeneAbility.Healing h, Horse horse, ServerLevel level) {
         int interval = Math.max(1, h.intervalTicks());
-        if (horse.tickCount % interval != 0) {
+        if (!beat(horse, interval)) {
             return;
         }
         AABB box = horse.getBoundingBox().inflate(h.radius());
@@ -923,7 +992,7 @@ public final class GeneAbilityHandler {
      */
     private static void spread(GeneAbility.Spread s, Horse horse, ServerLevel level) {
         int interval = Math.max(1, s.intervalTicks());
-        if (horse.tickCount % interval != 0) {
+        if (!beat(horse, interval)) {
             return;
         }
         if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
@@ -1028,7 +1097,7 @@ public final class GeneAbilityHandler {
 
     private static void applyMobEffect(GeneAbility.SelfEffect e, Horse horse, String geneKey) {
         int refresh = Math.max(1, e.refreshTicks());
-        if (horse.tickCount % refresh != 0) {
+        if (!beat(horse, refresh)) {
             return; // only re-apply on the refresh beat
         }
         if ("group".equals(e.target())) {
@@ -1599,7 +1668,7 @@ public final class GeneAbilityHandler {
      * gladiator out of the ravine it would otherwise die in.
      */
     private static void temper(GeneAbility.Temper te, Horse horse, ServerLevel level) {
-        if (horse.tickCount % Math.max(1, te.intervalTicks()) != 0) {
+        if (!beat(horse, te.intervalTicks())) {
             return;
         }
         if (horse.getTarget() != null && te.hold()
@@ -1650,9 +1719,64 @@ public final class GeneAbilityHandler {
     private static void maybeSummon(GeneAbility.Summon su, Horse horse, ServerLevel level,
                                      String geneKey) {
         if (!triggerFiresNow(su.trigger(), horse, false)) {
+            return; // an on_feed summon never fires from the tick - see onFeed
+        }
+        summon(su, horse, level, geneKey);
+    }
+
+    /**
+     * <b>Feeding fires the {@code on_feed} abilities</b> - today, only the
+     * spawner. Anything the horse eats from a hand counts: its favourite, what a
+     * special diet accepts, or vanilla horse food for an ordinary horse - the
+     * same split {@link CrouchFeedGoal} tempts with.
+     *
+     * <p>HIGHEST priority, because {@link FoodPreferenceHandler} (HIGH) and
+     * {@link HorseDietHandler} both cancel the interaction and shrink the stack,
+     * and a stack of one would already be empty by the time a later listener
+     * looked at it. It does not cancel anything itself.
+     *
+     * <p>It fires whether or not vanilla then actually eats (a horse at full
+     * health refuses wheat): the summon counts before it makes anything, so a
+     * spare trigger is a no-op rather than a duplication.
+     */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    static void onFeed(PlayerInteractEvent.EntityInteract event) {
+        if (event.isCanceled() || event.getLevel().isClientSide()
+                || !(event.getTarget() instanceof Horse horse)
+                || !(horse.level() instanceof ServerLevel level)) {
             return;
         }
+        ItemStack held = event.getItemStack();
+        if (held.isEmpty() || !eats(horse, held)) {
+            return;
+        }
+        HorseRecord record = HorseRecords.of(horse);
+        if (!record.hasName()) {
+            return;
+        }
+        for (HorseAbilities.Active active : resolve(horse, record)) {
+            if (active.ability() instanceof GeneAbility.Summon su
+                    && su.trigger() instanceof GeneAbility.Trigger.OnFeed
+                    && conditionHolds(su.when(), horse, record)) {
+                summon(su, horse, level, active.geneKey());
+            }
+        }
+    }
+
+    /** Would this horse eat {@code stack} from a hand? Favourite, then diet, then vanilla. */
+    private static boolean eats(Horse horse, ItemStack stack) {
+        String favourite = horse.isBaby() ? null : FoodPreferenceHandler.favouriteOf(horse);
+        if (favourite != null && favourite.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())) {
+            return true;
+        }
+        HorseDiet diet = HorseDietHandler.dietOf(horse);
+        return diet.isSpecial() ? DietFoods.accepts(diet, stack) : horse.isFood(stack);
+    }
+
+    private static void summon(GeneAbility.Summon su, Horse horse, ServerLevel level, String geneKey) {
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
+            DebugAnnounce.say(level, "Spawner", "nothing made - the world is on Peaceful",
+                    ChatFormatting.YELLOW);
             return;
         }
         Identifier rl = Identifier.tryParse(su.mob());
@@ -1663,22 +1787,53 @@ public final class GeneAbilityHandler {
         }
         AABB box = horse.getBoundingBox().inflate(su.radius());
         long present = level.getEntities(type, box, e -> e.isAlive()).size();
+        String what = type.getDescription().getString();
         if (present >= su.upTo()) {
-            return; // already enough of them; this is the whole self-limit
+            // already enough of them; this is the whole self-limit
+            DebugAnnounce.say(level, "Spawner", present + " " + what + " already within "
+                    + (int) su.radius() + " blocks - nothing to top up", ChatFormatting.GRAY);
+            return;
         }
         int wanted = (int) (su.upTo() - present);
+        int made = 0;
         for (int i = 0; i < wanted; i++) {
             BlockPos at = findSpawnSpot(horse, level, su.radius());
             if (at == null) {
-                return;
+                break;
             }
-            Entity made = type.spawn(level, at, EntitySpawnReason.NATURAL);
-            if (made instanceof Mob mob) {
-                // NOT setPersistenceRequired: it must despawn like anything else.
-                mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at),
-                        EntitySpawnReason.NATURAL, null);
+            // EntityType.spawn already runs finalizeSpawn (inside create) and
+            // posts FinalizeSpawnEvent, so other mods' protections apply. A
+            // second finalizeSpawn here used to re-roll equipment and variant.
+            // NOT setPersistenceRequired: it must despawn like anything else.
+            if (type.spawn(level, at, EntitySpawnReason.NATURAL) != null) {
+                made++;
             }
         }
+        DebugAnnounce.say(level, "Spawner", "made " + made + " of " + wanted + " " + what
+                + (made < wanted ? " (no clear spot, or another mod cancelled the spawn)" : ""),
+                made > 0 ? ChatFormatting.GREEN : ChatFormatting.YELLOW);
+    }
+
+    /**
+     * <b>A timed beat, on the world's clock rather than the horse's.</b>
+     * {@code tickCount} is not saved - it restarts at zero whenever a horse is
+     * spawned, its chunk reloads or the world is reopened - so
+     * {@code tickCount % n == 0} needed {@code n} unbroken ticks of one horse
+     * staying loaded, and every reload threw the progress away. For the short
+     * beats that never mattered; for dryad's 9 000 - 32 000 tick sapling, or the
+     * spawner's old once-a-day, it meant never. Owner-observed 2026-09-10: a cow
+     * spawner that had not spawned a cow.
+     *
+     * <p>Game time is saved with the world and keeps counting, and each horse is
+     * offset by its UUID so two horses on the same beat are still not in
+     * lockstep - the property {@code tickCount} was chosen for.
+     */
+    private static boolean beat(Horse horse, int interval) {
+        if (interval <= 1) {
+            return true;
+        }
+        long phase = horse.getUUID().getLeastSignificantBits() & 0x7FFFFFFFL;
+        return Math.floorMod(horse.level().getGameTime() + phase, (long) interval) == 0;
     }
 
     private static BlockPos findSpawnSpot(Horse horse, ServerLevel level, double radius) {
@@ -1702,9 +1857,10 @@ public final class GeneAbilityHandler {
         return switch (trigger) {
             case GeneAbility.Trigger.Continuous ignored -> true;
             case GeneAbility.Trigger.OnMove ignored -> moving;
-            case GeneAbility.Trigger.Interval in -> horse.tickCount % Math.max(1, in.ticks()) == 0;
+            case GeneAbility.Trigger.Interval in -> beat(horse, in.ticks());
             // Event-driven triggers never fire from the tick loop.
             case GeneAbility.Trigger.OnInteract ignored -> false;
+            case GeneAbility.Trigger.OnFeed ignored -> false;
             case GeneAbility.Trigger.OnHurt ignored -> false;
             case GeneAbility.Trigger.OnOwnerHurt ignored -> false;
         };

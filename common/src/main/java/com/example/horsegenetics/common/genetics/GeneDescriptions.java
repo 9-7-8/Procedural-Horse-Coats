@@ -387,7 +387,7 @@ public final class GeneDescriptions {
                             + "matched pair is always something somebody bred."),
             Map.entry("horsegenetics.spawner",
                     "A magical recessive that paints nothing: two copies of the SAME allele and "
-                            + "once a day the horse tops the local population of one mob UP TO two - "
+                            + "feeding the horse tops the local population of one mob UP TO two - "
                             + "doing nothing at all if they are still there. One allele per mob INCLUDING "
                             + "the monsters, and never expressed in the wild."),
             Map.entry("horsegenetics.lycan",
