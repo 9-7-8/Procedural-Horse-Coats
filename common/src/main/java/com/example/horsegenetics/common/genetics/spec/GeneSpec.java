@@ -446,6 +446,30 @@ public record GeneSpec(
          * See known-gaps gap 102.
          */
         CHOICE,
+        /**
+         * <b>Something poured along a line and running off it</b> - a band whose
+         * edge sags into separate drips of different lengths, each with a heavy
+         * tip, joined to the band by a concave fillet.
+         *
+         * <p>It exists because {@link #WAVES} is the wrong shape for a liquid
+         * and cannot be talked into it. A wave is one periodic function: every
+         * lobe is the same length, the same width and the same distance from
+         * the next, and the only edge shapes on offer are a scallop, a tooth and
+         * a ramp. Goo is not periodic - the whole read of a drip is that one ran
+         * further than its neighbour - and it is not a displaced line either,
+         * because a drip is fatter at the bottom than where it left the band.
+         * The owner's report on the first ooze drip was "it looks like
+         * triangles", which is what a sine at this scale is.
+         *
+         * <p>So this is a <b>distance field</b>, not a displacement: a half-plane
+         * for the band, a capsule per drip, a disc for each drip's tip, unioned
+         * with a polynomial smooth-minimum so the joins fillet the way a liquid's
+         * meniscus does. Everything about a drip - whether it is there at all,
+         * where along the band it hangs, how far it runs and how thick it is -
+         * is drawn per cell from the seed, so no two are alike and a horse keeps
+         * its own.
+         */
+        GOO,
         /** Coverage read off the pigment the earlier genes left - "find the black". */
         PIGMENT,
         /**

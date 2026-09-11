@@ -966,6 +966,36 @@
             "scale": 2.0,
             "strength": 88
           }
+        },
+        {
+          "name": "goo poured along the topline, with drips of its own lengths - the GOO mask",
+          "masks": [
+            {
+              "type": "GOO",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$spotSeed",
+              "axis": "X",
+              "across": "Y",
+              "space": "part",
+              "from": 0.82,
+              "to": 1.7,
+              "spacing": 4.5,
+              "drop": 5.0,
+              "width": 1.7,
+              "bulb": 1.7,
+              "vary": 0.9,
+              "chance": 0.72,
+              "wobble": 0.8,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#9fd6ff",
+            "strength": 74
+          }
         }
       ]
     },

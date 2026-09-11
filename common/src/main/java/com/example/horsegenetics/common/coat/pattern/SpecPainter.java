@@ -870,6 +870,68 @@ public final class SpecPainter {
                 }
                 return best;
             }
+            case GOO: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                Axis along = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
+                Axis across = Axis.valueOf(p.text("across", "Y").toUpperCase(java.util.Locale.ROOT));
+                double travel = point.along(along);
+                double coord = point.along(across);
+                String space = p.text("space", "part");
+                double t = switch (space) {
+                    case "body" -> normalise(coord, HorseSkinGeometry.bodyBounds(skin), across);
+                    case "units" -> coord;
+                    case "local" -> HorseSkinGeometry.local(skin, part, point).along(across);
+                    default -> normalise(coord, bounds.get(part), across);
+                };
+                // A drip is a round shape, so everything but 'from' and 'to' is
+                // in body units - which means knowing how many body units one
+                // unit of 'across' is worth in the space the band was measured in.
+                double span = switch (space) {
+                    case "body" -> spanOf(HorseSkinGeometry.bodyBounds(skin), across);
+                    case "units", "local" -> 1.0;
+                    default -> spanOf(bounds.get(part), across);
+                };
+                double from = v.get(p.value("from", 0.75), leg);
+                double to = v.get(p.value("to", 1.6), leg);
+                double spacing = Math.max(0.05, v.get(p.value("spacing", 4.0), leg));
+                double drop = Math.max(0.0, v.get(p.value("drop", 3.0), leg));
+                double width = Math.max(0.05, v.get(p.value("width", 1.6), leg));
+                double bulb = Math.max(0.0, v.get(p.value("bulb", 1.5), leg));
+                double vary = Math.min(1.0, Math.max(0.0, v.get(p.value("vary", 0.6), leg)));
+                double chance = v.get(p.value("chance", 0.75), leg);
+                double wobble = v.get(p.value("wobble", 0.5), leg);
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.1), leg));
+
+                double dir = to >= from ? 1.0 : -1.0;
+                // Below the edge is positive, into the band is negative, both in
+                // body units; the edge itself wanders on a long, slow field.
+                double depth = (from - t) * span * dir
+                        + wobble * (BodyNoise.value(seed ^ 0x51L, travel / (spacing * 2.5), 0.5, 0.5) * 2 - 1);
+                double thickness = Math.abs(to - from) * span;
+
+                double sd = depth;                       // the band: a half-plane
+                double fillet = Math.max(1e-6, width * 0.5);
+                int cell = (int) Math.floor(travel / spacing);
+                for (int i = cell - 1; i <= cell + 1; i++) {
+                    if (BodyNoise.value(seed ^ 0xA4L, i * 0.73 + 0.19, 0.61, 0.29) > chance) {
+                        continue;                        // this cell has no drip
+                    }
+                    double jitter = (BodyNoise.value(seed ^ 0xA1L, i * 0.73 + 0.19, 0.31, 0.57) - 0.5) * 0.7 * vary;
+                    double cx = (i + 0.5 + jitter) * spacing;
+                    double len = drop * (1 - vary * BodyNoise.value(seed ^ 0xA2L, i * 0.73 + 0.19, 0.13, 0.83));
+                    double half = width * 0.5
+                            * (1 - 0.45 * vary * BodyNoise.value(seed ^ 0xA3L, i * 0.73 + 0.19, 0.47, 0.11));
+                    double qx = travel - cx;
+                    // A capsule from the edge down to the drip's end, and a disc
+                    // at the end - the bead that makes it read as liquid.
+                    double h = Math.min(1.0, Math.max(0.0, depth / Math.max(1e-6, len)));
+                    double stem = Math.hypot(qx, depth - h * len) - half;
+                    double tip = Math.hypot(qx, depth - len) - half * bulb;
+                    sd = smoothMin(sd, Math.min(stem, tip), fillet);
+                }
+                // Nothing past the far edge of the band.
+                return 1.0 - BodyStripes.smoothstep(0, soft, Math.max(sd, -(depth + thickness)));
+            }
             case CRACKLE: {
                 long seed = v.seed(p.value("seed", 0), seedBase);
                 double scale = Math.max(0.05, v.get(p.value("scale", 5.0), leg));
@@ -1373,6 +1435,27 @@ public final class SpecPainter {
      * side. A zero {@code softness} gives a hard edge - available, but the
      * default is soft because a marking that stops on a line reads as a bug.
      */
+    /**
+     * The polynomial smooth minimum - a union of two distance fields whose join
+     * is filleted over {@code k} rather than creased. It is what makes
+     * {@code GOO}'s drips look poured on rather than stuck on: a hard
+     * {@code min} leaves a sharp corner where a drip meets its band, and a
+     * liquid never has one.
+     */
+    private static double smoothMin(double a, double b, double k) {
+        double h = Math.min(1.0, Math.max(0.0, 0.5 + 0.5 * (b - a) / k));
+        return b + (a - b) * h - k * h * (1 - h);
+    }
+
+    /** How many body units one unit of {@code axis} is worth inside {@code bounds}. */
+    private static double spanOf(Bounds bounds, Axis axis) {
+        return switch (axis) {
+            case X -> bounds.xMax() - bounds.xMin();
+            case Y -> bounds.yMax() - bounds.yMin();
+            case Z -> bounds.zMax() - bounds.zMin();
+        };
+    }
+
     private static double band(double t, double from, double to, double softness) {
         double soft = Math.max(1e-6, softness);
         return BodyStripes.smoothstep(from - soft, from, t) * (1.0 - BodyStripes.smoothstep(to, to + soft, t));

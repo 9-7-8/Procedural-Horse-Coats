@@ -14,7 +14,8 @@
     "The black field is a fixed colour in both forms. It is the ground the rim reads against, so the white form is a pale-rimmed black drip rather than a white one.",
     "founders below is a placeholder that satisfies the loader. Run intake/tools/founders.py to derive the real table from the rarity tier.",
     "Arrived at priority 260. Moved to 387: lines and strokes - runs down from the topline, and paired with ooze drip. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
-    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse."
+    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse.",
+    "THE BLACK FIELD'S 'to' IS 1.45, NOT 1.05 (2026-09-11). WAVES displaces the WHOLE band, not just the edge you are shaping: at a trough the far edge came down to 0.85 of the barrel and left a bare brown stripe along the top of the back, once per wavelength, which is what the owner saw. Anything banded across a part has to clear 1.0 by its amplitude plus its softness."
   ],
   "alleles": [
     {
@@ -66,7 +67,7 @@
                 "BODY"
               ],
               "from": 0.7,
-              "to": 1.05,
+              "to": 1.45,
               "wavelength": 6,
               "amplitude": 0.2,
               "phase": 0,
@@ -247,7 +248,7 @@
                 "BODY"
               ],
               "from": 0.7,
-              "to": 1.05,
+              "to": 1.45,
               "wavelength": 6,
               "amplitude": 0.2,
               "phase": 0,

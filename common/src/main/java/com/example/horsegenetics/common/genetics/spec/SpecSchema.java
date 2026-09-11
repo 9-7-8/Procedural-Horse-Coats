@@ -662,6 +662,41 @@ public final class SpecSchema {
                                 + "when 'spacing' is above 0"),
                 Param.value("softness", 0.15, "fade width outside the band")));
 
+        MASKS.put(MaskType.GOO, List.of(
+                Param.parts("parts", "restrict to these parts (and, in 'part' space, measure within each)"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.choice("axis", List.of("X", "Y", "Z"),
+                        "the axis the band RUNS along, and so the one the drips are spaced out "
+                                + "along - as on WAVES, not as on AXIS"),
+                Param.choice("across", List.of("Y", "X", "Z"),
+                        "the axis the band sits on. The drips hang from the 'from' edge, away "
+                                + "from 'to' - so a topline band that runs down the flanks is "
+                                + "axis X, across Y, from high, to higher"),
+                Param.choice("space", AXIS_SPACES,
+                        "how 'across' is measured, exactly as on AXIS - and so the units 'from' "
+                                + "and 'to' are in. Every other length here is in BODY units, "
+                                + "because a drip is a shape and has to stay round"),
+                Param.value("from", 0.75, "the edge the drips hang from"),
+                Param.value("to", 1.6,
+                        "the far edge of the band. Put it well past the end of the part - a band "
+                                + "that stops at 1.0 leaves the top of the back bare wherever the "
+                                + "edge wanders above it"),
+                Param.value("spacing", 4.0, "body units from one drip to the next, before 'vary' moves them"),
+                Param.value("drop", 3.0, "how far the longest drip runs below the edge, body units"),
+                Param.value("width", 1.6, "the stem's width, body units"),
+                Param.value("bulb", 1.5,
+                        "the tip's radius as a multiple of the stem's half-width. 1 is a plain "
+                                + "round end; above 1 is a bead of liquid about to fall"),
+                Param.value("vary", 0.6,
+                        "0 makes every drip the same length, in the same place, and the mask is "
+                                + "a comb; 1 runs them from nothing to 'drop' and shifts each a "
+                                + "third of a cell either way"),
+                Param.value("chance", 0.75, "share of cells that carry a drip at all"),
+                Param.value("wobble", 0.5,
+                        "how far the band's own edge wanders, body units - the difference "
+                                + "between a poured line and a ruled one"),
+                Param.value("softness", 0.1, "edge fade, body units")));
+
         MASKS.put(MaskType.CRACKLE, List.of(
                 Param.parts("parts", "restrict to these parts"),
                 Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),

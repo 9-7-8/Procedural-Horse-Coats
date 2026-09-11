@@ -36985,7 +36985,7 @@
   "name": "Ooze Drip",
   "phase": "magical",
   "priority": 386,
-  "blurb": "Something bright has been poured along the spine and is running down the barrel in fat rounded lobes.",
+  "blurb": "Something bright has been poured along the spine and is running down the barrel in fat drips, each hanging from a heavy bead.",
   "rarity": "UNCOMMON",
   "alleles": [
     {
@@ -37027,36 +37027,44 @@
           "name": "the dark lip around each drip",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
               "seed": "$dripSeed",
               "axis": "X",
               "across": "Y",
-              "shape": "sine",
               "space": "part",
-              "from": 0.52,
-              "to": 1.2,
-              "wavelength": 4.5,
-              "amplitude": 0.34,
-              "softness": 0.04
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.74,
+              "to": 1.7,
+              "drop": 6.0,
+              "width": 2.9,
+              "bulb": 1.45,
+              "wobble": 0.85
             },
             {
-              "type": "WAVES",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
               "seed": "$dripSeed",
               "axis": "X",
               "across": "Y",
-              "shape": "sine",
               "space": "part",
-              "from": 0.6,
-              "to": 1.2,
-              "wavelength": 4.5,
-              "amplitude": 0.24,
-              "softness": 0.04,
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85,
               "invert": true
             }
           ],
@@ -37070,20 +37078,24 @@
           "name": "the drip itself",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
               "seed": "$dripSeed",
               "axis": "X",
               "across": "Y",
-              "shape": "sine",
               "space": "part",
-              "from": 0.6,
-              "to": 1.2,
-              "wavelength": 4.5,
-              "amplitude": 0.24,
-              "softness": 0.04
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85
             }
           ],
           "op": {
@@ -37107,36 +37119,44 @@
           "name": "the dark lip around each drip",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
               "seed": "$dripSeed",
               "axis": "X",
               "across": "Y",
-              "shape": "sine",
               "space": "part",
-              "from": 0.52,
-              "to": 1.2,
-              "wavelength": 4.5,
-              "amplitude": 0.34,
-              "softness": 0.04
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.74,
+              "to": 1.7,
+              "drop": 6.0,
+              "width": 2.9,
+              "bulb": 1.45,
+              "wobble": 0.85
             },
             {
-              "type": "WAVES",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
               "seed": "$dripSeed",
               "axis": "X",
               "across": "Y",
-              "shape": "sine",
               "space": "part",
-              "from": 0.6,
-              "to": 1.2,
-              "wavelength": 4.5,
-              "amplitude": 0.24,
-              "softness": 0.04,
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85,
               "invert": true
             }
           ],
@@ -37150,20 +37170,24 @@
           "name": "the drip itself",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
               "seed": "$dripSeed",
               "axis": "X",
               "across": "Y",
-              "shape": "sine",
               "space": "part",
-              "from": 0.6,
-              "to": 1.2,
-              "wavelength": 4.5,
-              "amplitude": 0.24,
-              "softness": 0.04
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85
             }
           ],
           "op": {
@@ -37192,11 +37216,12 @@
     "n/n": 99.888
   },
   "notes": [
-    "Two WAVES bands on one seed, so the lobes line up. The outline layer is wound wider - amplitude 0.34 against 0.24, starting at 0.52 against 0.60 - and painted first, so what survives at the fringe is a thick cartoon lip. The gap works out well over a body unit at the bottom of each lobe, which is the minimum that reads at half a unit per texel.",
+    "Two GOO masks on one seed, so the lip follows the drips exactly. The lip is the same field grown by about 0.6 body units - wider stem, longer drop, a bigger bead - with the inner one cut back out of it, so what survives is a thick cartoon outline all the way round.",
     "BODY only. A Y band on the pitched NECK is a collar and not a topline stripe, so the drips stop at the withers rather than trying to run down the throat. If they should carry onto the neck, that is a second layer in space local, not a wider parts list.",
     "Arrived at priority 122. Moved to 386: lines and strokes - runs down from the topline, and paired with rainbow drip. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
     "LAYERS MADE DISJOINT on the way in. The dark lip sat under the whole drip rather than round it, so the drip itself was the bright colour plus the lip's darkening - dimmer than the file asks for, and a different colour on every coat. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.",
-    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse."
+    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse.",
+    "REBUILT ON THE GOO MASK (2026-09-11). It was two WAVES bands, and the owner's verdict was 'it looks like triangles' - correctly, because a sine at 4.5 body units with a 2.4-unit amplitude is a zigzag by the time it lands on half-unit texels, and every lobe was the same length anyway. WAVES cannot express a liquid: it is one periodic function, and the whole read of a drip is that one ran further than the next. GOO is a distance field instead - a half-plane, a capsule per drip and a bead at each tip, smooth-unioned so the joins fillet. Checked on a six-seed side view: lengths differ, cells go empty, no two horses alike."
   ]
 },
 {
@@ -45160,7 +45185,8 @@
     "The black field is a fixed colour in both forms. It is the ground the rim reads against, so the white form is a pale-rimmed black drip rather than a white one.",
     "founders below is a placeholder that satisfies the loader. Run intake/tools/founders.py to derive the real table from the rarity tier.",
     "Arrived at priority 260. Moved to 387: lines and strokes - runs down from the topline, and paired with ooze drip. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
-    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse."
+    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse.",
+    "THE BLACK FIELD'S 'to' IS 1.45, NOT 1.05 (2026-09-11). WAVES displaces the WHOLE band, not just the edge you are shaping: at a trough the far edge came down to 0.85 of the barrel and left a bare brown stripe along the top of the back, once per wavelength, which is what the owner saw. Anything banded across a part has to clear 1.0 by its amplitude plus its softness."
   ],
   "alleles": [
     {
@@ -45212,7 +45238,7 @@
                 "BODY"
               ],
               "from": 0.7,
-              "to": 1.05,
+              "to": 1.45,
               "wavelength": 6,
               "amplitude": 0.2,
               "phase": 0,
@@ -45393,7 +45419,7 @@
                 "BODY"
               ],
               "from": 0.7,
-              "to": 1.05,
+              "to": 1.45,
               "wavelength": 6,
               "amplitude": 0.2,
               "phase": 0,

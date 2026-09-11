@@ -178,8 +178,9 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                intake(player, inv, legend, 0, "ooze_drip", null, "hangs DOWN from the spine, not toward the tail");
-                intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too");
+                intake(player, inv, legend, 0, "ooze_drip", null,
+                        "rebuilt on the GOO mask - spawn several: separate drips, own lengths, beads, no triangles");
+                intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too - and check the spine: no bare stripes now");
                 intake(player, inv, legend, 2, "rainbow_drip", "Rdc", "the coloured form");
                 intake(player, inv, legend, 3, "contour_cells", null,
                         "nested outlines in dark patches - may take several eggs; check the far flank");

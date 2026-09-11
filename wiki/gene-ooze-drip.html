@@ -21,7 +21,7 @@
 <h1>Ooze Drip</h1>
 
 <p class="lede">
-    Something bright has been poured along the spine and is running down the barrel in fat rounded lobes.
+    Something bright has been poured along the spine and is running down the barrel in fat drips, each hanging from a heavy bead.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -101,14 +101,14 @@
 <tr><th>Priority</th><td>386 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Oz</code> &middot; <code>oz</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>2 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>TOWARD, WAVES, emissive</td></tr>
+<tr><th>Built from</th><td>GOO, TOWARD, emissive</td></tr>
 </tbody>
 </table>
 </div>
 
 <h2 id="about">Why it is built this way</h2>
 
-<p>Two WAVES bands on one seed, so the lobes line up. The outline layer is wound wider - amplitude 0.34 against 0.24, starting at 0.52 against 0.60 - and painted first, so what survives at the fringe is a thick cartoon lip. The gap works out well over a body unit at the bottom of each lobe, which is the minimum that reads at half a unit per texel.</p>
+<p>Two GOO masks on one seed, so the lip follows the drips exactly. The lip is the same field grown by about 0.6 body units - wider stem, longer drop, a bigger bead - with the inner one cut back out of it, so what survives is a thick cartoon outline all the way round.</p>
 
 <p>BODY only. A Y band on the pitched NECK is a collar and not a topline stripe, so the drips stop at the withers rather than trying to run down the throat. If they should carry onto the neck, that is a second layer in space local, not a wider parts list.</p>
 
@@ -117,6 +117,8 @@
 <p>LAYERS MADE DISJOINT on the way in. The dark lip sat under the whole drip rather than round it, so the drip itself was the bright colour plus the lip's darkening - dimmer than the file asks for, and a different colour on every coat. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.</p>
 
 <p>WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse.</p>
+
+<p>REBUILT ON THE GOO MASK (2026-09-11). It was two WAVES bands, and the owner's verdict was 'it looks like triangles' - correctly, because a sine at 4.5 body units with a 2.4-unit amplitude is a zigzag by the time it lands on half-unit texels, and every lobe was the same length anyway. WAVES cannot express a liquid: it is one periodic function, and the whole read of a drip is that one ran further than the next. GOO is a distance field instead - a half-plane, a capsule per drip and a bead at each tip, smooth-unioned so the joins fillet. Checked on a six-seed side view: lengths differ, cells go empty, no two horses alike.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -132,8 +134,8 @@
 <p>Lime ooze running down from the topline in rounded drips, each outlined in near-black, and lit at night.</p>
 
 <ol>
-<li>the dark lip around each drip &mdash; <code>WAVES</code> &times; <code>WAVES inverted</code>, painted with <code>TOWARD</code></li>
-<li>the drip itself &mdash; <code>WAVES</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
+<li>the dark lip around each drip &mdash; <code>GOO</code> &times; <code>GOO inverted</code>, painted with <code>TOWARD</code></li>
+<li>the drip itself &mdash; <code>GOO</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
 </ol>
 
 <h3>Ooze drip, coloured</h3>
@@ -141,8 +143,8 @@
 <p>The same drips in the colour this line carries.</p>
 
 <ol>
-<li>the dark lip around each drip &mdash; <code>WAVES</code> &times; <code>WAVES inverted</code>, painted with <code>TOWARD</code></li>
-<li>the drip itself &mdash; <code>WAVES</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
+<li>the dark lip around each drip &mdash; <code>GOO</code> &times; <code>GOO inverted</code>, painted with <code>TOWARD</code></li>
+<li>the drip itself &mdash; <code>GOO</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
 </ol>
 
 <h3>Wild type</h3>

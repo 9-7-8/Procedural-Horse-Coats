@@ -340,6 +340,31 @@ window.HG = window.HG || {};
         v("softness", 0.15, "fade width outside the band")
       ]
     },
+    GOO: {
+      blurb: "A band whose edge sags into separate drips, each hanging from a heavy bead and filleted where it "
+        + "leaves the band - something poured on and running off. WAVES repeats one lobe forever; this one "
+        + "varies every drip and leaves cells empty.",
+      params: [
+        parts("parts", "restrict to these parts (and, in 'part' space, measure inside each one)"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        choice("axis", ["X", "Y", "Z"], "the axis the band RUNS along, and the drips are spaced out along - as on WAVES"),
+        choice("across", ["Y", "X", "Z"],
+          "the axis the band sits on. Drips hang from the 'from' edge, away from 'to'"),
+        choice("space", ["part", "body", "units", "local"],
+          "how 'across' is measured - as on AXIS, and so the units of 'from' and 'to'. Every other "
+          + "length here is in body units, because a drip has to stay round"),
+        v("from", 0.75, "the edge the drips hang from", { min: -2, max: 2, step: 0.01 }),
+        v("to", 1.6, "the far edge of the band - put it well past the end of the part", { min: -2, max: 2, step: 0.01 }),
+        v("spacing", 4.0, "body units from one drip to the next", { min: 0.5, max: 20, step: 0.1 }),
+        v("drop", 3.0, "how far the longest drip runs below the edge", { min: 0, max: 20, step: 0.1 }),
+        v("width", 1.6, "the stem's width, body units", { min: 0.1, max: 8, step: 0.1 }),
+        v("bulb", 1.5, "the tip's radius, as a multiple of the stem's half-width", { min: 0, max: 4, step: 0.05 }),
+        v("vary", 0.6, "0 is a comb of identical drips; 1 runs them from nothing to 'drop'"),
+        v("chance", 0.75, "share of cells that carry a drip at all"),
+        v("wobble", 0.5, "how far the band's own edge wanders, body units", { min: 0, max: 6, step: 0.05 }),
+        v("softness", 0.1, "edge fade, body units")
+      ]
+    },
     CRACKLE: {
       blurb: "Polygons that tile, each filled solid, separated by an even channel - a giraffe, a cracked glaze, a dry lake bed. DAPPLES and SPOTS draw round; this draws straight.",
       params: [

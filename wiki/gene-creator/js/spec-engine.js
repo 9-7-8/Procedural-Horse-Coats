@@ -299,6 +299,12 @@ window.HG = window.HG || {};
       noise.mul(noise.fromInt(layerIndex + 1), noise.fromHex("C2B2AE3D27D4EB4F")));
   }
 
+  /** The polynomial smooth minimum - the port of SpecPainter.smoothMin. */
+  function smoothMin(a, b, k) {
+    var h = Math.min(1, Math.max(0, 0.5 + 0.5 * (b - a) / k));
+    return b + (a - b) * h - k * h * (1 - h);
+  }
+
   function band(t, from, to, softness) {
     var soft = Math.max(1e-6, softness);
     return smoothstep(from - soft, from, t) * (1 - smoothstep(to, to + soft, t));
@@ -593,6 +599,56 @@ window.HG = window.HG || {};
           best9 = Math.max(best9, band(t9 - centre, from9, to9, soft9));
         }
         return best9;
+      }
+      case "GOO": {
+        var sg = getSeed(values, mask.seed, seedBase);
+        var alongG = (mask.axis || "X").toUpperCase();
+        var acrossG = (mask.across || "Y").toUpperCase();
+        var travelG = axisOf(point, alongG);
+        var coordG = axisOf(point, acrossG);
+        var spaceG = mask.space || "part";
+        var boundsG = spaceG === "body" ? geo.bodyBounds(skin) : geo.bounds(skin, part);
+        var tG = spaceG === "body" ? normalise(coordG, geo.bodyBounds(skin), acrossG)
+          : spaceG === "units" ? coordG
+            : spaceG === "local" ? axisOf(geo.local(skin, part, point), acrossG)
+              : normalise(coordG, geo.bounds(skin, part), acrossG);
+        // Every length but 'from' and 'to' is in body units - a drip is a round
+        // shape and has to stay round - so the band's span is what converts.
+        var spanG = (spaceG === "units" || spaceG === "local") ? 1
+          : (boundsG ? boundsG.span(acrossG) : 1);
+        var fromG = get(values, mask.from, 0.75, legIndex);
+        var toG = get(values, mask.to, 1.6, legIndex);
+        var spacingG = Math.max(0.05, get(values, mask.spacing, 4.0, legIndex));
+        var dropG = Math.max(0, get(values, mask.drop, 3.0, legIndex));
+        var widthG = Math.max(0.05, get(values, mask.width, 1.6, legIndex));
+        var bulbG = Math.max(0, get(values, mask.bulb, 1.5, legIndex));
+        var varyG = Math.min(1, Math.max(0, get(values, mask.vary, 0.6, legIndex)));
+        var chanceG = get(values, mask.chance, 0.75, legIndex);
+        var wobbleG = get(values, mask.wobble, 0.5, legIndex);
+        var softG = Math.max(1e-6, get(values, mask.softness, 0.1, legIndex));
+
+        var dirG = toG >= fromG ? 1 : -1;
+        var depthG = (fromG - tG) * spanG * dirG
+          + wobbleG * (noise.value(noise.xor(sg, noise.u64(0, 0x51)), travelG / (spacingG * 2.5), 0.5, 0.5) * 2 - 1);
+        var thicknessG = Math.abs(toG - fromG) * spanG;
+
+        var sdG = depthG;
+        var filletG = Math.max(1e-6, widthG * 0.5);
+        var cellG = Math.floor(travelG / spacingG);
+        for (var iG = cellG - 1; iG <= cellG + 1; iG++) {
+          if (noise.value(noise.xor(sg, noise.u64(0, 0xA4)), iG * 0.73 + 0.19, 0.61, 0.29) > chanceG) continue;
+          var jitterG = (noise.value(noise.xor(sg, noise.u64(0, 0xA1)), iG * 0.73 + 0.19, 0.31, 0.57) - 0.5) * 0.7 * varyG;
+          var cxG = (iG + 0.5 + jitterG) * spacingG;
+          var lenG = dropG * (1 - varyG * noise.value(noise.xor(sg, noise.u64(0, 0xA2)), iG * 0.73 + 0.19, 0.13, 0.83));
+          var halfG = widthG * 0.5
+            * (1 - 0.45 * varyG * noise.value(noise.xor(sg, noise.u64(0, 0xA3)), iG * 0.73 + 0.19, 0.47, 0.11));
+          var qxG = travelG - cxG;
+          var hG = Math.min(1, Math.max(0, depthG / Math.max(1e-6, lenG)));
+          var stemG = Math.hypot(qxG, depthG - hG * lenG) - halfG;
+          var tipG = Math.hypot(qxG, depthG - lenG) - halfG * bulbG;
+          sdG = smoothMin(sdG, Math.min(stemG, tipG), filletG);
+        }
+        return 1 - smoothstep(0, softG, Math.max(sdG, -(depthG + thicknessG)));
       }
       case "CRACKLE": {
         var sc = getSeed(values, mask.seed, seedBase);

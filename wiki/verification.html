@@ -57,6 +57,29 @@
     </p>
 </div>
 
+<h2 id="goo-mask">&sect;0-CF &mdash; A GOO mask, and the drips rebuilt on it (2026-09-11, NOT looked at in game)</h2>
+
+<p>Owner's report on the first look at the drips: ooze drip &ldquo;looks like triangles&rdquo; and needed to be
+    &ldquo;more irregular and curved&rdquo;, and both drips left &ldquo;weird gaps on the top of the horse&rdquo;.
+    Rendered side-on and from above at several seeds; parity green, and watched go red. Design:
+    <a href="making-a-gene.html#masks">the mask table</a>.</p>
+
+<ul>
+    <li><strong>Ooze drip is a different marking now.</strong> A band poured along the topline whose edge sags
+        into <em>separate</em> drips - each its own length, some cells empty, a heavy bead at every tip, and a
+        concave fillet where it leaves the band. Spawn several: no two horses should carry the same run of drips,
+        and none should read as a row of triangles. The dark lip should follow every drip all the way round.</li>
+    <li><strong>The bare stripes along the back are gone.</strong> <code>WAVES</code> displaces the
+        <em>whole</em> band, so rainbow drip's far edge dipped to 0.85 of the barrel at every trough and left a
+        brown stripe on top, once per wavelength; ooze drip had the same fault. Look along the spine of both, and
+        of anything else banded across a part.</li>
+    <li><strong>The <code>GOO</code> mask itself is new engine code</strong> - a distance field rather than a
+        displaced line (<code>SpecPainter</code>, mirrored in the creator's
+        <code>spec-engine.js</code>). Nothing else uses it yet. In the <strong>gene creator</strong>, a layer
+        using it should preview the same shape the game draws; that is what parity checks, with the caveat in
+        <a href="known-gaps.html#gap-194">gap 194</a>.</li>
+</ul>
+
 <h2 id="stick-tame">&sect;0-CE &mdash; The breeds and size test batches: confirmed (2026-09-11)</h2>
 
 <p><em>Owner-confirmed and removed from &sect;0-CA / &sect;0-CB / &sect;0-CC</em>, kept here for
