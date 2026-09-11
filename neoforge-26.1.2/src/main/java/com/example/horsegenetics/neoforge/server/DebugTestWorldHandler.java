@@ -366,8 +366,12 @@ public final class DebugTestWorldHandler {
         }
         Genome genome = new Genome(Genotype.of(built).withSex(sex),
                 Epigenome.random(new NeoRng(player.getRandom())));
+        // An EMPTY epigenome, so HorseEggSpawner.spawnPreset rolls a fresh one at
+        // every use. A stored one made every horse from a creative egg the same
+        // horse - the owner spawned a stack of trillium and taper flame to see
+        // posU move them, and every mark stood in one place (2026-09-11).
         ItemStack egg = PresetHorseSpawnEggItem.of(new StoredGenome(genome.genotypeCode(),
-                genome.epigenome().toCode(), player.getUUID(), player.getGameProfile().name(), ""), baby);
+                "", player.getUUID(), player.getGameProfile().name(), ""), baby);
         egg.set(DataComponents.CUSTOM_NAME, Component.literal(label));
         return egg;
     }
