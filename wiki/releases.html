@@ -58,6 +58,38 @@
     </p>
 </div>
 
+<h2 id="v0-5-001">0.5.001</h2>
+
+<p class="lede">
+    <strong>One folder for everything.</strong> Drop-in genes move into
+    <code>.minecraft/phc/</code> with the breeds and the settings, so nothing of the mod's
+    is in <code>config/</code> any more.
+</p>
+
+<pre><code>.minecraft/phc/
+  genes/                 your genes, from the gene creator
+  breeds/                your breeds, from the breed designer
+  breed-spawning.toml    which breeds your world has
+  server.toml
+  client.toml</code></pre>
+
+<div class="note warn">
+    <span class="label">Before you open a world</span>
+    <p>
+        <strong>If you use drop-in genes, move them first.</strong> Take every
+        <code>.json</code> out of <code>.minecraft/config/horsegenetics/genes/</code> and put it
+        in <code>.minecraft/phc/genes/</code>, then start the game. The old folder is not read.
+        A world opened without the gene loaded loses it: every horse that carried it comes back
+        without it, and moving the file afterwards does not bring it back. If you have no
+        drop-in genes, there is nothing to do.
+    </p>
+</div>
+
+<p>
+    Everything else is <a href="#v0-5-000">0.5.000</a>, unchanged &mdash; replace that jar
+    with this one.
+</p>
+
 <h2 id="v0-5-000">0.5.000</h2>
 
 <p class="lede">
