@@ -28,6 +28,9 @@ public final class HorseGenetics {
         // Unlike a gene, a breed does not lengthen the genotype code, so this
         // one is not order-critical against anything else.
         ModBreedSpecs.load();
+        // The world's say over the shipped breeds - built from the registry, so
+        // it has to come after the load above. phc/breed-spawning.toml.
+        BreedSpawningConfig.register(modContainer, modEventBus);
         // The diet locus names categories in common/ and items here; this is
         // the only thing that checks the two agree, and the failure it catches
         // is silent (a horse that would simply never accept anything).
@@ -46,10 +49,12 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.data.loot.ModLootModifiers.register(modEventBus);
         com.example.horsegenetics.neoforge.data.loot.ModLootFunctions.register(modEventBus);
         com.example.horsegenetics.neoforge.world.ModBiomeModifiers.register(modEventBus);
-        modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        // Both settings files live in .minecraft/phc/ beside the breeds folder,
+        // not in config/ - see ModBreedSpecs.configFile for how, and why.
+        modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, ModBreedSpecs.configFile("client.toml"));
         // Server-side: how much of the health genetics this world plays with.
         // Whether a foal dies has to be one answer for everyone on a server.
-        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, ModBreedSpecs.configFile("server.toml"));
         // HorseGeneticsEventHandler, ModNetworking, ClientSetup, DebugKeyBindings,
         // DebugKeyHandler, and DebugPenTickHandler are all @EventBusSubscriber-
         // annotated and pick themselves up automatically - nothing else to wire

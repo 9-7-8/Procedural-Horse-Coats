@@ -40,7 +40,7 @@ public record StoredGenome(String genotypeCode, String epigenomeCode,
                            UUID sourceId, String sourceName, String breed) {
 
     public static final Codec<StoredGenome> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.STRING.fieldOf("genotype").forGetter(StoredGenome::genotypeCode),
+            GenomeCodeCodecs.STORED_GENOTYPE.fieldOf("genotype").forGetter(StoredGenome::genotypeCode),
             Codec.STRING.fieldOf("epigenome").forGetter(StoredGenome::epigenomeCode),
             UUIDUtil.CODEC.fieldOf("source_id").forGetter(StoredGenome::sourceId),
             Codec.STRING.optionalFieldOf("source_name", "").forGetter(StoredGenome::sourceName),

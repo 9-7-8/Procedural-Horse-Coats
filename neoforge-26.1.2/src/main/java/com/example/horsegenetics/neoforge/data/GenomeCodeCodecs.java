@@ -44,6 +44,23 @@ public final class GenomeCodeCodecs {
     public static final StreamCodec<ByteBuf, String> GENOTYPE_CODE =
             ByteBufCodecs.stringUtf8(MAX_GENOTYPE_CHARS);
 
+    /**
+     * A genotype code as it is <b>saved</b> (horse records, transfer papers,
+     * seed jars): read back through {@code Genotype.readableStored}, so a horse
+     * saved by an older release carrying an allele that has since been retired
+     * loads with that locus at its default instead of throwing from every later
+     * parse. Written unchanged.
+     */
+    public static final com.mojang.serialization.Codec<String> STORED_GENOTYPE =
+            com.mojang.serialization.Codec.STRING.xmap(GenomeCodeCodecs::readable, code -> code);
+
+    private static String readable(String code) {
+        return com.example.horsegenetics.common.genetics.Genotype.readableStored(code, segment ->
+                com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.warn(
+                        "[genes] a saved horse carried '{}', which this version cannot read - that locus is back at its default",
+                        segment));
+    }
+
     private GenomeCodeCodecs() {
     }
 }

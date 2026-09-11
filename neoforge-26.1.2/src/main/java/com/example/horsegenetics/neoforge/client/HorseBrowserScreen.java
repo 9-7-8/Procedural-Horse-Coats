@@ -2117,9 +2117,18 @@ public final class HorseBrowserScreen extends Screen {
         if (breed.magical()) {
             sb.append(" Carries magic as a matter of course rather than by accident.");
         }
-        sb.append(breed.spawnWeight() >= 8 ? " Common in the wild."
-                : breed.spawnWeight() >= 2 ? " Turns up now and then."
-                : " Rarely seen.");
+        if (breed.sources().isEmpty()) {
+            // Switched off in phc/breed-spawning.toml, or a file that says
+            // "spawn": [] (the local copy - on a
+            // remote server the server's own file decides, and may differ).
+            sb.append(" Not found anywhere in this world.");
+        } else if (!breed.allows(com.example.horsegenetics.common.breed.BreedSource.WILD)) {
+            sb.append(" Not found in the wild.");
+        } else {
+            sb.append(breed.spawnWeight() >= 8 ? " Common in the wild."
+                    : breed.spawnWeight() >= 2 ? " Turns up now and then."
+                    : " Rarely seen.");
+        }
         return sb.toString();
     }
 

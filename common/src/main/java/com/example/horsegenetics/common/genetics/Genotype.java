@@ -96,6 +96,64 @@ public final class Genotype {
     }
 
     /**
+     * A genotype code <b>read back from a save</b>, trimmed to what this build
+     * can parse: a segment naming an allele the gene no longer has - or that is
+     * malformed - is dropped, so that locus comes back at its default, exactly
+     * as {@link #parse} already treats a segment naming a gene that no longer
+     * exists. Returns {@code code} itself when nothing was dropped.
+     *
+     * <p>{@link #parse} stays strict, because a code somebody typed should say
+     * what is wrong with it. This is for codes nobody can retype: a horse saved
+     * by an older release, whose one retired allele (Cleave's {@code Clv}, retired
+     * in 0.5.000) would otherwise throw from inside an entity tick and take the
+     * world down every time that chunk loaded. Released jars have players on
+     * them, and losing one rare marking is better than losing the world.
+     *
+     * @param dropped told each segment that was dropped, for the log
+     */
+    public static String readableStored(String code, java.util.function.Consumer<String> dropped) {
+        if (code == null || code.isEmpty()) {
+            return code;
+        }
+        StringBuilder kept = new StringBuilder(code.length());
+        boolean any = false;
+        for (String segment : code.split(GENE_SEP, -1)) {
+            if (readable(segment)) {
+                if (kept.length() > 0) {
+                    kept.append(GENE_SEP);
+                }
+                kept.append(segment);
+            } else {
+                any = true;
+                dropped.accept(segment);
+            }
+        }
+        return any ? kept.toString() : code;
+    }
+
+    private static boolean readable(String segment) {
+        int eq = segment.indexOf(NAME_SEP);
+        if (eq < 0) {
+            return false;
+        }
+        Gene g = Genes.byKeyOrNull(segment.substring(0, eq));
+        if (g == null) {
+            return true; // parse drops it by itself
+        }
+        String[] tokens = segment.substring(eq + 1).split(ALLELE_SEP, -1);
+        if (tokens.length != 2) {
+            return false;
+        }
+        try {
+            g.fromToken(tokens[0]);
+            g.fromToken(tokens[1]);
+            return true;
+        } catch (IllegalArgumentException retired) {
+            return false;
+        }
+    }
+
+    /**
      * This genotype with its sex locus set to {@code sex} - the rest untouched.
      * The one legitimate way to <i>choose</i> a horse's sex, and it is a founder
      * operation: the horse dimension stocks each pen with one mare and one

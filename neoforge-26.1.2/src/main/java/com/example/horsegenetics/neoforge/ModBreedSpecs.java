@@ -39,8 +39,35 @@ import java.util.List;
  */
 public final class ModBreedSpecs {
 
-    /** Relative to the game directory - {@code .minecraft} for the vanilla launcher. */
-    public static final String FOLDER = "phc/breeds";
+    /**
+     * The mod's own folder in the game directory - {@code .minecraft} for the
+     * vanilla launcher. It holds the breeds folder and the three settings
+     * files, so everything a player is told to touch is in one place.
+     */
+    public static final String ROOT = "phc";
+
+    /** Relative to the game directory. */
+    public static final String FOLDER = ROOT + "/breeds";
+
+    /**
+     * A settings file's name as NeoForge's {@code registerConfig} takes it,
+     * putting the file in {@code .minecraft/phc/} rather than {@code config/}.
+     *
+     * <p>NeoForge resolves a config file name against the config directory with
+     * a plain {@code Path.resolve} and creates missing parents
+     * ({@code ConfigTracker.openConfig} / {@code setupConfigFile}, FML 11.0.15),
+     * so a leading {@code ..} is taken literally. That is read from source, not
+     * seen documented: <b>unverified API usage</b>. The name is a constant
+     * rather than a computed relative path because a SERVER config is synced to
+     * clients by file name, and both ends must spell it the same.
+     *
+     * <p>One consequence worth knowing: a SERVER config's per-world override is
+     * looked up as {@code <world>/serverconfig/<name>}, which for this name is
+     * {@code <world>/phc/server.toml} - so a world can carry its own copy there.
+     */
+    public static String configFile(String name) {
+        return "../" + ROOT + "/" + name;
+    }
 
     /**
      * The drop-in folder on this machine. The client asks too, to open it: on
@@ -72,6 +99,12 @@ public final class ModBreedSpecs {
             Export the breed there, save the .json into this folder, and restart
             the game. The Breeds tab of the H menu has a button that opens this
             folder.
+
+            The breeds the mod ships are changed in ../breed-spawning.toml, one
+            folder up: switch any of them off, move them to other biomes, make
+            them rarer or commoner - or switch them all off, and Feral Mixed
+            too, and your world has only the breeds in this folder. The mod's
+            other settings are beside it (server.toml, client.toml).
 
             Notes:
               * A breed's "id" must be lower case and unique. A file whose id

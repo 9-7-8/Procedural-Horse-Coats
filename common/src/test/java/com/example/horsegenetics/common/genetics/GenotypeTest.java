@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -74,6 +75,22 @@ class GenotypeTest {
     })
     void parseRejectsMalformed(String bad) {
         assertThrows(IllegalArgumentException.class, () -> Genotype.parse(bad));
+    }
+
+    /**
+     * A saved horse from an older release whose allele has been retired (0.4.1's
+     * Cleave "Clv") loads with that locus at its default rather than throwing.
+     */
+    @Test
+    void aStoredCodeDropsOnlyTheSegmentsItCannotRead() {
+        String code = "horsegenetics.extension=E/e-horsegenetics.cleave=Clv/n-horsegenetics.agouti=a/a";
+        java.util.List<String> dropped = new java.util.ArrayList<>();
+        String readable = Genotype.readableStored(code, dropped::add);
+        assertEquals(java.util.List.of("horsegenetics.cleave=Clv/n"), dropped);
+        Genotype g = Genotype.parse(readable);
+        assertTrue(g.pair(Genes.byKeyOrNull("horsegenetics.agouti")).homozygous());
+        String clean = "horsegenetics.extension=E/e";
+        assertSame(clean, Genotype.readableStored(clean, s -> { throw new AssertionError(s); }));
     }
 
     @Test

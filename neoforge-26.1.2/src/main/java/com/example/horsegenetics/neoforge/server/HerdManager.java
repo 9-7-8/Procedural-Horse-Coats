@@ -60,6 +60,14 @@ import java.util.UUID;
  *       task finally runs.</li>
  *   <li>A clump of one - a genuinely solitary horse - is a lone <b>Feral Mixed</b>.</li>
  * </ul>
+ *
+ * <h2>Nothing to be</h2>
+ * A world's breed settings ({@code phc/breed-spawning.toml}) can leave a wild
+ * horse with <b>no breed of its biome and no Feral Mixed</b> to fall back on.
+ * {@link BreedSpawnHandler} refuses most of those spawns outright; the rest - a
+ * lone horse where Feral Mixed is off, a pack that spawned before the hour
+ * turned - reach here and are <b>discarded</b> before they are ever founded, so
+ * no record, coat or herd is made for a horse that should not exist.
  */
 public final class HerdManager {
 
@@ -106,11 +114,22 @@ public final class HerdManager {
                         .orElse(horse);
                 lead = leader.getUUID();
                 RandomSource seeded = seededFor(lead);
-                breed = pickHerdBreed(level.getBiome(leader.blockPosition()), seeded, level.isDarkOutside());
+                breed = pickWildBreed(level.getBiome(leader.blockPosition()), seeded, level.isDarkOutside());
+                if (breed == null) {
+                    // No breed of the biome and no Feral Mixed: every clump member
+                    // reaches the same answer from the lead's seed, so the whole
+                    // pack goes, not half of it.
+                    discard(horse, "no breed or Feral Mixed may spawn here");
+                    return;
+                }
                 band = seeded.nextInt(10) < 7 ? BandType.TRADITIONAL : BandType.BACHELOR;
                 sex = lead.equals(horse.getUUID()) ? leadSex(horse, rng) : joinerSex(horse, band, rng);
             } else {
-                // genuinely alone -> a lone Feral Mixed
+                // genuinely alone -> a lone Feral Mixed, if the world has any
+                if (!Breeds.spawnSettings().feral().allowedIn(biomeId(level.getBiome(horse.blockPosition())))) {
+                    discard(horse, "a lone horse, and Feral Mixed is switched off here");
+                    return;
+                }
                 breed = Breeds.FERAL_MIXED;
                 band = BandType.TRADITIONAL;
                 lead = null;
@@ -144,6 +163,17 @@ public final class HerdManager {
             PacketDistributor.sendToPlayersTrackingEntity(horse,
                     new HorseCareSyncPayload(horse.getId(), care.bond(), care.inHerd()));
         }
+    }
+
+    /** Remove a wild spawn that has nothing to be - see "Nothing to be" above. */
+    private static void discard(Horse horse, String why) {
+        DebugAnnounce.log("Breeds", "wild horse at " + horse.blockPosition().toShortString()
+                + " not spawned: " + why);
+        horse.discard();
+    }
+
+    private static String biomeId(Holder<Biome> biome) {
+        return biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
     }
 
     // ------------------------------------------------------------------
@@ -235,15 +265,36 @@ public final class HerdManager {
     }
 
     /**
-     * A herd's breed: weighted by the biome's breeds only, among those whose
+     * A wild herd's breed: weighted among the biome's breeds whose
      * {@code spawn_time} allows the hour (see
-     * {@link com.example.horsegenetics.common.breed.SpawnTime}). Feral Mixed only
-     * when no breed of the biome is allowed now.
+     * {@link com.example.horsegenetics.common.breed.SpawnTime}), with Feral Mixed
+     * in the draw at its own weight where the world's settings give it one.
+     * Otherwise Feral Mixed only when no breed of the biome is allowed now - and
+     * {@code null} when Feral Mixed is not allowed here either, which the caller
+     * takes as "this horse should not exist".
      *
      * @param dark whether it is dark outside where the herd is being founded
      */
-    public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng, boolean dark) {
-        return pickHerdBreed(biome, rng, com.example.horsegenetics.common.breed.BreedSource.WILD, dark);
+    public static Breed pickWildBreed(Holder<Biome> biome, RandomSource rng, boolean dark) {
+        String id = biomeId(biome);
+        List<Breed> candidates = Breeds.wildCandidates(id, dark);
+        com.example.horsegenetics.common.breed.BreedSpawnSettings.Feral feral = Breeds.spawnSettings().feral();
+        boolean feralHere = feral.allowedIn(id);
+        if (candidates.isEmpty()) {
+            return feralHere ? Breeds.FERAL_MIXED : null;
+        }
+        double total = feralHere ? feral.herdWeight() : 0.0;
+        for (Breed b : candidates) {
+            total += b.spawnWeight();
+        }
+        double roll = rng.nextDouble() * total;
+        for (Breed b : candidates) {
+            roll -= b.spawnWeight();
+            if (roll < 0.0) {
+                return b;
+            }
+        }
+        return feralHere && feral.herdWeight() > 0.0 ? Breeds.FERAL_MIXED : candidates.get(candidates.size() - 1);
     }
 
     /**
@@ -255,17 +306,9 @@ public final class HerdManager {
      */
     public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng,
                                       com.example.horsegenetics.common.breed.BreedSource source) {
-        return pickHerdBreed(biome, rng, source, false);
-    }
-
-    private static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng,
-                                       com.example.horsegenetics.common.breed.BreedSource source, boolean dark) {
-        String biomeId = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
-        List<Breed> candidates = new java.util.ArrayList<>(Breeds.forBiome(biomeId, source));
-        if (source == com.example.horsegenetics.common.breed.BreedSource.WILD) {
-            // Only the wild draw keeps hours; a breeder sells at any time of day.
-            candidates.removeIf(b -> !b.spawnTime().allows(dark));
-        }
+        // A breeder sells at any time of day, so no hours here; the wild draw is
+        // pickWildBreed.
+        List<Breed> candidates = Breeds.forBiome(biomeId(biome), source);
         if (candidates.isEmpty()) {
             return Breeds.FERAL_MIXED;
         }

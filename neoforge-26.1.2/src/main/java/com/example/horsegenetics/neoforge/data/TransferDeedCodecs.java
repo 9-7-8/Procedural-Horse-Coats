@@ -27,7 +27,7 @@ public final class TransferDeedCodecs {
             Codec.STRING.optionalFieldOf("breed").forGetter(TransferDeed::breed),
             Codec.STRING.optionalFieldOf("bred_by").forGetter(TransferDeed::bredBy),
             Codec.STRING.optionalFieldOf("issued_by", "").forGetter(TransferDeed::issuedBy),
-            Codec.STRING.fieldOf("genetic_code").forGetter(TransferDeed::geneticCode),
+            GenomeCodeCodecs.STORED_GENOTYPE.fieldOf("genetic_code").forGetter(TransferDeed::geneticCode),
             Codec.STRING.fieldOf("epigenome_code").forGetter(TransferDeed::epigenomeCode)
     ).apply(i, TransferDeed::new));
 

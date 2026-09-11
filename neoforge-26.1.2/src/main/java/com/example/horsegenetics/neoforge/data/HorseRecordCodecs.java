@@ -39,7 +39,7 @@ public final class HorseRecordCodecs {
             Codec.STRING.optionalFieldOf("first_name", "").forGetter(HorseRecord::firstName),
             Codec.STRING.optionalFieldOf("last_name", "").forGetter(HorseRecord::lastName),
             Codec.STRING.optionalFieldOf("barn_name").forGetter(HorseRecord::barnName),
-            Codec.STRING.fieldOf("genetic_code").forGetter(HorseRecord::geneticCode),
+            GenomeCodeCodecs.STORED_GENOTYPE.fieldOf("genetic_code").forGetter(HorseRecord::geneticCode),
             Codec.STRING.optionalFieldOf("epigenome_code", "").forGetter(HorseRecord::epigenomeCode),
             Codec.STRING.optionalFieldOf("breed").forGetter(HorseRecord::breed),
             UUIDUtil.STRING_CODEC.optionalFieldOf("mother_id").forGetter(HorseRecord::motherId),

@@ -43,6 +43,16 @@ import java.util.Optional;
  * {@code ModBreedSpecs.load()}, both from the mod constructor - and the laziness
  * is what makes the same class work in a test and in the browser without either
  * having to know to call an initialiser.
+ *
+ * <h2>A world's settings sit on top</h2>
+ * {@link #applySpawnSettings} lets a world change where, how often and whether
+ * the <b>shipped</b> breeds spawn, and switch Feral Mixed off. The registry keeps
+ * each breed exactly as its file said ({@code ORIGINAL}) and publishes a copy
+ * with the world's settings applied, so every caller - herds, cowboy, stables,
+ * eggs, the breed book - reads the world's version through the same
+ * {@link #all()} / {@link #get} it always used. The published list is swapped
+ * whole, never edited in place: settings can be re-read from a file-watcher
+ * thread while the server is iterating it.
  */
 public final class Breeds {
 
@@ -70,8 +80,14 @@ public final class Breeds {
             .note("Absorbing: any cross involving a Feral Mixed horse produces a Mixed foal.")
             .build();
 
-    private static final List<Breed> ALL = new ArrayList<>();
-    private static final Map<String, Breed> BY_ID = new LinkedHashMap<>();
+    /** Every breed as its file (or Java) says, in registration order. */
+    private static final List<Breed> ORIGINAL = new ArrayList<>();
+    /** The ids that came out of the jar - the ones {@link BreedSpawnSettings} governs. */
+    private static final java.util.Set<String> SHIPPED = new java.util.HashSet<>();
+    /** What callers see: {@code ORIGINAL} with the settings applied. Swapped whole. */
+    private static volatile List<Breed> ALL = List.of();
+    private static volatile Map<String, Breed> BY_ID = Map.of();
+    private static volatile BreedSpawnSettings settings = BreedSpawnSettings.DEFAULT;
     private static boolean builtinsLoaded;
 
     private Breeds() {
@@ -90,10 +106,53 @@ public final class Breeds {
     }
 
     private static void register(Breed b) {
-        if (BY_ID.put(b.id(), b) != null) {
-            throw new IllegalStateException("duplicate breed id " + b.id());
+        for (Breed existing : ORIGINAL) {
+            if (existing.id().equals(b.id())) {
+                throw new IllegalStateException("duplicate breed id " + b.id());
+            }
         }
-        ALL.add(b);
+        ORIGINAL.add(b);
+        publish();
+    }
+
+    /** Rebuild what callers see from the originals and the current settings. */
+    private static void publish() {
+        List<Breed> all = new ArrayList<>(ORIGINAL.size());
+        Map<String, Breed> byId = new LinkedHashMap<>();
+        for (Breed b : ORIGINAL) {
+            Breed seen = b == FERAL_MIXED ? b : settings.apply(b, SHIPPED.contains(b.id()));
+            all.add(seen);
+            byId.put(seen.id(), seen);
+        }
+        ALL = java.util.Collections.unmodifiableList(all);
+        BY_ID = java.util.Collections.unmodifiableMap(byId);
+    }
+
+    /**
+     * Apply a world's settings to the shipped breeds (and Feral Mixed). Replaces
+     * any settings applied before; {@link BreedSpawnSettings#DEFAULT} undoes them.
+     */
+    public static synchronized void applySpawnSettings(BreedSpawnSettings s) {
+        loadBuiltins();
+        settings = s == null ? BreedSpawnSettings.DEFAULT : s;
+        publish();
+    }
+
+    /** The settings in force - Feral Mixed's live here, since it has no file. */
+    public static BreedSpawnSettings spawnSettings() {
+        return settings;
+    }
+
+    /** The breeds that came out of the jar, as their files say - what a settings file lists. */
+    public static synchronized List<Breed> shipped() {
+        loadBuiltins();
+        List<Breed> out = new ArrayList<>();
+        for (Breed b : ORIGINAL) {
+            if (SHIPPED.contains(b.id())) {
+                out.add(b);
+            }
+        }
+        return out;
     }
 
     /**
@@ -105,7 +164,11 @@ public final class Breeds {
             return;
         }
         builtinsLoaded = true;
-        accept(BreedSpecLoader.fromClasspath());
+        BreedSpecLoader.Result result = BreedSpecLoader.fromClasspath();
+        for (Breed b : result.breeds()) {
+            SHIPPED.add(b.id());
+        }
+        accept(result);
     }
 
     /**
@@ -175,8 +238,11 @@ public final class Breeds {
 
     /** Forget every loaded breed. Tests only - nothing in the game re-reads the folder. */
     public static synchronized void resetForTesting() {
-        ALL.clear();
-        BY_ID.clear();
+        ORIGINAL.clear();
+        SHIPPED.clear();
+        settings = BreedSpawnSettings.DEFAULT;
+        ALL = List.of();
+        BY_ID = Map.of();
         builtinsLoaded = false;
     }
 
@@ -231,6 +297,26 @@ public final class Breeds {
             }
         }
         return out;
+    }
+
+    /**
+     * The breeds a <b>wild herd</b> founded in {@code biomeId} may be at this
+     * hour: the biome's wild breeds whose {@code spawn_time} allows it.
+     */
+    public static List<Breed> wildCandidates(String biomeId, boolean dark) {
+        List<Breed> out = forBiome(biomeId, BreedSource.WILD);
+        out.removeIf(b -> !b.spawnTime().allows(dark));
+        return out;
+    }
+
+    /**
+     * May a wild horse spawning in {@code biomeId} be <b>anything at all</b> -
+     * one of the biome's breeds, or Feral Mixed where the settings allow it?
+     * When the answer is no the host does not spawn it: a world whose owner
+     * switched everything off but their own breeds has no horses anywhere else.
+     */
+    public static boolean anythingMaySpawn(String biomeId, boolean dark) {
+        return settings.feral().allowedIn(biomeId) || !wildCandidates(biomeId, dark).isEmpty();
     }
 
     /** Every breed allowed to come from {@code source}, in registration order. */

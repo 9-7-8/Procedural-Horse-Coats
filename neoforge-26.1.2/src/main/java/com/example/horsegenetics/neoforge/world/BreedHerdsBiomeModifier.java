@@ -24,7 +24,7 @@ import net.neoforged.neoforge.common.world.ModifiableBiomeInfo;
  * data file - so a breed that lived in a dark forest, a swamp or a modded biome
  * loaded, registered, turned up at the cowboy's and in spawn eggs, and was
  * never once seen wild. The herd <i>founder</i> already chose among the biome's
- * breeds ({@code HerdManager.pickHerdBreed}); what was missing was a horse there
+ * breeds ({@code HerdManager.pickWildBreed}); what was missing was a horse there
  * to found.
  *
  * <p><b>Why a union and not two modifiers.</b> The listed biomes keep their
@@ -37,6 +37,11 @@ import net.neoforged.neoforge.common.world.ModifiableBiomeInfo;
  * the breed registry is complete long before that - {@code ModBreedSpecs.load()}
  * runs from the mod constructor. A breed dropped in while the game is running
  * is picked up on the next start, like everything else in that folder.
+ *
+ * <p><b>A world's breed settings count.</b> A shipped breed moved to other
+ * biomes, or switched off, in {@code phc/breed-spawning.toml} brings its herds
+ * with it, because this asks the registry after the settings are applied. A
+ * change made while a server is running reaches the herds on its next start.
  *
  * <p>A horse still needs somewhere to stand: vanilla's animal spawn rule wants
  * grass underfoot and light, so a breed that names a desert or the Nether will
@@ -57,7 +62,13 @@ public record BreedHerdsBiomeModifier(HolderSet<Biome> biomes, int weight, int m
         if (phase != Phase.ADD) {
             return;
         }
-        if (!biomes.contains(biome) && !aWildBreedLivesIn(biome)) {
+        // The listed biomes are Feral Mixed country; a world that has switched
+        // Feral Mixed off there gets no extra horses from the list, only from
+        // the breeds that live in it. (Settings are read before this runs:
+        // COMMON configs load at startup, biome modifiers at server start.)
+        boolean feralHerds = biomes.contains(biome)
+                && Breeds.spawnSettings().feral().allowedIn(biomeId(biome));
+        if (!feralHerds && !aWildBreedLivesIn(biome)) {
             return;
         }
         builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, weight,
@@ -65,8 +76,12 @@ public record BreedHerdsBiomeModifier(HolderSet<Biome> biomes, int weight, int m
     }
 
     private static boolean aWildBreedLivesIn(Holder<Biome> biome) {
-        String id = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
+        String id = biomeId(biome);
         return !id.isEmpty() && !Breeds.forBiome(id, BreedSource.WILD).isEmpty();
+    }
+
+    private static String biomeId(Holder<Biome> biome) {
+        return biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
     }
 
     @Override
