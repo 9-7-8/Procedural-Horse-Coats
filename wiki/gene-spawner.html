@@ -79,9 +79,16 @@
 <h2 id="colour">The colour of what it makes</h2>
 
 <p>
-    Epigenetic, so a line breeds its own shade &mdash; but only for the mobs
-    that <em>have</em> colours. Sheep, cats, wolves, llamas, parrots, rabbits and
-    a handful of others. A spawned zombie is a zombie.
+    Epigenetic, so a line breeds its own shade &mdash; every sheep one horse makes
+    is the same dye, and its foals drift from it. Only for the mobs that
+    <em>have</em> colours or variants: sheep, cows, pigs, chickens, cats, wolves,
+    frogs, foxes, parrots, rabbits (never the killer one), llamas, axolotls,
+    mooshrooms and a few others. A spawned zombie is a zombie.
+</p>
+
+<p>
+    <em>This was promised here from the start and never happened until 2026-09-10 -
+    before that, every spawned mob picked its own colour, as a wild one would.</em>
 </p>
 
 <h2 id="health">Health</h2>
@@ -99,7 +106,7 @@
     <div><dt>Alleles</dt><dd>one per mob including hostiles, plus <code>n</code></dd></div>
     <div><dt>Inheritance</dt><dd>homozygous recessive, matched pair; <strong>no homozygous founders</strong></dd></div>
     <div><dt>Reaches the game as</dt><dd>a <code>summon</code> effect on the built-in <code>OnFeed</code> trigger</dd></div>
-    <div><dt>Epigenetic</dt><dd>spawned colour, where the mob has one</dd></div>
+    <div><dt>Epigenetic</dt><dd><code>variant</code>, a number in [0, 1) per allele copy, carried to the translator as <code>Summon.variant</code></dd></div>
     <div><dt>Coat effect</dt><dd>a faint pink tint on head and mane</dd></div>
 </dl>
 
@@ -144,7 +151,10 @@
 <div class="note">
     <span class="label">The epigenetic colour is a no-op for most alleles</span>
     <p>
-        Only about ten vanilla mobs have colour variants. That is a property of <em>some</em> alleles rather than of the locus, and the gameplay tab says so &mdash; otherwise it reads as broken on the other seventy.
+        Only a couple of dozen vanilla mobs have colour variants. That is a property of <em>some</em> alleles rather than of the locus, and the gameplay tab says so &mdash; otherwise it reads as broken on the rest.
+    </p>
+    <p>
+        <strong>How it is applied:</strong> <code>server/MobVariants</code>. Since 1.21.5 a mob&rsquo;s colour is a data component on the entity (<code>SHEEP_COLOR</code>, <code>COW_VARIANT</code>, <code>CAT_VARIANT</code>&hellip;), set with <code>Entity.setComponent</code> the way a spawn egg sets it. The helper takes the first colour component the spawned mob actually has and picks from that component&rsquo;s own values - an enum&rsquo;s constants, or every entry of the registry a <code>Holder</code> lives in, sorted by id so the same number means the same variant in every world. The killer rabbit is excluded by name. A data gene&rsquo;s <code>summon</code> passes <code>Summon.NATURAL</code> and the game chooses, as before.
     </p>
 </div>
 

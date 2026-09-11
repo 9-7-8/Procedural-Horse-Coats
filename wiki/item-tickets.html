@@ -82,6 +82,25 @@
 </p>
 
 <p>All four share one texture.</p>
+
+<h2 id="holding-pen">The holding pen ticket, and its sign</h2>
+
+<p>
+    A horse you tamed a minute ago has no stall, so no ticket above can send it anywhere.
+    The <strong>holding pen</strong> is for that horse. Hang a <strong>holding pen
+    sign</strong> (a spruce sign and horse hair) on the wall of a pen - it measures the
+    room behind it the way a stall sign does - and that pen is yours. Then right-click
+    <em>any</em> horse you own with a <strong>holding pen ticket</strong> (a blank ticket
+    and wheat) and it arrives in the middle of your pen, from any world.
+</p>
+
+<ul>
+    <li><strong>One pen per player.</strong> Hanging a second sign moves your pen there;
+        the old sign stays up as an ordinary sign.</li>
+    <li>Breaking the sign releases the pen.</li>
+    <li>Like every ticket it is one use, and it refuses - and is not spent - when the horse
+        is not yours, you have no pen yet, or the pen has no room to stand.</li>
+</ul>
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -114,6 +133,18 @@
     to the sign&rsquo;s own block &mdash; flush against a wall, with wall material at head
     height, and the one position in the routine never checked for anything. The horse
     suffocated. A refusal the player can read beats a horse in a wall.
+</p>
+
+<p>
+    <strong>The holding pen</strong> is the same machinery pointed at a player instead of a
+    horse: <code>item/HoldingPenSignItem</code> writes a <code>PenRecord</code> (owner,
+    dimension, sign) into <code>StallData</code>, keyed by the player so a second sign
+    replaces the first, and <code>item/HoldingPenTicketItem</code> is handled in
+    <code>TicketHandler.sendToPen</code> - the same live measure, the same dead-centre
+    <code>StallDetector.landingSpot</code>, the same <code>arrive</code>. Breaking the sign
+    goes through <code>StallSignHandler.onSignBroken</code>, which now releases a pen as
+    well as a stall. The ticket&rsquo;s texture is the ticket&rsquo;s art hue-rotated, as a
+    placeholder.
 </p>
 
 <h2 id="gaps">Known gaps</h2>

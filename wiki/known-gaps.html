@@ -170,19 +170,6 @@
     the cheap one is a node check that both tables name the same mask set with the same
     defaults.</li>
 
-<li id="gap-154"><strong>A crossbred or spliced horse never fills in a Breeds row.</strong>
-    Opened 2026-09-09 as "the Breeds tab ignores creative and does not fill in on taming";
-    <b>both of those are fixed</b> (2026-09-10, not yet re-played). Creative now goes through
-    <code>HorseBrowserScreen.metBreed</code>, and the taming half turned out not to be the
-    suspected token mismatch at all: <code>CrouchFeedGoal</code> called
-    <code>tameWithName</code> without firing <code>AnimalTameEvent</code>, so a horse tamed by
-    hand never reached <code>GeneDiscoveryHandler.onTame</code>. <b>What is left:</b> a
-    pure-bred horse's lineage token is its bare breed id and matches its row, but a cross
-    (<code>cross:arabian+friesian</code>) or a spliced line (<code>spliced:&hellip;</code>) is
-    stored as that token and matches no row, so owning one teaches you nothing. Whether a
-    cross should count as meeting both parents' breeds is a design call. Also still possible:
-    a lone wild horse may carry no breed at all, so taming it records nothing.</li>
-
 <li id="gap-155"><strong>Hearts on bond, the foal's inherited bond, and crouch-feed's tuning have not been played.</strong>
     Opened 2026-09-09 with 0.3.8. Taming by hand itself is owner-confirmed (2026-09-10).
     <code>CrouchFeedGoal</code> re-tests its four conditions every tick, so the failure mode

@@ -43,18 +43,23 @@
         like &mdash; nothing takes time and nothing is used up. Shift-clicking a paper from
         your inventory files it. A shelf holds <strong>one paper per gene</strong>, so a
         second paper for a gene that is already there will not go in.</li>
-    <li><strong>Copy</strong> &mdash; pick a gene from the papers on the shelf, put a blank
-        book in, and take a copy of that gene&rsquo;s paper out. The book is spent. <b>The
-        shelf&rsquo;s own paper never is</b>, so you can do it as many times as you have
-        books.
+    <li><strong>Copy</strong> &mdash; pick a gene from the papers on the shelf and put blank
+        books in. <strong>It works like a furnace</strong>: each book becomes a copy of that
+        gene&rsquo;s paper in the result slot, one after another, whether or not you have the
+        shelf open - set it going and walk away. Copies of the same gene stack. <b>The
+        shelf&rsquo;s own paper is never used up.</b>
         <p>
             <strong>A copy takes time</strong> &mdash; one iron ingot&rsquo;s smelt per
             rarity tier, so about ten seconds for a common gene and about a minute for a
-            mythic one. The arrow between the slots fills as it goes and the line
-            underneath counts down. Pulling the book out abandons the copy rather than
-            pausing it.
+            mythic one. The arrow between the slots fills as it goes. Running out of books,
+            picking a different gene, or taking the original off the shelf starts the clock
+            again rather than pausing it.
         </p></li>
 </ul>
+
+<p>
+    The shelf opens on <strong>whichever tab you used last</strong>.
+</p>
 
 <div class="note">
     <span class="label">Taking a paper back stops the copying</span>
@@ -129,10 +134,25 @@
     <code>ShelfSyncPayload</code> and the withdraw action are gone.
 </p>
 
+<h2 id="furnace">The copy runs on the block, like a furnace</h2>
+
 <p>
-    The result is <strong>recomputed, never remembered</strong>: it exists only while a
-    book is in the slot and the shelf still holds the selected gene, so pulling the book
-    out or taking the original off the shelf clears it on its own.
+    The book slot, the result slot, the picked gene and the progress all live on
+    <code>EquineResearchShelfBlockEntity</code>, and its ticker advances them whoever is
+    looking. The menu only wraps them - its slots are the block&rsquo;s containers and its
+    progress bar reads the block&rsquo;s <code>ContainerData</code>, the furnace&rsquo;s
+    <code>dataAccess</code> pattern. The copy used to live on the menu, which only exists
+    while a player has the screen open, so it stopped the moment they clicked off
+    (owner-reported 2026-09-10). A finished copy spends one book; the pick reaches the
+    client as an index into the Copy list (<code>DATA_SELECTED</code>), since a
+    <code>ContainerData</code> can only carry ints.
+</p>
+
+<p>
+    <strong>Its labels are window-relative.</strong> <code>AbstractContainerScreen</code>
+    translates to <code>(leftPos, topPos)</code> before calling <code>extractLabels</code>,
+    and the shelf used to add them again, which threw the title and the inventory label off
+    the window. The last tab is a static on the screen, so it holds for the session.
 </p>
 </section>
 

@@ -1533,6 +1533,16 @@
     </p>
 </div>
 
+<h3 id="breed-filter">A natural / magical filter on the Breeds tab</h3>
+
+<p>
+    The owner's note (2026-09-10): once magical breeds exist, the Breeds tab needs a way to
+    show the natural ones, the magical ones, or both. <code>Breed.magical()</code> is already
+    on every breed, so the filter is a toggle beside the list and a clause in
+    <code>HorseBrowserScreen.drawBreedList</code>. Not built yet because there are no magical
+    breeds to filter - build it with the first one, so it can be seen doing something.
+</p>
+
 <hr>
 
 <h2 id="stables">19. More generated stables</h2>
@@ -1759,6 +1769,20 @@
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
+
+<h3>Settled 2026-09-10</h3>
+
+<ul>
+    <li><strong>Only pure-bred horses fill in a Breeds row.</strong> A cross
+        (<code>cross:a+b</code>) or a spliced line teaches the breed book nothing. Owner's
+        call - it was already how the code behaved, and is now the rule rather than a gap.</li>
+    <li><strong>One holding pen per player.</strong> A second holding pen sign moves the pen.
+        The owner considered and rejected several pens per player the same day.</li>
+    <li><strong>A spawner feeds uncapped.</strong> Two creatures per meal the horse eats, no
+        local cap - the food is the cost, and the owner will price it. Only a meal actually
+        eaten counts.</li>
+    <li><strong>A hurt mare refuses to be milked</strong>, bottle or bucket, and says so.</li>
+</ul>
 
 <h3>Settled 2026-09-08</h3>
 

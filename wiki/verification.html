@@ -35,63 +35,72 @@
     </p>
 </div>
 
-<h2 id="play-fixes-0910b">&sect;0-BX &mdash; The second 2026-09-10 play session's fixes (NOT looked at in game)</h2>
+<h2 id="play-fixes-0910c">&sect;0-BY &mdash; The third 2026-09-10 play session's fixes (NOT looked at in game)</h2>
 
-<p><em>Owner-confirmed in that session and removed from this page:</em> fireproof floats in
-    lava and immunity ends when you dismount; bird boned; the spawner fires on feeding;
-    potion milk, single and double; the spawn egg's search box; height in hands on the
-    information screen; hand-feed taming; and every eye locus - the third eye, the glows,
-    the sectors.</p>
+<p><em>Owner-confirmed in that session and removed from this page:</em> the research shelf
+    stores papers; the spawner fires on every meal with no cap; My horses shows hands; the
+    stall ticket lands a horse properly (as a basis - still to be pushed on); the Breeds tab;
+    molten hooves' prints render.</p>
 
-<p><strong>The "Spawn Test Horse World" button now hands you a kit for this list</strong> -
-    a named preset egg per test horse, the wheat, bottles, papers, books, signs, tickets and
-    stall blocks, and a chat legend saying which is for what
-    (<code>DebugTestWorldHandler.fillInventory</code>). It is re-aimed whenever this list
-    changes.</p>
+<p><strong>The "Spawn Test Horse World" kit is re-aimed at this list</strong>
+    (<code>DebugTestWorldHandler.fillInventory</code>) - four molten hooves eggs, a sheep
+    spawner, holding pen signs and tickets, a potion mare, a bucket, and the shelf and stall
+    gear - with a chat legend.</p>
 
 <ul>
-    <li><strong>The research shelf is a chest now.</strong> Store opens first: six rows of
-        nine slots, papers in and out by hand, instantly, shift-click to file. A second paper
-        for a gene already on the shelf must refuse to go in. Copy is the old craft tab: pick
-        a gene from the shelf's papers, add a blank book, wait by rarity. <em>Also break a
-        shelf with papers in it</em> - they must all drop. The old shelf dropped them from a
-        hook that ran after the block entity was gone, so it probably lost them.</li>
-    <li><strong>A ticketed horse should land in the dead centre of its stall</strong>, not
-        against a wall. It used to be centred on the middle tile, and a horse is about 1.4
-        blocks wide, so in a two-wide stall it always hung into a side wall. It now lands at
-        the centre of the floor, checked against its own body, and falls back to the nearest
-        tile it fits on. Try a two-wide stall, an odd-sized one, an L-shape, and a stall
-        narrower than the horse (it should still land in the middle).</li>
-    <li><strong>The stall size message should report the real height</strong> - floor to
-        ceiling, capped at 8 for an open top - instead of always saying 2.</li>
-    <li><strong>The spawner has no cap</strong>: two per feeding, every feeding. It must
-        only count a feeding the horse <em>ate</em> - feed a tamed, full-health horse wheat
-        (it refuses, and the wheat comes back) and nothing should spawn. A feeding that is
-        eaten should spawn every time, with other cows standing right there.</li>
-    <li><strong>Milking a stallion with a bottle</strong> should make him rear, kick you,
-        and say so; a foal should say it has nothing to give. The plain milk gene's
-        stallion kick now rears too.</li>
-    <li><strong>The Breeds tab in creative</strong> should list all 49, named, and clicking
-        one should open its entry. Out of creative, <strong>taming a breed horse by hand</strong>
-        should fill in its row - hand taming never fired the tame event, so it reached neither
-        the breed book nor the "tame a mare / stallion" checklist tasks.</li>
-    <li><strong>Holy ward, and how to see it.</strong> With <code>debug.announce</code> on, a
-        refused spawn now says so in chat (purple, at most every ten seconds, with a count).
-        <em>Stand at least 24 blocks from the horse</em> - the game never spawns a monster
-        within 24 blocks of a player, and the ward only reaches 8 to 16, so standing beside
-        the horse there is nothing to refuse. Put a warding horse in a dark open area at
-        night, watch from a distance, and look for the lines; a matching dark area without
-        the horse should fill with mobs. Spawn eggs next to a warding horse are
-        owner-confirmed to still work.</li>
-    <li><strong>The chat is quiet when horses load.</strong> The <code>[coat]</code> line per
-        horse now goes to the log only, except the one failure it exists to catch (a coat
-        that came out as the bare white template).</li>
-    <li><strong>My horses</strong> shows height in hands in its Hands column
-        (<code>15.3</code>, horseman's notation), and the filter understands
-        <code>hands&gt;16</code> / <code>height&lt;14.2</code> in decimal hands.
-        <code>size:</code> still means the raw scale.</li>
+    <li><strong>The research shelf copies like a furnace.</strong> Pick a gene on Copy, put
+        books in, <em>close the screen and walk away</em>: copies must keep arriving, one per
+        book, stacking in the result slot. It used to stop the moment you clicked off,
+        because the copy lived on the screen. Also: the title and "Inventory" labels sit in
+        the window again (they were drawn offset twice), and the shelf opens on whichever
+        tab you used last.</li>
+    <li><strong>Molten hooves has four alleles.</strong> White (<code>MltW</code>) is dominant
+        - one copy glows white. Black (<code>MltB</code>), one colour (<code>MltC</code>) and
+        multicolour (<code>MltM</code>) are recessive and show only as their own
+        homozygotes; <code>MltB/MltC</code> shows nothing. Check black does <em>not</em>
+        glow at night, and that a colour horse and a multicolour one really differ.</li>
+    <li><strong>A spawner's mobs are all one colour now</strong> - the allele copy's own
+        number picks which of the mob's variants it makes (a sheep's dye, a cow's, a cat's,
+        a frog's). Feed the sheep spawner several times: every sheep the same colour. A
+        different spawner horse should make a different colour (usually). It was promised on
+        the gene page and never implemented.</li>
+    <li><strong>The holding pen.</strong> Hang a holding pen sign on a pen's wall (it
+        measures the room like a stall sign and flashes its outline), then right-click
+        <em>any</em> horse you own with a holding pen ticket - it should arrive in the pen,
+        dead centre. One pen per player: a second sign moves it; breaking the sign releases
+        it. Works across worlds. Refusals to check: an untamed horse, no pen yet, a pen with
+        no room.</li>
+    <li><strong>A hurt mare refuses to be milked, and says so</strong> - potion milk with a
+        bottle and plain milk with a bucket alike: <em>"She's hurt, and won't give ... until
+        she's healed."</em> Before, potion milk ignored health, and plain milk silently did
+        nothing.</li>
+    <li><strong>Breed plates carry no stray magic.</strong> The Breeds tab's horse is a real
+        founder roll minus every magical gene the breed does not name. None of the 49 should
+        show a magical coat.</li>
+    <li><strong>Crossbred horses never fill a Breeds row</strong> - only pure-breds do. That
+        is how it already worked; it is now the rule, owner's call.</li>
 </ul>
 
+<h2 id="play-fixes-0910b">&sect;0-BX &mdash; The second 2026-09-10 play session's fixes (partly confirmed)</h2>
+
+<ul>
+    <li><strong>Stall landing:</strong> try the awkward ones - an L-shape, a stall narrower
+        than the horse (it should still land in the middle), a full stall of hay (the
+        ticket must refuse and not be used up). And the size message should report the real
+        height.</li>
+    <li><strong>Milking a stallion with a bottle</strong> should make him rear, kick you,
+        and say so; a foal should say it has nothing to give.</li>
+    <li><strong>Out of creative, taming a breed horse by hand</strong> should fill in its
+        Breeds row and tick "tame a mare / stallion".</li>
+    <li><strong>Holy ward, and how to see it.</strong> With <code>debug.announce</code> on, a
+        refused spawn says so in chat (purple, at most every ten seconds). <em>Stand at least
+        24 blocks from the horse</em> - the game never spawns a monster within 24 blocks of
+        a player. Spawn eggs beside a warding horse are owner-confirmed to still work.</li>
+    <li><strong>Breaking a shelf full of papers</strong> must drop every one - and now its
+        books and finished copies too.</li>
+    <li><strong>The chat is quiet when horses load</strong> - the <code>[coat]</code> line goes
+        to the log only, except for a coat that came out bare white.</li>
+</ul>
 <h2 id="play-fixes-0910">&sect;0-BW &mdash; The first 2026-09-10 play session's fixes (NOT looked at in game)</h2>
 
 <ul>
@@ -345,45 +354,26 @@
     largest roster and is the worst case.</p>
 
 
-<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves: glowing prints on the ground (2026-09-10, NOT looked at in game)</h2>
+<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves: prints on the ground (2026-09-10, rendering owner-confirmed)</h2>
 
-<p><a href="gene-molten-hooves.html">Molten hooves</a> was played once as coloured dust and
-    did not read as hoofprints. It now lays the mod&rsquo;s own particle,
-    <code>horsegenetics:hoofprint</code>: a flat, full-brightness print on the ground,
-    one per half-block travelled. <strong>None of the rendering has been seen</strong>
-    &mdash; the rotation maths is reasoned from vanilla&rsquo;s shriek particle, not
-    looked at. It still paints nothing on the coat.</p>
+<p><a href="gene-molten-hooves.html">Molten hooves</a> lays the mod&rsquo;s own flat print
+    particle, one per half-block travelled, and the owner has seen it work ("looks pretty
+    good to start with"; the sprite is theirs to redraw). The allele redesign is on
+    <a href="#play-fixes-0910c">&sect;0-BY</a>. What is left here:</p>
 
 <ul>
-    <li><strong>Do prints appear at all, and lie flat?</strong> Ride or lead a molten
-        horse across grass at night. Each print should lie on the ground, not stand up
-        facing you. If nothing shows from above but something shows from below, the
-        two faces&rsquo; pitches in <code>HoofprintParticle.extract</code> are the wrong
-        way round. If you see a black or purple-checked square, the sprite did not load
-        into the particle atlas.</li>
-    <li><strong>Does the toe point the way the horse went?</strong> The sprite is a
-        horseshoe open at the heel. If the open end faces forward, add <code>PI</code> to
-        <code>heading</code>.</li>
-    <li><strong>Do they glow?</strong> At night, prints should stay bright against dark
-        grass. They are not meant to light the ground around them.</li>
     <li><strong>Spacing and fade.</strong> A walk should leave an even track; a gallop,
-        prints further apart; standing still, nothing. Each lasts four seconds, holds
-        its colour for about the first third, and cools to the second colour as it fades.
-        Size, spacing and life are three constants (<code>HALF_SIZE</code>,
-        <code>STRIDE</code>, <code>LIFETIME</code>) if any feels wrong.</li>
-    <li><strong>Uneven ground.</strong> Stairs, slabs, snow layers, the edge of a drop.
-        A print should sit on the surface under its hoof, never float or sink, and none
-        should appear over air or water.</li>
-    <li><strong>A doubled horse</strong> (<code>Mlt/Mlt</code>) should leave prints that
-        alternate between its two colour pairs.</li>
-    <li><strong>A molten horse may burn blue</strong>, and this is deliberate:
-        <code>EpiValue.colour</code> rolls hue over the whole circle. Look at a few founders
-        and decide whether that is charming or wrong.</li>
-    <li><strong>Wild frequency is 3% single, 0.4% double</strong>, both expressing. Whether
-        that feels like &ldquo;uncommon but you will meet one&rdquo; needs a few hundred
-        wild horses.</li>
-</ul>
-<h2 id="intake-eleven">&sect;0-BR &mdash; Eleven more genes, and dorsal wing's underline (2026-09-10, NOT looked at in game)</h2>
+        prints further apart; standing still, nothing. Size, spacing and life are three
+        constants (<code>HALF_SIZE</code>, <code>STRIDE</code>, <code>LIFETIME</code>).</li>
+    <li><strong>Uneven ground.</strong> Stairs, slabs, snow layers, the edge of a drop. A
+        print should sit on the surface under its hoof and none should appear over air or
+        water.</li>
+    <li><strong>A colour horse may burn blue</strong>, deliberately: the hue rolls over the
+        whole circle. Decide whether that is charming or wrong.</li>
+    <li><strong>Wild frequency</strong> - white 2% one copy and 0.2% two; black 0.3%, colour
+        0.5%, multicolour 0.2%, homozygotes only. Whether that feels right needs a few
+        hundred wild horses.</li>
+</ul><h2 id="intake-eleven">&sect;0-BR &mdash; Eleven more genes, and dorsal wing's underline (2026-09-10, NOT looked at in game)</h2>
 
 <p>Agatebound, bargello, bracketed, coronal, geode, maelstrom,
     <a href="gene-nacre-saddle.html">nacre saddle</a>, starburst, sunspiral, wing

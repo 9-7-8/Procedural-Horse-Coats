@@ -20,9 +20,9 @@
 <h1>Molten hooves</h1>
 
 <p class="lede">
-    Glowing hoofprints lie on the ground behind the horse as it moves, and cool
-    from one colour to another as they fade. The colours are written on the allele
-    copy and inherited with it, so a line breeds true to its own fire. It is
+    Hoofprints lie on the ground behind the horse as it moves, and fade as they cool.
+    Four kinds: white, black, one colour, or several. The colours are written on the
+    allele copy and inherited with it, so a line breeds true to its own fire. It is
     <strong>light and particles only</strong> &mdash; nothing it runs over catches.
 </p>
 
@@ -34,18 +34,21 @@
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
     <tbody>
-        <tr><td><code>Mlt/Mlt</code></td><td>burning hoofprints, both copies&rsquo; colours in the trail</td></tr>
-        <tr><td><code>Mlt/n</code></td><td>burning hoofprints in that copy&rsquo;s colour</td></tr>
-        <tr><td><code>n/n</code></td><td>nothing</td></tr>
+        <tr><td><code>MltW</code> with anything</td><td><strong>white</strong> glowing prints &mdash; one copy is enough</td></tr>
+        <tr><td><code>MltB/MltB</code></td><td><strong>black</strong> prints that do not glow &mdash; a scorch, not an ember</td></tr>
+        <tr><td><code>MltC/MltC</code></td><td>glowing prints in <strong>one colour</strong></td></tr>
+        <tr><td><code>MltM/MltM</code></td><td>glowing prints running through <strong>several colours</strong></td></tr>
+        <tr><td>any other mix, e.g. <code>MltB/n</code> or <code>MltC/MltM</code></td><td>nothing &mdash; a carrier</td></tr>
     </tbody>
 </table>
 
 <p>
-    It is <strong>dominant</strong>, so one copy is enough and it is common
-    wherever it exists at all. That is the whole character of the gene: a herd
-    with molten hooves in it is visible from a long way off at night.
+    <strong>White is dominant</strong> over everything, so it is the one you can simply
+    catch. The other three are <strong>recessive</strong>: each shows only when a horse has
+    two copies of the <em>same</em> one, which makes a black- or a multicolour-hooved line
+    something you have to breed for. The colour and multicolour prints take their colours
+    from the alleles; white is always white and black always black.
 </p>
-
 <h2 id="fire">It does not set anything on fire</h2>
 
 <p>
@@ -67,23 +70,23 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd><code>horsegenetics.molten_hooves</code></dd></div>
-    <div><dt>Alleles</dt><dd><code>Mlt</code> molten, <code>n</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>MltW</code> white, <code>MltB</code> black, <code>MltC</code> colour, <code>MltM</code> multicolour, <code>n</code></dd></div>
     <div><dt>Priority</dt><dd>154 &mdash; beside the other emission loci; it paints nothing, so the number is a slot</dd></div>
-    <div><dt>Inheritance</dt><dd><strong>dominant</strong> &mdash; one copy expresses</dd></div>
-    <div><dt>Reaches the game as</dt><dd>one <code>emitter</code> effect <strong>per molten copy</strong></dd></div>
+    <div><dt>Inheritance</dt><dd>white <strong>dominant</strong> over all; black, colour and multicolour <strong>recessive</strong>, each expressing only as its own homozygote</dd></div>
+    <div><dt>Reaches the game as</dt><dd>one <code>emitter</code> (white, black, colour) or two, one per copy (multicolour); the emitter&rsquo;s <code>data</code> is 1 for a glowing print and 0 for black&rsquo;s unlit one</dd></div>
     <div><dt>Particle</dt><dd><code>horsegenetics:hoofprint</code> &mdash; the mod&rsquo;s own, laid by stride</dd></div>
-    <div><dt>Epigenetic</dt><dd>both trail colours, per allele copy</dd></div>
-    <div><dt>Wild founders</dt><dd>3% one copy, 0.4% two &mdash; both express, so no invisible carriers</dd></div>
+    <div><dt>Epigenetic</dt><dd>two colours per allele copy &mdash; read by the colour allele (copy one&rsquo;s first) and the multicolour allele (all four)</dd></div>
+    <div><dt>Wild founders</dt><dd>white 2% one copy, 0.2% two; black 0.3%, colour 0.5%, multicolour 0.2% as homozygotes &mdash; no invisible carriers</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
 <div class="note warn">
-    <span class="label">Newly built, not yet play-tested</span>
+    <span class="label">Prints seen in game; the four alleles are not yet</span>
     <p>
-        Nothing on this page has been seen in game. The gene, its founder table and its
-        emitter are covered by <code>MoltenHoovesGeneTest</code>; what no test can check is
-        whether the trail actually reads as fire at the hooves of a moving horse.
-        Checklist on <a href="verification.html">To be verified</a>.
+        The owner has seen the prints render (2026-09-10). The same day the single
+        dominant <code>Mlt</code> became four alleles - a dominant white and three
+        recessive colours - which is covered by <code>MoltenHoovesGeneTest</code> and not
+        yet played. Checklist on <a href="verification.html#play-fixes-0910c">To be verified</a>.
     </p>
 </div>
 
@@ -99,7 +102,9 @@
         pulls any emitter naming it out of the ordinary path into <code>layHoofprint</code>:
         one print each time the horse covers half a block (scaled by its size), hooves in
         trot order, snapped to the top of whatever is under that hoof, skipped over air and
-        fluid. A doubled horse&rsquo;s two emitters take turns print by print. The
+        fluid. A multicolour horse&rsquo;s two emitters take turns print by print, and
+        <code>HoofprintOptions.glow</code> (from the emitter&rsquo;s <code>data</code>) is
+        what lets black&rsquo;s prints be lit by the world instead of glowing. The
         emitter&rsquo;s <code>count</code> and <code>chance</code> are not used on this path.
         The particle is not in the gene file format&rsquo;s vocabulary, so only this built-in
         gene can name it.
@@ -107,9 +112,9 @@
 </div>
 
 <div class="note warn">
-    <span class="label">Dominant, so the particle budget matters more here than anywhere else</span>
+    <span class="label">White is dominant, so the particle budget matters more here than anywhere else</span>
     <p>
-        Every other emitter locus in the mod is recessive or rare. This one expresses on a single copy, so a populated stable can have a dozen horses all printing at once. The cost is bounded by distance rather than time &mdash; one print per half-block walked, each living eighty ticks &mdash; so a standing herd costs nothing. The fix for &ldquo;not dramatic enough&rdquo; is a brighter colour or a longer life, not a shorter stride.
+        Every other emitter locus in the mod is recessive or rare. White expresses on a single copy, so a populated stable can have a dozen horses all printing at once. The cost is bounded by distance rather than time &mdash; one print per half-block walked, each living eighty ticks &mdash; so a standing herd costs nothing. The fix for &ldquo;not dramatic enough&rdquo; is a brighter colour or a longer life, not a shorter stride.
     </p>
 </div>
 
