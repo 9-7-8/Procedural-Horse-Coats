@@ -48,5 +48,7 @@ class SpawnerGeneTest {
         assertTrue(su.trigger() instanceof GeneAbility.Trigger.OnFeed, "fed, not timed");
         assertEquals(SpawnerGene.PER_FEEDING, su.upTo());
         assertEquals("minecraft:cow", su.mob());
+        assertTrue(su.variant() >= 0 && su.variant() < 1,
+                "the colour is the allele copy's own number, not left to the game");
     }
 }

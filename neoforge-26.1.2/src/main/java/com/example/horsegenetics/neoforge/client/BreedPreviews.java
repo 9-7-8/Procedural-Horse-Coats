@@ -25,6 +25,10 @@ import java.util.Map;
  * the breed could actually produce, drawn by the live coat pipeline. It is one
  * draw out of many, which is exactly what a plate in a field guide is, and the
  * entry says so rather than implying every Fjord looks like this.
+ *
+ * <p>Through {@link BreedFounder#plate}, not {@code roll}: the plate carries no
+ * magical gene the breed does not name. A wild founder's stray dose of magic
+ * put galaxy coats and the like on breeds that have nothing to do with them.
  */
 public final class BreedPreviews {
 
@@ -68,7 +72,7 @@ public final class BreedPreviews {
         try {
             // Seeded from the id, so the plate for a breed is the same plate on
             // every world, every session and every player's machine.
-            Genome genome = BreedFounder.roll(breed, new SeededRng(seedFor(breed.id())));
+            Genome genome = BreedFounder.plate(breed, new SeededRng(seedFor(breed.id())));
             GENOMES.put(breed.id(), genome);
             return genome;
         } catch (RuntimeException cannotRoll) {

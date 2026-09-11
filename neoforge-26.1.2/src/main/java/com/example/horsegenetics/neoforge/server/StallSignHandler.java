@@ -77,6 +77,9 @@ public final class StallSignHandler {
         if (StallData.get(server).removeBySign(level.dimension(), event.getPos()) && event.getPlayer() != null) {
             event.getPlayer().sendSystemMessage(Component.literal("Stall released - its sign was broken."));
         }
+        if (StallData.get(server).removePenBySign(level.dimension(), event.getPos()) && event.getPlayer() != null) {
+            event.getPlayer().sendSystemMessage(Component.literal("Holding pen released - its sign was broken."));
+        }
     }
 
     private StallSignHandler() {

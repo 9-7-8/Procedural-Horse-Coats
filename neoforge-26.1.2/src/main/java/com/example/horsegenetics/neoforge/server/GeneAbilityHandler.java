@@ -787,7 +787,7 @@ public final class GeneAbilityHandler {
             return;
         }
         GeneAbility.Emitter e = emitters.get(hoof % emitters.size());
-        level.sendParticles(new HoofprintOptions(e.color(), e.color2(), horse.getYRot(), horse.getScale()),
+        level.sendParticles(new HoofprintOptions(e.color(), e.color2(), horse.getYRot(), horse.getScale(), e.data() > 0.5),
                 at.x, ground + 0.015, at.z, 1, 0.0, 0.0, 0.0, 0.0);
     }
 
@@ -843,7 +843,7 @@ public final class GeneAbilityHandler {
             // Normally laid by layHoofprint; this is for an emitter that names it
             // through the ordinary path (a puff shape, a non-hoof anchor).
             case ModParticles.HOOFPRINT_ID ->
-                    new HoofprintOptions(rgb, second, horse.getYRot(), horse.getScale());
+                    new HoofprintOptions(rgb, second, horse.getYRot(), horse.getScale(), data > 0.5);
             case "minecraft:effect" -> SpellParticleOption.create(ParticleTypes.EFFECT, argb, 1.0F);
             case "minecraft:instant_effect" ->
                     SpellParticleOption.create(ParticleTypes.INSTANT_EFFECT, argb, 1.0F);
@@ -1955,7 +1955,10 @@ public final class GeneAbilityHandler {
             // posts FinalizeSpawnEvent, so other mods' protections apply. A
             // second finalizeSpawn here used to re-roll equipment and variant.
             // NOT setPersistenceRequired: it must despawn like anything else.
-            if (type.spawn(level, at, EntitySpawnReason.NATURAL) != null) {
+            Entity spawned = type.spawn(level, at, EntitySpawnReason.NATURAL);
+            if (spawned != null) {
+                // The allele copy's colour, where the mob has one to set.
+                MobVariants.apply(spawned, su.variant(), level);
                 made++;
             }
         }

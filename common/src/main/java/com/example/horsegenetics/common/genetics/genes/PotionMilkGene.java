@@ -179,14 +179,29 @@ public final class PotionMilkGene implements Gene, AbilityContribution {
             return List.of();
         }
         if (a == b) {
-            return List.of(bottle(brews.get(a), 1, STRONG_DURATION), STALLION, FOAL);
+            return List.of(bottle(brews.get(a), 1, STRONG_DURATION), STALLION, FOAL, HURT);
         }
         if (b == n.order()) {
-            return List.of(bottle(brews.get(a), 0, WEAK_DURATION), STALLION, FOAL);
+            return List.of(bottle(brews.get(a), 0, WEAK_DURATION), STALLION, FOAL, HURT);
         }
         return List.of(bottle(brews.get(a), 0, WEAK_DURATION),
-                bottle(brews.get(b), 0, WEAK_DURATION), STALLION, FOAL);
+                bottle(brews.get(b), 0, WEAK_DURATION), STALLION, FOAL, HURT);
     }
+
+    /**
+     * A tamed mare below her own full health refuses, exactly as the plain milk
+     * gene's mare does - the rule that ties milking to the healing gate. The
+     * bottle's own condition carries {@code full_health} too; this is the line
+     * that says why, instead of the bottle doing nothing (owner's call,
+     * 2026-09-10: "an injured potion horse should refuse to give milk same as a
+     * milk horse").
+     */
+    private static final GeneAbility HURT = denied(new GeneAbility.Condition.All(List.of(
+                    new GeneAbility.Condition.Flag("adult", false),
+                    new GeneAbility.Condition.Flag("sex_female", false),
+                    new GeneAbility.Condition.Flag("tamed", false),
+                    new GeneAbility.Condition.Flag("full_health", true))),
+            0.0, "message.horsegenetics.potion_milk.hurt");
 
     /** The kick, in the same currency as {@code MilkGene}'s. */
     public static final double STALLION_KICK_DAMAGE = MilkGene.STALLION_KICK_DAMAGE;
@@ -218,7 +233,8 @@ public final class PotionMilkGene implements Gene, AbilityContribution {
                 new GeneAbility.Condition.All(List.of(
                         new GeneAbility.Condition.Flag("sex_female", false),
                         new GeneAbility.Condition.Flag("adult", false),
-                        new GeneAbility.Condition.Flag("tamed", false))),
+                        new GeneAbility.Condition.Flag("tamed", false),
+                        new GeneAbility.Condition.Flag("full_health", false))),
                 1);
     }
 }

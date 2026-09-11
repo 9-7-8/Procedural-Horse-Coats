@@ -851,7 +851,7 @@ public final class AbilityType {
                     throw v.bad("up_to must be 1-" + MAX_SUMMON_POPULATION + ", got " + upTo);
                 }
                 return new GeneAbility.Summon(v.str("mob"), radius, upTo, v.trigger("trigger"),
-                        v.when, v.minDose);
+                        v.when, v.minDose, GeneAbility.Summon.NATURAL);
             }));
 
     /**

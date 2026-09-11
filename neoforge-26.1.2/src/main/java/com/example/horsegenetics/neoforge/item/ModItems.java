@@ -162,6 +162,14 @@ public final class ModItems {
     public static final DeferredItem<StallSignItem> STALL_SIGN = register("stall_sign", StallSignItem::new);
     public static final DeferredItem<StallSignItem> BOUND_STALL_SIGN = register("bound_stall_sign", StallSignItem::new);
 
+    // --- the holding pen - one per player, for horses with no stall yet ----
+    // A sign bound to the player rather than a horse, and a ticket that sends
+    // any horse you own there. HoldingPenSignItem / server.TicketHandler.
+    public static final DeferredItem<HoldingPenSignItem> HOLDING_PEN_SIGN =
+            register("holding_pen_sign", HoldingPenSignItem::new);
+    public static final DeferredItem<HoldingPenTicketItem> HOLDING_PEN_TICKET =
+            register("holding_pen_ticket", HoldingPenTicketItem::new);
+
     // --- transfer papers - how a horse changes hands --------------------
     // A blank is bound to whoever crafted it and can only be signed against a
     // horse that player currently owns; signing it produces a signed paper,

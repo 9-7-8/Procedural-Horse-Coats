@@ -1,7 +1,9 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.data.PenRecord;
 import com.example.horsegenetics.neoforge.data.StallData;
 import com.example.horsegenetics.neoforge.data.StallRecord;
+import com.example.horsegenetics.neoforge.item.HoldingPenTicketItem;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.item.TicketItem;
 import java.util.Set;
@@ -53,6 +55,13 @@ public final class TicketHandler {
             return;
         }
         ItemStack stack = event.getItemStack();
+        if (stack.getItem() instanceof HoldingPenTicketItem) {
+            if (!event.getLevel().isClientSide() && horse.level() instanceof ServerLevel level) {
+                sendToPen(level, horse, event.getEntity(), stack);
+            }
+            consume(event);
+            return;
+        }
         if (!(stack.getItem() instanceof TicketItem ticket)) {
             // The blank is the crafting base and does nothing, but it should say
             // so rather than mounting the horse the player just poked.
@@ -101,7 +110,7 @@ public final class TicketHandler {
             return;
         }
 
-        Vec3 landing = landingSpot(target, stall, horse);
+        Vec3 landing = landingSpot(target, stall.signPos(), horse);
         if (landing == null) {
             // Nothing is spent and nothing moves. A horse that quietly fails to
             // arrive is indistinguishable from a horse that was deleted, and
@@ -111,11 +120,61 @@ public final class TicketHandler {
                     + "that the stall has a floor and two blocks of headroom.");
             return;
         }
-        // A puff where it was, so the player sees the horse leave rather than
-        // just noticing it has gone.
-        level.sendParticles(ParticleTypes.PORTAL, horse.getX(), horse.getY() + 0.8, horse.getZ(),
+        arrive(level, target, horse, landing);
+        if (!player.getAbilities().instabuild) {
+            stack.shrink(1);
+        }
+        say(player, (stall.horseName().isBlank() ? "The horse" : stall.horseName()) + " is back in its stall.");
+    }
+
+    /**
+     * <b>A holding pen ticket</b>: any horse the player owns, to the player's one
+     * holding pen, from any world. The same checks and the same live landing as
+     * a stall ticket, because a pen is a stall that belongs to a player instead
+     * of a horse - see {@code HoldingPenSignItem}.
+     */
+    private static void sendToPen(ServerLevel level, Horse horse, Player player, ItemStack stack) {
+        MinecraftServer server = level.getServer();
+        if (server == null) {
+            return;
+        }
+        if (!ownedBy(horse, player.getUUID())) {
+            say(player, "That is not your horse - tame it first.");
+            return;
+        }
+        PenRecord pen = StallData.get(server).penOf(player.getUUID());
+        if (pen == null) {
+            say(player, "You have no holding pen yet. Hang a holding pen sign on a pen's wall first.");
+            return;
+        }
+        ServerLevel target = server.getLevel(pen.dimension());
+        if (target == null) {
+            say(player, "Your holding pen's world is not loaded.");
+            return;
+        }
+        if (horse.isVehicle()) {
+            say(player, "Get off first - a horse cannot travel with a rider.");
+            return;
+        }
+        Vec3 landing = landingSpot(target, pen.signPos(), horse);
+        if (landing == null) {
+            say(player, "There is no room to stand in your holding pen - check the sign is still up and "
+                    + "that the pen has a floor and two blocks of headroom.");
+            return;
+        }
+        arrive(level, target, horse, landing);
+        if (!player.getAbilities().instabuild) {
+            stack.shrink(1);
+        }
+        String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
+        say(player, name + " is in your holding pen.");
+    }
+
+    /** Move the horse, with a puff and a sound at both ends so the player sees it go. */
+    private static void arrive(ServerLevel from, ServerLevel target, Horse horse, Vec3 landing) {
+        from.sendParticles(ParticleTypes.PORTAL, horse.getX(), horse.getY() + 0.8, horse.getZ(),
                 24, 0.4, 0.6, 0.4, 0.2);
-        level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
+        from.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                 SoundEvents.ENDERMAN_TELEPORT, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
         horse.dropLeash();
@@ -126,11 +185,6 @@ public final class TicketHandler {
                 24, 0.4, 0.6, 0.4, 0.2);
         target.playSound(null, landing.x, landing.y, landing.z, SoundEvents.ENDERMAN_TELEPORT,
                 SoundSource.NEUTRAL, 1.0F, 1.0F);
-
-        if (!player.getAbilities().instabuild) {
-            stack.shrink(1);
-        }
-        say(player, (stall.horseName().isBlank() ? "The horse" : stall.horseName()) + " is back in its stall.");
     }
 
     /** Does a ticket of this tier reach from {@code from} to {@code to}? */
@@ -165,8 +219,7 @@ public final class TicketHandler {
      * <p>The chunk is pulled in first. A horse teleported into unloaded terrain
      * is the failure that looks exactly like a horse that was deleted.
      */
-    private static Vec3 landingSpot(ServerLevel level, StallRecord stall, Horse horse) {
-        BlockPos signPos = stall.signPos();
+    private static Vec3 landingSpot(ServerLevel level, BlockPos signPos, Horse horse) {
         level.getChunk(signPos); // load it, so what we read is real and the horse arrives somewhere
         BlockState sign = level.getBlockState(signPos);
         if (!(sign.getBlock() instanceof WallSignBlock)) {

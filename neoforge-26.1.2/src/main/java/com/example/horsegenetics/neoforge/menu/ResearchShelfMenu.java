@@ -1,12 +1,7 @@
 package com.example.horsegenetics.neoforge.menu;
 
-import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.GeneRarity;
-import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.block.EquineResearchShelfBlockEntity;
-import com.example.horsegenetics.neoforge.data.ModDataComponents;
-import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -14,7 +9,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -24,30 +18,24 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * <b>The Equine Research Shelf's menu.</b> Two tabs.
+ * <b>The Equine Research Shelf's menu</b> - a window onto the block, like a
+ * furnace's. Two tabs.
  *
  * <ul>
  *   <li><b>Store</b> - {@link EquineResearchShelfBlockEntity#SLOTS} slots of
- *       research papers, <b>like a chest</b>: put a paper in, take it out,
- *       instantly. One paper per gene.</li>
- *   <li><b>Craft</b> - pick a gene the shelf holds, put a blank book in
- *       {@link #BOOK_SLOT}, and after a while by rarity take its copy out of
- *       {@link #RESULT_SLOT}. The book is spent; the shelf's own paper is
- *       not.</li>
+ *       research papers, like a chest. One paper per gene.</li>
+ *   <li><b>Copy</b> - pick a gene the shelf holds, put blank books in
+ *       {@link #BOOK_SLOT}, and copies arrive in {@link #RESULT_SLOT} one book
+ *       at a time, by rarity.</li>
  * </ul>
  *
- * <h2>It used to be a list and a filing slot</h2>
- * Filing consumed the paper into a set of gene keys and a clickable list gave
- * them back, which needed two custom packets to keep the client's list in step
- * - and in play, "putting a book in the research shelf still does nothing"
- * (2026-09-10). Real slots sync themselves, so the only packet left is the
- * Craft tab's gene pick.
- *
- * <h2>The shelf is still the authority</h2>
- * The paper slots wrap the block entity's own container on the server; the
- * client's copy has an empty container of the same size that the ordinary
- * slot sync fills in. The Craft list is read from those slots on both sides,
- * so a forged pick for a gene the shelf does not hold copies nothing.
+ * <h2>It holds no state of its own</h2>
+ * Every slot wraps one of the block entity's containers and the progress bar
+ * reads its {@code ContainerData}, so closing the screen changes nothing: the
+ * copy carries on, as a furnace smelts with its lid shut. The copy state used to
+ * live here, and ended the moment the player clicked off (2026-09-10). The
+ * client's copy wraps empty containers of the same shape, which the ordinary
+ * slot and data sync fill in.
  */
 public final class ResearchShelfMenu extends AbstractContainerMenu {
 
@@ -58,13 +46,9 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     private static final int SLOT_COUNT = FIRST_PAPER_SLOT + EquineResearchShelfBlockEntity.SLOTS;
 
     // ------------------------------------------------------------------
-    // The window's layout, in one place
+    // The window's layout, in one place - addSlot needs it here, and the
+    // screen reads every one of them. A double chest's size.
     // ------------------------------------------------------------------
-    //
-    // These live on the MENU rather than the screen because addSlot needs them
-    // here, and a slot is the one thing that must agree with the drawing
-    // exactly. The screen reads every one of them. The window is a double
-    // chest's size, because it holds a double chest's worth.
 
     public static final int WIDTH = 176;
     public static final int HEIGHT = 222;
@@ -72,9 +56,8 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
 
     /** Store tab: the paper grid, six rows of nine, where a double chest's are. */
     public static final int GRID_Y = 18;
-    public static final int GRID_ROWS = EquineResearchShelfBlockEntity.SLOTS / 9;
 
-    /** Craft tab: the gene list, then the book and result slots under it. */
+    /** Copy tab: the gene list, then the book and result slots under it. */
     public static final int LIST_Y = 20;
     public static final int LIST_W = 160;
     public static final int LIST_ROWS = 5;
@@ -91,33 +74,17 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
     private final Player player;
     private final @Nullable EquineResearchShelfBlockEntity shelf;
     private final Container papers;
-
-    /**
-     * <b>Copying takes time, and how much is the gene's rarity.</b> One iron
-     * ingot's smelt - 200 ticks, ten seconds - per rarity tier, so a common gene
-     * is ten seconds and a mythic one a minute. Kept at the owner's call when
-     * storing became instant: copying is the thing worth waiting for.
-     */
-    public static final int TICKS_PER_RARITY_TIER = 200;
-
-    /** {@link ContainerData} slots - vanilla's furnace pattern, synced by the menu itself. */
-    public static final int DATA_PROGRESS = 0;
-    public static final int DATA_TOTAL = 1;
-    private static final int DATA_COUNT = 2;
-
-    private final Container input = new SimpleContainer(1);
-    private final ResultContainer result = new ResultContainer();
-
-    private String selectedGene = "";
+    private final ContainerData data;
 
     /**
      * <b>Which tab the screen is showing</b>, so the slots that do not belong to
-     * it can go inactive on the client. Only ever set there - see
-     * {@link #activeOnTab}, which is why the server's copy never refuses a slot.
+     * it go inactive on the client. Only ever set there - see
+     * {@link #activeOnTab}.
      */
     private boolean storeTab;
 
-    private final ContainerData data = new SimpleContainerData(DATA_COUNT);
+    /** Client-side: the pick the player just clicked, shown until the server's arrives. */
+    private String clientPick = "";
 
     /** Client constructor - {@code MenuType} hands us no block entity. */
     public ResearchShelfMenu(int containerId, Inventory inventory) {
@@ -130,8 +97,11 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         this.player = inventory.player;
         this.shelf = shelf;
         this.papers = shelf != null ? shelf.papers() : new SimpleContainer(EquineResearchShelfBlockEntity.SLOTS);
+        Container book = shelf != null ? shelf.book() : new SimpleContainer(1);
+        Container result = shelf != null ? shelf.result() : new SimpleContainer(1);
+        this.data = shelf != null ? shelf.data() : new SimpleContainerData(EquineResearchShelfBlockEntity.DATA_COUNT);
 
-        addSlot(new Slot(input, 0, BOOK_X, SLOT_Y) {
+        addSlot(new Slot(book, 0, BOOK_X, SLOT_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return stack.is(Items.BOOK);
@@ -155,8 +125,7 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
 
             @Override
             public void onTake(Player taker, ItemStack taken) {
-                input.removeItem(0, 1);
-                recomputeResult();
+                HorseProgress.complete(taker, ProgressTask.COPY_PAPER);
                 super.onTake(taker, taken);
             }
         });
@@ -210,18 +179,10 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
                 HorseProgress.complete(player, ProgressTask.FILE_PAPER);
             }
         }
-
-        @Override
-        public void setChanged() {
-            super.setChanged();
-            if (!canCopy()) {
-                recomputeResult(); // the original left the shelf - that copy is over
-            }
-        }
     }
 
     // ------------------------------------------------------------------
-    // What the shelf holds
+    // What the shelf holds, and the copy
     // ------------------------------------------------------------------
 
     /** Every gene the shelf can copy, in display order - read from the slots on either side. */
@@ -229,22 +190,38 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         return EquineResearchShelfBlockEntity.genesIn(papers);
     }
 
-    /** Is this menu looking at that shelf? Used by the block's ticker. */
-    public boolean isFor(EquineResearchShelfBlockEntity candidate) {
-        return shelf != null && shelf == candidate;
+    /** The gene being copied: the server's word, synced as an index into {@link #storedGenes}. */
+    public String selectedGene() {
+        if (shelf != null) {
+            return shelf.selectedGene();
+        }
+        int i = data.get(EquineResearchShelfBlockEntity.DATA_SELECTED);
+        List<String> genes = storedGenes();
+        return i >= 0 && i < genes.size() ? genes.get(i) : clientPick;
     }
 
-    public String selectedGene() {
-        return selectedGene;
+    /** From the client's list click; on the server it goes to the block. */
+    public void selectGene(String geneKey) {
+        if (shelf != null) {
+            shelf.select(geneKey);
+        } else {
+            clientPick = geneKey == null ? "" : geneKey;
+        }
+    }
+
+    public int copyProgress() {
+        return data.get(EquineResearchShelfBlockEntity.DATA_PROGRESS);
+    }
+
+    public int copyTotal() {
+        int total = data.get(EquineResearchShelfBlockEntity.DATA_TOTAL);
+        return total <= 0 ? EquineResearchShelfBlockEntity.TICKS_PER_RARITY_TIER : total;
     }
 
     /**
      * <b>Every slot is live on the server; the tab only hides them on the
-     * client.</b> The server has no screen and cannot know which tab the player
-     * is looking at; the client will not send a click on a slot it is not
-     * drawing, so hiding it there is the whole of the enforcement. Deciding it
-     * twice, from state only one side has, is how the old filing slot came to
-     * refuse everything.
+     * client.</b> The server cannot know which tab the player is looking at; the
+     * client will not send a click on a slot it is not drawing.
      */
     private boolean activeOnTab(boolean tab) {
         return !player.level().isClientSide() || storeTab == tab;
@@ -254,99 +231,14 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         this.storeTab = store;
     }
 
-    /** From the client's list click, and re-checked here against the shelf. Also set client-side for the highlight. */
-    public void selectGene(String geneKey) {
-        this.selectedGene = geneKey == null ? "" : geneKey;
-        recomputeResult();
-    }
-
-    // ------------------------------------------------------------------
-    // Copying
-    // ------------------------------------------------------------------
-
-    /** The gene is picked, the shelf still has it, and there is a book to write on. */
-    private boolean canCopy() {
-        return shelf != null
-                && !selectedGene.isEmpty()
-                && shelf.stores(selectedGene)
-                && input.getItem(0).is(Items.BOOK);
-    }
-
-    /** How long this gene takes to copy - see {@link #TICKS_PER_RARITY_TIER}. */
-    public static int copyTicks(String geneKey) {
-        Gene gene = Genes.byKeyOrNull(geneKey);
-        GeneRarity rarity = gene == null ? GeneRarity.DEFAULT : gene.rarity();
-        return (rarity.ordinal() + 1) * TICKS_PER_RARITY_TIER;
-    }
-
-    /**
-     * <b>One tick of copying</b>, driven by the block entity's ticker. Anything
-     * that invalidates the job resets progress to zero rather than pausing it:
-     * pulling the book out, or taking the original off the shelf mid-copy,
-     * means the copy did not happen.
-     */
-    public void tickCopy() {
-        if (shelf == null) {
-            return;
-        }
-        if (!canCopy() || !result.getItem(0).isEmpty()) {
-            if (data.get(DATA_PROGRESS) != 0) {
-                data.set(DATA_PROGRESS, 0);
-            }
-            return;
-        }
-        int total = copyTicks(selectedGene);
-        data.set(DATA_TOTAL, total);
-        int progress = data.get(DATA_PROGRESS) + 1;
-        if (progress < total) {
-            data.set(DATA_PROGRESS, progress);
-            return;
-        }
-        data.set(DATA_PROGRESS, 0);
-        ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
-        paper.set(ModDataComponents.RESEARCH_GENE.get(), selectedGene);
-        result.setItem(0, paper);
-        broadcastChanges();
-        HorseProgress.complete(player, ProgressTask.COPY_PAPER);
-    }
-
-    public int copyProgress() {
-        return data.get(DATA_PROGRESS);
-    }
-
-    public int copyTotal() {
-        int total = data.get(DATA_TOTAL);
-        return total <= 0 ? TICKS_PER_RARITY_TIER : total;
-    }
-
-    @Override
-    public void slotsChanged(Container container) {
-        super.slotsChanged(container);
-        recomputeResult();
-    }
-
-    /** Clear the result and restart the clock whenever the job changes. */
-    private void recomputeResult() {
-        if (shelf == null) {
-            return; // client-side; the server sends the answer
-        }
-        if (!canCopy()) {
-            result.setItem(0, ItemStack.EMPTY);
-        }
-        data.set(DATA_PROGRESS, 0);
-        data.set(DATA_TOTAL, selectedGene.isEmpty() ? 0 : copyTicks(selectedGene));
-        broadcastChanges();
-    }
-
     // ------------------------------------------------------------------
     // Plumbing
     // ------------------------------------------------------------------
 
     /**
-     * Shift-click. From the shelf or the machine into the player; from the
-     * player, a paper goes onto the shelf and a book into the book slot -
-     * {@code moveItemStackTo} asks each slot's {@code mayPlace}, so a
-     * duplicate paper simply stays where it was.
+     * Shift-click. Out of the shelf into the player; from the player, a paper
+     * goes onto the shelf and a book into the book slot - {@code moveItemStackTo}
+     * asks each slot's {@code mayPlace}, so a duplicate paper stays put.
      */
     @Override
     public ItemStack quickMoveStack(Player who, int index) {
@@ -373,6 +265,9 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         } else {
             slot.setChanged();
         }
+        if (index == RESULT_SLOT) {
+            slot.onTake(who, original);
+        }
         return original;
     }
 
@@ -384,15 +279,5 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
         }
         return !shelf.isRemoved()
                 && who.distanceToSqr(shelf.getBlockPos().getCenter()) <= 64.0;
-    }
-
-    /** The book goes back to the player, as a workbench does. The papers stay on the shelf. */
-    @Override
-    public void removed(Player who) {
-        super.removed(who);
-        result.setItem(0, ItemStack.EMPTY);
-        if (!who.level().isClientSide()) {
-            clearContainer(who, input);
-        }
     }
 }

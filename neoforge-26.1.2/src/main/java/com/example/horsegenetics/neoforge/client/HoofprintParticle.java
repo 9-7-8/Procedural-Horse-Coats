@@ -56,6 +56,7 @@ public final class HoofprintParticle extends SingleQuadParticle {
     private final float g1;
     private final float b1;
     private final float heading;
+    private final boolean glow;
 
     private HoofprintParticle(ClientLevel level, double x, double y, double z,
                               HoofprintOptions o, TextureAtlasSprite sprite) {
@@ -77,6 +78,7 @@ public final class HoofprintParticle extends SingleQuadParticle {
         // edge, once laid flat, points along -Z, and a Y rotation of PI - yaw
         // turns -Z onto that heading.
         this.heading = (float) (Math.PI - Math.toRadians(o.yaw()));
+        this.glow = o.glow();
         this.setColor(r0, g0, b0);
     }
 
@@ -98,9 +100,11 @@ public final class HoofprintParticle extends SingleQuadParticle {
         this.extractRotatedQuad(state, camera, rotation, partialTick);
     }
 
+    /** Full block light for a glowing print; the world's own light for a black one. */
     @Override
     public int getLightCoords(float partialTick) {
-        return LightCoordsUtil.withBlock(super.getLightCoords(partialTick), 15);
+        return glow ? LightCoordsUtil.withBlock(super.getLightCoords(partialTick), 15)
+                : super.getLightCoords(partialTick);
     }
 
     @Override

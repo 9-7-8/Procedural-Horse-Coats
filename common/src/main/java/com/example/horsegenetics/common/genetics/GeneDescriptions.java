@@ -257,12 +257,11 @@ public final class GeneDescriptions {
                             + "working round the whole rainbow. One copy shows nothing. How fast "
                             + "the colour turns is drawn per allele copy and inherited with it."),
             Map.entry("horsegenetics.molten_hooves",
-                    "A magical DOMINANT that paints nothing - the only dominant one among the "
-                            + "trails: one Mlt copy is enough, and the horse leaves burning "
-                            + "hoofprints that fade out behind it as it moves. Nothing catches "
-                            + "fire. Two copies behave exactly the same but draw the trail from "
-                            + "both copies' colours at once. The colour is drawn per allele copy "
-                            + "and inherited with it, so a line breeds true to its own fire."),
+                    "A magical locus that paints nothing: hoofprints on the ground behind the "
+                            + "horse, fading as they cool. WHITE is dominant over everything - one "
+                            + "copy glows white. BLACK (unlit), one COLOUR and MULTICOLOUR are "
+                            + "recessive and show only as their own homozygotes; the colours are "
+                            + "written on the allele copy and inherited with it. Nothing catches fire."),
             Map.entry("horsegenetics.fireproof",
                     "A magical recessive that paints nothing: two copies and neither the horse "
                             + "nor its rider takes fire damage, and the horse swims THROUGH lava rather "

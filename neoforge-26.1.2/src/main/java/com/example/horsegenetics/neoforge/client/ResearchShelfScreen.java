@@ -50,7 +50,14 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
     private static final int TITLE_Y = 6;
     private static final int ROW_H = 12;
 
-    private Tab tab = Tab.STORE;
+    /**
+     * The tab the shelf opens on: <b>whichever was showing last time</b>, for the
+     * rest of the session (owner's request, 2026-09-10). Client-wide rather than
+     * per shelf - the question is "what was I doing", not "what was this one".
+     */
+    private static Tab lastTab = Tab.STORE;
+
+    private Tab tab = lastTab;
     private int scroll;
 
     public ResearchShelfScreen(ResearchShelfMenu menu, Inventory inventory, Component title) {
@@ -77,6 +84,7 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         if (hit != null) {
             if (hit != tab && this.menu.getCarried().isEmpty()) {
                 tab = hit;
+                lastTab = hit;
                 scroll = 0;
                 this.menu.setStoreTab(tab == Tab.STORE);
             }
@@ -272,12 +280,16 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
         pose.popMatrix();
     }
 
-    /** Vanilla draws both captions in {@code #404040}; this window is vanilla-coloured. */
+    /**
+     * Vanilla draws both captions in {@code #404040}; this window is
+     * vanilla-coloured. <b>Window-relative coordinates</b>: the caller has
+     * already translated to {@code (leftPos, topPos)}, and adding them again is
+     * what threw the title and the inventory label off the window (2026-09-10).
+     */
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        g.text(this.font, this.title, leftPos + ResearchShelfMenu.MARGIN, topPos + TITLE_Y,
-                VanillaPanel.TEXT, false);
-        g.text(this.font, this.playerInventoryTitle, leftPos + ResearchShelfMenu.MARGIN,
-                topPos + ResearchShelfMenu.INV_LABEL_Y, VanillaPanel.TEXT, false);
+        g.text(this.font, this.title, ResearchShelfMenu.MARGIN, TITLE_Y, VanillaPanel.TEXT, false);
+        g.text(this.font, this.playerInventoryTitle, ResearchShelfMenu.MARGIN,
+                ResearchShelfMenu.INV_LABEL_Y, VanillaPanel.TEXT, false);
     }
 }

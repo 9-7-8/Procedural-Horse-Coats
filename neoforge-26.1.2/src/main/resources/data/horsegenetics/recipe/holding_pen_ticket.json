@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:blank_ticket",
+    "minecraft:wheat"
+  ],
+  "result": {
+    "id": "horsegenetics:holding_pen_ticket"
+  }
+}

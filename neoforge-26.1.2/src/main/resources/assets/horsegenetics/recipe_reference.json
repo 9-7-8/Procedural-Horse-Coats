@@ -172,6 +172,26 @@
       "count": 4
     },
     {
+      "id": "holding_pen_sign",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:spruce_sign",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:holding_pen_sign",
+      "count": 1
+    },
+    {
+      "id": "holding_pen_ticket",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:blank_ticket",
+        "minecraft:wheat"
+      ],
+      "out": "horsegenetics:holding_pen_ticket",
+      "count": 1
+    },
+    {
       "id": "horse_hair_bundle",
       "kind": "shapeless",
       "in": [

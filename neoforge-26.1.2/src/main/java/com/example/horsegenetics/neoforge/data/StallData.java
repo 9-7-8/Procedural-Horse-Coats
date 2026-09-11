@@ -26,7 +26,8 @@ import net.minecraft.world.level.saveddata.SavedDataType;
 public final class StallData extends SavedData {
 
     public static final Codec<StallData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.list(StallRecord.CODEC).fieldOf("stalls").forGetter(StallData::snapshot)
+            Codec.list(StallRecord.CODEC).fieldOf("stalls").forGetter(StallData::snapshot),
+            Codec.list(PenRecord.CODEC).optionalFieldOf("pens", List.of()).forGetter(StallData::penSnapshot)
     ).apply(instance, StallData::new));
 
     public static final SavedDataType<StallData> TYPE = new SavedDataType<>(
@@ -36,13 +37,43 @@ public final class StallData extends SavedData {
 
     private final Map<UUID, StallRecord> byHorse = new LinkedHashMap<>();
 
+    /** Each player's one holding pen - see {@link PenRecord}. Owner-confirmed: one per player. */
+    private final Map<UUID, PenRecord> penByOwner = new LinkedHashMap<>();
+
     private StallData() {
     }
 
-    private StallData(List<StallRecord> stalls) {
+    private StallData(List<StallRecord> stalls, List<PenRecord> pens) {
         for (StallRecord s : stalls) {
             byHorse.put(s.horseId(), s);
         }
+        for (PenRecord p : pens) {
+            penByOwner.put(p.owner(), p);
+        }
+    }
+
+    private List<PenRecord> penSnapshot() {
+        return List.copyOf(penByOwner.values());
+    }
+
+    /** Set (or move) a player's holding pen. */
+    public void assignPen(PenRecord pen) {
+        penByOwner.put(pen.owner(), pen);
+        setDirty();
+    }
+
+    public PenRecord penOf(UUID owner) {
+        return penByOwner.get(owner);
+    }
+
+    /** Drop whatever holding pen has its sign at {@code signPos} in {@code dimension}. */
+    public boolean removePenBySign(ResourceKey<Level> dimension, BlockPos signPos) {
+        boolean removed = penByOwner.values().removeIf(
+                p -> p.dimension().equals(dimension) && p.signPos().equals(signPos));
+        if (removed) {
+            setDirty();
+        }
+        return removed;
     }
 
     public static StallData get(MinecraftServer server) {

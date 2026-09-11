@@ -198,6 +198,11 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
             // and it teaches the player the horse's sex by doing.
             out.add(deniedBucket(new Condition.All(List.of(flag("adult"), flag("sex_male"))),
                     STALLION_KICK_DAMAGE, "message.horsegenetics.milk.stallion"));
+            // A hurt mare refuses and says why, rather than the bucket doing
+            // nothing - the healing gate made visible (2026-09-10).
+            out.add(deniedBucket(new Condition.All(List.of(flag("adult"), flag("sex_female"),
+                            flag("tamed"), new Condition.Flag("full_health", true))),
+                    0.0, "message.horsegenetics.milk.hurt"));
         }
         // A foal has nothing to give, but says so rather than reading as a bug.
         out.add(deniedBucket(flag("baby"), 0.0, "message.horsegenetics.milk.foal"));

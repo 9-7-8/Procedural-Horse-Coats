@@ -122,6 +122,31 @@ public final class BreedFounder {
     }
 
     /**
+     * <b>The breed's plate</b> - the horse the Breeds tab draws as "one horse this
+     * breed can produce". A real {@link #roll} with one difference: <b>no magical
+     * gene the breed does not name</b>. A wild founder keeps its small geometric
+     * dose of random magic, which is right for a herd and wrong for a field
+     * guide, where a Fjord shown with a galaxy coat teaches the reader that
+     * Fjords are galaxy-coated (owner-reported 2026-09-10). A magical gene the
+     * breed <i>does</i> name - in its gene pool or its magic whitelist - stays,
+     * and so do the four body-stat loci, which are how the breed's size and
+     * scores reach the horse at all.
+     */
+    public static Genome plate(Breed breed, Rng rng) {
+        Genome rolled = roll(breed, rng);
+        Genotype g = rolled.genotype();
+        for (Gene gene : Genes.magicalOrder()) {
+            String key = gene.key();
+            if (BODY_STAT_KEYS.contains(key) || breed.constrains(key)
+                    || breed.magicWhitelist().contains(key)) {
+                continue;
+            }
+            g = g.with(wild(gene));
+        }
+        return new Genome(g, rolled.epigenome());
+    }
+
+    /**
      * Write the breed's stat bands onto the founder's <b>allele copies</b> - the
      * one and only place a breed touches a number.
      *

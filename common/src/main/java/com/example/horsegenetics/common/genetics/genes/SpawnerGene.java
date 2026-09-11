@@ -1,5 +1,7 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
 import com.example.horsegenetics.common.genetics.epi.EpiValues;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 
@@ -94,9 +96,25 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
         return "spawner";
     }
 
+    /**
+     * <b>Which of the mob's own colours it comes out as</b>, on the allele copy:
+     * a number in {@code [0, 1)} the translator turns into one of that mob's
+     * variants - a sheep's dye, a cow's or a cat's or a frog's variant. So every
+     * sheep one horse makes is the same colour, and its foals drift from it.
+     * A mob with no variants ignores it. It was promised on the gene page from
+     * the start and never read; owner-reported 2026-09-10.
+     */
+    public static final String VARIANT = "variant";
+
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.uniform(VARIANT, 0.0, 0.999));
+    }
+
     @Override
     protected List<GeneAbility> abilitiesFor(Variant v, EpiValues epi) {
         return List.of(new GeneAbility.Summon(v.subject(), RADIUS, PER_FEEDING,
-                new GeneAbility.Trigger.OnFeed(), GeneAbility.Condition.ALWAYS, 1));
+                new GeneAbility.Trigger.OnFeed(), GeneAbility.Condition.ALWAYS, 1,
+                epi.get(VARIANT)));
     }
 }

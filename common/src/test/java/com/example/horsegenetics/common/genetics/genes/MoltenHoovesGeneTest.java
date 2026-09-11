@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Molten hooves - the one <b>dominant</b> emission locus, and the gene whose
- * name most invites somebody to make it set things on fire.
+ * Molten hooves: a dominant white and three recessive colours - black (unlit),
+ * one colour, and multicolour - per the owner's design of 2026-09-10.
  */
 class MoltenHoovesGeneTest {
 
@@ -41,77 +41,86 @@ class MoltenHoovesGeneTest {
         return out;
     }
 
-    // ------------------------------------------------------------------
-
-    /**
-     * Dominant, which no other emission locus is: one copy is the whole effect.
-     * A doubled horse gets a second emitter rather than a stronger one, which is
-     * the only difference between the two expressing rows.
-     */
+    /** White is dominant over everything, the wild type and the three colours alike. */
     @Test
-    void oneCopyIsEnoughAndTwoCopiesTrailTwoColours() {
-        assertEquals(1, emittersOf(pair("Mlt", "n"), 1).size(), "one copy expresses");
-        assertEquals(2, emittersOf(pair("Mlt", "Mlt"), 1).size(), "two copies, two trails");
+    void whiteIsDominantOverEveryOtherAllele() {
+        for (String other : new String[] {"n", "MltB", "MltC", "MltM", "MltW"}) {
+            List<GeneAbility.Emitter> e = emittersOf(pair("MltW", other), 1);
+            assertEquals(1, e.size(), "MltW/" + other + " shows white");
+            assertEquals(MoltenHoovesGene.WHITE, e.get(0).color());
+            assertEquals(MoltenHoovesGene.GLOWS, e.get(0).data(), "white glows");
+            assertEquals("white", GENE.expressionOf(pair("MltW", other)).id());
+        }
+    }
+
+    /** The three colours are recessive: each shows only as its own homozygote, and a mix is a carrier. */
+    @Test
+    void theColoursAreRecessiveAndOnlyShowAsHomozygotes() {
+        for (String a : new String[] {"MltB", "MltC", "MltM"}) {
+            assertEquals(List.of(), emittersOf(pair(a, "n"), 1), a + "/n is a carrier");
+            assertEquals("carrier", GENE.expressionOf(pair(a, "n")).id());
+            assertTrue(!emittersOf(pair(a, a), 1).isEmpty(), a + "/" + a + " expresses");
+        }
+        assertEquals(List.of(), emittersOf(pair("MltB", "MltC"), 1), "two different recessives show nothing");
         assertEquals(List.of(), emittersOf(pair("n", "n"), 1));
     }
 
-    /** The three rows are three distinct outcomes, and none of them paints. */
+    /** Black is the one print that does not glow. */
     @Test
-    void theExpressionsAreDistinctAndNoneOfThemPaints() {
-        assertNotEquals(GENE.expressionOf(pair("Mlt", "Mlt")).id(),
-                GENE.expressionOf(pair("Mlt", "n")).id());
-        assertNotEquals(GENE.expressionOf(pair("Mlt", "n")).id(),
-                GENE.expressionOf(pair("n", "n")).id());
-        GENE.expressions().forEach(e ->
-                assertTrue(e.wildType(), e.id() + " must paint nothing - this locus is an emission"));
+    void blackIsUnlit() {
+        GeneAbility.Emitter e = emittersOf(pair("MltB", "MltB"), 3).get(0);
+        assertEquals(MoltenHoovesGene.BLACK, e.color());
+        assertEquals(MoltenHoovesGene.UNLIT, e.data());
     }
 
-    /**
-     * A fading dust off all four feet as the horse walks. Deliberately
-     * <b>not</b> a flame particle: flames ignore colour, and a colour written on
-     * the allele copy is the entire point of the locus.
-     */
+    /** One colour: a single emitter in one epigenetic colour, and two horses differ. */
     @Test
-    void theTrailIsAFadingDustOffTheHooves() {
-        GeneAbility.Emitter e = emittersOf(pair("Mlt", "n"), 7).get(0);
+    void theColourAlleleIsOneEpigeneticColour() {
+        List<GeneAbility.Emitter> e = emittersOf(pair("MltC", "MltC"), 11);
+        assertEquals(1, e.size());
+        assertEquals(e.get(0).color(), e.get(0).color2(), "one colour, start to finish");
+        assertNotEquals(e.get(0).color(), emittersOf(pair("MltC", "MltC"), 12).get(0).color(),
+                "the colour is drawn per copy");
+    }
+
+    /** Multicolour: one emitter per copy, each with its own two colours, taken in turn. */
+    @Test
+    void theMulticolourAlleleRunsThroughBothCopiesColours() {
+        List<GeneAbility.Emitter> e = emittersOf(pair("MltM", "MltM"), 5);
+        assertEquals(2, e.size());
+        e.forEach(x -> assertEquals(MoltenHoovesGene.GLOWS, x.data()));
+    }
+
+    /** Every outcome is an emission; none paints. */
+    @Test
+    void noOutcomePaints() {
+        GENE.expressions().forEach(x ->
+                assertTrue(x.wildType(), x.id() + " must paint nothing - this locus is an emission"));
+    }
+
+    /** The prints are the mod's own particle, off the hooves, as the horse walks. */
+    @Test
+    void thePrintsAreTheHoofprintParticle() {
+        GeneAbility.Emitter e = emittersOf(pair("MltW", "n"), 7).get(0);
         assertEquals(MoltenHoovesGene.PARTICLE, e.particle());
         assertEquals("hooves", e.anchor());
-        assertTrue(e.trigger() instanceof GeneAbility.Trigger.OnMove, "it fires as the horse walks");
-        assertEquals(0, e.cycleTicks(), "it is not a rainbow - the two colours are the colours");
-        assertEquals(MoltenHoovesGene.COUNT, e.count(), "count is fixed, not epigenetic");
-        assertTrue(e.chance() > 0 && e.chance() <= 1);
+        assertTrue(e.trigger() instanceof GeneAbility.Trigger.OnMove);
     }
 
-    /**
-     * <b>The budget guard.</b> This locus is dominant, so a populated stable can
-     * have a dozen of these emitting on the same moving tick - which is why the
-     * count is fixed and the chance sits below the particle locus's. If somebody
-     * turns either up for drama, this is the test that should stop them and send
-     * them to change the colour instead.
-     */
-    @Test
-    void itStaysCheaperThanTheRecessiveParticleLocus() {
-        assertTrue(MoltenHoovesGene.EMIT_CHANCE < ParticleGene.EMIT_CHANCE,
-                "a dominant trail must fire less often than the recessive one");
-        assertTrue(MoltenHoovesGene.COUNT <= ParticleGene.MAX_COUNT,
-                "a dominant trail must not be denser than the recessive one");
-    }
-
-    /** The colour is per allele copy, so two horses burn differently and a line breeds true. */
-    @Test
-    void twoMoltenHorsesBurnDifferentColours() {
-        int a = emittersOf(pair("Mlt", "n"), 11).get(0).color();
-        int b = emittersOf(pair("Mlt", "n"), 12).get(0).color();
-        assertNotEquals(a, b, "the colour is drawn per copy");
-    }
-
-    /**
-     * Both expressing combinations are in the founder table, so there is no such
-     * thing as an invisible carrier here - the rule for every emission locus.
-     */
+    /** Wild founders only ever express - no invisible carriers, the rule for every emission locus. */
     @Test
     void everyFounderCombinationExpresses() {
-        assertTrue(GENE.founderTable(null).share(pair("Mlt", "n")) > 0, "single copies are born wild");
-        assertTrue(GENE.founderTable(null).share(pair("Mlt", "Mlt")) > 0, "doubles are born wild too");
+        for (String[] p : new String[][] {{"MltW", "n"}, {"MltW", "MltW"}, {"MltB", "MltB"},
+                {"MltC", "MltC"}, {"MltM", "MltM"}}) {
+            assertTrue(GENE.founderTable(null).share(pair(p[0], p[1])) > 0, p[0] + "/" + p[1] + " is born wild");
+        }
+        assertEquals(0.0, GENE.founderTable(null).share(pair("MltB", "n")), "no invisible carriers");
+    }
+
+    /** The budget guard, kept from the single-allele version: a dominant emitter stays cheap. */
+    @Test
+    void itStaysCheaperThanTheRecessiveParticleLocus() {
+        assertTrue(MoltenHoovesGene.EMIT_CHANCE < ParticleGene.EMIT_CHANCE);
+        assertTrue(MoltenHoovesGene.COUNT <= ParticleGene.MAX_COUNT);
     }
 }

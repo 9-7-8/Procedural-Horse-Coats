@@ -25,14 +25,18 @@ import net.minecraft.util.ExtraCodecs;
  * @param toColor   RGB it fades to as it cools
  * @param yaw       the horse's heading in degrees, so the toe points the way it went
  * @param scale     the horse's scale, so a draught horse leaves a bigger print
+ * @param glow      full brightness, or lit by the world like anything else -
+ *                  molten hooves' black allele is the one print that does not glow
  */
-public record HoofprintOptions(int fromColor, int toColor, float yaw, float scale) implements ParticleOptions {
+public record HoofprintOptions(int fromColor, int toColor, float yaw, float scale, boolean glow)
+        implements ParticleOptions {
 
     public static final MapCodec<HoofprintOptions> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             ExtraCodecs.RGB_COLOR_CODEC.fieldOf("from_color").forGetter(HoofprintOptions::fromColor),
             ExtraCodecs.RGB_COLOR_CODEC.fieldOf("to_color").forGetter(HoofprintOptions::toColor),
             Codec.FLOAT.fieldOf("yaw").forGetter(HoofprintOptions::yaw),
-            Codec.FLOAT.fieldOf("scale").forGetter(HoofprintOptions::scale)
+            Codec.FLOAT.fieldOf("scale").forGetter(HoofprintOptions::scale),
+            Codec.BOOL.optionalFieldOf("glow", true).forGetter(HoofprintOptions::glow)
     ).apply(i, HoofprintOptions::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, HoofprintOptions> STREAM_CODEC = StreamCodec.composite(
@@ -40,6 +44,7 @@ public record HoofprintOptions(int fromColor, int toColor, float yaw, float scal
             ByteBufCodecs.INT, HoofprintOptions::toColor,
             ByteBufCodecs.FLOAT, HoofprintOptions::yaw,
             ByteBufCodecs.FLOAT, HoofprintOptions::scale,
+            ByteBufCodecs.BOOL, HoofprintOptions::glow,
             HoofprintOptions::new);
 
     @Override

@@ -354,7 +354,17 @@ public sealed interface GeneAbility {
      * persistent, and must respect the world's difficulty.
      */
     record Summon(String mob, double radius, int upTo, Trigger trigger,
-                  Condition when, int minDose) implements GeneAbility {}
+                  Condition when, int minDose, double variant) implements GeneAbility {
+
+        /**
+         * {@code variant} in {@code [0, 1)} picks which of the mob's own colours
+         * or variants it comes out as - the spawner's epigenetic value, so a
+         * line breeds true to its own shade of sheep. {@link #NATURAL} lets the
+         * game choose, as it would for any spawn. It is not a gene-file
+         * parameter; a data gene's summon always gets {@code NATURAL}.
+         */
+        public static final double NATURAL = -1.0;
+    }
 
     /**
      * <b>How the horse feels about other creatures</b> - {@link NightTemper}

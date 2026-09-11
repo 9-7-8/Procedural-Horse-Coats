@@ -107,50 +107,56 @@ public final class DebugTestWorldHandler {
      * nothing in particular. Preset eggs are the lever: a horse built for one
      * test, named for it, one right-click from existing.
      *
-     * <p>Aimed at checklist &sect;0-BX / &sect;0-BS (2026-09-10): molten hooves
-     * prints, the uncapped fed spawner, the potion-milk stallion and foal, holy
-     * ward, a ridden particle trail, the chest shelf, stall landing and height,
-     * and hand-taming a breed horse for the Breeds tab. A chat legend says which
-     * item is for which.
+     * <p>Aimed at checklist &sect;0-BY (2026-09-10, second batch): the four
+     * molten hooves alleles, the spawner's colour, the holding pen, the hurt
+     * potion mare, the shelf copying in the background, plus what is still
+     * open from &sect;0-BX (stall landing, ward, zombie gear, ridden trail,
+     * potion stallion and foal). A chat legend says which item is for which.
      */
     private static void fillInventory(ServerPlayer player) {
         Inventory inv = player.getInventory();
         List<String> legend = new ArrayList<>();
 
-        // Hotbar: the horses and what they eat.
+        // Hotbar: molten hooves, all four alleles, and the sheep spawner.
         put(inv, legend, 0, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()), "custom egg - build anything else");
-        put(inv, legend, 1, preset(player, "Test: molten hooves", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=Mlt/Mlt"), "ride at night - prints flat, glowing, toe forward, two colours alternating");
-        put(inv, legend, 2, preset(player, "Test: cow spawner", Sex.FEMALE, false,
-                "horsegenetics.spawner=Cow/Cow"), "feed wheat - two cows every meal it eats; tamed + full health refuses and makes none");
-        put(inv, legend, 3, new ItemStack(Items.WHEAT, 64), "wheat - spawner meals, and hand-taming (crouch, look, stand still)");
-        put(inv, legend, 4, new ItemStack(Items.GLASS_BOTTLE, 16), "glass bottles - hold out to the potion stallion and foal");
-        put(inv, legend, 5, preset(player, "Test: potion stallion", Sex.MALE, false,
-                "horsegenetics.potion_milk=Spd/Str"), "bottle on him - he should rear, kick and say so");
-        put(inv, legend, 6, preset(player, "Test: potion foal", Sex.FEMALE, true,
-                "horsegenetics.potion_milk=Spd/Spd"), "bottle on her - 'a foal has no potion milk'");
+        put(inv, legend, 1, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
+        put(inv, legend, 2, preset(player, "Test: molten black", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
+        put(inv, legend, 3, preset(player, "Test: molten colour", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
+        put(inv, legend, 4, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltM/MltM"), "glowing prints running through several colours");
+        put(inv, legend, 5, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
+                "horsegenetics.spawner=Shp/Shp"), "feed it - every sheep it makes must be the SAME colour");
+        put(inv, legend, 6, new ItemStack(Items.WHEAT, 64), "wheat - spawner meals, and hand-taming (crouch, look, stand still)");
         put(inv, legend, 7, new ItemStack(Items.SADDLE), "saddle - for riding the molten and particle horses");
-        put(inv, legend, 8, new ItemStack(Items.LEAD), null);
+        put(inv, legend, 8, new ItemStack(Items.GLASS_BOTTLE, 16), "glass bottles - the potion mare, stallion and foal");
 
-        // Main inventory, row 1: the other horses.
-        put(inv, legend, 9, preset(player, "Test: holy ward", Sex.FEMALE, false,
-                "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off - purple 'spawn refused' lines");
-        put(inv, legend, 10, preset(player, "Test: zombie spawner", Sex.MALE, false,
-                "horsegenetics.spawner=Zmb/Zmb"), "feed it (survival, Easy+) - check the zombies' gear is ordinary");
-        put(inv, legend, 11, preset(player, "Test: fading-dust trail", Sex.FEMALE, false,
-                "horsegenetics.particle=Dst2/Dst2"), "ride it - the trail must show while ridden");
+        // Row 1: the holding pen, the potion horses, and a horse to tame.
+        put(inv, legend, 9, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
+                "holding pen signs - hang one on a pen wall; a second moves your pen");
+        put(inv, legend, 10, new ItemStack(ModItems.HOLDING_PEN_TICKET.get(), 8),
+                "holding pen tickets - right-click any horse you own: it goes to your pen, dead centre");
         Breed breed = Breeds.get("arabian") != null ? Breeds.get("arabian")
                 : (Breeds.all().isEmpty() ? null : Breeds.all().get(0));
         if (breed != null) {
-            put(inv, legend, 12, BreedSpawnEggItem.of(breed), "wild " + breed.name()
-                    + " - tame by hand in survival, then its Breeds row should fill in");
+            put(inv, legend, 11, BreedSpawnEggItem.of(breed), "wild " + breed.name()
+                    + " - tame by hand (survival: its Breeds row fills), then pen-ticket it");
         }
-        put(inv, legend, 13, new ItemStack(Items.GOLDEN_CARROT, 16), null);
-
+        put(inv, legend, 12, preset(player, "Test: potion mare", Sex.FEMALE, false,
+                "horsegenetics.potion_milk=Spd/Spd"), "tame, hurt her, bottle her - 'she's hurt' and no potion");
+        put(inv, legend, 13, new ItemStack(Items.BUCKET, 4), "bucket - a hurt milk mare should refuse the same way");
+        put(inv, legend, 14, preset(player, "Test: potion stallion", Sex.MALE, false,
+                "horsegenetics.potion_milk=Spd/Str"), "bottle on him - he should rear, kick and say so");
+        put(inv, legend, 15, preset(player, "Test: potion foal", Sex.FEMALE, true,
+                "horsegenetics.potion_milk=Spd/Spd"), "bottle on her - 'a foal has no potion milk'");
+        put(inv, legend, 16, new ItemStack(Items.GOLDEN_CARROT, 16), null);
+        put(inv, legend, 17, new ItemStack(Items.LEAD), null);
         // Row 2: the research shelf.
         put(inv, legend, 18, new ItemStack(ModItems.EQUINE_RESEARCH_SHELF.get(), 2),
-                "research shelf x2 - one to fill and BREAK: every paper must drop");
-        put(inv, legend, 19, new ItemStack(Items.BOOK, 16), "books - the Copy tab");
+                "research shelf x2 - copy a gene, CLOSE the screen, come back: it kept going; break one: all drops");
+        put(inv, legend, 19, new ItemStack(Items.BOOK, 16), "books - the Copy tab; a stack copies one after another");
         String[] papers = {"silver", "dun", "roan", "tobiano", "champagne", "silver"};
         for (int i = 0; i < papers.length; i++) {
             ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
@@ -170,6 +176,10 @@ public final class DebugTestWorldHandler {
         put(inv, legend, 32, new ItemStack(Items.OAK_SLAB, 32), null);
         put(inv, legend, 33, new ItemStack(Items.HAY_BLOCK, 32),
                 "hay - fill a stall solid: the ticket must refuse and not be used up");
+        put(inv, legend, 34, preset(player, "Test: holy ward", Sex.FEMALE, false,
+                "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off - purple 'spawn refused' lines");
+        put(inv, legend, 35, preset(player, "Test: fading-dust trail", Sex.FEMALE, false,
+                "horsegenetics.particle=Dst2/Dst2"), "ride it - the trail must show while ridden");
 
         tell(player, Component.literal("Test kit - what each thing is for:").withStyle(ChatFormatting.GOLD));
         for (String line : legend) {
