@@ -1,11 +1,11 @@
 {
   "format": 3,
   "key": "horsegenetics.rainbow_drip",
-  "name": "Rainbow Drip",
+  "name": "Ribbon Drip",
   "phase": "magical",
   "priority": 387,
   "rarity": "RARE",
-  "blurb": "A field of black poured over the topline, its lower edge sagging into even lobes and rimmed with four ribbons of colour, as if it were still running.",
+  "blurb": "A field of black poured over the topline, its lower edge sagging into even lobes and rimmed with four ribbons - pale on one form, the whole spectrum on the other.",
   "notes": [
     "The reference arrived as a traced SVG (372 gradient-filled paths), half of which are the transparency checkerboard behind the artwork rather than the artwork. It is not pasted in as an SVG mask: the marking is a periodic lobed boundary, which is a kind of shape and not a particular one, so it is WAVES - the only mask in the vocabulary that repeats evenly on purpose.",
     "All five layers carry the SAME WAVES seed, wavelength, amplitude and phase and differ only in from/to. That is what makes the four ribbons sit parallel to the black edge and to each other all the way along the lobe. Change the wavelength on one and the marking comes apart; change it on all five together and the lobes get longer or shorter, which is the knob worth turning.",
@@ -15,16 +15,17 @@
     "founders below is a placeholder that satisfies the loader. Run intake/tools/founders.py to derive the real table from the rarity tier.",
     "Arrived at priority 260. Moved to 387: lines and strokes - runs down from the topline, and paired with ooze drip. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
     "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse.",
-    "THE BLACK FIELD'S 'to' IS 1.45, NOT 1.05 (2026-09-11). WAVES displaces the WHOLE band, not just the edge you are shaping: at a trough the far edge came down to 0.85 of the barrel and left a bare brown stripe along the top of the back, once per wavelength, which is what the owner saw. Anything banded across a part has to clear 1.0 by its amplitude plus its softness."
+    "THE BLACK FIELD'S 'to' IS 1.45, NOT 1.05 (2026-09-11). WAVES displaces the WHOLE band, not just the edge you are shaping: at a trough the far edge came down to 0.85 of the barrel and left a bare brown stripe along the top of the back, once per wavelength, which is what the owner saw. Anything banded across a part has to clear 1.0 by its amplitude plus its softness.",
+    "RENAMED FROM 'RAINBOW DRIP' (2026-09-11, owner's call). Two thirds of the horses this gene makes carry Rdw, whose rim is grey to white, and a gene called Rainbow Drip that comes out black and white is a name arguing with the horse in front of you - \"the name makes it SUPER confusing\". Ribbon Drip describes what both forms are, and the rainbow is now the name of the allele that actually draws one. The KEY is still horsegenetics.rainbow_drip: it is the genotype code's spelling and no horse should change because a label did."
   ],
   "alleles": [
     {
       "token": "Rdw",
-      "label": "Rainbow drip, pale rim (Rdw)"
+      "label": "Pale ribbons (Rdw)"
     },
     {
       "token": "Rdc",
-      "label": "Rainbow drip, coloured rim (Rdc)"
+      "label": "Rainbow ribbons (Rdc)"
     },
     {
       "token": "n",
@@ -45,7 +46,7 @@
   "expressions": [
     {
       "id": "white",
-      "name": "Rainbow drip (pale)",
+      "name": "Ribbon drip, pale",
       "description": "Black poured over the topline with a lobed lower edge, rimmed by four ribbons stepping from grey at the leading edge to white against the black.",
       "when": [
         "Rdw/Rdw",
@@ -228,7 +229,7 @@
     },
     {
       "id": "coloured",
-      "name": "Rainbow drip (coloured)",
+      "name": "Ribbon drip, rainbow",
       "description": "Black poured over the topline with a lobed lower edge, rimmed by four ribbons running most of the way round the colour wheel.",
       "when": [
         "Rdc/Rdc"

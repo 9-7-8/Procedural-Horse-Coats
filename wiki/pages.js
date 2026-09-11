@@ -435,7 +435,7 @@ window.HG.pages = {
                 { href: "gene-opaline-zebra.html", text: "Opaline Zebra", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-panark.html", text: "Panark", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-qhada.html", text: "Qhada", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-rainbow-drip.html", text: "Rainbow Drip", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-rainbow-drip.html", text: "Ribbon Drip", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-riblines.html", text: "Riblines", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-rime.html", text: "Rime", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-scratches.html", text: "Scratches", kind: "magical", views: ["gameplay","coding"] },

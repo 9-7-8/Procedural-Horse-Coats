@@ -927,8 +927,8 @@
       {"id": "ooze-coloured", "name": "Ooze drip, coloured", "pairs": ["oz/oz"], "stage": "bay", "coverageMin": 19.2, "coverageMax": 21.8, "parts": ["body"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
     ]},
     "horsegenetics.rainbow_drip": {"natural": false, "family": "MAGIC_LINES", "sexLinked": false, "outcomes": [
-      {"id": "white", "name": "Rainbow drip (pale)", "pairs": ["Rdw/Rdw", "Rdw/Rdc", "Rdw/n"], "stage": "bay", "coverageMin": 20.1, "coverageMax": 20.1, "parts": ["body"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false},
-      {"id": "coloured", "name": "Rainbow drip (coloured)", "pairs": ["Rdc/Rdc"], "stage": "bay", "coverageMin": 20.0, "coverageMax": 20.1, "parts": ["body"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
+      {"id": "white", "name": "Ribbon drip, pale", "pairs": ["Rdw/Rdw", "Rdw/Rdc", "Rdw/n"], "stage": "bay", "coverageMin": 20.1, "coverageMax": 20.1, "parts": ["body"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false},
+      {"id": "coloured", "name": "Ribbon drip, rainbow", "pairs": ["Rdc/Rdc"], "stage": "bay", "coverageMin": 20.0, "coverageMax": 20.1, "parts": ["body"], "colorful": true, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false}
     ]},
     "horsegenetics.datarain": {"natural": false, "family": "MAGIC_LINES", "sexLinked": false, "outcomes": [
       {"id": "pale", "name": "Static", "pairs": ["P/P", "P/C", "P/n"], "stage": "bay", "coverageMin": 27.9, "coverageMax": 28.1, "parts": ["body"], "colorful": false, "blackOnly": false, "whiteOnly": false, "onBlack": true, "onWhite": true, "onColour": true, "sexes": ["male", "female"], "effects": false},
