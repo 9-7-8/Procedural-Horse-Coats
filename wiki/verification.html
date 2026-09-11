@@ -39,8 +39,8 @@
     <span class="label">The test kit</span>
     <p>
         <strong>Spawn Test Horse World</strong> (<code>DebugTestWorldHandler.fillInventory</code>)
-        hands out <strong>one hotbar at a time</strong>: eight themed batches covering
-        &sect;0-CC down to &sect;0-BX, batch 1 on login and the rest with <code>/testkit n</code>
+        hands out <strong>one hotbar at a time</strong>: themed batches covering
+        what is below, a batch deleted once worked through, batch 1 on login and the rest with <code>/testkit n</code>
         (<code>/testkit</code> alone lists them; each batch's legend ends with a clickable link to
         the next). Swapping a batch empties the hotbar only. Every batch that tames carries a
         stick, every one that breeds carries golden carrots. Two clickable <code>/tp</code>s on
@@ -57,26 +57,27 @@
     </p>
 </div>
 
-<h2 id="stick-tame">&sect;0-CE &mdash; The debug stick counts as taming; a breed founder's disorders go to the log (2026-09-11, NOT looked at in game)</h2>
+<h2 id="stick-tame">&sect;0-CE &mdash; Test batch 1, the breeds: confirmed (2026-09-11)</h2>
 
-<p><em>Owner-confirmed in test batch 1 and removed from this page:</em> the custom egg's Breed
-    list starts at Feral Mixed and carries the drop-in breeds; the gene hover picture on the
-    custom egg; a drop-in breed registers and fills its Breeds row when tamed in survival; a
-    drop-in gene (<code>phc/genes/aurora.json</code>) loads and draws. The log confirmed the
-    broken-gene breed loads with a warning and the duplicate Friesian is refused.</p>
+<p><em>Owner-confirmed and removed from &sect;0-CA / &sect;0-CB / &sect;0-CC</em>, kept here for
+    the session log: the custom egg's Breed list starts at Feral Mixed and carries drop-in
+    breeds; the gene hover picture on the custom egg; a drop-in breed registers, fills its
+    Breeds row and shows its About text; its herds spawn wild in the biome it names (15
+    <code>kit_forest_paint</code> herd founders logged in a dark forest - the
+    <code>breed_herds</code> biome modifier works); a drop-in gene loads and draws; a switched-off
+    Morgan keeps its label and entry; a moved Friesian's entry gives the new biome. The log
+    confirmed the broken-gene breed loads with a warning and the duplicate Friesian is
+    refused.</p>
 
-<ul>
-    <li><strong>The stick fires the tame event now</strong> - owner-confirmed: a stick-tamed
-        Morgan and Friesian fill their rows in survival.</li>
-    <li><strong><code>[breed-health]</code> lines.</strong> Every breed founder the server
-        rolls - egg, wild herd, cowboy, stable - logs its health genes against its sheet, and a
-        <code>WARN ... NOT ON ITS SHEET</code> for any disorder or magical gene the sheet does
-        not list. Seen working on wild New Forest and Knabstrupper herds and on eggs, all on
-        their sheets. &ldquo;Health genes&rdquo; is the breed book's rule
-        (<code>HealthContribution</code>), so leopard complex, splash white and grey appear
-        beside the true disorders. Still wanted: a stack of Quarter Horse and Thoroughbred
-        eggs.</li>
-</ul>
+<p><strong>Fixed and confirmed the same day:</strong> the debug stick now fires the tame event
+    (it called <code>tameWithName</code> bare, so a stick-tamed horse never filled its Breeds
+    row). <strong>New:</strong> every breed founder the server rolls - egg, wild herd, cowboy,
+    stable - logs a <code>[breed-health]</code> line of its health genes against its sheet, and
+    <code>WARN ... NOT ON ITS SHEET</code> for any disorder or magical gene the sheet does not
+    list. Twenty-four Quarter Horses and twenty-five Thoroughbreds logged no warning; three
+    Quarter Horses carried HYPP, and none carried PSSM1 or HERDA (listed, rare). &ldquo;Health
+    genes&rdquo; is the breed book's rule (<code>HealthContribution</code>), so leopard complex,
+    splash white and grey appear beside the true disorders.</p>
 
 <h2 id="village-tag">&sect;0-CD &mdash; Vanilla's village POI tag loads again (2026-09-11, NOT looked at in game)</h2>
 
@@ -112,7 +113,8 @@
         <code>[Breeds] wild horse at ... not spawned</code>.</li>
     <li><strong>A shipped breed moved.</strong> The breed book gives the Friesian's new biome
         (owner-confirmed, dev run: dark forest only). Still unseen: a dark forest herd of
-        them in new chunks.</li>
+        them in new chunks (the dev run's <code>kit_forest_paint</code> was cut to the
+        Friesian's weight after it headed every herd).</li>
     <li><strong>Switched off, but still a breed.</strong> The Morgan keeps its label and its
         entry fills (owner-confirmed). Still unseen: the creative tab and the cowboy no longer
         offering a Morgan egg or horse.</li>
@@ -141,11 +143,6 @@
         times): no magical coat, particle or ability the breed does not list. A vanilla-spawned
         horse (Feral Mixed) still can carry one - that is now the only place random magic comes
         from.</li>
-    <li><strong>No surprise disorders.</strong> Spawn a stack of Quarter Horses: the
-        <code>[breed-health]</code> log lines (&sect;0-CE) should show some carrying HYPP, PSSM1
-        or HERDA (the sheet lists them). Thoroughbreds and Friesians should never log a
-        <code>NOT ON ITS SHEET</code>. The Breeds tab's detail line reads &ldquo;Carries no
-        disorder but the ones listed below.&rdquo;</li>
     <li><strong>The jar</strong> no longer carries the wiki tool classes or the example
         genes. Nothing in the game used them; if anything in the log says a
         <code>*Tool</code> class is missing, that assumption was wrong.</li>
@@ -187,12 +184,6 @@
         breed pane). The OS file browser should open on that folder. Unverified: that
         <code>Util.getPlatform().openPath</code> behaves on this machine as it does for the
         resource-pack screen.</li>
-    <li><strong>Drop-in herds in the wild.</strong> A drop-in breed registers and fills its
-        Breeds row (owner-confirmed). Still unseen: its <strong>About</strong> text in the
-        entry, and its herds in new chunks of the biome it names - the new
-        <code>horsegenetics:breed_herds</code> biome modifier, which nothing else has tested.
-        The dev run's <code>kit_forest_paint</code> lives in <code>minecraft:dark_forest</code>;
-        the test world offers a <code>/tp</code> there.</li>
     <li><strong>A night breed.</strong> <code>"spawn_time": "night"</code>, and explore
         after dark: herds founded in the dark may be it, and ones founded by day never
         are. Expect it to be rare near where you already are - vanilla spawns no animals
@@ -241,7 +232,7 @@
 
 <h2 id="intake-evening">&sect;0-BZ &mdash; Twenty-four genes out of the evening intake (2026-09-10, NOT looked at in game)</h2>
 
-<p><strong>Where to look:</strong> <code>/testkit 3</code>, <code>4</code> and <code>5</code>
+<p><strong>Where to look:</strong> <code>/testkit 2</code>, <code>3</code> and <code>4</code>
     in the test world - one preset egg per new gene, homozygous for the form its icon shows,
     plus three other forms (nightbell foxglove, black barred wing, coloured rainbow drip). Every gene was rendered
     side-on in every form before shipping; none has been on a real horse, in real light, or

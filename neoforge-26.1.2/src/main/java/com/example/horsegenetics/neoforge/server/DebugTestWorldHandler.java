@@ -148,13 +148,15 @@ public final class DebugTestWorldHandler {
      * carries a <b>stick</b> (it tames on the spot - {@code HorseInteractionHandler})
      * and every batch that breeds carries <b>golden carrots</b>.
      *
-     * <p>Batches 1 and 2 lean on files in the dev run's {@code run/phc/} that no
-     * kit can make: the {@code kit_*.json} breeds, the example drop-in gene and a
-     * {@code breed-spawning.toml} moving the Friesian and switching the Morgan
-     * off. An egg whose breed or gene is not loaded is simply left out.
+     * <p>A batch is deleted once the owner has worked through it, and the rest
+     * move up - the first batch is always the next thing to test. The breeds
+     * batch went that way on 2026-09-11; its leftovers need no items, only the
+     * dark-forest {@code /tp} and the dev run's {@code run/phc/} files (the
+     * {@code kit_*.json} breeds, a {@code breed-spawning.toml} moving the
+     * Friesian and switching the Morgan off). An egg whose breed or gene is not
+     * loaded is simply left out.
      */
     private static final String[] BATCHES = {
-            "Breeds and drop-ins (checklist 0-CC, 0-CB)",
             "Size by copy count (0-CA)",
             "Intake: the rebuilt marks, and their other forms (0-BZ)",
             "Intake: drips, contour cells, crackle, flakes, small drawings (0-BZ)",
@@ -181,23 +183,6 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tames a horse on the spot");
-                put(inv, legend, 1, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()),
-                        "custom egg - Breed list starts at Feral Mixed, has Test Forest Paint; hover a gene: picture");
-                put(inv, legend, 2, breedEgg("kit_forest_paint"),
-                        "drop-in breed - tame it: the Breeds tab shows its About text");
-                put(inv, legend, 3, breedEgg("morgan"),
-                        "Morgan, switched off - stick-tame in SURVIVAL: its row fills; entry says 'Not found anywhere in this world'");
-                put(inv, legend, 4, breedEgg("friesian"),
-                        "Friesian, moved - stick-tame in survival: row fills; 'Where it lives' says dark forest only");
-                put(inv, legend, 5, breedEgg("quarter_horse"),
-                        "Quarter Horse - just spawn a dozen; the log lists each one's disorders ([breed-health])");
-                put(inv, legend, 6, breedEgg("thoroughbred"),
-                        "Thoroughbred - same: spawn a dozen, the log flags anything NOT ON ITS SHEET");
-                put(inv, legend, 7, preset(player, "Test: Aurora (drop-in gene)", Sex.FEMALE, false,
-                        "example.aurora=Aur/Aur"), "drop-in gene - the horse should wear it");
-            }
-            case 2 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame first; the Magic tab shows body size");
                 put(inv, legend, 1, new ItemStack(Items.GOLDEN_CARROT, 64), "golden carrots - breeding");
                 put(inv, legend, 2, breedEgg("clydesdale"),
@@ -206,8 +191,9 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 4, breedEgg("falabella"), "Falabella - always two Small copies, below your waist");
                 put(inv, legend, 5, breedEgg("connemara_pony"),
                         "Connemara - always ONE copy; spawn two, tame, breed: some foals ordinary-sized");
+                put(inv, legend, 6, new ItemStack(Items.CLOCK), "clock - right-click a foal: grown at once, to compare sizes");
             }
-            case 3 -> {
+            case 2 -> {
                 intake(player, inv, legend, 0, "corolla", null, "the eye and deep heart should show inside the mark");
                 intake(player, inv, legend, 1, "agate_eye", null, "two bands and a dark core");
                 intake(player, inv, legend, 2, "taper_flame", null, "a spark inside the flame");
@@ -218,7 +204,7 @@ public final class DebugTestWorldHandler {
                 intake(player, inv, legend, 7, "foxglove", null, "ringed throats");
                 intake(player, inv, legend, 8, "foxglove", "B", "the nightbell form");
             }
-            case 4 -> {
+            case 3 -> {
                 intake(player, inv, legend, 0, "ooze_drip", null, "hangs DOWN from the spine, not toward the tail");
                 intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too");
                 intake(player, inv, legend, 2, "rainbow_drip", "Rdc", "the coloured form");
@@ -230,14 +216,14 @@ public final class DebugTestWorldHandler {
                 intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
                 intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
             }
-            case 5 -> {
+            case 4 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {
                     intake(player, inv, legend, i, rest[i], null, i == 0 ? "does each look like its icon?" : null);
                 }
             }
-            case 6 -> {
+            case 5 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
                 put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
                 put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
@@ -254,7 +240,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 8, preset(player, "Test: holy ward", Sex.FEMALE, false,
                         "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off: purple 'spawn refused'");
             }
-            case 7 -> {
+            case 6 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - both tickets need a horse you own");
                 put(inv, legend, 1, breedEgg("arabian"), "a horse to move around");
                 put(inv, legend, 2, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
@@ -270,7 +256,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 64), null);
                 put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
             }
-            case 8 -> {
+            case 7 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame each one first");
                 put(inv, legend, 1, preset(player, "Test: potion mare", Sex.FEMALE, false,
                         "horsegenetics.potion_milk=Spd/Spd"), "hurt her, then bottle her: 'She's hurt' and no potion");
@@ -452,7 +438,7 @@ public final class DebugTestWorldHandler {
                     .withStyle(ChatFormatting.RED));
             return;
         }
-        offerTp(player, level, "Dark forest (drop-in breed herds, moved Friesians)", hit.getFirst());
+        offerTp(player, level, "Dark forest (Friesian herds by day, cremellos at night)", hit.getFirst());
     }
 
     /** One chat line: a place, and a {@code /tp} to above it that one click puts in the chat box. */
