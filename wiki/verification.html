@@ -66,17 +66,16 @@
     broken-gene breed loads with a warning and the duplicate Friesian is refused.</p>
 
 <ul>
-    <li><strong>The stick fires the tame event now.</strong> It called
-        <code>tameWithName</code> bare, which never reaches <code>GeneDiscoveryHandler.onTame</code>:
-        a stick-tamed Morgan and Friesian stayed &ldquo;???&rdquo; in survival's breed book
-        (the same bug hand-taming had, fixed once already in <code>CrouchFeedGoal</code>).
-        Stick-tame a breed horse in survival: its row fills, its genes are discovered, and
-        &ldquo;tame a mare / stallion&rdquo; ticks.</li>
+    <li><strong>The stick fires the tame event now</strong> - owner-confirmed: a stick-tamed
+        Morgan and Friesian fill their rows in survival.</li>
     <li><strong><code>[breed-health]</code> lines.</strong> Every breed founder the server
-        rolls - egg, wild herd, cowboy, stable - logs its disorders against its sheet, and a
+        rolls - egg, wild herd, cowboy, stable - logs its health genes against its sheet, and a
         <code>WARN ... NOT ON ITS SHEET</code> for any disorder or magical gene the sheet does
-        not list. That replaces taming a dozen Quarter Horses to read their genes: spawn a
-        stack of eggs and read the log. Batch 1's eggs are the first thing to feed it.</li>
+        not list. Seen working on wild New Forest and Knabstrupper herds and on eggs, all on
+        their sheets. &ldquo;Health genes&rdquo; is the breed book's rule
+        (<code>HealthContribution</code>), so leopard complex, splash white and grey appear
+        beside the true disorders. Still wanted: a stack of Quarter Horse and Thoroughbred
+        eggs.</li>
 </ul>
 
 <h2 id="village-tag">&sect;0-CD &mdash; Vanilla's village POI tag loads again (2026-09-11, NOT looked at in game)</h2>
@@ -111,14 +110,12 @@
         should have <em>no</em> horses at all, dark forests should have herds of that breed and
         nothing else. With <code>debug.announce</code> on, a refused lone horse logs
         <code>[Breeds] wild horse at ... not spawned</code>.</li>
-    <li><strong>A shipped breed moved.</strong> Put the Friesian in
-        <code>minecraft:dark_forest</code> only, restart, and find a dark forest herd of them;
-        the breed book should say the new biome. (The dev run's file already does this; a
-        first try was blocked by the stick bug in &sect;0-CE.)</li>
-    <li><strong>Switched off, but still a breed.</strong> A horse you already own whose breed
-        you switch off keeps its label; its breed book entry says &ldquo;Not found anywhere in
-        this world&rdquo;, and the cowboy and breed spawn eggs stop offering it. (The dev run
-        has the Morgan off; same stick bug on the first try.)</li>
+    <li><strong>A shipped breed moved.</strong> The breed book gives the Friesian's new biome
+        (owner-confirmed, dev run: dark forest only). Still unseen: a dark forest herd of
+        them in new chunks.</li>
+    <li><strong>Switched off, but still a breed.</strong> The Morgan keeps its label and its
+        entry fills (owner-confirmed). Still unseen: the creative tab and the cowboy no longer
+        offering a Morgan egg or horse.</li>
     <li><strong>Feral Mixed weight.</strong> <code>feral_mixed.herd_weight = 100</code>: most
         new herds in horse biomes should be Feral Mixed.</li>
     <li><strong>An old world.</strong> Open a 0.4.1 world on this jar. It should load; any
