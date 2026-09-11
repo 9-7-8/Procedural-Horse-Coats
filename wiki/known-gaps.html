@@ -342,6 +342,49 @@ golden, <code>expected.json</code>, and the creator's JS twin, which is a
 <a href="making-a-gene.html#contracts">five-file change</a> and not something to do on
 the way past an intake.</li>
 
+<li id="gap-170"><strong>Three loci have an allele per mob and only two of them read the same table.</strong>
+    Opened 2026-09-10. <code>MobRoster</code> exists precisely so that
+    <a href="gene-pack-leader.html">leader of the pack</a> and
+    <a href="gene-spawner.html">spawner</a> cannot disagree about what the mobs are, and
+    <a href="gene-lycan.html">lycan</a> &mdash; which established the pattern &mdash;
+    <strong>still keeps its own copy</strong>. The two lists are identical today and will
+    not stay that way: the first time the game adds a creature, somebody will update one.
+    <strong>It was not migrated because lycan&rsquo;s allele <em>order</em> is part of the
+    genotype code</strong> and is baked into two checked-in goldens, so moving it rewrites
+    every saved horse - a real change with a real diff rather than a tidy-up, and not
+    something to do in passing during a twenty-six-gene batch. The honest state is: the
+    table exists, it prevents the drift for the two new loci, and the gene that needed it
+    first is the one still outside it.</li>
+
+<li id="gap-171"><strong>A guardian cannot answer a player, because 26.1.2 exposes no
+    server-side PvP flag.</strong> Opened 2026-09-10.
+    <a href="gene-guardian.html">Guardian</a> attacks whatever damaged its owner, and the
+    design called for retaliation against a <em>player</em> attacker to be gated on the
+    server&rsquo;s PvP setting. <code>MinecraftServer</code> in this version has no such
+    accessor under any name the decompiled sources contain, so the handler takes the
+    conservative branch and <strong>never targets a player at all</strong>. That is
+    defensible on its own terms - a horse joining a fight between two people changes what
+    that fight is without either of them agreeing - but it is a decision forced by an API
+    gap rather than chosen, and it is recorded here so it is not mistaken for the
+    intended design. The right resolution is a mod config option rather than hunting for
+    the vanilla flag.</li>
+
+<li id="gap-172"><strong>A gene page whose filename does not match its gene key is
+    invisible, and nothing fails.</strong> Opened and closed 2026-09-10.
+    <code>GeneWikiTool</code> derives a page filename from the gene key, so
+    <code>horsegenetics.pack_leader</code> looks for <code>gene-pack-leader.html</code>.
+    Four of this batch&rsquo;s pages were written under readable names instead
+    (<code>gene-eyesight-locus.html</code>, <code>gene-leader-of-the-pack.html</code>, and
+    both weather loci), and the result was four genes <strong>missing from the sidebar and
+    the landing page</strong> with the build entirely green. The bake does say so - it
+    prints <code>no page of their own, so not listed</code> - but on a line nobody reads
+    unless they are already suspicious, buried under the usual preview chatter. The four
+    pages were renamed and every inbound link updated. <strong>The lesson is the same one
+    as <a href="#gap-13">gap 13</a>:</strong> a link between two things that is checked by
+    nothing will eventually be wrong, and here the check exists but only whispers. A
+    <code>check-links --orphans</code> run does not catch it either, because the pages were
+    reachable from the roadmap.</li>
+
 <li id="gap-169"><strong>Half closed 2026-09-10: a check now catches the layers that
 get thrown away, but nothing yet catches the ones that merely come out wrong.</strong>
 Opened 2026-09-10, after dorsal wing shipped from intake painting a solid black horse and

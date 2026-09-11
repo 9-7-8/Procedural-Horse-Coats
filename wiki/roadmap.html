@@ -945,132 +945,52 @@
 <p>
     A family that changes what a horse <em>does</em> rather than how it looks, riding
     the <a href="making-a-gene.html#block"><code>effects</code></a> path plus whatever new verbs
-    each needs. Open-ended and deliberately silly in places; the owner wants a batch.
+    each needs.
 </p>
 
-<p>
-    <strong>Eight of them shipped on 2026-09-08</strong> and are no longer on this list:
-    <a href="gene-magic-swim-speed.html">swim speed</a>,
-    <a href="gene-magic-water-breathing.html">water breathing</a>,
-    <a href="gene-magic-fighter.html">fighter</a>,
-    <a href="gene-magic-on-death.html">on death</a>,
-    <a href="gene-magic-item-drop.html">item drop</a>,
-    <a href="gene-magic-mob-aura.html">mob aura</a>,
-    <a href="gene-magic-meat.html">meat</a> and
-    <a href="gene-magic-milk-volume.html">milk volume</a>. They brought six new verbs with
-    them, so the &ldquo;whatever new verbs each needs&rdquo; cost is now measured rather
-    than guessed: about one verb per behaviour, and the expensive part was never the verb
-    but deciding what the compound heterozygote means.
-</p>
-
-<h4 id="behaviour-genes">Twenty-seven specified, each with a page</h4>
+<div class="note good">
+    <span class="label">The batch has shipped &mdash; twenty-seven genes, and this section is nearly empty because of it</span>
+    <p>
+        A twenty-nine-gene proposal was specified one gene at a time, two were cut, and
+        the remaining twenty-seven are <strong>built, registered and documented</strong>.
+        Each has its own page carrying the settled inheritance, the rejected
+        alternatives, and its game-breaking, compatibility and performance hazards on
+        the <code>coding</code> tab. Those pages are the source of truth; nothing about
+        them belongs here any more. <strong>None of it has been seen in game</strong>
+        &mdash; <a href="verification.html">To be verified</a> is the authority on that,
+        and is where the batch now lives.
+    </p>
+</div>
 
 <p>
-    <strong><a href="gene-molten-hooves.html">Molten hooves</a> has since shipped</strong>
-    and is off this list. It cost one class and one line in <code>Genes</code> &mdash; no
-    verb, no trigger, no condition flag &mdash; which is the forecast on its page holding
-    up exactly. It is the mod&rsquo;s first <em>dominant</em> emission locus.
-</p>
-
-
-<p>
-    A design pass walked a twenty-nine-gene proposal one gene at a time and settled the
-    shape of each. <strong>Every survivor has its own page already</strong>, written before
-    the code so that building it is transcription rather than invention &mdash; the
-    settled inheritance, the settled compound heterozygote, the rejected alternatives and
-    the reason each was rejected, and on every <code>coding</code> tab the
-    game-breaking, compatibility and performance hazards to design in from the start.
-    <strong>Those pages are the source of truth; this section is only the index and the
-    order.</strong>
-</p>
-
-<p>
-    <strong>Two were cut.</strong> <em>Moon-sick</em> is already shipped as the
+    <strong>The two that were cut.</strong> <em>Moon-sick</em> was already shipped as the
     <code>Aga/Aga</code> allele on <a href="gene-magic-night-temper.html">night temper</a>,
-    and a second locus doing the same thing is not a gene. <em>Electric</em> cannot be built
-    as described: redstone power comes from blocks, never from entities, so the honest
-    version is either per-tick block placement or pressure plates, which already respond to
-    every horse in vanilla.
+    and a second locus doing the same thing is not a gene. <em>Electric</em> cannot be
+    built as described: redstone power comes from blocks and never from entities, so the
+    honest version is either per-tick block placement or pressure plates, which already
+    respond to every horse in vanilla. Neither should be reopened without a new argument.
 </p>
 
-<div class="note danger">
-    <span class="label">Five of these can break a world. Read their coding tabs before building any of them</span>
-    <p>
-        <a href="gene-spontaneous-breeding.html">Spontaneous breeding</a> is uncapped
-        automatic breeding, which is the classic server killer and runs while the player is
-        asleep. <a href="gene-holy-ward.html">Holy ward</a> hooks every spawn attempt in the
-        world and must cancel <em>natural</em> spawns only, or it silently breaks mob farms.
-        <a href="gene-spawner.html">Spawner</a> must spawn through the normal path so other
-        mods&rsquo; protections still fire, and must never mark what it makes persistent.
-        <a href="gene-egg-layer.html">Egg layer</a> drops item entities on a timer, which
-        accumulate. And every gene granting a traversal flag to the <strong>rider</strong>
-        &mdash; <a href="gene-fireproof.html">fireproof</a>,
-        <a href="gene-bird-boned.html">bird boned</a>,
-        <a href="gene-ocean-born.html">ocean-born</a> &mdash; writes state onto a player and
-        needs a removal path on dismount, or it is an invulnerability dupe.
-    </p>
-</div>
+<p>
+    <strong>What the batch cost, for the next time somebody estimates one.</strong> Seven
+    new verbs (<code>sound</code>, <code>produce</code>, <code>teleport</code>,
+    <code>summon</code>, <code>temper</code>, <code>bond</code>, <code>ward</code>), two
+    new triggers, four new condition flags, five existing verbs widened, and three base
+    classes that carry twenty-three of the twenty-six between them. The earlier estimate
+    of &ldquo;about one verb per behaviour&rdquo; was roughly three times too high:
+    behaviours cluster, and the base classes were worth more than any individual verb.
+</p>
 
-<h4 id="behaviour-machinery">Build this once, then most of them are a file each</h4>
+<h4 id="behaviour-left">What is left on this family</h4>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Machinery</th><th>Genes it unlocks</th><th>Hazard to design in</th></tr></thead>
+<thead><tr><th>Gene / family</th><th>What it does</th><th>What it needs</th></tr></thead>
 <tbody>
-<tr><td><code>sound</code> verb</td><td><a href="gene-singer.html">singer</a>, <a href="gene-meowing.html">meowing</a>, <a href="gene-echolocate.html">echolocate</a>, <a href="gene-base-alarm.html">base alarm</a></td><td>Sound is cheap; sound <em>spam</em> is the risk. One firing per event with a cooldown, never one per beat per target.</td></tr>
-<tr><td>Mob-group filter on <code>mob_aura</code> and <code>healing</code></td><td><a href="gene-pack-leader.html">leader of the pack</a>, <a href="gene-intimidating.html">intimidating</a>, <a href="gene-meowing.html">meowing</a>, <a href="gene-cleansing-light.html">cleansing light</a>, <a href="gene-holy-ward.html">holy ward</a></td><td><strong>Entity type tags, not a hardcoded list</strong>, or every modded mob is invisible to five genes at once &mdash; silently.</td></tr>
-<tr><td><code>target: self | rider | both</code> on <code>traversal</code></td><td><a href="gene-fireproof.html">fireproof</a>, <a href="gene-bird-boned.html">bird boned</a>, <a href="gene-ocean-born.html">ocean-born</a></td><td>The dangerous one. Write the removal path in the same change as the grant. Build it against bird boned first &mdash; it has no other moving parts.</td></tr>
-<tr><td><code>temper</code> &mdash; <a href="gene-magic-night-temper.html">night temper</a> with the night gate lifted into a <code>when</code></td><td><a href="gene-gladiator.html">gladiator</a>, <a href="gene-guardian.html">guardian</a></td><td>Re-check the condition every beat, not on engagement. Both genes hold a radius and never chase &mdash; a settled call, not a gap.</td></tr>
-<tr><td><code>bond</code> verb</td><td><a href="gene-music-enjoyer.html">music enjoyer</a>, <a href="gene-food-preference.html">food preference</a></td><td>Must count against <code>bondToday</code>. Also closes &sect;<a href="#bond">15</a>&rsquo;s &ldquo;more bond sources&rdquo;.</td></tr>
-<tr><td><code>produce</code>, <code>teleport</code>, <code>summon</code></td><td><a href="gene-egg-layer.html">egg layer</a>, <a href="gene-ender-echo.html">ender echo</a>, <a href="gene-spawner.html">spawner</a> &mdash; one each</td><td>All three carry danger-level notes on their own pages.</td></tr>
-<tr><td>Triggers <code>on_hurt</code>, <code>on_owner_hurt</code></td><td><a href="gene-ender-echo.html">ender echo</a>, <a href="gene-guardian.html">guardian</a></td><td>Two new entries in a closed set of four. <code>on_owner_hurt</code> fires on every damage event to every player &mdash; early-out before any lookup. Land them together.</td></tr>
-<tr><td>Flags <code>light_level</code>, <code>near_jukebox</code>, <code>snowing</code></td><td><a href="gene-eyesight.html">eyesight</a>, <a href="gene-music-enjoyer.html">music enjoyer</a>, <a href="gene-weather-speed.html">weather sensitive</a></td><td>Every existing flag is a field read. These three touch the world &mdash; interval-sampled and cached, never per tick. <strong>Note</strong> the weather loci need more than a flag: see the correction on their pages.</td></tr>
-<tr><td>A conditioned multi-pair factor gene &mdash; a generalisation of <code>AbstractMagicFactorGene</code></td><td><a href="gene-weather-speed.html">weather sensitive (speed)</a>, <a href="gene-weather-jump.html">(jump)</a></td><td>The existing base class is strictly <em>one</em> up/down pair, so it cannot carry a positive and a negative allele per weather type. Either generalise it to several conditioned pairs, or accept one locus per weather type and watch the locus count multiply. <strong>Not the free win an earlier draft claimed.</strong></td></tr>
-<tr><td>Two <code>spread</code> vocabulary words</td><td><a href="gene-hot-blooded.html">hot blooded</a>, <a href="gene-dryad.html">dryad</a></td><td>Dryad first &mdash; one block a day exercises the whole path at a rate where nothing can go wrong quickly. Hot blooded is the expensive one.</td></tr>
-<tr><td>Open ids resolved live</td><td>egg layer (items), spawner and leader of the pack (mobs), singer (discs), potion milk (effects)</td><td>Follow <a href="gene-lycan.html">lycan</a>: an id this game version has never heard of simply does nothing. Never throw, never log per firing.</td></tr>
-</tbody>
-</table>
-</div>
-
-<h4 id="behaviour-order">Suggested order</h4>
-
-<ol>
-    <li><strong>Wins with almost no new machinery.</strong>
-        <a href="gene-eyesight.html">Eyesight</a> needs one condition flag and
-        <a href="gene-potion-milk.html">potion milk</a> needs one merge in the yield
-        translator. Both are otherwise existing machinery, and either is a day.</li>
-    <li><strong>The shared changes</strong>, in the table above &mdash; the traversal
-        <code>target</code>, the group filter, the <code>sound</code> verb. Nine genes fall
-        out of these three.</li>
-    <li><strong>The verbs with one user each</strong>, and the two triggers together.</li>
-    <li><strong>The system hooks</strong> &mdash;
-        <a href="gene-spontaneous-breeding.html">spontaneous breeding</a>,
-        <a href="gene-food-preference.html">food preference</a>,
-        <a href="gene-holy-ward.html">holy ward</a>. None is an <code>effects</code> verb,
-        and all three touch code that already exists.</li>
-</ol>
-
-<div class="note">
-    <span class="label">Two corrections this pass turned up</span>
-    <p>
-        <code>walk_on_lava</code> and <code>water_averse</code> are both declared in the gene
-        format and fall straight into <code>warnUntranslated</code>
-        (<code>GeneAbilityHandler.java:438</code>).
-        <a href="gene-fireproof.html">Fireproof</a> and
-        <a href="gene-hydrophobic.html">hydrophobic</a> need them, so those stubs stop being
-        debt. And &sect;<a href="#defects">1.3</a>&rsquo;s claim that the
-        <code>attribute</code> verb &ldquo;parses and is never applied&rdquo; is
-        <strong>stale</strong> &mdash; <code>applyAttribute</code> is wired, scoped per gene,
-        and flagged unverified rather than absent. Four genes here depend on it.
-    </p>
-</div>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Still on this list from before</th><th>What it does</th><th>What it needs</th></tr></thead>
-<tbody>
-<tr><td><strong>Diet genes</strong></td><td>A carnivore horse &mdash; eats or is fed meat, refuses or is unaffected by plants. The hook for vampire and werewolf breeds.</td><td>A diet declaration the feeding, breeding and bond code reads instead of <code>isFood</code>. Touches <a href="horse-care.html">horse care</a> (feed-bond) and taming. <a href="gene-food-preference.html">Food preference</a> now overrides it, so build the override point in the same change.</td></tr>
-<tr><td><strong>Vampire horses</strong></td><td>Heal <strong>only</strong> by damaging other living mobs; optionally take sun damage like a skeleton.</td><td>Suppress the gated regen for these horses and add a lifesteal-on-attack effect. Sun damage is a burn-in-daylight tick reusing the skeleton condition.</td></tr>
+<tr><td><strong>Diet genes</strong></td><td>A carnivore horse &mdash; eats or is fed meat, refuses or is unaffected by plants. The hook for vampire and werewolf breeds.</td><td>Partly built: <code>HorseDietHandler</code> and the diet locus ship. What is missing is the rest of the vocabulary and the breeding / taming side. <strong><a href="gene-food-preference.html">Food preference</a> now deliberately overrides it</strong>, and that ordering is a contract rather than an accident.</td></tr>
+<tr><td><strong>Vampire horses</strong></td><td>Heal <strong>only</strong> by damaging other living mobs; optionally take sun damage like a skeleton.</td><td>Suppress the gated regen for these horses and add a lifesteal-on-attack effect. Sun damage is a burn-in-daylight tick reusing the skeleton condition. The <code>temper</code> verb and the <code>on_hurt</code> trigger both exist now, so this is cheaper than it was.</td></tr>
+<tr><td><strong>A guardian that answers a player</strong></td><td>A guardian currently never retaliates against a <em>player</em> attacker, only against mobs.</td><td>A deliberate limitation rather than a gap: 26.1.2 exposes no server-side PvP flag to gate it on, and a horse joining a fight between two people without either agreeing is the wrong default. It wants a mod config option, not a code fix.</td></tr>
+<tr><td><strong>Lycan onto <code>MobRoster</code></strong></td><td>Three loci have an allele per mob; two read one table and <a href="gene-lycan.html">lycan</a> still keeps its own copy.</td><td>The drift this is designed to prevent. Lycan's allele <em>order</em> is baked into the genotype code and two checked-in goldens, so migrating it moves every saved horse &mdash; a real change with a real diff, not a tidy-up. See <a href="known-gaps.html">known gaps</a>.</td></tr>
 </tbody>
 </table>
 </div>

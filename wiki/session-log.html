@@ -27,6 +27,119 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10g">2026-09-10</h2>
+
+<h3>Twenty-seven behaviour genes, specified one at a time and then built</h3>
+
+<p>
+    The session started as a design conversation about invisible ability genes and
+    finished with the whole family in the mod. It went in that order deliberately, and
+    the order is most of why it worked: <strong>every gene was specified, argued over and
+    written up before any of it was built</strong>, so building it was transcription
+    rather than invention.
+</p>
+
+<h4>The specification pass</h4>
+
+<p>
+    A twenty-nine-gene proposal was walked one gene at a time, in batches of four or five,
+    with the owner ruling on each genuine fork. <strong>Two were cut.</strong>
+    <em>Moon-sick</em> turned out to be already shipped as the <code>Aga/Aga</code> allele
+    on <a href="gene-magic-night-temper.html">night temper</a>. <em>Electric</em> cannot be
+    built as described at all, because redstone power comes from blocks and never from
+    entities - the achievable version is pressure plates, which already respond to every
+    horse in vanilla.
+</p>
+
+<p>
+    Several specifications were wrong in ways only the code could reveal, and finding that
+    out on paper was cheap. A Minecraft sound cannot be started partway through, so
+    <a href="gene-singer.html">singer</a> plays a record&rsquo;s opening rather than
+    &ldquo;a section&rdquo; of it. There is no concept of a &ldquo;base&rdquo; anywhere in
+    the mod, so <a href="gene-base-alarm.html">base alarm</a> measures from the horse and
+    stabling becomes the interface. And the mod&rsquo;s own swimming assist means
+    <a href="gene-hydrophobic.html">hydrophobic</a> restores vanilla behaviour rather than
+    adding to it - which flipped it from dominant to recessive, because dominant would have
+    silently changed how every horse already bred behaves.
+</p>
+
+<h4>Each page carries its own hazards</h4>
+
+<p>
+    The owner asked for the game-breaking, compatibility and performance risks to be
+    flagged on each gene&rsquo;s <code>coding</code> tab, and that turned out to be the
+    most useful thing written all session. Five genes can damage a world -
+    <a href="gene-spontaneous-breeding.html">spontaneous breeding</a> is uncapped automatic
+    breeding that runs while the player is asleep; <a href="gene-holy-ward.html">holy
+    ward</a> hooks every spawn attempt in the world and can break a mob farm invisibly;
+    <a href="gene-spawner.html">spawner</a> can bypass other mods&rsquo; protections;
+    <a href="gene-egg-layer.html">egg layer</a> accumulates entities; and the three genes
+    granting a traversal flag to the <em>rider</em> write state onto a player.
+</p>
+
+<p>
+    Writing those down first meant the implementation answered them by <strong>shape</strong>
+    rather than by a comment asking the next person to be careful. The ward does not scan
+    for horses at all - the horse tick, which already runs per horse and already holds the
+    ability list, writes its position into a small map and the spawn event walks that.
+    Rider-targeted traversal is re-applied per tick and stores nothing, so there is no
+    state to remove on dismount and it cannot become an invulnerability dupe. Followers are
+    nudged rather than given an injected goal, so a dead horse cannot leave a goal behind on
+    every creature it ever met. And ward entries <em>expire</em> rather than being removed
+    on death, so a missed hook cannot leave a ward suppressing spawns for ever at a
+    position with no horse at it.
+</p>
+
+<h4>What the batch actually cost</h4>
+
+<p>
+    The previous estimate on the roadmap - &ldquo;about one verb per behaviour&rdquo; - was
+    roughly three times too high. Twenty-six genes needed seven new verbs, two triggers,
+    four condition flags and five widened verbs, because <strong>behaviours cluster</strong>:
+    four genes wanted <code>sound</code>, five wanted one mob-group filter, three wanted one
+    traversal parameter. Three base classes carry twenty-three of the twenty-six between
+    them, and they were worth more than any individual verb.
+</p>
+
+<p>
+    Parity earned its keep twice in one session, both times immediately: it caught the
+    creator&rsquo;s missing condition flags, and then caught <code>MOB_GROUPS</code> being
+    declared below the table that reads it - a JavaScript hoisting bug that produced empty
+    choice lists and would have been invisible in the editor.
+</p>
+
+<h4>Both goldens moved, and neither moved wrongly</h4>
+
+<p>
+    <strong>None of the twenty-seven paints</strong>, and that is measured rather than
+    asserted: all 1056 rows of the pipeline golden kept their rendered-byte hashes and only
+    their genotype keys changed, and the bake golden gained 206 rows with not one existing
+    row moving. That check had to be done <em>keyed by gene and allele</em> - a positional
+    diff claimed 312 rows had moved, which was entirely the artefact of inserting 206 rows
+    into a sorted file.
+</p>
+
+<h4>Three things recorded rather than fudged</h4>
+
+<ul>
+    <li><a href="known-gaps.html#gap-170">Gap 170</a> - <a href="gene-lycan.html">lycan</a>
+        still keeps its own mob list rather than reading <code>MobRoster</code>, because its
+        allele order is baked into the genotype code and two goldens.</li>
+    <li><a href="known-gaps.html#gap-171">Gap 171</a> - a guardian never retaliates against
+        a player, because 26.1.2 exposes no server-side PvP flag to gate it on. A decision
+        forced by an API gap rather than chosen.</li>
+    <li><a href="known-gaps.html#gap-172">Gap 172</a> - four pages were invisible because
+        their filenames did not match their gene keys, with the build entirely green. The
+        bake does say so, on a line nobody reads.</li>
+</ul>
+
+<p>
+    <strong>Nothing in this batch has been seen in game.</strong>
+    <a href="verification.html#behaviour-batch">&sect;0-BT</a> is the checklist, ordered by
+    what can do damage first.
+</p>
+
+
 <h2 id="d2026-09-10f">2026-09-10</h2>
 
 <h3>Eleven more genes out of intake, none of them duplicates, and the dead-layer

@@ -35,6 +35,115 @@
     </p>
 </div>
 
+<h2 id="behaviour-batch">&sect;0-BT &mdash; Twenty-seven behaviour genes, none of them ever seen (2026-09-10, NOT looked at in game)</h2>
+
+<p>The whole behaviour family &mdash; <a href="roadmap.html#behaviour-left">&sect;12.2</a>'s
+    batch &mdash; is built, registered and documented, and <strong>not one of these
+    twenty-seven genes has been watched happening to a horse</strong>. This is by some
+    distance the largest block of unverified behaviour the mod has ever carried, and it
+    is behaviour rather than coat: a gene that paints wrongly is obvious in a render, and
+    a gene that <em>acts</em> wrongly is only obvious in play.</p>
+
+<p>What <em>is</em> proven, by measurement rather than assertion: <strong>none of them
+    paints</strong>. All 1056 rows of the coat pipeline golden kept their rendered-byte
+    hashes, and all 206 new rows in the bake golden carry the same "paints nothing" hash
+    as sex and diet. Creator parity is green at 7031 checks.</p>
+
+<h3>Start here &mdash; the five that can damage a world</h3>
+
+<ul>
+    <li><strong><a href="gene-spontaneous-breeding.html">Spontaneous breeding</a> is the
+        one to watch first, and the hardest to see.</strong> It runs while you are asleep.
+        Put four expressing horses in a paddock, leave the world running, and come back:
+        the local cap should hold the population at six and then stop <em>for ever</em>,
+        not creep. If it creeps, nothing else in this list matters.</li>
+    <li><strong><a href="gene-holy-ward.html">Holy ward</a> must not break a mob farm.</strong>
+        Build or borrow a spawner-based farm, stand a warding horse next to it, and check
+        the farm still produces. The ward is meant to cancel <em>natural</em> spawns only;
+        if a spawner or a spawn egg stops working, the allow-list in
+        <code>GeneWardHandler.isNatural</code> is wrong. Also worth watching: does the
+        ward actually follow the horse, and does it stop within a couple of seconds of the
+        horse dying? Entries expire after 40 ticks rather than being removed on death.</li>
+    <li><strong><a href="gene-spawner.html">Spawner</a> must count before it spawns.</strong>
+        The rule is "top up to two", not "make two". Leave one for several in-game days
+        with its mobs alive and confirm it does nothing at all. Then kill them and confirm
+        exactly two appear. Also: what it makes must <em>despawn</em> like anything else.</li>
+    <li><strong><a href="gene-egg-layer.html">Egg layer</a> must stop when the ground is
+        full.</strong> Leave one overnight in a closed pen. The nearby-cap should stop it
+        at eight of the item, not carpet the floor.</li>
+    <li><strong>Rider-targeted traversal must not follow you off the horse.</strong> Ride a
+        <a href="gene-fireproof.html">fireproof</a> horse into lava, dismount on the far
+        side, and walk into fire. If you are still immune, the grant is being stored
+        somewhere it should not be &mdash; it is meant to be re-applied per tick and stored
+        nowhere. Same test for <a href="gene-bird-boned.html">bird boned</a> off a cliff
+        and <a href="gene-ocean-born.html">ocean-born</a> under water.</li>
+</ul>
+
+<h3>The ones most likely to be quietly wrong</h3>
+
+<ul>
+    <li><strong><a href="gene-potion-milk.html">Potion milk</a>'s merge.</strong> A horse
+        with two <em>different</em> brew alleles must hand back <strong>one bottle
+        carrying both effects</strong>. If it comes back with one effect, the same-kind
+        merge in <code>GeneYieldHandler.sameKindEffects</code> is not firing - and this is
+        the single most likely thing in the batch to be silently half-working, because a
+        single-effect potion looks perfectly fine.</li>
+    <li><strong><a href="gene-food-preference.html">Food preference</a> beating the diet.</strong>
+        The whole point of the locus. Find a horse whose favourite its diet forbids and
+        feed it. It must accept. If it refuses, the handler ordering has lost to
+        <code>HorseDietHandler</code> and the gene does nothing at all &mdash; which is the
+        failure mode this project already tracks by name.</li>
+    <li><strong><a href="gene-ender-echo.html">Ender echo</a> with a rider aboard.</strong>
+        Get shot while mounted. You should arrive somewhere legal, still seated, without
+        rubber-banding. A ridden horse's movement is owned by the controlling client, so
+        this is the most likely place in the batch for a desync.</li>
+    <li><strong><a href="gene-pack-leader.html">Leader of the pack</a> at scale.</strong>
+        One is fine. Six followers pathfinding continuously is the cost, and the interval
+        and target cap are guesses. Watch the tick time with a full retinue.</li>
+    <li><strong><a href="gene-echolocate.html">Echolocate</a> in a busy cave.</strong> Its
+        cost is <em>packets</em>, not ticks, and that does not show up with one horse in a
+        field. Ride one into a large cave system and watch for network stutter.</li>
+    <li><strong><a href="gene-hot-blooded.html">Hot blooded</a> in a snowy biome.</strong>
+        The melt/refreeze loop is the thing to catch. Stable one in a snow biome and leave
+        it. Ice melts to a water source rather than to air, deliberately &mdash; check that
+        a horse on a frozen lake ends up swimming rather than falling through into a hole.</li>
+</ul>
+
+<h3>Feel, which no test can reach</h3>
+
+<ul>
+    <li><strong>Do the fighters feel like guards or like liabilities?</strong>
+        <a href="gene-gladiator.html">Gladiator</a> and
+        <a href="gene-guardian.html">guardian</a> both hold a radius and never chase,
+        which was a settled decision precisely so they do not die forty blocks away. If
+        they still die a lot, the radius is wrong rather than the rule.</li>
+    <li><strong>Is <a href="gene-intimidating.html">intimidating</a>'s cost too high?</strong>
+        It empties a farm, on purpose. Whether that is a memorable trade-off or just
+        annoying is a judgement only play can make.</li>
+    <li><strong>Are the sound genes bearable in a herd?</strong>
+        <a href="gene-singer.html">Singer</a>, <a href="gene-meowing.html">meowing</a>,
+        <a href="gene-base-alarm.html">base alarm</a> and echolocate all have cooldowns
+        chosen by guesswork. Base alarm is <em>dominant</em>, so several in one paddock
+        noticing the same skeleton is the normal case.</li>
+    <li><strong>Does <a href="gene-eyesight.html">eyesight</a>'s torch trade-off land?</strong>
+        A caveborn horse gets slower the more you light the tunnel. That is deliberate and
+        may simply read as a bug.</li>
+    <li><strong>Are the <a href="gene-weather-speed.html">weather</a> loci noticeable at
+        all?</strong> They only express when the sky agrees, and the magnitudes are a first
+        guess. It is the one locus family you cannot check on demand.</li>
+</ul>
+
+<h3>Frequencies, which want a few hundred wild horses</h3>
+
+<p>Every carriers-only locus &mdash; fireproof, holy ward, ocean-born, bird boned,
+    gladiator, guardian, ender echo, spontaneous breeding, and all four matched-pair loci
+    &mdash; is invisible in the wild by design, so the only way to judge the rates is to
+    test a lot of horses through the gene database. The matched-pair loci are the ones to
+    doubt: with dozens of alleles, finding two carriers of the <em>same</em> one may prove
+    so rare that nobody ever does it. <a href="gene-spawner.html">Spawner</a> has the
+    largest roster and is the worst case.</p>
+
+
 <h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves, the first dominant emission gene (2026-09-10, NOT looked at in game)</h2>
 
 <p><a href="gene-molten-hooves.html">Molten hooves</a> is built and registered. It
