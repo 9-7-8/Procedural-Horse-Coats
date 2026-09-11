@@ -39,9 +39,12 @@
     <span class="label">The test kit</span>
     <p>
         <strong>Spawn Test Horse World</strong> (<code>DebugTestWorldHandler.fillInventory</code>)
-        is aimed at &sect;0-CC, &sect;0-CB and &sect;0-CA, with the still-open &sect;0-BY /
-        &sect;0-BX items in its bottom two rows; a chat legend says which slot is for which test,
-        and two clickable <code>/tp</code>s go to the nearest plains village and dark forest.
+        hands out <strong>one hotbar at a time</strong>: eight themed batches covering
+        &sect;0-CC down to &sect;0-BX, batch 1 on login and the rest with <code>/testkit n</code>
+        (<code>/testkit</code> alone lists them; each batch's legend ends with a clickable link to
+        the next). Swapping a batch empties the hotbar only. Every batch that tames carries a
+        stick, every one that breeds carries golden carrots. Two clickable <code>/tp</code>s on
+        login go to the nearest plains village and dark forest.
         Four of those tests need files the kit cannot make, so the dev run's
         <code>run/phc/</code> was prepared for them on 2026-09-11 and a dedicated server
         confirmed all four load: <code>breeds/kit_forest_paint.json</code> (chestnut paints, dark
@@ -231,10 +234,9 @@
 
 <h2 id="intake-evening">&sect;0-BZ &mdash; Twenty-four genes out of the evening intake (2026-09-10, NOT looked at in game)</h2>
 
-<p><strong>Where to look:</strong> the Spawn Test Horse World kit, inventory slot 6, is a
-    <strong>chest</strong> named &ldquo;Intake genes&rdquo; &mdash; place it and it holds one
-    preset egg per new gene, homozygous for the form its icon shows, then three other forms
-    (nightbell foxglove, black barred wing, coloured rainbow drip). Every gene was rendered
+<p><strong>Where to look:</strong> <code>/testkit 3</code>, <code>4</code> and <code>5</code>
+    in the test world - one preset egg per new gene, homozygous for the form its icon shows,
+    plus three other forms (nightbell foxglove, black barred wing, coloured rainbow drip). Every gene was rendered
     side-on in every form before shipping; none has been on a real horse, in real light, or
     with other markings on top of it.</p>
 
@@ -267,9 +269,6 @@
         family band that describes it. Two new genes on one horse should now layer the way
         the coverage rule intends: smaller marks over bigger ones. Rime and maelstrom are the
         nearest pair in the whole mod; check they look like different things side by side.</li>
-    <li><strong>The chest itself is new code</strong> &mdash; an item carrying
-        <code>DataComponents.CONTAINER</code>, checked against the 26.1.2 sources but not
-        placed in game. If it lands empty, that is the first thing to report.</li>
 </ul>
 
 <h2 id="play-fixes-0910c">&sect;0-BY &mdash; The third 2026-09-10 play session's fixes (NOT looked at in game)</h2>

@@ -17,11 +17,13 @@ import com.example.horsegenetics.neoforge.data.StoredGenome;
 import com.example.horsegenetics.neoforge.item.BreedSpawnEggItem;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.item.PresetHorseSpawnEggItem;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.component.DataComponents;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -35,7 +37,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -43,6 +44,8 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
 
@@ -53,9 +56,10 @@ import org.jspecify.annotations.Nullable;
  * for exercising horse features and put them somewhere worth testing from.
  *
  * <ul>
- *   <li><b>Inventory</b>: a test kit aimed at whatever is waiting on the
- *       verification checklist - see {@link #fillInventory}, and re-aim it
- *       whenever that list changes.</li>
+ *   <li><b>Hotbar</b>: a test kit aimed at whatever is waiting on the
+ *       verification checklist, one batch of nine at a time - see
+ *       {@link #BATCHES} and {@code /testkit}, and re-aim it whenever that list
+ *       changes.</li>
  *   <li><b>Directions</b>: where the nearest <b>plains village</b> is, and the
  *       {@code /tp} that gets you there ({@link #locatePlainsVillage}) - because
  *       that is where both villagers live and hunting for one on foot is most of
@@ -63,7 +67,8 @@ import org.jspecify.annotations.Nullable;
  *       ({@link #locateDarkForest}), where the kit's drop-in breeds live.</li>
  * </ul>
  *
- * Inert in production (nothing sets the flag).
+ * Inert in production (nothing sets the flag, and {@code /testkit} is not
+ * registered).
  */
 @EventBusSubscriber
 public final class DebugTestWorldHandler {
@@ -98,9 +103,34 @@ public final class DebugTestWorldHandler {
             return;
         }
         pendingHotbarFill = false;
-        fillInventory(player);
+        giveBatch(player, 1);
         locatePlainsVillage(player);
         locateDarkForest(player);
+    }
+
+    /**
+     * {@code /testkit} lists the batches; {@code /testkit <n>} swaps the hotbar
+     * for batch {@code n}. Dev runs only, and gamemaster permission, which the
+     * test world's cheats give you. It exists so moving to the next batch costs
+     * one line of chat rather than a rebuild and a fresh world.
+     */
+    @SubscribeEvent
+    static void onRegisterCommands(RegisterCommandsEvent event) {
+        if (FMLEnvironment.isProduction()) {
+            return;
+        }
+        event.getDispatcher().register(Commands.literal("testkit")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .executes(c -> {
+                    listBatches(c.getSource().getPlayerOrException());
+                    return 1;
+                })
+                .then(Commands.argument("batch", IntegerArgumentType.integer(1, BATCHES.length))
+                        .executes(c -> {
+                            giveBatch(c.getSource().getPlayerOrException(),
+                                    IntegerArgumentType.getInteger(c, "batch"));
+                            return 1;
+                        })));
     }
 
     /**
@@ -108,106 +138,201 @@ public final class DebugTestWorldHandler {
      * right now, and meant to be re-aimed every time that list changes</b>
      * (owner's standing request, 2026-09-10: "each time you do some kind of
      * debug, change what's in my inventory ... to make it as easy as possible to
-     * test each new part"). It used to be one of every mod item, which tested
-     * nothing in particular. Preset eggs are the lever: a horse built for one
+     * test each new part"). Preset eggs are the lever: a horse built for one
      * test, named for it, one right-click from existing.
      *
-     * <p>Aimed at checklist &sect;0-CC, &sect;0-CB and &sect;0-CA (2026-09-11):
-     * breeds that are exactly their sheets, size by copy count, drop-in breeds
-     * and genes, a breed switched off and one moved. Four of those need files in
-     * the dev run's {@code run/phc/} that the kit cannot make - the kit prep
-     * wrote {@code kit_*.json} breeds, an example drop-in gene and a small
-     * {@code breed-spawning.toml} (Friesian to dark forest only, Morgan off);
-     * an egg whose breed or gene is not loaded is simply left out. Rows 2 and 3
-     * carry what is still open from &sect;0-BY / &sect;0-BX. A chat legend says
-     * which item is for which.
+     * <p><b>One hotbar at a time.</b> A kit that filled all 36 slots, with a
+     * 30-line legend, was "SUPER overwhelming" (owner, 2026-09-11) - so the
+     * checklist is cut into themed batches of at most nine, the first handed out
+     * on login and the rest a {@code /testkit n} away. Every batch that tames
+     * carries a <b>stick</b> (it tames on the spot - {@code HorseInteractionHandler})
+     * and every batch that breeds carries <b>golden carrots</b>.
+     *
+     * <p>Batches 1 and 2 lean on files in the dev run's {@code run/phc/} that no
+     * kit can make: the {@code kit_*.json} breeds, the example drop-in gene and a
+     * {@code breed-spawning.toml} moving the Friesian and switching the Morgan
+     * off. An egg whose breed or gene is not loaded is simply left out.
      */
-    private static void fillInventory(ServerPlayer player) {
-        Inventory inv = player.getInventory();
-        List<String> legend = new ArrayList<>();
+    private static final String[] BATCHES = {
+            "Breeds and drop-ins (checklist 0-CC, 0-CB)",
+            "Size by copy count (0-CA)",
+            "Intake: the rebuilt marks, and their other forms (0-BZ)",
+            "Intake: drips, contour cells, crackle, flakes, small drawings (0-BZ)",
+            "Intake: the rest (0-BZ)",
+            "Molten hooves, the sheep spawner, the ward (0-BY, 0-BX)",
+            "Holding pen and stalls (0-BY, 0-BX)",
+            "Potion milk and the research shelf (0-BY, 0-BX)",
+    };
 
-        // Hotbar: the breed registry and the settings file (0-CC, 0-CB).
-        put(inv, legend, 0, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()),
-                "custom egg - Breed list starts at Feral Mixed and has Test Forest Paint; hover genes for pictures");
-        put(inv, legend, 1, breedEgg("kit_forest_paint"),
-                "drop-in breed - chestnut paints; Breeds tab shows its About text. Wild herds: dark forest tp below");
-        put(inv, legend, 2, breedEgg("morgan"),
-                "Morgan, SWITCHED OFF - tame: keeps its label, breed book says 'Not found anywhere in this world'");
-        put(inv, legend, 3, breedEgg("friesian"),
-                "Friesian, MOVED to dark forest only - breed book should say so; no disorder outside its list");
-        put(inv, legend, 4, breedEgg("quarter_horse"),
-                "Quarter Horse x a handful - some may carry HYPP / PSSM1 / HERDA (its sheet lists them)");
-        put(inv, legend, 5, breedEgg("thoroughbred"),
-                "Thoroughbred x a handful - nothing outside its list, and no magic on any natural breed");
-        put(inv, legend, 6, preset(player, "Test: Aurora (drop-in gene)", Sex.FEMALE, false,
-                "example.aurora=Aur/Aur"), "drop-in gene from phc/genes/ - the log counts '1 dropped in'");
-        put(inv, legend, 7, new ItemStack(Items.GOLDEN_CARROT, 64), "golden carrots - breed two one-copy horses");
-        put(inv, legend, 8, new ItemStack(Items.SADDLE), "saddle - tame by riding, and the molten horses");
-
-        // Row 1: size by copy count (0-CA), a broken breed file, the intake.
-        put(inv, legend, 9, breedEgg("clydesdale"),
-                "Clydesdale - Magic body size is Big/n (smaller) or Big/Big (larger); 1.14-1.43x");
-        put(inv, legend, 10, breedEgg("shire"), "Shire - should tower, as before");
-        put(inv, legend, 11, breedEgg("falabella"), "Falabella - always two Small copies, below your waist");
-        put(inv, legend, 12, breedEgg("connemara_pony"),
-                "Connemara pony - always ONE copy; breed two, some foals ordinary-sized");
-        put(inv, legend, 13, breedEgg("kit_broken_gene"),
-                "Test Broken Gene - names a missing gene: loaded anyway, with a log warning");
-        put(inv, legend, 14, intakeChest(player),
-                "intake chest - place it: one egg per new gene (checklist 0-BZ); the last three are other forms");
-        put(inv, legend, 15, new ItemStack(Items.LEAD, 4), null);
-        put(inv, legend, 16, new ItemStack(Items.WHEAT, 64), "wheat - spawner meals");
-        put(inv, legend, 17, new ItemStack(Items.GLASS_BOTTLE, 16), "glass bottles - potion mare and stallion");
-
-        // Row 2: still open from 0-BY.
-        put(inv, legend, 18, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
-        put(inv, legend, 19, preset(player, "Test: molten black", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
-        put(inv, legend, 20, preset(player, "Test: molten colour", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
-        put(inv, legend, 21, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltM/MltM"), "several colours - must differ from the one-colour horse");
-        put(inv, legend, 22, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
-                "horsegenetics.spawner=Shp/Shp"), "feed it - every sheep it makes must be the SAME colour");
-        put(inv, legend, 23, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
-                "holding pen signs - hang one on a pen wall; a second moves your pen");
-        put(inv, legend, 24, new ItemStack(ModItems.HOLDING_PEN_TICKET.get(), 8),
-                "holding pen tickets - right-click any horse you own: it goes to your pen, dead centre");
-        put(inv, legend, 25, preset(player, "Test: potion mare", Sex.FEMALE, false,
-                "horsegenetics.potion_milk=Spd/Spd"), "tame, hurt her, bottle her - 'she's hurt' and no potion");
-        put(inv, legend, 26, preset(player, "Test: potion stallion", Sex.MALE, false,
-                "horsegenetics.potion_milk=Spd/Str"), "bottle on him - he should rear, kick and say so");
-
-        // Row 3: the research shelf, the stall, the ward.
-        put(inv, legend, 27, new ItemStack(ModItems.EQUINE_RESEARCH_SHELF.get(), 2),
-                "research shelf x2 - copy a gene, CLOSE the screen, come back: it kept going; break one: all drops");
-        put(inv, legend, 28, new ItemStack(Items.BOOK, 16), "books - the Copy tab; a stack copies one after another");
-        String[] papers = {"silver", "dun", "silver"};
-        for (int i = 0; i < papers.length; i++) {
-            ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
-            paper.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics." + papers[i]);
-            put(inv, legend, 29 + i, paper, i == 0
-                    ? "research papers - two genes, and a second Silver that must refuse to go in" : null);
+    private static void listBatches(ServerPlayer player) {
+        tell(player, Component.literal("Test kit batches - click one, then press Enter:")
+                .withStyle(ChatFormatting.GOLD));
+        for (int i = 0; i < BATCHES.length; i++) {
+            tell(player, command("/testkit " + (i + 1), BATCHES[i]));
         }
-        put(inv, legend, 32, new ItemStack(ModItems.STALL_SIGN.get(), 4),
-                "stall signs - bind, then check the size message's height");
-        put(inv, legend, 33, new ItemStack(ModItems.BOUND_TICKET.get(), 8),
-                "tickets - lands dead centre: try L-shaped, narrower than the horse, full of hay (must refuse)");
-        put(inv, legend, 34, new ItemStack(Items.HAY_BLOCK, 32), null);
-        put(inv, legend, 35, preset(player, "Test: holy ward", Sex.FEMALE, false,
-                "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off - purple 'spawn refused' lines");
+    }
 
-        tell(player, Component.literal("Test kit - what each thing is for:").withStyle(ChatFormatting.GOLD));
+    /** Empty the hotbar and fill it with batch {@code n} (1-based), then say what each slot is for. */
+    private static void giveBatch(ServerPlayer player, int n) {
+        Inventory inv = player.getInventory();
+        for (int slot = 0; slot < 9; slot++) {
+            inv.setItem(slot, ItemStack.EMPTY);
+        }
+        List<String> legend = new ArrayList<>();
+        switch (n) {
+            case 1 -> {
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tames a horse on the spot");
+                put(inv, legend, 1, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()),
+                        "custom egg - Breed list starts at Feral Mixed, has Test Forest Paint; hover a gene: picture");
+                put(inv, legend, 2, breedEgg("kit_forest_paint"),
+                        "drop-in breed - tame it: the Breeds tab shows its About text");
+                put(inv, legend, 3, breedEgg("morgan"),
+                        "Morgan, switched off - tame: keeps its label; breed book 'Not found anywhere in this world'");
+                put(inv, legend, 4, breedEgg("friesian"),
+                        "Friesian, moved - breed book should list dark forest only");
+                put(inv, legend, 5, breedEgg("quarter_horse"),
+                        "Quarter Horse - tame several: some may carry HYPP / PSSM1 / HERDA");
+                put(inv, legend, 6, breedEgg("thoroughbred"),
+                        "Thoroughbred - tame several: no disorder outside its list, no magic");
+                put(inv, legend, 7, preset(player, "Test: Aurora (drop-in gene)", Sex.FEMALE, false,
+                        "example.aurora=Aur/Aur"), "drop-in gene - the horse should wear it");
+            }
+            case 2 -> {
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame first; the Magic tab shows body size");
+                put(inv, legend, 1, new ItemStack(Items.GOLDEN_CARROT, 64), "golden carrots - breeding");
+                put(inv, legend, 2, breedEgg("clydesdale"),
+                        "Clydesdale - Big/n are the smaller ones, Big/Big the larger (1.14-1.43x)");
+                put(inv, legend, 3, breedEgg("shire"), "Shire - should tower, as before");
+                put(inv, legend, 4, breedEgg("falabella"), "Falabella - always two Small copies, below your waist");
+                put(inv, legend, 5, breedEgg("connemara_pony"),
+                        "Connemara - always ONE copy; spawn two, tame, breed: some foals ordinary-sized");
+            }
+            case 3 -> {
+                intake(player, inv, legend, 0, "corolla", null, "the eye and deep heart should show inside the mark");
+                intake(player, inv, legend, 1, "agate_eye", null, "two bands and a dark core");
+                intake(player, inv, legend, 2, "taper_flame", null, "a spark inside the flame");
+                intake(player, inv, legend, 3, "barred_wing", null, "bars inside the wing");
+                intake(player, inv, legend, 4, "barred_wing", "Bwb", "the black form");
+                intake(player, inv, legend, 5, "uraniid", null, "bands inside the mark");
+                intake(player, inv, legend, 6, "trillium", null, "a ring and an eye");
+                intake(player, inv, legend, 7, "foxglove", null, "ringed throats");
+                intake(player, inv, legend, 8, "foxglove", "B", "the nightbell form");
+            }
+            case 4 -> {
+                intake(player, inv, legend, 0, "ooze_drip", null, "hangs DOWN from the spine, not toward the tail");
+                intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too");
+                intake(player, inv, legend, 2, "rainbow_drip", "Rdc", "the coloured form");
+                intake(player, inv, legend, 3, "contour_cells", null,
+                        "nested outlines in dark patches - may take several eggs; check the far flank");
+                intake(player, inv, legend, 4, "gilded_crackle", null, "pale plates with gold seams");
+                intake(player, inv, legend, 5, "holo_flake", null, "separate glinting flakes on the crest");
+                intake(player, inv, legend, 6, "rime", null, "must look unlike maelstrom (in the custom egg)");
+                intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
+                intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
+            }
+            case 5 -> {
+                String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
+                        "sporefall", "wishstar", "datarain", "foamed"};
+                for (int i = 0; i < rest.length; i++) {
+                    intake(player, inv, legend, i, rest[i], null, i == 0 ? "does each look like its icon?" : null);
+                }
+            }
+            case 6 -> {
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
+                put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
+                put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
+                put(inv, legend, 3, preset(player, "Test: molten black", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
+                put(inv, legend, 4, preset(player, "Test: molten colour", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
+                put(inv, legend, 5, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltM/MltM"), "several colours - must differ from slot 5");
+                put(inv, legend, 6, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
+                        "horsegenetics.spawner=Shp/Shp"), "tame, feed wheat - every sheep the SAME colour");
+                put(inv, legend, 7, new ItemStack(Items.WHEAT, 64), "wheat - the spawner's meals");
+                put(inv, legend, 8, preset(player, "Test: holy ward", Sex.FEMALE, false,
+                        "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off: purple 'spawn refused'");
+            }
+            case 7 -> {
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - both tickets need a horse you own");
+                put(inv, legend, 1, breedEgg("arabian"), "a horse to move around");
+                put(inv, legend, 2, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
+                        "holding pen sign - hang on a pen wall; a second one moves your pen");
+                put(inv, legend, 3, new ItemStack(ModItems.HOLDING_PEN_TICKET.get(), 8),
+                        "pen ticket - on your horse: it lands in the pen, dead centre. Try untamed / no pen / full");
+                put(inv, legend, 4, new ItemStack(ModItems.STALL_SIGN.get(), 4),
+                        "stall sign - bind it; the size message should give the real height");
+                put(inv, legend, 5, new ItemStack(ModItems.BOUND_TICKET.get(), 8),
+                        "stall ticket - dead centre even L-shaped or narrower than the horse");
+                put(inv, legend, 6, new ItemStack(Items.HAY_BLOCK, 64),
+                        "hay - fill a stall solid: the ticket must refuse and not be used up");
+                put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 64), null);
+                put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
+            }
+            case 8 -> {
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame each one first");
+                put(inv, legend, 1, preset(player, "Test: potion mare", Sex.FEMALE, false,
+                        "horsegenetics.potion_milk=Spd/Spd"), "hurt her, then bottle her: 'She's hurt' and no potion");
+                put(inv, legend, 2, preset(player, "Test: potion stallion", Sex.MALE, false,
+                        "horsegenetics.potion_milk=Spd/Str"), "bottle on him - he rears, kicks and says so");
+                put(inv, legend, 3, preset(player, "Test: potion foal", Sex.FEMALE, true,
+                        "horsegenetics.potion_milk=Spd/Spd"), "bottle on her - a foal has nothing to give");
+                put(inv, legend, 4, new ItemStack(Items.GLASS_BOTTLE, 16), "glass bottles");
+                put(inv, legend, 5, new ItemStack(Items.BUCKET), "bucket - a hurt mare refuses plain milk the same way");
+                put(inv, legend, 6, new ItemStack(ModItems.EQUINE_RESEARCH_SHELF.get(), 2),
+                        "research shelf - copy, CLOSE the screen, come back: it kept going; break it: everything drops");
+                put(inv, legend, 7, new ItemStack(Items.BOOK, 16), "books - the Copy tab, one copy per book");
+                ItemStack papers = new ItemStack(ModItems.RESEARCH_PAPER.get(), 2);
+                papers.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics.silver");
+                put(inv, legend, 8, papers, "two Silver papers - the second must refuse to go in");
+            }
+            default -> {
+                return;
+            }
+        }
+
+        tell(player, Component.literal("Test kit " + n + "/" + BATCHES.length + ": " + BATCHES[n - 1])
+                .withStyle(ChatFormatting.GOLD));
         for (String line : legend) {
             tell(player, Component.literal(line).withStyle(ChatFormatting.WHITE));
+        }
+        if (n < BATCHES.length) {
+            tell(player, command("/testkit " + (n + 1), "next: " + BATCHES[n]));
         }
     }
 
     /**
+     * An intake gene's egg, homozygous for {@code token} - or for the gene's
+     * first-listed allele, the form its icon shows, when {@code token} is null.
+     */
+    private static void intake(ServerPlayer player, Inventory inv, List<String> legend, int slot,
+                               String id, @Nullable String token, @Nullable String look) {
+        Gene gene = Genes.byKeyOrNull("horsegenetics." + id);
+        if (gene == null) {
+            HorseGenetics.LOGGER.warn("Test kit: no gene {}", id);
+            return;
+        }
+        String t = token != null ? token : gene.alleles().get(0).token();
+        String label = gene.name() + " (" + t + "/" + t + ")";
+        put(inv, legend, slot, preset(player, "Intake: " + label, Sex.FEMALE, false,
+                gene.key() + "=" + t + "/" + t), look == null ? null : label + " - " + look);
+    }
+
+    /** A chat line that puts {@code cmd} in the chat box when clicked. */
+    private static Component command(String cmd, String text) {
+        return Component.literal("[" + cmd + "] " + text).withStyle(style -> style
+                .withColor(ChatFormatting.AQUA)
+                .withUnderlined(true)
+                .withClickEvent(new ClickEvent.SuggestCommand(cmd))
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click, then press Enter"))));
+    }
+
+    /**
      * A breed egg, or {@code null} (so the slot stays empty) when this run has
-     * no such breed - the kit's {@code kit_*} drop-ins only exist in a dev run
-     * whose {@code run/phc/breeds/} was prepared for them.
+     * no such breed - {@link Breeds#get} answers Feral Mixed for an unknown id,
+     * and the kit's {@code kit_*} drop-ins only exist in a dev run whose
+     * {@code run/phc/breeds/} was prepared for them.
      */
     private static @Nullable ItemStack breedEgg(String id) {
         Breed breed = Breeds.get(id);
@@ -216,46 +341,6 @@ public final class DebugTestWorldHandler {
             return null;
         }
         return BreedSpawnEggItem.of(breed);
-    }
-
-    /**
-     * The evening intake's twenty-four genes, each homozygous for its first-listed
-     * allele - the form the gene's icon shows - in checklist order, then three of
-     * the other forms the install changed most. A chest because twenty-seven eggs
-     * do not fit beside the kit that is already waiting on the checklist.
-     */
-    private static final String[][] INTAKE = {
-            {"tidewave"}, {"trillium"}, {"barred_wing"}, {"uraniid"}, {"candelabra"},
-            {"taper_flame"}, {"inkcoil"}, {"foxglove"}, {"opal_fire"}, {"agate_eye"},
-            {"corolla"}, {"contour_cells"}, {"beadscale"}, {"scuted"}, {"sporefall"},
-            {"wishstar"}, {"tribal_claw"}, {"ooze_drip"}, {"rainbow_drip"}, {"datarain"},
-            {"rime"}, {"foamed"}, {"gilded_crackle"}, {"holo_flake"},
-            {"foxglove", "B"}, {"barred_wing", "Bwb"}, {"rainbow_drip", "Rdc"},
-    };
-
-    private static ItemStack intakeChest(ServerPlayer player) {
-        List<ItemStack> eggs = new ArrayList<>();
-        for (String[] entry : INTAKE) {
-            Gene gene = Genes.byKeyOrNull("horsegenetics." + entry[0]);
-            if (gene == null) {
-                HorseGenetics.LOGGER.warn("Test kit: no gene {} for the intake chest", entry[0]);
-                continue;
-            }
-            String token = entry.length > 1 ? entry[1] : gene.alleles().get(0).token();
-            ItemStack egg = preset(player, "Intake: " + gene.name() + " (" + token + "/" + token + ")",
-                    Sex.FEMALE, false, gene.key() + "=" + token + "/" + token);
-            if (egg != null) {
-                eggs.add(egg);
-            }
-        }
-        ItemStack chest = new ItemStack(Items.CHEST);
-        // CONTAINER on a chest item is what a picked-up chest carries and what
-        // placing it restores - checked against the 26.1.2 patched sources
-        // (ItemContainerContents.fromItems, DataComponents.CONTAINER), not yet
-        // seen in game.
-        chest.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(eggs));
-        chest.set(DataComponents.CUSTOM_NAME, Component.literal("Intake genes (checklist 0-BZ)"));
-        return chest;
     }
 
     /** Put a stack in a slot and, if it has a purpose worth saying, add it to the legend. */
@@ -267,7 +352,7 @@ public final class DebugTestWorldHandler {
         stack.setCount(Math.min(stack.getCount(), stack.getMaxStackSize()));
         inv.setItem(slot, stack);
         if (purpose != null) {
-            legend.add((slot < 9 ? "hotbar " + (slot + 1) : "inv " + (slot - 8)) + ": " + purpose);
+            legend.add("slot " + (slot + 1) + ": " + purpose);
         }
     }
 
