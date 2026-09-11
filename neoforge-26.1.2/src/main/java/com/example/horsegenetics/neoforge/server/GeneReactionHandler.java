@@ -41,6 +41,50 @@ public final class GeneReactionHandler {
     /** Last blink per horse, so a burst of arrows is one dodge rather than five. */
     private static final Map<UUID, Long> LAST_BLINK = new ConcurrentHashMap<>();
 
+    /**
+     * <b>The owners who have a guarding horse, and the reason this class is
+     * affordable.</b>
+     *
+     * <p>The first version of {@link #onOwnerHurt} asked the level for horses in
+     * a sixteen-block box and <i>then</i> checked whether any of them belonged
+     * to the hurt player - which is an entity scan on <b>every hit any player
+     * takes anywhere in the world</b>, paid for by everybody whether or not
+     * anyone owns a guardian. The javadoc claimed it established ownership
+     * cheaply first; it did not.
+     *
+     * <p>So the horse tick, which already runs per horse and already holds the
+     * ability list, records its owner here, and the event does one set lookup
+     * before it touches the world. On a server where nobody has bred a guardian
+     * this class now costs a hash lookup per hit and nothing else.
+     */
+    private static final Map<UUID, Long> GUARDED_OWNERS = new ConcurrentHashMap<>();
+
+    /** How long an owner entry survives without the tick refreshing it. */
+    private static final long GUARD_STALE_TICKS = 100;
+
+    /**
+     * Called from the horse tick for a horse expressing a guardian temper.
+     * Cheap by construction - the caller has already resolved the abilities.
+     */
+    static void noteGuardian(Horse horse) {
+        if (horse.getOwner() != null) {
+            GUARDED_OWNERS.put(horse.getOwner().getUUID(), horse.level().getGameTime());
+        }
+    }
+
+    /** Does this player have a guarding horse anywhere? One lookup, and usually false. */
+    private static boolean hasGuardian(Player player, long now) {
+        Long seen = GUARDED_OWNERS.get(player.getUUID());
+        if (seen == null) {
+            return false;
+        }
+        if (now - seen > GUARD_STALE_TICKS) {
+            GUARDED_OWNERS.remove(player.getUUID());
+            return false;
+        }
+        return true;
+    }
+
     @SubscribeEvent
     static void onDamage(LivingDamageEvent.Post event) {
         LivingEntity hurt = event.getEntity();
@@ -157,10 +201,9 @@ public final class GeneReactionHandler {
      * care take a target.
      *
      * <p><b>The early-out is the whole design of this method.</b> The event
-     * fires on every hit any player in the world takes, so the first thing it
-     * does is establish there is an attacker worth retaliating against and a
-     * server level to look in - both single field reads - before it ever asks
-     * the world for entities.
+     * fires on every hit any player in the world takes, so nothing here touches
+     * the world until {@link #hasGuardian} has said this player owns a guarding
+     * horse at all - one hash lookup, and false for almost everybody.
      *
      * <p><b>Players are never targets</b>, and that is a decision rather than a
      * limitation - see the branch below.
@@ -182,6 +225,12 @@ public final class GeneReactionHandler {
             // them having agreed to it - and 26.1.2 exposes no server-side PvP
             // flag to gate it on, so the safe answer is also the only available
             // one. Mobs only.
+            return;
+        }
+        // THE early-out. Before this line the method has only read fields; after
+        // it, it asks the world for entities. Nobody without a guarding horse
+        // ever gets past here.
+        if (!hasGuardian(player, level.getGameTime())) {
             return;
         }
         AABB box = player.getBoundingBox().inflate(GUARD_RANGE);

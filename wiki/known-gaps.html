@@ -342,6 +342,24 @@ golden, <code>expected.json</code>, and the creator's JS twin, which is a
 <a href="making-a-gene.html#contracts">five-file change</a> and not something to do on
 the way past an intake.</li>
 
+<li id="gap-173"><strong>Two per-entity costs hid behind comments claiming they were cheap.</strong>
+    Opened and closed 2026-09-10, both found by re-reading the same day's work rather than
+    by any check. <strong>(a)</strong> The world-reading condition flags were sampled all
+    four together, so a caveborn <a href="gene-eyesight.html">eyesight</a> horse - which
+    needs one block-light read - was paying for a two-thousand-block jukebox search and a
+    sixteen-block entity scan every twenty ticks, for ever. <strong>(b)</strong>
+    <a href="gene-guardian.html">Guardian</a>'s handler scanned a sixteen-block box for
+    horses on <em>every hit any player took anywhere in the world</em> and only then
+    checked ownership - while its javadoc asserted it established ownership cheaply first.
+    Both are fixed: flags are computed individually, and the horse tick keeps an owner
+    index the event can miss on with one hash lookup.
+    <strong>The lesson is the one worth keeping.</strong> Both bugs were written in the
+    same session as the comments claiming they were not bugs, and both were in code whose
+    hazards had been <em>correctly identified and written down in advance</em> on the
+    gene's own page. Knowing the hazard did not prevent it; only reading the finished code
+    against the hazard did. A comment asserting something is cheap is not evidence that it
+    is, and there is no check anywhere in this repo that would have caught either.</li>
+
 <li id="gap-170"><strong>Three loci have an allele per mob and only two of them read the same table.</strong>
     Opened 2026-09-10. <code>MobRoster</code> exists precisely so that
     <a href="gene-pack-leader.html">leader of the pack</a> and

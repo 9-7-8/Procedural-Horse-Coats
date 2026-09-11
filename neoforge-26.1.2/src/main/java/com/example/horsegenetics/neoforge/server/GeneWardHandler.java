@@ -6,7 +6,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.equine.Horse;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -51,8 +52,17 @@ public final class GeneWardHandler {
     private GeneWardHandler() {
     }
 
-    /** One warding horse, reduced to the only things the check needs. */
-    private record Ward(double x, double y, double z, double radiusSqr, long seenTick) {
+    /**
+     * One warding horse, reduced to the only things the check needs.
+     *
+     * <p>{@code dimension} is <b>not optional</b>. Without it a horse warding in
+     * the Nether suppresses spawns in the Overworld at the same x/z, which is
+     * exactly the kind of bug nobody would ever trace back to this gene - the
+     * ward is invisible, the horse is in another world, and all the player sees
+     * is that monsters have stopped appearing somewhere.
+     */
+    private record Ward(ResourceKey<Level> dimension, double x, double y, double z,
+                        double radiusSqr, long seenTick) {
     }
 
     /**
@@ -124,7 +134,8 @@ public final class GeneWardHandler {
      * and already knows the condition holds, so this is one map write.
      */
     static void note(Horse horse, GeneAbility.Ward ward) {
-        WARDS.put(horse.getUUID(), new Ward(horse.getX(), horse.getY(), horse.getZ(),
+        WARDS.put(horse.getUUID(), new Ward(horse.level().dimension(),
+                horse.getX(), horse.getY(), horse.getZ(),
                 ward.radius() * ward.radius(), horse.level().getGameTime()));
     }
 
@@ -143,8 +154,11 @@ public final class GeneWardHandler {
         long now = level.getGameTime();
         List<Ward> out = new ArrayList<>(WARDS.size());
         WARDS.entrySet().removeIf(e -> now - e.getValue().seenTick() > STALE_TICKS);
+        ResourceKey<Level> here = level.dimension();
         for (Ward w : WARDS.values()) {
-            out.add(w);
+            if (w.dimension().equals(here)) {
+                out.add(w);
+            }
         }
         return out;
     }

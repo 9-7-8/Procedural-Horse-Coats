@@ -133,6 +133,25 @@
         bake does say so, on a line nobody reads.</li>
 </ul>
 
+<h4>A review pass, which found three bugs in the same day's code</h4>
+
+<p>
+    Re-reading the finished work before closing turned up a dimension leak in the ward - a
+    horse warding in the Nether would have suppressed Overworld spawns at the same x/z -
+    and two per-entity costs that had been hidden behind comments asserting they were
+    cheap. All three are fixed, and <a href="known-gaps.html#gap-173">gap 173</a> records
+    the part worth keeping: <strong>every one of them was in code whose hazards had been
+    correctly identified and written down in advance on the gene's own page.</strong>
+    Knowing the hazard did not prevent it. Only reading the finished code back against the
+    hazard did, and no check in this repo would have caught any of the three.
+</p>
+
+<p>
+    The same pass found that <a href="gene-hydrophobic.html">hydrophobic</a> only does half
+    of what its page claims - it ejects the rider and does not then head for shore - which
+    is now said on the page rather than discovered in a lake.
+</p>
+
 <p>
     <strong>Nothing in this batch has been seen in game.</strong>
     <a href="verification.html#behaviour-batch">&sect;0-BT</a> is the checklist, ordered by

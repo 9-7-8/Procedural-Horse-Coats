@@ -181,7 +181,16 @@ public final class GeneAbilityHandler {
                 case GeneAbility.Sound so -> maybeSound(so, horse, (ServerLevel) level, moving, active.geneKey());
                 case GeneAbility.Produce pr -> maybeProduce(pr, horse, (ServerLevel) level, active.geneKey());
                 case GeneAbility.Bond bo -> maybeBond(bo, horse, active.geneKey());
-                case GeneAbility.Temper te -> temper(te, horse, (ServerLevel) level);
+                case GeneAbility.Temper te -> {
+                    if (te.trigger() instanceof GeneAbility.Trigger.OnOwnerHurt) {
+                        // Not a tick effect - it fires from GeneReactionHandler.
+                        // The tick's job is to keep that handler's owner index
+                        // warm so it can early-out on every other player's hits.
+                        GeneReactionHandler.noteGuardian(horse);
+                    } else {
+                        temper(te, horse, (ServerLevel) level);
+                    }
+                }
                 case GeneAbility.Summon su -> maybeSummon(su, horse, (ServerLevel) level, active.geneKey());
                 case GeneAbility.Ward w -> GeneWardHandler.note(horse, w);
                 case GeneAbility.Teleport ignored -> { /* read by GeneReactionHandler, when something hits it */ }
@@ -1208,7 +1217,13 @@ public final class GeneAbilityHandler {
         WorldSample sample = WORLD_FLAGS.get(horse.getUUID());
         long now = level.getGameTime();
         if (sample == null || now - sample.tick() >= WORLD_FLAG_SAMPLE_TICKS) {
-            sample = sampleWorld(horse, level, now);
+            // Only what was actually asked for. Computing all four together was
+            // the first version and it was a real cost: a caveborn horse asks
+            // for "dark" - one block-light read - and was paying for a ~2000
+            // block jukebox search and a 16-block entity scan it has no use for,
+            // every twenty ticks, for ever. The flags a horse never names are
+            // never computed.
+            sample = sampleWorld(horse, level, now, name);
             if (WORLD_FLAGS.size() > 4096) {
                 WORLD_FLAGS.clear(); // dev-mod housekeeping; it re-samples next tick
             }
@@ -1223,27 +1238,49 @@ public final class GeneAbilityHandler {
         };
     }
 
-    private static WorldSample sampleWorld(Horse horse, Level level, long now) {
+    /**
+     * Sample the world for <b>one</b> flag.
+     *
+     * <p>The other three are carried forward from whatever the previous sample
+     * said, which is deliberately a little stale rather than expensive: a horse
+     * that names two world flags pays for both on alternate refreshes, and a
+     * horse that names one never computes the other three at all. The costs
+     * differ by orders of magnitude - a light read is nothing, the jukebox
+     * search is a couple of thousand blocks - so treating them alike was never
+     * defensible.
+     */
+    private static WorldSample sampleWorld(Horse horse, Level level, long now, String wanted) {
         BlockPos at = horse.blockPosition();
-        boolean dark = level.getMaxLocalRawBrightness(at) <= DARK_LEVEL;
+        WorldSample prev = WORLD_FLAGS.get(horse.getUUID());
 
-        // Snow is not weather in Minecraft - it is rain in a cold biome, so the
-        // flag is a biome query and not a level one.
-        boolean snowing = level.isRaining()
-                && level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
+        boolean dark = prev != null && prev.dark();
+        boolean snowing = prev != null && prev.snowing();
+        boolean jukebox = prev != null && prev.nearJukebox();
+        boolean hostile = prev != null && prev.hostileNear();
 
-        boolean jukebox = false;
-        for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
-                at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {
-            BlockState state = level.getBlockState(p);
-            if (state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD)) {
-                jukebox = true;
-                break;
+        if ("dark".equals(wanted)) {
+            dark = level.getMaxLocalRawBrightness(at) <= DARK_LEVEL;
+        }
+        if ("snowing".equals(wanted)) {
+            // Snow is not weather in Minecraft - it is rain in a cold biome, so
+            // the flag is a biome query and not a level one.
+            snowing = level.isRaining()
+                    && level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
+        }
+        if ("near_jukebox".equals(wanted)) {
+            jukebox = false;
+            for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
+                    at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {
+                BlockState state = level.getBlockState(p);
+                if (state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD)) {
+                    jukebox = true;
+                    break;
+                }
             }
         }
-        // An entity scan, which is why this is a sampled flag and not a live one.
-        boolean hostile = false;
-        if (level instanceof ServerLevel sl) {
+        if ("hostile_near".equals(wanted) && level instanceof ServerLevel sl) {
+            // An entity scan, which is why this is a sampled flag and not a live one.
+            hostile = false;
             AABB box = horse.getBoundingBox().inflate(HOSTILE_NEAR_RANGE);
             for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, box)) {
                 if (MobGroups.isHostile(e)) {

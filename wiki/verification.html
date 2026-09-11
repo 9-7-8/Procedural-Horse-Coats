@@ -49,6 +49,135 @@
     hashes, and all 206 new rows in the bake golden carry the same "paints nothing" hash
     as sex and diet. Creator parity is green at 7031 checks.</p>
 
+<div class="note danger">
+    <span class="label">What I am actually worried about, in order</span>
+    <p>
+        The rest of this entry is a checklist. <strong>This part is a confession.</strong>
+        Twenty-seven genes went in without one of them being watched, several touch systems
+        that are shared with the whole world rather than with one horse, and the list below
+        is the honest ranking of what could go wrong badly rather than visibly. If play
+        time is limited, spend it here.
+    </p>
+</div>
+
+<h3>Worst case first: things that damage a save rather than look wrong</h3>
+
+<ol>
+    <li>
+        <p><strong><a href="gene-spontaneous-breeding.html">Spontaneous breeding</a> is the
+        only gene here that can ruin a world while nobody is looking.</strong> Everything
+        else fails in front of you. This one runs on a 600-tick beat whether or not a
+        player is nearby, and if the local cap does not hold, the failure is an entity
+        storm discovered hours later in a save that is already damaged.</p>
+        <p>The cap counts horses within eight blocks and refuses above six, so a single
+        pasture should settle and stay. <strong>What I am not sure about is a large
+        field</strong>: the count is per-horse and local, so two clusters twenty blocks
+        apart are two separate caps, and a big paddock could hold several. That is probably
+        fine and might not be. <strong>Test it by leaving it alone</strong> - four
+        expressing horses, a wide fenced field, walk away for several in-game days, come
+        back and count. This is the one to do first and the one where "it looked fine for
+        ten minutes" proves nothing.</p>
+    </li>
+    <li>
+        <p><strong><a href="gene-holy-ward.html">Holy ward</a> can break somebody's mob farm
+        without erroring.</strong> It hooks <code>FinalizeSpawnEvent</code>, which is a
+        global, high-frequency event shared with every other mod in the pack. It is meant
+        to cancel <em>natural</em> spawns only, by an allow-list of four spawn reasons.</p>
+        <p>If that allow-list is wrong - or if another mod uses a reason I did not
+        anticipate - a spawner stops producing and <strong>nothing anywhere says why</strong>.
+        Stand a warding horse beside a working spawner farm and confirm the farm keeps
+        producing. Then check a spawn egg, and a breeding pen.</p>
+        <p><em>One bug in this was already found and fixed before shipping:</em> the ward
+        did not record which dimension the horse was in, so a horse warding in the Nether
+        would have suppressed Overworld spawns at the same coordinates. That class of
+        mistake is exactly what worries me about this gene - it is invisible from the
+        player's side, and the only symptom is that monsters stopped appearing somewhere
+        they should.</p>
+    </li>
+    <li>
+        <p><strong><a href="gene-spawner.html">Spawner</a> puts entities into the world on a
+        timer.</strong> Three things have to all be right: it counts before it spawns, it
+        spawns through the normal path so other mods' claim and protection mods still fire,
+        and it never marks what it makes persistent. I believe all three are, but the
+        failure mode of the first is unbounded growth and the failure mode of the second is
+        spawning monsters inside somebody's protected base.</p>
+        <p><strong>I am least confident about the spawn call itself.</strong> It goes
+        through <code>EntityType.spawn</code> and then calls <code>finalizeSpawn</code>,
+        and there is a real chance that double-finalises the mob - re-rolling equipment or
+        variant. Watch what a spawned zombie is carrying.</p>
+    </li>
+    <li>
+        <p><strong>Rider-targeted traversal writes state onto a player.</strong> Every other
+        effect in the mod touches only a horse, which is disposable. These three -
+        <a href="gene-fireproof.html">fireproof</a>,
+        <a href="gene-bird-boned.html">bird boned</a>,
+        <a href="gene-ocean-born.html">ocean-born</a> - reach something that walks away.</p>
+        <p>They are granted per tick and store nothing, which <em>should</em> make a
+        lingering immunity impossible. Prove it: ride a fireproof horse through lava,
+        dismount, and walk into fire. If you are still immune, this is an invulnerability
+        duplication and the gene should come straight back out.</p>
+    </li>
+</ol>
+
+<h3>Things I expect to be subtly wrong rather than dangerous</h3>
+
+<ul>
+    <li><strong><a href="gene-potion-milk.html">Potion milk</a>'s merge is the most likely
+        thing in the batch to be quietly half-working</strong>, because the broken version
+        looks completely normal. A horse with two <em>different</em> brew alleles must give
+        <strong>one bottle with both effects</strong>. One effect means the merge is not
+        firing, and nobody would notice without knowing to look.</li>
+    <li><strong><a href="gene-ender-echo.html">Ender echo</a> with a rider is the most
+        likely desync.</strong> A ridden horse's movement belongs to the controlling
+        client. I move it server-side and hope the client accepts the position. If you
+        rubber-band back, or the horse and your camera disagree about where you are, that
+        is this.</li>
+    <li><strong><a href="gene-food-preference.html">Food preference</a> depends on handler
+        ordering</strong>, not on anything the type system protects. It registers at HIGH
+        priority so it sees the interaction before the diet handler and cancels. If another
+        mod also wants that event at HIGH, the gene silently does nothing - which is the
+        exact failure this project already tracks by name.</li>
+    <li><strong><a href="gene-hydrophobic.html">Hydrophobic</a> only does half of what its
+        page says.</strong> It ejects the rider in deep water. The "and then heads for the
+        nearest shore" half is <em>not implemented</em> - the horse is simply dumped where
+        it stood. Worse, it may dump the rider in the middle of a lake. I would treat this
+        gene as incomplete rather than untested.</li>
+    <li><strong><a href="gene-pack-leader.html">Leader of the pack</a> is the performance
+        one.</strong> Six followers pathfinding continuously, and pathfinding is the most
+        expensive thing a mob does. One horse is certainly fine. A stable with several
+        pack leaders in it is the case I have no feel for at all.</li>
+</ul>
+
+<h3>Two performance bugs found while reviewing, and what they suggest</h3>
+
+<p>
+    Both were fixed before shipping, and both are worth recording because they are the same
+    mistake in two places and it will happen again.
+</p>
+
+<ul>
+    <li><strong>The world-reading condition flags were computed all together.</strong> A
+        caveborn <a href="gene-eyesight.html">eyesight</a> horse asks for one block-light
+        read and was paying for a two-thousand-block jukebox search and a sixteen-block
+        entity scan, every twenty ticks, for ever. Eyesight is one of the more common genes
+        here, so this would have been a real and entirely invisible tax. Now only the flag
+        actually named is computed.</li>
+    <li><strong>The guardian's "cheap early-out" did not exist.</strong> Its javadoc claimed
+        it established ownership before touching the world; in fact it scanned a
+        sixteen-block box for horses on <em>every hit any player took anywhere</em>, and
+        then checked ownership. The horse tick now keeps an owner index and the event does
+        one hash lookup. <strong>The lesson is that a comment asserting something is cheap
+        is not evidence that it is</strong>, and I wrote that comment myself in the same
+        session.</li>
+</ul>
+
+<p>
+    If the game stutters in a way that correlates with horses rather than with anything
+    obvious, the shape of both of these bugs - a per-entity cost paid by everybody, hidden
+    behind a claim of cheapness - is the first thing to go looking for.
+</p>
+
+
 <h3>Start here &mdash; the five that can damage a world</h3>
 
 <ul>
