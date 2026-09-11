@@ -149,12 +149,11 @@ public final class DebugTestWorldHandler {
      * and every batch that breeds carries <b>golden carrots</b>.
      *
      * <p>A batch is deleted once the owner has worked through it, and the rest
-     * move up - the first batch is always the next thing to test. The breeds
-     * and size batches went that way on 2026-09-11. An egg whose breed or gene
+     * move up - the first batch is always the next thing to test. The breeds,
+     * size and rebuilt-intake batches went that way on 2026-09-11. An egg whose breed or gene
      * is not loaded is simply left out.
      */
     private static final String[] BATCHES = {
-            "Intake: the wider taper flame, dark forms, drawings that move (0-BZ)",
             "Intake: drips, contour cells, crackle, flakes, small drawings (0-BZ)",
             "Intake: the rest (0-BZ)",
             "Molten hooves, the sheep spawner, the ward (0-BY, 0-BX)",
@@ -179,21 +178,6 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                // Corolla, agate eye, barred wing, uraniid, trillium and foxglove
-                // passed on 2026-09-11. What is left: the widened taper flame, the
-                // two dark forms on a coat they can show on, and the six barrel
-                // drawings now moving along the barrel (posU).
-                intake(player, inv, legend, 0, "taper_flame", null,
-                        "wider now - a flame with a skin, not a streak. Spawn a few: it moves along the barrel");
-                intake(player, inv, legend, 1, "taper_flame", "Tfc", "the coloured form - the spark should show");
-                intake(player, inv, legend, 2, "barred_wing", "Bwb", "black form, on a palomino so it shows",
-                        PALOMINO);
-                intake(player, inv, legend, 3, "foxglove", "B", "nightbell form, on a palomino so it shows",
-                        PALOMINO);
-                intake(player, inv, legend, 4, "trillium", null, "spawn several: a different place on each horse");
-                intake(player, inv, legend, 5, "uraniid", null, "same - shoulder to hip, never off the barrel");
-            }
-            case 2 -> {
                 intake(player, inv, legend, 0, "ooze_drip", null, "hangs DOWN from the spine, not toward the tail");
                 intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too");
                 intake(player, inv, legend, 2, "rainbow_drip", "Rdc", "the coloured form");
@@ -205,14 +189,14 @@ public final class DebugTestWorldHandler {
                 intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
                 intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
             }
-            case 3 -> {
+            case 2 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {
                     intake(player, inv, legend, i, rest[i], null, i == 0 ? "does each look like its icon?" : null);
                 }
             }
-            case 4 -> {
+            case 3 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
                 put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
                 put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
@@ -229,7 +213,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 8, preset(player, "Test: holy ward", Sex.FEMALE, false,
                         "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off: purple 'spawn refused'");
             }
-            case 5 -> {
+            case 4 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - both tickets need a horse you own");
                 put(inv, legend, 1, breedEgg("arabian"), "a horse to move around");
                 put(inv, legend, 2, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
@@ -245,7 +229,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 64), null);
                 put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
             }
-            case 6 -> {
+            case 5 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame each one first");
                 put(inv, legend, 1, preset(player, "Test: potion mare", Sex.FEMALE, false,
                         "horsegenetics.potion_milk=Spd/Spd"), "hurt her, then bottle her: 'She's hurt' and no potion");
