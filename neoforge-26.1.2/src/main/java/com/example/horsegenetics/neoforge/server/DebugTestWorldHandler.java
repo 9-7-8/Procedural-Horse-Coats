@@ -36,6 +36,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -57,7 +59,8 @@ import org.jspecify.annotations.Nullable;
  *   <li><b>Directions</b>: where the nearest <b>plains village</b> is, and the
  *       {@code /tp} that gets you there ({@link #locatePlainsVillage}) - because
  *       that is where both villagers live and hunting for one on foot is most of
- *       the cost of testing them.</li>
+ *       the cost of testing them. And the nearest <b>dark forest</b>
+ *       ({@link #locateDarkForest}), where the kit's drop-in breeds live.</li>
  * </ul>
  *
  * Inert in production (nothing sets the flag).
@@ -97,6 +100,7 @@ public final class DebugTestWorldHandler {
         pendingHotbarFill = false;
         fillInventory(player);
         locatePlainsVillage(player);
+        locateDarkForest(player);
     }
 
     /**
@@ -108,85 +112,110 @@ public final class DebugTestWorldHandler {
      * nothing in particular. Preset eggs are the lever: a horse built for one
      * test, named for it, one right-click from existing.
      *
-     * <p>Aimed at checklist &sect;0-BY (2026-09-10, second batch): the four
-     * molten hooves alleles, the spawner's colour, the holding pen, the hurt
-     * potion mare, the shelf copying in the background, plus what is still
-     * open from &sect;0-BX (stall landing, ward, zombie gear, ridden trail,
-     * potion stallion and foal). A chat legend says which item is for which.
+     * <p>Aimed at checklist &sect;0-CC, &sect;0-CB and &sect;0-CA (2026-09-11):
+     * breeds that are exactly their sheets, size by copy count, drop-in breeds
+     * and genes, a breed switched off and one moved. Four of those need files in
+     * the dev run's {@code run/phc/} that the kit cannot make - the kit prep
+     * wrote {@code kit_*.json} breeds, an example drop-in gene and a small
+     * {@code breed-spawning.toml} (Friesian to dark forest only, Morgan off);
+     * an egg whose breed or gene is not loaded is simply left out. Rows 2 and 3
+     * carry what is still open from &sect;0-BY / &sect;0-BX. A chat legend says
+     * which item is for which.
      */
     private static void fillInventory(ServerPlayer player) {
         Inventory inv = player.getInventory();
         List<String> legend = new ArrayList<>();
 
-        // Hotbar: molten hooves, all four alleles, and the sheep spawner.
-        put(inv, legend, 0, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()), "custom egg - build anything else");
-        put(inv, legend, 1, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
-        put(inv, legend, 2, preset(player, "Test: molten black", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
-        put(inv, legend, 3, preset(player, "Test: molten colour", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
-        put(inv, legend, 4, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
-                "horsegenetics.molten_hooves=MltM/MltM"), "glowing prints running through several colours");
-        put(inv, legend, 5, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
-                "horsegenetics.spawner=Shp/Shp"), "feed it - every sheep it makes must be the SAME colour");
-        put(inv, legend, 6, new ItemStack(Items.WHEAT, 64), "wheat - spawner meals, and hand-taming (crouch, look, stand still)");
-        put(inv, legend, 7, new ItemStack(Items.SADDLE), "saddle - for riding the molten and particle horses");
-        put(inv, legend, 8, new ItemStack(Items.GLASS_BOTTLE, 16), "glass bottles - the potion mare, stallion and foal");
+        // Hotbar: the breed registry and the settings file (0-CC, 0-CB).
+        put(inv, legend, 0, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()),
+                "custom egg - Breed list starts at Feral Mixed and has Test Forest Paint; hover genes for pictures");
+        put(inv, legend, 1, breedEgg("kit_forest_paint"),
+                "drop-in breed - chestnut paints; Breeds tab shows its About text. Wild herds: dark forest tp below");
+        put(inv, legend, 2, breedEgg("morgan"),
+                "Morgan, SWITCHED OFF - tame: keeps its label, breed book says 'Not found anywhere in this world'");
+        put(inv, legend, 3, breedEgg("friesian"),
+                "Friesian, MOVED to dark forest only - breed book should say so; no disorder outside its list");
+        put(inv, legend, 4, breedEgg("quarter_horse"),
+                "Quarter Horse x a handful - some may carry HYPP / PSSM1 / HERDA (its sheet lists them)");
+        put(inv, legend, 5, breedEgg("thoroughbred"),
+                "Thoroughbred x a handful - nothing outside its list, and no magic on any natural breed");
+        put(inv, legend, 6, preset(player, "Test: Aurora (drop-in gene)", Sex.FEMALE, false,
+                "example.aurora=Aur/Aur"), "drop-in gene from phc/genes/ - the log counts '1 dropped in'");
+        put(inv, legend, 7, new ItemStack(Items.GOLDEN_CARROT, 64), "golden carrots - breed two one-copy horses");
+        put(inv, legend, 8, new ItemStack(Items.SADDLE), "saddle - tame by riding, and the molten horses");
 
-        // Row 1: the holding pen, the potion horses, and a horse to tame.
-        put(inv, legend, 9, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
-                "holding pen signs - hang one on a pen wall; a second moves your pen");
-        put(inv, legend, 10, new ItemStack(ModItems.HOLDING_PEN_TICKET.get(), 8),
-                "holding pen tickets - right-click any horse you own: it goes to your pen, dead centre");
-        Breed breed = Breeds.get("arabian") != null ? Breeds.get("arabian")
-                : (Breeds.all().isEmpty() ? null : Breeds.all().get(0));
-        if (breed != null) {
-            put(inv, legend, 11, BreedSpawnEggItem.of(breed), "wild " + breed.name()
-                    + " - tame by hand (survival: its Breeds row fills), then pen-ticket it");
-        }
-        put(inv, legend, 12, preset(player, "Test: potion mare", Sex.FEMALE, false,
-                "horsegenetics.potion_milk=Spd/Spd"), "tame, hurt her, bottle her - 'she's hurt' and no potion");
-        put(inv, legend, 13, new ItemStack(Items.BUCKET, 4), "bucket - a hurt milk mare should refuse the same way");
-        put(inv, legend, 14, preset(player, "Test: potion stallion", Sex.MALE, false,
-                "horsegenetics.potion_milk=Spd/Str"), "bottle on him - he should rear, kick and say so");
-        put(inv, legend, 15, preset(player, "Test: potion foal", Sex.FEMALE, true,
-                "horsegenetics.potion_milk=Spd/Spd"), "bottle on her - 'a foal has no potion milk'");
-        put(inv, legend, 16, new ItemStack(Items.GOLDEN_CARROT, 16), null);
-        put(inv, legend, 17, intakeChest(player),
+        // Row 1: size by copy count (0-CA), a broken breed file, the intake.
+        put(inv, legend, 9, breedEgg("clydesdale"),
+                "Clydesdale - Magic body size is Big/n (smaller) or Big/Big (larger); 1.14-1.43x");
+        put(inv, legend, 10, breedEgg("shire"), "Shire - should tower, as before");
+        put(inv, legend, 11, breedEgg("falabella"), "Falabella - always two Small copies, below your waist");
+        put(inv, legend, 12, breedEgg("connemara_pony"),
+                "Connemara pony - always ONE copy; breed two, some foals ordinary-sized");
+        put(inv, legend, 13, breedEgg("kit_broken_gene"),
+                "Test Broken Gene - names a missing gene: loaded anyway, with a log warning");
+        put(inv, legend, 14, intakeChest(player),
                 "intake chest - place it: one egg per new gene (checklist 0-BZ); the last three are other forms");
-        // Row 2: the research shelf.
-        put(inv, legend, 18, new ItemStack(ModItems.EQUINE_RESEARCH_SHELF.get(), 2),
+        put(inv, legend, 15, new ItemStack(Items.LEAD, 4), null);
+        put(inv, legend, 16, new ItemStack(Items.WHEAT, 64), "wheat - spawner meals");
+        put(inv, legend, 17, new ItemStack(Items.GLASS_BOTTLE, 16), "glass bottles - potion mare and stallion");
+
+        // Row 2: still open from 0-BY.
+        put(inv, legend, 18, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
+        put(inv, legend, 19, preset(player, "Test: molten black", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
+        put(inv, legend, 20, preset(player, "Test: molten colour", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
+        put(inv, legend, 21, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
+                "horsegenetics.molten_hooves=MltM/MltM"), "several colours - must differ from the one-colour horse");
+        put(inv, legend, 22, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
+                "horsegenetics.spawner=Shp/Shp"), "feed it - every sheep it makes must be the SAME colour");
+        put(inv, legend, 23, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
+                "holding pen signs - hang one on a pen wall; a second moves your pen");
+        put(inv, legend, 24, new ItemStack(ModItems.HOLDING_PEN_TICKET.get(), 8),
+                "holding pen tickets - right-click any horse you own: it goes to your pen, dead centre");
+        put(inv, legend, 25, preset(player, "Test: potion mare", Sex.FEMALE, false,
+                "horsegenetics.potion_milk=Spd/Spd"), "tame, hurt her, bottle her - 'she's hurt' and no potion");
+        put(inv, legend, 26, preset(player, "Test: potion stallion", Sex.MALE, false,
+                "horsegenetics.potion_milk=Spd/Str"), "bottle on him - he should rear, kick and say so");
+
+        // Row 3: the research shelf, the stall, the ward.
+        put(inv, legend, 27, new ItemStack(ModItems.EQUINE_RESEARCH_SHELF.get(), 2),
                 "research shelf x2 - copy a gene, CLOSE the screen, come back: it kept going; break one: all drops");
-        put(inv, legend, 19, new ItemStack(Items.BOOK, 16), "books - the Copy tab; a stack copies one after another");
-        String[] papers = {"silver", "dun", "roan", "tobiano", "champagne", "silver"};
+        put(inv, legend, 28, new ItemStack(Items.BOOK, 16), "books - the Copy tab; a stack copies one after another");
+        String[] papers = {"silver", "dun", "silver"};
         for (int i = 0; i < papers.length; i++) {
             ItemStack paper = new ItemStack(ModItems.RESEARCH_PAPER.get());
             paper.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics." + papers[i]);
-            put(inv, legend, 20 + i, paper, i == 0
-                    ? "research papers - five genes, and a second Silver that must refuse to go in" : null);
+            put(inv, legend, 29 + i, paper, i == 0
+                    ? "research papers - two genes, and a second Silver that must refuse to go in" : null);
         }
-
-        // Row 3: build a stall.
-        put(inv, legend, 27, new ItemStack(ModItems.STALL_SIGN.get(), 4),
+        put(inv, legend, 32, new ItemStack(ModItems.STALL_SIGN.get(), 4),
                 "stall signs - bind, then check the size message's height");
-        put(inv, legend, 28, new ItemStack(ModItems.BOUND_TICKET.get(), 8),
-                "tickets - horse must land dead centre: try 2-wide, L-shaped, narrower than the horse");
-        put(inv, legend, 29, new ItemStack(Items.OAK_FENCE, 64), null);
-        put(inv, legend, 30, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
-        put(inv, legend, 31, new ItemStack(Items.OAK_PLANKS, 64), null);
-        put(inv, legend, 32, new ItemStack(Items.OAK_SLAB, 32), null);
-        put(inv, legend, 33, new ItemStack(Items.HAY_BLOCK, 32),
-                "hay - fill a stall solid: the ticket must refuse and not be used up");
-        put(inv, legend, 34, preset(player, "Test: holy ward", Sex.FEMALE, false,
+        put(inv, legend, 33, new ItemStack(ModItems.BOUND_TICKET.get(), 8),
+                "tickets - lands dead centre: try L-shaped, narrower than the horse, full of hay (must refuse)");
+        put(inv, legend, 34, new ItemStack(Items.HAY_BLOCK, 32), null);
+        put(inv, legend, 35, preset(player, "Test: holy ward", Sex.FEMALE, false,
                 "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off - purple 'spawn refused' lines");
-        put(inv, legend, 35, preset(player, "Test: fading-dust trail", Sex.FEMALE, false,
-                "horsegenetics.particle=Dst2/Dst2"), "ride it - the trail must show while ridden");
 
         tell(player, Component.literal("Test kit - what each thing is for:").withStyle(ChatFormatting.GOLD));
         for (String line : legend) {
             tell(player, Component.literal(line).withStyle(ChatFormatting.WHITE));
         }
+    }
+
+    /**
+     * A breed egg, or {@code null} (so the slot stays empty) when this run has
+     * no such breed - the kit's {@code kit_*} drop-ins only exist in a dev run
+     * whose {@code run/phc/breeds/} was prepared for them.
+     */
+    private static @Nullable ItemStack breedEgg(String id) {
+        Breed breed = Breeds.get(id);
+        if (breed == null || breed == Breeds.FERAL_MIXED) {
+            HorseGenetics.LOGGER.warn("Test kit: no breed '{}' - its egg skipped", id);
+            return null;
+        }
+        return BreedSpawnEggItem.of(breed);
     }
 
     /**
@@ -317,12 +346,38 @@ public final class DebugTestWorldHandler {
             return;
         }
 
+        offerTp(player, level, "Plains village", found);
+    }
+
+    /**
+     * Where the nearest <b>dark forest</b> is - the one biome the kit's drop-in
+     * breeds and the moved Friesian live in, and no shipped breed's default.
+     * The same search {@code /locate biome minecraft:dark_forest} runs, with its
+     * radius and sampling steps; a biome search samples the biome source and
+     * generates nothing, so it is cheaper than the village one.
+     */
+    private static void locateDarkForest(ServerPlayer player) {
+        if (!(player.level() instanceof ServerLevel level)) {
+            return;
+        }
+        Pair<BlockPos, Holder<Biome>> hit = level.findClosestBiome3d(
+                biome -> biome.is(Biomes.DARK_FOREST), player.blockPosition(), 6400, 32, 64);
+        if (hit == null) {
+            tell(player, Component.literal("No dark forest within 6400 blocks of spawn.")
+                    .withStyle(ChatFormatting.RED));
+            return;
+        }
+        offerTp(player, level, "Dark forest (drop-in breed herds, moved Friesians)", hit.getFirst());
+    }
+
+    /** One chat line: a place, and a {@code /tp} to above it that one click puts in the chat box. */
+    private static void offerTp(ServerPlayer player, ServerLevel level, String what, BlockPos found) {
         BlockPos surface = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, found);
         int altitude = Math.max(TP_ALTITUDE, surface.getY() + 2);
         String command = "/tp @s " + surface.getX() + " " + altitude + " " + surface.getZ();
-        HorseGenetics.LOGGER.info("Test world: nearest plains village at {}", surface);
+        HorseGenetics.LOGGER.info("Test world: {} at {}", what, surface);
 
-        tell(player, Component.literal("Plains village at "
+        tell(player, Component.literal(what + " at "
                         + surface.getX() + ", " + surface.getY() + ", " + surface.getZ()
                         + " (tp drops you in at y=" + altitude + "). ")
                 .withStyle(ChatFormatting.YELLOW)

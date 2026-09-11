@@ -19,7 +19,9 @@ import java.util.Set;
  * <p>The <b>Cowboy Hitch</b> is deliberately <i>not</i> here. It is not a job
  * site - no profession claims it, because a cowboy is an entity and not a
  * profession - so it is found by looking for the block rather than by asking the
- * POI system. See {@code server/CowboyHitchHandler}.
+ * POI system. See {@code server/CowboyHitchHandler}. <b>Nor may it be named in a
+ * POI tag</b>: {@code minecraft:village} carried it for four days, and a tag
+ * with one missing entry fails whole - vanilla's own village POIs with it.
  *
  * <p>A POI is only half the wiring. It has to be in the
  * {@code minecraft:acquirable_job_site} block-entity tag before an unemployed

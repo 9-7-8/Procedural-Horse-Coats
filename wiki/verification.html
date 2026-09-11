@@ -35,6 +35,35 @@
     </p>
 </div>
 
+<div class="note">
+    <span class="label">The test kit</span>
+    <p>
+        <strong>Spawn Test Horse World</strong> (<code>DebugTestWorldHandler.fillInventory</code>)
+        is aimed at &sect;0-CC, &sect;0-CB and &sect;0-CA, with the still-open &sect;0-BY /
+        &sect;0-BX items in its bottom two rows; a chat legend says which slot is for which test,
+        and two clickable <code>/tp</code>s go to the nearest plains village and dark forest.
+        Four of those tests need files the kit cannot make, so the dev run's
+        <code>run/phc/</code> was prepared for them on 2026-09-11 and a dedicated server
+        confirmed all four load: <code>breeds/kit_forest_paint.json</code> (chestnut paints, dark
+        forest), <code>kit_night_cremello.json</code> (dark forest, night only),
+        <code>kit_broken_gene.json</code> (logs a missing-gene warning, loads anyway),
+        <code>kit_zz_duplicate_friesian.json</code> (refused); <code>genes/aurora.json</code> (the
+        example gene, &ldquo;1 dropped in&rdquo;); and <code>breed-spawning.toml</code> with the
+        Friesian moved to dark forest only and the Morgan switched off. Delete them to put the
+        dev run back.
+    </p>
+</div>
+
+<h2 id="village-tag">&sect;0-CD &mdash; Vanilla's village POI tag loads again (2026-09-11, NOT looked at in game)</h2>
+
+<p><code>data/minecraft/tags/point_of_interest_type/village.json</code> had named
+    <code>horsegenetics:cowboy_hitch</code> since the hitch stopped being a POI (2026-09-07), and
+    a tag with one missing entry fails whole: every boot logged <code>Couldn't load tag
+    minecraft:village</code>, which takes vanilla's own village POIs with it. The entry is gone
+    and a dedicated server boots without the error. <strong>Unseen:</strong> what the missing
+    tag had broken - vanilla uses it to decide what counts as a village (raids, cats, golem
+    spawning). Nothing to do but notice if a village behaves oddly now, in either direction.</p>
+
 <h2 id="world-settings">&sect;0-CC &mdash; 0.5.000: the settings folder and breed-spawning.toml (2026-09-11, NOT looked at in a client)</h2>
 
 <p>A dedicated server was booted on it twice: <code>run/phc/</code> got <code>server.toml</code>
@@ -202,7 +231,7 @@
 
 <h2 id="intake-evening">&sect;0-BZ &mdash; Twenty-four genes out of the evening intake (2026-09-10, NOT looked at in game)</h2>
 
-<p><strong>Where to look:</strong> the Spawn Test Horse World kit, inventory slot 9, is a
+<p><strong>Where to look:</strong> the Spawn Test Horse World kit, inventory slot 6, is a
     <strong>chest</strong> named &ldquo;Intake genes&rdquo; &mdash; place it and it holds one
     preset egg per new gene, homozygous for the form its icon shows, then three other forms
     (nightbell foxglove, black barred wing, coloured rainbow drip). Every gene was rendered
@@ -250,10 +279,10 @@
     stall ticket lands a horse properly (as a basis - still to be pushed on); the Breeds tab;
     molten hooves' prints render.</p>
 
-<p><strong>The "Spawn Test Horse World" kit is re-aimed at this list</strong>
-    (<code>DebugTestWorldHandler.fillInventory</code>) - four molten hooves eggs, a sheep
-    spawner, holding pen signs and tickets, a potion mare, a bucket, and the shelf and stall
-    gear - with a chat legend.</p>
+<p><strong>The kit still carries this list</strong> in its bottom two rows - four molten
+    hooves eggs, a sheep spawner, holding pen signs and tickets, the potion mare and stallion,
+    and the shelf and stall gear. The potion foal and the bucket were dropped for room; build
+    them from the custom egg and creative inventory.</p>
 
 <ul>
     <li><strong>The research shelf copies like a furnace.</strong> Pick a gene on Copy, put
