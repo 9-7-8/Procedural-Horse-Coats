@@ -157,7 +157,7 @@ public final class DebugTestWorldHandler {
      * loaded is simply left out.
      */
     private static final String[] BATCHES = {
-            "Size by copy count (0-CA)",
+            "Size: the one-copy Connemara cross (0-CA)",
             "Intake: the rebuilt marks, and their other forms (0-BZ)",
             "Intake: drips, contour cells, crackle, flakes, small drawings (0-BZ)",
             "Intake: the rest (0-BZ)",
@@ -183,15 +183,13 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame first; the Magic tab shows body size");
-                put(inv, legend, 1, new ItemStack(Items.GOLDEN_CARROT, 64), "golden carrots - breeding");
-                put(inv, legend, 2, breedEgg("clydesdale"),
-                        "Clydesdale - Big/n are the smaller ones, Big/Big the larger (1.14-1.43x)");
-                put(inv, legend, 3, breedEgg("shire"), "Shire - should tower, as before");
-                put(inv, legend, 4, breedEgg("falabella"), "Falabella - always two Small copies, below your waist");
-                put(inv, legend, 5, breedEgg("connemara_pony"),
-                        "Connemara - always ONE copy; spawn two, tame, breed: some foals ordinary-sized");
-                put(inv, legend, 6, new ItemStack(Items.CLOCK), "clock - right-click a foal: grown at once, to compare sizes");
+                // Clydesdale, Shire and Falabella confirmed 2026-09-11; what is
+                // left is the one-copy cross, which wants several foals.
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame both parents");
+                put(inv, legend, 1, new ItemStack(Items.GOLDEN_CARROT, 64), "golden carrots - breed the pair again and again");
+                put(inv, legend, 2, breedEgg("connemara_pony"),
+                        "Connemara - Small/n. Breed ~6 foals: about 1 in 4 is n/n and ordinary-sized (the breeding chat says)");
+                put(inv, legend, 3, new ItemStack(Items.CLOCK), "clock - right-click a foal: grown at once, to see its size");
             }
             case 2 -> {
                 intake(player, inv, legend, 0, "corolla", null, "the eye and deep heart should show inside the mark");

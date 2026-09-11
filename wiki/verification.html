@@ -69,6 +69,12 @@
     confirmed the broken-gene breed loads with a warning and the duplicate Friesian is
     refused.</p>
 
+<p><em>Then, from the log of the dark-forest trip and the size batch:</em> Friesian herds found
+    in the dark forest (the moved biome); <code>kit_night_cremello</code> herds founded only after
+    nightfall (9 after <code>/time set night</code>, none before); no Morgan egg in the creative
+    tab; a Shire towers and a Falabella stands below the waist; each size founder carries the
+    number of copies its band says.</p>
+
 <p><strong>Fixed and confirmed the same day:</strong> the debug stick now fires the tame event
     (it called <code>tameWithName</code> bare, so a stick-tamed horse never filled its Breeds
     row). <strong>New:</strong> every breed founder the server rolls - egg, wild herd, cowboy,
@@ -111,13 +117,9 @@
         should have <em>no</em> horses at all, dark forests should have herds of that breed and
         nothing else. With <code>debug.announce</code> on, a refused lone horse logs
         <code>[Breeds] wild horse at ... not spawned</code>.</li>
-    <li><strong>A shipped breed moved.</strong> The breed book gives the Friesian's new biome
-        (owner-confirmed, dev run: dark forest only). Still unseen: a dark forest herd of
-        them in new chunks (the dev run's <code>kit_forest_paint</code> was cut to the
-        Friesian's weight after it headed every herd).</li>
-    <li><strong>Switched off, but still a breed.</strong> The Morgan keeps its label and its
-        entry fills (owner-confirmed). Still unseen: the creative tab and the cowboy no longer
-        offering a Morgan egg or horse.</li>
+    <li><strong>Switched off, but still a breed.</strong> Owner-confirmed but for one place: the
+        cowboy should never have a switched-off breed (the dev run has the Morgan off) in his
+        string.</li>
     <li><strong>Feral Mixed weight.</strong> <code>feral_mixed.herd_weight = 100</code>: most
         new herds in horse biomes should be Feral Mixed.</li>
     <li><strong>An old world.</strong> Open a 0.4.1 world on this jar. It should load; any
@@ -184,24 +186,17 @@
         breed pane). The OS file browser should open on that folder. Unverified: that
         <code>Util.getPlatform().openPath</code> behaves on this machine as it does for the
         resource-pack screen.</li>
-    <li><strong>A night breed.</strong> <code>"spawn_time": "night"</code>, and explore
-        after dark: herds founded in the dark may be it, and ones founded by day never
-        are. Expect it to be rare near where you already are - vanilla spawns no animals
-        in the dark on existing chunks. (<code>kit_night_cremello</code>, dark forest.)</li>
 </ul>
 
 <h3>Size</h3>
 
 <ul>
-    <li><strong>Every breed's size should look as it did.</strong> The files moved from
-        hands to multiples through the same curve, so a Shire should tower and a Falabella
-        should not reach your waist exactly as before. The Breeds tab now reads
-        &ldquo;size 1.14-1.38x (16.2 hh to 17.3 hh)&rdquo;.</li>
-    <li><strong>One copy or two.</strong> A tamed Clydesdale founder (1.14-1.43x) is either
-        <code>Big/n</code> (smaller ones) or <code>Big/Big</code> (larger ones) at Magic
-        body size; a Falabella is always two <code>Small</code> copies; a pony breed
-        between 0.7 and 1.3 always one. Breed two one-copy horses and some foals should come
-        out ordinary-sized.</li>
+    <li><strong>The one-copy cross.</strong> Founders carry the right number of copies
+        (owner session: Clydesdale <code>Big/Big</code>, Shire <code>Big/n</code>, Falabella
+        <code>Small/Small</code>, Connemara <code>Small/n</code>). Still unseen: two
+        <code>Small/n</code> Connemaras throwing an <code>n/n</code>, ordinary-sized foal - about
+        one in four. The first foal was <code>Small/Small</code> at 0.70x, smaller than either
+        parent, which is the other one in four. Test kit batch 1.</li>
 </ul>
 
 <h3>The gene hover picture - three places</h3>
