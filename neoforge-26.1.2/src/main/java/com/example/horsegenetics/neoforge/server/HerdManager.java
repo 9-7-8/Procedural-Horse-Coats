@@ -144,6 +144,7 @@ public final class HerdManager {
         }
 
         Genome genome = BreedFounder.roll(breed, rng, sex);
+        BreedFounderLog.founder(breed, genome.genotype(), "wild herd");
         String token = breed == Breeds.FERAL_MIXED
                 ? BreedLineage.FERAL.toToken()
                 : BreedLineage.pure(breed.id()).toToken();

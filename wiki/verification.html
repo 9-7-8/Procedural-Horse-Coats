@@ -57,6 +57,28 @@
     </p>
 </div>
 
+<h2 id="stick-tame">&sect;0-CE &mdash; The debug stick counts as taming; a breed founder's disorders go to the log (2026-09-11, NOT looked at in game)</h2>
+
+<p><em>Owner-confirmed in test batch 1 and removed from this page:</em> the custom egg's Breed
+    list starts at Feral Mixed and carries the drop-in breeds; the gene hover picture on the
+    custom egg; a drop-in breed registers and fills its Breeds row when tamed in survival; a
+    drop-in gene (<code>phc/genes/aurora.json</code>) loads and draws. The log confirmed the
+    broken-gene breed loads with a warning and the duplicate Friesian is refused.</p>
+
+<ul>
+    <li><strong>The stick fires the tame event now.</strong> It called
+        <code>tameWithName</code> bare, which never reaches <code>GeneDiscoveryHandler.onTame</code>:
+        a stick-tamed Morgan and Friesian stayed &ldquo;???&rdquo; in survival's breed book
+        (the same bug hand-taming had, fixed once already in <code>CrouchFeedGoal</code>).
+        Stick-tame a breed horse in survival: its row fills, its genes are discovered, and
+        &ldquo;tame a mare / stallion&rdquo; ticks.</li>
+    <li><strong><code>[breed-health]</code> lines.</strong> Every breed founder the server
+        rolls - egg, wild herd, cowboy, stable - logs its disorders against its sheet, and a
+        <code>WARN ... NOT ON ITS SHEET</code> for any disorder or magical gene the sheet does
+        not list. That replaces taming a dozen Quarter Horses to read their genes: spawn a
+        stack of eggs and read the log. Batch 1's eggs are the first thing to feed it.</li>
+</ul>
+
 <h2 id="village-tag">&sect;0-CD &mdash; Vanilla's village POI tag loads again (2026-09-11, NOT looked at in game)</h2>
 
 <p><code>data/minecraft/tags/point_of_interest_type/village.json</code> had named
@@ -80,12 +102,9 @@
     <li><strong>The folder.</strong> After one launch, <code>.minecraft/phc/</code> (for the
         dev run, <code>neoforge-26.1.2/run/phc/</code>) holds <code>genes/</code>,
         <code>breeds/</code>, <code>client.toml</code>, <code>server.toml</code> and
-        <code>breed-spawning.toml</code>, and <code>config/</code> gets nothing of this mod's.
-        <code>genes/</code> moved there in 0.5.001: drop a gene-creator file into
-        <code>phc/genes/</code>, restart, and the log's <code>[genes] ... dropped in from</code>
-        line should count it. The dev run's old
-        client and server settings were copied across by hand. Mods &rarr; Horse Genetics &rarr;
-        Config should still open all three.</li>
+        <code>breed-spawning.toml</code>, and <code>config/</code> gets nothing of this mod's
+        (a drop-in gene in <code>phc/genes/</code> is owner-confirmed). Mods &rarr; Horse
+        Genetics &rarr; Config should still open all three.</li>
     <li><strong>Only my breeds.</strong> Set <code>shipped_breeds_enabled = false</code> and
         <code>feral_mixed.enabled = false</code>, drop in one breed that lives in
         <code>minecraft:dark_forest</code>, and restart. Explore new chunks: plains and savanna
@@ -94,10 +113,12 @@
         <code>[Breeds] wild horse at ... not spawned</code>.</li>
     <li><strong>A shipped breed moved.</strong> Put the Friesian in
         <code>minecraft:dark_forest</code> only, restart, and find a dark forest herd of them;
-        the breed book should say the new biome.</li>
+        the breed book should say the new biome. (The dev run's file already does this; a
+        first try was blocked by the stick bug in &sect;0-CE.)</li>
     <li><strong>Switched off, but still a breed.</strong> A horse you already own whose breed
         you switch off keeps its label; its breed book entry says &ldquo;Not found anywhere in
-        this world&rdquo;, and the cowboy and breed spawn eggs stop offering it.</li>
+        this world&rdquo;, and the cowboy and breed spawn eggs stop offering it. (The dev run
+        has the Morgan off; same stick bug on the first try.)</li>
     <li><strong>Feral Mixed weight.</strong> <code>feral_mixed.herd_weight = 100</code>: most
         new herds in horse biomes should be Feral Mixed.</li>
     <li><strong>An old world.</strong> Open a 0.4.1 world on this jar. It should load; any
@@ -123,17 +144,11 @@
         times): no magical coat, particle or ability the breed does not list. A vanilla-spawned
         horse (Feral Mixed) still can carry one - that is now the only place random magic comes
         from.</li>
-    <li><strong>No surprise disorders.</strong> Tame a handful of Quarter Horses: some may
-        carry HYPP, PSSM1 or HERDA (the sheet lists them). Tame a handful of Thoroughbreds or
-        Friesians and nothing outside their lists should ever show. The Breeds tab's detail
-        line reads &ldquo;Carries no disorder but the ones listed below.&rdquo;</li>
-    <li><strong>Custom spawn egg: the Breed list starts at Feral Mixed</strong>, not
-        &ldquo;(none)&rdquo;. Picking it still leaves the genome alone. A drop-in breed from
-        <code>.minecraft/phc/breeds/</code> should be in the same list.</li>
-    <li><strong>Gene pictures in the hover card</strong> are now 64-pixel copies made at build
-        time (nearest-neighbour) instead of the wiki's full-size ones. Check they look right at
-        your GUI scale - if they are jagged, the fix is a larger copy in
-        <code>shrinkGeneIcons</code> (<code>neoforge-26.1.2/build.gradle</code>).</li>
+    <li><strong>No surprise disorders.</strong> Spawn a stack of Quarter Horses: the
+        <code>[breed-health]</code> log lines (&sect;0-CE) should show some carrying HYPP, PSSM1
+        or HERDA (the sheet lists them). Thoroughbreds and Friesians should never log a
+        <code>NOT ON ITS SHEET</code>. The Breeds tab's detail line reads &ldquo;Carries no
+        disorder but the ones listed below.&rdquo;</li>
     <li><strong>The jar</strong> no longer carries the wiki tool classes or the example
         genes. Nothing in the game used them; if anything in the log says a
         <code>*Tool</code> class is missing, that assumption was wrong.</li>
@@ -175,19 +190,16 @@
         breed pane). The OS file browser should open on that folder. Unverified: that
         <code>Util.getPlatform().openPath</code> behaves on this machine as it does for the
         resource-pack screen.</li>
-    <li><strong>Make a breed in the designer, export it, drop it in, restart.</strong> The
-        log says <code>[breeds] N breed(s) registered (1 from ...)</code>. Give it a biome no
-        shipped breed uses - <code>minecraft:dark_forest</code> - and go looking in new
-        chunks: its herds should appear there. That is the new
-        <code>horsegenetics:breed_herds</code> biome modifier, and nothing else has tested
-        it. Tame one and check the Breeds tab shows its <strong>About</strong> text.</li>
+    <li><strong>Drop-in herds in the wild.</strong> A drop-in breed registers and fills its
+        Breeds row (owner-confirmed). Still unseen: its <strong>About</strong> text in the
+        entry, and its herds in new chunks of the biome it names - the new
+        <code>horsegenetics:breed_herds</code> biome modifier, which nothing else has tested.
+        The dev run's <code>kit_forest_paint</code> lives in <code>minecraft:dark_forest</code>;
+        the test world offers a <code>/tp</code> there.</li>
     <li><strong>A night breed.</strong> <code>"spawn_time": "night"</code>, and explore
         after dark: herds founded in the dark may be it, and ones founded by day never
         are. Expect it to be rare near where you already are - vanilla spawns no animals
-        in the dark on existing chunks.</li>
-    <li><strong>Break one on purpose</strong> (carried over from &sect;0-AL): name a gene
-        that does not exist and check the breed still loads with a warning naming it; drop
-        in <code>"id": "friesian"</code> and check it is refused, not duplicated.</li>
+        in the dark on existing chunks. (<code>kit_night_cremello</code>, dark forest.)</li>
 </ul>
 
 <h3>Size</h3>
@@ -207,11 +219,9 @@
 <h3>The gene hover picture - three places</h3>
 
 <ul>
-    <li><strong>Custom spawn egg:</strong> hover a gene. The blurb panel is wider and
-        carries the gene's baked picture at the left, text wrapping round it. A gene with no
-        picture (the eye loci, the health genes) should show text only, not a
-        purple-and-black square. The pictures ship inside the jar as small copies of
-        <code>wiki/assets/gene-icons/</code>, made at build time.</li>
+    <li><strong>Custom spawn egg:</strong> the picture is owner-confirmed. Still unseen: a gene
+        with no picture (the eye loci, the health genes) should show text only, not a
+        purple-and-black square.</li>
     <li><strong>Horse designer:</strong> the same, on the canvas (seen in a headless
         browser).</li>
     <li><strong>Breed designer:</strong> any underlined gene name.</li>

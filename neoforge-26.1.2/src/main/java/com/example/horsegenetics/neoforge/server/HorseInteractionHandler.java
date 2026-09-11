@@ -69,7 +69,12 @@ public final class HorseInteractionHandler {
         // a tamed horse with an item vanilla treats as "ride"). The state change
         // itself only runs server-side.
         if (stack.is(Items.STICK) && !horse.isTamed()) {
-            if (!client) {
+            // Fire the tame EVENT first, as CrouchFeedGoal and vanilla's
+            // RunAroundLikeCrazyGoal do - tameWithName alone skips it, so a
+            // stick-tamed horse never reached GeneDiscoveryHandler.onTame: no
+            // Breeds row, no genes discovered, no "tame a mare" tick. Owner
+            // report 2026-09-11: a stick-tamed Morgan and Friesian stayed "???".
+            if (!client && !net.neoforged.neoforge.event.EventHooks.onAnimalTame(horse, player)) {
                 horse.tameWithName(player);
             }
             consume(event, InteractionResult.SUCCESS);

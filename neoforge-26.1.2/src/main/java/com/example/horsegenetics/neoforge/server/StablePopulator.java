@@ -275,7 +275,9 @@ public final class StablePopulator {
 
         Genome genome = spawn.roll(rng);
         HorseRecord record = HorseRecords.newFounder(horse, rng, genome);
-        record = record.withBreed(spawn.breed(rng).id());
+        com.example.horsegenetics.common.breed.Breed breed = spawn.breed(rng);
+        BreedFounderLog.founder(breed, genome.genotype(), "stable");
+        record = record.withBreed(breed.id());
         HorseRecords.apply(horse, record);
         level.addFreshEntity(horse);
         return true;

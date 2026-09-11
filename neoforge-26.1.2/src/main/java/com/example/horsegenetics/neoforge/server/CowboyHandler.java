@@ -291,6 +291,7 @@ public final class CowboyHandler {
         horse.setPersistenceRequired();  // their stock does not despawn
 
         Genome genome = BreedFounder.roll(breed, rng);
+        BreedFounderLog.founder(breed, genome.genotype(), "cowboy");
         NameParts name = HorseRecords.newNameParts(rng);
         HorseRecord record = HorseRecord
                 .founder(horse.getUUID(), name.first(), name.last(), genome,

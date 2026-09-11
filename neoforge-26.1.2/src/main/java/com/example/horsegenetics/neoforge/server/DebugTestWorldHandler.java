@@ -187,13 +187,13 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 2, breedEgg("kit_forest_paint"),
                         "drop-in breed - tame it: the Breeds tab shows its About text");
                 put(inv, legend, 3, breedEgg("morgan"),
-                        "Morgan, switched off - tame: keeps its label; breed book 'Not found anywhere in this world'");
+                        "Morgan, switched off - stick-tame in SURVIVAL: its row fills; entry says 'Not found anywhere in this world'");
                 put(inv, legend, 4, breedEgg("friesian"),
-                        "Friesian, moved - breed book should list dark forest only");
+                        "Friesian, moved - stick-tame in survival: row fills; 'Where it lives' says dark forest only");
                 put(inv, legend, 5, breedEgg("quarter_horse"),
-                        "Quarter Horse - tame several: some may carry HYPP / PSSM1 / HERDA");
+                        "Quarter Horse - just spawn a dozen; the log lists each one's disorders ([breed-health])");
                 put(inv, legend, 6, breedEgg("thoroughbred"),
-                        "Thoroughbred - tame several: no disorder outside its list, no magic");
+                        "Thoroughbred - same: spawn a dozen, the log flags anything NOT ON ITS SHEET");
                 put(inv, legend, 7, preset(player, "Test: Aurora (drop-in gene)", Sex.FEMALE, false,
                         "example.aurora=Aur/Aur"), "drop-in gene - the horse should wear it");
             }

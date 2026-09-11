@@ -80,6 +80,7 @@ public final class HorseRecords {
      */
     public static HorseRecord newFounder(Horse horse, Rng rng, Breed breed) {
         Genome genome = BreedFounder.roll(breed, rng);
+        BreedFounderLog.founder(breed, genome.genotype(), "egg");
         NameParts name = NAMES.generateParts(rng);
         String token = breed == Breeds.FERAL_MIXED
                 ? BreedLineage.FERAL.toToken()
