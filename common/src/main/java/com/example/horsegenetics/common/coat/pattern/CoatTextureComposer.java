@@ -11,7 +11,10 @@ import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.EyePatch;
 import com.example.horsegenetics.common.genetics.EyePatchContribution;
 import com.example.horsegenetics.common.genetics.EyePatches;
-import com.example.horsegenetics.common.genetics.EyeSpread;
+import com.example.horsegenetics.common.genetics.eye.EyeHue;
+import com.example.horsegenetics.common.genetics.eye.EyePhenotype;
+import com.example.horsegenetics.common.genetics.eye.EyeRender;
+import com.example.horsegenetics.common.genetics.eye.Eyes;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -225,17 +228,29 @@ public final class CoatTextureComposer {
             out[i] = (ta << 24) | (rr << 16) | (gg << 8) | bb;
         }
 
-        CoatRegions.redrawEyes(skin, out, template);
+        // The eye loci, resolved once: what colour each iris and sclera is, which
+        // part of which iris is a second colour, which halves glow, and whether
+        // there is a third eye. Resolved HERE rather than in the overlay pass
+        // because an INVISIBLE iris or sclera is not a colour - it means those
+        // texels must not be copied back off the template at all, and this is
+        // the copy. See CoatRegions.EyeRedraw.
+        EyePhenotype eyes = Eyes.resolve(genotype, epigenome);
+        CoatRegions.EyeRedraw redraw = redrawFor(eyes);
+        clearInvisibleEyeTexels(skin, out, template, colour, redraw);
+        CoatRegions.redrawEyes(skin, out, template, redraw);
 
         // 5. overlay phase - final pixels and emissive texels, over the finished
         // coat. Runs after the eyes precisely so a gene can colour them.
         CoatOverlay overlay = new CoatOverlay(skin, out.clone());
         overlay.lock(locked);
+        // Which eye texels are iris and which are sclera is a fact about the
+        // TEMPLATE, not about the coat in front of it - see CoatOverlay.
+        overlay.eyeTemplate(template);
 
         // 5a. Eye colour, before the general overlay pass, so a gene that wants
         // the whole eye (light's glowing gold, the leopard complex's white rim)
         // still gets the last word over the iris tint.
-        paintEyes(genotype, epigenome, overlay, whiteCoverage(pigment, skin));
+        paintEyes(eyes, genotype, epigenome, overlay, whiteCoverage(pigment, skin));
 
         for (Gene gene : Genes.codeOrder()) {
             if (!(gene instanceof CoatOverlayContribution contribution)) {
@@ -482,38 +497,118 @@ public final class CoatTextureComposer {
     record EyeClaim(Gene gene, EyeColor color) {}
 
     /**
-     * <b>Draw both irises.</b> Three layers, and the order between them is the
-     * whole model:
+     * <b>Make an invisible half of an eye actually invisible.</b>
+     *
+     * <p>Not redrawing the template over a texel is <i>not</i> enough, and this
+     * is the trap: phase 4 composites the coat onto the template by
+     * <b>multiplying</b>, and the template's iris is pure black. A skipped iris
+     * texel therefore comes out black - the template's own eye, indistinguishable
+     * from the ordinary one, which is the opposite of "no iris". The sclera has
+     * the mirror problem in a milder form: it is near-white rather than white, so
+     * a skipped sclera texel comes out very slightly shaded.
+     *
+     * <p>So the texel is recomposited here against a <b>plain white</b>
+     * template, which is what the rest of the head is made of, and the horse's
+     * own coat runs straight through where the eye would be. The template's
+     * alpha is kept, so the silhouette is unchanged.
+     */
+    private static void clearInvisibleEyeTexels(Skin skin, int[] out, int[] template,
+                                                ColorView colour, CoatRegions.EyeRedraw redraw) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        int[][] rects = CoatRegions.eyeRects(skin);
+        for (int eye = 0; eye < rects.length; eye++) {
+            boolean keepIris = eye >= redraw.keepIris().length || redraw.keepIris()[eye];
+            boolean keepSclera = eye >= redraw.keepSclera().length || redraw.keepSclera()[eye];
+            if (keepIris && keepSclera) {
+                continue;
+            }
+            int[] r = rects[eye];
+            for (int y = r[1]; y < r[1] + r[3]; y++) {
+                for (int x = r[0]; x < r[0] + r[2]; x++) {
+                    if (x < 0 || y < 0 || x >= n || y >= n) {
+                        continue;
+                    }
+                    int t = template[y * n + x];
+                    int ta = t >>> 24;
+                    if (ta == 0) {
+                        continue;
+                    }
+                    boolean light = lumaOf(t) > CoatRegions.scleraLuma();
+                    if (light ? keepSclera : keepIris) {
+                        continue;
+                    }
+                    int o = colour.argb(x, y);
+                    float oa = (o >>> 24) / 255f;
+                    out[y * n + x] = (ta << 24)
+                            | (blend(0xFF, (o >> 16) & 0xFF, oa) << 16)
+                            | (blend(0xFF, (o >> 8) & 0xFF, oa) << 8)
+                            | blend(0xFF, o & 0xFF, oa);
+                }
+            }
+        }
+    }
+
+    private static double lumaOf(int argb) {
+        return (0.299 * ((argb >> 16) & 0xFF) + 0.587 * ((argb >> 8) & 0xFF)
+                + 0.114 * (argb & 0xFF)) / 255.0;
+    }
+
+    /**
+     * <b>Which halves of which eyes survive the template redraw.</b> Everything
+     * but an {@link EyeHue#INVISIBLE} one does; see
+     * {@link CoatRegions.EyeRedraw} for why that cannot be an overlay decision.
+     */
+    private static CoatRegions.EyeRedraw redrawFor(EyePhenotype eyes) {
+        EyeRender right = eyes.right();
+        EyeRender left = eyes.left();
+        if (right.iris().paints() && right.sclera().paints()
+                && left.iris().paints() && left.sclera().paints()) {
+            return CoatRegions.EyeRedraw.ALL;
+        }
+        return new CoatRegions.EyeRedraw(
+                new boolean[]{right.iris().paints(), left.iris().paints()},
+                new boolean[]{right.sclera().paints(), left.sclera().paints()});
+    }
+
+    /**
+     * <b>Draw the eyes.</b> Three things in order, and the order is the model:
      *
      * <ol>
-     *   <li>the winning <b>pigment</b> claim - cream, champagne, tiger eye -
-     *       over the whole of both eyes;</li>
-     *   <li>the winning <b>depigmenting</b> claim, if any, over as much of each
-     *       eye as {@link EyeSpread} says it reached. That is what makes one
-     *       blue eye and the blue wedge possible at all: a depigmented iris is
-     *       not a colour painted over the pigment, it is pigment that never
-     *       arrived, so what shows where the blue stops is the horse's own eye
-     *       and it has to still be there underneath;</li>
+     *   <li>the <b>eye loci</b> - iris, sector, sclera and the two glows, per
+     *       eye, plus the third eye if the horse has one. This is where a
+     *       horse's eye colour comes from now: thirteen ordinary heritable
+     *       loci, resolved by {@link Eyes#resolve} with no reference to the
+     *       coat at all. A cremello's blue and a tiger-eye horse's gold get
+     *       here the same way every other eye colour does - the gene
+     *       {@linkplain com.example.horsegenetics.common.genetics.eye.EyeRequest
+     *       asked} for the allele and the horse was born carrying it;</li>
+     *   <li>the surviving {@link EyeColorContribution} claims, which are now
+     *       <b>magical genes only</b> - the dhampir's red, painted over whatever
+     *       the horse's own eyes were. The rank ordering still works and still
+     *       means what it said; what changed is that the three <i>natural</i>
+     *       ranks have no claimants left, so in practice this is one gene
+     *       getting the last word;</li>
      *   <li>every {@link EyePatchContribution}'s patches, in code order.</li>
      * </ol>
+     *
+     * <p>The old middle step - re-asking the channel below
+     * {@link EyeColor#RANK_DEPIGMENTED} and laying a blue over as much of each
+     * iris as {@code EyeSpread} said it reached - is gone from here, because
+     * nothing depigments an iris at bake time any more. That roll still happens
+     * and still produces one blue eye and the blue wedge; it happens in
+     * {@link com.example.horsegenetics.common.genetics.genes.WhitePatternEyes},
+     * when the horse is bred, and comes out as alleles the horse then carries.
      */
-    private static void paintEyes(Genotype genotype, Epigenome epigenome, CoatOverlay overlay,
-                                  double whiteCoverage) {
+    private static void paintEyes(EyePhenotype eyes, Genotype genotype, Epigenome epigenome,
+                                  CoatOverlay overlay, double whiteCoverage) {
+        paintEye(overlay, CoatRegions.RIGHT_EYE, eyes.right());
+        paintEye(overlay, CoatRegions.LEFT_EYE, eyes.left());
+        if (eyes.hasThird()) {
+            paintThirdEye(overlay, eyes.third());
+        }
+
         EyeClaim winner = eyeClaimOf(genotype, epigenome, whiteCoverage, Integer.MAX_VALUE);
-        if (winner != null && winner.color().depigmented()) {
-            EyeClaim under = eyeClaimOf(genotype, epigenome, whiteCoverage, EyeColor.RANK_DEPIGMENTED);
-            if (under != null) {
-                overlay.tintIris(under.color().rgb(), under.color().strength());
-            }
-            EyeColor blue = winner.color();
-            // Off the winning gene's own copy: the spread values live on every
-            // gene that can claim an eye, precisely because which one wins is
-            // not known until here.
-            EyeSpread spread = EyeSpread.roll(
-                    GeneEpigenetics.forGene(winner.gene(), genotype, epigenome).expressed());
-            overlay.tintIrisSector(CoatRegions.RIGHT_EYE, spread.right(), blue.rgb(), blue.strength());
-            overlay.tintIrisSector(CoatRegions.LEFT_EYE, spread.left(), blue.rgb(), blue.strength());
-        } else if (winner != null) {
+        if (winner != null) {
             overlay.tintIris(winner.color().rgb(), winner.color().strength());
         }
 
@@ -527,6 +622,60 @@ public final class CoatTextureComposer {
                         paint(overlay, CoatRegions.LEFT_EYE, patches.left());
                     });
         }
+    }
+
+    /**
+     * One eye. Sclera, then iris, then the sector over part of the iris, then
+     * the glows - which colour nothing and only say what renders full-bright.
+     *
+     * <p>An invisible half is skipped rather than painted transparent: its
+     * texels were never copied back from the template, so what is there is the
+     * horse's own coat, and painting anything at all over it would undo that.
+     * An invisible iris takes its sector and its glow with it - a sector of an
+     * iris that is not there is not there either.
+     */
+    private static void paintEye(CoatOverlay overlay, int eye, EyeRender render) {
+        if (render.sclera().paints()) {
+            // The wild type paints NOTHING. The template's sclera is already the
+            // white of a horse's eye, antialiased into the iris beside it, and
+            // flattening it to one flat hue would throw that away on every horse
+            // in the world to say something it already said. An iris cannot do
+            // the same - the template's is pure black, which is not an eye
+            // colour - so brown really is painted.
+            if (render.sclera().hue() != EyeHue.WHITE) {
+                overlay.tintSclera(eye, render.sclera().rgb(), 1.0);
+            }
+            if (render.glowSclera()) {
+                overlay.markEmissiveSclera(eye);
+            }
+        }
+        if (!render.iris().paints()) {
+            return;
+        }
+        overlay.tintIris(eye, render.iris().rgb(), 1.0);
+        if (render.sectoral()) {
+            overlay.tintIrisSector(eye, render.sector().maskFor(eye),
+                    render.sectorInk().rgb(), 1.0);
+        }
+        if (render.glowIris()) {
+            overlay.markEmissiveIris(eye);
+        }
+    }
+
+    /**
+     * The forehead eye, painted <b>absolutely</b> rather than tinted - there is
+     * no eye on the template there to walk toward a colour, only plain white
+     * head. See {@link CoatRegions#thirdEyeRect}.
+     */
+    private static void paintThirdEye(CoatOverlay overlay, EyeRender render) {
+        Integer iris = render.iris().paints() ? render.iris().rgb() : null;
+        Integer sclera = render.sclera().paints() ? render.sclera().rgb() : null;
+        overlay.paintThirdEye(iris, sclera);
+        if (iris != null && render.sectoral()) {
+            overlay.paintThirdEyeSector(render.sector().mask(), render.sectorInk().rgb());
+        }
+        overlay.markEmissiveThirdEye(iris != null && render.glowIris(),
+                sclera != null && render.glowSclera());
     }
 
     private static void paint(CoatOverlay overlay, int eye, java.util.List<EyePatch> patches) {
@@ -548,10 +697,14 @@ public final class CoatTextureComposer {
      * {@link EyeColorContribution} for why the white loci are claimants at all
      * and why blue out-ranks a pigment colour.
      *
-     * <p>{@code maxRank} is exclusive, and exists for exactly one caller: the
-     * eye painter asks a second time, capped below
+     * <p>{@code maxRank} is exclusive. It existed for one caller - the eye
+     * painter asked a second time, capped below
      * {@link EyeColor#RANK_DEPIGMENTED}, to find out what colour the horse's
-     * iris would have been if the white loci had left it alone.
+     * iris would have been if the white loci had left it alone - and that
+     * caller is gone: the white loci no longer claim an eye colour, they
+     * request an allele at the eye loci instead, so there is nothing to paint
+     * underneath. The parameter stays because a third-party magical gene may
+     * still want the question.
      */
     static EyeClaim eyeClaimOf(Genotype genotype, Epigenome epigenome, double whiteCoverage,
                                int maxRank) {

@@ -8,15 +8,15 @@ import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.EyeColor;
-import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.eye.EyeHue;
+import com.example.horsegenetics.common.genetics.eye.EyeRequest;
+import com.example.horsegenetics.common.genetics.eye.EyeRequestContribution;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
-import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +52,7 @@ import java.util.Optional;
  *
  * <p>Founder frequency {@code 1/}{@value #WILD_CHAMPAGNE_ONE_IN} per allele.
  */
-public final class ChampagneGene implements Gene, EyeColorContribution {
+public final class ChampagneGene implements Gene, EyeRequestContribution {
 
     public static final String KEY = "horsegenetics.champagne";
     public static final int WILD_CHAMPAGNE_ONE_IN = 40;
@@ -151,26 +151,23 @@ public final class ChampagneGene implements Gene, EyeColorContribution {
      */
     @Override
     public EpiSchema epiSchema() {
-        return EpiSchema.of(EpiValue.uniform("eye", 0, 1))
-                .and(EyeSpread.schema().values().toArray(new EpiValue[0]));
+        return EpiSchema.of(EpiValue.uniform("eye", 0, 1));
     }
 
     @Override
-    public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
-                                       double whiteCoverage) {
+    public EyeRequest requestEyes(AllelePair pair, Genotype genotype, Epigenome epigenome) {
         if (!pair.has(Ch)) {
-            return Optional.empty();
+            return EyeRequest.none();
         }
         double roll = GeneEpigenetics.forGene(this, genotype, epigenome).expressed().get("eye");
+        EyeHue hue;
         if (roll < P_AMBER) {
-            return Optional.of(EyeColor.dilution("champagne-amber", "Champagne amber", AMBER));
+            hue = EyeHue.GOLD;
+        } else if (roll < P_LIGHT_BROWN) {
+            hue = EyeHue.BROWN;          // hazel and light brown both land here
+        } else {
+            hue = EyeHue.GREEN;          // the olive tail of the distribution
         }
-        if (roll < P_HAZEL) {
-            return Optional.of(EyeColor.dilution("champagne-hazel", "Champagne hazel", HAZEL));
-        }
-        if (roll < P_LIGHT_BROWN) {
-            return Optional.of(EyeColor.dilution("champagne-light-brown", "Champagne light brown", LIGHT_BROWN));
-        }
-        return Optional.of(EyeColor.dilution("champagne-olive", "Champagne olive", OLIVE));
+        return EyeRequest.none().bothIrises(hue);
     }
 }

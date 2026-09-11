@@ -135,8 +135,19 @@ public abstract class AbstractWeatherGene implements Gene, EpigeneticAbilityCont
         this.founders = b.weight(n, n, 100.0 - WILD_CARRIER_PERCENT).build();
     }
 
+    /**
+     * <b>{@code +} and {@code v}, never {@code +} and {@code -}.</b> It was the
+     * latter, and that was a real bug with a long fuse: {@code -} is
+     * {@link com.example.horsegenetics.common.genetics.Genotype}'s own gene
+     * separator, so any horse carrying a "suffers in" allele wrote a genotype
+     * code its own parser could not read back
+     * ({@code horsegenetics.weather_jump=T-/T-} splits into three segments, two
+     * of them nonsense). Nothing caught it because it needs a founder to
+     * actually roll one of these, which is a few percent of a few percent; it
+     * surfaced when adding the eye loci shifted the founder RNG stream.
+     */
     private void add(Weather w, boolean positive, String statWord) {
-        String token = w.token() + (positive ? "+" : "-");
+        String token = w.token() + (positive ? "+" : "v");
         String label = (positive ? "Thrives in " : "Suffers in ") + w.label();
         variants.add(new Variant(new Allele(key, variants.size(), token, label + " (" + token + ")"),
                 w, positive));

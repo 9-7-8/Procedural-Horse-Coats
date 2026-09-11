@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.eye.Eyes;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -152,7 +153,12 @@ class CoatBakeGoldenTest {
                 if (!gene.canOccur(pair)) {
                     continue;   // an embryonic lethal is never a horse
                 }
-                Genotype gt = Genotype.wildType().with(pair);
+                // Forced, because that is what being born does to a horse: a
+                // gene that asks for an eye colour rather than painting one
+                // (tiger eye, cream, champagne, the four white loci) shows
+                // NOTHING on an unforced genotype, and its line here would
+                // quietly become the plain horse's. See Eyes.force.
+                Genotype gt = Eyes.force(Genotype.wildType().with(pair), epi);
                 int[] sheet = CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, adult, luts);
                 sb.append(gene.key()).append(' ').append(variant.token()).append(' ')
                         .append(sha256(sheet)).append('\n');

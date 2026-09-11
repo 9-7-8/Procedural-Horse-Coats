@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.eye.Eyes;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -320,8 +321,11 @@ class CoatPipelineGoldenTest {
         StringBuilder sb = new StringBuilder();
         for (String code : CODES) {
             for (long seed : SEEDS) {
-                Genotype gt = Genotype.parse(code);
+                // Forced, because these are horses rather than genotypes - see
+                // CoatBakeGoldenTest and Eyes.force. Without it every splashed
+                // white horse in the list would be brown-eyed.
                 Epigenome epi = Epigenome.fromSeed(seed);
+                Genotype gt = Eyes.force(Genotype.parse(code), epi);
                 sb.append(code).append(' ').append(seed).append(" adult ")
                         .append(sha256(CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, adultTemplate, luts)))
                         .append('\n');

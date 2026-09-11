@@ -3,8 +3,8 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.EyeColor;
-import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.eye.EyeRequest;
+import com.example.horsegenetics.common.genetics.eye.EyeRequestContribution;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
@@ -83,7 +83,8 @@ import java.util.List;
  *
  * <p>Natural, <b>non-deterministic</b>. See {@code wiki/gene-mitf.html}.
  */
-public final class MitfGene implements Gene, HealthContribution, EyeColorContribution {
+public final class MitfGene implements Gene, HealthContribution, EyeRequestContribution,
+        WhitePatternEyes.WhiteExtent {
 
     public static final String KEY = "horsegenetics.mitf";
 
@@ -268,9 +269,32 @@ public final class MitfGene implements Gene, HealthContribution, EyeColorContrib
      * not only the bold ones. See {@link WhitePatternEyes}.
      */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
-            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
-        return WhitePatternEyes.blueIf(isSplash(pair), whiteCoverage);
+    public EyeRequest requestEyes(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome) {
+        return WhitePatternEyes.blueIf(isSplash(pair), this, pair, genotype, epigenome);
+    }
+
+    /**
+     * The painter's own strength constants. The minimal outcome is a range
+     * rather than a value, so its midpoint stands in - the horse's real roll is
+     * on the coat and this runs before there is one.
+     */
+    @Override
+    public double whiteness(AllelePair pair) {
+        Expression e = expressionOf(pair);
+        if (e == MINIMAL) {
+            return (S_MINIMAL_LOW + S_MINIMAL_HIGH) / 2.0;
+        }
+        if (e == SPLASH) {
+            return S_SPLASH;
+        }
+        if (e == BOLD) {
+            return S_BOLD;
+        }
+        if (e == EXTENSIVE) {
+            return S_EXTENSIVE;
+        }
+        return 0.0;
     }
 
     /**

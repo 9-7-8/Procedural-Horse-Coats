@@ -6,8 +6,8 @@ import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.EyeColor;
-import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.eye.EyeRequest;
+import com.example.horsegenetics.common.genetics.eye.EyeRequestContribution;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
@@ -136,7 +136,8 @@ import java.util.Map;
  * <p>Natural. Every outcome but the wild type and dominant white is
  * <b>non-deterministic</b>. See {@code wiki/gene-kit.html}.
  */
-public final class KitGene implements Gene, EyeColorContribution {
+public final class KitGene implements Gene, EyeRequestContribution,
+        WhitePatternEyes.WhiteExtent {
 
     public static final String KEY = "horsegenetics.kit";
 
@@ -443,12 +444,45 @@ public final class KitGene implements Gene, EyeColorContribution {
      * {@link WhitePatternEyes}.
      */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
-            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
+    public EyeRequest requestEyes(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome) {
         Expression e = expressionOf(pair);
         boolean broad = e == BROAD || e == EXTENSIVE || e == NEAR_WHITE
                 || e == DOMINANT_WHITE || e == CAMARILLO_WHITE;
-        return WhitePatternEyes.blueIf(broad, whiteCoverage);
+        return WhitePatternEyes.blueIf(broad, this, pair, genotype, epigenome);
+    }
+
+    /**
+     * Roughly how much of the horse this combination leaves unpigmented - the
+     * painter's own strength constants, which is the honest answer since they
+     * are literally what the sabino field is scaled by. Dominant and Camarillo
+     * white are 1: there is nothing left.
+     */
+    @Override
+    public double whiteness(AllelePair pair) {
+        Expression e = expressionOf(pair);
+        if (e == MINIMAL) {
+            return S_MINIMAL;
+        }
+        if (e == MODEST) {
+            return S_MODEST;
+        }
+        if (e == SABINO) {
+            return S_SABINO;
+        }
+        if (e == BROAD) {
+            return S_BROAD;
+        }
+        if (e == EXTENSIVE) {
+            return S_EXTENSIVE;
+        }
+        if (e == NEAR_WHITE) {
+            return S_NEAR_WHITE;
+        }
+        if (e == DOMINANT_WHITE || e == CAMARILLO_WHITE) {
+            return 1.0;
+        }
+        return 0.0;
     }
 
     /**

@@ -17,6 +17,7 @@ import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.eye.Eyes;
 import com.example.horsegenetics.common.genetics.Inheritance;
 import com.example.horsegenetics.common.genetics.RandomizeMode;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
@@ -1188,6 +1189,18 @@ public final class CustomHorseSpawnScreen extends Screen {
     /**
      * Only the added rows are named; {@link Genotype#of} fills every other gene
      * with its default allele, which is what a horse carries there anyway.
+     *
+     * <p><b>Forced.</b> What comes back is the horse as it would be <i>born</i>:
+     * {@link Eyes#force} writes the eye alleles that the rest of the genotype
+     * asks for, exactly as {@code Genome.random} and {@code Genome.breedWith}
+     * do. Without it a splashed white horse built by hand here would preview
+     * with brown eyes and spawn with brown eyes, while every splashed white
+     * horse in the world had blue ones - and the whole point of this screen is
+     * that it is the game. A player who sets an eye row on a horse whose coat
+     * genes ask for an eye colour is therefore overruled, which is also what
+     * happens to the foal.
+     *
+     * <p>The twin does the same thing in the same place - see the other file.
      */
     private Genotype genotype() {
         List<AllelePair> pairs = new ArrayList<>();
@@ -1198,7 +1211,7 @@ public final class CustomHorseSpawnScreen extends Screen {
             List<Allele> as = row.gene.alleles();
             pairs.add(new AllelePair(as.get(row.a), as.get(row.b)));
         }
-        return Genotype.of(pairs).withSex(female ? Sex.FEMALE : Sex.MALE);
+        return Eyes.force(Genotype.of(pairs).withSex(female ? Sex.FEMALE : Sex.MALE), epigenome);
     }
 
     /** Back to a plain horse - but a locked row is kept, which is the point of a lock. */

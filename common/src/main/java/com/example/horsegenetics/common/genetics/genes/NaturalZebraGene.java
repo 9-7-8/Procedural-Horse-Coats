@@ -78,7 +78,14 @@ public final class NaturalZebraGene implements Gene {
      * it. The stripes are a subtraction from the finished base coat, so they
      * have to run once the base coat is finished.
      */
-    public static final int PRIORITY = 68;
+    /**
+     * 69, not 68: the eight natural eye loci took {@code 61}-{@code 68} and this
+     * is the first gene of the white-pattern band, so the band boundary in
+     * {@link com.example.horsegenetics.common.genetics.GeneFamily} moved with
+     * it. Nothing about this gene cares which number it is - it only has to
+     * stay after the dilutions and before the white loci proper.
+     */
+    public static final int PRIORITY = 69;
 
     /** Founder frequency: one allele copy in this many. */
     public static final int WILD_ZEB_ONE_IN = 60;

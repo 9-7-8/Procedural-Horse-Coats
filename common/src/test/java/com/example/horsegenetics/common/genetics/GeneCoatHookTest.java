@@ -205,6 +205,13 @@ class GeneCoatHookTest {
                 || gene instanceof WhiteLockContribution
                 || gene instanceof EyeColorContribution
                 || gene instanceof EyePatchContribution
+                // A gene that REQUESTS an eye colour rather than painting one -
+                // tiger eye, cream, champagne, the four white loci. Same
+                // argument as the claimants above: the whole effect lands in the
+                // overlay phase, through alleles at the eye loci.
+                || gene instanceof com.example.horsegenetics.common.genetics.eye.EyeRequestContribution
+                // ...and the eye loci themselves, which are where it lands.
+                || gene instanceof com.example.horsegenetics.common.genetics.genes.AbstractEyeGene
                 || paintsNothingOnThisBase(gene);
     }
 

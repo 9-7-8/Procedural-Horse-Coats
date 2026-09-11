@@ -122,17 +122,115 @@ public final class CoatRegions {
         });
     }
 
+    /**
+     * <b>The forehead</b> - where a {@code ThirdEyeGene} horse's third eye is
+     * drawn, as {@code {x, y, w, h}}.
+     *
+     * <p>The middle of the head's <b>top</b> face, and deliberately not its
+     * front one: the head box is {@code 6 x 5 x 7} and the muzzle box
+     * {@code 4 x 5 x 5} sits directly in front of it at exactly the same
+     * height, so the head's front face is covered except for a one-unit strip
+     * down either side. A third eye painted there would be invisible from every
+     * angle worth looking from.
+     *
+     * <p>Four texels wide by two tall, laid out sclera / iris / iris / sclera -
+     * the same proportions as a real eye's rect, but drawn <b>absolutely</b>
+     * rather than tinted, because the forehead is plain white on both templates
+     * and there is no iris there to colour.
+     *
+     * <p><b>Unverified.</b> Derived from {@code HorseSkinGeometry}'s box-UV
+     * tables (head {@code tu,tv} = {@code 0,13} adult, {@code 0,0} foal, at two
+     * texels per unit), not from a render, and with nothing on the template to
+     * check it against the way the two eye rects could be. On
+     * {@code wiki/verification.html}.
+     */
+    private static final int[] THIRD_EYE_ADULT = {18, 32, 4, 2};
+    private static final int[] THIRD_EYE_BABY = {22, 8, 4, 2};
+
+    public static int[] thirdEyeRect(Skin skin) {
+        return skin == Skin.BABY ? THIRD_EYE_BABY : THIRD_EYE_ADULT;
+    }
+
+    /** Index of the third eye, where a caller addresses all three by number. */
+    public static final int THIRD_EYE = 2;
+
+    /**
+     * <b>Which half of an eye survives the redraw</b> - one flag per eye per
+     * half, and the only reason {@link #redrawEyes} takes an argument.
+     *
+     * <p>An invisible iris or sclera is not a colour: it means those texels are
+     * <b>not painted</b>, so the coat that the white loci and the magical genes
+     * left on the head shows through where the eye would be. There is no way to
+     * express that in the overlay pass - every painter there works from the
+     * already-redrawn eye - so it has to be a decision about whether to copy the
+     * template back at all.
+     *
+     * <p>Iris and sclera are told apart by the template's own luma, the same
+     * half-way cut {@code CoatOverlay} uses, because the two eyes' faces are
+     * mirrored on the sheet and neither half is at a fixed offset.
+     *
+     * @param keepIris   per eye ({@code eyeRects} index), redraw the dark texels
+     * @param keepSclera per eye, redraw the light ones
+     */
+    public record EyeRedraw(boolean[] keepIris, boolean[] keepSclera) {
+
+        /** Both halves of both eyes - what every horse but an invisible-eyed one wants. */
+        public static final EyeRedraw ALL =
+                new EyeRedraw(new boolean[]{true, true}, new boolean[]{true, true});
+    }
+
+    /**
+     * Above this luma an eye texel is sclera rather than iris. Half-way: the
+     * template's sclera is near-white and its iris is pure black, so anything in
+     * between is the antialiased boundary and belongs to whichever side it is
+     * closer to. The same number {@code CoatOverlay} splits an eye on, and
+     * exposed so that the composer's own invisible-eye pass cannot drift from
+     * the redraw's.
+     */
+    private static final double SCLERA_LUMA = 0.5;
+
+    public static double scleraLuma() {
+        return SCLERA_LUMA;
+    }
+
     /** Copy the eye texels straight from {@code template} into {@code dst}. */
     public static void redrawEyes(Skin skin, int[] dst, int[] template) {
-        for (int[] r : eyeRects(skin)) {
+        redrawEyes(skin, dst, template, EyeRedraw.ALL);
+    }
+
+    /**
+     * Copy the eye texels back from {@code template}, skipping the halves
+     * {@code which} says this horse does not have. See {@link EyeRedraw} - and
+     * note a skipped texel is left showing the <b>composed coat</b>, not made
+     * transparent: a horse with no iris has its own colour where the iris was.
+     */
+    public static void redrawEyes(Skin skin, int[] dst, int[] template, EyeRedraw which) {
+        int[][] rects = eyeRects(skin);
+        for (int eye = 0; eye < rects.length; eye++) {
+            int[] r = rects[eye];
+            boolean iris = eye >= which.keepIris().length || which.keepIris()[eye];
+            boolean sclera = eye >= which.keepSclera().length || which.keepSclera()[eye];
             for (int y = r[1]; y < r[1] + r[3]; y++) {
                 for (int x = r[0]; x < r[0] + r[2]; x++) {
-                    if (x >= 0 && y >= 0 && x < N && y < N) {
+                    if (x < 0 || y < 0 || x >= N || y >= N) {
+                        continue;
+                    }
+                    boolean light = luma(template[y * N + x]) > SCLERA_LUMA;
+                    if (light ? sclera : iris) {
                         dst[y * N + x] = template[y * N + x];
                     }
                 }
             }
         }
+    }
+
+    /** Rec. 601 luma of an ARGB texel, {@code [0,1]}; a transparent one reads as 0. */
+    private static double luma(int argb) {
+        if ((argb >>> 24) == 0) {
+            return 0.0;
+        }
+        return (0.299 * ((argb >> 16) & 0xFF) + 0.587 * ((argb >> 8) & 0xFF)
+                + 0.114 * (argb & 0xFF)) / 255.0;
     }
 
     // ---- pigment restriction -----------------------------------------

@@ -260,8 +260,8 @@ public enum GeneFamily {
         NATURAL_BANDS.put(0, NATURAL_OTHER);      // sex, diet
         NATURAL_BANDS.put(10, NATURAL_COAT);      // extension, agouti
         NATURAL_BANDS.put(30, NATURAL_DILUTION);  // silver .. grey
-        NATURAL_BANDS.put(60, NATURAL_OTHER);     // tiger eye - the eyes and nothing else
-        NATURAL_BANDS.put(65, NATURAL_WHITE);     // zebra striping .. PAX3, and the PATN modifiers
+        NATURAL_BANDS.put(60, NATURAL_OTHER);     // tiger eye, then the eight natural eye loci
+        NATURAL_BANDS.put(69, NATURAL_WHITE);     // zebra striping .. PAX3, and the PATN modifiers
 
         // What you get out of the horse.
         MAGICAL_OVERRIDES.put("horsegenetics.milk", MAGIC_YIELD);

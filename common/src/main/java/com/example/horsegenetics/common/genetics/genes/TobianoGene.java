@@ -45,7 +45,7 @@ import java.util.List;
  * patch field's seed), {@code nextFloat()} for how much white, {@code nextFloat()}
  * for the patch size.
  */
-public final class TobianoGene implements Gene {
+public final class TobianoGene implements Gene, WhitePatternEyes.WhiteExtent {
 
     public static final String KEY = "horsegenetics.tobiano";
     public static final int WILD_TOBIANO_ONE_IN = 50;
@@ -119,6 +119,27 @@ public final class TobianoGene implements Gene {
     public final Allele To = new Allele(KEY, 0, "To", "Tobiano (To)");
     public final Allele to = new Allele(KEY, 1, "to", "Wild-type (to)");
     private final List<Allele> alleles = List.of(To, to);
+
+    /**
+     * <b>Tobiano never claims a blue eye</b>, and that is the point of it being
+     * here at all: it is a white gene with no eye rule of its own, so all it
+     * declares is how much of the horse it takes the colour off. That still
+     * counts toward {@link WhitePatternEyes#whiteScore} - a tobiano that is also
+     * a loud sabino is a broadly white horse however it got there, and the eyes
+     * follow the coat rather than following any one locus.
+     */
+    @Override
+    public double whiteness(AllelePair pair) {
+        return expressionOf(pair).wildType() ? 0.0 : TOBIANO_WHITENESS;
+    }
+
+    /**
+     * Roughly the share of a tobiano the white patches cover. Unlike the sabino
+     * and splash loci this gene has no single strength constant to borrow - its
+     * pattern is a count of patches, not a coverage - so this is a declared
+     * estimate rather than a number the painter also uses.
+     */
+    private static final double TOBIANO_WHITENESS = 0.45;
 
     private final Expression WILD = Expression.wildType("No white patches.");
 

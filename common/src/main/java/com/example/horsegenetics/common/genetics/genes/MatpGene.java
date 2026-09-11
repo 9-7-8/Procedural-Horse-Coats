@@ -6,15 +6,15 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.EyeColor;
-import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.eye.EyeHue;
+import com.example.horsegenetics.common.genetics.eye.EyeRequest;
+import com.example.horsegenetics.common.genetics.eye.EyeRequestContribution;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
-import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -77,7 +77,7 @@ import java.util.Optional;
  * pearls alone give the pale, bright iris pearl is described by. A single cream
  * copy does not touch the eye at all.
  */
-public final class MatpGene implements Gene, EyeColorContribution {
+public final class MatpGene implements Gene, EyeRequestContribution {
 
     public static final String KEY = "horsegenetics.matp";
 
@@ -316,29 +316,28 @@ public final class MatpGene implements Gene, EyeColorContribution {
      * one entry per outcome and not one per horse.
      */
     @Override
-    public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
-                                       double whiteCoverage) {
+    public EyeRequest requestEyes(AllelePair pair, Genotype genotype, Epigenome epigenome) {
         int cream = pair.count(Cr);
         int pearl = pair.count(prl);
         Expression coat = expressionOf(pair);
         if (cream == 1 && pearl == 1) {
             // The one row where cream and pearl disagree about the eye, and the
-            // mod ordinary source of a green iris.
-            return Optional.of(EyeColor.dilution("cream-pearl-green", "Blue-green", CREAM_PEARL_GREEN));
+            // mod's ordinary source of a green iris.
+            return EyeRequest.none().bothIrises(EyeHue.GREEN);
         }
         if (coat == DOUBLE_DILUTE) {
             // Every route to a double dilute gives the pale blue - two creams,
             // a cream beside a recessive, or two snowdrops. That is the point of
             // the look-alikes: the eye does not tell them apart either.
-            return Optional.of(EyeColor.dilution("cream-blue", "Cream blue", DOUBLE_CREAM_BLUE));
+            return EyeRequest.none().bothIrises(EyeHue.LIGHT_BLUE);
         }
         if (coat == CLASSIC_PEARL) {
-            return Optional.of(EyeColor.dilution("pearl-light", "Pale pearl", PEARL_LIGHT));
+            return EyeRequest.none().bothIrises(EyeHue.LIGHT_BLUE);
         }
         if (coat == SUNSHINE) {
-            return Optional.of(EyeColor.dilution("sunshine-amber", "Pale amber", SUNSHINE_AMBER));
+            return EyeRequest.none().bothIrises(EyeHue.GOLD);
         }
-        return Optional.empty();
+        return EyeRequest.none();
     }
 
     private static Expression.Pigment dilution(float keepRed, float keepBlack, float blackTint) {
@@ -355,7 +354,7 @@ public final class MatpGene implements Gene, EyeColorContribution {
      */
     @Override
     public EpiSchema epiSchema() {
-        return EyeSpread.schema();
+        return EpiSchema.EMPTY;   // see TigerEyeGene - a pigment request needs no spread
     }
 
 }

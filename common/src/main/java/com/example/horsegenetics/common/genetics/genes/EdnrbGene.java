@@ -13,8 +13,8 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.EyeColor;
-import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.eye.EyeRequest;
+import com.example.horsegenetics.common.genetics.eye.EyeRequestContribution;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
@@ -112,7 +112,8 @@ import java.util.Map;
  * {@code lethal-white} is deterministic (it is total). See
  * {@code wiki/gene-ednrb.html}.
  */
-public final class EdnrbGene implements Gene, HealthContribution, EyeColorContribution {
+public final class EdnrbGene implements Gene, HealthContribution, EyeRequestContribution,
+        WhitePatternEyes.WhiteExtent {
 
     public static final String KEY = "horsegenetics.ednrb";
     /** Founder frequency of {@code O}: one allele copy in this many. */
@@ -664,9 +665,26 @@ public final class EdnrbGene implements Gene, HealthContribution, EyeColorContri
      * it has no pigment anywhere at all. See {@link WhitePatternEyes}.
      */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
-            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
-        return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), whiteCoverage);
+    public EyeRequest requestEyes(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome) {
+        return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), this, pair, genotype, epigenome);
+    }
+
+    /**
+     * Frame's own coverage range, at its midpoint - the horse's real roll is on
+     * the coat and this runs before there is one. Lethal white is 1 and will
+     * never be asked: that foal does not live to have eyes looked at.
+     */
+    @Override
+    public double whiteness(AllelePair pair) {
+        Expression e = expressionOf(pair);
+        if (e == FRAME_OVERO) {
+            return COVER_MIN + COVER_RANGE / 2.0;
+        }
+        if (e == LETHAL_WHITE) {
+            return 1.0;
+        }
+        return 0.0;
     }
 
 }

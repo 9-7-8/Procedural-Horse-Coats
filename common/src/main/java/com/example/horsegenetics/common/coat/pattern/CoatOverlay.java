@@ -59,9 +59,48 @@ public final class CoatOverlay {
      */
     private boolean[] locked;
 
+    /**
+     * <b>The white template</b>, or {@code null} - the only thing that reliably
+     * says which texels of an eye are iris and which are sclera.
+     *
+     * <p>It used to be read off {@link #base}: an eye is a block of pure black
+     * beside a block of near-white, so "dark" meant iris. That stopped being
+     * true the moment an iris could be invisible - a cleared iris shows the
+     * horse own coat, which on a pale horse is bright, so the sclera painter
+     * claimed it and the colour bled across. The template never changes, so
+     * classifying from it is right whatever any earlier painter did.
+     */
+    private int[] eyeTemplate;
+
     CoatOverlay(Skin skin, int[] base) {
         this.skin = skin;
         this.base = base;
+    }
+
+    /** Hand over the template the eyes are classified from. Set once, before any gene paints. */
+    void eyeTemplate(int[] template) {
+        this.eyeTemplate = template;
+    }
+
+    /** Is this eye texel part of the iris rather than the sclera? */
+    private boolean isIris(int px, int py) {
+        return lumaAt(px, py) <= SCLERA_LUMA;
+    }
+
+    /**
+     * How bright this eye texel is on the template, {@code [0,1]} - the weight
+     * both eye painters scale by, so the antialiased rim between iris and sclera
+     * takes a proportional share of each instead of a hard edge.
+     */
+    private double lumaAt(int px, int py) {
+        int[] t = eyeTemplate;
+        int argb = t != null && px >= 0 && py >= 0 && px < N && py < N
+                ? t[py * N + px]
+                : base(px, py);
+        if ((argb >>> 24) == 0) {
+            return 0.0;
+        }
+        return luma(argb);
     }
 
     /** Which mesh is being painted - a foal has no {@code MANE} or {@code MUZZLE}. */
@@ -118,6 +157,15 @@ public final class CoatOverlay {
             return;
         }
         double t = strength < 0 ? 0 : (strength > 1 ? 1 : strength);
+        if (t == 0) {
+            // Nothing to do - and doing it anyway is not harmless. A write of
+            // the base colour is still a WRITE, and these are absolute
+            // last-writer-wins, so a zero-strength pass over a texel another
+            // painter has already claimed silently undoes it. That is exactly
+            // what tintIris does to every sclera texel it walks over: the
+            // 1 - luma weighting is 0 there, and a black sclera came out white.
+            return;
+        }
         int r = mix((b >> 16) & 0xFF, (rgb >> 16) & 0xFF, t);
         int g = mix((b >> 8) & 0xFF, (rgb >> 8) & 0xFF, t);
         int bl = mix(b & 0xFF, rgb & 0xFF, t);
@@ -196,15 +244,21 @@ public final class CoatOverlay {
      * complex's white rim, wrong for an iris.
      */
     public void tintIris(int rgb, double strength) {
-        forEachEyeTexel((px, py) -> {
-            int b = base(px, py);
-            if ((b >>> 24) == 0) {
-                return;
-            }
-            double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
-                    + 0.114 * (b & 0xFF)) / 255.0;
-            blendToward(px, py, rgb, strength * (1.0 - luma));
-        });
+        forEachEyeTexel((px, py) -> tintIrisTexel(px, py, rgb, strength));
+    }
+
+    private void tintIrisTexel(int px, int py, int rgb, double strength) {
+        if ((base(px, py) >>> 24) == 0) {
+            return;
+        }
+        blendToward(px, py, rgb, strength * (1.0 - lumaAt(px, py)));
+    }
+
+    private void tintScleraTexel(int px, int py, int rgb, double strength) {
+        if ((base(px, py) >>> 24) == 0) {
+            return;
+        }
+        blendToward(px, py, rgb, strength * lumaAt(px, py));
     }
 
     /**
@@ -246,13 +300,7 @@ public final class CoatOverlay {
                 if ((quadrants & (1 << q)) == 0) {
                     continue;
                 }
-                int b = base(x, y);
-                if ((b >>> 24) == 0) {
-                    continue;
-                }
-                double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
-                        + 0.114 * (b & 0xFF)) / 255.0;
-                blendToward(x, y, rgb, strength * (1.0 - luma));
+                tintIrisTexel(x, y, rgb, strength);
             }
         }
     }
@@ -267,13 +315,10 @@ public final class CoatOverlay {
         int xMin = Integer.MAX_VALUE, yMin = Integer.MAX_VALUE, xMax = -1, yMax = -1;
         for (int y = r[1]; y < r[1] + r[3]; y++) {
             for (int x = r[0]; x < r[0] + r[2]; x++) {
-                int b = base(x, y);
-                if ((b >>> 24) == 0) {
+                if ((base(x, y) >>> 24) == 0) {
                     continue;
                 }
-                double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
-                        + 0.114 * (b & 0xFF)) / 255.0;
-                if (luma < 0.5) {
+                if (isIris(x, y)) {
                     xMin = Math.min(xMin, x);
                     yMin = Math.min(yMin, y);
                     xMax = Math.max(xMax, x);
@@ -284,6 +329,101 @@ public final class CoatOverlay {
         return xMax < 0
                 ? new int[]{r[0], r[1], r[0] + r[2] - 1, r[1] + r[3] - 1}
                 : new int[]{xMin, yMin, xMax, yMax};
+    }
+
+    /**
+     * <b>Colour the sclera</b> - the light texels of the eye - and leave the
+     * iris alone. The exact complement of {@link #tintIris}, and weighted the
+     * same way for the same reason: an adult eye is a block of near-white beside
+     * a block of pure black, so each texel takes the colour in proportion to how
+     * <b>bright</b> it already is.
+     *
+     * <p>A foal has no sclera on its template - its eye is the pupil block alone
+     * - so this does nothing on one. That is not a bug to work round: a foal's
+     * eye genuinely has no white in it to colour, and the same horse grown up
+     * shows the locus.
+     */
+    public void tintSclera(int rgb, double strength) {
+        forEachEyeTexel((px, py) -> tintScleraTexel(px, py, rgb, strength));
+    }
+
+    /** {@link #tintIris} over one eye only - {@code eye} is an {@code eyeRects} index. */
+    public void tintIris(int eye, int rgb, double strength) {
+        forEachEyeTexel(eye, (px, py) -> tintIrisTexel(px, py, rgb, strength));
+    }
+
+    /** {@link #tintSclera} over one eye only. */
+    public void tintSclera(int eye, int rgb, double strength) {
+        forEachEyeTexel(eye, (px, py) -> tintScleraTexel(px, py, rgb, strength));
+    }
+
+    /**
+     * <b>Draw a third eye on the forehead</b>, absolutely.
+     *
+     * <p>Everything else here tints: it walks the template's own eye toward a
+     * colour, which is what keeps a two-texel iris reading as an eye. There is
+     * nothing to tint on a forehead - both templates are plain white there - so
+     * this writes the pixels outright, in the {@code sclera / iris / iris /
+     * sclera} layout {@link CoatRegions#thirdEyeRect} documents.
+     *
+     * <p>A {@code null} colour means that half is not painted at all, which is
+     * how an invisible iris or sclera reaches the forehead: the coat shows
+     * through, exactly as it does on the two real eyes.
+     */
+    public void paintThirdEye(Integer irisRgb, Integer scleraRgb) {
+        int[] r = CoatRegions.thirdEyeRect(skin);
+        for (int y = r[1]; y < r[1] + r[3]; y++) {
+            for (int x = r[0]; x < r[0] + r[2]; x++) {
+                Integer rgb = thirdEyeIris(r, x) ? irisRgb : scleraRgb;
+                if (rgb != null) {
+                    paint(x, y, 0xFF000000 | (rgb & 0xFFFFFF));
+                }
+            }
+        }
+    }
+
+    /**
+     * {@link #tintIrisSector} for the third eye - the same four quadrants over
+     * its two iris columns, so a third eye can carry a sector like any other.
+     */
+    public void paintThirdEyeSector(int quadrants, int rgb) {
+        int[] r = CoatRegions.thirdEyeRect(skin);
+        double midX = r[0] + r[2] / 2.0;
+        double midY = r[1] + r[3] / 2.0;
+        for (int y = r[1]; y < r[1] + r[3]; y++) {
+            for (int x = r[0]; x < r[0] + r[2]; x++) {
+                if (!thirdEyeIris(r, x)) {
+                    continue;
+                }
+                int q = (x < midX ? 0 : 1) + (y < midY ? 0 : 2);
+                if ((quadrants & (1 << q)) != 0) {
+                    paint(x, y, 0xFF000000 | (rgb & 0xFFFFFF));
+                }
+            }
+        }
+    }
+
+    /** Mark the third eye's iris or sclera full-bright. */
+    public void markEmissiveThirdEye(boolean iris, boolean sclera) {
+        int[] r = CoatRegions.thirdEyeRect(skin);
+        for (int y = r[1]; y < r[1] + r[3]; y++) {
+            for (int x = r[0]; x < r[0] + r[2]; x++) {
+                if (thirdEyeIris(r, x) ? iris : sclera) {
+                    markEmissive(x, y);
+                }
+            }
+        }
+    }
+
+    /** The middle two columns of the forehead rect are the iris; the outer two are sclera. */
+    private static boolean thirdEyeIris(int[] rect, int x) {
+        int col = x - rect[0];
+        return col > 0 && col < rect[2] - 1;
+    }
+
+    private static double luma(int argb) {
+        return (0.299 * ((argb >> 16) & 0xFF) + 0.587 * ((argb >> 8) & 0xFF)
+                + 0.114 * (argb & 0xFF)) / 255.0;
     }
 
     // ------------------------------------------------------------------
@@ -319,6 +459,29 @@ public final class CoatOverlay {
     }
 
     /**
+     * Mark only the <b>iris</b> - the dark texels - leaving the white round it
+     * alone. The complement of {@link #markEmissiveSclera}, and the two are
+     * separate because they are two completely different faces: a lit iris is a
+     * lamp, a lit sclera with a hole in it is a dhampir.
+     */
+    public void markEmissiveIris(int eye) {
+        forEachEyeTexel(eye, (px, py) -> {
+            if ((base(px, py) >>> 24) != 0 && isIris(px, py)) {
+                markEmissive(px, py);
+            }
+        });
+    }
+
+    /** {@link #markEmissiveSclera} over one eye only. */
+    public void markEmissiveSclera(int eye) {
+        forEachEyeTexel(eye, (px, py) -> {
+            if ((base(px, py) >>> 24) != 0 && !isIris(px, py)) {
+                markEmissive(px, py);
+            }
+        });
+    }
+
+    /**
      * Mark only the <b>sclera</b> - the light texels of the eye - leaving the
      * iris alone. The exact complement of {@link #tintIris}, and weighted the
      * same way and for the same reason: an adult eye is a block of near-white
@@ -331,13 +494,7 @@ public final class CoatOverlay {
      */
     public void markEmissiveSclera() {
         forEachEyeTexel((px, py) -> {
-            int b = base(px, py);
-            if ((b >>> 24) == 0) {
-                return;
-            }
-            double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
-                    + 0.114 * (b & 0xFF)) / 255.0;
-            if (luma > SCLERA_LUMA) {
+            if ((base(px, py) >>> 24) != 0 && !isIris(px, py)) {
                 markEmissive(px, py);
             }
         });
@@ -377,6 +534,19 @@ public final class CoatOverlay {
                 for (int x = r[0]; x < r[0] + r[2]; x++) {
                     visitor.at(x, y);
                 }
+            }
+        }
+    }
+
+    private void forEachEyeTexel(int eye, TexelVisitor visitor) {
+        int[][] rects = CoatRegions.eyeRects(skin);
+        if (eye < 0 || eye >= rects.length) {
+            return;
+        }
+        int[] r = rects[eye];
+        for (int y = r[1]; y < r[1] + r[3]; y++) {
+            for (int x = r[0]; x < r[0] + r[2]; x++) {
+                visitor.at(x, y);
             }
         }
     }

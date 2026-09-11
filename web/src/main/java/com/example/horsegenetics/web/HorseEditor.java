@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.eye.Eyes;
 import com.example.horsegenetics.common.genetics.Inheritance;
 import com.example.horsegenetics.common.genetics.RandomizeMode;
 import com.example.horsegenetics.common.horse.Sex;
@@ -245,7 +246,21 @@ public final class HorseEditor {
         return epigenome;
     }
 
-    /** The horse as it stands - every added row's pair, plus the sex locus. */
+    /**
+     * The horse as it stands - every added row's pair, plus the sex locus.
+     *
+     * <p><b>Forced.</b> What comes back is the horse as it would be <i>born</i>:
+     * {@link Eyes#force} writes the eye alleles that the rest of the genotype
+     * asks for, exactly as {@code Genome.random} and {@code Genome.breedWith}
+     * do. Without it a splashed white horse built by hand here would preview
+     * with brown eyes and spawn with brown eyes, while every splashed white
+     * horse in the world had blue ones - and the whole point of this screen is
+     * that it is the game. A player who sets an eye row on a horse whose coat
+     * genes ask for an eye colour is therefore overruled, which is also what
+     * happens to the foal.
+     *
+     * <p>The twin does the same thing in the same place - see the other file.
+     */
     public Genotype genotype() {
         Genotype gt = Genotype.wildType().withSex(female ? Sex.FEMALE : Sex.MALE);
         for (Row row : rows) {
@@ -255,7 +270,7 @@ public final class HorseEditor {
             List<Allele> as = row.gene.alleles();
             gt = gt.with(new AllelePair(as.get(row.a), as.get(row.b)));
         }
-        return gt;
+        return Eyes.force(gt, epigenome);
     }
 
     public Genome genome() {

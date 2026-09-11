@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.epi.EpiDrift;
+import com.example.horsegenetics.common.genetics.eye.Eyes;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.horse.Sex;
 
@@ -35,12 +36,35 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
 
     /** A founder / wild horse: random alleles, random epigenetics on each copy. */
     public static Genome random(Rng rng) {
-        return new Genome(Genotype.random(rng), Epigenome.random(rng));
+        return withForcedEyes(Genotype.random(rng), Epigenome.random(rng));
     }
 
     /** A known genotype with fresh rolled epigenetics (debug-pen horses, imports). */
     public static Genome of(Genotype genotype, Rng rng) {
-        return new Genome(genotype, Epigenome.random(rng));
+        return withForcedEyes(genotype, Epigenome.random(rng));
+    }
+
+    /**
+     * <b>Where the eye loci are settled</b>, and the only place - see
+     * {@link Eyes#force}. A gene with something to say about an eye says it as a
+     * request, and the requested allele is written onto the horse here, once,
+     * when the horse is made.
+     *
+     * <p>It has to be at the {@link Genome} level rather than inside
+     * {@link Genotype#random} because several requests read the epigenome:
+     * champagne picks which of three hues to ask for off its own allele copy,
+     * and the white loci roll how far the blue got. Forcing twice - once with
+     * midpoints and once with the real numbers - would destroy the horse's own
+     * eye alleles on the first pass and leave the second unable to tell that it
+     * had.
+     *
+     * <p>The epigenome is handed back untouched and stays aligned: a forced
+     * locus keeps whatever numbers its two copies were rolled or inherited
+     * with, and {@link Epigenome.Copies} is addressed by slot rather than by
+     * allele.
+     */
+    private static Genome withForcedEyes(Genotype genotype, Epigenome epigenome) {
+        return new Genome(Eyes.force(genotype, epigenome), epigenome);
     }
 
     public static Genome parse(String genotypeCode, String epigenomeCode) {
@@ -158,7 +182,7 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
                     first, AlleleEpigenetics.deconflict(first, second, rng)));
         }
 
-        return new Genome(Genotype.of(List.copyOf(pairs.values())), Epigenome.of(copies));
+        return withForcedEyes(Genotype.of(List.copyOf(pairs.values())), Epigenome.of(copies));
     }
 
     /**

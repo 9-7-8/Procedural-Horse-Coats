@@ -4,15 +4,15 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.EyeColor;
-import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.eye.EyeHue;
+import com.example.horsegenetics.common.genetics.eye.EyeRequest;
+import com.example.horsegenetics.common.genetics.eye.EyeRequestContribution;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
-import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,8 +35,11 @@ import java.util.Optional;
  * <h2>It is not a coat pattern</h2>
  * Worth saying because the breed reference this mod was built from files tiger
  * eye under coat patterns, and it is not one: the coat is completely unaffected
- * and only the iris changes, which is why the gene needed the eye-colour channel
- * ({@link EyeColorContribution}) to exist before it could be built at all.
+ * and only the iris changes, which is why the gene needed an eye channel to exist
+ * before it could be built at all - and, in the end, why the eyes became loci of
+ * their own. It no longer paints an iris: it {@linkplain EyeRequestContribution
+ * asks} the eye loci for gold, and the allele is written onto the horse at
+ * birth.
  *
  * <p>It does, however, <b>affect the baked coat texture</b> - the eyes are drawn
  * into it - so unlike the other "paints nothing" genes its expressing outcomes
@@ -54,7 +57,7 @@ import java.util.Optional;
  *
  * <p>Natural, deterministic. See {@code wiki/gene-tiger-eye.html}.
  */
-public final class TigerEyeGene implements Gene, EyeColorContribution {
+public final class TigerEyeGene implements Gene, EyeRequestContribution {
 
     public static final String KEY = "horsegenetics.tiger_eye";
     public static final int PRIORITY = 60; // after the dilutions and grey, before the white loci
@@ -62,10 +65,12 @@ public final class TigerEyeGene implements Gene, EyeColorContribution {
     /** Per allele, in the wild population at large. Paso Finos carry it far more often. */
     public static final int WILD_ONE_IN = 70;
 
-    /** A warm amber - the classic tiger eye. */
-    public static final int AMBER = 0xC8811E;
-    /** {@code TE2}'s paler, greener-yellow shade. */
-    public static final int YELLOW = 0xD6B341;
+    // The two shades this locus used to own - a warm amber and a paler yellow -
+    // are gone. Both requested EyeHue.GOLD, which is the amber value, so TE1 and
+    // TE2 no longer differ in the eye. That is a real loss of a distinction and
+    // it is the price of a closed, breedable colour vocabulary: a hue an allele
+    // cannot name is a hue nobody can breed toward. If the pale form is worth
+    // keeping, it wants an allele at the iris locus, not a constant here.
 
     public final Allele TE1 = new Allele(KEY, 0, "TE1", "Tiger eye 1 (TE1)");
     public final Allele TE2 = new Allele(KEY, 1, "TE2", "Tiger eye 2 (TE2)");
@@ -130,21 +135,16 @@ public final class TigerEyeGene implements Gene, EyeColorContribution {
      * pigment left in a depigmented iris for this gene to colour.
      */
     @Override
-    public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
-                                      double whiteCoverage) {
+    public EyeRequest requestEyes(AllelePair pair, Genotype genotype, Epigenome epigenome) {
         if (pair.has(N)) {
-            return Optional.empty();
+            return EyeRequest.none();
         }
-        return Optional.of(pair.homozygousFor(TE2)
-                ? EyeColor.pigment("tiger-eye-yellow", "Tiger eye (yellow)", YELLOW)
-                : EyeColor.pigment("tiger-eye-amber", "Tiger eye (amber)", AMBER));
+        return EyeRequest.none().bothIrises(EyeHue.GOLD);
     }
-    /**
-     * Only the eye spread; the iris colour itself is fixed by the alleles.
-     */
-    @Override
-    public EpiSchema epiSchema() {
-        return EyeSpread.schema();
-    }
+    // No epigenetics at all. It used to carry EyeSpread's five values, because
+    // any gene that could win the eye-colour claim had to be ready to be the one
+    // the spread was read off. It cannot win anything now - it asks the iris
+    // loci for gold and they decide - and only a DEPIGMENTING request needs a
+    // spread, which this is not.
 
 }

@@ -15,6 +15,13 @@ import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.ExtremeWhiteDominantGene;
+import com.example.horsegenetics.common.genetics.genes.EyeColourGene;
+import com.example.horsegenetics.common.genetics.genes.EyeGlowGene;
+import com.example.horsegenetics.common.genetics.genes.EyeScleraGene;
+import com.example.horsegenetics.common.genetics.genes.EyeSectorColourGene;
+import com.example.horsegenetics.common.genetics.genes.EyeSectorGene;
+import com.example.horsegenetics.common.genetics.genes.ThirdEyeGene;
+import com.example.horsegenetics.common.genetics.eye.EyeLocus;
 import com.example.horsegenetics.common.genetics.genes.FlaxenGene;
 import com.example.horsegenetics.common.genetics.genes.Gbe1Gene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
@@ -318,6 +325,47 @@ public final class Genes {
      * changes only the eyes, and the reason the eye-colour channel exists.
      */
     public static final TigerEyeGene TIGER_EYE = new TigerEyeGene();
+    /**
+     * <b>The eye loci</b> - thirteen of them, and the reason no gene in the mod
+     * paints an iris on its own account any more.
+     *
+     * <p>Eight are natural and sit in the {@code 61}-{@code 68} slots
+     * immediately after {@link #TIGER_EYE}, which is the gene that made the case
+     * for them: iris colour, sclera colour, and the two halves of sectoral
+     * heterochromia, each once per eye. Five are magical - the two glows per eye
+     * and the third eye - and sit at {@code 121}-{@code 125}.
+     *
+     * <p><b>The right eye of each pair sorts one ahead of the left</b>, and that
+     * is load-bearing rather than tidy: the second locus to roll reads the first
+     * through {@link FounderContext} and usually copies it, which is what keeps
+     * wild heterochromia rare while leaving it completely ordinary to breed for.
+     * See {@link com.example.horsegenetics.common.genetics.genes.AbstractEyeGene}.
+     *
+     * <p>What a <i>white</i> or a <i>cream</i> horse's eyes are is not decided
+     * here and not decided by those genes either: they
+     * {@linkplain com.example.horsegenetics.common.genetics.eye.EyeRequest request}
+     * an allele at these loci and
+     * {@link com.example.horsegenetics.common.genetics.eye.Eyes#force} writes it
+     * onto the horse when the horse is made. See {@code wiki/eye-colour.html}.
+     */
+    public static final EyeColourGene EYE_COLOUR_RIGHT = new EyeColourGene(EyeLocus.IRIS_RIGHT, 61);
+    public static final EyeColourGene EYE_COLOUR_LEFT = new EyeColourGene(EyeLocus.IRIS_LEFT, 62);
+    public static final EyeSectorGene EYE_SECTOR_RIGHT = new EyeSectorGene(EyeLocus.SECTOR_RIGHT, 63);
+    public static final EyeSectorGene EYE_SECTOR_LEFT = new EyeSectorGene(EyeLocus.SECTOR_LEFT, 64);
+    public static final EyeSectorColourGene EYE_SECTOR_COLOUR_RIGHT =
+            new EyeSectorColourGene(EyeLocus.SECTOR_COLOUR_RIGHT, 65);
+    public static final EyeSectorColourGene EYE_SECTOR_COLOUR_LEFT =
+            new EyeSectorColourGene(EyeLocus.SECTOR_COLOUR_LEFT, 66);
+    public static final EyeScleraGene EYE_SCLERA_RIGHT = new EyeScleraGene(EyeLocus.SCLERA_RIGHT, 67);
+    public static final EyeScleraGene EYE_SCLERA_LEFT = new EyeScleraGene(EyeLocus.SCLERA_LEFT, 68);
+    public static final EyeGlowGene EYE_GLOW_IRIS_RIGHT = new EyeGlowGene(EyeLocus.GLOW_IRIS_RIGHT, 121);
+    public static final EyeGlowGene EYE_GLOW_IRIS_LEFT = new EyeGlowGene(EyeLocus.GLOW_IRIS_LEFT, 122);
+    public static final EyeGlowGene EYE_GLOW_SCLERA_RIGHT =
+            new EyeGlowGene(EyeLocus.GLOW_SCLERA_RIGHT, 123);
+    public static final EyeGlowGene EYE_GLOW_SCLERA_LEFT =
+            new EyeGlowGene(EyeLocus.GLOW_SCLERA_LEFT, 124);
+    public static final ThirdEyeGene THIRD_EYE = new ThirdEyeGene(125);
+
     public static final MagicSizeGene BODY_SIZE = new MagicSizeGene();
     public static final MagicSpeedGene MAGIC_SPEED = new MagicSpeedGene();
     public static final MagicHealthGene MAGIC_HEALTH = new MagicHealthGene();
@@ -536,6 +584,10 @@ public final class Genes {
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, EXTREME_WHITE_DOMINANT, DUN, SILVER, FLAXEN, SOOTY, PANGARE, HUED_PANGARE,
             MUSHROOM, BRINDLE, TIGER_EYE,
+            EYE_COLOUR_RIGHT, EYE_COLOUR_LEFT, EYE_SECTOR_RIGHT, EYE_SECTOR_LEFT,
+            EYE_SECTOR_COLOUR_RIGHT, EYE_SECTOR_COLOUR_LEFT, EYE_SCLERA_RIGHT, EYE_SCLERA_LEFT,
+            EYE_GLOW_IRIS_RIGHT, EYE_GLOW_IRIS_LEFT, EYE_GLOW_SCLERA_RIGHT, EYE_GLOW_SCLERA_LEFT,
+            THIRD_EYE,
             NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,

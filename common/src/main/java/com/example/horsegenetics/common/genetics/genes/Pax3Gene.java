@@ -3,8 +3,8 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.EyeColor;
-import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.eye.EyeRequest;
+import com.example.horsegenetics.common.genetics.eye.EyeRequestContribution;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
@@ -69,7 +69,8 @@ import java.util.List;
  * the two loci produce the same pattern, which is exactly why they were
  * mistaken for one gene. See {@code wiki/gene-pax3.html}.
  */
-public final class Pax3Gene implements Gene, HealthContribution, EyeColorContribution {
+public final class Pax3Gene implements Gene, HealthContribution, EyeRequestContribution,
+        WhitePatternEyes.WhiteExtent {
 
     public static final String KEY = "horsegenetics.pax3";
 
@@ -176,9 +177,22 @@ public final class Pax3Gene implements Gene, HealthContribution, EyeColorContrib
 
     /** The second splash locus, and the same rule - see {@link MitfGene#eyeColor}. */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
-            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
-        return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), whiteCoverage);
+    public EyeRequest requestEyes(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome) {
+        return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), this, pair, genotype, epigenome);
+    }
+
+    /** The painter's own strength constants - see {@link MitfGene#whiteness}. */
+    @Override
+    public double whiteness(AllelePair pair) {
+        Expression e = expressionOf(pair);
+        if (e == SPLASH) {
+            return S_SPLASH;
+        }
+        if (e == BOLD) {
+            return S_BOLD;
+        }
+        return 0.0;
     }
 
     /**
