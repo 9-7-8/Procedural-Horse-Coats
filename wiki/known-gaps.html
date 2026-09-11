@@ -59,6 +59,82 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-186"><strong>Two tests were red on <code>main</code> before the 2026-09-10 evening
+    intake, and nothing records why.</strong> Opened 2026-09-10.
+    <code>GameteBiasTest.epigeneticSpliceRerollsEpigeneticsNotAlleles</code> (&ldquo;seed 0:
+    alleles unchanged&rdquo; - an epigenetic splice is changing a foal's alleles, which it
+    exists not to do, or the test's stream assumption has gone stale) and
+    <code>CreatorMetadataRoundTripTest</code> (&ldquo;the creator should be able to emit
+    every verb the game declares&rdquo;: 23 declared, 16 in the creator - seven
+    <code>effects</code> verbs have been added to <code>AbilityType</code> without their
+    creator half, which is <a href="making-a-gene.html#contract-verb">the verb contract</a>
+    drifting). Both fail identically on a clean worktree at <code>1cf48a8</code>, so neither
+    came from the intake. The first is the one that matters: if splicing really does move
+    alleles, a paid-for epigenetic splice is quietly rerolling a foal's coat.</li>
+<li id="gap-185"><strong>Priority is the paint order <em>and</em> the sidebar family, and
+    nothing checks either against the hand-written genes.</strong> Opened 2026-09-10.
+    <code>GeneFilesTest</code> keeps gene <em>files</em> off each other's priorities, but not
+    off the Java genes', and the 100&ndash;199 band is dense with those (eye glow 121&ndash;125,
+    the yield and behaviour genes 130&ndash;182). So dorsal wing ties eye glow at 121, contour
+    at 122, dripwork at 124, nacre saddle ties particle at 150, starburst rainbow dust at 151,
+    bargello lycan at 152 - all broken alphabetically, which is the thing the file-level check
+    exists to prevent. Worse, <strong>seven coat genes from the 2026-09-10 afternoon intake
+    sit in 140&ndash;149, which <code>GeneFamily</code> bands as body-stat</strong>: coronal,
+    bracketed, witchfire, maelstrom, sunspiral, geode and agatebound are listed in the sidebar
+    under &ldquo;Magical body-stat genes&rdquo; beside magic speed and magic health. Moving
+    them is cheap (free slots, the genotype codes in the pipeline golden move, no coat
+    does) but it is re-doing a shipped intake, so it waits for the owner. The check that
+    would stop it recurring: extend <code>shippedGenePrioritiesAreDistinct</code> to every
+    registered gene, and assert that a data-driven gene's family is a coat family.</li>
+<li id="gap-184"><strong>On <code>WAVES</code>, <code>axis</code> means the opposite of what it
+    means everywhere else.</strong> Opened 2026-09-10. <code>axis</code> is the direction the
+    wave <em>travels</em> and <code>across</code> is the axis the band sits on; on
+    <code>AXIS</code>, <code>axis</code> is the band. Ooze drip and rainbow drip both arrived
+    written the natural way and ran sideways. The descriptions now say so in
+    <code>SpecSchema</code>, the creator and both tables on the making-a-gene page, but the
+    names are still a trap. <strong>Fourteen shipped genes use <code>axis: "Y", across:
+    "X"</code></strong> - a band across X with lobes running up and down - and some of them
+    surely mean it (cleave's vertical bands). None has been audited against its blurb.
+    Renaming the parameters would be the real fix and is a format change.</li>
+<li id="gap-183"><strong>Ringwork's rings are dead for a different reason than its baseline
+    line says, and its other two layers are inside out.</strong> Opened 2026-09-10.
+    <code>DeadLayerTest</code>'s javadoc and <code>dead-layers.txt</code> put ringwork's two
+    contour rings down to being 0.1 units wide. They are not narrow, they are empty: under
+    <code>measure: centroid</code> a <code>CRACKLE</code> mask covers everything
+    <em>farther</em> than <code>gap/2</code> body units from the centre, ringwork wrote its
+    gaps as fractions of the cell (the schema used to describe the field as 0 at the middle
+    and 1 at the rim), and each ring is &ldquo;outside 0.43 and inside 0.33&rdquo;. The same
+    misreading makes &ldquo;the pale ground inside each cell&rdquo; cover 99.6% of the horse
+    and &ldquo;the core, on most cells&rdquo; 88%. It still looks like something, which is
+    why nobody noticed. <a href="gene-contour-cells.html">Contour cells</a> arrived with the
+    identical construction and was rebuilt on bands of <em>wall</em> distance, which is the
+    fix here too. Crazework writes the same fractional gaps and has not been examined.</li>
+<li id="gap-182"><strong>A mark at the centre of a lattice cell rarely reaches the skin,
+    because the lattice is three-dimensional.</strong> Opened 2026-09-10. <code>SPOTS</code>,
+    <code>RINGS</code> and <code>CRACKLE</code> all place their cell centres in 3D, and the
+    body surface slices through the cells wherever it happens to lie - so a centre mark of
+    radius <em>r</em> shows only where the skin passes within <em>r</em> of a centre, and how
+    often that happens falls away roughly as <em>r</em>&sup3;. Concentric designs lose their
+    middle first: the baseline's ocular pupil, moth wings' pupil, dorsal shield's stud and
+    concentric eyespots' 0.8 band are all this, and the evening intake arrived with three
+    more (agate eye's core, corolla's eye, contour cells' pip), all enlarged to about 1.0
+    to 1.3 units to get them onto the horse at all. A <code>SPOTS</code> <code>stretch</code>
+    on Z does not help - the centres still jitter through the full depth of the cell. The
+    real fix is an option that snaps a cell's centre onto the surface before measuring, so
+    every cell the skin cuts is cut through its middle; it would be a new parameter on three
+    masks, and so <a href="making-a-gene.html#contract-mask">the mask contract</a> three
+    times.</li>
+<li id="gap-181"><strong>A gene can be carried, expressed, and show nothing - and the icon
+    tool photographs exactly one horse.</strong> Opened 2026-09-10. A marking gated by
+    <code>PATCHES</code>, or scattered at low <code>chance</code> over a small region, is
+    absent on some horses by design. <a href="gene-contour-cells.html">Contour cells</a>
+    shows no patch on about one horse in forty, the icon tool seeds its horse from the gene
+    key, and that horse is one of them - so the gene has no icon, which is the signal the
+    tool reserves for &ldquo;paints nothing&rdquo;. Agate eye was worse before its
+    <code>chance</code> went up (three horses in eight showed no eye). Nothing measures
+    <em>how often</em> an expressing horse is blank; a check that painted forty seeds and
+    reported the blank share would, and would also let the icon tool pick a horse that shows
+    the gene.</li>
 <li id="gap-180"><strong>Holy ward's radius sits inside the zone where monsters never spawn
     anyway.</strong> Opened 2026-09-10, found while working out how the owner could test it.
     Vanilla never naturally spawns a monster within 24 blocks of a player, and the ward
@@ -410,7 +486,11 @@ of always sixteen, which costs a traced outline what it is actually worth and co
 moonwing nothing. It is not done here because it moves every existing SVG gene's bake
 golden, <code>expected.json</code>, and the creator's JS twin, which is a
 <a href="making-a-gene.html#contracts">five-file change</a> and not something to do on
-the way past an intake.</li>
+the way past an intake. <strong>The intake side is a tool now:</strong>
+<code>node intake/tools/fit-svg.mjs gene.json --write</code> does the hand simplification
+and measures what it moved - seven drawings of the 2026-09-10 evening batch went from
+1316&ndash;7785 points to 700 (candelabra 1000), with at most 0.41% of any viewBox changing
+side. The engine fix is still the right one.</li>
 
 <li id="gap-173"><strong>Two per-entity costs hid behind comments claiming they were cheap.</strong>
     Opened and closed 2026-09-10, both found by re-reading the same day's work rather than
@@ -511,6 +591,17 @@ is harmless. <strong>There is no metric that separates "relies on summing and lo
 good" from "relies on summing and looks wrong", because the only difference between them
 is whether a human liked the result.</strong> So contour's kind of failure - a wash
 rather than a dead layer - is still only catchable by looking at the horse.</p>
+
+<p><strong>The 2026-09-10 evening intake is the case for looking.</strong> Eight of its
+twenty-four genes nested their layers and expected them to stack - corolla, agate eye,
+taper flame, barred wing, uraniid, trillium, foxglove, ooze drip - and <em>every pale form
+came out a blank white shape</em>: corolla's blooms were flat discs, taper flame's spark
+was clamped out. <code>DeadLayerTest</code> caught three of the eight, and only the
+innermost mark of each; the side-view renders caught all eight. The prompt's rule 8 only
+said that a layer cannot <em>read</em> an earlier one; it now also says that overlapping
+layers sum, and that a nested marking has to be written disjoint (each layer multiplying in
+the inverted shape of every layer painted after it, which for hard masks is stacking
+exactly). That is what all eight were rebuilt with.</p>
 
 <p><strong>The root-cause fix, not done and not this session's call:</strong> a per-layer
 <code>"over": true</code> that applies the delta accumulated so far before the layer

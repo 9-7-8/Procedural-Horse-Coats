@@ -27,6 +27,126 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10j">2026-09-10 (late) &mdash; twenty-four genes out of intake, and what only the renders caught</h2>
+
+<p>
+    The whole intake folder: three authoring batches of 7, 7 and 4 genes with a note each,
+    and six more with none. Commits <code>a6d76bd</code> (the batch exactly as it arrived,
+    so the unsimplified traces survive in history) and <code>b3f9e9b</code> (the install).
+    Every gene is <a href="verification.html#intake-evening">waiting in game</a>.
+</p>
+
+<h3>Checked before anything was opened</h3>
+
+<ul>
+    <li><strong>Hashed</strong> &mdash; no two files alike.</li>
+    <li><strong>Scored for content</strong> against all 171 shipped genes (layer signatures
+        plus the nouns in each blurb). Nothing was a re-arrival. Rime and maelstrom are the
+        closest pair at 0.31 &mdash; a vortex on each flank, but feathered frost against
+        tapering arms.</li>
+    <li><strong>One name collision.</strong> The new Contour shares only the word with the
+        shipped one (hypsometric bands against a patch of ringed cells) and became
+        <a href="gene-contour-cells.html">Contour Cells</a>. Its allele tokens were the
+        shipped Contour's own <code>Ct</code>, so they became <code>Cl</code>.</li>
+</ul>
+
+<h3>What had to change on the way in</h3>
+
+<ul>
+    <li><strong>Priorities.</strong> Thirteen collided with another gene file, and the
+        batch-two and unannotated files sat on 120&ndash;159, where most slots are held by
+        hand-written genes that the registry tie-breaks alphabetically. Since priority is also
+        the sidebar family, they were placed by the coverage rule, next to what each
+        resembles: fields 290&ndash;298, spots and rings 325&ndash;329, speckle
+        332&ndash;333, lines 385&ndash;391; holo flake kept 430. That audit also turned up
+        seven coat genes from the afternoon intake filed as body-stat genes
+        (<a href="known-gaps.html#gap-185">gap 185</a>). Left for the owner.</li>
+    <li><strong>Keys and case.</strong> Six arrived as <code>ixora.*</code>. The whole batch
+        wrote its rarity in lower case, and <code>founders.py</code> looked tiers up in
+        upper case, so every gene would have been budgeted as UNCOMMON. The script is
+        case-blind now. Running it also re-derived <strong>twelve shipped genes that had
+        never been through it</strong> (the eleven from the afternoon intake, plus
+        nymphaline), all still on hand-written tables at about ten times their tier.</li>
+    <li><strong>The SVG point ceiling.</strong> Seven traced drawings flattened to between
+        1,316 and 7,785 points. <code>intake/tools/fit-svg.mjs</code> is the hand
+        simplification done for blackwork and dorsal wing, made into a tool that measures
+        its own damage. Six drawings changed under 0.33% of their viewBox; candelabra was
+        given 1,000 points and changed 0.41%.</li>
+</ul>
+
+<h3>What the renders showed and the tests did not</h3>
+
+<p>
+    All tests were green once the files parsed, apart from twelve dead layers. Then a
+    side-view renderer drew every form of every gene on a bay, and half the batch was
+    wrong in ways no test measures. The renderer was a scratch diagnostic and is <em>not</em>
+    checked in: a hundred lines in the <code>coat.pattern</code> package, making the same
+    calls <code>DeadLayerTest</code> makes (a synthetic bay, <code>SpecPainter.tint</code> for
+    one expression), and plotting every <code>Face.LEFT</code> texel at its body-space
+    (x, y), with seeds and the expression taken from system properties. The icon bake shows
+    one horse per gene from three-quarters; this showed every form, on several horses, from
+    the side, and that difference is the whole of this section. It is worth making a
+    Gradle task.
+</p>
+
+<ul>
+    <li><strong>Eight genes nested their layers, and every pale form came out a blank white
+        shape.</strong> Corolla, agate eye, taper flame, barred wing, uraniid, trillium,
+        foxglove, ooze drip. Layers sum rather than stack
+        (<a href="known-gaps.html#gap-169">gap 169</a>), and near-whites nested three deep
+        clamp to one white. The black forms hid it, because dark plus dark still reads. Each
+        layer now multiplies in the inverted shape of every later layer. The prompt's rule 8
+        never actually said layers sum &mdash; only that one cannot read another &mdash; and
+        now it does. The <code>"over"</code> flag on
+        <a href="roadmap.html#layer-over">the roadmap</a> is the real fix, and this batch is
+        the cost of not having it.</li>
+    <li><strong>Both drips ran sideways.</strong> On <code>WAVES</code>, <code>axis</code>
+        is where the wave travels and <code>across</code> is the band, the reverse of
+        <code>AXIS</code>. Nothing said so; <code>SpecSchema</code>, the creator and both
+        making-a-gene tables do now (<a href="known-gaps.html#gap-184">gap 184</a>).</li>
+    <li><strong>Contour Cells drew nothing, and then almost nothing.</strong> A
+        <code>CRACKLE</code> centroid mask covers everything <em>farther</em> than
+        <code>gap/2</code> body units from the centre. The schema called the field
+        &ldquo;0 middle, 1 rim&rdquo;, so the gaps were written as fractions. Fixing the
+        units and the polarity produced rings that seldom appeared, because the lattice is
+        3D and most centres lie off the skin (<a href="known-gaps.html#gap-182">gap
+        182</a>). It was rebuilt on bands of <em>wall</em> distance, which are the polygon
+        shrunk and exist in every cell. Ringwork, shipped this afternoon, has the identical
+        fault and is left alone (<a href="known-gaps.html#gap-183">gap 183</a>).</li>
+    <li><strong>Crackle gaps swallowed their plates.</strong> Gilded crackle came out as a
+        gold field with pale islands, and holo flake as single texels. The skin sits near a
+        wall far more often than a flat tiling suggests. Both gaps are now at about an eighth
+        of the scale, where the shipped crackles sit.</li>
+    <li><strong>Small centre marks were enlarged</strong> (agate core, corolla eye, taper
+        spark) for the same 3D reason. Agate eye's <code>chance</code> went from 0.5 to
+        0.85, because three horses in eight showed no eye at all.</li>
+</ul>
+
+<p>
+    Every change is written into the gene's own <code>notes</code>, with the reason.
+    <code>DeadLayerTest</code> finished with no new entries. The bake golden gained 84 rows
+    and moved none, and the pipeline golden changed genotype codes only, with no hash
+    moving. Parity and the NeoForge build were green.
+</p>
+
+<h3>Deliberately not done</h3>
+
+<ul>
+    <li><strong>The two tool gaps</strong> (<code>RAMP</code> <code>angle</code>,
+        <code>FAN</code> <code>origin: "cell"</code>) are real and are on
+        <a href="roadmap.html#intake-tool-gaps">the roadmap</a>. Tidewave and opal fire ship
+        with the authors' approximations.</li>
+    <li><strong>Ringwork, the fourteen <code>Y/X</code> <code>WAVES</code> genes and the
+        seven mis-filed coat genes</strong> are all shipped work and were not re-done. Each
+        is a known gap with its fix written out.</li>
+    <li><strong>Two tests are red on <code>main</code> and were red before this
+        session</strong> &mdash; <code>GameteBiasTest</code>'s splice check and
+        <code>CreatorMetadataRoundTripTest</code>'s verb count. Both were confirmed on a
+        clean worktree at <code>1cf48a8</code> (<a href="known-gaps.html#gap-186">gap
+        186</a>). The full <code>:common:test</code> suite was not run; the classes a new
+        gene can move were.</li>
+</ul>
+
 <h2 id="d2026-09-10i">2026-09-10 (evening) &mdash; three play sessions, fixed as they came</h2>
 
 <p>

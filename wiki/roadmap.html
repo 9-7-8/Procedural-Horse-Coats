@@ -222,7 +222,10 @@
     delta accumulated so far before this layer measures. Everything without the flag
     behaves exactly as it does now, so <strong>no existing gene moves</strong> &mdash;
     which is the property that makes it worth doing rather than changing the default.
-    Dorsal wing's original file would have been correct as written.
+    Dorsal wing's original file would have been correct as written &mdash; and so would
+    eight of the twenty-four genes in the 2026-09-10 evening intake, every one of which
+    arrived nested and had to be rewritten disjoint by hand
+    (<a href="known-gaps.html#gap-169">gap 169</a>). That is the rate this is costing.
 </p>
 
 <p>
@@ -938,6 +941,42 @@
         Colourful flank and body emblems in the spirit of
         <a href="gene-cutie-mark.html">cutie marks</a> but simpler &mdash; no item atlas.
         Open-ended; the owner wants a visible batch of these for the 1.0 look.</li>
+</ul>
+
+<h3 id="intake-tool-gaps">Two mask parameters the 2026-09-10 evening intake asked for</h3>
+
+<p>
+    Both arrived as <a href="making-a-gene.html#prompt">tool gaps</a> in the authoring
+    notes, both were read after the approximations had been seen on a horse, and both
+    describe a shortfall that is really there. Each is one new parameter on an existing
+    mask, defaulting to today's behaviour, so <strong>no shipped gene moves</strong> - but
+    each is still <a href="making-a-gene.html#contract-mask">the mask contract</a>: the
+    painter, <code>SpecSchema</code>, the creator's twin, both tables, a
+    <code>prismatic</code> case, fixtures and parity.
+</p>
+
+<ul>
+    <li><strong><code>RAMP</code> <code>angle</code></strong> (degrees, default 0, read only
+        when <code>axis</code> is X, Y or Z): rotate the sweep within the plane of the named
+        axis and the next one round (X&rarr;Y&rarr;Z&rarr;X), so <code>angle: 90</code> on X
+        is Y. The coverage is the dot product of the position with the rotated unit vector,
+        normalised through <code>from</code>/<code>to</code> as now. What it buys: an SVG's
+        <code>&lt;linearGradient&gt;</code> runs at an arbitrary angle and today can only be
+        collapsed to one flat tone per band or one sweep along the horse's length -
+        <a href="gene-tidewave.html">tidewave</a> ships with the latter, and its swells
+        lose the sense of each being separately lit.</li>
+    <li><strong><code>FAN</code> <code>origin: "cell"</code></strong> (with
+        <code>scale</code>, <code>seed</code>, and <code>vary</code> as a per-cell rotation
+        of the fan's zero): walk the same lattice <code>SPOTS</code> uses and measure the
+        angle and radius from the texel's own cell centre instead of from
+        <code>originU</code>/<code>originV</code>, so a field of independent sprays is one
+        layer. Multiplying one <code>FAN</code> by <code>SPOTS</code> cannot do it - that
+        clips one global fan into cell-shaped pieces that all point at the same pivot.
+        <a href="gene-opal-fire.html">Opal fire</a> ships with two hand-placed fans that
+        land in the same two spots on every horse. Note
+        <a href="known-gaps.html#gap-182">gap 182</a> before building it: a per-cell pivot on
+        a 3D lattice will mostly sit off the skin, so this probably wants the same
+        snap-to-surface option as the centre marks.</li>
 </ul>
 
 <h3>12.2 Behavioural, diet and shapeshifting genes</h3>
