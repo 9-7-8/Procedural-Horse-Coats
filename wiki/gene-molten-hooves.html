@@ -20,10 +20,10 @@
 <h1>Molten hooves</h1>
 
 <p class="lede">
-    Flame trails from the hooves that fade behind the horse as it moves. The
-    colour is written on the allele copy and inherited with it, so a line breeds
-    true to its own fire. It is <strong>light and particles only</strong> &mdash;
-    nothing it runs over catches.
+    Glowing hoofprints lie on the ground behind the horse as it moves, and cool
+    from one colour to another as they fade. The colours are written on the allele
+    copy and inherited with it, so a line breeds true to its own fire. It is
+    <strong>light and particles only</strong> &mdash; nothing it runs over catches.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -49,8 +49,9 @@
 <h2 id="fire">It does not set anything on fire</h2>
 
 <p>
-    Worth saying plainly, because the name promises otherwise. The hoofprints
-    are particles and a brief glow. Grass, crops, wooden stables and the horse
+    Worth saying plainly, because the name promises otherwise. Each print lies
+    flat, glows in the dark for about four seconds and fades; it does not light
+    up the ground around it. Grass, crops, wooden stables and the horse
     itself are all safe, and you can ride one through a forest.
 </p>
 
@@ -70,7 +71,7 @@
     <div><dt>Priority</dt><dd>154 &mdash; beside the other emission loci; it paints nothing, so the number is a slot</dd></div>
     <div><dt>Inheritance</dt><dd><strong>dominant</strong> &mdash; one copy expresses</dd></div>
     <div><dt>Reaches the game as</dt><dd>one <code>emitter</code> effect <strong>per molten copy</strong></dd></div>
-    <div><dt>Particle</dt><dd><code>minecraft:dust_color_transition</code></dd></div>
+    <div><dt>Particle</dt><dd><code>horsegenetics:hoofprint</code> &mdash; the mod&rsquo;s own, laid by stride</dd></div>
     <div><dt>Epigenetic</dt><dd>both trail colours, per allele copy</dd></div>
     <div><dt>Wild founders</dt><dd>3% one copy, 0.4% two &mdash; both express, so no invisible carriers</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
@@ -87,20 +88,28 @@
 </div>
 
 <div class="note good">
-    <span class="label">It needed no new machinery, and that held</span>
+    <span class="label">It needed one piece of new machinery: its own particle</span>
     <p>
-        No verb, no trigger, no condition flag. An <code>emitter</code> anchored at
-        <code>hooves</code> with an epigenetic colour, which is what
-        <a href="gene-particle.html">particle</a> and
-        <a href="gene-rainbow-dust.html">rainbow dust</a> already do. The whole gene is one
-        class and one line in <code>Genes</code>.
+        Still no verb, trigger or condition flag &mdash; an <code>emitter</code> anchored at
+        <code>hooves</code> with an epigenetic colour, as <a href="gene-particle.html">particle</a>
+        and <a href="gene-rainbow-dust.html">rainbow dust</a> do. But the emitter names
+        <code>horsegenetics:hoofprint</code> (<code>particle/ModParticles</code>,
+        <code>particle/HoofprintOptions</code>, <code>client/HoofprintParticle</code>, the sprite
+        at <code>textures/particle/hoofprint.png</code>), and <code>GeneAbilityHandler</code>
+        pulls any emitter naming it out of the ordinary path into <code>layHoofprint</code>:
+        one print each time the horse covers half a block (scaled by its size), hooves in
+        trot order, snapped to the top of whatever is under that hoof, skipped over air and
+        fluid. A doubled horse&rsquo;s two emitters take turns print by print. The
+        emitter&rsquo;s <code>count</code> and <code>chance</code> are not used on this path.
+        The particle is not in the gene file format&rsquo;s vocabulary, so only this built-in
+        gene can name it.
     </p>
 </div>
 
 <div class="note warn">
     <span class="label">Dominant, so the particle budget matters more here than anywhere else</span>
     <p>
-        Every other emitter locus in the mod is recessive or rare. This one expresses on a single copy, so a populated stable can have a dozen horses all emitting on <code>on_move</code> at once. Keep the shipped <code>count</code> and <code>chance</code> defaults rather than tuning them up for looks &mdash; the fix for &ldquo;not dramatic enough&rdquo; is a brighter colour, not more particles.
+        Every other emitter locus in the mod is recessive or rare. This one expresses on a single copy, so a populated stable can have a dozen horses all printing at once. The cost is bounded by distance rather than time &mdash; one print per half-block walked, each living eighty ticks &mdash; so a standing herd costs nothing. The fix for &ldquo;not dramatic enough&rdquo; is a brighter colour or a longer life, not a shorter stride.
     </p>
 </div>
 
@@ -111,16 +120,20 @@
     </p>
 </div>
 
-<h2 id="particle">Why it is dust and not flame</h2>
+<h2 id="particle">Why it has its own particle</h2>
 
 <p>
-    Flame particles ignore colour entirely, and a colour written on the allele
-    copy is the entire point of the locus &mdash; so the trail is drawn with
-    <code>dust_color_transition</code>, which is also the only particle that
-    <em>fades</em> the way a cooling hoofprint should. It is the same particle
-    <a href="gene-rainbow-dust.html">rainbow dust</a> uses, with the cycle left at
-    zero: rainbow dust reads its hue off the clock, and this one means the two
-    colours it carries.
+    No vanilla particle is coloured, glowing <em>and</em> flat. Flame glows but
+    ignores colour, and a colour written on the allele copy is the entire point of
+    the locus. Dust takes a colour &mdash; the first build used
+    <code>dust_color_transition</code>, the same particle
+    <a href="gene-rainbow-dust.html">rainbow dust</a> uses &mdash; but it is lit by the
+    world, faces the camera, and scatters, so in play it read as coloured puffs
+    rather than prints. The owner asked for marks on the ground. The print is a
+    flat quad drawn at a fixed rotation (vanilla&rsquo;s shriek particle is the
+    precedent), held at full block light so it glows, turned to the heading the
+    horse was travelling, and fading from the copy&rsquo;s first colour to its
+    second.
 </p>
 
 <h2 id="hue">A molten horse may burn blue</h2>

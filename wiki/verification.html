@@ -47,22 +47,8 @@
         It will still be <strong>slow</strong> in lava: vanilla lava movement has a fixed,
         low speed with no attribute behind it, and walking <em>on</em> lava the way a
         strider does needs a mixin, which this mod does not have.</li>
-    <li><strong>The spawner fires when you feed the horse</strong>, not on a timer (owner&rsquo;s
-        call). Feed a <code>Cow/Cow</code> horse wheat with no cows nearby: two should appear
-        and chat should say <code>[Spawner] made 2 of 2</code>. Feed it again: chat should say
-        the two are already there and nothing is made. Check a spawned zombie&rsquo;s gear too
-        &mdash; the second <code>finalizeSpawn</code> that could re-roll it is gone. The daily
-        timer never fired because it counted on the horse&rsquo;s unsaved
-        <code>tickCount</code>.</li>
-    <li><strong>Molten hooves should trail under a rider.</strong> Every <code>on_move</code>
-        effect was silent on a ridden horse: the server&rsquo;s copy of a player-steered horse
-        has zero velocity, and &ldquo;moving&rdquo; was read off velocity. It now compares
-        positions tick to tick. The same fix reaches the particle locus&rsquo;s trails and
-        any moving sound. <em>Be clear on what it is:</em> coloured dust puffs at the
-        hooves that fade from one colour to another, not marks lying flat on the ground,
-        and they do not glow &mdash; dust is lit by the world like anything else. If you
-        want glowing prints, that is a design change (an emissive particle, which cannot
-        carry the per-copy colour), not a bug fix.</li>
+    <li><strong>The spawner</strong> now fires on feeding and is owner-confirmed working (2026-09-10). Still worth a glance: what a spawned zombie is holding &mdash; the second <code>finalizeSpawn</code> that could re-roll its gear is gone.</li>
+    <li><strong>On-move effects under a rider.</strong> Every <code>on_move</code> effect was silent on a ridden horse, because the server&rsquo;s copy of a player-steered horse has zero velocity; &ldquo;moving&rdquo; is now measured by position between ticks. Check a <a href="gene-particle.html">particle</a>-locus trail while riding. Molten hooves has its own entry, <a href="#molten-hooves">&sect;0-BS</a>.</li>
     <li><strong>Every long timed effect now survives a reload.</strong> Timed beats counted
         on <code>tickCount</code>, which restarts whenever a horse loads, so anything slower
         than a few minutes almost never fired. The worst case was
@@ -390,43 +376,44 @@
     largest roster and is the worst case.</p>
 
 
-<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves, the first dominant emission gene (2026-09-10, NOT looked at in game)</h2>
+<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves: glowing prints on the ground (2026-09-10, NOT looked at in game)</h2>
 
-<p><a href="gene-molten-hooves.html">Molten hooves</a> is built and registered. It
-    paints nothing &mdash; confirmed by measurement, not by assertion: all 1056 rows
-    of the coat pipeline golden kept their rendered-bytes hash and only their
-    genotype key moved, and both of the gene's rows in the bake golden carry the
-    same &ldquo;paints nothing&rdquo; hash as sex and diet. What no test can check is
-    whether it reads as fire.</p>
+<p><a href="gene-molten-hooves.html">Molten hooves</a> was played once as coloured dust and
+    did not read as hoofprints. It now lays the mod&rsquo;s own particle,
+    <code>horsegenetics:hoofprint</code>: a flat, full-brightness print on the ground,
+    one per half-block travelled. <strong>None of the rendering has been seen</strong>
+    &mdash; the rotation maths is reasoned from vanilla&rsquo;s shriek particle, not
+    looked at. It still paints nothing on the coat.</p>
 
 <ul>
-    <li><strong>Does the trail look like burning hoofprints, or like coloured
-        dust?</strong> This is the whole question. It is a
-        <code>dust_color_transition</code> off the <code>hooves</code> anchor, fading
-        from the copy's first colour to its second, because flame particles ignore
-        colour and a per-copy colour is the point of the locus. If it reads as
-        confetti rather than fire, the fix is the colour pair or the fade, not the
-        count.</li>
-    <li><strong>Is it too much on a full stable?</strong> It is the only
-        <strong>dominant</strong> emission locus, so unlike
-        <a href="gene-particle.html">particle</a> a paddock can contain a dozen of
-        them emitting at once. The count is fixed at 2 and the chance is 0.15,
-        deliberately below the particle locus's 0.2, and
-        <code>MoltenHoovesGeneTest</code> guards both &mdash; but the number that
-        matters is what a dozen of them look like together, and only the game can say.</li>
-    <li><strong>Does a doubled horse read as two-toned?</strong> <code>Mlt/Mlt</code>
-        emits <em>two</em> emitters, one per copy, rather than blending. Whether that
-        is visible at a trot or just looks like a slightly denser single is unknown.</li>
-    <li><strong>A molten horse may burn blue</strong>, and this is deliberate.
-        <code>EpiValue.colour</code> bounds saturation and value but rolls hue over
-        the whole circle. Worth looking at a few founders to decide whether an
-        unconstrained hue is charming or wrong &mdash; it is the one design call in
-        the gene that was made for cost rather than for taste.</li>
-    <li><strong>Wild frequency is 3% single, 0.4% double.</strong> Both express, so
-        there are no invisible carriers. Whether 3% feels like &ldquo;uncommon but you
-        will meet one&rdquo; is a judgement that needs a few hundred wild horses.</li>
+    <li><strong>Do prints appear at all, and lie flat?</strong> Ride or lead a molten
+        horse across grass at night. Each print should lie on the ground, not stand up
+        facing you. If nothing shows from above but something shows from below, the
+        two faces&rsquo; pitches in <code>HoofprintParticle.extract</code> are the wrong
+        way round. If you see a black or purple-checked square, the sprite did not load
+        into the particle atlas.</li>
+    <li><strong>Does the toe point the way the horse went?</strong> The sprite is a
+        horseshoe open at the heel. If the open end faces forward, add <code>PI</code> to
+        <code>heading</code>.</li>
+    <li><strong>Do they glow?</strong> At night, prints should stay bright against dark
+        grass. They are not meant to light the ground around them.</li>
+    <li><strong>Spacing and fade.</strong> A walk should leave an even track; a gallop,
+        prints further apart; standing still, nothing. Each lasts four seconds, holds
+        its colour for about the first third, and cools to the second colour as it fades.
+        Size, spacing and life are three constants (<code>HALF_SIZE</code>,
+        <code>STRIDE</code>, <code>LIFETIME</code>) if any feels wrong.</li>
+    <li><strong>Uneven ground.</strong> Stairs, slabs, snow layers, the edge of a drop.
+        A print should sit on the surface under its hoof, never float or sink, and none
+        should appear over air or water.</li>
+    <li><strong>A doubled horse</strong> (<code>Mlt/Mlt</code>) should leave prints that
+        alternate between its two colour pairs.</li>
+    <li><strong>A molten horse may burn blue</strong>, and this is deliberate:
+        <code>EpiValue.colour</code> rolls hue over the whole circle. Look at a few founders
+        and decide whether that is charming or wrong.</li>
+    <li><strong>Wild frequency is 3% single, 0.4% double</strong>, both expressing. Whether
+        that feels like &ldquo;uncommon but you will meet one&rdquo; needs a few hundred
+        wild horses.</li>
 </ul>
-
 <h2 id="intake-eleven">&sect;0-BR &mdash; Eleven more genes, and dorsal wing's underline (2026-09-10, NOT looked at in game)</h2>
 
 <p>Agatebound, bargello, bracketed, coronal, geode, maelstrom,
