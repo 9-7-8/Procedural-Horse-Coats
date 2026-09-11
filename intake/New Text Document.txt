@@ -1,0 +1,27 @@
+I'll start by fetching the machine-readable prompt and my project conventions.The page truncated before the actual prompt section. Let me get the rest.The prompt section is truncated in both fetches. Let me check my project conventions and try the raw page source.Got the full prompt. Now let me inspect the SVGs.These are traced raster images with many paths. Let me render them so I can see what they depict.Now let me analyze the path structure of each file to pick the load-bearing shapes.Let me test-render candidate path subsets to confirm each still reads as the reference.Bounding boxes are misleading — those are thin slivers. Let me measure actual filled area per path.Let me test whether I can safely merge sibling paths as subpaths, and render the final compositions.Let me verify the fill-rule choices for the merged subpath groups.All checks pass. Now generating the seven gene files.Let me check the point counts per mask — there's an implementation point ceiling I should stay well under.Now let me validate all seven against the format's own rules.Found a real bug — chained string replacement corrupted two founder tables. Fixing.Final check — rendering each marking at its true on-horse texel resolution (1 unit = 2 texels).The markings lose their internal structure at that size. Let me give them the full barrel height — the maximum the body allows — and re-check.The placement note didn't update with the geometry. Fixing the text so it matches the file.Seven files, one per reference. All are `phase: magical`, all sit on `PARTS: BODY` with the SVG viewport inside x 11.1–26.7, y 11.4–20.6 — the barrel only, nothing on legs, neck, head or tail.
+
+| key | drawing | priority | rarity | layers |
+|---|---|---|---|---|
+| `horsegenetics.tidewave` | flowing swells | 250 | uncommon | 3 |
+| `horsegenetics.trillium` | three-petal bloom | 320 | rare | 3 |
+| `horsegenetics.barred_wing` | butterfly | 330 | epic | 2 |
+| `horsegenetics.uraniid` | swallowtail moth | 340 | epic | 2 |
+| `horsegenetics.candelabra` | chandelier | 350 | legendary | 1 |
+| `horsegenetics.taper_flame` | candle flame | 360 | rare | 4 |
+| `horsegenetics.inkcoil` | ink swirl | 370 | rare | 2 |
+
+Six carry the four-allele white / black / coloured / `n` shape. Tidewave has no black form — its whole idea is the sweep of colour, so a grey version would be a different marking wearing its name.
+
+Two things worth knowing before you bake. The `d` strings are verbatim, but I *selected* paths — the tracer emits 35 to 170 per drawing and most are slivers. The counts that matter: chandelier 1,352 commands in one mask, moth 1,193, butterfly 890 across two. If there's a hard point ceiling in `SpecSchema`, those three are the ones that will hit it. And the barrel is 10 units tall, so `meet` caps every portrait drawing at about 18 texels — silhouette and tonal split survive, internal bars and scrollwork read as texture rather than as countable structure. Both are recorded in `notes`.
+
+ELEMENT   The linear gradients inside each traced shape — every one of these files carries `<linearGradient>` blocks with `x1,y1 → x2,y2` running at an arbitrary angle across the drawing.
+
+SHIPPED   Tidewave uses one `RAMP` with `axis: "X"`, `space: "body"`, `from` 0.20 `to` 0.70 — a single horizontal sweep across the whole viewport, shared by all three swells. Elsewhere the gradients collapse to one flat `TOWARD` per tonal band. A viewer sees the colour change along the horse's length instead of along each band's own run, so a swell that rises through the sweep takes the same hue at its crest as the flat band beside it, and the reference's sense of each band being separately lit is gone.
+
+WHY NOT   `RAMP`'s three positional axes are the body basis vectors, and the projection is onto one of X, Y or Z — there is no way to ask for the projection onto an oblique direction. The three non-axes do not reach it either: `noise` wanders and is not monotonic, `cell` is radial per lattice cell, `cellId` is constant per cell with a wall between neighbours. Compositing two ramps does not help, because a layer gets the accumulator as it was before the gene started (rule 8), so a second ramp cannot read the first. This is a different measurement, not different tuning: every existing option measures distance along a fixed basis vector, and an SVG drawing's own gradients are specified by an arbitrary vector in the drawing's plane.
+
+PROPOSAL   A new parameter on `RAMP`, not a new mask.
+
+  `angle` — number, degrees, default `0`. Read only when `axis` is `X`, `Y` or `Z`. Rotates the sweep direction by `angle` within the plane spanned by the named axis and the next axis in `X → Y → Z → X` order, so `axis: "X", angle: 0` is exactly today's behaviour and `angle: 90` is `axis: "Y"`. At a texel it measures the dot product of the body-space position with the rotated unit vector, then normalises that through `from` and `to` as now. Coverage 0 is the `from` end of the rotated span and takes the first colour stop; coverage 1 is the `to` end and takes the last.
+
+  Closest existing thing: `RAMP axis: "X"` itself. The one thing it does that that cannot is aim the sweep at an angle rather than along a basis vector — which is what makes a pasted `<linearGradient>`'s `x1,y1 → x2,y2` expressible, since an exported gradient is almost never axis-aligned.

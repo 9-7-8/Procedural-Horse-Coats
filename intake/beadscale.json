@@ -1,0 +1,212 @@
+{
+  "format": 3,
+  "key": "horsegenetics.beadscale",
+  "name": "Beadscale",
+  "phase": "magical",
+  "priority": 128,
+  "blurb": "The crest of the neck is beaded with small iridescent scales, each taking its own colour, separated by dark channels.",
+  "rarity": "rare",
+  "alleles": [
+    {
+      "token": "Bs",
+      "label": "Beadscale (Bs)"
+    },
+    {
+      "token": "bs",
+      "label": "Beadscale, coloured (bs)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "scaleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "beadscale",
+      "name": "Beadscale",
+      "description": "A band of small teal-to-magenta scales along the crest, each bead a slightly different colour from its neighbour.",
+      "when": [
+        "Bs/Bs",
+        "Bs/bs",
+        "Bs/n"
+      ],
+      "layers": [
+        {
+          "name": "the dark channel between scales",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK",
+                "MANE"
+              ],
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.3,
+              "softness": 0.12
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$scaleSeed",
+              "scale": 2.6,
+              "gap": 0.5,
+              "warp": 0.4,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0610",
+            "strength": 100
+          }
+        },
+        {
+          "name": "the scales themselves",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK",
+                "MANE"
+              ],
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.3,
+              "softness": 0.12
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$scaleSeed",
+              "scale": 2.6,
+              "gap": 0.5,
+              "warp": 0.4,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "colors": [
+              "#1fe0c8",
+              "#2f7fd4",
+              "#7a3bd6",
+              "#c81fa8"
+            ],
+            "axis": "cellId",
+            "seed": "$scaleSeed",
+            "scale": 2.6,
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "beadscale-coloured",
+      "name": "Beadscale, coloured",
+      "description": "The same crest of scales swept through a narrow band of this line's own colour.",
+      "when": [
+        "bs/bs"
+      ],
+      "layers": [
+        {
+          "name": "the dark channel between scales",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK",
+                "MANE"
+              ],
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.3,
+              "softness": 0.12
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$scaleSeed",
+              "scale": 2.6,
+              "gap": 0.5,
+              "warp": 0.4,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0610",
+            "strength": 100
+          }
+        },
+        {
+          "name": "the scales themselves",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK",
+                "MANE"
+              ],
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.3,
+              "softness": 0.12
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$scaleSeed",
+              "scale": 2.6,
+              "gap": 0.5,
+              "warp": 0.4,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 55,
+            "saturation": 0.8,
+            "lightness": 0.55,
+            "axis": "cellId",
+            "seed": "$scaleSeed",
+            "scale": 2.6,
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No scaling.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Bs/Bs": 0.001,
+    "Bs/bs": 0.004,
+    "Bs/n": 0.09,
+    "bs/bs": 0.005,
+    "n/n": 99.9
+  },
+  "notes": [
+    "space local, axis X is the crest. The neck is pitched 30 degrees and an ordinary part-space Y band across it comes out as a collar wrapping crest and throat alike - that is the bug that put goth's hood on the underside of the neck. The band starts at -1.0 rather than 0.0 because a pitched part's corner texels sit off the ends of its own cuboid and nothing clamps them.",
+    "RAMP axis cellId reads one colour per cell and meets its neighbours at a wall, which is the difference between iridescence and a gradient. Its seed and scale point at the same values the CRACKLE mask uses, so the colour lines up with the scales rather than drifting across them.",
+    "scale 2.6 with a 0.5 gap puts the channel at about one texel. Any finer and the whole field resolves as a wash."
+  ]
+}

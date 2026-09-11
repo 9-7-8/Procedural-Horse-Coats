@@ -1,0 +1,89 @@
+{
+  "format": 3,
+  "key": "horsegenetics.holo_flake",
+  "name": "Holo Flake",
+  "phase": "magical",
+  "priority": 430,
+  "rarity": "uncommon",
+  "blurb": "A dusting of small angular flakes along the crest of the neck, each one a different colour from the one beside it, over a dull grey wash.",
+  "notes": [
+    "The reference arrived as a traced SVG (864 gradient-filled paths - it is glitter, so the tracer found one path per flake). It is not pasted in as an SVG mask and could not usefully be: that mask carries a drawn shape and would put the SAME 864 flakes on every horse in the world. The marking is a field, so it is CRACKLE with a wide gap, which shrinks each cell to a small isolated polygon with bare coat around it.",
+    "The flake layer's mask and its RAMP share seed and scale. That is not optional decoration - RAMP axis cellId reading a different seed or scale from the CRACKLE under it would colour a lattice that has nothing to do with where the flakes are, and the flakes would come out in two-tone fragments. SPOTS and DAPPLES would not line up either; they lay down their own centres.",
+    "scale 2.4 with gap 1.2 leaves flakes about 1.2 body units across, which is 2.4 texels. Anything under about 1.8 scale here goes under the texel floor and the neck comes out plain grey.",
+    "The colour is drawn per cell rather than swept, which is why this is RAMP axis cellId and not axis Y: the point of the marking is that neighbouring flakes are unrelated and meet at a wall. A gradient would read as a sheen, which is a different thing.",
+    "A band along a pitched part needs space local - axis X low is the crest - and the band starts at -1.0 rather than 0.0 because fractions run outside 0..1 on a pitched part's bounding box.",
+    "founders below is a placeholder that satisfies the loader. Run intake/tools/founders.py to derive the real table from the rarity tier."
+  ],
+  "alleles": [
+    { "token": "Hfw", "label": "Holo flake, white (Hfw)" },
+    { "token": "Hfc", "label": "Holo flake, coloured (Hfc)" },
+    { "token": "n",   "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "flakeSeed", "type": "seed" },
+    { "name": "hue", "min": 0, "max": 360 }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Holo flake (white)",
+      "description": "Small angular flakes scattered along the crest, each a different step of grey from the one beside it, over a dull wash.",
+      "when": [ "Hfw/Hfw", "Hfw/Hfc", "Hfw/n" ],
+      "layers": [
+        {
+          "name": "dull ground",
+          "masks": [
+            { "type": "PARTS", "parts": [ "NECK" ] },
+            { "type": "AXIS", "axis": "X", "space": "local", "parts": [ "NECK" ], "from": -1.0, "to": 0.45, "softness": 0.28 }
+          ],
+          "op": { "type": "TOWARD", "color": "#8a8a80", "strength": 42, "opacity": 65 }
+        },
+        {
+          "name": "flakes",
+          "masks": [
+            { "type": "PARTS", "parts": [ "NECK" ] },
+            { "type": "AXIS", "axis": "X", "space": "local", "parts": [ "NECK" ], "from": -1.0, "to": 0.45, "softness": 0.28 },
+            { "type": "CRACKLE", "seed": "$flakeSeed", "scale": 2.4, "gap": 1.2, "warp": 0.6, "chance": 0.55, "softness": 0.05 }
+          ],
+          "op": { "type": "RAMP", "axis": "cellId", "seed": "$flakeSeed", "scale": 2.4, "colors": [ "#ffffff", "#d8d8d8", "#ababab", "#f0f0f0", "#c2c2c2", "#8f8f8f" ], "strength": 100 }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Holo flake (coloured)",
+      "description": "Small angular flakes scattered along the crest, each a different colour from the one beside it, over a dull wash.",
+      "when": [ "Hfc/Hfc" ],
+      "layers": [
+        {
+          "name": "dull ground",
+          "masks": [
+            { "type": "PARTS", "parts": [ "NECK" ] },
+            { "type": "AXIS", "axis": "X", "space": "local", "parts": [ "NECK" ], "from": -1.0, "to": 0.45, "softness": 0.28 }
+          ],
+          "op": { "type": "TOWARD", "color": "#8a8a80", "strength": 42, "opacity": 65 }
+        },
+        {
+          "name": "flakes",
+          "masks": [
+            { "type": "PARTS", "parts": [ "NECK" ] },
+            { "type": "AXIS", "axis": "X", "space": "local", "parts": [ "NECK" ], "from": -1.0, "to": 0.45, "softness": 0.28 },
+            { "type": "CRACKLE", "seed": "$flakeSeed", "scale": 2.4, "gap": 1.2, "warp": 0.6, "chance": 0.55, "softness": 0.05 }
+          ],
+          "op": { "type": "RAMP", "axis": "cellId", "seed": "$flakeSeed", "scale": 2.4, "hue": "$hue", "hueSpan": 300, "saturation": 0.72, "lightness": 0.66, "strength": 100 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No flakes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Hfw/Hfw": 0.012, "Hfw/Hfc": 0.024, "Hfw/n": 0.340,
+    "Hfc/Hfc": 0.064,
+    "n/n": 99.560
+  }
+}

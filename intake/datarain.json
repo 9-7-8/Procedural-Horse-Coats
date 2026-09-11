@@ -1,0 +1,339 @@
+{
+  "format": 3,
+  "key": "ixora.datarain",
+  "name": "Datarain",
+  "phase": "magical",
+  "priority": 159,
+  "blurb": "A curtain of thin bright streaks falls down the shoulder and ribs over a dark ground, with small lit flecks scattered through it.",
+  "rarity": "rare",
+  "notes": [
+    "curl 0.05, not 0. STROKES is the level set of a noise field and its lines wander by nature; winding curl almost to zero is what makes them fall straight, and leaving a trace of it in is what stops them looking combed.",
+    "width 0.55 against spacing 2.0. The width has to stay well under the spacing or neighbouring streaks touch and the whole curtain resolves as a wash of colour rather than as rain. 0.55 is also barely above a texel, which is the other wall - there is not much room between the two here.",
+    "PALETTE rather than RAMP, which is the opposite call from most of these. PALETTE draws one colour per cell of its own lattice and adjacent cells meet at a WALL. Normally that wall is the thing to avoid; here it is the point, because the reference's streaks change colour abruptly and a continuous gradient down the shoulder would read as an aurora instead.",
+    "scale 2.6 on the streak palette is close to the stroke spacing on purpose, so a colour cell is about one streak wide and each streak mostly takes one colour.",
+    "No black form. The acid violet and green are the gene; in greys this is static.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim."
+  ],
+  "alleles": [
+    {
+      "token": "P",
+      "label": "Static (P)"
+    },
+    {
+      "token": "C",
+      "label": "Datarain (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "rainSeed",
+      "type": "seed"
+    },
+    {
+      "name": "fleckSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Static",
+      "description": "A curtain of white streaks over a grey ground, flecked with light.",
+      "when": [
+        "P/P",
+        "P/C",
+        "P/n"
+      ],
+      "layers": [
+        {
+          "name": "the dark ground",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 13.0,
+              "to": 29.5,
+              "softness": 2.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 11.0,
+              "to": 21.5,
+              "softness": 1.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "the falling streaks",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 13.0,
+              "to": 29.5,
+              "softness": 2.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 11.0,
+              "to": 21.5,
+              "softness": 1.2
+            },
+            {
+              "type": "STROKES",
+              "seed": "$rainSeed",
+              "axis": "Y",
+              "spacing": 2.0,
+              "length": 14.0,
+              "width": 0.55,
+              "curl": 0.05,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "seed": "$rainSeed",
+            "scale": 2.6,
+            "strength": 100,
+            "colors": [
+              "#848484",
+              "#bcbcbc",
+              "#f9f9f9"
+            ]
+          }
+        },
+        {
+          "name": "the bright flecks",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 13.0,
+              "to": 29.5,
+              "softness": 2.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 11.0,
+              "to": 21.5,
+              "softness": 1.2
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$fleckSeed",
+              "spacing": 1.1,
+              "size": 0.5,
+              "density": 0.22,
+              "clumping": 0.5,
+              "clumpScale": 5.0
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "seed": "$fleckSeed",
+            "scale": 1.8,
+            "strength": 100,
+            "colors": [
+              "#b2b2b2",
+              "#ffffff",
+              "#ffffff"
+            ]
+          },
+          "emissive": true
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Datarain",
+      "description": "Violet and white rain over deep navy, flecked with lit green.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the dark ground",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 13.0,
+              "to": 29.5,
+              "softness": 2.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 11.0,
+              "to": 21.5,
+              "softness": 1.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "the falling streaks",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 13.0,
+              "to": 29.5,
+              "softness": 2.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 11.0,
+              "to": 21.5,
+              "softness": 1.2
+            },
+            {
+              "type": "STROKES",
+              "seed": "$rainSeed",
+              "axis": "Y",
+              "spacing": 2.0,
+              "length": 14.0,
+              "width": 0.55,
+              "curl": 0.05,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "seed": "$rainSeed",
+            "scale": 2.6,
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.55,
+            "hueSpread": 70
+          }
+        },
+        {
+          "name": "the bright flecks",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "units",
+              "from": 13.0,
+              "to": 29.5,
+              "softness": 2.6
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "units",
+              "from": 11.0,
+              "to": 21.5,
+              "softness": 1.2
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$fleckSeed",
+              "spacing": 1.1,
+              "size": 0.5,
+              "density": 0.22,
+              "clumping": 0.5,
+              "clumpScale": 5.0
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "seed": "$fleckSeed",
+            "scale": 1.8,
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8,
+            "hueSpread": 90
+          },
+          "emissive": true
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "P/P": 0.003,
+    "P/C": 0.006,
+    "P/n": 0.3,
+    "C/C": 0.008,
+    "n/n": 99.683
+  }
+}

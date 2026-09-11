@@ -1,0 +1,21 @@
+I'll fetch the prompt spec first, then look at the uploaded SVGs.I have the spec but the numbered prompt rules section got truncated. Let me check my project notes and the uploaded files.These are full-image traces. I need to actually see them before I can decide what marking each one is.Now let me extract clean path data for the two drawn shapes.Both survived the trace cleanly. Now building the seven gene files.Now let me validate them against the format's own rules before handing them over.One sizing issue: the tribal claw viewport works out ~8 units tall against a 10-unit-deep barrel, which isn't minimal. Tightening it.Seven genes, each restricted to one region so they can stack on a horse without turning into mud:
+
+| Source | Gene | Where it lands | How it's built |
+|---|---|---|---|
+| blue agate slab | **Agate Eye** | haunch | 4 draws on one seed/spacing/vary — SPOTS rim, 2 RINGS bands, SPOTS core |
+| green drips on checker | **Ooze Drip** | topline of the barrel | 2 WAVES bands, the wider one painted first as a cartoon lip |
+| tribal claw spray | **Tribal Claw** | shoulder, both flanks | SVG mask, 3 of the 7 strokes |
+| concentric polygons | **Contour** | 1–2 patches on the barrel | CRACKLE `measure: centroid`, banded, gated by PATCHES |
+| iridescent pebbles | **Beadscale** | neck crest | CRACKLE + RAMP `axis: cellId` on the same seed/scale |
+| green flecks on purple | **Sporefall** | hindquarter, fading forward | NOISE wash + emissive SPECKLE |
+| four-point sparkle | **Wishstar** | high on each flank | SVG mask, ~2×4.4 units, bloom layer + emissive star |
+
+All seven validate clean: every allele combination claimed exactly once, founders sum to 100, no unknown keys, no MAX/ADD in first position, no PIGMENT in an emissive layer, and RINGS/SPOTS/SPECKLE dimensions all above the texel floor.
+
+Two things to check when you bake:
+
+**Contour's ring direction.** `measure: centroid` runs 0 at the cell centre to 1 at the boundary, and I've written each ring as an outer mask times an inner one inverted. If the rings come out as filled discs instead, the field reads the other way and the two inverts want swapping. The gene's `notes` says so — paint the four layers in flat primaries and look rather than reasoning about it.
+
+**Key namespace.** I used `horsegenetics.` to match the built-ins. If these are going in under a separate modid, that's a find-and-replace on the `key` field in all seven.
+
+Two source images gave up more than I used — the tribal drawing has four more strokes, and the checkerboard under the drips is a whole second gene if you want it. Say the word.

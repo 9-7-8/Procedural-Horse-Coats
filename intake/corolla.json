@@ -1,0 +1,529 @@
+{
+  "format": 3,
+  "key": "ixora.corolla",
+  "name": "Corolla",
+  "phase": "magical",
+  "priority": 157,
+  "blurb": "Broad flowers open across the barrel and neck, each one a pale halo round a bright rim, a deep heart and a small light eye.",
+  "rarity": "epic",
+  "notes": [
+    "Five SPOTS draws on ONE seed, ONE spacing, ONE stretch and ONE vary. That is the concentric-zone idiom and it is the only arrangement that keeps five bands both centred on each other AND in proportion, because vary scales all five by the same per-cell factor - a big bloom gets a big eye. Only radius differs. Give one of them a different stretch and it is walking a different lattice, and the eye lands beside the flower rather than inside it.",
+    "Radii 0.7 / 1.4 / 2.8 / 3.4 / 4.2 leave bands of 0.7, 1.4, 0.6 and 0.8 units. The 0.6 between the deep heart and the bright rim is the tightest thing here at a shade over one texel, and it is the first band to go if anyone scales the flower down.",
+    "THE KNOWN SHORTFALL. The reference's petals are LOBED - the outline goes in and out five or six times round each bloom. What ships is round. SPOTS measures distance to a cell centre and has no angular term except arc, which clips every cell to one wedge rather than modulating its radius periodically. Multiplying by any second field would break the concentricity the whole marking depends on, since that field lays down its own lattice. See the tool gap filed alongside this gene.",
+    "chance 0.45 at spacing 9.0 leaves most of the barrel bare, which is the difference between a horse wearing flowers and a horse wearing wallpaper.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim."
+  ],
+  "alleles": [
+    {
+      "token": "W",
+      "label": "Pale corolla (W)"
+    },
+    {
+      "token": "B",
+      "label": "Nightshade corolla (B)"
+    },
+    {
+      "token": "C",
+      "label": "Coloured corolla (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "bloomSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Pale corolla",
+      "description": "Chalk-white blooms haloed and ringed in greys, with a bright eye.",
+      "when": [
+        "W/W",
+        "W/B",
+        "W/C",
+        "W/n"
+      ],
+      "layers": [
+        {
+          "name": "corolla zone r=4.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 4.2,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#dedede"
+          }
+        },
+        {
+          "name": "corolla zone r=3.4",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 3.4,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#bcbcbc"
+          }
+        },
+        {
+          "name": "corolla zone r=2.8",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 2.8,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "corolla zone r=1.4",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 1.4,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#9b9b9b"
+          }
+        },
+        {
+          "name": "corolla zone r=0.7",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 0.7,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Nightshade corolla",
+      "description": "Blooms in soot and slate, near-black hearts inside gunmetal rims.",
+      "when": [
+        "B/B",
+        "B/C",
+        "B/n"
+      ],
+      "layers": [
+        {
+          "name": "corolla zone r=4.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 4.2,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#575757"
+          }
+        },
+        {
+          "name": "corolla zone r=3.4",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 3.4,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#3e3e3e"
+          }
+        },
+        {
+          "name": "corolla zone r=2.8",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 2.8,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "corolla zone r=1.4",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 1.4,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#262626"
+          }
+        },
+        {
+          "name": "corolla zone r=0.7",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 0.7,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#707070"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured corolla",
+      "description": "Blooms in the line's own colour - a deep heart, a bright rim and a pale halo.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "corolla zone r=4.2",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 4.2,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.68
+          }
+        },
+        {
+          "name": "corolla zone r=3.4",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 3.4,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "corolla zone r=2.8",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 2.8,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "corolla zone r=1.4",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 1.4,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.42
+          }
+        },
+        {
+          "name": "corolla zone r=0.7",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ]
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$bloomSeed",
+              "spacing": 9.0,
+              "radius": 0.7,
+              "vary": 0.45,
+              "stretch": 1.0,
+              "chance": 0.45,
+              "mirror": true,
+              "softness": 0.22
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "W/W": 0.002,
+    "W/B": 0.0035,
+    "W/C": 0.0045,
+    "W/n": 0.26,
+    "B/B": 0.003,
+    "B/C": 0.005,
+    "B/n": 0.22,
+    "C/C": 0.006,
+    "n/n": 99.496
+  }
+}
