@@ -20,8 +20,8 @@
 <h1>Spawner</h1>
 
 <p class="lede">
-    At first light the horse looks around, and if there are fewer than two of a
-    particular creature nearby, there are two now. Which creature depends on the
+    Feed the horse anything it eats and it looks around, and if there are fewer
+    than two of a particular creature nearby, there are two now. Which creature depends on the
     allele, and there is one for every mob in the game. The only outward sign is
     a pink tinge through the head and mane.
 </p>
@@ -29,14 +29,12 @@
 <section class="tab-panel" data-tab="gameplay">
 
 <div class="note warn">
-    <span class="label">Built, and not yet seen in game</span>
+    <span class="label">Played once, and it did nothing &mdash; rebuilt, not yet re-played</span>
     <p>
-        The gene, its inheritance and its founder table exist and are covered by
-        the test suite; the translator that turns it into behaviour was written
-        against the 26.1.2 sources and is flagged unverified in its own comments.
-        <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        The first in-game test was a cow spawner that never made a cow: the daily
+        timer could not survive a reload. It now fires when you feed the horse.
+        <strong>That version has not been watched happening yet.</strong>
+        What to look at is on <a href="verification.html">To be verified</a>.
     </p>
 </div>
 
@@ -45,7 +43,7 @@
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
     <tbody>
-        <tr><td>two copies of one allele</td><td>at sunrise, tops the local population of that mob up to two</td></tr>
+        <tr><td>two copies of one allele</td><td>when fed, tops the local population of that mob up to two</td></tr>
         <tr><td>two different alleles</td><td>nothing</td></tr>
         <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
     </tbody>
@@ -54,17 +52,25 @@
 <h2 id="two">Exactly two, and no more</h2>
 
 <p>
-    It counts what is already there first. A horse whose two sheep are still
-    alive does nothing at all; a horse whose sheep have wandered off makes two
-    more. It cannot run away with itself, which is the whole reason the rule is
-    written this way.
+    Hand it anything it eats &mdash; its ordinary food, whatever a special diet
+    asks for, or its favourite &mdash; and it counts what is already there first.
+    Feed a horse whose two sheep are still nearby and nothing happens beyond the
+    meal; feed one whose sheep have wandered off and it makes two more. It cannot
+    run away with itself, which is the whole reason the rule is written this way.
+    Left alone in a field it does nothing at all.
+</p>
+
+<p>
+    <em>It used to fire by itself once a Minecraft day. In play it never fired:
+    the day was counted on a clock that restarts every time the horse loads. It
+    was moved onto feeding on 2026-09-10, at the owner&rsquo;s call.</em>
 </p>
 
 <h2 id="hostile">Some of the alleles are not friendly</h2>
 
 <p>
     There is an allele for every mob, hostile ones included. A horse that
-    produces two creepers every dawn is a real thing this locus can express
+    produces two creepers every time you feed it is a real thing this locus can express
     &mdash; and it is never something you will catch, because no wild horse is
     ever homozygous here. Somebody has to make it.
 </p>
@@ -91,7 +97,7 @@
     <div><dt>Gene key</dt><dd><code>horsegenetics.spawner</code></dd></div>
     <div><dt>Alleles</dt><dd>one per mob including hostiles, plus <code>n</code></dd></div>
     <div><dt>Inheritance</dt><dd>homozygous recessive, matched pair; <strong>no homozygous founders</strong></dd></div>
-    <div><dt>Reaches the game as</dt><dd>a <code>summon</code> effect at dawn</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>summon</code> effect on the built-in <code>OnFeed</code> trigger</dd></div>
     <div><dt>Epigenetic</dt><dd>spawned colour, where the mob has one</dd></div>
     <div><dt>Coat effect</dt><dd>a faint pink tint on head and mane</dd></div>
 </dl>
@@ -106,21 +112,24 @@
 <div class="note danger">
     <span class="label">Never mark what it spawns persistent</span>
     <p>
-        A persistent mob never despawns. Two a day, every day, from every expressing horse, is unbounded growth &mdash; and the count-to-two rule does not save you, because it counts only what is nearby. What it makes must despawn like anything else.
+        A persistent mob never despawns. Two per feeding, from every expressing horse, is unbounded growth &mdash; and the count-to-two rule does not save you, because it counts only what is nearby. What it makes must despawn like anything else.
     </p>
 </div>
 
 <div class="note danger">
-    <span class="label">Count first, or it spawns two more every day</span>
+    <span class="label">Count first, or it spawns two more every feeding</span>
     <p>
         The rule is &ldquo;top up to two&rdquo;, not &ldquo;make two&rdquo;. The scan for existing mobs is the gene, and getting it backwards turns a self-limiting locus into the worst thing in the mod.
     </p>
 </div>
 
 <div class="note warn">
-    <span class="label">Sunrise is one tick; stagger the firing</span>
+    <span class="label">Fed, not timed &mdash; and why the timer failed</span>
     <p>
-        Every expressing horse in the world wants to scan a two-chunk radius on the same tick. A stable of fifty is a visible spike. Offset each horse off its own <code>tickCount</code> &mdash; the same trick every radius effect in the format already uses.
+        <code>GeneAbilityHandler.onFeed</code> listens to the interaction at <code>HIGHEST</code> priority, because the diet and favourite-food handlers both cancel it and shrink the stack; a stack of one would already be empty for a later listener. &ldquo;Eats&rdquo; is the same split the crouch-feed goal tempts with: the favourite, the special diet&rsquo;s list, or vanilla horse food. It fires whether or not vanilla then actually eats, which is safe only because the summon counts first. The trigger is <code>GeneAbility.Trigger.OnFeed</code>, built-in only &mdash; a gene file cannot ask for it yet.
+    </p>
+    <p>
+        The old once-a-day timer was <code>tickCount % 24000</code>, and <code>tickCount</code> is not saved: every reload started it again from nothing. Every timed beat in the handler now counts on the world&rsquo;s saved game time instead, offset per horse by its UUID so horses still do not fire in lockstep.
     </p>
 </div>
 
@@ -183,7 +192,7 @@
 <p>
     Everything else in this family is invisible. This one carries a faint pink
     tint on the head and mane, and it should: a horse that manufactures
-    creatures at dawn is the one case where a player deserves a warning they can
+    creatures on demand is the one case where a player deserves a warning they can
     see before they buy it.
 </p>
 

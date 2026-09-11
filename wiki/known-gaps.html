@@ -67,6 +67,23 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-178"><strong>The <code>OnFeed</code> trigger exists only for built-in genes.</strong>
+    Opened 2026-09-10, when the <a href="gene-spawner.html">spawner</a> moved off its timer
+    and onto feeding. <code>GeneAbility.Trigger.OnFeed</code> is fired by
+    <code>GeneAbilityHandler.onFeed</code>, but <code>GeneSpecParser</code>, the gene
+    creator&rsquo;s schema and its parity fixtures do not know it, so a gene file cannot
+    say <code>"trigger": "on_feed"</code>. That is deliberate rather than forgotten: adding
+    a trigger to the format is the multi-file change on
+    <a href="making-a-gene.html#contracts">the contracts list</a>, and it was not worth
+    doing for one gene. It is the first thing to do if a second gene wants to react to
+    being fed.</li>
+<li id="gap-179"><strong>A fireproof horse crawls through lava, and making it faster needs a
+    mixin.</strong> Opened 2026-09-10. It now floats (a <code>GRAVITY</code> modifier),
+    but vanilla lava travel moves at a fixed <code>0.02</code> with half-speed drag and
+    reads no attribute, so nothing short of replacing <code>travelInLava</code> or
+    overriding <code>canStandOnFluid</code> will speed it up - and this module has no
+    mixins. Owner&rsquo;s call whether a lava crossing that slow is acceptable, or whether
+    it is worth the first mixin.</li>
 <li id="gap-177"><strong>The broadest coat test only ever varies the first 35 loci, because
     its gene mask is a <code>long</code>.</strong> Opened 2026-09-10, pre-existing and found by
     reading the test while waiting for it.

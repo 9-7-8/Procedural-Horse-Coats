@@ -35,6 +35,50 @@
     </p>
 </div>
 
+<h2 id="play-fixes-0910">&sect;0-BW &mdash; Five things off the 2026-09-10 play session (NOT looked at in game)</h2>
+
+<ul>
+    <li><strong>A fireproof horse should float in lava now</strong>, hooves under, the way a
+        ridden horse floats in water. It was sinking. The buoyancy is a <code>GRAVITY</code>
+        attribute modifier held while the lava is above the horse&rsquo;s knees, because a
+        ridden horse is moved by your client and ignores server-side velocity &mdash; and
+        attributes sync to it. <em>Look for:</em> does it bob too much at the surface (the
+        modifier reaches your client a tick or two late); can it climb out onto the shore.
+        It will still be <strong>slow</strong> in lava: vanilla lava movement has a fixed,
+        low speed with no attribute behind it, and walking <em>on</em> lava the way a
+        strider does needs a mixin, which this mod does not have.</li>
+    <li><strong>The spawner fires when you feed the horse</strong>, not on a timer (owner&rsquo;s
+        call). Feed a <code>Cow/Cow</code> horse wheat with no cows nearby: two should appear
+        and chat should say <code>[Spawner] made 2 of 2</code>. Feed it again: chat should say
+        the two are already there and nothing is made. Check a spawned zombie&rsquo;s gear too
+        &mdash; the second <code>finalizeSpawn</code> that could re-roll it is gone. The daily
+        timer never fired because it counted on the horse&rsquo;s unsaved
+        <code>tickCount</code>.</li>
+    <li><strong>Molten hooves should trail under a rider.</strong> Every <code>on_move</code>
+        effect was silent on a ridden horse: the server&rsquo;s copy of a player-steered horse
+        has zero velocity, and &ldquo;moving&rdquo; was read off velocity. It now compares
+        positions tick to tick. The same fix reaches the particle locus&rsquo;s trails and
+        any moving sound. <em>Be clear on what it is:</em> coloured dust puffs at the
+        hooves that fade from one colour to another, not marks lying flat on the ground,
+        and they do not glow &mdash; dust is lit by the world like anything else. If you
+        want glowing prints, that is a design change (an emissive particle, which cannot
+        carry the per-copy colour), not a bug fix.</li>
+    <li><strong>Every long timed effect now survives a reload.</strong> Timed beats counted
+        on <code>tickCount</code>, which restarts whenever a horse loads, so anything slower
+        than a few minutes almost never fired. The worst case was
+        <a href="gene-dryad.html">dryad</a> (a sapling every 9&nbsp;000 to 32&nbsp;000
+        ticks). They now count on the world&rsquo;s saved game time. <em>Look for:</em> a
+        dryad horse left near you for a real half-hour should have planted something.</li>
+    <li><strong>The info screen shows height in hands</strong> beside the size word
+        (<code>average  15.3 hh  (1.00)</code>), in horseman&rsquo;s notation &mdash; the digit
+        after the point is inches, 0 to 3. A foal shows the height it will grow to, marked
+        &ldquo;grown&rdquo;. It is the exact inverse of how a breed&rsquo;s hands range sets
+        its scale, so a breed sheet saying 17 hands should read about 17.0 hh on the
+        horse. The breed sheet itself still prints <em>decimal</em> hands
+        (<code>15.5-17.0 hands</code>), which is a different notation for the same thing;
+        worth deciding whether it should switch.</li>
+</ul>
+
 <h2 id="gene-search">&sect;0-BV &mdash; A search box on both gene editors (2026-09-10, NOT looked at in game)</h2>
 
 <ul>
@@ -273,18 +317,12 @@
         full.</strong> Leave one overnight in a closed pen. The nearby-cap should stop it
         at eight of the item, not carpet the floor.</li>
     <li><strong>Rider-targeted traversal must not follow you off the horse.</strong>
-        <em>Played 2026-09-10: <a href="gene-fireproof.html">fireproof</a> protected
-        neither the horse nor the rider</em> &mdash; the tick only put the burning out, and
-        lava hurts directly. It is now a damage cancel on the <code>is_fire</code> tag
-        (<code>GeneAbilityHandler.onTraversalDamage</code>), and
-        <a href="gene-bird-boned.html">bird boned</a> got the same treatment on
-        <code>is_fall</code>, because a rider&rsquo;s fall damage is handed down from the
-        horse and the old reset never touched it. <strong>Re-test all of it:</strong> ride
-        a fireproof horse into lava and stand in fire &mdash; both of you should take
-        nothing; then dismount and walk into fire &mdash; you should burn. Ride a bird-boned
-        horse off a tall cliff (twenty-plus blocks, so it reaches full speed), then jump off
-        one on foot. <a href="gene-ocean-born.html">Ocean-born</a> under water is unchanged
-        and still unplayed.</li>
+        <a href="gene-fireproof.html">Fireproof</a> and <a href="gene-bird-boned.html">bird
+        boned</a> are owner-confirmed protecting horse and rider (2026-09-10, after the
+        damage-cancel rewrite). <strong>Still to check:</strong> dismount and walk into fire
+        &mdash; you should burn; jump off a cliff on foot &mdash; you should take damage.
+        <a href="gene-ocean-born.html">Ocean-born</a> under water is unchanged and still
+        unplayed.</li>
 </ul>
 
 <h3>The ones most likely to be quietly wrong</h3>

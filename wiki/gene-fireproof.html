@@ -108,6 +108,22 @@
     for the rider and a movement speed in lava.
 </p>
 
+<p>
+    <strong>How it floats.</strong> The first build only slowed the sink, from the
+    server, and in play the horse simply sank: a horse under a rider is simulated
+    by the rider&rsquo;s client, and the server&rsquo;s velocity changes never reach
+    it. Vanilla lava movement pulls down by a quarter of the horse&rsquo;s
+    <code>GRAVITY</code> attribute each tick, and attributes <em>do</em> sync to the
+    client, so <code>lava_swim</code> holds a transient gravity modifier of
+    <code>-0.16</code> (net <code>-0.08</code>) while the lava is above the horse&rsquo;s
+    fluid-jump threshold. That settles into a slow rise, and dropping it at the
+    surface makes the horse bob there - the float vanilla gives a ridden horse in
+    water and not in lava. The speed is still vanilla lava&rsquo;s fixed crawl: there
+    is no attribute on it, and standing <em>on</em> lava like a strider is
+    <code>canStandOnFluid</code>, an entity method with no event, which would need a
+    mixin.
+</p>
+
 <h2 id="shared">One shared change, three genes</h2>
 
 <p>
