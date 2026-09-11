@@ -78,23 +78,22 @@
 </dl>
 
 <div class="note danger">
-    <span class="label">A flag granted to the rider must come off on dismount</span>
+    <span class="label">Immunity is a damage cancel, and it stores nothing</span>
     <p>
-        This is the sharpest hazard in the whole behaviour batch. Traversal flags currently only ever touch the horse, which is disposable state on an entity the mod owns. Granting one to a <em>player</em> writes state onto something that walks away. <strong>If the grant is not reconciled off the tick the rider dismounts, it is an invulnerability duplication</strong> &mdash; ride the horse, step off, keep the immunity. The removal path must be written in the same change as the grant, the way <code>clearAttributes</code> already does for attributes.
+        <code>GeneAbilityHandler.onTraversalDamage</code> cancels any
+        <code>LivingIncomingDamageEvent</code> whose source carries the
+        <code>minecraft:is_fire</code> damage-type tag - so lava, fire blocks, burning and
+        other mods&rsquo; heat sources alike - when it lands on a horse expressing the gene,
+        or on the player who is its <em>first passenger at the moment of the hit</em>.
+        Nothing is written onto the player, so there is nothing to take off on dismount and
+        no invulnerability to duplicate: step off and the next hit is an ordinary one.
     </p>
-</div>
-
-<div class="note warn">
-    <span class="label">It finishes a flag that currently does nothing</span>
     <p>
-        <code>walk_on_lava</code> is declared in the gene format and falls straight into <code>warnUntranslated</code> at <code>GeneAbilityHandler.java:438</code> &mdash; it parses, validates, and silently has no effect. This gene wants <em>swimming</em> rather than walking, so the stub is either repurposed or joined by a sibling; either way the dead branch stops being debt in the same change.
-    </p>
-</div>
-
-<div class="note warn">
-    <span class="label">Use the damage-type tag, not a fire-only check</span>
-    <p>
-        A check against vanilla fire and lava damage leaves the rider dying to every modded heat source while the page promises immunity. Test the fire damage-type tag so other mods&rsquo; burn damage is covered by the same grant.
+        <strong>The first version did nothing, and the reason is worth keeping.</strong> It
+        called <code>clearFire()</code> on the tick, which puts out the burning but not the
+        damage: lava and fire blocks hurt directly, and vanilla&rsquo;s own immunity is a flag
+        on the entity <em>type</em>, which a gene cannot set per horse. The owner rode one into
+        lava on 2026-09-10 and neither of them was protected.
     </p>
 </div>
 

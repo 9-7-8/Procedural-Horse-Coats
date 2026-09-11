@@ -78,16 +78,23 @@
 </dl>
 
 <div class="note danger">
-    <span class="label">A flag granted to the rider must come off on dismount</span>
+    <span class="label">Immunity is a damage cancel, and it stores nothing</span>
     <p>
-        This is the sharpest hazard in the whole behaviour batch. Traversal flags currently only ever touch the horse, which is disposable state on an entity the mod owns. Granting one to a <em>player</em> writes state onto something that walks away. <strong>If the grant is not reconciled off the tick the rider dismounts, it is an invulnerability duplication</strong> &mdash; ride the horse, step off, keep the immunity. The removal path must be written in the same change as the grant, the way <code>clearAttributes</code> already does for attributes.
+        <code>GeneAbilityHandler.onTraversalDamage</code> cancels any
+        <code>LivingIncomingDamageEvent</code> carrying the <code>minecraft:is_fall</code>
+        damage-type tag when it lands on a horse expressing the gene, or on the player who is
+        its first passenger at the moment of the hit. Nothing is written onto the player, so
+        stepping off ends it and there is no immunity to carry away. The tick still resets
+        the horse&rsquo;s fall distance, which keeps the landing sound quiet.
     </p>
-</div>
-
-<div class="note good">
-    <span class="label">The horse half already works</span>
     <p>
-        <code>fall_immune</code> is translated today &mdash; it resets the horse&rsquo;s fall distance every tick. The only new work here is the rider, which is the shared <code>target</code> parameter, not anything specific to this gene.
+        <strong>Why not the per-tick reset on its own.</strong> Fall damage is applied inside
+        the move, <em>before</em> the post-tick handler runs, so one tick at full speed still
+        hurt. And a rider&rsquo;s fall damage is the horse&rsquo;s, passed down by
+        <code>AbstractHorse.propagateFallToPassengers</code>, so resetting the rider&rsquo;s own
+        fall distance never protected them at all. Found 2026-09-10 while fixing
+        <a href="gene-fireproof.html">fireproof</a>, which had the same flaw and was caught in
+        play.
     </p>
 </div>
 

@@ -40,10 +40,11 @@
         and <strong>shade</strong> are always on the horse and have no <code>x</code>:
         every horse has versions of all three, and between them they decide whether it is
         black, bay or chestnut.</li>
-    <li>The <strong>menu above the list</strong> narrows it to one kind of gene &mdash; the
-        natural dilutions, the whites, the health genes, or any one family of magic. A
-        hundred and seventy genes in one alphabetical column is a list you scroll rather
-        than read.</li>
+    <li>The <strong>search box above the list</strong> finds a gene by name or by one of
+        its allele codes &mdash; type <code>Frp</code> and you get fireproof. Beside it, the
+        <strong>family menu</strong> narrows the list to one kind of gene &mdash; the
+        natural dilutions, the whites, the health genes, or any one family of magic. The
+        two work together, so you can search inside a family.</li>
     <li><strong>Point at a gene and it tells you what it is.</strong> A panel opens
         beside the list with the gene's name and a sentence or three on what the locus
         does &mdash; the same summary the gene browser uses, not a description of the
@@ -237,6 +238,15 @@
         bands were laid out as families in the first place), naturals that change nothing
         visible are health genes, and the handful whose slot in the paint order fights
         their family are named in one short override table with the reason.</li>
+    <li>The search is <code>EditorRules.matchesSearch</code> in <code>common/</code>:
+        case-insensitive, over the display name, the key without its namespace
+        (underscores read as spaces), and every allele's token and label. The screen
+        calls it directly; the browser twin asks for the matches through
+        <code>DesignerApi.searchMatchesJson</code>, so the two cannot disagree about
+        what a query finds. The screen keeps one <code>EditBox</code> across
+        <code>rebuildWidgets</code> and re-focuses it after each keystroke, because a
+        rebuild clears focus; the browser draws its box on the canvas and takes keys in
+        the window's capture phase so typing does not also walk the horse.</li>
 </ul>
 
 <h2 id="breed-egg">Breed spawn eggs</h2>

@@ -35,6 +35,25 @@
     </p>
 </div>
 
+<h2 id="gene-search">&sect;0-BV &mdash; A search box on both gene editors (2026-09-10, NOT looked at in game)</h2>
+
+<ul>
+    <li><strong>Does typing work?</strong> Open the custom spawn egg, click the box above
+        the list and type <code>fire</code>. The list should narrow as you type, and the box
+        should <em>keep focus</em> between letters. The screen rebuilds every widget on each
+        keystroke, and the box is re-focused by hand after each rebuild. If only the first
+        letter lands, that is the thing that failed.</li>
+    <li><strong>Allele codes find their gene</strong> &mdash; <code>Frp</code>,
+        <code>Spb</code>, <code>Hly</code>. And the search should combine with the family
+        menu rather than replace it.</li>
+    <li><strong>Is half the row enough for the family menu?</strong> Long family names now
+        truncate on the button face. The dropdown still shows them whole.</li>
+    <li><strong>The browser twin</strong> (<a href="horse-designer/">horse designer</a>):
+        the same box, drawn on the canvas. Check that typing <code>w</code>, <code>a</code>,
+        <code>s</code> or <code>d</code> into it does not also walk the horse, that Esc clears
+        it, and that clicking anywhere else lets go of it.</li>
+</ul>
+
 <h2 id="eye-loci">&sect;0-BU &mdash; Thirteen eye loci, and every horse in the world
     is brown-eyed now (2026-09-10, NOT looked at in game)</h2>
 
@@ -163,10 +182,12 @@
         <a href="gene-fireproof.html">fireproof</a>,
         <a href="gene-bird-boned.html">bird boned</a>,
         <a href="gene-ocean-born.html">ocean-born</a> - reach something that walks away.</p>
-        <p>They are granted per tick and store nothing, which <em>should</em> make a
-        lingering immunity impossible. Prove it: ride a fireproof horse through lava,
-        dismount, and walk into fire. If you are still immune, this is an invulnerability
-        duplication and the gene should come straight back out.</p>
+        <p>Fire and fall are now damage cancels that read the horse under you at the
+        moment of the hit, and store nothing - see the rider bullet under
+        <em>Start here</em> below for what the first play of fireproof found. Prove the
+        store-nothing half: ride a fireproof horse through lava, dismount, and walk into
+        fire. If you are still immune, this is an invulnerability duplication and the gene
+        should come straight back out.</p>
     </li>
 </ol>
 
@@ -251,12 +272,19 @@
     <li><strong><a href="gene-egg-layer.html">Egg layer</a> must stop when the ground is
         full.</strong> Leave one overnight in a closed pen. The nearby-cap should stop it
         at eight of the item, not carpet the floor.</li>
-    <li><strong>Rider-targeted traversal must not follow you off the horse.</strong> Ride a
-        <a href="gene-fireproof.html">fireproof</a> horse into lava, dismount on the far
-        side, and walk into fire. If you are still immune, the grant is being stored
-        somewhere it should not be &mdash; it is meant to be re-applied per tick and stored
-        nowhere. Same test for <a href="gene-bird-boned.html">bird boned</a> off a cliff
-        and <a href="gene-ocean-born.html">ocean-born</a> under water.</li>
+    <li><strong>Rider-targeted traversal must not follow you off the horse.</strong>
+        <em>Played 2026-09-10: <a href="gene-fireproof.html">fireproof</a> protected
+        neither the horse nor the rider</em> &mdash; the tick only put the burning out, and
+        lava hurts directly. It is now a damage cancel on the <code>is_fire</code> tag
+        (<code>GeneAbilityHandler.onTraversalDamage</code>), and
+        <a href="gene-bird-boned.html">bird boned</a> got the same treatment on
+        <code>is_fall</code>, because a rider&rsquo;s fall damage is handed down from the
+        horse and the old reset never touched it. <strong>Re-test all of it:</strong> ride
+        a fireproof horse into lava and stand in fire &mdash; both of you should take
+        nothing; then dismount and walk into fire &mdash; you should burn. Ride a bird-boned
+        horse off a tall cliff (twenty-plus blocks, so it reaches full speed), then jump off
+        one on foot. <a href="gene-ocean-born.html">Ocean-born</a> under water is unchanged
+        and still unplayed.</li>
 </ul>
 
 <h3>The ones most likely to be quietly wrong</h3>
