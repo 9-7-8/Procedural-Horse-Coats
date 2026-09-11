@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedBands;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Commonness;
+import com.example.horsegenetics.common.breed.SpawnTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,9 @@ public final class BreedSpecWriter {
 
         fields.add(field("id", quote(breed.id())));
         fields.add(field("name", quote(breed.name())));
+        if (!breed.description().isEmpty()) {
+            fields.add(field("description", quote(breed.description())));
+        }
         if (breed.magical()) {
             fields.add(field("kind", quote("magical")));
         }
@@ -57,6 +61,9 @@ public final class BreedSpecWriter {
                 }
             }
             fields.add(field("spawn", inlineArray(tokens)));
+        }
+        if (breed.spawnTime() != SpawnTime.ANY) {
+            fields.add(field("spawn_time", quote(breed.spawnTime().id())));
         }
         if (!breed.biomes().isEmpty()) {
             fields.add(field("biomes", blockArray(quoteAll(breed.biomes()), 2)));
@@ -107,7 +114,7 @@ public final class BreedSpecWriter {
         scores.speed().ifPresent(r -> parts.add(field("speed", range(r), 4)));
         scores.jump().ifPresent(r -> parts.add(field("jump", range(r), 4)));
         scores.health().ifPresent(r -> parts.add(field("health", range(r), 4)));
-        scores.heightHands().ifPresent(r -> parts.add(field("height", range(r), 4)));
+        scores.size().ifPresent(r -> parts.add(field("size", range(r), 4)));
         return "{\n" + String.join(",\n", parts) + "\n  }";
     }
 
@@ -134,8 +141,16 @@ public final class BreedSpecWriter {
         for (String key : bands.genes()) {
             List<String> values = new ArrayList<>();
             for (Map.Entry<String, BreedBands.Band> e : bands.forGene(key).entrySet()) {
-                values.add("      " + quote(e.getKey()) + ": "
-                        + inlineArray(List.of(number(e.getValue().lo()), number(e.getValue().hi()))));
+                BreedBands.Band band = e.getValue();
+                // A zero-width band is a lock, and reads as one: a single number.
+                values.add("      " + quote(e.getKey()) + ": " + (band.lo() == band.hi()
+                        ? number(band.lo())
+                        : inlineArray(List.of(number(band.lo()), number(band.hi())))));
+            }
+            for (Map.Entry<String, Long> e : bands.seedsFor(key).entrySet()) {
+                // A string, because a JSON number is a double and most seeds do
+                // not survive the trip through one.
+                values.add("      " + quote(e.getKey()) + ": " + quote(String.valueOf(e.getValue())));
             }
             byGene.add("    " + quote(key) + ": {\n" + String.join(",\n", values) + "\n    }");
         }

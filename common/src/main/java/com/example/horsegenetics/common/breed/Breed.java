@@ -28,7 +28,7 @@ import java.util.Set;
  * <h2>Almost every breed is a JSON file</h2>
  * This type is the <b>parsed</b> form. The breeds the mod ships live in
  * {@code common/src/main/resources/horsegenetics/breeds/}, one file each, and a
- * player may drop more into {@code config/horsegenetics/breeds/} after the jar
+ * player may drop more into {@code .minecraft/phc/breeds/} after the jar
  * is built - see {@code breed/spec/BreedSpecLoader} and
  * {@code wiki/breed-designer/}. Writing a breed in Java is still supported
  * ({@link Builder}) but is reserved for one that needs behaviour a data file
@@ -46,8 +46,11 @@ import java.util.Set;
  *       disorder locus to clear.</li>
  *   <li><b>The four magical body-stat genes</b> are driven by
  *       {@link #statTargets()}: an axis with a {@link TargetBand} makes every
- *       founder homozygous for that gene's pushing allele, and the gene lands
- *       the horse inside the band. An axis with no band is left wild.</li>
+ *       founder carry that gene's pushing allele, and the gene lands the horse
+ *       inside the band. Speed, jump and health are always homozygous; size is
+ *       heterozygous for a founder that lands between 0.7x and 1.3x and
+ *       homozygous outside it (see {@link BreedStatCurve#heterozygousSize}). An
+ *       axis with no band is left wild.</li>
  *   <li><b>Any other gene's epigenetic numbers</b> may be pinned by
  *       {@link #bands()} - "deeply black", not merely "black". See
  *       {@link BreedBands}.</li>
@@ -77,7 +80,9 @@ public record Breed(
         Set<String> magicBlacklist,
         boolean hardy,
         List<String> notes,
-        Optional<PriceRange> price) {
+        Optional<PriceRange> price,
+        String description,
+        SpawnTime spawnTime) {
 
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
@@ -103,8 +108,8 @@ public record Breed(
     }
 
     /**
-     * The breed sheet's <b>declared</b> numbers - three 1-10 scores and a height
-     * range in hands - kept as written rather than only as the
+     * The breed sheet's <b>declared</b> numbers - three 1-10 scores and a size
+     * range in multiples of the baseline horse - kept as written rather than only as the
      * {@link TargetBand}s {@link BreedStatCurve} turns them into.
      *
      * <p>They are kept because they are what a person edits. A band is
@@ -115,7 +120,7 @@ public record Breed(
      * ({@link Breed#statTargets()}).
      */
     public record StatScores(Optional<Range> speed, Optional<Range> jump,
-                             Optional<Range> health, Optional<Range> heightHands) {
+                             Optional<Range> health, Optional<Range> size) {
 
         public static final StatScores NONE =
                 new StatScores(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
@@ -124,11 +129,11 @@ public record Breed(
             speed = speed == null ? Optional.empty() : speed;
             jump = jump == null ? Optional.empty() : jump;
             health = health == null ? Optional.empty() : health;
-            heightHands = heightHands == null ? Optional.empty() : heightHands;
+            size = size == null ? Optional.empty() : size;
         }
 
         public boolean isEmpty() {
-            return speed.isEmpty() && jump.isEmpty() && health.isEmpty() && heightHands.isEmpty();
+            return speed.isEmpty() && jump.isEmpty() && health.isEmpty() && size.isEmpty();
         }
     }
 
@@ -166,6 +171,8 @@ public record Breed(
         magicBlacklist = orderedSet(magicBlacklist);
         notes = List.copyOf(notes);
         price = price == null ? Optional.empty() : price;
+        description = description == null ? "" : description;
+        spawnTime = spawnTime == null ? SpawnTime.ANY : spawnTime;
     }
 
     private static Map<String, List<Combo>> ordered(Map<String, List<Combo>> pools) {
@@ -209,16 +216,31 @@ public record Breed(
         scores.speed().ifPresent(r -> b.band(StatAxis.SPEED, BreedStatCurve.bandFor(StatAxis.SPEED, r.lo(), r.hi())));
         scores.jump().ifPresent(r -> b.band(StatAxis.JUMP, BreedStatCurve.bandFor(StatAxis.JUMP, r.lo(), r.hi())));
         scores.health().ifPresent(r -> b.band(StatAxis.HEALTH, BreedStatCurve.bandFor(StatAxis.HEALTH, r.lo(), r.hi())));
-        scores.heightHands().ifPresent(r -> b.band(StatAxis.SCALE, BreedStatCurve.scaleBand(r.lo(), r.hi())));
+        scores.size().ifPresent(r -> b.band(StatAxis.SCALE, BreedStatCurve.sizeBand(r.lo(), r.hi())));
         return b.build();
     }
 
-    /** The breed's founder table for a gene it constrains. Tokens resolve against the live registry. */
+    /**
+     * The breed's founder table for a gene it constrains. Tokens resolve against
+     * the live registry.
+     *
+     * <p>A breed file's weights are <b>relative</b> - three pairs at 10 each is
+     * a third apiece, which is how the breed designer writes them - while a
+     * {@link FounderTable} takes percentages and complains about any other
+     * total. So they are scaled to 100 here, once, rather than letting every
+     * founder roll log the same "does not sum to 100" error.
+     */
     public FounderTable founderTable(String geneKey) {
         Gene gene = Genes.byKey(geneKey);
+        List<Combo> pool = genePools.get(geneKey);
+        double total = 0.0;
+        for (Combo c : pool) {
+            total += c.weight();
+        }
+        double scale = total > 0.0 ? 100.0 / total : 1.0;
         FounderTable.Builder b = FounderTable.builder();
-        for (Combo c : genePools.get(geneKey)) {
-            b.weight(alleleOf(gene, c.a()), alleleOf(gene, c.b()), c.weight());
+        for (Combo c : pool) {
+            b.weight(alleleOf(gene, c.a()), alleleOf(gene, c.b()), c.weight() * scale);
         }
         return b.build();
     }
@@ -251,7 +273,7 @@ public record Breed(
         private Optional<Range> speed = Optional.empty();
         private Optional<Range> jump = Optional.empty();
         private Optional<Range> health = Optional.empty();
-        private Optional<Range> height = Optional.empty();
+        private Optional<Range> size = Optional.empty();
         private final BreedBands.Builder bands = BreedBands.builder();
         private double magicChance = 0.20;
         private final Set<String> whitelist = new LinkedHashSet<>();
@@ -259,6 +281,8 @@ public record Breed(
         private boolean hardy = false;
         private final List<String> notes = new ArrayList<>();
         private Optional<PriceRange> price = Optional.empty();
+        private String description = "";
+        private SpawnTime spawnTime = SpawnTime.ANY;
 
         private Builder(String id, String name) {
             this.id = id;
@@ -316,6 +340,12 @@ public record Breed(
         /** Pin one of a gene's epigenetic numbers to a band on every founder. */
         public Builder band(String geneKey, String valueName, double lo, double hi) {
             bands.band(geneKey, valueName, lo, hi);
+            return this;
+        }
+
+        /** Lock one of a gene's noise seeds to a single value on every founder. */
+        public Builder seed(String geneKey, String valueName, long seed) {
+            bands.seed(geneKey, valueName, seed);
             return this;
         }
 
@@ -399,9 +429,21 @@ public record Breed(
             return this;
         }
 
-        /** The breed's height range, in hands. Sets the body-scale band. */
-        public Builder height(double loHh, double hiHh) {
-            this.height = Optional.of(new Range(loHh, hiHh));
+        /** The breed's size range, in multiples of the baseline horse. Sets the body-scale band. */
+        public Builder size(double lo, double hi) {
+            this.size = Optional.of(new Range(lo, hi));
+            return this;
+        }
+
+        /** A sentence or two for the Breeds tab - what a player reads about the breed in game. */
+        public Builder description(String text) {
+            this.description = text == null ? "" : text;
+            return this;
+        }
+
+        /** When its wild herds may be founded - see {@link SpawnTime}. */
+        public Builder spawnTime(SpawnTime time) {
+            this.spawnTime = time == null ? SpawnTime.ANY : time;
             return this;
         }
 
@@ -447,8 +489,9 @@ public record Breed(
         public Breed build() {
             return new Breed(id, name, magical, biomes, spawnWeight,
                     sourcesNamed ? sources : BreedSource.ALL, pools,
-                    new StatScores(speed, jump, health, height), bands.build(),
-                    magicChance, whitelist, blacklist, hardy, notes, price);
+                    new StatScores(speed, jump, health, size), bands.build(),
+                    magicChance, whitelist, blacklist, hardy, notes, price,
+                    description, spawnTime);
         }
     }
 }

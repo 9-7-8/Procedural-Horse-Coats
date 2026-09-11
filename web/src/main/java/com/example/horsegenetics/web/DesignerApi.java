@@ -1075,6 +1075,10 @@ public final class DesignerApi {
             Json j = new Json().obj()
                     .kv("speed", t.speed()).kv("health", t.health())
                     .kv("jump", t.jump()).kv("scale", t.scale())
+                    // The ordinary horse, so a page can say "x1.4" without
+                    // keeping its own copy of the baseline.
+                    .kv("baseSpeed", HorseTraits.BASE_SPEED).kv("baseHealth", HorseTraits.BASE_HEALTH)
+                    .kv("baseJump", HorseTraits.BASE_JUMP)
                     .key("conditions").arr();
             for (Condition c : t.conditions()) {
                 j.obj().kv("name", c.name()).kv("severity", c.severity().name()).endObj();
@@ -1275,7 +1279,12 @@ public final class DesignerApi {
                             .name().toLowerCase(java.util.Locale.ROOT))
                     .kv("genes", b.genePools().size())
                     .kv("biomes", b.biomes().size())
-                    .key("spawn").arr();
+                    .kv("description", b.description())
+                    .kv("spawnTime", b.spawnTime().id());
+            // The breed designer's size step draws every breed's range against
+            // the baseline horse, so it needs the numbers and not just a count.
+            b.scores().size().ifPresent(s -> j.kv("sizeLo", s.lo()).kv("sizeHi", s.hi()));
+            j.key("spawn").arr();
             for (BreedSource source : BreedSource.values()) {
                 if (b.allows(source)) {
                     j.val(source.id());
@@ -1311,12 +1320,15 @@ public final class DesignerApi {
 
     /**
      * A gene's <b>epigenetic value schema</b> - the named numbers a breed may
-     * band, with the range founders are rolled in and the hard clamp beyond it.
+     * band or lock, with the range founders are rolled in and the hard clamp
+     * beyond it.
      *
-     * <p>Only {@code SCALAR}s are listed. A seed is the long behind a noise
-     * field and a category is an index into a list the gene owns; neither has a
-     * "slightly more", so neither can be banded, and offering a slider for one
-     * would be offering a control that does nothing.
+     * <p>Every kind is listed, with its {@code kind}: a {@code scalar} is banded
+     * or locked, a {@code category} is banded over whole options (its
+     * {@code max} is the option count), and a {@code seed} can only be locked -
+     * two neighbouring seeds draw unrelated fields, so there is no range to
+     * offer, but "every founder carries this exact pattern" is a real thing for
+     * a breed to want.
      */
     @JSExport
     public static String epiSchemaJson(String geneKey) {
@@ -1326,11 +1338,9 @@ public final class DesignerApi {
             return j.endArr().toString();
         }
         for (EpiValue v : g.epiSchema().values()) {
-            if (v.kind() != EpiValue.Kind.SCALAR) {
-                continue;
-            }
             j.obj()
                     .kv("name", v.name())
+                    .kv("kind", v.kind().name().toLowerCase(java.util.Locale.ROOT))
                     .kv("min", v.min())
                     .kv("max", v.max())
                     .kv("clampLo", v.clampLo())
@@ -1404,6 +1414,77 @@ public final class DesignerApi {
                 .kv("genotype", genome.genotypeCode())
                 .kv("epigenome", genome.epigenome().toCode())
                 .endObj().toString();
+    }
+
+    /**
+     * The breed's <b>plate</b> - {@code BreedFounder.plate}: a real founder with
+     * no magical gene the breed did not ask for. The breed designer's preview
+     * is this rather than a raw roll, because "reroll the example founder"
+     * means "show me another horse with the traits I picked", and a stray
+     * galaxy coat from the wild magic draw is not one of them. The herd strip
+     * beside it still uses the real roll.
+     */
+    @JSExport
+    public static String breedPlateJson(String json, int seed) {
+        Breed breed;
+        try {
+            breed = BreedSpecParser.parse(json, "the editor", m -> { });
+        } catch (RuntimeException e) {
+            return new Json().obj().kv("ok", false)
+                    .kv("error", String.valueOf(e.getMessage())).endObj().toString();
+        }
+        Genome genome = BreedFounder.plate(breed, new SeededRng(seed));
+        return new Json().obj()
+                .kv("ok", true)
+                .kv("genotype", genome.genotypeCode())
+                .kv("epigenome", genome.epigenome().toCode())
+                .endObj().toString();
+    }
+
+    /**
+     * A body scale as the horseman reads it - {@code "15.3 hh"} - through the
+     * game's own curve ({@code BreedStatCurve.handsFor}). The breed designer
+     * shows it beside every size, and asking here keeps the curve in one place.
+     */
+    @JSExport
+    public static String handsLabel(double scale) {
+        return com.example.horsegenetics.common.breed.BreedStatCurve.formatHands(
+                com.example.horsegenetics.common.breed.BreedStatCurve.handsFor(scale));
+    }
+
+    /**
+     * Every allele pair a gene can carry, each with the outcome it shows - the
+     * breed designer's "which of these may my breed have" grid. Pairs the gene
+     * says cannot occur are left out; the wild type is included and marked,
+     * because "and some plain ones" is a real choice for a pool.
+     */
+    @JSExport
+    public static String allelePairsJson(String geneKey) {
+        Gene g = Genes.byKeyOrNull(geneKey);
+        Json j = new Json().arr();
+        if (g == null) {
+            return j.endArr().toString();
+        }
+        for (Allele a : g.alleles()) {
+            for (Allele b : g.alleles()) {
+                if (b.order() < a.order()) {
+                    continue;
+                }
+                AllelePair pair = new AllelePair(a, b);
+                if (!g.canOccur(pair)) {
+                    continue;
+                }
+                var e = g.expressionOf(pair);
+                j.obj()
+                        .kv("pair", a.token() + "/" + b.token())
+                        .kv("homozygous", a.equals(b))
+                        .kv("outcome", e == null ? "" : e.id())
+                        .kv("outcomeName", e == null ? "" : e.name())
+                        .kv("wild", e == null || e.wildType())
+                        .endObj();
+            }
+        }
+        return j.endArr().toString();
     }
 
     // ---- the live parity check ---------------------------------------------

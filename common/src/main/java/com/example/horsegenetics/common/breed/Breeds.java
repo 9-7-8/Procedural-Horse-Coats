@@ -21,7 +21,7 @@ import java.util.Optional;
  * each, listed in {@code index.json}; {@code wiki/breed-designer/} writes them
  * and {@code wiki/breed-format.html} documents them. The point is that adding a
  * breed is now something a player can do to a built jar, by putting a file in
- * {@code config/horsegenetics/breeds/}, and that changing one is a two-line diff
+ * {@code .minecraft/phc/breeds/}, and that changing one is a two-line diff
  * somebody can read.
  *
  * <p>The per-gene pool <b>rates</b> in those files are still estimates, chosen
@@ -109,7 +109,7 @@ public final class Breeds {
     }
 
     /**
-     * Read a drop-in folder - {@code config/horsegenetics/breeds/} in game.
+     * Read a drop-in folder - {@code .minecraft/phc/breeds/} in game.
      * Returns everything worth telling the player about, most serious first:
      * files that would not parse, then loci that were skipped because this
      * install has not got the gene.

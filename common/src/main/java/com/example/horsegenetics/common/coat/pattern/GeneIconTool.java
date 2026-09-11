@@ -116,17 +116,8 @@ public final class GeneIconTool {
         Path outDir = Path.of(args.length > 0 ? args[0] : "wiki/assets/gene-icons");
         Files.createDirectories(outDir);
 
-        int[] template = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
-        int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
-        GradientLut base = new GradientLut(g, lastReadWidth, lastReadHeight);
-        LutSet luts = LutSet.fromRegistry(base, path -> {
-            try {
-                int[] px = readArgb("/assets/horsegenetics/" + path);
-                return new GradientLut(px, lastReadWidth, lastReadHeight);
-            } catch (IOException missing) {
-                return null;   // LutSet.resolve falls back to the base gradient
-            }
-        });
+        int[] template = loadTemplate();
+        LutSet luts = loadLuts();
 
         List<String> written = new ArrayList<>();
         Map<String, List<String>> onBackdrop = new LinkedHashMap<>();
@@ -353,6 +344,25 @@ public final class GeneIconTool {
             }
         }
         throw new IllegalArgumentException(gene.key() + " has no allele " + token);
+    }
+
+    /** The white-horse template every coat is multiplied onto. Shared with {@link MarkingFactsTool}. */
+    static int[] loadTemplate() throws IOException {
+        return readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
+    }
+
+    /** The base gradient and every registered alternate. Shared with {@link MarkingFactsTool}. */
+    static LutSet loadLuts() throws IOException {
+        int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
+        GradientLut base = new GradientLut(g, lastReadWidth, lastReadHeight);
+        return LutSet.fromRegistry(base, path -> {
+            try {
+                int[] px = readArgb("/assets/horsegenetics/" + path);
+                return new GradientLut(px, lastReadWidth, lastReadHeight);
+            } catch (IOException missing) {
+                return null;   // LutSet.resolve falls back to the base gradient
+            }
+        });
     }
 
     private static int[] readArgb(String resource) throws IOException {

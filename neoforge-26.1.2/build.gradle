@@ -63,6 +63,16 @@ processResources {
         include "assets/**"
     }
 
+    // The gene icons, for the spawn egg's hover card. Baked once, into the wiki
+    // (:common:bakeGeneIcons), and copied into the jar here rather than checked
+    // in a second time under src/main/resources. `_bay.png` and `_sheet.png`
+    // are the bake's own reference images, not icons.
+    from(rootProject.file("wiki/assets/gene-icons")) {
+        include "*.png"
+        exclude "_*"
+        into "assets/horsegenetics/textures/gui/gene_icons"
+    }
+
     // The mod version lived twice - here as `mod_version`, and again as a
     // literal in neoforge.mods.toml - and a release shipped a jar named 0.3.7
     // that told the game it was 0.3.6, because bumping one is not bumping the

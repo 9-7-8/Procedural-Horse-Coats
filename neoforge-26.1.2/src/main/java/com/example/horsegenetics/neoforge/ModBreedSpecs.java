@@ -12,12 +12,19 @@ import java.util.List;
 
 /**
  * Loads the player's own breeds - the JSON files the breed designer
- * ({@code wiki/breed-designer/}) writes - out of
- * {@code config/horsegenetics/breeds/} and into the {@link Breeds} registry.
+ * ({@code wiki/breed-designer/}) writes - out of {@code <game dir>/phc/breeds/}
+ * and into the {@link Breeds} registry.
  *
- * <p>This is the twin of {@link ModGeneSpecs}, on purpose: same folder shape,
- * same README, same "a broken file is logged and skipped, never fatal" rule. A
- * player who has learnt to drop a gene in has already learnt this.
+ * <p><b>The folder is in the game directory, not in {@code config/}.</b> That is
+ * {@code .minecraft/phc/breeds/} for a vanilla launcher and the instance folder
+ * for any other, and it is where a player who has only the jar is told to look:
+ * it is made on the first launch with the mod installed (this runs from the mod
+ * constructor), it carries a README, and the Breeds tab of the H menu has a
+ * button that opens it. A breed is the thing a player is invited to make, so
+ * its folder should not be three levels into a directory of settings files.
+ *
+ * <p>Same rules as {@link ModGeneSpecs} otherwise: a broken file is logged and
+ * skipped, never fatal.
  *
  * <p><b>It runs after {@link ModGeneSpecs}</b>, and that order is the whole
  * reason this is a separate call rather than a static initialiser. A breed file
@@ -32,8 +39,20 @@ import java.util.List;
  */
 public final class ModBreedSpecs {
 
-    /** Relative to the instance's {@code config/} folder. */
-    public static final String FOLDER = "horsegenetics/breeds";
+    /** Relative to the game directory - {@code .minecraft} for the vanilla launcher. */
+    public static final String FOLDER = "phc/breeds";
+
+    /**
+     * The drop-in folder on this machine. The client asks too, to open it: on
+     * a single-player world the integrated server and the client share a game
+     * directory, so it is the folder the breeds were read from. On a dedicated
+     * server the breeds are the server's, and the button opens the player's own
+     * copy - which is where they would make a breed to send to the server's
+     * owner, so it is still the right folder to open.
+     */
+    public static Path folder() {
+        return FMLPaths.GAMEDIR.get().resolve(FOLDER);
+    }
 
     private static final String README = """
             Horse Genetics - drop-in breeds
@@ -45,9 +64,14 @@ public final class ModBreedSpecs {
             eggs all draw from the same registry, so a breed you add here turns
             up everywhere a built-in one does.
 
-            Make them with the breed designer: wiki/breed-designer/index.html in
-            the mod's repository. It previews the base coat on a real horse and
-            writes the file for you.
+            Make them with the breed designer, which walks you through a breed
+            one step at a time and shows the horses it makes as you go:
+
+              https://9-7-8.github.io/Procedural-Horse-Coats/wiki/breed-designer/
+
+            Export the breed there, save the .json into this folder, and restart
+            the game. The Breeds tab of the H menu has a button that opens this
+            folder.
 
             Notes:
               * A breed's "id" must be lower case and unique. A file whose id
@@ -60,6 +84,10 @@ public final class ModBreedSpecs {
               * "spawn" is a checklist: wild, cowboy, spawn_egg, stable. Leave
                 it out and the breed is allowed all four. Write "spawn": [] and
                 it comes from nowhere at all.
+              * A wild breed's herds turn up in the biomes it lists - any biome,
+                including modded ones, as long as a horse can stand there. They
+                appear as new chunks are generated, so explore to find them.
+              * "spawn_time" is "day" or "night" to found herds only then.
               * Unlike a gene, a breed does NOT change the genotype code, so
                 adding or removing one will not invalidate horses you already
                 have.
@@ -72,7 +100,7 @@ public final class ModBreedSpecs {
 
     /** Find, parse and register. Returns how many breeds the folder added. */
     public static int load() {
-        Path dir = FMLPaths.CONFIGDIR.get().resolve(FOLDER);
+        Path dir = folder();
         ensureFolder(dir);
 
         int before = Breeds.all().size();

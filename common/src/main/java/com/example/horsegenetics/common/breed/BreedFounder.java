@@ -36,10 +36,14 @@ import java.util.Set;
  *   <li><b>every gene the breed does name</b> is redrawn from the breed's own
  *       {@link Breed#founderTable weighted pool};</li>
  *   <li><b>the four magical body-stat loci</b> are set from
- *       {@link Breed#statTargets()} - homozygous for the pushing allele on any
- *       axis the breed pins, wild on the rest - and then, once the epigenome
- *       exists, those copies are given numbers that land the horse inside the
- *       band ({@link #stampStatTargets});</li>
+ *       {@link Breed#statTargets()} - carrying the pushing allele on any axis
+ *       the breed pins, wild on the rest - and then, once the epigenome exists,
+ *       those copies are given numbers that land the horse inside the band
+ *       ({@link #stampStatTargets}). Speed, jump and health are homozygous.
+ *       <b>Size is decided per founder</b>: its target is drawn first, and a
+ *       founder landing inside {@link BreedStatCurve#heterozygousSize 0.7x to
+ *       1.3x} carries one size copy and the wild type, while one outside it
+ *       carries two;</li>
  *   <li><b>every other magical gene</b> is forced wild, then the geometric
  *       {@link #rollMagic magic-gene draw} switches a few back on.</li>
  * </ol>
@@ -82,6 +86,11 @@ public final class BreedFounder {
             return Genome.of(base, rng);
         }
 
+        // Size is drawn before the genotype pass because it decides the
+        // genotype: one copy of the size allele inside 0.7x-1.3x, two outside.
+        TargetBand sizeBand = breed.statTargets().band(StatAxis.SCALE);
+        double size = sizeBand == null ? Double.NaN : sizeBand.lerp(rng.nextFloat());
+
         Genotype g = base;
         for (Gene gene : Genes.codeOrder()) {
             String key = gene.key();
@@ -89,7 +98,7 @@ public final class BreedFounder {
                 continue; // 50/50 from the base roll, not a breed trait
             }
             if (BODY_STAT_KEYS.contains(key)) {
-                g = g.with(bodyStatPair(breed, gene));
+                g = g.with(bodyStatPair(breed, gene, size));
                 continue;
             }
             if (breed.constrains(key)) {
@@ -118,7 +127,7 @@ public final class BreedFounder {
         }
 
         g = rollMagic(breed, g, rng);
-        return stampBands(breed, stampStatTargets(breed, Genome.of(g, rng), rng), rng);
+        return stampBands(breed, stampStatTargets(breed, Genome.of(g, rng), rng, size), rng);
     }
 
     /**
@@ -166,7 +175,7 @@ public final class BreedFounder {
      * gametes interchangeable, and half the interest in breeding one is that its
      * foals differ depending on which copy they drew.
      */
-    private static Genome stampStatTargets(Breed breed, Genome genome, Rng rng) {
+    private static Genome stampStatTargets(Breed breed, Genome genome, Rng rng, double size) {
         Epigenome epi = genome.epigenome();
         for (Gene gene : Genes.codeOrder()) {
             if (!BODY_STAT_KEYS.contains(gene.key())) {
@@ -180,13 +189,24 @@ public final class BreedFounder {
             if (pair.count(gene.defaultAllele()) == 2) {
                 continue;   // the breed pins this axis but the horse lost the allele
             }
-            // Both copies are the pushing allele, and the gene sums their two
-            // deltas - so the total distance from 1.0 is what has to land in the
-            // band, and each copy carries a share of it. The sign is the
-            // allele's job, so the stored numbers are always positive.
-            double total = Math.abs(band.lerp(rng.nextFloat()) - 1.0);
-            double share = 0.5 + (rng.nextFloat() - 0.5f) * COPY_SKEW;
+            // The gene sums its copies' deltas, so the total distance from 1.0 is
+            // what has to land in the band. The sign is the allele's job, so the
+            // stored numbers are always positive. Size's target was drawn before
+            // the genotype, because it chose how many copies there are.
+            boolean isSize = axisOf(gene) == StatAxis.SCALE;
+            double total = Math.abs((isSize ? size : band.lerp(rng.nextFloat())) - 1.0);
             Epigenome.Copies c = epi.copies(gene);
+            if (pair.count(gene.defaultAllele()) == 1) {
+                // One pushing copy: it carries the whole distance, and the wild
+                // copy's number is inert (the baseline allele is worth nothing).
+                boolean pushFirst = !pair.first().equals(gene.defaultAllele());
+                epi = epi.with(gene.key(), new Epigenome.Copies(
+                        pushFirst ? withDelta(c.first(), total) : c.first(),
+                        pushFirst ? c.second() : withDelta(c.second(), total)));
+                continue;
+            }
+            // Two pushing copies, each carrying a share.
+            double share = 0.5 + (rng.nextFloat() - 0.5f) * COPY_SKEW;
             epi = epi.with(gene.key(), new Epigenome.Copies(
                     withDelta(c.first(), total * share),
                     withDelta(c.second(), total * (1.0 - share))));
@@ -237,18 +257,42 @@ public final class BreedFounder {
                     continue;
                 }
                 EpiValue value = schema.get(index);
-                if (value.kind() != EpiValue.Kind.SCALAR) {
-                    continue;   // a seed or a category has no "slightly more"
+                if (value.kind() == EpiValue.Kind.SEED) {
+                    continue;   // a seed is locked below, never banded
                 }
                 BreedBands.Band band = e.getValue();
                 for (int leg = 0; leg < value.arity(); leg++) {
-                    first = withValue(first, value, leg, band.lerp(rng.nextFloat()));
-                    second = withValue(second, value, leg, band.lerp(rng.nextFloat()));
+                    first = withValue(first, value, leg, draw(value, band, rng));
+                    second = withValue(second, value, leg, draw(value, band, rng));
                 }
+            }
+            // A locked seed goes on both copies, so every founder draws the same
+            // field - and, from there, it inherits like any other seed.
+            for (Map.Entry<String, Long> e : bands.seedsFor(key).entrySet()) {
+                int index = schema.indexOf(e.getKey());
+                if (index < 0 || schema.get(index).kind() != EpiValue.Kind.SEED) {
+                    continue;
+                }
+                first = new AlleleEpigenetics(first.priority(), first.values().withSeed(e.getKey(), e.getValue()));
+                second = new AlleleEpigenetics(second.priority(), second.values().withSeed(e.getKey(), e.getValue()));
             }
             epi = epi.with(key, new Epigenome.Copies(first, second));
         }
         return new Genome(genome.genotype(), epi);
+    }
+
+    /**
+     * One founder's value inside a band. A category is an index, so it is drawn
+     * over whole options, inclusive at both ends - {@code [1, 2]} means option
+     * one or option two, evenly - where a scalar is drawn across the interval.
+     */
+    private static double draw(EpiValue value, BreedBands.Band band, Rng rng) {
+        if (value.kind() == EpiValue.Kind.CATEGORY) {
+            int lo = (int) Math.round(band.lo());
+            int hi = (int) Math.round(band.hi());
+            return lo + (hi > lo ? rng.nextInt(hi - lo + 1) : 0);
+        }
+        return band.lerp(rng.nextFloat());
     }
 
     private static AlleleEpigenetics withValue(AlleleEpigenetics copy, EpiValue value, int leg, double raw) {
@@ -321,13 +365,17 @@ public final class BreedFounder {
         return new AllelePair(v, gene.defaultAllele());
     }
 
-    private static AllelePair bodyStatPair(Breed breed, Gene gene) {
-        TargetBand band = breed.statTargets().band(axisOf(gene));
+    private static AllelePair bodyStatPair(Breed breed, Gene gene, double size) {
+        StatAxis axis = axisOf(gene);
+        TargetBand band = breed.statTargets().band(axis);
         if (band == null) {
             return wild(gene);
         }
         // alleles(): index 0 is the "up" allele, 1 is "down", 2 is the wild type
         Allele push = band.pushesUp() ? gene.alleles().get(0) : gene.alleles().get(1);
+        if (axis == StatAxis.SCALE && BreedStatCurve.heterozygousSize(size)) {
+            return new AllelePair(push, gene.defaultAllele());
+        }
         return new AllelePair(push, push);
     }
 

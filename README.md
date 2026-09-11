@@ -73,6 +73,18 @@ live on a 3D horse over a range of base coats. Export the file, drop it in
 your world's config folder, and it inherits, breeds, and shows up in-game
 exactly like a built-in gene.
 
+**Make your own breeds.** A breed is where a whole idea lives: not a
+"zombie gene" but a zombie *breed* - rotted-looking markings, a bad temper,
+slow and tough. The in-browser
+[breed designer](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/breed-designer/)
+walks you through one step at a time - colour, size, dilutions, white, eyes,
+magical markings, health, diet, temper, abilities, speed, jump, where it lives -
+and shows the horses it makes as you go. Export it (any time; it saves your
+progress), put the file in `.minecraft/phc/breeds/`, and restart: the game
+starts spawning it in the biomes you picked, and the cowboy, stables and spawn
+eggs know it too. The folder is made the first time the game runs with the
+mod, and the **Breeds** tab of the in-game **H** menu has a button that opens it.
+
 **A whole world of it.** A player-built portal leads to a self-contained
 horse dimension for browsing genotypes, plus stallion seed jars, whistles,
 shearing, a gene database you fill in by discovery, and more.

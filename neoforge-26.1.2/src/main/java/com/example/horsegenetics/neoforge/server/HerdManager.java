@@ -106,7 +106,7 @@ public final class HerdManager {
                         .orElse(horse);
                 lead = leader.getUUID();
                 RandomSource seeded = seededFor(lead);
-                breed = pickHerdBreed(level.getBiome(leader.blockPosition()), seeded);
+                breed = pickHerdBreed(level.getBiome(leader.blockPosition()), seeded, level.isDarkOutside());
                 band = seeded.nextInt(10) < 7 ? BandType.TRADITIONAL : BandType.BACHELOR;
                 sex = lead.equals(horse.getUUID()) ? leadSex(horse, rng) : joinerSex(horse, band, rng);
             } else {
@@ -235,11 +235,15 @@ public final class HerdManager {
     }
 
     /**
-     * A herd's breed: weighted by the biome's breeds only. Feral Mixed only when the
-     * biome has no assigned breed at all.
+     * A herd's breed: weighted by the biome's breeds only, among those whose
+     * {@code spawn_time} allows the hour (see
+     * {@link com.example.horsegenetics.common.breed.SpawnTime}). Feral Mixed only
+     * when no breed of the biome is allowed now.
+     *
+     * @param dark whether it is dark outside where the herd is being founded
      */
-    public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng) {
-        return pickHerdBreed(biome, rng, com.example.horsegenetics.common.breed.BreedSource.WILD);
+    public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng, boolean dark) {
+        return pickHerdBreed(biome, rng, com.example.horsegenetics.common.breed.BreedSource.WILD, dark);
     }
 
     /**
@@ -251,8 +255,17 @@ public final class HerdManager {
      */
     public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng,
                                       com.example.horsegenetics.common.breed.BreedSource source) {
+        return pickHerdBreed(biome, rng, source, false);
+    }
+
+    private static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng,
+                                       com.example.horsegenetics.common.breed.BreedSource source, boolean dark) {
         String biomeId = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
-        List<Breed> candidates = Breeds.forBiome(biomeId, source);
+        List<Breed> candidates = new java.util.ArrayList<>(Breeds.forBiome(biomeId, source));
+        if (source == com.example.horsegenetics.common.breed.BreedSource.WILD) {
+            // Only the wild draw keeps hours; a breeder sells at any time of day.
+            candidates.removeIf(b -> !b.spawnTime().allows(dark));
+        }
         if (candidates.isEmpty()) {
             return Breeds.FERAL_MIXED;
         }

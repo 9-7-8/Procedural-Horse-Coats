@@ -15,7 +15,7 @@ import java.util.List;
  * behind every "a random breed spawn egg" in a chest or on a villager's counter.
  *
  * <p>The twin of {@link GenePool}, and the same argument for existing: a breed a
- * player drops into {@code config/horsegenetics/breeds/} joins these pools by
+ * player drops into {@code .minecraft/phc/breeds/} joins these pools by
  * being registered, not by anyone editing a list. The only membership test is
  * {@link BreedSource#SPAWN_EGG} - which is exactly the "each breed can opt out"
  * switch, expressed as the absence of a source rather than as a flag of its own.

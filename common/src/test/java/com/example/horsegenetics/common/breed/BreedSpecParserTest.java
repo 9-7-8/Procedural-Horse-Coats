@@ -128,9 +128,9 @@ class BreedSpecParserTest {
     void statScoresSurviveAsWrittenAndStillResolveToBands() {
         Breed b = parse("""
                 {"id": "x", "name": "X",
-                 "stats": {"speed": 9, "jump": 5, "health": 8, "height": [14.5, 16]}}""");
+                 "stats": {"speed": 9, "jump": 5, "health": 8, "size": [0.92, 1.05]}}""");
         assertEquals(9.0, b.scores().speed().orElseThrow().lo());
-        assertEquals(14.5, b.scores().heightHands().orElseThrow().lo());
+        assertEquals(0.92, b.scores().size().orElseThrow().lo());
         assertNotNull(b.statTargets().band(StatAxis.SPEED));
         // A score of 5 is the baseline, so its band is dropped - see BreedStatCurve.
         assertEquals(null, b.statTargets().band(StatAxis.JUMP));
@@ -174,9 +174,11 @@ class BreedSpecParserTest {
                  "biomes": ["minecraft:plains"],
                  "price": [8, 14], "hardy": true, "magic_chance": 0.4,
                  "magic_whitelist": ["horsegenetics.lycan"],
-                 "stats": {"speed": 9, "height": [16, 18]},
+                 "description": "A test breed.", "spawn_time": "night",
+                 "stats": {"speed": 9, "size": [1.1, 1.4]},
                  "genes": {"horsegenetics.extension": [ {"pair": "E/e", "weight": 3} ]},
-                 "bands": {"horsegenetics.ednrb": {"cover": [0.55, 0.8]}},
+                 "bands": {"horsegenetics.ednrb": {"cover": [0.55, 0.8]},
+                           "horsegenetics.contour_cells": {"hue": 120, "cellSeed": "-1234567890123456789"}},
                  "notes": ["a note"]}""";
         Breed once = parse(source);
         String written = BreedSpecWriter.write(once);

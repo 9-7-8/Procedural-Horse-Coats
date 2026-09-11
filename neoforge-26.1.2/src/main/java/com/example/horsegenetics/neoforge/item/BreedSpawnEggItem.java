@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * The breed is a {@code breed} data component, so there is a single registered
  * item and every breed is a stack of it. That is not a shortcut - it is what
  * makes the feature work for <i>player-added</i> breeds. A breed dropped into
- * {@code config/horsegenetics/breeds/} after the jar was built has no registry
+ * {@code .minecraft/phc/breeds/} after the jar was built has no registry
  * entry, no model file and no lang key, and could never have an item of its own;
  * with the breed on the component it gets an egg on exactly the same terms as
  * the built-in ones, which is the whole promise of making breeds data.

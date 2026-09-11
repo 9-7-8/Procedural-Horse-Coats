@@ -97,6 +97,18 @@ tasks.register<JavaExec>("bakeGeneIcons") {
     args(rootProject.layout.projectDirectory.dir("wiki/assets/gene-icons").asFile.absolutePath)
 }
 
+// What every painting outcome does to a horse - coverage, parts, colour, what it
+// paints on - measured through the real pipeline for the breed designer's
+// markings filters. See MarkingFactsTool.
+tasks.register<JavaExec>("bakeMarkingFacts") {
+    group = "horsegenetics"
+    description = "Write wiki/breed-designer/assets/marking-facts.json - measured facts per painting outcome"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.coat.pattern.MarkingFactsTool")
+    args(rootProject.layout.projectDirectory.file("wiki/breed-designer/assets/marking-facts.json").asFile.absolutePath)
+}
+
 // Concatenate the shipped gene files into the single array the browser fetches.
 // The wiki tools cannot walk a classpath index; see GeneFileTool.
 tasks.register<JavaExec>("bakeGeneBundle") {

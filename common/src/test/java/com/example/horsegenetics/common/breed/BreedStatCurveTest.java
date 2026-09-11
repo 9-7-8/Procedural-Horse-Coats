@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.breed;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,8 +36,8 @@ class BreedStatCurveTest {
     void nearBaselineScoresCarryNoBand() {
         assertNull(BreedStatCurve.bandFor(StatAxis.SPEED, 5));
         assertNull(BreedStatCurve.bandFor(StatAxis.HEALTH, 5));
-        assertNull(BreedStatCurve.scaleBand(BreedStatCurve.BASELINE_HH, BreedStatCurve.BASELINE_HH));
-        assertNull(BreedStatCurve.scaleBand(15.5, 16.0)); // both sides near baseline even after big-end exaggeration
+        assertNull(BreedStatCurve.sizeBand(1.0, 1.0));
+        assertNull(BreedStatCurve.sizeBand(0.97, 1.04)); // both sides near baseline
     }
 
     @Test
@@ -51,17 +52,34 @@ class BreedStatCurveTest {
     }
 
     @Test
-    void heightBandIsMidHeightOverBaseline() {
-        TargetBand tiny = BreedStatCurve.scaleBand(6.0, 8.0);
+    void theSizeRangeIsTheBand() {
+        TargetBand tiny = BreedStatCurve.sizeBand(0.38, 0.51);
         assertNotNull(tiny);
-        assertEquals(6.0 / 15.75, tiny.lo(), 1e-9);
-        assertEquals(8.0 / 15.75, tiny.hi(), 1e-9);
+        assertEquals(0.38, tiny.lo(), 1e-9);
+        assertEquals(0.51, tiny.hi(), 1e-9);
 
-        TargetBand draught = BreedStatCurve.scaleBand(16.5, 17.75);
+        TargetBand draught = BreedStatCurve.sizeBand(1.14, 1.38);
         assertNotNull(draught);
-        assertTrue(draught.lo() > 1.0, "draught band should sit above 1.0: " + draught);
-        // the big end is exaggerated well past the raw 17.75/15.75 = 1.13 ratio
-        assertTrue(draught.hi() > 1.25, "draught top end should be dramatic: " + draught);
+        assertEquals(1.14, draught.lo(), 1e-9);
+        assertEquals(1.38, draught.hi(), 1e-9);
+    }
+
+    /** The files were converted with sizeForHands; it is the old hands curve, exaggeration and all. */
+    @Test
+    void sizeForHandsIsTheOldHeightCurve() {
+        assertEquals(6.0 / 15.75, BreedStatCurve.sizeForHands(6.0), 1e-9);
+        assertEquals(1.0, BreedStatCurve.sizeForHands(BreedStatCurve.BASELINE_HH), 1e-9);
+        // above the baseline the excess is tripled: 17.75 hh is 1.127 raw, 1.381 drawn
+        assertEquals(1.0 + (17.75 / 15.75 - 1.0) * 3.0, BreedStatCurve.sizeForHands(17.75), 1e-9);
+    }
+
+    @Test
+    void oneSizeCopyBetweenSevenTenthsAndOneAndThreeTenths() {
+        assertTrue(BreedStatCurve.heterozygousSize(0.7));
+        assertTrue(BreedStatCurve.heterozygousSize(1.0));
+        assertTrue(BreedStatCurve.heterozygousSize(1.3));
+        assertFalse(BreedStatCurve.heterozygousSize(0.69));
+        assertFalse(BreedStatCurve.heterozygousSize(1.31));
     }
 
     @Test

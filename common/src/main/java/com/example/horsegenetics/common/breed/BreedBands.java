@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.genetics.epi.EpiValue;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,10 +39,13 @@ import java.util.Set;
  *       {@code stats} block, which knows about scores, hands, and which allele
  *       is the pushing one. A band naming one of them is dropped with a warning
  *       rather than silently fighting it.</li>
- *   <li><b>Seeds and categories.</b> A {@link EpiValue.Kind#SEED} is the long
- *       behind a noise field and a {@link EpiValue.Kind#CATEGORY} is an index
- *       into a list - neither has a "slightly bigger", so a band over one means
- *       nothing. Only {@link EpiValue.Kind#SCALAR}s are banded.</li>
+ *   <li><b>Seeds are locked, not banded.</b> A {@link EpiValue.Kind#SEED} is
+ *       the long behind a noise field, and two neighbouring seeds draw
+ *       unrelated fields - there is no "slightly more". So a seed takes exactly
+ *       one value ({@link #seedsFor}), which is how a breed says "every one of
+ *       ours carries this particular pattern". A
+ *       {@link EpiValue.Kind#CATEGORY} is banded like a scalar, over whole
+ *       indices, and a band of zero width is a lock on one option.</li>
  *   <li><b>A value the gene does not declare.</b> Dropped with a warning, the
  *       same way an unknown gene is - a breed written against someone else's
  *       gene pack must still load on an install that does not have it.</li>
@@ -54,7 +58,7 @@ import java.util.Set;
 public final class BreedBands {
 
     /** A breed that pins no numbers - the common case. */
-    public static final BreedBands NONE = new BreedBands(CommonMaps.empty());
+    public static final BreedBands NONE = new BreedBands(CommonMaps.empty(), CommonMaps.empty());
 
     /** One closed range, and the point of it a founder is given. */
     public record Band(double lo, double hi) {
@@ -75,22 +79,38 @@ public final class BreedBands {
     }
 
     private final Map<String, Map<String, Band>> byGene;
+    private final Map<String, Map<String, Long>> seedsByGene;
+    private final Set<String> genes;
 
-    private BreedBands(Map<String, Map<String, Band>> byGene) {
-        Map<String, Map<String, Band>> copy = new LinkedHashMap<>();
-        for (Map.Entry<String, Map<String, Band>> e : byGene.entrySet()) {
+    private BreedBands(Map<String, Map<String, Band>> byGene, Map<String, Map<String, Long>> seeds) {
+        this.byGene = frozen(byGene);
+        this.seedsByGene = frozen(seeds);
+        Set<String> keys = new LinkedHashSet<>(byGene.keySet());
+        keys.addAll(seeds.keySet());
+        this.genes = Collections.unmodifiableSet(keys);
+    }
+
+    private static <V> Map<String, Map<String, V>> frozen(Map<String, Map<String, V>> in) {
+        Map<String, Map<String, V>> copy = new LinkedHashMap<>();
+        for (Map.Entry<String, Map<String, V>> e : in.entrySet()) {
             copy.put(e.getKey(), Collections.unmodifiableMap(new LinkedHashMap<>(e.getValue())));
         }
-        this.byGene = Collections.unmodifiableMap(copy);
+        return Collections.unmodifiableMap(copy);
     }
 
     public boolean isEmpty() {
-        return byGene.isEmpty();
+        return genes.isEmpty();
     }
 
-    /** The gene keys this pins something on, in declaration order. */
+    /** The gene keys this pins something on - a band or a seed - in declaration order. */
     public Set<String> genes() {
-        return byGene.keySet();
+        return genes;
+    }
+
+    /** The value name to locked seed map for one gene, or an empty map. */
+    public Map<String, Long> seedsFor(String geneKey) {
+        Map<String, Long> m = seedsByGene.get(geneKey);
+        return m == null ? CommonMaps.empty() : m;
     }
 
     /** The value name to band map for one gene, or an empty map. */
@@ -109,6 +129,7 @@ public final class BreedBands {
 
     public static final class Builder {
         private final Map<String, Map<String, Band>> bands = new LinkedHashMap<>();
+        private final Map<String, Map<String, Long>> seeds = new LinkedHashMap<>();
 
         public Builder band(String geneKey, String valueName, double lo, double hi) {
             bands.computeIfAbsent(geneKey, k -> new LinkedHashMap<>())
@@ -116,8 +137,13 @@ public final class BreedBands {
             return this;
         }
 
+        public Builder seed(String geneKey, String valueName, long seed) {
+            seeds.computeIfAbsent(geneKey, k -> new LinkedHashMap<>()).put(valueName, seed);
+            return this;
+        }
+
         public BreedBands build() {
-            return bands.isEmpty() ? NONE : new BreedBands(bands);
+            return bands.isEmpty() && seeds.isEmpty() ? NONE : new BreedBands(bands, seeds);
         }
     }
 }

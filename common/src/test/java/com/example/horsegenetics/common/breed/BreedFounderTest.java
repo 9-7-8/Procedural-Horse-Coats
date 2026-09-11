@@ -173,6 +173,72 @@ class BreedFounderTest {
         assertNotNull(BreedFounder.roll(breed, new SeededRng(7)));
     }
 
+    /**
+     * Size zygosity is decided per founder, by that founder's own size: one
+     * copy inside 0.7x-1.3x, two outside. A band straddling 1.3 must produce
+     * both kinds, and each must agree with where its copies actually land it.
+     */
+    @Test
+    void sizeZygosityFollowsTheFoundersOwnSize() {
+        var size = Genes.byKey("horsegenetics.body_size");
+        Breed straddling = Breed.of("tall", "Tall").size(1.15, 1.45).build();
+        int het = 0;
+        int hom = 0;
+        for (long seed = 0; seed < 80; seed++) {
+            Genome g = BreedFounder.roll(straddling, new SeededRng(seed));
+            var pair = g.genotype().pair(size);
+            Epigenome.Copies copies = g.epigenome().copies(size);
+            double sum = 0;
+            if (!pair.first().equals(size.defaultAllele())) {
+                sum += copies.first().values().get("delta");
+            }
+            if (!pair.second().equals(size.defaultAllele())) {
+                sum += copies.second().values().get("delta");
+            }
+            double factor = 1.0 + sum;
+            int wild = pair.count(size.defaultAllele());
+            assertTrue(wild < 2, "seed " + seed + ": a pinned size must carry the allele");
+            assertTrue(factor >= 1.15 - 1e-6 && factor <= 1.45 + 1e-6,
+                    "seed " + seed + " landed at " + factor + ", outside the band");
+            if (wild == 1) {
+                het++;
+                assertTrue(factor <= 1.3 + 1e-6, "seed " + seed + ": one copy, but sized " + factor);
+            } else {
+                hom++;
+                assertTrue(factor >= 1.3 - 1e-6, "seed " + seed + ": two copies, but sized " + factor);
+            }
+        }
+        assertTrue(het > 0 && hom > 0, "a band across 1.3 must give both: het " + het + ", hom " + hom);
+
+        Breed pony = Breed.of("pony", "Pony").size(0.75, 0.9).build();
+        Breed mini = Breed.of("mini", "Mini").size(0.4, 0.5).build();
+        for (long seed = 0; seed < 30; seed++) {
+            assertEquals(1, BreedFounder.roll(pony, new SeededRng(seed)).genotype().pair(size)
+                    .count(size.defaultAllele()), "a pony is heterozygous for size");
+            assertEquals(0, BreedFounder.roll(mini, new SeededRng(seed)).genotype().pair(size)
+                    .count(size.defaultAllele()), "a miniature is homozygous for size");
+        }
+    }
+
+    /** A locked seed lands, identically, on both copies of every founder. */
+    @Test
+    void aLockedSeedIsTheSameOnEveryFounder() {
+        var gene = Genes.byKey("horsegenetics.contour_cells");
+        String token = gene.alleles().get(0).token();
+        Breed breed = Breed.of("locked", "Locked")
+                .fixed(gene.key(), token)
+                .seed(gene.key(), "cellSeed", -1234567890123456789L)
+                .band(gene.key(), "hue", 200, 200)
+                .build();
+        for (long seed = 0; seed < 20; seed++) {
+            Epigenome.Copies copies = BreedFounder.roll(breed, new SeededRng(seed)).epigenome().copies(gene);
+            assertEquals(-1234567890123456789L, copies.first().values().seed("cellSeed"));
+            assertEquals(-1234567890123456789L, copies.second().values().seed("cellSeed"));
+            assertEquals(200.0, copies.first().values().get("hue"), 1e-9);
+            assertEquals(200.0, copies.second().values().get("hue"), 1e-9);
+        }
+    }
+
     /** Is this horse carrying a disorder that actually costs it something? */
     private static boolean isSick(Traits t) {
         for (com.example.horsegenetics.common.trait.Condition c : t.conditions()) {

@@ -433,6 +433,8 @@ public final class HorseBrowserScreen extends Screen {
     private boolean recipeMenuOpen;
     private Button refreshRosterButton;
     private Button settledToggle;
+    /** Breeds tab: opens the drop-in breed folder in the OS file browser. */
+    private Button openBreedsFolderButton;
 
     // --- My horses tab ---
     private static String horseFilter = "";
@@ -641,6 +643,14 @@ public final class HorseBrowserScreen extends Screen {
         settledToggle.visible = false;
         addRenderableWidget(settledToggle);
 
+        openBreedsFolderButton = Button.builder(Component.literal("Open breeds folder"), b -> openBreedsFolder())
+                .bounds(detailR() - buttonW("Open breeds folder"), contentTop() - 1,
+                        buttonW("Open breeds folder"), 14).build();
+        openBreedsFolderButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                "Your own breeds live here. Drop a .json from the breed designer in and restart.")));
+        openBreedsFolderButton.visible = false;
+        addRenderableWidget(openBreedsFolderButton);
+
         applyFilter();
         if (tab == Tab.MY_HORSES && !ClientHorseRoster.received()) {
             requestRoster();
@@ -661,6 +671,23 @@ public final class HorseBrowserScreen extends Screen {
      */
     private int buttonW(String label) {
         return this.font.width(label) + 14;
+    }
+
+    /**
+     * Open {@code <game dir>/phc/breeds/} the way the resource-pack screen opens
+     * its folder. Made first, in case the player deleted it since launch: an
+     * "open folder" that does nothing because the folder is gone is exactly the
+     * kind of button that teaches people buttons do not work.
+     */
+    private void openBreedsFolder() {
+        java.nio.file.Path dir = com.example.horsegenetics.neoforge.ModBreedSpecs.folder();
+        try {
+            java.nio.file.Files.createDirectories(dir);
+        } catch (java.io.IOException e) {
+            com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.warn("[breeds] could not create {}: {}",
+                    dir, e.toString());
+        }
+        net.minecraft.util.Util.getPlatform().openPath(dir);
     }
 
     private void requestRoster() {
@@ -712,6 +739,13 @@ public final class HorseBrowserScreen extends Screen {
             int w = Math.min(buttonW(settledLabel().getString()), listX() + listW() - x);
             settledToggle.setRectangle(Math.max(20, w), 18, x, contentTop() - 1);
             settledToggle.setMessage(settledLabel());
+        }
+        if (openBreedsFolderButton != null) {
+            boolean show = tab == Tab.BREEDS;
+            openBreedsFolderButton.visible = show;
+            openBreedsFolderButton.active = show;
+            int w = buttonW("Open breeds folder");
+            openBreedsFolderButton.setRectangle(w, 14, detailR() - w, contentTop() - 1);
         }
         if (horseFilterBox != null) {
             horseFilterBox.visible = mine;
@@ -2013,6 +2047,7 @@ public final class HorseBrowserScreen extends Screen {
             y += lineH + 4;
         }
 
+        y = breedSection(g, "About", breed.description(), l, y, w, lineH);
         y = breedSection(g, "Where it lives", biomeLine(breed), l, y, w, lineH);
         y = breedSection(g, "Body", bodyLine(breed), l, y, w, lineH);
         y = breedSection(g, "Disposition", dispositionLine(breed), l, y, w, lineH);
@@ -2040,17 +2075,19 @@ public final class HorseBrowserScreen extends Screen {
         return y + 5;
     }
 
-    /** Speed / jump / heartiness scores and the height band, in the sheet's own units. */
+    /** Speed / jump / heartiness scores and the size band, with the hands it comes to. */
     private static String bodyLine(Breed breed) {
         StringBuilder sb = new StringBuilder();
         appendScore(sb, "speed", breed.scores().speed());
         appendScore(sb, "jump", breed.scores().jump());
         appendScore(sb, "heartiness", breed.scores().health());
-        breed.scores().heightHands().ifPresent(h -> {
+        breed.scores().size().ifPresent(s -> {
             if (sb.length() > 0) {
                 sb.append("; ");
             }
-            sb.append(String.format(Locale.ROOT, "%.1f-%.1f hands", h.lo(), h.hi()));
+            sb.append(String.format(Locale.ROOT, "size %.2f-%.2fx (%s to %s)", s.lo(), s.hi(),
+                    BreedStatCurve.formatHands(BreedStatCurve.handsFor(s.lo())),
+                    BreedStatCurve.formatHands(BreedStatCurve.handsFor(s.hi()))));
         });
         return sb.length() == 0 ? "Nothing pinned - this breed takes whatever it inherits." : sb.toString();
     }

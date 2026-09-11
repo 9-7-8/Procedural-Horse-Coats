@@ -226,9 +226,17 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     /** Many-allele genes (particle, KIT, ...) get a scrollable list instead of a cycle button. */
     /** The hover blurb's panel: width, its text's line height, and its margin. */
-    private static final int BLURB_W = 176;
+    private static final int BLURB_W = 224;
     private static final int BLURB_LINE_H = 10;
     private static final int BLURB_PAD = 5;
+    /**
+     * The gene's baked picture on the left of the blurb, under the heading, with
+     * the text wrapped round it: narrow beside it, full width below. 236:210 is
+     * the icon bake's own aspect. The browser twin (gui.js) copies these four.
+     */
+    private static final int BLURB_ICON_W = 64;
+    private static final int BLURB_ICON_H = 57;
+    private static final int BLURB_ICON_GAP = 5;
 
     private static final int DD_ROW_H = 12;
     private static final int DD_VISIBLE = 8;
@@ -1790,16 +1798,26 @@ public final class CustomHorseSpawnScreen extends Screen {
      * at all rather than an empty box. Every registered gene has one today, and
      * {@code GeneDescriptionCoverageTest} keeps it that way; a drop-in gene with
      * no blurb is the case this guards.
+     *
+     * <p><b>The picture.</b> Where the gene has a baked icon ({@link GeneIcons})
+     * it sits at the left under the heading, and the text flows round it -
+     * narrow lines beside it, full-width lines below. No icon, no gap: the text
+     * simply runs the full width, as it did before there were pictures.
      */
     private void drawGeneBlurb(GuiGraphicsExtractor g, Gene gene, int hoveredIndex) {
         String blurb = gene.description();
         if (blurb == null || blurb.isBlank()) {
             return;
         }
-        List<String> lines = wrap(blurb, BLURB_W - 2 * BLURB_PAD);
+        net.minecraft.resources.Identifier icon = GeneIcons.iconFor(gene);
+        int inner = BLURB_W - 2 * BLURB_PAD;
+        int besideW = icon == null ? inner : inner - BLURB_ICON_W - BLURB_ICON_GAP;
+        int besideLines = icon == null ? 0 : (BLURB_ICON_H + BLURB_LINE_H - 1) / BLURB_LINE_H;
+        List<String> lines = wrap(blurb, besideW, besideLines, inner);
         String heading = gene.name();
 
-        int h = BLURB_PAD * 2 + BLURB_LINE_H + 2 + lines.size() * BLURB_LINE_H;
+        int body = Math.max(lines.size() * BLURB_LINE_H, icon == null ? 0 : BLURB_ICON_H);
+        int h = BLURB_PAD * 2 + BLURB_LINE_H + 2 + body;
         int x = LIST_X + listWidth() + 6;
         int y = LIST_TOP + (hoveredIndex - scroll) * ROW_H - 2;
         x = Math.min(x, this.width - BLURB_W - 4);
@@ -1810,9 +1828,16 @@ public final class CustomHorseSpawnScreen extends Screen {
         g.fill(x - 1, y - 1, x + BLURB_W + 1, y + h + 1, 0xF00E0E16);
         g.fill(x - 1, y - 1, x + BLURB_W + 1, y, 0xFF5A6478);
         drawFitted(g, heading, x + BLURB_PAD, y + BLURB_PAD, BLURB_W - 2 * BLURB_PAD, 0xFFFFFFFF);
-        int ty = y + BLURB_PAD + BLURB_LINE_H + 2;
-        for (String line : lines) {
-            g.text(this.font, Component.literal(line), x + BLURB_PAD, ty, 0xFFC0C4D0);
+        int top = y + BLURB_PAD + BLURB_LINE_H + 2;
+        if (icon != null) {
+            int ix = x + BLURB_PAD;
+            g.fill(ix, top, ix + BLURB_ICON_W, top + BLURB_ICON_H, 0xFF1A1A24);
+            g.blit(icon, ix, top, ix + BLURB_ICON_W, top + BLURB_ICON_H, 0.0f, 1.0f, 0.0f, 1.0f);
+        }
+        int ty = top;
+        for (int i = 0; i < lines.size(); i++) {
+            int tx = i < besideLines ? x + BLURB_PAD + BLURB_ICON_W + BLURB_ICON_GAP : x + BLURB_PAD;
+            g.text(this.font, Component.literal(lines.get(i)), tx, ty, 0xFFC0C4D0);
             ty += BLURB_LINE_H;
         }
     }
@@ -1826,12 +1851,22 @@ public final class CustomHorseSpawnScreen extends Screen {
      * blurb is, and a hyphenated break reads worse than a slightly wide line.
      */
     private List<String> wrap(String text, int maxW) {
+        return wrap(text, maxW, 0, maxW);
+    }
+
+    /**
+     * The same wrap with the first {@code narrowLines} lines held to
+     * {@code narrowW} and the rest to {@code fullW} - text flowing round a
+     * picture in the corner.
+     */
+    private List<String> wrap(String text, int narrowW, int narrowLines, int fullW) {
         List<String> lines = new ArrayList<>();
         StringBuilder line = new StringBuilder();
         for (String word : text.split(" ")) {
             if (word.isEmpty()) {
                 continue;
             }
+            int maxW = lines.size() < narrowLines ? narrowW : fullW;
             String candidate = line.isEmpty() ? word : line + " " + word;
             if (this.font.width(candidate) <= maxW || line.isEmpty()) {
                 line.setLength(0);

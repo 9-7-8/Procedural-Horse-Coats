@@ -1,5 +1,5 @@
 {
-  "type": "neoforge:add_spawns",
+  "type": "horsegenetics:breed_herds",
   "biomes": [
     "minecraft:plains",
     "minecraft:sunflower_plains",
@@ -39,10 +39,7 @@
     "minecraft:windswept_gravelly_hills",
     "minecraft:windswept_forest"
   ],
-  "spawners": {
-    "type": "minecraft:horse",
-    "weight": 10,
-    "minCount": 3,
-    "maxCount": 6
-  }
+  "weight": 10,
+  "min_count": 3,
+  "max_count": 6
 }

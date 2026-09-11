@@ -37,9 +37,12 @@ window.HG = window.HG || {};
   var RIGHT_STEP = 24;    // 20-high buttons with a 4px gutter (was 22, i.e. 2px)
   var RIGHT_STEP_MIN = 20;    // the tightest gutter, i.e. buttons touching
   var RIGHT_ROWS = 7;     // Age, Sex, Breed, Randomize, Add, Rnd health, Clear
-  var BLURB_W = 176;      // the hover blurb panel - see drawGeneBlurb
+  var BLURB_W = 224;      // the hover blurb panel - see drawGeneBlurb
   var BLURB_LINE_H = 10;
   var BLURB_PAD = 5;
+  var BLURB_ICON_W = 64;  // the gene's baked picture, left of the text - 236:210
+  var BLURB_ICON_H = 57;
+  var BLURB_ICON_GAP = 5;
   var DD_ROW_H = 12;
   var DD_VISIBLE = 8;
   var DD_W = 76;
@@ -493,13 +496,23 @@ window.HG = window.HG || {};
      * being allowed to run off the edge. A gene whose description is empty
      * draws no panel at all: Gene.description() is documented as possibly
      * empty, and an empty box is worse than nothing.
+     *
+     * The gene's baked icon (gene-icons.js) sits at the left under the heading
+     * and the text flows round it - narrow beside it, full width below - as the
+     * screen's GeneIcons does. No icon (none baked, or still loading) and the
+     * text runs the full width.
      */
     function drawGeneBlurb(gene, hoveredIndex) {
       var blurb = gene.description;
       if (!blurb) return;
-      var lines = wrap(blurb, BLURB_W - 2 * BLURB_PAD);
+      var icon = HG.geneIcons ? HG.geneIcons.image(gene.key) : null;
+      var inner = BLURB_W - 2 * BLURB_PAD;
+      var besideW = icon ? inner - BLURB_ICON_W - BLURB_ICON_GAP : inner;
+      var besideLines = icon ? Math.ceil(BLURB_ICON_H / BLURB_LINE_H) : 0;
+      var lines = wrap(blurb, besideW, besideLines, inner);
 
-      var h = BLURB_PAD * 2 + BLURB_LINE_H + 2 + lines.length * BLURB_LINE_H;
+      var body = Math.max(lines.length * BLURB_LINE_H, icon ? BLURB_ICON_H : 0);
+      var h = BLURB_PAD * 2 + BLURB_LINE_H + 2 + body;
       var x = LIST_X + listWidth() + 6;
       var y = LIST_TOP + (hoveredIndex - scroll) * ROW_H - 2;
       x = Math.max(4, Math.min(x, vw - BLURB_W - 4));
@@ -508,22 +521,33 @@ window.HG = window.HG || {};
       fill(x - 1, y - 1, x + BLURB_W + 1, y + h + 1, "rgba(14,14,22,0.94)");
       fill(x - 1, y - 1, x + BLURB_W + 1, y, "#5A6478");
       fitted(gene.name, x + BLURB_PAD, y + BLURB_PAD, BLURB_W - 2 * BLURB_PAD, "#FFFFFF");
-      var ty = y + BLURB_PAD + BLURB_LINE_H + 2;
+      var top = y + BLURB_PAD + BLURB_LINE_H + 2;
+      if (icon) {
+        fill(x + BLURB_PAD, top, x + BLURB_PAD + BLURB_ICON_W, top + BLURB_ICON_H, "#1A1A24");
+        ctx.drawImage(icon, x + BLURB_PAD, top, BLURB_ICON_W, BLURB_ICON_H);
+      }
+      var ty = top;
       for (var i = 0; i < lines.length; i++) {
-        text(lines[i], x + BLURB_PAD, ty, "#C0C4D0");
+        var tx = i < besideLines ? x + BLURB_PAD + BLURB_ICON_W + BLURB_ICON_GAP : x + BLURB_PAD;
+        text(lines[i], tx, ty, "#C0C4D0");
         ty += BLURB_LINE_H;
       }
     }
 
     /**
      * Greedy word wrap to a pixel width - the screen's wrap(). A single word
-     * longer than the line is left long rather than broken mid-word.
+     * longer than the line is left long rather than broken mid-word. The first
+     * narrowLines lines are held to narrowW and the rest to fullW, for text
+     * flowing round the blurb's picture; called with two arguments it is the
+     * plain wrap.
      */
-    function wrap(s, maxW) {
+    function wrap(s, narrowW, narrowLines, fullW) {
+      if (fullW === undefined) { fullW = narrowW; narrowLines = 0; }
       var lines = [], line = "";
       var words = s.split(" ");
       for (var i = 0; i < words.length; i++) {
         if (!words[i]) continue;
+        var maxW = lines.length < narrowLines ? narrowW : fullW;
         var candidate = line ? line + " " + words[i] : words[i];
         if (widthOf(candidate) <= maxW || !line) {
           line = candidate;

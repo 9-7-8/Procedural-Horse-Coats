@@ -28,7 +28,7 @@ import java.util.stream.Stream;
  *       directory to walk, hence the index file.</li>
  *   <li>{@link #fromDirectory} - a real folder on disk, walked in filename
  *       order. This is the drop-in path: save the file the breed designer gave
- *       you into {@code config/horsegenetics/breeds/} and restart. No rebuild,
+ *       you into {@code .minecraft/phc/breeds/} and restart. No rebuild,
  *       no code, and no need for the jar to have been built with your breed in
  *       it.</li>
  * </ul>

@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Commonness;
+import com.example.horsegenetics.common.breed.SpawnTime;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -54,9 +55,9 @@ public final class BreedSpecParser {
 
     /** Keys a breed file may carry. Anything else is a hard error. */
     private static final Set<String> KEYS = Set.of(
-            "id", "name", "kind", "commonness", "spawn_weight", "biomes", "spawn",
-            "price", "hardy", "magic_chance", "magic_whitelist", "magic_blacklist",
-            "stats", "genes", "bands", "notes");
+            "id", "name", "description", "kind", "commonness", "spawn_weight", "biomes",
+            "spawn", "spawn_time", "price", "hardy", "magic_chance", "magic_whitelist",
+            "magic_blacklist", "stats", "genes", "bands", "notes");
 
     private BreedSpecParser() {
     }
@@ -122,6 +123,7 @@ public final class BreedSpecParser {
             throw new IllegalArgumentException("\"" + id + "\" is reserved by the breed label system");
         }
         Breed.Builder b = Breed.of(id, requireString(root, "name"));
+        b.description(string(root, "description", ""));
 
         // --- kind: natural (default) or magical --------------------------
         String kind = string(root, "kind", "natural");
@@ -161,6 +163,16 @@ public final class BreedSpecParser {
             b.sources(named.toArray(new BreedSource[0]));
         }
 
+        if (root.containsKey("spawn_time")) {
+            String token = asString(root.get("spawn_time"), "spawn_time");
+            SpawnTime time = SpawnTime.byId(token);
+            if (time == null) {
+                throw new IllegalArgumentException("\"spawn_time\" is \"any\", \"day\" or \"night\", got \""
+                        + token + "\"");
+            }
+            b.spawnTime(time);
+        }
+
         if (root.containsKey("price")) {
             List<Object> p = asArray(root.get("price"), "price");
             if (p.size() != 2) {
@@ -192,19 +204,19 @@ public final class BreedSpecParser {
     }
 
     /**
-     * {@code "stats": {"speed": 9, "jump": [4, 6], "health": 8, "height": [14.2, 16.0]}}
+     * {@code "stats": {"speed": 9, "jump": [4, 6], "health": 8, "size": [0.9, 1.1]}}
      *
      * <p>Each of the three axes is a 1-10 score, written as a number or as a
-     * {@code [lo, hi]} range; {@code height} is always a range, in hands. An
-     * absent axis is left wild, which is not the same as a score of 5 - see
-     * {@code BreedStatCurve}'s near-baseline rule.
+     * {@code [lo, hi]} range; {@code size} is a multiple of the baseline horse,
+     * written the same way. An absent axis is left wild, which is not the same
+     * as a score of 5 - see {@code BreedStatCurve}'s near-baseline rule.
      */
     private static void readStats(Map<String, Object> root, Breed.Builder b) {
         if (!root.containsKey("stats")) {
             return;
         }
         Map<String, Object> stats = asObject(root.get("stats"), "stats");
-        expectKeys(stats, Set.of("speed", "jump", "health", "height"));
+        expectKeys(stats, Set.of("speed", "jump", "health", "size"));
         if (stats.containsKey("speed")) {
             double[] r = range(stats.get("speed"), "stats.speed");
             b.speed(r[0], r[1]);
@@ -215,9 +227,13 @@ public final class BreedSpecParser {
         if (stats.containsKey("health")) {
             b.health(range(stats.get("health"), "stats.health")[0]);
         }
-        if (stats.containsKey("height")) {
-            double[] r = range(stats.get("height"), "stats.height");
-            b.height(r[0], r[1]);
+        if (stats.containsKey("size")) {
+            double[] r = range(stats.get("size"), "stats.size");
+            if (r[0] <= 0.0 || r[1] <= 0.0) {
+                throw new IllegalArgumentException("\"stats.size\" is a multiple of the baseline horse and must be"
+                        + " above zero");
+            }
+            b.size(r[0], r[1]);
         }
     }
 
@@ -281,6 +297,10 @@ public final class BreedSpecParser {
     /**
      * {@code "bands": {"<gene key>": {"<value name>": [lo, hi]}}}
      *
+     * <p>A scalar or a category takes {@code [lo, hi]}, or a single number, which
+     * locks it. A seed takes one value only - a number, or a string of digits
+     * when it is too big for a JSON number to hold exactly, which most are.
+     *
      * <p>The four body-stat genes are refused here rather than skipped
      * silently, because a band on one of them is not a missing feature - it is
      * the author fighting their own {@code stats} block, and they need to be
@@ -314,10 +334,9 @@ public final class BreedSpecParser {
                             + v.getKey() + "\" - that band is ignored");
                     continue;
                 }
-                if (schema.get(index).kind() != EpiValue.Kind.SCALAR) {
-                    warn.accept(source + ": " + at + " is a "
-                            + schema.get(index).kind().name().toLowerCase(Locale.ROOT)
-                            + ", which has no in-between - that band is ignored");
+                EpiValue.Kind kind = schema.get(index).kind();
+                if (kind == EpiValue.Kind.SEED) {
+                    b.seed(key, v.getKey(), seed(v.getValue(), at));
                     continue;
                 }
                 double[] r = range(v.getValue(), at);
@@ -366,6 +385,26 @@ public final class BreedSpecParser {
     }
 
     /** A number, or a two-element {@code [lo, hi]}. Returns {@code {lo, hi}} either way. */
+    /**
+     * A locked seed. A JSON number is a double and cannot carry most 64-bit
+     * seeds exactly, so the writer spells one as a string of digits; a small
+     * one typed by hand as a number is taken too.
+     */
+    private static long seed(Object raw, String where) {
+        if (raw instanceof String s) {
+            try {
+                return Long.parseLong(s.trim());
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(where + " is a seed - a whole number, got \"" + s + "\"");
+            }
+        }
+        double d = asNumber(raw, where);
+        if (d != Math.rint(d)) {
+            throw new IllegalArgumentException(where + " is a seed - a whole number, got " + d);
+        }
+        return (long) d;
+    }
+
     private static double[] range(Object raw, String where) {
         if (raw instanceof List<?> list) {
             if (list.size() != 2) {
