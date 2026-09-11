@@ -72,7 +72,7 @@
 
 <p>
     A gene is a <strong>JSON file</strong>. Not a class, not code &mdash; a file you drop in
-    <code>config/horsegenetics/genes/</code>, restart, and wild horses start carrying. It
+    <code>.minecraft/phc/genes/</code>, restart, and wild horses start carrying. It
     breeds Mendelian, takes its own segment in the genotype code, and stores its own
     per-horse numbers, all without you writing a line of Java. The full format is on
     <a href="#the-shape">the gene file format</a>; this page is about the part that
@@ -175,7 +175,7 @@
         needs a class. Build it in the
         <a href="gene-creator/index.html">gene creator</a> &mdash; which previews it on
         a 3D horse over any base coat &mdash; export the JSON, drop it in
-        <code>config/horsegenetics/genes/</code>, restart. Every key is on
+        <code>.minecraft/phc/genes/</code>, restart. Every key is on
         <a href="#header"><strong>The file</strong></a> and every mask and op on
         <a href="#masks"><strong>Masks &amp; ops</strong></a>.
     </p>
@@ -3700,7 +3700,7 @@ public List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
 
 <p>
     A <strong>data-driven</strong> gene registers itself: every <code>.json</code> in
-    <code>config/horsegenetics/genes/</code> is loaded at startup, in filename order,
+    <code>.minecraft/phc/genes/</code> is loaded at startup, in filename order,
     and placed after the built-ins by its declared <code>priority</code>. Nothing below
     applies to it. A <strong>Java</strong> gene is <strong>two</strong> edits, and
     neither of them is an ordering &mdash; your gene&rsquo;s own

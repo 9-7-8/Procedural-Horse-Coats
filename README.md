@@ -73,7 +73,7 @@ you.
 [gene creator](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/gene-creator/)
 lets you design a new gene - where it paints, what it does - and preview it
 live on a 3D horse over a range of base coats. Export the file, drop it in
-your world's config folder, and it inherits, breeds, and shows up in-game
+`.minecraft/phc/genes/`, and it inherits, breeds, and shows up in-game
 exactly like a built-in gene.
 
 **Make your own breeds.** A breed is where a whole idea lives: not a
@@ -110,8 +110,10 @@ every system, and it stays current as the mod grows.
 
 Works client-side and on dedicated servers; both sides need the mod.
 
-The mod's settings live in **`.minecraft/phc/`**, beside the breeds folder -
-`breed-spawning.toml`, `server.toml` and `client.toml`.
+Everything of the mod's you might touch lives in **`.minecraft/phc/`** (the instance
+folder, for a launcher other than vanilla's): `genes/` and `breeds/` for the files you
+drop in, and three settings files - `breed-spawning.toml`, `server.toml` and
+`client.toml`. Nothing goes in `config/`.
 
 **`breed-spawning.toml` decides which horses your world has.** Every breed the mod
 ships has a section - switch it off, make it rarer or commoner, move it to other

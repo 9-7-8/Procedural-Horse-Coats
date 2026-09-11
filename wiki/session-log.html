@@ -27,6 +27,26 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-11d">2026-09-11 &mdash; every folder in <code>phc/</code></h2>
+
+<p>
+    The owner, after 0.5.000: &ldquo;change the folder situation to all be in
+    agreement.&rdquo; Drop-in genes move from <code>config/horsegenetics/genes/</code> to
+    <strong><code>.minecraft/phc/genes/</code></strong>, beside <code>breeds/</code> and the
+    three settings files, and nothing of the mod's is in <code>config/</code> any more
+    (<code>ModGeneSpecs.FOLDER</code> is now <code>ModBreedSpecs.ROOT + "/genes"</code>,
+    resolved against the game directory). Both folders' READMEs name the other and the
+    settings. Gap 192 closed.
+</p>
+<p>
+    <strong>This is not in the 0.5.000 jar.</strong> The next release's notes must say it: a
+    gene left in the old folder is not loaded, and a saved horse's segment for it is
+    dropped on load like any unregistered gene's - the player moves the file and restarts
+    <em>before</em> opening the world, or loses that gene from every horse that carried it.
+    The dev run had no drop-in genes, and its stale <code>run/config/horsegenetics*</code>
+    files were deleted (their values had already been copied into <code>run/phc/</code>).
+</p>
+
 <h2 id="d2026-09-11c">2026-09-11 &mdash; 0.5.000: a world decides which breeds it has</h2>
 
 <p>
@@ -48,10 +68,10 @@
         breeds (<code>ModBreedSpecs.configFile</code>; <a href="api-notes.html">api-notes</a>).
         Read from the FML source, then seen on a dedicated server - including the file
         watcher re-reading an edit through the <code>..</code>.</li>
-    <li><strong>The gene folder was not moved</strong>
-        (<a href="known-gaps.html#gap-192">gap 192</a>): a drop-in gene is a segment in
-        every genotype code, so moving its folder under a tester is a different kind of
-        change from moving a settings file.</li>
+    <li><strong>The gene folder was not moved</strong> (gap 192, closed the same day -
+        see the next entry up): a drop-in gene is a segment in every genotype code, so
+        moving its folder under a tester is a different kind of change from moving a
+        settings file.</li>
 </ul>
 
 <h3><code>breed-spawning.toml</code></h3>

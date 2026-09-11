@@ -46,9 +46,12 @@
 
 <ul>
     <li><strong>The folder.</strong> After one launch, <code>.minecraft/phc/</code> (for the
-        dev run, <code>neoforge-26.1.2/run/phc/</code>) holds <code>breeds/</code>,
-        <code>client.toml</code>, <code>server.toml</code> and <code>breed-spawning.toml</code>,
-        and <code>config/</code> gets no new <code>horsegenetics-*.toml</code>. The dev run's old
+        dev run, <code>neoforge-26.1.2/run/phc/</code>) holds <code>genes/</code>,
+        <code>breeds/</code>, <code>client.toml</code>, <code>server.toml</code> and
+        <code>breed-spawning.toml</code>, and <code>config/</code> gets nothing of this mod's.
+        <code>genes/</code> moved there after the 0.5.000 jar was built: drop a gene-creator
+        file into <code>phc/genes/</code>, restart, and the log's <code>[genes] ... dropped in
+        from</code> line should count it. The dev run's old
         client and server settings were copied across by hand. Mods &rarr; Horse Genetics &rarr;
         Config should still open all three.</li>
     <li><strong>Only my breeds.</strong> Set <code>shipped_breeds_enabled = false</code> and
@@ -7030,7 +7033,7 @@ the <a href="session-log.html">session log</a>.</em></p>
         parse error would drop them silently from the genotype.</li>
     <li><strong>The gene creator still exports a file the game accepts.</strong> Open
         <code>wiki/gene-creator/index.html</code>, load an example, export, drop it in
-        <code>config/horsegenetics/genes/</code> and restart. The form now asks
+        <code>.minecraft/phc/genes/</code> and restart. The form now asks
         &ldquo;shows when the horse has one copy or two&rdquo; and takes three founder
         percentages instead of a dominance dropdown and a 1-in-N field.</li>
     <li><strong>Pen signs.</strong> The catalogue no longer drives the corridor
@@ -7142,7 +7145,7 @@ the <a href="session-log.html">session log</a>.</em></p>
         <strong>Download</strong>. Note what the preview looks like &mdash; that is the
         claim being checked.</li>
     <li>Drop <code>tobiano.json</code> into
-        <code>neoforge-26.1.2/run/config/horsegenetics/genes/</code>. The folder and its
+        <code>neoforge-26.1.2/run/phc/genes/</code>. The folder and its
         <code>README.txt</code> should already be there from a previous launch; if not,
         that is itself a finding.</li>
     <li><code>./gradlew :neoforge-26.1.2:runClient</code> and read the log for
