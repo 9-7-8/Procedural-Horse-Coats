@@ -73,17 +73,26 @@ public final class MoltenHoovesGene implements Gene, EpigeneticAbilityContributi
     public static final int PRIORITY = 154;
 
     /**
-     * The particle. Flame particles ignore colour entirely, and the one thing
-     * this locus stores per copy is a colour - so the trail is drawn with the
-     * dust that fades from one colour into another, which is also the only
-     * particle that <i>fades</i> the way a cooling hoofprint should.
+     * The particle - the mod's own glowing print, lying flat and fading from the
+     * copy's first colour to its second. No vanilla particle is coloured,
+     * emissive <i>and</i> flat (dust takes a colour but is lit by the world and
+     * faces the camera; flame glows but ignores colour), and the one thing this
+     * locus stores per copy is a colour. The NeoForge module registers it
+     * ({@code particle/ModParticles}) and lays it by stride rather than by chance
+     * ({@code GeneAbilityHandler.layHoofprint}). It was
+     * {@code minecraft:dust_color_transition} until the owner looked for prints
+     * on the ground and found coloured puffs.
      */
-    public static final String PARTICLE = "minecraft:dust_color_transition";
+    public static final String PARTICLE = "horsegenetics:hoofprint";
 
-    /** Particles per firing. Fixed, not epigenetic - see the class note on the budget. */
+    /**
+     * Particles per firing, for the ordinary emitter path. The print path lays
+     * one print per stride and ignores it - kept so the budget guard in the test
+     * still means something if the gene ever goes back to puffs.
+     */
     public static final int COUNT = 2;
 
-    /** Probability the trail fires on any given moving tick. Below the particle locus's 0.2, because this one is dominant. */
+    /** Probability per moving tick, for the ordinary emitter path; the print path is by distance. */
     public static final double EMIT_CHANCE = 0.15;
 
     /** Share of wild founders showing a single copy. Both combinations express, so there are no invisible carriers here. */

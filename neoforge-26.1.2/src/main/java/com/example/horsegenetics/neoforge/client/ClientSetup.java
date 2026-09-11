@@ -62,6 +62,13 @@ public final class ClientSetup {
                 ResearchShelfScreen::new);
     }
 
+    /** Molten hooves' glowing prints - see {@link HoofprintParticle}. */
+    @SubscribeEvent
+    static void registerParticles(net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(com.example.horsegenetics.neoforge.particle.ModParticles.HOOFPRINT.get(),
+                HoofprintParticle.Provider::new);
+    }
+
     @SubscribeEvent
     static void registerReloadListeners(AddClientReloadListenersEvent event) {
         event.addListener(CoatAssetReload.ID, new CoatAssetReload());

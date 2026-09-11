@@ -36,6 +36,7 @@ public final class HorseGenetics {
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        com.example.horsegenetics.neoforge.particle.ModParticles.register(modEventBus);
         com.example.horsegenetics.neoforge.menu.ModMenus.register(modEventBus);
         ModItems.register(modEventBus);
         com.example.horsegenetics.neoforge.entity.ModEntities.register(modEventBus);

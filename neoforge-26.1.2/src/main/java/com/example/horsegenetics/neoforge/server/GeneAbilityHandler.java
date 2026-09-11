@@ -10,8 +10,12 @@ import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
+import com.example.horsegenetics.neoforge.particle.HoofprintOptions;
+import com.example.horsegenetics.neoforge.particle.ModParticles;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ColorParticleOption;
@@ -73,6 +77,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Map;
@@ -158,6 +163,7 @@ public final class GeneAbilityHandler {
         }
 
         boolean moving = isMoving(horse);
+        List<GeneAbility.Emitter> prints = null; // hoofprint emitters - laid by stride, after the loop
 
         for (HorseAbilities.Active active : abilities) {
             GeneAbility ability = active.ability();
@@ -169,7 +175,16 @@ public final class GeneAbilityHandler {
                     applyTraversal(t.flag(), horse);
                     applyRiderTraversal(t, horse);
                 }
-                case GeneAbility.Emitter e -> maybeEmit(e, horse, (ServerLevel) level, moving);
+                case GeneAbility.Emitter e -> {
+                    if (ModParticles.HOOFPRINT_ID.equals(e.particle())) {
+                        if (prints == null) {
+                            prints = new ArrayList<>(2);
+                        }
+                        prints.add(e);
+                    } else {
+                        maybeEmit(e, horse, (ServerLevel) level, moving);
+                    }
+                }
                 case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey());
                 case GeneAbility.Breath b -> breathe(b, horse);
                 case GeneAbility.MobAura ma -> mobAura(ma, horse, (ServerLevel) level);
@@ -203,6 +218,9 @@ public final class GeneAbilityHandler {
             }
         }
 
+        if (prints != null) {
+            layHoofprint(prints, horse, (ServerLevel) level, moving);
+        }
         reconcileGlow(horse, (ServerLevel) level, record, abilities);
         clearAttributes(horse, abilities, record);
     }
@@ -696,13 +714,96 @@ public final class GeneAbilityHandler {
             case "hooves", "front_hooves", "back_hooves" -> {
                 boolean front = "front_hooves".equals(anchor)
                         || ("hooves".equals(anchor) && level.getRandom().nextBoolean());
-                double along = (front ? 1 : -1) * reach * 0.65;
-                double across = (level.getRandom().nextBoolean() ? 1 : -1) * half * 0.6;
-                yield new Vec3(horse.getX() + fx * along + rx * across, foot,
-                        horse.getZ() + fz * along + rz * across);
+                yield hoofPoint(horse, front, level.getRandom().nextBoolean(), foot);
             }
             default -> new Vec3(horse.getX(), foot, horse.getZ()); // feet
         };
+    }
+
+    /** One hoof's place on the ground, from the live box and yaw - see {@link #anchorPoint}. */
+    private static Vec3 hoofPoint(Horse horse, boolean front, boolean left, double y) {
+        double yaw = Math.toRadians(horse.getYRot());
+        double fx = -Math.sin(yaw);
+        double fz = Math.cos(yaw);
+        double along = (front ? 1 : -1) * horse.getBbWidth() * 0.9 * 0.65;
+        double across = (left ? 1 : -1) * horse.getBbWidth() * 0.5 * 0.6;
+        return new Vec3(horse.getX() + fx * along + fz * across, y,
+                horse.getZ() + fz * along - fx * across);
+    }
+
+    // ------------------------------------------------------------------
+    // Hoofprints
+    // ------------------------------------------------------------------
+
+    /** Per horse: where the last print went down, and which hoof it was. */
+    private record PrintState(double x, double z, int hoof) {}
+
+    private static final Map<UUID, PrintState> PRINTS = new ConcurrentHashMap<>();
+
+    /** Blocks travelled between prints at scale 1 - about two a block, four hooves in turn. */
+    private static final double STRIDE = 0.5;
+
+    /**
+     * <b>Molten hooves' trail: prints by distance, not puffs by chance.</b> A
+     * track is evenly spaced because a horse puts a foot down every so far, not
+     * every so often - so a print goes down each time the horse has covered a
+     * stride since the last one, cycling the hooves in trot order (near fore,
+     * off hind, off fore, near hind). A standing horse leaves nothing; a
+     * galloping one spaces them out.
+     *
+     * <p>A doubled horse has two emitters with two colour pairs, and they take
+     * turns print by print - two-toned, which is what the gene page promises -
+     * rather than stacking two prints on one spot. That is why the emitters are
+     * gathered and handled once per horse here instead of one by one in
+     * {@link #maybeEmit}; the emitter's count and chance play no part.
+     *
+     * <p>Each print is snapped to the top of whatever is under that hoof, one
+     * block down at most so a print can follow a step, and skipped over air,
+     * water or lava. Sent with no spread, so it lands exactly there.
+     */
+    private static void layHoofprint(List<GeneAbility.Emitter> emitters, Horse horse, ServerLevel level,
+                                     boolean moving) {
+        if (!moving || !horse.onGround() || horse.isInWater() || horse.isInLava()) {
+            return;
+        }
+        PrintState last = PRINTS.get(horse.getUUID());
+        double stride = STRIDE * Math.max(0.3, horse.getScale());
+        if (last != null) {
+            double dx = horse.getX() - last.x();
+            double dz = horse.getZ() - last.z();
+            if (dx * dx + dz * dz < stride * stride) {
+                return;
+            }
+        }
+        int hoof = last == null ? 0 : (last.hoof() + 1) & 3;
+        PRINTS.put(horse.getUUID(), new PrintState(horse.getX(), horse.getZ(), hoof));
+
+        boolean front = hoof == 0 || hoof == 2;
+        boolean left = hoof == 0 || hoof == 3;
+        Vec3 at = hoofPoint(horse, front, left, horse.getY());
+        Double ground = groundUnder(level, at, horse.getY());
+        if (ground == null) {
+            return;
+        }
+        GeneAbility.Emitter e = emitters.get(hoof % emitters.size());
+        level.sendParticles(new HoofprintOptions(e.color(), e.color2(), horse.getYRot(), horse.getScale()),
+                at.x, ground + 0.015, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    /** The top of the solid surface under a point - this block or the one below it - or {@code null}. */
+    private static Double groundUnder(ServerLevel level, Vec3 at, double feetY) {
+        BlockPos pos = BlockPos.containing(at.x, feetY - 0.05, at.z);
+        for (int step = 0; step < 2; step++, pos = pos.below()) {
+            BlockState state = level.getBlockState(pos);
+            if (!state.getFluidState().isEmpty()) {
+                return null;
+            }
+            VoxelShape shape = state.getCollisionShape(level, pos);
+            if (!shape.isEmpty()) {
+                return pos.getY() + shape.max(Direction.Axis.Y);
+            }
+        }
+        return null;
     }
 
     /**
@@ -738,6 +839,10 @@ public final class GeneAbilityHandler {
             case "minecraft:dust" -> new DustParticleOptions(rgb, 1.0F);
             case "minecraft:dust_color_transition" ->
                     new DustColorTransitionOptions(rgb, second, 1.0F);
+            // Normally laid by layHoofprint; this is for an emitter that names it
+            // through the ordinary path (a puff shape, a non-hoof anchor).
+            case ModParticles.HOOFPRINT_ID ->
+                    new HoofprintOptions(rgb, second, horse.getYRot(), horse.getScale());
             case "minecraft:effect" -> SpellParticleOption.create(ParticleTypes.EFFECT, argb, 1.0F);
             case "minecraft:instant_effect" ->
                     SpellParticleOption.create(ParticleTypes.INSTANT_EFFECT, argb, 1.0F);
@@ -886,6 +991,7 @@ public final class GeneAbilityHandler {
         }
         BREATH_DEBT.remove(horse.getUUID());
         LAST_POS.remove(horse.getUUID());
+        PRINTS.remove(horse.getUUID());
         BlockPos pos = GLOW_LIGHT.remove(horse.getUUID());
         if (pos != null && event.getLevel() instanceof ServerLevel level) {
             PENDING_LIGHT_CLEARS.add(new PendingClear(level.dimension(), pos.immutable()));
