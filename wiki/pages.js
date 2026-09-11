@@ -210,20 +210,42 @@ window.HG.pages = {
         {
             title: "Magical yield genes",
             items: [
+                { href: "gene-egg-layer.html", text: "Egg layer", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-item-drop.html", text: "Magic item drop", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-meat.html", text: "Magic meat", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-milk-volume.html", text: "Magic milk volume", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-on-death.html", text: "Magic on death", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-milk.html", text: "Milk", kind: "magical", views: ["gameplay","coding","science"] }
+                { href: "gene-milk.html", text: "Milk", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-potion-milk.html", text: "Potion milk", kind: "magical", views: ["gameplay","coding","science"] }
             ]
         },
         {
             title: "Magical behaviour genes",
             items: [
+                { href: "gene-base-alarm.html", text: "Base alarm", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-bird-boned.html", text: "Bird boned", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-cleansing-light.html", text: "Cleansing light", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-dryad.html", text: "Dryad", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-echolocate.html", text: "Echolocate", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-ender-echo.html", text: "Ender echo", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-fireproof.html", text: "Fireproof", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-food-preference.html", text: "Food preference", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-gladiator.html", text: "Gladiator", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-guardian.html", text: "Guardian", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-holy-ward.html", text: "Holy ward", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-hot-blooded.html", text: "Hot blooded", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-hydrophobic.html", text: "Hydrophobic", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-intimidating.html", text: "Intimidating", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-pack-leader.html", text: "Leader of the pack", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-lycan.html", text: "LYCAN", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-mob-aura.html", text: "Magic mob aura", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-night-temper.html", text: "Magic night temper", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-night-watch.html", text: "Magic night watch", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-meowing.html", text: "Meowing", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-music-enjoyer.html", text: "Music enjoyer", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-ocean-born.html", text: "Ocean-born", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-spawner.html", text: "Spawner", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-spontaneous-breeding.html", text: "Spontaneous breeding", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical", views: ["gameplay","coding"] }
             ]
         },
@@ -232,7 +254,8 @@ window.HG.pages = {
             items: [
                 { href: "gene-molten-hooves.html", text: "Molten hooves", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-particle.html", text: "Particle", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] }
+                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-singer.html", text: "Singer", kind: "magical", views: ["gameplay","coding","science"] }
             ]
         },
         {
@@ -241,6 +264,7 @@ window.HG.pages = {
                 { href: "gene-agatebound.html", text: "Agatebound", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-bracketed.html", text: "Bracketed", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-coronal.html", text: "Coronal", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-eyesight.html", text: "Eyesight locus", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-geode.html", text: "Geode", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-maelstrom.html", text: "Maelstrom", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-body-size.html", text: "Magic body size", kind: "magical", views: ["gameplay","coding"] },
@@ -251,6 +275,8 @@ window.HG.pages = {
                 { href: "gene-magic-swim-speed.html", text: "Magic swim speed", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-water-breathing.html", text: "Magic water breathing", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-sunspiral.html", text: "Sunspiral", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-weather-jump.html", text: "Weather sensitive (jump)", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-weather-speed.html", text: "Weather sensitive (speed)", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-witchfire.html", text: "Witchfire", kind: "magical", views: ["gameplay","coding"] }
             ]
         },

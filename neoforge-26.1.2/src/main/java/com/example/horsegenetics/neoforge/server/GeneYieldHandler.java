@@ -18,6 +18,16 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.alchemy.PotionContents;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -57,7 +67,8 @@ public final class GeneYieldHandler {
             "minecraft:honey_bottle", Items.HONEY_BOTTLE,
             "minecraft:glass_bottle", Items.GLASS_BOTTLE,
             "minecraft:egg", Items.EGG,
-            "minecraft:slime_ball", Items.SLIME_BALL);
+            "minecraft:slime_ball", Items.SLIME_BALL,
+            "minecraft:potion", Items.POTION);
 
     @SubscribeEvent
     static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
@@ -102,7 +113,8 @@ public final class GeneYieldHandler {
                     applyDenial(horse, player, yield);
                 } else {
                     fulfil(horse, player, held, yield, active.geneKey(),
-                            chargesFor(yield.kind(), abilities, horse, record));
+                            chargesFor(yield.kind(), abilities, horse, record),
+                            sameKindEffects(yield, abilities, horse, record));
                 }
             }
             event.setCanceled(true);
@@ -144,8 +156,65 @@ public final class GeneYieldHandler {
         }
     }
 
+    /**
+     * <b>Every potion effect this horse's yields of one kind ask for.</b>
+     *
+     * <p>This is the merge, and it is the one part of the potion-milk locus that
+     * is not free. A compound heterozygote carries <i>two</i> yields triggered by
+     * the same bottle, each naming its own effect - and without this the first
+     * one would fire and the second would be silently dropped, handing back a
+     * single-effect potion while the gene's page promises two.
+     *
+     * <p>It is done here rather than in {@code common/} on purpose: what a potion
+     * item can carry is a Minecraft question, and the genetics side does not get
+     * to know the answer. It only declares two yields and lets the translator
+     * decide they are one bottle.
+     *
+     * <p>An unrecognised effect id is <b>skipped</b> rather than producing an
+     * empty potion, because a bottle that comes back with nothing in it is worse
+     * than no bottle at all - it has consumed the glass.
+     */
+    private static List<MobEffectInstance> sameKindEffects(GeneAbility.Yield yield,
+                                                           List<HorseAbilities.Active> abilities,
+                                                           Horse horse, HorseRecord record) {
+        if (yield.potionEffect().isEmpty()) {
+            return List.of();
+        }
+        List<MobEffectInstance> out = new ArrayList<>(2);
+        Set<String> seen = new HashSet<>();
+        for (HorseAbilities.Active active : abilities) {
+            if (!(active.ability() instanceof GeneAbility.Yield other)) {
+                continue;
+            }
+            if (other.potionEffect().isEmpty() || !other.kind().equals(yield.kind())) {
+                continue;
+            }
+            if (!other.trigger().item().equals(yield.trigger().item())) {
+                continue;
+            }
+            if (!GeneAbilityHandler.conditionHolds(other.when(), horse, record)) {
+                continue;
+            }
+            if (!seen.add(other.potionEffect())) {
+                continue;
+            }
+            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT
+                    .get(Identifier.parse(other.potionEffect())).orElse(null);
+            if (effect == null) {
+                com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.info(
+                        "[genes] potion effect '{}' is not recognised - left out of the bottle",
+                        other.potionEffect());
+                continue;
+            }
+            out.add(new MobEffectInstance(effect, other.potionDurationTicks(),
+                    other.potionAmplifier()));
+        }
+        return List.copyOf(out);
+    }
+
     private static void fulfil(Horse horse, Player player, ItemStack held, GeneAbility.Yield yield,
-                               String geneKey, int charges) {
+                               String geneKey, int charges,
+                               List<MobEffectInstance> effects) {
         tickYieldTask(player, held);
         long now = horse.level().getGameTime();
         String key = "yield:" + geneKey;
@@ -175,6 +244,11 @@ public final class GeneYieldHandler {
             held.shrink(1);
         }
         ItemStack produced = new ItemStack(output);
+        if (!effects.isEmpty()) {
+            // One bottle, every effect the horse's matching yields asked for.
+            produced.set(DataComponents.POTION_CONTENTS,
+                    new PotionContents(Optional.empty(), Optional.empty(), effects, Optional.empty()));
+        }
         if (!player.addItem(produced)) {
             player.drop(produced, false);
         }

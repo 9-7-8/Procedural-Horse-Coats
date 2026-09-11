@@ -183,7 +183,7 @@ public final class GeneAbilityHandler {
                 case GeneAbility.Bond bo -> maybeBond(bo, horse, active.geneKey());
                 case GeneAbility.Temper te -> temper(te, horse, (ServerLevel) level);
                 case GeneAbility.Summon su -> maybeSummon(su, horse, (ServerLevel) level, active.geneKey());
-                case GeneAbility.Ward ignored -> { /* read by GeneWardHandler, on every spawn attempt */ }
+                case GeneAbility.Ward w -> GeneWardHandler.note(horse, w);
                 case GeneAbility.Teleport ignored -> { /* read by GeneReactionHandler, when something hits it */ }
             }
         }
@@ -406,12 +406,16 @@ public final class GeneAbilityHandler {
         AABB box = horse.getBoundingBox().inflate(aura.radius());
         double reachSqr = aura.radius() * aura.radius();
         boolean attract = "attract".equals(aura.mode());
+        boolean follow = "follow".equals(aura.mode());
         int touched = 0;
         for (Mob mob : level.getEntitiesOfClass(Mob.class, box, Mob::isAlive)) {
             if (touched >= aura.maxTargets()) {
                 break; // every radius effect is capped - see wiki/making-a-gene.html
             }
-            if (mob == horse || !(mob instanceof Enemy)) {
+            // The group (or the single mob id) decides who this aura is about.
+            // Tags, not a hardcoded list - see MobGroups, and the five genes
+            // that would otherwise each go blind to modded creatures.
+            if (mob == horse || !MobGroups.matches(aura.group(), aura.mob(), mob)) {
                 continue;
             }
             // The scan box is a box and the aura is a sphere, so check properly.
@@ -423,6 +427,11 @@ public final class GeneAbilityHandler {
                     mob.setTarget(horse);
                     touched++;
                 }
+                continue;
+            }
+            if (follow) {
+                followHorse(mob, horse);
+                touched++;
                 continue;
             }
             if (mob.getTarget() == horse || mob.getTarget() == horse.getControllingPassenger()) {
@@ -437,6 +446,32 @@ public final class GeneAbilityHandler {
             mob.hurtMarked = true; // tell the client the mob was shoved
             touched++;
         }
+    }
+
+    /** How close a follower is content to get before it stops walking. */
+    private static final double FOLLOW_STOP = 3.0;
+
+    /**
+     * Nudge one mob toward the horse.
+     *
+     * <p><b>A navigation nudge, not an injected goal.</b> A goal added to an
+     * arbitrary mob has to be taken off again, and a horse that dies, despawns
+     * or stops expressing would leave it behind on every creature it had ever
+     * met - the same lifecycle failure the repel branch already avoids by
+     * shoving rather than adding an avoidance goal. Re-issuing a path each beat
+     * is stateless and cannot leak.
+     *
+     * <p>This is also the expensive half of the follow mode: pathfinding is the
+     * most costly thing a mob does, so the caller's interval and target cap are
+     * doing real work rather than being tidy.
+     */
+    private static void followHorse(Mob mob, Horse horse) {
+        if (mob.distanceToSqr(horse) <= FOLLOW_STOP * FOLLOW_STOP) {
+            mob.getNavigation().stop();
+            mob.getLookControl().setLookAt(horse, 10.0F, (float) mob.getMaxHeadXRot());
+            return;
+        }
+        mob.getNavigation().moveTo(horse, 1.0);
     }
 
     // ------------------------------------------------------------------
@@ -816,11 +851,26 @@ public final class GeneAbilityHandler {
             if (healed >= h.maxTargets()) {
                 break; // every radius effect is capped - see wiki/making-a-gene.html
             }
-            if (!matchesHealTarget(h.target(), target, horse)) {
+            if (!matchesHealTarget(h.target(), h.group(), target, horse)) {
                 continue;
             }
             // The scan box is a box and the aura is a sphere, so check properly.
-            if (target.distanceToSqr(horse) > reachSqr || target.getHealth() >= target.getMaxHealth()) {
+            if (target.distanceToSqr(horse) > reachSqr) {
+                continue;
+            }
+            if (amount < 0) {
+                // A healing aura with the sign flipped, which is how the
+                // cleansing locus damages undead without a second radius verb.
+                // The kill is credited to the HORSE, so no player experience and
+                // no player-only drops - a settled decision, not an oversight.
+                target.hurt(level.damageSources().magic(), -amount);
+                healed++;
+                level.sendParticles(ParticleTypes.END_ROD, target.getX(),
+                        target.getY() + target.getBbHeight() * 0.6, target.getZ(),
+                        3, 0.25, 0.25, 0.25, 0.0);
+                continue;
+            }
+            if (target.getHealth() >= target.getMaxHealth()) {
                 continue;
             }
             target.heal(amount);
@@ -830,7 +880,10 @@ public final class GeneAbilityHandler {
         }
     }
 
-    private static boolean matchesHealTarget(String target, LivingEntity candidate, Horse horse) {
+    private static boolean matchesHealTarget(String target, String group, LivingEntity candidate, Horse horse) {
+        if ("group".equals(target)) {
+            return MobGroups.matches(group, candidate);
+        }
         return switch (target) {
             case "players" -> candidate instanceof Player;
             case "rider" -> candidate == horse.getControllingPassenger();
@@ -877,7 +930,7 @@ public final class GeneAbilityHandler {
         if (!level.isLoaded(target)) {
             return;
         }
-        BlockState converted = convert(s.cover(), level.getBlockState(target));
+        BlockState converted = convert(s.cover(), level, target);
         if (converted == null) {
             return;
         }
@@ -894,7 +947,17 @@ public final class GeneAbilityHandler {
      * cover, and knowing that mycelium eats podzol but not deepslate needs the
      * block registry.
      */
-    private static BlockState convert(String cover, BlockState state) {
+    /**
+     * What one vocabulary word does to one block.
+     *
+     * <p>The verb takes a <b>word</b> and not a block id precisely so that the
+     * judgement about what may be converted stays here, with the code that knows
+     * the game's blocks - which is what stops any of these eating something a
+     * player placed. {@code melt} deliberately leaves packed and blue ice alone
+     * for that reason: those are building materials, not weather.
+     */
+    private static BlockState convert(String cover, ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
         return switch (cover) {
             case "mycelium" -> {
                 if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.COARSE_DIRT)
@@ -916,6 +979,33 @@ public final class GeneAbilityHandler {
                     yield Blocks.GRASS_BLOCK.defaultBlockState();
                 }
                 yield null;
+            }
+            case "melt" -> {
+                // Snow goes to air; plain ice goes straight to a water SOURCE
+                // rather than to air, because an air pocket in a lake floods and
+                // flowing water is the expensive part of this whole gene.
+                // Packed and blue ice are somebody's floor and are left alone.
+                if (state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK)
+                        || state.is(Blocks.POWDER_SNOW)) {
+                    yield Blocks.AIR.defaultBlockState();
+                }
+                if (state.is(Blocks.ICE) || state.is(Blocks.FROSTED_ICE)) {
+                    yield Blocks.WATER.defaultBlockState();
+                }
+                yield null;
+            }
+            case "sapling" -> {
+                // The only word that plants ABOVE the ground rather than
+                // converting it, so it is the only one that has to look down.
+                if (!state.isAir()) {
+                    yield null;
+                }
+                BlockState below = level.getBlockState(pos.below());
+                if (!below.is(Blocks.GRASS_BLOCK) && !below.is(Blocks.DIRT)
+                        && !below.is(Blocks.PODZOL) && !below.is(Blocks.COARSE_DIRT)) {
+                    yield null;
+                }
+                yield saplingFor(level, pos);
             }
             default -> null;
         };
@@ -1034,6 +1124,26 @@ public final class GeneAbilityHandler {
     }
 
     // ------------------------------------------------------------------
+
+    /**
+     * <b>What this horse's genes grant, for a handler that is not the tick.</b>
+     *
+     * <p>The ward runs on every spawn attempt in the world and the reaction
+     * handler on every damage event, and neither has a {@link HorseRecord} in
+     * hand. Both go through here so they share the one cache rather than
+     * re-parsing a genotype per event - which for the ward would mean parsing
+     * once per spawn attempt per horse.
+     *
+     * <p>Returns an empty list for a horse whose record has not been assigned
+     * yet, which is the same answer the tick loop gives.
+     */
+    static List<HorseAbilities.Active> abilitiesOf(Horse horse) {
+        if (!HorseAbilities.anyLoaded()) {
+            return List.of();
+        }
+        HorseRecord record = HorseRecords.of(horse);
+        return record.hasName() ? resolve(horse, record) : List.of();
+    }
 
     private static List<HorseAbilities.Active> resolve(Horse horse, HorseRecord record) {
         String code = record.geneticCode();
@@ -1211,6 +1321,20 @@ public final class GeneAbilityHandler {
      * so a firing that is off-trigger or on cooldown is dropped before the sound
      * id is even resolved.
      */
+    /** The saplings a dryad may plant, picked to suit where it is standing. */
+    private static final List<BlockState> SAPLINGS = List.of(
+            Blocks.OAK_SAPLING.defaultBlockState(),
+            Blocks.BIRCH_SAPLING.defaultBlockState(),
+            Blocks.SPRUCE_SAPLING.defaultBlockState(),
+            Blocks.JUNGLE_SAPLING.defaultBlockState(),
+            Blocks.ACACIA_SAPLING.defaultBlockState(),
+            Blocks.DARK_OAK_SAPLING.defaultBlockState());
+
+    /** One of the saplings, chosen from the position so a wood is not all one species. */
+    private static BlockState saplingFor(ServerLevel level, BlockPos pos) {
+        return SAPLINGS.get(Math.floorMod(pos.hashCode(), SAPLINGS.size()));
+    }
+
     private static void maybeSound(GeneAbility.Sound so, Horse horse, ServerLevel level,
                                    boolean moving, String geneKey) {
         if (!triggerFiresNow(so.trigger(), horse, moving)) {
