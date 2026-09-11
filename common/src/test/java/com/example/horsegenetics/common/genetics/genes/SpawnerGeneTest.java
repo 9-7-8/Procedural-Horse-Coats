@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The spawner fires when it is <b>fed</b>, and tops up to two. It used to be a
+ * The spawner fires when it is <b>fed</b>, two per meal with no cap. It used to be a
  * once-a-day timer counted on the horse's unsaved {@code tickCount}, which in
  * play meant it never fired at all.
  */
@@ -32,7 +32,7 @@ class SpawnerGeneTest {
     }
 
     @Test
-    void aMatchedPairSummonsOnFeedingUpToTwo() {
+    void aMatchedPairSummonsTwoPerFeeding() {
         Gene spawner = Genes.byKey(SpawnerGene.KEY);
         Allele cow = allele(spawner, "Cow");
         Genotype gt = Genotype.wildType().with(new AllelePair(cow, cow));
@@ -46,7 +46,7 @@ class SpawnerGeneTest {
         assertEquals(1, summons.size());
         GeneAbility.Summon su = summons.get(0);
         assertTrue(su.trigger() instanceof GeneAbility.Trigger.OnFeed, "fed, not timed");
-        assertEquals(SpawnerGene.UP_TO, su.upTo());
+        assertEquals(SpawnerGene.PER_FEEDING, su.upTo());
         assertEquals("minecraft:cow", su.mob());
     }
 }

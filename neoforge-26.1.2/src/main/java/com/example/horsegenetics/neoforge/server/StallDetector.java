@@ -3,7 +3,14 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.stable.StallFill;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
@@ -132,10 +139,39 @@ public final class StallDetector {
         }
         return new Result(region,
                 new BlockPos(region.minX(), region.minY(), region.minZ()),
-                // The span a horse occupies, so the outline drawn round it is the
-                // room and not just the floor slice.
-                new BlockPos(region.maxX(), region.maxY() + HEADROOM - 1, region.maxZ()),
+                // Up to the ceiling, so the size reported and the outline drawn
+                // are the room and not just the two cells a horse needs. It used
+                // to stop at HEADROOM, so every stall read as two blocks tall
+                // (owner-reported 2026-09-10).
+                new BlockPos(region.maxX(), region.maxY() + ceilingHeight(level, region) - 1, region.maxZ()),
                 region.size(), true);
+    }
+
+    /** How far up a room is measured before it is called open-topped. */
+    private static final int MAX_HEIGHT = 8;
+
+    /**
+     * <b>The room's height</b>: from the floor to the first solid block above,
+     * the tallest over every tile, capped at {@link #MAX_HEIGHT} for an
+     * open-topped stall. Measured only for the report and the outline - the
+     * fill itself still never looks up, which is what keeps an open-topped
+     * stall a stall.
+     */
+    private static int ceilingHeight(LevelReader level, StallFill.Region region) {
+        int tallest = HEADROOM;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (StallFill.Column c : region.columns()) {
+            int h = HEADROOM;
+            while (h < MAX_HEIGHT) {
+                p.set(c.x(), c.y() + h, c.z());
+                if (level.isOutsideBuildHeight(p) || level.getBlockState(p).blocksMotion()) {
+                    break;
+                }
+                h++;
+            }
+            tallest = Math.max(tallest, h);
+        }
+        return tallest;
     }
 
     /**
@@ -228,14 +264,49 @@ public final class StallDetector {
      * one position in the whole routine that was never checked for anything,
      * and it was reached exactly when the stall was least understood.
      *
-     * <p>A real room answers from its own floor tiles. The fallback box has no
-     * floor that was ever checked, so every cell in it is tested here, nearest
-     * the middle first.
+     * <p>A real room answers from its own floor, and the answer is the <b>dead
+     * centre</b> of it ({@link StallFill.Region#centroid}), checked against the
+     * horse's actual box. It used to be the centre of the middle <i>tile</i>,
+     * and a horse is about 1.4 blocks wide, so in a stall two wide it always
+     * arrived overhanging a side wall - owner-reported 2026-09-10 as "still
+     * teleporting horses into walls". If the centre does not fit (the corner
+     * of an L, a raised tile), the tile centres are tried nearest-first; if
+     * nothing fits at all - a stall narrower than the horse - it is the centre
+     * anyway, because that is the least-bad place and the caller only refuses
+     * when there is no floor.
+     *
+     * <p>The fallback box has no floor that was ever checked, so every cell in
+     * it is tested here, nearest the middle first.
+     *
+     * @return the exact position to put the horse's feet, or {@code null}
      */
-    public static BlockPos landingSpot(LevelReader level, Result result) {
+    public static Vec3 landingSpot(LevelReader level, Result result, Entity horse) {
         if (result.region() != null) {
-            StallFill.Column c = result.region().middle();
-            return new BlockPos(c.x(), c.y(), c.z());
+            StallFill.Region region = result.region();
+            double[] c = region.centroid();
+            StallFill.Column under = region.columnAt((int) Math.floor(c[0]), (int) Math.floor(c[1]));
+            if (under != null) {
+                Vec3 centre = new Vec3(c[0], footprintFloor(region, c[0], c[1], horse), c[1]);
+                if (fits(level, horse, centre)) {
+                    return centre;
+                }
+            }
+            List<StallFill.Column> byDistance = new ArrayList<>(region.columns());
+            byDistance.sort(Comparator.comparingDouble(col ->
+                    sq(col.x() + 0.5 - c[0]) + sq(col.z() + 0.5 - c[1])));
+            for (StallFill.Column col : byDistance) {
+                Vec3 at = new Vec3(col.x() + 0.5,
+                        footprintFloor(region, col.x() + 0.5, col.z() + 0.5, horse), col.z() + 0.5);
+                if (fits(level, horse, at)) {
+                    return at;
+                }
+            }
+            // Nothing fits - a stall narrower than the horse. Dead centre anyway.
+            if (under != null) {
+                return new Vec3(c[0], footprintFloor(region, c[0], c[1], horse), c[1]);
+            }
+            StallFill.Column m = region.middle();
+            return new Vec3(m.x() + 0.5, m.y(), m.z() + 0.5);
         }
         BlockPos min = result.min();
         BlockPos max = result.max();
@@ -261,7 +332,34 @@ public final class StallDetector {
                 }
             }
         }
-        return best;
+        return best == null ? null : Vec3.atBottomCenterOf(best);
+    }
+
+    /** Would the horse's box, with its feet at {@code at}, touch anything solid? */
+    private static boolean fits(LevelReader level, Entity horse, Vec3 at) {
+        AABB box = horse.getDimensions(horse.getPose()).makeBoundingBox(at);
+        return level.noCollision(horse, box);
+    }
+
+    /**
+     * The floor height under a horse centred at {@code (x, z)}: the highest
+     * tile its footprint covers, so a raised tile under one corner lifts it
+     * rather than burying that corner.
+     */
+    private static double footprintFloor(StallFill.Region region, double x, double z, Entity horse) {
+        double half = horse.getBbWidth() / 2.0;
+        int y = Integer.MIN_VALUE;
+        for (StallFill.Column col : region.columns()) {
+            if (col.x() + 1 > x - half && col.x() < x + half
+                    && col.z() + 1 > z - half && col.z() < z + half) {
+                y = Math.max(y, col.y());
+            }
+        }
+        return y == Integer.MIN_VALUE ? region.middle().y() : y;
+    }
+
+    private static double sq(double v) {
+        return v * v;
     }
 
     /**

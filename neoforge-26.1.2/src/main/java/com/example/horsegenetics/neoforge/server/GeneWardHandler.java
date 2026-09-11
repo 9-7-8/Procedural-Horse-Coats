@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
+import net.minecraft.ChatFormatting;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -105,11 +106,44 @@ public final class GeneWardHandler {
             double dx = entity.getX() - ward.x();
             double dy = entity.getY() - ward.y();
             double dz = entity.getZ() - ward.z();
-            if (dx * dx + dy * dy + dz * dz <= ward.radiusSqr()) {
+            double d2 = dx * dx + dy * dy + dz * dz;
+            if (d2 <= ward.radiusSqr()) {
                 event.setSpawnCancelled(true);
+                announce(level, entity, Math.sqrt(d2));
                 return;
             }
         }
+    }
+
+    /** Refusals since the last line, and when that line went out - see {@link #announce}. */
+    private static int heldBack;
+    private static long lastAnnounced = Long.MIN_VALUE;
+
+    /** At most one chat line per this many ticks, however many spawns were refused. */
+    private static final long ANNOUNCE_EVERY = 200;
+
+    /**
+     * <b>The ward is invisible when it works</b> - the evidence is a monster
+     * that did not appear - so with {@code debug.announce} on it says so, at
+     * most once every ten seconds with a count. Added 2026-09-10 when the owner
+     * asked how to tell it was working at all. Remember when reading it that the
+     * game never spawns monsters within 24 blocks of a player, so a player
+     * standing beside the horse sees no refusals because there is nothing to
+     * refuse.
+     */
+    private static void announce(ServerLevel level, Entity entity, double distance) {
+        heldBack++;
+        long now = level.getGameTime();
+        if (now - lastAnnounced < ANNOUNCE_EVERY) {
+            return;
+        }
+        DebugAnnounce.say(level, "Ward", heldBack + " natural monster spawn"
+                        + (heldBack == 1 ? "" : "s") + " refused - the last a "
+                        + entity.getType().getDescription().getString() + ", "
+                        + (int) Math.round(distance) + " blocks from a warding horse",
+                ChatFormatting.LIGHT_PURPLE);
+        heldBack = 0;
+        lastAnnounced = now;
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.BreedStatCurve;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.Allele;
@@ -507,6 +508,16 @@ public final class HorseBrowserScreen extends Screen {
 
     private boolean discovered(Gene g) {
         return g != null && (creative() || ClientGeneDatabase.knows(g.key()));
+    }
+
+    /**
+     * Has this player met the breed - or are they in creative, where every gene
+     * already counts as discovered and the breeds must too. The breed rows used
+     * to ask {@code ClientGeneDatabase.hasBreed} alone, so creative showed
+     * forty-nine question marks ({@code known-gaps.html#gap-154}).
+     */
+    private boolean metBreed(Breed b) {
+        return creative() || ClientGeneDatabase.hasBreed(b.id());
     }
 
     private boolean craftable(Gene g) {
@@ -1902,7 +1913,7 @@ public final class HorseBrowserScreen extends Screen {
         breedRows.clear();
         int known = 0;
         for (Breed b : Breeds.all()) {
-            boolean met = ClientGeneDatabase.hasBreed(b.id());
+            boolean met = metBreed(b);
             if (met) {
                 known++;
             }
@@ -1917,7 +1928,7 @@ public final class HorseBrowserScreen extends Screen {
             breedRows.add(b);
         }
         breedRows.sort(Comparator
-                .comparing((Breed b) -> ClientGeneDatabase.hasBreed(b.id()) ? 0 : 1)
+                .comparing((Breed b) -> metBreed(b) ? 0 : 1)
                 .thenComparing(Breed::name, String.CASE_INSENSITIVE_ORDER));
 
         g.text(this.font, Component.literal("Breeds met  " + known + " / " + Breeds.all().size()),
@@ -1929,7 +1940,7 @@ public final class HorseBrowserScreen extends Screen {
         int y = top - (int) breedScroll;
         for (Breed b : breedRows) {
             if (y + rowH > top && y < bottom) {
-                boolean met = ClientGeneDatabase.hasBreed(b.id());
+                boolean met = metBreed(b);
                 boolean hover = mouseX >= l - 3 && mouseX < l + w && mouseY >= y - 1 && mouseY < y + rowH - 2;
                 if (b.id().equals(selectedBreed)) {
                     g.fill(l - 3, y - 1, l + w, y + rowH - 2, ROW_SEL);
@@ -2115,7 +2126,7 @@ public final class HorseBrowserScreen extends Screen {
             return null;
         }
         Breed b = Breeds.get(selectedBreed);
-        return b != null && ClientGeneDatabase.hasBreed(b.id()) ? b : null;
+        return b != null && metBreed(b) ? b : null;
     }
 
     /** A click in the breed list picks one - but only one you have met. */
@@ -2132,7 +2143,7 @@ public final class HorseBrowserScreen extends Screen {
             return false;
         }
         Breed picked = breedRows.get(index);
-        if (!ClientGeneDatabase.hasBreed(picked.id())) {
+        if (!metBreed(picked)) {
             return true; // a question mark is not a link, but it did take the click
         }
         if (!picked.id().equals(selectedBreed)) {
@@ -2682,7 +2693,9 @@ public final class HorseBrowserScreen extends Screen {
                 String.format("%.3f", row.speed()),
                 String.format("%.1f", row.health()),
                 String.format("%.2f", row.jump()),
-                String.format("%.2f", row.scale()),
+                // Hands in horseman's notation, "hh" dropped to fit the column -
+                // the heading says Hands. The info screen has the full form.
+                BreedStatCurve.formatHands(BreedStatCurve.handsFor(row.scale())).replace(" hh", ""),
                 row.bond() < 0 ? "?" : Integer.toString(row.bond()),
                 row.loaded() ? row.where() : "not loaded"
         };

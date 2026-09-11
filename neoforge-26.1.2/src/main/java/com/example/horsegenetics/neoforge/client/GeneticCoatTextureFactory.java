@@ -259,16 +259,15 @@ public final class GeneticCoatTextureFactory {
     }
 
     /**
-     * Dev-build only: drop a line in chat every time a coat texture is baked, so
-     * the compose pipeline can be watched live. Flags the failure mode where the
-     * whole overlay came out transparent and the horse will render as the bare
-     * white template ("FLAT WHITE").
+     * One line per baked coat, <b>to the log</b> - it used to go to chat as well,
+     * and every horse loading in printed its genotype there, which drowned
+     * everything else (owner's request, 2026-09-10). Chat still gets the one
+     * line that is a problem: the failure where the whole overlay came out
+     * transparent and the horse renders as the bare white template
+     * ("FLAT WHITE").
      */
     private static void debugLogCoat(CoatData coat, boolean baby, int[] argb, int[] template, String breedLabel) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) {
-            return;
-        }
         boolean bareTemplate = Arrays.equals(argb, template);
         String msg = "[coat] " + (baby ? "foal  " : "adult ")
                 + GeneCodeDisplay.shortForm(coat.genotype())
@@ -276,7 +275,10 @@ public final class GeneticCoatTextureFactory {
                 + (coat.isDeterministic() ? "  det" : "  per-horse")
                 + (breedLabel == null ? "" : "  [" + breedLabel + "]")
                 + (bareTemplate ? "  >> FLAT WHITE (overlay fully transparent)" : "");
-        mc.player.sendSystemMessage(Component.literal(msg));
+        HorseGenetics.LOGGER.info(msg);
+        if (bareTemplate && mc.player != null) {
+            mc.player.sendSystemMessage(Component.literal(msg));
+        }
     }
 
     private static synchronized void ensureAssetsLoaded() {

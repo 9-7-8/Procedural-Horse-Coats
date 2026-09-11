@@ -255,12 +255,20 @@ public final class GeneYieldHandler {
         horse.setData(ModAttachments.HORSE_COOLDOWNS.get(), cooldowns.stamp(key, now));
     }
 
-    /** The else branch: a stallion kick, a foal's "nothing to give". */
+    /**
+     * The else branch: a stallion kick, a foal's "nothing to give". A kick also
+     * rears the horse ({@code makeMad}, which plays the angry sound itself), so
+     * the reaction is something you see and not only a line in chat.
+     */
     private static void applyDenial(Horse horse, Player player, GeneAbility.Yield yield) {
         if (yield.deniedDamage() > 0 && player.level() instanceof ServerLevel level) {
             player.hurtServer(level, horse.damageSources().mobAttack(horse), (float) yield.deniedDamage());
-            horse.level().playSound(null, horse.getX(), horse.getY(), horse.getZ(),
-                    SoundEvents.HORSE_ANGRY, SoundSource.NEUTRAL, 1.0F, 1.0F);
+            if (horse.isStanding()) {
+                horse.level().playSound(null, horse.getX(), horse.getY(), horse.getZ(),
+                        SoundEvents.HORSE_ANGRY, SoundSource.NEUTRAL, 1.0F, 1.0F);
+            } else {
+                horse.makeMad();
+            }
         }
         if (!yield.deniedMessage().isEmpty()) {
             player.sendSystemMessage(Component.translatable(yield.deniedMessage()));

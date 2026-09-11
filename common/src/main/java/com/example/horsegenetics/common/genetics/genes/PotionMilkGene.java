@@ -179,13 +179,36 @@ public final class PotionMilkGene implements Gene, AbilityContribution {
             return List.of();
         }
         if (a == b) {
-            return List.of(bottle(brews.get(a), 1, STRONG_DURATION));
+            return List.of(bottle(brews.get(a), 1, STRONG_DURATION), STALLION, FOAL);
         }
         if (b == n.order()) {
-            return List.of(bottle(brews.get(a), 0, WEAK_DURATION));
+            return List.of(bottle(brews.get(a), 0, WEAK_DURATION), STALLION, FOAL);
         }
         return List.of(bottle(brews.get(a), 0, WEAK_DURATION),
-                bottle(brews.get(b), 0, WEAK_DURATION));
+                bottle(brews.get(b), 0, WEAK_DURATION), STALLION, FOAL);
+    }
+
+    /** The kick, in the same currency as {@code MilkGene}'s. */
+    public static final double STALLION_KICK_DAMAGE = MilkGene.STALLION_KICK_DAMAGE;
+
+    /**
+     * <b>The else branches</b>, the same two {@code MilkGene} has: a stallion
+     * kicks, a foal says it has nothing. Without them a bottle held out to the
+     * wrong horse fell through to vanilla and did nothing at all, which the owner
+     * reported (2026-09-10) as reading like a bug. No kind, so the volume locus
+     * cannot make a stallion kick more often.
+     */
+    private static final GeneAbility STALLION = denied(new GeneAbility.Condition.All(List.of(
+                    new GeneAbility.Condition.Flag("adult", false),
+                    new GeneAbility.Condition.Flag("sex_male", false))),
+            STALLION_KICK_DAMAGE, "message.horsegenetics.potion_milk.stallion");
+
+    private static final GeneAbility FOAL = denied(new GeneAbility.Condition.Flag("baby", false),
+            0.0, "message.horsegenetics.potion_milk.foal");
+
+    private static GeneAbility denied(GeneAbility.Condition when, double damage, String messageKey) {
+        return new GeneAbility.Yield(new GeneAbility.Trigger.OnInteract(CONSUMES),
+                "", "", 0, damage, messageKey, "", "", 0, 0, when, 1);
     }
 
     private static GeneAbility bottle(Brew brew, int amplifier, int duration) {

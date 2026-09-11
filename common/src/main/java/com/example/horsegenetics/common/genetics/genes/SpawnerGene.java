@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <b>Spawner</b> ({@code horsegenetics.spawner}) - feed the horse, and it looks
- * around; if there are fewer than two of a particular creature nearby, there are
- * two now.
+ * <b>Spawner</b> ({@code horsegenetics.spawner}) - feed the horse, and two of a
+ * particular creature appear nearby.
  *
  * <h2>Fed, not timed</h2>
  * It used to fire once a Minecraft day, and in play it never fired at all: the
@@ -19,18 +18,20 @@ import java.util.List;
  * spawner you can work beats one you wait for, and a horse left alone in a
  * field now does nothing at all.
  *
- * <h2>Up to two, which is the whole design</h2>
- * Almost every design for a spawning gene is a lag machine, because almost every
- * one counts <i>time</i> and not <i>population</i>. This one counts what is
- * already there first, so feeding a horse in a stocked field does nothing, and
- * it only makes anything when something has been lost or led away. The ceiling
- * is in the definition rather than bolted on as a cooldown - which is also why a
- * feeding trigger needs no cooldown of its own.
+ * <h2>Two per meal, and no cap</h2>
+ * On its old timer it counted what was already there and only topped up to two,
+ * because a spawning gene that counts <i>time</i> and not <i>population</i> is a
+ * lag machine. Fed, the player pays for every firing with food, so the owner
+ * took the cap off (2026-09-10): each meal makes {@link #PER_FEEDING}, full stop,
+ * and the cost is the lever - "I'll up the cost for it later". Only a meal the
+ * horse actually <i>eats</i> counts; the translator checks, because a horse at
+ * full health hands the wheat back and an uncapped trigger on a free click would
+ * be an infinite spawner.
  *
  * <h2>It reaches the monsters, and only by being bred</h2>
  * The allele set is {@link MobRoster#all()} - every mob, hostile ones included,
  * which is a deliberate departure from {@link LycanGene}'s non-hostile rule. A
- * horse that produces two creepers every dawn is a real thing this locus can
+ * horse that produces two creepers every time it is fed is a real thing this locus can
  * express, and it is never something you will catch: like every locus on this
  * base, only carriers are born wild, so somebody has to make it.
  *
@@ -42,8 +43,8 @@ import java.util.List;
  *
  * <p>Three requirements land on the translator rather than here, and each is on
  * the gene's page as a hazard: spawn through the normal path so other mods'
- * protections still fire, never mark what is spawned persistent, and count
- * before spawning.
+ * protections still fire, never mark what is spawned persistent, and only
+ * count a feeding that was eaten.
  */
 public final class SpawnerGene extends AbstractMatchedPairGene {
 
@@ -53,8 +54,8 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
     /** Blocks - about two chunks, which is what "nearby" was specified as. */
     public static final double RADIUS = 32.0;
 
-    /** The local population it tops up to. Not "how many to make" - see the class note. */
-    public static final int UP_TO = 2;
+    /** Creatures per meal. No cap on the total - see the class note. */
+    public static final int PER_FEEDING = 2;
 
     /** Carriers in a hundred. The largest roster in the mod, so the rate has to be generous. */
     public static final double WILD_CARRIER_PERCENT = 20.0;
@@ -73,11 +74,9 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
                     }
 
                     @Override public String description(Variant v) {
-                        return "Two matching copies. Feed the horse anything it eats and it looks "
-                                + "around, and if there are fewer than two "
-                                + v.label().toLowerCase() + "s within about two chunks, it makes "
-                                + "up the difference. If they are all still there, the feeding is "
-                                + "just a meal.";
+                        return "Two matching copies. Feed the horse anything it eats and two "
+                                + v.label().toLowerCase() + "s appear nearby - every meal, as "
+                                + "many times as you care to feed it.";
                     }
                 });
     }
@@ -97,7 +96,7 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
 
     @Override
     protected List<GeneAbility> abilitiesFor(Variant v, EpiValues epi) {
-        return List.of(new GeneAbility.Summon(v.subject(), RADIUS, UP_TO,
+        return List.of(new GeneAbility.Summon(v.subject(), RADIUS, PER_FEEDING,
                 new GeneAbility.Trigger.OnFeed(), GeneAbility.Condition.ALWAYS, 1));
     }
 }

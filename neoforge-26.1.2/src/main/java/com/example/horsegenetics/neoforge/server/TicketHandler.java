@@ -7,6 +7,7 @@ import com.example.horsegenetics.neoforge.item.TicketItem;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -100,7 +101,7 @@ public final class TicketHandler {
             return;
         }
 
-        BlockPos landing = landingSpot(target, stall);
+        Vec3 landing = landingSpot(target, stall, horse);
         if (landing == null) {
             // Nothing is spent and nothing moves. A horse that quietly fails to
             // arrive is indistinguishable from a horse that was deleted, and
@@ -118,12 +119,13 @@ public final class TicketHandler {
                 SoundEvents.ENDERMAN_TELEPORT, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
         horse.dropLeash();
-        horse.teleportTo(target, landing.getX() + 0.5, landing.getY(), landing.getZ() + 0.5,
+        horse.teleportTo(target, landing.x, landing.y, landing.z,
                 Set.of(), horse.getYRot(), horse.getXRot(), false);
 
-        target.sendParticles(ParticleTypes.PORTAL, landing.getX() + 0.5, landing.getY() + 0.8,
-                landing.getZ() + 0.5, 24, 0.4, 0.6, 0.4, 0.2);
-        target.playSound(null, landing, SoundEvents.ENDERMAN_TELEPORT, SoundSource.NEUTRAL, 1.0F, 1.0F);
+        target.sendParticles(ParticleTypes.PORTAL, landing.x, landing.y + 0.8, landing.z,
+                24, 0.4, 0.6, 0.4, 0.2);
+        target.playSound(null, landing.x, landing.y, landing.z, SoundEvents.ENDERMAN_TELEPORT,
+                SoundSource.NEUTRAL, 1.0F, 1.0F);
 
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
@@ -163,7 +165,7 @@ public final class TicketHandler {
      * <p>The chunk is pulled in first. A horse teleported into unloaded terrain
      * is the failure that looks exactly like a horse that was deleted.
      */
-    private static BlockPos landingSpot(ServerLevel level, StallRecord stall) {
+    private static Vec3 landingSpot(ServerLevel level, StallRecord stall, Horse horse) {
         BlockPos signPos = stall.signPos();
         level.getChunk(signPos); // load it, so what we read is real and the horse arrives somewhere
         BlockState sign = level.getBlockState(signPos);
@@ -173,7 +175,7 @@ public final class TicketHandler {
         Direction facing = sign.getValue(WallSignBlock.FACING);
         StallDetector.Result live =
                 StallDetector.forSign(level, signPos.relative(facing.getOpposite()), facing);
-        return StallDetector.landingSpot(level, live);
+        return StallDetector.landingSpot(level, live, horse);
     }
 
     private static boolean ownedBy(Horse horse, UUID playerId) {

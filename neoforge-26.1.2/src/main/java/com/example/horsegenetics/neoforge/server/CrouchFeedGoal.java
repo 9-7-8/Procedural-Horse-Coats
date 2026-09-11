@@ -155,7 +155,13 @@ public final class CrouchFeedGoal extends Goal {
         // failure nudges the temper up so patience still pays. Matching it
         // rather than inventing a curve is the point - this is a second door
         // into taming, not an easier one.
-        if (horse.getRandom().nextInt(horse.getMaxTemper()) < horse.getTemper()) {
+        // The tame EVENT, as RunAroundLikeCrazyGoal fires it before its own
+        // tameWithName - calling tameWithName bare skipped it, so a horse tamed
+        // by hand never reached GeneDiscoveryHandler.onTame: no breed in the
+        // Breeds tab, no genes discovered, no "tame a mare" tick (gap 154). It
+        // is cancelable, and a cancel means another mod said no.
+        if (horse.getRandom().nextInt(horse.getMaxTemper()) < horse.getTemper()
+                && !net.neoforged.neoforge.event.EventHooks.onAnimalTame(horse, player)) {
             horse.tameWithName(player);
             level.broadcastEntityEvent(horse, (byte) 7); // hearts
         } else {

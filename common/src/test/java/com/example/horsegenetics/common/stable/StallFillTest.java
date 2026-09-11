@@ -83,6 +83,31 @@ class StallFillTest {
     }
 
     /**
+     * <b>The dead centre, not the middle tile.</b> Owner-reported 2026-09-10:
+     * ticketed horses still arrived in walls. A horse is about 1.4 blocks wide,
+     * and the landing was the centre of one tile - so in a stall two wide it
+     * always overhung a side wall by a fifth of a block. The centre of this 2x3
+     * floor is on the line between its two columns.
+     */
+    @Test
+    void theCentreOfATwoWideStallIsBetweenItsColumns() {
+        StallFill.Region r = fill(new String[] {
+                "####",
+                "#..#",
+                "#..#",
+                "#..#",
+                "####",
+        }, 1, 1);
+
+        assertNotNull(r);
+        double[] c = r.centroid();
+        assertEquals(2.0, c[0], 1e-9, "x: the line between columns 1 and 2");
+        assertEquals(2.5, c[1], 1e-9, "z: the middle of row 2");
+        assertNotNull(r.columnAt(2, 2));
+        assertNull(r.columnAt(0, 2), "the wall is not floor");
+    }
+
+    /**
      * <b>The reported bug.</b> A stall fronted by a fence with the gate left
      * open. The old fill climbed over the fence - it was allowed three blocks
      * of rise and a fence is one block tall - and escaped into the aisle, so

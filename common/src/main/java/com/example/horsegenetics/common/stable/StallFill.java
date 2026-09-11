@@ -93,7 +93,37 @@ public final class StallFill {
             return columns.size();
         }
 
-        /** The column nearest the middle of the region, which is where a horse wants to arrive. */
+        /**
+         * The <b>centre of the floor</b>, in continuous block coordinates: the
+         * mean of every tile's centre. For a rectangular stall it is the dead
+         * centre - between two tiles, in a stall two wide - which is where a
+         * horse wider than a block has to be put, or it hangs into a side wall.
+         * For an L-shaped room it can land over the wall between the arms, so
+         * check {@link #columnAt} before trusting it.
+         *
+         * @return {@code {x, z}}
+         */
+        public double[] centroid() {
+            double sx = 0;
+            double sz = 0;
+            for (Column c : columns) {
+                sx += c.x() + 0.5;
+                sz += c.z() + 0.5;
+            }
+            return new double[] {sx / columns.size(), sz / columns.size()};
+        }
+
+        /** The floor tile at {@code (x, z)}, or {@code null} if that tile is not part of the room. */
+        public Column columnAt(int x, int z) {
+            for (Column c : columns) {
+                if (c.x() == x && c.z() == z) {
+                    return c;
+                }
+            }
+            return null;
+        }
+
+        /** The column nearest the middle of the region - the fallback when the centre will not do. */
         public Column middle() {
             double cx = (minX + maxX) / 2.0;
             double cz = (minZ + maxZ) / 2.0;

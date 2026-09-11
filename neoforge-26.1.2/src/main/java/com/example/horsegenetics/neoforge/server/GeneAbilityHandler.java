@@ -37,6 +37,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -1808,13 +1809,16 @@ public final class GeneAbilityHandler {
     // ------------------------------------------------------------------
 
     /**
-     * Top the local population of one mob up to a fixed number.
+     * Put {@code upTo} of one mob into the world - topped up to that number for
+     * a timed summon, made outright for a fed one.
      *
      * <p>Three things here are requirements rather than choices, and each is on
      * the gene's page as a hazard:
      * <ul>
-     *   <li><b>Count first.</b> The rule is "top up to N", not "make N" - getting
-     *       that backwards turns a self-limiting locus into unbounded growth.</li>
+     *   <li><b>Count first, on a timer.</b> A summon that fires on its own must
+     *       "top up to N", not "make N" - getting that backwards turns a
+     *       self-limiting locus into unbounded growth. A <i>fed</i> summon is
+     *       paid for per firing, so it makes N each meal (owner's call).</li>
      *   <li><b>Spawn through the normal path</b>, so {@code FinalizeSpawnEvent}
      *       fires and other mods' claim and spawn protections still apply. A
      *       direct placement bypasses every one of them.</li>
@@ -1836,35 +1840,71 @@ public final class GeneAbilityHandler {
      * special diet accepts, or vanilla horse food for an ordinary horse - the
      * same split {@link CrouchFeedGoal} tempts with.
      *
+     * <p><b>Only a meal that was actually eaten.</b> A fed summon has no cap
+     * (owner's call, 2026-09-10 - the food is the cost), so a feeding that did
+     * not happen must not count: a tamed horse at full health refuses wheat and
+     * vanilla hands the wheat back, and without this one wheat would make cows
+     * for ever. Whether it ate is only knowable afterwards, so this notes the
+     * stack in hand and {@link #drainPendingFeeds} looks again at the end of the
+     * tick - fewer items, or a different item (a bucket back from a bucket of
+     * something), means it ate. Creative consumes nothing, so a creative
+     * feeding always counts.
+     *
      * <p>HIGHEST priority, because {@link FoodPreferenceHandler} (HIGH) and
      * {@link HorseDietHandler} both cancel the interaction and shrink the stack,
-     * and a stack of one would already be empty by the time a later listener
-     * looked at it. It does not cancel anything itself.
-     *
-     * <p>It fires whether or not vanilla then actually eats (a horse at full
-     * health refuses wheat): the summon counts before it makes anything, so a
-     * spare trigger is a no-op rather than a duplication.
+     * and the "before" count has to be read first. It cancels nothing itself.
      */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onFeed(PlayerInteractEvent.EntityInteract event) {
         if (event.isCanceled() || event.getLevel().isClientSide()
                 || !(event.getTarget() instanceof Horse horse)
-                || !(horse.level() instanceof ServerLevel level)) {
+                || !(horse.level() instanceof ServerLevel)) {
             return;
         }
         ItemStack held = event.getItemStack();
         if (held.isEmpty() || !eats(horse, held)) {
             return;
         }
-        HorseRecord record = HorseRecords.of(horse);
-        if (!record.hasName()) {
-            return;
-        }
-        for (HorseAbilities.Active active : resolve(horse, record)) {
-            if (active.ability() instanceof GeneAbility.Summon su
-                    && su.trigger() instanceof GeneAbility.Trigger.OnFeed
-                    && conditionHolds(su.when(), horse, record)) {
-                summon(su, horse, level, active.geneKey());
+        PENDING_FEEDS.add(new PendingFeed(event.getEntity(), event.getHand(), held.getItem(),
+                held.getCount(), horse));
+    }
+
+    /** A feeding waiting to find out whether it was eaten - see {@link #onFeed}. */
+    private record PendingFeed(Player player, InteractionHand hand, Item item, int before, Horse horse) {}
+
+    private static final Queue<PendingFeed> PENDING_FEEDS = new ConcurrentLinkedQueue<>();
+
+    /**
+     * The other half of {@link #onFeed}. Interaction packets are handled
+     * between ticks, so by the next post-tick the horse has eaten or refused.
+     * <b>Unverified in-game:</b> that ordering is from reading the 26.1.2
+     * packet handling, not from watching it; if feedings stop counting, this is
+     * the first thing to check.
+     */
+    @SubscribeEvent
+    static void drainPendingFeeds(ServerTickEvent.Post event) {
+        PendingFeed feed;
+        while ((feed = PENDING_FEEDS.poll()) != null) {
+            Horse horse = feed.horse();
+            if (!horse.isAlive() || !(horse.level() instanceof ServerLevel level)) {
+                continue;
+            }
+            ItemStack now = feed.player().getItemInHand(feed.hand());
+            boolean ate = feed.player().getAbilities().instabuild
+                    || now.getItem() != feed.item() || now.getCount() < feed.before();
+            if (!ate) {
+                continue;
+            }
+            HorseRecord record = HorseRecords.of(horse);
+            if (!record.hasName()) {
+                continue;
+            }
+            for (HorseAbilities.Active active : resolve(horse, record)) {
+                if (active.ability() instanceof GeneAbility.Summon su
+                        && su.trigger() instanceof GeneAbility.Trigger.OnFeed
+                        && conditionHolds(su.when(), horse, record)) {
+                    summon(su, horse, level, active.geneKey());
+                }
             }
         }
     }
@@ -1891,16 +1931,20 @@ public final class GeneAbilityHandler {
             warnUntranslated("summon:" + su.mob(), geneKey);
             return;
         }
-        AABB box = horse.getBoundingBox().inflate(su.radius());
-        long present = level.getEntities(type, box, e -> e.isAlive()).size();
         String what = type.getDescription().getString();
-        if (present >= su.upTo()) {
-            // already enough of them; this is the whole self-limit
-            DebugAnnounce.say(level, "Spawner", present + " " + what + " already within "
-                    + (int) su.radius() + " blocks - nothing to top up", ChatFormatting.GRAY);
-            return;
+        int wanted;
+        if (su.trigger() instanceof GeneAbility.Trigger.OnFeed) {
+            // Fed: no cap, the food is the cost - upTo is "how many per meal".
+            wanted = su.upTo();
+        } else {
+            // Timed: top up to upTo, counting first, or it is unbounded growth.
+            AABB box = horse.getBoundingBox().inflate(su.radius());
+            long present = level.getEntities(type, box, e -> e.isAlive()).size();
+            if (present >= su.upTo()) {
+                return;
+            }
+            wanted = (int) (su.upTo() - present);
         }
-        int wanted = (int) (su.upTo() - present);
         int made = 0;
         for (int i = 0; i < wanted; i++) {
             BlockPos at = findSpawnSpot(horse, level, su.radius());

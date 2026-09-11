@@ -44,6 +44,8 @@
   "message.horsegenetics.shear.regrowing": "This horse's coat hasn't grown back yet.",
   "message.horsegenetics.milk.stallion": "The stallion kicks you.",
   "message.horsegenetics.milk.foal": "A foal has no milk to give.",
+  "message.horsegenetics.potion_milk.stallion": "The stallion rears and kicks you. Only a mare gives potion milk.",
+  "message.horsegenetics.potion_milk.foal": "A foal has no potion milk to give.",
   "message.horsegenetics.yield.recharging": "Nothing to give yet - try again later.",
   "message.horsegenetics.carrot.too_young": "A foal cannot be bred.",
   "message.horsegenetics.carrot.no_effect": "This horse is homozygous everywhere - the carrot does nothing for it.",

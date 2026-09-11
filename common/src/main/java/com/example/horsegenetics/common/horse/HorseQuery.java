@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.horse;
 
+import com.example.horsegenetics.common.breed.BreedStatCurve;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -62,7 +63,7 @@ public final class HorseQuery {
         SPEED("Speed"),
         HEALTH("Health"),
         JUMP("Jump"),
-        SIZE("Size"),
+        SIZE("Hands"),
         BOND("Bond"),
         WHERE("Where");
 
@@ -83,7 +84,7 @@ public final class HorseQuery {
     /** Every {@code key:} a filter term understands, for the tab's help line. */
     public static List<String> keys() {
         return List.of("name", "barn", "breed", "coat", "sex", "age", "by", "where",
-                "gen", "bond", "speed", "health", "jump", "size",
+                "gen", "bond", "speed", "health", "jump", "hands", "size",
                 "gene", "carries", "expresses", "condition");
     }
 
@@ -214,6 +215,10 @@ public final class HorseQuery {
                 return compare(row.health(), op, orEqual, value);
             case "jump":
                 return compare(row.jump(), op, orEqual, value);
+            case "hands":
+            case "height":
+                // Decimal hands, the way the breed files write them (16.5, not 16.2 hh).
+                return compare(BreedStatCurve.handsFor(row.scale()), op, orEqual, value);
             case "size":
             case "scale":
                 return compare(row.scale(), op, orEqual, value);
