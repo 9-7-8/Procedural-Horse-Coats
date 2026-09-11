@@ -154,7 +154,7 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     private static final String[] BATCHES = {
-            "Intake: the rebuilt marks, and their other forms (0-BZ)",
+            "Intake: the wider taper flame, dark forms, drawings that move (0-BZ)",
             "Intake: drips, contour cells, crackle, flakes, small drawings (0-BZ)",
             "Intake: the rest (0-BZ)",
             "Molten hooves, the sheep spawner, the ward (0-BY, 0-BX)",
@@ -179,15 +179,19 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                intake(player, inv, legend, 0, "corolla", null, "the eye and deep heart should show inside the mark");
-                intake(player, inv, legend, 1, "agate_eye", null, "two bands and a dark core");
-                intake(player, inv, legend, 2, "taper_flame", null, "a spark inside the flame");
-                intake(player, inv, legend, 3, "barred_wing", null, "bars inside the wing");
-                intake(player, inv, legend, 4, "barred_wing", "Bwb", "the black form");
-                intake(player, inv, legend, 5, "uraniid", null, "bands inside the mark");
-                intake(player, inv, legend, 6, "trillium", null, "a ring and an eye");
-                intake(player, inv, legend, 7, "foxglove", null, "ringed throats");
-                intake(player, inv, legend, 8, "foxglove", "B", "the nightbell form");
+                // Corolla, agate eye, barred wing, uraniid, trillium and foxglove
+                // passed on 2026-09-11. What is left: the widened taper flame, the
+                // two dark forms on a coat they can show on, and the six barrel
+                // drawings now moving along the barrel (posU).
+                intake(player, inv, legend, 0, "taper_flame", null,
+                        "wider now - a flame with a skin, not a streak. Spawn a few: it moves along the barrel");
+                intake(player, inv, legend, 1, "taper_flame", "Tfc", "the coloured form - the spark should show");
+                intake(player, inv, legend, 2, "barred_wing", "Bwb", "black form, on a palomino so it shows",
+                        PALOMINO);
+                intake(player, inv, legend, 3, "foxglove", "B", "nightbell form, on a palomino so it shows",
+                        PALOMINO);
+                intake(player, inv, legend, 4, "trillium", null, "spawn several: a different place on each horse");
+                intake(player, inv, legend, 5, "uraniid", null, "same - shoulder to hip, never off the barrel");
             }
             case 2 -> {
                 intake(player, inv, legend, 0, "ooze_drip", null, "hangs DOWN from the spine, not toward the tail");
@@ -278,7 +282,7 @@ public final class DebugTestWorldHandler {
      * first-listed allele, the form its icon shows, when {@code token} is null.
      */
     private static void intake(ServerPlayer player, Inventory inv, List<String> legend, int slot,
-                               String id, @Nullable String token, @Nullable String look) {
+                               String id, @Nullable String token, @Nullable String look, String... base) {
         Gene gene = Genes.byKeyOrNull("horsegenetics." + id);
         if (gene == null) {
             HorseGenetics.LOGGER.warn("Test kit: no gene {}", id);
@@ -286,9 +290,21 @@ public final class DebugTestWorldHandler {
         }
         String t = token != null ? token : gene.alleles().get(0).token();
         String label = gene.name() + " (" + t + "/" + t + ")";
-        put(inv, legend, slot, preset(player, "Intake: " + label, Sex.FEMALE, false,
-                gene.key() + "=" + t + "/" + t), look == null ? null : label + " - " + look);
+        String[] pairs = new String[base.length + 1];
+        pairs[0] = gene.key() + "=" + t + "/" + t;
+        System.arraycopy(base, 0, pairs, 1, base.length);
+        put(inv, legend, slot, preset(player, "Intake: " + label, Sex.FEMALE, false, pairs),
+                look == null ? null : label + " - " + look);
     }
+
+    /**
+     * A base coat for a dark marking. A preset egg names only the loci it is
+     * given, and every other locus sits at its default - which the owner saw as a
+     * black horse, where a black barred wing and a nightbell foxglove simply
+     * vanish (2026-09-11). Chestnut with one cream copy is pale gold, which a
+     * black mark and a white one both show on.
+     */
+    private static final String[] PALOMINO = {"horsegenetics.extension=e/e", "horsegenetics.matp=Cr/N"};
 
     /** A chat line that puts {@code cmd} in the chat box when clicked. */
     private static Component command(String cmd, String text) {

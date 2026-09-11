@@ -105,7 +105,7 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>296 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Ik</code> &middot; <code>Ikb</code> &middot; <code>Ikc</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>1 value drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Varies per horse</th><td>2 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>PARTS, SVG, TOWARD</td></tr>
 </tbody>
 </table>
@@ -115,7 +115,7 @@
 
 <p>The d strings are pasted verbatim out of the traced SVG - every command, both cases, all subpaths, fillRule evenodd as the artist's file declared it. Paths were SELECTED (the tracer emits dozens per drawing); none was re-typed or re-pointed.</p>
 
-<p>Placed with originU/originV 0.27/0.338 and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.</p>
+<p>Originally placed with originU/originV 0.27/0.338 (originU is now the posU knob - see the note below) and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.</p>
 
 <p>Two layers of one hue at two lightnesses - the dark stroke first, the wash over it - because the reference is a single brush loaded once, not two colours. That is why this gene needs one hue knob where the other emblems need two.</p>
 
@@ -126,6 +126,8 @@
 <p>Arrived at priority 370. Moved to 296: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.</p>
 
 <p>Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The stroke 3631 to 700 and the wash 1556 to 700, 0.1% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix.</p>
+
+<p>PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down.</p>
 
 <h2 id="layers">What it paints</h2>
 

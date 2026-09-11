@@ -8,14 +8,16 @@
   "rarity": "RARE",
   "notes": [
     "The d strings are pasted verbatim out of the traced SVG - every command, both cases, all subpaths, fillRule evenodd as the artist's file declared it. Paths were SELECTED (the tracer emits dozens per drawing); none was re-typed or re-pointed.",
-    "Placed with originU/originV 0.27/0.338 and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
+    "Originally placed with originU/originV 0.27/0.338 (originU is now the posU knob - see the note below) and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
     "Four layers, painted outer skin to spark, and the order is the marking - each one sits inside the one before it. The source's fifth path is the black page behind the flame and is deliberately not here; pasting it would have painted a rectangle over the whole flank.",
     "Three of the four tones are one hue at rising lightness, so the coloured form runs them off a single $hue. The spark is not - in the reference it is a warm mark inside a cold flame - so it takes its own knob rather than an offset, which rule 16 does not allow.",
     "Lightness order in the reference is outer < mid < spark < core, and both achromatic forms keep that order and its spacing even though the spark is painted last.",
     "At this viewport the marking is about 18 texels tall (a texel is 0.5 body units, and meet fits the tall side first). The silhouette and the tonal split survive that; detail finer than about half a body unit inside the drawing does not, and reads as texture rather than as countable structure. That is rule 15 being accepted deliberately, not overlooked - the barrel is 10 units tall and there is nowhere else for the marking to grow.",
     "Arrived at priority 360. Moved to 295: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
     "LAYERS MADE DISJOINT on the way in. The flame came out as one white sliver and the spark painted nothing at all - four near-white tones, each inside the one before, sum straight past white, and the spark was clamped away entirely. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of every shape painted after it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.",
-    "The spark is drawn at twice the size it was traced at, scaled about its own centre by the mask's transform - translate(313.1 389.1) scale(2) translate(-313.1 -389.1). At the traced size it was two texels on the horse and the check could not find it on any coat; the rest of the flame is untouched, and the other layers cut their hole for it from the same transformed shape."
+    "The spark is drawn at twice the size it was traced at, scaled about its own centre by the mask's transform - translate(313.1 389.1) scale(2) translate(-313.1 -389.1). At the traced size it was two texels on the horse and the check could not find it on any coat; the rest of the flame is untouched, and the other layers cut their hole for it from the same transformed shape.",
+    "PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down.",
+    "WIDENED 2.6x ABOUT ITS CENTRE LINE (2026-09-11). Every SVG mask's transform starts translate(311 0) scale(2.6 1) translate(-311 0), x 311 being the flame's own centre. As traced the flame is 150 by 752 in its viewBox, which on the horse is 1.5 by 7.7 units - three texels wide, with an outer skin under a texel that vanished and left the owner looking at 'a very very narrow white streak'. At 2.6 it is about 4 units wide and reads as a flame with a skin, a core, a foot and a spark; 3.2 was tried and turns it into an egg."
   ],
   "knobs": [
     {
@@ -27,6 +29,11 @@
       "name": "hueSpark",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "posU",
+      "min": 0.12,
+      "max": 0.4
     }
   ],
   "alleles": [
@@ -74,10 +81,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -85,11 +93,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -97,11 +106,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -109,12 +119,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -137,10 +147,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -148,11 +159,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -160,12 +172,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -188,10 +200,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -199,12 +212,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -227,11 +240,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -266,10 +279,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -277,11 +291,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -289,11 +304,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -301,12 +317,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -329,10 +345,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -340,11 +357,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -352,12 +370,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -380,10 +398,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -391,12 +410,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -419,11 +438,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -456,10 +475,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -467,11 +487,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -479,11 +500,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -491,12 +513,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -521,10 +543,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -532,11 +555,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -544,12 +568,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -574,10 +598,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -585,12 +610,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -615,11 +640,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {

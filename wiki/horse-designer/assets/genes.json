@@ -2520,13 +2520,14 @@
   "rarity": "EPIC",
   "notes": [
     "The d strings are pasted verbatim out of the traced SVG - every command, both cases, all subpaths, fillRule evenodd as the artist's file declared it. Paths were SELECTED (the tracer emits dozens per drawing); none was re-typed or re-pointed.",
-    "Placed with originU/originV 0.27/0.338 and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
+    "Originally placed with originU/originV 0.27/0.338 (originU is now the posU knob - see the note below) and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
     "Two layers, and they must stay in this order: the dark wing ground is drawn first and the bars are drawn over it. The ground paths carry the bars as evenodd holes, so dropping the fillRule would fill them in and the marking would come out as two plain dark wings.",
     "The two halves of the reference are not the same colour - one wing pair is dark with pale bars, the other is pale-barred over slate - so the ground and the bars get independent hue knobs rather than one hue and an offset, which rule 16 forbids.",
     "At this viewport the marking is about 18 texels tall (a texel is 0.5 body units, and meet fits the tall side first). The silhouette and the tonal split survive that; detail finer than about half a body unit inside the drawing does not, and reads as texture rather than as countable structure. That is rule 15 being accepted deliberately, not overlooked - the barrel is 10 units tall and there is nowhere else for the marking to grow.",
     "Arrived at priority 330. Moved to 292: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
     "Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The wing ground 5260 to 700 and the bars 5206 to 700, 0.2% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix.",
-    "LAYERS MADE DISJOINT on the way in. The pale wing came out a flat white shape with no bars in it: the bars were being added to the pale ground beneath them rather than painted over it. The black form hid the problem, because dark on dark sums to something that still looks like bars. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism."
+    "LAYERS MADE DISJOINT on the way in. The pale wing came out a flat white shape with no bars in it: the bars were being added to the pale ground beneath them rather than painted over it. The black form hid the problem, because dark on dark sums to something that still looks like bars. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.",
+    "PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down."
   ],
   "knobs": [
     {
@@ -2538,6 +2539,11 @@
       "name": "hueBar",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "posU",
+      "min": 0.12,
+      "max": 0.4
     }
   ],
   "alleles": [
@@ -2585,7 +2591,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -2596,7 +2602,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -2623,7 +2629,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -2661,7 +2667,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -2672,7 +2678,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -2699,7 +2705,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -2735,7 +2741,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -2746,7 +2752,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -2775,7 +2781,7 @@
               "viewBox": "0 0 406 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -5021,13 +5027,19 @@
     "Consequently all three forms are one tone each rather than three. That is the drawing having one tone, not the achromatic forms being flattened.",
     "At this viewport the marking is about 18 texels tall (a texel is 0.5 body units, and meet fits the tall side first). The silhouette and the tonal split survive that; detail finer than about half a body unit inside the drawing does not, and reads as texture rather than as countable structure. That is rule 15 being accepted deliberately, not overlooked - the barrel is 10 units tall and there is nowhere else for the marking to grow.",
     "Arrived at priority 350. Moved to 294: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
-    "Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The chandelier 7785 to 1000 points, 0.41% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix."
+    "Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The chandelier 7785 to 1000 points, 0.41% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix.",
+    "PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down."
   ],
   "knobs": [
     {
       "name": "hue",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "posU",
+      "min": 0.12,
+      "max": 0.4
     }
   ],
   "alleles": [
@@ -5075,7 +5087,7 @@
               "viewBox": "0 0 1059 1431",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -5113,7 +5125,7 @@
               "viewBox": "0 0 1059 1431",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -5149,7 +5161,7 @@
               "viewBox": "0 0 1059 1431",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -26424,18 +26436,24 @@
   "rarity": "RARE",
   "notes": [
     "The d strings are pasted verbatim out of the traced SVG - every command, both cases, all subpaths, fillRule evenodd as the artist's file declared it. Paths were SELECTED (the tracer emits dozens per drawing); none was re-typed or re-pointed.",
-    "Placed with originU/originV 0.27/0.338 and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
+    "Originally placed with originU/originV 0.27/0.338 (originU is now the posU knob - see the note below) and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
     "Two layers of one hue at two lightnesses - the dark stroke first, the wash over it - because the reference is a single brush loaded once, not two colours. That is why this gene needs one hue knob where the other emblems need two.",
     "The source's largest path is the pale paper behind the brushwork and is not used. It is 82% of the drawing; pasting it would have washed the whole flank.",
     "At this viewport the marking is about 18 texels tall (a texel is 0.5 body units, and meet fits the tall side first). The silhouette and the tonal split survive that; detail finer than about half a body unit inside the drawing does not, and reads as texture rather than as countable structure. That is rule 15 being accepted deliberately, not overlooked - the barrel is 10 units tall and there is nowhere else for the marking to grow.",
     "Arrived at priority 370. Moved to 296: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
-    "Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The stroke 3631 to 700 and the wash 1556 to 700, 0.1% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix."
+    "Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The stroke 3631 to 700 and the wash 1556 to 700, 0.1% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix.",
+    "PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down."
   ],
   "knobs": [
     {
       "name": "hue",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "posU",
+      "min": 0.12,
+      "max": 0.4
     }
   ],
   "alleles": [
@@ -26483,7 +26501,7 @@
               "viewBox": "0 0 704 1200",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -26509,7 +26527,7 @@
               "viewBox": "0 0 704 1200",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -26547,7 +26565,7 @@
               "viewBox": "0 0 704 1200",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -26573,7 +26591,7 @@
               "viewBox": "0 0 704 1200",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -26609,7 +26627,7 @@
               "viewBox": "0 0 704 1200",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -26637,7 +26655,7 @@
               "viewBox": "0 0 704 1200",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -56311,14 +56329,16 @@
   "rarity": "RARE",
   "notes": [
     "The d strings are pasted verbatim out of the traced SVG - every command, both cases, all subpaths, fillRule evenodd as the artist's file declared it. Paths were SELECTED (the tracer emits dozens per drawing); none was re-typed or re-pointed.",
-    "Placed with originU/originV 0.27/0.338 and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
+    "Originally placed with originU/originV 0.27/0.338 (originU is now the posU knob - see the note below) and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
     "Four layers, painted outer skin to spark, and the order is the marking - each one sits inside the one before it. The source's fifth path is the black page behind the flame and is deliberately not here; pasting it would have painted a rectangle over the whole flank.",
     "Three of the four tones are one hue at rising lightness, so the coloured form runs them off a single $hue. The spark is not - in the reference it is a warm mark inside a cold flame - so it takes its own knob rather than an offset, which rule 16 does not allow.",
     "Lightness order in the reference is outer < mid < spark < core, and both achromatic forms keep that order and its spacing even though the spark is painted last.",
     "At this viewport the marking is about 18 texels tall (a texel is 0.5 body units, and meet fits the tall side first). The silhouette and the tonal split survive that; detail finer than about half a body unit inside the drawing does not, and reads as texture rather than as countable structure. That is rule 15 being accepted deliberately, not overlooked - the barrel is 10 units tall and there is nowhere else for the marking to grow.",
     "Arrived at priority 360. Moved to 295: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
     "LAYERS MADE DISJOINT on the way in. The flame came out as one white sliver and the spark painted nothing at all - four near-white tones, each inside the one before, sum straight past white, and the spark was clamped away entirely. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of every shape painted after it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.",
-    "The spark is drawn at twice the size it was traced at, scaled about its own centre by the mask's transform - translate(313.1 389.1) scale(2) translate(-313.1 -389.1). At the traced size it was two texels on the horse and the check could not find it on any coat; the rest of the flame is untouched, and the other layers cut their hole for it from the same transformed shape."
+    "The spark is drawn at twice the size it was traced at, scaled about its own centre by the mask's transform - translate(313.1 389.1) scale(2) translate(-313.1 -389.1). At the traced size it was two texels on the horse and the check could not find it on any coat; the rest of the flame is untouched, and the other layers cut their hole for it from the same transformed shape.",
+    "PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down.",
+    "WIDENED 2.6x ABOUT ITS CENTRE LINE (2026-09-11). Every SVG mask's transform starts translate(311 0) scale(2.6 1) translate(-311 0), x 311 being the flame's own centre. As traced the flame is 150 by 752 in its viewBox, which on the horse is 1.5 by 7.7 units - three texels wide, with an outer skin under a texel that vanished and left the owner looking at 'a very very narrow white streak'. At 2.6 it is about 4 units wide and reads as a flame with a skin, a core, a foot and a spark; 3.2 was tried and turns it into an egg."
   ],
   "knobs": [
     {
@@ -56330,6 +56350,11 @@
       "name": "hueSpark",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "posU",
+      "min": 0.12,
+      "max": 0.4
     }
   ],
   "alleles": [
@@ -56377,10 +56402,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56388,11 +56414,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56400,11 +56427,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56412,12 +56440,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56440,10 +56468,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56451,11 +56480,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56463,12 +56493,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56491,10 +56521,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56502,12 +56533,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56530,11 +56561,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56569,10 +56600,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56580,11 +56612,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56592,11 +56625,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56604,12 +56638,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56632,10 +56666,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56643,11 +56678,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56655,12 +56691,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56683,10 +56719,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56694,12 +56731,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56722,11 +56759,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56759,10 +56796,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56770,11 +56808,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56782,11 +56821,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56794,12 +56834,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56824,10 +56864,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56835,11 +56876,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "invert": true
+              "invert": true,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56847,12 +56889,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56877,10 +56919,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
-              "sizeV": 0.273
+              "sizeV": 0.273,
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0)"
             },
             {
               "type": "SVG",
@@ -56888,12 +56931,12 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
               "invert": true,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -56918,11 +56961,11 @@
               "viewBox": "0 0 615 900",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
-              "transform": "translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
+              "transform": "translate(311 0) scale(2.6 1) translate(-311 0) translate(313.1 389.1) scale(2) translate(-313.1 -389.1)"
             }
           ],
           "op": {
@@ -59006,13 +59049,14 @@
   "rarity": "RARE",
   "notes": [
     "The d strings are pasted verbatim out of the traced SVG - every command, both cases, all subpaths, fillRule evenodd as the artist's file declared it. Paths were SELECTED (the tracer emits dozens per drawing); none was re-typed or re-pointed.",
-    "Placed with originU/originV 0.27/0.338 and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
+    "Originally placed with originU/originV 0.27/0.338 (originU is now the posU knob - see the note below) and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
     "Three layers because the reference has three tones and they have to stay in that order: petals, then the ring, then the eye on top. The petals are the only achromatic mass in the drawing, so they are what the coloured form re-hues.",
     "The ring and the eye are two different hues a fixed distance apart on the wheel, and there is no '$hue + n' in this format (rule 16), so the ring carries its own knob and the eye is a fixed amber. The amber is deliberate: it is the one colour that is the same on every trillium, so it is the gene rather than the line.",
     "At this viewport the marking is about 18 texels tall (a texel is 0.5 body units, and meet fits the tall side first). The silhouette and the tonal split survive that; detail finer than about half a body unit inside the drawing does not, and reads as texture rather than as countable structure. That is rule 15 being accepted deliberately, not overlooked - the barrel is 10 units tall and there is nowhere else for the marking to grow.",
     "Arrived at priority 320. Moved to 291: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
     "Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The petals 3076 to 700 and the ring 1292 to 700, 0.03% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix.",
-    "LAYERS MADE DISJOINT on the way in. The pale bloom came out a flat white trefoil and the ring and eye inside it did not show: they were being added to the petals beneath them rather than painted over them. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism."
+    "LAYERS MADE DISJOINT on the way in. The pale bloom came out a flat white trefoil and the ring and eye inside it did not show: they were being added to the petals beneath them rather than painted over them. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.",
+    "PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down."
   ],
   "knobs": [
     {
@@ -59024,6 +59068,11 @@
       "name": "hueEye",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "posU",
+      "min": 0.12,
+      "max": 0.4
     }
   ],
   "alleles": [
@@ -59071,7 +59120,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59082,7 +59131,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59094,7 +59143,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59121,7 +59170,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59132,7 +59181,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59159,7 +59208,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59197,7 +59246,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59208,7 +59257,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59220,7 +59269,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59247,7 +59296,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59258,7 +59307,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59285,7 +59334,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59321,7 +59370,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59332,7 +59381,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59344,7 +59393,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59373,7 +59422,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59384,7 +59433,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59413,7 +59462,7 @@
               "viewBox": "0 0 469 440",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59755,14 +59804,15 @@
   "rarity": "EPIC",
   "notes": [
     "The d strings are pasted verbatim out of the traced SVG - every command, both cases, all subpaths, fillRule evenodd as the artist's file declared it. Paths were SELECTED (the tracer emits dozens per drawing); none was re-typed or re-pointed.",
-    "Placed with originU/originV 0.27/0.338 and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
+    "Originally placed with originU/originV 0.27/0.338 (originU is now the posU knob - see the note below) and sizeU/sizeV 0.38/0.273 in body space, so the viewport is x 11.1-26.7 and y 11.4-20.6 - the full height of BODY (x 7.5-29.5, y 11-21) and about two thirds of its length, with clearance on every side. It is sized to the barrel's HEIGHT because every drawing here except the trillium is portrait and meet fits the tall side first; the spare width is centring room. The first mask is PARTS BODY, so nothing the side-plane extrusion reaches can land on a leg or the neck if the mesh ever moves.",
     "The whole moth is one path in the source: silhouette, tails and every band, with the bands as evenodd holes. That is why the body layer is a single mask and why fillRule evenodd is load-bearing here rather than cosmetic - as nonzero the holes close and the moth comes out a solid blot.",
     "The bands are about 0.4 body units apart at this viewport, which is under a texel (rule 15). They read as a raked texture rather than as countable stripes, and winding the marking bigger is the only thing that would change that - the barrel is not tall enough for it, so this is the size it ships at.",
     "The two bright bands are a second layer over the body, on their own hue knob, because in the reference they are a different colour from the body rather than a lighter version of it.",
     "At this viewport the marking is about 18 texels tall (a texel is 0.5 body units, and meet fits the tall side first). The silhouette and the tonal split survive that; detail finer than about half a body unit inside the drawing does not, and reads as texture rather than as countable structure. That is rule 15 being accepted deliberately, not overlooked - the barrel is 10 units tall and there is nowhere else for the marking to grow.",
     "Arrived at priority 340. Moved to 293: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
     "Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The moth 6648 to 697 and the bright bands 1301 to 700, 0.32% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix.",
-    "LAYERS MADE DISJOINT on the way in. The pale moth came out a flat white shape and its bright bands barely showed: they were being added to the pale moth beneath them rather than painted over it. The black form hid the problem, because dark on dark sums to something that still reads. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism."
+    "LAYERS MADE DISJOINT on the way in. The pale moth came out a flat white shape and its bright bands barely showed: they were being added to the pale moth beneath them rather than painted over it. The black form hid the problem, because dark on dark sums to something that still reads. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.",
+    "PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down."
   ],
   "knobs": [
     {
@@ -59774,6 +59824,11 @@
       "name": "hueBand",
       "min": 0,
       "max": 360
+    },
+    {
+      "name": "posU",
+      "min": 0.12,
+      "max": 0.4
     }
   ],
   "alleles": [
@@ -59821,7 +59876,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59832,7 +59887,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59859,7 +59914,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59897,7 +59952,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59908,7 +59963,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -59935,7 +59990,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59971,7 +60026,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
@@ -59982,7 +60037,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273,
@@ -60011,7 +60066,7 @@
               "viewBox": "0 0 520 600",
               "fillRule": "evenodd",
               "softness": 0.2,
-              "originU": 0.27,
+              "originU": "$posU",
               "sizeU": 0.38,
               "originV": 0.338,
               "sizeV": 0.273
