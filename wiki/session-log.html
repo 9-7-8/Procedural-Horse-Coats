@@ -27,6 +27,82 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10i">2026-09-10 (evening) &mdash; three play sessions, fixed as they came</h2>
+
+<p>
+    The owner played the build three times in one evening and reported as they went; the
+    session was almost entirely answering what they found. Commits <code>363b3a8</code> to
+    <code>759f184</code>.
+</p>
+
+<h3>Owner-verified in game</h3>
+
+<ul>
+    <li>Fireproof protects horse and rider, floats in lava, and immunity ends on dismount.
+        Bird boned protects horse and rider.</li>
+    <li>The spawner fires on feeding, uncapped (tested with a carrot on a plain horse).</li>
+    <li>Potion milk, single and double copy, including the two-effect merge.</li>
+    <li>The spawn egg's gene search box. Height in hands on the info screen and in My
+        horses.</li>
+    <li>Hand-feed taming. Every eye locus - third eye, glows, sectors.</li>
+    <li>The research shelf stores papers; stall tickets land a horse properly (as a basis);
+        the Breeds tab in creative; molten hooves' prints render.</li>
+</ul>
+
+<h3>What was built, and the reason behind each</h3>
+
+<ul>
+    <li><strong>Immunities are damage cancels, not per-tick resets.</strong> Fireproof only
+        called <code>clearFire()</code>, which stops burning but not lava's direct damage;
+        vanilla's fire immunity is an entity-<em>type</em> flag no gene can set. A rider's
+        fall damage turned out to be the horse's, handed down by
+        <code>propagateFallToPassengers</code>, so bird boned never covered riders either.</li>
+    <li><strong>A ridden horse is simulated on the rider's client.</strong> This explained
+        two bugs at once: server-side velocity nudges never reach it (so lava buoyancy is a
+        synced <code>GRAVITY</code> attribute modifier), and its server-side velocity is
+        exactly zero (so every <code>on_move</code> effect was silent under a rider; movement
+        is now measured by position between ticks).</li>
+    <li><strong><code>tickCount</code> is not saved.</strong> The spawner's once-a-day timer
+        and dryad's 9 000-32 000-tick sapling needed that many unbroken ticks of one horse
+        staying loaded. Every timed beat now counts on saved game time, offset per horse by
+        UUID. The spawner then moved onto feeding at the owner's call, uncapped, counting only
+        a meal actually eaten - an uncapped trigger on a free click would be infinite.</li>
+    <li><strong>The spawner's colour</strong> was promised on its page and never read: a
+        per-copy epigenetic value now picks from the spawned mob's own colour data component
+        (<code>server/MobVariants</code>).</li>
+    <li><strong>Molten hooves</strong> became real prints on the ground - the mod's first
+        particle type (<code>horsegenetics:hoofprint</code>, flat, emissive, coloured, laid by
+        stride) - and then four alleles at the owner's design: a dominant white and three
+        recessive colours, black unlit.</li>
+    <li><strong>Stalls</strong> land a horse at the centroid of the floor, checked against its
+        box - it had been centred on one tile, and a horse is 1.4 blocks wide - and report the
+        real ceiling height. The <strong>holding pen</strong> (one per player, owner-confirmed
+        after briefly considering several) sends any owned horse to a general pen.</li>
+    <li><strong>The research shelf</strong> became a chest of papers, then copied like a
+        furnace on the block entity. Two bugs found on the way: its drops ran after the block
+        entity was gone, and its labels were offset twice.</li>
+    <li><strong>Hand taming never fired <code>AnimalTameEvent</code></strong>, so it reached
+        neither the breed book nor the tame tasks. The Breeds tab's plate is now
+        <code>BreedFounder.plate</code>, with no unnamed magic.</li>
+    <li>A search box on both gene editors, one rule in <code>EditorRules</code>; a generated
+        <a href="timeline-of-genes.html">timeline of genes</a>; the debug world's kit re-aimed
+        at the checklist, a standing request.</li>
+</ul>
+
+<h3>Lessons</h3>
+
+<ul>
+    <li><strong>Ask where a ridden entity is simulated before touching its movement.</strong>
+        It cost three separate symptoms before the one cause was named.</li>
+    <li><strong>A PowerShell function called as <code>F 'a' + $x + 'b'</code> gets five
+        arguments, not one.</strong> A cut-between-markers helper called that way deleted
+        about a thousand lines of the checklist; it was restored from git and the edit redone
+        with the Edit tool. Wrap every concatenated argument in parentheses, or don't script
+        multi-marker edits at all.</li>
+    <li>A compile ran once while the owner's client was open, because the window check and
+        the build were one command. Gate the build on the check.</li>
+</ul>
+
 <h2 id="d2026-09-10h">2026-09-10</h2>
 
 <h3>The eyes stopped being a channel and became thirteen genes</h3>
