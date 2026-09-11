@@ -290,6 +290,56 @@
     it is the absence of a breed, so it never spawns as itself and never has an egg.
 </p>
 
+<h2 id="world-settings">A world's own ecology: <code>breed-spawning.toml</code></h2>
+<p>
+    A player's breeds are their own files; the breeds the mod ships are inside the jar.
+    <strong><code>.minecraft/phc/breed-spawning.toml</code></strong> is how a world changes
+    the shipped ones without unpacking it &mdash; and how it switches them off entirely,
+    so that the only horses in it are the ones its owner designed. It is written on first
+    launch, generated from the registry: one section per shipped breed, each defaulting to
+    what that breed&rsquo;s own file says, so what you edit is a number you can see.
+</p>
+<table>
+<thead><tr><th>Setting</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>general.shipped_breeds_enabled</code></td><td><code>false</code> switches every shipped breed off at once &mdash; no herds, cowboy stock, stables or eggs &mdash; whatever their sections say.</td></tr>
+<tr><td><code>breeds.&lt;id&gt;.enabled</code></td><td><code>false</code>: the breed loses every <a href="#sources">source</a>. It keeps its entry &mdash; horses already carrying the label still have a breed, and the breed book still explains it (&ldquo;Not found anywhere in this world&rdquo;).</td></tr>
+<tr><td><code>breeds.&lt;id&gt;.spawn_weight</code></td><td>Its pull against the other breeds of the same biome when a herd is founded, on the <a href="#commonness">commonness</a> scale (moderate is 6). <code>0</code> takes it out of the wild only; the cowboy, stables and eggs keep it.</td></tr>
+<tr><td><code>breeds.&lt;id&gt;.biomes</code></td><td>Where its wild herds live. Any biome id, modded included.</td></tr>
+<tr><td><code>breeds.&lt;id&gt;.spawn_time</code></td><td><code>any</code>, <code>day</code> or <code>night</code>.</td></tr>
+<tr><td><code>feral_mixed.enabled</code></td><td>Whether a wild horse may be Feral Mixed at all.</td></tr>
+<tr><td><code>feral_mixed.biomes</code></td><td>Where it may be. Empty is everywhere.</td></tr>
+<tr><td><code>feral_mixed.herd_weight</code></td><td>Its weight against a biome's breeds when a herd is founded. <code>0</code> (the default) keeps it to where no breed may spawn, which is what it always was.</td></tr>
+</tbody>
+</table>
+<p>
+    <strong>A wild horse with nothing to be does not spawn.</strong> A natural spawn,
+    chunk-generation spawn or spawner spawn is refused outright
+    (<code>BreedSpawnHandler</code>, <code>Breeds.anythingMaySpawn</code>) when no breed of
+    its biome may head a herd at that hour <em>and</em> Feral Mixed is not allowed there.
+    What gets past that &mdash; a horse that turns out to be alone where Feral Mixed is off
+    &mdash; is discarded by <code>HerdManager</code> a second later, before any record or
+    coat is made for it. <code>/summon</code> and a vanilla spawn egg are a player asking
+    for a horse, and always make a Feral Mixed.
+</p>
+<p>
+    Everything that spawns a horse asks the same registry, so nothing else knows the file
+    exists: <code>Breeds.applySpawnSettings</code> keeps each breed as its file says and
+    publishes a copy with the world's settings applied. Edits are re-read while the game
+    runs and reach herds, the cowboy, stables and eggs at once; <em>which biomes get extra
+    herd spawns</em> is decided by the biome modifier at world start, so moving a breed to
+    a new biome wants a restart.
+</p>
+<div class="note">
+    <span class="label">Per install, not per world</span>
+    <p>
+        Despite the name of this section, the file belongs to the install (or the dedicated
+        server), and every world opened on it shares it. It is a COMMON config because the
+        herd biome modifier needs it before any world exists. A per-world copy is recorded as
+        <a href="known-gaps.html#gap-190">gap 190</a>.
+    </p>
+</div>
+
 <h2 id="crosses">Breeding: crosses and mixes</h2>
 <p>
     A foal&rsquo;s breed label (<code>BreedLineage.combine</code>, applied in

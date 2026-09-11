@@ -35,6 +35,42 @@
     </p>
 </div>
 
+<h2 id="world-settings">&sect;0-CC &mdash; 0.5.000: the settings folder and breed-spawning.toml (2026-09-11, NOT looked at in a client)</h2>
+
+<p>A dedicated server was booted on it twice: <code>run/phc/</code> got <code>server.toml</code>
+    and <code>breed-spawning.toml</code>, and an edit to the latter was re-read live (the log line
+    <code>[breeds] spawn settings read from ../phc/breed-spawning.toml</code> changed to
+    &ldquo;shipped breeds OFF ... Feral Mixed OFF&rdquo;). The logic is covered by
+    <code>BreedSpawnSettingsTest</code>. <strong>No horse has been seen to spawn or not spawn
+    under it.</strong> Design: <a href="breeds.html#world-settings">breeds</a>.</p>
+
+<ul>
+    <li><strong>The folder.</strong> After one launch, <code>.minecraft/phc/</code> (for the
+        dev run, <code>neoforge-26.1.2/run/phc/</code>) holds <code>breeds/</code>,
+        <code>client.toml</code>, <code>server.toml</code> and <code>breed-spawning.toml</code>,
+        and <code>config/</code> gets no new <code>horsegenetics-*.toml</code>. The dev run's old
+        client and server settings were copied across by hand. Mods &rarr; Horse Genetics &rarr;
+        Config should still open all three.</li>
+    <li><strong>Only my breeds.</strong> Set <code>shipped_breeds_enabled = false</code> and
+        <code>feral_mixed.enabled = false</code>, drop in one breed that lives in
+        <code>minecraft:dark_forest</code>, and restart. Explore new chunks: plains and savanna
+        should have <em>no</em> horses at all, dark forests should have herds of that breed and
+        nothing else. With <code>debug.announce</code> on, a refused lone horse logs
+        <code>[Breeds] wild horse at ... not spawned</code>.</li>
+    <li><strong>A shipped breed moved.</strong> Put the Friesian in
+        <code>minecraft:dark_forest</code> only, restart, and find a dark forest herd of them;
+        the breed book should say the new biome.</li>
+    <li><strong>Switched off, but still a breed.</strong> A horse you already own whose breed
+        you switch off keeps its label; its breed book entry says &ldquo;Not found anywhere in
+        this world&rdquo;, and the cowboy and breed spawn eggs stop offering it.</li>
+    <li><strong>Feral Mixed weight.</strong> <code>feral_mixed.herd_weight = 100</code>: most
+        new herds in horse biomes should be Feral Mixed.</li>
+    <li><strong>An old world.</strong> Open a 0.4.1 world on this jar. It should load; any
+        horse that carried Cleave's retired alleles logs <code>[genes] a saved horse carried
+        'horsegenetics.cleave=...'</code> and comes back without the marking
+        (<a href="known-gaps.html#gap-193">gap 193</a>).</li>
+</ul>
+
 <h2 id="breeds-exact">&sect;0-CB &mdash; Breeds are exactly their sheets; the breed designer's second pass (2026-09-11, NOT looked at in game)</h2>
 
 <p>The designer was driven in a headless browser again: all sixteen steps render, the eye strip
@@ -1585,10 +1621,9 @@
         <code>ServerConfig.bodySizeActive()</code> firing because the config is consulted
         before it loads.</li>
     <li><strong>Set it false and reload.</strong> Edit
-        <code>config/horsegenetics-server.toml</code> in the instance &mdash; in this
-        NeoForge that is where a <code>SERVER</code> config lives, and a world&rsquo;s own
-        <code>serverconfig/</code> folder is an optional per-world <em>override</em> of it
-        &mdash; then quit to title and come back. A Falabella and a Percheron standing side by side should now be the
+        <code>.minecraft/phc/server.toml</code> (it moved there in 0.5.000; a per-world
+        override is <code>&lt;world&gt;/phc/server.toml</code>) &mdash; then quit to title and
+        come back. A Falabella and a Percheron standing side by side should now be the
         same height. They re-resolve on the entity tick once per level load, so a horse
         that was already loaded needs the reload &mdash; if one stays big after a full
         restart, <code>HorseFoundingTickHandler</code> is not re-running.</li>
@@ -6204,7 +6239,7 @@
 <h3>The server config</h3>
 
 <ul>
-    <li><code>run/config/horsegenetics-server.toml</code>, <code>health.mode</code>.
+    <li><code>run/phc/server.toml</code>, <code>health.mode</code>.
         Set <code>NO_DEATHS</code>: a lethal foal should be born with very few hearts and
         <em>live</em>, and a MET pairing should produce a foal.</li>
     <li>Set <code>OFF</code>: a dwarf should be full size with full hearts, and no
@@ -7502,7 +7537,7 @@ the <a href="session-log.html">session log</a>.</em></p>
 <thead><tr><th>Item</th><th>How to check</th></tr></thead>
 <tbody>
 <tr><td><code>breedNth</code> foal names past foal 1</td><td>Breed one pair 7+ times: foal 1 = parent combo, foal 2 = the other combo, foals 3&ndash;6 = one parent name half + a random word, foal 7+ = fully random, no repeats. <code>HorseNames</code> is unit-tested; the live <code>offspringCount(dam, sire)</code> link is unproven.</td></tr>
-<tr><td><code>FamilyTreeScreen</code> scroll mode</td><td>The default shrink-to-fit chart is confirmed good; the other path is not. Flip <code>familyTree.scrollBar</code> true in <code>config/horsegenetics-client.toml</code> and check the wheel and the right-edge thumb.</td></tr>
+<tr><td><code>FamilyTreeScreen</code> scroll mode</td><td>The default shrink-to-fit chart is confirmed good; the other path is not. Flip <code>familyTree.scrollBar</code> true in <code>phc/client.toml</code> and check the wheel and the right-edge thumb.</td></tr>
 <tr><td>Stats surfaces</td><td>Foal speed/health landing on the entity&rsquo;s attributes; the inventory-panel green/amber/red tint vs <code>parentStats</code>; the paper dump&rsquo;s <code>vs parents</code> line.</td></tr>
 <tr><td>Compact gene code</td><td><code>GeneCodeDisplay.shortForm</code> on the surfaces not specifically eyeballed: the paper dump&rsquo;s <code>genetic code:</code> line and the mounted info panel&rsquo;s word-wrapped block.</td></tr>
 <tr><td>Water riding feel</td><td><code>HorseWaterRidingHandler</code> &mdash; the speed cap (0.09 b/t) and the submerged lift are a first guess.</td></tr>

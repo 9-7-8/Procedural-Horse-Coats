@@ -85,8 +85,10 @@ magical markings, health, diet, temper, abilities, speed, jump, where it lives -
 and shows the horses it makes as you go. Export it (any time; it saves your
 progress), put the file in `.minecraft/phc/breeds/`, and restart: the game
 starts spawning it in the biomes you picked, and the cowboy, stables and spawn
-eggs know it too. The folder is made the first time the game runs with the
-mod, and the **Breeds** tab of the in-game **H** menu has a button that opens it.
+eggs know it too. `.minecraft/phc/breed-spawning.toml` (below) is where you
+switch off or reshape the breeds the mod ships, if yours should have the world
+to themselves. The `phc` folder is made the first time the game runs with
+the mod, and the **Breeds** tab of the in-game **H** menu has a button that opens it.
 
 **A whole world of it.** A player-built portal leads to a self-contained
 horse dimension for browsing genotypes, plus stallion seed jars, whistles,
@@ -108,7 +110,18 @@ every system, and it stays current as the mod grows.
 
 Works client-side and on dedicated servers; both sides need the mod.
 
-Two things in `config/horsegenetics-server.toml` are worth knowing about, because
+The mod's settings live in **`.minecraft/phc/`**, beside the breeds folder -
+`breed-spawning.toml`, `server.toml` and `client.toml`.
+
+**`breed-spawning.toml` decides which horses your world has.** Every breed the mod
+ships has a section - switch it off, make it rarer or commoner, move it to other
+biomes, or give it day or night hours - and one switch turns all of them off at
+once. Feral Mixed, the unbred wild horse, has its own section too. A wild horse that
+has nothing it is allowed to be simply does not spawn, so turning off the shipped
+breeds and Feral Mixed leaves a world with only the breeds you made, living only
+where you put them.
+
+Two things in `server.toml` are worth knowing about, because
 they are the only two the mod turns off for you. `health.mode` decides how much of
 the disease layer a world plays with, and **`body.size` decides whether the size
 genes actually resize the horse** - on by default, but a Falabella and a Percheron

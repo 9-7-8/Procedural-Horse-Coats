@@ -27,6 +27,85 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-11c">2026-09-11 &mdash; 0.5.000: a world decides which breeds it has</h2>
+
+<p>
+    The owner's brief for the release: the big thing is custom breeds; before shipping,
+    move the settings somewhere sensible relative to the breeds folder, and let a world set
+    the spawn rate and location of every shipped breed - down to switching all of them off,
+    Feral Mixed included, with a horse that has nothing to be simply not spawning. Commit
+    <code>94332fb</code>; tagged <a href="releases.html#v0-5-000">0.5.000</a>. Waiting in
+    game: <a href="verification.html#world-settings">&sect;0-CC</a>.
+</p>
+
+<h3>One folder</h3>
+
+<ul>
+    <li><strong><code>.minecraft/phc/</code> holds everything a player is told to
+        touch</strong>: the breeds folder and three settings files. NeoForge resolves a
+        config's file name against <code>config/</code> with a plain
+        <code>Path.resolve</code>, so <code>../phc/server.toml</code> lands beside the
+        breeds (<code>ModBreedSpecs.configFile</code>; <a href="api-notes.html">api-notes</a>).
+        Read from the FML source, then seen on a dedicated server - including the file
+        watcher re-reading an edit through the <code>..</code>.</li>
+    <li><strong>The gene folder was not moved</strong>
+        (<a href="known-gaps.html#gap-192">gap 192</a>): a drop-in gene is a segment in
+        every genotype code, so moving its folder under a tester is a different kind of
+        change from moving a settings file.</li>
+</ul>
+
+<h3><code>breed-spawning.toml</code></h3>
+
+<ul>
+    <li><strong>Generated from the registry</strong> in the mod constructor, after the
+        breeds load: a section per shipped breed (<code>enabled</code>,
+        <code>spawn_weight</code>, <code>biomes</code>, <code>spawn_time</code>, each
+        defaulting to the breed's own file), <code>shipped_breeds_enabled</code>, and a
+        <code>feral_mixed</code> section (<code>enabled</code>, <code>biomes</code>,
+        <code>herd_weight</code>). Drop-in breeds are not listed; they are already files.</li>
+    <li><strong>COMMON, not SERVER</strong>: the herd biome modifier runs at server start and
+        needs it, and a SERVER config is synced to clients whose spec was built from their
+        own breeds. The price is that it is per install
+        (<a href="known-gaps.html#gap-190">gap 190</a>).</li>
+    <li><strong>It works by changing what the registry publishes.</strong>
+        <code>Breeds</code> keeps each breed as its file says and publishes copies with the
+        settings applied (<code>BreedSpawnSettings</code>, in <code>common/</code>, tested by
+        <code>BreedSpawnSettingsTest</code>), swapped whole because the file watcher re-reads
+        off the server thread. A switched-off breed loses every source but keeps its entry,
+        so a horse's label still means something. Herds, the biome modifier, the cowboy,
+        stables, egg loot and the breed book needed no change beyond asking the same
+        registry.</li>
+    <li><strong>Nothing to be, nothing spawned.</strong> <code>BreedSpawnHandler</code>
+        cancels a natural, chunk-generation or spawner spawn when
+        <code>Breeds.anythingMaySpawn</code> says no; <code>HerdManager</code> discards what
+        gets past (a lone horse where Feral Mixed is off). <code>/summon</code> is left
+        alone - a player asked for it.</li>
+    <li><strong>The first boot crashed</strong>, which is why the server was booted at all:
+        <code>defineInList</code> with a <code>List.of</code> throws on NeoForge's
+        <code>contains(null)</code> probe while writing a fresh file.</li>
+</ul>
+
+<h3>Old worlds</h3>
+
+<ul>
+    <li>Diffing the gene bundles against the <code>v0.4.1</code> tag found one retired
+        allele set: Cleave's four, from when it became two loci. A strict parse of a saved
+        horse carrying one throws, and from the entity tick that is a world that will not
+        load. Saved codes now go through <code>Genotype.readableStored</code> at the codec
+        (records, transfer papers, seed jars), which drops what it cannot read the way
+        <code>parse</code> already drops unknown genes. <code>parse</code> itself stays
+        strict. Unverified on a real 0.4.1 world
+        (<a href="known-gaps.html#gap-193">gap 193</a>).</li>
+</ul>
+
+<p class="muted">
+    Tests run: <code>BreedSpawnSettingsTest</code>, <code>GenotypeTest</code>, the breed
+    classes, creator parity; <code>:neoforge-26.1.2:build</code> green; a dedicated server
+    booted clean twice. The full <code>:common:test</code> was not run - it would still need
+    to confirm that nothing else reads <code>Breeds</code> in a way the published copies
+    change. The debug world kit was not re-aimed: nothing in &sect;0-CC is an item.
+</p>
+
 <h2 id="d2026-09-11b">2026-09-11 &mdash; a breed is exactly its sheet; the designer draws, asks and explains</h2>
 
 <p>

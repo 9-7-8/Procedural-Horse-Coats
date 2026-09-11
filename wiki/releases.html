@@ -58,6 +58,97 @@
     </p>
 </div>
 
+<h2 id="v0-5-000">0.5.000</h2>
+
+<p class="lede">
+    <strong>Your world, your horses.</strong> Design a breed in the browser, drop the file
+    into a folder, and the game spawns it; then decide which of the mod's own breeds your
+    world keeps &mdash; down to none of them, so the only horses in it are the ones you made.
+</p>
+
+<h3>Make your own breeds</h3>
+
+<ul>
+    <li><strong><a href="breed-designer/index.html">The breed designer</a></strong> walks
+        through a breed one decision at a time &mdash; base colour, size, dilutions, white,
+        eyes, magical markings, health, disorders, diet, temper, abilities, speed, jump,
+        where it lives, price, name &mdash; with a horse of the breed on the right that you
+        can reroll, and six more under it. Every number it shows comes from the mod itself,
+        compiled for the browser. Export at any step; import to carry on.</li>
+    <li><strong>Drop the file into <code>.minecraft/phc/breeds/</code></strong> and restart.
+        It heads wild herds in the biomes you picked, and the cowboy, stables and breed
+        spawn eggs know it too. The folder is made the first time the game runs, and the
+        H menu's Breeds tab has a button that opens it.</li>
+    <li><strong>A breed is exactly what you made it.</strong> Its horses carry the magic and
+        the disorders you gave it and nothing else &mdash; no stray magical genes, no
+        background rate of disease. That is true of the mod's own breeds now as well; the
+        nine whose real-world sheets name disorders list them. Random magic turns up in one
+        place: <strong>Feral Mixed</strong>, the unbred wild horse.</li>
+    <li>The idea underneath, on <a href="philosophy.html#concepts-are-breeds">the philosophy
+        page</a>: a zombie horse is a zombie <em>breed</em> &mdash; rotted markings, a bad
+        temper, a low speed score &mdash; not one indivisible zombie gene.</li>
+</ul>
+
+<h3>Decide which horses your world has</h3>
+
+<p>
+    Settings now live in <strong><code>.minecraft/phc/</code></strong>, beside the breeds:
+    <code>server.toml</code>, <code>client.toml</code>, and the new
+    <strong><code>breed-spawning.toml</code></strong>, which lists every breed the mod
+    ships with its biomes, how common it is and its hours &mdash; change any of them, or
+    switch the breed off. One line switches all of them off at once, and Feral Mixed has its
+    own section. A wild horse with nothing it is allowed to be simply does not spawn.
+    <a href="breeds.html#world-settings">How it works.</a>
+</p>
+
+<h3>Horses</h3>
+
+<ul>
+    <li><strong>Eyes are inherited.</strong> Thirteen eye genes &mdash; iris, sclera and a
+        heterochromia wedge for each eye, glowing irises and sclera, and a third eye. A
+        splashed or champagne horse writes its eye colour onto itself, so the colour passes
+        to foals that do not inherit the splash. <a href="eye-colour.html">Eye colour</a>.</li>
+    <li><strong>Twenty-seven behaviour genes</strong> &mdash; horses that sing, guard, lay
+        eggs, ward off monsters, fear water, breed on their own, and more, each with its
+        hazards written on its page.</li>
+    <li><strong>Fifty new coat markings</strong>, and a black form for forty-two existing
+        ones. Cleave became two genes: the marking, and which half it is on.</li>
+    <li>Fireproof and bird-boned protect horse and rider properly; molten hooves leaves
+        glowing hoofprints; size is shown as a multiple of an ordinary horse, and a breed's
+        size range decides whether its horses carry one size gene or two.</li>
+    <li>Hovering a gene in the custom spawn egg shows its picture beside the description.
+        The egg's breed list starts at Feral Mixed and includes your own breeds.</li>
+    <li>The research shelf is a chest, stalls land a horse dead centre, a holding pen, and a
+        run of fixes from three play sessions.</li>
+</ul>
+
+<h3>What this does to a world you already have</h3>
+
+<ul>
+    <li><strong>Your settings are not carried over.</strong> <code>config/horsegenetics-server.toml</code>
+        and <code>-client.toml</code> are no longer read; copy any value you changed into the
+        new files in <code>.minecraft/phc/</code>.</li>
+    <li><strong>A 0.4.1 world should load, but none has been tried.</strong> The one gene
+        whose alleles changed is Cleave: a horse carrying its old alleles comes back without
+        the marking (the log says which) rather than breaking the world. Horses made before
+        eye colour was inherited are expected to show brown eyes, blue-eyed splashed horses
+        included &mdash; their eye genes did not exist when they were made.</li>
+    <li>New wild horses of a breed no longer carry stray magic or unlisted disorders.
+        Horses you already have keep whatever they carry.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Not played yet</span>
+    <p>
+        The breed spawn settings were checked on a dedicated server &mdash; the files are
+        written and re-read live &mdash; but no horse has been watched spawning, or failing
+        to, under them. The designer has been driven in a browser, not by a player.
+        <a href="verification.html#world-settings">&sect;0-CC</a>,
+        <a href="verification.html#breeds-exact">&sect;0-CB</a> and
+        <a href="verification.html#breeds-overhaul">&sect;0-CA</a> are the checklist.
+    </p>
+</div>
+
 <h2 id="v0-4-1">0.4.1</h2>
 
 <p class="lede">
