@@ -1,0 +1,220 @@
+{
+  "format": 3,
+  "key": "horsegenetics.ooze_drip",
+  "name": "Ooze Drip",
+  "phase": "magical",
+  "priority": 386,
+  "blurb": "Something bright has been poured along the spine and is running down the barrel in fat rounded lobes.",
+  "rarity": "UNCOMMON",
+  "alleles": [
+    {
+      "token": "Oz",
+      "label": "Ooze (Oz)"
+    },
+    {
+      "token": "oz",
+      "label": "Ooze, coloured (oz)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "dripSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "ooze",
+      "name": "Ooze drip",
+      "description": "Lime ooze running down from the topline in rounded drips, each outlined in near-black, and lit at night.",
+      "when": [
+        "Oz/Oz",
+        "Oz/oz",
+        "Oz/n"
+      ],
+      "layers": [
+        {
+          "name": "the dark lip around each drip",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "from": 0.52,
+              "to": 1.2,
+              "wavelength": 4.5,
+              "amplitude": 0.34,
+              "softness": 0.04
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "from": 0.6,
+              "to": 1.2,
+              "wavelength": 4.5,
+              "amplitude": 0.24,
+              "softness": 0.04,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#07120a"
+          }
+        },
+        {
+          "name": "the drip itself",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "from": 0.6,
+              "to": 1.2,
+              "wavelength": 4.5,
+              "amplitude": 0.24,
+              "softness": 0.04
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#25d425"
+          },
+          "emissive": true
+        }
+      ]
+    },
+    {
+      "id": "ooze-coloured",
+      "name": "Ooze drip, coloured",
+      "description": "The same drips in the colour this line carries.",
+      "when": [
+        "oz/oz"
+      ],
+      "layers": [
+        {
+          "name": "the dark lip around each drip",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "from": 0.52,
+              "to": 1.2,
+              "wavelength": 4.5,
+              "amplitude": 0.34,
+              "softness": 0.04
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "from": 0.6,
+              "to": 1.2,
+              "wavelength": 4.5,
+              "amplitude": 0.24,
+              "softness": 0.04,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#07120a"
+          }
+        },
+        {
+          "name": "the drip itself",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "from": 0.6,
+              "to": 1.2,
+              "wavelength": 4.5,
+              "amplitude": 0.24,
+              "softness": 0.04
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.52
+          },
+          "emissive": true
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No ooze.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Oz/Oz": 0.004,
+    "Oz/oz": 0.016,
+    "Oz/n": 0.076,
+    "oz/oz": 0.016,
+    "n/n": 99.888
+  },
+  "notes": [
+    "Two WAVES bands on one seed, so the lobes line up. The outline layer is wound wider - amplitude 0.34 against 0.24, starting at 0.52 against 0.60 - and painted first, so what survives at the fringe is a thick cartoon lip. The gap works out well over a body unit at the bottom of each lobe, which is the minimum that reads at half a unit per texel.",
+    "BODY only. A Y band on the pitched NECK is a collar and not a topline stripe, so the drips stop at the withers rather than trying to run down the throat. If they should carry onto the neck, that is a second layer in space local, not a wider parts list.",
+    "Arrived at priority 122. Moved to 386: lines and strokes - runs down from the topline, and paired with rainbow drip. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
+    "LAYERS MADE DISJOINT on the way in. The dark lip sat under the whole drip rather than round it, so the drip itself was the bright colour plus the lip's darkening - dimmer than the file asks for, and a different colour on every coat. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.",
+    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse."
+  ]
+}

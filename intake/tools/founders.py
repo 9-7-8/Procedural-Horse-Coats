@@ -109,7 +109,9 @@ def main(check_only):
         spec = json.load(io.open(path, encoding='utf-8'))
         tokens = [a['token'] for a in spec['alleles']]
         combos, shows, hides = expressing(spec)
-        budget = BUDGET.get(spec.get('rarity', 'UNCOMMON'), 0.08)
+        # Upper-cased because the parser is case-blind and this used not to be:
+        # a batch that wrote "rare" and "epic" was budgeted as UNCOMMON throughout.
+        budget = BUDGET.get(str(spec.get('rarity', 'UNCOMMON')).upper(), 0.08)
 
         variant, baseline = tokens[0], tokens[-1]
         het = variant + '/' + baseline
@@ -135,7 +137,7 @@ def main(check_only):
         spec['founders'] = {c: round(v, 6) for c, v in founders.items() if v > 0}
 
         total += spent
-        rows.append((name, spec.get('rarity', 'UNCOMMON'), round(spent, 4)))
+        rows.append((name, str(spec.get('rarity', 'UNCOMMON')).upper(), round(spent, 4)))
         if not check_only:
             io.open(path, 'w', encoding='utf-8').write(json.dumps(spec, indent=2) + '\n')
 

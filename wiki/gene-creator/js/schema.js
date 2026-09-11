@@ -322,8 +322,11 @@ window.HG = window.HG || {};
       params: [
         parts("parts", "restrict to these parts (and, in 'part' space, measure inside each one)"),
         v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
-        choice("axis", ["X", "Y", "Z"], "the axis the wave runs along"),
-        choice("across", ["Y", "X", "Z"], "the axis the wave displaces the band on"),
+        choice("axis", ["X", "Y", "Z"],
+          "the axis the wave TRAVELS along - not the band's axis, the opposite of AXIS. A topline "
+          + "band with lobes hanging down is axis X, across Y"),
+        choice("across", ["Y", "X", "Z"],
+          "the axis the BAND sits on - from and to are measured along it"),
         choice("shape", ["sine", "triangle", "saw"], "curved, folded into teeth, or cut back square"),
         choice("space", ["part", "body", "units", "local"],
           "how 'across' is measured - as on AXIS. Note 'amplitude' is in this space and "
@@ -350,7 +353,9 @@ window.HG = window.HG || {};
         choice("measure", ["wall", "centroid"],
           "'wall' is the crack between two polygons; 'centroid' is distance from a texel to its "
           + "OWN polygon's middle, on the same tessellation - the only way to shade or band each "
-          + "irregular cell independently and stay concentric with the outline"),
+          + "irregular cell independently. Under 'centroid' the mask covers everything farther "
+          + "than gap/2 BODY UNITS from the middle (not a fraction of the cell), so a central "
+          + "disc is the mask inverted"),
         v("vertexWeight", 0.0,
           "blend the wall distance toward distance to the nearest three-way CORNER. A threshold "
           + "on the blend pools where cracks meet and thins between them - a vein network, which "

@@ -1,0 +1,310 @@
+{
+  "format": 3,
+  "key": "horsegenetics.foamed",
+  "name": "Foamed",
+  "phase": "magical",
+  "priority": 390,
+  "blurb": "A raft of round bubbles sits on the flank, drawn as the web between them rather than as the bubbles - heavy where three meet, thin along each wall.",
+  "rarity": "RARE",
+  "notes": [
+    "CRACKLE inverted. The mask fills its polygons solid and leaves a channel between them; inverting it keeps only the channel, which is the web. SPOTS and DAPPLES both measure distance to a cell CENTRE, so neither will ever draw the thing that lives on the wall between two cells - that is what CRACKLE is for.",
+    "vertexWeight 0.8 is what makes it read as foam rather than as cracked glaze. At 0 the channel is the even width a distance-to-a-plane always is; wound up, the web pools where three cells meet and thins to a hairline along each wall - which is exactly what surface tension does to a bubble raft, and what a crack does not do.",
+    "gap 0.85 against a 0.5-unit texel. The thin part of the web after vertexWeight has taken its cut is narrower than gap, so anything much below 0.8 leaves a marking that is nothing but disconnected blobs at the junctions with no walls between them.",
+    "The two layers share ONE foam seed and ONE scale, so the fringe fragments are the same raft continuing - not a second, unrelated foam laid beside it. Only the gate threshold and chance differ. The PATCHES gate is what stops this tiling the whole horse.",
+    "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim.",
+    "Arrived keyed 'ixora.foamed'. Renamed to the horsegenetics namespace every other gene in the mod uses - the format allows a modder their own, but a gene shipping INSIDE this mod under a second namespace breaks the tooling that builds a key from a slug.",
+    "Arrived at priority 155. Moved to 390: lines and strokes, with the other CRACKLE webs (kintsugi 376, stained glass 382). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under."
+  ],
+  "alleles": [
+    {
+      "token": "W",
+      "label": "Sea foam (W)"
+    },
+    {
+      "token": "B",
+      "label": "Pitch foam (B)"
+    },
+    {
+      "token": "C",
+      "label": "Coloured foam (C)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    },
+    {
+      "name": "foamSeed",
+      "type": "seed"
+    },
+    {
+      "name": "gateSeed",
+      "type": "seed"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Sea foam",
+      "description": "A white bubble web across the flank, thickest at its junctions.",
+      "when": [
+        "W/W",
+        "W/B",
+        "W/C",
+        "W/n"
+      ],
+      "layers": [
+        {
+          "name": "the web between the bubbles",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$gateSeed",
+              "scale": 8,
+              "threshold": 0.42,
+              "softness": 0.35
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$foamSeed",
+              "scale": 3.8,
+              "warp": 0.28,
+              "vertexWeight": 0.8,
+              "softness": 0.12,
+              "invert": true,
+              "gap": 0.85
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#7a7a7a"
+          }
+        },
+        {
+          "name": "fragments at the fringe",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$gateSeed",
+              "scale": 8,
+              "threshold": 0.28,
+              "softness": 0.5
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$foamSeed",
+              "scale": 3.8,
+              "warp": 0.28,
+              "vertexWeight": 0.8,
+              "softness": 0.12,
+              "invert": true,
+              "gap": 0.62,
+              "chance": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Pitch foam",
+      "description": "The reference form - a black web of bubble walls on the flank.",
+      "when": [
+        "B/B",
+        "B/C",
+        "B/n"
+      ],
+      "layers": [
+        {
+          "name": "the web between the bubbles",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$gateSeed",
+              "scale": 8,
+              "threshold": 0.42,
+              "softness": 0.35
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$foamSeed",
+              "scale": 3.8,
+              "warp": 0.28,
+              "vertexWeight": 0.8,
+              "softness": 0.12,
+              "invert": true,
+              "gap": 0.85
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d0d0d"
+          }
+        },
+        {
+          "name": "fragments at the fringe",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$gateSeed",
+              "scale": 8,
+              "threshold": 0.28,
+              "softness": 0.5
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$foamSeed",
+              "scale": 3.8,
+              "warp": 0.28,
+              "vertexWeight": 0.8,
+              "softness": 0.12,
+              "invert": true,
+              "gap": 0.62,
+              "chance": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#707070"
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured foam",
+      "description": "A bubble web in the line's own colour, deepest along the walls.",
+      "when": [
+        "C/C"
+      ],
+      "layers": [
+        {
+          "name": "the web between the bubbles",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$gateSeed",
+              "scale": 8,
+              "threshold": 0.42,
+              "softness": 0.35
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$foamSeed",
+              "scale": 3.8,
+              "warp": 0.28,
+              "vertexWeight": 0.8,
+              "softness": 0.12,
+              "invert": true,
+              "gap": 0.85
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.3
+          }
+        },
+        {
+          "name": "fragments at the fringe",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$gateSeed",
+              "scale": 8,
+              "threshold": 0.28,
+              "softness": 0.5
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$foamSeed",
+              "scale": 3.8,
+              "warp": 0.28,
+              "vertexWeight": 0.8,
+              "softness": 0.12,
+              "invert": true,
+              "gap": 0.62,
+              "chance": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No marking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "W/W": 0.002,
+    "W/B": 0.002667,
+    "W/C": 0.002667,
+    "W/n": 0.038,
+    "B/B": 0.002667,
+    "B/C": 0.002667,
+    "B/n": 0.002667,
+    "C/C": 0.002667,
+    "n/n": 99.944
+  }
+}

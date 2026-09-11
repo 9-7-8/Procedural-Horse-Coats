@@ -1,0 +1,357 @@
+{
+  "format": 3,
+  "key": "horsegenetics.contour_cells",
+  "name": "Contour Cells",
+  "phase": "magical",
+  "priority": 327,
+  "blurb": "A patch of coat goes dark and fills with tiling polygons, each drawn as two concentric contour rings around a central pip.",
+  "rarity": "EPIC",
+  "alleles": [
+    {
+      "token": "Cl",
+      "label": "Contour (Cl)"
+    },
+    {
+      "token": "cl",
+      "label": "Contour, coloured (cl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "cellSeed",
+      "type": "seed"
+    },
+    {
+      "name": "patchSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "contour",
+      "name": "Contour",
+      "description": "One or two dark patches on the barrel, each tiled with blue contour polygons.",
+      "when": [
+        "Cl/Cl",
+        "Cl/cl",
+        "Cl/n"
+      ],
+      "layers": [
+        {
+          "name": "the dark ground the contours sit on",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d1526"
+          }
+        },
+        {
+          "name": "outer contour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 0.7,
+              "warp": 0.3,
+              "softness": 0.07
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 1.7,
+              "warp": 0.3,
+              "softness": 0.07,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#1a63dd"
+          }
+        },
+        {
+          "name": "middle contour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 2.7,
+              "warp": 0.3,
+              "softness": 0.07
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 3.7,
+              "warp": 0.3,
+              "softness": 0.07,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#1a63dd"
+          }
+        },
+        {
+          "name": "the pip at each centre",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 5.2,
+              "warp": 0.3,
+              "softness": 0.07
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#1a63dd"
+          }
+        }
+      ]
+    },
+    {
+      "id": "contour-coloured",
+      "name": "Contour, coloured",
+      "description": "The same tiling in the colour this line carries.",
+      "when": [
+        "cl/cl"
+      ],
+      "layers": [
+        {
+          "name": "the dark ground the contours sit on",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#0d1526"
+          }
+        },
+        {
+          "name": "outer contour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 0.7,
+              "warp": 0.3,
+              "softness": 0.07
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 1.7,
+              "warp": 0.3,
+              "softness": 0.07,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.5
+          }
+        },
+        {
+          "name": "middle contour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 2.7,
+              "warp": 0.3,
+              "softness": 0.07
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 3.7,
+              "warp": 0.3,
+              "softness": 0.07,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.5
+          }
+        },
+        {
+          "name": "the pip at each centre",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "seed": "$patchSeed",
+              "scale": 14,
+              "threshold": 0.54,
+              "softness": 0.1
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$cellSeed",
+              "scale": 9,
+              "gap": 5.2,
+              "warp": 0.3,
+              "softness": 0.07
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No contouring.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Cl/Cl": 0.001,
+    "Cl/cl": 0.004,
+    "Cl/n": 0.019,
+    "cl/cl": 0.004,
+    "n/n": 99.972
+  },
+  "notes": [
+    "The rings are bands of distance to the cell WALL, not to the cell centre - a wall-distance band inside a polygon is that polygon shrunk, which is what a contour ring is, and it is concentric with the tessellation by construction because it is measured from the same walls. A band [a, b] is CRACKLE at gap 2a times CRACKLE at gap 2b inverted: outer ring 0.35 to 0.85 units in from the wall, middle ring 1.35 to 1.85, and the pip is everything more than 2.6 in. The bare coat between the wall and the outer ring is the dark ground, which is what draws the tiling itself.",
+    "REBUILT ON THE WAY IN. It arrived measuring centroid - distance from the cell centre - which reads as circles, not polygons, and did not survive a render. Two things were wrong. Under centroid, a CRACKLE mask covers everything FARTHER than gap/2 body units from the centre, and the gaps were written as fractions of the cell (the schema calls the field 0 at the middle and 1 at the rim, which reads that way), so every ring selected nothing. Fixing the units and the polarity gave rings, but hardly ever: the lattice is three-dimensional and most cell centres lie well off the skin, so the surface rarely comes near one and a centre-measured ring mostly appeared as a stray arc. Wall distance has no such problem - every cell the skin cuts has walls on the skin.",
+    "scale is 9 rather than the default 5 so a cell holds two rings and a pip with bare coat between each: the rings are half a unit wide (a texel) with half a unit of ground either side. At 5 the pip would only appear in the few cells the skin cuts near their middle.",
+    "The PATCHES mask is the whole of the restraint. Without it this tiles the entire barrel, which is what the source image actually looked like and is not what this gene is for. Its threshold went from 0.66 to 0.54 because at 0.66 a third of the horses rendered showed no patch at all on the near flank.",
+    "Renamed on the way in. It arrived as 'Contour', which is already a gene here - a whole coat stacked into hypsometric bands off one FRACTAL field. This one is a patch of CRACKLE cells, each drawn as rings round a pip, and the two have nothing in common but the word, so this one took the longer name. Its alleles were Ct and ct, which are the shipped Contour's own token, so they became Cl and cl: a genotype reading Ct/n would otherwise not say which gene it meant.",
+    "Arrived at priority 126. Moved to 327: spots and rings - a repeating figure in a patch, not a replacement ground. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under."
+  ]
+}

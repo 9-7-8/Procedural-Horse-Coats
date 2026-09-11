@@ -1,0 +1,415 @@
+{
+  "format": 3,
+  "key": "horsegenetics.rainbow_drip",
+  "name": "Rainbow Drip",
+  "phase": "magical",
+  "priority": 387,
+  "rarity": "RARE",
+  "blurb": "A field of black poured over the topline, its lower edge sagging into even lobes and rimmed with four ribbons of colour, as if it were still running.",
+  "notes": [
+    "The reference arrived as a traced SVG (372 gradient-filled paths), half of which are the transparency checkerboard behind the artwork rather than the artwork. It is not pasted in as an SVG mask: the marking is a periodic lobed boundary, which is a kind of shape and not a particular one, so it is WAVES - the only mask in the vocabulary that repeats evenly on purpose.",
+    "All five layers carry the SAME WAVES seed, wavelength, amplitude and phase and differ only in from/to. That is what makes the four ribbons sit parallel to the black edge and to each other all the way along the lobe. Change the wavelength on one and the marking comes apart; change it on all five together and the lobes get longer or shorter, which is the knob worth turning.",
+    "Each ribbon is 0.07 of the barrel's Y span, which is 0.7 body units, or 1.4 texels. That is deliberately just clear of the half-unit floor - do not narrow them to fit a fifth ribbon in, because at 0.05 they average away and the gene draws a black field with no rim at all.",
+    "The four ribbons could not be four fixed hues a constant apart, because a knob cannot be offset by a constant. Instead every ribbon layer runs the SAME RAMP across the WHOLE rainbow zone (0.42 to 0.70) and its mask decides which quarter of that sweep it lands on. One knob, four discrete ribbons, and the spectrum stays in order whatever $hue is set to.",
+    "The black field is a fixed colour in both forms. It is the ground the rim reads against, so the white form is a pale-rimmed black drip rather than a white one.",
+    "founders below is a placeholder that satisfies the loader. Run intake/tools/founders.py to derive the real table from the rarity tier.",
+    "Arrived at priority 260. Moved to 387: lines and strokes - runs down from the topline, and paired with ooze drip. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
+    "WAVES axis and across arrived the wrong way round, and every drip ran sideways - lobes pointing at the tail from a band across the front of the barrel. On WAVES, 'axis' is the direction the wave TRAVELS and 'across' is the axis the band sits on, which is the opposite of what 'axis' means on an AXIS mask, and the file was written the natural way. A band along the topline with lobes hanging down is across Y, axis X. The numbers did not change: from and to were always heights, and the wavelength was always a spacing along the horse."
+  ],
+  "alleles": [
+    {
+      "token": "Rdw",
+      "label": "Rainbow drip, pale rim (Rdw)"
+    },
+    {
+      "token": "Rdc",
+      "label": "Rainbow drip, coloured rim (Rdc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "dripSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Rainbow drip (pale)",
+      "description": "Black poured over the topline with a lobed lower edge, rimmed by four ribbons stepping from grey at the leading edge to white against the black.",
+      "when": [
+        "Rdw/Rdw",
+        "Rdw/Rdc",
+        "Rdw/n"
+      ],
+      "layers": [
+        {
+          "name": "black field above the drip line",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.7,
+              "to": 1.05,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b030e",
+            "strength": 100
+          }
+        },
+        {
+          "name": "upper ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.63,
+              "to": 0.7,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "colors": [
+              "#787878",
+              "#a0a0a0",
+              "#d0d0d0",
+              "#ffffff"
+            ],
+            "strength": 100
+          }
+        },
+        {
+          "name": "second ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.56,
+              "to": 0.63,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "colors": [
+              "#787878",
+              "#a0a0a0",
+              "#d0d0d0",
+              "#ffffff"
+            ],
+            "strength": 100
+          }
+        },
+        {
+          "name": "third ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.49,
+              "to": 0.56,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "colors": [
+              "#787878",
+              "#a0a0a0",
+              "#d0d0d0",
+              "#ffffff"
+            ],
+            "strength": 100
+          }
+        },
+        {
+          "name": "leading ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.42,
+              "to": 0.49,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "colors": [
+              "#787878",
+              "#a0a0a0",
+              "#d0d0d0",
+              "#ffffff"
+            ],
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Rainbow drip (coloured)",
+      "description": "Black poured over the topline with a lobed lower edge, rimmed by four ribbons running most of the way round the colour wheel.",
+      "when": [
+        "Rdc/Rdc"
+      ],
+      "layers": [
+        {
+          "name": "black field above the drip line",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.7,
+              "to": 1.05,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b030e",
+            "strength": 100
+          }
+        },
+        {
+          "name": "upper ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.63,
+              "to": 0.7,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "hue": "$hue",
+            "hueSpan": 300,
+            "saturation": 0.95,
+            "lightness": 0.58,
+            "strength": 100
+          }
+        },
+        {
+          "name": "second ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.56,
+              "to": 0.63,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "hue": "$hue",
+            "hueSpan": 300,
+            "saturation": 0.95,
+            "lightness": 0.58,
+            "strength": 100
+          }
+        },
+        {
+          "name": "third ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.49,
+              "to": 0.56,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "hue": "$hue",
+            "hueSpan": 300,
+            "saturation": 0.95,
+            "lightness": 0.58,
+            "strength": 100
+          }
+        },
+        {
+          "name": "leading ribbon",
+          "masks": [
+            {
+              "type": "WAVES",
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "shape": "sine",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.42,
+              "to": 0.49,
+              "wavelength": 6,
+              "amplitude": 0.2,
+              "phase": 0,
+              "softness": 0.025
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "Y",
+            "space": "part",
+            "from": 0.42,
+            "to": 0.7,
+            "hue": "$hue",
+            "hueSpan": 300,
+            "saturation": 0.95,
+            "lightness": 0.58,
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No drip.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Rdw/Rdw": 0.002,
+    "Rdw/Rdc": 0.008,
+    "Rdw/n": 0.038,
+    "Rdc/Rdc": 0.008,
+    "n/n": 99.944
+  }
+}

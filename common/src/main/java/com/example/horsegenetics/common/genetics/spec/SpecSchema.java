@@ -635,8 +635,13 @@ public final class SpecSchema {
         MASKS.put(MaskType.WAVES, List.of(
                 Param.parts("parts", "restrict to these parts (and, in 'part' space, measure within each)"),
                 Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
-                Param.choice("axis", List.of("X", "Y", "Z"), "the axis the wave runs along"),
-                Param.choice("across", List.of("Y", "X", "Z"), "the axis the wave displaces the band on"),
+                Param.choice("axis", List.of("X", "Y", "Z"),
+                        "the axis the wave TRAVELS along - NOT the band's axis, which is the opposite "
+                                + "of what 'axis' means on AXIS. A topline band with lobes hanging down "
+                                + "is axis X, across Y"),
+                Param.choice("across", List.of("Y", "X", "Z"),
+                        "the axis the BAND sits on - from and to are measured along it, and the wave "
+                                + "pushes the band's edges back and forth on it"),
                 Param.choice("shape", WAVEFORMS,
                         "'sine' scallops, 'triangle' zigzags into straight-sided teeth, 'saw' ramps "
                                 + "and cuts back square into raked spears"),
@@ -671,10 +676,14 @@ public final class SpecSchema {
                 Param.choice("measure", CRACKLE_MEASURES,
                         "'wall' is distance to the boundary between two polygons - the crack. "
                                 + "'centroid' is distance from the texel to ITS OWN polygon's centre, "
-                                + "normalised so 0 is the middle and 1 the rim, which is the only way "
-                                + "to shade or band each irregular cell independently. Under "
-                                + "'centroid' the 'gap' and 'softness' numbers stop meaning a channel "
-                                + "width and become a radius"),
+                                + "which is the only way to shade or band each irregular cell "
+                                + "independently. Under 'centroid' the mask covers everything FARTHER "
+                                + "than gap/2 BODY UNITS from the centre - not a fraction of the cell: "
+                                + "the field runs from 0 to roughly 'scale', with walls near 0.55 of "
+                                + "that. A disc at the centre is therefore the mask INVERTED. And the "
+                                + "lattice is 3D, so most centres lie off the skin: a small centre mark "
+                                + "rarely shows. For rings concentric with the polygon outline, bands "
+                                + "of 'wall' distance are the robust choice"),
                 Param.value("vertexWeight", 0.0,
                         "0 to 1, how far the wall distance is blended toward distance to the nearest "
                                 + "three-way CORNER of the tiling. 0 is the even channel; at 1 the "

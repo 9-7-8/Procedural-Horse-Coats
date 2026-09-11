@@ -1,0 +1,417 @@
+{
+  "format": 3,
+  "key": "horsegenetics.agate_eye",
+  "name": "Agate Eye",
+  "phase": "magical",
+  "priority": 325,
+  "blurb": "A few banded agate eyes sit on the haunch - a pale rim, two bands and a dark core, like a cut geode.",
+  "rarity": "RARE",
+  "alleles": [
+    {
+      "token": "Ag",
+      "label": "Agate (Ag)"
+    },
+    {
+      "token": "ag",
+      "label": "Agate, coloured (ag)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "agateSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "agate",
+      "name": "Agate eye",
+      "description": "Two or three banded blue eyes on the haunch, each ringed pale and cored dark.",
+      "when": [
+        "Ag/Ag",
+        "Ag/ag",
+        "Ag/n"
+      ],
+      "layers": [
+        {
+          "name": "pale outer rim",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "SPOTS",
+              "radius": 3.4,
+              "softness": 0.55,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            },
+            {
+              "type": "RINGS",
+              "radius": 2.6,
+              "thickness": 0.9,
+              "softness": 0.35,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            },
+            {
+              "type": "RINGS",
+              "radius": 1.5,
+              "thickness": 0.8,
+              "softness": 0.3,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            },
+            {
+              "type": "SPOTS",
+              "radius": 1.3,
+              "softness": 0.22,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 80,
+            "color": "#e8eef7"
+          }
+        },
+        {
+          "name": "outer band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "RINGS",
+              "radius": 2.6,
+              "thickness": 0.9,
+              "softness": 0.35,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 95,
+            "color": "#4a74b4"
+          }
+        },
+        {
+          "name": "inner band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "RINGS",
+              "radius": 1.5,
+              "thickness": 0.8,
+              "softness": 0.3,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            },
+            {
+              "type": "SPOTS",
+              "radius": 1.3,
+              "softness": 0.22,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#2f4f8f"
+          }
+        },
+        {
+          "name": "dark core",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "SPOTS",
+              "radius": 1.3,
+              "softness": 0.22,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#101a33"
+          }
+        }
+      ],
+      "notes": [
+        "Four draws on one seed and one spacing, which is what keeps them concentric. vary is set explicitly on all four rather than left at the per-mask default, so a cell that comes out large comes out large in every band instead of tearing its core out of its rings.",
+        "chance 0.5 at spacing 9 is the whole of the restraint here: it leaves roughly two or three marks on the haunch rather than tiling it."
+      ]
+    },
+    {
+      "id": "agate-coloured",
+      "name": "Agate eye, coloured",
+      "description": "The same banded eyes in whatever colour this line runs to.",
+      "when": [
+        "ag/ag"
+      ],
+      "layers": [
+        {
+          "name": "pale outer rim",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "SPOTS",
+              "radius": 3.4,
+              "softness": 0.55,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            },
+            {
+              "type": "RINGS",
+              "radius": 2.6,
+              "thickness": 0.9,
+              "softness": 0.35,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            },
+            {
+              "type": "RINGS",
+              "radius": 1.5,
+              "thickness": 0.8,
+              "softness": 0.3,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            },
+            {
+              "type": "SPOTS",
+              "radius": 1.3,
+              "softness": 0.22,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 80,
+            "hue": "$hue",
+            "saturation": 0.14,
+            "lightness": 0.92
+          }
+        },
+        {
+          "name": "outer band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "RINGS",
+              "radius": 2.6,
+              "thickness": 0.9,
+              "softness": 0.35,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 95,
+            "hue": "$hue",
+            "saturation": 0.52,
+            "lightness": 0.62
+          }
+        },
+        {
+          "name": "inner band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "RINGS",
+              "radius": 1.5,
+              "thickness": 0.8,
+              "softness": 0.3,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            },
+            {
+              "type": "SPOTS",
+              "radius": 1.3,
+              "softness": 0.22,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.38
+          }
+        },
+        {
+          "name": "dark core",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.46,
+              "softness": 0.2
+            },
+            {
+              "type": "SPOTS",
+              "radius": 1.3,
+              "softness": 0.22,
+              "seed": "$agateSeed",
+              "spacing": 9,
+              "vary": 0.35,
+              "chance": 0.85
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.11
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No agate.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ag/Ag": 0.002,
+    "Ag/ag": 0.008,
+    "Ag/n": 0.038,
+    "ag/ag": 0.008,
+    "n/n": 99.944
+  },
+  "notes": [
+    "Source was a slab of blue banded agate: packed concentric rings around a dark core. The bands are RINGS rather than a colour ramp because agate banding has a hard boundary between colours, and nothing noise-derived gives you one.",
+    "Arrived at priority 120. Moved to 325: spots and rings, after moth eyes (324) - a few banded eyes on the haunch. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
+    "LAYERS MADE DISJOINT on the way in. The eyes came out as pale blurs with no bands in them - the two blue bands were being added to the pale rim beneath them rather than painted over it. The rim now leaves holes where the bands and the core go; the bands and the core never overlapped each other. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of every shape painted after it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism. The core also went from radius 0.8 to 1.3, and now fills everything inside the inner band rather than floating in a pale gap within it - the band leaves a hole for it the way the rim leaves holes for both bands. At 0.8, and again at 1.0, it landed on the skin so rarely that no horse the check tried showed one: a spot on a three-dimensional lattice only reaches the surface where its centre is within its radius of it, so how often a centre mark shows falls away roughly as the cube of its size.",
+    "chance went from 0.5 to 0.85 on every mask (they must match, or the bands stop being concentric with the rim). At 0.5, three horses in eight rendered with no eye on the near haunch at all - the haunch only holds a cell or two at spacing 9, so half of them empty often means all of them. It is still a few eyes; it is no longer sometimes none."
+  ]
+}

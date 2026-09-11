@@ -1,0 +1,520 @@
+{
+  "format": 3,
+  "key": "horsegenetics.gilded_crackle",
+  "name": "Gilded Crackle",
+  "phase": "magical",
+  "priority": 391,
+  "rarity": "RARE",
+  "blurb": "A patch of cracked glaze over the haunch, each plate a slightly different shade and every seam between them run with gold.",
+  "notes": [
+    "The reference arrived as a traced SVG (563 gradient-filled paths). It was not pasted in as an SVG mask and should not be: the SVG mask carries a shape somebody DREW, and a traced photograph is a field - the point ceiling exists precisely to stop one going in a gene file. The reference is a kind of shape, not a particular one, so it is written as CRACKLE.",
+    "All three cell layers share seed and scale and differ only in gap. That is what keeps them concentric with each other: layer 1 reads the plate at gap 1.2, layer 2 reads the same reading inverted so it lands in the seam, layer 3 reads a wider gap so the speckle sits inset from the gold rather than running up to it. Do not change scale on one of them alone.",
+    "The gold is a fixed colour in all three forms rather than a graded tone. It is a saturated target and it is the gene - a grey-seamed crackle is a different marking. Only the plates and the speckle regrade.",
+    "founders below is a placeholder that satisfies the loader. Run intake/tools/founders.py to derive the real table from the rarity tier.",
+    "Arrived at priority 330. Moved to 391: lines and strokes, with the other CRACKLE webs (kintsugi 376, stained glass 382). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.",
+    "The seam arrived 1.2 units wide and the speckle inset at 2, and the marking came out inside out: a solid gold haunch with a few pale plates floating in it - 29% of the barrel seam against 12% plate. A CRACKLE lattice is three-dimensional and the skin cuts its cells well away from their centres, so the surface lies much nearer a wall than a flat tiling suggests, and a channel that looks thin on paper eats the plates. Now 0.6 and 1.3, which is where the shipped crackles sit relative to their scale (stained glass, qular), and the plates outweigh the gold again."
+  ],
+  "alleles": [
+    {
+      "token": "Gcw",
+      "label": "Gilded crackle, pale plates (Gcw)"
+    },
+    {
+      "token": "Gck",
+      "label": "Gilded crackle, black plates (Gck)"
+    },
+    {
+      "token": "Gcc",
+      "label": "Gilded crackle, coloured plates (Gcc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "crackleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "speckleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0,
+      "max": 360
+    }
+  ],
+  "expressions": [
+    {
+      "id": "pale",
+      "name": "Gilded crackle (pale)",
+      "description": "A cracked glaze across the haunch in three shades of off-white, every seam between the plates run with gold.",
+      "when": [
+        "Gcw/Gcw",
+        "Gcw/Gck",
+        "Gcw/Gcc",
+        "Gcw/n"
+      ],
+      "layers": [
+        {
+          "name": "plates",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.6,
+              "warp": 0.42,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$crackleSeed",
+            "scale": 4.5,
+            "colors": [
+              "#7d7d7d",
+              "#c9c9c9",
+              "#9a9a9a"
+            ],
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.6,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "speckle inside the plates",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 1.3,
+              "warp": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$speckleSeed",
+              "spacing": 0.9,
+              "size": 0.5,
+              "density": 0.38,
+              "clumping": 0.5,
+              "clumpScale": 6,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efefef",
+            "strength": 80,
+            "opacity": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "black",
+      "name": "Gilded crackle (black)",
+      "description": "The same cracked glaze in three shades of near-black, still seamed with gold.",
+      "when": [
+        "Gck/Gck",
+        "Gck/Gcc",
+        "Gck/n"
+      ],
+      "layers": [
+        {
+          "name": "plates",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.6,
+              "warp": 0.42,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$crackleSeed",
+            "scale": 4.5,
+            "colors": [
+              "#0f0f0f",
+              "#3d3d3d",
+              "#242424"
+            ],
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.6,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "speckle inside the plates",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 1.3,
+              "warp": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$speckleSeed",
+              "spacing": 0.9,
+              "size": 0.5,
+              "density": 0.38,
+              "clumping": 0.5,
+              "clumpScale": 6,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#707070",
+            "strength": 80,
+            "opacity": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Gilded crackle (coloured)",
+      "description": "The same cracked glaze in the colour this line of horses runs to, the plates each a shade apart, gold in every seam.",
+      "when": [
+        "Gcc/Gcc"
+      ],
+      "layers": [
+        {
+          "name": "plates",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.6,
+              "warp": 0.42,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "axis": "cellId",
+            "seed": "$crackleSeed",
+            "scale": 4.5,
+            "hue": "$hue",
+            "hueSpan": 44,
+            "saturation": 0.62,
+            "lightness": 0.36,
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.6,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "speckle inside the plates",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 1.3,
+              "warp": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "SPECKLE",
+              "seed": "$speckleSeed",
+              "spacing": 0.9,
+              "size": 0.5,
+              "density": 0.38,
+              "clumping": 0.5,
+              "clumpScale": 6,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c9c4bd",
+            "strength": 80,
+            "opacity": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No crackle.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Gcw/Gcw": 0.002,
+    "Gcw/Gck": 0.002667,
+    "Gcw/Gcc": 0.002667,
+    "Gcw/n": 0.038,
+    "Gck/Gck": 0.002667,
+    "Gck/Gcc": 0.002667,
+    "Gck/n": 0.002667,
+    "Gcc/Gcc": 0.002667,
+    "n/n": 99.944
+  }
+}
