@@ -27,6 +27,104 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-10h">2026-09-10</h2>
+
+<h3>The eyes stopped being a channel and became thirteen genes</h3>
+
+<p>
+    The owner asked for eyes that are &ldquo;extremely polygenic&rdquo;, specified locus by
+    locus: iris colour and sclera colour per eye, a heterochromia sector and a colour for it
+    per eye, a glowing iris and a glowing sclera per eye, and a third eye on the forehead that
+    can copy one of the others, mix them, or invent itself. Thirteen loci. Then the harder
+    half: <strong>the natural genes that used to paint an iris should stop</strong>, and ask
+    the eye loci for one instead.
+</p>
+
+<p>
+    <strong>What made it a design question rather than a port</strong> was where the asking
+    lands. The old channel applied a claim at <em>bake</em> time, so a splashed white
+    horse&rsquo;s blue eyes were paint: real while it had the splash, gone the moment a foal
+    did not inherit it. The owner chose the other answer &mdash; the requested allele is
+    <strong>written onto the horse when it is made</strong>, so a splashed foal genuinely
+    carries <code>MBl/MBl</code>, shows blue eyes, and passes blue eyes on to foals that are
+    not splashed at all. Blue spreads through a herd the way any other allele does. That is a
+    bigger claim than it looks and it is the reason <code>Eyes.force</code> runs in
+    <code>Genome</code> and nowhere else: forcing twice, once with epigenetic midpoints and
+    once with the real numbers, would destroy the horse&rsquo;s own eye alleles on the first
+    pass and leave the second unable to tell that it had.
+</p>
+
+<p>
+    <strong>The cost that had to be paid for it</strong> is on
+    <a href="known-gaps.html">gap 174</a>. The old &ldquo;this horse is broadly white however
+    it got there&rdquo; rule measured the finished coat, which is the honest signal and is
+    unavailable at breeding time. It is a declared per-locus sum now, and it will be wrong on
+    horses whose white patterns overlap or avoid each other.
+</p>
+
+<p>
+    <strong>Three real bugs came out of the painting.</strong> Two were new and one was old:
+</p>
+<ul>
+    <li><code>blendToward</code> at strength <em>zero</em> still wrote the base colour, and
+        these are absolute last-writer-wins writes &mdash; so <code>tintIris</code> walking
+        over a sclera texel with weight 0 silently undid whatever the sclera painter had just
+        put there. A black sclera came out white.</li>
+    <li>Iris and sclera were told apart by the luma of the <em>coat</em>. That stopped being
+        true the moment an iris could be invisible: a cleared iris shows the horse&rsquo;s own
+        coat, which on a pale horse is bright, so the sclera painter claimed it. Both are read
+        off the <strong>template</strong> now, which never changes.</li>
+    <li>Not redrawing the template over an invisible iris is not enough to make it invisible,
+        because the composite <em>multiplies</em> and the template&rsquo;s iris is black. A
+        skipped texel came out black &mdash; the template&rsquo;s own eye, which is exactly
+        what it was supposed to remove. Invisible halves are recomposited against plain white
+        before the redraw.</li>
+</ul>
+
+<p>
+    <strong>And one that had nothing to do with eyes.</strong> The weather loci minted allele
+    tokens as <code>T+</code> and <code>T-</code>, and <code>-</code> is
+    <code>Genotype</code>&rsquo;s own gene separator &mdash; so any horse carrying a
+    &ldquo;suffers in&rdquo; allele wrote a genotype code its own parser could not read back.
+    Nothing had caught it because it needs a founder to actually roll one, which is a few
+    percent of a few percent. Adding thirteen loci shifted the founder RNG stream and three
+    unrelated tests went red at once. The suffix is <code>v</code> now.
+</p>
+
+<p>
+    <strong>What was deliberately not done.</strong> The eye loci get no
+    <code>wiki/gene-*.html</code> pages: thirteen near-identical pages would be thirteen places
+    for one fact to go stale, and <a href="eye-colour.html">Eye colour</a> is already declared
+    the single source of truth for eyes. The four magical genes that paint eyes directly
+    (dhampir, shadowcreature, light, magic sectoral heterochromia) were left exactly as they
+    were and are now audited on that page &mdash; two of them are redundant, and
+    <a href="known-gaps.html">gaps 175 and 176</a> record the calls the owner has to make.
+    The leopard complex&rsquo;s white sclera rim was left alone too: it is not an iris colour,
+    and there is no allele meaning &ldquo;more of the white shows&rdquo;.
+</p>
+
+<p>
+    <strong>A fourth bug, found by reading a test while waiting for it.</strong>
+    <code>CoatTextureComposerTest</code>&rsquo;s broadest case builds each genotype from a
+    bitmask over <code>Genes.codeOrder()</code> and writes <code>(1L &lt;&lt; n) - 1</code> for
+    &ldquo;every gene on&rdquo;. Java masks a shift distance to six bits, so past 64 genes that
+    silently becomes <code>1L &lt;&lt; (n &amp; 63)</code> &mdash; at 291 genes, a shift of 35.
+    Three thousand random masks leave every locus from the 36th onward pinned to its last
+    allele, and nothing goes red because the test only asserts that a bake returns a full
+    sheet. It has been wrong since the registry passed 64 genes. Recorded as
+    <a href="known-gaps.html">gap 177</a> rather than fixed, because the same test is roughly
+    six and a half thousand whole coat bakes and is on its own a large share of the ten-minute
+    suite &mdash; widening it without sampling would make that worse.
+</p>
+
+<p>
+    <strong>Every horse in the world changed.</strong> Brown is the dominant iris allele, so
+    every horse now has a painted brown iris where it had the template&rsquo;s flat black.
+    Both goldens moved wholesale, all 203 gene icons were rebaked, and none of it has been seen
+    in game &mdash; <a href="verification.html#eye-loci">&sect;0-BU</a> is the checklist, and
+    its first four items are the ones that could be <em>wrong</em> rather than merely unseen.
+</p>
+
 <h2 id="d2026-09-10g">2026-09-10</h2>
 
 <h3>Twenty-seven behaviour genes, specified one at a time and then built</h3>

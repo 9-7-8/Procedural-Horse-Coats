@@ -161,30 +161,46 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
     Champagne dilutes the iris along with everything else, and the shade an adult settles
     on is famously not one colour: amber, golden, hazel, light brown, or &mdash;
     occasionally &mdash; a greenish olive. So the coat is deterministic and the
-    <strong>iris is epigenetic</strong>, rolled once from the expressing copy's seed and
+    <strong>iris roll is epigenetic</strong>, made once from the expressing copy's seed and
     inherited with it.
+</p>
+
+<p>
+    What the roll <em>produces</em> is not a colour any more. Champagne does not paint an
+    iris: it <a href="eye-colour.html#requests">requests an allele</a> at the two iris loci,
+    and the allele is written onto the horse at birth, so a champagne really carries its eye
+    colour and really passes it on. The roll therefore picks one of three
+    <code>EyeHue</code> alleles rather than one of four hex values:
 </p>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Iris</th><th>Share of champagne horses</th></tr></thead>
+<thead><tr><th>Roll</th><th>Asks for</th><th>Share of champagne horses</th></tr></thead>
 <tbody>
-<tr><td>Amber</td><td>40%</td></tr>
-<tr><td><strong>Hazel</strong></td><td>35%</td></tr>
-<tr><td>Light brown</td><td>17%</td></tr>
-<tr><td><strong>Olive green</strong></td><td>8%</td></tr>
+<tr><td>Amber</td><td><code>Gld</code></td><td><code>ChampagneGene.P_AMBER</code></td></tr>
+<tr><td><strong>Hazel</strong>, light brown</td><td><code>Brn</code></td><td>the middle of the range</td></tr>
+<tr><td><strong>Olive green</strong></td><td><code>Grn</code></td><td>the tail</td></tr>
 </tbody>
 </table>
 </div>
 
+<div class="note warn">
+    <span class="label">Hazel and light brown became one</span>
+    <p>
+        Four shades became three requests: the colour vocabulary is closed now, because a hue
+        no allele can name is a hue nobody can breed toward, and hazel and light brown both
+        land on <code>Brn</code>. They are still separate <em>rolls</em> and the distribution
+        is unchanged; they just look the same.
+    </p>
+</div>
+
 <p>
-    This is the mod's ordinary source of a <strong>hazel</strong> eye and its only source
-    of a <strong>green</strong> one that is not magical, and because it is epigenetic an
-    olive-eyed champagne is something a breeder can chase rather than something the game
-    hands out. It claims at <code>RANK_DILUTION</code>, the lowest of the three, so
-    <a href="gene-tiger-eye.html">tiger eye</a> over-rides it and a splashed white
-    champagne has blue eyes &mdash; see
-    <a href="eye-colour.html">Eye colour &amp; heterochromia</a>.
+    This is still the mod's ordinary non-magical source of a <strong>green</strong> eye. The
+    old rank argument survives as ordinary gene order: champagne sorts before
+    <a href="gene-tiger-eye.html">tiger eye</a> and before the
+    <a href="gene-kit.html">white loci</a>, and requests merge last-writer-wins, so tiger eye
+    over-rides it and a splashed white champagne has blue eyes &mdash; see
+    <a href="eye-colour.html#request-order">Eye colour</a>.
 </p>
 
 <div class="note warn">

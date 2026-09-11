@@ -52,6 +52,14 @@
 </li>
 <li><strong>"White finds white" has never been seen stacked more than two deep.</strong> Each white-pattern painter raises its strength by how white the horse already is, which is what makes the two splash loci and <code>W20</code> mean anything - but a horse carrying tobiano <em>and</em> <code>KIT</code> <em>and</em> both splash loci compounds four times. It cannot run away (strength clamps at 1), but it has not been looked at.
 </li>
+<li><strong>The thirteen eye loci have never been seen in game.</strong> Every
+    colour, sector, glow and the third eye are asserted through the real pipeline, and
+    none of it has been looked at on a horse. Four open questions, all on
+    <a href="verification.html">To be verified</a>: does a four-texel iris split in two
+    read as heterochromia at riding distance; do the two diagonal sectors read as anything
+    but stray pixels; is <code>EyeSector.MIRRORED_EYE</code> the right eye to un-mirror;
+    and is <code>CoatRegions.thirdEyeRect</code> actually on the forehead.
+</li>
 <li><strong>The wide white-pattern genes don't compose an eye-safe check</strong> - a big <code>SB1/SB1</code> or a topline-crossing tobiano could in principle wipe the eye texels; <code>CoatRegions.redrawEyes</code> runs last so eyes always come back, but confirm in-game.
 </li>
 </ul>
@@ -59,6 +67,61 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-177"><strong>The broadest coat test only ever varies the first 35 loci, because
+    its gene mask is a <code>long</code>.</strong> Opened 2026-09-10, pre-existing and found by
+    reading the test while waiting for it.
+    <code>CoatTextureComposerTest.everyBuiltInGeneComboComposesWithoutThrowingAdultAndFoal</code>
+    builds each genotype from a bitmask over <code>Genes.codeOrder()</code> &mdash; bit set
+    means the gene&rsquo;s first allele, clear means its last &mdash; and writes
+    <code>(1L &lt;&lt; n) - 1</code> for &ldquo;every gene on&rdquo;. Java masks a shift
+    distance to the low six bits, so with <code>n</code> past 64 that silently becomes
+    <code>1L &lt;&lt; (n &amp; 63)</code>. At 291 genes the shift is <strong>35</strong>: the
+    &ldquo;all on&rdquo; mask is wrong, and all three thousand random masks leave every locus
+    from the 36th onward pinned to its <em>last</em> allele. <strong>Nothing goes red</strong>
+    &mdash; the test only asserts that a bake returns a full sheet and does not throw, so
+    narrower coverage is invisible. It broke the moment the registry passed 64 genes, which was
+    a long time ago, and the single-bit masks added in the loop above it still touch every
+    locus one at a time, which is why it has been quietly useful rather than useless. The fix
+    is a <code>java.util.BitSet</code> or a <code>boolean[]</code>; the reason it is worth
+    fixing rather than deleting is that this is the one test that would catch a gene that
+    throws only in combination with another.
+    <br><strong>Also worth knowing:</strong> this test is roughly six and a half thousand whole
+    coat bakes, adult and foal, and is on its own a large share of the ten-minute suite. Any
+    fix should sample rather than widen.</li>
+<li id="gap-174"><strong>&ldquo;Broadly white however it got there&rdquo; is an estimate now,
+    not a measurement.</strong> Opened 2026-09-10, with the eye loci. The rule that gives a
+    horse blue eyes when it is white from <em>two</em> mild alleles stacking used to read the
+    <strong>finished coat</strong> &mdash; the fraction of mapped texels left with no pigment
+    at all &mdash; and that is exactly the right signal, because no per-locus test can see a
+    stack. It cannot be used any more: an <a href="eye-colour.html#requests">eye request</a> is
+    applied when the horse is <em>bred</em>, and there is no coat at that point and no cheap
+    way to make one. <code>WhitePatternEyes.whiteScore</code> is a declared sum instead &mdash;
+    each white locus says how much of the horse it takes the pigment off, through
+    <code>WhiteExtent</code>, using the painters&rsquo; own strength constants where there is
+    one to borrow and a hand-set number where there is not (tobiano). <strong>The case it will
+    get wrong is a horse whose loci stack in a way a flat sum does not model</strong>: two
+    patterns covering the same half of the horse add to more than they cover, and two that
+    avoid each other add to less. Nothing goes red either way; the horse simply has the wrong
+    eyes. A real fix would need the founder roll to bake a throwaway coat, which is far too
+    expensive for what it buys.</li>
+<li id="gap-175"><strong>Magic sectoral heterochromia is now redundant, and nothing has been
+    decided about it.</strong> Opened 2026-09-10. The locus exists to put two colours in one
+    iris; the <a href="eye-colour.html#sectors">sector and sector-colour loci</a> now do that
+    per eye, with a <em>named</em> shape, inheritably, and with a far larger outcome space. The
+    magic locus still works and still paints over the top of everything, so nothing is broken
+    &mdash; but it is fifteen expressions and a whole gene page describing a thing the model
+    does better one layer down. Either it goes, or it keeps the one property the loci cannot
+    reproduce (its expressing combination is the <em>heterozygote</em>, which is unique in the
+    mod) and its page says so. Owner&rsquo;s call.</li>
+<li id="gap-176"><strong>Red is the one iris colour with no allele behind it.</strong> Opened
+    2026-09-10. The <a href="gene-dhampir.html">dhampir</a> paints a deep red iris at
+    <code>EyeColor.RANK_MAGICAL</code>, and nothing else in the mod can be red-eyed: the
+    <code>EyeHue</code> palette runs brown, green, gold, three blues, white, chaos, invisible.
+    Every other colour a magical gene paints is now reachable as an allele, which makes this
+    the odd one out rather than a design. Adding <code>RED</code> to the iris palette is three
+    lines and a founder weight; the question is whether a red-eyed horse should be
+    <em>breedable</em> at all, or whether it should stay something only the dhampir locus can
+    produce.</li>
 <li id="gap-160"><strong>Nothing checks that a registered effect verb has a section on the
     page that documents them.</strong> Opened 2026-09-09. <code>night_temper</code> and
     <code>night_watch</code> were registered on <code>AbilityType</code> and shipped in two

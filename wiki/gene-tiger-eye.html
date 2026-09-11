@@ -80,7 +80,7 @@
         The iris colour is asserted through the real pipeline in
         <code>EyeColorTest</code> &mdash; a bay's black iris comes out
         <code>#C8811E</code> and its sclera stays white. What is unknown is whether a
-        two-texel amber iris <em>reads</em> as an amber eye on a horse at riding distance,
+        two-texel gold iris <em>reads</em> as a gold eye on a horse at riding distance,
         or whether it needs to be brighter. Checklist on
         <a href="verification.html">To be verified</a>.
     </p>
@@ -93,8 +93,8 @@
     <tbody>
         <tr><td><code>N/N</code></td><td>wild</td><td>Ordinary dark eyes</td></tr>
         <tr><td><code>TE1/N</code>, <code>TE2/N</code></td><td><code>tiger-eye-carrier</code></td><td>Nothing at all &mdash; not in the eyes, not in the coat</td></tr>
-        <tr><td><code>TE1/TE1</code>, <code>TE1/TE2</code></td><td><code>tiger-eye-amber</code></td><td>A bright amber iris, <code>#C8811E</code></td></tr>
-        <tr><td><code>TE2/TE2</code></td><td><code>tiger-eye-yellow</code></td><td>The paler, more yellow shade, <code>#D6B341</code></td></tr>
+        <tr><td><code>TE1/TE1</code>, <code>TE1/TE2</code></td><td><code>tiger-eye-amber</code></td><td>Asks the <a href="eye-colour.html">iris loci</a> for <code>Gld</code></td></tr>
+        <tr><td><code>TE2/TE2</code></td><td><code>tiger-eye-yellow</code></td><td>The same request. See the note below &mdash; the paler shade is gone.</td></tr>
     </tbody>
 </table>
 
@@ -119,8 +119,10 @@
     drawn into it. So unlike the mod's other "paints nothing" genes, its expressing
     outcomes are real markers rather than wild types: they stay in
     <code>Genotype.coatCode()</code>, and two horses that differ only here do not share a
-    cached texture. They are <strong>deterministic</strong> &mdash; every amber eye is the
-    same amber &mdash; so the cache pays one entry per outcome and not one per horse.
+    cached texture. They are <strong>deterministic</strong> &mdash; every gold eye is the
+    same gold &mdash; so the cache pays one entry per outcome and not one per horse. What is
+    actually in the key now is the <a href="eye-colour.html">iris locus</a> the request wrote
+    to, which comes to the same thing.
 </p>
 
 <h2 id="channel">The eye-colour channel</h2>
@@ -143,23 +145,42 @@
 </p>
 
 <p>
-    Tiger eye claims at <strong>rank 20, iris-specific pigment</strong>: above the
-    whole-body dilutions (<a href="gene-matp.html">cream / pearl</a>,
-    <a href="gene-champagne.html">champagne</a>), because a gene aimed at the eye beats
-    one that reached it on the way past &mdash; a cremello that also carries tiger eye has
-    amber eyes, not cream blue ones. And below the depigmented rank, because
-    <strong>blue beats amber</strong> and has to: a depigmented iris has no pigment left
-    for a pigment gene to recolour, so a splashed white tiger-eye horse has blue eyes.
+    <strong>Tiger eye does not paint an iris. It asks for one.</strong> It implements
+    <code>EyeRequestContribution</code> and requests <code>EyeHue.GOLD</code> at both iris
+    loci; <code>Eyes.force</code> writes the allele onto the horse when the horse is made.
+    So a tiger-eye horse is genuinely <code>Gld/Gld</code> at both eyes &mdash; it shows the
+    gold, and it <em>passes the gold on</em>, tiger eye or no tiger eye.
+</p>
+<p>
+    The old rank argument survives as ordinary gene order. Tiger eye sorts before the four
+    <a href="gene-kit.html">white loci</a> and after the dilutions, and requests merge
+    last-writer-wins &mdash; so a cremello that also carries tiger eye has gold eyes, and a
+    splashed white tiger-eye horse has blue ones, for exactly the reasons they always did
+    and without a rank number to maintain. See
+    <a href="eye-colour.html#request-order">when two genes both ask</a>.
 </p>
 
-<div class="note">
-    <span class="label">One blue eye and one amber one</span>
+<div class="note warn">
+    <span class="label">The two shades became one</span>
     <p>
-        That last rule now has a visible middle. A depigmenting claim frequently fails to
-        reach the whole of both irises, and where the blue stops the horse's own colour
-        shows &mdash; so a splashed white tiger-eye horse may well come out with one blue
-        eye and one amber one, or with a blue wedge in an amber iris. See
-        <a href="eye-colour.html#spread">the spread</a>.
+        <code>TE1</code>&rsquo;s amber and <code>TE2</code>&rsquo;s paler yellow were two
+        hex values this gene owned. The colour vocabulary is closed now &mdash;
+        <code>EyeHue</code> is a fixed list of alleles, because a hue no allele can name is a
+        hue nobody can breed toward &mdash; and both shades map to <code>Gld</code>. <strong>The
+        two outcomes are still separate combinations and still separately breedable, but they
+        look the same.</strong> If the pale form is worth keeping it wants an allele at the
+        iris locus, not a constant here.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">One blue eye and one gold one</span>
+    <p>
+        A white locus&rsquo;s request frequently fails to reach both irises, and the eye it
+        does not reach was never asked about &mdash; so it keeps tiger eye&rsquo;s gold. A
+        splashed white tiger-eye horse may well come out with one blue eye and one gold one,
+        or with a blue wedge in a gold iris, and unlike before <strong>both of those are
+        alleles it carries</strong>. See <a href="eye-colour.html#spread">the spread</a>.
     </p>
 </div>
 

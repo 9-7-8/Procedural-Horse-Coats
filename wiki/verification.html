@@ -35,6 +35,57 @@
     </p>
 </div>
 
+<h2 id="eye-loci">&sect;0-BU &mdash; Thirteen eye loci, and every horse in the world
+    is brown-eyed now (2026-09-10, NOT looked at in game)</h2>
+
+<p>
+    A horse&rsquo;s eyes became <a href="eye-colour.html">thirteen ordinary genes</a>. Nothing
+    below has been seen on a horse. The first four are the ones that could be
+    <em>wrong</em> rather than merely unseen; the rest is "does it read".
+</p>
+
+<ol>
+    <li><strong>Is the third eye on the forehead?</strong>
+        <code>CoatRegions.thirdEyeRect</code> is {18, 32, 4, 2} on an adult and {22, 8, 4, 2}
+        on a foal, derived from <code>HorseSkinGeometry</code>&rsquo;s box-UV tables and
+        <strong>never rendered</strong>. Unlike the two real eyes there is nothing on the
+        template at that spot to check it against. Spawn a horse with
+        <code>horsegenetics.eye_third=Rgt/Rgt</code> and look at its head from in front and
+        from above. If it is on the nose, the poll, or nowhere, the rect is wrong &mdash; the
+        head&rsquo;s <em>front</em> face is the obvious alternative and is wrong for a
+        different reason (the muzzle box covers it).</li>
+    <li><strong>Is <code>EyeSector.MIRRORED_EYE</code> the right eye?</strong> Breed a horse
+        <code>UL/UL</code> at <em>both</em> sector loci and walk round it. The sector should be
+        in the upper left of both eyes as you look at them. If it is upper-left on one side and
+        upper-right on the other, flip that constant.</li>
+    <li><strong>Do the two diagonal sectors read as anything?</strong>
+        <code>EyePatch.WEDGES</code> deliberately excludes them on the grounds that at four
+        texels a diagonal is two stray pixels. They are alleles here by the owner&rsquo;s call.
+        Look at <code>URLL/URLL</code> and decide.</li>
+    <li><strong>Does an invisible iris look like a hole or like a bug?</strong>
+        <code>Inv/Inv</code> leaves the coat running through where the eye is. On a dark horse
+        that may be indistinguishable from an ordinary eye; on a pale one it should be
+        striking. Same question for an invisible sclera.</li>
+    <li><strong>Is brown the right brown?</strong> <em>Every</em> horse in the world now has a
+        painted brown iris where it used to have the template&rsquo;s flat black. That is one
+        of the largest visual changes the mod has ever made and it lands on every horse at
+        once. <code>EyeHue.BROWN</code> is the one line.</li>
+    <li><strong>Does a sector read as heterochromia at riding distance</strong>, or only in the
+        inventory screen?</li>
+    <li><strong>Do the glows read?</strong> A glowing iris should be a lamp; a glowing sclera
+        should be a lit ring with a hole in it. Both need the emissive pass, so check them
+        at night.</li>
+    <li><strong>Chaos.</strong> Two chaos-eyed horses should not match, and one horse should
+        regenerate the same colour every time you reload.</li>
+    <li><strong>A splashed white horse</strong> should still have two blue eyes usually, one
+        blue eye sometimes, and a wedge rarely &mdash; and the genotype screen should now
+        <em>show</em> it carrying <code>MBl/MBl</code>. A cremello should be light blue, a
+        tiger-eye horse gold, a champagne one of gold / brown / green.</li>
+    <li><strong>Breeding.</strong> A blue-eyed splash bred to a plain horse should throw
+        blue-eyed <em>carriers</em>, and blue eyes should reappear a generation later on foals
+        with no splash at all. That is the design working, not a bug.</li>
+</ol>
+
 <h2 id="behaviour-batch">&sect;0-BT &mdash; Twenty-seven behaviour genes, none of them ever seen (2026-09-10, NOT looked at in game)</h2>
 
 <p>The whole behaviour family &mdash; <a href="roadmap.html#behaviour-left">&sect;12.2</a>'s
