@@ -247,6 +247,10 @@ public final class DesignerApi {
                     .kv("family", GeneFamily.of(g).name())
                     .kv("alwaysCarried", EditorRules.alwaysCarried(g))
                     .kv("influencesCoat", Genes.influencesCoat(g))
+                    // Writes eye alleles when a horse is made (champagne, the
+                    // white loci) - the breed designer names these as the reason
+                    // a breed's eyes are not the brown it picked.
+                    .kv("eyeRequest", g instanceof com.example.horsegenetics.common.genetics.eye.EyeRequestContribution)
                     .key("alleles").arr();
             for (Allele a : g.alleles()) {
                 j.obj().kv("token", a.token()).kv("label", a.label()).endObj();
@@ -363,10 +367,10 @@ public final class DesignerApi {
         return j.endArr().toString();
     }
 
-    /** "(none)" plus every breed, in {@link com.example.horsegenetics.common.breed.Breeds#all()} order. */
+    /** "Feral Mixed" plus every breed, in {@link com.example.horsegenetics.common.breed.Breeds#all()} order. */
     @JSExport
     public static String breedsJson() {
-        Json j = new Json().arr().val("(none)");
+        Json j = new Json().arr().val(com.example.horsegenetics.common.breed.Breeds.FERAL_MIXED.name());
         for (Breed b : editor().breeds()) {
             j.val(b.name());
         }
@@ -1394,10 +1398,15 @@ public final class DesignerApi {
      * else with.
      *
      * <p>It is a real {@code BreedFounder.roll}: the pool draw, the wild-type
-     * forcing, the geometric magic draw, the stat targets and the epigenetic
-     * bands. So the horses the designer shows are the horses a herd of this
-     * breed would actually be made of, and "my pool looks right but every horse
-     * comes out black" is answerable in the tool.
+     * forcing, the stat targets and the epigenetic bands. So the horses the
+     * designer shows are the horses a herd of this breed would actually be made
+     * of, and "my pool looks right but every horse comes out black" is
+     * answerable in the tool.
+     *
+     * <p>{@code eyes} is the founder's eyes as {@code Eyes.resolve} paints them
+     * - after champagne, cream and the white patterns have written their
+     * requests - so the eye step can show the eyes a breed really gets rather
+     * than the ones its pools name.
      */
     @JSExport
     public static String breedFounderJson(String json, int seed) {
@@ -1409,36 +1418,105 @@ public final class DesignerApi {
                     .kv("error", String.valueOf(e.getMessage())).endObj().toString();
         }
         Genome genome = BreedFounder.roll(breed, new SeededRng(seed));
-        return new Json().obj()
+        com.example.horsegenetics.common.genetics.eye.EyePhenotype eyes =
+                com.example.horsegenetics.common.genetics.eye.Eyes.resolve(genome.genotype(), genome.epigenome());
+        Json j = new Json().obj()
                 .kv("ok", true)
                 .kv("genotype", genome.genotypeCode())
                 .kv("epigenome", genome.epigenome().toCode())
-                .endObj().toString();
+                .key("eyes").obj();
+        eyeJson(j.key("right"), eyes.right());
+        eyeJson(j.key("left"), eyes.left());
+        j.kv("third", eyes.hasThird());
+        return j.endObj().endObj().toString();
+    }
+
+    private static void eyeJson(Json j, com.example.horsegenetics.common.genetics.eye.EyeRender e) {
+        j.obj()
+                .kv("iris", e.iris().hue().token())
+                .kv("irisRgb", e.iris().rgb())
+                .kv("sclera", e.sclera().hue().token())
+                .kv("scleraRgb", e.sclera().rgb())
+                .kv("sectoral", e.sectoral())
+                .kv("sectorRgb", e.sectorInk().rgb())
+                .kv("glowIris", e.glowIris())
+                .kv("glowSclera", e.glowSclera())
+                .endObj();
     }
 
     /**
-     * The breed's <b>plate</b> - {@code BreedFounder.plate}: a real founder with
-     * no magical gene the breed did not ask for. The breed designer's preview
-     * is this rather than a raw roll, because "reroll the example founder"
-     * means "show me another horse with the traits I picked", and a stray
-     * galaxy coat from the wild magic draw is not one of them. The herd strip
-     * beside it still uses the real roll.
+     * Every eye colour the eye loci share ({@code EyeHue}), with its fixed
+     * colour, so the breed designer can draw its eye step as swatches rather
+     * than as a list of allele tokens. Chaos and Invisible have no colour of
+     * their own; their {@code rgb} is meaningless and the page draws them as
+     * patterns.
      */
     @JSExport
-    public static String breedPlateJson(String json, int seed) {
-        Breed breed;
-        try {
-            breed = BreedSpecParser.parse(json, "the editor", m -> { });
-        } catch (RuntimeException e) {
-            return new Json().obj().kv("ok", false)
-                    .kv("error", String.valueOf(e.getMessage())).endObj().toString();
+    public static String eyeHuesJson() {
+        Json j = new Json().arr();
+        for (com.example.horsegenetics.common.genetics.eye.EyeHue h
+                : com.example.horsegenetics.common.genetics.eye.EyeHue.values()) {
+            j.obj().kv("token", h.token()).kv("label", h.label()).kv("rgb", h.fixedRgb()).endObj();
         }
-        Genome genome = BreedFounder.plate(breed, new SeededRng(seed));
-        return new Json().obj()
-                .kv("ok", true)
-                .kv("genotype", genome.genotypeCode())
-                .kv("epigenome", genome.epigenome().toCode())
-                .endObj().toString();
+        return j.endArr().toString();
+    }
+
+    /**
+     * Every gene whose epigenetic numbers <b>are a colour</b> - three channels
+     * named {@code <prefix>_r/_g/_b} - or <b>a hue</b> (a scalar named for one,
+     * spanning 0-360). The breed designer's colour search offers exactly these:
+     * type a colour, see the genes that can be locked to it. Derived from each
+     * gene's schema, never listed.
+     */
+    @JSExport
+    public static String colourableJson() {
+        Json j = new Json().arr();
+        for (Gene g : Genes.codeOrder()) {
+            List<EpiValue> values = g.epiSchema().values();
+            java.util.Set<String> names = new java.util.HashSet<>();
+            for (EpiValue v : values) {
+                names.add(v.name());
+            }
+            List<String> rgb = new ArrayList<>();
+            List<String> hues = new ArrayList<>();
+            for (EpiValue v : values) {
+                String n = v.name();
+                if (n.endsWith("_r") && v.kind() == EpiValue.Kind.SCALAR) {
+                    String prefix = n.substring(0, n.length() - 2);
+                    if (names.contains(prefix + "_g") && names.contains(prefix + "_b")) {
+                        rgb.add(prefix);
+                    }
+                } else if (v.kind() == EpiValue.Kind.SCALAR && n.toLowerCase(java.util.Locale.ROOT).contains("hue")
+                        && v.min() >= 0 && v.max() <= 360 && v.max() - v.min() >= 180) {
+                    hues.add(n);
+                }
+            }
+            if (rgb.isEmpty() && hues.isEmpty()) {
+                continue;
+            }
+            j.obj().kv("key", g.key()).key("rgb").arr();
+            for (String s : rgb) {
+                j.val(s);
+            }
+            j.endArr().key("hue").arr();
+            for (String s : hues) {
+                j.val(s);
+            }
+            j.endArr().endObj();
+        }
+        return j.endArr().toString();
+    }
+
+    /**
+     * The multiplier a 1-10 breed score maps to on {@code axis} ("speed",
+     * "health" or "jump") - {@code BreedStatCurve.factor}, so the designer's
+     * explanation of a score quotes the game's own curve.
+     */
+    @JSExport
+    public static double statFactor(String axis, double score) {
+        return com.example.horsegenetics.common.breed.BreedStatCurve.factor(
+                com.example.horsegenetics.common.trait.StatAxis.valueOf(axis.toUpperCase(java.util.Locale.ROOT)),
+                score);
     }
 
     /**

@@ -42,10 +42,14 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 55 },
       { "pair": "N/N", "weight": 45 }
+    ],
+    "horsegenetics.gys1": [
+      { "pair": "P/N", "weight": 2.5 },
+      { "pair": "N/N", "weight": 97.5 }
     ]
   },
   "notes": [
     "The tallest breed - the scale band tops out around the natural draught ceiling. Heavy feathering (roadmap), Roman nose (not modelled).",
-    "CPL, PSSM: age-related, folded into heartiness."
+    "PSSM carried at the wild rate (GYS1); CPL is not modelled."
   ]
 }

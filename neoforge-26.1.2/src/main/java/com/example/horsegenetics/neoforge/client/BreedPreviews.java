@@ -26,9 +26,9 @@ import java.util.Map;
  * draw out of many, which is exactly what a plate in a field guide is, and the
  * entry says so rather than implying every Fjord looks like this.
  *
- * <p>Through {@link BreedFounder#plate}, not {@code roll}: the plate carries no
- * magical gene the breed does not name. A wild founder's stray dose of magic
- * put galaxy coats and the like on breeds that have nothing to do with them.
+ * <p>A founder carries no magical gene or disorder its breed does not name
+ * (only Feral Mixed rolls those), so the plate never shows a galaxy coat on a
+ * breed that has nothing to do with one.
  */
 public final class BreedPreviews {
 
@@ -72,7 +72,7 @@ public final class BreedPreviews {
         try {
             // Seeded from the id, so the plate for a breed is the same plate on
             // every world, every session and every player's machine.
-            Genome genome = BreedFounder.plate(breed, new SeededRng(seedFor(breed.id())));
+            Genome genome = BreedFounder.roll(breed, new SeededRng(seedFor(breed.id())));
             GENOMES.put(breed.id(), genome);
             return genome;
         } catch (RuntimeException cannotRoll) {

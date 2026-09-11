@@ -91,7 +91,11 @@ window.HG = window.HG || {};
     $("tab-step").addEventListener("click", function () { tab = "step"; renderPanel(); });
     $("tab-chosen").addEventListener("click", function () { tab = "chosen"; renderPanel(); });
     $("btn-back").addEventListener("click", function () { go(current - 1); });
-    $("btn-next").addEventListener("click", function () { go(current + 1); });
+    // The last step has nowhere to go next, so its button is the export -
+    // a dead "Next" at the end read as the page being broken.
+    $("btn-next").addEventListener("click", function () {
+      if (current === bd.steps.length - 1) exportJson(); else go(current + 1);
+    });
     $("btn-reroll").addEventListener("click", function () { seed = (seed + 1) | 0; renderFounders(); });
     $("btn-export").addEventListener("click", exportJson);
     $("file-input").addEventListener("change", function (e) {
@@ -147,10 +151,9 @@ window.HG = window.HG || {};
       panel.appendChild(host);
       step.render(host);
       $("btn-back").disabled = current === 0;
-      $("btn-next").disabled = current === bd.steps.length - 1;
       $("step-of").textContent = (current + 1) + " of " + bd.steps.length;
       var next = bd.steps[current + 1];
-      $("btn-next").textContent = next ? "Next: " + next.title + " →" : "Next →";
+      $("btn-next").textContent = next ? "Next: " + next.title + " →" : "Export breed ⤓";
     }
     panel.scrollTop = keep;
   }
@@ -185,7 +188,7 @@ window.HG = window.HG || {};
   function renderVerdict() { fillVerdict($("verdict"), false); var long = $("verdict-long"); if (long) fillVerdict(long, true); }
 
   function fillVerdict(host, long) {
-    var v = JSON.parse(bd.api.checkBreedJson(fileForCheck()));
+    var v = JSON.parse(bd.api.checkBreedJson(bd.fileForCheck()));
     host.innerHTML = "";
     if (v.ok) {
       host.appendChild(el("span", { "class": "ok", text: long
@@ -197,14 +200,6 @@ window.HG = window.HG || {};
     if (long && v.warnings && v.warnings.length) {
       host.appendChild(el("ul", {}, v.warnings.map(function (w) { return el("li", { text: w }); })));
     }
-  }
-
-  /** The file with a placeholder id/name, so an unnamed breed still previews and verdicts. */
-  function fileForCheck() {
-    var s = Object.assign({}, bd.state);
-    if (!s.id) s.id = "unnamed_breed";
-    if (!s.name) s.name = "Unnamed breed";
-    return bd.toJson(s);
   }
 
   // ---- import / export --------------------------------------------------
@@ -260,15 +255,14 @@ window.HG = window.HG || {};
   }
 
   /**
-   * The example founder - BreedFounder.plate, so no stray magic the author did
-   * not pick - and a strip of real founder rolls under it, which do carry the
-   * wild magic draw. A breed is judged on a herd, not on one horse: "they are
-   * all the same" and "one in six is a colour it should not be" are only
-   * visible in several.
+   * The example founder - a real BreedFounder.roll, exactly what a wild herd
+   * of this breed would be made of - and a strip of six more under it. A breed
+   * is judged on a herd, not on one horse: "they are all the same" and "one in
+   * six is a colour it should not be" are only visible in several.
    */
   function renderFounders() {
-    var json = fileForCheck();
-    var one = JSON.parse(bd.api.breedPlateJson(json, seed));
+    var json = bd.fileForCheck();
+    var one = JSON.parse(bd.api.breedFounderJson(json, seed));
     var info = $("founder-info");
     if (!one.ok) {
       info.textContent = "The file does not load yet: " + one.error;

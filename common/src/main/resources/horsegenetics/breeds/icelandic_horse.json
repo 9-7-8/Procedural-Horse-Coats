@@ -8,7 +8,6 @@
     "minecraft:jagged_peaks",
     "minecraft:snowy_slopes"
   ],
-  "hardy": true,
   "stats": {
     "speed": 5,
     "jump": 4,

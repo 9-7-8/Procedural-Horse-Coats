@@ -61,10 +61,10 @@ class BreedFounderTest {
             // near double speed. That is the whole point of the change.
             Traits t = HorseTraits.resolve(g.genotype(), g.epigenome(), true);
             if (isSick(t)) {
-                // A Thoroughbred is not a hardy breed, so a founder can be born
-                // with one of the dominant disorders and be genuinely slower for
-                // it. That is the disorder working, not the band failing - the
-                // claim here is about the breed's speed, so ask a well horse.
+                // A breed carries only the disorders its sheet names, and the
+                // Thoroughbred's names none - but should one be added, a sick
+                // founder is genuinely slower. That is the disorder working, not
+                // the band failing; the claim here is the breed's speed.
                 continue;
             }
             // "Near double" over every one of 60 seeds. 1.75 rather than 1.85
@@ -95,38 +95,6 @@ class BreedFounderTest {
         Genotype g = roll("friesian", 7);
         assertFalse(g.shows(Genes.MAGIC_SPEED));
         assertFalse(g.shows(Genes.BODY_SIZE));
-    }
-
-    @Test
-    void magicGenesAppearRoughlyAtTheDeclaredRate() {
-        int withMagic = 0;
-        int total = 600;
-        int maxPicks = 0;
-        for (long s = 0; s < total; s++) {
-            Genotype g = roll("morgan", s * 7L + 1);
-            int picks = 0;
-            for (var gene : Genes.magicalOrder()) {
-                if (gene.key().equals("horsegenetics.body_size")
-                        || gene.key().equals("horsegenetics.magic_speed")
-                        || gene.key().equals("horsegenetics.magic_health")
-                        || gene.key().equals("horsegenetics.magic_jump")
-                        || gene.key().equals("horsegenetics.test")) {
-                    continue;
-                }
-                // count "carries a variant copy" - milk / verdant / particle paint
-                // nothing, so Genotype.shows() would miss them
-                if (!g.pair(gene).homozygousFor(gene.defaultAllele())) {
-                    picks++;
-                }
-            }
-            if (picks > 0) {
-                withMagic++;
-            }
-            maxPicks = Math.max(maxPicks, picks);
-        }
-        double rate = withMagic / (double) total;
-        assertTrue(rate > 0.12 && rate < 0.32, "magic-carrier rate was " + rate);
-        assertTrue(maxPicks <= 10, "geometric draw exceeded its cap: " + maxPicks);
     }
 
     @Test

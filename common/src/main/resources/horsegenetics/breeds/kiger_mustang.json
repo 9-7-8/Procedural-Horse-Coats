@@ -8,7 +8,6 @@
     "minecraft:wooded_badlands",
     "minecraft:savanna"
   ],
-  "hardy": true,
   "stats": {
     "speed": 7,
     "jump": 5,
@@ -56,10 +55,18 @@
     "horsegenetics.patn2": [
       { "pair": "PATN2/n", "weight": 12 },
       { "pair": "n/n", "weight": 88 }
+    ],
+    "horsegenetics.ppib": [
+      { "pair": "herda/N", "weight": 3.4 },
+      { "pair": "N/N", "weight": 96.6 }
+    ],
+    "horsegenetics.gbe1": [
+      { "pair": "gbed/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
     ]
   },
   "notes": [
     "Strongly dun (dorsal stripe + leg bars) - the near-fixed dun does this. Some carry the leopard complex.",
-    "HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related."
+    "HERDA, GBED: both carried at the wild rate (PPIB, GBE1)."
   ]
 }

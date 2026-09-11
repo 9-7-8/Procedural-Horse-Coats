@@ -7,7 +7,6 @@
     "minecraft:taiga",
     "minecraft:snowy_slopes"
   ],
-  "hardy": true,
   "stats": {
     "speed": 4,
     "jump": 4,

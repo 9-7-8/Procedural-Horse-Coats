@@ -56,8 +56,7 @@ public final class BreedSpecParser {
     /** Keys a breed file may carry. Anything else is a hard error. */
     private static final Set<String> KEYS = Set.of(
             "id", "name", "description", "kind", "commonness", "spawn_weight", "biomes",
-            "spawn", "spawn_time", "price", "hardy", "magic_chance", "magic_whitelist",
-            "magic_blacklist", "stats", "genes", "bands", "notes");
+            "spawn", "spawn_time", "price", "stats", "genes", "bands", "notes");
 
     private BreedSpecParser() {
     }
@@ -181,18 +180,6 @@ public final class BreedSpecParser {
             b.price((int) asNumber(p.get(0), "price[0]"), (int) asNumber(p.get(1), "price[1]"));
         }
 
-        if (bool(root, "hardy", false)) {
-            b.hardy();
-        }
-        if (root.containsKey("magic_chance")) {
-            b.magicChance(asNumber(root.get("magic_chance"), "magic_chance"));
-        }
-        for (String key : strings(root, "magic_whitelist")) {
-            b.magicWhitelist(key);
-        }
-        for (String key : strings(root, "magic_blacklist")) {
-            b.magicBlacklist(key);
-        }
         for (String note : strings(root, "notes")) {
             b.note(note);
         }
@@ -449,16 +436,6 @@ public final class BreedSpecParser {
 
     private static String string(Map<String, Object> o, String key, String fallback) {
         return o.containsKey(key) ? asString(o.get(key), key) : fallback;
-    }
-
-    private static boolean bool(Map<String, Object> o, String key, boolean fallback) {
-        if (!o.containsKey(key)) {
-            return fallback;
-        }
-        if (o.get(key) instanceof Boolean value) {
-            return value;
-        }
-        throw new IllegalArgumentException("\"" + key + "\" must be true or false");
     }
 
     @SuppressWarnings("unchecked")

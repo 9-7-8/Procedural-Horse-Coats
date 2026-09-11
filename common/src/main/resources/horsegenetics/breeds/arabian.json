@@ -45,10 +45,22 @@
       { "pair": "W15/N", "weight": 1 },
       { "pair": "W23/N", "weight": 1 },
       { "pair": "N/N", "weight": 71 }
+    ],
+    "horsegenetics.prkdc": [
+      { "pair": "scid/N", "weight": 2.8 },
+      { "pair": "N/N", "weight": 97.2 }
+    ],
+    "horsegenetics.toe1": [
+      { "pair": "ca/N", "weight": 2.4 },
+      { "pair": "N/N", "weight": 97.6 }
+    ],
+    "horsegenetics.myo5a": [
+      { "pair": "lfs/N", "weight": 2.2 },
+      { "pair": "N/N", "weight": 97.8 }
     ]
   },
   "notes": [
     "Dished face and high-carried tail - head profile is not modelled; tail carriage could be a pose tweak (roadmap).",
-    "SCID, CA, LFS: early-lethal foal disorders - candidate genes, see roadmap."
+    "SCID, CA, LFS: early-lethal foal disorders - carried at the wild rate (PRKDC, TOE1, MYO5A)."
   ]
 }

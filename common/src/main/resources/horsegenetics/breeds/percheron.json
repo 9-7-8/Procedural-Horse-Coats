@@ -37,9 +37,13 @@
       { "pair": "G3/N", "weight": 58 },
       { "pair": "G3/G3", "weight": 30 },
       { "pair": "N/N", "weight": 12 }
+    ],
+    "horsegenetics.gys1": [
+      { "pair": "P/N", "weight": 2.5 },
+      { "pair": "N/N", "weight": 97.5 }
     ]
   },
   "notes": [
-    "Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 / anhidrosis are age-related."
+    "Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 carried at the wild rate (GYS1); anhidrosis is not modelled."
   ]
 }

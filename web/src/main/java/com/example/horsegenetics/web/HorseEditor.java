@@ -391,7 +391,7 @@ public final class HorseEditor {
     }
 
     /**
-     * Pick a breed. Index 0 is "(none)"; anything else rolls a fresh wild
+     * Pick a breed. Index 0 is Feral Mixed (no preset); anything else rolls a fresh wild
      * founder of that breed - genotype, epigenome and sex - into the editor,
      * exactly as the screen's breed dropdown does. You can still hand-edit any
      * locus afterwards.

@@ -299,7 +299,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         int rgb;
     }
 
-    /** 0 = no preset; 1..N = Breeds.all().get(index-1). A preset also stamps the spawned horse's breed. */
+    /** 0 = Feral Mixed (no preset); 1..N = Breeds.all().get(index-1). A preset also stamps the spawned horse's breed. */
     private int breedIndex = 0;
     private final java.util.List<Breed> breedChoices = Breeds.all();
 
@@ -422,7 +422,12 @@ public final class CustomHorseSpawnScreen extends Screen {
                 }
             }
             case BREED -> {
-                out.add("(none)");
+                // Index 0 is Feral Mixed - the unbred population, and what a
+                // horse with no breed label already is. Every other entry is
+                // Breeds.all(), drop-in breeds from .minecraft/phc/breeds/
+                // included: they are registered in the mod constructor on the
+                // client too, before any screen can open.
+                out.add(Breeds.FERAL_MIXED.name());
                 for (Breed b : breedChoices) {
                     out.add(b.name());
                 }
@@ -1020,7 +1025,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         // characters was a guess at what fitted a 96px button and was wrong in
         // both directions - it truncated names that would have fitted and let
         // through ones that did not. truncate() measures.
-        String breedName = breedIndex == 0 ? "(none)" : breedChoices.get(breedIndex - 1).name();
+        String breedName = breedIndex == 0 ? Breeds.FERAL_MIXED.name() : breedChoices.get(breedIndex - 1).name();
         breedName = truncate(breedName, RIGHT_W - this.font.width("Breed:  ▾") - 8);
         final int breedBtnX = rx;
         final int breedBtnY = ry;

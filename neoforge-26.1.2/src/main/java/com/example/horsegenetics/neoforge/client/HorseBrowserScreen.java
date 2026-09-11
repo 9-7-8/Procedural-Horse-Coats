@@ -2108,12 +2108,12 @@ public final class HorseBrowserScreen extends Screen {
         });
     }
 
-    /** Built from hardiness, spawn weight and magic - see {@link #drawBreedDetail}. */
+    /** Built from spawn weight and magic - see {@link #drawBreedDetail}. */
     private static String dispositionLine(Breed breed) {
         StringBuilder sb = new StringBuilder();
-        sb.append(breed.hardy()
-                ? "Hardy - shrugs off the disorders that trouble other lines."
-                : "Ordinary constitution.");
+        // A breed carries only the disorders its sheet lists, and those are
+        // listed under "Health to watch for" - nothing else can turn up.
+        sb.append("Carries no disorder but the ones listed below.");
         if (breed.magical()) {
             sb.append(" Carries magic as a matter of course rather than by accident.");
         }

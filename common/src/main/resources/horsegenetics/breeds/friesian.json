@@ -19,11 +19,22 @@
     ],
     "horsegenetics.agouti": [
       { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.acan": [
+      { "pair": "D1/N", "weight": 0.7874 },
+      { "pair": "D2/N", "weight": 0.7874 },
+      { "pair": "D3/N", "weight": 0.7874 },
+      { "pair": "D4/N", "weight": 0.7874 },
+      { "pair": "N/N", "weight": 96.8504 }
+    ],
+    "horsegenetics.megaesophagus": [
+      { "pair": "meg/N", "weight": 1.7 },
+      { "pair": "N/N", "weight": 98.3 }
     ]
   },
   "notes": [
     "Jet black, heavy feathering, thick wavy mane and tail. Fixed E/E a/a, no white or dilution genes at all.",
     "Feathering + wavy mane: roadmap render items.",
-    "Dwarfism, megaesophagus: dwarfism exists (ACAN); megaesophagus is early-lethal - candidate gene, roadmap."
+    "Dwarfism, megaesophagus: dwarfism exists (ACAN); megaesophagus carried at the wild rate too."
   ]
 }

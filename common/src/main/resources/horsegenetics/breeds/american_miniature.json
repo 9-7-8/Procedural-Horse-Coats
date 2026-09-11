@@ -73,6 +73,13 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 60 },
       { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.acan": [
+      { "pair": "D1/N", "weight": 0.7874 },
+      { "pair": "D2/N", "weight": 0.7874 },
+      { "pair": "D3/N", "weight": 0.7874 },
+      { "pair": "D4/N", "weight": 0.7874 },
+      { "pair": "N/N", "weight": 96.8504 }
     ]
   },
   "notes": [

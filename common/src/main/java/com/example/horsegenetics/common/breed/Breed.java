@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,10 +39,8 @@ import java.util.Set;
  *   <li><b>Coat genes</b> it does not name are left <b>wild</b> - breeds are
  *       visually unified, so a Friesian is jet black because nothing switches
  *       any pattern or dilution on.</li>
- *   <li><b>Disorder genes</b> it does not name keep their <b>global</b> founder
- *       rates, so any bred line can still turn up a carrier - unless the breed
- *       is {@link Builder#hardy() hardy}, which forces every implemented
- *       disorder locus to clear.</li>
+ *   <li><b>Disorder genes</b> it does not name are <b>clear</b>: a breed only
+ *       ever carries the disorders its breed sheet lists, in its pools.</li>
  *   <li><b>The four magical body-stat genes</b> are driven by
  *       {@link #statTargets()}: an axis with a {@link TargetBand} makes every
  *       founder carry that gene's pushing allele, and the gene lands the horse
@@ -54,8 +51,8 @@ import java.util.Set;
  *   <li><b>Any other gene's epigenetic numbers</b> may be pinned by
  *       {@link #bands()} - "deeply black", not merely "black". See
  *       {@link BreedBands}.</li>
- *   <li><b>Other magical genes</b> appear via the geometric {@link #magicChance}
- *       draw, honouring {@link #magicWhitelist} / {@link #magicBlacklist}.</li>
+ *   <li><b>Magical genes</b> it does not name are <b>wild</b>. There is no
+ *       stray magic: only {@link Breeds#FERAL_MIXED} rolls random magic.</li>
  * </ul>
  *
  * <p>Real-world traits this mod cannot model yet - breed-specific mane shapes,
@@ -75,10 +72,6 @@ public record Breed(
         Map<String, List<Combo>> genePools,
         StatScores scores,
         BreedBands bands,
-        double magicChance,
-        Set<String> magicWhitelist,
-        Set<String> magicBlacklist,
-        boolean hardy,
         List<String> notes,
         Optional<PriceRange> price,
         String description,
@@ -167,8 +160,6 @@ public record Breed(
         genePools = ordered(genePools);
         scores = scores == null ? StatScores.NONE : scores;
         bands = bands == null ? BreedBands.NONE : bands;
-        magicWhitelist = orderedSet(magicWhitelist);
-        magicBlacklist = orderedSet(magicBlacklist);
         notes = List.copyOf(notes);
         price = price == null ? Optional.empty() : price;
         description = description == null ? "" : description;
@@ -181,10 +172,6 @@ public record Breed(
             copy.put(e.getKey(), List.copyOf(e.getValue()));
         }
         return Collections.unmodifiableMap(copy);
-    }
-
-    private static Set<String> orderedSet(Set<String> values) {
-        return Collections.unmodifiableSet(new LinkedHashSet<>(values));
     }
 
     public boolean constrains(String geneKey) {
@@ -275,10 +262,6 @@ public record Breed(
         private Optional<Range> health = Optional.empty();
         private Optional<Range> size = Optional.empty();
         private final BreedBands.Builder bands = BreedBands.builder();
-        private double magicChance = 0.20;
-        private final Set<String> whitelist = new LinkedHashSet<>();
-        private final Set<String> blacklist = new LinkedHashSet<>();
-        private boolean hardy = false;
         private final List<String> notes = new ArrayList<>();
         private Optional<PriceRange> price = Optional.empty();
         private String description = "";
@@ -447,30 +430,6 @@ public record Breed(
             return this;
         }
 
-        public Builder magicChance(double p) {
-            this.magicChance = p;
-            return this;
-        }
-
-        public Builder magicWhitelist(String... geneKeys) {
-            for (String s : geneKeys) {
-                whitelist.add(s);
-            }
-            return this;
-        }
-
-        public Builder magicBlacklist(String... geneKeys) {
-            for (String s : geneKeys) {
-                blacklist.add(s);
-            }
-            return this;
-        }
-
-        public Builder hardy() {
-            this.hardy = true;
-            return this;
-        }
-
         public Builder note(String s) {
             notes.add(s);
             return this;
@@ -490,7 +449,7 @@ public record Breed(
             return new Breed(id, name, magical, biomes, spawnWeight,
                     sourcesNamed ? sources : BreedSource.ALL, pools,
                     new StatScores(speed, jump, health, size), bands.build(),
-                    magicChance, whitelist, blacklist, hardy, notes, price,
+                    notes, price,
                     description, spawnTime);
         }
     }

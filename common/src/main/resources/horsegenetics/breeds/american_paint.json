@@ -64,6 +64,18 @@
     "horsegenetics.pax3": [
       { "pair": "SW2/N", "weight": 30 },
       { "pair": "N/N", "weight": 70 }
+    ],
+    "horsegenetics.scn4a": [
+      { "pair": "H/N", "weight": 1.2 },
+      { "pair": "N/N", "weight": 98.8 }
+    ],
+    "horsegenetics.ppib": [
+      { "pair": "herda/N", "weight": 3.4 },
+      { "pair": "N/N", "weight": 96.6 }
+    ],
+    "horsegenetics.gys1": [
+      { "pair": "P/N", "weight": 2.5 },
+      { "pair": "N/N", "weight": 97.5 }
     ]
   },
   "notes": [

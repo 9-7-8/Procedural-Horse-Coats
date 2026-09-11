@@ -44,8 +44,6 @@ class BreedSpecParserTest {
         assertEquals(BreedSource.ALL, b.sources(), "a breed that names no source gets every source");
         assertTrue(b.biomes().isEmpty());
         assertTrue(b.price().isEmpty(), "an unpriced breed is priced by HorsePrices, not here");
-        assertFalse(b.hardy());
-        assertEquals(0.20, b.magicChance());
         assertTrue(b.scores().isEmpty(), "no stats block leaves every axis wild");
         assertTrue(b.genePools().isEmpty());
         assertTrue(b.bands().isEmpty());
@@ -172,8 +170,7 @@ class BreedSpecParserTest {
                 {"id": "x", "name": "X", "kind": "magical", "commonness": "rare",
                  "spawn": ["cowboy", "spawn_egg"],
                  "biomes": ["minecraft:plains"],
-                 "price": [8, 14], "hardy": true, "magic_chance": 0.4,
-                 "magic_whitelist": ["horsegenetics.lycan"],
+                 "price": [8, 14],
                  "description": "A test breed.", "spawn_time": "night",
                  "stats": {"speed": 9, "size": [1.1, 1.4]},
                  "genes": {"horsegenetics.extension": [ {"pair": "E/e", "weight": 3} ]},

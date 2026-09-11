@@ -574,7 +574,7 @@ window.HG = window.HG || {};
       step();
       // No fixed character cut: button() fits its label to the width, which is
       // what the screen's truncate() now does too.
-      var breedName = breeds[state.breedIndex] || "(none)";
+      var breedName = breeds[state.breedIndex] || "Feral Mixed";
       var by = ry;
       button(rx, ry, RIGHT_W, 20, "Breed: " + breedName + " ▾", function () {
         dd = {

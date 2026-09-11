@@ -7,7 +7,6 @@
     "minecraft:forest",
     "minecraft:meadow"
   ],
-  "hardy": true,
   "stats": {
     "speed": 6,
     "jump": 6,

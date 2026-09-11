@@ -24,8 +24,8 @@ import java.util.Optional;
  *
  * <p><b>It omits every field that is at its default.</b> A breed file should
  * read as the handful of decisions someone actually made, not as a form with
- * every box filled in; a file that spells out {@code "magic_chance": 0.2} tells
- * a later reader that the number was chosen, which is a lie.
+ * every box filled in; a file that spells out {@code "commonness": "moderate"} tells
+ * a later reader that the tier was chosen, which is a lie.
  */
 public final class BreedSpecWriter {
 
@@ -72,18 +72,6 @@ public final class BreedSpecWriter {
         if (price.isPresent()) {
             fields.add(field("price", inlineArray(List.of(
                     String.valueOf(price.get().min()), String.valueOf(price.get().max())))));
-        }
-        if (breed.hardy()) {
-            fields.add(field("hardy", "true"));
-        }
-        if (breed.magicChance() != 0.20) {
-            fields.add(field("magic_chance", number(breed.magicChance())));
-        }
-        if (!breed.magicWhitelist().isEmpty()) {
-            fields.add(field("magic_whitelist", inlineArray(quoteAll(breed.magicWhitelist()))));
-        }
-        if (!breed.magicBlacklist().isEmpty()) {
-            fields.add(field("magic_blacklist", inlineArray(quoteAll(breed.magicBlacklist()))));
         }
         String stats = stats(breed.scores());
         if (stats != null) {

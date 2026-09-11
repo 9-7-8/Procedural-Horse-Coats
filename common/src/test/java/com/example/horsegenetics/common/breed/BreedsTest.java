@@ -75,13 +75,6 @@ class BreedsTest {
     }
 
     @Test
-    void hardyBreedsAreFlagged() {
-        assertTrue(Breeds.get("exmoor_pony").hardy());
-        assertTrue(Breeds.get("icelandic_horse").hardy());
-        assertFalse(Breeds.get("thoroughbred").hardy());
-    }
-
-    @Test
     void fixedColourBreedsPinExtensionAndAgouti() {
         assertTrue(Breeds.get("friesian").constrains("horsegenetics.extension"));
         assertTrue(Breeds.get("friesian").constrains("horsegenetics.agouti"));

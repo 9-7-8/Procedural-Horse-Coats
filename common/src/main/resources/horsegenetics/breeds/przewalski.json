@@ -7,7 +7,6 @@
     "minecraft:badlands",
     "minecraft:savanna"
   ],
-  "hardy": true,
   "stats": {
     "speed": 6,
     "jump": 3,

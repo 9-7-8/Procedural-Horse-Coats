@@ -44,15 +44,18 @@ import java.util.Set;
  *       founder landing inside {@link BreedStatCurve#heterozygousSize 0.7x to
  *       1.3x} carries one size copy and the wild type, while one outside it
  *       carries two;</li>
- *   <li><b>every other magical gene</b> is forced wild, then the geometric
- *       {@link #rollMagic magic-gene draw} switches a few back on.</li>
+ *   <li><b>every other magical gene</b> and <b>every disorder</b> the breed
+ *       does not name is forced wild. A breed is exactly its breed sheet: it
+ *       carries the magic it names and the disorders it names, and nothing
+ *       else. There is no stray magic and no background disorder rate.</li>
  * </ol>
- * Disorder genes the breed does not name keep whatever the base roll gave them
- * (so a bred line can still surface a carrier); a {@link Breed#hardy() hardy}
- * breed clears them too.
+ * Natural genes that are neither coat nor disorder (the performance loci) keep
+ * whatever the base roll gave them.
  *
  * <p>{@link Breeds#FERAL_MIXED} skips all of this and returns the base roll
- * untouched - the pre-breeds behaviour, exactly.
+ * untouched - the pre-breeds behaviour, exactly. It is the <b>only</b> source
+ * of random magical genes and of unlisted disorders: the unbred population,
+ * which no registry ever kept.
  *
  * <p>This is a <b>founder</b> path: the {@link Rng} is the wild spawn's, not a
  * seeded one, and consuming a few extra draws for genes that are then
@@ -117,42 +120,16 @@ public final class BreedFounder {
                 continue;
             }
             if (isMagical(gene)) {
-                g = g.with(wild(gene)); // cleared; the geometric draw adds some back
+                g = g.with(wild(gene)); // no stray magic - a breed carries what it names
                 continue;
             }
-            if (breed.hardy() && gene instanceof HealthContribution) {
-                g = g.with(wild(gene));
+            if (gene instanceof HealthContribution) {
+                g = g.with(wild(gene)); // no disorder the breed sheet does not list
             }
-            // otherwise: keep the base roll (disorder carriers, natural performance genes)
+            // otherwise: keep the base roll (the natural performance genes)
         }
 
-        g = rollMagic(breed, g, rng);
         return stampBands(breed, stampStatTargets(breed, Genome.of(g, rng), rng, size), rng);
-    }
-
-    /**
-     * <b>The breed's plate</b> - the horse the Breeds tab draws as "one horse this
-     * breed can produce". A real {@link #roll} with one difference: <b>no magical
-     * gene the breed does not name</b>. A wild founder keeps its small geometric
-     * dose of random magic, which is right for a herd and wrong for a field
-     * guide, where a Fjord shown with a galaxy coat teaches the reader that
-     * Fjords are galaxy-coated (owner-reported 2026-09-10). A magical gene the
-     * breed <i>does</i> name - in its gene pool or its magic whitelist - stays,
-     * and so do the four body-stat loci, which are how the breed's size and
-     * scores reach the horse at all.
-     */
-    public static Genome plate(Breed breed, Rng rng) {
-        Genome rolled = roll(breed, rng);
-        Genotype g = rolled.genotype();
-        for (Gene gene : Genes.magicalOrder()) {
-            String key = gene.key();
-            if (BODY_STAT_KEYS.contains(key) || breed.constrains(key)
-                    || breed.magicWhitelist().contains(key)) {
-                continue;
-            }
-            g = g.with(wild(gene));
-        }
-        return new Genome(g, rolled.epigenome());
     }
 
     /**
@@ -322,48 +299,6 @@ public final class BreedFounder {
     }
 
     // ------------------------------------------------------------------
-
-    private static Genotype rollMagic(Breed breed, Genotype g, Rng rng) {
-        List<Gene> pool = new ArrayList<>();
-        for (Gene gene : Genes.magicalOrder()) {
-            String key = gene.key();
-            if (BODY_STAT_KEYS.contains(key)) {
-                continue;
-            }
-            if (gene.feralOnly()) {
-                continue;   // the loop above forced it wild; do not hand it back
-            }
-            if (breed.magicBlacklist().contains(key)) {
-                continue;
-            }
-            if (!breed.magicWhitelist().isEmpty() && !breed.magicWhitelist().contains(key)) {
-                continue;
-            }
-            pool.add(gene);
-        }
-
-        double p = breed.magicChance();
-        int picks = 0;
-        while (picks < 10 && !pool.isEmpty() && rng.nextFloat() < p) {
-            Gene gene = pool.remove(rng.nextInt(pool.size()));
-            g = g.with(oneVariant(gene, rng));
-            picks++;
-            p *= 0.5;
-        }
-        return g;
-    }
-
-    /** A single random variant copy against the wild type. */
-    private static AllelePair oneVariant(Gene gene, Rng rng) {
-        List<Allele> variants = new ArrayList<>();
-        for (Allele a : gene.alleles()) {
-            if (!a.equals(gene.defaultAllele())) {
-                variants.add(a);
-            }
-        }
-        Allele v = variants.get(rng.nextInt(variants.size()));
-        return new AllelePair(v, gene.defaultAllele());
-    }
 
     private static AllelePair bodyStatPair(Breed breed, Gene gene, double size) {
         StatAxis axis = axisOf(gene);

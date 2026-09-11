@@ -7,7 +7,6 @@
     "minecraft:grove",
     "minecraft:snowy_plains"
   ],
-  "hardy": true,
   "stats": {
     "speed": 6,
     "jump": 5,

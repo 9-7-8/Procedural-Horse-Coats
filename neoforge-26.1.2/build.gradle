@@ -58,20 +58,44 @@ tasks.withType(JavaCompile).configureEach {
 // discovered as a mod resource pack - fold it into this module's own resources
 // at build time. `include 'assets/**'` keeps it from colliding with :common's
 // classpath-only `horsegenetics/names/**` word tables.
+// The gene pictures for the spawn egg's hover card. The wiki's icons are
+// 236x210 and the card draws them 64x57, so the jar gets its own copies at
+// exactly that size, written here at build time - nothing from wiki/ goes into
+// the jar as it is. Nearest-neighbour on purpose: a smooth resize makes
+// gradients that PNG compresses worse than the full-size originals (tried: the
+// jar grew), and the GUI draws textures unfiltered anyway. `_bay.png` and
+// `_sheet.png` are the bake's reference images, not icons.
+def geneIconsIn = rootProject.file("wiki/assets/gene-icons")
+def geneIconsOut = layout.buildDirectory.dir("generated/gene-icons")
+tasks.register('shrinkGeneIcons') {
+    inputs.dir(geneIconsIn)
+    outputs.dir(geneIconsOut)
+    doLast {
+        def dir = new File(geneIconsOut.get().asFile, "assets/horsegenetics/textures/gui/gene_icons")
+        dir.deleteDir()
+        dir.mkdirs()
+        geneIconsIn.listFiles().findAll { it.name.endsWith('.png') && !it.name.startsWith('_') }.each { f ->
+            def src = javax.imageio.ImageIO.read(f)
+            int w = 64
+            int h = (int) Math.round(src.height * (w / (double) src.width))
+            def dst = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+            def g = dst.createGraphics()
+            g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                    java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR)
+            g.drawImage(src, 0, 0, w, h, null)
+            g.dispose()
+            javax.imageio.ImageIO.write(dst, 'png', new File(dir, f.name))
+        }
+    }
+}
+
 processResources {
     from(project(":common").file("src/main/resources")) {
         include "assets/**"
     }
 
-    // The gene icons, for the spawn egg's hover card. Baked once, into the wiki
-    // (:common:bakeGeneIcons), and copied into the jar here rather than checked
-    // in a second time under src/main/resources. `_bay.png` and `_sheet.png`
-    // are the bake's own reference images, not icons.
-    from(rootProject.file("wiki/assets/gene-icons")) {
-        include "*.png"
-        exclude "_*"
-        into "assets/horsegenetics/textures/gui/gene_icons"
-    }
+    dependsOn tasks.named('shrinkGeneIcons')
+    from(geneIconsOut)
 
     // The mod version lived twice - here as `mod_version`, and again as a
     // literal in neoforge.mods.toml - and a release shipped a jar named 0.3.7
@@ -100,5 +124,10 @@ dependencies {
 tasks.named('jar', Jar) {
     from(project(':common').sourceSets.main.output) {
         exclude 'assets/**'
+        // Wiki and build tooling, not the game: the bakes that write the wiki's
+        // icons, pages, fixtures and facts (every *Tool is one - nothing in the
+        // game calls them), and the gene creator's example files.
+        exclude '**/*Tool.class', '**/*Tool$*.class'
+        exclude 'horsegenetics/example-genes/**'
     }
 }
