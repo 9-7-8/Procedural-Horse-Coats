@@ -94,6 +94,7 @@ window.HG.pages = {
                 { href: "known-gaps.html", text: "Known gaps & lessons", kind: "core", views: ["coding"] },
                 { href: "compatibility.html", text: "Mod compatibility", kind: "core", views: ["coding"] },
                 { href: "roadmap.html", text: "Roadmap / backlog", kind: "core", views: ["coding"] },
+                { href: "timeline-of-genes.html", text: "Timeline of genes", kind: "core", views: ["coding"] },
                 { href: "session-log.html", text: "Session log", kind: "core", views: ["coding"] }
             ]
         },

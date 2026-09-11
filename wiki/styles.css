@@ -1304,3 +1304,75 @@ a.card .card-text {
     a.card.card-iconed { grid-template-columns: 72px minmax(0, 1fr); }
     .card-iconed .card-icon { width: 72px; }
 }
+
+/* ---- timeline-of-genes.html ------------------------------------------------
+   A rail down the left, a dot per day, and each batch's genes as a grid of
+   small icon tiles. The tile's left edge is the natural / magical colour. */
+.timeline { margin-top: 1.5rem; }
+.tl-summary { color: var(--text-dim); margin: 0 0 1.25rem; }
+.tl-day {
+    position: relative;
+    border-left: 2px solid var(--border);
+    margin-left: 0.4rem;
+    padding: 0 0 1.5rem 1.4rem;
+}
+.tl-day h2.tl-date {
+    margin: 0 0 0.75rem;
+    font-size: 1.15rem;
+    border: 0;
+    padding: 0;
+}
+.tl-day h2.tl-date::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: 0.3rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--view-accent);
+    box-shadow: 0 0 0 3px var(--bg);
+}
+.tl-count { color: var(--text-faint); font-size: 0.85rem; font-weight: normal; margin-left: 0.4rem; }
+.tl-batch { margin: 0 0 1rem; }
+.tl-batch-title { margin: 0 0 0.5rem; color: var(--text-dim); font-size: 0.9rem; }
+.tl-batch-title code { color: var(--text-faint); }
+.tl-genes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
+    gap: 0.5rem;
+}
+.tl-genes li a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.45rem 0.35rem 0.5rem;
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--magical);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    height: 100%;
+    box-sizing: border-box;
+}
+.tl-genes li.tl-natural a { border-left-color: var(--natural); }
+.tl-genes li a:hover { border-color: var(--view-edge); background: var(--view-soft); }
+.tl-genes img { width: 72px; height: auto; image-rendering: pixelated; border-radius: 4px; }
+.tl-noicon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 64px;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    color: var(--text-faint);
+}
