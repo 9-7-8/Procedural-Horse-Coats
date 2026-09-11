@@ -38,13 +38,13 @@
 </p>
 
 <ul>
-    <li><strong>Store</strong> &mdash; put a research paper in the slot and the shelf
-        <em>files</em> it: the paper is gone and the gene is now on the shelf&rsquo;s list.
-        Click any row in that list to take that paper back out. A shelf holds
-        <strong>one paper per gene</strong> and any number of genes, so filing a
-        duplicate does nothing and the paper is left in the slot rather than eaten.</li>
-    <li><strong>Craft</strong> &mdash; pick a gene from the same list, put a blank book in,
-        and take a copy of that gene&rsquo;s paper out. The book is spent. <b>The
+    <li><strong>Store</strong> &mdash; opens first, and it is <strong>a chest</strong>: six
+        rows of nine slots for research papers. Put a paper in, take it out, whenever you
+        like &mdash; nothing takes time and nothing is used up. Shift-clicking a paper from
+        your inventory files it. A shelf holds <strong>one paper per gene</strong>, so a
+        second paper for a gene that is already there will not go in.</li>
+    <li><strong>Copy</strong> &mdash; pick a gene from the papers on the shelf, put a blank
+        book in, and take a copy of that gene&rsquo;s paper out. The book is spent. <b>The
         shelf&rsquo;s own paper never is</b>, so you can do it as many times as you have
         books.
         <p>
@@ -59,18 +59,17 @@
 <div class="note">
     <span class="label">Taking a paper back stops the copying</span>
     <p>
-        The list is the shelf&rsquo;s contents, not your gene database. Withdraw the
-        original and that gene leaves the list, and the shelf can no longer copy it. That
-        is the whole point: a shelf you have filled is a collection that exists in the
+        The Copy list is what is on the shelf, not your gene database. Take the original
+        out of its slot and that gene leaves the list, and the shelf can no longer copy it.
+        That is the whole point: a shelf you have filled is a collection that exists in the
         world, and it can be emptied.
     </p>
 </div>
 
 <p>
-    <strong>Breaking it gives everything back</strong> &mdash; the block and every filed
-    paper drop together. Moving a shelf costs nothing.
+    <strong>Breaking it gives everything back</strong> &mdash; the block and every paper
+    on it drop together, the way a chest does. Moving a shelf costs nothing.
 </p>
-
 <h2 id="loop">Where the papers come from</h2>
 
 <p>
@@ -91,60 +90,50 @@
 
 <section class="tab-panel" data-tab="coding">
 
-<h2 id="storage">It stores a set of keys, not items</h2>
+<h2 id="storage">Real slots, one paper per gene</h2>
 
 <p>
-    <code>EquineResearchShelfBlockEntity</code> keeps a <code>Set&lt;String&gt;</code> of
-    gene keys. A research paper is completely described by the one gene it names, and the
-    shelf holds at most one of each &mdash; so the rule is <strong>structural</strong>
-    rather than enforced. There is no way to express &ldquo;two papers for flaxen&rdquo;
-    in the data, so no code has to remember not to, and a shelf can hold every gene in
-    the mod without an item stack per gene.
+    <code>EquineResearchShelfBlockEntity</code> holds a 54-slot container
+    (<code>SLOTS</code>, a double chest) saved with <code>ContainerHelper</code>. It was a
+    <code>Set&lt;String&gt;</code> of gene keys fed through one filing slot and read back
+    through a clickable list; in play that read as a shelf that did nothing, and the owner
+    asked for it to be &ldquo;just a UI like a chest&rdquo; (2026-09-10). The one-per-gene
+    rule the set used to make structural is now a slot rule:
+    <code>PaperSlot.mayPlace</code> refuses a paper whose gene another slot already holds,
+    and every slot takes one item.
 </p>
 
 <p>
-    Keys become items again at exactly two moments: a withdrawal, and
-    <code>affectNeighborsAfterRemoval</code>. A key for a gene this build no longer has is
-    kept and shown by its raw key rather than dropped &mdash; losing somebody&rsquo;s
-    collection because they removed a gene pack would be worse than a row that reads
-    oddly.
+    <strong>Breaking it drops the contents from the block entity&rsquo;s
+    <code>preRemoveSideEffects</code></strong>, where vanilla&rsquo;s chests do it. The old
+    shelf dropped from the block&rsquo;s <code>affectNeighborsAfterRemoval</code>, which
+    runs after the block entity is already gone &mdash; so as far as the code shows, breaking
+    a filled shelf used to lose the lot.
 </p>
 
-<h2 id="menu">Three slots, two tabs</h2>
+<h2 id="menu">Two tabs, one set of slots each</h2>
 
 <p>
-    <code>ResearchShelfMenu</code> has a book slot, a result slot and a filing slot. Which
-    are live is the tab, and the mechanism is <code>Slot.isActive()</code> rather than
-    moving them: <code>Slot.x</code> and <code>Slot.y</code> are final, and
-    <code>isActive()</code> is what vanilla consults for drawing <em>and</em> for
-    hit-testing &mdash; the pair that must never disagree, because a slot you cannot see
-    but can still click is the worst of both.
+    <code>ResearchShelfMenu</code> has the 54 paper slots (Store) and a book slot and a
+    result slot (Copy). Which are live is the tab, through <code>Slot.isActive()</code>
+    rather than moving them: <code>Slot.x</code> and <code>Slot.y</code> are final, and
+    <code>isActive()</code> is what vanilla consults for drawing <em>and</em> hit-testing.
+    The tab is only known on the client, so on the server every slot is live &mdash; the
+    client never sends a click on a slot it is not drawing.
+</p>
+
+<p>
+    Because the papers are real slots the ordinary container sync carries them, and the
+    Copy list is read from those slots on both sides (<code>genesIn</code>). The only
+    packet left is <code>ShelfActionPayload</code>&rsquo;s gene pick; the old
+    <code>ShelfSyncPayload</code> and the withdraw action are gone.
 </p>
 
 <p>
     The result is <strong>recomputed, never remembered</strong>: it exists only while a
     book is in the slot and the shelf still holds the selected gene, so pulling the book
-    out or withdrawing the original clears it on its own.
+    out or taking the original off the shelf clears it on its own.
 </p>
-
-<h2 id="sync">The shelf is the authority</h2>
-
-<p>
-    The contents are not items in slots, so none of it reaches the client through the
-    ordinary container sync. <code>ShelfSyncPayload</code> pushes the gene list on every
-    change, and <code>server/ShelfOpenSync</code> pushes it once when the menu opens
-    &mdash; that one has no change behind it, and without it a freshly opened shelf draws
-    empty until you touch something. It is an event rather than a line in the menu&rsquo;s
-    constructor because <code>openMenu</code> builds the menu <em>before</em> it sends the
-    open packet, so a constructor push would arrive first and be dropped.
-</p>
-
-<p>
-    <code>ShelfActionPayload</code> carries the two things a player can do &mdash; select
-    a gene, withdraw a paper &mdash; and both are re-checked against the block entity. A
-    forged packet can at worst ask for a gene the shelf does not hold, and get nothing.
-</p>
-
 </section>
 
 </article>

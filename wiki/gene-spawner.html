@@ -20,8 +20,8 @@
 <h1>Spawner</h1>
 
 <p class="lede">
-    Feed the horse anything it eats and it looks around, and if there are fewer
-    than two of a particular creature nearby, there are two now. Which creature depends on the
+    Feed the horse anything it eats and two of a particular creature appear
+    nearby &mdash; every meal. Which creature depends on the
     allele, and there is one for every mob in the game. The only outward sign is
     a pink tinge through the head and mane.
 </p>
@@ -43,27 +43,28 @@
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
     <tbody>
-        <tr><td>two copies of one allele</td><td>when fed, tops the local population of that mob up to two</td></tr>
+        <tr><td>two copies of one allele</td><td>each meal it eats makes two of that mob</td></tr>
         <tr><td>two different alleles</td><td>nothing</td></tr>
         <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
     </tbody>
 </table>
 
-<h2 id="two">Exactly two, and no more</h2>
+<h2 id="two">Two per meal, and the food is the limit</h2>
 
 <p>
     Hand it anything it eats &mdash; its ordinary food, whatever a special diet
-    asks for, or its favourite &mdash; and it counts what is already there first.
-    Feed a horse whose two sheep are still nearby and nothing happens beyond the
-    meal; feed one whose sheep have wandered off and it makes two more. It cannot
-    run away with itself, which is the whole reason the rule is written this way.
-    Left alone in a field it does nothing at all.
+    asks for, or its favourite &mdash; and two appear, however many are already
+    standing there. The only thing that counts is a meal it actually
+    <em>eats</em>: a horse at full health that turns wheat down makes nothing, and
+    you keep the wheat. Left alone in a field it does nothing at all.
 </p>
 
 <p>
-    <em>It used to fire by itself once a Minecraft day. In play it never fired:
-    the day was counted on a clock that restarts every time the horse loads. It
-    was moved onto feeding on 2026-09-10, at the owner&rsquo;s call.</em>
+    <em>It used to fire by itself once a Minecraft day, and in play it never
+    fired: the day was counted on a clock that restarts every time the horse
+    loads. It was moved onto feeding on 2026-09-10, and later the same day the
+    "only up to two nearby" cap came off too &mdash; with the player paying food
+    for every firing, the food is the limit. Both the owner&rsquo;s calls.</em>
 </p>
 
 <h2 id="hostile">Some of the alleles are not friendly</h2>
@@ -112,21 +113,21 @@
 <div class="note danger">
     <span class="label">Never mark what it spawns persistent</span>
     <p>
-        A persistent mob never despawns. Two per feeding, from every expressing horse, is unbounded growth &mdash; and the count-to-two rule does not save you, because it counts only what is nearby. What it makes must despawn like anything else.
+        A persistent mob never despawns. With no cap, every expressing horse fed every day is unbounded growth. What it makes is spawned without <code>setPersistenceRequired</code> &mdash; though note a cow or a sheep is an animal and does not despawn anyway, so for the farm alleles the food really is the only limit.
     </p>
 </div>
 
 <div class="note danger">
-    <span class="label">Count first, or it spawns two more every feeding</span>
+    <span class="label">Only a meal that was eaten, or it is an infinite spawner</span>
     <p>
-        The rule is &ldquo;top up to two&rdquo;, not &ldquo;make two&rdquo;. The scan for existing mobs is the gene, and getting it backwards turns a self-limiting locus into the worst thing in the mod.
+        With the cap gone, a firing that costs nothing must not happen. A tamed horse at full health refuses wheat and vanilla hands it back, so a trigger on the <em>click</em> would be free and endless. <code>GeneAbilityHandler.onFeed</code> notes the stack in hand at <code>HIGHEST</code> priority (before the diet and favourite-food handlers shrink it), and <code>drainPendingFeeds</code> looks again at the end of the tick: fewer items, or a different item (a bucket back from a bucket of something), means it ate. Creative consumes nothing, so a creative feeding always counts.
     </p>
 </div>
 
 <div class="note warn">
     <span class="label">Fed, not timed &mdash; and why the timer failed</span>
     <p>
-        <code>GeneAbilityHandler.onFeed</code> listens to the interaction at <code>HIGHEST</code> priority, because the diet and favourite-food handlers both cancel it and shrink the stack; a stack of one would already be empty for a later listener. &ldquo;Eats&rdquo; is the same split the crouch-feed goal tempts with: the favourite, the special diet&rsquo;s list, or vanilla horse food. It fires whether or not vanilla then actually eats, which is safe only because the summon counts first. The trigger is <code>GeneAbility.Trigger.OnFeed</code>, built-in only &mdash; a gene file cannot ask for it yet.
+        &ldquo;Eats&rdquo; is the same split the crouch-feed goal tempts with: the favourite, the special diet&rsquo;s list, or vanilla horse food. The trigger is <code>GeneAbility.Trigger.OnFeed</code>, built-in only &mdash; a gene file cannot ask for it yet (<a href="known-gaps.html#gap-178">gap 178</a>). A <em>timed</em> summon, if a gene ever declares one, still tops up to its number rather than making it; only the fed path is uncapped.
     </p>
     <p>
         The old once-a-day timer was <code>tickCount % 24000</code>, and <code>tickCount</code> is not saved: every reload started it again from nothing. Every timed beat in the handler now counts on the world&rsquo;s saved game time instead, offset per horse by its UUID so horses still do not fire in lockstep.
@@ -177,14 +178,17 @@
 
 <section class="tab-panel" data-tab="science">
 
-<h2 id="cap">Self-limiting by construction</h2>
+<h2 id="cap">From self-limiting to paid-for</h2>
 
 <p>
     Almost every design for a spawning gene is a lag machine, because almost
-    every design counts <em>time</em> and not <em>population</em>. Topping up to
-    a fixed local number instead means a horse in a stocked field does nothing at
-    all, for ever, and only acts when something has been lost. The gene has a
-    ceiling built into its definition rather than bolted on as a cooldown.
+    every design counts <em>time</em> and not <em>population</em>. The first
+    version answered that by topping up to a fixed local number, so a horse in a
+    stocked field did nothing at all. Moving the trigger from a clock to a meal
+    changed the question: a firing now costs the player something every time, so
+    the limit can be the cost rather than the count. That is why the cap came off
+    &mdash; and why "it ate" has to be checked rather than assumed, because a
+    trigger that is uncapped <em>and</em> free is the lag machine again.
 </p>
 
 <h2 id="visible">The one behaviour gene that paints</h2>

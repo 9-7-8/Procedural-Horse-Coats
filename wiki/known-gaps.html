@@ -52,14 +52,6 @@
 </li>
 <li><strong>"White finds white" has never been seen stacked more than two deep.</strong> Each white-pattern painter raises its strength by how white the horse already is, which is what makes the two splash loci and <code>W20</code> mean anything - but a horse carrying tobiano <em>and</em> <code>KIT</code> <em>and</em> both splash loci compounds four times. It cannot run away (strength clamps at 1), but it has not been looked at.
 </li>
-<li><strong>The thirteen eye loci have never been seen in game.</strong> Every
-    colour, sector, glow and the third eye are asserted through the real pipeline, and
-    none of it has been looked at on a horse. Four open questions, all on
-    <a href="verification.html">To be verified</a>: does a four-texel iris split in two
-    read as heterochromia at riding distance; do the two diagonal sectors read as anything
-    but stray pixels; is <code>EyeSector.MIRRORED_EYE</code> the right eye to un-mirror;
-    and is <code>CoatRegions.thirdEyeRect</code> actually on the forehead.
-</li>
 <li><strong>The wide white-pattern genes don't compose an eye-safe check</strong> - a big <code>SB1/SB1</code> or a topline-crossing tobiano could in principle wipe the eye texels; <code>CoatRegions.redrawEyes</code> runs last so eyes always come back, but confirm in-game.
 </li>
 </ul>
@@ -67,6 +59,16 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-180"><strong>Holy ward's radius sits inside the zone where monsters never spawn
+    anyway.</strong> Opened 2026-09-10, found while working out how the owner could test it.
+    Vanilla never naturally spawns a monster within 24 blocks of a player, and the ward
+    reaches 8 to 16 blocks (<code>HolyWardGene.MIN_RADIUS</code> / <code>MAX_RADIUS</code>).
+    So whenever you are standing with your warding horse, the ward is doing nothing you
+    could not already count on; it only matters for a horse at least 24 blocks from every
+    player - a paddock you are not in. That may be exactly the right job for it (guarding
+    the field while you are in the house), but it is not what the name suggests, and a
+    player testing it beside the horse will conclude it is broken. Either the radius goes
+    past 24, or the gene page says plainly what it protects. Owner's call.</li>
 <li id="gap-178"><strong>The <code>OnFeed</code> trigger exists only for built-in genes.</strong>
     Opened 2026-09-10, when the <a href="gene-spawner.html">spawner</a> moved off its timer
     and onto feeding. <code>GeneAbility.Trigger.OnFeed</code> is fired by
@@ -168,29 +170,23 @@
     the cheap one is a node check that both tables name the same mask set with the same
     defaults.</li>
 
-<li id="gap-154"><strong>The Breeds tab does not fill in when you tame a horse, and ignores creative.</strong>
-    Opened 2026-09-09 with 0.4.0, reported the same evening: &ldquo;the breeds tab should be
-    fully filled in on creative, and when I tested it just now, it did not fill in when I
-    tamed a breed horse.&rdquo; <b>Two separate faults.</b> The creative one is certain and
-    small: every other gated tab asks <code>discovered(gene)</code>, which is
-    <code>creative() || ClientGeneDatabase.knows(...)</code>, and the breed rows ask
-    <code>ClientGeneDatabase.hasBreed(id)</code> with no creative clause at all - so a
-    creative player sees forty-nine question marks. The taming one is not yet diagnosed and
-    the <b>prime suspect is a token mismatch</b>: <code>HorseRecord.breed()</code> holds a
-    <code>BreedLineage</code> token, and the tab matches it against <code>Breed.id()</code>. If a
-    lineage token is anything but the bare id for a pure-bred horse - a prefix, a cross
-    form, a label - then <code>discoverBreeds</code> is storing strings that no row will
-    ever match, and it would look exactly like this. Check that first. Two other
-    possibilities worth ruling out after it: a lone wild horse may carry no breed at all
-    (only herd members are stamped), so the horse tamed may genuinely have had nothing to
-    record; and the tab reads a client mirror that only refreshes when the sync payload
-    arrives, so a tame that fires <code>discoverBreeds</code> with no change makes no
-    packet and the tab would not move until something else did.</li>
+<li id="gap-154"><strong>A crossbred or spliced horse never fills in a Breeds row.</strong>
+    Opened 2026-09-09 as "the Breeds tab ignores creative and does not fill in on taming";
+    <b>both of those are fixed</b> (2026-09-10, not yet re-played). Creative now goes through
+    <code>HorseBrowserScreen.metBreed</code>, and the taming half turned out not to be the
+    suspected token mismatch at all: <code>CrouchFeedGoal</code> called
+    <code>tameWithName</code> without firing <code>AnimalTameEvent</code>, so a horse tamed by
+    hand never reached <code>GeneDiscoveryHandler.onTame</code>. <b>What is left:</b> a
+    pure-bred horse's lineage token is its bare breed id and matches its row, but a cross
+    (<code>cross:arabian+friesian</code>) or a spliced line (<code>spliced:&hellip;</code>) is
+    stored as that token and matches no row, so owning one teaches you nothing. Whether a
+    cross should count as meeting both parents' breeds is a design call. Also still possible:
+    a lone wild horse may carry no breed at all, so taming it records nothing.</li>
 
-<li id="gap-155"><strong>Taming by hand, hearts on bond, and the foal's inherited bond have not been played.</strong>
-    Opened 2026-09-09 with 0.3.8. <code>CrouchFeedGoal</code> is a new AI goal on every
-    untamed adult horse and none of it has run: the four conditions are re-tested every
-    tick, so the failure mode nobody will notice is the goal <em>starting</em> too easily
+<li id="gap-155"><strong>Hearts on bond, the foal's inherited bond, and crouch-feed's tuning have not been played.</strong>
+    Opened 2026-09-09 with 0.3.8. Taming by hand itself is owner-confirmed (2026-09-10).
+    <code>CrouchFeedGoal</code> re-tests its four conditions every tick, so the failure mode
+    nobody will notice is the goal <em>starting</em> too easily
     and pulling horses out of a herd at a distance whenever somebody walks past crouched
     with wheat. The tuning is all guesses - a 12-block search, a 25-degree gaze cone, a
     2-block tolerance on standing still, 45 ticks a mouthful. The taming roll itself is
@@ -248,8 +244,15 @@
     <code>Genes.codeOrder()</code> rather than for this page, and the honest fixes are a
     second row or a &ldquo;+3 more&rdquo; tile rather than a bigger constant.</li>
 
-<li id="gap-153"><strong>The stall detector was rewritten after it got a horse killed, and the
-    rewrite has not been played.</strong> Opened 2026-09-09 with 0.3.7, rewritten
+<li id="gap-153"><strong>The stall detector was rewritten after it got a horse killed; binding is
+    confirmed, landing was fixed again and is unplayed.</strong> <em>Update 2026-09-10:</em>
+    the owner confirmed the sign binds and finds the inside of a stall, and reported horses
+    still arriving in walls. The landing was the centre of the middle floor <em>tile</em>, and
+    a horse is about 1.4 blocks wide, so in a two-wide stall it overhung a side wall every
+    time. <code>StallDetector.landingSpot</code> now returns the centroid of the floor,
+    checked against the horse's own box with <code>noCollision</code>, falling back to the
+    nearest tile it fits on; the reported height is measured to the ceiling. The original
+    account follows. Opened 2026-09-09 with 0.3.7, rewritten
     2026-09-09 with 0.3.8. The ticket half is <b>confirmed working</b> - the owner bound
     a sign, spent a ticket and the horse came home. The detector half was wrong twice
     over and the two compounded: the fill walked <b>air</b>, three blocks above the sign,

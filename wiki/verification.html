@@ -35,47 +35,80 @@
     </p>
 </div>
 
-<h2 id="play-fixes-0910">&sect;0-BW &mdash; Five things off the 2026-09-10 play session (NOT looked at in game)</h2>
+<h2 id="play-fixes-0910b">&sect;0-BX &mdash; The second 2026-09-10 play session's fixes (NOT looked at in game)</h2>
+
+<p><em>Owner-confirmed in that session and removed from this page:</em> fireproof floats in
+    lava and immunity ends when you dismount; bird boned; the spawner fires on feeding;
+    potion milk, single and double; the spawn egg's search box; height in hands on the
+    information screen; hand-feed taming; and every eye locus - the third eye, the glows,
+    the sectors.</p>
 
 <ul>
-    <li><strong>A fireproof horse should float in lava now</strong>, hooves under, the way a
-        ridden horse floats in water. It was sinking. The buoyancy is a <code>GRAVITY</code>
-        attribute modifier held while the lava is above the horse&rsquo;s knees, because a
-        ridden horse is moved by your client and ignores server-side velocity &mdash; and
-        attributes sync to it. <em>Look for:</em> does it bob too much at the surface (the
-        modifier reaches your client a tick or two late); can it climb out onto the shore.
-        It will still be <strong>slow</strong> in lava: vanilla lava movement has a fixed,
-        low speed with no attribute behind it, and walking <em>on</em> lava the way a
-        strider does needs a mixin, which this mod does not have.</li>
-    <li><strong>The spawner</strong> now fires on feeding and is owner-confirmed working (2026-09-10). Still worth a glance: what a spawned zombie is holding &mdash; the second <code>finalizeSpawn</code> that could re-roll its gear is gone.</li>
+    <li><strong>The research shelf is a chest now.</strong> Store opens first: six rows of
+        nine slots, papers in and out by hand, instantly, shift-click to file. A second paper
+        for a gene already on the shelf must refuse to go in. Copy is the old craft tab: pick
+        a gene from the shelf's papers, add a blank book, wait by rarity. <em>Also break a
+        shelf with papers in it</em> - they must all drop. The old shelf dropped them from a
+        hook that ran after the block entity was gone, so it probably lost them.</li>
+    <li><strong>A ticketed horse should land in the dead centre of its stall</strong>, not
+        against a wall. It used to be centred on the middle tile, and a horse is about 1.4
+        blocks wide, so in a two-wide stall it always hung into a side wall. It now lands at
+        the centre of the floor, checked against its own body, and falls back to the nearest
+        tile it fits on. Try a two-wide stall, an odd-sized one, an L-shape, and a stall
+        narrower than the horse (it should still land in the middle).</li>
+    <li><strong>The stall size message should report the real height</strong> - floor to
+        ceiling, capped at 8 for an open top - instead of always saying 2.</li>
+    <li><strong>The spawner has no cap</strong>: two per feeding, every feeding. It must
+        only count a feeding the horse <em>ate</em> - feed a tamed, full-health horse wheat
+        (it refuses, and the wheat comes back) and nothing should spawn. A feeding that is
+        eaten should spawn every time, with other cows standing right there.</li>
+    <li><strong>Milking a stallion with a bottle</strong> should make him rear, kick you,
+        and say so; a foal should say it has nothing to give. The plain milk gene's
+        stallion kick now rears too.</li>
+    <li><strong>The Breeds tab in creative</strong> should list all 49, named, and clicking
+        one should open its entry. Out of creative, <strong>taming a breed horse by hand</strong>
+        should fill in its row - hand taming never fired the tame event, so it reached neither
+        the breed book nor the "tame a mare / stallion" checklist tasks.</li>
+    <li><strong>Holy ward, and how to see it.</strong> With <code>debug.announce</code> on, a
+        refused spawn now says so in chat (purple, at most every ten seconds, with a count).
+        <em>Stand at least 24 blocks from the horse</em> - the game never spawns a monster
+        within 24 blocks of a player, and the ward only reaches 8 to 16, so standing beside
+        the horse there is nothing to refuse. Put a warding horse in a dark open area at
+        night, watch from a distance, and look for the lines; a matching dark area without
+        the horse should fill with mobs. Spawn eggs next to a warding horse are
+        owner-confirmed to still work.</li>
+    <li><strong>The chat is quiet when horses load.</strong> The <code>[coat]</code> line per
+        horse now goes to the log only, except the one failure it exists to catch (a coat
+        that came out as the bare white template).</li>
+    <li><strong>My horses</strong> shows height in hands in its Hands column
+        (<code>15.3</code>, horseman's notation), and the filter understands
+        <code>hands&gt;16</code> / <code>height&lt;14.2</code> in decimal hands.
+        <code>size:</code> still means the raw scale.</li>
+</ul>
+
+<h2 id="play-fixes-0910">&sect;0-BW &mdash; The first 2026-09-10 play session's fixes (NOT looked at in game)</h2>
+
+<ul>
     <li><strong>On-move effects under a rider.</strong> Every <code>on_move</code> effect was silent on a ridden horse, because the server&rsquo;s copy of a player-steered horse has zero velocity; &ldquo;moving&rdquo; is now measured by position between ticks. Check a <a href="gene-particle.html">particle</a>-locus trail while riding. Molten hooves has its own entry, <a href="#molten-hooves">&sect;0-BS</a>.</li>
+    <li><strong>What a spawned zombie is holding</strong> &mdash; the second
+        <code>finalizeSpawn</code> that could re-roll its gear is gone.</li>
     <li><strong>Every long timed effect now survives a reload.</strong> Timed beats counted
         on <code>tickCount</code>, which restarts whenever a horse loads, so anything slower
         than a few minutes almost never fired. The worst case was
         <a href="gene-dryad.html">dryad</a> (a sapling every 9&nbsp;000 to 32&nbsp;000
         ticks). They now count on the world&rsquo;s saved game time. <em>Look for:</em> a
         dryad horse left near you for a real half-hour should have planted something.</li>
-    <li><strong>The info screen shows height in hands</strong> beside the size word
-        (<code>average  15.3 hh  (1.00)</code>), in horseman&rsquo;s notation &mdash; the digit
-        after the point is inches, 0 to 3. A foal shows the height it will grow to, marked
-        &ldquo;grown&rdquo;. It is the exact inverse of how a breed&rsquo;s hands range sets
-        its scale, so a breed sheet saying 17 hands should read about 17.0 hh on the
-        horse. The breed sheet itself still prints <em>decimal</em> hands
-        (<code>15.5-17.0 hands</code>), which is a different notation for the same thing;
-        worth deciding whether it should switch.</li>
+    <li><strong>Lava is still slow.</strong> Floating is confirmed; crossing a lava lake at
+        vanilla's fixed lava speed is the open question - see
+        <a href="known-gaps.html#gap-179">gap 179</a>.</li>
+    <li><strong>The breed sheet still prints <em>decimal</em> hands</strong>
+        (<code>15.5-17.0 hands</code>) where the horse now shows <code>15.2 hh</code>. Worth
+        deciding whether it should switch.</li>
 </ul>
 
-<h2 id="gene-search">&sect;0-BV &mdash; A search box on both gene editors (2026-09-10, NOT looked at in game)</h2>
+<h2 id="gene-search">&sect;0-BV &mdash; A search box on both gene editors (2026-09-10, spawn egg confirmed)</h2>
 
 <ul>
-    <li><strong>Does typing work?</strong> Open the custom spawn egg, click the box above
-        the list and type <code>fire</code>. The list should narrow as you type, and the box
-        should <em>keep focus</em> between letters. The screen rebuilds every widget on each
-        keystroke, and the box is re-focused by hand after each rebuild. If only the first
-        letter lands, that is the thing that failed.</li>
-    <li><strong>Allele codes find their gene</strong> &mdash; <code>Frp</code>,
-        <code>Spb</code>, <code>Hly</code>. And the search should combine with the family
-        menu rather than replace it.</li>
     <li><strong>Is half the row enough for the family menu?</strong> Long family names now
         truncate on the button face. The dropdown still shows them whole.</li>
     <li><strong>The browser twin</strong> (<a href="horse-designer/">horse designer</a>):
@@ -84,46 +117,14 @@
         it, and that clicking anywhere else lets go of it.</li>
 </ul>
 
-<h2 id="eye-loci">&sect;0-BU &mdash; Thirteen eye loci, and every horse in the world
-    is brown-eyed now (2026-09-10, NOT looked at in game)</h2>
+<h2 id="eye-loci">&sect;0-BU &mdash; Thirteen eye loci (2026-09-10, owner-confirmed on sight)</h2>
 
 <p>
-    A horse&rsquo;s eyes became <a href="eye-colour.html">thirteen ordinary genes</a>. Nothing
-    below has been seen on a horse. The first four are the ones that could be
-    <em>wrong</em> rather than merely unseen; the rest is "does it read".
+    The owner looked at the <a href="eye-colour.html">eye loci</a> and confirmed them all:
+    placement, sectors, glows, the third eye. What looking cannot settle is left:
 </p>
 
 <ol>
-    <li><strong>Is the third eye on the forehead?</strong>
-        <code>CoatRegions.thirdEyeRect</code> is {18, 32, 4, 2} on an adult and {22, 8, 4, 2}
-        on a foal, derived from <code>HorseSkinGeometry</code>&rsquo;s box-UV tables and
-        <strong>never rendered</strong>. Unlike the two real eyes there is nothing on the
-        template at that spot to check it against. Spawn a horse with
-        <code>horsegenetics.eye_third=Rgt/Rgt</code> and look at its head from in front and
-        from above. If it is on the nose, the poll, or nowhere, the rect is wrong &mdash; the
-        head&rsquo;s <em>front</em> face is the obvious alternative and is wrong for a
-        different reason (the muzzle box covers it).</li>
-    <li><strong>Is <code>EyeSector.MIRRORED_EYE</code> the right eye?</strong> Breed a horse
-        <code>UL/UL</code> at <em>both</em> sector loci and walk round it. The sector should be
-        in the upper left of both eyes as you look at them. If it is upper-left on one side and
-        upper-right on the other, flip that constant.</li>
-    <li><strong>Do the two diagonal sectors read as anything?</strong>
-        <code>EyePatch.WEDGES</code> deliberately excludes them on the grounds that at four
-        texels a diagonal is two stray pixels. They are alleles here by the owner&rsquo;s call.
-        Look at <code>URLL/URLL</code> and decide.</li>
-    <li><strong>Does an invisible iris look like a hole or like a bug?</strong>
-        <code>Inv/Inv</code> leaves the coat running through where the eye is. On a dark horse
-        that may be indistinguishable from an ordinary eye; on a pale one it should be
-        striking. Same question for an invisible sclera.</li>
-    <li><strong>Is brown the right brown?</strong> <em>Every</em> horse in the world now has a
-        painted brown iris where it used to have the template&rsquo;s flat black. That is one
-        of the largest visual changes the mod has ever made and it lands on every horse at
-        once. <code>EyeHue.BROWN</code> is the one line.</li>
-    <li><strong>Does a sector read as heterochromia at riding distance</strong>, or only in the
-        inventory screen?</li>
-    <li><strong>Do the glows read?</strong> A glowing iris should be a lamp; a glowing sclera
-        should be a lit ring with a hole in it. Both need the emissive pass, so check them
-        at night.</li>
     <li><strong>Chaos.</strong> Two chaos-eyed horses should not match, and one horse should
         regenerate the same colour every time you reload.</li>
     <li><strong>A splashed white horse</strong> should still have two blue eyes usually, one
@@ -134,7 +135,6 @@
         blue-eyed <em>carriers</em>, and blue eyes should reappear a generation later on foals
         with no splash at all. That is the design working, not a bug.</li>
 </ol>
-
 <h2 id="behaviour-batch">&sect;0-BT &mdash; Twenty-seven behaviour genes, none of them ever seen (2026-09-10, NOT looked at in game)</h2>
 
 <p>The whole behaviour family &mdash; <a href="roadmap.html#behaviour-left">&sect;12.2</a>'s
@@ -195,40 +195,18 @@
         they should.</p>
     </li>
     <li>
-        <p><strong><a href="gene-spawner.html">Spawner</a> puts entities into the world on a
-        timer.</strong> Three things have to all be right: it counts before it spawns, it
-        spawns through the normal path so other mods' claim and protection mods still fire,
-        and it never marks what it makes persistent. I believe all three are, but the
-        failure mode of the first is unbounded growth and the failure mode of the second is
-        spawning monsters inside somebody's protected base.</p>
-        <p><strong>I am least confident about the spawn call itself.</strong> It goes
-        through <code>EntityType.spawn</code> and then calls <code>finalizeSpawn</code>,
-        and there is a real chance that double-finalises the mob - re-rolling equipment or
-        variant. Watch what a spawned zombie is carrying.</p>
-    </li>
-    <li>
-        <p><strong>Rider-targeted traversal writes state onto a player.</strong> Every other
-        effect in the mod touches only a horse, which is disposable. These three -
-        <a href="gene-fireproof.html">fireproof</a>,
-        <a href="gene-bird-boned.html">bird boned</a>,
-        <a href="gene-ocean-born.html">ocean-born</a> - reach something that walks away.</p>
-        <p>Fire and fall are now damage cancels that read the horse under you at the
-        moment of the hit, and store nothing - see the rider bullet under
-        <em>Start here</em> below for what the first play of fireproof found. Prove the
-        store-nothing half: ride a fireproof horse through lava, dismount, and walk into
-        fire. If you are still immune, this is an invulnerability duplication and the gene
-        should come straight back out.</p>
+        <p><strong><a href="gene-spawner.html">Spawner</a></strong> is owner-confirmed, and
+        now fires on feeding, two per meal with no cap, only when the horse actually ate
+        (<a href="#play-fixes-0910b">&sect;0-BX</a>). It still has to spawn through the
+        normal path so other mods' protections fire. Rider immunity (fireproof, bird boned)
+        is owner-confirmed, dismount included; <a href="gene-ocean-born.html">ocean-born</a>
+        is the one still unplayed.</p>
     </li>
 </ol>
 
 <h3>Things I expect to be subtly wrong rather than dangerous</h3>
 
 <ul>
-    <li><strong><a href="gene-potion-milk.html">Potion milk</a>'s merge is the most likely
-        thing in the batch to be quietly half-working</strong>, because the broken version
-        looks completely normal. A horse with two <em>different</em> brew alleles must give
-        <strong>one bottle with both effects</strong>. One effect means the merge is not
-        firing, and nobody would notice without knowing to look.</li>
     <li><strong><a href="gene-ender-echo.html">Ender echo</a> with a rider is the most
         likely desync.</strong> A ridden horse's movement belongs to the controlling
         client. I move it server-side and hope the client accepts the position. If you
@@ -280,7 +258,7 @@
 </p>
 
 
-<h3>Start here &mdash; the five that can damage a world</h3>
+<h3>Start here &mdash; what is left that can damage a world</h3>
 
 <ul>
     <li><strong><a href="gene-spontaneous-breeding.html">Spontaneous breeding</a> is the
@@ -294,32 +272,17 @@
         if a spawner or a spawn egg stops working, the allow-list in
         <code>GeneWardHandler.isNatural</code> is wrong. Also worth watching: does the
         ward actually follow the horse, and does it stop within a couple of seconds of the
-        horse dying? Entries expire after 40 ticks rather than being removed on death.</li>
-    <li><strong><a href="gene-spawner.html">Spawner</a> must count before it spawns.</strong>
-        The rule is "top up to two", not "make two". Leave one for several in-game days
-        with its mobs alive and confirm it does nothing at all. Then kill them and confirm
-        exactly two appear. Also: what it makes must <em>despawn</em> like anything else.</li>
+        horse dying? Entries expire after 40 ticks rather than being removed on death.
+        Spawn eggs are owner-confirmed to still work; how to see the ward refuse something
+        is on <a href="#play-fixes-0910b">&sect;0-BX</a>.</li>
     <li><strong><a href="gene-egg-layer.html">Egg layer</a> must stop when the ground is
         full.</strong> Leave one overnight in a closed pen. The nearby-cap should stop it
         at eight of the item, not carpet the floor.</li>
-    <li><strong>Rider-targeted traversal must not follow you off the horse.</strong>
-        <a href="gene-fireproof.html">Fireproof</a> and <a href="gene-bird-boned.html">bird
-        boned</a> are owner-confirmed protecting horse and rider (2026-09-10, after the
-        damage-cancel rewrite). <strong>Still to check:</strong> dismount and walk into fire
-        &mdash; you should burn; jump off a cliff on foot &mdash; you should take damage.
-        <a href="gene-ocean-born.html">Ocean-born</a> under water is unchanged and still
-        unplayed.</li>
 </ul>
 
 <h3>The ones most likely to be quietly wrong</h3>
 
 <ul>
-    <li><strong><a href="gene-potion-milk.html">Potion milk</a>'s merge.</strong> A horse
-        with two <em>different</em> brew alleles must hand back <strong>one bottle
-        carrying both effects</strong>. If it comes back with one effect, the same-kind
-        merge in <code>GeneYieldHandler.sameKindEffects</code> is not firing - and this is
-        the single most likely thing in the batch to be silently half-working, because a
-        single-effect potion looks perfectly fine.</li>
     <li><strong><a href="gene-food-preference.html">Food preference</a> beating the diet.</strong>
         The whole point of the locus. Find a horse whose favourite its diet forbids and
         feed it. It must accept. If it refuses, the handler ordering has lost to
@@ -893,10 +856,9 @@
 
 <ol>
     <li><strong>The rewritten stall detector, in a stall with a fence and a gate.</strong>
-        This is the one that killed a horse, so it is the one to try first. Build an
-        ordinary stall - three walls and a fence with a gate across the front - hang a bound
-        sign on the back wall from the inside, and check the message says it found a room of
-        about the right size rather than &ldquo;no walls found&rdquo;. Then the cases the
+        Owner-confirmed 2026-09-10: the sign binds and finds the inside of an ordinary
+        stall. (Where the horse <em>lands</em> is on <a href="#play-fixes-0910b">&sect;0-BX</a>.)
+        Then the cases the
         new rules are guesses about: a stall floored with <b>slabs or carpet</b> (should be
         one room), a floor with <b>a one-block step</b> in it (should still be one room), a
         <b>two-block drop</b> (should not), and a stall whose <b>gate is standing open</b>
@@ -909,12 +871,10 @@
         Then the awkward ones that are still unproven: a stall in an <b>unloaded chunk</b>,
         and an interdimensional ticket used <b>from the horse dimension</b>.</li>
 
-    <li><strong>Taming by hand.</strong> Crouch, hold wheat, look at a wild adult horse and
-        stand still. It should walk over, eat, and roll for taming exactly as being thrown
-        off does. Then the failure worth watching for: walk past a wild herd crouched with
-        food in hand and see whether horses peel off and follow you when you did not mean
-        them to. Also worth checking a <b>carnivorous</b> horse ignores a carrot and a
-        <b>dhampir</b> does not come at all. <a href="known-gaps.html#gap-155">Gap 155</a>.</li>
+    <li><strong>Taming by hand</strong> is owner-confirmed. Still unwatched: whether horses
+        peel off a wild herd when you only walk past crouched with food, that a
+        <b>carnivorous</b> horse ignores a carrot, and that a <b>dhampir</b> does not come at
+        all. <a href="known-gaps.html#gap-155">Gap 155</a>.</li>
 
     <li><strong>Bareback steering, and the saddle you should never see.</strong> Get a horse
         to <b>attentive/follows</b> - bond 81 - then ride it with no saddle. It should steer
@@ -924,12 +884,10 @@
         a horse you saddled yourself is never touched.
         <a href="known-gaps.html#gap-156">Gap 156</a>.</li>
 
-    <li><strong>The Breeds tab.</strong> Two known faults before anything else
-        (<a href="known-gaps.html#gap-154">gap 154</a>): it shows question marks in
-        <b>creative</b>, and it did not fill in when a breed horse was tamed. Once those are
-        fixed, the things to look at are the entry itself - the plate horse, the biome list,
-        the body scores, and whether &ldquo;known to carry&rdquo; naming only discovered
-        genes reads as informative or as broken.</li>
+    <li><strong>The Breeds tab.</strong> Both known faults are fixed and waiting on
+        <a href="#play-fixes-0910b">&sect;0-BX</a>. Then look at the entry itself - the plate
+        horse, the biome list, the body scores, and whether &ldquo;known to carry&rdquo;
+        naming only discovered genes reads as informative or as broken.</li>
 
     <li><strong>Hearts when the bond moves, and where they stop.</strong> Hand-feed a tamed
         horse and watch for hearts. Then keep feeding past the daily cap of 15 and check the
@@ -939,10 +897,8 @@
         the foal's information screen opens at roughly a quarter of hers rather than at
         zero.</li>
 
-    <li><strong>The research shelf, again.</strong> It was written up as fixed once and was
-        not. Check <b>a paper actually goes into the filing slot and stays there</b> - it
-        used to snap back to the cursor - and that no caption runs out through the frame on
-        either tab. <a href="known-gaps.html#gap-150">Gap 150</a>.</li>
+    <li><strong>The research shelf</strong> was rebuilt as a chest after it still "did
+        nothing" in play - see <a href="#play-fixes-0910b">&sect;0-BX</a>.</li>
 
     <li><strong>The tab strip's new order</strong> - Getting started, Recipes, My horses,
         Breeding, Gene database, Alleles, Breeds - and that the <b>gene previews</b> no
