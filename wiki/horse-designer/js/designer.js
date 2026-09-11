@@ -16,6 +16,9 @@ window.HG = window.HG || {};
     var scene = HG.designerScene.create($("field"));
     var gui = HG.gui.create($("gui"), {
       edit: edit,
+      // The search box's matches, from EditorRules.matchesSearch - the same
+      // rule the spawn egg screen filters with.
+      search: function (q) { return api ? JSON.parse(api.searchMatchesJson(q)) : []; },
       toggleWander: function () { wander = !wander; refresh(); },
       resetView: function () { if (scene) scene.resetView(); },
       exportJson: exportJson,

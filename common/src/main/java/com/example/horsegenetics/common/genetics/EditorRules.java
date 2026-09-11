@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.horse.Sex;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The genetics behind the two <b>gene editors</b> - the custom horse spawn egg
@@ -165,5 +166,38 @@ public final class EditorRules {
         }
         Expression x = genotype.expressionOf(gene);
         return x != null && !x.wildType();
+    }
+
+    /**
+     * <b>The gene list's search box.</b> Case-insensitive, and a gene matches
+     * if the query appears in its display name, in its key (without the
+     * {@code horsegenetics.} namespace, underscores read as spaces), or in any
+     * allele's token or label - so {@code Frp} finds fireproof and {@code brown}
+     * finds every eye locus that can be brown. A blank query matches everything.
+     *
+     * <p>It narrows <i>on top of</i> the family filter; the screens AND the two.
+     * Here rather than on either screen so the browser twin cannot drift: it
+     * reaches this through {@code DesignerApi.searchMatchesJson}.
+     */
+    public static boolean matchesSearch(Gene gene, String query) {
+        String q = normalise(query);
+        if (q.isEmpty()) {
+            return true;
+        }
+        String key = gene.key();
+        int dot = key.lastIndexOf('.');
+        if (normalise(gene.name()).contains(q) || normalise(key.substring(dot + 1)).contains(q)) {
+            return true;
+        }
+        for (Allele a : gene.alleles()) {
+            if (normalise(a.token()).contains(q) || normalise(a.label()).contains(q)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String normalise(String s) {
+        return s == null ? "" : s.trim().toLowerCase(Locale.ROOT).replace('_', ' ');
     }
 }

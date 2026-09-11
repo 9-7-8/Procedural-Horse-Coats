@@ -78,7 +78,11 @@ window.HG = window.HG || {};
     var genes = [], breeds = [], state = null;
     var families = [], modes = [], addScopes = [];
     var filter = "";             // "" = every gene; otherwise a GeneFamily name
-    var view = [];               // indices into genes[], after the filter
+    var search = "";             // the search box - the screen's EditBox
+    var searchFocused = false;   // typing goes to the box while this is true
+    var searchHits = null;       // { geneIndex: true } for searchFor, from Java
+    var searchFor = null;
+    var view = [];               // indices into genes[], after the filter and search
     var scroll = 0;
     var mouse = { x: -1, y: -1, inside: false };
     var widgets = [];            // rebuilt every draw, like the screen's init()
@@ -130,14 +134,23 @@ window.HG = window.HG || {};
     }
 
     /**
-     * Which genes the list is showing, after the family filter. Recomputed
-     * every frame rather than cached: it is a walk of a few hundred strings and
-     * a cache would be one more thing to invalidate when a gene is added.
+     * Which genes the list is showing, after the family filter and the search.
+     * Recomputed every frame rather than cached: it is a walk of a few hundred
+     * strings and a cache would be one more thing to invalidate when a gene is
+     * added. The search itself is asked of Java (EditorRules.matchesSearch, via
+     * opts.search) and only re-asked when the query changes.
      */
     function rebuildView() {
+      if (search.trim() && searchFor !== search) {
+        searchHits = {};
+        var hits = opts.search ? opts.search(search) : [];
+        for (var h = 0; h < hits.length; h++) searchHits[hits[h]] = true;
+        searchFor = search;
+      }
+      var searching = !!search.trim();
       view = [];
       for (var i = 0; i < genes.length; i++) {
-        if (!filter || genes[i].family === filter) view.push(i);
+        if ((!filter || genes[i].family === filter) && (!searching || searchHits[i])) view.push(i);
       }
     }
 
@@ -312,25 +325,57 @@ window.HG = window.HG || {};
     }
 
     /**
-     * The family filter, above the list. A hundred and seventy loci in one
-     * alphabetical column is a list you scroll rather than read; this is how you
-     * ask for the eight dilutions, or for the fourteen genes made of strokes.
+     * Search and the family filter, sharing the row above the list half each -
+     * the screen's init(), same split. Hundreds of loci in one alphabetical
+     * column is a list you scroll rather than read; the filter asks for the
+     * dilutions, the search for the one gene you already know the name of.
      */
     function drawFilter() {
       var w = listWidth() + 4;
       var y = LIST_TOP - FILTER_H - 2;
+      var searchW = Math.floor(w / 2);
+      drawSearch(LIST_X - 4, y, searchW, FILTER_H);
+
+      var familyX = LIST_X - 4 + searchW + 2;
+      var familyW = w - searchW - 2;
       var label = "All genes";
       for (var i = 0; i < families.length; i++) {
         if (families[i].key === filter) label = families[i].label;
       }
       var fy = y;
-      button(LIST_X - 4, y, w, FILTER_H, label + "  \u25be", function () {
+      button(familyX, y, familyW, FILTER_H, label + "  \u25be", function () {
         dd = {
-          kind: "family", x: LIST_X - 4, y: clampDd(fy + FILTER_H),
+          kind: "family", x: familyX, y: clampDd(fy + FILTER_H),
           scroll: Math.max(0, Math.min(indexOfFamily() - (DD_VISIBLE >> 1),
             Math.max(0, families.length - DD_VISIBLE)))
         };
       }, true);
+    }
+
+    /** The search box, drawn the way Minecraft draws an EditBox: black, a border, a caret. */
+    function drawSearch(x, y, w, h) {
+      fill(x, y, x + w, y + h, searchFocused ? "#FFFFFF" : "#A0A0A0");
+      fill(x + 1, y + 1, x + w - 1, y + h - 1, "#000000");
+      var tx = x + 4, ty = y + (h - 8) / 2;
+      if (search) {
+        // Show the end of a long query, as an EditBox scrolls to its cursor.
+        var shown = search;
+        while (shown.length > 1 && widthOf(shown) > w - 10) shown = shown.substring(1);
+        text(shown, tx, ty, "#E0E0E0");
+        tx += widthOf(shown);
+      } else if (!searchFocused) {
+        text("Search genes", tx, ty, "#707070");
+      }
+      if (searchFocused && Math.floor(Date.now() / 300) % 2 === 0) {
+        fill(tx, ty - 1, tx + 1, ty + 9, "#D0D0D0");
+      }
+      widgets.push({ x: x, y: y, w: w, h: h, click: function () { searchFocused = true; } });
+    }
+
+    function setSearch(s) {
+      search = s;
+      scroll = 0;
+      draw();
     }
 
     function indexOfFamily() {
@@ -693,7 +738,11 @@ window.HG = window.HG || {};
     }, true);
 
     window.addEventListener("pointerdown", function (e) {
-      if (isDom(e) || !overGui(e)) return;      // let it fall through to the field
+      if (isDom(e)) return;
+      // Any click unfocuses the search box; a click on the box re-focuses it
+      // through its own widget below. The screen's EditBox behaves the same.
+      searchFocused = false;
+      if (!overGui(e)) return;                  // let it fall through to the field
       e.stopPropagation();
       e.preventDefault();
       for (var i = widgets.length - 1; i >= 0; i--) {
@@ -723,6 +772,31 @@ window.HG = window.HG || {};
         e.stopPropagation();
       }
     }, { passive: false, capture: true });
+
+    // Typing into the search box. Capture phase on the window, like the pointer
+    // listeners, so a focused box takes the key before scene.js reads it as
+    // walking the horse. Esc clears and lets go; Enter just lets go.
+    window.addEventListener("keydown", function (e) {
+      if (!searchFocused) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;   // shortcuts; a paste arrives as its own event
+      if (e.key === "Escape") { searchFocused = false; setSearch(""); }
+      else if (e.key === "Enter") { searchFocused = false; }
+      else if (e.key === "Backspace") { setSearch(search.slice(0, -1)); }
+      else if (e.key.length === 1) {
+        if (search.length < 40) setSearch(search + e.key);   // the EditBox's setMaxLength
+      }
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+
+    window.addEventListener("paste", function (e) {
+      if (!searchFocused) return;
+      var t = (e.clipboardData && e.clipboardData.getData("text")) || "";
+      setSearch((search + t.replace(/[\r\n]+/g, " ")).slice(0, 40));
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
 
     return {
       setData: function (g, b, f, m, a) {

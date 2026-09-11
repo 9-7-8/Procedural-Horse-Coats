@@ -325,6 +325,24 @@ public final class DesignerApi {
         return j.endArr().toString();
     }
 
+    /**
+     * The gene-list search box: the indices into {@link #genesJson()}'s array of
+     * every gene {@link EditorRules#matchesSearch} accepts. The rule is in
+     * {@code common/} so the spawn egg screen and this page cannot disagree
+     * about what a query finds; the page ANDs the result with its family filter.
+     */
+    @JSExport
+    public static String searchMatchesJson(String query) {
+        Json j = new Json().arr();
+        List<HorseEditor.Row> rows = editor().rows();
+        for (int i = 0; i < rows.size(); i++) {
+            if (EditorRules.matchesSearch(rows.get(i).gene, query)) {
+                j.val(i);
+            }
+        }
+        return j.endArr().toString();
+    }
+
     /** The Randomize split button's menu, in {@link RandomizeMode} order. */
     @JSExport
     public static String randomizeModesJson() {

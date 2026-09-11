@@ -28,6 +28,7 @@ import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
@@ -64,6 +65,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -1324,6 +1326,81 @@ public final class GeneAbilityHandler {
             case "underwater_breathing" -> rider.setAirSupply(rider.getMaxAirSupply());
             default -> { }
         }
+    }
+
+    /**
+     * <b>An immunity is a damage cancel, not a per-tick reset.</b> The tick's
+     * {@code clearFire} only stops the <i>burning</i>; standing in lava or a
+     * fire block hurts through {@code Entity.lavaHurt} / the block's
+     * {@code entityInside} directly, and vanilla's own immunity is a flag on the
+     * entity <i>type</i> ({@code isInvulnerableToBase}: {@code IS_FIRE &&
+     * fireImmune()}), which a gene cannot set per horse. Owner-observed
+     * 2026-09-10: neither the horse nor its rider was protected.
+     *
+     * <p>Falling has the same shape: fall damage lands inside {@code move()},
+     * before the post-tick reset runs, so one tick of terminal velocity still
+     * hurt - and a <i>rider's</i> fall damage is the horse's, handed down by
+     * {@code AbstractHorse.propagateFallToPassengers}, so resetting the rider's
+     * own fall distance never protected them at all.
+     *
+     * <p>Still stores nothing: the rider case reads the vehicle <i>at the moment
+     * of the hit</i>, so stepping off ends it with no state to take back.
+     */
+    @SubscribeEvent
+    static void onTraversalDamage(LivingIncomingDamageEvent event) {
+        Set<String> flags;
+        if (event.getSource().is(DamageTypeTags.IS_FIRE)) {
+            flags = FIRE_FLAGS;
+        } else if (event.getSource().is(DamageTypeTags.IS_FALL)) {
+            flags = FALL_FLAGS;
+        } else {
+            return;
+        }
+        LivingEntity hurt = event.getEntity();
+        if (hurt.level().isClientSide()) {
+            return;
+        }
+        if (hurt instanceof Horse horse) {
+            if (grantsImmunity(horse, flags, false)) {
+                event.setCanceled(true);
+                if (flags == FIRE_FLAGS) {
+                    horse.clearFire();
+                }
+            }
+        } else if (hurt instanceof Player rider
+                && rider.getVehicle() instanceof Horse horse
+                && horse.getFirstPassenger() == rider
+                && grantsImmunity(horse, flags, true)) {
+            event.setCanceled(true);
+            if (flags == FIRE_FLAGS) {
+                rider.clearFire();
+            }
+        }
+    }
+
+    /** The traversal flags that carry fire immunity - the same set the rider tick puts out. */
+    private static final Set<String> FIRE_FLAGS = Set.of("fire_immune", "walk_on_lava", "lava_swim");
+    private static final Set<String> FALL_FLAGS = Set.of("fall_immune");
+
+    /** Does this horse express one of {@code flags} for itself, or for its rider? */
+    private static boolean grantsImmunity(Horse horse, Set<String> flags, boolean forRider) {
+        HorseRecord record = HorseRecords.of(horse);
+        if (!record.hasName()) {
+            return false;
+        }
+        for (HorseAbilities.Active active : resolve(horse, record)) {
+            if (!(active.ability() instanceof GeneAbility.Traversal t)) {
+                continue;
+            }
+            if (!flags.contains(t.flag())) {
+                continue;
+            }
+            boolean reaches = forRider ? !"self".equals(t.target()) : !"rider".equals(t.target());
+            if (reaches && conditionHolds(t.when(), horse, record)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------

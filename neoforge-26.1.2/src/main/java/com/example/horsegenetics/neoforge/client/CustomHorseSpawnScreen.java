@@ -31,6 +31,7 @@ import com.example.horsegenetics.neoforge.network.SpawnCustomHorsePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -58,8 +59,9 @@ import java.util.List;
  * <b>Left</b> - every registered gene in <b>alphabetical order by display
  * name</b> ({@link Gene#name()}, so the list reads ACAN, Agouti, B4GALT7,
  * Champagne, EDNRB (frame overo), KIT (white spotting)&hellip; rather than in
- * the registry's processing order), under a {@link GeneFamily} filter and each
- * with a padlock.
+ * the registry's processing order), under a search box and a
+ * {@link GeneFamily} filter that share one row, and each with a padlock. The
+ * search matches name, key and allele tokens ({@link EditorRules#matchesSearch}).
  * <b>Centre</b> - a live 3D horse in the coat the genome makes.
  * <b>Right</b> - age, sex, breed, the two split buttons, and spawn.
  *
@@ -298,6 +300,14 @@ public final class CustomHorseSpawnScreen extends Screen {
     private final List<Row> view = new ArrayList<>();
     /** The gene family the list is narrowed to, or {@code null} for all of them. */
     private GeneFamily filter = null;
+    /** What the search box holds - {@link EditorRules#matchesSearch}, ANDed with {@link #filter}. */
+    private String search = "";
+    /**
+     * Kept across {@link #rebuildWidgets} rather than rebuilt with the rest: a
+     * fresh box on every keystroke would lose the cursor position, and this
+     * screen rebuilds its widgets on nearly every click.
+     */
+    private EditBox searchBox;
     private final List<GeneFamily> familyChoices = new ArrayList<>();
 
     /** What the Randomize split button will do next time it is pressed. */
@@ -684,11 +694,12 @@ public final class CustomHorseSpawnScreen extends Screen {
         row.locked = !row.locked;
     }
 
-    /** {@link #rows} narrowed by {@link #filter}. Rebuilt whenever either moves. */
+    /** {@link #rows} narrowed by {@link #filter} and {@link #search}. Rebuilt whenever either moves. */
     private void rebuildView() {
         view.clear();
         for (Row row : rows) {
-            if (filter == null || GeneFamily.of(row.gene) == filter) {
+            if ((filter == null || GeneFamily.of(row.gene) == filter)
+                    && EditorRules.matchesSearch(row.gene, search)) {
                 view.add(row);
             }
         }
@@ -894,16 +905,38 @@ public final class CustomHorseSpawnScreen extends Screen {
         int bX = LIST_X + listW - ALLELE_W - REMOVE_W - 4;
         int xX = LIST_X + listW - REMOVE_W;
 
-        // The gene-family filter, above the list. A hundred and seventy loci in
-        // one alphabetical column is a list you scroll rather than read; this is
-        // how you ask for the dilutions, or for the genes made of strokes.
+        // Search and the gene-family filter share the row above the list, half
+        // each. Hundreds of loci in one alphabetical column is a list you scroll
+        // rather than read; the filter asks for the dilutions, the search for the
+        // one gene you already know the name of.
         final int filterY = LIST_TOP - FILTER_H - 2;
+        final int searchW = (listW + 4) / 2;
+        if (searchBox == null) {
+            searchBox = new EditBox(this.font, LIST_X - 4, filterY, searchW, FILTER_H,
+                    Component.literal("Search genes"));
+            searchBox.setMaxLength(40);
+            searchBox.setHint(Component.literal("Search genes"));
+            searchBox.setResponder(text -> {
+                search = text;
+                scroll = 0;
+                rebuildView();
+                rebuildWidgets();
+                setFocused(searchBox); // rebuildWidgets clears focus; keep typing
+            });
+        } else {
+            searchBox.setX(LIST_X - 4);
+            searchBox.setY(filterY);
+            searchBox.setWidth(searchW);
+        }
+        addRenderableWidget(searchBox);
+        final int familyX = LIST_X - 4 + searchW + 2;
+        final int familyW = listW + 4 - searchW - 2;
         addRenderableWidget(Button.builder(
                         Component.literal(truncate(
                                 (filter == null ? "All genes" : filter.label()) + " \u25be",
-                                listW - 4)),
-                        b -> openDropdown(Dd.FAMILY, LIST_X - 4, filterY + FILTER_H))
-                .bounds(LIST_X - 4, filterY, listW + 4, FILTER_H).build());
+                                familyW - 6)),
+                        b -> openDropdown(Dd.FAMILY, familyX, filterY + FILTER_H))
+                .bounds(familyX, filterY, familyW, FILTER_H).build());
 
         int visible = visibleRows();
         for (int i = scroll; i < view.size() && i < scroll + visible; i++) {
@@ -1606,6 +1639,11 @@ public final class CustomHorseSpawnScreen extends Screen {
         // same value.
         g.fill(LIST_X - 4, LIST_TOP - 2, LIST_X + nameWidth(true) + LOCK_W + 2,
                 LIST_TOP + shown * ROW_H, 0xE0000000);
+        if (view.isEmpty()) {
+            g.fill(LIST_X - 4, LIST_TOP - 2, LIST_X + listW, LIST_TOP + ROW_H, 0xE0000000);
+            drawFitted(g, search.isBlank() ? "No genes in this family" : "No gene matches \"" + search.trim() + "\"",
+                    nameX(), LIST_TOP + 6, listW - LOCK_W - 4, 0xFF9AA0B0);
+        }
 
         for (int i = scroll; i < view.size() && i < scroll + visible; i++) {
             Row row = view.get(i);
