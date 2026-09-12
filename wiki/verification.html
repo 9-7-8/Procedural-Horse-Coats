@@ -56,6 +56,36 @@
     </p>
 </div>
 
+<h2 id="rest-stops">&sect;0-CJ &mdash; A hay portal every 25 pens in the corridor (2026-09-11, NOT looked at in game)</h2>
+
+<p>
+    Every 25th segment is a break with a portal home instead of a pair of pens &mdash;
+    41 of them, one every 175 blocks. Written up on
+    <a href="horse-dimension.html#rest-stops">the horse dimension</a>. What to look at:
+</p>
+
+<ul>
+    <li><strong>Walk in and count.</strong> Twenty-five pens down one side, then an open
+        stretch with a hay portal set back off the north side. The sign on the road should
+        say how many pens you have passed.</li>
+    <li><strong>Step through one.</strong> It should put you back where you came in from,
+        exactly as the entrance portal does, and bring your tamed horses with you. This is
+        the part most likely to be wrong: it relies on
+        <code>plotContaining</code> resolving the plot from the portal's X, which is true
+        by construction but has never been exercised anywhere but the entrance.</li>
+    <li><strong>You should not be able to fall through it by accident.</strong> It is set
+        back three blocks off the road edge on purpose - confirm that walking the corridor
+        normally does not clip its edge.</li>
+    <li><strong>The numbering has no holes.</strong> The pens either side of a break should
+        read &hellip;49, 50, 51 with the break between 49 and 50, not a jump to 53.</li>
+    <li><strong>The last pens still exist.</strong> The corridor was lengthened so the
+        breaks are extra segments rather than pens taken away - walking to the far end
+        should still find pen 2,000 and the end cap behind it.</li>
+    <li><strong>The floor and outer walls are unbroken across a break.</strong> The pens are
+        skipped but <code>buildCorridor</code> still runs, so there should be no gap to the
+        void where a pen would have been.</li>
+</ul>
+
 <h2 id="allele-picker">&sect;0-CI &mdash; Gene and allele pickers on My horses (2026-09-11, NOT looked at in game)</h2>
 
 <p>

@@ -169,6 +169,41 @@
     so they are two examples rather than two copies.
 </p>
 
+<h3 id="rest-stops">A way out every twenty-five pens</h3>
+
+<p>
+    <strong>Every 25th segment carries no pens. It is a break with a hay-bale portal
+    home.</strong> The corridor is some seven thousand blocks end to end and until now
+    had exactly <em>one</em> way out, the return portal at the entrance &mdash; so
+    anybody who walked in a few hundred pens to look at something had to walk all the way
+    back. There are <strong>41</strong> of these, one every <strong>175 blocks</strong>,
+    so a way home is never more than about ninety blocks away.
+</p>
+
+<ul>
+    <li><strong>Counted in segments</strong>, so it is twenty-five pens down <em>each
+        side</em> between breaks &mdash; which is what &ldquo;every twenty-five&rdquo;
+        means to somebody walking past one row of them.</li>
+    <li><strong>The portal is set back off the north side, not across the road.</strong>
+        The entrance portal stands in the road because you arrive through it; one of these
+        in the road would teleport out anybody walking the length of the place, which is
+        the opposite of a convenience. You step aside into it.</li>
+    <li><strong>It needs no destination wiring.</strong>
+        <code>HorsePortalManager</code> resolves a portal in this dimension through
+        <code>plotContaining</code>, which is an X range &mdash; so a portal anywhere in
+        the plot already sends you to that plot's own return position, and takes your
+        tamed horses with you exactly as the entrance one does.</li>
+    <li><strong>Pen numbering stays contiguous.</strong> A break builds no pens, so
+        numbering by segment would leave a hole and the signs would read &hellip;49, 50,
+        then 53. The breaks before a segment are subtracted, so a pen's number still means
+        &ldquo;the nth pen you have walked past&rdquo;. It is still a pure function of the
+        segment index, so a recycled plot rebuilds identically.</li>
+    <li><strong>The corridor got longer, not shorter.</strong> The breaks are extra
+        segments rather than pens taken away, so all 2,000 pens still exist &mdash; 1,042
+        segments, 41 of them breaks. Skipping that would have quietly eaten the last forty
+        pens.</li>
+</ul>
+
 <h3><code>ShowcaseGenotypes</code> &mdash; a founder draw with a floor under it</h3>
 
 <p>
@@ -216,6 +251,9 @@
         gene</strong>, so a busy horse reads very wide.</li>
     <li><strong>At the entrance</strong>, three blocks in front of the return portal:
         <em>Horse Pens / 2,000 pens / random genome / mare + stallion</em>.</li>
+    <li><strong>At each <a href="#rest-stops">rest stop</a></strong>, on the road side of
+        the break: <em>Way out / step through / N pens / that way -&gt;</em>, where N is how
+        many pens you have walked past to get there.</li>
 </ul>
 
 <h2 id="layout">Layout</h2>

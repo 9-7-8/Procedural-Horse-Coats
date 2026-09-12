@@ -144,12 +144,36 @@ public final class DebugPenManager {
     static final int PEN_COUNT = 2_000;
 
     /**
-     * The corridor holds {@link #PEN_COUNT} pens, two per segment. Fixed, so a
-     * plot rebuilt on a recycled X has the same geometry as the one it replaces
-     * - see the teardown note in the class javadoc.
+     * <b>A rest stop every this many pen segments</b>, in place of that
+     * segment's two pens: no fences, no horses, and a hay-bale portal home.
+     *
+     * <p>The corridor is {@value #PEN_COUNT} pens long and a pen segment is
+     * {@value #PERIOD} blocks, so walking it end to end is some seven thousand
+     * blocks with, until now, exactly one way out - the return portal at the
+     * start. Anyone who walked in a few hundred pens to look at something had
+     * to walk all the way back. A break every twenty-five segments puts a way
+     * home within about ninety blocks from anywhere.
+     *
+     * <p>Counted in <b>segments</b>, so it is twenty-five pens down each side
+     * between breaks - which is what "every twenty-five" means to somebody
+     * walking past one row of them.
+     */
+    private static final int REST_STOP_EVERY = 25;
+
+    /** Pen segments needed to hold {@link #PEN_COUNT} pens, before any breaks. */
+    private static final int PEN_SEGMENTS = (PEN_COUNT + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT;
+
+    /**
+     * The corridor holds {@link #PEN_COUNT} pens, two per segment, <b>plus</b>
+     * the rest-stop segments that carry none - so it is longer than the pen
+     * count alone would make it, or the breaks would eat the last forty pens.
+     * One break per {@code REST_STOP_EVERY - 1} pen segments, and one spare so
+     * rounding can never cut the corridor short. Fixed, so a plot rebuilt on a
+     * recycled X has the same geometry as the one it replaces - see the
+     * teardown note in the class javadoc.
      */
     private static final int LAST_SEGMENT_INDEX =
-            (PEN_COUNT + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT - 1;
+            PEN_SEGMENTS + PEN_SEGMENTS / (REST_STOP_EVERY - 1);
 
     private static final int ROAD_HALF_WIDTH = 3;        // gravel road: z in [-3, 3]
     private static final int WALL_TOP_DY = 10;           // glowstone line height above the floor
@@ -308,13 +332,83 @@ public final class DebugPenManager {
             buildStartCap(level, plot);
         }
         buildCorridor(level, plot, x0);
-        int base = index * PENS_PER_SEGMENT;
-        buildPen(level, plot, x0, NORTH_PEN, base);
-        buildPen(level, plot, x0, SOUTH_PEN, base + 1);
+        if (isRestStop(index)) {
+            // The corridor floor and its outer walls are laid by buildCorridor,
+            // not by buildPen, so a segment with no pens in it is still solid
+            // ground between solid walls - just an open stretch with a way home.
+            buildRestStop(level, plot, x0, index);
+        } else {
+            int base = penBaseFor(index);
+            buildPen(level, plot, x0, NORTH_PEN, base);
+            buildPen(level, plot, x0, SOUTH_PEN, base + 1);
+        }
         if (index == 0) {
             buildReturnPortal(level, plot);
             buildEntranceSign(level, plot);
         }
+    }
+
+    /** Is this segment a break rather than a pair of pens? Never the first one. */
+    private static boolean isRestStop(int index) {
+        return index > 0 && index % REST_STOP_EVERY == 0;
+    }
+
+    /**
+     * The number of the first pen in segment {@code index}.
+     *
+     * <p><b>Not {@code index * 2}</b>, which is what it was before the breaks
+     * existed: a rest stop builds no pens, so counting by segment would leave a
+     * hole in the numbering and the signs would read ...49, 50, then 53. The
+     * breaks before this segment are subtracted, so the numbers stay contiguous
+     * down the corridor and a pen's sign still means "the nth pen you have
+     * walked past". A pure function of the index, so the geometry is still
+     * deterministic and a recycled plot rebuilds identically.
+     */
+    private static int penBaseFor(int index) {
+        return (index - index / REST_STOP_EVERY) * PENS_PER_SEGMENT;
+    }
+
+    /**
+     * A break in the rows: no fences, no horses, and a hay-bale portal set back
+     * off the north side of the road.
+     *
+     * <p>It is <b>off</b> the road rather than across it on purpose. The return
+     * portal at the start stands in the road because you arrive through it and
+     * everything past it is the corridor; one of these standing in the road
+     * would teleport out anybody walking the length of the place, which is the
+     * opposite of a convenience. You step aside into this one.
+     *
+     * <p>It needs no destination wiring: {@code HorsePortalManager} resolves a
+     * debug-dimension portal through {@link #plotContaining}, which is an X
+     * range, so a portal anywhere in the plot already sends you to that plot's
+     * own return position.
+     */
+    private static void buildRestStop(ServerLevel level, Plot plot, int x0, int index) {
+        int gy = plot.baseY;
+        int pz = ROAD_HALF_WIDTH + 3;        // set back from the road edge, not on it
+        BlockState hay = Blocks.HAY_BLOCK.defaultBlockState();
+        BlockState portal = ModBlocks.HAY_PORTAL.get().defaultBlockState()
+                .setValue(HayPortalBlock.AXIS, Direction.Axis.X);
+
+        // Frame spans x0+1..x0+4 with a 2-wide, 3-tall interior - the same
+        // shape as the return portal, turned to face the road.
+        for (int x = x0 + 1; x <= x0 + 4; x++) {
+            fastSet(level, new BlockPos(x, gy, pz), hay);
+            fastSet(level, new BlockPos(x, gy + 4, pz), hay);
+        }
+        for (int y = gy + 1; y <= gy + 3; y++) {
+            fastSet(level, new BlockPos(x0 + 1, y, pz), hay);
+            fastSet(level, new BlockPos(x0 + 4, y, pz), hay);
+            fastSetPortal(level, new BlockPos(x0 + 2, y, pz), portal);
+            fastSetPortal(level, new BlockPos(x0 + 3, y, pz), portal);
+        }
+
+        int pensSoFar = penBaseFor(index);
+        placeSign(level, new BlockPos(x0 + 5, gy + 1, ROAD_HALF_WIDTH + 1), Direction.SOUTH,
+                List.of("Way out",
+                        "step through",
+                        String.format("%,d pens", pensSoFar),
+                        "that way ->"));
     }
 
     private static void giveDebugPaper(ServerPlayer player) {
