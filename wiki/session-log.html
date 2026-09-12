@@ -27,7 +27,7 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
-<h2 id="d2026-09-12">2026-09-12 &mdash; three quarters of &sect;10, and one word that had to be neither of the obvious two</h2>
+<h2 id="d2026-09-12">2026-09-12 &mdash; three quarters of &sect;10, three genes that use it, and one word that had to be neither of the obvious two</h2>
 
 <p>
     Three of the four things left in <a href="roadmap.html#designer">&sect;10</a> shipped:
@@ -163,16 +163,71 @@
         only the fixture was stale.</li>
 </ul>
 
+<h3>Then three genes picked it up</h3>
+
+<p>
+    A format nothing uses is a format nobody has tested, so the same session put the three
+    features into shipped genes &mdash; one each, chosen because the gene was already
+    describing the thing it could not say.
+</p>
+
+<ul>
+    <li><strong><a href="gene-starburst.html">Starburst</a> scales.</strong> All
+        twenty-one of its paths are centred on the same point in units space, which is
+        what makes a minimal shape possible at all here: <code>pointsMin</code> is each
+        path scaled about that centre to 45%, so the rings stay concentric and the spikes
+        stay registered to the core at every size. The <code>size</code> knob's range is
+        deliberately the scale itself (0.45 to 1), so the number a horse drew reads as
+        what it means.</li>
+    <li><strong><a href="gene-lantern.html">Lantern</a> and
+        <a href="gene-tron.html">Tron</a> burn.</strong> Both were already a lit core
+        beside an unlit halo &mdash; which is what you write when a glow is a bit and a
+        halo can only be painted. The halo is lit now (22% and 25%), the core carries the
+        gene's dial, and the falloff is free: a glow is scaled by its layer's coverage,
+        and both haloes' masks already faded.</li>
+</ul>
+
+<p>
+    The haloes are <strong>flat constants</strong> rather than a share of the core,
+    because the format has no arithmetic - "a fifth of the core" is not expressible - and
+    a constant under the dial's own floor keeps the core the brighter of the two on every
+    horse. That is a real limit found by using the feature, and it is the first thing a
+    knob-driven glow wants that it cannot have.
+</p>
+
+<div class="note">
+    <span class="label">The dial exposed a gene that was already a coin flip</span>
+    <p>
+        Adding a knob to Starburst made <code>DeadLayerTest</code> fail on "black shards in
+        the spikes", and the obvious reading - the shrunken emblem starved the shards - was
+        <strong>wrong</strong>. Setting <code>pointsMin</code> equal to <code>points</code>,
+        so the geometry could not have changed, failed identically: what had happened was
+        that the extra knob re-rolled that gene's draw for the one horse the test seeds.
+    </p>
+    <p>
+        Measuring it settled what was actually true. That layer is a sparse
+        <code>SPOTS</code> field inside a shape a few units across, and over twenty horses
+        it painted <strong>nothing on five of them</strong>. It had always been a coin
+        flip; the test had only ever seen the one horse, which happened to land. So the
+        fix was the gene, not the dial: 2.8 / 0.5 instead of 3.4 / 0.4 lands on every horse
+        at every size and keeps the density it had at full size. <strong>A layer whose
+        existence depends on a seed is one re-roll from dead</strong>, and the only thing
+        that finds those is measuring across horses rather than looking at one.
+    </p>
+</div>
+
 <h3>What is not built</h3>
 
 <ul>
     <li><strong>The creator still cannot show a glow.</strong> Its preview is an unlit
         sheet, so there is nothing to be brighter than. Fixing it means shading in the
-        preview, which is a different job from anything in &sect;10.</li>
-    <li><strong>No shipped gene uses a dial, a minimal shape or a partial glow</strong>, so
-        none of today's work is visible in game beyond the softened glow edges. Putting a
-        dial on two or three existing marking genes is the cheapest way to make all three
-        real at once, and is the thing to pick up first.</li>
+        preview, which is a different job from anything in &sect;10
+        (<a href="known-gaps.html#gap-201">gap 201</a>).</li>
+    <li><strong>Per-region colour ranges</strong> are what is left of &sect;10, and the
+        first question is whether a colour becomes a <code>Value</code> at all &mdash;
+        every colour in the format is a literal today, while a hundred-odd genes already
+        carry a <code>hue</code> knob feeding a <code>RAMP</code> axis, so the answer may
+        be a different shape from the one the roadmap assumes.</li>
 </ul>
 
 <h2 id="d2026-09-11h">2026-09-11 &mdash; the two items at the top of the roadmap, both of them</h2>

@@ -30675,6 +30675,12 @@
       "name": "bloom",
       "min": 1.2,
       "max": 2.2
+    },
+    {
+      "name": "burn",
+      "min": 0.35,
+      "max": 1.0,
+      "dial": true
     }
   ],
   "expressions": [
@@ -30720,11 +30726,12 @@
             "saturation": 0.7,
             "lightness": 0.55,
             "strength": 40
-          }
+          },
+          "emissive": 0.22
         },
         {
           "name": "the lit core of the line, broken in places",
-          "emissive": true,
+          "emissive": "$burn",
           "masks": [
             {
               "type": "CENTERLINE",
@@ -30807,7 +30814,8 @@
             "saturation": 0.7,
             "lightness": 0.6,
             "strength": 55
-          }
+          },
+          "emissive": 0.18
         }
       ]
     },
@@ -30822,7 +30830,11 @@
     "La/La": 0.002,
     "La/n": 0.038,
     "n/n": 99.96
-  }
+  },
+  "notes": [
+    "The three layers are one light source now rather than a lit line beside two painted ones. The core carries the gene's dial ('burn'), so one horse's topline smoulders and another's blazes; the bloom and the mane carry flat, dimmer levels. They are flat because the format has no arithmetic - 'a fifth of the core' cannot be written - and a constant under the dial's own floor of 0.35 keeps the core the brightest thing on every horse, which is what the eye reads. The falloff is free: a glow is scaled by its layer's coverage, and the bloom's CENTERLINE already fades over 1.2 units, so the light spills away from the line exactly as far as the paint does.",
+    "'burn' does not run to 0. A lantern horse with no light in it is a horse wearing a coloured stripe, which is not what the locus is for; 0.35 is dim enough to read as 'barely lit' beside a 1.0 sibling."
+  ]
 },
 {
   "format": 3,
@@ -52633,7 +52645,10 @@
     "Sourced from a traced SVG, but not drawn with the SVG mask. The trace runs to thousands of path commands over hundreds of subpaths, most of it trace noise - well past the point ceiling, which exists to keep a traced photograph out of a gene file, and it would have made the marking identical on every horse. The reference was read for what KIND of shape each element is and rebuilt from field masks. A hand-drawn, low-node version of the source would be worth the SVG mask with its d string verbatim.",
     "Arrived keyed 'ixora.starburst'. Renamed to the horsegenetics namespace every other gene in the mod uses - the format allows a modder their own, but a gene shipping INSIDE this mod under a second namespace breaks the tooling that builds a key from a slug.",
     "The three stars are DISJOINT and have to be. Outline, inline and core are three nested filled PATHs at strength 100, and a gene's layers each measure their delta against the colour the gene started from and then sum - so the core was adding white to a texel the outline and inline had already driven to the clamp, and DeadLayerTest caught it painting nothing at all. Each star now subtracts the one inside it and paints only its own ring.",
-    "The flecks were spacing 4.6 at radius 0.6 and chance 0.3, which over a barrel is about three spots of a texel and a half - they landed on four texels in total. 3.8 / 1.0 / 0.55 is a scatter you can actually see."
+    "The flecks were spacing 4.6 at radius 0.6 and chance 0.3, which over a barrel is about three spots of a texel and a half - they landed on four texels in total. 3.8 / 1.0 / 0.55 is a scatter you can actually see.",
+    "The emblem SCALES per horse rather than being one stamp. Every path here is centred on the same point in units space, so 'pointsMin' is each one scaled about that centre by 0.45 - the rings stay concentric and the spikes stay registered to the core at every size, because they all move along the same dial. The 'size' knob's range is deliberately the scale itself (0.45 to 1), so the number a horse drew reads as what it is.",
+    "What does NOT scale is 'softness', which is in body units either way, so a small emblem reads slightly softer at its edges than a large one. That is left alone: it is a fraction of a texel on the rings, and a smaller marking being a touch less crisp is not wrong.",
+    "The shards were retuned from spacing 3.4 / chance 0.4 to 2.8 / 0.5 when the dial went in, and the reason is worth keeping: that layer was ALREADY a coin flip. Measured over twenty horses it painted nothing on five of them - a sparse SPOTS field inside a shape a few units across either lands or does not - and DeadLayerTest only ever saw the one horse it seeds, which happened to land. Adding a knob re-rolled that horse and the layer came up empty, which is how a latent fragility surfaced as a test failure that looked like the dial's fault. At 2.8 / 0.5 it lands on every horse at every size (7 texels at the smallest emblem, 29 to 75 at the largest), which is the point: a layer whose existence depends on a seed is one re-roll from dead whatever else changes."
   ],
   "alleles": [
     {
@@ -52670,6 +52685,12 @@
     {
       "name": "fleckSeed",
       "type": "seed"
+    },
+    {
+      "name": "size",
+      "min": 0.45,
+      "max": 1.0,
+      "dial": true
     }
   ],
   "expressions": [
@@ -52730,6 +52751,40 @@
                 18.49,
                 21.37,
                 17.58
+              ],
+              "pointsMin": [
+                20.791,
+                18.57,
+                19.347,
+                17.117,
+                17.732,
+                17.967,
+                18.442,
+                16.887,
+                14.73,
+                17.13,
+                18.159,
+                16.428,
+                15.981,
+                15.604,
+                18.659,
+                16.014,
+                18.209,
+                14.43,
+                19.653,
+                15.883,
+                21.268,
+                15.033,
+                20.558,
+                16.113,
+                24.27,
+                15.87,
+                20.841,
+                16.572,
+                23.019,
+                17.395,
+                20.341,
+                16.986
               ],
               "closed": true,
               "fill": true,
@@ -52799,6 +52854,40 @@
                 21.37,
                 17.58
               ],
+              "pointsMin": [
+                20.791,
+                18.57,
+                19.347,
+                17.117,
+                17.732,
+                17.967,
+                18.442,
+                16.887,
+                14.73,
+                17.13,
+                18.159,
+                16.428,
+                15.981,
+                15.604,
+                18.659,
+                16.014,
+                18.209,
+                14.43,
+                19.653,
+                15.883,
+                21.268,
+                15.033,
+                20.558,
+                16.113,
+                24.27,
+                15.87,
+                20.841,
+                16.572,
+                23.019,
+                17.395,
+                20.341,
+                16.986
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.45
@@ -52806,12 +52895,12 @@
             {
               "type": "SPOTS",
               "seed": "$shardSeed",
-              "spacing": 3.4,
+              "spacing": 2.8,
               "radius": 0.85,
               "vary": 0.5,
               "stretch": 2.4,
               "axis": "Y",
-              "chance": 0.42,
+              "chance": 0.5,
               "softness": 0.2,
               "combine": "MULTIPLY"
             }
@@ -52861,6 +52950,32 @@
                 20.88,
                 17.81
               ],
+              "pointsMin": [
+                19.5,
+                18.084,
+                18.879,
+                17.09,
+                17.255,
+                17.211,
+                18.262,
+                16.5,
+                16.805,
+                15.645,
+                18.879,
+                15.91,
+                19.5,
+                14.916,
+                20.121,
+                15.91,
+                21.745,
+                15.789,
+                20.738,
+                16.5,
+                22.195,
+                17.355,
+                20.121,
+                17.09
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.22
@@ -52894,6 +53009,32 @@
                 18.07,
                 20.62,
                 17.57
+              ],
+              "pointsMin": [
+                19.5,
+                17.809,
+                18.996,
+                16.982,
+                17.642,
+                17.09,
+                18.488,
+                16.5,
+                17.268,
+                15.793,
+                18.996,
+                16.018,
+                19.5,
+                15.191,
+                20.004,
+                16.018,
+                21.358,
+                15.91,
+                20.512,
+                16.5,
+                21.732,
+                17.206,
+                20.004,
+                16.982
               ],
               "closed": true,
               "fill": true,
@@ -52946,6 +53087,32 @@
                 20.62,
                 17.57
               ],
+              "pointsMin": [
+                19.5,
+                17.809,
+                18.996,
+                16.982,
+                17.642,
+                17.09,
+                18.488,
+                16.5,
+                17.268,
+                15.793,
+                18.996,
+                16.018,
+                19.5,
+                15.191,
+                20.004,
+                16.018,
+                21.358,
+                15.91,
+                20.512,
+                16.5,
+                21.732,
+                17.206,
+                20.004,
+                16.982
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.22
@@ -52979,6 +53146,32 @@
                 17.75,
                 20.38,
                 17.33
+              ],
+              "pointsMin": [
+                19.5,
+                17.54,
+                19.104,
+                16.873,
+                18.029,
+                16.968,
+                18.712,
+                16.5,
+                17.732,
+                15.938,
+                19.104,
+                16.127,
+                19.5,
+                15.46,
+                19.896,
+                16.127,
+                20.971,
+                16.032,
+                20.288,
+                16.5,
+                21.268,
+                17.062,
+                19.896,
+                16.873
               ],
               "closed": true,
               "fill": true,
@@ -53030,6 +53223,32 @@
                 17.75,
                 20.38,
                 17.33
+              ],
+              "pointsMin": [
+                19.5,
+                17.54,
+                19.104,
+                16.873,
+                18.029,
+                16.968,
+                18.712,
+                16.5,
+                17.732,
+                15.938,
+                19.104,
+                16.127,
+                19.5,
+                15.46,
+                19.896,
+                16.127,
+                20.971,
+                16.032,
+                20.288,
+                16.5,
+                21.268,
+                17.062,
+                19.896,
+                16.873
               ],
               "closed": true,
               "fill": true,
@@ -53128,6 +53347,40 @@
                 21.37,
                 17.58
               ],
+              "pointsMin": [
+                20.791,
+                18.57,
+                19.347,
+                17.117,
+                17.732,
+                17.967,
+                18.442,
+                16.887,
+                14.73,
+                17.13,
+                18.159,
+                16.428,
+                15.981,
+                15.604,
+                18.659,
+                16.014,
+                18.209,
+                14.43,
+                19.653,
+                15.883,
+                21.268,
+                15.033,
+                20.558,
+                16.113,
+                24.27,
+                15.87,
+                20.841,
+                16.572,
+                23.019,
+                17.395,
+                20.341,
+                16.986
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.45
@@ -53196,6 +53449,40 @@
                 21.37,
                 17.58
               ],
+              "pointsMin": [
+                20.791,
+                18.57,
+                19.347,
+                17.117,
+                17.732,
+                17.967,
+                18.442,
+                16.887,
+                14.73,
+                17.13,
+                18.159,
+                16.428,
+                15.981,
+                15.604,
+                18.659,
+                16.014,
+                18.209,
+                14.43,
+                19.653,
+                15.883,
+                21.268,
+                15.033,
+                20.558,
+                16.113,
+                24.27,
+                15.87,
+                20.841,
+                16.572,
+                23.019,
+                17.395,
+                20.341,
+                16.986
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.45
@@ -53203,12 +53490,12 @@
             {
               "type": "SPOTS",
               "seed": "$shardSeed",
-              "spacing": 3.4,
+              "spacing": 2.8,
               "radius": 0.85,
               "vary": 0.5,
               "stretch": 2.4,
               "axis": "Y",
-              "chance": 0.42,
+              "chance": 0.5,
               "softness": 0.2,
               "combine": "MULTIPLY"
             }
@@ -53258,6 +53545,32 @@
                 20.88,
                 17.81
               ],
+              "pointsMin": [
+                19.5,
+                18.084,
+                18.879,
+                17.09,
+                17.255,
+                17.211,
+                18.262,
+                16.5,
+                16.805,
+                15.645,
+                18.879,
+                15.91,
+                19.5,
+                14.916,
+                20.121,
+                15.91,
+                21.745,
+                15.789,
+                20.738,
+                16.5,
+                22.195,
+                17.355,
+                20.121,
+                17.09
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.22
@@ -53291,6 +53604,32 @@
                 18.07,
                 20.62,
                 17.57
+              ],
+              "pointsMin": [
+                19.5,
+                17.809,
+                18.996,
+                16.982,
+                17.642,
+                17.09,
+                18.488,
+                16.5,
+                17.268,
+                15.793,
+                18.996,
+                16.018,
+                19.5,
+                15.191,
+                20.004,
+                16.018,
+                21.358,
+                15.91,
+                20.512,
+                16.5,
+                21.732,
+                17.206,
+                20.004,
+                16.982
               ],
               "closed": true,
               "fill": true,
@@ -53343,6 +53682,32 @@
                 20.62,
                 17.57
               ],
+              "pointsMin": [
+                19.5,
+                17.809,
+                18.996,
+                16.982,
+                17.642,
+                17.09,
+                18.488,
+                16.5,
+                17.268,
+                15.793,
+                18.996,
+                16.018,
+                19.5,
+                15.191,
+                20.004,
+                16.018,
+                21.358,
+                15.91,
+                20.512,
+                16.5,
+                21.732,
+                17.206,
+                20.004,
+                16.982
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.22
@@ -53376,6 +53741,32 @@
                 17.75,
                 20.38,
                 17.33
+              ],
+              "pointsMin": [
+                19.5,
+                17.54,
+                19.104,
+                16.873,
+                18.029,
+                16.968,
+                18.712,
+                16.5,
+                17.732,
+                15.938,
+                19.104,
+                16.127,
+                19.5,
+                15.46,
+                19.896,
+                16.127,
+                20.971,
+                16.032,
+                20.288,
+                16.5,
+                21.268,
+                17.062,
+                19.896,
+                16.873
               ],
               "closed": true,
               "fill": true,
@@ -53427,6 +53818,32 @@
                 17.75,
                 20.38,
                 17.33
+              ],
+              "pointsMin": [
+                19.5,
+                17.54,
+                19.104,
+                16.873,
+                18.029,
+                16.968,
+                18.712,
+                16.5,
+                17.732,
+                15.938,
+                19.104,
+                16.127,
+                19.5,
+                15.46,
+                19.896,
+                16.127,
+                20.971,
+                16.032,
+                20.288,
+                16.5,
+                21.268,
+                17.062,
+                19.896,
+                16.873
               ],
               "closed": true,
               "fill": true,
@@ -53523,6 +53940,40 @@
                 21.37,
                 17.58
               ],
+              "pointsMin": [
+                20.791,
+                18.57,
+                19.347,
+                17.117,
+                17.732,
+                17.967,
+                18.442,
+                16.887,
+                14.73,
+                17.13,
+                18.159,
+                16.428,
+                15.981,
+                15.604,
+                18.659,
+                16.014,
+                18.209,
+                14.43,
+                19.653,
+                15.883,
+                21.268,
+                15.033,
+                20.558,
+                16.113,
+                24.27,
+                15.87,
+                20.841,
+                16.572,
+                23.019,
+                17.395,
+                20.341,
+                16.986
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.45
@@ -53593,6 +54044,40 @@
                 21.37,
                 17.58
               ],
+              "pointsMin": [
+                20.791,
+                18.57,
+                19.347,
+                17.117,
+                17.732,
+                17.967,
+                18.442,
+                16.887,
+                14.73,
+                17.13,
+                18.159,
+                16.428,
+                15.981,
+                15.604,
+                18.659,
+                16.014,
+                18.209,
+                14.43,
+                19.653,
+                15.883,
+                21.268,
+                15.033,
+                20.558,
+                16.113,
+                24.27,
+                15.87,
+                20.841,
+                16.572,
+                23.019,
+                17.395,
+                20.341,
+                16.986
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.45
@@ -53600,12 +54085,12 @@
             {
               "type": "SPOTS",
               "seed": "$shardSeed",
-              "spacing": 3.4,
+              "spacing": 2.8,
               "radius": 0.85,
               "vary": 0.5,
               "stretch": 2.4,
               "axis": "Y",
-              "chance": 0.42,
+              "chance": 0.5,
               "softness": 0.2,
               "combine": "MULTIPLY"
             }
@@ -53657,6 +54142,32 @@
                 20.88,
                 17.81
               ],
+              "pointsMin": [
+                19.5,
+                18.084,
+                18.879,
+                17.09,
+                17.255,
+                17.211,
+                18.262,
+                16.5,
+                16.805,
+                15.645,
+                18.879,
+                15.91,
+                19.5,
+                14.916,
+                20.121,
+                15.91,
+                21.745,
+                15.789,
+                20.738,
+                16.5,
+                22.195,
+                17.355,
+                20.121,
+                17.09
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.22
@@ -53690,6 +54201,32 @@
                 18.07,
                 20.62,
                 17.57
+              ],
+              "pointsMin": [
+                19.5,
+                17.809,
+                18.996,
+                16.982,
+                17.642,
+                17.09,
+                18.488,
+                16.5,
+                17.268,
+                15.793,
+                18.996,
+                16.018,
+                19.5,
+                15.191,
+                20.004,
+                16.018,
+                21.358,
+                15.91,
+                20.512,
+                16.5,
+                21.732,
+                17.206,
+                20.004,
+                16.982
               ],
               "closed": true,
               "fill": true,
@@ -53744,6 +54281,32 @@
                 20.62,
                 17.57
               ],
+              "pointsMin": [
+                19.5,
+                17.809,
+                18.996,
+                16.982,
+                17.642,
+                17.09,
+                18.488,
+                16.5,
+                17.268,
+                15.793,
+                18.996,
+                16.018,
+                19.5,
+                15.191,
+                20.004,
+                16.018,
+                21.358,
+                15.91,
+                20.512,
+                16.5,
+                21.732,
+                17.206,
+                20.004,
+                16.982
+              ],
               "closed": true,
               "fill": true,
               "softness": 0.22
@@ -53777,6 +54340,32 @@
                 17.75,
                 20.38,
                 17.33
+              ],
+              "pointsMin": [
+                19.5,
+                17.54,
+                19.104,
+                16.873,
+                18.029,
+                16.968,
+                18.712,
+                16.5,
+                17.732,
+                15.938,
+                19.104,
+                16.127,
+                19.5,
+                15.46,
+                19.896,
+                16.127,
+                20.971,
+                16.032,
+                20.288,
+                16.5,
+                21.268,
+                17.062,
+                19.896,
+                16.873
               ],
               "closed": true,
               "fill": true,
@@ -53830,6 +54419,32 @@
                 17.75,
                 20.38,
                 17.33
+              ],
+              "pointsMin": [
+                19.5,
+                17.54,
+                19.104,
+                16.873,
+                18.029,
+                16.968,
+                18.712,
+                16.5,
+                17.732,
+                15.938,
+                19.104,
+                16.127,
+                19.5,
+                15.46,
+                19.896,
+                16.127,
+                20.971,
+                16.032,
+                20.288,
+                16.5,
+                21.268,
+                17.062,
+                19.896,
+                16.873
               ],
               "closed": true,
               "fill": true,
@@ -59558,6 +60173,12 @@
       "name": "bloom",
       "min": 0.9,
       "max": 1.8
+    },
+    {
+      "name": "burn",
+      "min": 0.4,
+      "max": 1.0,
+      "dial": true
     }
   ],
   "expressions": [
@@ -59592,7 +60213,8 @@
             "saturation": 0.95,
             "lightness": 0.5,
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube itself, along every edge of every box",
@@ -59618,7 +60240,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         }
       ]
     },
@@ -59656,7 +60278,8 @@
             "axis": "X",
             "space": "body",
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube, running the whole circle of the wheel tail to nose",
@@ -59685,7 +60308,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         }
       ]
     },
@@ -59719,7 +60342,8 @@
             "saturation": 0.95,
             "lightness": 0.5,
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube itself, along every edge of every box",
@@ -59745,7 +60369,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         },
         {
           "name": "the halo the tube throws onto the panel around it",
@@ -59772,7 +60396,8 @@
             "axis": "X",
             "space": "body",
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube, running the whole circle of the wheel tail to nose",
@@ -59801,7 +60426,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         }
       ]
     },
@@ -59819,7 +60444,11 @@
     "Trg/Trg": 0.002667,
     "Trg/n": 0.002667,
     "n/n": 99.972
-  }
+  },
+  "notes": [
+    "The halo is lit now, at a flat 0.25, and the tube carries the gene's dial ('burn'). That is the whole of what a neon tube does and the gene could not say it before: the glass burns, the panel beside it catches some of that, and the catch falls off with distance - which here is free, because a glow is scaled by its layer's coverage and the halo's EDGE mask already fades. The halo's level is a constant rather than a fraction of the tube's because the format has no arithmetic; keeping it below the dial's floor of 0.4 means the tube is the brighter of the two on every horse.",
+    "All three expressions get the same treatment, including 'both', where the solid tube and the gradient tube are separate layers - they light independently and take the brighter where they overlap, which is what CoatOverlay does with two glows on one texel."
+  ]
 },
 {
   "format": 3,

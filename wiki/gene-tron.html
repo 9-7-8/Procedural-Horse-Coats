@@ -102,11 +102,17 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>720 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Trs</code> &middot; <code>Trg</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>EDGE, RAMP, TOWARD, emissive</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="about">Why it is built this way</h2>
+
+<p>The halo is lit now, at a flat 0.25, and the tube carries the gene's dial ('burn'). That is the whole of what a neon tube does and the gene could not say it before: the glass burns, the panel beside it catches some of that, and the catch falls off with distance - which here is free, because a glow is scaled by its layer's coverage and the halo's EDGE mask already fades. The halo's level is a constant rather than a fraction of the tube's because the format has no arithmetic; keeping it below the dial's floor of 0.4 means the tube is the brighter of the two on every horse.</p>
+
+<p>All three expressions get the same treatment, including 'both', where the solid tube and the gradient tube are separate layers - they light independently and take the brighter where they overlap, which is what CoatOverlay does with two glows on one texel.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -122,8 +128,8 @@
 <p>One neon colour, run along every edge of every box the horse is made of, with a weaker halo bleeding off it onto the panel either side. The colour is the horse's own and is inherited with the copy, so a line of Tron horses keeps its colour and a cross with another one does not average them - the foal gets one parent's tube or the other's. The tube renders full-bright, so it holds its colour in a dark stable.</p>
 
 <ol>
-<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>TOWARD</code></li>
-<li>the lit tube itself, along every edge of every box &mdash; <code>EDGE</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
+<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong> at 25%</li>
+<li>the lit tube itself, along every edge of every box &mdash; <code>EDGE</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong>, by an amount that varies per horse</li>
 </ol>
 
 <h3>Gradient outline</h3>
@@ -131,8 +137,8 @@
 <p>The same tube, carrying a hue ramp instead of a colour: it starts at the horse's own hue at the tail and travels five sixths of the way round the wheel by the nose, so the line changes colour along the horse rather than along its own length. Which end of the spectrum a horse starts at is the epigenetic value, exactly as on the solid form.</p>
 
 <ol>
-<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>RAMP</code></li>
-<li>the lit tube, running the whole circle of the wheel tail to nose &mdash; <code>EDGE</code>, painted with <code>RAMP</code>, and it <strong>glows</strong></li>
+<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>RAMP</code>, and it <strong>glows</strong> at 25%</li>
+<li>the lit tube, running the whole circle of the wheel tail to nose &mdash; <code>EDGE</code>, painted with <code>RAMP</code>, and it <strong>glows</strong>, by an amount that varies per horse</li>
 </ol>
 
 <h3>Solid and gradient</h3>
@@ -140,10 +146,10 @@
 <p>One copy of each. Neither is dominant to the other, so the horse gets both tubes laid on the same edges - the ramp over the solid core, which reads as a brighter, harder line than either allele draws alone.</p>
 
 <ol>
-<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>TOWARD</code></li>
-<li>the lit tube itself, along every edge of every box &mdash; <code>EDGE</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
-<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>RAMP</code></li>
-<li>the lit tube, running the whole circle of the wheel tail to nose &mdash; <code>EDGE</code>, painted with <code>RAMP</code>, and it <strong>glows</strong></li>
+<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong> at 25%</li>
+<li>the lit tube itself, along every edge of every box &mdash; <code>EDGE</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong>, by an amount that varies per horse</li>
+<li>the halo the tube throws onto the panel around it &mdash; <code>EDGE</code>, painted with <code>RAMP</code>, and it <strong>glows</strong> at 25%</li>
+<li>the lit tube, running the whole circle of the wheel tail to nose &mdash; <code>EDGE</code>, painted with <code>RAMP</code>, and it <strong>glows</strong>, by an amount that varies per horse</li>
 </ol>
 
 <h3>Wild type</h3>

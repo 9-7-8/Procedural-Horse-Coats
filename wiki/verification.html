@@ -95,10 +95,52 @@
         is wrong rather than the levels.</li>
 </ul>
 
+<h2 id="dialled-genes">&sect;0-CP &mdash; Starburst scales, Lantern and Tron burn (2026-09-12, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">The first three genes to use the dial &mdash; and the first horses that differ in a way you can measure by eye</span>
+    <p>
+        These are what make <a href="#dial-slider">&sect;0-CN</a> and
+        <a href="#glow-intensity">&sect;0-CO</a> real. All three changed their own coat
+        golden rows and nothing else's, so the blast radius is exactly these loci.
+    </p>
+</div>
+
+<ul>
+    <li><strong><a href="gene-starburst.html">Starburst</a>: the emblem is a different
+        size on every horse.</strong> Every one of its twenty-one paths is centred on the
+        same point, so <code>pointsMin</code> is each one scaled about that centre to 45%
+        and the whole emblem grows and shrinks as one thing. <strong>Breed a few and line
+        them up.</strong> The question is whether the range reads as natural variation or
+        as two sizes with a gap: the dial is uniform over 0.45&ndash;1.0, and if the small
+        end looks like a different marking rather than a smaller one, the floor wants
+        raising.</li>
+    <li><strong>Its shards were retuned on the way past</strong> (spacing 3.4 &rarr; 2.8,
+        chance 0.4 &rarr; 0.5) because they were <em>already</em> a coin flip &mdash;
+        measured over twenty horses, the layer painted nothing on five of them. Look at a
+        big emblem and check the shards read as a shattered star rather than as speckle.</li>
+    <li><strong><a href="gene-lantern.html">Lantern</a>'s bloom is lit now</strong>, at
+        22%, with the mane carry at 18% and the core on the dial (0.35&ndash;1.0). The
+        light should <em>spill</em> off the line and fade, rather than stopping at the
+        core's edge. <strong>At night, and up close.</strong> Two horses side by side,
+        one near each end of the dial, is the check that the dial is doing anything.</li>
+    <li><strong><a href="gene-tron.html">Tron</a>'s haloes are lit at 25%</strong> and its
+        tubes are on the dial (0.4&ndash;1.0). The <code>both</code> expression is the
+        interesting one: the solid tube and the gradient tube are separate layers, they
+        light independently, and where they overlap the <strong>brighter</strong> wins
+        rather than the two summing. If an overlap looks blown out, that rule is not
+        working.</li>
+    <li><strong>Is a flat halo beside a varying core right?</strong> The haloes are
+        constants because the format has no arithmetic - "a quarter of the core" cannot
+        be written - so a dim Lantern has a proportionally brighter bloom than a bright
+        one. It should read as the light guttering rather than as the halo taking over;
+        if it does not, the answer is probably a second knob rather than a wider floor.</li>
+</ul>
+
 <h2 id="dial-slider">&sect;0-CN &mdash; The dial, the minimal shape, and the slider (2026-09-12, NOT looked at)</h2>
 
 <div class="note">
-    <span class="label">A format change and a control, and no shipped gene uses either yet</span>
+    <span class="label">Three genes use it now &mdash; see &sect;0-CP below</span>
     <p>
         A knob may be marked <code>"dial": true</code>, and a <code>PATH</code> may carry
         <code>pointsMin</code> &mdash; the same shape at the gene's weakest, morphed point
@@ -106,9 +148,8 @@
         fainter (<a href="making-a-gene.html#pointsmin">the format</a>). Fifteen headless
         checks drive the canvas and the slider, and an answer table in the parity fixtures
         compares the morph itself in both engines. <strong>What no script can say is
-        whether it is worth drawing with</strong>, and no gene in
-        <code>horsegenetics/genes/</code> uses it, so nothing in the game looks different
-        yet.
+        whether it is worth drawing with</strong> &mdash; and three genes carry one now, so
+        there is something to look at: <a href="#dialled-genes">&sect;0-CP</a>.
     </p>
 </div>
 

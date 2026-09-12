@@ -35,6 +35,12 @@
       "name": "bloom",
       "min": 0.9,
       "max": 1.8
+    },
+    {
+      "name": "burn",
+      "min": 0.4,
+      "max": 1.0,
+      "dial": true
     }
   ],
   "expressions": [
@@ -69,7 +75,8 @@
             "saturation": 0.95,
             "lightness": 0.5,
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube itself, along every edge of every box",
@@ -95,7 +102,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         }
       ]
     },
@@ -133,7 +140,8 @@
             "axis": "X",
             "space": "body",
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube, running the whole circle of the wheel tail to nose",
@@ -162,7 +170,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         }
       ]
     },
@@ -196,7 +204,8 @@
             "saturation": 0.95,
             "lightness": 0.5,
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube itself, along every edge of every box",
@@ -222,7 +231,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         },
         {
           "name": "the halo the tube throws onto the panel around it",
@@ -249,7 +258,8 @@
             "axis": "X",
             "space": "body",
             "strength": 34
-          }
+          },
+          "emissive": 0.25
         },
         {
           "name": "the lit tube, running the whole circle of the wheel tail to nose",
@@ -278,7 +288,7 @@
             "strength": 100,
             "opacity": 100
           },
-          "emissive": true
+          "emissive": "$burn"
         }
       ]
     },
@@ -296,5 +306,9 @@
     "Trg/Trg": 0.002667,
     "Trg/n": 0.002667,
     "n/n": 99.972
-  }
+  },
+  "notes": [
+    "The halo is lit now, at a flat 0.25, and the tube carries the gene's dial ('burn'). That is the whole of what a neon tube does and the gene could not say it before: the glass burns, the panel beside it catches some of that, and the catch falls off with distance - which here is free, because a glow is scaled by its layer's coverage and the halo's EDGE mask already fades. The halo's level is a constant rather than a fraction of the tube's because the format has no arithmetic; keeping it below the dial's floor of 0.4 means the tube is the brighter of the two on every horse.",
+    "All three expressions get the same treatment, including 'both', where the solid tube and the gradient tube are separate layers - they light independently and take the brighter where they overlap, which is what CoatOverlay does with two glows on one texel."
+  ]
 }

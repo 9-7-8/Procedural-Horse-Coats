@@ -35,6 +35,12 @@
       "name": "bloom",
       "min": 1.2,
       "max": 2.2
+    },
+    {
+      "name": "burn",
+      "min": 0.35,
+      "max": 1.0,
+      "dial": true
     }
   ],
   "expressions": [
@@ -80,11 +86,12 @@
             "saturation": 0.7,
             "lightness": 0.55,
             "strength": 40
-          }
+          },
+          "emissive": 0.22
         },
         {
           "name": "the lit core of the line, broken in places",
-          "emissive": true,
+          "emissive": "$burn",
           "masks": [
             {
               "type": "CENTERLINE",
@@ -167,7 +174,8 @@
             "saturation": 0.7,
             "lightness": 0.6,
             "strength": 55
-          }
+          },
+          "emissive": 0.18
         }
       ]
     },
@@ -182,5 +190,9 @@
     "La/La": 0.002,
     "La/n": 0.038,
     "n/n": 99.96
-  }
+  },
+  "notes": [
+    "The three layers are one light source now rather than a lit line beside two painted ones. The core carries the gene's dial ('burn'), so one horse's topline smoulders and another's blazes; the bloom and the mane carry flat, dimmer levels. They are flat because the format has no arithmetic - 'a fifth of the core' cannot be written - and a constant under the dial's own floor of 0.35 keeps the core the brightest thing on every horse, which is what the eye reads. The falloff is free: a glow is scaled by its layer's coverage, and the bloom's CENTERLINE already fades over 1.2 units, so the light spills away from the line exactly as far as the paint does.",
+    "'burn' does not run to 0. A lantern horse with no light in it is a horse wearing a coloured stripe, which is not what the locus is for; 0.35 is dim enough to read as 'barely lit' beside a 1.0 sibling."
+  ]
 }

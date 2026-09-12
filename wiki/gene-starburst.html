@@ -105,7 +105,7 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>151 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>W</code> &middot; <code>B</code> &middot; <code>C</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>FRACTAL, PARTS, PATH, SPOTS, TOWARD</td></tr>
 </tbody>
 </table>
@@ -132,6 +132,12 @@
 <p>The three stars are DISJOINT and have to be. Outline, inline and core are three nested filled PATHs at strength 100, and a gene's layers each measure their delta against the colour the gene started from and then sum - so the core was adding white to a texel the outline and inline had already driven to the clamp, and DeadLayerTest caught it painting nothing at all. Each star now subtracts the one inside it and paints only its own ring.</p>
 
 <p>The flecks were spacing 4.6 at radius 0.6 and chance 0.3, which over a barrel is about three spots of a texel and a half - they landed on four texels in total. 3.8 / 1.0 / 0.55 is a scatter you can actually see.</p>
+
+<p>The emblem SCALES per horse rather than being one stamp. Every path here is centred on the same point in units space, so 'pointsMin' is each one scaled about that centre by 0.45 - the rings stay concentric and the spikes stay registered to the core at every size, because they all move along the same dial. The 'size' knob's range is deliberately the scale itself (0.45 to 1), so the number a horse drew reads as what it is.</p>
+
+<p>What does NOT scale is 'softness', which is in body units either way, so a small emblem reads slightly softer at its edges than a large one. That is left alone: it is a fraction of a texel on the rings, and a smaller marking being a touch less crisp is not wrong.</p>
+
+<p>The shards were retuned from spacing 3.4 / chance 0.4 to 2.8 / 0.5 when the dial went in, and the reason is worth keeping: that layer was ALREADY a coin flip. Measured over twenty horses it painted nothing on five of them - a sparse SPOTS field inside a shape a few units across either lands or does not - and DeadLayerTest only ever saw the one horse it seeds, which happened to land. Adding a knob re-rolled that horse and the layer came up empty, which is how a latent fragility surfaced as a test failure that looked like the dial's fault. At 2.8 / 0.5 it lands on every horse at every size (7 texels at the smallest emblem, 29 to 75 at the largest), which is the point: a layer whose existence depends on a seed is one re-roll from dead whatever else changes.</p>
 
 <h2 id="layers">What it paints</h2>
 

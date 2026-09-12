@@ -1047,11 +1047,17 @@ public final class GeneWikiTool {
                 sb.append(" &mdash; ").append(String.join(" &times; ", masks))
                         .append(", painted with <code>").append(layer.op().type()).append("</code>");
                 if (layer.glows()) {
-                    // A partial or knob-driven glow says so, since "glows" on a
-                    // page beside a horse that is barely lit reads as a bug.
-                    sb.append(layer.emissive() instanceof GeneSpec.Value.Const c && c.v() >= 1.0
-                            ? ", and it <strong>glows</strong>"
-                            : ", and it <strong>glows</strong>, partly");
+                    // How brightly, because "glows" beside a horse that is barely
+                    // lit reads as a bug - and a glow that varies per horse is the
+                    // more interesting thing to say, not a dimmer one.
+                    sb.append(", and it <strong>glows</strong>");
+                    if (layer.emissive() instanceof GeneSpec.Value.Const c) {
+                        if (c.v() < 1.0) {
+                            sb.append(" at ").append(Math.round(c.v() * 100)).append("%");
+                        }
+                    } else {
+                        sb.append(", by an amount that varies per horse");
+                    }
                 }
                 sb.append("</li>\n");
             }
