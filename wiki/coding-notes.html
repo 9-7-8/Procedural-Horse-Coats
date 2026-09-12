@@ -118,6 +118,15 @@
     covered by parity and parity stayed green &mdash; because no example gene had a
     layer whose output differed between the two semantics. The check ran, the
     comparison was real, and the inputs could not tell the two answers apart.</li>
+<li><strong>The probe could not reach the detail.</strong> The <code>GOO</code> mask
+    (2026-09-11) went in with a layer in <code>prismatic.json</code>, and the gate was
+    watched go red twice - a port returning zero fails 43 checks, a missing end-face wrap
+    fails one. Then two <em>subtle</em> disagreements were tried: multiplying the field by
+    0.98, and changing the sag bite from 1.4 to 1.1. Both stayed green, because the fixture
+    samples four texels per part and none of them sits in the soft edge or between two
+    drips. The lesson is not "parity is useless" but that <strong>a gate's worth is the
+    smallest error it can see</strong>, and that number is only known by trying one. See
+    <a href="known-gaps.html#gap-194">gap 194</a>.</li>
 </ol>
 
 <p>

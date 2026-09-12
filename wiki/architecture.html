@@ -183,6 +183,19 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 
 <p>Run <code>:common:test</code> first when iterating on genetics/stats - it doesn't touch Minecraft. Requires JDK 25; <code>foojay-resolver-convention</code> in <code>settings.gradle.kts</code> auto-provisions it.</p>
 
+<p>
+    <strong>The test world.</strong> A dev run's title screen carries a <b>Spawn Test Horse
+    World</b> button (<code>client/DebugTitleScreenButton</code>): a fresh creative world,
+    deleted again on shutdown, whose first login hands out a hotbar aimed at whatever is
+    waiting on <a href="verification.html">the checklist</a> and two clickable
+    <code>/tp</code>s. The kit is <b>one hotbar at a time</b> -
+    <code>server/DebugTestWorldHandler.BATCHES</code> - and <code>/testkit</code> lists the
+    batches while <code>/testkit n</code> swaps the hotbar for one, so working through them
+    costs no rebuild. Both are dev-only: the button checks
+    <code>FMLEnvironment.isProduction()</code> and the command is not registered in a built
+    mod.
+</p>
+
 <p><code>runServer</code> here does not auto-stop - it sits at the console after <code>Done</code>. Kill it (<code>taskkill</code>, or a PowerShell <code>Stop-Process</code> on the recent <code>java</code> pids) when the smoke test has printed <code>Done (...)! For help</code>.</p>
 
 <h2 id="gradle">Build setup notes</h2>

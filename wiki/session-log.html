@@ -27,6 +27,154 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-11e">2026-09-11 &mdash; a test kit you can finish, and a mask for liquids</h2>
+
+<p>
+    A play session run as a conversation: the owner asked to be set up to test, tested, and
+    reported back, several times over. What the day produced is a <strong>test kit that is
+    worked through rather than looked at</strong>, three defects found by that testing and
+    fixed, and one new mask in the drawing engine. Nothing below has been seen in a client
+    since the last change; <a href="verification.html">the checklist</a> is the authority on
+    which parts the owner confirmed as they went.
+</p>
+
+<h3>The kit: one hotbar, and a batch is deleted when it is done</h3>
+
+<ul>
+    <li>The kit filled all 36 slots and printed a 30-line legend. The owner: &ldquo;SUPER
+        overwhelming. Let's start with one hotbar's worth of tests at a time.&rdquo; It is
+        themed batches of at most nine now, batch 1 given on login and the rest behind a
+        dev-only <code>/testkit n</code>, so moving on costs a line of chat rather than a
+        rebuild and a fresh world. <strong>A batch is deleted once it is worked through and
+        the rest move up</strong>, so batch 1 is always the next thing to test - the breeds,
+        size and rebuilt-intake batches all went that way during the day.</li>
+    <li>Every batch that tames carries a <strong>stick</strong> and every batch that breeds
+        carries <strong>golden carrots</strong>, on the owner's reminder. Preset eggs carry a
+        genotype and <strong>no epigenome</strong>: a stored one made every horse from one
+        creative egg the same horse, which is why a stack of trillium all stood in the same
+        place.</li>
+    <li>Files the kit cannot make were prepared in the dev run's <code>run/phc/</code> -
+        drop-in breeds (a dark-forest paint, a night-only cremello, one naming a missing
+        gene, one duplicating the Friesian), a drop-in gene, and a
+        <code>breed-spawning.toml</code> moving the Friesian and switching the Morgan off -
+        and a dedicated server confirmed all of them load.</li>
+    <li>By the end the owner asked for tests that are not &ldquo;does this look pretty
+        in-game&rdquo;, so the front two batches are now
+        <a href="verification.html#behaviour-batch">&sect;0-BT</a>'s own ranking of what
+        fails badly rather than visibly: spontaneous breeding left in a field for days and
+        then counted, a ward beside a working spawner farm, pack leaders in one stable, a
+        dryad left half an hour; then ender echo under a rider, hydrophobic, food preference,
+        ocean-born.</li>
+</ul>
+
+<h3>Three defects the testing found</h3>
+
+<ul>
+    <li><strong>The debug stick did not count as taming.</strong> It called
+        <code>tameWithName</code> bare, which never fires <code>AnimalTameEvent</code>, so
+        <code>GeneDiscoveryHandler.onTame</code> never ran: a stick-tamed Morgan and Friesian
+        stayed &ldquo;???&rdquo; in survival's breed book, with no genes discovered and no
+        tame-a-mare tick. Hand-taming had the same bug once (gap 154) and
+        <code>CrouchFeedGoal</code> fires the event first; the stick does now. This is why two
+        breed-book checks looked broken and were not.</li>
+    <li><strong>Vanilla's <code>minecraft:village</code> POI tag had not loaded since
+        2026-09-07.</strong> It named <code>horsegenetics:cowboy_hitch</code>, which stopped
+        being a POI when the hitch and the table were split, and a tag with one missing entry
+        fails whole - taking vanilla's own village POIs with it. Found in the log while
+        checking something else. Waiting:
+        <a href="verification.html#village-tag">&sect;0-CD</a>.</li>
+    <li><strong>Bare stripes along the spine</strong> on both drip genes: <code>WAVES</code>
+        displaces the <em>whole</em> band, so a far edge at 1.05 with a 0.2 amplitude dips to
+        0.85 of the barrel once per wavelength.</li>
+</ul>
+
+<h3>Drawings that stand somewhere, and a gene that lied about itself</h3>
+
+<ul>
+    <li>Six SVG barrel drawings - taper flame, barred wing, candelabra, inkcoil, trillium,
+        uraniid - all placed their viewport at <code>originU</code> 0.27, so every horse wore
+        its drawing in the same spot. <code>originU</code> is a per-copy knob now
+        (<code>posU</code> 0.12-0.40): shoulder to hip, checked on a side-view render at six
+        seeds each, and it inherits with the allele copy.</li>
+    <li><strong>Taper flame was &ldquo;a very very narrow white streak&rdquo;</strong> - as
+        traced the flame is 150 by 752 in its viewBox, three texels wide on the horse, with an
+        outer skin under one texel. Every mask widens it 2.6&times; about its own centre line
+        now; 3.2 was tried and reads as an egg.</li>
+    <li>A preset egg names only the loci it is given and leaves the rest at their defaults,
+        which comes out <strong>black</strong> - so the black barred wing and the nightbell
+        foxglove were invisible in the kit. Both spawn on a palomino.</li>
+    <li><strong>Rainbow Drip is Ribbon Drip.</strong> Two horses in three carry the pale
+        allele, whose rim is grey to white, so the name argued with the horse in front of you:
+        &ldquo;the name makes it SUPER confusing&rdquo;. The key stays
+        <code>horsegenetics.rainbow_drip</code> - it is the genotype code's spelling - and the
+        coat golden confirms no horse changed.</li>
+</ul>
+
+<h3>GOO: the first mask for a liquid</h3>
+
+<p>
+    Ooze drip &ldquo;looks like triangles&rdquo;, and needed to be &ldquo;more irregular and
+    curved&rdquo;. That is not a tuning problem: <code>WAVES</code> is one periodic function,
+    so every lobe is the same length, width and spacing, and at the two or three texels a lobe
+    gets on a barrel a sine <em>is</em> a zigzag. A liquid is not periodic - the whole read of
+    a drip is that one ran further than its neighbour. The owner gave permission to extend the
+    engine for it.
+</p>
+
+<ul>
+    <li><strong>A distance field, not a displaced line</strong>: a half-plane for the band, a
+        capsule per drip, a disc for each tip, unioned with a polynomial smooth-minimum so the
+        joins fillet like a meniscus. Every drip draws its own length, width and place from the
+        seed; <code>chance</code> leaves cells empty; <code>sag</code> bites an arc out of the
+        edge between two drips, because a ruled line with beads on it reads as a wire. Only
+        <code>from</code> and <code>to</code> are in the band's space - every other length is
+        body units, because a drip has to stay round.</li>
+    <li><strong>An end face is carried round the corner.</strong> The rump has one value of the
+        band's own axis over its whole surface, so it took a single drip's answer for the lot
+        and came out a slab, which is what the owner saw. The pattern continues round from each
+        flank and the two meet in the middle of the face.</li>
+    <li>All five places a mask touches: <code>SpecSchema</code>, <code>SpecPainter</code>, the
+        creator's <code>schema.js</code> and <code>spec-engine.js</code>, and both docs tables -
+        plus a <code>prismatic.json</code> layer so parity reaches it. It was <em>watched go
+        red</em>: a port returning zero fails 43 checks and a missing corner wrap fails one, but
+        a 2% change to the field and a changed sag bite both stay green.
+        <a href="known-gaps.html#gap-194">Gap 194</a> records exactly that, because
+        &ldquo;parity is green&rdquo; is worth only what the probe can discriminate.</li>
+</ul>
+
+<h3>A log line instead of a chore</h3>
+
+<p>
+    Checking that a breed carries only the disorders on its sheet meant taming horses one at a
+    time and reading their genes, which the owner declined - reasonably. Every breed founder
+    the server rolls now logs a <code>[breed-health]</code> line of its health genes against its
+    sheet, with a <code>WARN ... NOT ON ITS SHEET</code> for anything the sheet does not list.
+    Two dozen Quarter Horses and two dozen Thoroughbreds later: three HYPP carriers, no
+    warnings, and the answer came out of a <code>grep</code> rather than out of an evening.
+</p>
+
+<h3>Owner-verified in-game</h3>
+
+<ul>
+    <li>The custom egg's Breed list starts at Feral Mixed and carries drop-in breeds; gene hover
+        pictures.</li>
+    <li>A drop-in breed registers, fills its Breeds row when tamed in survival, shows its About
+        text, and <strong>its herds spawn wild in the biome its file names</strong> - the
+        <code>breed_herds</code> biome modifier, which nothing had tested.</li>
+    <li>A moved Friesian's entry gives the new biome and its herds are found there; a night-only
+        breed's herds appear only after nightfall (9 founders after <code>/time set night</code>,
+        none before); a switched-off Morgan keeps its label and its entry, and has no egg in the
+        creative tab.</li>
+    <li>A drop-in gene loads from <code>phc/genes/</code> and draws.</li>
+    <li>Size by copy count, all of it: Clydesdale <code>Big/Big</code>, Shire <code>Big/n</code>,
+        Falabella <code>Small/Small</code>, Connemara <code>Small/n</code>, and two Connemaras
+        throwing all three kinds of foal - including the ordinary-sized <code>n/n</code> at
+        exactly 1.00x.</li>
+    <li>The rebuilt-disjoint intake marks: corolla, agate eye, barred wing, uraniid, trillium,
+        foxglove - and, after the fixes, the widened taper flame, the drawings moving along the
+        barrel, and the dark forms on a palomino.</li>
+</ul>
+
 <h2 id="d2026-09-11d">2026-09-11 &mdash; every folder in <code>phc/</code></h2>
 
 <p>
