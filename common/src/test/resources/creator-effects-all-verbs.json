@@ -146,6 +146,54 @@
           "type": "night_watch",
           "mode": "behind",
           "radius": 2
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:entity.cat.ambient",
+          "trigger": { "interval": 200 },
+          "volume": 0.8,
+          "pitch": 1.2,
+          "cooldown": 120
+        },
+        {
+          "type": "produce",
+          "item": "minecraft:feather",
+          "interval": 12000,
+          "min": 1,
+          "max": 3,
+          "nearby_cap": 6
+        },
+        {
+          "type": "teleport",
+          "distance": 12,
+          "with_rider": false,
+          "trigger": "on_hurt",
+          "cooldown": 60
+        },
+        {
+          "type": "summon",
+          "mob": "minecraft:bee",
+          "radius": 24,
+          "up_to": 3,
+          "trigger": { "interval": 24000 }
+        },
+        {
+          "type": "temper",
+          "mood": "flee",
+          "towards": "players",
+          "radius": 12,
+          "interval": 40,
+          "max_targets": 6,
+          "hold": true
+        },
+        {
+          "type": "bond",
+          "amount": 2,
+          "interval": 1200
+        },
+        {
+          "type": "ward",
+          "radius": 6
         }
       ]
     },
