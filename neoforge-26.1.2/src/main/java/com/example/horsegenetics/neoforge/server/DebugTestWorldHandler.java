@@ -154,11 +154,13 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     private static final String[] BATCHES = {
+            "Behaviour that can damage a world - leave these running (0-BT)",
+            "Behaviour that is probably subtly wrong (0-BT)",
+            "Holding pen and stalls - the refusals (0-BY, 0-BX)",
+            "Potion milk and the research shelf - the refusals (0-BY, 0-BX)",
+            "Molten hooves and the sheep spawner (0-BY)",
             "Intake: drips, contour cells, crackle, flakes, small drawings (0-BZ)",
             "Intake: the rest (0-BZ)",
-            "Molten hooves, the sheep spawner, the ward (0-BY, 0-BX)",
-            "Holding pen and stalls (0-BY, 0-BX)",
-            "Potion milk and the research shelf (0-BY, 0-BX)",
     };
 
     private static void listBatches(ServerPlayer player) {
@@ -178,43 +180,47 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                intake(player, inv, legend, 0, "ooze_drip", null,
-                        "rebuilt on the GOO mask - spawn several: separate drips, own lengths, beads, no triangles");
-                intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too - and check the spine: no bare stripes now");
-                intake(player, inv, legend, 2, "rainbow_drip", "Rdc", "the coloured form");
-                intake(player, inv, legend, 3, "contour_cells", null,
-                        "nested outlines in dark patches - may take several eggs; check the far flank");
-                intake(player, inv, legend, 4, "gilded_crackle", null, "pale plates with gold seams");
-                intake(player, inv, legend, 5, "holo_flake", null, "separate glinting flakes on the crest");
-                intake(player, inv, legend, 6, "rime", null, "must look unlike maelstrom (in the custom egg)");
-                intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
-                intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
+                // The checklist's own ranking of what could go wrong badly
+                // rather than visibly (0-BT). These are left running, not looked
+                // at: the failures are an entity storm and a farm that quietly
+                // stopped, and ten minutes of watching proves nothing.
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame what needs taming");
+                put(inv, legend, 1, preset(player, "Test: spontaneous breeding", Sex.FEMALE, false,
+                        "horsegenetics.spontaneous_breeding=Spb/Spb"),
+                        "spawn FOUR in a wide fenced field, walk away for several in-game days, come back and COUNT");
+                put(inv, legend, 2, new ItemStack(Items.OAK_FENCE, 64), "fence - make that field a big one");
+                put(inv, legend, 3, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
+                put(inv, legend, 4, preset(player, "Test: holy ward", Sex.FEMALE, false,
+                        "horsegenetics.holy_ward=Hly/Hly"),
+                        "stand it beside a working spawner farm: the farm must keep producing. Then a spawn egg, then a breeding pen");
+                put(inv, legend, 5, new ItemStack(Items.SPAWNER), "spawner - right-click it with the egg below");
+                put(inv, legend, 6, new ItemStack(Items.ZOMBIE_SPAWN_EGG, 4), "zombie egg - sets the spawner, and tests the ward's allow-list");
+                put(inv, legend, 7, preset(player, "Test: pack leader (wolves)", Sex.FEMALE, false,
+                        "horsegenetics.pack_leader=Wlf/Wlf"),
+                        "ONE is certainly fine; put three or four in a stable and watch the tick time (F3)");
+                put(inv, legend, 8, preset(player, "Test: dryad", Sex.FEMALE, false,
+                        "horsegenetics.dryad=Dry/Dry"),
+                        "leave it near you for a real half-hour: it should have planted something (timed beats survive a reload now)");
             }
             case 2 -> {
-                String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
-                        "sporefall", "wishstar", "datarain", "foamed"};
-                for (int i = 0; i < rest.length; i++) {
-                    intake(player, inv, legend, i, rest[i], null, i == 0 ? "does each look like its icon?" : null);
-                }
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick");
+                put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - the two below are ridden tests");
+                put(inv, legend, 2, preset(player, "Test: ender echo", Sex.FEMALE, false,
+                        "horsegenetics.ender_echo=End/End"),
+                        "RIDE it: the likeliest desync in the mod. Rubber-banding, or camera and horse disagreeing, is this");
+                put(inv, legend, 3, preset(player, "Test: hydrophobic", Sex.FEMALE, false,
+                        "horsegenetics.hydrophobic=Hyd/Hyd"),
+                        "ride into deep water: it ejects you - and may dump you mid-lake. Half-built, per its page");
+                put(inv, legend, 4, preset(player, "Test: food preference (carrot)", Sex.FEMALE, false,
+                        "horsegenetics.food_preference=Car/Car"),
+                        "offer it everything: only carrots. Silently does nothing if another mod took the event first");
+                put(inv, legend, 5, preset(player, "Test: ocean-born", Sex.FEMALE, false,
+                        "horsegenetics.ocean_born=Ocn/Ocn"), "the one rider-immunity gene never played");
+                put(inv, legend, 6, new ItemStack(Items.WATER_BUCKET), "water - for the two above");
+                put(inv, legend, 7, new ItemStack(Items.CARROT, 32), null);
+                put(inv, legend, 8, new ItemStack(Items.WHEAT, 32), "wheat and carrots - what food preference refuses");
             }
             case 3 -> {
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
-                put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
-                put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
-                put(inv, legend, 3, preset(player, "Test: molten black", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
-                put(inv, legend, 4, preset(player, "Test: molten colour", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
-                put(inv, legend, 5, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltM/MltM"), "several colours - must differ from slot 5");
-                put(inv, legend, 6, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
-                        "horsegenetics.spawner=Shp/Shp"), "tame, feed wheat - every sheep the SAME colour");
-                put(inv, legend, 7, new ItemStack(Items.WHEAT, 64), "wheat - the spawner's meals");
-                put(inv, legend, 8, preset(player, "Test: holy ward", Sex.FEMALE, false,
-                        "horsegenetics.holy_ward=Hly/Hly"), "leave in the dark, stand 24+ blocks off: purple 'spawn refused'");
-            }
-            case 4 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - both tickets need a horse you own");
                 put(inv, legend, 1, breedEgg("arabian"), "a horse to move around");
                 put(inv, legend, 2, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
@@ -230,7 +236,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 64), null);
                 put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
             }
-            case 5 -> {
+            case 4 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame each one first");
                 put(inv, legend, 1, preset(player, "Test: potion mare", Sex.FEMALE, false,
                         "horsegenetics.potion_milk=Spd/Spd"), "hurt her, then bottle her: 'She's hurt' and no potion");
@@ -246,6 +252,41 @@ public final class DebugTestWorldHandler {
                 ItemStack papers = new ItemStack(ModItems.RESEARCH_PAPER.get(), 2);
                 papers.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics.silver");
                 put(inv, legend, 8, papers, "two Silver papers - the second must refuse to go in");
+            }
+            case 5 -> {
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
+                put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
+                put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
+                put(inv, legend, 3, preset(player, "Test: molten black", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
+                put(inv, legend, 4, preset(player, "Test: molten colour", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
+                put(inv, legend, 5, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
+                        "horsegenetics.molten_hooves=MltM/MltM"), "several colours - must differ from slot 5");
+                put(inv, legend, 6, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
+                        "horsegenetics.spawner=Shp/Shp"), "tame, feed wheat - every sheep the SAME colour");
+                put(inv, legend, 7, new ItemStack(Items.WHEAT, 64), "wheat - the spawner's meals");
+            }
+            case 6 -> {
+                intake(player, inv, legend, 0, "ooze_drip", null,
+                        "rebuilt on the GOO mask - spawn several: separate drips, own lengths, beads, no triangles");
+                intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too - and check the spine: no bare stripes now");
+                intake(player, inv, legend, 2, "rainbow_drip", "Rdc", "the coloured form");
+                intake(player, inv, legend, 3, "contour_cells", null,
+                        "nested outlines in dark patches - may take several eggs; check the far flank");
+                intake(player, inv, legend, 4, "gilded_crackle", null, "pale plates with gold seams");
+                intake(player, inv, legend, 5, "holo_flake", null, "separate glinting flakes on the crest");
+                intake(player, inv, legend, 6, "rime", null, "must look unlike maelstrom (in the custom egg)");
+                intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
+                intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
+            }
+            case 7 -> {
+                String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
+                        "sporefall", "wishstar", "datarain", "foamed"};
+                for (int i = 0; i < rest.length; i++) {
+                    intake(player, inv, legend, i, rest[i], null, i == 0 ? "does each look like its icon?" : null);
+                }
             }
             default -> {
                 return;
