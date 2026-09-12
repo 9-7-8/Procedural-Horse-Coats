@@ -70,13 +70,26 @@ public sealed interface CarrotEffect {
     }
 
     /**
-     * A <i>Known Gene Splice carrot</i> - treat this parent as {@code n<gene>}
-     * ({@code homozygous=false}, the default) or {@code <gene><gene>}
-     * ({@code homozygous=true}) for that one gene's gamete. Normal Mendelian
-     * rules apply from there.
+     * A <i>Known Gene Splice carrot</i> - treat this parent as carrying exactly
+     * {@code alleleA}/{@code alleleB} for that one gene's gamete. Normal
+     * Mendelian rules apply from there, so the foal draws one of the two.
+     *
+     * <h2>It names the alleles, not just the gene</h2>
+     * This used to be a {@code boolean homozygous} beside the gene key, and the
+     * pair was built by taking {@code gene.alleles().get(0)} - the
+     * <b>first-declared</b> allele - as "the variant". That is fine for a
+     * two-allele locus and silently useless for anything wider: the
+     * <a href="https://example.invalid">particle</a> locus has forty alleles and
+     * only ever spliced the first one, so no carrot could ever hand over a soul
+     * flame, and KIT could only ever hand over one of its thirteen.
+     *
+     * <p>Naming both alleles also makes "heterozygous or homozygous" fall out
+     * rather than being a flag: {@code n}/{@code X} is the old het,
+     * {@code X}/{@code X} the old hom, and {@code X}/{@code Y} is a thing the
+     * old shape could not say at all.
      */
-    record KnownGeneSplice(String geneKey, boolean homozygous) implements CarrotEffect {
-        @Override public String id() { return "known:" + geneKey + (homozygous ? ":hom" : ":het"); }
+    record KnownGeneSplice(String geneKey, String alleleA, String alleleB) implements CarrotEffect {
+        @Override public String id() { return "known:" + geneKey + ":" + alleleA + ":" + alleleB; }
     }
 
     // ------------------------------------------------------------------
@@ -101,9 +114,9 @@ public sealed interface CarrotEffect {
                             : java.util.Optional.of(new GeneSplice(category));
                 }
                 if (token.startsWith("known:")) {
-                    String[] p = token.split(":", 3);
-                    if (p.length == 3 && (p[2].equals("hom") || p[2].equals("het"))) {
-                        return java.util.Optional.of(new KnownGeneSplice(p[1], p[2].equals("hom")));
+                    String[] p = token.split(":", 4);
+                    if (p.length == 4) {
+                        return java.util.Optional.of(new KnownGeneSplice(p[1], p[2], p[3]));
                     }
                 }
                 return java.util.Optional.empty();
@@ -131,15 +144,16 @@ public sealed interface CarrotEffect {
     static boolean isContradictory(List<CarrotEffect> effects) {
         boolean stab = false;
         boolean magn = false;
-        Map<String, Boolean> magic = new LinkedHashMap<>();
+        Map<String, String> magic = new LinkedHashMap<>();
         for (CarrotEffect e : effects) {
             if (e instanceof Stabilizer) {
                 stab = true;
             } else if (e instanceof Magnifier) {
                 magn = true;
             } else if (e instanceof KnownGeneSplice mg) {
-                Boolean prev = magic.putIfAbsent(mg.geneKey(), mg.homozygous());
-                if (prev != null && prev != mg.homozygous()) {
+                String pair = mg.alleleA() + "/" + mg.alleleB();
+                String prev = magic.putIfAbsent(mg.geneKey(), pair);
+                if (prev != null && !prev.equals(pair)) {
                     return true;
                 }
             }
@@ -177,8 +191,9 @@ public sealed interface CarrotEffect {
                 }
             } else if (e instanceof KnownGeneSplice mg) {
                 Gene g = Genes.byKeyOrNull(mg.geneKey());
-                if (g != null && g.hasGeneCarrot()) {
-                    subs.put(g.key(), magicPair(g, mg.homozygous()));
+                AllelePair named = g == null ? null : magicPair(g, mg.alleleA(), mg.alleleB());
+                if (named != null && g.hasGeneCarrot()) {
+                    subs.put(g.key(), named);
                 }
             }
         }
@@ -227,16 +242,51 @@ public sealed interface CarrotEffect {
                 });
     }
 
-    /** {@code n<gene>} or {@code <gene><gene>}, falling back to het if the homozygote cannot occur. */
-    private static AllelePair magicPair(Gene gene, boolean homozygous) {
-        Allele variant = gene.alleles().get(0);          // first-declared = the variant, by convention
-        Allele baseline = gene.defaultAllele();
-        if (homozygous) {
-            AllelePair hom = new AllelePair(variant, variant);
-            if (gene.canOccur(hom)) {
-                return hom;
+    /**
+     * The pair a carrot names, or {@code null} if it does not name one this gene
+     * has. A token the registry does not know is <b>dropped</b> rather than
+     * guessed at: a carrot naming a retired allele should do nothing, not splice
+     * whatever happens to sit at that index now.
+     *
+     * <p>A pair the gene says cannot occur is dropped for the same reason -
+     * {@code canOccur} is where a locus states its own impossible combinations
+     * (a sex-linked pair, a lethal the founder table excludes), and a carrot is
+     * not a way round it.
+     */
+    private static AllelePair magicPair(Gene gene, String tokenA, String tokenB) {
+        // Looked up rather than asked for: Gene.fromToken THROWS on a token the
+        // gene does not have, and this runs inside breeding - a carrot naming a
+        // retired allele must be inert, not take the foal down with it.
+        Allele a = alleleOrNull(gene, tokenA);
+        Allele b = alleleOrNull(gene, tokenB);
+        if (a == null || b == null) {
+            return null;
+        }
+        AllelePair pair = new AllelePair(a, b);
+        return gene.canOccur(pair) ? pair : null;
+    }
+
+    private static Allele alleleOrNull(Gene gene, String token) {
+        for (Allele a : gene.alleles()) {
+            if (a.token().equals(token)) {
+                return a;
             }
         }
-        return new AllelePair(variant, baseline);
+        return null;
+    }
+
+    /**
+     * The pair a carrot made for {@code gene} alone should name, while a
+     * research paper still documents a whole gene rather than one allele. The
+     * first-declared allele is the variant by convention, and
+     * {@link Gene#geneCarrotHomozygous()} decides whether the other copy is the
+     * same again or the wild type.
+     */
+    public static KnownGeneSplice defaultSpliceFor(Gene gene) {
+        String variant = gene.alleles().get(0).token();
+        String other = gene.geneCarrotHomozygous()
+                ? variant
+                : gene.defaultAllele().token();
+        return new KnownGeneSplice(gene.key(), variant, other);
     }
 }

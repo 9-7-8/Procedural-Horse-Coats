@@ -86,7 +86,8 @@ public class SetRandomGeneFunction extends LootItemConditionalFunction {
         switch (target) {
             case PAPER -> stack.set(ModDataComponents.RESEARCH_GENE.get(), gene.key());
             case CARROT -> stack.set(ModDataComponents.CARROT_EFFECTS.get(), List.of(
-                    "known:" + gene.key() + (gene.geneCarrotHomozygous() ? ":hom" : ":het")));
+                    com.example.horsegenetics.common.genetics.CarrotEffect
+                            .defaultSpliceFor(gene).id()));
         }
         return stack;
     }

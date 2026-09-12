@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server.recipe;
 
+import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
@@ -89,8 +90,13 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
             return ItemStack.EMPTY;
         }
         ItemStack out = new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get());
-        String token = "known:" + gene.key() + (gene.geneCarrotHomozygous() ? ":hom" : ":het");
-        out.set(ModDataComponents.CARROT_EFFECTS.get(), List.of(token));
+        // Built through CarrotEffect rather than by concatenating a token, so
+        // the shape of that token lives in exactly one place. It used to be
+        // spelled out here and in SetRandomGeneFunction, and when the token
+        // gained the allele names both spellings compiled and silently stopped
+        // parsing.
+        out.set(ModDataComponents.CARROT_EFFECTS.get(),
+                List.of(CarrotEffect.defaultSpliceFor(gene).id()));
         return out;
     }
 
