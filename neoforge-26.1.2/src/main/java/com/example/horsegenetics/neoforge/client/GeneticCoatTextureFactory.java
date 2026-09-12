@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.CoatTextureId;
 import com.example.horsegenetics.common.coat.TexelBudgetCache;
@@ -19,7 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
-import net.neoforged.fml.loading.FMLEnvironment;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -237,7 +237,7 @@ public final class GeneticCoatTextureFactory {
         int[] template = baby ? babyTemplate : adultTemplate;
         int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, lutSet);
 
-        if (!FMLEnvironment.isProduction()) {
+        if (ClientConfig.debugTools()) {
             debugLogCoat(coat, baby, argb, template, breedLabel);
         }
 

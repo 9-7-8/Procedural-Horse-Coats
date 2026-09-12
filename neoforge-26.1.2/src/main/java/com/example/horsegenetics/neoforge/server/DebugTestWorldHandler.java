@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.genetics.Allele;
@@ -48,7 +49,6 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
@@ -114,13 +114,31 @@ public final class DebugTestWorldHandler {
 
     /**
      * {@code /testkit} lists the batches; {@code /testkit <n>} swaps the hotbar
-     * for batch {@code n}. Dev runs only, and gamemaster permission, which the
-     * test world's cheats give you. It exists so moving to the next batch costs
-     * one line of chat rather than a rebuild and a fresh world.
+     * for batch {@code n}; {@code /testkit village} and {@code /testkit forest}
+     * hand out the two teleports. Gated on {@link ServerConfig#debugTools()} and
+     * gamemaster permission. It exists so moving to the next batch costs one
+     * line of chat rather than a rebuild and a fresh world.
+     *
+     * <h2>Why the teleports are commands now</h2>
+     * They used to be handed to you on login, from {@link #onPlayerLogin},
+     * together with batch 1. That works in singleplayer because the title-screen
+     * button and the integrated server are the <b>same JVM</b>, so the button
+     * can set {@code pendingHotbarFill} and the login hook can read it.
+     *
+     * <p>On a dedicated server they are two processes and that flag is never
+     * set, so none of it fires: no hotbar, no teleports. The login path is left
+     * in place because it is still the nicer route in a local test world - but
+     * everything it does is reachable by command as well, which is what testing
+     * a release build against a real server needs.
      */
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
-        if (FMLEnvironment.isProduction()) {
+        // Says, once per server start, which way the gate went. The lesson is
+        // DebugAnnounce's: "/testkit does nothing" and "/testkit was never
+        // registered" are opposite bugs that look identical from a chat box.
+        HorseGenetics.LOGGER.info("[Debug] test kit commands enabled={} (config debug.tools)",
+                ServerConfig.debugTools());
+        if (!ServerConfig.debugTools()) {
             return;
         }
         event.getDispatcher().register(Commands.literal("testkit")
@@ -133,6 +151,16 @@ public final class DebugTestWorldHandler {
                         .executes(c -> {
                             giveBatch(c.getSource().getPlayerOrException(),
                                     IntegerArgumentType.getInteger(c, "batch"));
+                            return 1;
+                        }))
+                .then(Commands.literal("village")
+                        .executes(c -> {
+                            locatePlainsVillage(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+                .then(Commands.literal("forest")
+                        .executes(c -> {
+                            locateDarkForest(c.getSource().getPlayerOrException());
                             return 1;
                         })));
 

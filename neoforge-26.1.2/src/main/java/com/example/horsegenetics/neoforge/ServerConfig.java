@@ -56,6 +56,26 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * {@code server/DebugAnnounce}, which logs which answer it got, once, at
  * startup.
  *
+ * <h2>debug.tools</h2>
+ * <b>On in a dev run, off in a normal install.</b> The test kit
+ * ({@code /testkit}, {@code /bond}), the breeding report in chat, the debug
+ * pen and stall-overlay packets, and the stick/clock breeding shortcuts
+ * outside the horse dimension. All of them were {@code isProduction()}-gated,
+ * which meant they existed only under {@code runClient} and vanished from
+ * every jar anybody could actually play.
+ *
+ * <p>That stopped working when testing moved onto a real server: the owner
+ * plays a <i>release</i> build against a dedicated server over a tailnet, so a
+ * tool that only exists in a dev run is a tool they no longer have. This is
+ * the same call {@code debug.announce} made one release earlier, for the same
+ * reason - a gate you cannot open is indistinguishable from a feature that
+ * does not work, and the person who most needs these is the one holding a jar
+ * rather than a checkout.
+ *
+ * <p>It stays <b>off by default in a normal install</b>: the commands are
+ * additionally {@code LEVEL_GAMEMASTERS}, so a player on someone else's server
+ * cannot reach them even when a server owner turns this on.
+ *
  * <h2>What none of them can change</h2>
  * <b>All the health genetics are built and inherited regardless.</b> The genes
  * are registered in every world, they occupy the same slots in the genotype
@@ -96,6 +116,8 @@ public final class ServerConfig {
 
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
+    public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         HEALTH_MODE = builder
@@ -131,6 +153,16 @@ public final class ServerConfig {
                         "Turn it on in a normal install when you are chasing a bug and want",
                         "something to paste into a report.")
                 .define("debug.announce", !production());
+        DEBUG_TOOLS = builder
+                .comment("Whether this server's testing tools exist at all.",
+                        "  /testkit and /bond, the breeding report in chat, the debug-pen",
+                        "  and stall-overlay packets, and the stick/clock breeding",
+                        "  shortcuts outside the horse dimension.",
+                        "Defaults to ON in a development run and OFF in a normal install.",
+                        "Turn it on when you are testing a release build on a real server -",
+                        "that is what it is for. The commands still require gamemaster",
+                        "permission, so this does not hand them to ordinary players.")
+                .define("debug.tools", !production());
         SPEC = builder.build();
     }
 
@@ -177,6 +209,21 @@ public final class ServerConfig {
             // Before the config file is read - the mod constructor, mostly.
             // Match the default rather than guessing true, or a normal install
             // gets the lines it is about to be told it does not want.
+            return !production();
+        }
+    }
+
+    /**
+     * <b>Do this server's testing tools exist?</b> See the {@code debug.tools}
+     * section above. Off by default in a normal install; the commands behind it
+     * are gamemaster-only regardless.
+     */
+    public static boolean debugTools() {
+        try {
+            return DEBUG_TOOLS.get();
+        } catch (IllegalStateException notLoaded) {
+            // Command registration can run before the server config is read.
+            // Match the default rather than guessing.
             return !production();
         }
     }

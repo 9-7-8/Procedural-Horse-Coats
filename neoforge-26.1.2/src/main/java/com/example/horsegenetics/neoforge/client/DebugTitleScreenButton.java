@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.server.DebugTestWorldHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -14,7 +15,6 @@ import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 
 /**
@@ -35,7 +35,7 @@ public final class DebugTitleScreenButton {
 
     @SubscribeEvent
     static void onTitleScreenInit(ScreenEvent.Init.Post event) {
-        if (FMLEnvironment.isProduction() || !(event.getScreen() instanceof TitleScreen)) {
+        if (!ClientConfig.debugTools() || !(event.getScreen() instanceof TitleScreen)) {
             return;
         }
         Button button = Button.builder(

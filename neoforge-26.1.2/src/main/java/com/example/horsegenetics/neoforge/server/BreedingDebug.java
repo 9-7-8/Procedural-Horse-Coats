@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.genetics.BreedingReport;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genome;
@@ -10,7 +11,6 @@ import com.example.horsegenetics.common.trait.Viability;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -34,9 +34,10 @@ import java.util.List;
  *       whenever {@link DebugAnnounce} is on. It is too wide and too long to
  *       read in a chat box and it is exactly what you want in a pasted log.</li>
  *   <li><b>Chat</b> gets a summary and the notable loci - the ones the foal
- *       expresses or landed on a combination neither parent had - and only in a
- *       <b>dev build</b> ({@code !FMLEnvironment.isProduction()}). Nobody
- *       playing a real world wants sixty lines per foal.</li>
+ *       expresses or landed on a combination neither parent had - and only
+ *       where {@link ServerConfig#debugTools()} is on: a dev run by default,
+ *       or a server the owner switched it on for. Nobody playing a real world
+ *       wants sixty lines per foal.</li>
  * </ul>
  *
  * <p><b>Nothing here is on the production path except the miscarriage line</b>,
@@ -81,7 +82,7 @@ public final class BreedingDebug {
             DebugAnnounce.log("Breeding", "  " + line);
         }
 
-        if (FMLEnvironment.isProduction() || breeder == null) {
+        if (!ServerConfig.debugTools() || breeder == null) {
             return;
         }
         List<String> notable = BreedingReport.notable(dam.genotype(), sire.genotype(), foal.genotype());

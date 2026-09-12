@@ -1,11 +1,11 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.lifecycle.ClientStartedEvent;
 import net.neoforged.neoforge.client.event.lifecycle.ClientStoppedEvent;
 
@@ -70,7 +70,7 @@ public final class DebugTestWorldCleanup {
     }
 
     private static void deleteTestWorlds(Minecraft client, String why) {
-        if (FMLEnvironment.isProduction()) {
+        if (!ClientConfig.debugTools()) {
             return;
         }
         Path saves = client.getLevelSource().getBaseDir();

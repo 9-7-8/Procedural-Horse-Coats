@@ -35,6 +35,20 @@ public final class ClientConfig {
      */
     public static final ModConfigSpec.BooleanValue TUTORIAL_SEEN;
 
+    /**
+     * <b>Do this client's debug tools exist?</b> The F6 pen generator and F7
+     * stall overlay keybinds, the "Spawn Test Horse World" title-screen button
+     * and the cleanup that removes those worlds again, and the per-coat texture
+     * dump in the log.
+     *
+     * <p>The server half of the same idea is {@code ServerConfig.debug.tools},
+     * and the two are deliberately separate rather than one setting: a client
+     * config cannot be read by a dedicated server, and the title-screen button
+     * is a singleplayer thing that no server has an opinion about. Turning this
+     * on does not give you the server-side tools, and vice versa.
+     */
+    public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         FAMILY_TREE_SCROLLBAR = builder
@@ -55,6 +69,16 @@ public final class ClientConfig {
                         "tab. It does that once, and sets this the first time you leave the tab.",
                         "Set it back to false to be shown the introduction again.")
                 .define("tutorial.seen", false);
+        DEBUG_TOOLS = builder
+                .comment("Whether this client's debug tools exist at all.",
+                        "  The F6 debug-pen and F7 stall-overlay keys, the \"Spawn Test",
+                        "  Horse World\" button on the title screen (and the cleanup that",
+                        "  deletes those worlds again), and a per-coat dump in the log.",
+                        "Defaults to ON in a development run and OFF in a normal install.",
+                        "Turn it on when you are testing a release build - that is what it",
+                        "is for. The two keys also need the server to allow them:",
+                        "see debug.tools in server.toml.")
+                .define("debug.tools", !production());
         SPEC = builder.build();
     }
 
@@ -98,5 +122,31 @@ public final class ClientConfig {
     }
 
     private ClientConfig() {
+    }
+
+    /**
+     * <b>Do this client's debug tools exist?</b> See the field above. Off by
+     * default in a normal install.
+     */
+    public static boolean debugTools() {
+        try {
+            return DEBUG_TOOLS.get();
+        } catch (IllegalStateException notLoaded) {
+            // Keybind and title-screen registration both run early.
+            return !production();
+        }
+    }
+
+    /**
+     * {@code FMLEnvironment.isProduction()}, but never fatal - it throws when
+     * no loader is active. Unknown counts as production, so a strange
+     * environment gets the quiet answer. Mirrors {@code ServerConfig}.
+     */
+    private static boolean production() {
+        try {
+            return net.neoforged.fml.loading.FMLEnvironment.isProduction();
+        } catch (Throwable notLoaded) {
+            return true;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
@@ -9,7 +10,6 @@ import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
@@ -57,11 +57,11 @@ public final class HorseInteractionHandler {
         }
 
         // The stick / clock shortcuts work in the horse dimension always, and
-        // anywhere in a dev build (FMLEnvironment.isProduction() is false under
-        // runClient) - they make breeding tests bearable. In a real build they
-        // are dimension-only.
+        // anywhere that debug.tools is on - they make breeding tests bearable.
+        // That is a dev run by default, and a release server the owner has
+        // switched it on for. Otherwise they are dimension-only.
         if (!horse.level().dimension().equals(DebugPenManager.DEBUG_LEVEL)
-                && FMLEnvironment.isProduction()) {
+                && !ServerConfig.debugTools()) {
             return;
         }
 

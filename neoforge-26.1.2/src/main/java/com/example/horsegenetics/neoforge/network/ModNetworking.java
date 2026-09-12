@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.network;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.common.genetics.Epigenome;
@@ -28,7 +29,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -113,8 +113,10 @@ public final class ModNetworking {
                 RequestDebugPensPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
                     // Re-checked here independently of the client-side keybind gate -
-                    // a forged packet against a production server should still no-op.
-                    if (FMLEnvironment.isProduction()) return;
+                    // a forged packet against a server that has not switched the
+                    // tools on should still no-op. The client's debug.tools is the
+                    // client's business; this one is the server's.
+                    if (!ServerConfig.debugTools()) return;
                     if (context.player() instanceof ServerPlayer serverPlayer) {
                         DebugPenManager.teleportAndGenerate(serverPlayer);
                     }
@@ -131,7 +133,7 @@ public final class ModNetworking {
                 RequestStallHighlightPayload.TYPE,
                 RequestStallHighlightPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
-                    if (FMLEnvironment.isProduction()) return; // dev-only debug overlay
+                    if (!ServerConfig.debugTools()) return; // debug overlay, server's call
                     if (context.player() instanceof ServerPlayer serverPlayer) {
                         com.example.horsegenetics.neoforge.server.StallDebug.highlight(serverPlayer);
                     }
