@@ -33,11 +33,28 @@ public final class DebugKeyBindings {
     /** Null in production - flashes the particle outline of nearby stalls. */
     public static KeyMapping showStalls;
 
-    /** Null in production - glows every nearby horse for 10 seconds so you can find them. */
+    /**
+     * <b>Registered in production too</b>, unlike the other two - the horse
+     * highlight is a "where are my horses" toggle rather than a way to reach
+     * anything a player should not have, and the bug testers are running real
+     * jars and asked for it (owner, 2026-09-11). It appears in the Controls
+     * menu and can be rebound like any other key.
+     */
     public static KeyMapping highlightHorses;
 
     @SubscribeEvent
     static void register(RegisterKeyMappingsEvent event) {
+        // The one binding a real build keeps. Registered before the production
+        // check, so the early return below cannot take it with it.
+        highlightHorses = new KeyMapping(
+                "key.horsegenetics.highlight_horses",
+                KeyConflictContext.IN_GAME,
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F8,
+                KeyMapping.Category.MISC
+        );
+        event.register(highlightHorses);
+
         if (FMLEnvironment.isProduction()) {
             return;
         }
@@ -62,14 +79,6 @@ public final class DebugKeyBindings {
         );
         event.register(showStalls);
 
-        highlightHorses = new KeyMapping(
-                "key.horsegenetics.highlight_horses",
-                KeyConflictContext.IN_GAME,
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F8,
-                KeyMapping.Category.MISC
-        );
-        event.register(highlightHorses);
     }
 
     private DebugKeyBindings() {

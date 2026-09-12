@@ -142,7 +142,9 @@ public final class ModNetworking {
                 RequestHighlightHorsesPayload.TYPE,
                 RequestHighlightHorsesPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
-                    if (FMLEnvironment.isProduction()) return; // dev-only find-my-horses toggle
+                    // Not production-gated, unlike the debug pens and the stall
+                    // overlay: this only makes horses the player can already see
+                    // glow, and the bug testers run real jars.
                     if (context.player() instanceof ServerPlayer serverPlayer) {
                         com.example.horsegenetics.neoforge.server.DebugHighlightHandler.toggle(serverPlayer);
                     }

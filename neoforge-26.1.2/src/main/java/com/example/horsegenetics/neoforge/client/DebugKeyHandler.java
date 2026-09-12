@@ -21,10 +21,12 @@ public final class DebugKeyHandler {
 
     @SubscribeEvent
     static void onClientTick(ClientTickEvent.Post event) {
-        if (DebugKeyBindings.generateDebugPens == null) {
-            return; // not registered - we're in a production build
-        }
-        while (DebugKeyBindings.generateDebugPens.consumeClick()) {
+        // Each binding is guarded on its own. It used to return early when
+        // generateDebugPens was null, which in a production build is always -
+        // so a binding that IS registered there (the horse highlight) would
+        // never have been read at all.
+        while (DebugKeyBindings.generateDebugPens != null
+                && DebugKeyBindings.generateDebugPens.consumeClick()) {
             ClientPacketDistributor.sendToServer(new RequestDebugPensPayload());
         }
         while (DebugKeyBindings.showStalls != null && DebugKeyBindings.showStalls.consumeClick()) {
