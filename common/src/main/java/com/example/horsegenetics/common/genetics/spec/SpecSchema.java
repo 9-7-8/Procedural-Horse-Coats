@@ -695,6 +695,9 @@ public final class SpecSchema {
                 Param.value("wobble", 0.5,
                         "how far the band's own edge wanders, body units - the difference "
                                 + "between a poured line and a ruled one"),
+                Param.value("sag", 0.6,
+                        "how deeply the edge arcs UP between two drips, body units. 0 leaves it "
+                                + "ruled, which reads as beads hung on a wire"),
                 Param.value("softness", 0.1, "edge fade, body units")));
 
         MASKS.put(MaskType.CRACKLE, List.of(

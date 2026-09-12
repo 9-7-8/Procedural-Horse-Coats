@@ -362,6 +362,7 @@ window.HG = window.HG || {};
         v("vary", 0.6, "0 is a comb of identical drips; 1 runs them from nothing to 'drop'"),
         v("chance", 0.75, "share of cells that carry a drip at all"),
         v("wobble", 0.5, "how far the band's own edge wanders, body units", { min: 0, max: 6, step: 0.05 }),
+        v("sag", 0.6, "how deeply the edge arcs UP between two drips - 0 leaves it ruled", { min: 0, max: 4, step: 0.05 }),
         v("softness", 0.1, "edge fade, body units")
       ]
     },

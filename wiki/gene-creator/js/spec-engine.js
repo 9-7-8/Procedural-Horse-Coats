@@ -604,8 +604,20 @@ window.HG = window.HG || {};
         var sg = getSeed(values, mask.seed, seedBase);
         var alongG = (mask.axis || "X").toUpperCase();
         var acrossG = (mask.across || "Y").toUpperCase();
-        var travelG = axisOf(point, alongG);
         var coordG = axisOf(point, acrossG);
+        // A face the drips run INTO has one 'along' value over its whole
+        // surface, so it would take a single drip's answer for the lot. Carry
+        // the pattern round the corner from each side instead.
+        var travelG = axisOf(point, alongG);
+        var boxG = geo.bounds(skin, part);
+        var faceG = geo.FACES[face];
+        if (boxG && faceG && faceG.normal === alongG) {
+          var lateralG = (alongG !== "Z" && acrossG !== "Z") ? "Z"
+            : ((alongG !== "X" && acrossG !== "X") ? "X" : "Y");
+          var midG = (boxG.min(lateralG) + boxG.max(lateralG)) / 2;
+          var reachG = boxG.span(lateralG) / 2 - Math.abs(axisOf(point, lateralG) - midG);
+          travelG = faceG.atMax ? boxG.max(alongG) + reachG : boxG.min(alongG) - reachG;
+        }
         var spaceG = mask.space || "part";
         var boundsG = spaceG === "body" ? geo.bodyBounds(skin) : geo.bounds(skin, part);
         var tG = spaceG === "body" ? normalise(coordG, geo.bodyBounds(skin), acrossG)
@@ -625,6 +637,7 @@ window.HG = window.HG || {};
         var varyG = Math.min(1, Math.max(0, get(values, mask.vary, 0.6, legIndex)));
         var chanceG = get(values, mask.chance, 0.75, legIndex);
         var wobbleG = get(values, mask.wobble, 0.5, legIndex);
+        var sagG = Math.max(0, get(values, mask.sag, 0.6, legIndex));
         var softG = Math.max(1e-6, get(values, mask.softness, 0.1, legIndex));
 
         var dirG = toG >= fromG ? 1 : -1;
@@ -647,6 +660,15 @@ window.HG = window.HG || {};
           var stemG = Math.hypot(qxG, depthG - hG * lenG) - halfG;
           var tipG = Math.hypot(qxG, depthG - lenG) - halfG * bulbG;
           sdG = smoothMin(sdG, Math.min(stemG, tipG), filletG);
+        }
+        // The straight edge between two drips arcs up when a disc is bitten
+        // out of it at every cell boundary - a draining meniscus.
+        if (sagG > 0) {
+          var biteG = sagG * 1.4;
+          for (var jG = cellG - 1; jG <= cellG + 2; jG++) {
+            var dG = Math.hypot(travelG - jG * spacingG, depthG + biteG * 0.35) - biteG;
+            sdG = -smoothMin(-sdG, dG, filletG);
+          }
         }
         return 1 - smoothstep(0, softG, Math.max(sdG, -(depthG + thicknessG)));
       }

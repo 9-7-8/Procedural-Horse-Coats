@@ -874,9 +874,23 @@ public final class SpecPainter {
                 long seed = v.seed(p.value("seed", 0), seedBase);
                 Axis along = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
                 Axis across = Axis.valueOf(p.text("across", "Y").toUpperCase(java.util.Locale.ROOT));
-                double travel = point.along(along);
                 double coord = point.along(across);
                 String space = p.text("space", "part");
+                // A face the drips run INTO - the back of the barrel, for a band
+                // running along X - has one 'along' value over its whole surface,
+                // so it would take a single drip's answer for the lot and come out
+                // a slab. Carry on round the corner instead: the pattern continues
+                // across the end face from each side, and the two meet in the
+                // middle of it.
+                double travel = point.along(along);
+                Bounds box = bounds.get(part);
+                if (box != null && face.normal() == along) {
+                    Axis lateral = along != Axis.Z && across != Axis.Z ? Axis.Z
+                            : (along != Axis.X && across != Axis.X ? Axis.X : Axis.Y);
+                    double mid = (minOf(box, lateral) + maxOf(box, lateral)) / 2;
+                    double reach = spanOf(box, lateral) / 2 - Math.abs(point.along(lateral) - mid);
+                    travel = face.atMax() ? maxOf(box, along) + reach : minOf(box, along) - reach;
+                }
                 double t = switch (space) {
                     case "body" -> normalise(coord, HorseSkinGeometry.bodyBounds(skin), across);
                     case "units" -> coord;
@@ -900,6 +914,7 @@ public final class SpecPainter {
                 double vary = Math.min(1.0, Math.max(0.0, v.get(p.value("vary", 0.6), leg)));
                 double chance = v.get(p.value("chance", 0.75), leg);
                 double wobble = v.get(p.value("wobble", 0.5), leg);
+                double sag = Math.max(0.0, v.get(p.value("sag", 0.6), leg));
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.1), leg));
 
                 double dir = to >= from ? 1.0 : -1.0;
@@ -928,6 +943,17 @@ public final class SpecPainter {
                     double stem = Math.hypot(qx, depth - h * len) - half;
                     double tip = Math.hypot(qx, depth - len) - half * bulb;
                     sd = smoothMin(sd, Math.min(stem, tip), fillet);
+                }
+                // Between two drips the edge is left straight, which reads as a
+                // ruled line with beads hung off it. Bite a disc out of it at
+                // every cell boundary so it arcs up between them - the meniscus
+                // a liquid leaves behind as it drains toward the runs.
+                if (sag > 0) {
+                    double bite = sag * 1.4;
+                    for (int i = cell - 1; i <= cell + 2; i++) {
+                        double d = Math.hypot(travel - i * spacing, depth + bite * 0.35) - bite;
+                        sd = -smoothMin(-sd, d, fillet);
+                    }
                 }
                 // Nothing past the far edge of the band.
                 return 1.0 - BodyStripes.smoothstep(0, soft, Math.max(sd, -(depth + thickness)));
@@ -1445,6 +1471,22 @@ public final class SpecPainter {
     private static double smoothMin(double a, double b, double k) {
         double h = Math.min(1.0, Math.max(0.0, 0.5 + 0.5 * (b - a) / k));
         return b + (a - b) * h - k * h * (1 - h);
+    }
+
+    private static double minOf(Bounds bounds, Axis axis) {
+        return switch (axis) {
+            case X -> bounds.xMin();
+            case Y -> bounds.yMin();
+            case Z -> bounds.zMin();
+        };
+    }
+
+    private static double maxOf(Bounds bounds, Axis axis) {
+        return switch (axis) {
+            case X -> bounds.xMax();
+            case Y -> bounds.yMax();
+            case Z -> bounds.zMax();
+        };
     }
 
     /** How many body units one unit of {@code axis} is worth inside {@code bounds}. */
