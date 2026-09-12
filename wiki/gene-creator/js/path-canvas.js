@@ -152,6 +152,15 @@ window.HG = window.HG || {};
    * @param opts.mask     the mask object; read live, so plane / curve / fill
    *                      changes show without rebuilding the control
    * @param opts.name     the parameter holding the points ("points")
+   * @param opts.minName  the parameter holding the MINIMAL shape ("pointsMin"),
+   *                      edited on this same canvas behind a toggle. The two
+   *                      arrays are twins - a point added to one is added to
+   *                      the other - because the loader refuses a pair of
+   *                      different lengths on both sides
+   * @param opts.hasDial  () -> boolean, whether the gene has declared the dial
+   *                      knob a minimal shape blends along. Without one the
+   *                      file will not load, so the canvas declines to start a
+   *                      minimal shape rather than writing a broken gene
    * @param opts.skinOf   () -> "ADULT" | "BABY", the horse being previewed
    * @param opts.widthOf  (raw, fallback) -> number, to draw the stroke at its
    *                      real width when it is a knob rather than a literal
@@ -180,8 +189,61 @@ window.HG = window.HG || {};
     root.appendChild(bar);
     root.appendChild(note);
 
-    function pts() { return mask[name] || (mask[name] = []); }
+    // Which of the two shapes the handles belong to. The other is drawn behind
+    // as a ghost, so you are always editing one shape against the other rather
+    // than against a memory of it.
+    var editingMin = false;
+    var minName = opts.minName || null;
+
+    function pts() { return active() || (mask[activeName()] = []); }
+    function activeName() { return editingMin && minName ? minName : name; }
+    function active() { return mask[activeName()]; }
+    /** The other array when there is one and it is in use, else null. */
+    function twin() {
+      var other = editingMin ? name : minName;
+      if (!other) return null;
+      var a = mask[other];
+      return a && a.length ? a : null;
+    }
+    function hasMin() { return !!(minName && mask[minName] && mask[minName].length); }
     function count() { return Math.floor(pts().length / 2); }
+
+    /**
+     * <b>Every structural edit goes through these three</b>, because a point
+     * added to one shape has to be added to the other. The parser refuses a
+     * minimal shape with a different number of points - each one moves to its
+     * twin, so there has to be one of each - and a canvas that let the two
+     * drift apart would write a gene the game will not load.
+     */
+    function insertPoint(index, u, v) {
+      pts().splice(index * 2, 0, u, v);
+      var other = twin();
+      if (!other) return;
+      // The twin gets the same span's own midpoint, so the shape it already
+      // describes does not move when a point is added to the other one.
+      var n = other.length / 2;
+      var before = Math.max(0, Math.min(n - 1, index - 1));
+      var after = Math.min(n - 1, index);
+      other.splice(index * 2, 0,
+        (other[before * 2] + other[after * 2]) / 2,
+        (other[before * 2 + 1] + other[after * 2 + 1]) / 2);
+    }
+
+    function removePoint(index) {
+      pts().splice(index * 2, 2);
+      var other = twin();
+      if (other) other.splice(index * 2, 2);
+    }
+
+    function reverseBoth() {
+      [active(), twin()].forEach(function (a) {
+        if (!a) return;
+        var out = [];
+        for (var i = a.length - 2; i >= 0; i -= 2) out.push(a[i], a[i + 1]);
+        a.length = 0;
+        for (var j = 0; j < out.length; j++) a.push(out[j]);
+      });
+    }
 
     function tool(label, title, fn) {
       var b = document.createElement("button");
@@ -195,17 +257,68 @@ window.HG = window.HG || {};
     }
 
     tool("Reverse", "Flip the order of the points - which end is the start", function () {
-      var p = pts(), out = [];
-      for (var i = p.length - 2; i >= 0; i -= 2) out.push(p[i], p[i + 1]);
-      mask[name] = out;
+      reverseBoth();
       if (selected >= 0) selected = count() - 1 - selected;
       edited();
     });
     tool("Clear", "Remove every point", function () {
       mask[name] = [];
+      if (minName) delete mask[minName];
+      editingMin = false;
       selected = -1;
       edited();
     });
+
+    // ---- the minimal shape ----------------------------------------------
+
+    if (minName) {
+      var fullTab = tool("Full", "Edit the shape at this gene's fullest", function () {
+        editingMin = false;
+        selected = -1;
+        edited();
+      });
+      var minTab = tool("Minimal", "Edit the shape it erases down to at its weakest",
+        function () {
+          if (!hasMin()) {
+            seedMinimal();
+          }
+          editingMin = true;
+          selected = -1;
+          edited();
+        });
+      var dropMin = tool("Drop minimal", "Go back to one shape on every carrier", function () {
+        delete mask[minName];
+        editingMin = false;
+        selected = -1;
+        edited();
+      });
+    }
+
+    /**
+     * Start a minimal shape by <b>shrinking the drawn one</b> toward its own
+     * centre, rather than by copying it or by starting empty.
+     *
+     * <p>A copy would make the two ends identical, so the gene would look
+     * static until the author moved every point; empty is not a legal shape at
+     * all. Shrunk is what "erases down to" means in the ordinary case, and it
+     * is immediately visible on the slider - which is the point of seeding it
+     * at all rather than asking for eight more clicks.
+     */
+    function seedMinimal() {
+      var p = mask[name] || [];
+      var n = p.length / 2;
+      if (n < 2) return;
+      var cu = 0, cv = 0;
+      for (var i = 0; i < n; i++) { cu += p[i * 2]; cv += p[i * 2 + 1]; }
+      cu /= n;
+      cv /= n;
+      var out = [];
+      for (var j = 0; j < n; j++) {
+        out.push(Math.round((cu + (p[j * 2] - cu) * 0.4) * 1000) / 1000,
+          Math.round((cv + (p[j * 2 + 1] - cv) * 0.4) * 1000) / 1000);
+      }
+      mask[minName] = out;
+    }
 
     function edited() {
       draw();
@@ -241,10 +354,12 @@ window.HG = window.HG || {};
 
       drawHorse(ctx, f, skin);
       drawGrid(ctx, f, skin, box);
+      drawGhost(ctx, f);
       drawShape(ctx, f);
       drawHandles(ctx, f);
       drawReadout(ctx, f, box);
       renderNote();
+      syncTabs();
     }
 
     function drawHorse(ctx, f, skin) {
@@ -285,6 +400,36 @@ window.HG = window.HG || {};
       var right = f.axes.uEnds[1];
       ctx.fillText(right, box.w - 3 - ctx.measureText(right).width, box.h - 3);
       ctx.fillText(f.axes.vEnds[1], 2, 10);
+    }
+
+    /**
+     * The shape that is <b>not</b> being edited, in outline. Drawing the pair
+     * together is the whole reason the minimal shape shares this canvas: what
+     * matters about it is how much smaller it is than the other one, and that
+     * is invisible in a second editor somewhere else on the page.
+     */
+    function drawGhost(ctx, f) {
+      var p = twin();
+      if (!p || p.length < 4) return;
+      var closed = !!mask.fill || !!mask.closed;
+      var line = polyline(p, !!mask.curve, closed, f);
+      if (!line.length) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(line[0][0], line[0][1]);
+      for (var i = 1; i < line.length; i++) ctx.lineTo(line[i][0], line[i][1]);
+      if (closed) ctx.closePath();
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = "rgba(140, 195, 255, 0.35)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      for (var j = 0; j < p.length / 2; j++) {
+        ctx.beginPath();
+        ctx.arc(f.px(f.unitU(p[j * 2])), f.py(f.unitV(p[j * 2 + 1])), 2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(140, 195, 255, 0.4)";
+        ctx.fill();
+      }
+      ctx.restore();
     }
 
     function drawShape(ctx, f) {
@@ -336,7 +481,7 @@ window.HG = window.HG || {};
         var x = f.px(f.unitU(p[i * 2])), y = f.py(f.unitV(p[i * 2 + 1]));
         ctx.beginPath();
         ctx.arc(x, y, HANDLE_R, 0, Math.PI * 2);
-        ctx.fillStyle = i === selected ? "#e8eef8" : "#4f9dff";
+        ctx.fillStyle = i === selected ? "#e8eef8" : (editingMin ? "#c98bff" : "#4f9dff");
         ctx.fill();
         ctx.strokeStyle = "#0b1120";
         ctx.lineWidth = 1.5;
@@ -369,9 +514,32 @@ window.HG = window.HG || {};
       var what = n === 0 ? "no points yet - click the horse to start drawing"
         : n < 2 ? "1 point - a PATH wants at least two"
           : n + " points";
-      note.textContent = what
+      var which = editingMin ? "the MINIMAL shape (dashed: the full one) — " : "";
+      note.textContent = which + what
         + " — click to add, drag to move, click a hollow dot to insert, "
         + "right-click or select and press Delete to remove";
+    }
+
+    /**
+     * The two tabs, and whether a minimal shape can be started at all. A gene
+     * with no dial knob has nothing for the shape to shrink along and the
+     * loader says so, so the button explains itself rather than writing a file
+     * that fails at startup.
+     */
+    function syncTabs() {
+      if (!minName) return;
+      var allowed = !opts.hasDial || opts.hasDial();
+      var drawn = (mask[name] || []).length >= 4;
+      fullTab.classList.toggle("on", !editingMin);
+      minTab.classList.toggle("on", editingMin);
+      minTab.disabled = !allowed || !drawn;
+      minTab.title = !drawn
+        ? "Draw the full shape first - the minimal one starts as a shrunken copy of it"
+        : allowed
+          ? "Edit the shape it erases down to at its weakest"
+          : "Mark one of the gene's knobs as its \"dial\" first - a minimal shape "
+            + "needs something to shrink along";
+      dropMin.style.display = hasMin() ? "" : "none";
     }
 
     // ---- pointer ---------------------------------------------------------
@@ -425,14 +593,12 @@ window.HG = window.HG || {};
       var hit = handleAt(xy, f);
       if (hit < 0) {
         var ins = inserterAt(xy, f);
-        var p = pts();
         if (ins) {
-          p.splice((ins.after + 1) * 2, 0, 0, 0);
           hit = ins.after + 1;
         } else {
-          p.push(0, 0);
-          hit = p.length / 2 - 1;
+          hit = count();
         }
+        insertPoint(hit, 0, 0);
         setPoint(hit, xy, f);
         edited();
       }
@@ -475,7 +641,7 @@ window.HG = window.HG || {};
       var f = currentFrame();
       var hit = handleAt(at(e), f);
       if (hit < 0) return;
-      pts().splice(hit * 2, 2);
+      removePoint(hit);
       selected = -1;
       edited();
     });
@@ -484,7 +650,7 @@ window.HG = window.HG || {};
       if (selected < 0) return;
       var f = currentFrame();
       if (e.key === "Delete" || e.key === "Backspace") {
-        pts().splice(selected * 2, 2);
+        removePoint(selected);
         selected = -1;
         edited();
         e.preventDefault();
@@ -508,6 +674,12 @@ window.HG = window.HG || {};
 
     var api = {
       root: root,
+      /**
+       * Which array the handles are currently editing - so the textarea folded
+       * under the canvas shows the shape you are dragging rather than always
+       * the full one.
+       */
+      activeName: activeName,
       refresh: function () { selected = Math.min(selected, count() - 1); draw(); },
       dispose: function () {
         var i = live.indexOf(api);

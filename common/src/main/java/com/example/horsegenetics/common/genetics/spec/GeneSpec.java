@@ -298,19 +298,57 @@ public record GeneSpec(
      * <p>Draw order off the expressing copy: the base value, then one extra draw
      * per leg when {@code perLeg} is set.
      */
-    public record Knob(String name, double min, double max, boolean perLeg, double spread, boolean seed) {
+    public record Knob(String name, double min, double max, boolean perLeg, double spread,
+                       boolean seed, boolean dial) {
 
         public static Knob range(String name, double min, double max) {
-            return new Knob(name, min, max, false, 0, false);
+            return new Knob(name, min, max, false, 0, false, false);
         }
 
         public static Knob perLeg(String name, double min, double max, double spread) {
-            return new Knob(name, min, max, true, spread, false);
+            return new Knob(name, min, max, true, spread, false, false);
         }
 
         public static Knob seed(String name) {
-            return new Knob(name, 0, 0, false, 0, true);
+            return new Knob(name, 0, 0, false, 0, true, false);
         }
+
+        /** A whole-horse range knob that is also this gene's dial. */
+        public static Knob dial(String name, double min, double max) {
+            return new Knob(name, min, max, false, 0, false, true);
+        }
+    }
+
+    /**
+     * The index in {@link #knobs()} of the knob this gene declared as its
+     * <b>dial</b>, or {@code -1} when it declared none.
+     *
+     * <p>A gene may mark at most one knob {@code "dial": true}, and the flag
+     * says one thing only: <i>this</i> is the number that means "how much of
+     * itself this horse is showing". Nothing about resolution changes - the knob
+     * is drawn, stored and read exactly like any other, and a mask points at it
+     * as {@code $name} - so the flag costs nothing at paint time.
+     *
+     * <p>What it buys is that a <b>tool</b> can find it. The creator sweeps it
+     * to preview the gene at 0%, 50% and 100% of itself instead of re-rolling
+     * horses until one lands near an end, and {@code PATH}'s {@code pointsMin}
+     * (the minimal shape a marking erases down to) blends along it without the
+     * author having to name it twice. Both were impossible while "how much of
+     * this gene shows" was a convention only the author could see.
+     *
+     * <p><b>The word is deliberately neither of the two obvious ones.</b>
+     * {@link #expressions()} is already the table of <i>outcomes</i> - which
+     * allele combinations look like what - and {@code strength} is already a
+     * parameter on every colour op, for how hard it pulls. This is the handle
+     * the tools turn, so it is named after being a handle.
+     */
+    public int dialKnob() {
+        for (int i = 0; i < knobs.size(); i++) {
+            if (knobs.get(i).dial()) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     // ------------------------------------------------------------------

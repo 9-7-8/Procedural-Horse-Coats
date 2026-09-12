@@ -130,6 +130,15 @@ public final class GeneSpecParser {
             if (knobIndex.putIfAbsent(knob.name(), knobs.size()) != null) {
                 throw new IllegalArgumentException("two knobs named '" + knob.name() + "'");
             }
+            if (knob.dial()) {
+                for (Knob other : knobs) {
+                    if (other.dial()) {
+                        throw new IllegalArgumentException("two knobs marked 'dial' ('"
+                                + other.name() + "' and '" + knob.name() + "') - a gene has one "
+                                + "measure of how much of itself it is showing, or none");
+                    }
+                }
+            }
             knobs.add(knob);
         }
 
@@ -876,10 +885,16 @@ public final class GeneSpecParser {
     }
 
     private static Knob readKnob(Map<String, Object> o) {
-        expectKeys(o, "a knob", "name", "type", "min", "max", "per", "spread");
+        expectKeys(o, "a knob", "name", "type", "min", "max", "per", "spread", "dial");
         String name = string(o, "name", null);
         String type = string(o, "type", "range").toLowerCase(Locale.ROOT);
+        boolean dial = flag(o, "dial", false);
         if (type.equals("seed")) {
+            if (dial) {
+                throw new IllegalArgumentException("knob '" + name + "': a seed cannot be the "
+                        + "dial - a seed has no range to be a fraction of, and the dial means "
+                        + "'how far along its range this horse landed'");
+            }
             return Knob.seed(name);
         }
         if (!type.equals("range")) {
@@ -893,7 +908,12 @@ public final class GeneSpecParser {
             case "leg" -> true;
             default -> throw new IllegalArgumentException("knob '" + name + "': per must be 'horse' or 'leg'");
         };
-        return new Knob(name, min, max, perLeg, number(o, "spread", 0), false);
+        if (dial && perLeg) {
+            throw new IllegalArgumentException("knob '" + name + "': the dial knob is "
+                    + "per-horse - 'how much of itself this horse is showing' is one number, and "
+                    + "four legs' worth of it would give a marking four different minimal shapes");
+        }
+        return new Knob(name, min, max, perLeg, number(o, "spread", 0), false, dial);
     }
 
     private static Layer readLayer(Map<String, Object> o, String where, boolean natural,
@@ -976,10 +996,51 @@ public final class GeneSpecParser {
         Params params = readParams(o, SpecSchema.maskParams(type), SpecSchema.maskParamNames(type),
                 where + " '" + type + "'", knobs, knobIndex, "type", "combine", "invert");
         checkBandNotReversed(type, params, knobs, where);
+        if (type == MaskType.PATH) {
+            checkMinimalShape(params, knobs, where);
+        }
         if (type == MaskType.SVG) {
             params = flattenSvg(params, where);
         }
         return new Mask(type, params, combine, invert);
+    }
+
+    /**
+     * <b>Refuse a {@code pointsMin} that cannot morph.</b>
+     *
+     * <p>The minimal shape works by moving every control point to its twin, so
+     * the two arrays have to correspond point for point. Blending arrays of
+     * different lengths is expressible - fade one field into the other - and it
+     * was rejected on purpose: a hard-edged mark crossfading into a different
+     * hard-edged mark ghosts through the middle instead of shrinking, which is
+     * not what "erases down to" means. So a mismatch is a load error here
+     * rather than a second, quieter behaviour discovered later.
+     *
+     * <p>It also refuses a minimal shape with nothing to blend along. Without a
+     * knob marked {@code dial} the morph has no parameter, and silently
+     * pinning it at either end would mean half the file never paints.
+     */
+    private static void checkMinimalShape(Params params, List<Knob> knobs, String where) {
+        if (!params.has("pointsMin")) {
+            return;
+        }
+        int full = params.points("points").length;
+        int min = params.points("pointsMin").length;
+        if (full != min) {
+            throw new IllegalArgumentException(where + " PATH 'pointsMin': has " + (min / 2)
+                    + " points but 'points' has " + (full / 2) + " - the minimal shape is the same "
+                    + "shape drawn smaller, so each point moves to its twin and there has to be "
+                    + "one of each");
+        }
+        boolean any = false;
+        for (Knob knob : knobs) {
+            any |= knob.dial();
+        }
+        if (!any) {
+            throw new IllegalArgumentException(where + " PATH 'pointsMin': this gene has no knob "
+                    + "marked \"dial\": true, so there is nothing for the shape to shrink "
+                    + "along - declare one, or drop 'pointsMin'");
+        }
     }
 
     /**

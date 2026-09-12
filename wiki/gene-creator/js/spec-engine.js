@@ -135,25 +135,34 @@ window.HG = window.HG || {};
    * fills it. Sub-segments are generated on the fly rather than collected into
    * an array, because this runs per texel.
    */
-  function pathCoverage(pts, curve, closed, fill, uMin, uSpan, vMin, vSpan, u, v, half, soft) {
+  /**
+   * `min` is the shape at the gene's weakest and `morph` how far
+   * along it this horse sits - null and 1 for an ordinary path. The lerp is
+   * read through `at` rather than applied to a copied array first, exactly as
+   * SpecPainter does it, because this runs per texel.
+   */
+  function pathCoverage(pts, curve, closed, fill, uMin, uSpan, vMin, vSpan, u, v, half, soft,
+                        min, morph) {
     var n = pts.length / 2;
     var spans = closed ? n : n - 1;
     var steps = curve ? HG.schema.PATH_CURVE_SAMPLES : 1;
     var best = Infinity;
     var inside = false;
-    var au = uMin + pts[0] * uSpan;
-    var av = vMin + pts[1] * vSpan;
+    var m = min && min.length === pts.length ? min : null;
+    var mt = m ? morph : 1;
+    var au = uMin + at(pts, m, mt, 0) * uSpan;
+    var av = vMin + at(pts, m, mt, 1) * vSpan;
     for (var span = 0; span < spans; span++) {
       for (var step = 1; step <= steps; step++) {
         var bu, bv;
         if (curve) {
           var t = step / steps;
-          bu = uMin + spline(pts, n, closed, span, t, 0) * uSpan;
-          bv = vMin + spline(pts, n, closed, span, t, 1) * vSpan;
+          bu = uMin + spline(pts, n, closed, span, t, 0, m, mt) * uSpan;
+          bv = vMin + spline(pts, n, closed, span, t, 1, m, mt) * vSpan;
         } else {
           var j = (span + 1) % n;
-          bu = uMin + pts[j * 2] * uSpan;
-          bv = vMin + pts[j * 2 + 1] * vSpan;
+          bu = uMin + at(pts, m, mt, j * 2) * uSpan;
+          bv = vMin + at(pts, m, mt, j * 2 + 1) * vSpan;
         }
         var d = segmentDistance(u, v, au, av, bu, bv);
         if (d < best) best = d;
@@ -166,14 +175,23 @@ window.HG = window.HG || {};
     return 1 - smoothstep(half, half + soft, best);
   }
 
+  /**
+   * One coordinate of a control point, morphed toward the minimal shape's twin
+   * at the same index. The two arrays are the same length or `min` is null -
+   * the loader refuses anything else, on both sides.
+   */
+  function at(pts, min, t, i) {
+    return min === null || min === undefined ? pts[i] : min[i] + (pts[i] - min[i]) * t;
+  }
+
   /** Catmull-Rom, ends held by duplicating the first and last point. */
-  function spline(pts, n, closed, span, t, axis) {
+  function spline(pts, n, closed, span, t, axis, min, morph) {
     var i1 = span;
     var i2 = closed ? (span + 1) % n : Math.min(span + 1, n - 1);
     var i0 = closed ? (span - 1 + n) % n : Math.max(span - 1, 0);
     var i3 = closed ? (span + 2) % n : Math.min(span + 2, n - 1);
-    var p0 = pts[i0 * 2 + axis], p1 = pts[i1 * 2 + axis];
-    var p2 = pts[i2 * 2 + axis], p3 = pts[i3 * 2 + axis];
+    var p0 = at(pts, min, morph, i0 * 2 + axis), p1 = at(pts, min, morph, i1 * 2 + axis);
+    var p2 = at(pts, min, morph, i2 * 2 + axis), p3 = at(pts, min, morph, i3 * 2 + axis);
     var t2 = t * t, t3 = t2 * t;
     return 0.5 * ((2 * p1) + (-p0 + p2) * t
       + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2
@@ -251,7 +269,58 @@ window.HG = window.HG || {};
       }
       ranges[i] = perLeg;
     });
-    return { spec: spec, ranges: ranges, seeds: seeds, dose: dose };
+    return {
+      spec: spec, ranges: ranges, seeds: seeds, dose: dose,
+      dial: dialOf(spec, ranges)
+    };
+  }
+
+  /**
+   * Where this horse's dial knob landed IN ITS OWN RANGE - 0 at the knob's
+   * min, 1 at its max. The port of SpecValues.dialOf, normalised for the
+   * same reason: "how much of itself this horse is showing" is a fraction, and
+   * the raw draw is in whatever units the parameter wanted.
+   */
+  function dialOf(spec, ranges) {
+    var knobs = spec.knobs || [];
+    for (var i = 0; i < knobs.length; i++) {
+      if (!knobs[i].dial || !ranges[i]) continue;
+      var span = knobs[i].max - knobs[i].min;
+      if (Math.abs(span) < 1e-12) return 1;
+      var t = (ranges[i][0] - knobs[i].min) / span;
+      return t < 0 ? 0 : (t > 1 ? 1 : t);
+    }
+    return 1;
+  }
+
+  /**
+   * The same draw with the dial knob PINNED at `t` of its range - what the
+   * creator's dial slider previews with.
+   *
+   * <p>It moves the stored knob and re-derives the dial from it rather than
+   * setting the dial directly, so what the slider shows is a horse that
+   * could exist: every other parameter pointing at that knob moves with it,
+   * exactly as it would on a real foal that drew the number.
+   */
+  function withDial(values, t) {
+    var i = dialIndex(values.spec);
+    if (i < 0) return values;
+    var knob = values.spec.knobs[i];
+    var ranges = values.ranges.slice();
+    ranges[i] = [quantise(knob.min + (knob.max - knob.min) * t)];
+    return {
+      spec: values.spec, ranges: ranges, seeds: values.seeds, dose: values.dose,
+      dial: dialOf(values.spec, ranges)
+    };
+  }
+
+  /** The index of the knob marked `dial`, or -1. */
+  function dialIndex(spec) {
+    var knobs = spec.knobs || [];
+    for (var i = 0; i < knobs.length; i++) {
+      if (knobs[i].dial) return i;
+    }
+    return -1;
   }
 
   function knobIndex(spec, name) {
@@ -433,7 +502,8 @@ window.HG = window.HG || {};
         var psoft = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
         var phalf = Math.max(0, get(values, mask.width, 1.0, legIndex)) / 2;
         return pathCoverage(ppts, !!mask.curve, pclosed, pfill,
-          uMin, uSpan, vMin, vSpan, pu, pv, phalf, psoft);
+          uMin, uSpan, vMin, vSpan, pu, pv, phalf, psoft,
+          mask.pointsMin, values.dial);
       }
       case "CHOICE": {
         // Constant across the horse and exactly 0 or 1 - the position is
@@ -1344,6 +1414,14 @@ window.HG = window.HG || {};
     // than keeping a second copy of either - a canvas that bends the line
     // differently from the game is worse than no canvas.
     pathSpline: spline,
-    resolveValue: get
+    // For the parity check's answer table: the morph toward a minimal shape is
+    // a few dozen texels on a flank, and the probe cases never reach it.
+    pathCoverage: pathCoverage,
+    resolveValue: get,
+    // The dial: which knob a gene nominated as "how much of itself this horse
+    // is showing", and a draw with it pinned. The slider under the preview goes
+    // through these rather than reaching into `ranges` itself.
+    dialIndex: dialIndex,
+    withDial: withDial
   };
 })(window.HG);

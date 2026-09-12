@@ -240,4 +240,101 @@ class PathMaskTest {
         assertEquals(8, SpecSchema.PATH_CURVE_SAMPLES,
                 "the creator's port hard-codes this number too - change both or neither");
     }
+
+    // ------------------------------------------------------------------
+    // The minimal shape - 'pointsMin'
+    // ------------------------------------------------------------------
+
+    /** A stroked path morphed toward {@code min} at blend {@code t}. */
+    private static double morph(double[] pts, double[] min, double t,
+                                boolean curve, double u, double v, double width) {
+        return SpecPainter.pathCoverage(pts, min, t, curve, false, false,
+                0, 1, 0, 1, u, v, width / 2, SOFT);
+    }
+
+    /**
+     * The two ends are the two shapes. At full expression the mark is exactly
+     * what {@code points} drew and the minimal shape is not consulted; at zero
+     * it is exactly {@code pointsMin}. This is the whole contract - everything
+     * else is what happens between them.
+     */
+    @Test
+    void theEndsOfTheBlendAreTheTwoShapesThemselves() {
+        double[] full = {0.2, 0.5, 0.8, 0.5};
+        double[] min = {0.4, 0.5, 0.6, 0.5};
+        for (double u = 0; u <= 1.0; u += 0.05) {
+            assertEquals(stroke(full, false, false, u, 0.5, 0.1),
+                    morph(full, min, 1.0, false, u, 0.5, 0.1), 1e-12,
+                    "expression 1 is not the drawn shape at u=" + u);
+            assertEquals(stroke(min, false, false, u, 0.5, 0.1),
+                    morph(full, min, 0.0, false, u, 0.5, 0.1), 1e-12,
+                    "expression 0 is not the minimal shape at u=" + u);
+        }
+    }
+
+    /**
+     * <b>It shrinks, it does not fade.</b> That is the difference between a
+     * morph and the crossfade the format deliberately did not take: at half
+     * expression the mark still has a hard edge, and that edge sits halfway
+     * between the two ends rather than the middle being a half-covered blur of
+     * both.
+     */
+    @Test
+    void halfwayIsAShapeAndNotAGhostOfTwo() {
+        double[] full = {0.1, 0.5, 0.9, 0.5};
+        double[] min = {0.4, 0.5, 0.6, 0.5};
+
+        // A hard edge, so the softness is tightened to 0.02 - the default fade
+        // is a quarter of the plane wide and would swallow the distinction.
+        double tight = 0.02;
+        double outside = SpecPainter.pathCoverage(full, min, 0.5, false, false, false,
+                0, 1, 0, 1, 0.85, 0.5, 0.0, tight);
+        double inside = SpecPainter.pathCoverage(full, min, 0.5, false, false, false,
+                0, 1, 0, 1, 0.50, 0.5, 0.0, tight);
+        double fullThere = SpecPainter.pathCoverage(full, null, 1.0, false, false, false,
+                0, 1, 0, 1, 0.85, 0.5, 0.0, tight);
+        double minThere = SpecPainter.pathCoverage(min, null, 1.0, false, false, false,
+                0, 1, 0, 1, 0.85, 0.5, 0.0, tight);
+
+        // The line at half expression runs 0.25..0.75, so 0.85 is off its end
+        // while still being well inside the fully expressed 0.1..0.9.
+        assertEquals(1.0, inside, 1e-9, "the middle of a half-expressed mark is still solid");
+        assertEquals(0.0, outside, 1e-9,
+                "a texel past the end of the half-expressed mark is outside it, not half-lit");
+        assertEquals(0.5, 0.5 * fullThere + 0.5 * minThere, 1e-9,
+                "the crossfade this format did NOT take would report half coverage here");
+    }
+
+    /** A null minimal shape is the ordinary path, whatever the blend says. */
+    @Test
+    void noMinimalShapeIgnoresTheBlend() {
+        double[] pts = {0.2, 0.5, 0.8, 0.5};
+        assertEquals(stroke(pts, false, false, 0.5, 0.5, 0.2),
+                morph(pts, null, 0.0, false, 0.5, 0.5, 0.2), 1e-12);
+    }
+
+    /**
+     * The morph is applied to the control points, so a <b>curved</b> path
+     * morphs as a curve: the blend of two splines is the spline of the blended
+     * points, because Catmull-Rom is linear in them. Checked rather than
+     * assumed, since it is the reason the lerp can live inside the sampler.
+     */
+    @Test
+    void aCurvedPathMorphsThroughItsControlPoints() {
+        double[] full = {0.1, 0.4, 0.35, 0.8, 0.65, 0.2, 0.9, 0.6};
+        double[] min = {0.4, 0.45, 0.47, 0.6, 0.55, 0.4, 0.6, 0.55};
+        double t = 0.35;
+        double[] blended = new double[full.length];
+        for (int i = 0; i < full.length; i++) {
+            blended[i] = min[i] + (full[i] - min[i]) * t;
+        }
+        for (double u = 0.05; u <= 0.95; u += 0.05) {
+            for (double v = 0.2; v <= 0.8; v += 0.2) {
+                assertEquals(stroke(blended, true, false, u, v, 0.15),
+                        morph(full, min, t, true, u, v, 0.15), 1e-12,
+                        "the morphed curve is not the curve through the morphed points at "
+                                + u + "," + v);
+            }
+        }
+    }
 }

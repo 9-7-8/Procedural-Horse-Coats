@@ -59,7 +59,7 @@
 </div>
 
 <div class="note good" id="paused">
-    <span class="label">&sect;10's long pole is down &mdash; the three masks and the canvas are all in</span>
+    <span class="label">&sect;10 is down to colour and glow &mdash; the masks, the canvas and the dial are all in</span>
     <p>
         <code>FRACTAL</code> and <code>PATH</code> shipped on both sides in September, and
         <strong>the drawing canvas</strong> that <code>PATH</code> was waiting for is now
@@ -71,8 +71,23 @@
     <p>
         So the question this note used to park &mdash; whether the textarea was good enough
         to wait behind the <a href="#gene-api">Java gene API</a> &mdash; is moot, and the
-        API is item 1 below on its own merits. What is left of &sect;10 is the smaller half:
-        erase-down, per-region colour, glow intensity, and the expression preview.
+        API shipped on its own merits.
+    </p>
+    <p>
+        <strong>Erase-down and the expression preview are in too</strong>, and they turned
+        out to be one feature seen from two ends. A knob may now be marked
+        <code>"dial": true</code> &mdash; <em>this</em> is how much of itself the gene is
+        showing &mdash; which lets the creator put a <strong>slider</strong> under the
+        preview instead of making you re-roll horses until one lands near an end, and lets
+        a <code>PATH</code> carry <code>pointsMin</code>: the same shape at the gene's
+        weakest, morphed point to point, so a drawn marking gets <em>smaller</em> rather
+        than fainter. Both sides, with an answer table in the parity fixtures, because the
+        probe cases do not reach a drawing on a flank. See
+        <a href="making-a-gene.html#dial">the dial</a> and
+        <a href="making-a-gene.html#pointsmin"><code>pointsMin</code></a>.
+    </p>
+    <p>
+        What is left of &sect;10 is <strong>per-region colour ranges and glow intensity</strong>.
     </p>
 </div>
 
@@ -90,10 +105,11 @@
         deal else is built and unplayed: see <a href="verification.html">To be
         verified</a>, which is longer than this page's top section.</li>
     <li><strong>What is left of the visual marking designer</strong>
-        (<a href="#designer">&sect;10</a>) &mdash; the drawing canvas shipped, so what
-        remains is the smaller half beside it: erase-down for the minimal expression,
-        per-region colour ranges, glow / particle intensity, and a way to preview a gene
-        at 0%, 50% and 100% of its own expression.</li>
+        (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial and the minimal
+        shape all shipped, so what remains is <strong>glow / particle intensity</strong>
+        (which is not a tool job: emissiveness is a <em>bit</em> per texel by design, and
+        an intensity means <code>CoatOverlay</code>, the composer, the NeoForge texture
+        factory and both ports) and <strong>per-region colour ranges and gradients</strong>.</li>
     <li><strong>Deepen the thin science tabs</strong>
         (<a href="#science-tabs">&sect;science</a>) &mdash; every natural gene page now
         has one, so the work is no longer absence but depth: 23 predate the pass that
@@ -496,9 +512,27 @@
 </div>
 
 <ul>
-    <li><strong>Draw the mask &mdash; done.</strong> Still unbuilt beside it: erase-down
-        for the minimal expression, per-region colour ranges and gradients, and glow /
-        particle intensity.</li>
+    <li><strong>Draw the mask &mdash; done.</strong> Still unbuilt beside it: per-region
+        colour ranges and gradients, and glow / particle intensity.</li>
+    <li><strong>Erase-down &mdash; shipped, as <code>pointsMin</code>.</strong> A
+        <code>PATH</code> may carry a second array of the same length: the shape at the
+        gene's weakest, which each control point morphs toward as the gene's
+        <a href="making-a-gene.html#dial">dial</a> falls. A marking on a weakly marked
+        horse is <em>smaller</em>, with its edge intact, rather than a faded copy of the
+        full one &mdash; which is the difference between a morph and the crossfade the
+        format deliberately did not take (a hard-edged mark ghosts through the middle).
+        Both arrays are edited on the one canvas behind a toggle, with the other shown as
+        a dashed ghost, and every structural edit happens to both: the loader refuses a
+        mismatched pair, so the editor cannot write one.</li>
+    <li><strong>The expression preview &mdash; shipped, as the dial slider.</strong> The
+        entry below was right that the channel existed and the creator did not make it
+        <em>visible</em>. What was missing turned out to be smaller than a preview mode: a
+        gene had no way to say which of its knobs was the one that means "how much". One
+        flag (<code>"dial": true</code>, at most one per gene, per-horse, never a seed)
+        fixed that, and the slider under <em>This horse drew</em> pins it &mdash; 0%, 50%,
+        100% or anywhere between, with <em>as drawn</em> to hand it back. It pins the
+        <em>knob</em>, so every parameter pointing at that knob moves with it and what you
+        see is a horse that could be born.</li>
     <li><strong>Fractal pattern definitions &mdash; shipped.</strong> The
         <code>FRACTAL</code> mask joins the vocabulary: octaves,
         lacunarity, gain, a domain warp, and a <code>shape</code> that reads the summed
@@ -513,10 +547,10 @@
         mask parameter can be driven by a per-copy stored scalar over a declared range
         (<code>SpecValues.get</code>), and <code>Value.PerDose</code> gives a per-dose
         triple beside it. So &ldquo;expression scales parts&rdquo; is expressible today:
-        declare a knob and point every threshold at it. What is missing is that the
-        creator does not make the channel <em>visible</em> &mdash; there is no way to
-        preview a gene at 0%, 50% and 100% of its own expression, which is what the
-        editor was really asking for.</li>
+        declare a knob and point every threshold at it. <strong>And the creator makes it
+        visible now</strong> &mdash; see the dial slider above; this entry is kept only
+        because the reasoning under it is still the reason there is no separate
+        &ldquo;expression&rdquo; channel in the format.</li>
     <li><strong>The <code>PATH</code> mask &mdash; shipped.</strong> A drawn shape is
         vector control points in body space (owner&rsquo;s call), stroked or filled,
         extruded through the horse; <code>curve</code> smooths them with a spline that
@@ -532,10 +566,17 @@
         away, and the two write the same array. It changed no format, no engine and no
         parity fixture &mdash; which is exactly why the mask went first. Written up on
         <a href="making-a-gene.html#path">the format page</a>.</li>
-    <li><strong>Parity still applies.</strong> Anything the editor previews, it previews
-        through the JS port of the pipeline, and <code>check-parity.mjs</code> has to
-        cover the new mask and fractal ops &mdash; or the editor will show a horse the
-        game will not breed, convincingly.</li>
+    <li><strong>Parity still applies &mdash; and &ldquo;covered&rdquo; has to be
+        demonstrated.</strong> Anything the editor previews, it previews through the JS
+        port of the pipeline, or it will show a horse the game will not breed,
+        convincingly. <code>pointsMin</code> is the case that proves the probe cases are
+        not enough on their own: with a minimal shape on <code>prismatic</code>'s crescent
+        and nothing else, <strong>reversing the blend in the creator left parity green</strong>
+        &mdash; a drawing on a flank is a few dozen texels and the fixtures sample four per
+        part. It is checked by an answer table now
+        (<code>SpecFixtureTool.pathSection</code>), and the way that was established was to
+        break the port on purpose and watch the check stay quiet. Do that with the next
+        one too.</li>
 </ul>
 
 <h3>9.1 The smaller creator work</h3>

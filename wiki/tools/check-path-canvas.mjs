@@ -229,6 +229,136 @@ try {
       "50px right = " + right.toFixed(2) + " units, 50px up = " + up.toFixed(2));
   }
 
+  // ---- the minimal shape, and the dial that blends toward it -------------
+  //
+  // `pointsMin` shares this canvas with `points` behind a toggle, and the two
+  // arrays have to stay the same length or the gene will not load. Every way
+  // of changing the length goes through one pair of helpers for that reason,
+  // which is exactly the kind of invariant that holds on the day it is written
+  // and quietly stops holding later. So: drive the toggle, then count.
+
+  await page.evaluate(`(function () {
+    var sel = Array.prototype.filter.call(document.querySelectorAll("#layers-panel select"),
+      function (s) { return s.options.length === 3 && s.options[0].value === "side"; })[0];
+    sel.value = "side";
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  })()`);
+  await sleep(400);
+  await page.evaluate(`(function () {
+    var t = document.querySelector(".path-numbers textarea");
+    t.value = "0.3, 0.4\\n0.5, 0.6\\n0.7, 0.4";
+    t.dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  await sleep(300);
+
+  const MIN = `HG.ui.state.spec.expressions[0].layers[0].masks[0].pointsMin`;
+  const readMin = async () => JSON.parse(await page.evaluate(`JSON.stringify(${MIN} || null)`));
+  const tab = (label) => `Array.prototype.filter.call(
+    document.querySelectorAll(".path-bar .btn"),
+    function (b) { return b.textContent === "${label}"; })[0]`;
+
+  c.ok("the minimal-shape tab is offered",
+    await page.evaluate(`!!${tab("Minimal")}`));
+  c.ok("but not until a knob is the dial - the gene would not load",
+    await page.evaluate(`${tab("Minimal")}.disabled === true`),
+    await page.evaluate(`${tab("Minimal")}.title`));
+
+  // Mark a knob as the dial the way a person does: add one, then tick the box.
+  await page.evaluate(`(function () {
+    var add = Array.prototype.filter.call(document.querySelectorAll("#gene-panel .btn"),
+      function (b) { return b.textContent === "+ range knob"; })[0];
+    add.click();
+  })()`);
+  await sleep(300);
+  const ticked = await page.evaluate(`(function () {
+    var box = Array.prototype.filter.call(document.querySelectorAll("#gene-panel label"),
+      function (l) { return l.textContent.indexOf("dial") >= 0; })[0];
+    if (!box) return "no dial tickbox";
+    box.querySelector("input").click();
+    return HG.ui.state.spec.knobs.filter(function (k) { return k.dial; }).length;
+  })()`);
+  c.ok("a knob can be marked as the gene's dial", ticked === 1, String(ticked));
+
+  await sleep(400);
+  await page.evaluate(`${tab("Minimal")}.click()`);
+  await sleep(400);
+  const full = await read();
+  const min = await readMin();
+  c.ok("starting a minimal shape seeds it from the drawn one",
+    !!min && min.length === full.length, JSON.stringify(min));
+  // Seeded by shrinking toward the centroid, so it is not a copy - a copy
+  // would make the two ends of the blend identical and the dial look broken.
+  // Not "every coordinate moved", though: a point already sitting on the
+  // centroid's axis stays where it is, which is correct and would fail that.
+  c.ok("and seeds it SMALLER, not as a copy",
+    !!min && JSON.stringify(min) !== JSON.stringify(full)
+      && min.some((n, i) => Math.abs(n - full[i]) > 1e-9),
+    JSON.stringify(full) + " -> " + JSON.stringify(min));
+
+  const spread = (a) => Math.max(...a.filter((_, i) => i % 2 === 0))
+    - Math.min(...a.filter((_, i) => i % 2 === 0));
+  c.ok("the minimal shape is inside the full one",
+    spread(min) < spread(full), spread(min).toFixed(3) + " wide vs " + spread(full).toFixed(3));
+
+  // A point added while editing either shape has to appear in BOTH, or the
+  // loader rejects the file for a mismatch the author never typed.
+  const canvasBox = await page.evaluate(`(function () {
+    var e = document.querySelector(".path-canvas");
+    var r = e.getBoundingClientRect();
+    return { x: r.left + 1, y: r.top + 1, w: e.clientWidth, h: e.clientHeight };
+  })()`);
+  await page.click(canvasBox.x + canvasBox.w * 0.35, canvasBox.y + canvasBox.h * 0.7);
+  await sleep(300);
+  const full2 = await read();
+  const min2 = await readMin();
+  c.ok("a point added to one shape is added to the other",
+    full2.length === full.length + 2 && min2.length === full2.length,
+    full2.length / 2 + " full, " + min2.length / 2 + " minimal");
+  c.ok("and it is the MINIMAL shape being dragged, not the full one",
+    JSON.stringify(full2.slice(0, 6)) === JSON.stringify(full.slice(0, 6)),
+    JSON.stringify(full2));
+
+  await page.evaluate(`${tab("Full")}.click()`);
+  await sleep(300);
+  const areaNow = await page.evaluate(`document.querySelector(".path-numbers textarea").value`);
+  c.ok("the textarea follows the tab",
+    areaNow.split("\n").filter(Boolean).length === full2.length / 2, areaNow);
+
+  // The dial slider pins the knob. Pinned at nothing and pinned at everything
+  // are different horses, which is the whole point of having it.
+  c.ok("the dial slider appears with the knob",
+    await page.evaluate(`!!document.querySelector(".dial-slider")`));
+
+  const bakeAt = async (t) => page.evaluate(`(function () {
+    var s = document.querySelector(".dial-slider");
+    s.value = ${t};
+    s.dispatchEvent(new Event("input", { bubbles: true }));
+    return HG.ui.state.dial;
+  })()`);
+  await bakeAt(0);
+  await sleep(500);
+  const weak = await page.evaluate(`HG.ui.state.lastBake.values.dial`);
+  await bakeAt(1);
+  await sleep(500);
+  const strong = await page.evaluate(`HG.ui.state.lastBake.values.dial`);
+  c.ok("the slider pins the dial the bake actually used",
+    weak === 0 && strong === 1, weak + " then " + strong);
+
+  await page.evaluate(`(function () {
+    var b = Array.prototype.filter.call(document.querySelectorAll(".dial .btn"),
+      function (x) { return x.textContent === "as drawn"; })[0];
+    b.click();
+  })()`);
+  await sleep(400);
+  c.ok('"as drawn" hands the dial back to what this horse rolled',
+    await page.evaluate(`HG.ui.state.dial === null`));
+
+  await page.evaluate(`${tab("Drop minimal")}.click()`);
+  await sleep(300);
+  c.ok("dropping the minimal shape removes it from the file",
+    (await readMin()) === null
+    && !(await page.evaluate(`document.getElementById("json-output").value`)).includes("pointsMin"));
+
   c.ok("nothing on the console", page.errors().length === 0, page.errors().join(" ;; "));
   if (SHOT) await page.screenshot(SHOT);
 } finally {

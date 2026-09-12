@@ -172,6 +172,12 @@ window.HG = window.HG || {};
         choice("space", ["body", "units"],
           "how the points are measured - 'body' normalises over the whole horse so the shape lands in the same place on a foal, 'units' is raw body units. 'width' and 'softness' are body units either way"),
         points("points", "the control points, flat: u0, v0, u1, v1, ..."),
+        // Drawn on the SAME canvas as `points` rather than in a second editor
+        // of its own - see pointsEditor in ui.js. The two arrays are twins and
+        // have to stay the same length, which is hard to hold true across two
+        // controls and free across one.
+        points("pointsMin", "the same shape at this gene's weakest, one point per point of "
+          + "'points'. Needs a knob marked 'dial'"),
         flag("curve", "smooth the points into a curve that passes through every one of them"),
         flag("closed", "join the last point back to the first"),
         flag("fill", "fill the enclosed area rather than stroking the line - implies 'closed', and 'width' is then unread"),

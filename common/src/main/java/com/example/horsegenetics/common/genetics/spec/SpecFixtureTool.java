@@ -144,6 +144,7 @@ public final class SpecFixtureTool {
                 .append(",\n");
         sb.append(composerSection());
         sb.append(svgSection());
+        sb.append(pathSection());
         sb.append(geometrySection());
         sb.append("  },\n");
         return sb.toString();
@@ -440,6 +441,86 @@ public final class SpecFixtureTool {
             }
         }
         return out;
+    }
+
+    /**
+     * <b>The {@code PATH} mask's morph, as an answer table</b> - here for the
+     * reason {@link #svgSection} spells out, and demonstrated rather than
+     * assumed: with a minimal shape on {@code prismatic}'s crescent and nothing
+     * else, <b>reversing the blend in the creator's port left the probe cases
+     * green</b>. The crescent is a few dozen texels on the flank and the probes
+     * sample four per part, so they simply never met.
+     *
+     * <p>So the blend is compared where it happens: the same control points,
+     * the same sample points, at five points along the dial. A port that lerps
+     * the wrong way, normalises the dial differently, or morphs the polyline
+     * instead of the control points disagrees here on the first row.
+     */
+    private static String pathSection() {
+        // A straight run and a curve, each with a twin it shrinks toward. The
+        // curve matters on its own: Catmull-Rom is linear in its control
+        // points, so blending them and then splining is the same as splining
+        // both and blending - which is what lets the lerp live inside the
+        // sampler, and is worth pinning in case either side stops doing it.
+        double[] full = {0.1, 0.5, 0.9, 0.5};
+        double[] fullMin = {0.4, 0.5, 0.6, 0.5};
+        double[] curve = {0.1, 0.4, 0.35, 0.8, 0.65, 0.2, 0.9, 0.6};
+        double[] curveMin = {0.4, 0.45, 0.47, 0.6, 0.55, 0.4, 0.6, 0.55};
+        double[][] probes = {{0.5, 0.5}, {0.3, 0.5}, {0.85, 0.5}, {0.2, 0.45}, {0.7, 0.62}};
+        double[] dials = {0.0, 0.25, 0.5, 0.75, 1.0};
+
+        StringBuilder sb = new StringBuilder("    \"path\": {\n      \"curveSamples\": ")
+                .append(SpecSchema.PATH_CURVE_SAMPLES)
+                .append(",\n      \"maxPoints\": ").append(SpecSchema.MAX_PATH_POINTS)
+                .append(",\n      \"probes\": [");
+        for (int i = 0; i < probes.length; i++) {
+            sb.append(i > 0 ? ", " : "").append("[").append(num(probes[i][0])).append(", ")
+                    .append(num(probes[i][1])).append("]");
+        }
+        sb.append("],\n      \"dials\": [");
+        for (int i = 0; i < dials.length; i++) {
+            sb.append(i > 0 ? ", " : "").append(num(dials[i]));
+        }
+        sb.append("],\n      \"cases\": {");
+        sb.append(pathCase("straight", full, fullMin, false, false, probes, dials));
+        sb.append(",").append(pathCase("curved", curve, curveMin, true, false, probes, dials));
+        sb.append(",").append(pathCase("filled", curve, curveMin, true, true, probes, dials));
+        // And one with no minimal shape at all: the dial must then be ignored
+        // entirely rather than quietly scaling the shape toward nothing.
+        sb.append(",").append(pathCase("noMinimum", curve, null, true, false, probes, dials));
+        sb.append("\n      }\n    },\n");
+        return sb.toString();
+    }
+
+    private static String pathCase(String name, double[] pts, double[] min, boolean curve,
+                                   boolean fill, double[][] probes, double[] dials) {
+        StringBuilder sb = new StringBuilder("\n        \"").append(name).append("\": { \"points\": [");
+        for (int i = 0; i < pts.length; i++) {
+            sb.append(i > 0 ? ", " : "").append(num(pts[i]));
+        }
+        sb.append("], \"pointsMin\": ");
+        if (min == null) {
+            sb.append("null");
+        } else {
+            sb.append("[");
+            for (int i = 0; i < min.length; i++) {
+                sb.append(i > 0 ? ", " : "").append(num(min[i]));
+            }
+            sb.append("]");
+        }
+        sb.append(", \"curve\": ").append(curve).append(", \"fill\": ").append(fill)
+                .append(", \"coverage\": [");
+        boolean first = true;
+        for (double dial : dials) {
+            for (double[] probe : probes) {
+                sb.append(first ? "" : ", ").append(num(SpecPainter.pathCoverage(
+                        pts, min, dial, curve, fill, fill,
+                        0, 1, 0, 1, probe[0], probe[1], 0.06, 0.05)));
+                first = false;
+            }
+        }
+        sb.append("] }");
+        return sb.toString();
     }
 
     /**

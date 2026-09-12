@@ -263,6 +263,38 @@ window.HG = window.HG || {};
         });
       }
 
+      // ---- the PATH mask's minimal shape -----------------------------------
+      //
+      // Same reasoning as the SVG table below, and not hypothetical: a minimal
+      // shape on prismatic's crescent left the probe cases green while the
+      // blend in this file ran BACKWARDS. The crescent is a few dozen texels
+      // and the probes sample four per part.
+      if (schema.path && HG.specEngine.pathCoverage) {
+        var pa = schema.path;
+        if (HG.schema.PATH_CURVE_SAMPLES !== pa.curveSamples) {
+          fail("PATH_CURVE_SAMPLES: the game has " + pa.curveSamples
+            + ", the creator " + HG.schema.PATH_CURVE_SAMPLES);
+        }
+        count();
+        Object.keys(pa.cases || {}).forEach(function (name) {
+          var want = pa.cases[name];
+          var at = 0;
+          pa.dials.forEach(function (dial) {
+            pa.probes.forEach(function (probe) {
+              var got = HG.specEngine.pathCoverage(want.points, want.curve,
+                want.fill, want.fill, 0, 1, 0, 1, probe[0], probe[1], 0.06, 0.05,
+                want.pointsMin, dial);
+              if (Math.abs(got - want.coverage[at]) > TOLERANCE) {
+                fail("PATH " + name + " at dial " + dial + ", (" + probe + "): the game gives "
+                  + want.coverage[at] + ", the creator " + got);
+              }
+              at++;
+              count();
+            });
+          });
+        });
+      }
+
       // ---- the SVG path grammar -------------------------------------------
       //
       // Compared directly rather than through a horse, because the probe cases

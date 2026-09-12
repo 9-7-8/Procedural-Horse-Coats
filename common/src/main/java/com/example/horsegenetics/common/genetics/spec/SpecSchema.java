@@ -505,6 +505,12 @@ public final class SpecSchema {
                 Param.points("points",
                         "the control points, flat: [u0, v0, u1, v1, ...]. At least two points, "
                                 + "at most " + MAX_PATH_POINTS),
+                Param.points("pointsMin",
+                        "the same shape at this gene's WEAKEST - the one it erases down to. Needs "
+                                + "a knob marked \"dial\", and exactly as many points as "
+                                + "'points': each one moves to its twin as the dial knob runs "
+                                + "from its min to its max, so the mark shrinks rather than fading. "
+                                + "Omit it and the shape is the same on every carrier"),
                 Param.flag("curve",
                         "smooth the points into a Catmull-Rom spline that passes through every "
                                 + "one of them, instead of joining them with straight lines"),

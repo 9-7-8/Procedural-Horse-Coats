@@ -252,6 +252,12 @@ window.HG.examples = {
         "name": "spotSize",
         "min": 0.5,
         "max": 1.4
+      },
+      {
+        "name": "bloom",
+        "min": 0.0,
+        "max": 1.0,
+        "dial": true
       }
     ],
     "expressions": [
@@ -862,7 +868,7 @@ window.HG.examples = {
             }
           },
           {
-            "name": "and a filled crescent on the hindquarter, so fill and closed are compared too",
+            "name": "and a filled crescent on the hindquarter - fill, closed, and a minimal shape it erases down to on a weak carrier",
             "masks": [
               {
                 "type": "PATH",
@@ -884,6 +890,20 @@ window.HG.examples = {
                   0.52,
                   0.26,
                   0.48
+                ],
+                "pointsMin": [
+                  0.258,
+                  0.455,
+                  0.276,
+                  0.522,
+                  0.33,
+                  0.536,
+                  0.361,
+                  0.486,
+                  0.321,
+                  0.509,
+                  0.285,
+                  0.491
                 ],
                 "curve": true,
                 "fill": true,

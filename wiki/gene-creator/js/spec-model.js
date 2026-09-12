@@ -579,6 +579,39 @@ window.HG = window.HG || {};
     names.forEach(function (n, i) {
       if (names.indexOf(n) !== i) out.push("Two knobs are named \"" + n + "\".");
     });
+    // The three rules GeneSpecParser enforces about the dial knob, said
+    // here first. The loader's message is the better one; arriving at it by
+    // restarting the game is the worse way to read it.
+    var dials = (spec.knobs || []).filter(function (k) { return k.dial; });
+    if (dials.length > 1) {
+      out.push("Two knobs are marked as the dial (\"" + dials[0].name + "\" and \""
+        + dials[1].name + "\"). A gene has one measure of how much of itself it shows, "
+        + "or none.");
+    }
+    dials.forEach(function (k) {
+      if (k.type === "seed") {
+        out.push("Knob \"" + k.name + "\" is a seed and cannot be the dial - a seed has "
+          + "no range to be a fraction of.");
+      }
+      if (k.per === "leg") {
+        out.push("Knob \"" + k.name + "\" is per-leg and cannot be the dial - four legs' "
+          + "worth of \"how much of itself this horse shows\" is not one number.");
+      }
+    });
+    layers.forEach(function (layer, i) {
+      (layer.masks || []).forEach(function (m) {
+        if (m.type !== "PATH" || !m.pointsMin) return;
+        if (!dials.length) {
+          out.push("Layer " + (i + 1) + "'s PATH has a minimal shape but the gene has no knob "
+            + "marked as its dial, so there is nothing for the shape to shrink along.");
+        }
+        if ((m.pointsMin || []).length !== (m.points || []).length) {
+          out.push("Layer " + (i + 1) + "'s PATH has " + ((m.pointsMin || []).length / 2)
+            + " minimal points against " + ((m.points || []).length / 2) + " full ones - each "
+            + "point moves to its twin, so there has to be one of each.");
+        }
+      });
+    });
     effectsOf(spec).forEach(function (effect, i) {
       var where = "Effect " + (i + 1) + " (" + effect.type + ")";
       var def = schema.EFFECTS[effect.type];

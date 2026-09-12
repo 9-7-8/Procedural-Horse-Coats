@@ -475,4 +475,97 @@ class GeneSpecParserTest {
         GeneSpec spec = GeneSpecParser.parse(json, "flipped.json");
         assertEquals(List.of("A/a"), named(spec, "v").combinations());
     }
+
+    // ------------------------------------------------------------------
+    // The dial knob, and the minimal shape that blends along it
+    // ------------------------------------------------------------------
+
+    /** A PATH gene with the knobs and mask parameters the test is about. */
+    private static String drawn(String knobs, String pathExtra) {
+        return gene(", \"knobs\": [" + knobs + "]"
+                + ", \"expressions\": [ { \"id\": \"v\", \"when\": [\"A/a\"], \"layers\": ["
+                + " { \"masks\": [ { \"type\": \"PATH\", \"points\": [0.2, 0.5, 0.8, 0.5]"
+                + pathExtra + " } ],"
+                + "   \"op\": { \"type\": \"WHITEN\", \"amount\": 1 } } ] },"
+                + " { \"id\": \"wild\", \"wildType\": true } ]");
+    }
+
+    private static final String DIAL_KNOB =
+            "{ \"name\": \"extent\", \"min\": 0.2, \"max\": 1.0, \"dial\": true }";
+
+    /** The flag reaches the spec, and the gene can find its own dial knob. */
+    @Test
+    void readsAKnobMarkedAsTheDial() {
+        GeneSpec spec = GeneSpecParser.parse(drawn(DIAL_KNOB,
+                ", \"pointsMin\": [0.45, 0.5, 0.55, 0.5]"), "drawn.json");
+
+        assertEquals(0, spec.dialKnob());
+        assertTrue(spec.knobs().get(0).dial());
+        assertFalse(spec.knobs().get(0).perLeg());
+    }
+
+    /** A gene that marks none says so, rather than nominating its first knob. */
+    @Test
+    void aGeneWithNoDialKnobHasNone() {
+        GeneSpec spec = GeneSpecParser.parse(
+                drawn("{ \"name\": \"width\", \"min\": 0.2, \"max\": 1.0 }", ""), "plain.json");
+        assertEquals(-1, spec.dialKnob());
+    }
+
+    /** One measure of how much of itself a gene is showing, or none. */
+    @Test
+    void refusesTwoDialKnobs() {
+        String json = drawn(DIAL_KNOB + ", { \"name\": \"other\", \"min\": 0, \"max\": 1,"
+                + " \"dial\": true }", "");
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "two.json"));
+        assertTrue(e.getMessage().contains("two knobs marked 'dial'"), e.getMessage());
+        assertTrue(e.getMessage().contains("extent") && e.getMessage().contains("other"),
+                "the message should name both: " + e.getMessage());
+    }
+
+    /** A seed has no range, so it cannot be a fraction of one. */
+    @Test
+    void refusesASeedAsTheDial() {
+        String json = drawn("{ \"name\": \"s\", \"type\": \"seed\", \"dial\": true }", "");
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "seed.json"));
+        assertTrue(e.getMessage().contains("no range"), e.getMessage());
+    }
+
+    /** Four legs' worth of "how much of itself" is not one number. */
+    @Test
+    void refusesAPerLegDial() {
+        String json = drawn("{ \"name\": \"extent\", \"min\": 0.2, \"max\": 1.0,"
+                + " \"per\": \"leg\", \"dial\": true }", "");
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "legs.json"));
+        assertTrue(e.getMessage().contains("per-horse"), e.getMessage());
+    }
+
+    /**
+     * The minimal shape morphs point to point, so a mismatched count is a load
+     * error - and it names both counts, because the author is looking at two
+     * arrays of numbers and cannot see which one is short.
+     */
+    @Test
+    void refusesAMinimalShapeWithADifferentNumberOfPoints() {
+        String json = drawn(DIAL_KNOB, ", \"pointsMin\": [0.4, 0.5, 0.5, 0.5, 0.6, 0.5]");
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "mismatch.json"));
+        assertTrue(e.getMessage().contains("has 3 points") && e.getMessage().contains("has 2"),
+                "the message should name both counts: " + e.getMessage());
+    }
+
+    /** Nothing to shrink along is a load error, not a shape pinned at one end. */
+    @Test
+    void refusesAMinimalShapeWithNoDialKnob() {
+        String json = drawn("{ \"name\": \"width\", \"min\": 0.2, \"max\": 1.0 }",
+                ", \"pointsMin\": [0.45, 0.5, 0.55, 0.5]");
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "unanchored.json"));
+        assertTrue(e.getMessage().contains("no knob marked"), e.getMessage());
+        assertTrue(e.getMessage().contains("declare one"),
+                "the message should say what to do about it: " + e.getMessage());
+    }
 }

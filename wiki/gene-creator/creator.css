@@ -127,6 +127,9 @@ input[type="color"] { width: 46px; height: 26px; padding: 1px; background: #0c13
 .btn.small { padding: 3px 8px; font-size: 0.78rem; font-weight: 500; }
 .btn.tiny { padding: 1px 7px; font-size: 0.8rem; background: #23304a; }
 .btn.tiny:hover { background: #31456b; }
+/* The PATH canvas's full / minimal tabs: which shape the handles are on. */
+.btn.tiny.on { background: var(--accent-dim); color: #fff; }
+.btn.tiny:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn.danger { background: #5d2530; }
 .btn.danger:hover { background: var(--bad); }
 
@@ -272,9 +275,16 @@ input[type="color"] { width: 46px; height: 26px; padding: 1px; background: #0c13
 .pick div { font-size: 0.76rem; color: var(--text); }
 .pick .hint { color: var(--muted); }
 
-.drawn { display: flex; gap: 8px; font-size: 0.76rem; }
+.drawn { display: flex; gap: 8px; font-size: 0.76rem; align-items: center; }
 .drawn-name { color: var(--muted); min-width: 96px; }
 .drawn-value { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* The dial slider: pins the knob a gene nominated as "how much of itself this
+   horse is showing", so a marking can be looked at at its least and its most
+   without rolling horses until one lands near an end. */
+.dial { gap: 3px; margin-top: 6px; font-size: 0.76rem; }
+.dial .row { align-items: center; gap: 6px; }
+.dial-slider { flex: 1; min-width: 90px; accent-color: var(--accent); }
 
 .status { font-size: 0.75rem; color: var(--muted); }
 .status.warnish { color: var(--warn); }

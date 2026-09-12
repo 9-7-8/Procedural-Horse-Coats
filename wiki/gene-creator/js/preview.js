@@ -71,6 +71,11 @@ window.HG = window.HG || {};
     var s = HG.noise.xor(HG.noise.u64(0, seedLow),
       HG.noise.mul(HG.noise.fromInt(javaHashCode(spec ? (spec.key || "") : "")), HG.noise.K1));
     var values = spec ? HG.specEngine.drawValues(spec, s.h, s.l, opts.dose) : {};
+    // The dial slider pins the gene's dial knob rather than overriding the
+    // painting, so a pinned preview is still a horse that could be born.
+    if (spec && opts.dial !== null && opts.dial !== undefined) {
+      values = HG.specEngine.withDial(values, opts.dial);
+    }
 
     var coverage = null;
     var pigmentBeforeGene = null;

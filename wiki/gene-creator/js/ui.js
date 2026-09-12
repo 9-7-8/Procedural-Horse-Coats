@@ -16,6 +16,9 @@ window.HG = window.HG || {};
     dose: 1,
     coverageLayer: -1,
     selectedLayer: 0,
+    // null = whatever this horse rolled. A number pins the gene's dial knob at
+    // that fraction of its range, for the slider under the preview.
+    dial: null,
     viewport: null,
     lastBake: null
   };
@@ -421,7 +424,11 @@ window.HG = window.HG || {};
             k.per || "horse", function (v) { k.per = v; changed(); }),
           k.per === "leg" ? el("span", { class: "mini", text: "spread" }) : null,
           k.per === "leg" ? number(k.spread || 0, function (v) { k.spread = v; changed(); },
-            { step: 0.01, class: "narrow" }) : null
+            { step: 0.01, class: "narrow" }) : null,
+          // Ticking one un-ticks the others rather than raising an error: a
+          // gene has one dial, and "which knob is it" is a choice between
+          // knobs, not a property each of them owns independently.
+          k.per === "leg" ? null : dialToggle(spec, k)
         ]));
       }
       root.appendChild(row);
@@ -430,6 +437,33 @@ window.HG = window.HG || {};
       button("+ range knob", function () { spec.knobs.push(model.newKnob(spec, "range")); changed(); }, "btn small"),
       button("+ seed knob", function () { spec.knobs.push(model.newKnob(spec, "seed")); changed(); }, "btn small")
     ]));
+  }
+
+  /**
+   * <b>"this knob is the gene's dial"</b> - the tick that tells the tools which
+   * number means "how much of itself this horse is showing".
+   *
+   * <p>It changes nothing about how the knob is drawn or read. What it turns on
+   * is the slider under the preview (which pins it at 0%, 50% or anywhere
+   * between, instead of re-rolling horses until one lands near an end) and a
+   * PATH's minimal shape, which blends along it.
+   */
+  function dialToggle(spec, knob) {
+    var label = el("label", {
+      class: "cover-toggle",
+      title: "The knob that means 'how much of itself this horse is showing'. One per gene - "
+        + "it drives the dial slider under the preview, and a PATH's minimal shape."
+    });
+    var cb = el("input", { type: "checkbox" });
+    cb.checked = !!knob.dial;
+    cb.addEventListener("change", function () {
+      spec.knobs.forEach(function (other) { delete other.dial; });
+      if (cb.checked) knob.dial = true;
+      changed();
+    });
+    label.appendChild(cb);
+    label.appendChild(el("span", { text: "dial" }));
+    return label;
   }
 
   /**
@@ -810,6 +844,10 @@ window.HG = window.HG || {};
           changed();
         }), p.doc));
       } else if (p.kind === "POINTS") {
+        // `pointsMin` is drawn on the SAME canvas as `points`, behind a toggle,
+        // so it has no field of its own - two editors could not keep the two
+        // arrays the same length, which the loader requires.
+        if (p.name === "pointsMin") return;
         card.appendChild(fieldBlock(p.name, pointsEditor(mask, p.name), p.doc));
       } else if (p.kind === "SVG" || p.kind === "TEXT") {
         card.appendChild(field(p.name, svgTextEditor(mask, p.name, p, changed), p.doc));
@@ -865,6 +903,10 @@ window.HG = window.HG || {};
     var canvas = HG.pathCanvas.create({
       mask: mask,
       name: name,
+      minName: "pointsMin",
+      hasDial: function () {
+        return state.spec.knobs.some(function (k) { return k.dial; });
+      },
       skinOf: function () { return state.skin; },
       // A width driven by a knob is drawn at what THIS horse drew, which is
       // what the preview beside it is showing.
@@ -879,8 +921,13 @@ window.HG = window.HG || {};
     });
     wrap.appendChild(canvas.root);
 
+    /** The array the canvas has the handles on - `points`, or `pointsMin`. */
+    function shown() {
+      return canvas.activeName ? canvas.activeName() : name;
+    }
+
     function writeText() {
-      var flat = mask[name] || [];
+      var flat = mask[shown()] || [];
       var text = "";
       for (var i = 0; i + 1 < flat.length; i += 2) {
         text += flat[i] + ", " + flat[i + 1] + "\n";
@@ -906,7 +953,11 @@ window.HG = window.HG || {};
         ? bad + " line(s) not read yet - each one wants two numbers"
         : (out.length / 2) + " points";
       if (!bad) {
-        mask[name] = out;
+        // Whichever shape the canvas is on. Typing a different number of
+        // points into the minimal one breaks the twinning the loader requires
+        // - the validator says so by name rather than the box refusing to be
+        // edited, which is the same trade the rest of this textarea makes.
+        mask[shown()] = out;
         canvas.refresh();
         changedLive();
       }
@@ -1092,6 +1143,7 @@ window.HG = window.HG || {};
         baseCoatId: state.baseCoatId,
         seed: state.seed,
         dose: state.dose,
+        dial: state.dial,
         coverageLayer: state.coverageLayer
       });
     } catch (e) {
@@ -1120,21 +1172,128 @@ window.HG = window.HG || {};
     HG.pathCanvas.redrawAll();
   }
 
+  /**
+   * <b>What this horse drew</b> - a row per knob, plus the dial slider when the
+   * gene marks one.
+   *
+   * <p>Rebuilt only when the <i>shape</i> of the panel changes (a knob added,
+   * renamed, or made the dial) and updated in place otherwise. Every
+   * bake calls this, and a bake happens while the slider is being dragged, so
+   * a panel that rebuilt itself each time would replace the slider under the
+   * pointer and end the drag on its first move - the same trap the PATH canvas
+   * hit, and the reason {@link #changedLive} exists.
+   */
+  var drawnShape = null;
+  var drawnCells = {};
+  var dialSlider = null;
+  var dialLabel = null;
+
   function renderDrawnKnobs(values) {
     var root = $("drawn-knobs");
+    var shape = state.spec.knobs.map(function (k) {
+      return k.name + "/" + (k.type || "range") + "/" + (k.per || "horse") + (k.dial ? "/!" : "");
+    }).join("|");
+    if (shape !== drawnShape) {
+      drawnShape = shape;
+      buildDrawnKnobs(root);
+    }
+    state.spec.knobs.forEach(function (knob, i) {
+      var cell = drawnCells[knob.name];
+      if (!cell) return;
+      cell.textContent = knob.type === "seed" ? "(seed)"
+        : values.ranges[i].map(function (v) { return v.toFixed(3); }).join(" / ");
+    });
+    showDial(values.dial);
+  }
+
+  function buildDrawnKnobs(root) {
     root.innerHTML = "";
+    drawnCells = {};
+    dialSlider = null;
+    dialLabel = null;
     if (!state.spec.knobs.length) {
       root.appendChild(el("span", { class: "hint", text: "no knobs - every carrier looks the same" }));
       return;
     }
-    state.spec.knobs.forEach(function (knob, i) {
-      var shown = knob.type === "seed" ? "(seed)"
-        : values.ranges[i].map(function (v) { return v.toFixed(3); }).join(" / ");
+    state.spec.knobs.forEach(function (knob) {
+      var value = el("span", { class: "drawn-value" });
+      drawnCells[knob.name] = value;
       root.appendChild(el("div", { class: "drawn" }, [
         el("span", { class: "drawn-name", text: knob.name }),
-        el("span", { class: "drawn-value", text: shown })
+        knob.dial ? el("span", { class: "tag", text: "dial" }) : null,
+        value
       ]));
     });
+    if (state.spec.knobs.some(function (k) { return k.dial; })) {
+      root.appendChild(dialControl());
+    }
+  }
+
+  /**
+   * <b>The dial slider.</b> Pinning the gene's dial knob is how you see a
+   * marking at its least and its most without rolling horses until one lands
+   * near an end - which is what the tool has always made you do, and why "it
+   * varies per horse" was easy to write and hard to look at.
+   *
+   * <p>It pins the <i>knob</i>, not the painting: every parameter pointing at
+   * that knob moves with the slider, so what you are looking at is a horse that
+   * could be born, not a special rendering mode. "as drawn" hands it back to
+   * this horse's own roll.
+   */
+  function dialControl() {
+    var slider = el("input", { type: "range", class: "dial-slider" });
+    slider.min = 0;
+    slider.max = 1;
+    slider.step = 0.01;
+    dialSlider = slider;
+    dialLabel = el("span", { class: "drawn-value" });
+
+    slider.addEventListener("input", function () {
+      state.dial = Number(slider.value);
+      dialLabel.textContent = pct(state.dial) + " pinned";
+      // Live: this must not rebuild the panel the slider lives in.
+      rebake();
+    });
+
+    function pin(t) {
+      state.dial = t;
+      slider.value = t;
+      dialLabel.textContent = pct(t) + " pinned";
+      rebake();
+    }
+
+    return el("div", { class: "stack dial" }, [
+      el("div", { class: "row" }, [
+        el("span", { class: "drawn-name", text: "dial" }),
+        slider,
+        dialLabel
+      ]),
+      el("div", { class: "row" }, [
+        button("0%", function () { pin(0); }, "btn tiny"),
+        button("50%", function () { pin(0.5); }, "btn tiny"),
+        button("100%", function () { pin(1); }, "btn tiny"),
+        button("as drawn", function () {
+          state.dial = null;
+          rebake();
+        }, "btn tiny")
+      ])
+    ]);
+  }
+
+  function pct(t) {
+    return Math.round(t * 100) + "%";
+  }
+
+  /** Reflect the bake: the pin if there is one, this horse's own roll if not. */
+  function showDial(drawn) {
+    if (!dialSlider) return;
+    if (state.dial === null || state.dial === undefined) {
+      dialSlider.value = drawn === undefined ? 1 : drawn;
+      dialLabel.textContent = pct(drawn === undefined ? 1 : drawn) + " as drawn";
+    } else {
+      dialSlider.value = state.dial;
+      dialLabel.textContent = pct(state.dial) + " pinned";
+    }
   }
 
   function renderExport() {

@@ -641,7 +641,13 @@ public final class SpecPainter {
                 boolean closed = fill || p.flag("closed", false);
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
                 double half = Math.max(0.0, v.get(p.value("width", 1.0), leg)) / 2.0;
-                return pathCoverage(pts, p.flag("curve", false), closed, fill,
+                // The minimal shape, if there is one, and how far along it this
+                // horse sits. Both are constant for the whole skin; they are
+                // read here rather than hoisted because every other mask reads
+                // its parameters here too, and the cost is two map lookups.
+                double[] ptsMin = p.has("pointsMin") ? p.points("pointsMin") : null;
+                return pathCoverage(pts, ptsMin, ptsMin == null ? 1.0 : v.dial(),
+                        p.flag("curve", false), closed, fill,
                         uMin, uSpan, vMin, vSpan, u, vv, half, soft);
             }
             case CHOICE: {
@@ -1566,26 +1572,48 @@ public final class SpecPainter {
     static double pathCoverage(double[] pts, boolean curve, boolean closed, boolean fill,
                                        double uMin, double uSpan, double vMin, double vSpan,
                                        double u, double v, double half, double soft) {
+        return pathCoverage(pts, null, 1.0, curve, closed, fill,
+                uMin, uSpan, vMin, vSpan, u, v, half, soft);
+    }
+
+    /**
+     * The same, <b>morphed toward a minimal shape</b>: every control point sits
+     * a fraction {@code t} of the way from its twin in {@code min} to its own
+     * position, {@code t} being how far along its range this horse's dial
+     * knob landed. {@code min} null is the ordinary path.
+     *
+     * <p>The lerp happens at <b>read</b> time rather than by building a morphed
+     * array first, for the reason in the note above: this runs per texel, and a
+     * blended copy would be allocated once per texel of every skin. Reading
+     * through {@link #at} costs one multiply per coordinate and no memory.
+     */
+    // Public, unlike its twelve-argument twin: SpecFixtureTool bakes this into
+    // an answer table for the parity check, from another package, because the
+    // probe cases do not reach a drawn shape on a flank.
+    public static double pathCoverage(double[] pts, double[] min, double t,
+                                       boolean curve, boolean closed, boolean fill,
+                                       double uMin, double uSpan, double vMin, double vSpan,
+                                       double u, double v, double half, double soft) {
         int n = pts.length / 2;
         int spans = closed ? n : n - 1;
         int steps = curve ? SpecSchema.PATH_CURVE_SAMPLES : 1;
         double best = Double.MAX_VALUE;
         boolean inside = false;
 
-        double au = uMin + pts[0] * uSpan;
-        double av = vMin + pts[1] * vSpan;
+        double au = uMin + at(pts, min, t, 0) * uSpan;
+        double av = vMin + at(pts, min, t, 1) * vSpan;
         for (int span = 0; span < spans; span++) {
             for (int step = 1; step <= steps; step++) {
                 double bu;
                 double bv;
                 if (curve) {
-                    double t = step / (double) steps;
-                    bu = uMin + spline(pts, n, closed, span, t, 0) * uSpan;
-                    bv = vMin + spline(pts, n, closed, span, t, 1) * vSpan;
+                    double along = step / (double) steps;
+                    bu = uMin + spline(pts, min, t, n, closed, span, along, 0) * uSpan;
+                    bv = vMin + spline(pts, min, t, n, closed, span, along, 1) * vSpan;
                 } else {
                     int j = (span + 1) % n;
-                    bu = uMin + pts[j * 2] * uSpan;
-                    bv = vMin + pts[j * 2 + 1] * vSpan;
+                    bu = uMin + at(pts, min, t, j * 2) * uSpan;
+                    bv = vMin + at(pts, min, t, j * 2 + 1) * vSpan;
                 }
                 double d = segmentDistance(u, v, au, av, bu, bv);
                 if (d < best) {
@@ -1625,14 +1653,30 @@ public final class SpecPainter {
      * A closed path wraps instead, so it has no ends to special-case.
      */
     static double spline(double[] pts, int n, boolean closed, int span, double t, int axis) {
+        return spline(pts, null, 1.0, n, closed, span, t, axis);
+    }
+
+    /**
+     * One coordinate of a control point, <b>morphed</b>: {@code min} null gives
+     * the point as drawn, otherwise it sits {@code t} of the way from the
+     * minimal shape's twin to it. Index {@code i} is into the flat
+     * {@code [u0, v0, u1, v1, ...]} array, so the two arrays being the same
+     * length (the parser insists) is what makes the twins line up.
+     */
+    private static double at(double[] pts, double[] min, double t, int i) {
+        return min == null ? pts[i] : min[i] + (pts[i] - min[i]) * t;
+    }
+
+    static double spline(double[] pts, double[] min, double morph, int n, boolean closed,
+                         int span, double t, int axis) {
         int i1 = span;
         int i2 = closed ? (span + 1) % n : Math.min(span + 1, n - 1);
         int i0 = closed ? (span - 1 + n) % n : Math.max(span - 1, 0);
         int i3 = closed ? (span + 2) % n : Math.min(span + 2, n - 1);
-        double p0 = pts[i0 * 2 + axis];
-        double p1 = pts[i1 * 2 + axis];
-        double p2 = pts[i2 * 2 + axis];
-        double p3 = pts[i3 * 2 + axis];
+        double p0 = at(pts, min, morph, i0 * 2 + axis);
+        double p1 = at(pts, min, morph, i1 * 2 + axis);
+        double p2 = at(pts, min, morph, i2 * 2 + axis);
+        double p3 = at(pts, min, morph, i3 * 2 + axis);
         double t2 = t * t;
         double t3 = t2 * t;
         return 0.5 * ((2 * p1)

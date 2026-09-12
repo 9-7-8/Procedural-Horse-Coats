@@ -973,13 +973,57 @@
 
 <pre><code class="language-json">"knobs": [
   { "name": "barSeed", "type": "seed" },
-  { "name": "sock", "min": 0.25, "max": 0.6, "per": "leg", "spread": 0.18 }
+  { "name": "sock", "min": 0.25, "max": 0.6, "per": "leg", "spread": 0.18 },
+  { "name": "extent", "min": 0.2, "max": 1.0, "dial": true }
 ]</code></pre>
 
 <dl class="spec">
     <div><dt>type: "seed"</dt><dd>An opaque <code>long</code> feeding a noise mask's <code>seed</code>. <a href="breeding.html#drift">Drift</a> never nudges one &mdash; there is no &ldquo;slightly different&rdquo; noise field &mdash; so a lineage keeps the shape of its markings.</dd></div>
     <div><dt>per: "leg"</dt><dd>Four independent stored numbers, one per leg, across a range widened by <code>spread</code>. A horse's four socks come out near each other but never level &mdash; the shape <code>BayCoat</code> hand-rolls, in one line.</dd></div>
+    <div><dt>dial: true</dt><dd><strong>This knob is how much of itself the gene is showing.</strong> At most one per gene, per-horse, never a seed. It is drawn, stored and read like any other knob and costs nothing at paint time &mdash; what it buys is that the <em>tools</em> can find it. See below.</dd></div>
 </dl>
+
+<h3 id="dial">The dial &mdash; naming the knob that means &ldquo;how much&rdquo;</h3>
+
+<p>
+    Most patterned genes have one knob that is really the answer to <em>how strongly
+    does this horse show it</em>: how far the roaning reaches, how wide the blaze is,
+    how much of the barrel the spots cover. The format could always express that &mdash;
+    declare a knob, point every threshold at it &mdash; but nothing could
+    <strong>find</strong> it, because &ldquo;this one is the important one&rdquo; lived
+    only in the author's head.
+</p>
+
+<p>
+    <code>"dial": true</code> says it out loud, and two things follow:
+</p>
+
+<ul>
+    <li>The gene creator grows a <strong>slider</strong> under the preview that pins
+        it &mdash; 0%, 50%, 100%, or anywhere between. Before, the only way to see a
+        gene at its weakest was to re-roll horses until one landed near the bottom of
+        the range, which is a poor way to judge a marking you are still drawing.</li>
+    <li>A <code>PATH</code> may carry a <a href="#pointsmin">minimal shape</a> that it
+        morphs toward as the dial falls.</li>
+</ul>
+
+<p>
+    The number a mask sees is the knob's own value, exactly as before
+    (<code>"$extent"</code>). What the dial adds is a <em>normalised</em> reading
+    beside it &mdash; 0 at the knob's <code>min</code>, 1 at its <code>max</code>
+    (<code>SpecValues.dial</code>) &mdash; because &ldquo;how much of itself&rdquo; is a
+    fraction, and a raw draw is in whatever units the parameter wanted. A gene with no
+    dial reads 1: it shows all of itself.
+</p>
+
+<p class="note">
+    <strong>Why &ldquo;dial&rdquo; and not the obvious words.</strong>
+    <code>expressions</code> is already the table of <em>outcomes</em> &mdash; which
+    allele combinations look like what &mdash; and <code>strength</code> is already a
+    parameter on every colour op, for how hard it pulls. Both were tried and both read
+    as the other thing. This is the handle the tools turn, so it is named after being
+    a handle.
+</p>
 
 <p class="note">
     <strong>Renaming</strong> a knob orphans it: it reads as a fresh roll on the next
@@ -1147,7 +1191,7 @@
 <tr><td><code>PATCHES</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td>Big irregular blobs &mdash; pinto, tobiano, roan patching.</td></tr>
 <tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
 <tr><td><code>FRACTAL</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>octaves</code> 3, <code>lacunarity</code> 2.13, <code>gain</code> 0.5, <code>warp</code> 0, <code>shape</code> (<strong>fbm</strong>/ridged/billow), <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td><strong>The same field as <code>PATCHES</code>, at several scales at once.</strong> One octave <em>is</em> <code>PATCHES</code>; each further octave adds finer detail to the same shapes. <code>shape: "ridged"</code> is what makes it worth having &mdash; it turns the blob outlines into lines that fork, taper and pinch out, which at a high <code>threshold</code> is lace. See <a href="#fractal">the note below</a>.</td></tr>
-<tr><td><code>PATH</code></td><td><code>plane</code> (<strong>side</strong>/top/front), <code>space</code> (<strong>body</strong>/units), <code>points</code>, <code>curve</code>, <code>closed</code>, <code>fill</code>, <code>width</code> 1.0, <code>softness</code> 0.25</td><td><strong>A shape you drew.</strong> Control points in a plane, stroked as a line or filled as an outline, extruded through the horse. The only mask that carries a shape instead of a rule for making one &mdash; for a bolt, a crescent, a brand, a curl on a particular shoulder. See <a href="#path">the note below</a>.</td></tr>
+<tr><td><code>PATH</code></td><td><code>plane</code> (<strong>side</strong>/top/front), <code>space</code> (<strong>body</strong>/units), <code>points</code>, <code>pointsMin</code>, <code>curve</code>, <code>closed</code>, <code>fill</code>, <code>width</code> 1.0, <code>softness</code> 0.25</td><td><strong>A shape you drew.</strong> Control points in a plane, stroked as a line or filled as an outline, extruded through the horse. The only mask that carries a shape instead of a rule for making one &mdash; for a bolt, a crescent, a brand, a curl on a particular shoulder. See <a href="#path">the note below</a>.</td></tr>
 <tr><td><code>SVG</code></td><td><code>d</code>, <code>transform</code>, <code>viewBox</code>, <code>plane</code> (<strong>side</strong>/top/front), <code>space</code> (<strong>body</strong>/units), <code>originU</code>/<code>originV</code> 0, <code>sizeU</code>/<code>sizeV</code> 1, <code>fit</code> (<strong>meet</strong>/slice/none), <code>align</code> (<strong>xMidYMid</strong>&hellip;), <code>flipY</code> <strong>true</strong>, <code>fill</code> <strong>true</strong>, <code>fillRule</code> (<strong>nonzero</strong>/evenodd), <code>width</code> 1.0, <code>cap</code> (<strong>butt</strong>/round/square), <code>join</code> (<strong>miter</strong>/round/bevel), <code>miterLimit</code> 4, <code>dash</code> 0, <code>gap</code> 0, <code>dashOffset</code> 0, <code>softness</code> 0.25</td><td><strong>An SVG path, drawn.</strong> <code>PATH</code> with the whole grammar behind it instead of a polyline. See <a href="#svg">the note below</a>.</td></tr>
 <tr><td><code>FAN</code></td><td><code>plane</code>, <code>space</code>, <code>originU</code> 0.5, <code>originV</code> 0.5, <code>spacing</code> 0.4, <code>duty</code> 0.5, <code>twist</code> 0, <code>inner</code> 0, <code>outer</code> 0, <code>softness</code> 0.15</td><td><strong>Bars that radiate from a point</strong>, widening as they travel &mdash; a sunburst, the gills under a mushroom cap, the bars on a butterfly&rsquo;s wing. <code>WAVES</code> takes its phase from a straight line, so its bars are parallel, evenly spaced and all pointed the same way everywhere in the region, whatever its wavelength; this takes it from the <em>angle</em> around a pivot, so both the direction and the gap grow with distance from it. <strong><code>spacing</code> is an angle</strong> &mdash; the arc one cycle covers a single body unit out, so a full turn holds <code>2&pi;/spacing</code> bars and 0.4 is about sixteen of them. A number that reads like a body-unit spacing puts three bars on the whole horse. <code>twist</code> rotates the fan&rsquo;s zero with distance, which is the difference between a sunburst and a pinwheel; <code>inner</code> and <code>outer</code> bound it in body units, and <code>outer: 0</code> means it never stops.</td></tr>
 <tr><td><code>NORMAL</code></td><td><code>axis</code> (Y/X/Z), <code>space</code> (<strong>body</strong>/local), <code>round</code> 0, <code>from</code> -1, <code>to</code> 1</td><td><strong>Which way the surface faces</strong>, dotted with a body axis &mdash; a rim light along the topline, a wash that only takes on the upward planes, the curvature sheen on a shell. The second mask after <code>EDGE</code> that asks about the <em>model</em> rather than about position, and it asks the other question: not where a box stops but which way its face is pointed. <strong><code>round</code> is the parameter that matters.</strong> A Minecraft horse is boxes, so the flat face normal takes exactly three values on any axis and a sheen keyed to it reads as three hard zones; above 0 it blends toward the normal an <em>ellipsoid</em> of the same box would have, which is continuous. <strong>It is not iridescence</strong> &mdash; the coat is a baked texture and nothing here knows where a camera is, so a colour run through this mask shifts with the <em>surface</em> and not with the viewer. That is the structural half of the effect and it is the honest half. Carapace Sheen is the gene it was added for.</td></tr>
@@ -1336,6 +1380,44 @@
     carry it. And the points can be plain constants while <code>width</code> is a knob
     &mdash; so a drawn shape still varies per horse without ceasing to be that shape.
 </p>
+<h4 id="pointsmin"><code>pointsMin</code> &mdash; the shape it erases down to</h4>
+<p>
+    A marking that varies usually does not vary by <em>fading</em>. A weakly marked horse
+    has a <strong>smaller</strong> blaze, not a translucent one, and everything else in this
+    vocabulary can already say that: wind a threshold with a knob and the field covers less.
+    A drawn shape could not, because a drawing is not a rule &mdash; so it was the same
+    shape on every carrier, and a gene built out of one looked stamped.
+</p>
+<p>
+    <code>pointsMin</code> is that shape at the gene's weakest. Each point moves to its twin
+    in the other array as the gene's <a href="#dial">dial</a> runs from its
+    <code>min</code> to its <code>max</code>, so a horse halfway along wears the shape
+    halfway between them &mdash; with a hard edge, the whole way.
+</p>
+<pre><code class="language-json">{ "type": "PATH", "plane": "side", "space": "body",
+  "points":    [0.25, 0.45, 0.45, 0.60, 0.65, 0.55, 0.80, 0.40],
+  "pointsMin": [0.42, 0.48, 0.50, 0.54, 0.58, 0.52, 0.66, 0.46],
+  "curve": true, "fill": true }</code></pre>
+<p>
+    Two rules, both refused at load rather than papered over:
+</p>
+<ul>
+    <li><strong>The same number of points.</strong> Each one moves to its twin, so there has
+        to be one of each. Blending arrays of different lengths <em>is</em> expressible
+        &mdash; paint both and lerp the coverage &mdash; and it was rejected on purpose: a
+        hard-edged mark crossfading into a different hard-edged mark <em>ghosts</em> through
+        the middle instead of shrinking, which is not what &ldquo;erases down to&rdquo;
+        means.</li>
+    <li><strong>The gene needs a dial.</strong> Without one there is no parameter for the
+        morph to run along, and pinning it silently at either end would mean half the file
+        never paints.</li>
+</ul>
+<p>
+    It costs nothing per texel that the mask did not already cost: the blend is read
+    through the control points as the sampler walks them, so no second path is evaluated and
+    no morphed array is allocated. A <code>PATH</code> with a minimal shape is the same
+    price as one without.
+</p>
 <div class="note good">
     <span class="label">You do not have to type any of these numbers</span>
     <p>
@@ -1365,6 +1447,26 @@
         and the stroke is drawn at <code>width</code> in body units rather than at some
         decorative thickness. A knob-driven <code>width</code> is shown at whatever the
         horse in the preview drew.
+    </p>
+    <p>
+        <strong>The minimal shape is drawn on the same canvas</strong>, behind a
+        <em>Full</em> / <em>Minimal</em> toggle, with whichever one you are not editing
+        shown as a dashed ghost behind it &mdash; because what matters about it is how
+        much smaller it is than the other one, and that is invisible in a second editor
+        somewhere else on the page. Starting one seeds it by shrinking the drawn shape
+        toward its own centre, which is the ordinary case and saves placing every point
+        twice. A point added, inserted or deleted on either shape happens to
+        <strong>both</strong>, since the loader requires them to stay twinned. The toggle
+        only appears once a knob is marked as the gene's <a href="#dial">dial</a>; before
+        that it says so rather than writing a file that fails at startup.
+    </p>
+    <p>
+        Beside the preview, under <em>This horse drew</em>, the dial gets a
+        <strong>slider</strong>: drag it to see the gene at any strength from nothing to
+        everything, with 0% / 50% / 100% as buttons and <em>as drawn</em> to hand it back
+        to whatever this horse actually rolled. It pins the <em>knob</em>, not the
+        painting, so every parameter pointing at that knob moves with it &mdash; what you
+        are looking at is always a horse that could be born.
     </p>
 </div>
 </div></td></tr>
@@ -4080,7 +4182,7 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
 <tr><td><code>PATCHES</code></td><td><code>parts:parts seed=0 scale=6 threshold=0.5 softness=0.12</code></td><td>big irregular blobs</td></tr>
 <tr><td><code>NOISE</code></td><td><code>parts:parts seed=0 scale=8 low=0 high=1</code></td><td>smooth shading; ALSO the threshold tool - coverage is clamp01(low+(high-low)*n), so low=-2.6 high=1 keeps only the top quarter</td></tr>
 <tr><td><code>FRACTAL</code></td><td><code>parts:parts seed=0 scale=6 octaves=3 lacunarity=2.13 gain=0.5 warp=0 shape(fbm|ridged|billow) threshold=0.5 softness=0.12</code></td><td>PATCHES at several scales. octaves buys detail WITHOUT moving coverage (the sum is RMS-normalised), so 1 octave IS a PATCHES mask. shape=ridged turns the blob outlines into forking tapering LINES - the only lace here; 0.85/0.04 threshold/softness is a filament, 0.7/0.1 a ribbon. 2-3 octaves, not 6: past that the detail is under a texel and breaks into stipple - use warp for wander instead. scale is the COARSEST octave</td></tr>
-<tr><td><code>PATH</code></td><td><code>parts:parts plane(side|top|front) space(body|units) points:[u0,v0,u1,v1,...] curve=false closed=false fill=false width=1 softness=0.25</code></td><td>a shape you DREW, 2 to 64 points, extruded through the horse. plane=side (x,y) appears on BOTH flanks; top (x,z) straddles the spine; front (z,y) rings the barrel. space=body normalises over the WHOLE-HORSE box, where the underline is v 0.33 and the SPINE is 0.62 - not 1.0 - and the flank is u 0.18-0.72. width/softness are body units in either space. curve=Catmull-Rom through every point; fill implies closed and makes width unread. The only mask that carries a shape instead of a rule for one, so it is the same on every horse</td></tr>
+<tr><td><code>PATH</code></td><td><code>parts:parts plane(side|top|front) space(body|units) points:[u0,v0,u1,v1,...] pointsMin:[same length] curve=false closed=false fill=false width=1 softness=0.25</code></td><td>a shape you DREW, 2 to 64 points, extruded through the horse. plane=side (x,y) appears on BOTH flanks; top (x,z) straddles the spine; front (z,y) rings the barrel. space=body normalises over the WHOLE-HORSE box, where the underline is v 0.33 and the SPINE is 0.62 - not 1.0 - and the flank is u 0.18-0.72. width/softness are body units in either space. curve=Catmull-Rom through every point; fill implies closed and makes width unread. pointsMin is the SAME shape at the gene&#39;s weakest - exactly as many points, each moving to its twin as the gene&#39;s dial knob runs from its min to its max, so the mark shrinks rather than fading; it needs a knob marked "dial":true. The only mask that carries a shape instead of a rule for one, so its shape is the same on every horse - pointsMin is the one thing about it that is not</td></tr>
 <tr><td><code>CHOICE</code></td><td><code>parts:parts seed=0 options=2 is=0</code></td><td>the only BRANCH. draws one integer in [0,options) per horse and returns 1 where it equals is - the same answer on every texel of that horse. give each outcome a layer on the same seed with a different is</td></tr>
 <tr><td><code>PIGMENT</code></td><td><code>parts:parts channel(darkness|red|black|total) from=0.5 to=1 spread=0 spreadFrom(any|above|below|ahead|behind)</code></td><td>reads the PIGMENT LEVELS. channel=black tells a bay's points (0.85+) from its barrel (0.2-0.45); channel=darkness SATURATES on a bay (barrel 0.84, points 0.95). spread grows what the mask selected, after invert, in body units; spreadFrom=above grows the selection DOWNWARD (a drip), any is the isotropic disc</td></tr>
 <tr><td><code>LUMA</code></td><td><code>parts:parts channel(dark|light|white|saturation|red|green|blue) from=0.5 to=1 spread=0 spreadFrom(any|above|below|ahead|behind)</code></td><td>reads the RESOLVED COLOUR - after the gradient chart and after every magical gene before this one. white is NOT light: it is the achromatic floor, so bald white reads 1 and a palomino's gold near 0. prefer dark over light+invert, because invert also inverts what spread grows. MAGICAL genes only, never emissive - the parser refuses both</td></tr>
@@ -4174,7 +4276,8 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
   "knobs": [
     { "name": "shapeSeed", "type": "seed" },
     { "name": "hue", "min": 0.0, "max": 360.0 },
-    { "name": "size", "min": 1.2, "max": 2.4 }
+    { "name": "size", "min": 1.2, "max": 2.4 },
+    { "name": "extent", "min": 0.3, "max": 1.0, "dial": true }
   ],
   "expressions": [
     {
@@ -4346,6 +4449,16 @@ RULES THAT ARE NOT OPTIONAL
     RMS-normalised, so raising it does not move how much of the horse clears
     "threshold". One octave is exactly a PATCHES mask. Use "warp" for an edge
     that wanders rather than more octaves.
+12b. A knob may be marked "dial": true - ONE per gene, per-horse, never a
+    seed - to say THIS is how much of itself the gene is showing. It changes
+    nothing about painting; masks still read it as "$name". It lets the editor
+    preview the gene at any strength, and it lets a PATH carry "pointsMin": the
+    SAME shape at the gene's weakest, exactly as many points, each moving to its
+    twin as the dial runs min to max. That is how a drawn marking gets SMALLER
+    on a weakly marked horse instead of fainter - the one thing a drawn shape
+    could not do. Mark the dial on any gene whose reference describes a range of
+    expression ("from a few flecks to a full blanket"), and point the thresholds
+    at it.
 13. PATH's space "body" normalises over the WHOLE-HORSE box, hoof to ear tips.
     The underline is v 0.33 and the SPINE is v 0.62 - not 1.0. Points at 0.7
     float above the back and appear on nothing. The flank is u 0.18-0.72,

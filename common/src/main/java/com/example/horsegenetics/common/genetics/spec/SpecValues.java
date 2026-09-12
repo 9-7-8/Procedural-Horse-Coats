@@ -38,12 +38,14 @@ public final class SpecValues {
     private final long[] seeds;
     private final GeneSpec spec;
     private final int dose;
+    private final double dial;
 
-    private SpecValues(GeneSpec spec, double[][] ranges, long[] seeds, int dose) {
+    private SpecValues(GeneSpec spec, double[][] ranges, long[] seeds, int dose, double dial) {
         this.spec = spec;
         this.ranges = ranges;
         this.seeds = seeds;
         this.dose = dose;
+        this.dial = dial;
     }
 
     /**
@@ -91,7 +93,43 @@ public final class SpecValues {
             }
             ranges[i] = drawn;
         }
-        return new SpecValues(spec, ranges, seeds, dose);
+        return new SpecValues(spec, ranges, seeds, dose, dialOf(spec, ranges));
+    }
+
+    /**
+     * Where this horse's dial knob landed <b>in its own range</b>, as
+     * {@code 0} at the knob's minimum and {@code 1} at its maximum - not the
+     * drawn number itself.
+     *
+     * <p>Normalising is what makes the number mean the same thing in every
+     * gene. An author picks a range because it is the range the <i>parameter</i>
+     * wants (a width in body units, a threshold in field units); "how much of
+     * itself this horse is showing" is a fraction, and reading it off the raw
+     * draw would make 0.4 mean "barely" on one gene and "nearly all" on the
+     * next. A gene with no dial knob, or one whose range is a single
+     * point, shows all of itself: {@code 1}.
+     */
+    private static double dialOf(GeneSpec spec, double[][] ranges) {
+        int i = spec.dialKnob();
+        if (i < 0 || ranges[i] == null) {
+            return 1.0;
+        }
+        Knob knob = spec.knobs().get(i);
+        double span = knob.max() - knob.min();
+        if (Math.abs(span) < 1e-12) {
+            return 1.0;
+        }
+        double t = (ranges[i][0] - knob.min()) / span;
+        return t < 0 ? 0 : (t > 1 ? 1 : t);
+    }
+
+    /**
+     * This horse's {@link GeneSpec#dialKnob()} as a fraction of its range, or
+     * {@code 1} when the gene declared none - the blend a {@code PATH}'s
+     * {@code pointsMin} runs along.
+     */
+    public double dial() {
+        return dial;
     }
 
     /** How many copies of the variant allele the horse carries: 0, 1 or 2. */
