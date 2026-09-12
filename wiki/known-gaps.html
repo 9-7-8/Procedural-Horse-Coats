@@ -59,6 +59,21 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-201"><strong>The gene creator cannot show a glow, so the one property
+    it writes blind is the one it writes most often.</strong> Opened 2026-09-12 with
+    <a href="making-a-gene.html#emissive">glow intensity</a>. A layer's
+    <code>emissive</code> is a level now &mdash; a number, a knob, the gene's dial &mdash;
+    and the creator's preview is a flat unlit sheet, so there is nothing for a lit texel to
+    be <em>brighter than</em>: a glow at 1.0, a glow at 0.05 and a glow written into the
+    wrong layer all draw identically. That is how the glow came to be dropped from the
+    creator's export entirely and stay dropped (fixed the same day, and only found by
+    reading the exporter). <code>wiki/tools/check-glow-control.mjs</code> covers the
+    model &mdash; what is written, what survives the tidy, what the validator names
+    &mdash; which is the honest substitute, not a fix. A real fix means shading in the
+    preview: light the sheet in the 3D viewport and draw the emissive texels unshaded,
+    which is the only place in either editor where a second material would earn its
+    keep. Until then a glow is authored by arithmetic and confirmed in game
+    (<a href="verification.html#glow-intensity">&sect;0-CO</a>).</li>
 <li id="gap-200"><strong>A third-party Java gene cannot be put back once
     <code>clearLoaded()</code> has dropped it.</strong> Opened 2026-09-11, with the open
     registry. <code>clearLoaded()</code> means "back to the built-ins", and it re-reads the

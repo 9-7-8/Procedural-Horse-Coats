@@ -4801,7 +4801,13 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
 </p>
 
 <p>
-    <strong>And check that a probe case actually reaches it.</strong> The parity fixtures
+    <strong>And check that a probe case actually reaches it &mdash; by breaking the port
+    on purpose.</strong> Not by reading the fixture and judging: reverse a sign in
+    <code>spec-engine.js</code>, re-run <code>check-parity.mjs</code>, and see whether it
+    goes red. If it stays green, the coverage you thought you had is imaginary. That is
+    not hypothetical &mdash; <code>PATH</code>'s <code>pointsMin</code> was added to
+    <code>prismatic</code>'s crescent, and the check was <em>completely green</em> with
+    the blend in the creator running backwards. The parity fixtures
     sample four texels per part. A mask that covers most of the horse will be hit by one of
     them; a drawing placed on the flank is a few dozen texels and will not, so a
     <code>prismatic</code> layer using it can be green for the wrong reason. Where the new

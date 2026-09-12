@@ -27,6 +27,154 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-12">2026-09-12 &mdash; three quarters of &sect;10, and one word that had to be neither of the obvious two</h2>
+
+<p>
+    Three of the four things left in <a href="roadmap.html#designer">&sect;10</a> shipped:
+    erase-down, the expression preview, and glow intensity. The first two turned out to be
+    <strong>one feature seen from two ends</strong>, which is why they are one commit. What
+    remains of the section is per-region colour ranges.
+</p>
+
+<h3>The dial: naming the knob that means &ldquo;how much&rdquo;</h3>
+
+<p>
+    The format could always express a gene varying in strength &mdash; declare a knob,
+    point every threshold at it &mdash; but nothing could <strong>find</strong> that knob,
+    because &ldquo;this one is the important one&rdquo; lived in the author's head. So the
+    creator could not offer a handle for it, and a mask could not default to it. One flag
+    fixes both: <code>"dial": true</code>, at most one per gene, per-horse, never a seed.
+    It changes nothing at paint time.
+</p>
+
+<p>
+    <strong>The word was the hard part, and it was got wrong twice before it was got
+    right.</strong> &ldquo;Expression&rdquo; is what the owner and the roadmap both call it
+    and it is what a horse person would say &mdash; but the format's
+    <code>expressions</code> is already the table of <em>outcomes</em>, so a file would
+    have read <code>"expressions": [&hellip;]</code> beside <code>"expression": true</code>
+    meaning something else entirely. It was renamed to <code>strength</code> on that
+    reasoning, and <code>strength</code> turned out to be a parameter on every colour op
+    already (how hard it pulls) &mdash; found while editing an example gene that had
+    <code>"strength": 75</code> three lines below the new knob. <code>dial</code> is
+    named after being a handle rather than after what the number means, which is the one
+    reading neither of the others collides with.
+</p>
+
+<h3><code>pointsMin</code>: a marking that gets smaller, not fainter</h3>
+
+<p>
+    A weakly marked horse has a <em>smaller</em> blaze, not a translucent one. Every field
+    mask could say that already (wind a threshold and it covers less); a
+    <code>PATH</code> could not, because a drawing is not a rule &mdash; so a drawn shape
+    was the same on every carrier and a gene built from one looked stamped.
+    <code>pointsMin</code> is that shape at the gene's weakest, one point per point, each
+    morphing to its twin as the dial falls.
+</p>
+
+<p>
+    <strong>Morph rather than crossfade, decided before any of it was written.</strong>
+    Blending two coverage fields is easier and imposes no authoring constraint, and it is
+    wrong: a hard-edged mark fading into a different hard-edged mark <em>ghosts</em>
+    through the middle rather than shrinking. So the arrays must be the same length, a
+    mismatch is a load error, and the lerp is read through the control points inside the
+    sampler &mdash; no second path evaluated, no morphed array allocated, so a
+    <code>PATH</code> with a minimal shape costs what one without costs.
+</p>
+
+<p>
+    Both shapes are drawn on the <em>one</em> canvas behind a Full / Minimal toggle, with
+    the other as a dashed ghost, because what matters about the minimal shape is how much
+    smaller it is and that is invisible in a second editor elsewhere on the page. Starting
+    one seeds it by shrinking the drawn shape toward its own centre. Every structural edit
+    happens to both arrays, since the loader requires them twinned.
+</p>
+
+<div class="note danger">
+    <span class="label">Parity was green about a blend running backwards</span>
+    <p>
+        With a minimal shape on <code>prismatic</code>'s crescent and nothing else,
+        reversing the lerp in the creator's port left <code>check-parity.mjs</code>
+        <strong>completely green</strong>. A drawing on a flank is a few dozen texels and
+        the fixtures sample four per part; the two sets simply never met. The page had
+        warned about exactly this &mdash;
+        <a href="making-a-gene.html#contracts">the contracts note</a> says to check that a
+        probe case reaches the new thing &mdash; and the way it was established was to
+        <strong>break the port on purpose and watch the check stay quiet</strong>, which is
+        the only way to tell "covered" from "not reached".
+    </p>
+    <p>
+        There is an answer table now (<code>SpecFixtureTool.pathSection</code>, 101 checks)
+        comparing the morph where it happens, at five points along the dial, straight and
+        curved and filled. The same sabotage now fails it on the first row. <strong>Do the
+        sabotage for the next one too</strong>: a green parity check is evidence only about
+        what it reaches.
+    </p>
+</div>
+
+<h3>Glow became a level, which reverses an old call on purpose</h3>
+
+<p>
+    Emissiveness was one bit per texel, cut at a coverage of 0.5, and
+    <code>GeneSpec</code> said outright that there was no half-lit. That cut was always a
+    <em>stand-in</em>: it existed so a soft mask would not bloom a glow two body units
+    wider than the shape that drew it, and it paid for that with a hard line across a soft
+    edge. The renderer turned out to make the better version free &mdash; the emissive pass
+    is <code>BlendFunction.TRANSLUCENT</code> over the coat, read out of
+    <code>RenderPipelines.EYES</code> rather than assumed &mdash; so an intensity written
+    as the second texture's <strong>alpha</strong> is a true dimmer rather than a darker
+    colour.
+</p>
+
+<p>
+    So <code>CoatOverlay</code> holds a float per texel, a layer's <code>emissive</code> is
+    a <code>Value</code> (<code>true</code>, a number, a <code>$knob</code>, the dial), and
+    the mask's coverage scales it &mdash; the author draws the falloff once, in the mask.
+    Two genes over one texel take the brighter rather than summing, since there is nothing
+    above full bright to spend an overlap on. <strong>Every glowing gene in the game
+    changed</strong>: fifty-odd layers fade at their edges now.
+    <a href="verification.html#glow-intensity">&sect;0-CO</a> names the five soft-masked
+    genes to look at and the control group that should be identical.
+</p>
+
+<p>
+    <strong>Particle intensity is deliberately not part of it</strong> (owner's call).
+    Particles are the <code>emitter</code> effect, a different system with its own rate and
+    count.
+</p>
+
+<h3>Two bugs found by looking rather than by being told</h3>
+
+<ul>
+    <li><strong>The creator dropped a layer's glow from its export entirely.</strong> Load a
+        glowing gene, export it, and the light was out - <code>tidy</code> rebuilt each
+        layer from name, masks and op, and <code>emissive</code> was in none of those. It
+        had no control either, so there was no way to notice. Now written, validated
+        (range, phase, the <code>PIGMENT</code>/<code>LUMA</code> masks the loader refuses)
+        and round-tripped, with <code>wiki/tools/check-glow-control.mjs</code> to keep it
+        that way. That check exists because the creator's preview is a flat sheet with no
+        lighting to be brighter than: <strong>where a control has no picture, the check is
+        the feedback</strong>.</li>
+    <li><strong><code>CreatorMetadataRoundTripTest</code> had been red at 16 of 23.</strong>
+        <code>AbilityType</code> grew seven verbs (<code>sound</code>, <code>produce</code>,
+        <code>teleport</code>, <code>summon</code>, <code>temper</code>, <code>bond</code>,
+        <code>ward</code>) and the all-verbs fixture did not follow. The creator's form
+        offered all seven, so the drift the test exists to catch had <em>not</em> happened -
+        only the fixture was stale.</li>
+</ul>
+
+<h3>What is not built</h3>
+
+<ul>
+    <li><strong>The creator still cannot show a glow.</strong> Its preview is an unlit
+        sheet, so there is nothing to be brighter than. Fixing it means shading in the
+        preview, which is a different job from anything in &sect;10.</li>
+    <li><strong>No shipped gene uses a dial, a minimal shape or a partial glow</strong>, so
+        none of today's work is visible in game beyond the softened glow edges. Putting a
+        dial on two or three existing marking genes is the cheapest way to make all three
+        real at once, and is the thing to pick up first.</li>
+</ul>
+
 <h2 id="d2026-09-11h">2026-09-11 &mdash; the two items at the top of the roadmap, both of them</h2>
 
 <p>
