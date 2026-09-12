@@ -80,7 +80,7 @@
         <a href="verification.html#path-mask">verification &sect;0-BA</a> asks whether the
         textarea of <code>u, v</code> pairs the creator ships today is usable enough to
         author a shape with against the live preview. If it is, the canvas can wait behind
-        &sect;<a href="#drift">6</a>.
+        the <a href="#gene-api">Java gene API</a>.
     </p>
 </div>
 
@@ -101,9 +101,6 @@
         <code>points</code> array that already exists &mdash; <strong>no format, engine or
         parity work in it at all</strong>. Also still open beside it: erase-down for the
         minimal expression, per-region colour ranges, and glow / particle intensity.</li>
-    <li><strong>Epigenetic drift</strong> (<a href="#drift">&sect;6</a>) &mdash; a foal
-        copies a parent's per-allele seed exactly, so a closed line converges on one
-        look.</li>
     <li><strong>The Java gene API and an open registry</strong>
         (<a href="#gene-api">&sect;8</a>) &mdash; a third-party gene is the seam every
         other mod should extend through, and it is not built.</li>
@@ -175,10 +172,6 @@
 <table>
 <thead><tr><th>Gene</th><th>Problem</th><th>Fix</th></tr></thead>
 <tbody>
-<tr><td><strong>Foal eyes</strong></td><td><strong>The coat overwrites the sclera</strong> (owner-observed). On the foal mesh <code>redrawEyes</code> targets the head&rsquo;s L/R faces at <code>{6,20}</code>/<code>{40,20}</code>, but a wide coat pattern is painting over them.</td><td>Check the foal eye coordinates against <code>Skin.BABY</code>&rsquo;s actual projection, and that the restore runs after every white painter on the baby skin.</td></tr>
-<tr><td><a href="gene-magic-zebra.html"><strong>Magic zebra</strong></a></td><td><strong>It is not codominant.</strong> One <code>Mzeb</code> copy draws the whole pattern, so the locus has nothing between wild type and the full horse. (The &ldquo;prison bars&rdquo; half of this is <em>done</em> &mdash; it reads <a href="gene-natural-zebra.html#map">the body map</a> now.)</td><td>Follow <a href="gene-natural-zebra.html#codominant">natural zebra</a>, which is already codominant and already shares the painter: one copy at part strength, two at full. That is one strength argument and two expressions, not a second painter.</td></tr>
-<tr><td><a href="gene-light.html"><strong>Light</strong></a></td><td>The <strong>glowing-hooves</strong> case looks missing or not emitting.</td><td>Confirm <code>Lthf</code> both tints the hooves gold <em>and</em> marks them emissive in the overlay phase, as the mane and eye alleles do. If a light-<em>emitting</em> half is wanted for hooves specifically, add a <code>parts</code> anchor for them.</td></tr>
-<tr><td><a href="gene-particle.html"><strong>Particle</strong></a></td><td><strong>Codominant alleles show against wild type.</strong> A <code>-flm</code> flame allele paired with <code>n</code> trails its particle; it should not.</td><td>A codominant allele shows <strong>only when the other copy is another allele of the same family</strong> &mdash; and then the horse shows <em>both</em> particles, which is the whole meaning of the pairing. Against wild type or a non-family allele it is a silent carrier like any other. Update <a href="gene-particle.html">the particle page</a> in the same change.</td></tr>
 <tr><td><a href="gene-leopard.html"><strong>Leopard complex</strong></a></td><td><strong>&ldquo;White finds white&rdquo; is not applied.</strong> Leopard composes at priority 73, before the four white loci, so leopard + sabino simply stacks rather than compounding.</td><td>Decide whether the appaloosa patterns should read the coat they are handed like the other white painters do. Multi-pattern appaloosas are unverified either way. The spot / blanket / hoof-stripe constants are also first-guess and want a play session.</td></tr>
 </tbody>
 </table>
@@ -187,11 +180,6 @@
 <h3>1.3 Behaviour that silently does nothing</h3>
 
 <ul>
-    <li><strong>A tamed mare below her own max health gets neither milk nor a mount
-        and <em>no message</em>.</strong> The <a href="gene-milk.html">milk</a>
-        yield&rsquo;s <code>when</code> fails on <code>full_health</code>, the
-        interaction is consumed, and no denial yield covers that case. A &ldquo;heal
-        her first&rdquo; denial yield closes it.</li>
     <li><strong>The <code>attribute</code> effect verb parses and is never
         applied.</strong> <code>GeneAbilityHandler</code> logs it once through
         <code>warnUntranslated</code> and moves on. It is the one verb of the eight
@@ -378,60 +366,6 @@
         <a href="#defects">&sect;1.2</a>.</li>
 </ul>
 
-
-<h2 id="drift">6. Epigenetic drift</h2>
-
-<p>
-    <strong>This deliberately reopens a settled decision</strong> (&sect;<a href="#settled">22</a>:
-    &ldquo;a foal inherits each allele copy&rsquo;s epigenetic seed verbatim &mdash; no
-    re-roll&rdquo;). In life a foal is not an exact copy of its parents &mdash; white
-    markings especially are all over the place between generations &mdash; and a
-    breeding game where the epigenetics are perfectly heritable loses that. It is also
-    the standing complaint that a closed line converges on one look.
-</p>
-
-<h3>The design</h3>
-
-<ul>
-    <li><strong>A per-gene flag: does this gene&rsquo;s epigenetic seed re-roll on
-        conception, or inherit verbatim?</strong> The default stays
-        <strong>verbatim</strong>, so nothing changes for a gene that does not opt
-        in.</li>
-    <li><strong>Re-roll on</strong> where variation is the point: the white-pattern
-        loci, probably <a href="gene-grey.html">grey</a>&rsquo;s dapple field, and
-        bay&rsquo;s shade roll. A foal of two identical splash parents should still
-        vary in exactly where the white sits.</li>
-    <li><strong>Re-roll off</strong> where a line should breed true:
-        <a href="gene-cutie-mark.html">cutie mark</a> (a family line has <em>its</em>
-        mark &mdash; re-rolling it every generation defeats the gene),
-        <a href="gene-mane-color.html">mane</a> / <a href="gene-tail-color.html">tail</a>
-        colour, and the magical body-stat genes, whose whole point is breeding the
-        number up.</li>
-    <li><strong>The re-roll is at conception, per allele copy the parent passes
-        on</strong> &mdash; the same place and shape as the
-        <a href="carrots.html">Unknown Epigenetic Splice carrot</a>, which already does
-        exactly this for <em>every</em> gene. Drift is that mechanism made the default
-        for opted-in genes rather than a carrot.</li>
-</ul>
-
-<h3>What it needs</h3>
-
-<ul>
-    <li>A boolean on <code>Gene</code> and a <code>spec</code> field &mdash;
-        <code>rerollEpigeneticsOnConception()</code>, default false.</li>
-    <li><code>Genome.breedWith</code> to consult it in the copy-alignment step: for a
-        drift gene, draw a fresh seed instead of carrying the parent copy&rsquo;s.
-        <strong>Determinism is preserved</strong> &mdash; the draw is off the foal RNG
-        in gene order, exactly like a founder seed.</li>
-    <li>The <strong>Epigenetic Stabilizer carrot</strong> to bracket it
-        (&sect;<a href="#carrot-content">15</a>): forces verbatim on <em>all</em> genes,
-        drift genes included, for a player who wants a near-clone foal. The Unknown
-        Epigenetic Splice carrot is already the other end of the dial.</li>
-    <li><code>coat-golden.txt</code> regenerates when this lands &mdash; bred-foal cases
-        move, founder coats do not.</li>
-</ul>
-
-<hr>
 
 <h2 id="trait-rules">7. Group traits, and the rest of the effect architecture</h2>
 
@@ -1376,11 +1310,12 @@
 </div>
 
 <ul>
-    <li><strong>The Epigenetic Stabilizer carrot</strong> &mdash; conditional on
-        epigenetic drift (&sect;<a href="#drift">6</a>), which is what makes it mean
-        anything. It forces the fed parent&rsquo;s passed-on copies to be inherited
-        verbatim, drift genes included, so a player who wants a near-clone foal can buy
-        that.</li>
+    <li><strong>The Epigenetic Stabilizer carrot.</strong> The other end of the dial
+        from the Unknown Epigenetic Splice: it forces the fed parent&rsquo;s passed-on
+        copies to be inherited <em>verbatim</em>, suppressing
+        <a href="breeding.html#drift">drift</a> for one breeding, so a player who wants a
+        near-clone foal can buy that. Now that drift is the default on every value this
+        is the only way to switch it off, which is what makes it worth having.</li>
     <li><strong>Carrot effects captured on a <a href="item-seed-jars.html">seed
         jar</a></strong> and applied at impregnation. None are carried today.</li>
     <li><strong>A database check inside the recipe.</strong> The paper ingredient is the
@@ -2060,9 +1995,14 @@
         one is dropped, and either just triggers a coat regeneration. <strong>No
         segment-padding, no back-compat handling</strong> &mdash; the mod is pre-release
         and keeps no saves.</li>
-    <li>A foal <strong>inherits each allele copy&rsquo;s epigenetic seed verbatim</strong>.
-        <strong>Being revisited per gene</strong> &mdash; &sect;<a href="#drift">6</a>
-        keeps this as the default and lets a gene opt into re-rolling.</li>
+    <li>A foal inherits each allele copy&rsquo;s epigenetics <strong>drifted, not
+        verbatim</strong>. This reopened and replaced the original &ldquo;verbatim, no
+        re-roll&rdquo; answer, and it did it without the per-gene opt-in flag that was
+        proposed for the job: <em>every</em> scalar takes a tiny two-sided exponential
+        nudge at every breeding, seeds and categories get a small chance of an outright
+        re-roll, and the bound is the hard safety clamp rather than the design range a
+        founder is rolled in &mdash; so a line bred long enough is allowed somewhere no
+        wild horse has been. See <a href="breeding.html#drift">breeding &sect; drift</a>.</li>
     <li>Allele tokens are <strong>alphanumeric</strong>, 1&ndash;128 chars, wild type
         <code>n</code>.</li>
 </ul>

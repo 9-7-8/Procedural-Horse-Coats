@@ -67,14 +67,14 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.magic_zebra</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Mzeb</span> <span class="allele wild">n</span></dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>zebra</code></dd></div>
-    <div><dt>Shows when</dt><dd><code>Mzeb/n</code>, <code>Mzeb/Mzeb</code></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>dusky</code>, <code>zebra</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Mzeb/n</code> (dusky), <code>Mzeb/Mzeb</code> (black)</dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 100 per allele</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
     <div><dt>Epigenetic draws</dt><dd>1 long + 4 nextFloat</dd></div>
-    <div><dt>Strength</dt><dd>&minus;200% per channel</dd></div>
+    <div><dt>Strength</dt><dd>&minus;200% per channel at two copies; 0.09 of that at one</dd></div>
     <div><dt>Field</dt><dd>coat.pattern.ZebraStripes</dd></div>
 </dl>
 
@@ -88,6 +88,36 @@
         nor the new one has <strong>ever been seen on the actual 3D model</strong>, which
         is where a body-space pattern usually goes wrong. See
         <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">Codominant since 2026-09-11 &mdash; one copy is no longer the whole horse</span>
+    <p>
+        A single <span class="allele dom">Mzeb</span> copy used to draw the full black
+        pattern, so the locus had nothing at all between a plain horse and a finished one.
+        It now works exactly the way <a href="gene-natural-zebra.html#codominant">natural
+        zebra</a> does, and for the same reason &mdash; <strong>a carrier you can see is a
+        carrier you can breed from</strong>. There is <strong>one painter taking a
+        strength</strong>, not two painters, so a dusky parent and its black-striped foal
+        wear the same bands in the same places and the two outcomes cannot drift apart.
+    </p>
+    <p>
+        <code>Mzeb/Mzeb</code> passes <code>1.0</code> and is <strong>byte-for-byte what
+        this gene has always drawn</strong>. <code>Mzeb/n</code> passes
+        <code>0.09</code>, which scales the subtraction <em>and</em> the opacity together
+        &mdash; scaling only the colour would put a dusky band at full opacity over the
+        white template, which on a dominant white is a grey stripe as strong as the black
+        one.
+    </p>
+    <p>
+        <strong>The heterozygote is the one outcome that reads differently on different
+        coats</strong>, and that follows from the overkill rather than undermining it. A
+        fraction of a deliberately-too-large number is an ordinary-sized number, so a
+        dusky band is a real darkening of whatever was underneath: obvious on a cremello
+        or a chestnut, nearly invisible on a black horse &mdash; which is what a shadow on
+        a black horse looks like. The homozygote is the outcome that promises to read on
+        <em>any</em> coat, and it still does.
     </p>
 </div>
 

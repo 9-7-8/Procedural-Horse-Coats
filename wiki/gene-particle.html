@@ -112,25 +112,43 @@
 </div>
 
 <p>
-    Every allele also carries a <strong>rank</strong>, and the alleles are declared in
-    rank order &mdash; which is load-bearing rather than tidy, because
-    <code>AllelePair</code> canonicalises on <code>Allele.order()</code>, so declaring
-    them this way is what puts the copy a horse <em>shows</em> in slot 0 and the copy
-    it <em>hides</em> in slot 1.
+    <strong>The locus asks for agreement before it draws anything at all.</strong> Two
+    copies of the same allele, or two alleles of one family &mdash; and nothing else. Two
+    <em>variant</em> alleles that are not codominant partners are simply
+    <strong>two carriers</strong>: a <code>Dst/Soul</code> horse trails nothing, and
+    passes both on.
+</p>
+
+<div class="note warn">
+    <span class="label">This replaced a rank rule on 2026-09-11, and the rank rule was a lie to the player</span>
+    <p>
+        Until then, two variants that were not partners showed the
+        <em>lower-ranked</em> of the pair and hid the other. It sounded like the
+        thing that made a locus this wide breedable &mdash; a horse trailing dust
+        might be hiding a soul, and only its foals would say so &mdash; but look at
+        what it actually put in front of a breeder: a dust horse was either
+        <code>Dst/Dst</code> <em>or</em> <code>Dst</code> over any of the other
+        thirty-nine alleles, it looked <strong>exactly the same either way</strong>,
+        and no amount of looking told you which you had. That is the one thing a
+        breeding game must not do. Silence is the honest answer, and it costs
+        nothing: the <a href="#wild">founder table</a> already excluded these pairs
+        for precisely this reason, so no wild horse ever was one. They arise only
+        from breeding, where the pedigree explains them.
+    </p>
+</div>
+
+<p>
+    Declaration order survives, but it is <strong>no longer a dominance rank</strong>.
+    The alleles are declared in it because <code>AllelePair</code> canonicalises on
+    <code>Allele.order()</code>, and that is what makes <code>copy(0)</code> and
+    <code>copy(1)</code> address the two halves of a codominant pair in a fixed order
+    &mdash; which matters, because each half draws its own colour and its own place on
+    the horse.
 </p>
 
 <p>
-    Rank only ever decides between <em>two variants</em>. Meet two that are not
-    codominant and the lower rank is the one you see; the other is carried in silence
-    and passed on intact, and the horse is indistinguishable from one carrying two
-    copies of the winner. That is what makes a locus this wide <em>breedable</em>
-    rather than merely large: a horse trailing dust may be hiding a soul, and only its
-    foals will ever say so.
-</p>
-
-<p>
-    <code>n</code> is not simply the weakest allele in that ranking. It is an off
-    switch, and it beats everything.
+    <code>n</code> is an off switch and it beats everything &mdash; and now so is any
+    allele without its partner beside it.
 </p>
 
 <table class="data">
@@ -299,12 +317,13 @@
 <h2 id="alleles">The forty alleles</h2>
 
 <p>
-    In rank order &mdash; most dominant first. Where two are not in the same family,
-    the one higher in this table is the one that shows.
+    In declaration order. That order fixes which half of a codominant pair is
+    <code>copy(0)</code>; it is <strong>not</strong> a dominance rank, and where two
+    alleles are not in the same family neither of them shows.
 </p>
 
 <table class="data">
-    <thead><tr><th>Rank</th><th>Allele</th><th>Shows as</th><th>Particle</th><th>Family</th></tr></thead>
+    <thead><tr><th>#</th><th>Allele</th><th>Shows as</th><th>Particle</th><th>Family</th></tr></thead>
     <tbody>
         <tr><td>1</td><td><code>Dst</code></td><td>Dust</td><td><code>dust</code></td><td>dst</td></tr>
         <tr><td>2</td><td><code>Dst2</code></td><td>Fading dust</td><td><code>dust_color_transition</code></td><td>dst</td></tr>

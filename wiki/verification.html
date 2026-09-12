@@ -3274,6 +3274,15 @@
     <li><strong>An old horse from before this change may look different.</strong> A
         <code>Dst/n</code> horse in an existing world now trails nothing. That is
         correct, not a regression.</li>
+    <li><strong>And now a cross-family pair trails nothing either</strong> (2026-09-11).
+        The locus asks for <em>agreement</em> before it draws: the same allele twice, or
+        two of one family. <code>Dst/Soul</code> is two carriers and is plain. It used to
+        show the lower-ranked of the two, which made that horse look exactly like
+        <code>Dst/Dst</code> &mdash; so a horse trailing dust could be either and nothing
+        told you which. Check the <strong>i</strong> screen on a bred (not caught) horse
+        carrying two different families and confirm it trails nothing while still listing
+        both alleles. The founder table never handed one of these out, so nothing wild
+        moved.</li>
 </ul>
 
 <h2 id="horse-info">&sect;0-AG &mdash; The horse information screen, the breeding preview, and a mare that miscarries (2026-09-07, NOT looked at)</h2>
@@ -5396,6 +5405,31 @@
         both eyes on a horse and confirm the pupil sits nose-side on both.
     </p>
 </div>
+<div class="note warn">
+    <span class="label">The same bug on the foal &mdash; fixed 2026-09-11, NOT yet seen</span>
+    <p>
+        The owner-reported &ldquo;the coat overwrites the sclera&rdquo; on foals was
+        this defect on the other skin, and neither an ordering nor a projection
+        problem: the composer already redraws the eyes after both paint phases, and
+        the coordinates were on the eyes. <code>EYE_RECTS_BABY</code> was simply
+        <strong>2 texels wide where the eye is 4</strong> &mdash; the pupil and only
+        the pupil &mdash; on the strength of a comment asserting the foal template
+        has no bright sclera. It has two columns of one beside each pupil, so every
+        white painter and every magical gene painted over the whites of a foal's eyes
+        and the redraw put back the black. Now <code>{4,20,4,2}</code> and
+        <code>{40,20,4,2}</code>, verified against <code>HEAD</code>'s own face
+        extents rather than derived. <strong>Every one of the 528 foal rows</strong>
+        in <code>coat-golden.txt</code> moved and not one adult row did.
+    </p>
+    <p>
+        <strong>Look at:</strong> a foal beside its dam &mdash; the whites of its eyes
+        should now read the same way hers do, pupil nose-side on both sides. Then a
+        foal wearing something that paints the whole head (a <a href="gene-kit.html">dominant
+        white</a>, a broad <a href="gene-magic-zebra.html">magic zebra</a>), which is
+        where the old bug was most obvious. And a blue-eyed or heterochromatic foal,
+        since the eye-colour painters read the same rects.
+    </p>
+</div>
 <ul>
     <li><strong>The sclera must stay white.</strong> Asserted in the pipeline, but confirm
         it does not read as a solid coloured block at 128px.</li>
@@ -7271,17 +7305,32 @@ the <a href="session-log.html">session log</a>.</em></p>
 <h3 id="zebra">2. Magic zebra</h3>
 
 <p>
-    New 2026-09-02. Dominant and 1 in 100 per allele, so do not wait for a wild one:
-    the dimension&rsquo;s pens force a magical gene half the time, or summon one with
-    <code>magic_zebra=Mzeb/n</code> in
-    the code. What to look at:
+    New 2026-09-02. 1 in 100 per allele, so do not wait for a wild one: the
+    dimension&rsquo;s pens force a magical gene half the time, or summon one with
+    <code>magic_zebra=Mzeb/Mzeb</code> in the code. <strong>Note the pair &mdash; it
+    became codominant 2026-09-11 and <code>Mzeb/n</code> is no longer the full
+    pattern.</strong> What to look at:
 </p>
 
 <ul>
-    <li><strong>Stripes read black over any coat.</strong> Check one on a
-        <strong>cremello / perlino</strong> and one on a <strong>dominant-white</strong>
-        horse &mdash; that is the &minus;200% claim, and the whole reason phase 3 is an
-        unclamped signed <code>int</code>.</li>
+    <li><strong>Codominance &mdash; the new part, and the thing to look at first.</strong>
+        Put <code>n/n</code>, <code>Mzeb/n</code> and <code>Mzeb/Mzeb</code> side by side
+        on the <em>same</em> base coat. One copy should read as <strong>dusky bands a few
+        shades down from the horse's own colour</strong>, two as hard black, and the two
+        should not be mistakable for each other. Tuned off a rendered ladder on bay,
+        black and chestnut, so the number (0.09 of the full subtraction) is a first guess
+        at what reads well <em>in game</em> &mdash; it is the one knob here most likely to
+        want turning.</li>
+    <li><strong>The heterozygote is deliberately coat-dependent.</strong> It is clearly
+        visible on a pale coat and close to invisible on a black one, which is what a
+        shadow on a black horse looks like. Confirm that reads as intended rather than as
+        the gene failing &mdash; if a dusky black horse looks broken rather than subtle,
+        that is the argument for raising the number.</li>
+    <li><strong>Stripes read black over any coat</strong> &mdash; the
+        <strong><code>Mzeb/Mzeb</code></strong> claim, unchanged and byte-identical to
+        what it always drew. Check one on a <strong>cremello / perlino</strong> and one on
+        a <strong>dominant-white</strong> horse &mdash; that is the &minus;200% claim, and
+        the whole reason phase 3 is an unclamped signed <code>int</code>.</li>
     <li><strong>Repainted onto the shared body map</strong> &mdash; it no longer hangs
         parallel bars from the topline. Everything under
         <a href="#natural-zebra">&sect;0-Z</a> applies to this gene too, in black:

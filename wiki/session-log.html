@@ -27,6 +27,116 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-11f">2026-09-11 &mdash; three coat defects, and a roadmap that had stopped being true</h2>
+
+<p>
+    The session began as &ldquo;go through the whole roadmap and clear it out&rdquo;. It
+    turned into something more useful: <strong>auditing it against the code first</strong>,
+    because a large part of Part&nbsp;1 turned out to describe work that was already done.
+    Three real defects were fixed on the way, and the page lost two whole entries that had
+    shipped and never been deleted &mdash; which is the exact failure its own banner warns
+    about.
+</p>
+
+<h3>What the audit found</h3>
+
+<p>
+    Of the five rows under &ldquo;genes drawing the wrong thing&rdquo;, <strong>one was a
+    real defect, one was a real defect misdiagnosed, one was a design decision, and two were
+    already built</strong>. <a href="gene-particle.html">Particle</a>&rsquo;s carrier case
+    was correct, documented in its own javadoc and asserted by a passing test;
+    <a href="gene-light.html">light</a>&rsquo;s glowing hooves are wired end to end &mdash;
+    the gold tint <em>and</em> <code>markEmissiveLowerLeg</code> through to
+    <code>EmissiveCoatLayer</code>. Under &ldquo;behaviour that silently does nothing&rdquo;,
+    the hurt-mare denial message shipped on 2026-09-10 and was still listed as missing, while
+    sitting in the same page&rsquo;s own Settled section. Only the inert
+    <code>attribute</code> verb survived the sweep.
+</p>
+
+<p>
+    The larger find is that <strong>epigenetic drift is built</strong> &mdash; item two of
+    five in &ldquo;where to start&rdquo;, whose stated problem was that a foal copies its
+    parent&rsquo;s seed exactly. <code>EpiDrift</code> nudges every scalar at every breeding
+    on a two-sided exponential, re-rolls seeds and categories on a chance, and clamps to the
+    hard safety bound rather than the design range, so a long-bred line may reach somewhere no
+    wild horse has been. Its own javadoc opens &ldquo;Before this, inheritance was
+    verbatim.&rdquo; It shipped <em>without</em> the per-gene opt-in flag the roadmap proposed
+    for the job, and it is written up on <a href="breeding.html#drift">breeding</a>, so the
+    write-up had happened and only the deletion was missed. The section is gone, and the
+    Settled entry that still said &ldquo;verbatim&rdquo; now says what is true.
+</p>
+
+<h3>Magic zebra is codominant</h3>
+
+<p>
+    One <code>Mzeb</code> copy drew the whole pattern, so the locus had nothing between a
+    plain horse and a finished one. It follows <a href="gene-natural-zebra.html">natural
+    zebra</a> now: <strong>one painter taking a strength, two outcomes</strong>, so a dusky
+    parent and its black-striped foal cannot end up wearing different bands.
+    <code>Mzeb/Mzeb</code> passes <code>1.0</code> and is byte-for-byte what it always drew;
+    <code>Mzeb/n</code> is a new <code>dusky</code> outcome scaling the subtraction and the
+    opacity together &mdash; scaling only the colour would put a dusky band at full opacity
+    over the template, which on a dominant white is a grey stripe as strong as the black one.
+</p>
+
+<p>
+    The strength is <code>0.09</code> because it was <strong>picked off a rendered dose
+    ladder</strong>, not reasoned about: the first guess of <code>0.18</code> read as black on
+    a bay and was not distinguishable from the homozygote. Three base coats by three genotypes
+    in one image settled it in one look, which is the cheapest thing in this repo and is still
+    under-used. 48 <code>Mzeb/n</code> rows of the pipeline golden moved and the 6
+    <code>Mzeb/Mzeb</code> rows did not.
+</p>
+
+<h3>Particle stops lying about what a horse carries</h3>
+
+<p>
+    The owner reopened this one deliberately. Two variant alleles that were not codominant
+    partners used to show the lower-ranked of the pair, which meant a horse trailing dust was
+    either <code>Dst/Dst</code> or <code>Dst</code> over any of the other thirty-nine
+    &mdash; <strong>identical to look at, and unguessable</strong>. The locus asks for
+    agreement now: the same allele twice, or two of one family, and anything else is two
+    carriers and a plain horse. It cost nothing in the wild, because the founder table already
+    excluded exactly these pairs for exactly this reason. The rank rule went with it;
+    declaration order survives only to keep <code>AllelePair</code> canonical so
+    <code>copy(0)</code> and <code>copy(1)</code> address a codominant pair in a fixed order.
+</p>
+
+<h3>The foal sclera &mdash; and what it was not</h3>
+
+<p>
+    The owner-reported &ldquo;the coat overwrites the sclera&rdquo; was real, and both of the
+    roadmap&rsquo;s suggested causes were wrong: the composer already redraws the eyes after
+    both paint phases, and the coordinates were on the eyes.
+    <code>EYE_RECTS_BABY</code> was <strong>2 texels wide where the eye is 4</strong>, on the
+    strength of a comment in the file asserting that the foal template has no bright sclera.
+    It has two columns of one beside each pupil. So every white painter and every magical gene
+    painted over the whites of a foal&rsquo;s eyes and the redraw put back the black alone.
+</p>
+
+<p>
+    Worth recording how it was settled, because reasoning about body space has been wrong here
+    before: the fix was checked by dumping the template&rsquo;s actual pixels and by asking
+    <code>HorseSkinGeometry</code> which columns the head&rsquo;s faces own, rather than by
+    deriving it. An intermediate claim that the <em>adult</em> right eye was misaligned came
+    from feeding mistyped coordinates to a probe and was withdrawn on reading the source
+    &mdash; the adult has been correct since 2026-09-06. Every one of the 528 foal rows in the
+    pipeline golden moved, and not one adult row did, which is what a foal-only fix should
+    look like.
+</p>
+
+<div class="note">
+    <span class="label">A test that cannot see the bug it is for</span>
+    <p>
+        <code>CoatBakeGoldenTest</code> stayed green through the whole zebra change, and
+        correctly: it walks every gene but pairs each variant allele <em>with itself</em>
+        (<code>new AllelePair(variant, variant)</code>), so it never bakes a heterozygote and
+        is structurally blind to a codominance defect. That is not a fault in it &mdash; it
+        exists to catch a gene whose paint moved &mdash; but it is worth knowing which half of
+        the space it covers before trusting a green run to mean a coat did not move.
+    </p>
+</div>
+
 <h2 id="d2026-09-11e">2026-09-11 &mdash; a test kit you can finish, and a mask for liquids</h2>
 
 <p>
