@@ -168,9 +168,30 @@
     left out for the same reason vanilla leaves them out of riding.
     See <code>server/CrouchFeedGoal</code>.</p>
 
-<p>A saddle still buys you steering, and steering is what lets you go far enough
-    for the proximity gain and the riding gain to stack for any length of time.
-    So a saddle is worth having; it is simply not what the horse is counting.</p>
+<p>A saddle buys you steering, and steering is what lets you go far enough for the
+    proximity gain and the riding gain to stack for any length of time. So a saddle is
+    worth having; it is simply not what the horse is counting &mdash; and at the top
+    bond tier it is not even required (below).</p>
+
+<h3 id="bareback-steering">Bareback steering &mdash; what the top tier is for</h3>
+
+<p>
+    <strong>At behaviour tier 3 (bond 81+), a horse steers without tack.</strong> Mount it
+    bareback and it answers the reins as though saddled; drop below the tier and it stops.
+    That is the payoff at the top of the bond ladder, and it is the one bond reward a player
+    can feel rather than read: everything else the tiers do is the horse moving toward you on
+    its own.
+</p>
+
+<p>
+    It works by lending the horse a <strong>phantom saddle</strong> for as long as the rider
+    qualifies, because vanilla decides who may steer from inside the saddle slot and there is
+    no other hook &mdash; <code>server/BarebackSteeringHandler</code> puts it on and takes it
+    straight back off. Two consequences worth knowing: it is a <em>real</em> saddle while it
+    is there, so the only thing between this and an item duplicator is the sweep that removes
+    it (<a href="known-gaps.html#gap-156">gap 156</a>), and a horse whose bond falls loses the
+    ability mid-ride rather than at a tidy moment.
+</p>
 
 <p>
     A "day" is <strong>24 000 game ticks</strong> (<code>DAY_TICKS</code>);

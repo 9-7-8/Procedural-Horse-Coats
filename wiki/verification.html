@@ -56,6 +56,46 @@
     </p>
 </div>
 
+<h2 id="tester-confirms-0911">&sect;0-CG &mdash; Confirmed by playtesters (2026-09-11)</h2>
+
+<div class="note good">
+    <span class="label">Five things now stand confirmed, from outside testers rather than the dev machine</span>
+    <ul>
+        <li><strong>Bareback steering at a high bond works.</strong> This is the one worth
+            noting twice: it was still listed on the roadmap as <em>unbuilt</em> (&ldquo;riding
+            without a saddle gives no control today&rdquo;) while
+            <code>server/BarebackSteeringHandler</code> had been shipping it all along. Written
+            up now on <a href="horse-care.html#bareback-steering">horse care</a>.</li>
+        <li><strong>A horse can be ridden through water</strong> &mdash; wanted, not a bug.
+            Vanilla swims a ridden horse; the <code>water_averse</code> ability is what
+            <em>adds</em> ejection, so a plain horse swimming is correct.</li>
+        <li><strong>Breaking the equine research shelf drops what is inside it.</strong></li>
+        <li><strong>Setting a barn name works</strong>, and so does clearing one &mdash; the
+            first report said it could not be erased, and it could; it takes a beat to refresh.
+            <em>That refresh lag is the only thing left here</em>: the client's cached record
+            updates a tick late, which is cosmetic but reads as a failure.</li>
+        <li><strong>Destroying a horse-dimension portal stops its animations.</strong></li>
+    </ul>
+</div>
+
+<div class="note warn">
+    <span class="label">One report still open: an &ldquo;aura&rdquo; of glowing entities round a horse</span>
+    <p>
+        A tester saw entities near a horse in the horse dimension outlined by the
+        <b>glowing status effect</b>, while not riding it. <code>MobEffects.GLOWING</code> is
+        applied in <strong>exactly one place in the mod</strong> &mdash;
+        <code>server/DebugHighlightHandler</code>, the F8 toggle &mdash; which lights every
+        horse within 96 blocks, and the horse dimension is wall-to-wall pens. So the first
+        thing to check is whether pressing F8 again stops it.
+    </p>
+    <p>
+        <strong>If she is on a released jar, that does not fit</strong>: F8 was dev-only until
+        2026-09-11, so a real build could not reach it. Establish which jar before looking
+        further. The toggle now times out after four minutes and says how to stop itself,
+        which is hardening rather than a fix.
+    </p>
+</div>
+
 <h2 id="goo-mask">&sect;0-CF &mdash; A GOO mask, and the drips rebuilt on it (2026-09-11, NOT looked at in game)</h2>
 
 <p>Owner's report on the first look at the drips: ooze drip &ldquo;looks like triangles&rdquo; and needed to be

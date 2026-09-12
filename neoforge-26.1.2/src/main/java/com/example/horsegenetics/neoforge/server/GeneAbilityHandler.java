@@ -108,9 +108,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * surface buoyancy plus "don't sink", not a solid collision plane - and its
  * feel is a guess. {@code mob_effect} is executed - the effect id is resolved
  * against the registry and kept topped up on the {@code self} / {@code rider}
- * target while its {@code when} holds. {@code attribute} is the one verb still
- * parsed but <b>not executed yet</b> (logged once); see
- * {@code wiki/horse-traits.html}.
+ * target while its {@code when} holds. {@code attribute} <b>is</b> executed too -
+ * {@link #applyAttribute} holds a transient, gene-scoped modifier up while the
+ * condition holds and {@link #clearAttributes} takes it off again. This comment
+ * said it was parsed and never applied for some time after it stopped being
+ * true, which is the kind of claim worth checking against the dispatch switch
+ * rather than against the prose.
  *
  * <p>Yields ({@code minecraft:bucket} on a mare, ...) are handled on the
  * interaction event, not here - {@link GeneYieldHandler}.
