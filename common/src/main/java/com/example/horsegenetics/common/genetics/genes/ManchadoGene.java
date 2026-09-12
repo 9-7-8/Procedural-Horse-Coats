@@ -163,8 +163,6 @@ public final class ManchadoGene implements Gene {
     @Override public List<Expression> expressions() { return expressions; }
     @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
-    /** Homozygous, so the known carrot hands over a carrier and the pattern still has to be bred. */
-    @Override public boolean geneCarrotHomozygous() { return false; }
 
     @Override
     public Expression expressionOf(AllelePair pair) {

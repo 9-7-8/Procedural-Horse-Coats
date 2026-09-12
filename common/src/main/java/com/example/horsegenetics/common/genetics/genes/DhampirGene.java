@@ -178,12 +178,6 @@ public final class DhampirGene implements Gene, TraitContribution, EyeColorContr
     @Override public List<Expression> expressions() { return expressions; }
     @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
-    /**
-     * The known carrot hands over one copy, never two. A dhampir is the reward
-     * for breeding two carriers, and a carrot that produced one outright would
-     * skip the whole gene.
-     */
-    @Override public boolean geneCarrotHomozygous() { return false; }
 
     /**
      * Not for the random splice. {@link com.example.horsegenetics.common.genetics.SpliceSafety}

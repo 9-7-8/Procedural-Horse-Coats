@@ -181,8 +181,6 @@ public final class DietGene implements Gene, DietContribution {
     /** No breed carries this - see the class note. */
     @Override public boolean feralOnly() { return true; }
 
-    /** A known splice hands over a carrier; the diet itself has to be bred for. */
-    @Override public boolean geneCarrotHomozygous() { return false; }
 
     @Override
     public Expression expressionOf(AllelePair pair) {

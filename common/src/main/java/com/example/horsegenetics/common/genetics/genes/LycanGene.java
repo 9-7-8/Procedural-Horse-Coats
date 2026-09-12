@@ -222,12 +222,6 @@ public final class LycanGene implements Gene {
     @Override public List<Expression> expressions() { return expressions; }
     @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
-    /**
-     * The known carrot hands over one copy, never two. A shifter is the reward
-     * for breeding two carriers of the <i>same</i> shape, and a carrot that
-     * produced one outright would skip the entire locus.
-     */
-    @Override public boolean geneCarrotHomozygous() { return false; }
 
     /** Every form this gene defines, in declaration order - for the wiki and the tests. */
     public List<Form> forms() {

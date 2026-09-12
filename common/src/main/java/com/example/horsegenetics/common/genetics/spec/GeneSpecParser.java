@@ -227,7 +227,7 @@ public final class GeneSpecParser {
         Map<String, Object> o = asObject(raw, "carrot");
         expectKeys(o, "carrot", "enabled", "behaviour", "flavour");
         boolean enabled = flag(o, "enabled", true);
-        String behaviour = string(o, "behaviour", "heterozygous").toLowerCase(Locale.ROOT);
+        String behaviour = string(o, "behaviour", "homozygous").toLowerCase(Locale.ROOT);
         boolean homozygous = switch (behaviour) {
             case "heterozygous" -> false;
             case "homozygous" -> true;

@@ -132,11 +132,25 @@ public interface Gene {
 
     /**
      * Whether this gene's gene carrot makes the game treat the fed parent as
-     * <b>homozygous</b> ({@code <Gene><Gene>}) rather than the default
-     * <b>heterozygous</b> ({@code n<Gene>}) for that gamete (&sect;14.2).
+     * <b>homozygous</b> ({@code <Gene><Gene>}) rather than
+     * <b>heterozygous</b> ({@code n<Gene>}) for that gamete.
+     *
+     * <p><b>The default is homozygous</b> (owner's call, 2026-09-11), because
+     * heterozygous made the carrot a coin flip: the substituted pair is what
+     * the parent's gamete is drawn <i>from</i>, so {@code n<Gene>} meant a 50%
+     * chance the foal got the gene at all. A player who has researched a gene,
+     * gathered its ingredients and spent the carrot has bought an outcome, not
+     * a raffle ticket.
+     *
+     * <p><b>This does not hand the foal two copies.</b> It guarantees the
+     * <i>fed parent's</i> gamete carries the variant; the other copy still comes
+     * from the other parent as usual. A foal is only homozygous if both parents
+     * were fed, or the other parent already carried it - so a gene whose payoff
+     * is meant to need two copies still needs a breeding project, and the carrot
+     * only makes each step of it deterministic.
      */
     default boolean geneCarrotHomozygous() {
-        return false;
+        return true;
     }
 
     /**

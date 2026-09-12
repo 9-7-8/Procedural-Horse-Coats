@@ -57,12 +57,12 @@ window.HG = window.HG || {};
   var DEFAULT_RARITY = "uncommon";
 
   function defaultCarrot() {
-    return { enabled: true, behaviour: "heterozygous", flavour: [] };
+    return { enabled: true, behaviour: "homozygous", flavour: [] };
   }
 
   function carrotIsDefault(c) {
     return !c || (c.enabled !== false
-      && (c.behaviour || "heterozygous") === "heterozygous"
+      && (c.behaviour || "homozygous") === "homozygous"
       && !(c.flavour || []).length);
   }
 

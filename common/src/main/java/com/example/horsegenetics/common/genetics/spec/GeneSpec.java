@@ -89,10 +89,12 @@ public record GeneSpec(
      * opt-out flag surfaced as {@link com.example.horsegenetics.common.genetics.Gene#hasGeneCarrot()};
      * {@code homozygous} chooses whether feeding the carrot makes the game treat
      * the parent as {@code <Gene><Gene>} rather than {@code n<Gene>} for that
-     * gamete; {@code flavour} is the extra recipe ingredients (item ids).
+     * gamete, and <b>defaults to true</b> - see
+     * {@link com.example.horsegenetics.common.genetics.Gene#geneCarrotHomozygous()}
+     * for why a carrot is not a coin flip; {@code flavour} is the extra recipe ingredients (item ids).
      */
     public record Carrot(boolean enabled, boolean homozygous, List<String> flavour) {
-        public static final Carrot DEFAULT = new Carrot(true, false, List.of());
+        public static final Carrot DEFAULT = new Carrot(true, true, List.of());
 
         public Carrot {
             flavour = List.copyOf(flavour);
