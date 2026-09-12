@@ -87,7 +87,21 @@
         <a href="making-a-gene.html#pointsmin"><code>pointsMin</code></a>.
     </p>
     <p>
-        What is left of &sect;10 is <strong>per-region colour ranges and glow intensity</strong>.
+        <strong>Glow intensity is in as well.</strong> A layer's
+        <code>emissive</code> is a <a href="making-a-gene.html#emissive">level</a>
+        rather than a bit &mdash; any number or knob in <code>[0, 1]</code>, scaled by
+        the mask's coverage, so a soft edge fades its glow out instead of ending it on
+        a line at coverage 0.5. It reverses the old "there is no half-lit" call
+        deliberately: the emissive pass blends rather than replaces, so the level is
+        written as the second texture's alpha and a fraction means something.
+    </p>
+    <p>
+        What is left of &sect;10 is <strong>per-region colour ranges and gradients</strong>
+        &mdash; and one honest gap beside it: <strong>the creator cannot show a
+        glow</strong>. It writes one, validates it and round-trips it, but its preview
+        is a flat sheet with no lighting to be brighter than, so a glow is something
+        you have to go and look at in game. Fixing that means shading in the preview,
+        which is a different job from anything in this section.
     </p>
 </div>
 
@@ -105,11 +119,11 @@
         deal else is built and unplayed: see <a href="verification.html">To be
         verified</a>, which is longer than this page's top section.</li>
     <li><strong>What is left of the visual marking designer</strong>
-        (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial and the minimal
-        shape all shipped, so what remains is <strong>glow / particle intensity</strong>
-        (which is not a tool job: emissiveness is a <em>bit</em> per texel by design, and
-        an intensity means <code>CoatOverlay</code>, the composer, the NeoForge texture
-        factory and both ports) and <strong>per-region colour ranges and gradients</strong>.</li>
+        (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial, the minimal shape
+        and glow intensity have all shipped, so what remains is <strong>per-region
+        colour ranges and gradients</strong>: colours are literals in the format today
+        rather than <code>Value</code>s, so the first question is whether a colour
+        becomes knob-drivable at all.</li>
     <li><strong>Deepen the thin science tabs</strong>
         (<a href="#science-tabs">&sect;science</a>) &mdash; every natural gene page now
         has one, so the work is no longer absence but depth: 23 predate the pass that
@@ -513,7 +527,19 @@
 
 <ul>
     <li><strong>Draw the mask &mdash; done.</strong> Still unbuilt beside it: per-region
-        colour ranges and gradients, and glow / particle intensity.</li>
+        colour ranges and gradients.</li>
+    <li><strong>Glow intensity &mdash; shipped.</strong> <code>CoatOverlay</code> holds a
+        level per texel instead of a bit, the composer and the NeoForge texture factory
+        carry it through as the emissive texture's alpha, and a layer's
+        <code>emissive</code> is a <code>Value</code> - so a glow can be driven by a
+        knob, drift down a lineage, and be swept by the dial slider. The coverage
+        scaling is the part that changes existing genes: <code>EMISSIVE_THRESHOLD</code>
+        is gone, and fifty-odd shipped layers fade at their edges now instead of ending
+        on a line. Unlooked-at in game &mdash;
+        <a href="verification.html#glow-intensity">&sect;0-CO</a>.
+        <strong>Particle intensity is not part of it</strong> (owner's call): particles
+        are the <code>emitter</code> effect, which is a different system with its own
+        rate and count.</li>
     <li><strong>Erase-down &mdash; shipped, as <code>pointsMin</code>.</strong> A
         <code>PATH</code> may carry a second array of the same length: the shape at the
         gene's weakest, which each control point morphs toward as the gene's

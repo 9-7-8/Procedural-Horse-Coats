@@ -920,8 +920,8 @@ public final class GeneSpecParser {
                                    List<Knob> knobs, Map<String, Integer> knobIndex) {
         expectKeys(o, where, "name", "masks", "op", "emissive");
         String name = string(o, "name", where);
-        boolean emissive = flag(o, "emissive", false);
-        if (emissive && natural) {
+        Value emissive = readEmissive(o.get("emissive"), where, knobs, knobIndex);
+        if (emissive != null && natural) {
             throw new IllegalArgumentException(where + ": 'emissive' is a magical-phase property - a "
                     + "natural gene moves pigment, and pigment does not glow. Move the glow to a "
                     + "magical gene, or drop the flag.");
@@ -959,7 +959,7 @@ public final class GeneSpecParser {
                         + first + " the others into it.");
             }
         }
-        if (emissive) {
+        if (emissive != null) {
             for (Mask m : masks) {
                 if (m.type() == MaskType.PIGMENT || m.type() == MaskType.LUMA) {
                     throw new IllegalArgumentException(where + ": an emissive layer cannot use a "
@@ -986,6 +986,35 @@ public final class GeneSpecParser {
             }
         }
         return new Layer(name, List.copyOf(masks), new Op(opType, params), emissive);
+    }
+
+    /**
+     * A layer's glow: absent or {@code false} for a layer that does not light
+     * up, {@code true} for one that lights up fully, or any {@link Value} - a
+     * number, a {@code $knob}, an inline range, a per-dose triple - for one
+     * that lights up by however much.
+     *
+     * <p>{@code true} is kept as a spelling because it is what almost every
+     * glowing layer means and because "glows" reads better as a yes than as a
+     * 1. The rest of the format resolves a number the same way everywhere, and
+     * this is that number; a constant outside {@code [0, 1]} is refused here
+     * rather than silently clamped, since it is always a misunderstanding about
+     * what the scale is.
+     */
+    private static Value readEmissive(Object raw, String where,
+                                      List<Knob> knobs, Map<String, Integer> knobIndex) {
+        if (raw == null || Boolean.FALSE.equals(raw)) {
+            return null;
+        }
+        if (Boolean.TRUE.equals(raw)) {
+            return new Value.Const(1.0);
+        }
+        Value v = readValue(raw, where + " 'emissive'", knobs, knobIndex);
+        if (v instanceof Value.Const c && (c.v() < 0 || c.v() > 1)) {
+            throw new IllegalArgumentException(where + " 'emissive': must be between 0 and 1 - it is "
+                    + "a fraction of full bright, not a light level - got " + c.v());
+        }
+        return v;
     }
 
     private static Mask readMask(Map<String, Object> o, String where,

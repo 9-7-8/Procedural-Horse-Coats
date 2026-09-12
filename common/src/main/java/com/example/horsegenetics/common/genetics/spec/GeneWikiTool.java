@@ -1046,8 +1046,12 @@ public final class GeneWikiTool {
                 }
                 sb.append(" &mdash; ").append(String.join(" &times; ", masks))
                         .append(", painted with <code>").append(layer.op().type()).append("</code>");
-                if (layer.emissive()) {
-                    sb.append(", and it <strong>glows</strong>");
+                if (layer.glows()) {
+                    // A partial or knob-driven glow says so, since "glows" on a
+                    // page beside a horse that is barely lit reads as a bug.
+                    sb.append(layer.emissive() instanceof GeneSpec.Value.Const c && c.v() >= 1.0
+                            ? ", and it <strong>glows</strong>"
+                            : ", and it <strong>glows</strong>, partly");
                 }
                 sb.append("</li>\n");
             }
@@ -1074,7 +1078,7 @@ public final class GeneWikiTool {
                     out.add(mask.type().name());
                 }
                 out.add(layer.op().type().name());
-                if (layer.emissive()) {
+                if (layer.glows()) {
                     out.add("emissive");
                 }
             }

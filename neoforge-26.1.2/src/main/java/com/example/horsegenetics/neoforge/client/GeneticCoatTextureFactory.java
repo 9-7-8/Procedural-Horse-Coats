@@ -179,7 +179,7 @@ public final class GeneticCoatTextureFactory {
         CoatTextureComposer.Baked baked =
                 CoatTextureComposer.bake(coat.genotype(), coat.epigenome(), skin, !baby, template, lutSet);
         int[] argb = baked.argb();
-        boolean[] byGene = baked.emissive();
+        float[] byGene = baked.emissive();
 
         if (parts.isEmpty() && byGene == null) {
             return null; // nothing on this horse glows - cached as a real, free entry
@@ -190,8 +190,15 @@ public final class GeneticCoatTextureFactory {
         if (byGene != null) {
             for (int i = 0; i < mask.length; i++) {
                 int c = argb[i];
-                if (byGene[i] && (c >>> 24) != 0) {
-                    mask[i] = 0xFF000000 | (c & 0xFFFFFF);
+                // The gene's intensity becomes this texel's ALPHA. The emissive
+                // pass blends (BlendFunction.TRANSLUCENT) over the coat as the
+                // world lit it, so alpha 0.4 is four tenths of the full-bright
+                // colour over six tenths of the ordinary one - a dimmer, not a
+                // darker colour. Scaling the RGB instead would blend toward
+                // black and a dim glow would read as a smudge.
+                int alpha = Math.round(byGene[i] * 255f);
+                if (alpha > 0 && (c >>> 24) != 0) {
+                    mask[i] = (alpha << 24) | (c & 0xFFFFFF);
                     any[0] = true;
                 }
             }
@@ -200,6 +207,9 @@ public final class GeneticCoatTextureFactory {
             HorseSkinGeometry.forEachTexel(skin, part, (px, py, p2, face, point) -> {
                 int i = py * N + px;
                 int c = argb[i];
+                // A whole part named by a `glow` effect is lit outright - the
+                // effect has no intensity of its own, and full bright is what
+                // "this part glows" has always meant.
                 if ((c >>> 24) != 0) {
                     mask[i] = 0xFF000000 | (c & 0xFFFFFF);
                     any[0] = true;

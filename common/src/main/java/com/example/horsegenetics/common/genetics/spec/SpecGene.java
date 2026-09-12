@@ -151,7 +151,7 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
 
     private static boolean hasEmissiveLayer(GeneSpec.ExpressionSpec e) {
         for (GeneSpec.Layer layer : e.layers()) {
-            if (layer.emissive()) {
+            if (layer.glows()) {
                 return true;
             }
         }

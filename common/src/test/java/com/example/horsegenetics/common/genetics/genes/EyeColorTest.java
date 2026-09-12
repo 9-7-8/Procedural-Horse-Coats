@@ -596,21 +596,32 @@ class EyeColorTest {
     // Glow
     // ==================================================================
 
+    /**
+     * Whether the texel at {@code x} on the eye row is lit at all. Emissiveness
+     * is a <b>level</b> rather than a bit now (roadmap &sect;10's glow
+     * intensity), and the eye loci light what they light outright - so these
+     * read "more than nothing", and the levels themselves are
+     * {@code SpecPainter}'s business.
+     */
+    private static boolean lit(CoatTextureComposer.Baked baked, int x) {
+        return baked.emissive()[EYE_Y * N + x] > 0;
+    }
+
     @Test
     void aGlowingIrisLightsTheDarkTexelsOnly() {
         CoatTextureComposer.Baked baked =
                 bake(locus(EyeLocus.GLOW_IRIS_RIGHT, "Glo"), 7L);
         assertTrue(baked.hasEmissive(), "a glowing eye needs the emissive pass");
-        assertTrue(baked.emissive()[EYE_Y * N + EYE_X + 2], "the iris is lit");
-        assertFalse(baked.emissive()[EYE_Y * N + EYE_X], "the sclera is not");
+        assertTrue(lit(baked, EYE_X + 2), "the iris is lit");
+        assertFalse(lit(baked, EYE_X), "the sclera is not");
     }
 
     @Test
     void aGlowingScleraLightsTheWhiteOnly() {
         CoatTextureComposer.Baked baked =
                 bake(locus(EyeLocus.GLOW_SCLERA_RIGHT, "Glo"), 7L);
-        assertTrue(baked.emissive()[EYE_Y * N + EYE_X], "the white is lit");
-        assertFalse(baked.emissive()[EYE_Y * N + EYE_X + 2], "the iris is a hole in it");
+        assertTrue(lit(baked, EYE_X), "the white is lit");
+        assertFalse(lit(baked, EYE_X + 2), "the iris is a hole in it");
     }
 
     /** The glow has no colour of its own: it lights whatever the eye already is. */
@@ -619,7 +630,7 @@ class EyeColorTest {
         String code = locus(EyeLocus.IRIS_RIGHT, EyeHue.GOLD.token())
                 + "-" + EyeLocus.GLOW_IRIS_RIGHT.key() + "=Glo/Glo";
         assertEquals(GOLD, eye(code)[1]);
-        assertTrue(bake(code, 7L).emissive()[EYE_Y * N + EYE_X + 2]);
+        assertTrue(lit(bake(code, 7L), EYE_X + 2));
     }
 
     /** Nothing to light: an invisible iris carries the glow and shows none of it. */
@@ -628,7 +639,7 @@ class EyeColorTest {
         String code = locus(EyeLocus.IRIS_RIGHT, EyeHue.INVISIBLE.token())
                 + "-" + EyeLocus.GLOW_IRIS_RIGHT.key() + "=Glo/Glo";
         CoatTextureComposer.Baked baked = bake(code, 7L);
-        assertFalse(baked.hasEmissive() && baked.emissive()[EYE_Y * N + EYE_X + 2],
+        assertFalse(baked.hasEmissive() && lit(baked, EYE_X + 2),
                 "an iris that is not painted is not lit either");
     }
 

@@ -52,6 +52,49 @@
     </p>
 </div>
 
+<h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit (2026-09-12, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">Every glowing gene in the game changed, and nothing here can see it</span>
+    <p>
+        A layer's <code>emissive</code> is a number now, and <strong>the mask's coverage
+        scales it</strong>: the old threshold at coverage 0.5 is gone, so every
+        soft-edged glow that used to end on a line now fades out. Fifty-two layers
+        across the shipped genes say <code>"emissive": true</code> and every one of
+        them is affected. The arithmetic is covered by
+        <code>GlowIntensityTest</code>; what no test here can reach is <em>what it
+        looks like</em>, because the glow only exists in a render, at night, in a
+        world. The creator does not draw it either &mdash; its preview is a flat sheet
+        with no lighting to be brighter than.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Look at a soft-edged glow at night, before and after.</strong> The
+        genes to bring are the ones whose glow sits behind a noise or band mask rather
+        than a part list &mdash; <a href="gene-emberveins.html">ember veins</a>,
+        <a href="gene-datarain.html">data rain</a>, <a href="gene-geode.html">geode</a>,
+        <a href="gene-gamma.html">gamma</a>, <a href="gene-angler.html">angler</a>. The
+        question is whether the fade reads as a glow falling off or as a glow that has
+        gone weak and patchy.</li>
+    <li><strong>Is a dim glow visible at all?</strong> The intensity is the second
+        texture's alpha over a blended pass, so a 0.2 texel is a fifth of full bright
+        over the coat as the world lit it. In daylight that may be nothing at all.
+        If the bottom of the range is invisible in practice, the useful range is
+        narrower than 0&ndash;1 and the genes should say so.</li>
+    <li><strong>Two glows on one horse.</strong> Overlapping lit texels take the
+        brighter of the two rather than summing, deliberately &mdash; check that a
+        horse carrying two glowing genes does not look like it is carrying one.</li>
+    <li><strong>A glow pointed at the gene's <a href="#dial-slider">dial</a></strong>
+        is the new thing worth building on purpose: a gene whose glow varies per horse,
+        bred over a few generations, so some of the line smoulders and some blazes.
+        Nothing ships like that yet.</li>
+    <li><strong>The eye glows and <a href="gene-suntouched.html">Suntouched</a>'s
+        parts are unchanged</strong> &mdash; they light whole regions outright at full
+        alpha, and they are the control group. If those look different, the alpha path
+        is wrong rather than the levels.</li>
+</ul>
+
 <h2 id="dial-slider">&sect;0-CN &mdash; The dial, the minimal shape, and the slider (2026-09-12, NOT looked at)</h2>
 
 <div class="note">

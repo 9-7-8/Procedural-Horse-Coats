@@ -380,6 +380,7 @@
 
 <div class="codebox">
 <pre><code>node wiki/tools/check-path-canvas.mjs      # drive the PATH drawing canvas
+node wiki/tools/check-glow-control.mjs     # a layer's glow, which nothing can draw
 node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</code></pre>
 </div>
 
@@ -394,6 +395,20 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
     no Chrome on the machine they <em>skip</em> rather than fail &mdash; these are checks
     you run, not gates anything depends on.
 </p>
+
+<div class="note">
+    <span class="label">The best case for one of these is a control with nothing to look at</span>
+    <p>
+        <code>check-glow-control.mjs</code> exists because a layer's glow is the one
+        thing in the format the creator <strong>cannot show you</strong>: its preview is
+        a flat sheet with no lighting to be brighter than, so a glow written wrongly
+        looks exactly like a glow written correctly. That is how the glow came to be
+        dropped from the creator's export entirely &mdash; loading a glowing gene and
+        exporting it again silently put the light out, and no amount of staring at the
+        tool would have said so. Where a control has no picture, the check <em>is</em>
+        the feedback.
+    </p>
+</div>
 
 <div class="note">
     <span class="label">Assert on the model, not on the picture</span>

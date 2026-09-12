@@ -621,6 +621,14 @@ window.HG = window.HG || {};
         schema.OPS[layer.op.type].params.forEach(function (p) {
           body.appendChild(opParamRow(layer.op, p));
         });
+
+        // Glow is a property of the LAYER, not of the op: the same TOWARD that
+        // paints a teal spot paints a lit one with this number moved. Magical
+        // genes only - pigment does not glow, and the loader refuses it.
+        if (spec.phase === "magical") {
+          body.appendChild(el("h4", { text: "Glow" }));
+          body.appendChild(glowRow(layer));
+        }
         card.appendChild(body);
       }
       root.appendChild(card);
@@ -858,6 +866,51 @@ window.HG = window.HG || {};
       }
     });
     return card;
+  }
+
+  /**
+   * <b>How brightly this layer glows</b>, as a fraction of full bright, and
+   * nothing at all when it is off.
+   *
+   * <p>Off is the absence of the key rather than a zero, because that is what
+   * the file says and what the loader reads - a layer that does not glow has no
+   * <code>emissive</code> at all. Turning it on writes 1: a layer somebody
+   * ticks almost always wants all of it, and the number is there to turn down.
+   */
+  function glowRow(layer) {
+    var on = layer.emissive !== undefined && layer.emissive !== null
+      && layer.emissive !== false;
+    var row = el("div", { class: "row" }, [
+      (function () {
+        var l = el("label", { class: "cover-toggle", title: "Render what this layer paints full-bright" });
+        var cb = el("input", { type: "checkbox" });
+        cb.checked = on;
+        cb.addEventListener("change", function () {
+          if (cb.checked) layer.emissive = 1;
+          else delete layer.emissive;
+          changed();
+        });
+        l.appendChild(cb);
+        l.appendChild(el("span", { text: "glows" }));
+        return l;
+      })()
+    ]);
+    if (on) {
+      row.appendChild(valueEditor(layer, "emissive",
+        { name: "emissive", kind: "VALUE", fallback: 1, ui: { min: 0, max: 1, step: 0.05 } },
+        changed));
+    }
+    var wrap = el("div", { class: "col" }, [row]);
+    wrap.appendChild(el("p", {
+      class: "hint",
+      text: on
+        ? "The mask's coverage scales it, so a soft edge fades the glow out rather than "
+          + "cutting it off. Point it at the gene's dial and the glow varies per horse. "
+          + "The preview beside this does not render it - look in game."
+        : "Lit texels are drawn again at full bright over the coat, in whatever colour "
+          + "this layer ends up painting there."
+    }));
+    return wrap;
   }
 
   function opParamRow(op, p) {

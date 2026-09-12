@@ -130,7 +130,7 @@ public final class CoatTextureComposer {
      * {@link CoatOverlayContribution} marked full-bright ({@code null} when none
      * did, which is the ordinary case).
      */
-    public record Baked(int[] argb, boolean[] emissive) {
+    public record Baked(int[] argb, float[] emissive) {
 
         /** Does any gene on this horse want an emissive render pass at all? */
         public boolean hasEmissive() {

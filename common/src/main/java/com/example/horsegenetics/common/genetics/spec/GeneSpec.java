@@ -378,28 +378,36 @@ public record GeneSpec(
     // ------------------------------------------------------------------
 
     /**
-     * Where (masks) crossed with what (an op), plus whether what it paints
+     * Where (masks) crossed with what (an op), plus how brightly what it paints
      * <b>glows</b>.
      *
      * <p>{@code emissive} is a property of the layer rather than of the op
      * because glowing is orthogonal to colour: the same {@code TOWARD} that
-     * paints a teal spot paints a <i>lit</i> teal spot with one flag flipped,
+     * paints a teal spot paints a <i>lit</i> teal spot with one number changed,
      * and a gene that wants both a lit core and an unlit bloom writes two
-     * layers rather than two ops. Texels the layer covers past
-     * {@link #EMISSIVE_THRESHOLD} are handed to
-     * {@code CoatOverlay.markEmissive}; the coat colour is unaffected either
-     * way, so a spec that sets it on a natural gene is a load error.
+     * layers rather than two ops. The coat colour is unaffected either way, so
+     * a spec that lights a natural gene is a load error.
+     *
+     * <p>It is a <b>{@link Value} in {@code [0, 1]}</b>, null when the layer
+     * does not glow at all. {@code "emissive": true} still reads as 1 - most
+     * glowing layers want all of it - but a number, a {@code $knob} or the
+     * gene's dial gives a horse whose glow is its own: a lineage that smoulders
+     * and a foal that blazes.
+     *
+     * <p><b>The mask's coverage scales it</b>, so a soft edge glows soft.
+     * Emissiveness used to be one bit per texel, cut at a threshold of 0.5 -
+     * necessary while there was no half-lit, and a stand-in for exactly this:
+     * the cut existed to keep a glow from blooming two body units wider than
+     * the shape that drew it, and a falloff does that better by being the
+     * falloff the author already drew.
      */
-    public record Layer(String name, List<Mask> masks, Op op, boolean emissive) {}
+    public record Layer(String name, List<Mask> masks, Op op, Value emissive) {
 
-    /**
-     * How much of a texel an emissive layer has to cover before that texel is
-     * marked full-bright. Emissiveness is a boolean per texel - there is no
-     * half-lit - so a soft-edged glow needs a cut somewhere, and taking it at
-     * the halfway point keeps the lit region the shape the mask drew rather
-     * than a bloom two body units wider than it.
-     */
-    public static final double EMISSIVE_THRESHOLD = 0.5;
+        /** Whether this layer glows at all - i.e. whether it declared one. */
+        public boolean glows() {
+            return emissive != null;
+        }
+    }
 
     /** How a mask term folds into the coverage the terms before it produced. */
     public enum Combine { MULTIPLY, MAX, MIN, ADD, SUBTRACT }

@@ -379,11 +379,20 @@ window.HG = window.HG || {};
       if (e.when !== undefined && e.when !== null) entry.when = e.when;
       if (!e.wildType) {
         entry.layers = (e.layers || []).map(function (layer) {
-          return {
+          var out = {
             name: layer.name,
             masks: (layer.masks || []).map(function (m) { return tidyMask(m); }),
             op: tidyOp(layer.op)
           };
+          // A layer's glow used to be dropped here entirely: loading a glowing
+          // gene and exporting it again silently put the light out. It is a
+          // Value now (a number, a "$knob" or a per-dose triple), and `true`
+          // means all of it.
+          if (layer.emissive !== undefined && layer.emissive !== null
+            && layer.emissive !== false) {
+            out.emissive = layer.emissive === true ? 1 : cloneValue(layer.emissive);
+          }
+          return out;
         });
         if (e.effects && e.effects.length) entry.effects = e.effects.map(tidyEffect);
       }
@@ -564,6 +573,27 @@ window.HG = window.HG || {};
     }
     var layers = layersOf(spec);
     if (!layers.length) out.push("A gene with no layers does nothing to the coat.");
+    // The two things the loader refuses about a glow, said here first.
+    layers.forEach(function (layer, i) {
+      var glow = layer.emissive;
+      if (glow === undefined || glow === null || glow === false) return;
+      if (spec.phase !== "magical") {
+        out.push("Layer " + (i + 1) + " glows, but the gene is natural. Pigment does not "
+          + "glow - move the glow to a magical gene, or turn it off.");
+      }
+      if (typeof glow === "number" && (glow < 0 || glow > 1)) {
+        out.push("Layer " + (i + 1) + "'s glow is " + glow + ". It is a fraction of full "
+          + "bright, so it has to be between 0 and 1.");
+      }
+      (layer.masks || []).forEach(function (m) {
+        if (m.type === "PIGMENT" || m.type === "LUMA") {
+          out.push("Layer " + (i + 1) + " glows and uses a " + m.type + " mask. Glow is "
+            + "decided in the overlay pass, after the texture is baked, where there is "
+            + "neither a pigment field nor a colour accumulator left to read. Split the "
+            + "layer: paint with the " + m.type + " mask, glow with a shape one.");
+        }
+      });
+    });
     layers.forEach(function (layer, i) {
       var op = schema.OPS[layer.op.type];
       if (op && op.phase !== spec.phase) {

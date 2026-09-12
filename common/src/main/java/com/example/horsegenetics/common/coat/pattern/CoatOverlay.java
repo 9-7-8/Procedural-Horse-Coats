@@ -48,7 +48,7 @@ public final class CoatOverlay {
     private final Skin skin;
     private final int[] base;
     private final int[] paint = new int[N * N];
-    private final boolean[] emissive = new boolean[N * N];
+    private final float[] emissive = new float[N * N];
     private boolean painted;
     private boolean glowing;
     /**
@@ -436,10 +436,37 @@ public final class CoatOverlay {
      * light. The colour drawn is whatever ends up on the finished coat there.
      */
     public void markEmissive(int px, int py) {
+        markEmissive(px, py, 1.0);
+    }
+
+    /**
+     * The same, at a <b>fraction</b> of full bright.
+     *
+     * <p>Emissiveness used to be a bit per texel, and a layer's soft edge was
+     * cut at a threshold to keep the lit region the shape the mask drew. It is
+     * a level now, because the emissive pass blends
+     * ({@code BlendFunction.TRANSLUCENT}) rather than replacing: an intensity
+     * of 0.4 is four tenths of the full-bright colour over the texel as the
+     * world lit it, which is what a dim glow <i>is</i>. A soft-edged mask
+     * therefore fades its glow out at the edge instead of ending it on a line,
+     * and nothing has to guess where that line goes.
+     *
+     * <p>Two genes lighting the same texel take the <b>brighter</b> of the two
+     * rather than summing. Summing would make an overlap brighter than either
+     * gene asked for, and there is nothing above full-bright to spend it on.
+     */
+    public void markEmissive(int px, int py, double intensity) {
         if (px < 0 || py < 0 || px >= N || py >= N) {
             return;
         }
-        emissive[py * N + px] = true;
+        float level = (float) (intensity < 0 ? 0 : (intensity > 1 ? 1 : intensity));
+        if (level <= 0) {
+            return;
+        }
+        int i = py * N + px;
+        if (level > emissive[i]) {
+            emissive[i] = level;
+        }
         glowing = true;
     }
 
@@ -569,11 +596,12 @@ public final class CoatOverlay {
     }
 
     /**
-     * Which texels render full-bright, or {@code null} if none do - which is the
-     * ordinary case, and lets the renderer skip the whole emissive layer without
-     * scanning an array of 16 384 falses.
+     * How brightly each texel renders, {@code 0} for the ordinary ones, or
+     * {@code null} if nothing on this horse glows at all - which is the usual
+     * case, and lets the renderer skip the whole emissive layer without
+     * scanning an array of 16 384 zeroes.
      */
-    boolean[] emissiveMask() {
+    float[] emissiveMask() {
         return glowing ? emissive : null;
     }
 }

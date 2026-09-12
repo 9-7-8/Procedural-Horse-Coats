@@ -135,7 +135,8 @@ public final class SpecPainter {
     // ------------------------------------------------------------------
 
     /**
-     * Mark every texel an {@code emissive} layer covers as full-bright.
+     * Light every texel an {@code emissive} layer covers, as brightly as it
+     * covers it.
      *
      * <p>It runs in the <b>overlay</b> pass rather than in {@link #tint},
      * because that is the pass {@code CoatOverlay} - and so
@@ -155,15 +156,18 @@ public final class SpecPainter {
         Map<Part, Bounds> bounds = boundsOf(skin);
         for (int i = 0; i < layers.size(); i++) {
             Layer layer = layers.get(i);
-            if (!layer.emissive()) {
+            if (!layer.glows()) {
                 continue;
             }
             long fallbackSeed = layerSeed(spec, i);
             HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
                 double k = coverage(layer, values, skin, bounds, part, face, point, null, null, px, py,
                         legIndex(part), fallbackSeed);
-                if (k >= GeneSpec.EMISSIVE_THRESHOLD) {
-                    out.markEmissive(px, py);
+                // Coverage scales the glow, the way it scales every other move a
+                // layer makes: a mask's soft edge is the glow's falloff rather
+                // than a line the glow gets cut off at.
+                if (k > 0) {
+                    out.markEmissive(px, py, k * values.get(layer.emissive(), legIndex(part)));
                 }
             });
         }

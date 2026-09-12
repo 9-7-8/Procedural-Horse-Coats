@@ -119,7 +119,7 @@ coat/
     ColorField.java           phase 3 accumulator (writable)
     ColorView.java            phase 3 accumulator (read-only) - what a gene gets
     CoatBuildContext.java     the horse: genotype, epigenome, skin, adult, rng
-    CoatOverlay.java          phase 6 sink: final pixels + the emissive texel mask
+    CoatOverlay.java          phase 6 sink: final pixels + the emissive level per texel
     CoatOverlayContribution.java  capability: this gene writes finished pixels
     GradientLut.java          the red/black gradient lookup
     CoatRegions.java          reusable "paint / restrict this region" helpers
@@ -586,7 +586,7 @@ static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregis
     <span class="label">Six phases since 2026-09-04</span>
     <p>
         <code>CoatTextureComposer.bake(&hellip;)</code> returns a
-        <code>Baked(int[] argb, boolean[] emissive)</code>;
+        <code>Baked(int[] argb, float[] emissive)</code> &mdash; the second is a glow <em>level</em> per texel, 0 for the dark ones;
         <code>compose(&hellip;)</code> is the pixels alone and is unchanged, which is
         why the golden test and every existing caller were untouched. The extra
         phase runs after the eyes are restored and lets a gene write finished pixels

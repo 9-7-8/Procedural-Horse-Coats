@@ -1654,20 +1654,59 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 <h3 id="emissive">Glow</h3>
 
 <p>
-    A layer may carry <code>"emissive": true</code>. Every texel it covers past
-    halfway is marked full-bright, so it renders at night as if lit. Glow is a
-    property of the <em>layer</em>, not of the op, because it is orthogonal to
-    colour: the same <code>TOWARD</code> that paints a teal spot paints a lit teal
-    spot with one flag flipped, and a gene that wants a lit core inside an unlit
-    bloom writes two layers rather than two ops.
+    A layer may carry <code>"emissive"</code>, and what it carries is <strong>how
+    brightly it glows</strong>: <code>true</code> for all of it,
+    <code>0.35</code> for a smoulder, <code>"$burn"</code> or the gene's
+    <a href="#dial">dial</a> for a glow that is different on every horse. Lit texels
+    are drawn a second time at full brightness over the finished coat, so they render
+    at night as if lit. Glow is a property of the <em>layer</em>, not of the op,
+    because it is orthogonal to colour: the same <code>TOWARD</code> that paints a
+    teal spot paints a lit teal spot with one number moved, and a gene that wants a
+    lit core inside an unlit bloom writes two layers rather than two ops.
 </p>
 
+<div class="note">
+    <span class="label">The mask's coverage scales it, so a soft edge glows soft</span>
+    <p>
+        The level a texel ends up at is <strong>its coverage times the layer's
+        number</strong>. A hard-edged mask therefore lights its shape evenly, and a
+        soft-edged one fades its glow out exactly where it fades its paint out
+        &mdash; you do not draw the falloff twice.
+    </p>
+    <p>
+        This used to be a <em>bit</em> per texel, cut at a coverage of 0.5. The cut
+        was a stand-in for this: it existed so a soft mask would not bloom a glow two
+        body units wider than the shape that drew it, and it paid for that with a
+        hard line across a soft edge. A level does the job the cut was approximating,
+        because the emissive pass <strong>blends</strong> rather than replaces
+        (<code>BlendFunction.TRANSLUCENT</code>) &mdash; 0.4 is four tenths of the
+        full-bright colour over the texel as the world lit it, which is a dimmer
+        rather than a darker colour.
+    </p>
+    <p>
+        Two genes lighting one texel take the <strong>brighter</strong> of the two,
+        not the sum. There is nothing above full bright to spend an overlap on, and
+        summing would make a horse carrying two faint glows brighter than one
+        carrying a real one.
+    </p>
+</div>
+
 <p>
-    Two limits, both load errors rather than surprises. A natural gene cannot set it
-    &mdash; pigment does not glow. And an emissive layer cannot use a
-    <code>PIGMENT</code> mask: glow is decided in the overlay pass, after the texture
-    is baked, and there is no pigment field left there to read. Split the layer if you
-    need both.
+    Three limits, all load errors rather than surprises. A natural gene cannot glow
+    &mdash; pigment does not. An emissive layer cannot use a <code>PIGMENT</code> or
+    <code>LUMA</code> mask: glow is decided in the overlay pass, after the texture is
+    baked, and there is neither a pigment field nor a colour accumulator left there to
+    read &mdash; split the layer if you need both. And a constant outside
+    <code>[0, 1]</code> is refused rather than clamped, because it always means
+    somebody thought the number was a light level.
+</p>
+
+<p class="note">
+    <strong>The creator does not render the glow.</strong> It writes it, validates it
+    and keeps it through a round-trip, but the preview beside it is a flat sheet with
+    no lighting to be brighter than &mdash; so a glow is one of the few things you
+    have to go and look at in game. See
+    <a href="verification.html#glow-intensity">what to look at</a>.
 </p>
 
 <h2>Where the numbers actually live</h2>
@@ -2371,7 +2410,13 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     colour on the named parts, transparent elsewhere &mdash; and
     <code>client/EmissiveCoatLayer</code> (a twin of vanilla&rsquo;s
     <code>HorseMarkingLayer</code>) redraws the model through it with
-    <code>RenderTypes.eyes(&hellip;)</code> at full brightness. The emissive colour is
+    <code>RenderTypes.eyes(&hellip;)</code> at full brightness. That pass
+    <strong>blends</strong> (<code>BlendFunction.TRANSLUCENT</code>), which is what
+    lets a coat layer's glow be a <a href="#emissive">level</a> rather than a bit: the
+    texel's intensity is written as the second texture's <em>alpha</em>, so a partly
+    lit texel is that fraction of full bright over the coat as the world lit it. A
+    part named by the <code>glow</code> verb has no level of its own and is written at
+    full alpha. The emissive colour is
     whatever the coat <code>layers</code> already painted there, so
     <a href="gene-suntouched.html">Suntouched</a>&rsquo;s gold <code>TOWARD</code>
     layer and its <code>glow.parts</code> stay in sync by construction. It is the
@@ -4225,8 +4270,10 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
     Mask modifiers: <code>combine</code> (<code>MULTIPLY</code> default, <code>MAX</code>,
     <code>MIN</code>, <code>ADD</code>, <code>SUBTRACT</code>) and <code>invert</code>
     (boolean, applied before <code>spread</code>). Layer modifier:
-    <code>emissive</code> (boolean; magical phase only, and incompatible with a
-    <code>PIGMENT</code> or <code>LUMA</code> mask).
+    <code>emissive</code> (how brightly it glows: <code>true</code> for full, or any
+    number / <code>$knob</code> in <code>[0, 1]</code>, scaled by the mask's coverage;
+    magical phase only, and incompatible with a <code>PIGMENT</code> or
+    <code>LUMA</code> mask).
 </p>
 
 <p>
@@ -4459,6 +4506,11 @@ RULES THAT ARE NOT OPTIONAL
     could not do. Mark the dial on any gene whose reference describes a range of
     expression ("from a few flecks to a full blanket"), and point the thresholds
     at it.
+12c. A layer's "emissive" is HOW BRIGHTLY it glows, not whether: true is all
+    of it, and any number or "$knob" in 0..1 is less. The mask's coverage
+    scales it, so a soft edge fades the glow out and you never draw the falloff
+    twice. Magical genes only, never with a PIGMENT or LUMA mask, and two genes
+    over one texel take the brighter rather than summing.
 13. PATH's space "body" normalises over the WHOLE-HORSE box, hoof to ear tips.
     The underline is v 0.33 and the SPINE is v 0.62 - not 1.0. Points at 0.7
     float above the back and appear on nothing. The flank is u 0.18-0.72,
