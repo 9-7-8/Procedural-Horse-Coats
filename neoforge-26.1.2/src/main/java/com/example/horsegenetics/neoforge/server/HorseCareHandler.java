@@ -115,6 +115,13 @@ public final class HorseCareHandler {
         // Taming by hand: approach a crouched player holding food it eats.
         // Above the wandering goals, or a horse would drift off mid-approach.
         horse.goalSelector.addGoal(GOAL_PRIORITY - 1, new CrouchFeedGoal(horse));
+        // Drift toward anybody holding food it eats, and run for its favourite.
+        // Same priority as the crouch-feed goal and added AFTER it, so on the
+        // tie the more specific taming approach wins: both claim MOVE, and the
+        // goal selector breaks a priority tie by insertion order. Above
+        // BondFollowGoal on purpose - food is more interesting than an owner
+        // standing still.
+        horse.goalSelector.addGoal(GOAL_PRIORITY - 1, new FoodTemptGoal(horse));
     }
 
     // ------------------------------------------------------------------

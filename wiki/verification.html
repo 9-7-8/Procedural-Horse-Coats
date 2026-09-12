@@ -56,6 +56,40 @@
     </p>
 </div>
 
+<h2 id="food-tempt">&sect;0-CH &mdash; Horses come to food, and run for a favourite (2026-09-11, NOT looked at in game)</h2>
+
+<p>
+    <code>server/FoodTemptGoal</code>, written up on
+    <a href="horse-care.html#food-tempt">horse care</a>. Two speeds, and the gap between
+    them is the feature. What to look at:
+</p>
+
+<ul>
+    <li><strong>The amble is an amble.</strong> Hold wheat near a herd: they should take an
+        interest and wander over, and you should be able to walk away from them without
+        effort. If it reads as a pull rather than a drift, the walk speed is too high.</li>
+    <li><strong>The run is unmistakable.</strong> Spawn a horse with a known favourite
+        (<code>horsegenetics.food_preference=Car/Car</code> is in the test kit already) and
+        hold that item from across a paddock. It should notice from roughly twice as far and
+        come at a gallop. <strong>If the two speeds are not obviously different, the whole
+        feature has failed</strong> - the contrast is the only thing that makes the
+        preference locus discoverable without already knowing the answer.</li>
+    <li><strong>It stops short.</strong> Two and a half blocks, not shoving into you.</li>
+    <li><strong>Lowering your hand stops it mid-walk</strong>, rather than letting the horse
+        finish its approach.</li>
+    <li><strong>It yields to crouch-taming.</strong> Crouch at an untamed horse holding food:
+        the taming approach should run, not this. They share a priority and the taming goal
+        is added first, which is what breaks the tie - worth confirming, because it is a
+        behaviour that depends on insertion order rather than on anything declared.</li>
+    <li><strong>A carnivore ignores a carrot but runs at its favourite</strong>, if its
+        favourite is something its diet forbids. That is the preference-beats-diet rule, and
+        this is a second place it has to hold.</li>
+    <li><strong>Ridden, leashed and led horses ignore food entirely.</strong></li>
+    <li><strong>Performance:</strong> stand in a large herd holding food and watch for a tick
+        cost. The goal caches the genome parse, but that cache is the only thing between this
+        and sixty full genome parses a tick.</li>
+</ul>
+
 <h2 id="tester-confirms-0911">&sect;0-CG &mdash; Confirmed by playtesters (2026-09-11)</h2>
 
 <div class="note good">

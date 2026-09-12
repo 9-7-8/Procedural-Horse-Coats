@@ -168,6 +168,50 @@
     left out for the same reason vanilla leaves them out of riding.
     See <code>server/CrouchFeedGoal</code>.</p>
 
+<h3 id="food-tempt">Horses come to food &mdash; and run for their favourite</h3>
+
+<p>
+    <strong>Any horse drifts toward a player holding something it can eat</strong>
+    (<code>server/FoodTemptGoal</code>), tamed or wild, foal or adult. No crouch, no
+    gesture: hold food and horses take an interest. It is deliberately a <em>drift</em>
+    &mdash; well under walking pace, it stops a couple of blocks short rather than
+    pressing into you, and it ends the instant the food goes away, so a player who keeps
+    walking simply leaves. A horse should be interested in food, not glued to it.
+</p>
+
+<p>
+    <strong>Its <a href="gene-food-preference.html">favourite</a> food is the exception,
+    and it runs.</strong> Twice the notice radius and more than twice the speed, so it
+    picks its head up from across the paddock and comes at a gallop. That gap is the
+    point of the feature: it is <strong>the only way the preference locus is visible
+    before you have fed it</strong>. Until now you had to already know which of the
+    favourites a horse carried in order to try it; now the horse tells you, by reacting
+    to one item in a way it reacts to nothing else.
+</p>
+
+<p>
+    What counts as edible is genetic, the same test the crouch-feed goal uses &mdash; a
+    carnivore does not come over for a carrot. A favourite overrides the diet, exactly as
+    it does on the interaction, so a meat-eater with a taste for apples still runs at one.
+    A <strong>ridden, leashed or led</strong> horse ignores food entirely, because all
+    three mean somebody else is already deciding where it goes.
+</p>
+
+<div class="note">
+    <span class="label">Why it caches the genotype</span>
+    <p>
+        The goal resolves the horse's diet and favourite <strong>once</strong> and keeps
+        them. Both lookups parse the genetic code out of the record and
+        <code>dietOf</code> parses the <a href="known-gaps.html#gap-66">epigenome</a> as
+        well, and a goal's <code>canUse</code> runs <em>every tick for every horse</em> -
+        so without the cache a paddock of thirty horses would have been doing sixty full
+        genome parses a tick, doubled for two hands, for as long as anyone stood nearby
+        holding anything. Both facts are fixed at birth, so resolving once is correct as
+        well as cheap. It is lazy rather than done in the constructor because the goal is
+        added on entity join and the record is filled on the founding tick.
+    </p>
+</div>
+
 <p>A saddle buys you steering, and steering is what lets you go far enough for the
     proximity gain and the riding gain to stack for any length of time. So a saddle is
     worth having; it is simply not what the horse is counting &mdash; and at the top
