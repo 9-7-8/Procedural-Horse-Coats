@@ -376,7 +376,12 @@ public final class HorseCareHandler {
         }
     }
 
-    private static void syncCare(Horse horse, HorseCareAttachment care) {
+    /**
+     * Package-private rather than private because the note below is literally
+     * true - {@code /bond} in {@link DebugTestWorldHandler} is the new path, and
+     * it has to credit tiers and reach the client exactly like every other one.
+     */
+    static void syncCare(Horse horse, HorseCareAttachment care) {
         PacketDistributor.sendToPlayersTrackingEntity(horse,
                 new HorseCareSyncPayload(horse.getId(), care.bond(), care.inHerd()));
         creditBondTiers(horse, care);

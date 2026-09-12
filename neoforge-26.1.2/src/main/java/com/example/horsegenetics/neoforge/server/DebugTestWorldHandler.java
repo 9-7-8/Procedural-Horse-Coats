@@ -22,6 +22,10 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.component.DataComponents;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
+import com.example.horsegenetics.neoforge.data.ModAttachments;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -131,7 +135,104 @@ public final class DebugTestWorldHandler {
                                     IntegerArgumentType.getInteger(c, "batch"));
                             return 1;
                         })));
+
+        event.getDispatcher().register(Commands.literal("bond")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .executes(c -> reportBond(c.getSource().getPlayerOrException()))
+                .then(Commands.argument("bond",
+                                IntegerArgumentType.integer(0, HorseCareAttachment.MAX_BOND))
+                        .executes(c -> setBond(c.getSource().getPlayerOrException(),
+                                IntegerArgumentType.getInteger(c, "bond")))));
     }
+
+    // ------------------------------------------------------------------
+    // /bond - the one thing that made every bond tier untestable
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>{@code /bond <0-100>} sets the bond of the horse you are riding or
+     * looking at; {@code /bond} alone reports it.</b>
+     *
+     * <p>It exists because every <i>real</i> source of bond is deliberately slow
+     * - a daily cap of {@value HorseCareAttachment#DAILY_CAP}, a point per
+     * {@link HorseCareAttachment#TICKS_PER_BOND_POINT} ticks of proximity - so
+     * reaching tier 3 honestly is an hour of standing about, and exercising the
+     * tiers meant either grinding or temporarily editing the thresholds and
+     * rebuilding. Both are worse than a command, and the second changes the
+     * thing under test.
+     *
+     * <p>It writes through {@link HorseCareHandler#syncCare}, so it is not a
+     * back door: the client is told, and the bond <b>tier progress tasks are
+     * credited</b>, exactly as if the horse had earned it. That matters - a
+     * command that set the number without crediting would make the progress
+     * surface lie, and the progress surface is one of the things being tested.
+     */
+    private static int reportBond(ServerPlayer player) {
+        Horse horse = targetHorse(player);
+        if (horse == null) {
+            player.sendSystemMessage(Component.literal(
+                    "Ride a horse, or look at one within 12 blocks.").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
+        player.sendSystemMessage(Component.literal(
+                horse.getName().getString() + ": bond " + care.bond() + "/"
+                        + HorseCareAttachment.MAX_BOND + ", behaviour tier "
+                        + care.behaviourTier() + (care.inHerd() ? ", in a herd" : ""))
+                .withStyle(ChatFormatting.AQUA));
+        return 1;
+    }
+
+    private static int setBond(ServerPlayer player, int bond) {
+        Horse horse = targetHorse(player);
+        if (horse == null) {
+            player.sendSystemMessage(Component.literal(
+                    "Ride a horse, or look at one within 12 blocks.").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        HorseCareAttachment before = horse.getData(ModAttachments.HORSE_CARE.get());
+        HorseCareAttachment after = before.withBond(bond);
+        horse.setData(ModAttachments.HORSE_CARE.get(), after);
+        HorseCareHandler.syncCare(horse, after);
+        player.sendSystemMessage(Component.literal(
+                horse.getName().getString() + ": bond " + before.bond() + " -> " + after.bond()
+                        + ", behaviour tier " + before.behaviourTier() + " -> " + after.behaviourTier())
+                .withStyle(ChatFormatting.GREEN));
+        return 1;
+    }
+
+    /**
+     * The horse this command means: the one being ridden, else the nearest one
+     * the player is actually looking at. Riding wins because the tier that is
+     * hardest to reach honestly (bareback steering, following) is the one you
+     * are most likely to be sitting on when you want to change it.
+     */
+    private static @Nullable Horse targetHorse(ServerPlayer player) {
+        if (player.getVehicle() instanceof Horse ridden) {
+            return ridden;
+        }
+        Vec3 eye = player.getEyePosition();
+        Vec3 look = player.getLookAngle();
+        Horse best = null;
+        double bestDot = 0.97;   // roughly "in the crosshair", not "somewhere in front"
+        for (Horse horse : player.level().getEntitiesOfClass(Horse.class,
+                player.getBoundingBox().inflate(TARGET_RANGE))) {
+            Vec3 to = horse.getBoundingBox().getCenter().subtract(eye);
+            double len = to.length();
+            if (len < 1.0E-4) {
+                continue;
+            }
+            double dot = to.scale(1.0 / len).dot(look);
+            if (dot > bestDot) {
+                bestDot = dot;
+                best = horse;
+            }
+        }
+        return best;
+    }
+
+    /** How far {@code /bond} will look for a horse. */
+    private static final double TARGET_RANGE = 12.0;
 
     /**
      * <b>The test kit - aimed at what is waiting on {@code wiki/verification.html}

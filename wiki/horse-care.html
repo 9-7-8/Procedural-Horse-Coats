@@ -200,6 +200,35 @@
     common "near my owner" case.</p>
 </div>
 
+<h3 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h3>
+
+<p>
+    <code>/bond &lt;0-100&gt;</code> sets the bond of the horse you are
+    <strong>riding</strong>, or failing that the one you are looking at within 12
+    blocks; <code>/bond</code> on its own reports the number, the behaviour tier and
+    whether the horse is in a herd. Dev runs only &mdash; it is registered behind the
+    same <code>FMLEnvironment.isProduction()</code> guard as
+    <a href="verification.html">the test kit</a>, in
+    <code>server/DebugTestWorldHandler</code>.
+</p>
+
+<p>
+    It exists because every real source above is <em>deliberately</em> slow: a daily
+    cap of 15 and a point per real minute of proximity means reaching tier 3 honestly
+    is about an hour of standing about. Before this, exercising a tier meant grinding
+    it or temporarily lowering the thresholds and rebuilding &mdash; and the second
+    changes the thing under test.
+</p>
+
+<p>
+    <strong>It is not a back door.</strong> It writes through the same
+    <code>HorseCareHandler.syncCare</code> every other bond source ends at, so the
+    client is told and the <a href="items.html">bond progress tasks are credited</a>
+    exactly as if the horse had earned it. A command that set the number without
+    crediting would leave the progress surface lying, and the progress surface is one
+    of the things being tested with it.
+</p>
+
 <h2>3. Herds</h2>
 
 <div class="note">
