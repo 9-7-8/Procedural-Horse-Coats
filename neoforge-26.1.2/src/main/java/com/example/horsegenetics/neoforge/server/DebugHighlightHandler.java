@@ -52,6 +52,20 @@ public final class DebugHighlightHandler {
 
     private static final Set<UUID> ON = ConcurrentHashMap.newKeySet();
 
+    /**
+     * <b>The effect carries no particles and no status icon</b>
+     * ({@code ambient/visible/showIcon} are all false, so the outline is the
+     * only thing a glowing horse shows) and it is refreshed for as long as the
+     * toggle is on. Left on by accident that is indistinguishable from a bug -
+     * a playtester reported exactly that, having lit up a dimension full of
+     * pens and no longer being able to tell why. So the toggle gives up on its
+     * own after {@value #AUTO_OFF_TICKS} ticks and says so.
+     */
+    private static final int AUTO_OFF_TICKS = 4 * 60 * 20;   // four minutes
+
+    /** Server tick at which each player's toggle expires. */
+    private static final java.util.Map<UUID, Long> EXPIRES = new ConcurrentHashMap<>();
+
     private DebugHighlightHandler() {
     }
 
@@ -60,16 +74,23 @@ public final class DebugHighlightHandler {
 
     /** Flip the toggle for one player (called from the F8 payload handler). */
     public static void toggle(ServerPlayer player) {
+        EXPIRES.remove(player.getUUID());
         if (ON.remove(player.getUUID())) {
             clearNear(player);
             player.sendSystemMessage(Component.literal("Horse highlight OFF")
                     .withStyle(ChatFormatting.GRAY));
         } else {
             ON.add(player.getUUID());
+            if (player.level().getServer() != null) {
+                EXPIRES.put(player.getUUID(),
+                        (long) player.level().getServer().getTickCount() + AUTO_OFF_TICKS);
+            }
             glowNear(player);
             player.sendSystemMessage(Component.literal("Horse highlight ON - herd leads in ")
                     .withStyle(ChatFormatting.GRAY)
-                    .append(Component.literal("red").withStyle(ChatFormatting.RED)));
+                    .append(Component.literal("red").withStyle(ChatFormatting.RED))
+                    .append(Component.literal(". Press the key again to turn it off.")
+                            .withStyle(ChatFormatting.GRAY)));
         }
     }
 
@@ -105,19 +126,31 @@ public final class DebugHighlightHandler {
         if (event.getServer().getTickCount() % REFRESH != 0) {
             return;
         }
+        long now = event.getServer().getTickCount();
         for (UUID id : ON) {
             ServerPlayer player = event.getServer().getPlayerList().getPlayer(id);
             if (player == null) {
                 ON.remove(id);
-            } else {
-                glowNear(player);
+                EXPIRES.remove(id);
+                continue;
             }
+            Long expires = EXPIRES.get(id);
+            if (expires != null && now >= expires) {
+                ON.remove(id);
+                EXPIRES.remove(id);
+                clearNear(player);
+                player.sendSystemMessage(Component.literal(
+                        "Horse highlight timed out.").withStyle(ChatFormatting.GRAY));
+                continue;
+            }
+            glowNear(player);
         }
     }
 
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         ON.remove(event.getEntity().getUUID());
+        EXPIRES.remove(event.getEntity().getUUID());
     }
 
     private static void glowNear(ServerPlayer player) {
