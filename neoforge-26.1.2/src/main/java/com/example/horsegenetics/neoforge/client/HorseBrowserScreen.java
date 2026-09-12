@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.horse.HorseListing;
 import com.example.horsegenetics.common.horse.HorseQuery;
+import com.example.horsegenetics.common.horse.RosterGenetics;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
@@ -428,6 +429,40 @@ public final class HorseBrowserScreen extends Screen {
 
     private EditBox searchBox;
     private EditBox horseFilterBox;
+
+    // ------------------------------------------------------------------
+    // The gene / allele pickers on My horses.
+    //
+    // The filter language has understood gene:SB1 from the start; what it has
+    // never had is a way to find out that SB1 is a thing you own. These two
+    // buttons answer "what have I got" by listing ONLY what is in the roster -
+    // see common/horse/RosterGenetics - so the second dropdown is this horse
+    // collection's alleles of the gene you picked, not the locus's whole set.
+    // ------------------------------------------------------------------
+
+    private enum GeneDd { NONE, GENE, ALLELE }
+
+    private GeneDd geneDd = GeneDd.NONE;
+    private int geneDdX;
+    private int geneDdY;
+    private int geneDdScroll;
+
+    /** The gene the allele picker is currently about, or null for "any". */
+    private Gene pickedGene;
+
+    private Button genePickButton;
+    private Button allelePickButton;
+
+    /**
+     * The present-genes list, cached against the roster version. Rebuilding it
+     * walks every locus of every horse, which is the same cost
+     * {@link #rebuildHorseRows} refuses to pay per frame and for the same
+     * reason.
+     */
+    private List<Gene> ddGenes = List.of();
+    private List<Allele> ddAlleles = List.of();
+    private int ddGenesVersion = -1;
+    private String ddAllelesFor = "";
     private Button recipeCategoryButton;
     private static RecipeCategory recipeCategory = RecipeCategory.OTHER;
     private boolean recipeMenuOpen;
@@ -629,6 +664,29 @@ public final class HorseBrowserScreen extends Screen {
         horseFilterBox.setValue(horseFilter);
         addRenderableWidget(horseFilterBox);
 
+        int pickX = horseFilterBox.getX() + horseFilterBox.getWidth() + 4;
+        genePickButton = Button.builder(Component.literal("Gene..."), b -> {
+                    refreshPickerLists();
+                    openGeneDd(GeneDd.GENE, genePickButton.getX(),
+                            genePickButton.getY() + genePickButton.getHeight());
+                })
+                .bounds(pickX, contentTop(), 68, 16).build();
+        genePickButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                "Filter by a gene your horses actually carry.")));
+        genePickButton.visible = false;
+        addRenderableWidget(genePickButton);
+
+        allelePickButton = Button.builder(Component.literal("Allele..."), b -> {
+                    refreshPickerLists();
+                    openGeneDd(GeneDd.ALLELE, allelePickButton.getX(),
+                            allelePickButton.getY() + allelePickButton.getHeight());
+                })
+                .bounds(pickX + 71, contentTop(), 72, 16).build();
+        allelePickButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                "Filter by one allele. Pick a gene first to narrow the list.")));
+        allelePickButton.visible = false;
+        addRenderableWidget(allelePickButton);
+
         refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> requestRoster())
                 .bounds(listX(), contentTop() - 1, buttonW("Refresh"), 18).build();
         refreshRosterButton.visible = false;
@@ -707,6 +765,173 @@ public final class HorseBrowserScreen extends Screen {
         return Component.literal(recipeCategory.label + "  \u25be");
     }
 
+    // ------------------------------------------------------------------
+    // The gene / allele pickers
+    // ------------------------------------------------------------------
+
+    private static final int GDD_ROW_H = 12;
+    private static final int GDD_VISIBLE = 12;
+    private static final int GDD_W = 150;
+
+    /**
+     * Recompute what the roster contains, if it has moved. Cached against the
+     * roster version because it walks every locus of every horse.
+     */
+    private void refreshPickerLists() {
+        int version = ClientHorseRoster.version();
+        if (version != ddGenesVersion) {
+            ddGenes = RosterGenetics.genesPresent(ClientHorseRoster.all());
+            ddGenesVersion = version;
+            ddAllelesFor = "";
+            // A gene that was picked and is no longer owned stops being picked,
+            // rather than filtering against something the player sold.
+            if (pickedGene != null && !ddGenes.contains(pickedGene)) {
+                pickedGene = null;
+            }
+        }
+        String want = pickedGene == null ? "*" : pickedGene.key();
+        if (!want.equals(ddAllelesFor)) {
+            ddAlleles = pickedGene == null ? allAllelesPresent()
+                    : RosterGenetics.allelesPresent(ClientHorseRoster.all(), pickedGene);
+            ddAllelesFor = want;
+        }
+    }
+
+    /** Every allele in the roster, when no gene narrows it. */
+    private List<Allele> allAllelesPresent() {
+        List<Allele> out = new ArrayList<>();
+        for (Gene gene : ddGenes) {
+            out.addAll(RosterGenetics.allelesPresent(ClientHorseRoster.all(), gene));
+        }
+        return out;
+    }
+
+    private void openGeneDd(GeneDd kind, int anchorX, int anchorY) {
+        geneDd = kind;
+        geneDdX = Math.min(anchorX, this.width - GDD_W - 4);
+        int h = Math.min(GDD_VISIBLE, Math.max(1, geneDdLabels().size())) * GDD_ROW_H;
+        geneDdY = Math.max(4, Math.min(anchorY, this.height - h - 4));
+        geneDdScroll = 0;
+    }
+
+    private void closeGeneDd() {
+        geneDd = GeneDd.NONE;
+    }
+
+    /**
+     * What the open picker lists. The gene list carries an "Any gene" row at the
+     * top so the narrowing can be undone without clearing the filter box.
+     */
+    private List<String> geneDdLabels() {
+        List<String> out = new ArrayList<>();
+        switch (geneDd) {
+            case GENE -> {
+                out.add("Any gene");
+                for (Gene gene : ddGenes) {
+                    out.add(gene.name());
+                }
+            }
+            case ALLELE -> {
+                for (Allele allele : ddAlleles) {
+                    out.add(allele.token() + "  -  " + allele.label());
+                }
+            }
+            default -> { }
+        }
+        return out;
+    }
+
+    /**
+     * A click anywhere while a picker is open resolves or dismisses it. Picking
+     * a gene narrows the allele list; picking an allele writes a
+     * {@code gene:<token>} term into the filter box, because the filter language
+     * is the thing that actually does the work and the picker is only a way of
+     * discovering what to type.
+     */
+    private boolean pickFromGeneDd(double mx, double my) {
+        GeneDd kind = geneDd;
+        List<String> labels = geneDdLabels();
+        int rows = Math.min(GDD_VISIBLE, Math.max(1, labels.size()));
+        int idx = -1;
+        if (mx >= geneDdX && mx < geneDdX + GDD_W
+                && my >= geneDdY && my < geneDdY + rows * GDD_ROW_H) {
+            int hit = geneDdScroll + (int) ((my - geneDdY) / GDD_ROW_H);
+            if (hit >= 0 && hit < labels.size()) {
+                idx = hit;
+            }
+        }
+        closeGeneDd();
+        if (idx < 0) {
+            return true;    // clicked away: dismissed, and the click is spent
+        }
+        if (kind == GeneDd.GENE) {
+            pickedGene = idx == 0 ? null : ddGenes.get(idx - 1);
+            ddAllelesFor = "";
+            refreshPickerLists();
+        } else if (kind == GeneDd.ALLELE && idx < ddAlleles.size()) {
+            addFilterTerm("gene:" + ddAlleles.get(idx).token());
+        }
+        return true;
+    }
+
+    /**
+     * Append a term to the filter box, replacing any existing term with the same
+     * key. Two {@code gene:} terms are an AND, which is a legitimate thing to
+     * want but not what somebody clicking a second allele in a picker means -
+     * they are changing their mind, not narrowing twice.
+     */
+    private void addFilterTerm(String term) {
+        String key = term.substring(0, term.indexOf(':') + 1);
+        List<String> kept = new ArrayList<>();
+        for (String existing : horseFilter.split("\s+")) {
+            if (!existing.isEmpty() && !existing.startsWith(key)) {
+                kept.add(existing);
+            }
+        }
+        kept.add(term);
+        horseFilter = String.join(" ", kept);
+        if (horseFilterBox != null) {
+            horseFilterBox.setValue(horseFilter);
+        }
+        horseScroll = 0;
+    }
+
+    private void drawGeneDd(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (geneDd == GeneDd.NONE) {
+            return;
+        }
+        List<String> labels = geneDdLabels();
+        int rows = Math.min(GDD_VISIBLE, Math.max(1, labels.size()));
+        int h = rows * GDD_ROW_H;
+        g.fill(geneDdX - 1, geneDdY - 1, geneDdX + GDD_W + 1, geneDdY + h + 1, 0xFF20242E);
+        g.fill(geneDdX, geneDdY, geneDdX + GDD_W, geneDdY + h, 0xFF12141A);
+
+        if (labels.isEmpty()) {
+            drawFitted(g, geneDd == GeneDd.ALLELE && pickedGene != null
+                            ? "no alleles of that gene here"
+                            : "no genes in your horses yet",
+                    geneDdX + 4, geneDdY + 2, GDD_W - 8, TAG);
+            return;
+        }
+        for (int i = 0; i < rows; i++) {
+            int at = geneDdScroll + i;
+            if (at >= labels.size()) {
+                break;
+            }
+            int y = geneDdY + i * GDD_ROW_H;
+            boolean hot = mouseX >= geneDdX && mouseX < geneDdX + GDD_W
+                    && mouseY >= y && mouseY < y + GDD_ROW_H;
+            if (hot) {
+                g.fill(geneDdX, y, geneDdX + GDD_W, y + GDD_ROW_H, 0xFF2E3542);
+            }
+            drawFitted(g, labels.get(at), geneDdX + 4, y + 2, GDD_W - 8, hot ? NAME : LABEL);
+        }
+        if (labels.size() > rows) {
+            drawFitted(g, "scroll for " + (labels.size() - rows) + " more",
+                    geneDdX + 4, geneDdY + h + 2, GDD_W - 8, TAG);
+        }
+    }
+
     private void layoutGeneButtons() {
         if (recipeCategoryButton != null) {
             boolean show = tab == Tab.RECIPES;
@@ -721,6 +946,21 @@ public final class HorseBrowserScreen extends Screen {
         boolean breeding = tab == Tab.BREEDING_PREVIEW;
         boolean mine = tab == Tab.MY_HORSES;
         int refreshW = buttonW("Refresh");
+        if (genePickButton != null && allelePickButton != null) {
+            genePickButton.visible = mine;
+            genePickButton.active = mine;
+            allelePickButton.visible = mine;
+            allelePickButton.active = mine;
+            if (mine && horseFilterBox != null) {
+                int pickX = horseFilterBox.getX() + horseFilterBox.getWidth() + 4;
+                genePickButton.setRectangle(68, 16, pickX, contentTop());
+                allelePickButton.setRectangle(72, 16, pickX + 71, contentTop());
+                genePickButton.setMessage(Component.literal(
+                        pickedGene == null ? "Gene..." : pickedGene.name()));
+            } else {
+                closeGeneDd();
+            }
+        }
         if (refreshRosterButton != null) {
             // Both roster tabs want it; it sits in the same place on each.
             boolean show = breeding || mine;
@@ -841,6 +1081,12 @@ public final class HorseBrowserScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        // An open picker owns the next click, wherever it lands - picking an
+        // entry or dismissing itself. Before everything else, or the table
+        // underneath takes a click aimed at a menu drawn over it.
+        if (geneDd != GeneDd.NONE) {
+            return pickFromGeneDd(event.x(), event.y());
+        }
         if (recipeMenuClicked(event.x(), event.y())) {
             return true;
         }
@@ -1033,6 +1279,12 @@ public final class HorseBrowserScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        // An open picker takes the wheel, so a long list is reachable.
+        if (geneDd != GeneDd.NONE && sy != 0) {
+            int max = Math.max(0, geneDdLabels().size() - GDD_VISIBLE);
+            geneDdScroll = Math.max(0, Math.min(geneDdScroll - (int) sy, max));
+            return true;
+        }
         if (sy != 0 && overTabStrip(mx, my) && maxTabScroll() > 0) {
             tabScroll = Math.max(0, Math.min(tabScroll - (int) (sy * 24), maxTabScroll()));
             return true;
@@ -1161,6 +1413,9 @@ public final class HorseBrowserScreen extends Screen {
             case ALLELES -> drawAlleles(g, mouseX, mouseY);
             case RECIPES -> drawRecipes(g, mouseX, mouseY);
         }
+
+        // Last, so it covers the table it is anchored over.
+        drawGeneDd(g, mouseX, mouseY);
     }
 
     private void drawTabStrip(GuiGraphicsExtractor g) {

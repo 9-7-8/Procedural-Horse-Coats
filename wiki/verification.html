@@ -56,6 +56,52 @@
     </p>
 </div>
 
+<h2 id="allele-picker">&sect;0-CI &mdash; Gene and allele pickers on My horses (2026-09-11, NOT looked at in game)</h2>
+
+<p>
+    The browser's filter language has understood <code>gene:SB1</code> since it was
+    written; what it has never had is a way to <em>find out</em> that <code>SB1</code> is
+    something you own. Two buttons beside the filter box now list <strong>only what is in
+    your roster</strong> - <code>common/horse/RosterGenetics</code> - and picking an allele
+    writes the term into the box rather than doing anything new, so the filter language
+    stays the one thing that does the work.
+</p>
+
+<ul>
+    <li><strong>The lists are your horses, not the registry.</strong> This is the whole
+        point and the easiest thing to get wrong: every horse carries every gene, so a
+        naive list is two hundred entries of wild type. <strong>Gene...</strong> should
+        show only loci somebody actually carries a variant of, and <strong>Allele...</strong>
+        only the alleles actually present. A player with one splash horse should see
+        <code>SW1</code> and none of the other splash alleles.</li>
+    <li><strong>Carriers count.</strong> A heterozygote should put its hidden allele in the
+        list - finding what is hidden is the reason to look.</li>
+    <li><strong>Pick a gene, then an allele</strong>, and the second list should be that
+        gene's alleles only. <em>Any gene</em> at the top of the first list undoes the
+        narrowing.</li>
+    <li><strong>Picking a second allele replaces the first</strong> rather than ANDing two
+        <code>gene:</code> terms - somebody clicking again is changing their mind. Two
+        <code>gene:</code> terms typed by hand still AND, which is a legitimate query.</li>
+    <li><strong>A click anywhere dismisses the menu</strong> and is spent, rather than
+        falling through to the table underneath.</li>
+    <li><strong>The wheel scrolls a long list.</strong> A big stable will overflow twelve
+        rows.</li>
+    <li><strong>Sell or lose the last horse carrying a gene</strong> and it should drop out
+        of the list on the next refresh, taking the narrowing with it.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">It inherits the roster's cap</span>
+    <p>
+        The lists are built from the same client-side roster the tab filters over, which is
+        capped (<a href="known-gaps.html#gap-76">gap 76</a>). So they describe
+        <em>the horses the tab can see</em>, not necessarily every horse the player owns -
+        and on a big stable a gene held only by a horse past the cap will not be offered.
+        The honest fix is the same owned-horse index gap 76 wants; until then this is one
+        more consumer of the cap and one more reason to build it.
+    </p>
+</div>
+
 <h2 id="food-tempt">&sect;0-CH &mdash; Horses come to food, and run for a favourite (2026-09-11, NOT looked at in game)</h2>
 
 <p>
