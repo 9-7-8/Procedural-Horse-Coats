@@ -370,17 +370,26 @@ public final class HorseCareHandler {
      * shearing (roadmap &sect;12), sleeping nearby (&sect;13) - honouring the
      * daily cap and syncing the result. No-op for an untamed horse or one not
      * on a server level.
+     *
+     * <p><b>Returns whether the bond actually moved</b>, which is not the same
+     * as whether it was asked to. An untamed horse, a horse already at
+     * {@link HorseCareAttachment#MAX_BOND}, and one that has had its
+     * {@link HorseCareAttachment#DAILY_CAP} today all decline silently, and a
+     * caller that wants to tell the player what their food did has no other way
+     * to find out.
      */
-    public static void awardBondFor(Horse horse, int amount) {
+    public static boolean awardBondFor(Horse horse, int amount) {
         if (!horse.isTamed() || !(horse.level() instanceof ServerLevel level)) {
-            return;
+            return false;
         }
         HorseCareAttachment before = horse.getData(ModAttachments.HORSE_CARE.get());
         HorseCareAttachment after = awardBond(level, horse, before, amount);
-        if (!after.equals(before)) {
-            horse.setData(ModAttachments.HORSE_CARE.get(), after);
-            syncCare(horse, after);
+        if (after.equals(before)) {
+            return false;
         }
+        horse.setData(ModAttachments.HORSE_CARE.get(), after);
+        syncCare(horse, after);
+        return true;
     }
 
     /**

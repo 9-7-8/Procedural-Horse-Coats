@@ -56,6 +56,41 @@
     </p>
 </div>
 
+<h2 id="feed-feedback">&sect;0-CK &mdash; Feeding says when it did nothing, and a favourite is never refused (2026-09-11, NOT looked at in game)</h2>
+
+<div class="note warn">
+    <span class="label">Reported as &ldquo;the diet gene doesn't appear to work&rdquo;</span>
+    <p>
+        Investigated and the locus does express - roughly one horse in eight is on a
+        special diet, and <code>feralOnly</code> means breed horses can carry it too, so
+        it is not that they are absent. What was missing is <strong>feedback</strong>:
+        feeding a horse that is already on full health and at max bond (or capped for the
+        day) spends the item and gives it nothing, silently. Same for the favourite. That
+        is indistinguishable from a gene that does nothing, which is how it was read.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Feed a hurt or under-bonded horse its food</strong> - no message. The
+        message is only for the case where <em>both</em> halves declined, because either
+        one alone is a real effect worth not talking over.</li>
+    <li><strong>Feed a full-health, max-bond horse</strong> - it should still eat it, and
+        the action bar should say <em>&ldquo;&lt;name&gt; eats it happily, but did not seem
+        to need it.&rdquo;</em> Confirm the food <strong>is</strong> consumed: it was never
+        the refusing that was wrong.</li>
+    <li><strong>The daily bond cap counts as declining.</strong> A horse well short of max
+        bond that has had its 15 for the day should also produce the message, which is the
+        subtler half and the one most likely to confuse.</li>
+    <li><strong>A foal on a special diet can be fed its favourite.</strong> This is the case
+        that genuinely could not be done before - the preference handler skips babies, and
+        the diet handler then refused them. Try a carnivore foal with an apple favourite.</li>
+    <li><strong>Sugar and cocoa-bean favourites work.</strong> Neither is an edible item, so
+        neither used to pass the diet handler's feed-attempt test at all.</li>
+    <li><strong>A special-diet horse still refuses ordinary food it does not eat</strong>,
+        with the existing smoke and message. The favourite is the override, not a
+        free pass for everything.</li>
+</ul>
+
 <h2 id="rest-stops">&sect;0-CJ &mdash; A hay portal every 25 pens in the corridor (2026-09-11, NOT looked at in game)</h2>
 
 <p>

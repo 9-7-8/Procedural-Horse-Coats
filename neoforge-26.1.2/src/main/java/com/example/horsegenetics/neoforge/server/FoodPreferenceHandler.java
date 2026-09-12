@@ -78,15 +78,21 @@ public final class FoodPreferenceHandler {
             if (!event.getEntity().getAbilities().instabuild) {
                 held.shrink(1);
             }
+            // Measured BEFORE healing, or a horse on full health looks like one
+            // that was just healed to full.
+            boolean needed = horse.getHealth() < horse.getMaxHealth();
             horse.heal(2.0F);
             horse.addEffect(new MobEffectInstance(MobEffects.SPEED, BUFF_TICKS, 0,
                     true, false, false));
-            HorseCareHandler.awardBondFor(horse, FAVOURITE_BOND);
+            boolean bonded = HorseCareHandler.awardBondFor(horse, FAVOURITE_BOND);
             level.sendParticles(ParticleTypes.HEART,
                     horse.getX(), horse.getY() + horse.getBbHeight(), horse.getZ(),
                     5, 0.4, 0.3, 0.4, 0.0);
             level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                     SoundEvents.HORSE_EAT, SoundSource.NEUTRAL, 1.0F, 1.0F);
+            if (!needed && !bonded) {
+                FeedFeedback.ateButDidNotNeedIt(event.getEntity(), horse);
+            }
         }
 
         // Cancel, so the diet handler never sees it. This is the override.

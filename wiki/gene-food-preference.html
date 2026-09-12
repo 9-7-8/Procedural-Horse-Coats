@@ -40,6 +40,35 @@
     </p>
 </div>
 
+<div class="note good">
+    <span class="label">Feeding the favourite always works, and says so when it was not needed (2026-09-11)</span>
+    <p>
+        It always did work - what it never did was <strong>report</strong>. Both halves of
+        what the favourite gives decline silently when there is nothing to give: healing a
+        horse already on full health is a no-op, and the bond award returns without moving
+        anything for a horse at max bond or one that has had its daily cap. So feeding a
+        healthy, well-bonded horse spent the item, played the sound, showed the hearts, and
+        left the player with <strong>no way to tell whether the locus had done anything at
+        all</strong> - which reads exactly like a gene that does not work.
+    </p>
+    <p>
+        The food is still eaten; it was never the refusing that was wrong. When both halves
+        declined, the player is now told on the action bar: <em>&ldquo;&lt;name&gt; eats it
+        happily, but did not seem to need it.&rdquo;</em> <strong>Nothing is gated on
+        this</strong> - there is no new condition under which feeding fails, because a
+        horse refusing food for being too happy would be a worse lie than the silence was.
+    </p>
+    <p>
+        Two cases where the favourite genuinely <em>could not</em> be fed are closed with
+        it, both on <a href="gene-diet.html">the diet locus</a>. A <strong>foal</strong>
+        is skipped by the preference handler so vanilla keeps its own baby path, which left
+        the diet handler free to refuse a foal the one food it likes best; and the diet
+        handler's feed-attempt test gates on the item carrying a FOOD component, which
+        <strong>sugar and cocoa beans do not</strong> - so two of the twelve favourites
+        never reached it. The favourite now beats both.
+    </p>
+</div>
+
 <h2 id="what">What it does</h2>
 
 <table class="data">

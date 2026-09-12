@@ -65,7 +65,15 @@ public final class HorseDietHandler {
             return;
         }
         ItemStack held = event.getItemStack();
-        if (held.isEmpty() || !DietFoods.isFeedAttempt(held)) {
+        if (held.isEmpty()) {
+            return;
+        }
+        // A favourite is a feed attempt whatever else it is. isFeedAttempt
+        // gates on the FOOD data component, and two of the favourites - sugar
+        // and cocoa beans - are not edible items at all, so without this they
+        // never reached this handler and a foal with either could not be fed
+        // the thing it likes best.
+        if (!DietFoods.isFeedAttempt(held) && !isFavourite(horse, held)) {
             return;     // a saddle, a lead, a hand - none of our business
         }
 
@@ -77,7 +85,12 @@ public final class HorseDietHandler {
             return;     // breeding is not this locus's business - see the class note
         }
 
-        boolean accepted = DietFoods.accepts(diet, held);
+        // The preference locus beats the diet locus, here as everywhere else.
+        // It matters most for a FOAL: FoodPreferenceHandler bows out of babies
+        // so vanilla keeps its own baby path, which used to leave the diet
+        // handler free to refuse a foal the one food it likes best - the single
+        // case where a horse genuinely could not be fed its favourite.
+        boolean accepted = DietFoods.accepts(diet, held) || isFavourite(horse, held);
         if (!(horse.level() instanceof ServerLevel level)) {
             // Client side still has to cancel, or the hand swings and the
             // player is told a different story from the server's.
@@ -97,8 +110,18 @@ public final class HorseDietHandler {
 
     // ------------------------------------------------------------------
 
+    /** Is this the one item this horse's preference locus names? */
+    private static boolean isFavourite(Horse horse, ItemStack held) {
+        String favourite = FoodPreferenceHandler.favouriteOf(horse);
+        return favourite != null && net.minecraft.core.registries.BuiltInRegistries.ITEM
+                .getKey(held.getItem()).toString().equals(favourite);
+    }
+
     private static void feed(ServerLevel level, Horse horse, Player player,
                              ItemStack held, HorseDiet diet) {
+        // Before healing, or a horse already on full health is indistinguishable
+        // from one this mouthful just filled up.
+        boolean needed = horse.getHealth() < horse.getMaxHealth();
         if (diet.diet().healsFully()) {
             horse.setHealth(horse.getMaxHealth());
         } else {
@@ -119,8 +142,13 @@ public final class HorseDietHandler {
                 horse.getX(), horse.getY() + horse.getBbHeight() * 0.8, horse.getZ(),
                 6, 0.4, 0.3, 0.4, 0.0);
 
-        if (horse.isTamed() && horse.getOwner() == player) {
-            HorseCareHandler.awardBondFor(horse, FEED_BOND);
+        boolean bonded = horse.isTamed() && horse.getOwner() == player
+                && HorseCareHandler.awardBondFor(horse, FEED_BOND);
+
+        // It ate, as it always did - this only says so when there was nothing
+        // in it for the horse, which is the case that read as a broken locus.
+        if (!needed && !bonded) {
+            FeedFeedback.ateButDidNotNeedIt(player, horse);
         }
     }
 
