@@ -235,8 +235,6 @@ lives on a page.
 - **What has actually been seen in-game is a small fraction of what is built.**
   `wiki/verification.html` is the authority on which is which, and is the first
   thing to read before claiming something works.
-- **Machine caveat (this dev laptop):** hybrid graphics - the JVM dies in the AMD
-  GL driver unless pinned to the NVIDIA GPU. `wiki/architecture.html#running`.
 
 ---
 

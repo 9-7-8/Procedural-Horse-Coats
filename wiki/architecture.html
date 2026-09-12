@@ -269,12 +269,12 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 
 <p><strong>Crash reports</strong> land in <code>neoforge-26.1.2/run/crash-reports/</code> (<code>crash-&lt;timestamp&gt;-{server,client,fml}.txt</code>) - most recent last. That is where the owner will point for any in-game crash; read the newest one. <code>hs_err_pid*</code> JVM-level dumps land in <code>neoforge-26.1.2/run/</code> (and are git-ignored).</p>
 
-<p>Two machine-specific launch blockers on this dev laptop (NVIDIA RTX 3050 Ti + AMD integrated, AMD driver from 2023):</p>
+<p><strong>The current dev desktop has no machine-specific launch blockers</strong> - one NVIDIA GTX 1070 Ti, no integrated adapter, nothing to pin. The two below were real on the <em>previous</em> dev laptop (NVIDIA RTX 3050 Ti + AMD integrated, AMD driver from 2023). They are kept because they cost a day to find and would come straight back on any hybrid-graphics machine - but neither workaround is needed here, and the GPU-preference one is not applied here:</p>
 
 <ul>
 <li><strong>JVM hard-crash (<code>EXCEPTION_ACCESS_VIOLATION</code> in <code>atio6axx.dll</code>) at <code>glfwCreateWindow</code></strong> - the process ran on the old AMD integrated driver. Fix: Windows per-app GPU preference pinning <code>java.exe</code> / <code>javaw.exe</code> to "High performance" (<code>HKCU\Software\Microsoft\DirectX\UserGpuPreferences</code>, <code>GpuPreference=2;</code>). Durable; a driver update would also fix it.
 </li>
-<li><strong>FML early-loading splash window</strong> hits the same crash one step earlier. <code>run/config/fml.toml</code> has <code>earlyWindowControl = false</code>. <code>run/</code> is otherwise git-ignored, but <strong>that one file is deliberately still tracked</strong> (see "Build setup notes") so a <code>git clean</code> can't reset it to <code>true</code>.
+<li><strong>FML early-loading splash window</strong> hits the same crash one step earlier. <code>run/config/fml.toml</code> has <code>earlyWindowControl = false</code>. <code>run/</code> is otherwise git-ignored, but <strong>that one file is deliberately still tracked</strong> (see "Build setup notes") so a <code>git clean</code> can't reset it to <code>true</code>. Still <code>false</code>, and harmless on a machine that does not need it - so it has been left alone rather than flipped back.
 </li>
 </ul>
 
