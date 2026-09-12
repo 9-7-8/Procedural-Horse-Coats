@@ -1,0 +1,13 @@
+{
+  "id": "kit_forest_paint",
+  "name": "Test Forest Paint",
+  "description": "A test breed from the debug kit: every one a chestnut tobiano, and it lives only in dark forests. If you can read this under About, a drop-in breed's description reaches the breed book.",
+  "commonness": "moderate",
+  "spawn_time": "any",
+  "biomes": ["minecraft:dark_forest"],
+  "stats": { "size": [0.95, 1.05] },
+  "genes": {
+    "horsegenetics.extension": [ { "pair": "e/e", "weight": 100 } ],
+    "horsegenetics.tobiano": [ { "pair": "To/To", "weight": 100 } ]
+  }
+}

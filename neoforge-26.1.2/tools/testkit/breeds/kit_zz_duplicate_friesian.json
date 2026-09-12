@@ -1,0 +1,6 @@
+{
+  "id": "friesian",
+  "name": "Duplicate Friesian (must be refused)",
+  "description": "Collides with the shipped Friesian. The log should refuse this file; the breed book should show one Friesian, not two.",
+  "biomes": ["minecraft:plains"]
+}

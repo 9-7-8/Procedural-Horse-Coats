@@ -1,0 +1,489 @@
+#One section per shipped breed.
+#  enabled      - false: this breed never spawns, from anywhere.
+#  spawn_weight - how often it heads a wild herd against the other
+#                 breeds of the same biome. 0 = never wild (the cowboy,
+#                 stables and eggs still have it). The commonness names
+#                 in breed files are these weights:
+#                 extremely_common 48, very_common 24, common 12, moderate 6, uncommon 3, rare 1.5, very_rare 0.75
+#  biomes       - where its wild herds live. Modded ids work.
+#  spawn_time   - "any", "day" or "night": when a herd may be founded.
+[breeds]
+
+	#Friesian
+	[breeds.friesian]
+		biomes = ["minecraft:dark_forest"]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		spawn_time = "any"
+
+	#Morgan
+	[breeds.morgan]
+		enabled = false
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:plains", "minecraft:forest", "minecraft:taiga", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Akhal-Teke
+	[breeds.akhal_teke]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:desert", "minecraft:savanna", "minecraft:badlands", "minecraft:savanna_plateau"]
+		spawn_time = "any"
+
+	#American Cream Draft
+	[breeds.american_cream_draft]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#American Miniature
+	[breeds.american_miniature]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#American Paint
+	[breeds.american_paint]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:plains", "minecraft:savanna", "minecraft:windswept_savanna"]
+		spawn_time = "any"
+
+	#Andalusian
+	[breeds.andalusian]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		biomes = ["minecraft:plains", "minecraft:forest", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Appaloosa
+	[breeds.appaloosa]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		biomes = ["minecraft:taiga", "minecraft:forest", "minecraft:windswept_hills"]
+		spawn_time = "any"
+
+	#Arabian
+	[breeds.arabian]
+		enabled = true
+		# Default: 12.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 12.0
+		biomes = ["minecraft:desert", "minecraft:savanna", "minecraft:badlands", "minecraft:savanna_plateau"]
+		spawn_time = "any"
+
+	#Banker Horse
+	[breeds.banker_horse]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:beach", "minecraft:stony_shore", "minecraft:river"]
+		spawn_time = "any"
+
+	#Belgian Draft
+	[breeds.belgian_draft]
+		enabled = true
+		# Default: 12.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 12.0
+		biomes = ["minecraft:plains", "minecraft:forest", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Camargue
+	[breeds.camargue]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:river", "minecraft:beach"]
+		spawn_time = "any"
+
+	#Canadian Horse
+	[breeds.canadian_horse]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:snowy_taiga", "minecraft:grove", "minecraft:snowy_plains"]
+		spawn_time = "any"
+
+	#Caspian Pony
+	[breeds.caspian_pony]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:desert", "minecraft:badlands", "minecraft:savanna"]
+		spawn_time = "any"
+
+	#Cleveland Bay
+	[breeds.cleveland_bay]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:plains", "minecraft:forest", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Clydesdale
+	[breeds.clydesdale]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:taiga", "minecraft:snowy_taiga", "minecraft:grove", "minecraft:river"]
+		spawn_time = "any"
+
+	#Connemara Pony
+	[breeds.connemara_pony]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		biomes = ["minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_shore"]
+		spawn_time = "any"
+
+	#Dales Pony
+	[breeds.dales_pony]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:taiga"]
+		spawn_time = "any"
+
+	#Dartmoor Pony
+	[breeds.dartmoor_pony]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:windswept_hills", "minecraft:meadow", "minecraft:forest"]
+		spawn_time = "any"
+
+	#Exmoor Pony
+	[breeds.exmoor_pony]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:windswept_hills", "minecraft:taiga", "minecraft:snowy_slopes"]
+		spawn_time = "any"
+
+	#Falabella
+	[breeds.falabella]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Norwegian Fjord
+	[breeds.fjord]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:snowy_taiga", "minecraft:frozen_river", "minecraft:snowy_slopes", "minecraft:grove"]
+		spawn_time = "any"
+
+	#Gypsy Vanner
+	[breeds.gypsy_vanner]
+		enabled = true
+		# Default: 12.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 12.0
+		biomes = ["minecraft:plains", "minecraft:river", "minecraft:swamp", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Hackney
+	[breeds.hackney]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Haflinger
+	[breeds.haflinger]
+		enabled = true
+		# Default: 12.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 12.0
+		biomes = ["minecraft:cherry_grove", "minecraft:meadow", "minecraft:windswept_hills", "minecraft:grove"]
+		spawn_time = "any"
+
+	#Hanoverian
+	[breeds.hanoverian]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:plains", "minecraft:forest", "minecraft:meadow", "minecraft:sunflower_plains"]
+		spawn_time = "any"
+
+	#Icelandic Horse
+	[breeds.icelandic_horse]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		biomes = ["minecraft:snowy_plains", "minecraft:ice_spikes", "minecraft:frozen_peaks", "minecraft:jagged_peaks", "minecraft:snowy_slopes"]
+		spawn_time = "any"
+
+	#Irish Draught
+	[breeds.irish_draught]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:taiga", "minecraft:forest"]
+		spawn_time = "any"
+
+	#Karabakh
+	[breeds.karabakh]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:desert", "minecraft:savanna", "minecraft:badlands"]
+		spawn_time = "any"
+
+	#Kiger Mustang
+	[breeds.kiger_mustang]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:badlands", "minecraft:eroded_badlands", "minecraft:wooded_badlands", "minecraft:savanna"]
+		spawn_time = "any"
+
+	#Knabstrupper
+	[breeds.knabstrupper]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:plains", "minecraft:birch_forest", "minecraft:forest", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Lipizzan
+	[breeds.lipizzan]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:plains", "minecraft:windswept_hills", "minecraft:meadow", "minecraft:sunflower_plains"]
+		spawn_time = "any"
+
+	#Lusitano
+	[breeds.lusitano]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		biomes = ["minecraft:savanna", "minecraft:plains", "minecraft:savanna_plateau"]
+		spawn_time = "any"
+
+	#Marwari
+	[breeds.marwari]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:jungle", "minecraft:sparse_jungle", "minecraft:bamboo_jungle", "minecraft:savanna"]
+		spawn_time = "any"
+
+	#Mustang
+	[breeds.mustang]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		biomes = ["minecraft:badlands", "minecraft:eroded_badlands", "minecraft:wooded_badlands", "minecraft:savanna", "minecraft:windswept_savanna"]
+		spawn_time = "any"
+
+	#New Forest Pony
+	[breeds.new_forest_pony]
+		enabled = true
+		# Default: 12.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 12.0
+		biomes = ["minecraft:forest", "minecraft:birch_forest", "minecraft:old_growth_birch_forest", "minecraft:flower_forest"]
+		spawn_time = "any"
+
+	#Paso Fino
+	[breeds.paso_fino]
+		enabled = true
+		# Default: 6.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 6.0
+		biomes = ["minecraft:savanna", "minecraft:jungle", "minecraft:sparse_jungle", "minecraft:bamboo_jungle"]
+		spawn_time = "any"
+
+	#Percheron
+	[breeds.percheron]
+		enabled = true
+		# Default: 12.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 12.0
+		biomes = ["minecraft:plains", "minecraft:snowy_plains", "minecraft:meadow", "minecraft:sunflower_plains"]
+		spawn_time = "any"
+
+	#Przewalski's Horse
+	[breeds.przewalski]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:desert", "minecraft:badlands", "minecraft:savanna"]
+		spawn_time = "any"
+
+	#Puerto Rican Paso Fino
+	[breeds.puerto_rican_paso_fino]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:jungle", "minecraft:savanna", "minecraft:beach", "minecraft:mangrove_swamp"]
+		spawn_time = "any"
+
+	#Quarter Horse
+	[breeds.quarter_horse]
+		enabled = true
+		# Default: 48.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 48.0
+		biomes = ["minecraft:plains", "minecraft:savanna", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Shetland Pony
+	[breeds.shetland_pony]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:mushroom_fields", "minecraft:snowy_plains", "minecraft:taiga", "minecraft:grove"]
+		spawn_time = "any"
+
+	#Shire
+	[breeds.shire]
+		enabled = true
+		# Default: 3.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 3.0
+		biomes = ["minecraft:plains", "minecraft:river", "minecraft:meadow", "minecraft:swamp"]
+		spawn_time = "any"
+
+	#Standardbred
+	[breeds.standardbred]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Suffolk Punch
+	[breeds.suffolk_punch]
+		enabled = true
+		# Default: 1.5
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 1.5
+		biomes = ["minecraft:plains", "minecraft:forest", "minecraft:meadow", "minecraft:sunflower_plains"]
+		spawn_time = "any"
+
+	#Tennessee Walking Horse
+	[breeds.tennessee_walking]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:plains", "minecraft:forest", "minecraft:swamp", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Thoroughbred
+	[breeds.thoroughbred]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:plains", "minecraft:savanna", "minecraft:sunflower_plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+	#Trakehner
+	[breeds.trakehner]
+		enabled = true
+		# Default: 12.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 12.0
+		biomes = ["minecraft:taiga", "minecraft:forest", "minecraft:old_growth_pine_taiga", "minecraft:grove"]
+		spawn_time = "any"
+
+	#Welsh Pony
+	[breeds.welsh_pony]
+		enabled = true
+		# Default: 24.0
+		# Range: 0.0 ~ 1000.0
+		spawn_weight = 24.0
+		biomes = ["minecraft:windswept_hills", "minecraft:taiga", "minecraft:plains", "minecraft:meadow"]
+		spawn_time = "any"
+
+#Horse Genetics - which horses your world has.
+#
+#Every breed the mod ships is listed below with the values its own
+#breed file gives it; change any of them. Your own breeds (the .json
+#files in the breeds folder beside this file) are not listed - edit
+#those files instead. Changes reach herds, the cowboy, stables and
+#spawn eggs straight away; which biomes get wild herds at all is
+#decided when a world starts, so restart the world after moving a
+#breed to new biomes.
+#
+#A wild horse that has nothing it may be - no breed of its biome at
+#this hour, and no Feral Mixed - does not spawn. So switching off the
+#shipped breeds and Feral Mixed leaves a world with only your breeds,
+#and only where they live.
+[general]
+	#Whether ANY of the shipped breeds spawn. false switches them all off
+	#at once - no wild herds, no cowboy stock, no stables, no spawn eggs -
+	#whatever their own sections below say. Horses you already have keep
+	#their breed. (default: true)
+	shipped_breeds_enabled = true
+
+#Feral Mixed: the unbred horse. A lone wild horse is one, and so is a
+#herd in a biome where no breed may spawn at that hour. /summon and
+#vanilla spawn eggs always make one, whatever this says.
+[feral_mixed]
+	#Whether a wild horse may be Feral Mixed at all. false: a wild horse
+	#with no breed to be is not spawned. (default: true)
+	enabled = true
+	#The biomes a wild horse may be Feral Mixed in. Empty means every
+	#biome. Use the ids F3 shows, e.g. "minecraft:plains". (default: [])
+	biomes = []
+	#Its weight against the biome's breeds when a wild herd is founded,
+	#on the same scale as spawn_weight below. 0 means Feral Mixed only
+	#where no breed may spawn - how it has always been. (default: 0)
+	# Default: 0.0
+	# Range: 0.0 ~ 1000.0
+	herd_weight = 0.0

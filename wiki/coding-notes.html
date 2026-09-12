@@ -368,6 +368,70 @@
     <code>DesignerApi</code>, not a sixth mirror.
 </p>
 
+<h2 id="headless">Drive the browser tools; do not read them</h2>
+
+<p>
+    The wiki ships two <em>programs</em> &mdash; the gene creator, which runs the spec
+    engine in JavaScript, and the horse designer, which runs <code>common/</code> as
+    WebAssembly &mdash; and no static checker reaches either.
+    <code>check-links.mjs</code> can say the page exists;
+    only a browser can say the page <strong>works</strong>.
+</p>
+
+<div class="codebox">
+<pre><code>node wiki/tools/check-path-canvas.mjs      # drive the PATH drawing canvas
+node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</code></pre>
+</div>
+
+<p>
+    <strong>No Puppeteer, and no dependency at all.</strong> Node 24 has a
+    <code>WebSocket</code> and Chrome has <code>--remote-debugging-port</code>, which
+    between them is the whole harness &mdash; <code>wiki/tools/chrome.mjs</code>, about
+    forty lines. Adding a <code>devDependency</code> to a repo whose tools are all
+    zero-install would cost more than writing them. Both open the page over
+    <code>file://</code>, because that is the constraint the tools are built to: a check
+    that passed on a local server and failed off disk would be worse than useless. With
+    no Chrome on the machine they <em>skip</em> rather than fail &mdash; these are checks
+    you run, not gates anything depends on.
+</p>
+
+<div class="note">
+    <span class="label">Assert on the model, not on the picture</span>
+    <p>
+        <code>check-path-canvas.mjs</code> found a bug on its first run, and the bug was
+        not in the canvas: every mask parameter is wrapped in a
+        <code>&lt;label&gt;</code>, which forwards a click anywhere inside it to the
+        first control it contains &mdash; so each click on the horse was
+        <em>also</em> pressing the canvas's own Reverse button, and the drawing came out
+        backwards one point at a time. It was obvious from a click sequence that printed
+        the <code>points</code> array after every gesture, and would have been baffling
+        to hit by hand. So the checks read that array after each click, drag and delete;
+        the screenshot is a convenience (<code>--shot out.png</code>), never the
+        assertion.
+    </p>
+</div>
+
+<p>
+    <code>check-designer-boots.mjs</code> is the other half of
+    <a href="known-gaps.html#gap-199">gap 199</a>. That gap is that nothing
+    <em>builds</em> <code>:web</code>; this is the failure one step later, where the
+    build is green and the artefact is broken. <strong>TeaVM compiles only the reachable
+    graph</strong>, so a new call in <code>common/</code> can pull in a JDK method it
+    does not have, and the failure is at <em>instantiation</em>: the Gradle task goes
+    green, the wasm is written, and the page comes up blank. Run it after
+    <code>:web:bakeDesignerAssets</code>, which is to say after any change to
+    <code>common/</code> or <code>web/</code>.
+</p>
+
+<p class="muted">
+    One trap worth naming, since both checks hit it: <strong>&ldquo;loaded&rdquo; is not
+    &ldquo;ready&rdquo;.</strong> The creator runs a parity self-check on boot and the
+    designer paints a frame or two after it publishes itself, so a fixed
+    <code>sleep</code> is flaky against both. Poll for the condition you actually mean
+    &mdash; <code>open()</code> takes a <code>readyWhen</code> expression for exactly
+    this.
+</p>
+
 <h2 id="working">Working the build</h2>
 
 <h3 id="goldens">Two goldens, and only one of them is affordable</h3>

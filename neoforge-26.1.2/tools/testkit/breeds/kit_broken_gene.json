@@ -1,0 +1,11 @@
+{
+  "id": "kit_broken_gene",
+  "name": "Test Broken Gene",
+  "description": "Names a gene that does not exist. It should still load, with a warning in the log naming horsegenetics.no_such_gene.",
+  "spawn": ["spawn_egg"],
+  "genes": {
+    "horsegenetics.no_such_gene": [ { "pair": "X/X", "weight": 100 } ],
+    "horsegenetics.extension": [ { "pair": "E/E", "weight": 100 } ],
+    "horsegenetics.agouti": [ { "pair": "a/a", "weight": 100 } ]
+  }
+}

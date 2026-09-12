@@ -202,7 +202,7 @@ and fails *silently* when stale:
 | If you touched | Re-run | Commit |
 |---|---|---|
 | any gene, or a coat deliberately moved | **two** goldens move, and both write their actual to `common/build/` on a mismatch - run the class, check *which rows* moved, copy back. `*CoatBakeGoldenTest` is every gene in seconds; `*CoatPipelineGoldenTest` is 39 whole horses and also seconds (only the *whole* suite is ten minutes) | `common/src/test/resources/coat-bake-golden.txt`, `coat-golden.txt` |
-| **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
+| **anything in `common/` or `web/`** | `:web:bakeDesignerAssets`, then `node wiki/tools/check-designer-boots.mjs` - TeaVM compiles only the *reachable* graph, so the task goes green and the page comes up blank | `wiki/horse-designer/wasm/web.wasm` |
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs`; geometry also moves `:common:bakeGeneIcons` | `wiki/gene-creator/fixtures/expected.json`, `wiki/assets/gene-icons/` |
 | the coat PNGs, the name tables, **or `example-genes/`** | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets, incl. `wiki/gene-creator/js/examples.js` |

@@ -1,0 +1,12 @@
+{
+  "id": "kit_night_cremello",
+  "name": "Test Night Cremello",
+  "description": "A test breed from the debug kit: every one a cremello, in dark forests, and only herds founded at night.",
+  "commonness": "extremely_common",
+  "spawn_time": "night",
+  "biomes": ["minecraft:dark_forest"],
+  "genes": {
+    "horsegenetics.extension": [ { "pair": "e/e", "weight": 100 } ],
+    "horsegenetics.matp": [ { "pair": "Cr/Cr", "weight": 100 } ]
+  }
+}
