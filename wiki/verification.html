@@ -45,7 +45,11 @@
         Friesian moved to dark forest only and the Morgan switched off. Delete them to put the
         dev run back.
         <strong>Those six files are in the repo now</strong>, at
-        <code>neoforge-26.1.2/tools/testkit/</code> with a note saying how to put them back
+        <code>neoforge-26.1.2/tools/testkit/</code> &mdash; whose <code>README.txt</code> is
+        also the one-page answer to &ldquo;how do I start testing&rdquo;: the button, the
+        <code>/testkit</code> commands, the fixed plains seed and the two things that waste
+        an hour (rebuilding under a live client; <code>runServer</code> while the client
+        holds <code>run/</code>). It has a note saying how to put the drop-ins back
         &mdash; they had only ever existed in the <code>.gitignore</code>d
         <code>run/phc/</code>, which is to say on one laptop, so a fresh clone could not
         reproduce any of the four checks.
@@ -55,7 +59,7 @@
 <h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit (2026-09-12, NOT looked at)</h2>
 
 <div class="note danger">
-    <span class="label">Every glowing gene in the game changed, and nothing here can see it</span>
+    <span class="label">Every glowing gene in the game changed, and nothing here can see it &mdash; test kit batch 2</span>
     <p>
         A layer's <code>emissive</code> is a number now, and <strong>the mask's coverage
         scales it</strong>: the old threshold at coverage 0.5 is gone, so every
@@ -103,6 +107,15 @@
         These are what make <a href="#dial-slider">&sect;0-CN</a> and
         <a href="#glow-intensity">&sect;0-CO</a> real. All three changed their own coat
         golden rows and nothing else's, so the blast radius is exactly these loci.
+    </p>
+    <p>
+        <strong>This is test kit batch 1.</strong> <code>runClient</code>, press
+        <em>Spawn Test Horse World</em>, and the hotbar you are handed on login is this
+        list: six eggs, golden carrots to breed them and a clock, because half of it is a
+        night test. <code>/testkit</code> offers <code>/time set midnight</code> beside
+        the batch list. The world is the same plains every time &mdash; the seed is fixed
+        (<code>DebugTitleScreenButton.TEST_WORLD_SEED</code>) so that what differs between
+        two screenshots is the mod and not the weather.
     </p>
 </div>
 

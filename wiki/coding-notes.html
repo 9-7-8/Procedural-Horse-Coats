@@ -600,6 +600,27 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
     </p>
 </div>
 
+<div class="note danger">
+    <span class="label">And two Gradle builds in the same module at once corrupt its class files</span>
+    <p>
+        The same family, one step worse. A seed hunt that boots
+        <code>runServer</code> in a loop is <em>a build</em> - each round compiles the mod
+        before it launches - so running <code>compileJava</code> beside it puts two
+        Gradle invocations in <code>neoforge-26.1.2/build/classes/</code> at once. What
+        comes back is not a lock error, it is
+        <strong><code>bad class file: &hellip;/DebugTestWorldCleanup.class</code></strong>
+        against a class nobody touched, which reads exactly like the
+        <code>ClassNotFoundException</code> above and is a half-written file rather than a
+        missing one.
+    </p>
+    <p>
+        The fix is the obvious one - wait, then rebuild - and the reason it is worth a
+        note is that the diagnosis is not obvious: <strong>the error names your source,
+        not your concurrency.</strong> If a background task of yours runs Gradle, treat
+        the whole module's build directory as held until it exits.
+    </p>
+</div>
+
 </article>
 </main>
 </body>

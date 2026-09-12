@@ -51,6 +51,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -108,8 +109,89 @@ public final class DebugTestWorldHandler {
         }
         pendingHotbarFill = false;
         giveBatch(player, 1);
+        reportSpawnBiome(player);
         locatePlainsVillage(player);
         locateDarkForest(player);
+    }
+
+    /**
+     * <b>Say which biome you actually landed in</b>, and hand over a teleport
+     * when it is not plains.
+     *
+     * <p>The test world's seed is fixed so that it is always the same plains,
+     * which is the ground every coat is judged against. That is a claim about
+     * worldgen, and worldgen is somebody else's code: a Minecraft update, a
+     * dimension preset change or a mod that adds biomes can move the spawn
+     * without moving the seed. So the promise checks itself out loud on every
+     * login rather than being believed - and if it has drifted, the answer is
+     * one click away instead of a hunt.
+     */
+    private static void reportSpawnBiome(ServerPlayer player) {
+        if (!(player.level() instanceof ServerLevel level)) {
+            return;
+        }
+        Holder<Biome> here = level.getBiome(player.blockPosition());
+        String name = here.unwrapKey().map(k -> k.identifier().toString()).orElse("an unnamed biome");
+        long seed = level.getSeed();
+        HorseGenetics.LOGGER.info("[Debug] test world seed {} spawned in {} at {}",
+                seed, name, player.blockPosition());
+
+        if (here.is(Biomes.PLAINS)) {
+            tell(player, Component.literal("Spawn is plains, as the seed intends (seed " + seed + ").")
+                    .withStyle(ChatFormatting.GREEN));
+            return;
+        }
+        tell(player, Component.literal("Spawn is " + name + ", NOT plains - worldgen has moved under "
+                        + "seed " + seed + ". Coats are judged against plains; here is the nearest.")
+                .withStyle(ChatFormatting.RED));
+        Pair<BlockPos, Holder<Biome>> hit = level.findClosestBiome3d(
+                b -> b.is(Biomes.PLAINS), player.blockPosition(), 6400, 32, 64);
+        if (hit == null) {
+            tell(player, Component.literal("No plains within 6400 blocks either. Pick a new seed: "
+                    + "DebugTitleScreenButton.TEST_WORLD_SEED.").withStyle(ChatFormatting.RED));
+            return;
+        }
+        offerTp(player, level, "Plains (what the fixed seed was chosen for)", hit.getFirst());
+    }
+
+    /**
+     * The same reading, on a <b>dedicated</b> server, at startup.
+     *
+     * <p>This is what makes the seed checkable without a client at all:
+     * {@code runServer} on a given {@code level-seed} prints the biome its
+     * spawn landed in, so choosing the seed is a loop somebody can run rather
+     * than a number somebody remembers. The client path above cannot do that
+     * job - it needs a person to log in, which is the thing being avoided.
+     */
+    @SubscribeEvent
+    static void onServerStarted(ServerStartedEvent event) {
+        if (!ServerConfig.debugTools()) {
+            return;
+        }
+        ServerLevel level = event.getServer().overworld();
+        // 26.1.2: the world spawn is the overworld's respawn data, not a
+        // getSharedSpawnPos() on the level - see wiki/api-notes.html.
+        BlockPos spawn = level.getLevelData().getRespawnData().pos();
+        Holder<Biome> biome = level.getBiome(spawn);
+        String name = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("unnamed");
+        // How much plains, not just "is the one block under you plains": a
+        // spawn in a pocket wedged between a forest and a shore satisfies the
+        // letter of it and is no use to stand a horse in. Sixteen points on a
+        // 64-block ring is enough to tell a field from a pocket.
+        int plains = 0;
+        for (int i = 0; i < 16; i++) {
+            double angle = i * Math.PI / 8.0;
+            BlockPos at = spawn.offset((int) Math.round(Math.cos(angle) * 64), 0,
+                    (int) Math.round(Math.sin(angle) * 64));
+            if (level.getBiome(at).is(Biomes.PLAINS)) {
+                plains++;
+            }
+        }
+        HorseGenetics.LOGGER.info("[Debug] world seed {} - spawn {} is {}{}, and {}/16 of a "
+                        + "64-block ring round it is plains",
+                level.getSeed(), spawn, name,
+                biome.is(Biomes.PLAINS) ? " (PLAINS - what the test world wants)" : " (NOT plains)",
+                plains);
     }
 
     /**
@@ -161,6 +243,14 @@ public final class DebugTestWorldHandler {
                 .then(Commands.literal("forest")
                         .executes(c -> {
                             locateDarkForest(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+                // The login report again, on demand. An hour into a session you
+                // are a thousand blocks from spawn and the one line that said
+                // where you started has scrolled away.
+                .then(Commands.literal("seed")
+                        .executes(c -> {
+                            reportSpawnBiome(c.getSource().getPlayerOrException());
                             return 1;
                         })));
 
@@ -283,6 +373,8 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     private static final String[] BATCHES = {
+            "The dial: one gene that scales, two that burn (0-CP)",
+            "Glow is a level now - the soft-edged glows (0-CO)",
             "Behaviour that can damage a world - leave these running (0-BT)",
             "Behaviour that is probably subtly wrong (0-BT)",
             "Holding pen and stalls - the refusals (0-BY, 0-BX)",
@@ -298,6 +390,11 @@ public final class DebugTestWorldHandler {
         for (int i = 0; i < BATCHES.length; i++) {
             tell(player, command("/testkit " + (i + 1), BATCHES[i]));
         }
+        // Two of the first three batches can only be judged after dark, and
+        // hunting for the command is the sort of friction that turns "check the
+        // glow" into "check the glow tomorrow".
+        tell(player, command("/time set midnight", "make it night - batches 1 and 2 are glow tests"));
+        tell(player, command("/gamerule doDaylightCycle false", "and keep it night"));
     }
 
     /** Empty the hotbar and fill it with batch {@code n} (1-based), then say what each slot is for. */
@@ -309,6 +406,62 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
+                // 0-CP. The first three genes whose VARIATION is the point
+                // rather than their pattern, so every slot here is "spawn
+                // several and compare", not "spawn one and look".
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame what you want to keep");
+                put(inv, legend, 1, many(preset(player, "Test: starburst (pale)", Sex.FEMALE, false,
+                        "horsegenetics.starburst=W/W"), 8),
+                        "SPAWN SIX AND LINE THEM UP. The emblem scales 45-100% per horse: is that "
+                                + "natural variation, or two sizes with a gap?");
+                put(inv, legend, 2, many(preset(player, "Test: starburst (coloured)", Sex.FEMALE, false,
+                        "horsegenetics.starburst=C/C"), 6),
+                        "the coloured form - check the rings stay concentric at the small end");
+                put(inv, legend, 3, many(preset(player, "Test: lantern", Sex.FEMALE, false,
+                        "horsegenetics.lantern=La/La"), 6),
+                        "AT NIGHT. The bloom either side of the line is lit at 22% now: the light "
+                                + "should spill and fade, not stop at the core's edge");
+                put(inv, legend, 4, many(preset(player, "Test: tron (solid)", Sex.FEMALE, false,
+                        "horsegenetics.tron=Trs/Trs"), 6), "lit tubes on every box edge, haloes at 25%");
+                put(inv, legend, 5, many(preset(player, "Test: tron (BOTH forms)", Sex.MALE, false,
+                        "horsegenetics.tron=Trs/Trg"), 4),
+                        "the overlap case: solid and gradient tubes are separate layers and where "
+                                + "they cross the BRIGHTER wins rather than the two summing. Blown "
+                                + "out means that rule is broken");
+                put(inv, legend, 6, new ItemStack(Items.GOLDEN_CARROT, 16),
+                        "golden carrots - breed the starbursts: does a foal's emblem sit near its "
+                                + "parents' rather than re-rolling?");
+                put(inv, legend, 7, new ItemStack(Items.CLOCK),
+                        "clock - the two glow genes above are night tests");
+                put(inv, legend, 8, new ItemStack(Items.WHITE_WOOL, 64),
+                        "white wool - stand a starburst against it: the emblem is read against its "
+                                + "background and plains grass is the reference");
+            }
+            case 2 -> {
+                // 0-CO. EMISSIVE_THRESHOLD is gone, so every one of these fades
+                // at its edge instead of ending on a line. They are the genes
+                // whose glow sits behind a soft mask rather than a part list.
+                put(inv, legend, 0, new ItemStack(Items.CLOCK),
+                        "clock - all of this is a night test, and only a night test");
+                intake(player, inv, legend, 1, "emberveins", null,
+                        "veins in a cracked field - the glow should fall off along each vein, not "
+                                + "stop square");
+                intake(player, inv, legend, 2, "datarain", null, "falling glyphs - check the tails fade");
+                intake(player, inv, legend, 3, "geode", null, "lit crystal faces inside a dark shell");
+                intake(player, inv, legend, 4, "gamma", null,
+                        "a wide soft glow - the one most likely to look WEAKER than it did, since "
+                                + "its whole mask is soft edge");
+                intake(player, inv, legend, 5, "angler", "Ang",
+                        "the lure: a small bright thing, the control for 'did dim get too dim'");
+                put(inv, legend, 6, many(preset(player, "Control: suntouched", Sex.FEMALE, false,
+                        "horsegenetics.suntouched=Sntch/Sntch"), 4),
+                        "CONTROL - lights whole parts at full brightness through the glow effect, "
+                                + "so it must look EXACTLY as it always did. If this changed, the "
+                                + "alpha path is wrong rather than the levels");
+                put(inv, legend, 7, new ItemStack(Items.STICK), "stick");
+                put(inv, legend, 8, new ItemStack(Items.GOLDEN_CARROT, 16), "golden carrots");
+            }
+            case 3 -> {
                 // The checklist's own ranking of what could go wrong badly
                 // rather than visibly (0-BT). These are left running, not looked
                 // at: the failures are an entity storm and a farm that quietly
@@ -331,7 +484,7 @@ public final class DebugTestWorldHandler {
                         "horsegenetics.dryad=Dry/Dry"),
                         "leave it near you for a real half-hour: it should have planted something (timed beats survive a reload now)");
             }
-            case 2 -> {
+            case 4 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick");
                 put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - the two below are ridden tests");
                 put(inv, legend, 2, preset(player, "Test: ender echo", Sex.FEMALE, false,
@@ -349,7 +502,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.CARROT, 32), null);
                 put(inv, legend, 8, new ItemStack(Items.WHEAT, 32), "wheat and carrots - what food preference refuses");
             }
-            case 3 -> {
+            case 5 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - both tickets need a horse you own");
                 put(inv, legend, 1, breedEgg("arabian"), "a horse to move around");
                 put(inv, legend, 2, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
@@ -365,7 +518,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 64), null);
                 put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
             }
-            case 4 -> {
+            case 6 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame each one first");
                 put(inv, legend, 1, preset(player, "Test: potion mare", Sex.FEMALE, false,
                         "horsegenetics.potion_milk=Spd/Spd"), "hurt her, then bottle her: 'She's hurt' and no potion");
@@ -382,7 +535,7 @@ public final class DebugTestWorldHandler {
                 papers.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics.silver");
                 put(inv, legend, 8, papers, "two Silver papers - the second must refuse to go in");
             }
-            case 5 -> {
+            case 7 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
                 put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
                 put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
@@ -397,7 +550,7 @@ public final class DebugTestWorldHandler {
                         "horsegenetics.spawner=Shp/Shp"), "tame, feed wheat - every sheep the SAME colour");
                 put(inv, legend, 7, new ItemStack(Items.WHEAT, 64), "wheat - the spawner's meals");
             }
-            case 6 -> {
+            case 8 -> {
                 intake(player, inv, legend, 0, "ooze_drip", null,
                         "rebuilt on the GOO mask - spawn several: separate drips, own lengths, beads, no triangles");
                 intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too - and check the spine: no bare stripes now");
@@ -410,7 +563,7 @@ public final class DebugTestWorldHandler {
                 intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
                 intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
             }
-            case 7 -> {
+            case 9 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {
@@ -504,6 +657,22 @@ public final class DebugTestWorldHandler {
      * rather than failing the login - the kit outliving a gene rename should
      * cost one egg, not the whole inventory.
      */
+    /**
+     * {@code n} of a stack, or {@code null} if it was not built.
+     *
+     * <p>A test that reads "spawn six and line them up" needs six eggs in the
+     * slot, not one and a trip to the creative menu. They stack because a
+     * preset egg's components are identical from egg to egg - and the horses
+     * are not, because the stored epigenome is deliberately empty and every use
+     * rolls a fresh one.
+     */
+    private static @Nullable ItemStack many(@Nullable ItemStack stack, int n) {
+        if (stack != null) {
+            stack.setCount(n);
+        }
+        return stack;
+    }
+
     private static @Nullable ItemStack preset(ServerPlayer player, String label, Sex sex, boolean baby,
                                               String... pairs) {
         List<AllelePair> built = new ArrayList<>();

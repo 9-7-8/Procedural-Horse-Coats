@@ -67,6 +67,8 @@
 </li>
 <li><strong>Flat-generator <code>dimension/debug_pens.json</code></strong> schema unchanged; <code>"structure_overrides": []</code> disables villages/etc. It's now <code>the_void</code> biome + a single <code>air</code> layer (generates nothing - <code>DebugPenManager</code> builds the floor itself).
 </li>
+<li><strong>A world's spawn point is its <em>respawn data</em>, and a <code>ResourceKey</code>'s id is <code>identifier()</code>.</strong> There is no <code>Level#getSharedSpawnPos()</code> any more: the world spawn is <code>level.getLevelData().getRespawnData().pos()</code> (<code>LevelData.RespawnData</code> is a record of a <code>GlobalPos</code> plus yaw and pitch, with <code>pos()</code> as the convenience). And <code>ResourceKey#location()</code> is now <code>identifier()</code>, which bites anywhere a registry key is turned into a printable id - <code>biome.unwrapKey().map(k -&gt; k.identifier().toString())</code>. Both found writing the test world's spawn-biome report (<code>DebugTestWorldHandler</code>).
+</li>
 <li><strong><code>com.mojang.authlib.GameProfile</code> is a record</strong> - <code>profile.name()</code> / <code>profile.id()</code>, no <code>getName()</code>.
 </li>
 <li><strong>Attributes are <code>Holder&lt;Attribute&gt;</code>.</strong> <code>LivingEntity#getAttributeValue( Holder&lt;Attribute&gt;)</code> -&gt; double; <code>#getAttribute(Holder&lt;Attribute&gt;)</code> -&gt; <code>@Nullable AttributeInstance</code> with <code>setBaseValue(double)</code>. <code>Attributes. MOVEMENT_SPEED</code> / <code>MAX_HEALTH</code> are holders. Horses register both by default (<code>createBaseHorseAttributes</code>); <code>WATER_MOVEMENT_EFFICIENCY</code> is <strong>not</strong> on horses, so don't rely on it.
