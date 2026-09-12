@@ -23,6 +23,10 @@ public final class HorseGenetics {
         // adds a segment to that code, so registering one late would invalidate
         // codes already read. See ModGeneSpecs.
         ModGeneSpecs.load();
+        // ...then anyone else's, once every mod has been constructed. The event
+        // is deferred to exactly one point; see GeneRegistration, which also
+        // freezes the registry the moment it is done.
+        com.example.horsegenetics.neoforge.api.GeneRegistration.listen(modEventBus);
         // Then the breeds, which are mostly references to the genes above - a
         // breed loaded first would report every drop-in gene as missing.
         // Unlike a gene, a breed does not lengthen the genotype code, so this

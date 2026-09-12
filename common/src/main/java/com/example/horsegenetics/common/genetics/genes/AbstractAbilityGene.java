@@ -1,12 +1,8 @@
 package com.example.horsegenetics.common.genetics.genes;
 
-import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
 import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.FounderContext;
-import com.example.horsegenetics.common.genetics.FounderTable;
-import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
@@ -26,6 +22,12 @@ import java.util.List;
  * same founder table, the same two expressions and the same
  * {@code expressionOf}, and seventeen chances for one of them to get the
  * dominance backwards.
+ *
+ * <p>The locus half of that is now {@link TwoAlleleGene}, which
+ * {@link AbstractNaturalGene} and {@link AbstractMagicalGene} share - this class
+ * is where the shape was first noticed, and it kept its positional constructor
+ * because seventeen call sites use it. {@link TwoAlleleGene#gene} is the
+ * readable way to declare a new one.
  *
  * <h2>What a subclass decides</h2>
  * The token and label, whether it is {@link Dominance#DOMINANT dominant} or
@@ -54,61 +56,32 @@ import java.util.List;
  * out of the texture key and the genotype gallery collapses it however the
  * alleles fall.
  */
-public abstract class AbstractAbilityGene implements Gene, EpigeneticAbilityContribution {
+public abstract class AbstractAbilityGene extends TwoAlleleGene
+        implements EpigeneticAbilityContribution {
 
-    /** Whether one copy is enough. */
-    public enum Dominance { DOMINANT, RECESSIVE }
-
-    /** What the wild population carries. See the class note - this is a design decision, not a knob. */
-    public enum Founders {
-        /** The expressing combination is born wild, so the gene can be caught. */
-        EXPRESSING,
-        /** Only carriers are born wild, so the gene is never seen until somebody breeds it. */
-        CARRIERS_ONLY
-    }
-
-    private final String key;
-    private final int priority;
-    private final String displayName;
-    private final Dominance dominance;
-
-    /** The variant allele ({@code order() == 0}, so it lands in slot 0 of a pair). */
-    public final Allele variant;
-    /** The wild type. */
-    public final Allele n;
-    private final List<Allele> alleles;
-
-    private final Expression wild;
     private final Expression active;
-    private final List<Expression> expressions;
-    private final FounderTable founders;
 
     protected AbstractAbilityGene(String key, int priority, String displayName,
                                   String token, String label,
                                   Dominance dominance, Founders foundersPolicy, double wildPercent,
                                   String wildText, String activeName, String activeText) {
-        this.key = key;
-        this.priority = priority;
-        this.displayName = displayName;
-        this.dominance = dominance;
-
-        this.variant = new Allele(key, 0, token, label);
-        this.n = new Allele(key, 1, "n", "Wild-type (n)");
-        this.alleles = List.of(variant, n);
-
-        this.wild = Expression.wildType(wildText);
+        super(setup(key, priority, displayName, token, label,
+                dominance, foundersPolicy, wildPercent, wildText, activeName, activeText));
+        // A wild type, not a painted outcome: this locus changes what the horse
+        // does, never how it looks, so it stays out of the texture key.
         this.active = Expression.wildType(expressionId(), activeName, activeText);
-        this.expressions = List.of(wild, active);
+    }
 
-        FounderTable.Builder b = FounderTable.builder();
-        if (foundersPolicy == Founders.CARRIERS_ONLY || dominance == Dominance.DOMINANT) {
-            // A dominant gene's carrier IS its expressing form, so the two
-            // policies coincide there and the heterozygote is what goes in.
-            b.weight(variant, n, wildPercent);
-        } else {
-            b.weight(variant, variant, wildPercent);
-        }
-        this.founders = b.weight(n, n, 100.0 - wildPercent).build();
+    private static Setup setup(String key, int priority, String displayName,
+                               String token, String label,
+                               Dominance dominance, Founders foundersPolicy, double wildPercent,
+                               String wildText, String activeName, String activeText) {
+        Setup s = gene(key, priority, displayName)
+                .variant(token, label)
+                .founders(foundersPolicy, wildPercent)
+                .wild(wildText)
+                .outcome("active", activeName, activeText);
+        return dominance == Dominance.DOMINANT ? s.dominant() : s.recessive();
     }
 
     /** The id of the expressing outcome. Overridable for a gene that wants a better word than "active". */
@@ -125,24 +98,14 @@ public abstract class AbstractAbilityGene implements Gene, EpigeneticAbilityCont
      */
     protected abstract List<GeneAbility> abilitiesWhenExpressed(EpiValues epi);
 
-    /** Does this combination express? */
-    public final boolean expresses(AllelePair pair) {
-        int copies = pair.count(variant);
-        return dominance == Dominance.DOMINANT ? copies >= 1 : copies == 2;
+    @Override
+    protected final Expression outcome() {
+        return active;
     }
 
-    @Override public String key() { return key; }
-    @Override public String name() { return displayName; }
-    @Override public int priority() { return priority; }
-    @Override public boolean isNatural() { return false; }
-    @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele defaultAllele() { return n; }
-    @Override public List<Expression> expressions() { return expressions; }
-    @Override public FounderTable founderTable(FounderContext context) { return founders; }
-
     @Override
-    public Expression expressionOf(AllelePair pair) {
-        return expresses(pair) ? active : wild;
+    public final boolean isNatural() {
+        return false;
     }
 
     @Override

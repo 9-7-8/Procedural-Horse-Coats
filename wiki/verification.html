@@ -56,6 +56,53 @@
     </p>
 </div>
 
+<h2 id="gene-api">&sect;0-CM &mdash; A third-party mod can add a gene (2026-09-11, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">The one thing here that no test can reach</span>
+    <p>
+        <code>RegisterHorseGenesEvent</code> compiles against 26.1.2 and its firing
+        point is read off the loader's own <code>ModLoader.constructMods</code>
+        (<code>fancymodloader 11.0.15</code>): every mod is constructed, each gets
+        <code>FMLConstructModEvent</code>, and only then is the deferred work queue
+        drained on the sync executor &mdash; so a task enqueued from that handler runs
+        exactly once, after the last mod exists and before any registry event.
+        <strong>That reasoning has never been run.</strong> Everything on the
+        <code>common/</code> side of it is covered by <code>GeneApiTest</code>; the
+        event itself needs a second mod, and there is not one.
+    </p>
+</div>
+
+<p>
+    <strong>The cheap check, with no second mod at all:</strong> boot the game or a
+    server and look for the line
+    <code>[genes] 0 gene(s) registered by other mods; the registry is frozen at N
+    segments</code>. If it appears, the event fired and the freeze happened at the
+    right moment; if it never appears, the enqueued task never ran and the reasoning
+    above is wrong. <code>N</code> must equal the segment count
+    <code>ModGeneSpecs</code> logs two lines earlier.
+</p>
+
+<ul>
+    <li><strong>The real check is a throwaway second mod</strong> &mdash; a
+        <code>build.gradle</code>, a <code>@Mod</code> class, one listener, and a gene
+        extending <code>AbstractNaturalGene</code>. What it proves that nothing else
+        can: the listener is called at all, the gene lands in the sorted order rather
+        than after the built-ins, and a wild horse really carries it.</li>
+    <li><strong>Then remove that mod and load the same world.</strong> It should refuse
+        the saved horses, not crash &mdash; a gene's segment leaving the code is the
+        same event as a drop-in gene being deleted, which is expected and handled. This
+        is the failure mode a modder will hit first, so it is worth knowing which of
+        the two it is.</li>
+    <li><strong>Register a gene with a bad key</strong> (no dot, or capitals) and
+        confirm the refusal names the mod and the key rather than appearing as a
+        missing locus later.</li>
+    <li><strong>The freeze should be unreachable in normal play.</strong> Nothing in
+        the mod registers a gene after startup; if the frozen-registry
+        <code>IllegalStateException</code> ever shows up in a log, something is calling
+        <code>Genes.register</code> from the wrong place and the message says so.</li>
+</ul>
+
 <h2 id="path-canvas">&sect;0-CL &mdash; The <code>PATH</code> drawing canvas (2026-09-11, NOT looked at)</h2>
 
 <div class="note">

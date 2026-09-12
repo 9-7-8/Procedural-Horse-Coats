@@ -1,15 +1,11 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.FounderContext;
-import com.example.horsegenetics.common.genetics.FounderTable;
-import com.example.horsegenetics.common.genetics.Gene;
-
-import java.util.List;
 
 /**
  * <b>Mushroom</b> ({@code horsegenetics.mushroom}) - the mirror of
@@ -34,8 +30,13 @@ import java.util.List;
  *
  * <p>Natural, deterministic. Founder frequency
  * {@code 1/}{@value #WILD_MUSHROOM_ONE_IN} per allele.
+ *
+ * <p><b>The shortest gene in the mod</b>, and deliberately the example one:
+ * everything above the paint function is a {@link TwoAlleleGene#gene
+ * declaration}, so what is left to read is the dilution itself. See
+ * {@link AbstractNaturalGene}.
  */
-public final class MushroomGene implements Gene {
+public final class MushroomGene extends AbstractNaturalGene {
 
     public static final String KEY = "horsegenetics.mushroom";
     public static final int WILD_MUSHROOM_ONE_IN = 34;
@@ -51,56 +52,42 @@ public final class MushroomGene implements Gene {
     /** Fraction of the removed red fed back as eumelanin - drops the sample down the neutral ramp. */
     private static final float RED_TINT_BLACK = 0.34f;
 
-    public final Allele Mu = new Allele(KEY, 0, "Mu", "Mushroom (Mu)");
-    public final Allele mu = new Allele(KEY, 1, "mu", "Wild-type (mu)");
-    private final List<Allele> alleles = List.of(Mu, mu);
+    public MushroomGene() {
+        super(gene(KEY, 32, "Mushroom")
+                .variant("Mu", "Mushroom (Mu)")
+                .wildAllele("mu", "Wild-type (mu)")
+                .recessive()
+                .hardyWeinberg(1.0 / WILD_MUSHROOM_ONE_IN)
+                .wild("Red pigment is left alone.")
+                .carrier("mushroom-carrier", "Mushroom carrier",
+                        "One copy shows nothing. The allele passes on invisibly - two carriers bred "
+                                + "together are how mushroom appears.")
+                .outcome("mushroom", "Mushroom",
+                        "Red pigment cut hard and partly traded for black, so a chestnut becomes a flat "
+                                + "sepia-khaki. A black or bay horse has little red to lose and looks much "
+                                + "the same."));
+    }
 
-    private final Expression WILD = Expression.wildType("Red pigment is left alone.");
-
-    private final Expression CARRIER = Expression.wildType(
-            "mushroom-carrier", "Mushroom carrier",
-            "One copy shows nothing. The allele passes on invisibly - two carriers bred together "
-                    + "are how mushroom appears.");
-
-    private final Expression MUSHROOM = Expression.of("mushroom", "Mushroom")
-            .describe("Red pigment cut hard and partly traded for black, so a chestnut becomes a flat "
-                    + "sepia-khaki. A black or bay horse has little red to lose and looks much the "
-                    + "same.")
-            .restrict((ctx, coat) -> {
-                PigmentField f = coat.mutableCopy();
-                // dilute(keepRed, keepBlack, blackTint) walks black sideways into red; here
-                // the reverse move is done by hand - scale red, and add a little of what
-                // was removed back as black so the result is a dull sepia, not a pale tan.
-                CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -> {
-                    float r = field.red(px, py);
-                    field.setRed(px, py, r * KEEP_RED);
-                    field.setBlack(px, py, field.black(px, py) + r * (1f - KEEP_RED) * RED_TINT_BLACK);
-                });
-                return f;
-            });
-
-    private final List<Expression> expressions = List.of(WILD, CARRIER, MUSHROOM);
-
-    private final FounderTable founders = FounderTable.hardyWeinberg(Mu, mu, 1.0 / WILD_MUSHROOM_ONE_IN);
-
-    @Override public String key() { return KEY; }
-    @Override public String name() { return "Mushroom"; }
-    @Override public int priority() { return 32; }
-    @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele defaultAllele() { return mu; }
-    @Override public List<Expression> expressions() { return expressions; }
-    @Override public FounderTable founderTable(FounderContext context) { return founders; }
+    /** The {@code Mu} allele, for a test or a breed that names it. */
+    public final Allele Mu = variant;
+    /** The {@code mu} wild type. */
+    public final Allele mu = wild;
 
     @Override
-    public Expression expressionOf(AllelePair pair) {
-        return switch (pair.count(Mu)) {
-            case 2 -> MUSHROOM;
-            case 1 -> CARRIER;
-            default -> WILD;
-        };
+    protected PigmentField restrict(CoatBuildContext ctx, PigmentView coat) {
+        PigmentField f = coat.mutableCopy();
+        // dilute(keepRed, keepBlack, blackTint) walks black sideways into red; here
+        // the reverse move is done by hand - scale red, and add a little of what
+        // was removed back as black so the result is a dull sepia, not a pale tan.
+        CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -> {
+            float r = field.red(px, py);
+            field.setRed(px, py, r * KEEP_RED);
+            field.setBlack(px, py, field.black(px, py) + r * (1f - KEEP_RED) * RED_TINT_BLACK);
+        });
+        return f;
     }
 
     public boolean isMushroom(AllelePair pair) {
-        return pair.count(Mu) == 2;
+        return expresses(pair);
     }
 }

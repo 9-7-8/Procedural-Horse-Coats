@@ -10,10 +10,6 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.AbilityContribution;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.FounderContext;
-import com.example.horsegenetics.common.genetics.FounderTable;
-import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
@@ -55,7 +51,7 @@ import java.util.List;
  * <i>heals</i>, because the aura is a property of the genotype and not of the
  * mane. That is the same split light makes with a foal's missing mane.
  */
-public final class HealerGene implements Gene, AbilityContribution {
+public final class HealerGene extends AbstractMagicalGene implements AbilityContribution {
 
     public static final String KEY = "horsegenetics.healer";
     public static final int PRIORITY = 116;
@@ -83,51 +79,33 @@ public final class HealerGene implements Gene, AbilityContribution {
     /** Most players one beat may reach. Small: the aura is for a stable, not a battlefield. */
     public static final int HEAL_MAX_TARGETS = 8;
 
-    public final Allele Hlr = new Allele(KEY, 0, "Hlr", "Healer (Hlr)");
-    public final Allele n = new Allele(KEY, 1, "n", "Wild-type (n)");
-    private final List<Allele> alleles = List.of(Hlr, n);
+    public HealerGene() {
+        super(gene(KEY, PRIORITY, "Healer")
+                .variant("Hlr", "Healer (Hlr)")
+                .recessive()
+                .hardyWeinberg(WILD_HLR_FREQUENCY)
+                .wild("An ordinary horse.")
+                .carrier("healer-carrier", "Healer carrier",
+                        "One copy, which shows nothing and does nothing. Two carriers bred together "
+                                + "are the only way a healer appears.")
+                .outcome("healer", "Healer",
+                        "A red stripe runs down the centre of the mane, faint on some horses and "
+                                + "vivid on others, and everyone standing within " + (int) HEAL_RADIUS
+                                + " blocks of the horse steadily mends.")
+                .varies());
+    }
 
-    private final Expression WILD = Expression.wildType("An ordinary horse.");
-
-    private final Expression CARRIER = Expression.wildType("healer-carrier", "Healer carrier",
-            "One copy, which shows nothing and does nothing. Two carriers bred together are the "
-                    + "only way a healer appears.");
-
-    private final Expression HEALER = Expression.of("healer", "Healer")
-            .describe("A red stripe runs down the centre of the mane, faint on some horses and "
-                    + "vivid on others, and everyone standing within " + (int) HEAL_RADIUS
-                    + " blocks of the horse steadily mends.")
-            .varies()
-            .tint(HealerGene::paintStripe);
-
-    private final List<Expression> expressions = List.of(WILD, CARRIER, HEALER);
-
-    private final FounderTable founders = FounderTable.hardyWeinberg(Hlr, n, WILD_HLR_FREQUENCY);
+    /** The {@code Hlr} allele. */
+    public final Allele Hlr = variant;
+    /** The wild type. */
+    public final Allele n = wild;
 
     private final List<GeneAbility> aura = List.of(new GeneAbility.Healing(
             "players", "animals", HEAL_RADIUS, HEAL_AMOUNT, HEAL_INTERVAL_TICKS, HEAL_MAX_TARGETS,
             GeneAbility.Condition.ALWAYS, 1));
 
-    @Override public String key() { return KEY; }
-    @Override public String name() { return "Healer"; }
-    @Override public int priority() { return PRIORITY; }
-    @Override public boolean isNatural() { return false; }
-    @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele defaultAllele() { return n; }
-    @Override public List<Expression> expressions() { return expressions; }
-    @Override public FounderTable founderTable(FounderContext context) { return founders; }
-
-    @Override
-    public Expression expressionOf(AllelePair pair) {
-        return switch (pair.count(Hlr)) {
-            case 2 -> HEALER;
-            case 1 -> CARRIER;
-            default -> WILD;
-        };
-    }
-
     public boolean isHealer(AllelePair pair) {
-        return pair.count(Hlr) == 2;
+        return expresses(pair);
     }
 
     @Override
@@ -144,7 +122,8 @@ public final class HealerGene implements Gene, AbilityContribution {
         return EpiSchema.of(EpiValue.uniform("opacity", OPACITY_MIN, OPACITY_MIN + OPACITY_RANGE));
     }
 
-    private static ColorField paintStripe(CoatBuildContext ctx, PigmentView coat, ColorView accumulated) {
+    @Override
+    protected ColorField tint(CoatBuildContext ctx, PigmentView coat, ColorView accumulated) {
         double opacity = ctx.epigeneticsFor(KEY).get("opacity");
 
         ColorField delta = ColorField.deltaLike(accumulated);

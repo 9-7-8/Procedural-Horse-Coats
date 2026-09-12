@@ -85,17 +85,15 @@
 </p>
 
 <ol>
-    <li><strong>The Java gene API and an open registry</strong>
-        (<a href="#gene-api">&sect;8</a>) &mdash; a third-party gene is the seam every
-        other mod should extend through, and it is not built.</li>
+    <li><strong>Play-test the backlog</strong> &mdash; the two items that stood at the
+        top of this list both shipped, and neither has been seen by a person. A great
+        deal else is built and unplayed: see <a href="verification.html">To be
+        verified</a>, which is longer than this page's top section.</li>
     <li><strong>What is left of the visual marking designer</strong>
         (<a href="#designer">&sect;10</a>) &mdash; the drawing canvas shipped, so what
         remains is the smaller half beside it: erase-down for the minimal expression,
         per-region colour ranges, glow / particle intensity, and a way to preview a gene
         at 0%, 50% and 100% of its own expression.</li>
-    <li><strong>Play-test the backlog</strong> &mdash; a great deal is built and
-        unplayed. See <a href="verification.html">To be verified</a>; it is longer than
-        this page's top section.</li>
     <li><strong>Deepen the thin science tabs</strong>
         (<a href="#science-tabs">&sect;science</a>) &mdash; every natural gene page now
         has one, so the work is no longer absence but depth: 23 predate the pass that
@@ -430,57 +428,53 @@
     a lot of those still to come (&sect;&sect;<a href="#natural-genes">10</a>&ndash;<a href="#magical-genes">12</a>).
 </p>
 
-<h3>Base classes for a Java gene</h3>
+<div class="note good">
+    <span class="label">Built &mdash; the bases, the open registry and the event all shipped</span>
+    <p>
+        <code>AbstractNaturalGene</code>, <code>AbstractMagicalGene</code> and the
+        <code>TwoAlleleGene</code> skeleton under them answer seven of the interface's
+        eight methods from a declaration;
+        <a href="making-a-gene.html#bases">the short path</a> is the write-up, and
+        <a href="gene-mushroom.html">mushroom</a> is the worked example.
+        <code>AbstractAbilityGene</code> &mdash; which is where the shape was first
+        noticed, seventeen genes ago &mdash; was moved onto the same skeleton, which is
+        the evidence it generalises rather than being a second copy of it.
+        <code>Genes.register</code> takes any <code>Gene</code>, validates the
+        namespaced key, and <code>freeze()</code>s;
+        <code>neoforge.api.RegisterHorseGenesEvent</code> is the way in, and
+        <a href="making-a-gene.html#register">registering from another mod</a> says
+        when it fires and why it has to be an event.
+    </p>
+</div>
 
-<p>
-    A hand-written gene is a class implementing an eight-method interface. Most backlog
-    genes are one line of maths and should not need that. The mod has grown informal
-    bases already &mdash; <code>RecessiveDisorderGene</code>,
-    <code>AbstractMagicStatGene</code>, <code>HairColorGene</code>,
-    <code>AppaloosaModifierGene</code> &mdash; which is evidence the general ones are
-    worth writing:
-</p>
-
-<ul>
-    <li><code>AbstractNaturalGene</code> / <code>AbstractMagicalGene</code> take the
-        alleles, the outcomes and the frequency in their constructor and pre-answer
-        everything the interface asks except the one method that matters.</li>
-    <li><code>AbstractPatternGene</code> on top adds the <code>BodyNoise</code>
-        boilerplate and the &ldquo;pull N epigenetic knobs off the expressing copy&rdquo;
-        helper that <code>GreyCoat</code> and <code>BayCoat</code> both hand-roll.</li>
-    <li>Raw <code>Gene</code> stays for anything unusual. Nothing is taken away; the
-        tiers just mean a modder rarely reaches that far.</li>
-</ul>
-
-<p>
-    <strong>What the bases absorb</strong>, all boilerplate today: building the
-    <code>Allele</code> objects, their keys and slot orders, <code>fromToken</code>, a
-    two-allele <code>founderTable</code> from a declared frequency, the &ldquo;wild type
-    plus one visible outcome&rdquo; expression pair, and handing you the seeded RNG
-    instead of making you find it.
-</p>
-
-<h3>An open registry</h3>
+<h3>What is actually left</h3>
 
 <ul>
-    <li><code>Genes</code> becomes a real registry: register during startup,
-        <strong>freeze</strong>, then serve. Frozen means <code>codeOrder()</code> and
-        friends are computed once and cached &mdash; they are on the hot path for every
-        code parse.</li>
-    <li><strong>There is no registration hook at all today</strong>, so another mod
-        cannot add a Java gene. It lives in <code>neoforge-26.1.2/</code>, never
-        <code>common/</code> &mdash; a mod-bus <code>RegisterHorseGenesEvent</code>, or
-        a <code>DeferredRegister</code>-alike that calls into <code>common</code>&rsquo;s
-        plain-Java registry. <strong>That rule does not bend for this.</strong></li>
-    <li>Load order must not matter &mdash; orderings are sorted, never registration
-        order. This already holds; keep it true.</li>
-    <li>Genes need a namespaced key <code>&lt;modid&gt;.&lt;gene&gt;</code>. The
-        convention already does this, so it is a validation rule, not a new format.</li>
+    <li><strong><code>AbstractPatternGene</code> was not built, and the reason is worth
+        keeping.</strong> The entry above promised it would absorb &ldquo;the
+        <code>BodyNoise</code> boilerplate and the pull-N-knobs-off-the-expressing-copy
+        helper&rdquo;. Neither exists as boilerplate: reading epigenetics is the single
+        line <code>ctx.epigeneticsFor(KEY)</code>, and <code>BodyNoise</code> is a
+        static call whose arguments are the whole design of the pattern using it. A base
+        wrapping those would hide one line and constrain the interesting one. If a
+        pattern base is worth writing it will be because a <em>third</em> pattern gene
+        wants the same shape &mdash; write it then, from the duplication, not from
+        this entry.</li>
+    <li><strong>No third-party gene has ever been registered</strong>, in this game or
+        any other. The event compiles against 26.1.2 and its firing point is read off
+        the loader's own <code>constructMods</code>, but the proof is a second mod, and
+        there is not one. <a href="verification.html#gene-api">&sect;0-CM</a>.</li>
+    <li>The <strong>capability interfaces</strong> a third-party gene would implement to
+        do anything beyond painting (<code>TraitContribution</code>,
+        <code>AbilityContribution</code>, the rest) are not final &mdash; see
+        &sect;<a href="#trait-rules">7</a>. A modder writing a coat gene is on solid
+        ground today; one writing a behaviour gene is building on something that will
+        move.</li>
 </ul>
 
 <p class="muted">
     The <strong>allele rules</strong> and the <strong>contract</strong> a modder must
-    honour are already live on <a href="making-a-gene.html#java-when">Writing a gene</a>. One thing a
+    honour are on <a href="making-a-gene.html#java-when">Writing a gene</a>. One thing a
     third-party gene still stresses: <code>CoatTextureId</code> encodes the whole
     genotype into an <code>Identifier</code> path, so more genes means longer paths
     &mdash; see &sect;<a href="#scale">21</a>.

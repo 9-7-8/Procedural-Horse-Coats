@@ -3031,7 +3031,7 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
     default String       description()            { return GeneDescriptions.of(key()); }
     default GeneRarity   rarity()                 { return GeneRarity.DEFAULT; } // gold-ingot tier
     default boolean      hasGeneCarrot()         { return true; }              // false: sex, disorders
-    default boolean      geneCarrotHomozygous()  { return false; }             // default n&lt;Gene&gt;
+    default boolean      geneCarrotHomozygous()  { return true; }              // &lt;Gene&gt;&lt;Gene&gt;
     default Optional&lt;FounderTable&gt; spliceTable()  { return Optional.empty(); }   // else uniform draw
 
     // --- override only if a combination genuinely cannot exist -------------
@@ -3075,6 +3075,125 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
         <a href="genetics-model.html#combinations">the genetics model</a>.
     </p>
 </div>
+
+<h2 id="bases">The short path &mdash; a base class</h2>
+
+<p>
+    Most hand-written genes answer seven of those eight methods the same way: build two
+    alleles in the right slot order, list them, name a default, list the expressions,
+    count copies to map a pair to one of them, and turn a frequency into a founder
+    table. <strong>Three base classes do all seven from a declaration</strong>, leaving
+    you the one method that is the gene.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>You write</th><th>For</th></tr></thead>
+<tbody>
+<tr><td><code>AbstractNaturalGene</code></td><td><code>restrict(ctx, coat)</code></td><td>A real-life coat gene: it takes red or black away in phase 1.</td></tr>
+<tr><td><code>AbstractMagicalGene</code></td><td><code>tint(ctx, coat, colour)</code></td><td>A gene that adds signed RGB in phase 3.</td></tr>
+<tr><td><code>AbstractAbilityGene</code></td><td><code>abilitiesWhenExpressed(epi)</code></td><td>A gene that paints nothing and changes what the horse <em>does</em>. Seventeen built-ins use it.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="codebox">
+<div class="filename">the whole of a two-allele natural gene</div>
+<pre><code class="language-java">public final class MushroomGene extends AbstractNaturalGene {
+
+    public MushroomGene() {
+        super(gene("horsegenetics.mushroom", 32, "Mushroom")
+                .variant("Mu", "Mushroom (Mu)")
+                .wildAllele("mu", "Wild-type (mu)")     // optional; "n" by default
+                .recessive()                            // or .dominant()
+                .hardyWeinberg(1.0 / 34)                // or .founders(CARRIERS_ONLY, 6.0)
+                .wild("Red pigment is left alone.")
+                .carrier("mushroom-carrier", "Mushroom carrier", "One copy shows nothing...")
+                .outcome("mushroom", "Mushroom", "Red pigment cut hard..."));
+    }
+
+    @Override
+    protected PigmentField restrict(CoatBuildContext ctx, PigmentView coat) {
+        PigmentField f = coat.mutableCopy();            // never write through `coat`
+        ...
+        return f;
+    }
+}</code></pre>
+</div>
+
+<p>
+    That is the real <a href="gene-mushroom.html">mushroom</a> gene, and it is the
+    shortest in the mod on purpose &mdash; everything above the paint function is a
+    declaration, so what is left to read is the dilution itself. The declaration is
+    checked when the object is built, not when it first paints, so a missing
+    <code>outcome(...)</code> is a sentence naming the gene rather than a
+    <code>NullPointerException</code> four hours into a world.
+</p>
+
+<div class="note">
+    <span class="label">Where the tiers stop</span>
+    <p>
+        These fit <strong>two alleles, one variant, one outcome</strong>. A gene with
+        three alleles, or one whose <em>heterozygote</em> is the expressing
+        combination (<a href="gene-magic-sectoral-heterochromia.html">magic sectoral
+        heterochromia</a>), does not fit and <strong>should not be bent into
+        one</strong> &mdash; implement <code>Gene</code> directly. Nothing is taken
+        away by the bases existing; they only mean the common case is short. Other
+        shapes that recur have their own informal bases already
+        (<code>RecessiveDisorderGene</code>, <code>AbstractMagicStatGene</code>,
+        <code>HairColorGene</code>, <code>AbstractEyeGene</code>), and a new one is
+        worth writing the third time a shape appears, not the first.
+    </p>
+</div>
+
+<h2 id="register">Registering from another mod</h2>
+
+<p>
+    <code>Genes</code> is an <strong>open registry</strong>: a gene from any mod is
+    registered through the same method as a built-in, sorts into the same one
+    <code>(priority, key)</code> order, and is indistinguishable downstream. The way in
+    is a mod-bus event:
+</p>
+
+<div class="codebox">
+<div class="filename">your mod</div>
+<pre><code class="language-java">@Mod("yourmod")
+public final class YourMod {
+    public YourMod(IEventBus modEventBus) {
+        modEventBus.addListener(this::addGenes);
+    }
+
+    private void addGenes(RegisterHorseGenesEvent event) {
+        event.register(new YourGene());
+    }
+}</code></pre>
+</div>
+
+<ul>
+    <li><strong>It fires once, at the one safe moment</strong> &mdash; after every mod
+        has been constructed and before anything has parsed a genotype code. That is
+        why it is an event rather than a static call: <code>Genes.register</code> is
+        public and works from a mod constructor, but <em>when</em> a constructor runs
+        depends on mod load order, and the registry decides the genotype code&rsquo;s
+        layout. One firing point means every mod&rsquo;s genes land in the same place
+        every launch.</li>
+    <li><strong>The key must be <code>&lt;yourmodid&gt;.&lt;gene&gt;</code></strong>,
+        lower-case, one dot. Refused otherwise, loudly &mdash; the namespace is the
+        only thing keeping two mods&rsquo; &ldquo;dun&rdquo; apart, and a collision is
+        not a crash: it is that mod&rsquo;s gene silently missing from every horse.</li>
+    <li><strong>Registration order never decides gene order.</strong> Everything is
+        sorted on <code>(priority, key)</code>, ties broken alphabetically, so two
+        players with the same mods get the same horses whatever order those mods
+        loaded in.</li>
+    <li><strong>Then the registry freezes.</strong> A gene registered after that
+        throws, with a sentence saying why. It buys no speed &mdash; the orderings were
+        already computed once and cached &mdash; it buys a named failure instead of
+        horses whose loci have all shifted by one segment, which reads as a breeding
+        bug and is not one.</li>
+    <li><strong>Adding a gene changes the genotype code</strong>, and this mod has no
+        save compatibility: horses saved before your mod was added will not load with
+        it, and will not load again once it is removed.</li>
+</ul>
 
 <h2>Walkthrough 1 &mdash; a natural gene</h2>
 

@@ -239,6 +239,49 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 </table>
 </div>
 
+<h3>The gene base classes (<code>common/genetics/genes/</code>)</h3>
+
+<div class="codebox">
+<pre><code class="language-java">abstract class TwoAlleleGene implements Gene        // one variant, one wild type, one outcome
+    static Setup gene(String key, int priority, String displayName);
+    boolean expresses(AllelePair pair);
+    boolean isCarrier(AllelePair pair);             // a recessive's single copy
+    public final Allele variant, wild;
+
+abstract class AbstractNaturalGene extends TwoAlleleGene   // isNatural() == true
+    protected abstract PigmentField restrict(CoatBuildContext ctx, PigmentView coat);
+
+abstract class AbstractMagicalGene extends TwoAlleleGene   // isNatural() == false
+    protected abstract ColorField tint(CoatBuildContext ctx, PigmentView coat, ColorView colour);
+
+abstract class AbstractAbilityGene extends TwoAlleleGene   // paints nothing
+    protected abstract List&lt;GeneAbility&gt; abilitiesWhenExpressed(EpiValues epi);</code></pre>
+</div>
+
+<p>
+    The <code>Setup</code> is fluent and validated at construction:
+    <code>variant(token, label)</code>, <code>wildAllele(token, label)</code>,
+    <code>dominant()</code> / <code>recessive()</code>,
+    <code>hardyWeinberg(f)</code> / <code>founders(policy, percent)</code> /
+    <code>founderTable(t)</code>, <code>wild(text)</code>,
+    <code>carrier(id, name, text)</code>, <code>outcome(id, name, text)</code>, then
+    <code>varies()</code>, <code>masking()</code>, <code>rarity()</code>,
+    <code>feralOnly()</code>, <code>noGeneCarrot()</code>. Between them they answer
+    seven of <code>Gene</code>'s eight methods; the subclass writes the eighth. Worked
+    example and the limits of the shape:
+    <a href="making-a-gene.html#bases">the short path</a>.
+</p>
+
+<p>
+    Other shapes that recur have their own informal bases &mdash;
+    <code>RecessiveDisorderGene</code>, <code>DominantDisorderGene</code>,
+    <code>AbstractMagicStatGene</code>, <code>AbstractMagicFactorGene</code>,
+    <code>HairColorGene</code>, <code>AbstractEyeGene</code>,
+    <code>AbstractWeatherGene</code>, <code>AbstractMatchedPairGene</code>. None of
+    them is required: <code>implements Gene</code> is always available and is what a
+    multi-allele locus uses.
+</p>
+
 <h3><code>GameteBias</code> and <code>CarrotEffect</code> (<code>common/genetics/</code>)</h3>
 <p>
     A breeding carrot (<a href="carrots.html">a breeding carrot</a>) is data:
@@ -493,12 +536,31 @@ static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code>
 </div>
 
 <div class="codebox">
-<pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key; warns if out of band
-static void registerAll(Collection&lt;SpecGene&gt;);
+<pre><code class="language-java">static void register(Gene gene);                  // ANY gene - built-in, SpecGene or another mod's
+static void registerAll(Collection&lt;? extends Gene&gt;);
+static void freeze();                             // no more genes; late ones throw with a reason
+static boolean isFrozen();
 static List&lt;SpecGene&gt; loaded();                   // the data-driven genes, in gene order
-static void clearLoaded();                        // back to the forty-one built-ins
+static void clearLoaded();                        // back to the built-ins; also thaws (tests only)
 static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregistered - for tolerant parse</code></pre>
 </div>
+
+<p>
+    <code>register</code> refuses a key that is not
+    <code>&lt;modid&gt;.&lt;gene&gt;</code> in <code>[a-z0-9_]</code>, and refuses a
+    duplicate. Both are unrecoverable and both are silent if allowed through &mdash; a
+    colliding gene is simply missing from every horse. Another mod reaches this through
+    <code>neoforge.api.RegisterHorseGenesEvent</code>; see
+    <a href="making-a-gene.html#register">registering from another mod</a>.
+</p>
+
+<p>
+    <code>freeze()</code> buys no speed &mdash; the orderings below are already computed
+    once per registration and cached, and they are on the hot path for every code parse.
+    It buys a <em>named</em> failure: a gene registered after a code has been read
+    silently changes what every code already parsed means, and the symptom is horses
+    whose loci have all shifted by one segment.
+</p>
 
 <p>
     All three orderings are one <strong>derived</strong> result: every registered

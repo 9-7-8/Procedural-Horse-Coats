@@ -614,6 +614,18 @@ public final class Genes {
 
     private static final List<SpecGene> LOADED = new ArrayList<>();
 
+    /**
+     * Hand-written genes registered from outside this class - another mod's, or
+     * a test's. Separate from {@link #LOADED} only because
+     * {@link #clearLoaded()} puts the drop-in population back and cannot put
+     * these back: a Java gene is an object somebody handed us, not a file we
+     * can re-read.
+     */
+    private static final List<Gene> EXTRA = new ArrayList<>();
+
+    /** @see #freeze() */
+    private static volatile boolean frozen;
+
     private static volatile List<Gene> order = List.of();
     private static volatile List<Gene> naturalOrder = List.of();
     private static volatile List<Gene> magicalOrder = List.of();
@@ -699,25 +711,104 @@ public final class Genes {
     // ------------------------------------------------------------------
 
     /**
-     * Add a data-driven gene. Throws if its key is taken (that is genuinely
+     * <b>Add a gene.</b> Data-driven ({@link SpecGene}) or hand-written Java,
+     * this mod's or another's - the registry does not distinguish, and nothing
+     * downstream may either.
+     *
+     * <p>Throws if its key is taken or malformed (both are genuinely
      * unrecoverable); warns, but carries on, if its priority sits outside its
-     * phase's conventional band. Call during startup; the gene sorts into the
-     * one {@code (priority, key)} order, so registration order does not decide
-     * where it lands.
+     * phase's conventional band. Call during startup, before
+     * {@link #freeze()}; the gene sorts into the one {@code (priority, key)}
+     * order, so registration order does not decide where it lands.
+     *
+     * <p>Third-party genes reach here through
+     * {@code neoforge.api.RegisterHorseGenesEvent}, which is the supported way
+     * in - it fires at the one moment when every mod has been constructed and
+     * nothing has parsed a genotype code yet. Calling this directly from a mod
+     * constructor also works, and is subject to mod load order, which the event
+     * exists to take off the caller.
      */
-    public static synchronized void register(SpecGene gene) {
+    public static synchronized void register(Gene gene) {
+        requireOpen(gene);
+        validateKey(gene.key());
         if (byKey.containsKey(gene.key())) {
             throw new IllegalArgumentException("a gene is already registered under " + gene.key());
         }
         checkBand(gene);
-        LOADED.add(gene);
+        // SpecGenes are the drop-in population clearLoaded() puts back; a Java
+        // gene from another mod is not reloadable and is kept separately.
+        if (gene instanceof SpecGene spec) {
+            LOADED.add(spec);
+        } else {
+            EXTRA.add(gene);
+        }
         rebuild();
     }
 
-    public static synchronized void registerAll(Collection<SpecGene> genes) {
-        for (SpecGene g : genes) {
+    public static synchronized void registerAll(Collection<? extends Gene> genes) {
+        for (Gene g : genes) {
             register(g);
         }
+    }
+
+    /**
+     * A gene key is {@code <namespace>.<gene>} - the mod that owns it, then the
+     * locus, both in {@code [a-z0-9_]}.
+     *
+     * <p>Checked rather than trusted because the namespace is the <b>only</b>
+     * thing keeping two mods that both ship a "dun" from colliding, and the
+     * collision is not a crash: the second registration throws, is logged, and
+     * that mod's gene is silently missing from every horse in the world.
+     * Refusing a bare key at the point of registration turns that into a
+     * sentence naming the mod that got it wrong.
+     */
+    private static void validateKey(String key) {
+        int dot = key.indexOf('.');
+        if (dot <= 0 || dot != key.lastIndexOf('.') || dot == key.length() - 1) {
+            throw new IllegalArgumentException("gene key '" + key
+                    + "' must be <modid>.<gene> - exactly one dot, neither half empty");
+        }
+        for (int i = 0; i < key.length(); i++) {
+            char c = key.charAt(i);
+            boolean ok = (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.';
+            if (!ok) {
+                throw new IllegalArgumentException("gene key '" + key + "' has '" + c
+                        + "' in it - keys are lower-case [a-z0-9_] either side of the dot");
+            }
+        }
+    }
+
+    private static void requireOpen(Gene gene) {
+        if (frozen) {
+            throw new IllegalStateException("the gene registry is frozen - " + gene.key()
+                    + " is too late. Every registration moves where a gene sits in the genotype"
+                    + " code, so a gene added after the code has been read would make every code"
+                    + " already parsed mean something else. Register from"
+                    + " RegisterHorseGenesEvent.");
+        }
+    }
+
+    /**
+     * <b>No more genes.</b> Called once, when every mod has had its turn, and
+     * what it buys is a <i>sentence</i> instead of a mystery.
+     *
+     * <p>The three orderings and the two key maps are already computed once and
+     * cached - {@link #rebuild()} does that on every registration, and they are
+     * on the hot path for every genotype-code parse - so freezing does not make
+     * anything faster. What it does is make late registration <b>loud</b>: a
+     * gene registered after a code has been parsed silently changes what every
+     * code already read means, and the symptom is horses whose genes have all
+     * shifted by one segment, which reads as a breeding bug and is not one.
+     *
+     * <p>Idempotent. {@link #clearLoaded()} thaws, for tests.
+     */
+    public static synchronized void freeze() {
+        frozen = true;
+    }
+
+    /** Is the registry closed to new genes? */
+    public static boolean isFrozen() {
+        return frozen;
     }
 
     /** Every data-driven gene currently registered, in gene order. */
@@ -742,6 +833,10 @@ public final class Genes {
      */
     public static synchronized void clearLoaded() {
         LOADED.clear();
+        EXTRA.clear();
+        // Thaw: this is the tests' reset, and a frozen registry could not put
+        // the shipped gene files back. Nothing in the game calls it.
+        frozen = false;
         rebuild();
         loadBuiltinSpecs();
     }
@@ -760,9 +855,10 @@ public final class Genes {
     private static void rebuild() {
         LOADED.sort(BY_PRIORITY_THEN_KEY);
 
-        List<Gene> all = new ArrayList<>(BUILTINS.size() + LOADED.size());
+        List<Gene> all = new ArrayList<>(BUILTINS.size() + LOADED.size() + EXTRA.size());
         all.addAll(BUILTINS);
         all.addAll(LOADED);
+        all.addAll(EXTRA);
         all.sort(BY_PRIORITY_THEN_KEY);
         order = List.copyOf(all);
 
