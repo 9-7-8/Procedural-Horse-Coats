@@ -1615,7 +1615,7 @@ public final class SpecPainter {
      * <p>Catmull-Rom because it <b>passes through every control point</b>. A
      * Bezier's handles do not sit on the curve, which is the right trade for a
      * pen tool and the wrong one here: these points are what an author placed
-     * and what the creator will draw as draggable handles, and a curve that
+     * and what the creator draws as draggable handles, and a curve that
      * misses them would make the editor lie about its own data.
      *
      * <p>The ends are handled by <b>duplicating</b> the first and last point

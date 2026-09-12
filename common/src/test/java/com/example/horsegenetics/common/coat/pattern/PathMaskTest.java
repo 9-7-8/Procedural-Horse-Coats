@@ -86,7 +86,7 @@ class PathMaskTest {
     /**
      * <b>A smoothed path passes through every control point.</b> This is the
      * whole reason it is Catmull-Rom and not a Bezier: the points are what an
-     * author placed and what the creator will draw as draggable handles, so a
+     * author placed and what the creator draws as draggable handles, so a
      * curve that merely gets near them would make the editor lie about its own
      * data.
      */

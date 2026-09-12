@@ -1338,6 +1338,12 @@ window.HG = window.HG || {};
     restrict: restrict,
     tint: tint,
     coverageMap: coverageMap,
-    JavaRandom: JavaRandom
+    JavaRandom: JavaRandom,
+    // For the PATH drawing canvas. It draws the curve the painter walks and
+    // resolves a knob-driven width the way a mask parameter resolves, rather
+    // than keeping a second copy of either - a canvas that bends the line
+    // differently from the game is worse than no canvas.
+    pathSpline: spline,
+    resolveValue: get
   };
 })(window.HG);

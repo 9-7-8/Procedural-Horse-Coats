@@ -1336,6 +1336,37 @@
     carry it. And the points can be plain constants while <code>width</code> is a knob
     &mdash; so a drawn shape still varies per horse without ceasing to be that shape.
 </p>
+<div class="note good">
+    <span class="label">You do not have to type any of these numbers</span>
+    <p>
+        Add a <code>PATH</code> mask in
+        <a href="gene-creator/index.html">the gene creator</a> and the
+        <code>points</code> parameter is a <strong>drawing surface</strong>: a view of the
+        horse in whichever <code>plane</code> the mask is set to, with every control point
+        as a handle. Click to add a point, drag to move one, click the hollow dot in the
+        middle of a span to insert one there, right-click a handle (or select it and press
+        <kbd>Delete</kbd>) to remove it; the arrow keys nudge the selected point, and
+        <kbd>Shift</kbd> nudges it four times as far. The numbers are still underneath,
+        folded into <em>the numbers</em>, and the two edit the same array in both
+        directions.
+    </p>
+    <p>
+        Two things about that view are worth knowing, because both are deliberate.
+        The silhouette is the <strong>model's own boxes</strong> &mdash; each part drawn as
+        the body-space box the painter measures it by &mdash; so it is blocky, and what it
+        shows is exactly the region a point can land on. And the two axes are drawn at
+        <strong>one scale</strong>, in body units, which is why a plane like
+        <code>top</code> sits in a letterboxed strip rather than filling the box: a
+        circle you draw there has to be a circle on the horse.
+    </p>
+    <p>
+        The line it draws is the painter's own &mdash; the same Catmull-Rom, so
+        <code>curve</code>, <code>closed</code> and <code>fill</code> all preview truthfully,
+        and the stroke is drawn at <code>width</code> in body units rather than at some
+        decorative thickness. A knob-driven <code>width</code> is shown at whatever the
+        horse in the preview drew.
+    </p>
+</div>
 </div></td></tr>
 <tr><td colspan="3"><div class="note">
 <span class="label"><code>CHOICE</code> is the only mask that does not read where you are</span>

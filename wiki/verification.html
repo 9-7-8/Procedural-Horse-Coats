@@ -56,6 +56,46 @@
     </p>
 </div>
 
+<h2 id="path-canvas">&sect;0-CL &mdash; The <code>PATH</code> drawing canvas (2026-09-11, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Not a runClient item &mdash; it is a control in the creator, and no gene file changed</span>
+    <p>
+        Open <a href="gene-creator/index.html">the gene creator</a>, add a
+        <code>PATH</code> mask (or load <strong>Prismatic</strong>, which carries two), and
+        the <code>points</code> parameter is a horse you can draw on. Twenty-six checks of
+        it run in headless Chrome &mdash; clicks land where aimed, a drag moves one handle
+        and no other, the midpoint marker inserts in order, right-click deletes, the
+        textarea and the canvas agree in both directions, and all three planes map their
+        two axes at one scale &mdash; so what is unlooked-at is not whether it
+        <em>works</em> but whether it is <strong>pleasant</strong>, which no script can
+        answer.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Is the silhouette readable as a horse?</strong> It is the model's own boxes
+        &mdash; each part's body-space AABB &mdash; because that is exactly the region a
+        point can land on. Blocky is honest here, but if it reads as a pile of rectangles
+        rather than a horse, that is worth knowing.</li>
+    <li><strong>Draw something real.</strong> The shapes this was built for are the ones
+        that cannot be described in words &mdash; a peacock feather, a laced tobiano edge.
+        Try one end to end: click a dozen points, tick <code>curve</code>, tick
+        <code>fill</code>, and watch the horse beside it.</li>
+    <li><strong>Is 310px wide enough?</strong> It sits in the right-hand column, which
+        &sect;<a href="roadmap.html#creator-ux">9.2</a> already calls dense. If the answer
+        is no, the fix is a bigger surface somewhere, not a different control.</li>
+    <li><strong>Does the snap help or fight you?</strong> Handles land on a 0.01 grid of
+        the body box (about 0.4 of a body unit) so the numbers that reach the file are
+        readable. If a shape needs finer placement than that, say so &mdash; the grid is
+        one constant.</li>
+    <li><strong>The <code>top</code> and <code>front</code> planes are letterboxed</strong>
+        &mdash; deliberately, because both axes are drawn at one scale and those planes are
+        long and thin. Check the strip is still big enough to draw a girth band in.</li>
+    <li><strong>Switch the preview to a foal.</strong> The silhouette should become the
+        baby mesh, and the shape should stay where it is in <code>body</code> space.</li>
+</ul>
+
 <h2 id="feed-feedback">&sect;0-CK &mdash; Feeding says when it did nothing, and a favourite is never refused (2026-09-11, NOT looked at in game)</h2>
 
 <div class="note warn">
@@ -1673,12 +1713,12 @@
 </p>
 
 <ul>
-    <li><strong>The points editor is a textarea, on purpose.</strong> One
-        <code>u, v</code> pair per line. It is the honest placeholder until the canvas exists
-        &mdash; the question to answer is whether it is usable enough to author a shape with
-        against the live preview, or whether the canvas needs to come next rather than after
-        something else. A half-typed line is left alone rather than wiping the shape, which is
-        the one bit of behaviour worth poking at deliberately.</li>
+    <li><strong>The points editor is the drawing canvas now</strong> &mdash; so the
+        question this entry used to ask (is the textarea good enough to wait behind
+        something else?) no longer needs an answer. What wants an eye instead is
+        <a href="#path-canvas">&sect;0-CL</a>. The textarea is still under
+        <em>the numbers</em>, and a half-typed line there is still left alone rather than
+        wiping the shape, which is the one bit of its behaviour worth poking at.</li>
     <li><strong><code>fill</code> on a concave shape.</strong> The crescent should keep its
         notch. If a single row of texels through a filled shape ever comes out inverted, that
         is the even-odd crossing test hitting a vertex exactly on its own ray &mdash; pinned in

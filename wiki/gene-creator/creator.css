@@ -348,3 +348,25 @@ input[type="color"] { width: 46px; height: 26px; padding: 1px; background: #0c13
   word-break: break-all;
   margin-bottom: 3px;
 }
+
+/* ---- the PATH drawing canvas ---- */
+
+.path-editor { gap: 6px; }
+
+.path-canvas {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #0d1422;
+  cursor: crosshair;
+  touch-action: none;
+}
+.path-canvas:focus { outline: none; border-color: var(--accent-dim); }
+
+.path-bar { gap: 4px; }
+
+.path-note { line-height: 1.35; }
+
+.path-numbers summary { cursor: pointer; color: var(--muted); font-size: 0.72rem; }
+.path-numbers textarea { margin-top: 4px; }

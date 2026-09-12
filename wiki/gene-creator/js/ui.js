@@ -45,6 +45,23 @@ window.HG = window.HG || {};
     ]);
   }
 
+  /**
+   * The same field, as a plain block rather than a {@code <label>}.
+   *
+   * <p>A label forwards a click anywhere inside it to the first control it
+   * contains, which is exactly right for "name: [input]" and exactly wrong for
+   * a control that is itself several widgets: every click on the PATH canvas
+   * was also pressing its Reverse button, so the drawing came out backwards
+   * one point at a time.
+   */
+  function fieldBlock(label, control, hint) {
+    return el("div", { class: "field" }, [
+      el("span", { class: "field-label", text: label }),
+      control,
+      hint ? el("span", { class: "hint", text: hint }) : null
+    ]);
+  }
+
   function select(options, value, onChange) {
     var s = el("select", { onchange: function () { onChange(s.value); } });
     options.forEach(function (o) {
@@ -793,7 +810,7 @@ window.HG = window.HG || {};
           changed();
         }), p.doc));
       } else if (p.kind === "POINTS") {
-        card.appendChild(field(p.name, pointsEditor(mask, p.name), p.doc));
+        card.appendChild(fieldBlock(p.name, pointsEditor(mask, p.name), p.doc));
       } else if (p.kind === "SVG" || p.kind === "TEXT") {
         card.appendChild(field(p.name, svgTextEditor(mask, p.name, p, changed), p.doc));
       } else if (p.kind === "BOX") {
@@ -822,14 +839,19 @@ window.HG = window.HG || {};
   }
 
   /**
-   * <b>A PATH's control points</b>, as a textarea of {@code u, v} pairs.
+   * <b>A PATH's control points</b> - the drawing canvas, with the textarea of
+   * {@code u, v} pairs folded away underneath it.
    *
-   * <p>This is deliberately the plain version. The point of the PATH mask is
-   * that a shape can be <i>drawn</i>, and a canvas with draggable handles is
-   * what it is for - but the mask has to exist and be trusted before the
-   * surface that edits it is worth building, and in the meantime typing
-   * coordinates against the live preview is a real way to author one. The
-   * format does not change when the canvas arrives; only this control does.
+   * <p>The two are one value seen twice, and both write straight into
+   * {@code mask.points}. The canvas is the point of the PATH mask; the
+   * textarea stays because a number you can read is the only way to nudge a
+   * point to exactly 0.5, to paste a shape from somewhere else, or to see what
+   * the file will actually say.
+   *
+   * <p>Neither control calls {@link #changed} - that re-renders this whole
+   * panel, which would tear the canvas out of the DOM in the middle of a drag
+   * and drop the pointer capture with it. They call {@link #changedLive}, which
+   * re-exports and re-bakes without rebuilding any form.
    *
    * <p>One point per line, {@code u, v}. Anything unparseable is left in the
    * box rather than silently dropped, so a half-typed line does not erase the
@@ -837,13 +859,37 @@ window.HG = window.HG || {};
    */
   function pointsEditor(mask, name) {
     var wrap = el("div", { class: "col" });
-    var flat = mask[name] || [];
-    var text = "";
-    for (var i = 0; i + 1 < flat.length; i += 2) {
-      text += flat[i] + ", " + flat[i + 1] + "\n";
-    }
-    var area = el("textarea", { rows: Math.max(4, flat.length / 2 + 1), value: text.trim() });
+    var area = el("textarea", { rows: 4 });
     var note = el("span", { class: "hint" });
+
+    var canvas = HG.pathCanvas.create({
+      mask: mask,
+      name: name,
+      skinOf: function () { return state.skin; },
+      // A width driven by a knob is drawn at what THIS horse drew, which is
+      // what the preview beside it is showing.
+      widthOf: function (raw, fallback) {
+        if (!state.lastBake) return typeof raw === "number" ? raw : fallback;
+        return HG.specEngine.resolveValue(state.lastBake.values, raw, fallback, -1);
+      },
+      onEdit: function () {
+        writeText();
+        changedLive();
+      }
+    });
+    wrap.appendChild(canvas.root);
+
+    function writeText() {
+      var flat = mask[name] || [];
+      var text = "";
+      for (var i = 0; i + 1 < flat.length; i += 2) {
+        text += flat[i] + ", " + flat[i + 1] + "\n";
+      }
+      area.value = text.trim();
+      area.rows = Math.max(4, flat.length / 2 + 1);
+      note.textContent = (flat.length / 2) + " points";
+    }
+
     function reread() {
       var out = [];
       var bad = 0;
@@ -859,15 +905,21 @@ window.HG = window.HG || {};
       note.textContent = bad
         ? bad + " line(s) not read yet - each one wants two numbers"
         : (out.length / 2) + " points";
-      if (out.length >= 4) {
+      if (!bad) {
         mask[name] = out;
-        changed();
+        canvas.refresh();
+        changedLive();
       }
     }
     area.addEventListener("input", reread);
-    wrap.appendChild(area);
-    wrap.appendChild(note);
-    reread();
+
+    var box = el("details", { class: "path-numbers" }, [
+      el("summary", { text: "the numbers" }),
+      area,
+      note
+    ]);
+    wrap.appendChild(box);
+    writeText();
     return wrap;
   }
 
@@ -1009,6 +1061,20 @@ window.HG = window.HG || {};
     rebake();
   }
 
+  /**
+   * A change to a value that did not change the <i>shape</i> of any form -
+   * re-export and re-bake, but leave the DOM alone.
+   *
+   * <p>{@link #changed} rebuilds all three panels, which is fine for a click
+   * on a dropdown and fatal for a control that is mid-gesture: the PATH canvas
+   * would be replaced between two pointermove events and the drag would end
+   * on a node nobody can see any more.
+   */
+  function changedLive() {
+    renderExport();
+    rebake();
+  }
+
   function rebake() {
     if (rebakeTimer) clearTimeout(rebakeTimer);
     rebakeTimer = setTimeout(doBake, 40);
@@ -1048,6 +1114,10 @@ window.HG = window.HG || {};
     $("bake-status").textContent = "baked in " + ms + " ms" + note;
     $("bake-status").className = "status" + (result.expresses ? "" : " warnish");
     renderDrawnKnobs(result.values);
+    // The skin picker only rebakes, so this is where a PATH canvas hears that
+    // it is now silhouetting a foal - and where a knob-driven stroke width
+    // picks up what this horse drew.
+    HG.pathCanvas.redrawAll();
   }
 
   function renderDrawnKnobs(values) {
