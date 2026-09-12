@@ -1141,7 +1141,10 @@ public final class DesignerApi {
                 // the other tiers - the same weight the loot modifier uses.
                 .kv("lootWeight", g.rarity().lootWeight())
                 .kv("homozygous", hom)
-                .kv("effect", new CarrotEffect.KnownGeneSplice(g.key(), hom).id())
+                // Built through defaultSpliceFor rather than by naming the pair here:
+                // the carrot token now carries both allele tokens, and this was
+                // the third place that knew its shape.
+                .kv("effect", CarrotEffect.defaultSpliceFor(g).id())
                 // Whether the Unknown Gene Splice may roll this locus. Derived
                 // from what the gene does to the horse, never listed.
                 .kv("unknownSpliceable", SpliceSafety.isSafe(g))
