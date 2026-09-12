@@ -152,15 +152,24 @@ class ParticleGeneTest {
                 "a carrier must be indistinguishable from a plain horse");
     }
 
-    /** The lower rank wins, and the loser is carried silently - which is what makes the locus breedable. */
+    /**
+     * <b>Two variants that are not partners are two carriers.</b> The locus
+     * wants agreement - the same allele twice, or two of one family - and
+     * anything else is silent. It used to show the lower-ranked of the two,
+     * which made a cross-family heterozygote indistinguishable from a
+     * homozygote and so lied to a breeder about what a horse was carrying.
+     */
     @Test
-    void aNonCodominantHeterozygoteHidesTheHigherRankedCopy() {
-        // Dst (rank 1) against Soul (rank 99): dust shows, the soul is carried.
-        assertEquals(List.of(v("Dst")), GENE.shown(pair("Dst", "Soul")));
-        assertEquals(GENE.expressionOf(pair("Dst", "Dst")), GENE.expressionOf(pair("Dst", "Soul")),
-                "a hidden copy must be indistinguishable from a second copy of the one that shows");
-        // ...and it really is still there to pass on.
+    void aCrossFamilyHeterozygoteShowsNothingAtAll() {
+        // Dst (dust) against Soul (life): different families, so neither draws.
+        assertEquals(List.of(), GENE.shown(pair("Dst", "Soul")));
+        assertEquals(GENE.expressionOf(pair("n", "n")), GENE.expressionOf(pair("Dst", "Soul")),
+                "a cross-family heterozygote must be indistinguishable from a plain horse");
+        assertNotEquals(GENE.expressionOf(pair("Dst", "Dst")), GENE.expressionOf(pair("Dst", "Soul")),
+                "and must NOT be mistakable for a homozygote, which was the old bug");
+        // ...and both copies really are still there to pass on.
         assertTrue(pair("Dst", "Soul").has(GENE.fromToken("Soul")));
+        assertTrue(pair("Dst", "Soul").has(GENE.fromToken("Dst")));
     }
 
     @Test
@@ -191,17 +200,25 @@ class ParticleGeneTest {
         assertEquals(8, burn);
     }
 
+    /**
+     * Different families do not stack - and, since the rank rule went, do not
+     * half-stack either: neither copy shows, so the horse is plain.
+     */
     @Test
-    void allelesOfDifferentFamiliesNeverStack() {
-        assertEquals(1, GENE.shown(pair("Rflm", "Prtl")).size(), "a flame does not stack with a portal");
-        assertEquals(1, GENE.shown(pair("Lava", "Snw")).size(), "two ungrouped alleles never stack");
-        assertEquals(1, GENE.shown(pair("Dst", "Dstrn")).size(),
+    void allelesOfDifferentFamiliesShowNothing() {
+        assertEquals(0, GENE.shown(pair("Rflm", "Prtl")).size(), "a flame does not stack with a portal");
+        assertEquals(0, GENE.shown(pair("Lava", "Snw")).size(), "two ungrouped alleles never stack");
+        assertEquals(0, GENE.shown(pair("Dst", "Dstrn")).size(),
                 "enchanting glyphs are not a dust however the token reads");
-        assertEquals(1, GENE.shown(pair("Clrstr", "Lmstr")).size(),
+        assertEquals(0, GENE.shown(pair("Clrstr", "Lmstr")).size(),
                 "totem sparks are not a streak however the token reads");
     }
 
-    /** Codominance is exactly "same non-empty group", everywhere, with no special cases. */
+    /**
+     * Codominance is exactly "same non-empty group", everywhere, with no special
+     * cases - and it is now the <i>only</i> way two different alleles show. Two
+     * partners draw two particles; anything else draws none.
+     */
     @Test
     void codominanceIsExactlyTheGroupRelation() {
         for (Variant a : GENE.variants()) {
@@ -211,7 +228,7 @@ class ParticleGeneTest {
                 }
                 boolean sameFamily = !a.group().isEmpty() && a.group().equals(b.group());
                 int shown = GENE.shown(new AllelePair(a.allele(), b.allele())).size();
-                assertEquals(sameFamily ? 2 : 1, shown,
+                assertEquals(sameFamily ? 2 : 0, shown,
                         a.allele().token() + "/" + b.allele().token());
             }
         }

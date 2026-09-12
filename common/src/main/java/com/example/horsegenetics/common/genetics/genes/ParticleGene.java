@@ -49,14 +49,27 @@ import java.util.Map;
  * allele hands you, and a locus this wide would otherwise put something on far
  * too many horses.
  *
- * <p><b>Rank only decides between two variants.</b> Every allele carries one,
- * and the alleles are declared in rank order, so {@link AllelePair}'s canonical
- * form puts the more dominant copy in slot 0. Where two <i>variant</i> alleles
- * meet and are not codominant the lower rank is the one you see; the other is
- * carried silently and passed on. That is what makes the locus breedable rather
- * than merely wide - a horse trailing dust may be hiding a soul, and only its
- * foals will say so. Rank never beats the wild type: {@code n} is not the
- * weakest allele here, it is an off switch.
+ * <p><b>Two alleles that are not partners are two carriers.</b> Where two
+ * <i>variant</i> alleles meet and are not codominant, neither shows: a
+ * {@code Dst/Soul} horse trails nothing and passes both on. The locus asks for
+ * <b>agreement</b> before it draws anything at all - the same allele twice, or
+ * two alleles of one family - and every other combination is silent.
+ *
+ * <p>This replaced a rank rule, under which the lower-ranked of two variants
+ * showed and the other hid behind it. The rank rule made a cross-family
+ * heterozygote look exactly like a homozygote, which is the one thing a breeder
+ * must not be lied to about: a horse trailing dust was either {@code Dst/Dst}
+ * or {@code Dst}-over-anything, and no amount of looking told you which. Silence
+ * is the honest answer, and it costs nothing, because the
+ * {@linkplain #foundersTable() founder table} never hands you one of these in
+ * the wild anyway - they only arise from breeding, where the pedigree explains
+ * them.
+ *
+ * <p>Declaration order survives, but it is no longer a dominance rank: the
+ * alleles are declared in it so {@link AllelePair}'s canonical form is stable
+ * and {@code copy(0)} / {@code copy(1)} address the two halves of a codominant
+ * pair in a fixed order. {@code n} is not the weakest allele here, it is an off
+ * switch - and now so is any allele without its partner.
  *
  * <p><b>Codominance is by family.</b> Every allele belongs to at most one group
  * ({@link Variant#group()}), and two <i>different</i> alleles of the same group
@@ -333,8 +346,9 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
             return singles[a];
         }
         Expression both = duals.get(key(a, b));
-        // Not codominant: the lower rank is the one that shows, and slot 0 is it.
-        return both != null ? both : singles[a];
+        // Not codominant: neither shows. Two variants that are not partners are
+        // two carriers, exactly as a variant against the wild type is.
+        return both != null ? both : wild;
     }
 
     /**
@@ -353,7 +367,7 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
             return List.of(first);
         }
         Variant second = variants.get(b);
-        return first.codominantWith(second) ? List.of(first, second) : List.of(first);
+        return first.codominantWith(second) ? List.of(first, second) : List.of();
     }
 
     @Override

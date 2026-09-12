@@ -41,14 +41,33 @@ public final class CoatRegions {
     };
 
     /**
-     * Foal eyes: the 2x2 pupil per eye on the head's LEFT / RIGHT faces of
-     * {@code horse_white_baby.png} (the baby texture has no bright sclera). The
-     * earlier values sat in the centre facial-marking blob, not on the eyes, so
-     * the composed coat painted straight over the pupils.
+     * Foal eyes: <b>4x2 per eye</b> - two columns of sclera and two of pupil -
+     * on the head's RIGHT / LEFT faces of {@code horse_white_baby.png}.
+     *
+     * <p>These were {@code {6,20,2,2}} and {@code {40,20,2,2}}, which is the
+     * pupil and <i>only</i> the pupil. A comment here used to assert that the
+     * baby texture has no bright sclera; it does, and that claim is the whole
+     * reason the rects were cropped to it. Each eye is
+     * {@code ff ff 00 00} on the west face and the mirror {@code 00 00 ff ff} on
+     * the east, exactly like the adult - the foal sheet is the adult's layout at
+     * two texels per unit, so it could hardly be otherwise. Cropping to the
+     * black left the two white columns outside the redraw, so every white
+     * painter and every magical gene painted over the whites of a foal's eyes
+     * and the redraw put back only the pupil. That is the owner-reported
+     * "the coat overwrites the sclera", and it was never an ordering or a
+     * projection problem: {@link CoatTextureComposer} already redraws the eyes
+     * after both paint phases.
+     *
+     * <p>The sclera sits <b>nose-side</b> on the west face and ear-side on the
+     * east, which is why the right eye starts at {@code x4} and the left at
+     * {@code x40} rather than both shifting the same way. Verified against the
+     * head's own face extents rather than derived - {@code HEAD} owns
+     * {@code x0-17} (RIGHT) and {@code x30-47} (LEFT) at {@code y18-25} on the
+     * foal sheet.
      */
     private static final int[][] EYE_RECTS_BABY = {
-            {6, 20, 2, 2},
-            {40, 20, 2, 2},
+            {4, 20, 4, 2},   // right eye - head WEST face: sclera x4-5, pupil x6-7
+            {40, 20, 4, 2},  // left eye  - head EAST face: pupil x40-41, sclera x42-43
     };
 
     /**

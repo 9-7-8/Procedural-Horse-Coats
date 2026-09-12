@@ -24,7 +24,8 @@ import java.util.List;
  * <table>
  *   <tr><th>combination</th><th>outcome</th></tr>
  *   <tr><td>{@code n/n}</td><td>wild type</td></tr>
- *   <tr><td>{@code Mzeb/n}, {@code Mzeb/Mzeb}</td><td>{@code zebra} - black bands over any coat at all</td></tr>
+ *   <tr><td>{@code Mzeb/n}</td><td>{@code dusky} - the same bands, darkened rather than blacked</td></tr>
+ *   <tr><td>{@code Mzeb/Mzeb}</td><td>{@code zebra} - hard black bands over any coat at all</td></tr>
  * </table>
  *
  * <h2>The same map as the natural gene, in the opposite direction</h2>
@@ -47,6 +48,26 @@ import java.util.List;
  * grey - without this gene needing to know what else the horse carries. It also
  * raises opacity, so the stripes show on a dominant-white horse too.
  *
+ * <h2>Codominant, like the natural locus</h2>
+ * One {@code Mzeb} copy used to draw the whole pattern, which left the locus
+ * with nothing between a plain horse and a fully striped one. It is codominant
+ * now, the same way {@link NaturalZebraGene} is and for the same reason: a
+ * carrier a player can <i>see</i> is a carrier they can breed from.
+ *
+ * <p>There is <b>one painter</b> and it takes a strength, so the two outcomes
+ * cannot drift apart - a dusky parent and its black-striped foal wear the same
+ * bands in the same places. Two copies pass {@code 1.0} and are therefore
+ * byte-for-byte what this gene has always drawn; one copy passes
+ * {@value #SHADOW_STRENGTH}, which scales both the subtraction and the opacity.
+ *
+ * <p><b>The heterozygote is the one outcome that reads differently on different
+ * coats</b>, and that is a consequence of the overkill rather than a bug in it.
+ * A fraction of a deliberately-too-large number is an ordinary-sized number, so
+ * a dusky band is a real darkening of whatever was underneath: clearly visible
+ * on a cremello or a palomino, and close to invisible on a black horse, which
+ * is what a shadow on a black horse looks like. The homozygote is the outcome
+ * that promises to read on <i>any</i> coat, and it still does.
+ *
  * <p><b>Non-deterministic.</b> Five knobs come off the expressing {@code Mzeb}
  * copy, in this order: {@code nextLong()} (the band field's seed), then
  * {@code nextFloat()} for band <b>spacing</b>, <b>width</b>, how far the bands
@@ -62,6 +83,14 @@ public final class MagicZebraGene implements Gene {
 
     /** Per channel, as a percentage of full scale. Negative - stripes remove colour. */
     public static final int STRIPE_PERCENT = -200;
+
+    /**
+     * How much of the full subtraction <i>and</i> of the opacity one copy gets.
+     * Not a fraction picked for its own sake: {@link #STRIPE_PERCENT} is sized
+     * to floor any channel from anywhere, so the useful range for a band that
+     * must <b>not</b> floor is well under a quarter of it.
+     */
+    public static final double SHADOW_STRENGTH = 0.09;
 
     // Body units (1 = 1/16 block); the adult barrel is 22 long, a foal's 14.
     private static final double SPACING_MIN = 2.0;
@@ -90,6 +119,14 @@ public final class MagicZebraGene implements Gene {
 
     private final Expression WILD = Expression.wildType("No stripes.");
 
+    private final Expression DUSKY = Expression.of("dusky", "Dusky-banded")
+            .describe("One copy darkens the zebra map instead of blacking it, so the horse wears the "
+                    + "full pattern as dusky bands a few shades down from its own colour. Obvious on a "
+                    + "pale coat, subtle on a dark one - and visible enough to breed from, which is "
+                    + "the point of it.")
+            .varies()
+            .tint(paint(SHADOW_STRENGTH));
+
     private final Expression ZEBRA = Expression.of("zebra", "Magic zebra")
             .describe("A zebra's own stripe map painted in hard black: vertical bands off the spine, "
                     + "arcs round the hip, rings down the legs, narrow bands on the neck and face, a "
@@ -97,9 +134,9 @@ public final class MagicZebraGene implements Gene {
                     + "width, bend and leg reach. They read black over any coat at all, including a "
                     + "cremello or a dominant white.")
             .varies()
-            .tint(MagicZebraGene::paintStripes);
+            .tint(paint(1.0));
 
-    private final List<Expression> expressions = List.of(WILD, ZEBRA);
+    private final List<Expression> expressions = List.of(WILD, DUSKY, ZEBRA);
 
     private final FounderTable founders = FounderTable.hardyWeinberg(Mzeb, n, 1.0 / WILD_MZEB_ONE_IN);
 
@@ -114,9 +151,13 @@ public final class MagicZebraGene implements Gene {
 
     @Override
     public Expression expressionOf(AllelePair pair) {
-        return pair.has(Mzeb) ? ZEBRA : WILD;
+        if (!pair.has(Mzeb)) {
+            return WILD;
+        }
+        return pair.has(n) ? DUSKY : ZEBRA;
     }
 
+    /** Does this combination band the coat at all - one copy or two? */
     public boolean isZebra(AllelePair pair) {
         return pair.has(Mzeb);
     }
@@ -132,30 +173,42 @@ public final class MagicZebraGene implements Gene {
                 EpiValue.uniform("reach", REACH_MIN, REACH_MIN + REACH_RANGE));
     }
 
-    private static ColorField paintStripes(
-            com.example.horsegenetics.common.coat.pattern.CoatBuildContext ctx,
-            com.example.horsegenetics.common.coat.pattern.PigmentView coat,
-            com.example.horsegenetics.common.coat.pattern.ColorView accumulated) {
-        EpiValues epi = ctx.epigeneticsFor(KEY);
-        ZebraStripes.Pattern pat = new ZebraStripes.Pattern(
-                epi.seed("seed"),
-                epi.get("spacing"),
-                epi.get("width"),
-                epi.get("bend"),
-                epi.get("reach"),
-                DORSAL_HALF_WIDTH);
+    /**
+     * One painter for both outcomes, differing only in how hard it subtracts -
+     * which is what codominance means here, and the reason a dusky horse and a
+     * black-striped one cannot end up wearing different bands.
+     *
+     * <p>{@code strength} scales the subtraction <b>and</b> the opacity
+     * together. Scaling only the colour would leave a dusky band at full opacity
+     * over the white template, which on a dominant white is a grey stripe as
+     * strong as the homozygote's black one - the opposite of subtle.
+     *
+     * <p>Both outcomes read the same five stored numbers off the expressing copy,
+     * so the pattern is the horse's and the strength is its genotype's.
+     */
+    private static Expression.Colour paint(double strength) {
+        return (ctx, coat, accumulated) -> {
+            EpiValues epi = ctx.epigeneticsFor(KEY);
+            ZebraStripes.Pattern pat = new ZebraStripes.Pattern(
+                    epi.seed("seed"),
+                    epi.get("spacing"),
+                    epi.get("width"),
+                    epi.get("bend"),
+                    epi.get("reach"),
+                    DORSAL_HALF_WIDTH);
 
-        Skin skin = ctx.skin();
-        ColorField delta = ColorField.deltaLike(accumulated);
-        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-            double c = ZebraStripes.coverage(skin, part, point, pat);
-            if (c <= 0) {
-                return;
-            }
-            int amount = (int) Math.round(255.0 * STRIPE_PERCENT / 100.0 * c);
-            delta.add(px, py, amount, amount, amount);
-            delta.addOpacity(px, py, (int) Math.round(255.0 * c));
-        });
-        return delta;
+            Skin skin = ctx.skin();
+            ColorField delta = ColorField.deltaLike(accumulated);
+            HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+                double c = ZebraStripes.coverage(skin, part, point, pat) * strength;
+                if (c <= 0) {
+                    return;
+                }
+                int amount = (int) Math.round(255.0 * STRIPE_PERCENT / 100.0 * c);
+                delta.add(px, py, amount, amount, amount);
+                delta.addOpacity(px, py, (int) Math.round(255.0 * c));
+            });
+            return delta;
+        };
     }
 }
