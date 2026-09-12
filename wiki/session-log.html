@@ -27,6 +27,119 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-11g">2026-09-11 &mdash; a playtester session, and the roadmap stops being fiction</h2>
+
+<p>
+    Two halves. The first was a sweep of the roadmap against the code, which found that a
+    large part of it described work already done. The second was a live bug queue from
+    outside playtesters &mdash; the first time this mod has had reports from people who did
+    not write it &mdash; and most of those turned out to be <strong>missing feedback rather
+    than missing behaviour</strong>, which is a pattern worth naming.
+</p>
+
+<h3>Three things that were never broken, only silent</h3>
+
+<p>
+    <strong>&ldquo;The diet gene doesn't appear to work.&rdquo;</strong> It expresses on
+    about one horse in eight. What it never did was report: healing a horse already at full
+    health is a no-op and the bond award declines silently at max bond or the daily cap, so
+    feeding a healthy, well-bonded horse spent the item, played the sound, showed the
+    hearts and told the player nothing. Indistinguishable from a gene that does nothing.
+    The food is still always eaten &mdash; it was never the refusing that was wrong &mdash;
+    and the player is told when both halves declined.
+</p>
+
+<p>
+    <strong>&ldquo;A horse randomly got bigger, and it tracks bond.&rdquo;</strong> Nothing
+    in the mod grows a horse, and the negative is provable: one write to
+    <code>Attributes.SCALE</code>, a <code>setBaseValue</code> so it cannot accumulate, over
+    inputs fixed at birth, guarded to run once. It was a foal reaching adulthood. The bond
+    correlation is a <em>shared cause</em>: feeding awards bond and does not cancel the
+    interaction, so vanilla's feed runs too, and on a baby vanilla's feed is
+    <code>ageUp</code>. Hand-feeding a foal for bond accelerates its growth with the same
+    click. <a href="known-gaps.html#gap-196">Gap 196</a>.
+</p>
+
+<p>
+    <strong>&ldquo;An aura of glowing entities round a horse.&rdquo;</strong>
+    <code>MobEffects.GLOWING</code> is applied in exactly one place in the mod &mdash; the
+    F8 highlight, which lights every horse within 96 blocks, in a dimension that is wall to
+    wall with pens. The effect carries no particles and no icon and refreshes for as long as
+    it is on, so left on by accident it is indistinguishable from a bug. It times out now
+    and says how to stop itself.
+</p>
+
+<h3>Name tags, and a gate asked on the wrong side</h3>
+
+<p>
+    The one report that was a plain defect. <code>HorseInteractionHandler</code> runs on both
+    sides and cancels the name-tag interaction, but only when
+    <code>HorseRecords.hasRealRecord</code> says the horse is ours &mdash; and that asks the
+    <b>attachment</b>, which is never synced. Client-side it was always false, so the client
+    never cancelled and did what vanilla does for a tamed horse plus an item: <em>ride it</em>.
+    The rename window opened and the player was put on the horse at the same time. The client
+    does know which horses are ours, in <code>ClientHorseRecordCache</code>, so the question
+    is asked in a <code>Dist.CLIENT</code> subscriber. The stick and clock branches in that
+    same file carry a comment saying to cancel on both sides for exactly this reason.
+</p>
+
+<h3>What the audit found</h3>
+
+<p>
+    Part 1 of the roadmap is finished. Of its five &ldquo;genes drawing the wrong thing&rdquo;,
+    one was real, one was real and misdiagnosed, one was a decision and <strong>two were
+    already built</strong>; the <code>attribute</code> verb it called inert has been dispatched
+    for some time, with the class javadoc still saying otherwise. Epigenetic drift &mdash; item
+    two of five in &ldquo;where to start&rdquo; &mdash; is built, written up on
+    <a href="breeding.html#drift">breeding</a>, and had only never been deleted. Bareback
+    steering was listed as unbuilt while a playtester was confirming it works. The bond heart
+    particle likewise. On the gaps page, 38 of 183 entries are already marked closed and 41
+    more need <em>play</em> rather than code, so the real backlog is nearer 97 than 183.
+</p>
+
+<h3>The one that got away</h3>
+
+<div class="note warn">
+    <span class="label">A whole session of green builds over a broken module</span>
+    <p>
+        Changing <code>CarrotEffect</code>'s shape broke <code>web/DesignerApi</code>, and
+        <b>nothing noticed for eleven commits</b>: <code>:web</code> is not a dependency of
+        <code>:neoforge-26.1.2:build</code>, so every build was green, the tests were green,
+        and two commits of <code>common/</code> shipped with a stale wasm beside them. It
+        surfaced only because the end-of-session routine runs
+        <code>:web:bakeDesignerAssets</code> by hand. <a href="known-gaps.html#gap-199">Gap
+        199</a> - the check that would have caught it does not exist, and
+        <a href="known-gaps.html#gap-45">gap 45</a> assumes somebody looked at
+        <code>git status</code>.
+    </p>
+</div>
+
+<h3>Also built</h3>
+
+<ul>
+    <li><strong>Magic zebra is codominant</strong>, tuned off a rendered dose ladder rather
+        than guessed - 0.18 read as black on a bay and was indistinguishable from the
+        homozygote.</li>
+    <li><strong>Particle stops lying about carriers</strong> (owner's call): two variant
+        alleles that are not partners now show nothing, where the lower-ranked one used to
+        show and make a cross-family heterozygote look exactly like a homozygote.</li>
+    <li><strong>The foal sclera</strong> - the rects were 2 texels wide where the eye is 4,
+        on the strength of a comment claiming the foal template has no sclera. It has two
+        columns of one. All 528 foal golden rows moved; no adult row did.</li>
+    <li><strong>The family tree runs both ways</strong> - Ancestors, Descendants, Overview,
+        with Back and Home, on data the client was already being sent.</li>
+    <li><strong>A gene carrot names two alleles</strong>, which is stage one of the
+        <a href="roadmap.html#allele-papers">allele-paper design</a> and fixes a limitation
+        nothing had recorded: the pair came from <code>alleles().get(0)</code>, so the
+        forty-allele particle locus could only ever be spliced to dust.</li>
+    <li><strong>Horses come to food, and run for their favourite</strong> - the only way the
+        preference locus is visible before you have fed it.</li>
+    <li><strong>Gene and allele pickers on My horses</strong>, listing only what the roster
+        contains; <strong>/bond</strong> for testing the tiers; <strong>F8 in production</strong>
+        with the herd lead in red; a <strong>portal every 25 pens</strong> in a corridor that
+        had one way out in seven thousand blocks.</li>
+</ul>
+
 <h2 id="d2026-09-11f">2026-09-11 &mdash; three coat defects, and a roadmap that had stopped being true</h2>
 
 <p>

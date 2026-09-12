@@ -1245,15 +1245,6 @@
         economy (&sect;<a href="#items">13</a>).</li>
 </ul>
 
-<h3>Feedback and new behaviour</h3>
-
-<ul>
-    <li><strong>A heart particle on every point gained.</strong> Bond accrues silently
-        today; each whole point should pop a <code>HEART</code> particle so the player
-        sees the relationship building. The accumulator already tracks fractional bond,
-        so this is a &ldquo;crossed an integer&rdquo; check.</li>
-</ul>
-
 <h3>Herds, and testing any of it</h3>
 
 <ul>
@@ -1267,6 +1258,58 @@
     <li>Gated healing has no <strong>info-panel line naming what is missing</strong>
         &mdash; a hurt horse near food but no water shows particles and nothing else.</li>
 </ul>
+
+<hr>
+
+<h2 id="allele-papers">A research paper names an allele, not a gene</h2>
+
+<div class="note">
+    <span class="label">Owner's design, 2026-09-11. Stage one is built; the rest is not.</span>
+    <p>
+        The wanted end state: <strong>research papers pull out individual alleles</strong>
+        rather than whole genes, the <a href="items.html">equine research shelf</a> lets you
+        <strong>pick two of them</strong> and binds them into one book, and that book is what
+        the carrot recipes take. The crafting recipes themselves do not change.
+    </p>
+</div>
+
+<p>
+    <strong>Stage one shipped</strong> and is the load-bearing half:
+    <code>CarrotEffect.KnownGeneSplice</code> carries <b>two allele tokens</b> instead of a
+    gene key and a het/hom flag, so a carrot already names exactly the pair it grants. That
+    fixed a limitation nothing had recorded &mdash; the pair used to be built from
+    <code>gene.alleles().get(0)</code>, the first-declared allele, so on the forty-allele
+    <a href="gene-particle.html">particle</a> locus no carrot could ever hand over anything
+    but dust, and <a href="gene-kit.html">KIT</a> could only ever give one of its thirteen.
+</p>
+
+<p>What is left, in the order that keeps the game working at each step:</p>
+
+<ul>
+    <li><strong>The paper carries an allele.</strong> <code>RESEARCH_GENE</code> becomes a
+        gene key plus an allele token, and the discovery system that grants papers has to
+        decide <em>which</em> allele a horse teaches you &mdash; presumably the ones it
+        actually carries, which is the same question
+        <code>common/horse/RosterGenetics</code> already answers for the browser's
+        pickers.</li>
+    <li><strong>The shelf binds two into a book.</strong> Its <em>Copy</em> tab already
+        picks one gene and spends blank books; this is that tab taking two allele papers
+        instead. <code>ResearchShelfMenu</code> and <code>ResearchShelfScreen</code>.</li>
+    <li><strong>The recipe takes the book.</strong> <code>KnownGeneSpliceRecipe</code>
+        currently matches a research paper and calls
+        <code>CarrotEffect.defaultSpliceFor</code> to decide the pair; it would read the
+        pair off the book instead, at which point <code>defaultSpliceFor</code> and
+        <code>Gene.geneCarrotHomozygous()</code> both stop being needed and should go.</li>
+    <li><strong>The tooltip.</strong> A Known Gene Splice carrot already <em>carries</em>
+        the right data and has never <em>shown</em> it &mdash; every one of them looks
+        identical in the inventory. That is worth doing whether or not the rest lands.</li>
+</ul>
+
+<p class="muted">
+    Note the interaction: the carrot's homozygous-by-default rule, also settled
+    2026-09-11, is a stopgap that this design deletes. Once the player picks both alleles
+    there is no default to choose.
+</p>
 
 <hr>
 
