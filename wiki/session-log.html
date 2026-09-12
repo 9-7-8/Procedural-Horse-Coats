@@ -27,6 +27,119 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-11h">2026-09-11 &mdash; the two items at the top of the roadmap, both of them</h2>
+
+<p>
+    One session, the roadmap's first and second entries. Both were long-standing, both
+    turned out to be smaller than the page implied once the groundwork underneath them
+    had shipped, and both are now waiting on a person rather than on code
+    (<a href="verification.html#path-canvas">&sect;0-CL</a>,
+    <a href="verification.html#gene-api">&sect;0-CM</a>).
+</p>
+
+<h3>The <code>PATH</code> drawing canvas</h3>
+
+<p>
+    A <code>PATH</code> mask's control points are handles on a view of the horse now.
+    Click to add, drag to move, a hollow dot mid-span to insert, right-click or
+    <kbd>Delete</kbd> to remove, arrows to nudge; the textarea survives, folded under
+    <em>the numbers</em>, and the two write the same array. It changed no format, no
+    engine and no parity fixture &mdash; which is exactly what the entry predicted when
+    it argued for shipping the mask first and the surface after, and is worth recording
+    as a case where sequencing a job that way paid.
+</p>
+
+<p>
+    Two decisions inside it are the ones a later session might undo without knowing why.
+    <strong>The silhouette is the model's own body-space boxes</strong>, part by part,
+    because that is precisely the set of <code>(u, v)</code> the mask can reach &mdash; a
+    prettier horse drawn by hand would be a drawing of a horse rather than a map of where
+    a point lands. And <strong>both axes are drawn at one scale in body units</strong>, so
+    the <code>top</code> and <code>front</code> planes letterbox rather than stretch: the
+    alternative fits the box better and makes every circle an ellipse on the animal. The
+    curve is <code>SpecPainter</code>'s own Catmull-Rom, reached through two new
+    <code>spec-engine</code> exports rather than a second copy of the maths.
+</p>
+
+<div class="note">
+    <span class="label">The test found a bug on its first run, and it was in the form layer</span>
+    <p>
+        Every mask parameter is wrapped in a <code>&lt;label&gt;</code>, which forwards a
+        click anywhere inside it to the first control it contains. The canvas's toolbar
+        sits inside that label, so <strong>every click on the horse was also pressing
+        Reverse</strong> and the drawing came out backwards one point at a time. It would
+        have been baffling to hit by hand and was obvious from an automated click
+        sequence that printed the array after each step. Controls made of several widgets
+        get a plain block now, not a label.
+    </p>
+</div>
+
+<p>
+    Verified by driving the real page in headless Chrome &mdash; 26 checks covering click
+    placement, drag isolation, insert ordering, deletion, the textarea round-trip, the
+    foal mesh, and one-scale mapping in all three planes. The driver lives in the
+    scratchpad rather than the repo; landing it as a checked-in tool was offered and not
+    taken up, so it is a candidate rather than a gap.
+</p>
+
+<h3>The Java gene API, and an open registry</h3>
+
+<p>
+    <code>TwoAlleleGene</code> answers seven of <code>Gene</code>'s eight methods from a
+    fluent declaration; <code>AbstractNaturalGene</code> and
+    <code>AbstractMagicalGene</code> leave the subclass <code>restrict()</code> or
+    <code>tint()</code>. <a href="making-a-gene.html#bases">The short path</a> is the
+    write-up.
+</p>
+
+<p>
+    The part worth keeping: <strong><code>AbstractAbilityGene</code> was moved onto the
+    same skeleton</strong>. It is where this shape was first noticed, seventeen genes
+    ago, and folding it in is the difference between a generalisation and a second copy
+    of one &mdash; it kept its positional constructor so all seventeen call sites were
+    untouched. <a href="gene-mushroom.html">Mushroom</a> (natural) and
+    <a href="gene-healer.html">healer</a> (magical) were converted as worked examples, and
+    <strong>both coat goldens are unmoved</strong>, which is what says the conversions
+    preserved behaviour rather than a reading of the diff.
+</p>
+
+<p>
+    <code>Genes.register</code> takes any <code>Gene</code> now, validates the namespaced
+    key, then <code>freeze()</code>s. The freeze buys <em>no speed</em> &mdash; the
+    orderings were already computed once and cached &mdash; and the entry that asked for
+    it implied otherwise; what it actually buys is a named failure instead of horses whose
+    loci have all shifted by one segment, which reads as a breeding bug and is not one.
+</p>
+
+<h3>Two things deliberately not built</h3>
+
+<ul>
+    <li><strong><code>AbstractPatternGene</code>.</strong> &sect;8 said it would absorb
+        "the <code>BodyNoise</code> boilerplate and the pull-N-knobs-off-the-expressing-copy
+        helper". Neither is boilerplate: reading epigenetics is the single line
+        <code>ctx.epigeneticsFor(KEY)</code>, and <code>BodyNoise</code> is a static call
+        whose arguments <em>are</em> the design of the pattern using it. A base wrapping
+        those would hide the trivial half and constrain the interesting one. Write it from
+        a third pattern gene's duplication, if ever &mdash; not from the entry.</li>
+    <li><strong>Proof that another mod can register a gene.</strong>
+        <code>RegisterHorseGenesEvent</code> fires from <code>FMLConstructModEvent</code>'s
+        <em>deferred work queue</em>, which is the one moment when every mod has been
+        constructed and nothing has parsed a genotype code. That sequence was read off the
+        loader's own <code>constructMods</code> rather than assumed, and it compiles
+        &mdash; but it has never run with a second mod present, and no test in this repo
+        can make it. Flagged in the class note and on
+        <a href="verification.html#gene-api">&sect;0-CM</a>, which carries a cheap
+        log-line check that needs no second mod.</li>
+</ul>
+
+<p class="muted">
+    Also: <code>making-a-gene.html</code> documented
+    <code>geneCarrotHomozygous()</code> as defaulting to <code>false</code>; the code
+    changed to <code>true</code> on the owner's call the day before and the page had not
+    followed. And the designer's wasm was re-baked &mdash; <code>common/</code> moved, so
+    the browser had been running the previous build.
+</p>
+
 <h2 id="d2026-09-11g">2026-09-11 &mdash; a playtester session, and the roadmap stops being fiction</h2>
 
 <p>

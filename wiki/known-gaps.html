@@ -59,6 +59,20 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-200"><strong>A third-party Java gene cannot be put back once
+    <code>clearLoaded()</code> has dropped it.</strong> Opened 2026-09-11, with the open
+    registry. <code>clearLoaded()</code> means "back to the built-ins", and it re-reads the
+    shipped gene files on the way out so the drop-in population is restored &mdash; that is
+    what its note is about. It cannot do the same for a gene another mod handed us: a
+    <code>SpecGene</code> is a file we can re-read, a Java gene is an object we were given
+    once. So it clears them and they stay cleared. <strong>Nothing in the game calls
+    it</strong> &mdash; it is the tests' reset, and it also thaws the freeze for the same
+    reason &mdash; so this is latent rather than live, and it is recorded because the
+    failure would be quiet: the registry would come back one locus shorter and every
+    genotype code written since would mean something else. If a reload path is ever wanted
+    in game, the fix is to keep the registration <em>callbacks</em> rather than the gene
+    objects, and re-run them.</li>
+
 <li id="gap-199"><strong><code>:web</code> is not built by any gate, so it can be broken for a whole session without anything going red.</strong> Opened 2026-09-11, having done exactly that. A change to <code>CarrotEffect</code>'s shape left <code>web/DesignerApi</code> calling a constructor that no longer existed; <code>:neoforge-26.1.2:build</code> does not depend on <code>:web</code>, so every build afterwards was green, the tests were green, and the break only surfaced when <code>:web:bakeDesignerAssets</code> was run by hand at the end of the session. Two commits of <code>common/</code> had shipped in the meantime with a <b>stale wasm</b> beside them, which is the failure <a href="#gap-45">gap 45</a> and the "git status showing common/ changed and wasm unchanged" warning both exist to catch - and neither catches it, because both assume somebody looked. The cheap fix is making the session's green check compile <code>:web</code>; the honest one is a task that fails when the wasm is older than the <code>common/</code> it was built from.</li>
 <li id="gap-198"><strong>The horse browser's gene and allele pickers inherit the roster cap, so they describe what the tab can see rather than what the player owns.</strong> Opened 2026-09-11 with the pickers. They are built from the same capped, client-side roster the tab filters over (<a href="#gap-76">gap 76</a>), so on a large stable a gene held only by a horse past the cap is not offered - and unlike a missing <em>row</em>, a missing <em>gene</em> is invisible: the list simply does not mention it, and there is no footer saying so. One more consumer of the owned-horse index gap 76 wants, and the one where the cap lies rather than truncating.</li>
 <li id="gap-197"><strong>Two goals share a priority and the tie is broken by insertion order, which nothing declares.</strong> Opened 2026-09-11. <code>FoodTemptGoal</code> is registered at <code>CrouchFeedGoal</code>'s priority and after it, so on an untamed horse held food the crouch-taming approach wins - both claim <code>MOVE</code>, and vanilla's goal selector breaks a priority tie by the order goals were added. That is a real behaviour resting on an implementation detail of the selector and on the order of two lines in <code>HorseCareHandler.onHorseJoin</code>: reorder them and taming quietly stops working while both goals still look right. It wants either distinct priorities or a <code>canUse</code> on the tempt goal that stands down explicitly when the crouch conditions hold.</li>
@@ -501,6 +515,8 @@ the way past an intake. <strong>The intake side is a tool now:</strong>
 and measures what it moved - seven drawings of the 2026-09-10 evening batch went from
 1316&ndash;7785 points to 700 (candelabra 1000), with at most 0.41% of any viewBox changing
 side. The engine fix is still the right one.</li>
+
+
 
 <li id="gap-173"><strong>Two per-entity costs hid behind comments claiming they were cheap.</strong>
     Opened and closed 2026-09-10, both found by re-reading the same day's work rather than
