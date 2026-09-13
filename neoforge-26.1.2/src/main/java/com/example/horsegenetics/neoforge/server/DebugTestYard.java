@@ -82,7 +82,7 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 155;
+    private static final int YARD_DEPTH_Z = 210;
 
     // ------------------------------------------------------------------
     // THE GRID
@@ -139,6 +139,30 @@ final class DebugTestYard {
     private static final int ROW_J = ROW_I + ROW_I_D + AISLE;   // the night block, watch
     private static final int ROW_J_D = 7;
 
+    /**
+     * <b>Where the player stands for the ward test, and why it is so far from
+     * everything.</b>
+     *
+     * <p>Vanilla will not naturally spawn a monster within <b>24 blocks</b> of
+     * a player ({@code known-gaps.html} gap 180). That single rule is why the
+     * holy ward's real claim has never been tested: the ward reaches 8 to 16
+     * blocks, which is entirely inside the radius where nothing was going to
+     * spawn anyway, so standing next to a warded horse can only ever prove
+     * something you already had for free.
+     *
+     * <p>So the chambers are put {@value #WARD_RUN} blocks past the standing
+     * spot, which with their offset either side of the walkway puts both of
+     * them about thirty-five blocks away - comfortably outside the dead zone,
+     * and <b>equally far from both</b>, which is the part that makes the
+     * comparison fair.
+     */
+    private static final int WARD_RUN = 30;
+
+    /** The teal wool, and the two chambers thirty blocks beyond it. */
+    private static final int WARD_STAND = ROW_J + ROW_J_D + AISLE + 2;
+    private static final int ROW_K = WARD_STAND + WARD_RUN;
+    private static final int ROW_K_D = 12;
+
     /** The west block's left edge, and the east block's right edge. */
     private static final int WEST_MIN = WEST_MAX - BLOCK_W;
     private static final int EAST_MAX = EAST_MIN + BLOCK_W;
@@ -194,6 +218,7 @@ final class DebugTestYard {
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
         buildSpawnerRoom(level, gy, cx, mouthZ);
         buildNightBlock(level, gy, cx, mouthZ);
+        buildWardArrangement(level, gy, cx, mouthZ);
         buildBaseAlarmPen(level, gy, cx, mouthZ);
         buildIntimidatingPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
@@ -298,6 +323,80 @@ final class DebugTestYard {
     // ------------------------------------------------------------------
     // The overnight pens
     // ------------------------------------------------------------------
+
+    /**
+     * <b>The ward arrangement: a warded chamber, an unwarded control, and a
+     * block of teal wool to stand on.</b>
+     *
+     * <p>This is the test <a href="known-gaps.html">gap 210</a> said could not
+     * be run, and two separate things had to change before it could. The
+     * dimension needed <b>a biome that spawns hostiles</b> - it generated
+     * {@code the_void}, whose spawner lists are empty, so there was nothing
+     * anywhere in it for a ward to stop. And the geometry had to respect gap
+     * 180: <b>vanilla never naturally spawns a monster within 24 blocks of a
+     * player</b>, and the ward reaches 8 to 16, so every previous attempt was
+     * measuring a radius that sat entirely inside the radius where nothing was
+     * going to spawn anyway.
+     *
+     * <h2>Why there are two chambers and not one</h2>
+     * A warded chamber with no zombies in it proves nothing on its own: it is
+     * equally consistent with a working ward, a broken spawn rule, a mistake in
+     * the biome, and the player having wandered too close. <b>The control is
+     * the experiment.</b> Two identical dark boxes, the same distance from the
+     * same standing spot, one with a warded horse and one with a plain one -
+     * and the reading is the difference between their two counts, which is
+     * immune to every one of those confounders at once.
+     *
+     * <p>They sit on opposite sides of the walkway, about thirty-six blocks
+     * apart, because the ward reaches at most sixteen: any closer and the
+     * warded horse could be suppressing the control, which would quietly turn a
+     * working ward into a null result.
+     *
+     * <h2>What to do, and what a pass looks like</h2>
+     * Stand on the teal wool overnight. In the morning the census has counted
+     * the creatures in each chamber every two minutes, and every spawn has
+     * logged its reason and its distance to the nearest live ward.
+     * <b>Pass: the control fills and the warded chamber does not.</b> Both
+     * empty means the spawn rule is wrong rather than the gene - which is what
+     * the control is there to tell you.
+     */
+    private static void buildWardArrangement(ServerLevel level, int gy, int cx, int mouthZ) {
+        int z0 = mouthZ + ROW_K;
+        int z1 = z0 + ROW_K_D;
+
+        int wx0 = cx + WEST_MIN;
+        int wx1 = wx0 + 10;
+        darkRoom(level, gy, wx0, wx1, z0, z1, (wx0 + wx1) / 2, false);
+        DebugPenManager.placeSign(level, new BlockPos(wx0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("WARDED", "should stay", "EMPTY overnight", "SHUT THE DOOR"));
+        stock(level, gy, (wx0 + wx1) / 2.0, (z0 + z1) / 2.0, "horsegenetics.holy_ward",
+                "the warded chamber", 1, 0, null);
+        DebugWorldWatch.watch("WARDED CHAMBER", box(wx0, gy, z0, wx1, gy + 4, z1), null);
+
+        int ex1 = cx + EAST_MAX;
+        int ex0 = ex1 - 10;
+        darkRoom(level, gy, ex0, ex1, z0, z1, (ex0 + ex1) / 2, false);
+        DebugPenManager.placeSign(level, new BlockPos(ex0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("CONTROL", "no ward. This one", "SHOULD fill up.", "SHUT THE DOOR"));
+        // A plain horse, so the two chambers differ in ONE thing. An empty
+        // control would also differ in "has a horse in it", and a horse is an
+        // entity that other entities crowd against.
+        stock(level, gy, (ex0 + ex1) / 2.0, (z0 + z1) / 2.0, "horsegenetics.lantern",
+                "the control chamber", 1, 0, null);
+        DebugWorldWatch.watch("CONTROL CHAMBER", box(ex0, gy, z0, ex1, gy + 4, z1), null);
+
+        // THE TEAL WOOL. Thirty blocks short of both chambers, on the walkway,
+        // because where the player stands IS the experiment's apparatus here -
+        // a step too close and the dead zone swallows the whole thing.
+        int standZ = mouthZ + WARD_STAND;
+        for (int x = cx - 1; x <= cx + 1; x++) {
+            for (int z = standZ - 1; z <= standZ + 1; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, Blocks.CYAN_WOOL.defaultBlockState());
+            }
+        }
+        DebugPenManager.placeSign(level, new BlockPos(cx + 2, gy + 1, standZ), Direction.WEST,
+                List.of("STAND HERE", "all night. Both", "chambers are 30+", "blocks off - gap 180"));
+    }
 
     /** One night stall: the gene, the allele, what it should do, and whether it needs a target. */
     private record Nightly(String key, String token, String name, String what, boolean needsHerd,
@@ -715,7 +814,22 @@ final class DebugTestYard {
      * is a horse you cannot see glowing. A room with a lid is the only place in
      * here that is actually dark.
      */
-    private static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1, int doorX) {
+    private static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
+                                 int doorX) {
+        darkRoom(level, gy, x0, x1, z0, z1, doorX, true);
+    }
+
+    /**
+     * {@code spawnProof} is the difference between a room that is dark for
+     * <i>looking</i> and one that is dark for <i>spawning</i>, and getting it
+     * wrong in either direction ruins a test. The glow room wants the first: it
+     * must be black to the eye and must not fill with zombies overnight. The
+     * ward chambers want the second and would measure nothing at all with a
+     * light block in them - which is exactly what they would have inherited,
+     * because this method is shared.
+     */
+    private static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
+                                 int doorX, boolean spawnProof) {
         BlockState stone = Blocks.STONE_BRICKS.defaultBlockState();
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
@@ -752,10 +866,12 @@ final class DebugTestYard {
         // light 0 exactly, so ONE is enough to stop it, and one is still black
         // to the eye: a glow is judged against the room, and a room at 1 looks
         // the same as a room at 0 while a room full of zombies does not.
-        for (int x = x0 + 1; x < x1; x += 4) {
-            for (int z = z0 + 1; z < z1; z += 4) {
-                DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z),
-                        Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 1));
+        if (spawnProof) {
+            for (int x = x0 + 1; x < x1; x += 4) {
+                for (int z = z0 + 1; z < z1; z += 4) {
+                    DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z),
+                            Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 1));
+                }
             }
         }
     }
