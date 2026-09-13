@@ -104,7 +104,12 @@ final class DebugYardGameplay {
         int x1 = cx + WEST_MAX;
         int z0 = mouthZ + ROW_B;
         int z1 = z0 + ROW_B_D;
-        hall(level, gy, x0, x1, z0, z1, x0 + 9);
+        // OPEN, not a room. Owner on first sight of it: "the tack room does not
+        // need to be an enclosed room" - and she is right, because nothing in
+        // it needs containing. A room is for keeping something in or keeping
+        // the light out, and five chests want neither; all a door bought was a
+        // wall between her and the thing the room exists to hand her.
+        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 9, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("TACK ROOM", "one of every item", "in the mod. Take", "what you need"));
 
@@ -203,9 +208,23 @@ final class DebugYardGameplay {
         int x1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
         int z0 = mouthZ + ROW_B;
         int z1 = z0 + ROW_B_D;
-        hall(level, gy, x0, x1, z0, z1, x0 + 9);
+        // NO DOOR AND NO ROOF, and both halves of that are the fix. The first
+        // version was a sealed hall with a pair of oak doors, and the owner
+        // walked in to an empty room: "the horse villager did not spawn in the
+        // room, or did and escaped. You gotta trap him in there." He escaped.
+        // Villagers open wooden doors - the cowboy has a whole goal for it
+        // (CowboyDoorGoal) - so a door is not a wall to either of these two,
+        // and it was the ONLY thing between them and a hundred and eighty
+        // blocks of yard.
+        //
+        // Taking the roof off is what lets the door go. "Remember, I'm in
+        // creative, so I can fly in": a four-block wall with nothing on top is
+        // impassable to a villager and free to a player, which is exactly the
+        // asymmetry this room wants. Lit from inside so an open top does not
+        // turn it into a spawner overnight.
+        openPen(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 9, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("HORSEMAN + COWBOY", "both already here.", "Trade, transfer,", "research, hitch"));
+                List.of("HORSEMAN + COWBOY", "WALLED, no door -", "fly in over the top.", "They open doors"));
 
         // The horseman's corner: table, two shelves, a bed so the brain has
         // somewhere to send him, and the papers his trades produce.
@@ -337,7 +356,7 @@ final class DebugYardGameplay {
         DebugTestYard.fencedPlot(level, gy, x0, x0 + 7, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("HOLDING PEN", "hang the SIGN on", "a wall, then use", "a pen TICKET"));
-        chest(level, gy, x0 + 1, z0 + 1, "PEN SIGNS", List.of(
+        chest(level, gy, x0 + 1, z0 - 2, "PEN SIGNS", List.of(
                 stack(ModItems.HOLDING_PEN_SIGN.get(), 4),
                 stack(ModItems.HOLDING_PEN_TICKET.get(), 16),
                 stack(ModItems.STALL_SIGN.get(), 8),
@@ -412,7 +431,7 @@ final class DebugYardGameplay {
         DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("CARROT BENCH", "9 carrots, 4 horses", "with UNREAD genes.", "Splice them"));
-        chest(level, gy, x0 + 1, z0 + 1, "SPLICE CARROTS", List.of(
+        chest(level, gy, x0 + 1, z0 - 2, "SPLICE CARROTS", List.of(
                 stack(ModItems.UNKNOWN_GENE_SPLICE_CARROT.get(), 8),
                 stack(ModItems.KNOWN_GENE_SPLICE_CARROT.get(), 8),
                 stack(ModItems.MARKING_GENE_SPLICE_CARROT.get(), 8),
@@ -462,7 +481,7 @@ final class DebugYardGameplay {
         DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("DAIRY + CLIP", "3 milk refusals.", "Shear the greys", "for horse hair"));
-        chest(level, gy, x0 + 1, z0 + 1, "BOTTLES + SHEARS", List.of(
+        chest(level, gy, x0 + 1, z0 - 2, "BOTTLES + SHEARS", List.of(
                 new ItemStack(Items.GLASS_BOTTLE, 32),
                 new ItemStack(Items.BUCKET, 4),
                 new ItemStack(Items.SHEARS, 2),
@@ -588,7 +607,7 @@ final class DebugYardGameplay {
                     "horsegenetics.food_preference", loves[i][1], 1, 0,
                     loves[i][0] + "/" + loves[i][0]);
         }
-        chest(level, gy, x0 + 1, z0 + 1, "THE SAME FOUR", List.of(
+        chest(level, gy, x0 + 1, z0 - 2, "THE SAME FOUR", List.of(
                 new ItemStack(Items.APPLE, 16),
                 new ItemStack(Items.SUGAR, 16),
                 new ItemStack(Items.CAKE, 4),
@@ -660,6 +679,37 @@ final class DebugYardGameplay {
      * matters more than it sounds now that the dimension has a biome that
      * spawns zombies: an unlit enclosed box in this yard fills up overnight.
      */
+    /**
+     * <b>Four walls, no roof and no way through them.</b> A villager pen: the
+     * walls are too high to jump and there is no door to open, and the missing
+     * roof is the door - for a player in creative, which is the only kind of
+     * visitor this yard has.
+     *
+     * <p>Lit from the inside at head height rather than by the yard's own grid,
+     * because the walls are five tall and would shade their own floor.
+     */
+    private static void openPen(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+        BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
+                DebugPenManager.groundColumn(level, x, gy, z,
+                        edge ? wall : Blocks.SMOOTH_STONE.defaultBlockState());
+                for (int y = gy + 1; y <= gy + 5; y++) {
+                    DebugPenManager.fastSet(level, new BlockPos(x, y, z),
+                            edge ? wall : Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
+        BlockState lamp = Blocks.LIGHT.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.LightBlock.LEVEL, 15);
+        for (int x = x0 + 3; x < x1; x += 4) {
+            for (int z = z0 + 3; z < z1; z += 4) {
+                DebugPenManager.fastSet(level, new BlockPos(x, gy + 3, z), lamp);
+            }
+        }
+    }
+
     private static void hall(ServerLevel level, int gy, int x0, int x1, int z0, int z1, int doorX) {
         BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
         BlockState floor = Blocks.SMOOTH_STONE.defaultBlockState();
@@ -719,14 +769,23 @@ final class DebugYardGameplay {
     }
 
     /**
-     * <b>A chest, filled, with its purpose written above it.</b>
+     * <b>A chest, filled, with its purpose written beside it.</b>
+     *
+     * <p><b>Never put one inside a fenced pen.</b> A pen wall is one block
+     * high, a chest is another, and a horse will stand on the chest and step
+     * over the wall - which the owner found within minutes of the first build:
+     * <i>"you put a chest near a wall, and the horses jumped on it to
+     * escape."</i> Every chest that serves a pen sits in the <b>aisle</b> north
+     * of it now, beside the sign, which is better on both counts: it is also
+     * reachable without opening the gate, and a gate opened to fetch something
+     * is a gate somebody forgets to close.
      *
      * <p>A null or absent item is skipped rather than fatal: the yard is built
      * from a list of registry lookups and one missing item must not cost the
      * other thirty-five. That has already happened once in this file's history,
      * with a gene, which is why {@code stock} logs and carries on too.
      */
-    private static void chest(ServerLevel level, int gy, int x, int z, String label,
+    static void chest(ServerLevel level, int gy, int x, int z, String label,
                               List<ItemStack> contents) {
         BlockPos pos = new BlockPos(x, gy + 1, z);
         level.setBlock(pos, Blocks.CHEST.defaultBlockState()

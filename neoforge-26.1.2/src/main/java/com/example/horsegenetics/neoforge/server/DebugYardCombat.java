@@ -156,11 +156,27 @@ final class DebugYardCombat {
         int gx0 = cx + WEST_MIN;
         int gx1 = gx0 + 8;
         arenaBox(level, gy, gx0, gx1, z0, z1);
+        // UNTAMED, WHICH IS THE OPPOSITE OF EVERY OTHER PEN IN THE YARD - and
+        // it is the fix for "guardian does not react to me being damaged at
+        // all" (owner, 2026-09-13). The yard stocks its horses TAMED WITH NO
+        // OWNER on purpose: DebugPenManager.evacuateTamedHorses walks tamed AND
+        // owned horses back to the overworld when you leave, so an owned yard
+        // is a yard that empties itself into the portal. That convention
+        // silently breaks this one gene, because GeneReactionHandler.onOwnerHurt
+        // scans for horses whose owner is the hurt player and a horse with no
+        // owner matches nobody.
+        //
+        // So this one arrives wild and you tame it. That gives it a real owner
+        // (tameWithName sets one), which is what the gene needs, and the cost -
+        // it follows you home afterwards - is the correct outcome for a horse
+        // you actually tamed.
         DebugPenManager.placeSign(level, new BlockPos(gx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("GUARDIAN", "TAMED to you. Let", "a zombie hit YOU:", "it retaliates"));
-        DebugTestYard.stock(level, gy, gx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.guardian",
-                "GUARDIAN", 1, 0, "Grd/Grd");
-        zombieSpawner(level, gy, (gx0 + gx1) / 2, z1 - 3);
+                List.of("GUARDIAN - TAME IT", "it needs a real", "OWNER. Then let a", "zombie hit YOU"));
+        Horse guardian = DebugPenManager.spawnHorse(level, gy + 1, gx0 + 4.0, (z0 + z1) / 2.0,
+                com.example.horsegenetics.common.horse.Sex.FEMALE,
+                "horsegenetics.guardian=Grd/Grd", false);
+        DebugTestYard.label(guardian, "GUARDIAN - TAME ME");
+        arenaOpponents(level, gy, gx0, gx1, z1 - 3, 2);
         DebugTestYard.saddleAll(level, gy, gx0, gx1, z0, z1);
         DebugWorldWatch.watch("ARENA - GUARDIAN",
                 DebugTestYard.box(gx0, gy, z0, gx1, gy + 4, z1), null);
@@ -171,9 +187,18 @@ final class DebugYardCombat {
         DebugPenManager.placeSign(level, new BlockPos(lx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("GLADIATOR", "RIDE it. It picks", "the fight itself -", "only with a rider"));
         DebugTestYard.stock(level, gy, lx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.gladiator",
-                "GLADIATOR", 1, 0, "Gld/Gld");
-        zombieSpawner(level, gy, (lx0 + lx1) / 2, z1 - 3);
+                "GLADIATOR", 1, 0, "Gld/Gld", "horsegenetics.magic_fighter=Gld/Gld");
+        arenaOpponents(level, gy, lx0, lx1, z1 - 3, 3);
         DebugTestYard.saddleAll(level, gy, lx0, lx1, z0, z1);
+        // The fight's scale is in the tester's hand, not the spawner's - see
+        // arenaOpponents. A stick too, because the guardian next door has to be
+        // tamed before its gene can see an owner at all.
+        DebugYardGameplay.chest(level, gy, gx0 + 1, z0 - 2, "ARENA SUPPLIES", List.of(
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ZOMBIE_SPAWN_EGG, 16),
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK, 8),
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD, 1),
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SADDLE, 2),
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GOLDEN_APPLE, 8)));
         DebugWorldWatch.watch("ARENA - GLADIATOR",
                 DebugTestYard.box(lx0, gy, z0, lx1, gy + 4, z1), null);
     }
@@ -211,8 +236,18 @@ final class DebugYardCombat {
         int hx0 = cx + EAST_MIN;
         int hx1 = hx0 + 8;
         DebugTestYard.fencedPlot(level, gy, hx0, hx1, z0, z1);
+        // IT HEALS PLAYERS, NOT HORSES, and the first version of this pen had
+        // that backwards. HealerGene's aura is Healing("players", ...) - the
+        // owner spotted it from the other end within minutes of walking in:
+        // "it seems like the healer horses are healing me?" They are, and that
+        // is the gene.
+        //
+        // So the three hurt horses are not the subject, they are the CONTROL,
+        // and keeping them is worth more than fixing the sign: if they heal
+        // too, matchesHealTarget is not reading the target field and the aura
+        // is hitting everything alive in range.
         DebugPenManager.placeSign(level, new BlockPos(hx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("HEALER", "3 hurt patients,", "1 healer. Read the", "heal lines"));
+                List.of("HEALER: heals YOU", "hurt yourself, stand", "here. The 3 horses", "must NOT heal"));
         DebugTestYard.stock(level, gy, hx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.healer",
                 "HEALER", 1, 0, "Hlr/Hlr");
         for (int i = 0; i < 3; i++) {
@@ -226,16 +261,10 @@ final class DebugYardCombat {
         DebugWorldWatch.watchAttribute("INFIRMARY - HEALER",
                 DebugTestYard.box(hx0, gy, z0, hx1, gy + 1, z1), Attributes.MAX_HEALTH);
 
-        int cx0 = hx0 + 10;
-        int cx1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
-        arenaBox(level, gy, cx0, cx1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(cx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("CLEANSING LIGHT", "a HEALING verb", "aimed at undead.", "Zombies must die"));
-        DebugTestYard.stock(level, gy, cx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.cleansing_light",
-                "CLEANSING LIGHT", 1, 0, "Cln/Cln");
-        zombieSpawner(level, gy, (cx0 + cx1) / 2, z1 - 3);
-        DebugWorldWatch.watch("CLEANSING LIGHT",
-                DebugTestYard.box(cx0, gy, z0, cx1, gy + 4, z1), null);
+        // CLEANSING LIGHT IS CONFIRMED and its arena is gone (owner,
+        // 2026-09-13: "cleansing light works"). It was built this morning and
+        // retired the same afternoon, which is the yard working as intended -
+        // a pen for a settled question is the most expensive thing in it.
     }
 
     /**
@@ -394,6 +423,37 @@ final class DebugYardCombat {
         if (level.getBlockEntity(pos) instanceof SpawnerBlockEntity be) {
             be.setEntityId(EntityType.ZOMBIE, level.getRandom());
             be.setChanged();
+        }
+    }
+
+    /**
+     * <b>A fixed number of zombies, and a box of eggs to make more.</b>
+     *
+     * <p>The arenas started with a charged spawner each and that was the wrong
+     * instrument. A vanilla spawner keeps <b>six</b> alive within its range and
+     * refills them as fast as they die, so a single horse in a walled pen is
+     * not being tested, it is being counted down - and the owner found the
+     * sharp end of it within minutes: <i>"gladiator died to a zombie"</i>. A
+     * pen that kills its own subject reports nothing in the morning, and these
+     * are the only pens in the yard that can kill anything.
+     *
+     * <p>A <b>bounded</b> fight is also the better question. "Does the
+     * gladiator kill three zombies" has an answer; "does it survive an infinite
+     * stream" does not, for any horse, at any attack speed. Spawn eggs in the
+     * aisle chest put the scale under the tester's hand instead of the
+     * spawner's, which is the same reasoning that put every other prop in this
+     * yard within arm's reach.
+     */
+    private static void arenaOpponents(ServerLevel level, int gy, int x0, int x1, int z, int count) {
+        for (int i = 0; i < count; i++) {
+            var zombie = EntityType.ZOMBIE.create(level,
+                    net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            if (zombie == null) {
+                return;
+            }
+            zombie.setPos(x0 + 2.0 + i * 2.0, gy + 1, z);
+            zombie.setPersistenceRequired();
+            level.addFreshEntity(zombie);
         }
     }
 }

@@ -99,11 +99,33 @@ public final class HorseShearHandler {
                     hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
         }
 
+        // GROOMING, NOT SHEARING, and the difference is the whole feel of the
+        // interaction. Owner, 2026-09-13: "change the way shearing is spoken
+        // about in-game: instead of saying shearing, we should talk about it
+        // like grooming your horse. You groomed your horse, they enjoyed it,
+        // and you got a cluster of hair that fell out while you were brushing
+        // them."
+        //
+        // Which is also what the mechanic already WAS - it awards bond, it has
+        // a regrow cooldown, it never hurts the animal - and only the dressing
+        // said otherwise. A sheep's shearing sound is the loudest part of that:
+        // it is the sound of a fleece coming off, and it made a thing the horse
+        // likes read as a thing done TO it. The brush is the right noise, and
+        // the horse answering is the point.
         level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
-                SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
+                SoundEvents.BRUSH_GENERIC, SoundSource.NEUTRAL, 1.0F, 1.0F);
+        level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
+                SoundEvents.HORSE_BREATHE, SoundSource.NEUTRAL, 0.7F, 1.0F);
         level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, ModItems.HORSE_HAIR.get()),
                 horse.getX(), horse.getY() + horse.getBbHeight() * 0.6, horse.getZ(),
                 12, 0.3, 0.3, 0.3, 0.02);
+        // They enjoyed it - and this is not decoration, it is the only visible
+        // sign that grooming is one of the two things that builds bond.
+        level.sendParticles(ParticleTypes.HEART,
+                horse.getX(), horse.getY() + horse.getBbHeight(), horse.getZ(),
+                3, 0.3, 0.3, 0.3, 0.0);
+        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                "message.horsegenetics.shear.done", horse.getDisplayName()));
 
         HorseCareHandler.awardBondFor(horse, SHEAR_BOND);
     }

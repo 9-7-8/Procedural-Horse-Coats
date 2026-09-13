@@ -137,7 +137,35 @@ public final class BreedingCarrotHandler {
         // heterozygous locus - say so rather than let it read as "it worked".
         if ((tokens.contains("stabilizer") || tokens.contains("magnifier")) && allHomozygous(horse)) {
             player.sendSystemMessage(Component.translatable("message.horsegenetics.carrot.no_effect"));
+            // The one case where nothing happening is CORRECT, written down so
+            // it cannot be mistaken for the item being dead.
+            ActionTrace.log("carrot", ActionTrace.describeShort(horse)
+                    + " is homozygous everywhere, so that carrot has nothing to do - "
+                    + "this is the documented no-op, not a failure");
         }
+
+        // SAY WHICH CARROT, TO WHICH HORSE, AND FOR HOW LONG. Owner, on the
+        // new carrot bench: "you might need to put in more logging to detect
+        // the different carrot uses."
+        //
+        // She is describing the hardest thing about this whole item family.
+        // There are ELEVEN of them, every one is an orange carrot fed to a
+        // horse, and every one produces the same animation - hearts, a puff of
+        // dust, the horse in love. The only visible difference is the colour of
+        // the dust, and two of them (stabilizer, magnifier) legitimately do
+        // NOTHING AT ALL on a homozygous parent. So "did that carrot work" has
+        // three indistinguishable answers from inside the game: it worked, it
+        // correctly declined, or the item is not wired up.
+        //
+        // Worse, the effect does not happen here. A carrot opens a WINDOW on
+        // the parent and the genetics only happen at the foal, which may be
+        // several minutes and a second parent later. Logging the feed alone
+        // would still leave that gap, so takeCarrotBias logs the other end.
+        ActionTrace.log("carrot", player.getName().getString() + " fed "
+                + stack.getItem().getName(stack).getString() + " to "
+                + ActionTrace.describeShort(horse) + " - effects "
+                + String.join(", ", tokens) + ", window open for "
+                + CarrotWindowAttachment.WINDOW_TICKS + " ticks");
 
         int rgb = colourFor(tokens);
         DustParticleOptions dust = new DustParticleOptions(rgb, 1.2F);

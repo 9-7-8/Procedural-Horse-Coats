@@ -57,13 +57,33 @@ public final class GeneDeathHandler {
     // on_death - what happens to the ground
     // ------------------------------------------------------------------
 
+    /**
+     * <b>Both halves of this file used to switch themselves off in the horse
+     * dimension, which is the only place anybody ever kills a horse on
+     * purpose.</b>
+     *
+     * <p>Removed 2026-09-13, and the report that found it was
+     * <i>"drops a sword on death did not drop anything"</i> - from a pen built
+     * that morning specifically to watch these six alleles, which could not
+     * have worked for one second. This is the <b>seventh</b> protection in that
+     * dimension to turn out to be the reason a gene did nothing, after the mob
+     * deleter, the spread verb, the missing night, the dhampir's sunburn, the
+     * blanket damage cancel, and the tempt goal's blindness to a creative
+     * player.
+     *
+     * <p>The guard was defensible when it was written - a horse dimension full
+     * of lava springs and explosions is a horse dimension that eats itself, and
+     * nothing could die there anyway - and it is <b>not</b> defensible now that
+     * the yard has a pen whose entire purpose is killing six horses to see what
+     * they leave behind. The pen is floored in stone for exactly this: two of
+     * the six leave a fluid and a third detonates.
+     */
     @SubscribeEvent
     static void onHorseDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof Horse horse)) {
             return;
         }
-        if (!(horse.level() instanceof ServerLevel level)
-                || level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+        if (!(horse.level() instanceof ServerLevel level)) {
             return;
         }
         for (HorseAbilities.Active active : abilitiesOf(horse)) {
@@ -124,8 +144,7 @@ public final class GeneDeathHandler {
         if (!(event.getEntity() instanceof Horse horse)) {
             return;
         }
-        if (!(horse.level() instanceof ServerLevel level)
-                || level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+        if (!(horse.level() instanceof ServerLevel level)) {
             return;
         }
         List<ItemStack> added = new ArrayList<>();

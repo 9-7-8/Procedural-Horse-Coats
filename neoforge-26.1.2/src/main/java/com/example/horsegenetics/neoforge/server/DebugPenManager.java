@@ -811,7 +811,7 @@ public final class DebugPenManager {
         if (tamed) {
             horse.setTamed(true);
         }
-        horse.setPos(x, floorY, z);
+        placeClear(level, horse, x, floorY, z);
         // Record applied before the entity joins, so HorseGeneticsEventHandler
         // sees a real record and doesn't roll a random genotype over the top.
         HorseRecords.apply(horse,
@@ -819,6 +819,65 @@ public final class DebugPenManager {
         level.addFreshEntity(horse);
         return horse;
     }
+
+    /**
+     * <b>Put the horse somewhere it is not inside a block.</b>
+     *
+     * <p>Every pen in this dimension hands {@code spawnHorse} a hand-computed
+     * pair of coordinates, and a hand-computed coordinate is wrong sooner or
+     * later - a pen moves, a wall gains a thickness, a sign lands where a horse
+     * was going to stand. For most of this dimension's life that cost nothing
+     * visible, because the debug dimension cancelled all horse damage: a horse
+     * half inside a wall simply stood there looking slightly wrong.
+     *
+     * <p><b>That rule was removed on 2026-09-13 and the very first build after
+     * it killed a horse.</b> Half a second into the yard's construction:
+     * {@code horse hurt | Viking Quark took 1.0 from inWall}, over and over,
+     * until it died. Suffocation is two hearts a second and a horse is placed
+     * once and never moved, so a spot that is wrong is <em>fatal</em> rather
+     * than untidy - and it fails in the worst possible way for this project,
+     * which is that the pen still reads as stocked in the log and is empty by
+     * the time anybody walks to it.
+     *
+     * <p>So the coordinate is a <b>suggestion</b> now. {@code noCollision} asks
+     * the level about the horse's actual bounding box rather than about a block
+     * shape, which is the part a by-hand check keeps getting wrong: a horse is
+     * 1.4 wide, so standing "next to" a wall on a .5 coordinate overlaps it.
+     * The search spirals outward a block at a time and gives up after
+     * {@value #CLEAR_RADIUS}, because a pen with nowhere clear in five blocks
+     * is a pen with a real problem and quietly teleporting the horse across the
+     * yard would hide it.
+     */
+    private static void placeClear(ServerLevel level, Horse horse, double x, double floorY,
+                                   double z) {
+        horse.setPos(x, floorY, z);
+        if (level.noCollision(horse)) {
+            return;
+        }
+        for (int r = 1; r <= CLEAR_RADIUS; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+                        continue;   // ring only; the inside was tried last time round
+                    }
+                    horse.setPos(x + dx, floorY, z + dz);
+                    if (level.noCollision(horse)) {
+                        HorseGenetics.LOGGER.warn("[Debug] {} would have spawned inside a block at "
+                                        + "{}, {}, {} - moved {} block(s)",
+                                horse.getType().toShortString(), (int) x, (int) floorY, (int) z, r);
+                        return;
+                    }
+                }
+            }
+        }
+        horse.setPos(x, floorY, z);
+        HorseGenetics.LOGGER.error("[Debug] nowhere clear within {} blocks of {}, {}, {} - a horse "
+                + "is about to suffocate there, and the pen around it is wrong",
+                CLEAR_RADIUS, (int) x, (int) floorY, (int) z);
+    }
+
+    /** How far {@link #placeClear} will look before it reports the pen as broken. */
+    private static final int CLEAR_RADIUS = 5;
 
     // --- hay-bale return portal at the start of the plot ---
 

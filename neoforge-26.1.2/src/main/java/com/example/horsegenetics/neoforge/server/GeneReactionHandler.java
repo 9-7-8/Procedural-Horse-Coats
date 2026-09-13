@@ -97,6 +97,21 @@ public final class GeneReactionHandler {
         }
         if (hurt instanceof Player player) {
             onOwnerHurt(player, event.getSource().getEntity());
+            // AND THE HORSE UNDER THEM, which is a different question from
+            // "was the horse hit". Owner, 2026-09-13: "ender echo works: I hit
+            // it, it blinks. It should also blink if the RIDER takes damage
+            // though, which it currently does not."
+            //
+            // She is right, and the reason is worth writing down because it is
+            // a gap in the VERB rather than in the gene: on_hurt reads the
+            // damage event for the entity that carries the ability, and a
+            // mounted player takes their own damage. So a horse whose rider is
+            // being shot at is, as far as this handler was concerned, a horse
+            // that nothing has happened to - which is exactly backwards for an
+            // escape reflex. Getting the rider out is the whole point of one.
+            if (player.getVehicle() instanceof Horse mount) {
+                onHorseHurt(mount);
+            }
         }
     }
 

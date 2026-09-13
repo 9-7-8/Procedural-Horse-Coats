@@ -43,9 +43,10 @@ public enum ProgressTask {
             "Open a tamed horse's inventory, click the i hanging off the left of the window, and type "
                     + "into the box on Overview. A barn name is what you actually call it; its real "
                     + "name stays as it is."),
-    SHEAR_HORSE(Group.FIRST_STEPS, "Shear a horse for hair",
-            "Right-click one with shears. Horse hair is the base material for nearly everything "
-                    + "this mod adds, and it grows back."),
+    SHEAR_HORSE(Group.FIRST_STEPS, "Groom a horse for hair",
+            "Right-click one with shears. You are brushing it, not shearing it - the horse enjoys "
+                    + "it, and the loose hair that comes away in the brush is the base material "
+                    + "for nearly everything this mod adds. It grows back."),
     BREED_FOAL(Group.FIRST_STEPS, "Breed your first foal",
             "Feed a golden carrot to a tamed mare and a tamed stallion standing together."),
     MILK_MARE(Group.CARE, "Milk a mare",

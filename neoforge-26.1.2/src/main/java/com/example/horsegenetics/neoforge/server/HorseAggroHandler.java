@@ -78,7 +78,7 @@ public final class HorseAggroHandler {
                 return; // already wired
             }
         }
-        horse.goalSelector.addGoal(MELEE_GOAL_PRIORITY, new MeleeAttackGoal(horse, 1.4, true));
+        horse.goalSelector.addGoal(MELEE_GOAL_PRIORITY, new HorseMeleeGoal(horse, 1.4));
         horse.targetSelector.addGoal(TARGET_GOAL_PRIORITY, new WildHorseForgetTargetGoal(horse));
     }
 

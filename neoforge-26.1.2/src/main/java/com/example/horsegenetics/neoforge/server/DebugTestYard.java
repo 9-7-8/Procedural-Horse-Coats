@@ -340,6 +340,14 @@ final class DebugTestYard {
                 // warning nobody can act on is a warning that gets ignored the
                 // next time it is real.
                 || state.is(Blocks.CHEST) || state.is(Blocks.HAY_BLOCK)
+                // BOTH OF THESE ARE WALK-THROUGH, and leaving them out made the
+                // check report a sound yard as broken on its first build: 0
+                // spots with no floor and 22 "blocked at head height", every
+                // one of them either the invisible light blocks that fill a
+                // dark room's floor layer or the ocean-born pool. A warning
+                // nobody can act on is worse than no warning - it is the one
+                // that gets ignored the next time it is real.
+                || state.is(Blocks.LIGHT) || state.is(Blocks.WATER)
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.HORSEMANS_TABLE.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.COWBOY_HITCH.get());
@@ -475,13 +483,61 @@ final class DebugTestYard {
         int z1 = z0 + ROW_I_D;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DHAMPIR", "burns by DAY, then", "BITES a cow to heal", "- read the log"));
+                List.of("DHAMPIR", "CONFIRMED: burns,", "bites a cow, heals.", "Shelter at the back"));
+        shelter(level, gy, x1 - 7, x1 - 2, z1 - 6, z1 - 2);
         stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dhampir",
                 "the dhampir pen", 1, 0, null);
         for (int i = 0; i < 8; i++) {
             spawnCow(level, gy, x0 + 7.0 + (i % 4) * 2.5, z0 + 3.0 + (i / 4) * 4.0);
         }
         DebugWorldWatch.watch("DHAMPIR", box(x0, gy, z0, x1, gy + 1, z1), null);
+    }
+
+    /**
+     * <b>A roof on four posts, for a horse that is on fire.</b>
+     *
+     * <p>Owner, 2026-09-13: <em>"can you build a shelter for the dhampir horse
+     * in its pen, so it can flee and be safe during the day?"</em> The pen was
+     * built open to the sky on purpose - a dhampir that shelters never burns,
+     * never drops below full, and never hunts, so the whole loop stays shut -
+     * and with both halves now confirmed in one morning ("dhampirs burn to
+     * death and smoke during the day", "dhampirs can attack cows and feed on
+     * them, one per animal, non-fatal") that reason has expired. What is left
+     * is a horse burning to death in a box, which proves nothing twice.
+     *
+     * <p>It also fixes something that reads as a separate bug and is not.
+     * <b>The hunt is already gated on being below full health</b> -
+     * {@code DhampirHuntGoal.canUse} refuses at {@code getHealth() >=
+     * getMaxHealth()} and {@code canContinueToUse} re-checks it - so "it should
+     * only attack animals if its health is less than 100%" is already the rule.
+     * It looked otherwise because a horse with no shade is <em>never</em> at
+     * full health: it takes a point every two seconds, for ever. Shade is what
+     * lets it top up and stop, which is the only way anybody can watch the gate
+     * work rather than take it on trust.
+     *
+     * <p>Open-sided rather than a hut, because {@code DhampirShadeGoal} tests
+     * {@code !level.canSeeSky(pos)} and wants somewhere it can <b>stand</b> -
+     * a roof on posts is sheltered at every block under it and needs no door
+     * for a horse to find its way through.
+     */
+    private static void shelter(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+        BlockState post = Blocks.OAK_FENCE.defaultBlockState();
+        BlockState roof = Blocks.OAK_PLANKS.defaultBlockState();
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z), roof);
+            }
+        }
+        for (int[] corner : new int[][] {{x0, z0}, {x0, z1}, {x1, z0}, {x1, z1}}) {
+            for (int y = gy + 1; y <= gy + 3; y++) {
+                DebugPenManager.fastSet(level, new BlockPos(corner[0], y, corner[1]), post);
+            }
+        }
+        // Hay under it, so the shelter is somewhere to be rather than somewhere
+        // to stand - and so the pen reads as a stable rather than a slab on
+        // sticks.
+        DebugPenManager.fastSet(level, new BlockPos((x0 + x1) / 2, gy + 1, (z0 + z1) / 2),
+                Blocks.HAY_BLOCK.defaultBlockState());
     }
 
     private static final String NIGHT_TEMPER = "horsegenetics.magic_night_temper";

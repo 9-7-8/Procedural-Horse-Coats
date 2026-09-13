@@ -274,10 +274,32 @@ public final class HorseBreedingHandler {
         long now = parent.level().getGameTime();
         CarrotWindowAttachment window = parent.getData(ModAttachments.CARROT_WINDOW.get());
         java.util.List<CarrotEffect> effects = window.activeEffects(now);
+        boolean hadStale = !window.effects().isEmpty() && effects.isEmpty();
         if (!window.effects().isEmpty()) {
             parent.setData(ModAttachments.CARROT_WINDOW.get(), CarrotWindowAttachment.EMPTY);
         }
-        return CarrotEffect.fold(effects, parentGenome.genotype(), rng);
+        GameteBias bias = CarrotEffect.fold(effects, parentGenome.genotype(), rng);
+        // THE OTHER END OF THE CARROT. Feeding one is separated from its effect
+        // by a window, a courtship and a second parent, so a log line at the
+        // feed says only that an item was consumed. This is where it either
+        // does something or does not, and the three outcomes it has to
+        // distinguish look identical from outside: no carrot was fed, one was
+        // fed and EXPIRED before the pair got round to it, or one was fed and
+        // folded to a bias that happens to change nothing.
+        if (hadStale) {
+            ActionTrace.log("carrot", ActionTrace.describeShort(parent)
+                    + " had a carrot window that EXPIRED before breeding - the carrot was "
+                    + "spent and this foal is unaffected");
+        } else if (!effects.isEmpty()) {
+            ActionTrace.log("carrot", ActionTrace.describeShort(parent) + " breeds with "
+                    + effects.size() + " live carrot effect(s): "
+                    + effects.stream().map(CarrotEffect::id).collect(java.util.stream.Collectors.joining(", "))
+                    + (bias.isNone()
+                            ? " - which folded to NO bias, so the foal is unchanged"
+                            : " - bias: reroll epi=" + bias.rerollEpigenetics()
+                                    + ", substitutes " + bias.substitutePairs().size() + " locus/loci"));
+        }
+        return bias;
     }
 
     /**
