@@ -178,39 +178,72 @@
     </p>
 </div>
 
-<h2 id="spreaders">&sect;0-CU &mdash; The spreading genes, on floors they can convert (2026-09-12, NOT looked at)</h2>
+<h2 id="spreaders">&sect;0-CU &mdash; Verdant is confirmed; the dryad is the slow one left (2026-09-12)</h2>
 
-<div class="note danger">
-    <span class="label">They were forbidden, and then they need the right ground</span>
+<div class="note good">
+    <span class="label">Confirmed in play &mdash; all three verdant alleles</span>
     <p>
-        <code>GeneAbilityHandler.spread</code> refused to run in the horse dimension, so
-        the dryad and verdant's three were silent no-ops in the only place built to watch
-        them. That restriction is off (<a href="known-gaps.html#gap-204">gap 204</a>, to
-        be restored before 1.0), and the yard has a <strong>growing row</strong>: four
-        pens, each floored with what its own gene converts.
+        Grass on dirt, moss on stone, mycelium on dirt: all three convert, and their pens
+        are gone from the yard. They had never been broken. They had been <em>forbidden</em>
+        &mdash; <code>GeneAbilityHandler.spread</code> returned early in the horse
+        dimension, so the one place built to watch a spreading gene was the one place it
+        could not run (<a href="known-gaps.html#gap-204">gap 204</a>, restore before 1.0).
     </p>
     <p>
-        <strong>The floors are the test.</strong> <code>convert()</code> is a whitelist per
-        cover and they do not overlap: grass only converts <em>bare dirt</em>, so a grass
-        gene in a grass field can never show anything; moss wants stone, cobble, andesite,
-        gravel or dirt; mycelium wants dirt or grass; a sapling needs air with grass or
-        dirt beneath it. Each sign says what that floor should become.
+        <strong>The floor was the other half, and it is worth keeping in mind for any
+        future spreader.</strong> <code>convert()</code> is a whitelist per cover and they
+        do not overlap: grass only converts <em>bare dirt</em>, so the obvious test &mdash;
+        a grass gene in a grass field &mdash; can never show anything. A pen with the wrong
+        floor is indistinguishable from a broken gene.
+    </p>
+</div>
+
+<h2 id="slow-tests">&sect;0-CV &mdash; The three long tests, for leaving and coming back to (2026-09-12, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">These cannot be answered by standing still</span>
+    <p>
+        What is left in the yard is only the tests that need <em>time</em> rather than
+        attention. That is what a private dimension is actually good for, and it is why
+        these three are worth a walk away rather than a session in front of them.
     </p>
 </div>
 
 <ul>
-    <li><strong>Verdant grass, on dirt</strong> - dirt should turn to grass blocks.</li>
-    <li><strong>Verdant moss, on stone</strong> - stone should turn to moss.</li>
-    <li><strong>Verdant mycelium, on dirt</strong> - dirt should turn to mycelium.</li>
-    <li><strong>Dryad, on grass</strong> - saplings should appear standing on it. Slowest
-        of the four by design (about a day between plantings), so it is the one to leave
-        and come back to.</li>
-    <li><strong>If a pen does nothing, check the sign before the gene.</strong> Wrong floor
-        is the failure this row exists to rule out, and it is indistinguishable from a
-        broken gene without it.</li>
+    <li><strong>Dryad, in the growing row</strong> - a sapling every 9&nbsp;000 to
+        32&nbsp;000 ticks, so about a day of game time between plantings. An empty pen
+        after ten minutes means <em>not yet</em>, not broken. Come back to saplings
+        standing on the grass.</li>
+    <li><strong>Hot blooded, on the snow floor</strong> - new pen. A floor of snow with a
+        strip of ice in it, so &ldquo;how far has it got&rdquo; is answerable from the
+        gate. The ice is the half that matters: ice melts to a water <em>source</em>, which
+        is how this gene could flood something rather than just tidy it.</li>
+    <li><strong>The breeding field is now the population cap</strong> - re-signed. That it
+        breeds is settled; whether <code>LOCAL_CAP</code> <em>stops</em> it is not, and an
+        uncapped automatic breeder is the classic way to kill a server. Leave it running a
+        long while and <strong>count what is standing there</strong>. It should plateau
+        around six within eight blocks. If you come back to twenty, that is the bug.</li>
 </ul>
 
+<h2 id="ward-audit">&sect;0-CW &mdash; Holy ward, as a number instead of an impression (2026-09-12, NOT looked at)</h2>
 
+<div class="note">
+    <span class="label">The ward's claim is a negative, and a negative cannot be watched</span>
+    <p>
+        Standing in the spawner room counting zombies tells you the spawner works. It does
+        not tell you whether the ward moved anything, because <em>the ones it stopped are
+        the ones you never saw</em>. So every hostile spawn now goes to the log with its
+        distance to the nearest horse whose ward is actually live &mdash; asked of the
+        resolved ability list, not the genotype, since a carried gene can still be running
+        nothing.
+    </p>
+    <p>
+        <strong>What to do:</strong> leave the spawner running near the warded horse, then
+        hand over the log. <strong>What a pass looks like:</strong> plenty of
+        <code>monster spawned</code> lines, and a <em>floor</em> under the distance column
+        &mdash; none of them close. A broken ward reads as spawns at two or three blocks.
+    </p>
+</div>
 
 <div class="note danger">
     <span class="label">All three were invisible to every test in the repo, and two of them made other tests impossible</span>
@@ -266,10 +299,9 @@
         horse near it. That is the control - if it does not, the ward test cannot mean
         anything.</li>
     <li><strong>Then the four tests</strong>, which are the point:
-        <a href="roadmap.html#trait-rules">spontaneous breeding</a> (two mares and two
-        stallions from kit batch 3, leave, count), the holy ward beside the spawner (it
-        must <em>keep</em> producing), three or four pack leaders in the wolf pen with F3
-        open, and a dryad left in the bare plot for a real half hour.</li>
+        <a href="roadmap.html#trait-rules">the population cap</a> in the breeding field,
+        the holy ward beside the spawner (read the distances out of the log, &sect;0-CW),
+        and the dryad and the hot-blooded melt left alone for real time (&sect;0-CV).</li>
     <li><strong>Then leave and come back.</strong> Re-entering builds a fresh plot; the
         yard should be there again, empty, with no horses left from last time - the plot
         box was widened to cover it, and a breeding field that leaked would be the

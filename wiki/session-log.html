@@ -27,6 +27,69 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-12b">2026-09-12 &mdash; a play session that answered five genes, and a test yard that learned to throw things away</h2>
+
+<p>
+    The long tail of the previous entry: the owner played it. Five behaviour genes came
+    back confirmed &mdash; <strong>spontaneous breeding</strong>, <strong>pack
+    leader</strong>, and all three of <strong>verdant</strong>'s alleles &mdash; and not
+    one of them had ever been broken. Every one had been <em>unrunnable</em>. The kit only
+    ever handed out mares, so the breeding gene could not have produced a foal on any
+    hotbar it shipped. The dimension deleted every non-horse mob on arrival, so the pack
+    leader's cows and the holy ward's zombies could not exist in the yard built to judge
+    them. And <code>GeneAbilityHandler.spread</code> returned early in that dimension, so
+    the spreading genes were silent no-ops in the one place designed for watching them.
+</p>
+
+<p>
+    <strong>That is a pattern worth naming, because it cost most of two sessions.</strong>
+    A gene that does nothing and a gene that is forbidden from doing anything look
+    identical from inside the game, and the instinct on seeing nothing happen is to go and
+    read the gene. The tell in all three cases was in the <em>scaffolding</em>: the kit,
+    the dimension rules, the floor of the pen. So the yard now stocks itself rather than
+    leaning on a hotbar, all three dimension restrictions are off behind
+    <a href="known-gaps.html#gap-204">gap 204</a> with <code>RESTORE BEFORE 1.0</code> at
+    each site, and each growing pen is floored for its own gene &mdash; because
+    <code>convert()</code> is a whitelist per cover and grass, famously, only converts
+    <em>bare dirt</em>, which makes the obvious test (a grass gene in a grass field) the
+    one test that can never show anything.
+</p>
+
+<p>
+    <strong>Then the yard threw the answered questions away.</strong> Verdant's three pens
+    and the pack leader's are gone. What is left is only the tests that need time rather
+    than attention: the dryad, about a game-day between plantings; a new hot-blooded pen
+    floored with snow and a strip of ice, the ice because it melts to a water
+    <em>source</em> and that is the half of the gene that could flood something; and the
+    breeding field, re-signed from &ldquo;does it breed&rdquo; to <strong>does it
+    stop</strong>. An uncapped automatic breeder is the classic way to kill a server, and
+    no amount of watching answers it &mdash; only leaving and counting.
+</p>
+
+<p>
+    <strong>The holy ward got the thing it actually needed, which was arithmetic.</strong>
+    Its whole claim is a negative, and a negative cannot be watched: standing in the
+    spawner room counting zombies tells you the spawner works, not whether the ward moved
+    anything, because the ones it stopped are the ones that never appeared. Every hostile
+    spawn is now logged with its distance to the nearest horse whose ward is <em>live</em>
+    &mdash; asked of the resolved ability list rather than the genotype, since a carried
+    gene can still be running nothing. A working ward reads as a floor under that column.
+    A broken one reads as spawns at two blocks.
+</p>
+
+<p>
+    Three bugs out of the same session, all in shipped behaviour rather than scaffolding:
+    spontaneous breeding was putting <strong>same-sex pairs in love</strong> (hearts over
+    both, never a foal, since the gene was written &mdash; and the only visible sign of the
+    gene working is exactly what it looks like when it cannot), the F8 highlight
+    <strong>crashed</strong> on a horse that had left its team, and pack leader's label
+    promised followers it does not summon. One is still open: horses keep the F8 outline
+    after the highlight is switched off, because it lights them by proximity and clears
+    them by proximity later &mdash; and effect timers do not tick in unloaded chunks, so a
+    group left behind holds the outline frozen until somebody walks back.
+    <a href="known-gaps.html#gap-205">Gap 205</a>, with the fix written down.
+</p>
+
 <h2 id="d2026-09-12">2026-09-12 &mdash; three quarters of &sect;10, three genes that use it, and one word that had to be neither of the obvious two</h2>
 
 <p>
