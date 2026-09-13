@@ -458,12 +458,27 @@
 <div class="note danger">
     <span class="label">It had no night until 2026-09-12, and glowstone means night is not enough</span>
     <p>
-        <strong>26.1.2 made time per dimension.</strong> A <code>dimension_type</code>
-        names a <code>default_clock</code>, and one that names none has no time of day at
-        all - <code>/time set midnight</code> in the overworld leaves it in permanent
-        daylight. <code>debug_pens</code> named none, so the one place built for looking
-        at horses could not show a glowing one. It runs on
-        <code>minecraft:overworld</code>'s clock now; <code>/testkit night</code> sets it.
+        <strong>26.1.2 made time per dimension, and it takes TWO fields, not one.</strong>
+        A <code>dimension_type</code> names a <code>default_clock</code> - and naming one
+        is not enough. Sky darkness is not read off the clock at all:
+        <code>Level.isBrightOutside()</code> is <code>skyDarken &lt; 4</code>, and
+        <code>skyDarken</code> comes from the <code>SKY_LIGHT_LEVEL</code>
+        <strong>environment attribute</strong>. What makes that attribute vary with the
+        clock is the separate <code>timelines</code> field, which
+        <strong>defaults to empty</strong>.
+    </p>
+    <p>
+        So <code>debug_pens</code> had the overworld's clock and no timelines: the clock
+        advanced, nothing listened, and the sky stayed bright for ever. It carries
+        <code>"timelines": "#minecraft:in_overworld"</code> now, the same tag vanilla's
+        overworld uses.
+    </p>
+    <p>
+        <strong>This was found by a diagnostic rather than by reading, and that is the
+        point of it.</strong> The owner reported "night isn't working, it still looks like
+        day", which has three causes a chat box cannot separate. <code>/testkit night</code>
+        was made to answer back, and it said <em>"Night set. This dimension now reads
+        DAY"</em> - one line, and the glowstone explanation was eliminated in a second.
     </p>
     <p>
         <strong>And the clock is only half of it.</strong> The corridor and the yard are
