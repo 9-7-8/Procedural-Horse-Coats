@@ -7,8 +7,12 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -157,6 +161,21 @@ final class DebugTestYard {
             HorseGenetics.LOGGER.warn("[Debug] test yard is NOT sound: {} spot(s) with no floor, "
                     + "{} blocked at head height, around x={}", noFloor, blocked, cx);
         }
+    }
+
+    /**
+     * One cow, for the pack leader to lead. Non-horse mobs are allowed in the
+     * yard - see {@code HorseGeneticsEventHandler}, which deletes them
+     * everywhere else in this dimension and used to delete them here too.
+     */
+    private static void spawnCow(ServerLevel level, int gy, double x, double z) {
+        Cow cow = EntityType.COW.create(level, EntitySpawnReason.COMMAND);
+        if (cow == null) {
+            return;
+        }
+        cow.setPos(x, gy + 1, z);
+        cow.setPersistenceRequired();
+        level.addFreshEntity(cow);
     }
 
     /** Fences, signs, torches and the spawner room are meant to be in the way. */
@@ -323,11 +342,24 @@ final class DebugTestYard {
                 DebugPenManager.fastSet(level, new BlockPos(x, gy + 5, z), stone);
             }
         }
-        for (int x = doorX; x <= doorX + 1; x++) {
-            for (int y = gy + 1; y <= gy + 2; y++) {
-                DebugPenManager.fastSet(level, new BlockPos(x, y, z0), Blocks.AIR.defaultBlockState());
-            }
-        }
+        // A DOOR, not a hole. A two-wide gap let the yard's glowstone straight
+        // in - so the glow room was never dark - and let the horses straight
+        // out. A closed wooden door blocks light and a horse cannot open one,
+        // which is both requirements with no redstone in it: a piston door
+        // would look better and is a contraption to place blind, and this is
+        // already pitch black with the door shut.
+        BlockState lower = Blocks.OAK_DOOR.defaultBlockState()
+                .setValue(DoorBlock.FACING, Direction.NORTH)
+                .setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER);
+        BlockState upper = Blocks.OAK_DOOR.defaultBlockState()
+                .setValue(DoorBlock.FACING, Direction.NORTH)
+                .setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER);
+        level.setBlockAndUpdate(new BlockPos(doorX, gy + 1, z0), lower);
+        level.setBlockAndUpdate(new BlockPos(doorX, gy + 2, z0), upper);
+        // A torch outside it, so the door is findable from the yard without
+        // putting any light inside the room.
+        DebugPenManager.fastSet(level, new BlockPos(doorX + 1, gy + 2, z0 - 1),
+                Blocks.TORCH.defaultBlockState());
     }
 
     /**
@@ -342,7 +374,7 @@ final class DebugTestYard {
         int z1 = z0 + 12;
         darkRoom(level, gy, x0, x1, z0, z1, cx + 10);
         DebugPenManager.placeSign(level, new BlockPos(cx + 9, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("GLOW ROOM", "dark on purpose", "tron BOTH +", "lantern inside"));
+                List.of("GLOW ROOM", "SHUT THE DOOR", "tron: box EDGES", "lit, panels dim"));
         stock(level, gy, x0 + 3.5, (z0 + z1) / 2.0, "horsegenetics.tron",
                 "the glow room (tron)", 1, 1, "Trs/Trg");
         stock(level, gy, x1 - 3.5, (z0 + z1) / 2.0, "horsegenetics.lantern",
@@ -376,7 +408,11 @@ final class DebugTestYard {
         // Outside the door rather than inside it: the ward's claim is about
         // what happens NEAR it, and a horse shut in a dark box with a spawner
         // is a horse being hit by zombies.
-        stock(level, gy, cx + 8.5, z0 - 3.5, "horsegenetics.holy_ward", "the ward post");
+        // z0 - 1.5, not z0 - 3.5: the room's front wall is three blocks inside
+        // the yard's own, so the old spot was ON the yard wall and the horse
+        // never appeared at all. Right in front of the door instead, which is
+        // where a horse warding a spawner should stand anyway.
+        stock(level, gy, cx + 8.5, z0 - 1.5, "horsegenetics.holy_ward", "the ward post");
     }
 
     /** <b>Pack leader.</b> A pen to put three or four in and watch F3's tick line. */
@@ -387,9 +423,17 @@ final class DebugTestYard {
         int z1 = z0 + 16;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("PACK LEADER", "3 are in here:", "watch the tick", "time (F3)"));
+                List.of("PACK LEADER", "2 horses, 4 cows", "do the cows", "follow them?"));
+        // COWS, not wolves. The gene has one allele per non-hostile mob, so
+        // "test it with cows" is a different allele rather than a different
+        // gene - and a cow that follows you is a thing you can SEE happening,
+        // where a wolf that follows you looks like a wolf. Four of them go in
+        // with the horses, since the test is whether they trail it about.
         stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.pack_leader",
-                "the wolf pen", 3, 0, null);
+                "the pack-leader pen", 2, 0, "Cow/Cow");
+        for (int i = 0; i < 4; i++) {
+            spawnCow(level, gy, x0 + 8.0 + i * 1.5, (z0 + z1) / 2.0 + 2.0);
+        }
     }
 
     /**

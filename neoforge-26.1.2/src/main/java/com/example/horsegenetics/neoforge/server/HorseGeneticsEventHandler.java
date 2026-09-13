@@ -47,9 +47,23 @@ public final class HorseGeneticsEventHandler {
     static void keepDebugDimensionHorsesOnly(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide()) return;
         if (!event.getLevel().dimension().equals(DebugPenManager.DEBUG_LEVEL)) return;
-        if (event.getEntity() instanceof Mob && !(event.getEntity() instanceof Horse)) {
-            event.setCanceled(true);
+        if (!(event.getEntity() instanceof Mob) || event.getEntity() instanceof Horse) {
+            return;
         }
+        // ...except in the test yard, which is past the corridor's outer wall.
+        //
+        // This rule keeps the gallery a gallery: a corridor of pens you walk to
+        // look at coats, with nothing wandering it. It also made two of the
+        // yard's four tests impossible, silently - the holy ward's whole claim
+        // is that a mob farm KEEPS PRODUCING near a warded horse, and the pack
+        // leader's is about wolves. Both were being judged in a dimension that
+        // deleted every zombie and every wolf on arrival (owner, 2026-09-12).
+        // The yard is the one place in here that is not a gallery, so the rule
+        // stops at the wall it stops at.
+        if (Math.abs(event.getEntity().getBlockZ()) > DebugPenManager.corridorWallZ()) {
+            return;
+        }
+        event.setCanceled(true);
     }
 
     /** Horses can't be injured in the debug-pen dimension - it's a viewing gallery, not a fight. */

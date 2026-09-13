@@ -163,6 +163,39 @@
     </ol>
 </div>
 
+<h2 id="behaviour-bugs">&sect;0-CT &mdash; Three behaviour bugs found by playing (2026-09-12, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">All three were invisible to every test in the repo, and two of them made other tests impossible</span>
+    <p>
+        <strong>Spontaneous breeding put same-sex pairs in love.</strong> It paired any two
+        carriers in range and <code>HorseBreedingHandler</code> cancels same-sex pairings,
+        so two mares produced hearts and then nothing, for ever. It needs a mare and a
+        stallion now. <strong>The dimension deleted every non-horse mob</strong>, so the
+        ward's spawner and the pack leader's followers could not exist in the yard built
+        to test them; the rule now stops at the corridor wall. And <strong>pack leader
+        never summoned anything</strong> - it leads creatures already nearby, which its
+        label did not say.
+    </p>
+</div>
+
+<ul>
+    <li><strong>The breeding field, and watch the log.</strong> With debug tools on it
+        scans every four seconds and prints what it decided - <em>PAIRED</em>, the local
+        cap, vanilla's cooldown, wrong sex, no partner. A foal is the pass; a run of
+        <em>PAIRED</em> lines with no foal means something downstream of
+        <code>setInLove</code> is wrong and the log now says so.</li>
+    <li><strong>The spawner must produce zombies at all</strong> - that is the fix for the
+        mob rule, and it is the control the ward test rests on. If nothing spawns with no
+        ward horse near it, stop there.</li>
+    <li><strong>The pack-leader pen: do the four cows trail the two horses?</strong> Cows
+        rather than wolves because following is a thing you can watch. If they ignore the
+        horses entirely, check the horses are the cow allele (the sign says so) - the gene
+        has one allele per mob and the wrong one looks identical.</li>
+    <li><strong>Read the gene's own entry in the browser.</strong> It should now say it
+        <em>leads</em> creatures already nearby and does not create them.</li>
+</ul>
+
 <h2 id="test-yard">&sect;0-CS &mdash; The horse dimension's test yard (2026-09-12, NOT looked at)</h2>
 
 <div class="note">

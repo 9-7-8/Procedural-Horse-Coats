@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import net.minecraft.server.level.ServerLevel;
@@ -64,6 +65,20 @@ public final class SpontaneousBreedingHandler {
     /** Ticks between considering it. Long - this is a scan, and it need never be prompt. */
     private static final int CHECK_TICKS = 600;
 
+    /**
+     * <b>The same scan, thirty seconds sooner, when the testing tools are on.</b>
+     *
+     * <p>Thirty-second beats are right for a pasture nobody is watching and
+     * wrong for a person standing in front of it waiting to find out whether
+     * the gene works at all. With {@code debug.tools} on it runs every four
+     * seconds and says what it decided; in a real game neither happens.
+     *
+     * <p>It changes the <i>rate of checking</i>, not the outcome: vanilla's own
+     * breeding cooldown still governs how often a pair can actually produce,
+     * which is the limit that matters and is deliberately untouched.
+     */
+    private static final int DEBUG_CHECK_TICKS = 80;
+
     @SubscribeEvent
     static void onHorseTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Horse horse) || horse.level().isClientSide()) {
@@ -71,38 +86,81 @@ public final class SpontaneousBreedingHandler {
         }
         // Offset off the horse's own tick count so a field of them does not all
         // scan on the same tick - the discipline every radius effect here follows.
-        if ((horse.tickCount + horse.getId()) % CHECK_TICKS != 0) {
+        int beat = ServerConfig.debugTools() ? DEBUG_CHECK_TICKS : CHECK_TICKS;
+        if ((horse.tickCount + horse.getId()) % beat != 0) {
             return;
         }
         if (!(horse.level() instanceof ServerLevel level)) {
             return;
         }
-        if (horse.isBaby() || horse.isVehicle() || horse.isInLove() || !horse.canFallInLove()) {
+        if (!expresses(horse)) {
             return;
         }
-        if (!expresses(horse)) {
+        // Every refusal below says which one it was. Hearts over a horse mean
+        // setInLove landed, and that is the ONE outcome that shows - so from
+        // outside, "it is working", "it is on cooldown" and "the field is full"
+        // all look identical, which is how a working gene reads as a broken one
+        // (owner, 2026-09-12: "I'm seeing heart particles, but I don't know
+        // what that means").
+        if (horse.isBaby() || horse.isVehicle()) {
+            return;     // not a refusal worth a line: it is not a candidate at all
+        }
+        if (horse.isInLove()) {
+            trace(horse, "already in love - vanilla's breeding takes it from here");
+            return;
+        }
+        if (!horse.canFallInLove()) {
+            trace(horse, "on vanilla's breeding cooldown (this is the limit that governs the rate)");
             return;
         }
 
         AABB box = horse.getBoundingBox().inflate(RANGE);
         List<Horse> nearby = level.getEntitiesOfClass(Horse.class, box, Horse::isAlive);
         if (nearby.size() > LOCAL_CAP) {
-            return;     // the pasture is full; this is the cap that matters
+            trace(horse, "the local cap stopped it: " + nearby.size() + " horses within "
+                    + (int) RANGE + " blocks, cap is " + LOCAL_CAP);
+            return;
         }
 
+        int carriers = 0;
         for (Horse other : nearby) {
-            if (other == horse || other.isBaby() || other.isInLove() || !other.canFallInLove()) {
+            if (other == horse || other.isBaby()) {
                 continue;
             }
             if (!expresses(other)) {
+                continue;
+            }
+            carriers++;
+            if (other.isInLove() || !other.canFallInLove()) {
+                continue;
+            }
+            // A MARE AND A STALLION, because HorseBreedingHandler cancels
+            // same-sex pairings - so putting two mares in love produced hearts
+            // over both of them and then nothing at all, for ever. Reported as
+            // "the heart particle is not followed by any babies appearing"
+            // (owner, 2026-09-12), and it had been true of every same-sex pair
+            // since the gene was written: the one visible sign of this gene
+            // working is also exactly what it looks like when it cannot.
+            if (HorseRecords.of(horse).sex() == HorseRecords.of(other).sex()) {
                 continue;
             }
             // In love, not bred: the ordinary breeding path takes it from here,
             // so cooldowns, pedigree and stat inheritance all still apply.
             horse.setInLove(null);
             other.setInLove(null);
+            trace(horse, "PAIRED with " + other.getUUID().toString().substring(0, 8)
+                    + " - both in love; vanilla breeds them and a foal follows");
             return;
         }
+        trace(horse, "no partner: " + carriers + " other carrier(s) in range, none of them "
+                + "available (wrong sex, a cooldown, or already in love)");
+    }
+
+    /** One line per scan, only when the testing tools are on. */
+    private static void trace(Horse horse, String what) {
+        ActionTrace.log("spontaneous breeding",
+                horse.getUUID().toString().substring(0, 8) + " at "
+                        + horse.blockPosition().toShortString() + ": " + what);
     }
 
     /** Does this horse carry two copies? Both parents must, which is the whole gene. */

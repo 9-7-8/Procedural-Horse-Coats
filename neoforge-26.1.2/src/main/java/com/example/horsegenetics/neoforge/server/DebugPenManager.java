@@ -194,6 +194,16 @@ public final class DebugPenManager {
     // Y, same deterministic catalogue = same geometry, so it always does.
     private static final int PLOT_BASE_Y = 128;          // dimension is 512 tall (see dimension_type)
 
+    /**
+     * The last {@code |z|} the corridor itself occupies. Anything further out
+     * is the test yard or the void - which is how
+     * {@code HorseGeneticsEventHandler} tells "in the gallery" from "in the
+     * yard" without having to look up whose plot it is.
+     */
+    static int corridorWallZ() {
+        return WALL_BEDROCK_Z;
+    }
+
     /** Geometry for one side of the road. */
     private record PenSpec(int zRoad, int zBack, Direction roadFacing) {}
 

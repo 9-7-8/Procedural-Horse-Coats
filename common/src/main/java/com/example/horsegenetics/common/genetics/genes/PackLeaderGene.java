@@ -60,13 +60,17 @@ public final class PackLeaderGene extends AbstractMatchedPairGene {
                         + "reason the locus is a search rather than a slot machine.",
                 new MatchedText() {
                     @Override public String name(Variant v) {
-                        return "Followed by " + v.label().toLowerCase() + "s";
+                        return "Leads " + v.label().toLowerCase() + "s that are already nearby";
                     }
 
                     @Override public String description(Variant v) {
                         return "Two matching copies. Every " + v.label().toLowerCase() + " within "
                                 + "sixteen blocks trails the horse wherever it goes, and gives up "
-                                + "when it gets too far. It is a retinue rather than a command - "
+                                + "when it gets too far. IT DOES NOT CREATE THEM: take this horse "
+                                + "somewhere with no " + v.label().toLowerCase() + "s and nothing "
+                                + "happens, which is the single most likely reason to think the "
+                                + "gene is broken when it is working. It is a retinue rather than "
+                                + "a command - "
                                 + "they are not tamed, not owned, and will still wander off if "
                                 + "something more interesting happens.";
                     }
