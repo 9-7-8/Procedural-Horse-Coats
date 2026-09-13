@@ -148,7 +148,7 @@ final class DebugTestYard {
     private static final int ROW_H = ROW_G + ROW_G_D + AISLE;   // the retinue
     private static final int ROW_H_D = 10;
     private static final int ROW_I = ROW_H + ROW_H_D + AISLE;   // the night block, temper
-    private static final int ROW_I_D = 7;
+    private static final int ROW_I_D = 20;
     private static final int ROW_J = ROW_I + ROW_I_D + AISLE;   // the night block, watch
     private static final int ROW_J_D = 7;
 
@@ -231,6 +231,7 @@ final class DebugTestYard {
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
         buildSpawnerRoom(level, gy, cx, mouthZ);
         buildNightBlock(level, gy, cx, mouthZ);
+        buildStatPens(level, gy, cx, mouthZ);
         buildBaseAlarmPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
@@ -374,9 +375,92 @@ final class DebugTestYard {
      * its neighbour at the time was a night-hunter with a cow of its own.</p>
      */
     private static void buildNightBlock(ServerLevel level, int gy, int cx, int mouthZ) {
-        nightRow(level, gy, cx, mouthZ + ROW_I, ROW_I_D, List.of(
-                new Nightly("horsegenetics.dhampir", null, "DHAMPIR",
-                        "what does it DO?")));
+        buildDhampirPen(level, gy, cx, mouthZ);
+    }
+
+    /**
+     * <b>The three magic stat loci, which the attribute readout just made
+     * testable for nothing.</b>
+     *
+     * <p>&sect;0d has carried magic speed, health and jump as "NOT play-tested"
+     * since 2026-09-05, and they were awkward for the same reason the weather
+     * loci were: their entire effect is a number on the horse, and looking at a
+     * horse does not show you a number. The moment the census could print a
+     * named attribute's range across a pen, the test became free - so these
+     * three cost one method rather than a session.
+     *
+     * <p><b>Unlike weather they are unconditional</b>, so there is no second
+     * reading to take: the value is either moved off the breed's baseline or it
+     * is not. What the range across two horses <i>also</i> shows is whether the
+     * magnitude is per allele copy, which is the half nobody could see.
+     */
+    private static void buildStatPens(ServerLevel level, int gy, int cx, int mouthZ) {
+        String[][] pens = {
+                {"horsegenetics.magic_speed", "MAGIC SPEED", "speed"},
+                {"horsegenetics.magic_health", "MAGIC HEALTH", "health"},
+                {"horsegenetics.magic_jump", "MAGIC JUMP", "jump"}};
+        int z0 = mouthZ + ROW_F;
+        int z1 = z0 + 9;
+        for (int i = 0; i < pens.length; i++) {
+            int x0 = cx + EAST_MIN + i * 7;
+            int x1 = x0 + 6;
+            fencedPlot(level, gy, x0, x1, z0, z1);
+            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                    List.of(pens[i][1], "the census prints", "the number. Is it", "off baseline?"));
+            stock(level, gy, x0 + 2.0, (z0 + z1) / 2.0, pens[i][0], pens[i][1], 2, 0, null);
+            DebugWorldWatch.watchAttribute(pens[i][1], box(x0, gy, z0, x1, gy + 1, z1),
+                    "speed".equals(pens[i][2]) ? Attributes.MOVEMENT_SPEED
+                            : "health".equals(pens[i][2]) ? Attributes.MAX_HEALTH
+                            : Attributes.JUMP_STRENGTH);
+        }
+    }
+
+    /**
+     * <b>Dhampir: a paddock, a herd, and an open sky.</b>
+     *
+     * <p>The gene is a <i>cycle</i>, and no single moment of it looks like
+     * anything: it burns in daylight, runs for shade, and when it is below full
+     * health it hunts an animal, bites it for half a heart, heals three, and
+     * then leaves that one alone for a day. The only previous sighting was "it
+     * did damage a cow, though I'm not sure what else that did" - which is one
+     * frame of a five-step loop.
+     *
+     * <h2>The damage source is the sun, and it was being cancelled</h2>
+     * No debug damager is needed and none was added. Daylight <i>is</i> the
+     * damage: {@code DhampirHandler} calls {@code hurtServer(onFire)} every two
+     * seconds under an open sky. What stopped it was the dimension's own rule
+     * cancelling <b>all</b> horse damage - so the horse never lost health, never
+     * dropped below full, and the hunt goal's first condition was never true.
+     * Fire is exempt from that rule now, which is the fourth time today a
+     * protection in this dimension turned out to be the reason a gene "did
+     * nothing".
+     *
+     * <h2>Why it is big, open, and full of cows</h2>
+     * <b>No roof and no trees</b>, so it burns rather than sheltering - the
+     * shade goal would otherwise park it in a corner and the loop would never
+     * start. <b>Eight cows</b>, because a bitten animal is off the menu for a
+     * day and the design deliberately makes the triple health something a herd
+     * pays for. And <b>room</b>, because hunting is pathfinding and the shy
+     * paddocks taught that lesson already.
+     *
+     * <p>The evidence is in the log rather than the eye: every horse hurt and
+     * every horse healed writes a line, so the sequence reads as
+     * burn, burn, burn, bite, <b>+6.0 health</b>.
+     */
+    private static void buildDhampirPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + WEST_MIN;
+        int x1 = cx + WEST_MAX;
+        int z0 = mouthZ + ROW_I;
+        int z1 = z0 + ROW_I_D;
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("DHAMPIR", "burns by DAY, then", "BITES a cow to heal", "- read the log"));
+        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dhampir",
+                "the dhampir pen", 1, 0, null);
+        for (int i = 0; i < 8; i++) {
+            spawnCow(level, gy, x0 + 7.0 + (i % 4) * 2.5, z0 + 3.0 + (i / 4) * 4.0);
+        }
+        DebugWorldWatch.watch("DHAMPIR", box(x0, gy, z0, x1, gy + 1, z1), null);
     }
 
     private static final String NIGHT_TEMPER = "horsegenetics.magic_night_temper";

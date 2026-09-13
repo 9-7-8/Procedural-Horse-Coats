@@ -24,7 +24,9 @@ import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.minecraft.world.entity.monster.Monster;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.neoforged.neoforge.event.entity.player.BonemealEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
@@ -636,6 +638,37 @@ public final class DebugWorldWatch {
         note("monster spawn reason", event.getEntity().getType().builtInRegistryHolder().key()
                 .identifier() + " by " + event.getSpawnType() + " at "
                 + event.getEntity().blockPosition().toShortString());
+    }
+
+    /**
+     * <b>Damage and healing, which is a whole gene's loop for dhampir.</b>
+     *
+     * <p>Asked for directly (owner, 2026-09-13: "for dhampir, you'll need to
+     * listen for damage and healing"). It is the right instrument for a gene
+     * whose entire mechanic is a <i>cycle</i> - burn in the sun, go find an
+     * animal, bite it, heal three hearts, leave that one alone for a day. Any
+     * single frame of that looks like a horse standing near a cow; the sequence
+     * is the evidence, and a sequence is exactly what a log is good at.
+     */
+    @SubscribeEvent
+    static void onHorseHurt(LivingDamageEvent.Post event) {
+        if (!watching(event.getEntity().level()) || !(event.getEntity() instanceof Horse horse)) {
+            return;
+        }
+        note("horse hurt", ActionTrace.describeShort(horse) + " took "
+                + String.format("%.1f", event.getHealthDamage()) + " from "
+                + event.getSource().getMsgId() + " - now "
+                + String.format("%.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
+    }
+
+    @SubscribeEvent
+    static void onHorseHeal(LivingHealEvent event) {
+        if (!watching(event.getEntity().level()) || !(event.getEntity() instanceof Horse horse)) {
+            return;
+        }
+        note("horse healed", ActionTrace.describeShort(horse) + " by "
+                + String.format("%.1f", event.getAmount()) + " - now "
+                + String.format("%.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
     }
 
     /** Bone meal, by anybody. Nothing in the yard uses it - which is the point of watching. */

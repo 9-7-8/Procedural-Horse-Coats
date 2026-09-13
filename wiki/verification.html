@@ -80,6 +80,46 @@
     </p>
 </div>
 
+<h2 id="dhampir-loop">&sect;0-DI &mdash; Dhampir, and the three stat loci (2026-09-13, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">The fourth time today a protection turned out to be why a gene "did nothing"</span>
+    <p>
+        Dhampir is a <em>cycle</em>: it burns in daylight, runs for shade, and below full
+        health it hunts an animal, bites it for half a heart, heals three, and leaves that
+        one alone for a day. <strong>The dimension was cancelling step one.</strong>
+        <code>DhampirHandler</code> calls <code>hurtServer(onFire)</code> every two seconds
+        under an open sky, and the horse-dimension rule cancelled <em>all</em> horse
+        damage - so it never lost health, never dropped below full, and the hunt goal's
+        first condition was never true. Fire is exempt from that rule now.
+    </p>
+    <p>
+        <strong>No debug damager was needed and none was added.</strong> The sun already
+        is one; it was being blocked. Nothing else in that dimension makes fire - there is
+        no lava, and hot blooded's melt only removes it.
+    </p>
+</div>
+
+<ul>
+    <li><strong>The pen is open to the sky, on purpose.</strong> No roof and no trees, so
+        it burns rather than sheltering - the shade goal would otherwise park it in a
+        corner and the loop would never start.</li>
+    <li><strong>Eight cows</strong>, because a bitten animal is off the menu for a day and
+        the triple health is meant to be something a <em>herd</em> pays for.</li>
+    <li><strong>Read the sequence, not the moment.</strong> Every horse hurt and every
+        horse healed now writes a line, so a working dhampir reads as
+        <em>burn, burn, burn, bite, +6.0 health</em>. The only previous sighting was "it
+        did damage a cow, though I'm not sure what else that did" &mdash; which is one
+        frame of a five-step loop, and is exactly what a single glance can give you.</li>
+    <li><strong>The three magic stat loci</strong> (&sect;0d, "NOT play-tested" since
+        2026-09-05) got a pen each for nothing, because the attribute readout built for
+        weather already does the work. Their whole effect is a number on the horse, which
+        is why looking at one never helped. Unlike weather they are <em>unconditional</em>,
+        so there is no second reading: the value is either off the breed's baseline or it
+        is not &mdash; and the range across two horses also shows whether the magnitude is
+        per allele copy.</li>
+</ul>
+
 <h2 id="night-and-weather">&sect;0-DH &mdash; The night loci and the weather loci, all of them (2026-09-13)</h2>
 
 <div class="note good">
