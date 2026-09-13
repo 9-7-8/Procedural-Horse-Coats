@@ -80,6 +80,96 @@
     </p>
 </div>
 
+<h2 id="eyesight-answered">&sect;0-DM &mdash; The readout answered eyesight in five minutes, and the dhampir pen is back (2026-09-13)</h2>
+
+<div class="note good">
+    <span class="label">Eyesight &mdash; answered, and it is three-quarters right</span>
+    <p>
+        First census after the per-horse readout went in. <strong>All four
+        horses share a base of <code>0.188</code></strong>, so the two halves
+        were comparable all along &mdash; which the old min&ndash;max could not
+        have told anyone either way:
+    </p>
+    <table>
+        <tr><th></th><th>lit</th><th>dark</th></tr>
+        <tr><td><strong>Daywalker</strong></td>
+            <td><code>0.221</code> &mdash; +18% &check;</td>
+            <td><code>0.165</code> &mdash; &minus;12% &check;</td></tr>
+        <tr><td><strong>Caveborn</strong></td>
+            <td><code>0.165</code> &mdash; &minus;12% &check;</td>
+            <td><code>0.165</code> &mdash; <strong>wrong</strong></td></tr>
+    </table>
+    <p>
+        Caveborn in the dark should be the <em>faster</em> one and instead
+        carries the same penalty as the daywalker next to it &mdash; not its
+        base, the penalty. The dark condition is applying one modifier to both
+        alleles rather than branching on which the horse carries.
+        <a href="known-gaps.html#gap-219">Gap 219</a>, and it is a code fix
+        rather than another play session.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The instrument changes all reported correctly</span>
+    <ul>
+        <li><code>108 heals on horses already at full health, not logged
+            individually: 14x EGG LAYER, 7x ENDER ECHO, &hellip;</code> &mdash;
+            the tally works and names the pens.
+            <a href="known-gaps.html#gap-217">Gap 217</a> now has a number
+            rather than a guess: roughly a hundred every two minutes, spread
+            across every pen in the yard.</li>
+        <li>The <code>[Cowboy]</code> line appears about once per census with
+            <code>(unchanged)</code> on it, instead of once a second.</li>
+        <li>The mushroom pen reports as two areas &mdash;
+            <code>DRYAD MUSH - PODZOL (should fill)</code> and
+            <code>- GRASS (must stay empty)</code>.</li>
+        <li><strong>Noticed in passing and worth a look:</strong>
+            <code>melt 0/34 (0%)</code> on the spread counter, and
+            <code>WARD + SPAWNER | horses 0</code> &mdash; the ward post's horse
+            was not in its pen.</li>
+    </ul>
+</div>
+
+<div class="note bad">
+    <span class="label">The dhampir pen should not have been deleted, and is back</span>
+    <p>
+        It was removed in the audit commit on the grounds that the burn and the
+        feed were both confirmed and what remained was &ldquo;behaviour rather
+        than a test&rdquo;. <strong>The same commit lists the shade behaviour as
+        the second open question in the yard</strong>, and that pen is where the
+        failure was observed &mdash; a horse in a field cannot be made to
+        reproduce it on demand. Rebuilt in row I west, walled rather than
+        fenced, with the 9&times;9 shelter five blocks from where it spawns and
+        eight cows.
+    </p>
+    <p>
+        <strong>Pass condition, needing no new instrument:</strong> one
+        <code>[trace] dhampir</code> journey in the log and then quiet, with
+        <strong>no further <code>onFire</code> lines</strong> after it arrives.
+        The old failure printed a fresh journey every thirty seconds.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The yard is seventeen blocks shorter</span>
+    <p>
+        Rows <b>G</b> and <b>H</b> are gone. G was the growing row and was down
+        to two pens holding a nine-deep row and an aisle; they moved into row
+        A's west block, which bone meal had just vacated and which is sixteen
+        deep against their nine. H had been depth <em>zero</em> since the
+        retinue pen was deleted, so it built nothing and still cost an aisle.
+        Everything behind them moved forward on its own &mdash; the rows chain
+        off each other, which is the whole reason the chain is written that way.
+    </p>
+    <p>
+        <strong>The letters are deliberately not re-lettered.</strong> Every
+        sign in the yard, every open question on this page and a run of session
+        notes say &ldquo;row J west&rdquo;; renaming rows to close a gap in the
+        alphabet would invalidate all of it to save two characters. There is
+        simply no G or H, and the in-game map says so.
+    </p>
+</div>
+
 <h2 id="log-read-0913">&sect;0-DL &mdash; Read off the log, not played: the gladiator works, and the instrument did not (2026-09-13)</h2>
 
 <div class="note good">
@@ -290,12 +380,10 @@
         it back out; it holds until nightfall now, aims two rings in from every
         edge, and strikes off squares the navigator refuses. <b>Watch it survive
         a day</b> &mdash; the trace prints each journey and whether it arrived.</li>
-    <li><strong>Eyesight</strong> (row I east). The readout that was supposed to
-        answer this <b>was never called</b> &mdash; see
-        <a href="#log-read-0913">&sect;0-DL</a>. It is wired in now and prints each
-        horse against its own base, so the next census answers it outright
-        instead of showing a range that cannot distinguish "no effect" from "the
-        two values swapped".</li>
+    <li><strong>Eyesight</strong> &mdash; <b>answered, and it is a bug, not a
+        test</b>: caveborn carries the daylight penalty in the dark instead of
+        its bonus. <a href="#eyesight-answered">&sect;0-DM</a> and
+        <a href="known-gaps.html#gap-219">gap 219</a>. Nothing further to play.</li>
     <li><strong>The egg-layer cap</strong>, re-built because the old pen could
         not test it. Four layers of the <em>same</em> allele packed into one
         corner so their six-block circles overlap: the pen total is now the local

@@ -119,7 +119,7 @@ final class DebugTestYard {
     static final int BLOCK_W = 19;
 
     /** Row north walls, as offsets from the yard's mouth. Each is the one before it plus its depth plus an aisle. */
-    private static final int ROW_A = 3;                         // bone meal | spawner room
+    private static final int ROW_A = 3;                         // the two dryad pens | spawner room
     private static final int ROW_A_D = 16;
     // B, C AND D ARE THE GAMEPLAY LAYER, which had never been in this yard at
     // all. Owner, 2026-09-13: "add the entire item and gameplay layer as well
@@ -144,13 +144,23 @@ final class DebugTestYard {
     static final int ROW_E_D = 7;
     private static final int ROW_F = ROW_E + ROW_E_D + AISLE;   // starburst, F8 | the three stat pens
     private static final int ROW_F_D = 12;
-    private static final int ROW_G = ROW_F + ROW_F_D + AISLE;   // the growing row x4
-    private static final int ROW_G_D = 9;
-    // H is EMPTY: the retinue pen is gone (2026-09-13, a flat 50.0 ms/tick
-    // with twenty-four re-pathing mobs, which answered the question outright).
-    private static final int ROW_H = ROW_G + ROW_G_D + AISLE;
-    private static final int ROW_H_D = 0;
-    static final int ROW_I = ROW_H + ROW_H_D + AISLE;   // dhampir | eyesight
+    // G AND H ARE GONE, and the yard is seventeen blocks shorter for it.
+    //
+    // G was the growing row and had four slots. Verdant's three were confirmed
+    // and deleted on 2026-09-12; oak/birch and bone meal went the same way on
+    // 2026-09-13, which left TWO pens holding a nine-deep row and a four-block
+    // aisle open. They moved into row A's west block, which the bone-meal pen
+    // had just vacated and which is sixteen deep against their nine.
+    //
+    // H had been a row of depth ZERO since the retinue pen was deleted (a flat
+    // 50.0 ms/tick with twenty-four re-pathing mobs, which answered the
+    // question outright) - so it built nothing and still cost an aisle, which
+    // is the purest dead space this yard had.
+    //
+    // Nothing else had to move: the rows chain off each other, so deleting a
+    // depth pulls every row behind it forward on its own. That is the whole
+    // reason the chain is written this way.
+    static final int ROW_I = ROW_F + ROW_F_D + AISLE;   // dhampir | eyesight
     static final int ROW_I_D = 20;
     /**
      * <b>J and K are what removing the no-damage rule unlocked.</b>
@@ -270,6 +280,7 @@ final class DebugTestYard {
         buildBaseAlarmPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
+        buildDhampirPen(level, gy, cx, mouthZ);
         buildDisplayRow(level, gy, cx, mouthZ);
 
         // The two halves of the mod this yard never had: the item, block and
@@ -476,20 +487,78 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>Gone: dhampir is confirmed, both halves.</b> Owner, 2026-09-13:
-     * <i>"confirmed that dhampirs burn to death and smoke during the day"</i>
-     * and <i>"confirmed that dhampirs can attack cows and feed on them, one per
-     * animal, non-fatal"</i> - which is the whole cycle, sun to bite to heal.
+     * <b>Dhampir: a paddock, a herd, and an open sky - PUT BACK.</b>
      *
-     * <p>The pen outlived the test by several hours, because once the gene was
-     * proven the remaining work was keeping the animal <em>alive</em> - a
-     * shelter, then walls, then a shade goal that aims two rings in, holds
-     * until nightfall, and gives up on squares the navigator refuses. All of
-     * that is real and none of it needed a pen: it is behaviour, it applies to
-     * every dhampir in every world, and the place to confirm it is a horse in
-     * a field rather than a paddock with eight cows in it.
+     * <p>This pen was deleted on 2026-09-13 on the grounds that two of the
+     * gene's three questions were confirmed - <i>"dhampirs burn to death and
+     * smoke during the day"</i> and <i>"dhampirs can attack cows and feed on
+     * them, one per animal, non-fatal"</i> - and that what remained was
+     * behaviour rather than a test. <b>That was wrong, and the same commit
+     * said so two screens further down</b>, where the shade behaviour is
+     * listed as the second open question in the yard.
+     *
+     * <p>It is also the pen where the failure was actually observed: on the
+     * build from ten minutes before the fix, the trace read <i>stopped - in
+     * shade</i> at 51/66, then 48/66, then 33/66, then 6/66, each arrival
+     * followed within two seconds by <i>burning at</i> a square one block
+     * away, and then the animal was dead. A horse in a field cannot produce
+     * that sequence on demand; a paddock with a shelter five blocks from spawn
+     * produces it every single build.
+     *
+     * <h2>The pass condition, which needs no new instrument</h2>
+     * The shade goal now holds {@code Flag.MOVE} for as long as it is daylight
+     * rather than releasing the moment it is sheltered, so the stroll goal
+     * cannot walk it back into the sun. If that works, the log shows
+     * <b>one</b> {@code [trace] dhampir} journey and then silence, and
+     * <b>no further {@code onFire} lines</b> after it arrives. If it does not,
+     * the journeys keep coming every thirty seconds the way they did before,
+     * and the trace says which of the four known causes is still live.
+     *
+     * <h2>Why it is big, open, and full of cows</h2>
+     * <b>No roof and no trees</b> except the shelter, so it burns rather than
+     * sheltering by accident. <b>Eight cows</b>, because a bitten animal is off
+     * the menu for a day and the triple health is meant to be something a herd
+     * pays for - and because a dhampir that cannot feed cannot survive a day
+     * whatever the shade goal does. <b>Room</b>, because hunting is
+     * pathfinding.
      */
-    private static void buildDhampirPenRetired() {
+    private static void buildDhampirPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + WEST_MIN;
+        int x1 = cx + WEST_MAX;
+        int z0 = mouthZ + ROW_I;
+        int z1 = z0 + ROW_I_D;
+        // WALLED, NOT FENCED, because this is the one horse in the yard that
+        // RUNS. Owner, 2026-09-13: "the dhampir keeps walking out of the pen."
+        // DhampirShadeGoal paths at speed 1.6 and holds Flag.JUMP, and a horse
+        // at a gallop with jump control clears a one-block fence - which no
+        // other pen here ever discovers, because nothing else in the yard is
+        // trying to be somewhere else at speed.
+        walledPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("DHAMPIR - LEAVE IT", "pass = ONE journey", "in the log, then", "quiet until dusk"));
+
+        // THE SHELTER SITS BESIDE THE SPAWN. It was at the far corner, just
+        // under ten blocks away against a SEARCH_RADIUS of twelve - in range,
+        // but only barely, and the search runs from wherever the horse
+        // currently IS rather than from where it was placed. A few blocks of
+        // drift and the roofed arena one row over comes into range while its
+        // own roof drops out of it, and then the animal is correctly pathing to
+        // the nearest shade in the world and that shade is outside the wall.
+        //
+        // NINE BY NINE, because PREFERRED_MARGIN is two: a block two rings in
+        // from every edge needs a 5x5 of cover around it, and the 6x6 roof this
+        // started as offered exactly four such blocks - one of which had the
+        // hay bale on it. A 9x9 leaves a 5x5 core, so there is somewhere to
+        // stand however the horse drifts.
+        shelter(level, gy, x0 + 7, x0 + 15, z0 + 6, z0 + 14);
+        // Stocked OUTSIDE the shelter on purpose: it has to start in the sun or
+        // the journey the trace is there to record never happens.
+        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dhampir",
+                "THE DHAMPIR", 1, 0, null);
+        for (int i = 0; i < 8; i++) {
+            spawnCow(level, gy, x0 + 3.0 + (i % 4) * 3.0, z0 + 3.0 + (i / 4) * 3.0);
+        }
+        DebugWorldWatch.watch("DHAMPIR", box(x0, gy, z0, x1, gy + 1, z1), null);
     }
 
     /**
@@ -642,11 +711,15 @@ final class DebugTestYard {
      * sessions.
      */
     private static void buildGrowingRow(ServerLevel level, int gy, int cx, int mouthZ) {
-        int z = mouthZ + ROW_G;
-        // Two west, two east. Stepping straight across the yard put the third
-        // pen ON the centre walkway, which is how the back half of the yard
-        // walled itself off from the gate.
-        int[] at = {cx + WEST_MIN, cx + WEST_MIN + 10, cx + EAST_MIN, cx + EAST_MIN + 10};
+        // ROW A'S WEST BLOCK, not a row of its own. Two pens do not need
+        // nine blocks of depth and an aisle to themselves when row A's west
+        // half is standing empty - the bone-meal pen was there and is
+        // confirmed - and A is sixteen deep against these nine.
+        int z = mouthZ + ROW_A;
+        // Both west. The east block of this row is the spawner room and the
+        // ward post, and nothing may cross the centre walkway: WEST_MAX and
+        // EAST_MIN are what keep every gate reachable from the corridor door.
+        int[] at = {cx + WEST_MIN, cx + WEST_MIN + 10};
         int slot = 0;
         int x = at[slot];
 

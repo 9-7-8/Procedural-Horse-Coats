@@ -529,7 +529,7 @@ public final class DebugTestWorldHandler {
                         + "right off the arrival road, and it runs in rows either side of "
                         + "the walkway all the way to the back wall.")
                 .withStyle(ChatFormatting.GOLD));
-        tell(player, Component.literal("  A  bone meal | the ward's spawner       "
+        tell(player, Component.literal("  A  2 dryad pens | the ward's spawner    "
                         + "B  tack room | horseman + cowboy")
                 .withStyle(ChatFormatting.WHITE));
         tell(player, Component.literal("  C  ticket stalls | carrot bench         "
@@ -538,15 +538,22 @@ public final class DebugTestWorldHandler {
         tell(player, Component.literal("  E  crackle, the pool | food preference  "
                         + "F  starburst, F8 | the 3 stat pens")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  G  the growing row x4                   "
-                        + "I  dhampir | eyesight, lit and dark")
+        tell(player, Component.literal("  I  dhampir | eyesight, lit and dark     "
+                        + "J  guardian | the infirmary")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  J  guardian | gladiator | healer | cleansing light      "
-                        + "K  the deathbed | ender echo")
+        tell(player, Component.literal("  K  the deathbed | ender echo            "
+                        + "L, M, N  the ten splice-carrot pairs")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("Rows A, D, G, I and K run themselves - walk in, then "
+        // G AND H ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - the growing
+        // row's last two pens moved into A's west block when oak/birch and bone
+        // meal were confirmed, and H had been depth zero since the retinue pen
+        // was deleted. The letters are deliberately NOT re-lettered: every sign
+        // in the yard, every open question on wiki/verification.html and a
+        // year of session notes say "row J west", and renaming rows to close a
+        // gap would invalidate all of it to save two characters.
+        tell(player, Component.literal("Rows A, D, I and K run themselves - walk in, then "
                         + "leave it alone. B and C need your hands, and every chest in them is "
-                        + "labelled.")
+                        + "labelled. (There is no G or H: both were emptied and deleted.)")
                 .withStyle(ChatFormatting.GOLD));
     }
 
