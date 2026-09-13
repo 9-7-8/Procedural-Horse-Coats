@@ -100,54 +100,6 @@
         <code>horsegenetics:debug_pens</code> did exactly what it had to.</li>
 </ul>
 
-<h2 id="lava-mixin">&sect;0-DF &mdash; Lava speed is epigenetic, and the project has a mixin (2026-09-13, NOT looked at)</h2>
-
-<div class="note danger">
-    <span class="label">The first mixin. Read this before adding a second.</span>
-    <p>
-        <code>LivingEntity.travelInLava</code> is
-        <code>moveRelative(0.02F, input)</code> with hardcoded drag and <strong>reads no
-        attribute</strong> &mdash; verified by reading 26.1.2's source, and the same shape
-        exists in 1.12.2's <code>moveEntityWithHeading</code>. Three cheaper repairs were
-        tried on paper and all three fail on the case that matters, a horse with somebody
-        <em>riding</em> it: a velocity nudge is overwritten by the rider's client, there
-        is no existing attribute to lean on, and NeoForge's <code>FluidType.move</code>
-        hook belongs to the fluid type rather than to us.
-    </p>
-    <p>
-        <strong>What makes it defensible</strong> is that it does nothing unless asked. It
-        is a <code>ModifyConstant</code> on one float in one private method, returning
-        vanilla's own value unless the entity carries this mod's
-        <code>lava_movement</code> attribute &mdash; which is on horses only, and only a
-        horse with the gene ever gets a modifier. A mixin on
-        <code>LivingEntity</code> sits in a hot path shared with every mod in the pack, so
-        that is not a nicety; it is the whole licence to be there.
-    </p>
-    <p>
-        <strong>And it costs the backport nothing that matters.</strong> The epigenetic
-        speed, its founder floor and the breeding all live in <code>common/</code> as
-        plain Java. The mixin is the <em>translation</em>, which is what the platform
-        module is for.
-    </p>
-</div>
-
-<ul>
-    <li><strong>Ride both horses in the lava channel.</strong> The floor is five times
-        vanilla (about a walk) and the ceiling twenty times, drawn per allele copy &mdash;
-        so <strong>the two should visibly differ</strong>. If they move identically the
-        epigenetic value is not reaching the attribute.</li>
-    <li><strong>Then breed them</strong>, which is the actual feature: a foal's speed is
-        drawn from its parents' copies, so a line can be bred faster.</li>
-    <li><strong>Check an ordinary horse still crawls.</strong> That is the control for the
-        mixin itself &mdash; if everything now swims fast, the attribute default or the
-        constant match is wrong and every mob in the game is affected.</li>
-    <li><strong>Boot a server.</strong> Done once already: <em>Mixing LavaTravelMixin into
-        net.minecraft.world.entity.LivingEntity</em>, no injection failures. With
-        <code>defaultRequire: 1</code> a missed constant crashes the boot, so a clean boot
-        is proof the injection found its target &mdash; but it is worth re-running after
-        any Minecraft update, because that is exactly when a constant moves.</li>
-</ul>
-
 <h2 id="new-stalls">&sect;0-DG &mdash; What the biome and the attribute readout unlocked (2026-09-13, NOT looked at)</h2>
 
 <ul>
@@ -1903,7 +1855,26 @@
     largest roster and is the worst case.</p>
 
 
-<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves: prints on the ground (2026-09-10, rendering owner-confirmed)</h2>
+<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves: the four alleles are confirmed; the prints themselves are not (2026-09-13)</h2>
+
+<div class="note good">
+    <span class="label">All four forms, owner-confirmed 2026-09-13 &mdash; and the stalls are gone</span>
+    <p>
+        Black's prints do not glow; one-colour and multicolour both read correctly
+        <em>and are distinguishable from one another</em>, which is the question the yard's
+        row was built four-abreast to answer; and white shows from a <strong>single
+        copy</strong> &mdash; the only genuinely genetic question in the locus, and the one
+        none of the other three could touch, because every one of those stalls was
+        homozygous.
+    </p>
+    <p>
+        <strong>What that does not cover is everything below.</strong> "The four alleles
+        look right and differ" is a statement about <em>colour</em>. The four items left
+        here are about the print as an object &mdash; its spacing, its behaviour on ground
+        that is not flat, and how often the alleles turn up in the wild. None of them was
+        being looked at, and none of them is answered.
+    </p>
+</div>
 
 <p><a href="gene-molten-hooves.html">Molten hooves</a> lays the mod&rsquo;s own flat print
     particle, one per half-block travelled, and the owner has seen it work ("looks pretty

@@ -225,10 +225,8 @@ final class DebugTestYard {
         buildGlowRoom(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
         buildBoneMealPen(level, gy, cx, mouthZ);
-        buildLavaChannel(level, gy, cx, mouthZ);
         buildWeatherPens(level, gy, cx, mouthZ);
         buildDisplayRow(level, gy, cx, mouthZ);
-        buildMoltenRow(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
@@ -995,121 +993,6 @@ final class DebugTestYard {
                         look.alt() + "/" + look.alt(), PALE);
             }
         }
-    }
-
-    /**
-     * <b>Molten hooves' four alleles, side by side.</b>
-     *
-     * <p>The rendering is owner-confirmed; what is not is whether the four
-     * <i>differ</i>. The kit asked for them one egg at a time, and "must differ
-     * from the last one" is a question you cannot answer from memory two
-     * spawns later. Four stalls in a row answers it by looking left.
-     *
-     * <p>White is deliberately the <b>heterozygote</b> - one copy is supposed
-     * to be enough for it, and nothing has ever checked that it is.
-     */
-    private static void buildMoltenRow(ServerLevel level, int gy, int cx, int mouthZ) {
-        String[][] forms = {
-                {"MltW/n", "WHITE (1 copy)", "glowing white"},
-                {"MltB/MltB", "BLACK", "must NOT glow"},
-                {"MltC/MltC", "ONE COLOUR", "glowing, single"},
-                {"MltM/MltM", "MULTICOLOUR", "differs from <-"}};
-        // TWENTY DEEP AND NINE WIDE, not five by four. The first version was
-        // four narrow stalls and the owner's verdict was immediate: "the molten
-        // hooves pens are so small the horses can't move to show the marking".
-        // A hoofprint gene needs a horse that is WALKING, so the pen has to be
-        // somewhere a horse would choose to walk across - which is the one
-        // requirement a display stall gets exactly backwards.
-        int z0 = mouthZ + ROW_C;
-        int z1 = z0 + ROW_C_D;
-        int[] starts = {cx + WEST_MIN, cx + WEST_MIN + 10, cx + EAST_MIN, cx + EAST_MIN + 10};
-        for (int i = 0; i < forms.length; i++) {
-            int x0 = starts[i];
-            int x1 = x0 + 9;
-            fencedPlot(level, gy, x0, x1, z0, z1);
-            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of("MOLTEN " + (i + 1) + " of 4", forms[i][1], forms[i][2], "DO THE 4 DIFFER?"));
-            stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, "horsegenetics.molten_hooves",
-                    "molten " + forms[i][1], 2, 0, forms[i][0]);
-        }
-    }
-
-    /**
-     * <b>A long lava channel, to time a crossing.</b>
-     *
-     * <p>The float and the rider's immunity are owner-confirmed (2026-09-13).
-     * What is left is a number: {@code known-gaps.html} gap 179 asks whether a
-     * lava crossing at vanilla's fixed 0.02 with half-speed drag is
-     * <i>acceptable</i>, or whether it is worth this project's first mixin -
-     * and that cannot be answered by looking at one block of lava. It needs a
-     * run long enough to be boring, which is the entire design of this pen.
-     *
-     * <p>{@value #LAVA_LEN} blocks of it, with dry stone at both ends to get on
-     * and off. Ride in at one end, count.
-     *
-     * <h2>Two things this pen cannot tell you, and both are fine</h2>
-     * The horse survives the lava whether or not it is fireproof, because
-     * {@code HorseGeneticsEventHandler} cancels all horse damage in this
-     * dimension. And the <i>rider</i> survives it whether or not the gene
-     * protects them, because the test world is creative. Neither matters here:
-     * both of those are already confirmed, and what is being measured is
-     * <b>speed</b>. Worth writing down so nobody later reads a fireproof-less
-     * horse strolling through and concludes the gene does nothing.
-     *
-     * <h2>Stone, not grass, and the lava two blocks from the gate</h2>
-     * Lava sets fire to what it can reach, the pens are built with oak fence
-     * gates, and a yard that burns its own fences down overnight would be a
-     * memorable way to lose a night's readings.
-     */
-    private static void buildLavaChannel(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MAX;
-        int z0 = mouthZ + ROW_B;
-        int z1 = z0 + ROW_B_D;
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                DebugPenManager.groundColumn(level, x, gy, z, Blocks.STONE.defaultBlockState());
-            }
-        }
-        // The channel itself: two wide, and two DEEP, so the horse is properly
-        // in the lava rather than paddling at the edge of it.
-        for (int x = x0 + 2; x <= x0 + 1 + LAVA_LEN; x++) {
-            for (int z = z0 + 2; z <= z0 + 3; z++) {
-                poolColumn(level, x, gy, z, Blocks.LAVA.defaultBlockState());
-            }
-        }
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("LAVA " + LAVA_LEN + " LONG", "speed is EPIGENETIC", "ride BOTH - do they", "DIFFER? then breed"));
-        stock(level, gy, x0 + 0.5, z0 + 0.5, "horsegenetics.fireproof",
-                "the lava channel", 1, 1, null);
-        saddleAll(level, gy, x0, x1, z0, z1);
-        // The census prints the horses' actual lava_movement. That one line
-        // separates the three ways this feature can fail - the attribute never
-        // reached the horse, the gene never set it, or the mixin never read it
-        // - and no amount of riding up and down can.
-        DebugWorldWatch.watchAttribute("LAVA CHANNEL", box(x0, gy, z0, x1, gy + 1, z1),
-                com.example.horsegenetics.neoforge.entity.ModAttributes.LAVA_MOVEMENT);
-    }
-
-    /** How long the crossing is. Long enough that "is this too slow" is a real question. */
-    private static final int LAVA_LEN = 19;
-
-    /**
-     * A two-deep pool of {@code fluid}, dug into the floor rather than poured
-     * on top of it.
-     *
-     * <p>Poured on top it would need walls to hold it and would flow the moment
-     * anything updated; dug in, every neighbour at both levels is already solid
-     * ({@code groundColumn} lays dirt at {@code gy-1}), so the sources simply
-     * sit there. Stone under it rather than dirt, because a lava channel on
-     * dirt is a lava channel that has burned its own floor out.
-     */
-    private static void poolColumn(ServerLevel level, int x, int gy, int z, BlockState fluid) {
-        DebugPenManager.fastSet(level, new BlockPos(x, gy - 3, z), Blocks.BEDROCK.defaultBlockState());
-        DebugPenManager.fastSet(level, new BlockPos(x, gy - 2, z), Blocks.STONE.defaultBlockState());
-        DebugPenManager.fastSet(level, new BlockPos(x, gy - 1, z), fluid);
-        DebugPenManager.fastSet(level, new BlockPos(x, gy, z), fluid);
     }
 
     /**
