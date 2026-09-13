@@ -536,7 +536,12 @@ final class DebugTestYard {
         // Five blocks now, so its own roof stays nearest wherever it wanders.
         // Not inside the shelter, because it has to start in the sun for the
         // burn-bite-heal loop to run at all.
-        shelter(level, gy, x0 + 8, x0 + 13, z0 + 8, z0 + 13);
+        // NINE BY NINE, because PREFERRED_MARGIN is two: a block two rings in
+        // from every edge needs a 5x5 of cover around it, and the 6x6 roof this
+        // started as offered exactly four such blocks - one of which had the
+        // hay bale on it. A 9x9 leaves a 5x5 core, so there is somewhere to
+        // stand however the horse drifts.
+        shelter(level, gy, x0 + 7, x0 + 15, z0 + 6, z0 + 14);
         stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dhampir",
                 "THE DHAMPIR", 1, 0, null);
         for (int i = 0; i < 8; i++) {
@@ -617,7 +622,9 @@ final class DebugTestYard {
         // Hay under it, so the shelter is somewhere to be rather than somewhere
         // to stand - and so the pen reads as a stable rather than a slab on
         // sticks.
-        DebugPenManager.fastSet(level, new BlockPos((x0 + x1) / 2, gy + 1, (z0 + z1) / 2),
+        // In a corner, not the middle: the middle is the best-covered square in
+        // the shelter and a solid block there is one the horse cannot stand on.
+        DebugPenManager.fastSet(level, new BlockPos(x0 + 1, gy + 1, z0 + 1),
                 Blocks.HAY_BLOCK.defaultBlockState());
     }
 

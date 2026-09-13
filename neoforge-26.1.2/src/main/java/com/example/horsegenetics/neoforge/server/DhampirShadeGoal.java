@@ -36,9 +36,31 @@ public final class DhampirShadeGoal extends Goal {
     /** Re-path no more often than this, in ticks. */
     private static final int REPATH_INTERVAL = 20;
 
+    /**
+     * <b>How far in from the edge of cover to aim.</b> Owner, 2026-09-13:
+     * <i>"it should seek a block that's at least 2 in from each edge."</i>
+     *
+     * <p>One ring was not enough, and the reason is the horse's own size: it is
+     * 1.4 blocks across, the navigator finishes a path within a tolerance
+     * rather than on the exact square, and the animal shifts about where it
+     * stands. One block of margin absorbs none of that. Two does.
+     *
+     * <p>Preferred rather than required - less margin still beats standing in
+     * the open, and a lean-to that cannot offer two rings is still shelter.
+     */
+    private static final int PREFERRED_MARGIN = 2;
+
     private final Horse horse;
     private BlockPos shelter;
     private int repathCooldown;
+
+    /**
+     * Squares the navigator has refused this journey. Cleared on {@link #stop},
+     * so a spot that was blocked by a cow once is reconsidered next time - the
+     * memory is meant to stop a single journey deadlocking, not to write a
+     * square off for the life of the horse.
+     */
+    private final java.util.Set<BlockPos> unreachable = new java.util.HashSet<>();
 
     public DhampirShadeGoal(Horse horse) {
         this.horse = horse;
@@ -57,9 +79,32 @@ public final class DhampirShadeGoal extends Goal {
         return shelter != null;
     }
 
+    /**
+     * <b>Stay until the sun goes off it - not until it first reaches shade.</b>
+     *
+     * <p>This released as soon as {@code inSunlight} went false, and the trace
+     * added on 2026-09-13 is what showed why that is fatal. The goal was
+     * working perfectly: <i>heading for -10,163 (6.0 blocks, deep cover)</i>,
+     * then <i>stopped at -11,163 - in shade, health 51/66</i>. Three times in a
+     * row it found deep cover and got there.
+     *
+     * <p>And each time, the instant it was sheltered this goal let go of
+     * {@code Flag.MOVE}, {@code WaterAvoidingRandomStrollGoal} picked the horse
+     * up and walked it back into the sun. It burned on the way out and again on
+     * the way back: <b>51, then 48, then 33</b>, losing ground every cycle
+     * until it died. Four earlier fixes all aimed at <i>getting</i> it to
+     * shade, and getting there was never the problem.
+     *
+     * <p>So it holds for as long as it is daylight, which keeps the movement
+     * flag and keeps the stroll goal off it. A dhampir spends the day under
+     * cover and hunts after dark, which is what the animal is meant to do.
+     */
     @Override
     public boolean canContinueToUse() {
-        return shelter != null && !horse.isVehicle() && DhampirHandler.inSunlight(horse);
+        if (shelter == null || horse.isVehicle() || horse.isLeashed()) {
+            return false;
+        }
+        return horse.level().isBrightOutside();
     }
 
     /**
@@ -87,7 +132,7 @@ public final class DhampirShadeGoal extends Goal {
                     + horse.blockPosition().toShortString() + ", heading for "
                     + shelter.toShortString() + " ("
                     + String.format("%.1f", Math.sqrt(horse.blockPosition().distSqr(shelter)))
-                    + " blocks, " + (deeplySheltered(level, shelter) ? "deep cover" : "EDGE cover")
+                    + " blocks, margin " + coverMargin(level, shelter) + "/" + PREFERRED_MARGIN
                     + ", " + (accepted ? "path accepted" : "NO PATH") + ")");
         }
     }
@@ -103,12 +148,21 @@ public final class DhampirShadeGoal extends Goal {
                                     + String.format("%.0f/%.0f", horse.getHealth(), horse.getMaxHealth())));
         }
         shelter = null;
+        unreachable.clear();
         horse.getNavigation().stop();
     }
 
     @Override
     public void tick() {
         if (shelter == null) {
+            return;
+        }
+        // SHELTERED: stand still, and keep holding the movement flag. Doing
+        // nothing here is the entire point - it is what stops the stroll goal
+        // taking over and wandering back out into the daylight.
+        if (!DhampirHandler.inSunlight(horse)) {
+            horse.getNavigation().stop();
+            repathCooldown = REPATH_INTERVAL;
             return;
         }
         if (--repathCooldown <= 0) {
@@ -119,7 +173,29 @@ public final class DhampirShadeGoal extends Goal {
             if (nearer != null) {
                 shelter = nearer;
             }
-            horse.getNavigation().moveTo(shelter.getX() + 0.5, shelter.getY(), shelter.getZ() + 0.5, SPEED);
+            if (!horse.getNavigation().moveTo(
+                    shelter.getX() + 0.5, shelter.getY(), shelter.getZ() + 0.5, SPEED)) {
+                // UNREACHABLE. Give up on THIS square and look again without it.
+                //
+                // The owner's description was "the dhampir standing still, and
+                // just burning", and the trace had already said why on its very
+                // first line - "heading for -10,163 (6.0 blocks, deep cover, NO
+                // PATH)". The navigator refused, and the goal simply asked for
+                // the same square again twenty ticks later, and again, holding
+                // the movement flag the whole time so nothing else could move
+                // the horse either. It stood in the sun and burned, which looks
+                // exactly like a goal that is not running at all.
+                //
+                // Refusing the best square and taking the next one is always
+                // better than standing on a refusal: shelter you can reach beats
+                // shelter you cannot, whatever its margin.
+                unreachable.add(shelter);
+                shelter = findShelter();
+                if (shelter != null) {
+                    horse.getNavigation().moveTo(
+                            shelter.getX() + 0.5, shelter.getY(), shelter.getZ() + 0.5, SPEED);
+                }
+            }
         }
         horse.getLookControl().setLookAt(shelter.getX() + 0.5, shelter.getY() + 1.0, shelter.getZ() + 0.5);
         if (horse.horizontalCollision && horse.onGround()) {
@@ -157,6 +233,9 @@ public final class DhampirShadeGoal extends Goal {
                     if (!wet && !standable(level, cursor)) {
                         continue;
                     }
+                    if (unreachable.contains(cursor)) {
+                        continue;   // the navigator has already refused this one
+                    }
                     double d = from.distSqr(cursor);
                     // DEEP COVER BEATS NEAR COVER, and that is the whole of
                     // "it's just not moving far enough under cover". The
@@ -171,7 +250,7 @@ public final class DhampirShadeGoal extends Goal {
                     // So anything with cover on every side outranks anything
                     // without, however much closer the lip is. Distance only
                     // decides between blocks of the same kind.
-                    boolean deep = deeplySheltered(level, cursor);
+                    boolean deep = coverMargin(level, cursor) >= PREFERRED_MARGIN;
                     if (deep != bestDeep ? deep : d < bestDist) {
                         bestDeep = deep;
                         bestDist = d;
@@ -221,13 +300,22 @@ public final class DhampirShadeGoal extends Goal {
      * shelter, and a dhampir that refused it because it was not deep enough
      * would be worse off than one standing on the edge.
      */
-    private static boolean deeplySheltered(ServerLevel level, BlockPos pos) {
-        for (Direction side : Direction.Plane.HORIZONTAL) {
-            if (level.canSeeSky(pos.relative(side))) {
-                return false;
+    private static int coverMargin(ServerLevel level, BlockPos pos) {
+        BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
+        for (int ring = 1; ring <= PREFERRED_MARGIN; ring++) {
+            for (int dx = -ring; dx <= ring; dx++) {
+                for (int dz = -ring; dz <= ring; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) {
+                        continue;
+                    }
+                    probe.set(pos.getX() + dx, pos.getY(), pos.getZ() + dz);
+                    if (level.canSeeSky(probe)) {
+                        return ring - 1;
+                    }
+                }
             }
         }
-        return true;
+        return PREFERRED_MARGIN;
     }
 
     private static boolean standable(ServerLevel level, BlockPos pos) {

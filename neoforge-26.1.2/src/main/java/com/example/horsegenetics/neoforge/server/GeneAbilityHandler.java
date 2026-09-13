@@ -602,7 +602,10 @@ public final class GeneAbilityHandler {
             }
             case "fire_immune" -> horse.clearFire();
             case "fall_immune" -> horse.resetFallDistance();
-            case "underwater_breathing" -> horse.setAirSupply(horse.getMaxAirSupply());
+            case "underwater_breathing" -> {
+                horse.setAirSupply(horse.getMaxAirSupply());
+                sinkIfAsked(horse);
+            }
             case "walk_on_lava" -> {
                 if (horse.isInLava()) {
                     Vec3 dm = horse.getDeltaMovement();
@@ -1130,6 +1133,43 @@ public final class GeneAbilityHandler {
             default -> false;
         };
     }
+
+    /**
+     * <b>Hold the sprint key and a ridden water-breather goes down.</b>
+     *
+     * <p>Owner, 2026-09-13: <i>"oceanborn needs a way to ride the horse
+     * underwater, cause by default the horse can only bob at the top"</i>, and
+     * then <i>"ctrl should make a ridden horse sink underwater"</i>.
+     *
+     * <p>She is describing a gene that cannot be used. Ocean-born grants
+     * {@code underwater_breathing} to the horse <b>and its rider</b> - and a
+     * vanilla horse floats: {@code FloatGoal} makes it jump whenever it is in
+     * water, so it rides the surface with both heads in the air and the air bar
+     * never moves. The one thing the gene does is the one thing you could not
+     * arrange.
+     *
+     * <p><b>Sprint rather than sneak</b>, because sneak already means dismount
+     * while mounted and stealing it would break getting off a horse in water -
+     * which is a far worse bug than not being able to dive. Sprint is free
+     * while riding and is already synced to the server, so nothing new has to
+     * be sent.
+     *
+     * <p>The push is set rather than added, and is decisive on purpose: it is
+     * competing with buoyancy <i>and</i> with {@code FloatGoal} calling
+     * {@code jump()} on the same tick, and a gentle nudge loses to both.
+     */
+    private static void sinkIfAsked(Horse horse) {
+        if (!horse.isInWater()
+                || !(horse.getControllingPassenger() instanceof Player rider)
+                || !rider.isSprinting()) {
+            return;
+        }
+        Vec3 v = horse.getDeltaMovement();
+        horse.setDeltaMovement(v.x, -SINK_SPEED, v.z);
+    }
+
+    /** Blocks per tick downward while the rider holds sprint. Brisk, but not a stone. */
+    private static final double SINK_SPEED = 0.30;
 
     // ------------------------------------------------------------------
     // Ground cover spreading
