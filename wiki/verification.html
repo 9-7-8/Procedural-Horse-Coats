@@ -56,6 +56,159 @@
     </p>
 </div>
 
+<h2 id="first-night">&sect;0-CY &mdash; The first night's readings (2026-09-13, read off the log)</h2>
+
+<div class="note good">
+    <span class="label">Three hours unattended, and it worked &mdash; including the part where it caught its own tests being wrong</span>
+    <p>
+        The run started 23:07 and was still going at 02:04: <strong>89 censuses</strong>,
+        a flat entity count (154&ndash;155, so nothing leaked) and a flat 50.0&nbsp;ms per
+        tick throughout. The <a href="#overnight-watch">watch</a> did the job it was built
+        for. What follows is what it found, and two of the six pens turned out to be
+        testing nothing &mdash; which is itself the result, and the reason the census
+        prints every pen whether it moved or not.
+    </p>
+</div>
+
+<h3>Dryad &mdash; confirmed, for the first time ever</h3>
+
+<p>
+    <strong>00:00:03 a sapling appeared; 00:01:09 it grew.</strong> Six oak logs and
+    fifty-two leaves, seventy seconds apart, in a pen that had been bare grass. That is
+    the whole gene working end to end &mdash; plant, then vanilla's own random ticks
+    &mdash; and it has never been seen before, because until yesterday the dimension
+    forbade the spread verb and before that the plot had the wrong floor.
+</p>
+
+<p>
+    <strong>But it planted three times in three hours, not twenty</strong>, and the reason
+    is worth knowing because it applies to every spreading gene.
+    <code>GeneAbilityHandler.spread</code> picks <em>one</em> random block per interval,
+    from a cube of <code>radius</code> around the horse with a vertical offset of
+    &minus;1, 0 or +1, and gives up silently if that block will not convert. For a
+    sapling the only offset that can ever work is <strong>0</strong>: &minus;1 is the
+    grass block itself and is not air, +1 is air with air under it. <strong>So two
+    thirds of the dryad's attempts are thrown away on geometry</strong>, and its
+    effective rate is about a third of the 9&nbsp;000&ndash;32&nbsp;000 ticks its page
+    advertises. Not a bug, and worth saying out loud on the gene's page
+    (<a href="known-gaps.html#gap-208">gap 208</a>).
+</p>
+
+<p>
+    <strong>And one in six of its saplings can never grow at all.</strong>
+    <code>saplingFor</code> picks from six species by position hash, and one of them is
+    <strong>dark oak</strong>, which vanilla will only grow from a 2&nbsp;&times;&nbsp;2
+    block of saplings. A lone dark oak stands for ever: one was planted at 01:28 and was
+    still a sapling at 02:04, while the oak next to it had become a tree in seventy
+    seconds, and a third position logged <strong>ten failed growth attempts</strong>
+    between 01:15 and 02:01. <a href="known-gaps.html#gap-209">Gap 209</a>.
+</p>
+
+<p>
+    <strong>It also plants outside its own pen.</strong> A radius does not respect a
+    fence: saplings appeared at z&nbsp;110 with the pen's back wall at z&nbsp;107, so the
+    watch box under-counts. A test-design fault rather than a gene one &mdash; the box
+    wants to be wider than the radius.
+</p>
+
+<h3>Egg layer &mdash; the cap never fired, exactly as predicted</h3>
+
+<p>
+    <strong>Ground count peaked at five against a cap of eight</strong>, sat at two or
+    three most of the night, and of 57 eggs removed <strong>every single one
+    despawned</strong> &mdash; not one was picked up or refused. That is
+    <a href="known-gaps.html#gap-207">gap 207</a> confirmed by measurement rather than by
+    arithmetic: four layers in one six-block circle still cannot outrun vanilla's
+    6&nbsp;000-tick despawn, so <code>nearby_cap</code> is decorative in any real game.
+    Either it wants an interval that can outpace the despawn or the verb's page should
+    say the despawn is doing the work.
+</p>
+
+<h3>Holy ward &mdash; no data at all, and the control caught it</h3>
+
+<div class="note danger">
+    <span class="label">A vanilla spawner is not an unattended test</span>
+    <p>
+        <strong>Zero <code>monster spawned</code> lines from the yard's spawner in three
+        hours.</strong> <code>BaseSpawner.serverTick</code> begins
+        <code>if (this.isNearPlayer(...))</code>, and
+        <code>requiredPlayerRange</code> is <strong>16 blocks</strong>. The spawner only
+        runs while somebody is standing next to it, which is the one thing an overnight
+        run guarantees nobody is doing.
+    </p>
+    <p>
+        <strong>The fix costs nothing and needs no code:</strong> AFK <em>inside or beside
+        the spawner room</em>. Every other pen is force-loaded and runs regardless of
+        where the player stands, so the spawner room is simply the best place to leave the
+        character. Alternatively the field is settable through the block entity's
+        <code>RequiredPlayerRange</code> NBT, but standing in the right place is free.
+    </p>
+    <p>
+        Worth noting what <em>did</em> work: &sect;0-CW's control line &mdash; &ldquo;if
+        the log has no <code>monster spawned</code> lines anywhere, stop there, because a
+        silent spawner and a perfect ward look identical&rdquo;. Without it, three hours of
+        no hostile spawns beside a warded horse reads as a triumphant pass.
+    </p>
+</div>
+
+<h3>Intimidating &mdash; looks like a failure, and wants a person to confirm it</h3>
+
+<div class="note danger">
+    <span class="label">64 readings, and 63 of them are inside the radius the gene claims</span>
+    <p>
+        The gene says everything that is not a horse is held outside a radius <em>written
+        on the allele copy, at least eight blocks</em>. Measured: <strong>median 4.2
+        blocks, upper quartile 5.4, maximum 8.0, minimum 0.6</strong>, over sixty-four
+        readings across three hours. The cows started at three blocks and never got
+        meaningfully further away.
+    </p>
+    <p>
+        <strong>It is not doing nothing</strong> &mdash; a shove is a velocity nudge of
+        0.35 every twenty ticks, and a cow that walks back in between beats will sit
+        wherever the two balance. But &ldquo;pushed out and held out&rdquo; is not what
+        this reads like. The candidates, in order: the aura is not firing at all (check
+        for a <code>repel</code> in the horse's resolved ability list, not its genotype);
+        the shove is too weak against pathfinding; or the pen is too small for the effect
+        to be legible. <strong>Do not fix it from this alone</strong> &mdash; go and
+        watch one for a minute first, because a velocity nudge that works and one that
+        does not look different in a pen and identical in a column of numbers.
+    </p>
+</div>
+
+<h3>Hot blooded &mdash; it thawed, it did not flood, and it stopped early</h3>
+
+<p>
+    Snow 81&nbsp;&rarr;&nbsp;62, ice 18&nbsp;&rarr;&nbsp;3, water
+    0&nbsp;&rarr;&nbsp;32, all of it inside the first fifty minutes and then
+    <strong>completely static for over two hours</strong>. Two readings out of that:
+</p>
+
+<ul>
+    <li><strong>The water more than doubled the ice's footprint</strong> &mdash; fifteen
+        ice blocks became thirty-two water blocks, because ice melts to a <em>source</em>
+        and a source flows. That is the flood behaviour, and in a flat fenced pen it
+        found its level and stopped. It is still the thing to watch on any terrain with a
+        slope.</li>
+    <li><strong>It stopped because the horses stopped moving</strong>, not because it
+        finished. The melt radius is <strong>2.0</strong> and the pick is one block per
+        four seconds, so once a pair of horses settle they clear their own little cube and
+        nothing else is ever in reach. Sixty-two snow blocks and three ice are still
+        standing five blocks away. Again: the gene doing exactly what it says, and a test
+        that cannot see the whole claim.</li>
+</ul>
+
+<h3>Everything else</h3>
+
+<ul>
+    <li><strong>No leak.</strong> Entity count flat at 154&ndash;155 for three hours,
+        tick time flat at 50.0&nbsp;ms. The thing most likely to damage a save did not
+        happen.</li>
+    <li><strong>The sound rates are exactly as specified</strong> and did not drift:
+        24&nbsp;&times; cat and 4&nbsp;&times; disc per two minutes, every census.</li>
+    <li><strong>Read <code>50.0 ms/tick &mdash; BEHIND</code> as healthy</strong> in this
+        night's log only; see the note on &sect;0-CX.</li>
+</ul>
+
 <h2 id="overnight-watch">&sect;0-CX &mdash; The overnight watch, and a yard that runs itself (2026-09-12, NOT looked at)</h2>
 
 <div class="note">
