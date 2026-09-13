@@ -502,16 +502,37 @@ final class DebugYardGameplay {
     private static void splicePair(ServerLevel level, int gy, Splice carrot, int x0, int z0, int depth) {
         int x1 = x0 + PAIR_W;
         int z1 = z0 + depth;
-        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
-
-        // The divider, and the gate that makes it a pair rather than two pens.
         int mid = x0 + 4;
+
+        // A GATE INTO EACH HALF, side by side. Owner, 2026-09-13: "you need to
+        // put two gates adjacent to each other for the breeding horse pens."
+        // penWalls cuts ONE two-wide gate in the middle of the north wall, and
+        // the middle of this pen is the divider - so the single entrance
+        // straddled the fence and opened into the west half only. The stallion
+        // was behind a wall with no door.
+        DebugPenManager.penWalls(level, gy + 1, x0, x1, z0, z1, x0 + 1, z0, Direction.NORTH);
+        BlockState gate = Blocks.OAK_FENCE_GATE.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.FenceGateBlock.FACING, Direction.NORTH);
+        for (int x = x0 + 5; x <= x0 + 6; x++) {
+            level.setBlockAndUpdate(new BlockPos(x, gy + 1, z0), gate);
+        }
+
+        // The divider, and the gate pair that makes this one pen rather than
+        // two. TWO gates wide for the same reason the outer ones are: a horse
+        // is 1.4 blocks across, and a single-block opening it has to be led
+        // through is the difference between "open the gate and breed them" and
+        // "spend five minutes shoving a horse at a gap".
         int gateZ = (z0 + z1) / 2;
+        BlockState divider = Blocks.OAK_FENCE_GATE.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.FenceGateBlock.FACING, Direction.EAST);
         for (int z = z0 + 1; z < z1; z++) {
-            DebugPenManager.fastSet(level, new BlockPos(mid, gy + 1, z),
-                    z == gateZ
-                            ? Blocks.OAK_FENCE_GATE.defaultBlockState()
-                            : Blocks.OAK_FENCE.defaultBlockState());
+            boolean isGate = z == gateZ || z == gateZ + 1;
+            if (isGate) {
+                level.setBlockAndUpdate(new BlockPos(mid, gy + 1, z), divider);
+            } else {
+                DebugPenManager.fastSet(level, new BlockPos(mid, gy + 1, z),
+                        Blocks.OAK_FENCE.defaultBlockState());
+            }
         }
 
         DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,

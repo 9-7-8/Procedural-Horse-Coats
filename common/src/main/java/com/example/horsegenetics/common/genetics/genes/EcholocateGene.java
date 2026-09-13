@@ -58,12 +58,38 @@ public final class EcholocateGene extends AbstractAbilityGene {
         return EpiSchema.of(EpiValue.uniform(RADIUS, MIN_RADIUS, MAX_RADIUS));
     }
 
+    /**
+     * <b>Tamed, and carrying somebody.</b>
+     *
+     * <p>It was {@link GeneAbility.Condition#ALWAYS}, which made every
+     * echolocating horse in the world - wild ones included - light up
+     * everything within up to twenty blocks, every six seconds, for ever.
+     * Owner, 2026-09-13: <i>"the echolocate gene is still activating. We need
+     * to tune it. It should do NOTHING on untamed horses. On a tame horse, it
+     * normally only activates while ridden."</i>
+     *
+     * <p>Which is the right shape for what the ability <em>is</em>. Echolocation
+     * is a thing the horse does <b>for its rider</b> - the outline is drawn on
+     * the rider's screen, and a wild horse doing it in an empty field is
+     * painting for nobody while still paying the whole cost: a ten-target
+     * entity scan and an effect application per horse per six seconds, which is
+     * <a href="known-gaps.html">exactly the sort of cost that does not show up
+     * when testing with one horse in a field</a> and does show up in a stable.
+     *
+     * <p>Built from the two flags that already exist rather than a new one, so
+     * this costs the {@code AbilityType} contract nothing.
+     */
+    private static final GeneAbility.Condition RIDDEN_AND_TAMED =
+            new GeneAbility.Condition.All(List.of(
+                    new GeneAbility.Condition.Flag("tamed", false),
+                    new GeneAbility.Condition.Flag("has_rider", false)));
+
     @Override
     protected List<GeneAbility> abilitiesWhenExpressed(EpiValues epi) {
         return List.of(
                 new GeneAbility.Sound(SOUND, new GeneAbility.Trigger.Interval(REFRESH_TICKS),
-                        0.6, 1.0, 0, REFRESH_TICKS, GeneAbility.Condition.ALWAYS, 1),
+                        0.6, 1.0, 0, REFRESH_TICKS, RIDDEN_AND_TAMED, 1),
                 new GeneAbility.SelfEffect(EFFECT, "group", "all", epi.get(RADIUS), 0,
-                        REFRESH_TICKS, MAX_TARGETS, GeneAbility.Condition.ALWAYS, 1));
+                        REFRESH_TICKS, MAX_TARGETS, RIDDEN_AND_TAMED, 1));
     }
 }

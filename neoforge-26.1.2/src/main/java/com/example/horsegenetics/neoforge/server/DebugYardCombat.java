@@ -137,17 +137,30 @@ final class DebugYardCombat {
      * together.</b>
      *
      * <p>They are the same verb - {@code Temper("aggressive")} - with different
-     * triggers, and that is exactly why they must not share a pen. Guardian
-     * fires on {@code OnOwnerHurt} and only retaliates; gladiator fires
-     * {@code Continuous} while {@code has_rider} and picks the fight itself. In
-     * one pen with one batch of zombies, a zombie dying tells you nothing about
-     * which horse did it - and the difference between "retaliates" and "starts
-     * it" is the entire distinction between the two genes.
+     * triggers, and that is exactly why they must not share a pen: in one pen
+     * with one batch of zombies, a dead zombie tells you nothing about which
+     * horse killed it.
      *
-     * <p>Both come <b>saddled and tamed</b>. Gladiator needs a rider by
-     * definition and guardian needs an owner, and a test whose first step is
-     * "find a saddle" is a test that gets put off - the same reasoning that
-     * saddled the lava-channel pair.
+     * <h2>They want opposite things from you, which I had backwards</h2>
+     * <b>Gladiator fights while NOBODY is riding it.</b> Its condition is
+     * {@code Flag("has_rider", negate = true)} and its own description says so
+     * outright - <i>"while nobody is riding it, the horse attacks hostile mobs
+     * that come within reach... mount it and it stops immediately."</i> This
+     * file said the reverse for most of a day, the pen's sign told the owner to
+     * ride it, and the zombies were taken out of its arena on the strength of
+     * that misreading. They are back: an unridden gladiator among hostiles is
+     * exactly the test, and the reason it kept dying was the panic bug, not a
+     * gene that was switched off.
+     *
+     * <p><b>Guardian is the one that needs you.</b> It fires on
+     * {@code OnOwnerHurt}, so it wants an owner - which is why it arrives
+     * untamed - and something hurting that owner. Placed zombies would only
+     * kill it while its gene had nothing to react to, so its arena starts
+     * empty and the eggs are in the chest.
+     *
+     * <p>The lesson is cheap and I paid full price for it: <b>the gene's own
+     * description is the specification</b>, and it was one line away the whole
+     * time.
      */
     private static void buildArena(ServerLevel level, int gy, int cx, int mouthZ) {
         int z0 = mouthZ + ROW_J;
@@ -184,9 +197,12 @@ final class DebugYardCombat {
         int lx1 = cx + WEST_MAX;
         arenaBox(level, gy, lx0, lx1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(lx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("GLADIATOR", "RIDE it. It picks", "the fight itself -", "only with a rider"));
+                List.of("GLADIATOR", "LEAVE IT ALONE: it", "fights while NOT", "ridden. Mount=stop"));
         DebugTestYard.stock(level, gy, lx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.gladiator",
                 "GLADIATOR", 1, 0, "Gld/Gld", "horsegenetics.magic_fighter=Gld/Gld");
+        // Opponents restored. It fights these on its own - that IS the test -
+        // and with HorsePanicGoal it no longer bolts the moment one lands a hit.
+        arenaOpponents(level, gy, lx0, lx1, z1 - 3, 3);
         DebugTestYard.saddleAll(level, gy, lx0, lx1, z0, z1);
         // The fight's scale is in the tester's hand, not the spawner's - see
         // arenaOpponents. A stick too, because the guardian next door has to be
@@ -453,7 +469,6 @@ final class DebugYardCombat {
      * fast as they die, so one horse is not being tested, it is being counted
      * down.
      */
-    @SuppressWarnings("unused")
     private static void arenaOpponents(ServerLevel level, int gy, int x0, int x1, int z, int count) {
         for (int i = 0; i < count; i++) {
             var zombie = EntityType.ZOMBIE.create(level,
