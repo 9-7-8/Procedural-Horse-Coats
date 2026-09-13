@@ -1083,6 +1083,12 @@ final class DebugTestYard {
         stock(level, gy, x0 + 0.5, z0 + 0.5, "horsegenetics.fireproof",
                 "the lava channel", 1, 1, null);
         saddleAll(level, gy, x0, x1, z0, z1);
+        // The census prints the horses' actual lava_movement. That one line
+        // separates the three ways this feature can fail - the attribute never
+        // reached the horse, the gene never set it, or the mixin never read it
+        // - and no amount of riding up and down can.
+        DebugWorldWatch.watchAttribute("LAVA CHANNEL", box(x0, gy, z0, x1, gy + 1, z1),
+                com.example.horsegenetics.neoforge.entity.ModAttributes.LAVA_MOVEMENT);
     }
 
     /** How long the crossing is. Long enough that "is this too slow" is a real question. */

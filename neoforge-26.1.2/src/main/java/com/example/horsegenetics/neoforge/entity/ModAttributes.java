@@ -6,8 +6,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -65,28 +63,37 @@ public final class ModAttributes {
 
     public static void register(IEventBus modEventBus) {
         ATTRIBUTES.register(modEventBus);
+        modEventBus.addListener(ModAttributes::onAttributes);
     }
 
     /**
-     * Put it on horses only.
+     * Put it on horses only, and <b>subscribe explicitly rather than by
+     * annotation</b>.
+     *
+     * <p>26.1.2's {@code @EventBusSubscriber} has no {@code bus} element - it
+     * infers the bus from the event type - and when the attribute failed to
+     * reach any horse the first time, that inference was the one link in the
+     * chain that could not be checked by reading. An explicit
+     * {@code addListener} on the bus we were handed removes the question
+     * instead of answering it.
      *
      * <p>An attribute costs a slot on every entity that carries it, and nothing
-     * else in this mod is going to swim in lava on purpose. Anything without it
-     * falls through {@code getAttribute() == null} in the mixin and takes
-     * vanilla's constant.
+     * else in this mod swims in lava on purpose. Anything without it falls
+     * through {@code getAttribute() == null} in the mixin and takes vanilla's
+     * constant.
      */
-    @EventBusSubscriber(modid = HorseGenetics.MOD_ID)
-    public static final class Attach {
-        private Attach() {
-        }
-
-        @SubscribeEvent
-        static void onAttributes(EntityAttributeModificationEvent event) {
-            for (var type : event.getTypes()) {
-                if (AbstractHorse.class.isAssignableFrom(type.getBaseClass())) {
-                    event.add(type, LAVA_MOVEMENT);
-                }
+    private static void onAttributes(EntityAttributeModificationEvent event) {
+        int added = 0;
+        for (var type : event.getTypes()) {
+            if (AbstractHorse.class.isAssignableFrom(type.getBaseClass())) {
+                event.add(type, LAVA_MOVEMENT);
+                added++;
             }
         }
+        // Say it out loud. "The horse has no such attribute" is a SILENT
+        // early-out in GeneAbilityHandler.applyAttribute - correct there, and
+        // the reason a whole feature could be wired up, ship, and do nothing
+        // with no line anywhere saying so.
+        HorseGenetics.LOGGER.info("[Debug] lava_movement attached to {} entity type(s)", added);
     }
 }
