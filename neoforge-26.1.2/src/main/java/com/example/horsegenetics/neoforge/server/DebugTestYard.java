@@ -81,7 +81,7 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 135;
+    private static final int YARD_DEPTH_Z = 155;
 
     // ------------------------------------------------------------------
     // THE GRID
@@ -133,6 +133,10 @@ final class DebugTestYard {
     private static final int ROW_G_D = 9;
     private static final int ROW_H = ROW_G + ROW_G_D + AISLE;   // the retinue
     private static final int ROW_H_D = 10;
+    private static final int ROW_I = ROW_H + ROW_H_D + AISLE;   // the night block, temper
+    private static final int ROW_I_D = 7;
+    private static final int ROW_J = ROW_I + ROW_I_D + AISLE;   // the night block, watch
+    private static final int ROW_J_D = 7;
 
     /** The west block's left edge, and the east block's right edge. */
     private static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -188,7 +192,8 @@ final class DebugTestYard {
         buildPath(level, gy, cx, mouthZ);
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
         buildSpawnerRoom(level, gy, cx, mouthZ);
-        buildSoundHerdPen(level, gy, cx, mouthZ);
+        buildNightBlock(level, gy, cx, mouthZ);
+        buildBaseAlarmPen(level, gy, cx, mouthZ);
         buildIntimidatingPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGlowRoom(level, gy, cx, mouthZ);
@@ -196,7 +201,6 @@ final class DebugTestYard {
         buildBoneMealPen(level, gy, cx, mouthZ);
         buildRetinuePen(level, gy, cx, mouthZ);
         buildLavaChannel(level, gy, cx, mouthZ);
-        buildHydrophobicPen(level, gy, cx, mouthZ);
         buildDisplayRow(level, gy, cx, mouthZ);
         buildMoltenRow(level, gy, cx, mouthZ);
 
@@ -204,7 +208,7 @@ final class DebugTestYard {
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "ward, cows, lava,", "dryads, molten"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "NIGHT pens, ward,", "lava, dryads"));
 
         verify(level, gy, cx, mouthZ);
     }
@@ -294,34 +298,115 @@ final class DebugTestYard {
     // The overnight pens
     // ------------------------------------------------------------------
 
+    /** One night stall: the gene, the allele, what it should do, and whether it needs a target. */
+    private record Nightly(String key, String token, String name, String what, boolean needsHerd,
+                           boolean needsMonsters) {
+        Nightly(String key, String token, String name, String what) {
+            this(key, token, name, what, false, false);
+        }
+    }
+
     /**
-     * <b>The sound genes, as a number instead of an opinion.</b>
+     * <b>The night block: one stall per night behaviour, all fifteen.</b>
      *
-     * <p>The open question on all four is "are these bearable in a herd", and
-     * the cooldowns were chosen by guesswork. That reads like a question only
-     * ears can settle and it is not: a herd that fires eighty sounds in two
-     * minutes is unbearable arithmetically, and the arithmetic can be collected
-     * while everybody is asleep. So five of them in a pen, and
-     * {@code DebugWorldWatch} counts every play into the census.
+     * <p>&sect;0-AT has said since 2026-09-09 that "the night loci - behaviour,
+     * so nothing here is confirmed by a render". Two whole loci, thirteen
+     * variants between them, plus dhampir and lycanthropy, and <i>not one of
+     * them</i> has ever been watched. They were <b>unwatchable rather than
+     * untested</b>, and nobody knew which: the horse dimension had no night,
+     * because a {@code dimension_type} needs <b>timelines</b> as well as a
+     * {@code default_clock} and it carried only the clock. Every night-gated
+     * gene in the mod sat inert in the one place built for watching genes.
      *
-     * <p>Meowing and singer, not base alarm: base alarm is gated on
-     * {@code hostile_near} and would sit silent in a pen a hundred blocks from
-     * the spawner, which is a blank in the log that looks exactly like a broken
-     * gene. A test that cannot fire is worse than a missing one.
+     * <h2>Each variant gets its own stall, because the variants are the point</h2>
+     * They differ by <i>who they are about</i> - riders, herds, monsters,
+     * everything - and a single pen would answer for one of them and leave the
+     * rest exactly as unproven as they are now. Fifteen stalls is a walk down
+     * two rows with {@code /testkit night} run once.
+     *
+     * <h2>Two of them cannot fire here, and the sign says so</h2>
+     * The <b>monster</b>-targeted forms need a hostile nearby, and the only
+     * hostiles in this dimension come from the ward's spawner - which only runs
+     * with a player standing beside it. A stall that cannot fire is worse than
+     * no stall, so those two are labelled rather than quietly left to look
+     * broken. The <b>herd</b>-targeted forms get a cow each, so they can.
      */
-    private static void buildSoundHerdPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + WEST_MIN;
-        int x1 = cx + WEST_MAX;
-        int z0 = mouthZ + ROW_D;
-        int z1 = z0 + ROW_D_D;
+    private static void buildNightBlock(ServerLevel level, int gy, int cx, int mouthZ) {
+        List<Nightly> temper = List.of(
+                new Nightly(NIGHT_TEMPER, "Agp", "HUNT: RIDERS", "comes at YOU"),
+                new Nightly(NIGHT_TEMPER, "Agc", "HUNT: HERDS", "goes for the cow", true, false),
+                new Nightly(NIGHT_TEMPER, "Agh", "HUNT: MONSTERS", "NEEDS the spawner", false, true),
+                new Nightly(NIGHT_TEMPER, "Aga", "HUNT: ALL", "you AND the cow", true, false),
+                new Nightly(NIGHT_TEMPER, "Flp", "SHY: RIDERS", "backs away from you"),
+                new Nightly(NIGHT_TEMPER, "Flc", "SHY: HERDS", "avoids the cow", true, false),
+                new Nightly(NIGHT_TEMPER, "Flh", "SHY: MONSTERS", "NEEDS the spawner", false, true),
+                new Nightly(NIGHT_TEMPER, "Fla", "SHY: ALL", "avoids everything", true, false));
+        List<Nightly> watch = List.of(
+                new Nightly(NIGHT_WATCH, "Wst", "WATCH: FIXED", "stands and stares"),
+                new Nightly(NIGHT_WATCH, "Wnr", "WATCH: CLOSING", "watches what nears"),
+                new Nightly(NIGHT_WATCH, "Wsi", "WATCH: SIGHTED", "watches what it sees"),
+                new Nightly(NIGHT_WATCH, "Wun", "WATCH: UNSEEN", "watches the UNSEEN"),
+                new Nightly(NIGHT_WATCH, "Wbh", "WATCH: BEHIND", "watches close behind"),
+                new Nightly("horsegenetics.dhampir", null, "DHAMPIR", "night-gated too"),
+                new Nightly("horsegenetics.lycan", null, "LYCAN", "night-gated too"));
+
+        nightRow(level, gy, cx, mouthZ + ROW_I, ROW_I_D, temper);
+        nightRow(level, gy, cx, mouthZ + ROW_J, ROW_J_D, watch);
+    }
+
+    private static final String NIGHT_TEMPER = "horsegenetics.magic_night_temper";
+    private static final String NIGHT_WATCH = "horsegenetics.magic_night_watch";
+
+    /** Up to eight stalls across a row, four each side of the walkway. */
+    private static void nightRow(ServerLevel level, int gy, int cx, int z0, int depth,
+                                 List<Nightly> stalls) {
+        int z1 = z0 + depth;
+        int[] starts = {
+                cx + WEST_MIN, cx + WEST_MIN + 5, cx + WEST_MIN + 10, cx + WEST_MIN + 15,
+                cx + EAST_MIN, cx + EAST_MIN + 5, cx + EAST_MIN + 10, cx + EAST_MIN + 15};
+        for (int i = 0; i < stalls.size() && i < starts.length; i++) {
+            Nightly n = stalls.get(i);
+            int x0 = starts[i];
+            int x1 = x0 + 4;
+            fencedPlot(level, gy, x0, x1, z0, z1);
+            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                    List.of(n.name(), "after dark:", n.what(),
+                            n.needsMonsters() ? "CANNOT FIRE HERE" : "/testkit night"));
+            String pair = n.token() == null ? null : n.token() + "/" + n.token();
+            stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, n.key(), n.name(), 1, 0, pair);
+            if (n.needsHerd()) {
+                spawnCow(level, gy, x0 + 3.0, (z0 + z1) / 2.0);
+            }
+            DebugWorldWatch.watch(n.name(), box(x0, gy, z0, x1, gy + 1, z1), null);
+        }
+    }
+
+    /**
+     * <b>Base alarm, beside the spawner, because that is the only place its
+     * condition can be true.</b>
+     *
+     * <p>It was deliberately kept OUT of the sound herd for exactly this
+     * reason: its sound is gated on {@code hostile_near}, so a hundred blocks
+     * from the spawner it would have sat silent all night and a blank in the
+     * log reads exactly like a broken gene. Here it is one pen from the
+     * zombies, so when the spawner is running - which is when a player is
+     * standing at it, and that is where the ward test wants her anyway - this
+     * gene finally gets a chance to fire.
+     *
+     * <p>The census counts every gene sound by id, so the answer arrives as a
+     * number beside the ward's spawn lines rather than as an impression.
+     */
+    private static void buildBaseAlarmPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + EAST_MIN + 14;
+        int x1 = cx + EAST_MAX;
+        int z0 = mouthZ + ROW_A;
+        int z1 = z0 + ROW_A_D;
         fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("SOUND HERD", "3 meow, 2 sing.", "census counts", "every play"));
-        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.meowing",
-                "the sound herd (meowing)", 2, 1, null);
-        stock(level, gy, x0 + 9.0, (z0 + z1) / 2.0, "horsegenetics.singer",
-                "the sound herd (singer)", 1, 1, null);
-        DebugWorldWatch.watch("SOUND HERD", box(x0, gy, z0, x1, gy + 1, z1), null);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("BASE ALARM", "fires only when a", "HOSTILE is near -", "the spawner is"));
+        stock(level, gy, x0 + 2.0, (z0 + z1) / 2.0, "horsegenetics.base_alarm",
+                "the base alarm pen", 2, 0, null);
+        DebugWorldWatch.watch("BASE ALARM", box(x0, gy, z0, x1, gy + 1, z1), null);
     }
 
     /**
@@ -848,20 +933,23 @@ final class DebugTestYard {
         // came back "look fine" on 2026-09-13 and their stalls are gone - the
         // row is audited like every other pen, and a stall for an answered
         // question is the thing this yard exists to keep deleting.
+        // TWO. Contour cells and rainbow drip both have their verdict already -
+        // "one patch ate the whole barrel", "the shape is wrong" - and looking
+        // at them again before the drawing is changed adds nothing. They come
+        // back when there is something new to look AT.
+        //
+        // These two stay because each has forms nobody has seen. Ooze was
+        // confirmed in its PLAIN form ("looks GREAT") and has a coloured one;
+        // gilded crackle was seen in one of its three.
         List<Look> row = List.of(
-                new Look("horsegenetics.ooze_drip", "OOZE DRIP",
-                        "1-colour: GREAT.", "check the others"),
-                new Look("horsegenetics.rainbow_drip", "RAINBOW DRIP",
-                        "SHAPE is wrong -", "should match drip", "Rdc"),
-                new Look("horsegenetics.contour_cells", "CONTOUR CELLS",
-                        "UNCHANGED - one", "patch ate a barrel"),
-                new Look("horsegenetics.gilded_crackle", "GILDED CRACKLE",
-                        "wants more depth", "- does it read gold?"));
+                new Look("horsegenetics.ooze_drip", "OOZE - COLOURED",
+                        "plain is CONFIRMED", "this is the other", "oz"),
+                new Look("horsegenetics.gilded_crackle", "CRACKLE - BLACK",
+                        "1 of 3 forms seen.", "wants more depth", "Gck"));
 
         int z0 = mouthZ + ROW_E;
         int z1 = z0 + ROW_E_D;
-        int[] starts = {
-                cx + WEST_MIN, cx + WEST_MIN + 5, cx + WEST_MIN + 10, cx + WEST_MIN + 15};
+        int[] starts = {cx + WEST_MIN, cx + WEST_MIN + 5};
         for (int i = 0; i < row.size() && i < starts.length; i++) {
             Look look = row.get(i);
             int x0 = starts[i];
@@ -973,49 +1061,6 @@ final class DebugTestYard {
 
     /** How long the crossing is. Long enough that "is this too slow" is a real question. */
     private static final int LAVA_LEN = 19;
-
-    /**
-     * <b>Half a pen of deep water, for hydrophobic to throw you into.</b>
-     *
-     * <p>The gene ejects its rider once the water under it is more than 0.6 of
-     * a block deep, so the pool is <b>two</b> deep - far past the threshold,
-     * and deep enough that being dumped in it is the real experience rather
-     * than a technicality.
-     *
-     * <p><b>Half, and not all.</b> You have to be riding before the test can
-     * happen, and you cannot mount a swimming horse comfortably; a pen that was
-     * all water would be a test whose first step is impossible. So: dry ground
-     * to get on, water to ride into, and the gate on the dry side.
-     *
-     * <p>Expect it to be <i>half-built</i>, and that is the finding rather than
-     * a bug to report. Its own page says so: it ejects the rider and the "then
-     * heads for the nearest shore" half was never written, so it will happily
-     * dump you in the middle. Watch which way the horse goes afterwards, and
-     * whether you are left swimming a long way from either edge.
-     */
-    private static void buildHydrophobicPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + WEST_MIN;
-        int x1 = cx + WEST_MAX;
-        int z0 = mouthZ + ROW_B;
-        int z1 = z0 + ROW_B_D;
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
-            }
-        }
-        // The western half floods; the gate is on the dry eastern half.
-        for (int x = x0 + 1; x <= (x0 + x1) / 2; x++) {
-            for (int z = z0 + 1; z <= z1 - 1; z++) {
-                poolColumn(level, x, gy, z, Blocks.WATER.defaultBlockState());
-            }
-        }
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x1 - 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("HYDROPHOBIC", "saddled already.", "ride into the", "water: thrown?"));
-        stock(level, gy, x1 - 3.0, (z0 + z1) / 2.0, "horsegenetics.hydrophobic",
-                "the hydrophobic pen", 1, 1, null);
-        saddleAll(level, gy, x0, x1, z0, z1);
-    }
 
     /**
      * A two-deep pool of {@code fluid}, dug into the floor rather than poured

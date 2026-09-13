@@ -56,6 +56,59 @@
     </p>
 </div>
 
+<h2 id="night-loci">&sect;0-DB &mdash; The night loci, testable for the first time (2026-09-13, NOT looked at)</h2>
+
+<div class="note good">
+    <span class="label">These were unwatchable rather than untested, and nobody knew which</span>
+    <p>
+        &sect;0-AT has said since 2026-09-09 that "the night loci - behaviour, so nothing
+        here is confirmed by a render". Two whole loci,
+        <a href="gene-magic-night-temper.html">night temper</a> and
+        <a href="gene-magic-night-watch.html">night watch</a>, that nobody has ever seen do
+        anything. <strong>The reason turned out to be the dimension, not the genes</strong>:
+        the horse dimension had no night, because a <code>dimension_type</code> needs
+        <code>timelines</code> as well as a <code>default_clock</code> and it had only the
+        clock. Every night-gated gene in the mod sat inert in the one place built for
+        watching genes.
+    </p>
+</div>
+
+<p>
+    <strong>Fifteen stalls, one per behaviour</strong>, in two rows at the back of the
+    yard. Every variant gets its own, because the variants <em>are</em> the point &mdash;
+    they differ by who they are about (riders, herds, monsters, everything) and a single
+    pen would answer for one and leave the rest exactly as unproven as they are now. It
+    is a walk down two rows with <code>/testkit night</code> run once.
+</p>
+
+<ul>
+    <li><strong>Night temper, eight stalls</strong>: hunt and shy, each toward riders,
+        herds, monsters and everything. The <em>riders</em> and <em>everything</em> forms
+        are testable with nobody present but you &mdash; walk up by day, set night, walk
+        up again. The <em>herd</em> forms have a cow each so they have something to be
+        about.</li>
+    <li><strong>Night watch, five stalls</strong>: fixed, closing, sighted, unseen, close
+        behind. After dark each should stand and watch rather than graze, and the five
+        differ in <em>what</em> they watch.</li>
+    <li><strong>Dhampir and lycanthropy</strong> get a stall each &mdash; both are
+        night-gated and both were equally unwatchable for the same reason.</li>
+    <li><strong>Two stalls say CANNOT FIRE HERE on the sign</strong>, and that is
+        deliberate. The monster-targeted forms need a hostile nearby, and the only
+        hostiles in this dimension come from the ward's spawner, which runs only with a
+        player beside it. A stall that cannot fire is worse than no stall, so those two
+        are labelled rather than left to look broken.</li>
+    <li><strong>Base alarm</strong> is now <em>beside the spawner room</em>, which is the
+        only place its <code>hostile_near</code> condition can be true. It was deliberately
+        kept out of the sound herd for that reason - a hundred blocks from any monster it
+        would have been silent all night, and a blank in the log reads exactly like a
+        broken gene. The census counts sounds by id, so the answer arrives as a number
+        beside the ward's spawn lines.</li>
+    <li><strong>And check the sky itself.</strong> <code>/testkit night</code> reports what
+        the dimension reads. It said <em>DAY</em> after being set to night on 2026-09-13 -
+        that is the bug that was fixed, and the same line is how you confirm it stayed
+        fixed.</li>
+</ul>
+
 <h2 id="more-for-the-night">&sect;0-DA &mdash; Two more things the night can answer for free (2026-09-13, NOT looked at)</h2>
 
 <div class="note">
