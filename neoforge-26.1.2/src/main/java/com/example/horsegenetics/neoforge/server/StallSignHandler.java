@@ -35,6 +35,25 @@ import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 @EventBusSubscriber
 public final class StallSignHandler {
 
+    /**
+     * <b>Say now what the ticket will say later.</b> A sign binds to any horse -
+     * a stall is only a place - but a ticket sends a horse only for its owner,
+     * so a sign bound to a horse you do not own is a stall you cannot use. On
+     * 2026-09-13 the owner bound a sign to an untamed test mare, hung it, and
+     * heard nothing was wrong until the ticket refused at the very end.
+     * Nothing about binding changes; it just stops being silent.
+     */
+    private static String bindWarning(Horse horse, Player player) {
+        if (!horse.isTamed()) {
+            return " It is not tamed yet - tame it before a ticket will send it here.";
+        }
+        var owner = horse.getOwnerReference();
+        if (owner == null || !player.getUUID().equals(owner.getUUID())) {
+            return " It is not your horse, so your tickets will not send it.";
+        }
+        return "";
+    }
+
     @SubscribeEvent
     static void onBindToHorse(PlayerInteractEvent.EntityInteract event) {
         if (!(event.getTarget() instanceof Horse horse)) return;
@@ -60,7 +79,8 @@ public final class StallSignHandler {
                     player.drop(bound, false);
                 }
             }
-            player.sendSystemMessage(Component.literal("Stall sign bound to " + name + "."));
+            player.sendSystemMessage(Component.literal("Stall sign bound to " + name + "."
+                    + bindWarning(horse, player)));
         }
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);

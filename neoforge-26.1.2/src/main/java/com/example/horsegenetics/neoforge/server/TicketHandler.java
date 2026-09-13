@@ -88,7 +88,7 @@ public final class TicketHandler {
             return;
         }
         if (!ownedBy(horse, player.getUUID())) {
-            say(player, "That is not your horse.");
+            say(player, notYours(horse));
             return;
         }
         StallRecord stall = StallData.get(server).forHorse(horse.getUUID());
@@ -139,7 +139,7 @@ public final class TicketHandler {
             return;
         }
         if (!ownedBy(horse, player.getUUID())) {
-            say(player, "That is not your horse - tame it first.");
+            say(player, notYours(horse));
             return;
         }
         PenRecord pen = StallData.get(server).penOf(player.getUUID());
@@ -237,6 +237,20 @@ public final class TicketHandler {
         }
         EntityReference<LivingEntity> owner = horse.getOwnerReference();
         return owner != null && playerId.equals(owner.getUUID());
+    }
+
+    /**
+     * <b>Why a ticket will not take this horse</b>, in the words that say what
+     * to do about it. The two tickets used to answer the same check with two
+     * different sentences, and the stall ticket's was only "That is not your
+     * horse." - said to the owner standing beside an untamed test mare labelled
+     * TAME ME (2026-09-13). True, and no help at all. The pen ticket had the
+     * opposite fault: "tame it first" to a horse somebody else had tamed.
+     */
+    private static String notYours(Horse horse) {
+        return horse.isTamed()
+                ? "That horse belongs to someone else."
+                : "That horse is not tamed yet - tame it first, then use the ticket.";
     }
 
     private static void say(Player player, String text) {

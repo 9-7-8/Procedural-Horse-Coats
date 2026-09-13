@@ -80,6 +80,76 @@
     </p>
 </div>
 
+<h2 id="stalls-and-swings">&sect;0-DQ &mdash; The L-shaped stall, the ticket mare, and a swing speed that never changed (2026-09-13, NOT looked at)</h2>
+
+<div class="note good">
+    <span class="label">Read off the log: the stall fixes from &sect;0-DO partly work</span>
+    <ul>
+        <li><strong>The tight stall binds</strong> now that it has a real gate:
+            <code>Stall set for Dappled Dagger - 12 blocks, 3x3x4</code>.</li>
+        <li><strong>The full stall refuses the sign, and that is correct.</strong> It is
+            packed solid with hay, so there is no floor with headroom anywhere in it and
+            no stall to bind. That pre-empts what its sign was built to test (&ldquo;the
+            ticket must refuse and not be used up&rdquo;), but the player-facing answer
+            is the same &mdash; nothing binds and nothing is spent.</li>
+        <li><strong>The L-shaped stall refused, and that was a bug.</strong> The sign went
+            on the wall at <code>18,130,75</code>; worked back from the tight stall's
+            position, the square straight behind that point is the L's solid notch. The
+            detector only ever started from that one square, found stone, and called a
+            good room not enclosed. It now tries the columns along the wall, nearest
+            first, out to three &mdash; <a href="item-stall-signs.html#detector">stall
+            signs &rarr; the detector</a>.</li>
+    </ul>
+</div>
+
+<div class="note">
+    <span class="label">The ticket mare: untamed, and nothing said so until the end</span>
+    <p>
+        Every interaction traced her as <code>(untamed)</code> and no <code>tamed</code>
+        line ever appeared, so <em>&ldquo;That is not your horse&rdquo;</em> was true
+        &mdash; she arrives untamed on purpose, labelled <code>TICKET MARE - TAME
+        ME</code>. Two things were wrong around it. The stall ticket's refusal was the
+        one of two that did not say to tame her, and the <strong>stall sign bound to
+        her silently</strong>, so nothing flagged it until the last step. The ticket now
+        says <em>&ldquo;That horse is not tamed yet - tame it first&rdquo;</em> (or
+        <em>&ldquo;belongs to someone else&rdquo;</em>), and binding a sign to a horse
+        you cannot ticket says so at bind time.
+    </p>
+</div>
+
+<div class="note bad">
+    <span class="label">Horse swings were never faster than a zombie's</span>
+    <p>
+        <code>HorseMeleeGoal</code> was written earlier today to swing every 12 ticks,
+        and never did. Vanilla's <code>checkAndPerformAttack</code> calls
+        <code>resetAttackCooldown()</code>, which writes a hard-coded 20;
+        <code>getAttackInterval()</code>, the method that was overridden, is not on that
+        path. So every horse kept a zombie's exact rate &mdash; and the guardian's fight
+        shows it: tamed 15:09:17, dead 15:09:59, its zombie dead <b>one second
+        later</b>. The goal now owns its cooldown at <b>10 ticks</b>, two swings a second
+        against a zombie's one. <a href="known-gaps.html#gap-222">Gap 222</a>.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">NOT looked at &mdash; what to check</span>
+    <ol>
+        <li><strong>Hang a stall sign on the L-shaped stall's wall right in front of the
+            notch</strong> (where it refused, around <code>18,130,75</code>). It should
+            bind and flash the whole L.</li>
+        <li><strong>Bind a stall sign to the untamed ticket mare.</strong> The message
+            should warn she is not tamed; tame her with a stick, then the ticket
+            should send her.</li>
+        <li><strong>The guardian and the gladiator against one or two zombies.</strong>
+            Pass is the horse winning. <code>horse hurt</code> lines give the zombie's
+            hits; the zombie should die first.</li>
+        <li><strong>A fighting horse still closes on its target.</strong> It rears only
+            when not already rearing; if a horse stands in place reared up while a zombie
+            walks away, that rule is not enough.</li>
+        <li><em>Not tried yet:</em> the roofed stall's height in the bind message.</li>
+    </ol>
+</div>
+
 <h2 id="coat-budget">&sect;0-DP &mdash; The freeze that needed a reboot: coats and foundings are rationed now (2026-09-13, NOT looked at)</h2>
 
 <div class="note bad">

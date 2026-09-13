@@ -85,8 +85,9 @@
 <ol>
     <li>A real <code>oak_wall_sign</code> is placed, with the horse&rsquo;s name written
         on it.</li>
-    <li><code>server/StallDetector</code> measures the stall. <strong>It cannot
-        fail</strong> &mdash; see below.</li>
+    <li><code>server/StallDetector</code> measures the stall. <strong>If there is no
+        enclosed room there, the sign refuses</strong> and stays in your hand &mdash;
+        see below.</li>
     <li>The stall is stored in <code>data/StallData</code>, a server-global
         <code>SavedData</code> of <code>StallRecord</code>s, one per bound horse, and its
         outline is flashed with <code>HAPPY_VILLAGER</code> particles.</li>
@@ -117,8 +118,18 @@
 <ul>
     <li><strong>Both sides are tried.</strong> Which side of a wall the player meant is
         not something they should have to know. If both close, the smaller is the stall.
-        If neither does, the fallback box goes on the side the player was standing on,
-        because clicking from there is the only statement of intent available.</li>
+        <strong>If neither does, the sign refuses</strong> with <em>&ldquo;That is not an
+        enclosed stall&rdquo;</em> and is not used up. It used to fall back to a blind
+        5&times;3&times;5 box in front of the sign instead &mdash; never checked, and routinely
+        containing the wall it hung on &mdash; which turned every failed search into a
+        plausible-looking success (owner, 2026-09-13).</li>
+    <li><strong>It starts from the nearest floor along the wall</strong>, not only from the
+        square straight across. An L-shaped stall is why: a sign on the stretch of wall
+        backing onto the L's solid notch found stone straight behind it and refused a good
+        room one column over. Columns along the wall are tried nearest first &mdash;
+        across, then one either side, out to three &mdash; and the first one with floor
+        decides that side, closed or not, so an open aisle costs one search and the search
+        can never skip past open floor into a neighbouring stall.</li>
     <li><strong>It walks columns of floor and never rises.</strong> The version before
         this filled air up to three blocks above the sign, and a fence is one block tall
         &mdash; so it climbed over the front rail of every stall anyone actually builds,

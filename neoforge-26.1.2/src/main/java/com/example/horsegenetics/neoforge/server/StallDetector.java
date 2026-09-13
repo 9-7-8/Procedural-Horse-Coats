@@ -116,12 +116,48 @@ public final class StallDetector {
      */
     @Nullable
     public static Result forSign(LevelReader level, BlockPos wall, Direction face) {
-        BlockPos front = wall.relative(face);
-        BlockPos behind = wall.relative(face.getOpposite());
-
+        Direction along = face.getClockWise();
         // Null when neither side closes. The caller refuses to place rather
         // than inventing a room - see the class note.
-        return smaller(fill(level, front), fill(level, behind));
+        return smaller(nearestRoom(level, wall.relative(face), along),
+                nearestRoom(level, wall.relative(face.getOpposite()), along));
+    }
+
+    /**
+     * How far along the wall, each way, a sign looks for floor when the square
+     * straight across from it is solid.
+     */
+    private static final int SEED_REACH = 3;
+
+    /**
+     * <b>The room on one side of the wall, seeded from the nearest open floor
+     * along it</b> rather than only from the one square straight across.
+     *
+     * <p>That one square was the whole search, and an L-shaped stall showed
+     * why it is not enough (owner, 2026-09-13: the L refused). A sign hung on
+     * the stretch of wall that backs onto the L's solid notch found a block of
+     * stone straight behind it, had no floor to start from, and called a
+     * perfectly good room "not enclosed" - while the room was one column over.
+     * Any irregular stall has walls like that.
+     *
+     * <p>So the columns along the wall are tried nearest first - straight
+     * across, then one either side, then two - and <b>the first one with floor
+     * decides this side</b>, whether its fill closes or not. Stopping there
+     * rather than trying every column matters twice: an open side (the aisle)
+     * costs one flood instead of seven, and a search that kept going past open
+     * floor could end up seeding a different stall on the far side of a divider.
+     */
+    @Nullable
+    private static Result nearestRoom(LevelReader level, BlockPos across, Direction along) {
+        for (int step = 0; step <= SEED_REACH * 2; step++) {
+            int offset = step % 2 == 1 ? -((step + 1) / 2) : step / 2;  // 0, -1, +1, -2, +2 ...
+            BlockPos seed = across.relative(along, offset);
+            if (seedFloorY(level, seed.getX(), seed.getZ(), seed.getY()) == StallFill.NONE) {
+                continue;  // solid here - try the next column along the wall
+            }
+            return fill(level, seed);
+        }
+        return null;
     }
 
     /** Whichever of the two closed, and the tighter one if both did. */
