@@ -27,6 +27,97 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13f">2026-09-13 &mdash; three fixes that were never reached, and a freeze that needed a reboot</h2>
+
+<p>
+    A long afternoon of live testing with a log watch running beside the game. The
+    through-line: <strong>three separate "fixes" were written, documented and
+    committed, and not one of them ever ran</strong> &mdash; and each was caught by a
+    measurement, never by reading the code that contained it.
+</p>
+
+<h3>The fixes nobody reached</h3>
+<ul>
+    <li><strong>The eyesight readout.</strong> <code>DebugWorldWatch.attributeReadout</code>,
+        which names each horse instead of printing a min&ndash;max, was private and called
+        from nowhere. Wired in, then extended to print each horse against its own base and
+        its block light &mdash; which answered eyesight in four censuses (<a href="known-gaps.html#gap-216">gap 216</a>,
+        <a href="known-gaps.html#gap-219">219</a>).</li>
+    <li><strong>The horse attack interval.</strong> <code>HorseMeleeGoal</code> overrode
+        <code>getAttackInterval()</code> to 12 ticks; vanilla's <code>resetAttackCooldown</code>
+        writes a hard-coded 20 and never asks. Found in bytecode after a guardian died one
+        second before its zombie. The goal owns its cooldown now, at 10 (<a href="known-gaps.html#gap-222">gap 222</a>).</li>
+    <li><strong>The stall detector's fallback box.</strong> Built to "never refuse", it
+        turned every failed search into a plausible stall &mdash; which hid that the yard's
+        stalls had a hole for a doorway instead of a gate. It refuses now.</li>
+</ul>
+
+<h3>A regression I shipped, caught the same way</h3>
+<p>
+    The world-flag cache answered flags it had never computed, and my fix stamped
+    "never sampled" as <code>Long.MIN_VALUE</code> &mdash; so <code>now - sampledAt</code>
+    overflowed, and <code>dark</code>, <code>snowing</code>, <code>near_jukebox</code> and
+    <code>hostile_near</code> went permanently off for every gene for about an hour. The
+    census line <code>DAYWALKER (dark)=0.221 &hellip; light=1</code> made it undeniable. The
+    sentinel is compared with <code>==</code> now.
+</p>
+
+<h3>The freeze</h3>
+<p>
+    Walking toward a herd froze the owner's whole machine, needing a reboot. A thread dump
+    put it on the render thread (173&nbsp;s of CPU against the server's 32&nbsp;s): every
+    newly-seen horse was baked twice inside the frame that first drew it. Now one bake per
+    horse, a 4&nbsp;ms-per-50&nbsp;ms time budget with a shared stand-in coat, a 32-block
+    detail distance, and a founding budget of 15&nbsp;ms per server tick. Owner:
+    <em>&ldquo;Much, MUCH better feeling performance.&rdquo;</em>
+    <a href="pipeline.html#bake-budget">Pipeline &rarr; when a coat is baked</a>,
+    <a href="known-gaps.html#gap-221">gap 221</a>. My first two diagnoses were both wrong
+    within the hour; cumulative CPU per thread settled it, a single stack sample did not.
+</p>
+
+<h3>Stalls, tickets and ownership</h3>
+<ul>
+    <li><strong>The horse in the roof</strong> was the stall's own sign being measured as a
+        one-tile room: signs are force-solid, so a sign hung outside with sky above closed
+        as a room, and at ticket time it was smaller than the real stall and won. Diagnosed
+        on the first use of a trace line added for the purpose (<a href="known-gaps.html#gap-223">gap 223</a>).
+        An L-shaped stall also needed the search to start from the nearest floor along the
+        wall, not only the square straight behind the sign.</li>
+    <li><strong>Owner rules:</strong> nothing binds to a horse you do not own, creative
+        included; a seed jar is filled only from your stallion and used on any mare you own;
+        one stall sign per horse, with a second placement moving the stall and popping the
+        old sign off.</li>
+    <li><strong>Lycanthropy was deleting horses.</strong> A were-animal's death removed the
+        horse with no death at all. The first fix &mdash; refusing aquatic forms on land
+        &mdash; was overruled: <em>&ldquo;It should absolutely still shift and then just
+        die.&rdquo;</em> The animal's death now rebuilds the horse and kills it with the same
+        damage source (<a href="known-gaps.html#gap-220">gap 220</a>).</li>
+</ul>
+
+<h3>Confirmed and retired from the yard</h3>
+<p>
+    Gladiator; dhampir (all three questions &mdash; its pen was wrongly deleted once and
+    restored); eyesight; bone meal and the mixed dryad pair; ender echo's on-foot blink;
+    shears; milking for milk and potion; the carrot breeding mechanism; the horseman, the
+    cowboy and the transfer papers; every ticket stall; one stall sign per horse. Rows G and
+    H are gone and the yard is seventeen blocks shorter.
+</p>
+
+<h3>Process, written down so it is not paid for twice</h3>
+<ul>
+    <li><strong>Kill every client before relaunching</strong> &mdash; a
+        <code>MinecraftMain</code> command-line filter misses the dev client, two clients
+        ran at once and interleaved the log; <code>fml.modFolders</code> is the marker that
+        works.</li>
+    <li><strong>Check what else is in a room before retiring it</strong> &mdash; the
+        horseman's study also held the untested transfer-paper chest.</li>
+    <li>Untracked files in <code>intake/</code> are the owner's drop-ins, not strays.</li>
+</ul>
+
+<p>
+    What is still open, and where to look: <a href="verification.html#open-0913">verification &rarr; &sect;0-DS</a>.
+</p>
+
 <h2 id="d2026-09-13e">2026-09-13 &mdash; a long play session, and the day a convention turned out to be breaking features</h2>
 
 <p>
