@@ -4,11 +4,13 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.EntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.Set;
 
 /**
  * <b>Attributes this mod adds, and the first one is the reason the mod has a
@@ -82,10 +84,31 @@ public final class ModAttributes {
      * through {@code getAttribute() == null} in the mixin and takes vanilla's
      * constant.
      */
+    /**
+     * The horse family, <b>by identity rather than by class</b>.
+     *
+     * <p>This list looks clumsy beside
+     * {@code AbstractHorse.class.isAssignableFrom(type.getBaseClass())}, which
+     * is what was here first and which attached the attribute to <b>nothing</b>.
+     * {@code EntityType.getBaseClass()} is a stub:
+     *
+     * <pre>public Class&lt;? extends Entity&gt; getBaseClass() { return Entity.class; }</pre>
+     *
+     * <p>It returns {@code Entity.class} for every type in the game, so any
+     * class-based filter over entity types silently matches nothing. It
+     * compiles, it runs, it logs no warning, and downstream
+     * {@code GeneAbilityHandler.applyAttribute} takes its own silent early-out
+     * on "this entity has no such attribute" - three layers of quiet, and a
+     * feature that shipped doing nothing. See {@code wiki/api-notes.html}.
+     */
+    private static final Set<EntityType<?>> HORSE_TYPES = Set.of(
+            EntityType.HORSE, EntityType.DONKEY, EntityType.MULE,
+            EntityType.SKELETON_HORSE, EntityType.ZOMBIE_HORSE);
+
     private static void onAttributes(EntityAttributeModificationEvent event) {
         int added = 0;
         for (var type : event.getTypes()) {
-            if (AbstractHorse.class.isAssignableFrom(type.getBaseClass())) {
+            if (HORSE_TYPES.contains(type)) {
                 event.add(type, LAVA_MOVEMENT);
                 added++;
             }
