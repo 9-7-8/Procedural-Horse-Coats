@@ -176,7 +176,6 @@ final class DebugYardCombat {
                 com.example.horsegenetics.common.horse.Sex.FEMALE,
                 "horsegenetics.guardian=Grd/Grd", false);
         DebugTestYard.label(guardian, "GUARDIAN - TAME ME");
-        arenaOpponents(level, gy, gx0, gx1, z1 - 3, 2);
         DebugTestYard.saddleAll(level, gy, gx0, gx1, z0, z1);
         DebugWorldWatch.watch("ARENA - GUARDIAN",
                 DebugTestYard.box(gx0, gy, z0, gx1, gy + 4, z1), null);
@@ -188,7 +187,6 @@ final class DebugYardCombat {
                 List.of("GLADIATOR", "RIDE it. It picks", "the fight itself -", "only with a rider"));
         DebugTestYard.stock(level, gy, lx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.gladiator",
                 "GLADIATOR", 1, 0, "Gld/Gld", "horsegenetics.magic_fighter=Gld/Gld");
-        arenaOpponents(level, gy, lx0, lx1, z1 - 3, 3);
         DebugTestYard.saddleAll(level, gy, lx0, lx1, z0, z1);
         // The fight's scale is in the tester's hand, not the spawner's - see
         // arenaOpponents. A stick too, because the guardian next door has to be
@@ -427,23 +425,35 @@ final class DebugYardCombat {
     }
 
     /**
-     * <b>A fixed number of zombies, and a box of eggs to make more.</b>
+     * <b>NOT CALLED ANY MORE, and the reason is the whole design of these two
+     * pens.</b>
      *
-     * <p>The arenas started with a charged spawner each and that was the wrong
-     * instrument. A vanilla spawner keeps <b>six</b> alive within its range and
-     * refills them as fast as they die, so a single horse in a walled pen is
-     * not being tested, it is being counted down - and the owner found the
-     * sharp end of it within minutes: <i>"gladiator died to a zombie"</i>. A
-     * pen that kills its own subject reports nothing in the morning, and these
-     * are the only pens in the yard that can kill anything.
+     * <p>The arenas were given a charged spawner, then three placed zombies,
+     * and the gladiator died to both: <i>"gladiator died to a zombie"</i>, then
+     * <i>"the gladiator horse died to the zombie again"</i>. Faster swings did
+     * not save it and were never going to, because the horse was not fighting.
      *
-     * <p>A <b>bounded</b> fight is also the better question. "Does the
-     * gladiator kill three zombies" has an answer; "does it survive an infinite
-     * stream" does not, for any horse, at any attack speed. Spawn eggs in the
-     * aisle chest put the scale under the tester's hand instead of the
-     * spawner's, which is the same reasoning that put every other prop in this
-     * yard within arm's reach.
+     * <p><b>Neither of these genes acts unless the player is engaged.</b>
+     * Gladiator's temper is conditioned on {@code has_rider} - it picks fights
+     * <em>while ridden</em> and does nothing whatever on its own. Guardian
+     * fires on {@code OnOwnerHurt}: no owner, or an owner nobody is hitting,
+     * and it never takes a target. So a pen stocked with zombies and left alone
+     * is not an arena, it is an execution - the subject cannot defend itself by
+     * design, and every reading it produces is of a horse being killed while
+     * its gene is switched off.
+     *
+     * <p>The zombies are in the chest as <b>spawn eggs</b> instead. Mount the
+     * gladiator, then make the fight; tame the guardian, stand next to it, then
+     * make the fight. That is not a workaround for a pen that cannot hold
+     * monsters - it is the only arrangement in which either gene is <em>on</em>.
+     *
+     * <p>Kept rather than deleted because a pen that wants a bounded, repeatable
+     * group of opponents is a reasonable thing to want, and this is how to place
+     * one. A spawner is not: it keeps six alive within range and refills them as
+     * fast as they die, so one horse is not being tested, it is being counted
+     * down.
      */
+    @SuppressWarnings("unused")
     private static void arenaOpponents(ServerLevel level, int gy, int x0, int x1, int z, int count) {
         for (int i = 0; i < count; i++) {
             var zombie = EntityType.ZOMBIE.create(level,

@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.equine.Horse;
@@ -119,8 +120,8 @@ public final class DhampirShadeGoal extends Goal {
                     if (!sheltered && !wet) {
                         continue;
                     }
-                    if (!wet && !level.getBlockState(cursor).isAir()) {
-                        continue;   // shade you can actually stand in
+                    if (!wet && !standable(level, cursor)) {
+                        continue;
                     }
                     double d = from.distSqr(cursor);
                     if (d < bestDist) {
@@ -131,5 +132,40 @@ public final class DhampirShadeGoal extends Goal {
             }
         }
         return best;
+    }
+
+    /**
+     * <b>Shade the horse can actually stand in</b> - which is a stricter test
+     * than "air out of the sky", and the difference killed a dhampir.
+     *
+     * <p>The old test accepted any air block that could not see the sky, over a
+     * {@value #SEARCH_HEIGHT}-block vertical span. Under a roof that is
+     * <em>most of the column</em>: the air at head height and above is
+     * sheltered, closer to the horse's own eye position than the floor is, and
+     * therefore wins on distance every time. Then it is handed to a <b>ground
+     * pathfinder</b>, which cannot stand in mid-air and either refuses the path
+     * or walks somewhere else - so the horse kept burning a few blocks from a
+     * roof it had correctly identified.
+     *
+     * <p>Owner, 2026-09-13: <i>"the dhampir ran to the shelter, but it's still
+     * dying. We need a better way to detect 'sun' exposure, not just light
+     * exposure."</i> The <em>detection</em> was never the problem -
+     * {@link DhampirHandler#inSunlight} has always used
+     * {@code canSeeSky} on the eye block, which is sky exposure and not light at
+     * all, and it correctly reads false under this roof. What failed was the
+     * search: it found real shade and then named a square the animal could not
+     * occupy.
+     *
+     * <p>So: air to stand in, air above it for the horse's head, and something
+     * solid underneath. That is the same standard the navigator itself applies,
+     * which is the point - a goal that picks destinations its own pathfinder
+     * rejects is a goal that reports success and does nothing.
+     */
+    private static boolean standable(ServerLevel level, BlockPos pos) {
+        if (!level.getBlockState(pos).isAir() || !level.getBlockState(pos.above()).isAir()) {
+            return false;
+        }
+        BlockPos below = pos.below();
+        return level.getBlockState(below).isFaceSturdy(level, below, Direction.UP);
     }
 }

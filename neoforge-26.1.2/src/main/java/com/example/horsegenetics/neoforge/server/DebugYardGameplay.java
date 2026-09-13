@@ -34,6 +34,12 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_D_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_E;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_E_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_L;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_L_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_M;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_M_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_N;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_N_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MAX;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
@@ -77,7 +83,7 @@ final class DebugYardGameplay {
         buildTackRoom(level, gy, cx, mouthZ);
         buildHorsemansStudy(level, gy, cx, mouthZ);
         buildTicketStalls(level, gy, cx, mouthZ);
-        buildCarrotBench(level, gy, cx, mouthZ);
+        buildCarrotPens(level, gy, cx, mouthZ);
         buildDairyAndClip(level, gy, cx, mouthZ);
         buildEggLayerPen(level, gy, cx, mouthZ);
         buildFoodPreferencePen(level, gy, cx, mouthZ);
@@ -350,13 +356,18 @@ final class DebugYardGameplay {
      * </ol>
      */
     private static void buildTicketStalls(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + WEST_MIN;
         int z0 = mouthZ + ROW_C;
         int z1 = z0 + ROW_C_D;
-        DebugTestYard.fencedPlot(level, gy, x0, x0 + 7, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
+
+        // THE HOLDING PEN keeps the west block to itself. It is the control -
+        // a plain fenced ring, nothing awkward about it - and the one thing a
+        // holding-pen ticket needs is somewhere unambiguous to land.
+        int hx0 = cx + WEST_MIN;
+        int hx1 = cx + WEST_MAX;
+        DebugTestYard.fencedPlot(level, gy, hx0, hx1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(hx0 + 3, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("HOLDING PEN", "hang the SIGN on", "a wall, then use", "a pen TICKET"));
-        chest(level, gy, x0 + 1, z0 - 2, "PEN SIGNS", List.of(
+        chest(level, gy, hx0 + 1, z0 - 2, "PEN SIGNS", List.of(
                 stack(ModItems.HOLDING_PEN_SIGN.get(), 4),
                 stack(ModItems.HOLDING_PEN_TICKET.get(), 16),
                 stack(ModItems.STALL_SIGN.get(), 8),
@@ -364,19 +375,26 @@ final class DebugYardGameplay {
                 stack(ModItems.BOUND_TICKET.get(), 16),
                 new ItemStack(Items.STICK, 8),
                 new ItemStack(Items.HAY_BLOCK, 64)));
-        DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1, x0 + 4.0, (z0 + z1) / 2.0,
+        DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1, hx0 + 6.0, (z0 + z1) / 2.0,
                 Sex.FEMALE, DebugTestYard.PALE, true), "TICKET MARE");
 
-        // The four awkward stalls, in a line east of the holding pen. Each is
-        // walled in stone rather than fenced: a stall is a ROOM in this mod's
-        // terms and a fence ring is not one.
-        int sx = x0 + 9;
-        stallBox(level, gy, sx, sx + 3, z0, z0 + 5, true);           // tight: 4 wide inside is 2
+        // AND THE FOUR AWKWARD STALLS GET THE WHOLE EAST BLOCK, two by two.
+        // Owner, on the first version: "stall testing is too close to another
+        // pen, please put more space." It was packed into one 19-wide block
+        // alongside the holding pen, with single-block gaps and a one-block
+        // corridor serving two stall doorways - and a stall you have to squeeze
+        // past sideways is a stall whose bind you cannot judge, because you
+        // cannot see the shape you are binding.
+        //
+        // Each of these is a case the ticket has to get RIGHT, and each was an
+        // instruction to go and build something before it could be tried at all.
+        int sx = cx + EAST_MIN;
+        stallBox(level, gy, sx, sx + 4, z0, z0 + 5, true);
         DebugPenManager.placeSign(level, new BlockPos(sx + 1, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("STALL: TIGHT", "barely wider than", "the horse. Centre", "it anyway"));
 
-        stallBox(level, gy, sx + 5, sx + 10, z0, z0 + 5, true);      // the L
-        for (int x = sx + 8; x <= sx + 9; x++) {
+        stallBox(level, gy, sx + 8, sx + 14, z0, z0 + 5, true);
+        for (int x = sx + 12; x <= sx + 13; x++) {
             for (int z = z0 + 1; z <= z0 + 2; z++) {
                 for (int y = gy + 1; y <= gy + 4; y++) {
                     DebugPenManager.fastSet(level, new BlockPos(x, y, z),
@@ -384,74 +402,123 @@ final class DebugYardGameplay {
                 }
             }
         }
-        DebugPenManager.placeSign(level, new BlockPos(sx + 6, gy + 1, z0 - 1), Direction.NORTH,
+        DebugPenManager.placeSign(level, new BlockPos(sx + 9, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("STALL: L-SHAPED", "'dead centre' of", "an L is not the", "box's centre"));
 
-        stallBox(level, gy, sx, sx + 4, z0 + 7, z1, true);           // packed with hay
-        for (int x = sx + 1; x <= sx + 3; x++) {
-            for (int z = z0 + 8; z <= z1 - 1; z++) {
+        stallBox(level, gy, sx, sx + 5, z0 + 9, z1, true);
+        for (int x = sx + 1; x <= sx + 4; x++) {
+            for (int z = z0 + 10; z <= z1 - 1; z++) {
                 for (int y = gy + 1; y <= gy + 3; y++) {
                     DebugPenManager.fastSet(level, new BlockPos(x, y, z),
                             Blocks.HAY_BLOCK.defaultBlockState());
                 }
             }
         }
-        DebugPenManager.placeSign(level, new BlockPos(sx + 2, gy + 1, z0 + 6), Direction.NORTH,
+        DebugPenManager.placeSign(level, new BlockPos(sx + 2, gy + 1, z0 + 8), Direction.NORTH,
                 List.of("STALL: FULL", "SOLID hay. Ticket", "must REFUSE and", "NOT be used up"));
 
-        stallBox(level, gy, sx + 6, sx + 10, z0 + 7, z1, true);
-        DebugPenManager.placeSign(level, new BlockPos(sx + 8, gy + 1, z0 + 6), Direction.NORTH,
+        stallBox(level, gy, sx + 9, sx + 14, z0 + 9, z1, true);
+        DebugPenManager.placeSign(level, new BlockPos(sx + 11, gy + 1, z0 + 8), Direction.NORTH,
                 List.of("STALL: ROOFED", "bind it: does the", "size message give", "the REAL height?"));
     }
 
     // ==================================================================
-    // ROW C EAST - the carrot bench
+    // ROWS L, M and N - one breeding pair per carrot
     // ==================================================================
 
+    /** One carrot: the item, the short name on the sign, and what it claims to do. */
+    private record Splice(java.util.function.Supplier<net.minecraft.world.item.Item> item,
+                          String name, String claim) {
+    }
+
     /**
-     * <b>Every splice carrot, and four horses with genotypes nobody has
-     * read.</b>
+     * <b>Ten carrots, ten pairs of pens, and nothing shared between them.</b>
      *
-     * <p>{@code wiki/carrots.html} is one of the larger unplayed surfaces in
-     * the mod: seven splice carrots, a magnifier and a stabiliser, each of
-     * which edits a live horse's genotype. That is the most destructive thing
-     * any item here does and the least watched.
+     * <p>Owner, 2026-09-13: <i>"we need to structure the gene splice carrots
+     * better so that it's two horses to breed, and one small pair of pens per
+     * carrot."</i>
      *
-     * <p>The horses are stocked with <b>no named locus at all</b> - every gene
-     * rolled - which is the state the carrots are designed for and the state
-     * every other pen in this yard deliberately avoids. A carrot fed to a horse
-     * whose genotype you already know cannot surprise you, and surprising you
-     * is the entire function of the unknown-gene one.
+     * <p>What this replaces was one pen holding four horses and a chest with
+     * every carrot in it, and it could not have answered a single question.
+     * <b>A splice carrot does nothing to the horse that eats it</b> - it biases
+     * the gamete that parent contributes, so the whole result lives in a
+     * <i>foal</i>. That makes three things mandatory, and the bench had none of
+     * them: a known mare, a known stallion, and certainty about which carrot
+     * went into which parent. Feed two different carrots during one visit and
+     * {@code CarrotWindowAttachment.plus} <b>merges</b> them into one window, so
+     * the foal cannot tell you which one it came from - and with eleven carrots
+     * in one chest beside four horses, that is the likely outcome rather than a
+     * corner case.
+     *
+     * <h2>Why a divided pen rather than one pen or two</h2>
+     * A carrot also puts its eater straight into breeding mode
+     * ({@code horse.setInLove}), so two horses in one pen breed <b>the moment
+     * the second one is fed</b> - before you have had a chance to feed only one
+     * of them, which is the more interesting half of the test. Two separate
+     * pens fix that and make it impossible to breed them at all without
+     * carrying a horse about.
+     *
+     * <p>So: one enclosure, a fence down the middle, and a <b>gate in it</b>.
+     * Mare on the left, stallion on the right, feed whichever you mean to feed,
+     * open the gate when you want the foal. The pair is small on purpose -
+     * these horses are being fed and bred, never chased, and a big paddock only
+     * means walking after them.
      */
-    private static void buildCarrotBench(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
-        int z0 = mouthZ + ROW_C;
-        int z1 = z0 + ROW_C_D;
-        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("CARROT BENCH", "9 carrots, 4 horses", "with UNREAD genes.", "Splice them"));
-        chest(level, gy, x0 + 1, z0 - 2, "SPLICE CARROTS", List.of(
-                stack(ModItems.UNKNOWN_GENE_SPLICE_CARROT.get(), 8),
-                stack(ModItems.KNOWN_GENE_SPLICE_CARROT.get(), 8),
-                stack(ModItems.MARKING_GENE_SPLICE_CARROT.get(), 8),
-                stack(ModItems.DILUTION_GENE_SPLICE_CARROT.get(), 8),
-                stack(ModItems.WHITE_GENE_SPLICE_CARROT.get(), 8),
-                stack(ModItems.PERFORMANCE_GENE_SPLICE_CARROT.get(), 8),
-                stack(ModItems.MAGICAL_GENE_SPLICE_CARROT.get(), 8),
-                stack(ModItems.UNKNOWN_EPIGENETIC_SPLICE_CARROT.get(), 8),
-                stack(ModItems.STABILIZER_CARROT.get(), 8),
-                stack(ModItems.MAGNIFIER_CARROT.get(), 8),
-                new ItemStack(Items.GOLDEN_CARROT, 64),
-                new ItemStack(Items.STICK, 4)));
-        // No genotype fragment: everything rolls. See the note above.
-        for (int i = 0; i < 4; i++) {
-            DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1,
-                            x0 + 6.0 + i * 2.5, (z0 + z1) / 2.0,
-                            i % 2 == 0 ? Sex.FEMALE : Sex.MALE, "", true),
-                    "UNREAD " + (i + 1));
+    private static void buildCarrotPens(ServerLevel level, int gy, int cx, int mouthZ) {
+        List<Splice> carrots = List.of(
+                new Splice(ModItems.UNKNOWN_GENE_SPLICE_CARROT, "UNKNOWN GENE", "any locus, unseen"),
+                new Splice(ModItems.KNOWN_GENE_SPLICE_CARROT, "KNOWN GENE", "the locus you chose"),
+                new Splice(ModItems.MARKING_GENE_SPLICE_CARROT, "MARKING", "marking loci only"),
+                new Splice(ModItems.DILUTION_GENE_SPLICE_CARROT, "DILUTION", "dilution loci only"),
+                new Splice(ModItems.WHITE_GENE_SPLICE_CARROT, "WHITE", "white loci only"),
+                new Splice(ModItems.PERFORMANCE_GENE_SPLICE_CARROT, "PERFORMANCE", "performance loci"),
+                new Splice(ModItems.MAGICAL_GENE_SPLICE_CARROT, "MAGICAL", "magical loci only"),
+                new Splice(ModItems.UNKNOWN_EPIGENETIC_SPLICE_CARROT, "EPIGENETIC", "rerolls the epigenome"),
+                new Splice(ModItems.STABILIZER_CARROT, "STABILIZER", "favours one copy"),
+                new Splice(ModItems.MAGNIFIER_CARROT, "MAGNIFIER", "favours the other"));
+
+        int[][] slots = {
+                {cx + WEST_MIN, mouthZ + ROW_L, ROW_L_D}, {cx + WEST_MIN + 10, mouthZ + ROW_L, ROW_L_D},
+                {cx + EAST_MIN, mouthZ + ROW_L, ROW_L_D}, {cx + EAST_MIN + 10, mouthZ + ROW_L, ROW_L_D},
+                {cx + WEST_MIN, mouthZ + ROW_M, ROW_M_D}, {cx + WEST_MIN + 10, mouthZ + ROW_M, ROW_M_D},
+                {cx + EAST_MIN, mouthZ + ROW_M, ROW_M_D}, {cx + EAST_MIN + 10, mouthZ + ROW_M, ROW_M_D},
+                {cx + WEST_MIN, mouthZ + ROW_N, ROW_N_D}, {cx + WEST_MIN + 10, mouthZ + ROW_N, ROW_N_D}};
+
+        for (int i = 0; i < carrots.size() && i < slots.length; i++) {
+            splicePair(level, gy, carrots.get(i), slots[i][0], slots[i][1], slots[i][2]);
         }
-        DebugWorldWatch.watch("CARROT BENCH", DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1), null);
+    }
+
+    /** The pen width of one pair: two halves of three, plus the divider and two walls. */
+    private static final int PAIR_W = 8;
+
+    private static void splicePair(ServerLevel level, int gy, Splice carrot, int x0, int z0, int depth) {
+        int x1 = x0 + PAIR_W;
+        int z1 = z0 + depth;
+        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
+
+        // The divider, and the gate that makes it a pair rather than two pens.
+        int mid = x0 + 4;
+        int gateZ = (z0 + z1) / 2;
+        for (int z = z0 + 1; z < z1; z++) {
+            DebugPenManager.fastSet(level, new BlockPos(mid, gy + 1, z),
+                    z == gateZ
+                            ? Blocks.OAK_FENCE_GATE.defaultBlockState()
+                            : Blocks.OAK_FENCE.defaultBlockState());
+        }
+
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of(carrot.name(), carrot.claim(), "feed ONE, then open", "the middle gate"));
+
+        DebugTestYard.stock(level, gy, x0 + 2.0, gateZ - 2.0,
+                "horsegenetics.extension", carrot.name() + " MARE", 1, 0, "E/e");
+        DebugTestYard.stock(level, gy, x0 + 6.0, gateZ - 2.0,
+                "horsegenetics.extension", carrot.name() + " STUD", 0, 1, "E/e");
+
+        chest(level, gy, x0 + 5, z0 - 2, carrot.name(), List.of(
+                stack(carrot.item().get(), 16),
+                new ItemStack(Items.GOLDEN_CARROT, 16),
+                new ItemStack(Items.STICK, 4)));
     }
 
     // ==================================================================

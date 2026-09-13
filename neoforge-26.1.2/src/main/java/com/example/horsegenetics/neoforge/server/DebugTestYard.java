@@ -130,8 +130,14 @@ final class DebugTestYard {
     // them costs a build and is then free for ever.
     static final int ROW_B = ROW_A + ROW_A_D + AISLE;    // tack room | horseman's study
     static final int ROW_B_D = 14;
-    static final int ROW_C = ROW_B + ROW_B_D + AISLE;    // ticket stalls | carrot bench
-    static final int ROW_C_D = 12;
+    // ROW C IS THE TICKET STALLS, BOTH BLOCKS. Owner on first sight: "stall
+    // testing is too close to another pen, please put more space." It was: the
+    // holding pen and four awkward stalls were packed into one 19-wide block
+    // with single-block gaps, and a stall you have to squeeze past is a stall
+    // whose bind you cannot judge. The carrots moved out to rows L, M and N,
+    // which is what freed the east block.
+    static final int ROW_C = ROW_B + ROW_B_D + AISLE;    // the ticket stalls, both blocks
+    static final int ROW_C_D = 14;
     static final int ROW_D = ROW_C + ROW_C_D + AISLE;    // dairy and clip | egg layer
     static final int ROW_D_D = 12;
     static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // crackle | food preference
@@ -170,13 +176,40 @@ final class DebugTestYard {
     static final int ROW_K_D = 16;
 
     /**
+     * <b>L, M and N are one breeding pair per splice carrot.</b>
+     *
+     * <p>Owner, 2026-09-13: <i>"we need to structure the gene splice carrots
+     * better so that it's two horses to breed, and one small pair of pens per
+     * carrot."</i>
+     *
+     * <p>The bench they replace was one pen, four horses and a chest holding
+     * all eleven carrots, and it could not answer anything. <b>A splice carrot
+     * biases the gamete of the parent that ate it</b>, so the result is not
+     * visible on that horse at all - it is visible in a <i>foal</i>, which
+     * means every test needs a named mare, a named stallion, and certainty
+     * about which carrot went into which. One pen with a shared chest gives you
+     * none of that: feed two carrots in one visit and the window merges them
+     * ({@code CarrotWindowAttachment.plus}), and the foal cannot tell you which
+     * one it came from.
+     *
+     * <p>So each carrot gets a pair of pens with a gate between them, its own
+     * chest, and nothing else in reach.
+     */
+    static final int ROW_L = ROW_K + ROW_K_D + AISLE;   // splice carrots 1-4
+    static final int ROW_L_D = 10;
+    static final int ROW_M = ROW_L + ROW_L_D + AISLE;   // splice carrots 5-8
+    static final int ROW_M_D = 10;
+    static final int ROW_N = ROW_M + ROW_M_D + AISLE;   // stabilizer, magnifier
+    static final int ROW_N_D = 10;
+
+    /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
      * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
      * read 110 deep while its rows chained past 150, so the back of it was
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_K + ROW_K_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_N + ROW_N_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -1030,12 +1063,26 @@ final class DebugTestYard {
             be.setEntityId(EntityType.ZOMBIE, level.getRandom());
             be.setChanged();
         }
-        DebugPenManager.placeSign(level, new BlockPos(cx + 8, gy + 1, z0 - 1), Direction.NORTH,
+        // A PEN FOR THE WARD POST, because it was the loose horse. Owner,
+        // 2026-09-13: "also there's a loose horse." This one, and it had always
+        // been loose - it is deliberately OUTSIDE the spawner room (a horse
+        // shut in a dark box with a spawner is a horse being hit by zombies)
+        // and nothing ever fenced it. That cost nothing while it stood where it
+        // was put; the new safe-spawn search nudged it three blocks clear of
+        // the sign it had been placed inside, and a tamed horse with somewhere
+        // to walk walks. It still stands outside the door, which is the part
+        // the test needs - it just cannot wander off now.
+        // BESIDE the room, not in front of it: row A begins three blocks from
+        // the yard's mouth and a pen needs more than that, so the first
+        // attempt at this put the ward post OUTSIDE the yard's north wall
+        // entirely. Caught by the layout audit rather than in game, which is
+        // the second time that script has earned its keep.
+        int wx0 = cx + EAST_MIN + 14;
+        int wx1 = cx + EAST_MAX;
+        fencedPlot(level, gy, wx0, wx1, z0, z1 - 4);
+        DebugPenManager.placeSign(level, new BlockPos(wx0 + 2, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("WARD: NO HARM", "STAND HERE - a", "spawner needs you", "within 16 blocks"));
-        // Outside the door rather than inside it: the ward's claim is about
-        // what happens NEAR it, and a horse shut in a dark box with a spawner
-        // is a horse being hit by zombies.
-        stock(level, gy, cx + 8.5, z0 - 1.5, "horsegenetics.holy_ward", "the ward post", 1, 0, null);
+        stock(level, gy, wx0 + 3.0, z0 + 4.0, "horsegenetics.holy_ward", "THE WARD POST", 1, 0, null);
         DebugWorldWatch.watch("WARD + SPAWNER", box(x0, gy, z0 - 3, x1, gy + 4, z1), null);
     }
 

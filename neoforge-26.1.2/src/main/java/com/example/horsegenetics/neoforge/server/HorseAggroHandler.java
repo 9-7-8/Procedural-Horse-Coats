@@ -8,6 +8,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import java.util.ArrayList;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -48,6 +50,9 @@ public final class HorseAggroHandler {
     private static final int MELEE_GOAL_PRIORITY = 3;
     private static final int TARGET_GOAL_PRIORITY = 1;
 
+    /** Vanilla's own horse panic speed, kept so nothing else about fleeing changes. */
+    private static final double PANIC_SPEED = 1.2;
+
     private HorseAggroHandler() {
     }
 
@@ -80,6 +85,27 @@ public final class HorseAggroHandler {
         }
         horse.goalSelector.addGoal(MELEE_GOAL_PRIORITY, new HorseMeleeGoal(horse, 1.4));
         horse.targetSelector.addGoal(TARGET_GOAL_PRIORITY, new WildHorseForgetTargetGoal(horse));
+
+        // AND SWAP VANILLA'S PANIC FOR ONE THAT KNOWS ABOUT FIGHTING. Horses
+        // register PanicGoal at priority ONE; the melee goal above is at three;
+        // both hold Flag.MOVE, and the lower number wins. So the first hit a
+        // fighting horse took handed movement to panic, the melee goal starved
+        // for the whole flight, and the animal ran away from the fight its gene
+        // had just started - "the guardian makes a half-hearted attempt, is
+        // terrible at combat, runs off, then gets chased by the zombie and gets
+        // killed by it" (owner, 2026-09-13). Nothing about attack speed or
+        // damage could have fixed that, which is why making the swing faster
+        // did not save the gladiator either.
+        List<WrappedGoal> panics = new ArrayList<>();
+        for (WrappedGoal w : horse.goalSelector.getAvailableGoals()) {
+            if (w.getGoal() instanceof PanicGoal && !(w.getGoal() instanceof HorsePanicGoal)) {
+                panics.add(w);
+            }
+        }
+        for (WrappedGoal w : panics) {
+            horse.goalSelector.removeGoal(w.getGoal());
+            horse.goalSelector.addGoal(w.getPriority(), new HorsePanicGoal(horse, PANIC_SPEED));
+        }
     }
 
     @SubscribeEvent
