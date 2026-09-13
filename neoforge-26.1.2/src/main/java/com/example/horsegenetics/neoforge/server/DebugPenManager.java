@@ -250,6 +250,10 @@ public final class DebugPenManager {
         PLOTS.put(player.getUUID(), plot);
 
         ensureBuiltUpToIndex(debug, plot, LOOKAHEAD_PENS);
+        // After the corridor, because the yard's path is cut THROUGH the wall
+        // the corridor lays down. Once per plot: the geometry is fixed, so a
+        // plot rebuilt on a recycled X gets the same yard in the same place.
+        DebugTestYard.build(debug, plot);
 
         // Spawn on the road just past the return portal, facing +X down the corridor.
         player.teleportTo(debug, originX + 3.5, PLOT_BASE_Y + 1, 0.5, Set.of(), -90.0f, 0.0f, false);
@@ -339,7 +343,15 @@ public final class DebugPenManager {
             buildRestStop(level, plot, x0, index);
         } else {
             int base = penBaseFor(index);
-            buildPen(level, plot, x0, NORTH_PEN, base);
+            // Segment 0's +Z pen is the test yard's doorway - DebugTestYard
+            // writes a path straight through where its fence and back wall
+            // would stand, so building it first and cutting it open afterwards
+            // would leave brick stumps either side of the gap. The pen NUMBERS
+            // are left alone: the yard takes a pen's place, it does not shift
+            // the ones after it.
+            if (index != 0) {
+                buildPen(level, plot, x0, NORTH_PEN, base);
+            }
             buildPen(level, plot, x0, SOUTH_PEN, base + 1);
         }
         if (index == 0) {
@@ -423,7 +435,7 @@ public final class DebugPenManager {
 
     // --- floor + walls ---
 
-    private static void groundColumn(ServerLevel level, int x, int gy, int z, BlockState surface) {
+    static void groundColumn(ServerLevel level, int x, int gy, int z, BlockState surface) {
         fastSet(level, new BlockPos(x, gy - 3, z), Blocks.BEDROCK.defaultBlockState());
         fastSet(level, new BlockPos(x, gy - 2, z), Blocks.DIRT.defaultBlockState());
         fastSet(level, new BlockPos(x, gy - 1, z), Blocks.DIRT.defaultBlockState());
@@ -597,7 +609,7 @@ public final class DebugPenManager {
         }
     }
 
-    private static void torchOnFence(ServerLevel level, int x, int floorY, int z) {
+    static void torchOnFence(ServerLevel level, int x, int floorY, int z) {
         level.setBlock(new BlockPos(x, floorY + 1, z), Blocks.TORCH.defaultBlockState(), 2);
     }
 
@@ -660,7 +672,7 @@ public final class DebugPenManager {
      * {@value #SIGN_LINES} are dropped). Waxed so a visitor can't scribble over
      * the label.
      */
-    private static void placeSign(ServerLevel level, BlockPos pos, Direction facing, List<String> lines) {
+    static void placeSign(ServerLevel level, BlockPos pos, Direction facing, List<String> lines) {
         BlockState sign = Blocks.OAK_SIGN.defaultBlockState()
                 .setValue(StandingSignBlock.ROTATION, RotationSegment.convertToSegment(facing));
         level.setBlock(pos, sign, 3);
@@ -771,11 +783,17 @@ public final class DebugPenManager {
      * accumulate animals for the life of the world.
      */
     private static AABB plotBox(Plot plot) {
-        int xLo = plot.originX - 5; // covers the layered back wall at originX-3..-1
-        int xHi = plot.originX + (LAST_SEGMENT_INDEX + 2) * PERIOD + 3;
+        // Wide enough for the back wall at originX-3..-1 AND for the test yard,
+        // which hangs off the +Z side and reaches further west than the corridor
+        // does. The box is what tears a plot down and what walks tamed horses
+        // home, so anything built outside it leaks - see DebugTestYard.FAR_Z.
+        int xLo = Math.min(plot.originX - 5, plot.originX + DebugTestYard.WEST_DX);
+        int xHi = Math.max(plot.originX + (LAST_SEGMENT_INDEX + 2) * PERIOD + 3,
+                plot.originX + DebugTestYard.EAST_DX);
         int yLo = plot.baseY - 4;
         int yHi = plot.baseY + WALL_TOP_DY + 2;
-        return new AABB(xLo, yLo, -WALL_BEDROCK_Z - 1, xHi + 1, yHi + 1, WALL_BEDROCK_Z + 2);
+        return new AABB(xLo, yLo, -WALL_BEDROCK_Z - 1,
+                xHi + 1, yHi + 1, Math.max(WALL_BEDROCK_Z + 2, DebugTestYard.FAR_Z));
     }
 
     /**
@@ -844,7 +862,7 @@ public final class DebugPenManager {
         FREE_ORIGINS.add(plot.originX);
     }
 
-    private static void fastSet(ServerLevel level, BlockPos pos, BlockState state) {
+    static void fastSet(ServerLevel level, BlockPos pos, BlockState state) {
         level.setBlock(pos, state, 2); // UPDATE_CLIENTS only - bulk terrain, skip neighbour updates
     }
 

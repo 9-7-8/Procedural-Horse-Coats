@@ -142,6 +142,39 @@
         is wrong rather than the levels.</li>
 </ul>
 
+<h2 id="test-yard">&sect;0-CS &mdash; The horse dimension's test yard (2026-09-12, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Built by code nobody can watch run &mdash; so the first check is that it is even there</span>
+    <p>
+        Thirty blocks right of the arrival road, through a door in the corridor wall: a
+        walled yard with a breeding field, a zombie-spawner room, a wolf pen and a bare
+        dryad plot. See <a href="horse-dimension.html#test-yard">the dimension page</a>.
+        It replaces the first pen on that side.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Look in the log first.</strong> Building it prints either <em>test yard
+        built and walkable</em> or a count of holes. If it says the second thing, nothing
+        below is worth doing until that is fixed.</li>
+    <li><strong>Walk it.</strong> Out of the portal, turn right, follow the path. No gaps
+        underfoot, no wall to squeeze past where the doorway was cut, and the yard's own
+        wall should close all the way round with no view of the void.</li>
+    <li><strong>The spawner should produce zombies</strong> on its own, with no warded
+        horse near it. That is the control - if it does not, the ward test cannot mean
+        anything.</li>
+    <li><strong>Then the four tests</strong>, which are the point:
+        <a href="roadmap.html#trait-rules">spontaneous breeding</a> (two mares and two
+        stallions from kit batch 3, leave, count), the holy ward beside the spawner (it
+        must <em>keep</em> producing), three or four pack leaders in the wolf pen with F3
+        open, and a dryad left in the bare plot for a real half hour.</li>
+    <li><strong>Then leave and come back.</strong> Re-entering builds a fresh plot; the
+        yard should be there again, empty, with no horses left from last time - the plot
+        box was widened to cover it, and a breeding field that leaked would be the
+        world-breaking bug the yard exists to catch.</li>
+</ul>
+
 <h2 id="kit-and-egg">&sect;0-CR &mdash; The kit breeds, and Make egg works (2026-09-12, NOT looked at)</h2>
 
 <div class="note">

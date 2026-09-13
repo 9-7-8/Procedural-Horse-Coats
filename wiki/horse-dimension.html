@@ -332,6 +332,62 @@
         ridden one ahead of the build frontier.</li>
 </ul>
 
+<h2 id="test-yard">The test yard</h2>
+
+<p>
+    Thirty blocks to the <strong>right</strong> of where you arrive &mdash; you land
+    facing <code>+X</code>, so right is <code>+Z</code> &mdash; a five-wide gravel path
+    leaves the road through a door cut in the corridor wall and opens into a walled yard.
+    It takes the place of the first pen on that side, which
+    <code>DebugPenManager.buildSegment</code> deliberately does not build; the pen
+    <em>numbers</em> are unchanged, so the yard costs one pen rather than shifting the
+    rest.
+</p>
+
+<p>
+    It exists for the four genes that <strong>cannot be judged in a pen and should not be
+    judged in a real save</strong>. Each is a claim about something that happens while
+    nobody is watching, or about a cost rather than a picture:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Plot</th><th>For</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td><strong>Breeding field</strong></td><td>spontaneous breeding</td><td>The largest plot, 21&nbsp;&times;&nbsp;21 fenced. Big on purpose: the gene's own cap is a headcount within eight blocks, so a tight field would test the cap instead of the breeding. Leave two mares and two stallions, walk away, come back and count.</td></tr>
+<tr><td><strong>Spawner room</strong></td><td>holy ward</td><td>A roofed, unlit stone box with a real zombie spawner in it. Roofed because a spawner that cannot spawn for ordinary reasons proves nothing about the gene; charged with zombies at build time rather than left empty, because an empty spawner produces nothing and that is indistinguishable from the ward having stopped it.</td></tr>
+<tr><td><strong>Wolf pen</strong></td><td>pack leader</td><td>15&nbsp;&times;&nbsp;17 fenced. Put three or four in and watch F3's tick line: the gene's risk is cost, not looks.</td></tr>
+<tr><td><strong>Dryad plot</strong></td><td>dryad</td><td>Open grass, deliberately bare and unfenced. Anything standing in it half an hour later was planted.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>It is flat and plain on purpose.</strong> Every one of these tests is a count
+    or a &ldquo;did that still work&rdquo;, and both are ruined by terrain: a flat floor
+    inside a bedrock box means a missing horse did not fall down a hole and a stalled farm
+    did not stall because something spawned in a cave.
+</p>
+
+<div class="note">
+    <span class="label">Two things that would have leaked, and one that says so</span>
+    <p>
+        The yard is the first thing in the dimension built <em>outside</em> the corridor
+        walls, and a plot's bounding box is what tears the plot down and what walks tamed
+        horses home. Left out of it, the breeding field &mdash; a population that grows on
+        purpose &mdash; would have outlived its plot and piled up on a recycled origin for
+        ever. <code>plotBox</code> covers the yard's extent
+        (<code>DebugTestYard.FAR_Z</code>, <code>WEST_DX</code>, <code>EAST_DX</code>).
+    </p>
+    <p>
+        And because nobody can watch this code run, it <strong>reads the yard back</strong>
+        after building it: the path's centre line and a grid over the floor, checking each
+        spot has something to stand on and room to stand in. One line in the log either
+        way &mdash; <em>test yard built and walkable</em>, or a count of the holes. A floor
+        with a gap in it looks like nothing at all until somebody falls through it.
+    </p>
+</div>
+
 <h2 id="catalogue">The genotype catalogue, and why the corridor stopped using it</h2>
 
 <p>
