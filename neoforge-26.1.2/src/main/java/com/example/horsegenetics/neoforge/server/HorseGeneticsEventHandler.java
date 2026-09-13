@@ -62,19 +62,47 @@ public final class HorseGeneticsEventHandler {
         }
     }
 
-    /** The horse dimension is a fixed set - no breaking blocks there. */
+    /**
+     * <b>The horse dimension is a fixed set - unless you are the one testing
+     * it.</b>
+     *
+     * <p>These two rules treated the whole dimension as a display case, for
+     * everybody, with no exception. Owner, 2026-09-13: <i>"can't place
+     * anything, so can't test stalls"</i> - and that is not a corner case, it
+     * is <b>two of the open questions</b>. The ticket stalls in row C are built
+     * by hand by definition (tight, L-shaped, packed with hay, roofed), and the
+     * dark-oak control for gap 218 is "plant four saplings in a 2x2 yourself".
+     * A yard you cannot build in cannot host either.
+     *
+     * <p><b>Creative only</b>, which is the whole of the fix. The rule exists so
+     * that a horse, a mob, a piece of dispenser plumbing or a survival-mode
+     * accident cannot rewrite a gallery that is generated rather than saved -
+     * and every one of those is still stopped. The tester is in creative in
+     * this world always, and is the one person who is supposed to be able to
+     * change it.
+     *
+     * <p>This is the narrower rule the sibling comment above was already asking
+     * for, arrived at from the other direction: distinguish <i>who</i> rather
+     * than <i>where</i>, which needs no geometry and cannot drift out of step
+     * with {@code corridorWallZ()}.
+     */
     @SubscribeEvent
     static void noBlockBreakInDebugDimension(BreakBlockEvent event) {
         if (event.getPlayer() != null
+                && !event.getPlayer().getAbilities().instabuild
                 && event.getPlayer().level().dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
             event.setNotifyClient(true);
             event.setCanceled(true);
         }
     }
 
-    /** ...and no placing blocks there either (covers EntityMultiPlaceEvent via inheritance). */
+    /** ...and the same for placing (covers EntityMultiPlaceEvent via inheritance). */
     @SubscribeEvent
     static void noBlockPlaceInDebugDimension(BlockEvent.EntityPlaceEvent event) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player player
+                && player.getAbilities().instabuild) {
+            return;     // the tester, in creative - see noBlockBreakInDebugDimension
+        }
         if (event.getLevel() instanceof Level level
                 && level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
             event.setCanceled(true);

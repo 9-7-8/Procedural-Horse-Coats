@@ -80,6 +80,129 @@
     </p>
 </div>
 
+<h2 id="play-1400">&sect;0-DN &mdash; A ten-minute run that closed two questions and caught a regression I had just shipped (2026-09-13)</h2>
+
+<div class="note bad">
+    <span class="label">Mine, and it was live for about an hour</span>
+    <p>
+        The per-flag world-flag cache shipped earlier today initialised each
+        flag's timestamp to <code>Long.MIN_VALUE</code> and then tested
+        staleness with <code>now - sampledAt &gt;= 20</code>. That subtraction
+        <strong>overflows</strong> to a negative number, so every flag read as
+        &ldquo;fresh&rdquo; and was <em>never sampled</em> &mdash; returning the
+        default <code>false</code> for ever.
+    </p>
+    <p>
+        Not just eyesight: <code>dark</code>, <code>snowing</code>,
+        <code>near_jukebox</code> and <code>hostile_near</code> were switched
+        permanently off <strong>for every gene in the mod</strong>. Much larger
+        blast radius than the staleness bug it was written to fix. The sentinel
+        is compared with <code>==</code> now.
+    </p>
+    <p>
+        <strong>Caught by the instrument, not by reasoning.</strong> The census
+        printed <code>DAYWALKER (dark)=0.221 &hellip; light=1</code> &mdash;
+        light one, and the horse still behaving as though it were in daylight.
+        At light 1 there is no boundary argument to be had.
+        <strong>It also retires my previous call</strong> that the dark room was
+        at fault: it measures <b>1</b> through its body and 6&ndash;7 by the
+        door, and <code>DARK_LEVEL</code> is 7, so even the door corner counts
+        as dark. The door leak is a tidy-up, not a fault. Whether the original
+        caveborn fault survives the overflow fix is <em>unknown</em> until it is
+        measured again.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">The ten splice-carrot pairs &mdash; answered, first time asked</span>
+    <p>
+        <em>&ldquo;Nothing has ever bred a carrot-influenced foal; zero foals
+        all session.&rdquo;</em> This session: <strong>eight carrots fed, eight
+        breedings, eight foals</strong>, with both ends of the path on the line.
+        Eight distinct carrots &mdash; marking, dilution, magical, epigenetic,
+        performance, white, stabilizer, magnifier:
+    </p>
+    <pre>carrot | Dev fed Marking Gene Splice Carrot to Regal Archduke - window open for 600 ticks
+carrot | Regal Archduke breeds with 1 live carrot effect(s): gene_splice:marking
+         - bias: reroll epi=false, substitutes 1 locus/loci
+foal born | Racing Bloom x Regal Archduke -&gt; minecraft:horse</pre>
+    <p>
+        The two carrots that should <em>not</em> substitute a locus reported
+        exactly that: <code>stabilizer</code> and <code>magnifier</code> both
+        logged <code>substitutes 0 locus/loci</code>, and the epigenetic splice
+        was the only one with <code>reroll epi=true</code>. The mechanism fires
+        end to end. <strong>What is still unshown</strong> is the foal's
+        genotype actually carrying the substituted locus &mdash; the engine says
+        it did the substitution; nobody has read the foal.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">Confirmed by the owner, and retired</span>
+    <p>
+        <strong>The horseman and the cowboy</strong> &mdash; owner, 2026-09-13:
+        <em>&ldquo;the horseman and cowboy work totally fine, those were also
+        extensively tested in a previous run.&rdquo;</em> Off the open list.
+    </p>
+    <p>
+        <strong>The transfer papers too</strong> &mdash; <em>&ldquo;transfer
+        papers have also already been tested&rdquo;</em> &mdash; which is every
+        occupant of row B east, so <b>the whole room is deleted</b>.
+    </p>
+    <p>
+        It took both messages to get there, and the gap between them is the
+        point. On the first one alone the room had to stay: it held the
+        <b>PAPERS chest</b> (two Silver papers, the shelf must take one and
+        <em>refuse</em> the second), and knocking it down for its two confirmed
+        occupants would have taken an unanswered test with it. <b>Check what
+        else is standing in a room before retiring it for the thing you were
+        told about.</b>
+    </p>
+    <p>
+        Also confirmed in passing this run: <strong>shears</strong>
+        (<code>3x horse_hair</code> dropped in the dairy), and a
+        <strong>death locus</strong> &mdash; <code>DROPS DIAMOND</code> dropped
+        <code>3x minecraft:diamond</code> when killed.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Two that could not be run, and why</span>
+    <ul>
+        <li><strong>Ocean-born diving.</strong> Owner: <em>&ldquo;still no way to
+            dive on oceanborn&rdquo;</em>. The dive was gated on
+            <code>rider.isSprinting()</code>. Sprinting is a state the client
+            decides to <em>enter</em>, and <code>LocalPlayer</code> will not
+            enter it while the player is a passenger &mdash; so the server flag
+            stays false however long the key is held, and the code was correct
+            and unreachable. It reads
+            <code>ServerPlayer.getLastClientInput().sprint()</code> now, which is
+            the raw key state off the input packet the client sends every tick
+            regardless. Checked against the live classpath with
+            <code>javap</code>, not from memory.</li>
+        <li><strong>The ticket stalls, and the dark-oak control.</strong> Owner:
+            <em>&ldquo;can't place anything, so can't test stalls&rdquo;</em>.
+            The horse dimension cancelled block placing <em>and</em> breaking
+            unconditionally, for everybody. That blocks two open questions, not
+            one &mdash; row C's four awkward stalls are hand-built by definition,
+            and gap 218's control is &ldquo;plant four saplings in a
+            2&times;2 yourself&rdquo;. <b>Zero <code>tree grew</code> events all
+            session</b>, which is what that ban looks like from the log.
+            Creative-mode players are exempt now; mobs, dispensers and survival
+            accidents are still stopped.</li>
+    </ul>
+</div>
+
+<div class="note">
+    <span class="label">Still untouched</span>
+    <p>
+        <strong>The guardian</strong> never had an opponent this run &mdash;
+        <code>ARENA - GUARDIAN | horses 1, items 0</code> at every census, no
+        creatures, ever. It remains the oldest unanswered question in the yard.
+        <strong>Zero exceptions</strong> in 4 433 lines.
+    </p>
+</div>
+
 <h2 id="eyesight-answered">&sect;0-DM &mdash; The readout answered eyesight in five minutes, and the dhampir pen is back (2026-09-13)</h2>
 
 <div class="note good">
@@ -405,10 +528,12 @@
         not test it. Four layers of the <em>same</em> allele packed into one
         corner so their six-block circles overlap: the pen total is now the local
         count. Fills and <b>stops</b> is the pass.</li>
-    <li><strong>The ten carrot pairs</strong> (rows L, M, N) &mdash; one per
-        splice carrot, each a divided pen with a gate into each half. Nothing has
-        ever bred a carrot-influenced foal; zero foals all session. Both ends of
-        the path log now, including <em>window expired before breeding</em>.</li>
+    <li><strong>The ten carrot pairs</strong> &mdash; <b>the mechanism is
+        confirmed</b> (<a href="#play-1400">&sect;0-DN</a>: eight carrots, eight
+        breedings, eight foals). What is left is narrower and is a reading rather
+        than a play session: <b>open a foal and check the substituted locus is
+        actually there</b>. The engine says it did the substitution; nobody has
+        looked at the foal.</li>
     <li><strong>The ticket stalls</strong> (row C). The bound ticket answered
         <em>"That is not your horse"</em> &mdash; the mare arrives untamed now for
         the same reason the guardian does. Then the four awkward shapes: tight,
@@ -427,9 +552,11 @@
         full day &mdash; see <a href="#log-read-0913">&sect;0-DL</a> and
         <a href="known-gaps.html#gap-218">gap 218</a>. The rest of the dryad row
         is confirmed and deleted.</li>
-    <li><strong>The horseman and the cowboy</strong> (row B east), the tack room,
-        food preference, the three magic stat pens, the ward's non-interference
-        half. All built, none contradicted, none confirmed.</li>
+    <li><strong>The tack room</strong>, food preference, the three magic stat
+        pens, the ward's non-interference half. All built, none contradicted,
+        none confirmed. <b>The horseman, the cowboy and the transfer papers are
+        confirmed</b> and row B east is deleted &mdash;
+        <a href="#play-1400">&sect;0-DN</a>.</li>
     <li><strong>Visual, and therefore last:</strong> gilded crackle redrawn, and
         starburst's emblem inheritance.</li>
 </ol>

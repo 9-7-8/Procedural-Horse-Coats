@@ -1161,11 +1161,36 @@ public final class GeneAbilityHandler {
     private static void sinkIfAsked(Horse horse) {
         if (!horse.isInWater()
                 || !(horse.getControllingPassenger() instanceof Player rider)
-                || !rider.isSprinting()) {
+                || !holdingSprint(rider)) {
             return;
         }
         Vec3 v = horse.getDeltaMovement();
         horse.setDeltaMovement(v.x, -SINK_SPEED, v.z);
+    }
+
+    /**
+     * <b>The sprint KEY, not the sprinting STATE.</b>
+     *
+     * <p>Owner, 2026-09-13: <i>"still no way to dive on oceanborn"</i>, against
+     * a {@code rider.isSprinting()} test that reads correctly and is never true
+     * here. Sprinting is a state the client decides to enter and then reports;
+     * {@code LocalPlayer} will not enter it while the player is a passenger, so
+     * the server's flag stays false however hard the key is held, and the gene
+     * had no way to fire.
+     *
+     * <p>{@link ServerPlayer#getLastClientInput()} is the raw key state off
+     * {@code ServerboundPlayerInputPacket}, which the client sends every tick
+     * regardless of what it thinks about sprinting - seven booleans, one of
+     * them {@code sprint()}. That is what "is she holding ctrl" actually means.
+     *
+     * <p>The {@code isSprinting()} fallback is kept for a non-{@code
+     * ServerPlayer} rider, which is not a case this mod creates but is one
+     * another mod could.
+     */
+    private static boolean holdingSprint(Player rider) {
+        return rider instanceof ServerPlayer sp
+                ? sp.getLastClientInput().sprint()
+                : rider.isSprinting();
     }
 
     /** Blocks per tick downward while the rider holds sprint. Brisk, but not a stone. */
@@ -1625,12 +1650,23 @@ public final class GeneAbilityHandler {
      * cross-flag staleness. See the comment on {@code worldFlag} for what it
      * cost in the yard.
      */
+    /**
+     * "This flag has never been sampled." It is a sentinel and must be compared
+     * with {@code ==}, never by subtracting it from the clock: {@code now -
+     * Long.MIN_VALUE} OVERFLOWS to a negative number, so an age test against it
+     * reads as "fresh" and the flag is never computed at all. That shipped on
+     * 2026-09-13 and switched every world flag - dark, snowing, near_jukebox,
+     * hostile_near - permanently off, for every gene in the mod, which is a far
+     * bigger blast radius than the staleness bug it was written to fix.
+     */
+    private static final long NEVER_SAMPLED = Long.MIN_VALUE;
+
     private static final class WorldSample {
         final long[] sampledAt = new long[WORLD_FLAG_NAMES.size()];
         final boolean[] value = new boolean[WORLD_FLAG_NAMES.size()];
 
         WorldSample() {
-            java.util.Arrays.fill(sampledAt, Long.MIN_VALUE);
+            java.util.Arrays.fill(sampledAt, NEVER_SAMPLED);
         }
     }
 
@@ -1681,7 +1717,9 @@ public final class GeneAbilityHandler {
             sample = new WorldSample();
             WORLD_FLAGS.put(horse.getUUID(), sample);
         }
-        if (now - sample.sampledAt[index] >= WORLD_FLAG_SAMPLE_TICKS) {
+        // The == check FIRST, and it is not redundant - see NEVER_SAMPLED.
+        if (sample.sampledAt[index] == NEVER_SAMPLED
+                || now - sample.sampledAt[index] >= WORLD_FLAG_SAMPLE_TICKS) {
             // Only what was actually asked for. Computing all four together was
             // the first version and it was a real cost: a caveborn horse asks
             // for "dark" - one block-light read - and was paying for a ~2000

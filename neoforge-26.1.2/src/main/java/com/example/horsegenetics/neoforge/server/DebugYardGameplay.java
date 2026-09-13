@@ -1,18 +1,10 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.horse.Sex;
-import com.example.horsegenetics.neoforge.HorseGenetics;
-import com.example.horsegenetics.neoforge.block.ModBlocks;
-import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
-import com.example.horsegenetics.neoforge.village.ModVillagerProfessions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -81,7 +73,19 @@ final class DebugYardGameplay {
 
     static void build(ServerLevel level, int gy, int cx, int mouthZ) {
         buildTackRoom(level, gy, cx, mouthZ);
-        buildHorsemansStudy(level, gy, cx, mouthZ);
+
+        // ROW B EAST IS EMPTY: the horseman's study is gone, confirmed whole.
+        // Owner, 2026-09-13: "the horseman and cowboy work totally fine, those
+        // were also extensively tested in a previous run", and then "transfer
+        // papers have also already been tested" - which is every occupant of
+        // that room.
+        //
+        // The FIRST of those two messages alone would not have been enough. The
+        // room also held the PAPERS chest - two Silver papers, where the
+        // research shelf must take one and REFUSE the second - and knocking it
+        // down for its two confirmed occupants would have taken an unanswered
+        // test with it. Check what else is standing in a room before retiring
+        // it for the thing you were told about.
         buildTicketStalls(level, gy, cx, mouthZ);
         buildCarrotPens(level, gy, cx, mouthZ);
         buildDairyAndClip(level, gy, cx, mouthZ);
@@ -181,147 +185,6 @@ final class DebugYardGameplay {
                 new ItemStack(Items.IRON_SWORD, 1),
                 new ItemStack(Items.WATER_BUCKET, 2),
                 new ItemStack(Items.TORCH, 32)));
-    }
-
-    // ==================================================================
-    // ROW B EAST - the horseman's study
-    // ==================================================================
-
-    /**
-     * <b>A horseman at a table, a cowboy at a hitch, and no village to find.</b>
-     *
-     * <p>{@code wiki/villagers.html} says the expensive part of testing either
-     * of these is <i>getting to one</i>: the horseman only appears where there
-     * is a village with a spare bed and a Horseman's Table, and the cowboy
-     * comes with a barn that generates somewhere in the plains. Both of those
-     * are half an hour of walking before the first thing worth watching.
-     *
-     * <p>So both are simply placed here, standing at their own workstation. The
-     * horseman gets the profession set directly and a level with it, because a
-     * villager with no job looks like every other villager and sells nothing;
-     * the table is under him so vanilla's brain keeps the job rather than
-     * clearing it at the next restock.
-     *
-     * <p><b>What this room cannot show</b>, and it is worth being honest about
-     * it: it skips <i>acquisition</i> entirely. Whether a horseman actually
-     * spawns in a real village, and whether the barn generates, are questions
-     * about worldgen that a hand-placed villager says nothing about. This room
-     * tests the trades, the transfer papers, the research shelf and the hitch -
-     * everything <i>after</i> you have found one.
-     */
-    private static void buildHorsemansStudy(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
-        int z0 = mouthZ + ROW_B;
-        int z1 = z0 + ROW_B_D;
-        // NO DOOR AND NO ROOF, and both halves of that are the fix. The first
-        // version was a sealed hall with a pair of oak doors, and the owner
-        // walked in to an empty room: "the horse villager did not spawn in the
-        // room, or did and escaped. You gotta trap him in there." He escaped.
-        // Villagers open wooden doors - the cowboy has a whole goal for it
-        // (CowboyDoorGoal) - so a door is not a wall to either of these two,
-        // and it was the ONLY thing between them and a hundred and eighty
-        // blocks of yard.
-        //
-        // Taking the roof off is what lets the door go. "Remember, I'm in
-        // creative, so I can fly in": a four-block wall with nothing on top is
-        // impassable to a villager and free to a player, which is exactly the
-        // asymmetry this room wants. Lit from inside so an open top does not
-        // turn it into a spawner overnight.
-        openPen(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 9, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("HORSEMAN + COWBOY", "WALLED, no door -", "fly in over the top.", "They open doors"));
-
-        // The horseman's corner: table, two shelves, a bed so the brain has
-        // somewhere to send him, and the papers his trades produce.
-        BlockPos table = new BlockPos(x0 + 3, gy + 1, z0 + 4);
-        DebugPenManager.fastSet(level, table, ModBlocks.HORSEMANS_TABLE.get().defaultBlockState());
-        DebugPenManager.fastSet(level, new BlockPos(x0 + 2, gy + 1, z0 + 4),
-                ModBlocks.RESEARCH_SHELF.get().defaultBlockState());
-        DebugPenManager.fastSet(level, new BlockPos(x0 + 4, gy + 1, z0 + 4),
-                ModBlocks.RESEARCH_SHELF.get().defaultBlockState());
-        spawnHorseman(level, gy, x0 + 3.5, z0 + 6.5);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 2, z0 + 3), Direction.SOUTH,
-                List.of("HORSEMAN", "5 trade tiers.", "/horsemanlevel to", "jump a rung"));
-
-        // TWO Silver papers on purpose: the shelf must take the first and
-        // REFUSE the second, and a shelf that quietly swallows a duplicate is
-        // the failure this pair exists to catch.
-        ItemStack silver = stack(ModItems.RESEARCH_PAPER.get(), 2);
-        if (!silver.isEmpty()) {
-            silver.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics.silver");
-        }
-        chest(level, gy, x0 + 6, z0 + 4, "PAPERS", List.of(
-                silver,
-                stack(ModItems.BLANK_TRANSFER_PAPER.get(), 4),
-                stack(ModItems.SIGNED_TRANSFER_PAPER.get(), 2),
-                stack(ModItems.EQUINE_RESEARCH_SHELF.get(), 4),
-                new ItemStack(Items.BOOK, 16),
-                new ItemStack(Items.EMERALD, 64)));
-
-        // The cowboy's corner, at the other end of the same room so the two
-        // villager types are one walk rather than two.
-        BlockPos hitch = new BlockPos(x1 - 4, gy + 1, z0 + 4);
-        DebugPenManager.fastSet(level, hitch, ModBlocks.COWBOY_HITCH.get().defaultBlockState());
-        spawnCowboy(level, gy, x1 - 4.5, z0 + 6.5);
-        DebugPenManager.placeSign(level, new BlockPos(x1 - 4, gy + 2, z0 + 3), Direction.SOUTH,
-                List.of("COWBOY + HITCH", "hitch a horse,", "then trade. No", "barn to find"));
-
-        // Two tamed horses in the room, because half of what both villagers do
-        // needs a horse you own standing next to you - the transfer paper, the
-        // hitch, and every trade that takes one.
-        DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1, x0 + 9.0, z0 + 9.0,
-                Sex.FEMALE, DebugTestYard.PALE, true), "TRADE MARE");
-        DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1, x0 + 11.0, z0 + 9.0,
-                Sex.MALE, DebugTestYard.PALE, true), "TRADE STALLION");
-    }
-
-    /**
-     * A villager, given the horseman's job outright.
-     *
-     * <p>Set through {@code VillagerData} rather than by waiting for the brain
-     * to claim the table: {@code HorsemanHandler} watches for the profession
-     * appearing and the POI is under him either way, so this arrives at the
-     * same state the slow path would - in a tick instead of a morning.
-     */
-    private static void spawnHorseman(ServerLevel level, int gy, double x, double z) {
-        try {
-            Villager villager = EntityType.VILLAGER.create(level, EntitySpawnReason.COMMAND);
-            if (villager == null) {
-                HorseGenetics.LOGGER.warn("[Debug] test yard: no villager to make a horseman of");
-                return;
-            }
-            villager.setPos(x, gy + 1, z);
-            villager.setVillagerData(villager.getVillagerData()
-                    .withProfession(ModVillagerProfessions.HORSEMAN)
-                    .withLevel(1));
-            villager.setCustomName(Component.literal("HORSEMAN"));
-            villager.setCustomNameVisible(true);
-            villager.setPersistenceRequired();
-            level.addFreshEntity(villager);
-            ActionTrace.log("test yard", "horseman placed at his table");
-        } catch (RuntimeException e) {
-            HorseGenetics.LOGGER.warn("[Debug] test yard: could not place the horseman", e);
-        }
-    }
-
-    private static void spawnCowboy(ServerLevel level, int gy, double x, double z) {
-        try {
-            var cowboy = com.example.horsegenetics.neoforge.entity.ModEntities.COWBOY.get()
-                    .create(level, EntitySpawnReason.COMMAND);
-            if (cowboy == null) {
-                HorseGenetics.LOGGER.warn("[Debug] test yard: no cowboy entity in this build");
-                return;
-            }
-            cowboy.setPos(x, gy + 1, z);
-            cowboy.setCustomName(Component.literal("COWBOY"));
-            cowboy.setCustomNameVisible(true);
-            cowboy.setPersistenceRequired();
-            level.addFreshEntity(cowboy);
-            ActionTrace.log("test yard", "cowboy placed at his hitch");
-        } catch (RuntimeException e) {
-            HorseGenetics.LOGGER.warn("[Debug] test yard: could not place the cowboy", e);
-        }
     }
 
     // ==================================================================
