@@ -8,7 +8,7 @@
     "water_color": "#3f76e4"
   },
   "features": [],
-  "has_precipitation": false,
+  "has_precipitation": true,
   "spawn_costs": {},
   "spawners": {
     "ambient": [],

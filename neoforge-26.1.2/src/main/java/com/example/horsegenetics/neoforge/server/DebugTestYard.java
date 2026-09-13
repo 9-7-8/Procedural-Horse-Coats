@@ -84,7 +84,7 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 185;
+    private static final int YARD_DEPTH_Z = 110;
 
     // ------------------------------------------------------------------
     // THE GRID
@@ -128,12 +128,17 @@ final class DebugTestYard {
     // stalls these started in, the path was refused before it began: the owner
     // reported "the shy genes don't seem to be doing anything", and a flee into
     // a fence four blocks away is indistinguishable from no flee at all.
-    private static final int ROW_B = ROW_A + ROW_A_D + AISLE;   // shy: riders | shy: herds
-    private static final int ROW_B_D = 30;
-    private static final int ROW_C = ROW_B + ROW_B_D + AISLE;   // shy: monsters | shy: all
-    private static final int ROW_C_D = 30;
-    private static final int ROW_D = ROW_C + ROW_C_D + AISLE;   // sound herd | intimidating
-    private static final int ROW_D_D = 16;
+    // B, C and D are EMPTY. The shy paddocks, the weather pens and everything
+    // before them are confirmed and gone, and a row kept at its old depth is
+    // seventy blocks of nothing in the middle of the walk. Held at zero rather
+    // than deleted because the rows below chain off them by name, and renaming
+    // six constants to save three lines is how a working layout gets broken.
+    private static final int ROW_B = ROW_A + ROW_A_D + AISLE;
+    private static final int ROW_B_D = 0;
+    private static final int ROW_C = ROW_B + ROW_B_D + AISLE;
+    private static final int ROW_C_D = 0;
+    private static final int ROW_D = ROW_C + ROW_C_D + AISLE;
+    private static final int ROW_D_D = 0;
     private static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // the display row x8
     private static final int ROW_E_D = 7;
     private static final int ROW_F = ROW_E + ROW_E_D + AISLE;   // starburst, F8 | glow room
@@ -230,7 +235,6 @@ final class DebugTestYard {
         buildStockedRow(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
         buildBoneMealPen(level, gy, cx, mouthZ);
-        buildWeatherPens(level, gy, cx, mouthZ);
         buildDisplayRow(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
@@ -323,50 +327,6 @@ final class DebugTestYard {
                 || state.is(Blocks.SPAWNER) || state.is(Blocks.OAK_PLANKS);
     }
 
-    /**
-     * <b>The weather loci - the family &sect;0-BT said could not be checked at all.</b>
-     *
-     * <p>Its words: <i>"are the weather loci noticeable at all? They only
-     * express when the sky agrees, and the magnitudes are a first guess. It is
-     * the one locus family you cannot check on demand."</i> That is true of
-     * <i>looking</i> at a horse and false of reading its numbers. A conditional
-     * attribute modifier is either on the horse or it is not, and
-     * {@code DebugWorldWatch.watchAttribute} prints which.
-     *
-     * <p>So this is a two-reading test and the whole of it fits in one line:
-     * <b>read the census, {@code /weather rain}, read it again.</b> If the
-     * range moves, the locus works and the number is its magnitude - which also
-     * answers the second half of the complaint, because "a first guess" stops
-     * being a guess the moment somebody can see it.
-     *
-     * <p>Two pens, because the two loci move different attributes and a single
-     * pen could only report one of them.
-     */
-    private static void buildWeatherPens(ServerLevel level, int gy, int cx, int mouthZ) {
-        int z0 = mouthZ + ROW_D;
-        int z1 = z0 + ROW_D_D;
-
-        int x0 = cx + EAST_MIN;
-        int x1 = x0 + 9;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("WEATHER SPEED", "read the census,", "/weather rain,", "read it AGAIN"));
-        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, "horsegenetics.weather_speed",
-                "the weather speed pen", 2, 0, null);
-        DebugWorldWatch.watchAttribute("WEATHER SPEED",
-                box(x0, gy, z0, x1, gy + 1, z1), Attributes.MOVEMENT_SPEED);
-
-        int jx0 = cx + EAST_MIN + 11;
-        int jx1 = jx0 + 9;
-        fencedPlot(level, gy, jx0, jx1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(jx0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("WEATHER JUMP", "same test, jump", "instead of speed", "/weather rain"));
-        stock(level, gy, jx0 + 2.5, (z0 + z1) / 2.0, "horsegenetics.weather_jump",
-                "the weather jump pen", 2, 0, null);
-        DebugWorldWatch.watchAttribute("WEATHER JUMP",
-                box(jx0, gy, z0, jx1, gy + 1, z1), Attributes.JUMP_STRENGTH);
-    }
-
     /** One night stall: the gene, the allele, what it should do, and whether it needs a target. */
     private record Nightly(String key, String token, String name, String what, boolean needsHerd,
                            boolean needsMonsters) {
@@ -400,77 +360,23 @@ final class DebugTestYard {
      * no stall, so those two are labelled rather than quietly left to look
      * broken. The <b>herd</b>-targeted forms get a cow each, so they can.
      */
+    /**
+     * <b>What is left of the night block: one stall.</b>
+     *
+     * <p>Every variant of both night loci is confirmed - eight tempers and five
+     * watchers - and all thirteen stalls are gone. &sect;0-AT had listed the
+     * family as unwatchable since 2026-09-09, and it went from nothing to
+     * nothing-left inside a day once the dimension had a night to run them in.
+     *
+     * <p>Dhampir is the exception and stays. The only sighting of it so far is
+     * "the dhampir did damage a cow, though I'm not sure what else that did" -
+     * which is a thing happening near the horse rather than a confirmation, and
+     * its neighbour at the time was a night-hunter with a cow of its own.</p>
+     */
     private static void buildNightBlock(ServerLevel level, int gy, int cx, int mouthZ) {
-        buildShyPaddocks(level, gy, cx, mouthZ);
-        buildWatchStalls(level, gy, cx, mouthZ);
-    }
-
-    /**
-     * <b>The four shy forms, in paddocks rather than stalls.</b>
-     *
-     * <p>The hunting forms are all confirmed and their stalls are gone. These
-     * four were not, and the reason turned out to be the pen: a shy horse paths
-     * {@code FLEE_DISTANCE} - <b>twelve blocks</b> - directly away from whatever
-     * frightened it, and in a 4&nbsp;&times;&nbsp;7 stall the navigator refuses
-     * the path before it starts. Owner, 2026-09-13: <i>"the shy genes don't seem
-     * to be doing anything"</i>, and then <i>"I think it's working now, but it's
-     * hard to tell in their tiny pens."</i>
-     *
-     * <p><b>Nineteen by thirty each</b>, which is a twelve-block run with room
-     * to land and run again. The hunting forms never needed this and that is
-     * exactly why they were confirmed first: a hunter closes on you and a pen
-     * wall helps it, while a flee-er needs the one thing a stall cannot give.
-     * The same test in the same box answered one and hid the other.
-     */
-    private static void buildShyPaddocks(ServerLevel level, int gy, int cx, int mouthZ) {
-        List<Nightly> shy = List.of(
-                new Nightly(NIGHT_TEMPER, "Flp", "SHY: RIDERS", "backs away from YOU"),
-                new Nightly(NIGHT_TEMPER, "Flc", "SHY: HERDS", "avoids the cows", true, false),
-                new Nightly(NIGHT_TEMPER, "Flh", "SHY: MONSTERS", "flees the zombies"),
-                new Nightly(NIGHT_TEMPER, "Fla", "SHY: ALL", "avoids everything", true, false));
-        int[][] at = {
-                {cx + WEST_MIN, cx + WEST_MAX, mouthZ + ROW_B, mouthZ + ROW_B + ROW_B_D},
-                {cx + EAST_MIN, cx + EAST_MAX, mouthZ + ROW_B, mouthZ + ROW_B + ROW_B_D},
-                {cx + WEST_MIN, cx + WEST_MAX, mouthZ + ROW_C, mouthZ + ROW_C + ROW_C_D},
-                {cx + EAST_MIN, cx + EAST_MAX, mouthZ + ROW_C, mouthZ + ROW_C + ROW_C_D}};
-        for (int i = 0; i < shy.size(); i++) {
-            Nightly n = shy.get(i);
-            int x0 = at[i][0];
-            int x1 = at[i][1];
-            int z0 = at[i][2];
-            int z1 = at[i][3];
-            fencedPlot(level, gy, x0, x1, z0, z1);
-            DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of(n.name(), "after dark:", n.what(), "ROOM to run now"));
-            stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, n.key(), n.name(), 1, 0,
-                    n.token() + "/" + n.token());
-            if (n.needsHerd()) {
-                for (int c = 0; c < 3; c++) {
-                    spawnCow(level, gy, x0 + 8.0 + c * 2.0, (z0 + z1) / 2.0);
-                }
-            }
-            DebugWorldWatch.watch(n.name(), box(x0, gy, z0, x1, gy + 1, z1), null);
-        }
-    }
-
-    /**
-     * <b>The five watchers and dhampir, still as stalls.</b>
-     *
-     * <p>Unlike the shy forms these do not need room - a watcher's whole
-     * behaviour is standing still and looking, and the two that reposition do it
-     * within a few blocks. They are <b>named</b> though, so the gates can be
-     * opened and the five told apart once they are loose, which is the only way
-     * to judge a stalker properly.
-     */
-    private static void buildWatchStalls(ServerLevel level, int gy, int cx, int mouthZ) {
-        List<Nightly> watch = List.of(
-                new Nightly(NIGHT_WATCH, "Wst", "WATCH: FIXED", "stands and stares"),
-                new Nightly(NIGHT_WATCH, "Wnr", "WATCH: CLOSING", "watches what nears"),
-                new Nightly(NIGHT_WATCH, "Wsi", "WATCH: SIGHTED", "watches what it sees"),
-                new Nightly(NIGHT_WATCH, "Wun", "WATCH: UNSEEN", "NOT while you look"),
-                new Nightly(NIGHT_WATCH, "Wbh", "WATCH: BEHIND", "NOT while you look"),
-                new Nightly("horsegenetics.dhampir", null, "DHAMPIR", "night-gated too"));
-        nightRow(level, gy, cx, mouthZ + ROW_I, ROW_I_D, watch);
+        nightRow(level, gy, cx, mouthZ + ROW_I, ROW_I_D, List.of(
+                new Nightly("horsegenetics.dhampir", null, "DHAMPIR",
+                        "what does it DO?")));
     }
 
     private static final String NIGHT_TEMPER = "horsegenetics.magic_night_temper";

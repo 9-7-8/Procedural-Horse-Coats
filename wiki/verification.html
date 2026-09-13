@@ -80,6 +80,83 @@
     </p>
 </div>
 
+<h2 id="night-and-weather">&sect;0-DH &mdash; The night loci and the weather loci, all of them (2026-09-13)</h2>
+
+<div class="note good">
+    <span class="label">Thirteen variants and two loci that had never been watched at all &mdash; in one day</span>
+    <p>
+        &sect;0-AT has said since 2026-09-09 that "the night loci - behaviour, so nothing
+        here is confirmed by a render". <strong>All eight night-temper forms and all five
+        night-watch forms are now confirmed</strong>, and every one of those stalls is
+        gone.
+    </p>
+    <p>
+        <strong>They were never broken; they were unwatchable, and for three different
+        reasons.</strong> The dimension had no night, because a
+        <code>dimension_type</code> needs <code>timelines</code> as well as a
+        <code>default_clock</code> and it carried only the clock. The monster-targeted
+        forms had nothing to be about, because the biome was <code>the_void</code> and
+        spawned nothing. And the fleeing forms were in stalls, where the navigator refused
+        their path before it began. Each of those looked exactly like "the gene does
+        nothing".
+    </p>
+</div>
+
+<h3>The shy forms, and why they took three attempts</h3>
+
+<p>
+    Hunt and flee are one locus with the sign flipped, and they went into identical
+    4&nbsp;&times;&nbsp;7 stalls. <strong>The stalls confirmed the hunters immediately and
+    hid the fleers completely</strong> &mdash; because a hunter closes on you and a wall
+    <em>helps</em> it, while a flee-er paths <code>FLEE_DISTANCE</code>, twelve blocks,
+    and needs the one thing a stall cannot give. Moved to 19&nbsp;&times;&nbsp;30
+    paddocks, the log filled with <strong>48 lines, every one <code>path
+    accepted</code></strong>, including <code>from minecraft:cow</code> for the
+    herd-targeted form that had been reported dead.
+</p>
+
+<p>
+    The instrument is the reason that is a fact rather than an impression:
+    <code>Navigation.moveTo</code> returns whether the path was accepted and the return
+    was being discarded, so a flee that never fired and a flee that fired into a fence
+    four blocks away read identically.
+</p>
+
+<h3>The weather loci &mdash; measured, not looked at</h3>
+
+<div class="note good">
+    <span class="label">&sect;0-BT's "the one locus family you cannot check on demand"</span>
+    <table class="data">
+        <thead><tr><th></th><th><code>movement_speed</code></th><th><code>jump_strength</code></th></tr></thead>
+        <tbody>
+            <tr><td><strong>dry</strong></td><td>0.188 &ndash; 0.188</td><td>0.500 &ndash; 0.500</td></tr>
+            <tr><td><strong>rain</strong></td><td>0.194 &ndash; 0.252</td><td>0.584 &ndash; 0.591</td></tr>
+        </tbody>
+    </table>
+    <p>
+        Both move, and <strong>the shape is right as well as the direction</strong>:
+        identical when dry, because there is no modifier at all, and spreading into a
+        range under rain because each horse's magnitude is drawn per allele copy.
+    </p>
+    <p>
+        <strong>The owner reported this as not working</strong>, and looking at the horses
+        would have said exactly that. It is only a fact because the census prints a named
+        attribute's range across the pen &mdash; a conditional modifier is either on the
+        horse or it is not, which is a question about numbers and not about pictures.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Rain was invisible, and that was mine</span>
+    <p>
+        The new biome carried <code>"has_precipitation": false</code>, copied from
+        <code>the_void</code> when it was written. So the <em>level</em> rained &mdash; grey
+        sky, <code>isRaining()</code> true, the genes firing &mdash; and the
+        <em>biome</em> dropped nothing, which is why it looked like the command had not
+        worked. Now <code>true</code>. Needs a restart, being a datapack file.
+    </p>
+</div>
+
 <h2 id="conclusive">&sect;0-DE &mdash; Five things settled, and the pens are gone (2026-09-13)</h2>
 
 <div class="note good">
@@ -122,25 +199,6 @@
     <li><strong>The biome spawns.</strong> 42 hostiles in two minutes, every one logged
         <code>by NATURAL</code>. <code>the_void</code> to
         <code>horsegenetics:debug_pens</code> did exactly what it had to.</li>
-</ul>
-
-<h2 id="new-stalls">&sect;0-DG &mdash; What the biome and the attribute readout unlocked (2026-09-13, NOT looked at)</h2>
-
-<ul>
-    <li><strong>The two monster-targeted night stalls can fire now.</strong> They used to
-        say <em>CANNOT FIRE HERE</em> on the sign, because the only hostiles in the
-        dimension came from a spawner that needs a player beside it. Natural zombies
-        arrive on their own now, so <code>Agh</code> (hunts monsters) and <code>Flh</code>
-        (flees them) are live tests rather than labelled blanks.</li>
-    <li><strong>Base alarm can fire anywhere dark</strong>, for the same reason.</li>
-    <li><strong>The weather loci, which &sect;0-BT called uncheckable.</strong> Its words:
-        <em>"they only express when the sky agrees, and the magnitudes are a first guess.
-        It is the one locus family you cannot check on demand."</em> True of looking at a
-        horse, false of reading its numbers &mdash; a conditional modifier is either on
-        the horse or it is not. The watch reports a named attribute's range across a pen
-        now, so the whole test is <strong>read the census, <code>/weather rain</code>,
-        read it again</strong>. If the range moves, the locus works and the number is its
-        magnitude, which retires "a first guess" as well.</li>
 </ul>
 
 <h2 id="art-pass">&sect;0-DC &mdash; Four coat genes redrawn, and a biome that spawns zombies (2026-09-13, NOT looked at)</h2>
@@ -200,59 +258,6 @@
         and a natural one is the gene failing.
     </p>
 </div>
-
-<h2 id="night-loci">&sect;0-DB &mdash; The night loci, testable for the first time (2026-09-13, NOT looked at)</h2>
-
-<div class="note good">
-    <span class="label">These were unwatchable rather than untested, and nobody knew which</span>
-    <p>
-        &sect;0-AT has said since 2026-09-09 that "the night loci - behaviour, so nothing
-        here is confirmed by a render". Two whole loci,
-        <a href="gene-magic-night-temper.html">night temper</a> and
-        <a href="gene-magic-night-watch.html">night watch</a>, that nobody has ever seen do
-        anything. <strong>The reason turned out to be the dimension, not the genes</strong>:
-        the horse dimension had no night, because a <code>dimension_type</code> needs
-        <code>timelines</code> as well as a <code>default_clock</code> and it had only the
-        clock. Every night-gated gene in the mod sat inert in the one place built for
-        watching genes.
-    </p>
-</div>
-
-<p>
-    <strong>Fifteen stalls, one per behaviour</strong>, in two rows at the back of the
-    yard. Every variant gets its own, because the variants <em>are</em> the point &mdash;
-    they differ by who they are about (riders, herds, monsters, everything) and a single
-    pen would answer for one and leave the rest exactly as unproven as they are now. It
-    is a walk down two rows with <code>/testkit night</code> run once.
-</p>
-
-<ul>
-    <li><strong>Night temper, eight stalls</strong>: hunt and shy, each toward riders,
-        herds, monsters and everything. The <em>riders</em> and <em>everything</em> forms
-        are testable with nobody present but you &mdash; walk up by day, set night, walk
-        up again. The <em>herd</em> forms have a cow each so they have something to be
-        about.</li>
-    <li><strong>Night watch, five stalls</strong>: fixed, closing, sighted, unseen, close
-        behind. After dark each should stand and watch rather than graze, and the five
-        differ in <em>what</em> they watch.</li>
-    <li><strong>Dhampir and lycanthropy</strong> get a stall each &mdash; both are
-        night-gated and both were equally unwatchable for the same reason.</li>
-    <li><strong>Two stalls say CANNOT FIRE HERE on the sign</strong>, and that is
-        deliberate. The monster-targeted forms need a hostile nearby, and the only
-        hostiles in this dimension come from the ward's spawner, which runs only with a
-        player beside it. A stall that cannot fire is worse than no stall, so those two
-        are labelled rather than left to look broken.</li>
-    <li><strong>Base alarm</strong> is now <em>beside the spawner room</em>, which is the
-        only place its <code>hostile_near</code> condition can be true. It was deliberately
-        kept out of the sound herd for that reason - a hundred blocks from any monster it
-        would have been silent all night, and a blank in the log reads exactly like a
-        broken gene. The census counts sounds by id, so the answer arrives as a number
-        beside the ward's spawn lines.</li>
-    <li><strong>And check the sky itself.</strong> <code>/testkit night</code> reports what
-        the dimension reads. It said <em>DAY</em> after being set to night on 2026-09-13 -
-        that is the bug that was fixed, and the same line is how you confirm it stayed
-        fixed.</li>
-</ul>
 
 <h2 id="more-for-the-night">&sect;0-DA &mdash; Two more things the night can answer for free (2026-09-13, NOT looked at)</h2>
 
