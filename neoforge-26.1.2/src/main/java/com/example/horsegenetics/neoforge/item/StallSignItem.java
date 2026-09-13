@@ -78,7 +78,15 @@ public class StallSignItem extends Item {
         ItemStack stack = ctx.getItemInHand();
         BoundHorse bound = stack.get(ModDataComponents.BOUND_HORSE.get());
         if (bound == null) {
-            return InteractionResult.PASS; // blank sign - nothing to place
+            // A BLANK SIGN SAYS WHY IT DID NOTHING. It used to pass silently, and
+            // "the sign won't place and there's no message" cost the owner a
+            // round of debugging on 2026-09-13 before she noticed the sign in
+            // her hand was unbound. Said on the server only, so it prints once.
+            if (!ctx.getLevel().isClientSide()) {
+                message(ctx, "This stall sign is blank - right-click a horse you own with it to bind "
+                        + "it first, then place it on the stall wall.");
+            }
+            return InteractionResult.FAIL;
         }
         Level level = ctx.getLevel();
         if (level.isClientSide()) {
