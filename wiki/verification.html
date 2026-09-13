@@ -56,7 +56,142 @@
     </p>
 </div>
 
-<h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit (2026-09-12, NOT looked at)</h2>
+<h2 id="overnight-watch">&sect;0-CX &mdash; The overnight watch, and a yard that runs itself (2026-09-12, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">This is the whole night. If step 2 says nothing is being watched, stop and fix that first</span>
+    <p>
+        The owner's brief: <em>&ldquo;I'm going to leave the game and the horse dimension
+        running over night. Add as many time-reliant tests as possible, focusing on those
+        that don't require direct intervention from me.&rdquo;</em> That is a different
+        design brief from the one the yard was built to and it rules out more than it lets
+        in &mdash; a test belongs in there now only if it <strong>starts itself</strong>,
+        <strong>runs on a clock</strong>, and <strong>leaves something readable in the
+        morning</strong>.
+    </p>
+    <p>
+        The third of those is the new part, and it did not exist.
+        <code>ActionTrace</code> logs things a <em>person</em> does; every overnight test
+        is the opposite &mdash; a sapling that appeared, snow that stopped melting, eggs
+        that piled up and then stopped. None of those is an event anybody fires. They are
+        <strong>differences between two readings</strong>, and nothing in the repo took
+        readings. <code>DebugWorldWatch</code> does.
+    </p>
+</div>
+
+<h3>Before walking away &mdash; four things, in this order</h3>
+
+<ol>
+    <li><strong>Go through the hay portal.</strong> The yard is built when you enter the
+        dimension, and so is the watch. No portal, no night.</li>
+    <li><strong>Run <code>/testkit census</code>.</strong> It prints every watched pen to
+        the log at once. <strong>This is the check that costs one line of chat and saves
+        eight hours</strong> &mdash; if it answers <em>nothing is being watched</em>, the
+        night will record nothing and there is no way to tell from inside the game.</li>
+    <li><strong>Stay logged in and out of the pause menu.</strong> Singleplayer stops the
+        server on Esc; a paused server ticks nothing at all. The yard's chunks are
+        force-loaded, so where you stand does not matter &mdash; only that the game is
+        running.</li>
+    <li><strong>Do not leave the horse dimension.</strong> Leaving tears the plot down,
+        and the night with it.</li>
+</ol>
+
+<h3>What it writes, and how to read it in the morning</h3>
+
+<p>
+    Everything is prefixed <code>[watch]</code>, so the night is one grep:
+    <code>grep '\[watch\]' neoforge-26.1.2/run/logs/latest.log</code>. Two clocks and a
+    pile of event hooks:
+</p>
+
+<ul>
+    <li><strong>A scan every ten seconds</strong> counts the watched blocks and creatures
+        in each pen and logs <em>only what changed</em>. This is what dates a planting to
+        the minute with no event to hook &mdash; the dryad plants by writing the block.</li>
+    <li><strong>A census every two minutes</strong> prints every pen whether it moved or
+        not, plus the dimension's entity count, whether it is day or night, and
+        <strong>how many milliseconds the server actually spent per tick</strong>. Over 50
+        means it is behind, and the entity count on the same line is almost always why. A
+        flat line in the census is evidence; a gap in the log is not.</li>
+    <li><strong>Event hooks</strong> for the things a delta cannot explain: every item
+        dropped <em>and every item removed, with its age</em> (a despawn at 6 000 ticks
+        and a cap refusing to drop look identical in a count and opposite in a log),
+        creatures joining and dying, bone meal, a sapling becoming a tree, blocks placed
+        by anything that is not a player, explosions, teleports. Gene sounds are
+        <em>counted</em> rather than logged, because five horses meowing on a 300-tick
+        timer is seven thousand lines a night.</li>
+    <li><strong>It throttles itself at 400 lines a minute</strong> and says how many it
+        swallowed. The tool that finds a runaway must not be the thing that makes it
+        worse.</li>
+</ul>
+
+<h3>What each pen should say by morning</h3>
+
+<ul>
+    <li><strong>EGG LAYER</strong> &mdash; four of them in one pen, which is the only
+        arrangement that can make the cap fire at all. The guard is eight of the item
+        within six blocks; a copy's interval is 4&nbsp;000&ndash;14&nbsp;000 ticks and a
+        dropped item despawns at 6&nbsp;000, so <strong>one horse can essentially never
+        reach its own cap</strong> &mdash; the floor clears itself about as fast as one
+        horse fills it. <em>Pass:</em> the count climbs, sits at or below eight, and the
+        item-gone lines show pickups rather than a column of despawns. <em>Fail:</em> a
+        floor carpeted in eggs.</li>
+    <li><strong>DRYAD</strong> &mdash; a sapling every 9&nbsp;000 to 32&nbsp;000 ticks, so
+        about a game day between plantings. Its box is six blocks tall, because the far
+        end of this test is a grown <em>tree</em> and vanilla only grows one on random
+        ticks in a loaded chunk &mdash; which is the reason the yard is force-loaded.
+        <em>Pass:</em> several sapling lines overnight, and ideally a <em>tree grew</em>.</li>
+    <li><strong>HOT-BLOODED</strong> &mdash; a snow floor with a strip of <em>ice</em> in
+        it. The ice is the half that matters: it melts to a water <strong>source</strong>,
+        not to air, which is how this gene could flood something. <em>Pass:</em> snow
+        falling steadily. <em>The thing to look for:</em> whether the water count keeps
+        climbing after the ice is gone, which is a flood rather than a thaw.</li>
+    <li><strong>INTIMIDATING</strong> &mdash; six cows ringed round one horse.
+        <strong>Measured as a distance, not a count</strong>: penned cows cannot leave, so
+        four in the far corner and four round its feet are the same number and opposite
+        results. The watch reports the nearest non-horse every ten seconds.
+        <em>Pass:</em> it climbs within a minute and sits at eight or more all night.
+        <em>Fail:</em> a figure wandering between one and six as they graze past.</li>
+    <li><strong>SOUND HERD</strong> &mdash; three meowing and two singers. The open
+        question on the sound genes is &ldquo;are these bearable in a herd&rdquo; and the
+        cooldowns were guesses; that sounds like a question only ears can settle and it is
+        not. A herd firing eighty sounds in two minutes is unbearable by arithmetic, and
+        the census collects the arithmetic while everybody is asleep. Meowing and singer
+        rather than base alarm, which is gated on <code>hostile_near</code> and would sit
+        silent a hundred blocks from the spawner &mdash; a blank that looks exactly like a
+        broken gene.</li>
+    <li><strong>WARD + SPAWNER</strong> &mdash; the best of them, because it is the one
+        with the most data. Every hostile spawn is logged with its distance to the nearest
+        <em>live</em> ward, so a night is a column of hundreds of numbers (&sect;0-CW).</li>
+    <li><strong>The census's own entity count</strong> is the safety net under all of it.
+        An entity storm is the one failure here that damages a save rather than looking
+        wrong, and a count that climbs all night is how it announces itself.</li>
+</ul>
+
+<h3>Three fixes underneath it, none of them visible</h3>
+
+<ul>
+    <li><strong>The yard's horses are all tamed now.</strong> The kit's legend has said
+        &ldquo;the yard's horses come tamed&rdquo; since the day the yard was stocked and
+        the stocked row never was &mdash; so &ldquo;breed a starburst pair in the yard&rdquo;
+        was another instruction nothing in the world could carry out.</li>
+    <li><strong>Leaving the dimension no longer walks the yard home.</strong>
+        <code>evacuateTamedHorses</code> took every <em>tamed</em> horse in the plot back
+        to the overworld, which with the line above would have meant two dozen of them at
+        the portal on every exit and an empty yard on the way back in. It takes tamed
+        <em>and owned</em> horses now &mdash; a horse a player tamed has an owner, and the
+        yard's scenery does not.</li>
+    <li><strong>Spontaneous breeding stops claiming foals that are not coming.</strong>
+        The post-breeding cooldown is <code>getAge()</code> and
+        <code>canFallInLove()</code> cannot see it: <code>Animal.aiStep</code> zeroes
+        <code>inLove</code> every tick while the age is non-zero, so a pair that had just
+        bred read as available and were put in love again on every beat &mdash; hearts
+        cleared the following tick, for five minutes. The owner's log of 2026-09-12 has
+        two foals and then <strong>212 identical <em>PAIRED</em> lines</strong> with
+        nothing behind any of them. The gene was working; its account of itself was not.</li>
+</ul>
+
+<h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit (2026-09-12, the levels are confirmed; the list below is what is left)</h2>
 
 <div class="note good">
     <span class="label">Confirmed 2026-09-12 &mdash; and the predictions held</span>
@@ -163,66 +298,40 @@
     </ol>
 </div>
 
-<h2 id="behaviour-bugs">&sect;0-CT &mdash; Behaviour genes: two confirmed, the spreaders unblocked (2026-09-12)</h2>
-
-<div class="note good">
-    <span class="label">Confirmed in play, both for the first time</span>
-    <p>
-        <strong>Spontaneous breeding works</strong> - six pairings and foals on the ground.
-        It needed the horses <em>tamed</em>, which vanilla requires
-        (<code>AbstractHorse.canParent</code>) and this gene cannot supply, so the field is
-        stocked tamed now and the handler refuses pairs vanilla would refuse instead of
-        showing hearts that lead nowhere. <strong>Pack leader works</strong>: the cows
-        follow. Both had been unrunnable rather than untested - the kit only ever handed
-        out mares, and the dimension deleted the cows.
-    </p>
-</div>
-
-<h2 id="spreaders">&sect;0-CU &mdash; Verdant is confirmed; the dryad is the slow one left (2026-09-12)</h2>
-
-<div class="note good">
-    <span class="label">Confirmed in play &mdash; all three verdant alleles</span>
-    <p>
-        Grass on dirt, moss on stone, mycelium on dirt: all three convert, and their pens
-        are gone from the yard. They had never been broken. They had been <em>forbidden</em>
-        &mdash; <code>GeneAbilityHandler.spread</code> returned early in the horse
-        dimension, so the one place built to watch a spreading gene was the one place it
-        could not run (<a href="known-gaps.html#gap-204">gap 204</a>, restore before 1.0).
-    </p>
-    <p>
-        <strong>The floor was the other half, and it is worth keeping in mind for any
-        future spreader.</strong> <code>convert()</code> is a whitelist per cover and they
-        do not overlap: grass only converts <em>bare dirt</em>, so the obvious test &mdash;
-        a grass gene in a grass field &mdash; can never show anything. A pen with the wrong
-        floor is indistinguishable from a broken gene.
-    </p>
-</div>
-
-<h2 id="slow-tests">&sect;0-CV &mdash; The three long tests, for leaving and coming back to (2026-09-12, NOT looked at)</h2>
+<h2 id="slow-tests">&sect;0-CV &mdash; The pens that run themselves (2026-09-12, NOT looked at)</h2>
 
 <div class="note">
     <span class="label">These cannot be answered by standing still</span>
     <p>
-        What is left in the yard is only the tests that need <em>time</em> rather than
-        attention. That is what a private dimension is actually good for, and it is why
-        these three are worth a walk away rather than a session in front of them.
+        What is left in the yard is the tests that need <em>time</em> rather than
+        attention. That is what a private dimension is actually good for. Each one's pass
+        condition, and what the log should say, is on &sect;0-CX above; this is the index.
+    </p>
+    <p>
+        <strong>Gone from the yard, by the owner's call (2026-09-12):</strong> the
+        spontaneous-breeding field and the pack leader's pen &mdash; &ldquo;we're done
+        with those tests&rdquo;. Verdant's three floors went the same way when they were
+        confirmed. <strong>One question leaves with the breeding field and is worth
+        recording as dropped rather than answered</strong>: whether
+        <code>LOCAL_CAP</code> actually stops an automatic breeder. The breeding is
+        confirmed; the cap never was, and an uncapped one is the classic way to kill a
+        server. Say the word and the pen comes back.
     </p>
 </div>
 
 <ul>
-    <li><strong>Dryad, in the growing row</strong> - a sapling every 9&nbsp;000 to
-        32&nbsp;000 ticks, so about a day of game time between plantings. An empty pen
-        after ten minutes means <em>not yet</em>, not broken. Come back to saplings
-        standing on the grass.</li>
-    <li><strong>Hot blooded, on the snow floor</strong> - new pen. A floor of snow with a
-        strip of ice in it, so &ldquo;how far has it got&rdquo; is answerable from the
-        gate. The ice is the half that matters: ice melts to a water <em>source</em>, which
-        is how this gene could flood something rather than just tidy it.</li>
-    <li><strong>The breeding field is now the population cap</strong> - re-signed. That it
-        breeds is settled; whether <code>LOCAL_CAP</code> <em>stops</em> it is not, and an
-        uncapped automatic breeder is the classic way to kill a server. Leave it running a
-        long while and <strong>count what is standing there</strong>. It should plateau
-        around six within eight blocks. If you come back to twenty, that is the bug.</li>
+    <li><strong>Egg layer</strong>, four in a pen &mdash; does the accumulation guard hold,
+        or does the floor carpet?</li>
+    <li><strong>Dryad</strong>, on grass &mdash; a sapling about once a game day, and a
+        tree eventually.</li>
+    <li><strong>Hot blooded</strong>, on snow with a strip of ice &mdash; does it thaw, and
+        does the water stop?</li>
+    <li><strong>Intimidating</strong>, with six cows &mdash; does the nearest-cow distance
+        climb and stay up?</li>
+    <li><strong>The sound herd</strong> &mdash; how many plays a minute does a herd of five
+        actually make?</li>
+    <li><strong>The ward's spawner</strong> &mdash; &sect;0-CW, and the one with real
+        numbers behind it.</li>
 </ul>
 
 <h2 id="ward-audit">&sect;0-CW &mdash; Holy ward, as a number instead of an impression (2026-09-12, NOT looked at)</h2>
@@ -232,48 +341,32 @@
     <p>
         Standing in the spawner room counting zombies tells you the spawner works. It does
         not tell you whether the ward moved anything, because <em>the ones it stopped are
-        the ones you never saw</em>. So every hostile spawn now goes to the log with its
+        the ones you never saw</em>. So every hostile spawn goes to the log with its
         distance to the nearest horse whose ward is actually live &mdash; asked of the
         resolved ability list, not the genotype, since a carried gene can still be running
         nothing.
     </p>
     <p>
-        <strong>What to do:</strong> leave the spawner running near the warded horse, then
-        hand over the log. <strong>What a pass looks like:</strong> plenty of
-        <code>monster spawned</code> lines, and a <em>floor</em> under the distance column
-        &mdash; none of them close. A broken ward reads as spawns at two or three blocks.
-    </p>
-</div>
-
-<div class="note danger">
-    <span class="label">All three were invisible to every test in the repo, and two of them made other tests impossible</span>
-    <p>
-        <strong>Spontaneous breeding put same-sex pairs in love.</strong> It paired any two
-        carriers in range and <code>HorseBreedingHandler</code> cancels same-sex pairings,
-        so two mares produced hearts and then nothing, for ever. It needs a mare and a
-        stallion now. <strong>The dimension deleted every non-horse mob</strong>, so the
-        ward's spawner and the pack leader's followers could not exist in the yard built
-        to test them; the rule now stops at the corridor wall. And <strong>pack leader
-        never summoned anything</strong> - it leads creatures already nearby, which its
-        label did not say.
+        <strong>What to do:</strong> nothing. It is beside the spawner already and the
+        spawner is already charged with zombies. <strong>What a pass looks like:</strong>
+        plenty of <code>monster spawned</code> lines, and a <em>floor</em> under the
+        distance column &mdash; none of them close. A broken ward reads as spawns at two or
+        three blocks. An overnight run turns this from a handful of readings into
+        hundreds, which is the whole reason it is the best test in the yard.
     </p>
 </div>
 
 <ul>
-    <li><strong>The breeding field, and watch the log.</strong> With debug tools on it
-        scans every four seconds and prints what it decided - <em>PAIRED</em>, the local
-        cap, vanilla's cooldown, wrong sex, no partner. A foal is the pass; a run of
-        <em>PAIRED</em> lines with no foal means something downstream of
-        <code>setInLove</code> is wrong and the log now says so.</li>
-    <li><strong>The spawner must produce zombies at all</strong> - that is the fix for the
-        mob rule, and it is the control the ward test rests on. If nothing spawns with no
-        ward horse near it, stop there.</li>
-    <li><strong>The pack-leader pen: do the four cows trail the two horses?</strong> Cows
-        rather than wolves because following is a thing you can watch. If they ignore the
-        horses entirely, check the horses are the cow allele (the sign says so) - the gene
-        has one allele per mob and the wrong one looks identical.</li>
-    <li><strong>Read the gene's own entry in the browser.</strong> It should now say it
-        <em>leads</em> creatures already nearby and does not create them.</li>
+    <li><strong>The spawner must produce zombies at all.</strong> That is the control the
+        whole test rests on: if the log has no <code>monster spawned</code> lines
+        anywhere, stop there, because a silent spawner and a perfect ward look identical.</li>
+    <li><strong>Check the distances against the radius the gene claims</strong>, not
+        against zero. The ward is a radius, and a spawn just outside it is the gene
+        working exactly as specified.</li>
+    <li><strong>And check the ward horse is still alive in the morning.</strong> Entries
+        expire after 40 ticks rather than being removed on death, so a dead warder is a
+        ward that lingers for two seconds - which is fine, and which the distance column
+        would show as a brief gap rather than a wall.</li>
 </ul>
 
 <h2 id="test-yard">&sect;0-CS &mdash; The horse dimension's test yard (2026-09-12, NOT looked at)</h2>
@@ -282,9 +375,17 @@
     <span class="label">Built by code nobody can watch run &mdash; so the first check is that it is even there</span>
     <p>
         Thirty blocks right of the arrival road, through a door in the corridor wall: a
-        walled yard with a breeding field, a zombie-spawner room, a wolf pen and a bare
-        dryad plot. See <a href="horse-dimension.html#test-yard">the dimension page</a>.
-        It replaces the first pen on that side.
+        walled yard of signed pens. See
+        <a href="horse-dimension.html#test-yard">the dimension page</a> for the plan and
+        what is in each one. It replaces the first pen on that side.
+    </p>
+    <p>
+        <strong>A pen for an answered test is the most expensive thing in this
+        project</strong>, because it spends the one resource that cannot be bought back.
+        So the yard is audited against this page every time the page moves, and a
+        confirmed test's pen is <em>deleted</em> rather than left standing with a tick on
+        it. Gone that way already: verdant's three floors, the pack leader's cows, and the
+        spontaneous-breeding field.
     </p>
 </div>
 
@@ -294,18 +395,19 @@
         below is worth doing until that is fixed.</li>
     <li><strong>Walk it.</strong> Out of the portal, turn right, follow the path. No gaps
         underfoot, no wall to squeeze past where the doorway was cut, and the yard's own
-        wall should close all the way round with no view of the void.</li>
-    <li><strong>The spawner should produce zombies</strong> on its own, with no warded
-        horse near it. That is the control - if it does not, the ward test cannot mean
-        anything.</li>
-    <li><strong>Then the four tests</strong>, which are the point:
-        <a href="roadmap.html#trait-rules">the population cap</a> in the breeding field,
-        the holy ward beside the spawner (read the distances out of the log, &sect;0-CW),
-        and the dryad and the hot-blooded melt left alone for real time (&sect;0-CV).</li>
+        wall should close all the way round with no view of the void. Seven signed pens:
+        egg layer and the ward's spawner room at the near end, the sound herd and the cows
+        in the middle, starburst and the F8 herd and the glow room behind them, the dryad
+        and the thaw along the back.</li>
+    <li><strong>Every horse in it is tamed</strong> &mdash; new, and the thing that makes
+        the starburst breeding test possible at all.</li>
+    <li><strong>Then leave it running</strong>, which is what the rest of it is for:
+        &sect;0-CX.</li>
     <li><strong>Then leave and come back.</strong> Re-entering builds a fresh plot; the
-        yard should be there again, empty, with no horses left from last time - the plot
-        box was widened to cover it, and a breeding field that leaked would be the
-        world-breaking bug the yard exists to catch.</li>
+        yard should be there again, with its pens stocked and nothing left over from last
+        time. The plot box covers the yard, and the forced chunks are released on the way
+        out &mdash; a dimension still ticking a yard that is nobody's would be a bug this
+        session introduced rather than found.</li>
 </ul>
 
 <h2 id="kit-and-egg">&sect;0-CR &mdash; The kit breeds, and Make egg works (2026-09-12, NOT looked at)</h2>
@@ -346,12 +448,11 @@
     <li><strong>The horse designer was mirrored</strong> (hard rule 5) - open
         <a href="horse-designer/index.html">the designer</a> and confirm its right column
         matches, since it copies these constants by value.</li>
-    <li><strong>Batch 3: spawn two mares and two stallions</strong> from slots 2 and 3 in
-        a fenced field and leave them. A foal means the test can finally run; it has never
-        been able to before, so nothing about spontaneous breeding has ever been
-        verified.</li>
-    <li><strong>Batch 1: breed a starburst mare with a starburst stallion</strong> (slots
-        2 and 3). The foal's emblem should sit near its parents' rather than re-rolling.</li>
+    <li><strong>Breed the starburst pair in the yard</strong> with batch 1's golden
+        carrots. The foal's emblem should sit near its parents' rather than re-rolling.
+        This is the one test in the yard that still wants hands, and it is finally
+        possible: the yard's horses are tamed now, and vanilla will not breed an untamed
+        one.</li>
 </ul>
 
 <h2 id="highlight-crash">&sect;0-CQ &mdash; F8's highlight no longer crashes the server (2026-09-12, NOT looked at)</h2>

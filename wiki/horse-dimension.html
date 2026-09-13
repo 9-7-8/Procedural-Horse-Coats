@@ -345,31 +345,53 @@
 </p>
 
 <p>
-    It exists for the four genes that <strong>cannot be judged in a pen and should not be
-    judged in a real save</strong>. Each is a claim about something that happens while
-    nobody is watching, or about a cost rather than a picture:
+    It exists for the genes that <strong>cannot be judged in a pen and should not be
+    judged in a real save</strong> &mdash; each a claim about something that happens while
+    nobody is watching, or about a cost rather than a picture.
 </p>
+
+<div class="note">
+    <span class="label">Since 2026-09-12 it is built for a night rather than a visit</span>
+    <p>
+        The owner's brief: <em>&ldquo;I'm going to leave the game and the horse dimension
+        running over night. Add as many time-reliant tests as possible, focusing on those
+        that don't require direct intervention from me.&rdquo;</em> That rules out more
+        than it lets in. A pen belongs in here now only if its test <strong>starts
+        itself</strong>, <strong>runs on a clock</strong> and <strong>leaves something
+        readable in the morning</strong> &mdash; and the third of those is
+        <a href="#the-watch">the watch</a>, which is new, because until then nothing in
+        the repo took a reading of anything.
+    </p>
+</div>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Plot</th><th>For</th><th>What it is</th></tr></thead>
+<thead><tr><th>Pen</th><th>For</th><th>What it is, and what a pass looks like</th></tr></thead>
 <tbody>
-<tr><td><strong>Breeding field</strong></td><td>the population cap</td><td>The largest plot, 21&nbsp;&times;&nbsp;21 fenced. That the gene breeds at all is confirmed; what this plot asks now is whether <code>LOCAL_CAP</code> <em>stops</em> it, since an uncapped automatic breeder is the classic way to kill a server. Stocked with two tamed pairs &mdash; tamed because vanilla will not breed an untamed horse and this gene cannot supply that. Leave it a long while, come back and count: it should plateau, not climb.</td></tr>
-<tr><td><strong>Spawner room</strong></td><td>holy ward</td><td>A roofed, unlit stone box with a real zombie spawner in it. Roofed because a spawner that cannot spawn for ordinary reasons proves nothing about the gene; charged with zombies at build time rather than left empty, because an empty spawner produces nothing and that is indistinguishable from the ward having stopped it.</td></tr>
-<tr><td><strong>Spare pen</strong></td><td>&mdash;</td><td>15&nbsp;&times;&nbsp;17 fenced, and empty. It held the pack leader's cows until that gene was confirmed; it stays because the yard is short of fenced ground and the next long test will want some.</td></tr>
-<tr><td><strong>Growing row</strong></td><td>dryad, hot blooded</td><td>Two pens, each floored with what its own gene acts on. <strong>The floor is the test</strong>: <code>convert()</code> is a whitelist per cover, so a spreading gene given the wrong ground fails in a way indistinguishable from a broken gene. The dryad's is grass, for saplings to stand on; the hot-blooded pen is a floor of snow with a strip of ice in it, ice being the half that melts to a water <em>source</em> rather than to air.</td></tr>
+<tr><td><strong>Egg layer</strong></td><td>the <code>produce</code> accumulation cap</td><td>Four layers in one 16&nbsp;&times;&nbsp;17 pen &mdash; four, because <strong>one horse can essentially never reach its own cap</strong>. The guard is eight of the item within six blocks; a copy's interval is 4&nbsp;000&ndash;14&nbsp;000 ticks and a dropped item despawns at 6&nbsp;000, so a single layer's floor clears itself about as fast as it fills. Pass: the count climbs, stops at or below eight, and the log shows drops refused rather than items quietly expiring.</td></tr>
+<tr><td><strong>Spawner room</strong></td><td>holy ward</td><td>A roofed, unlit stone box with a real zombie spawner, charged with zombies at build time rather than left empty &mdash; an empty spawner produces nothing, which is indistinguishable from the ward having stopped it. The warded horse stands outside the door, because a horse shut in with a spawner is a horse being hit by zombies. Pass: hundreds of <code>monster spawned</code> lines with a <em>floor</em> under their distance column.</td></tr>
+<tr><td><strong>Sound herd</strong></td><td>the sound genes' cooldowns</td><td>Three meowing and two singers in one pen. &ldquo;Are these bearable in a herd&rdquo; sounds like a question only ears can settle and is not: a herd firing eighty sounds in two minutes is unbearable by arithmetic. Every play is counted into the census. Meowing and singer rather than base alarm, which is gated on <code>hostile_near</code> and would sit silent here &mdash; a blank that reads exactly like a broken gene.</td></tr>
+<tr><td><strong>Intimidating</strong></td><td>the <code>repel</code> aura</td><td>One horse with six cows ringed round it at three blocks. <strong>Measured as a distance, not a count</strong>: penned cows cannot leave, so four in the far corner and four round its feet are the same number and opposite results. Pass: the nearest-creature figure climbs within a minute and sits at eight or more.</td></tr>
+<tr><td><strong>Growing row</strong></td><td>dryad, hot blooded</td><td>Two pens, each floored with what its own gene acts on. <strong>The floor is the test</strong>: <code>convert()</code> is a whitelist per cover, so a spreading gene given the wrong ground fails in a way indistinguishable from a broken one. The dryad's is grass, for saplings to stand on, and its watch box is six blocks tall because the far end of that test is a grown tree. The hot-blooded pen is snow with a strip of <em>ice</em> in it &mdash; ice being the half that melts to a water <strong>source</strong> rather than to air, and therefore the half that could flood something.</td></tr>
+<tr><td><strong>Starburst, F8 herd, glow room</strong></td><td>&sect;0-CP, &sect;0-CQ, &sect;0-CO</td><td>The three that still want a person. They stay because they are cheap to do on the way past, not because they suit a night.</td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
+    <strong>Every horse in the yard is tamed.</strong> Vanilla refuses to breed an untamed
+    horse, the test kit's legend had been promising tamed ones since the day the yard was
+    stocked, and the stocked row was not &mdash; so &ldquo;breed a starburst pair in the
+    yard&rdquo; was an instruction nothing in the world could carry out. They are tamed
+    with <em>no owner</em>, which is load-bearing: see the leak note below.
+</p>
+
 <p>
-    <strong>A confirmed gene loses its pen.</strong> Verdant's three floors and the pack
-    leader's cows were here and are gone, because a pen for a settled question is a pen
-    somebody has to walk past to reach a live one. What the yard keeps is the tests that
-    cannot be answered by standing still and looking &mdash; the ones that need you to
-    leave and come back &mdash; which is the only thing a private dimension offers that a
-    creative flat world does not.
+    <strong>A confirmed gene loses its pen.</strong> Verdant's three floors, the pack
+    leader's cows and the spontaneous-breeding field have all been here and are gone
+    &mdash; the last two by the owner's call on 2026-09-12 (&ldquo;we're done with those
+    tests&rdquo;). A pen for a settled question is a pen somebody has to walk past to
+    reach a live one.
 </p>
 
 <p>
@@ -378,6 +400,55 @@
     inside a bedrock box means a missing horse did not fall down a hole and a stalled farm
     did not stall because something spawned in a cave.
 </p>
+
+<h3 id="the-watch">The watch &mdash; <code>DebugWorldWatch</code></h3>
+
+<p>
+    <code>ActionTrace</code> logs things a <em>person</em> does. Every test above is the
+    opposite: a sapling that appeared, snow that stopped melting, eggs that piled up and
+    then stopped. None of those is an event anybody fires &mdash; they are
+    <strong>differences between two readings</strong>. So each pen registers itself as a
+    named box with a list of blocks worth counting, and two clocks run over them.
+</p>
+
+<ul>
+    <li><strong>A scan every ten seconds</strong> counts the watched blocks and creatures
+        in each box and logs <em>only what changed</em>. Eight hours of &ldquo;nothing
+        moved&rdquo; every ten seconds is 2&nbsp;880 lines saying nothing.</li>
+    <li><strong>A census every two minutes</strong> prints every box whether it moved or
+        not, plus the dimension's entity count, day or night, and the real milliseconds
+        per tick over the window. A flat line in the census is evidence; a gap in the log
+        is not. <code>/testkit census</code> prints one on demand, which is the check to
+        run <em>before</em> walking away rather than the discovery to make afterwards.</li>
+    <li><strong>Event hooks</strong> for what a delta cannot explain: items dropped and
+        items removed <em>with their age</em> (a 6&nbsp;000-tick despawn and a cap
+        refusing to drop look identical in a count and opposite in a log), creatures
+        joining and dying, bone meal, saplings becoming trees, blocks placed by anything
+        that is not a player, explosions, teleports. Gene sounds are counted rather than
+        logged.</li>
+    <li>Everything is prefixed <code>[watch]</code>, and the hooks throttle at 400 lines a
+        minute and say how many they swallowed &mdash; the tool that finds a runaway must
+        not be the thing that makes it worse.</li>
+</ul>
+
+<div class="note danger">
+    <span class="label">The yard's chunks are force-loaded, and that is what makes a night mean anything</span>
+    <p>
+        Minecraft only ticks what is near a player. Blocks stop getting random ticks,
+        entities stop moving, and a gene on a 9&nbsp;000-tick timer simply does not fire.
+        The yard is 110 blocks deep and its far end is out of range of its near end, so
+        <em>any</em> place to stand leaves part of it asleep &mdash; which in the morning
+        reads exactly like the gene at that end being broken.
+    </p>
+    <p>
+        So entering forces the yard's chunks (about twenty-five) and leaving releases
+        them, and any left behind by a crash are swept at server start: a dimension that
+        quietly ticked for ever afterwards would be a bug this tool caused rather than
+        found. What the player must still do is <strong>stay logged in and off the pause
+        menu</strong> &mdash; singleplayer stops the server on Esc &mdash; and
+        <strong>not leave the dimension</strong>, which tears the plot down.
+    </p>
+</div>
 
 <div class="note danger">
     <span class="label">It had no night until 2026-09-12, and glowstone means night is not enough</span>
@@ -400,17 +471,26 @@
 </div>
 
 <div class="note">
-    <span class="label">Two things that would have leaked, and one that says so</span>
+    <span class="label">Three things that would have leaked, and one that says so</span>
     <p>
         The yard is the first thing in the dimension built <em>outside</em> the corridor
         walls, and a plot's bounding box is what tears the plot down and what walks tamed
-        horses home. Left out of it, the breeding field &mdash; a population that grows on
-        purpose &mdash; would have outlived its plot and piled up on a recycled origin for
-        ever. <code>plotBox</code> covers the yard's extent
-        (<code>DebugTestYard.FAR_Z</code>, <code>WEST_DX</code>, <code>EAST_DX</code>).
+        horses home. <code>plotBox</code> covers the yard's extent
+        (<code>DebugTestYard.FAR_Z</code>, <code>WEST_DX</code>, <code>EAST_DX</code>), or
+        anything built out there would outlive its plot and pile up on a recycled origin
+        for ever.
     </p>
     <p>
-        And because nobody can watch this code run, it <strong>reads the yard back</strong>
+        <strong>And it walks home tamed <em>and owned</em> horses, not merely tamed
+        ones.</strong> The moment the yard's own stock became tame, &ldquo;tamed&rdquo;
+        stopped meaning &ldquo;yours&rdquo;: leaving the dimension would have deposited two
+        dozen pieces of scenery at the overworld portal and left an empty yard behind. A
+        horse a player tamed has an owner (<code>tameWithName</code> sets one); the yard's
+        are set tame with none, and that is the line between somebody's horse and the
+        furniture.
+    </p>
+    <p>
+        Because nobody can watch this code run, it <strong>reads the yard back</strong>
         after building it: the path's centre line and a grid over the floor, checking each
         spot has something to stand on and room to stand in. One line in the log either
         way &mdash; <em>test yard built and walkable</em>, or a count of the holes. A floor
