@@ -27,6 +27,104 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13d">2026-09-13 &mdash; reading the yard back, and a leak that was hiding inside the number meant to detect it</h2>
+
+<p>
+    The first run of the new yard, read off the log. Most of the pens answered
+    their own questions; one was lying; and the census turned out to have been
+    concealing a leak in the one figure that exists to find leaks.
+</p>
+
+<h3>What the log settled outright</h3>
+<ul>
+    <li><strong>Egg layer, all eight alleles.</strong> Every one dropped its own
+        item &mdash; leather, wool, bone, slime, ink, feather, string, egg. The
+        pen separates itself exactly as designed, because a feather can only
+        have come from the feather horse.</li>
+    <li><strong>The six deathbed kills dropped leather and nothing else.</strong>
+        Killed inside thirty seconds, and the only items to appear were plain
+        vanilla horse drops. That is precisely the signature of a handler that
+        returns before <code>getDrops().clear()</code>, and it is how
+        <a href="known-gaps.html">the seventh protection</a> was confirmed
+        rather than merely suspected.</li>
+    <li><strong>The gladiator's death, to the tick.</strong> Seven consecutive
+        zombie hits, twenty ticks apart, three damage each, into twenty-two
+        health: dead in 6.4 seconds with no misses. Nothing was malfunctioning
+        &mdash; a horse and a zombie both swing every twenty ticks for three
+        damage, which is <em>exact parity</em>, and exact parity is a coin flip.
+        Worth stating because it is the opposite of the intuitive reading: the
+        fix is not "make the horse work", it is "stop making it a fair fight".</li>
+    <li><strong>Bone-meal dryad honours the crop carve-out.</strong> One
+        <code>gene fertilised | grass_block</code> and eighteen wheat standing
+        untouched all run. The carve-out cannot be observed directly - a crop
+        nobody fertilised grows anyway - so the evidence is the list of what it
+        <em>did</em> touch, which is why that line exists.</li>
+</ul>
+
+<h3>The pen that was lying, and why the lie is the more useful finding</h3>
+<p>
+    The eyesight pen reported <code>movement_speed 0.165-0.221</code> in the lit
+    half and <code>0.165-0.221</code> in the dark half, census after census.
+    Identical to three decimals reads as a dead gene.
+</p>
+<p>
+    It is very probably the opposite. Caveborn is faster in the dark and
+    daywalker slower, so the two horses' values <strong>swap</strong> when the
+    condition flips &mdash; and a set whose members have exchanged places has
+    exactly the same minimum and maximum as one that never moved. The tell was
+    in the outliers: three censuses read <code>0.165-0.165</code> and four read
+    <code>0.221-0.221</code>, which are the moments mid-swap with one horse
+    flipped and the other not. <strong>A measurement aggregated over the things
+    being compared cannot see the comparison</strong> &mdash; the same sentence
+    that <a href="known-gaps.html#gap-211">gap 211</a> has been making about the
+    spread counter. The readout names each horse now.
+</p>
+<p>
+    Beside it, <strong>7 480 heal lines in eighteen minutes</strong>, almost all
+    of them ordinary gated regen ticking the hundred and forty gallery horses
+    back to full. The healer pen's own readings were in there and unfindable.
+    Healing is scoped to a watched pen now; damage stays dimension-wide, because
+    a horse dying anywhere is worth a line and this log is the argument for it.
+</p>
+
+<h3>The leak, which took the owner's own account to identify</h3>
+<p>
+    The census went from <strong>205 horses to 290</strong> across one plot
+    rebuild. Two independent bugs on the same path, and the second one is the
+    interesting half.
+</p>
+<p>
+    <strong>The teardown sweep was blind.</strong> It was a single
+    <code>getEntities(plotBox(plot))</code>, and an entity query returns only
+    what is in a <em>loaded</em> chunk &mdash; while a plot is a corridor
+    thousands of blocks long whose far end unloads the moment nobody is standing
+    in it. Every horse past the player's chunk radius survived, and the teardown
+    said nothing about it because it had nothing to say. It walks the built
+    range chunk by chunk now, forcing each and releasing it immediately, bounded
+    by <code>highestIndex</code> rather than the declared box. It also releases
+    the watch's forced chunks <em>after</em> the sweep rather than before, which
+    was the same mistake in miniature.
+</p>
+<p>
+    <strong>And dying is a third way out of the dimension that nothing was
+    watching.</strong> <code>PlayerChangedDimensionEvent</code> does not fire for
+    a respawn - a respawn builds a new player entity rather than travelling - so
+    a player who died in a plot left it claimed, built, and holding forced
+    chunks for the life of the world. The owner supplied that half herself:
+    <em>&ldquo;I did die and have to respawn and go back in, if that could be
+    it.&rdquo;</em> It was.
+</p>
+<p>
+    <strong>The reason this one is worth a section rather than a line:</strong>
+    the entity count is the single number in the census that says whether this
+    dimension is leaking, and for as long as this was open <em>that number was
+    measuring the leak rather than reporting it</em>. An instrument that is
+    itself downstream of the fault is the hardest kind to distrust, and the only
+    thing that broke it open was a figure that moved when nothing should have
+    moved. The teardown now logs what it removed, so the next one is checkable
+    instead of inferred.
+</p>
+
 <h2 id="d2026-09-13c">2026-09-13 &mdash; the yard stopped protecting the horses, and grew the half of the mod it never had</h2>
 
 <p>

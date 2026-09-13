@@ -10,6 +10,8 @@ import com.example.horsegenetics.neoforge.block.HayPortalBlock;
 import com.example.horsegenetics.neoforge.block.ModBlocks;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -989,19 +991,93 @@ public final class DebugPenManager {
      * way to leave, for nothing.
      */
     private static void tearDown(ServerLevel level, Plot plot) {
-        // The watch holds forced chunks on this plot's yard. They have to go
-        // before the plot does, or the dimension keeps ticking a yard that is
-        // no longer anybody's for the life of the world.
-        DebugWorldWatch.stop(level);
         HorseAncestryData ancestry = level.getServer() == null
                 ? null : HorseAncestryData.get(level.getServer());
-        for (Entity e : level.getEntities((Entity) null, plotBox(plot), e -> !(e instanceof ServerPlayer))) {
-            if (ancestry != null && e instanceof Horse horse && HorseRecords.hasRealRecord(horse)) {
-                ancestry.forget(HorseRecords.of(horse).id());
-            }
-            e.discard();
-        }
+        int removed = sweepPlot(level, plot, ancestry);
+        // The watch's forced chunks go AFTER the sweep, not before. They have
+        // to go at all - otherwise the dimension keeps ticking a yard that is
+        // nobody's for the life of the world - but releasing them first means
+        // the yard can unload out from under the very query that is supposed to
+        // be emptying it.
+        DebugWorldWatch.stop(level);
         FREE_ORIGINS.add(plot.originX);
+        HorseGenetics.LOGGER.info("[Debug] plot at x={} torn down, {} entit{} removed",
+                plot.originX, removed, removed == 1 ? "y" : "ies");
+    }
+
+    /**
+     * <b>Empty a plot chunk by chunk, loading each one first.</b>
+     *
+     * <p>This used to be a single {@code getEntities(plotBox(plot))} and that
+     * <b>silently leaked most of the plot</b>. An entity query only ever returns
+     * what is in a <i>loaded</i> chunk, and a plot is a corridor thousands of
+     * blocks long: the far end is unloaded the moment the player walks back,
+     * so every horse they had walked past survived the teardown and stayed in
+     * the world for ever.
+     *
+     * <p>Measured 2026-09-13, and it took a player death to make it visible.
+     * The owner died in the horse dimension, respawned, and walked back in - a
+     * fresh plot, so a teardown of the old one - and the census went from
+     * <b>205 horses to 290</b> across the rebuild. Eighty-five left behind,
+     * which is about twenty corridor segments: exactly the stretch she had
+     * walked and left loaded-then-unloaded on the first visit. Every re-entry
+     * would have added another heap, and the entity count - the one number that
+     * says whether the dimension is leaking at all - was measuring the leak
+     * rather than reporting it.
+     *
+     * <h2>Why chunk by chunk, and why bounded by {@code highestIndex}</h2>
+     * The plot's <i>declared</i> box reaches
+     * {@value #PEN_COUNT} pens, which is some seven thousand blocks of x - call
+     * it seven thousand chunks with the yard's width. Forcing all of those to
+     * empty a corridor that was built thirty segments deep would be far worse
+     * than the bug. {@link Plot#highestIndex} is what was actually built, so
+     * that is what gets walked.
+     *
+     * <p>One chunk is forced at a time and released immediately, so the peak
+     * cost is one chunk rather than the whole corridor. It is slower than a
+     * single query and it happens once, on the way out of a dimension that is
+     * already teleporting you.
+     */
+    private static int sweepPlot(ServerLevel level, Plot plot, @Nullable HorseAncestryData ancestry) {
+        AABB box = builtBox(plot);
+        int removed = 0;
+        int cx0 = SectionPos.blockToSectionCoord((int) Math.floor(box.minX));
+        int cx1 = SectionPos.blockToSectionCoord((int) Math.ceil(box.maxX));
+        int cz0 = SectionPos.blockToSectionCoord((int) Math.floor(box.minZ));
+        int cz1 = SectionPos.blockToSectionCoord((int) Math.ceil(box.maxZ));
+        for (int cx = cx0; cx <= cx1; cx++) {
+            for (int cz = cz0; cz <= cz1; cz++) {
+                boolean forced = level.setChunkForced(cx, cz, true);
+                AABB chunkBox = new AABB(
+                        SectionPos.sectionToBlockCoord(cx), box.minY, SectionPos.sectionToBlockCoord(cz),
+                        SectionPos.sectionToBlockCoord(cx + 1), box.maxY, SectionPos.sectionToBlockCoord(cz + 1));
+                for (Entity e : level.getEntities((Entity) null, chunkBox.intersect(box),
+                        e -> !(e instanceof ServerPlayer))) {
+                    if (ancestry != null && e instanceof Horse horse && HorseRecords.hasRealRecord(horse)) {
+                        ancestry.forget(HorseRecords.of(horse).id());
+                    }
+                    e.discard();
+                    removed++;
+                }
+                if (forced) {
+                    level.setChunkForced(cx, cz, false);
+                }
+            }
+        }
+        return removed;
+    }
+
+    /**
+     * The part of {@link #plotBox} that was <b>actually built</b>. The declared
+     * box is sized for {@value #PEN_COUNT} pens because that is the corridor's
+     * limit; {@link Plot#highestIndex} is how many of them exist.
+     */
+    private static AABB builtBox(Plot plot) {
+        AABB declared = plotBox(plot);
+        int xHi = Math.max(plot.originX + (plot.highestIndex + 2) * PERIOD + 3,
+                plot.originX + DebugTestYard.EAST_DX) + 1;
+        return new AABB(declared.minX, declared.minY, declared.minZ,
+                Math.min(declared.maxX, xHi), declared.maxY, declared.maxZ);
     }
 
     static void fastSet(ServerLevel level, BlockPos pos, BlockState state) {

@@ -250,6 +250,39 @@ public final class PortalEventHandler {
         }
     }
 
+    /**
+     * <b>Dying in the horse dimension is the third way out of it, and it was
+     * the one nobody had hooked.</b>
+     *
+     * <p>{@code PlayerChangedDimensionEvent} does not fire for a respawn - a
+     * respawn is not travel, it builds a new player entity - so a player who
+     * died in a plot left it <b>claimed, built, and holding forced
+     * chunks</b>, for the life of the world. Nothing tore it down unless they
+     * happened to walk back in through a hay portal, which is the only path
+     * that calls {@code enter()} and therefore the only path that cleaned up.
+     *
+     * <p>Found on 2026-09-13, and the owner's own account is what identified
+     * it: <i>"I did die and have to respawn and go back in, if that could be
+     * it."</i> It was. The census went from 205 horses to 290 across that one
+     * round trip - and the entity count is the single number that says whether
+     * this dimension is leaking, so for as long as this was open that number
+     * was measuring the leak instead of reporting it.
+     *
+     * <p>Guarded on where they respawned rather than on where they died: a
+     * spawn point inside the debug dimension is possible, and tearing a plot
+     * down under a player standing in it is a worse bug than the one being
+     * fixed.
+     */
+    @SubscribeEvent
+    static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+                || player.level().getServer() == null
+                || player.level().dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+            return;
+        }
+        DebugPenManager.leave(player.level().getServer(), player.getUUID());
+    }
+
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && player.level().getServer() != null) {
