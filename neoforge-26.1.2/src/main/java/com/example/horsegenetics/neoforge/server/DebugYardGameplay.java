@@ -248,48 +248,13 @@ final class DebugYardGameplay {
         DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1, hx0 + 6.0, (z0 + z1) / 2.0,
                 Sex.FEMALE, DebugTestYard.PALE, false), "TICKET MARE - TAME ME");
 
-        // AND THE FOUR AWKWARD STALLS GET THE WHOLE EAST BLOCK, two by two.
-        // Owner, on the first version: "stall testing is too close to another
-        // pen, please put more space." It was packed into one 19-wide block
-        // alongside the holding pen, with single-block gaps and a one-block
-        // corridor serving two stall doorways - and a stall you have to squeeze
-        // past sideways is a stall whose bind you cannot judge, because you
-        // cannot see the shape you are binding.
-        //
-        // Each of these is a case the ticket has to get RIGHT, and each was an
-        // instruction to go and build something before it could be tried at all.
-        int sx = cx + EAST_MIN;
-        stallBox(level, gy, sx, sx + 4, z0, z0 + 5, true);
-        DebugPenManager.placeSign(level, new BlockPos(sx + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("STALL: TIGHT", "barely wider than", "the horse. Centre", "it anyway"));
-
-        stallBox(level, gy, sx + 8, sx + 14, z0, z0 + 5, true);
-        for (int x = sx + 12; x <= sx + 13; x++) {
-            for (int z = z0 + 1; z <= z0 + 2; z++) {
-                for (int y = gy + 1; y <= gy + 4; y++) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, y, z),
-                            Blocks.STONE_BRICKS.defaultBlockState());
-                }
-            }
-        }
-        DebugPenManager.placeSign(level, new BlockPos(sx + 9, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("STALL: L-SHAPED", "'dead centre' of", "an L is not the", "box's centre"));
-
-        stallBox(level, gy, sx, sx + 5, z0 + 9, z1, true);
-        for (int x = sx + 1; x <= sx + 4; x++) {
-            for (int z = z0 + 10; z <= z1 - 1; z++) {
-                for (int y = gy + 1; y <= gy + 3; y++) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, y, z),
-                            Blocks.HAY_BLOCK.defaultBlockState());
-                }
-            }
-        }
-        DebugPenManager.placeSign(level, new BlockPos(sx + 2, gy + 1, z0 + 8), Direction.NORTH,
-                List.of("STALL: FULL", "SOLID hay. Ticket", "must REFUSE and", "NOT be used up"));
-
-        stallBox(level, gy, sx + 9, sx + 14, z0 + 9, z1, true);
-        DebugPenManager.placeSign(level, new BlockPos(sx + 11, gy + 1, z0 + 8), Direction.NORTH,
-                List.of("STALL: ROOFED", "bind it: does the", "size message give", "the REAL height?"));
+        // ROW C EAST IS EMPTY: the four awkward stalls are confirmed and gone.
+        // Owner, 2026-09-13: "all the stalls that should work, do." The tight
+        // and L-shaped stalls bind and land a horse dead centre with the sign
+        // hung outside (it used to measure the sign's own top as a one-tile
+        // room - gap 223), the roofed stall does the same, and the hay-packed
+        // stall refuses the sign because it has no floor. The holding pen above
+        // stays: nobody has tested it yet, and the ticket mare is its horse.
     }
 
     // ==================================================================
@@ -727,55 +692,6 @@ final class DebugYardGameplay {
         level.setBlockAndUpdate(new BlockPos(doorX + 1, gy + 2, z0), upper);
     }
 
-    /**
-     * <b>A stone stall.</b> A stall in this mod is a <i>room</i> - the bind
-     * walks the enclosed space - so a fence ring is not one, which is the
-     * difference between these four and the holding pen beside them. The gap in
-     * the north wall is the doorway; it is left open rather than doored so a
-     * horse can be led in, and because a shut door is one more thing to blame
-     * when a bind fails.
-     */
-    private static void stallBox(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
-                                 boolean roof) {
-        BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
-                DebugPenManager.groundColumn(level, x, gy, z, edge ? wall : Blocks.SMOOTH_STONE.defaultBlockState());
-                for (int y = gy + 1; y <= gy + 3; y++) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, y, z),
-                            edge ? wall : Blocks.AIR.defaultBlockState());
-                }
-                if (roof) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z), wall);
-                }
-            }
-        }
-        // A GATE, NOT A HOLE - and this is why none of the four stalls could be
-        // detected. StallDetector walks the floor and treats a door, a trapdoor
-        // or a fence gate as the edge of the room IN EVERY STATE; open air is
-        // none of those, so the fill went straight out through the gap, across
-        // the open yard, past MAX_COLUMNS and gave up. Every one of these
-        // stalls then fell back to the blind box that used to stand in for a
-        // failed search, which is what the owner was looking at when she said
-        // the tight stall "detects an area in front of the sign, which includes
-        // the wall".
-        int doorX = (x0 + x1) / 2;
-        DebugPenManager.fastSet(level, new BlockPos(doorX, gy + 2, z0), Blocks.AIR.defaultBlockState());
-        DebugPenManager.fastSet(level, new BlockPos(doorX, gy + 1, z0),
-                Blocks.OAK_FENCE_GATE.defaultBlockState()
-                        .setValue(net.minecraft.world.level.block.FenceGateBlock.FACING, Direction.NORTH));
-        // AND LIGHT IT, because a roofed stall is a sealed dark box and the
-        // dimension spawns zombies in those. Eighteen of the nineteen natural
-        // spawns in the yard's first run were inside these four stalls - they
-        // clear gy+1..gy+3 to air, which WIPES the yard's own invisible lamp at
-        // gy+3, and then roof it over and put nothing back. A stall that
-        // manufactures zombies and lets them out through its doorway is not a
-        // stall test, it is a mob farm in the middle of the walkway.
-        DebugPenManager.fastSet(level, new BlockPos(doorX, gy + 3, (z0 + z1) / 2),
-                Blocks.LIGHT.defaultBlockState()
-                        .setValue(net.minecraft.world.level.block.LightBlock.LEVEL, 15));
-    }
 
     /**
      * <b>A chest, filled, with its purpose written beside it.</b>
