@@ -709,6 +709,58 @@ public final class AbilityType {
                         v.when, v.minDose);
             }));
 
+    /**
+     * <b>How the horse feels about other creatures while it is light</b> - the
+     * day mirror of {@link #NIGHT_TEMPER}, with the same fields and the same
+     * bounds. A separate verb, as the night one's note always said it would be.
+     */
+    public static final AbilityType DAY_TEMPER = register(new AbilityType("day_temper",
+            List.of(
+                    Param.requiredChoice("mood", List.of("aggressive", "flee"),
+                            "whether the horse goes for them or runs from them"),
+                    Param.requiredChoice("towards", NIGHT_TARGETS,
+                            "who it feels that about - 'passive' is animals, 'hostile' is "
+                                    + "monsters, 'all' is both plus players"),
+                    Param.num("radius", 16, "how far it notices, in blocks, 1-48"),
+                    Param.num("interval", 20, "ticks between scans (at least 1)"),
+                    Param.num("max_targets", 8, "most entities one scan may consider, 1-64")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 48) {
+                    throw v.bad("radius must be 1-48 blocks, got " + radius);
+                }
+                int interval = v.intOf("interval");
+                if (interval < 1) {
+                    throw v.bad("interval must be at least 1 tick, got " + interval);
+                }
+                int maxTargets = v.intOf("max_targets");
+                if (maxTargets < 1 || maxTargets > 64) {
+                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
+                }
+                return new GeneAbility.DayTemper(v.str("mood"), v.str("towards"), radius,
+                        interval, maxTargets, v.when, v.minDose);
+            }));
+
+    /** <b>What the horse does about the nearest player while it is light</b> - the day mirror of {@link #NIGHT_WATCH}. */
+    public static final AbilityType DAY_WATCH = register(new AbilityType("day_watch",
+            List.of(
+                    Param.requiredChoice("mode",
+                            List.of("stare", "approach", "line_of_sight", "unseen", "behind"),
+                            "what it does about the nearest player"),
+                    Param.num("radius", 10,
+                            "the distance the mode is measured against, in blocks, 1-48 - what "
+                                    + "'approach' closes to, and how far the others look"),
+                    Param.bool("silent_steps", true,
+                            "suppress the horse's footfall sound while the mode is active")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 48) {
+                    throw v.bad("radius must be 1-48 blocks, got " + radius);
+                }
+                return new GeneAbility.DayWatch(v.str("mode"), radius, v.bool("silent_steps"),
+                        v.when, v.minDose);
+            }));
+
     /** The most damage one hit may deal. A guard against a typo, not a balance number. */
     public static final double MAX_COMBAT_DAMAGE = 200.0;
 

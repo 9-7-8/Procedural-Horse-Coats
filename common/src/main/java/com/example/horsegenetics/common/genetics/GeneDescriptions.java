@@ -585,6 +585,16 @@ public final class GeneDescriptions {
                             + "rather than a list, each one a little closer and a little worse - from "
                             + "staring through walls to standing directly behind you. Any of them, "
                             + "homozygous, also makes the horse silent on its feet at night."),
+            Map.entry("horsegenetics.magic_day_temper",
+                    "The daylight twin of magic night temper: the same eight variants - four that "
+                            + "hunt and four that run, from riders, animals, monsters or everything - "
+                            + "active only while the sun is up. Far rarer in the wild than the night "
+                            + "locus."),
+            Map.entry("horsegenetics.magic_day_watch",
+                    "The daylight twin of magic night watch: the same five-rung ladder from staring "
+                            + "through walls to standing directly behind you, silent on its feet, "
+                            + "active only while the sun is up. Far rarer in the wild than the night "
+                            + "locus."),
             Map.entry("horsegenetics.magic_swim_speed",
                     "How fast the horse moves in water, and nothing else. It is unrelated to magic "
                             + "speed - not related-but-separate, unrelated - so a horse can be the "

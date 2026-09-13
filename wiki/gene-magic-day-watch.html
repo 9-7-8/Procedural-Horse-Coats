@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic day watch &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic day watch</h1>
+
+<p class="lede">
+    What the horse does about <em>you</em> while the sun is up &mdash; the daylight twin of
+    <a href="gene-magic-night-watch.html">magic night watch</a>. The same five-rung ladder
+    from staring through walls to standing directly behind you, and the same silence on its
+    feet. After dark it is an ordinary horse.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_day_watch"></div>
+
+<h2 id="what">The five</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>While it is light</th></tr></thead>
+    <tbody>
+        <tr><td><code>Wst/Wst</code></td><td>stops, faces you and stares &mdash; through walls, from anywhere.</td></tr>
+        <tr><td><code>Wnr/Wnr</code></td><td>closes to about ten blocks, then does the same.</td></tr>
+        <tr><td><code>Wsi/Wsi</code></td><td>watches only while it can see you; a closed door ends it.</td></tr>
+        <tr><td><code>Wun/Wun</code></td><td>stands where you are not looking, and watches from there.</td></tr>
+        <tr><td><code>Wbh/Wbh</code></td><td>stands close behind you &mdash; until you turn round.</td></tr>
+        <tr><td>anything else</td><td>an ordinary horse</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Any of the five is <strong>silent on its feet</strong> while it is light. If the horse
+    also carries <a href="gene-magic-day-temper.html">magic day temper</a> and that has
+    something to hunt or flee, the temper wins and the watching waits.
+</p>
+
+<h2 id="founders">Rare in the wild</h2>
+
+<p>
+    Where every wild horse carries a night watcher, most carry nothing here: each variant is
+    carried silently by about one and a half wild horses in a hundred, and none shows it.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_day_watch"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_day_watch</code></dd></div>
+    <div><dt>Alleles</dt><dd>the night watch's five tokens, plus <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd><code>MagicDayWatchGene.PRIORITY</code> &mdash; the magical behaviour band</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <a href="making-a-gene.html#day-watch"><code>day_watch</code></a> effect</dd></div>
+    <div><dt>In the wild</dt><dd>carriers only, <code>WILD_EACH_PERCENT</code> each; the rest <code>n/n</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        It reuses <code>NightWatchGoal</code> unchanged &mdash; the goal never knew it was
+        night, only which ability the handler gave it. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="daylight">Why daylight does not make it friendlier</h2>
+
+<p>
+    The night watcher borrows the oldest fear there is: something moving where you cannot see
+    it in the dark. In daylight you <em>can</em> see it, and that is the point of this twin
+    &mdash; a horse that stands behind you at noon, in a bright empty field, silently, is
+    unsettling for a different reason: there is nowhere for it to have been hiding.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-night-watch.html">Magic night watch</a>
+        <a href="gene-magic-day-temper.html">Magic day temper</a>
+        <a href="making-a-gene.html#day-watch">The day_watch verb</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicDayWatchGene.java</code>,
+    <code>neoforge/server/NightWatchGoal.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

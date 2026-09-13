@@ -29,9 +29,22 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The translator for the two <b>night</b> loci - {@code magic_night_temper},
  * which decides what the horse becomes after dark, and
- * {@code magic_night_watch}, which decides what it does about you.
+ * {@code magic_night_watch}, which decides what it does about you - and for
+ * their <b>daylight twins</b>, {@code magic_day_temper} and
+ * {@code magic_day_watch}, which are the same behaviours with the clock turned
+ * over. One handler for both, because the supersede rule and the flee path are
+ * the same whichever half of the day it is; the name stays because the night
+ * pair came first.
  *
- * <p><b>Not verified in-game.</b> Written against 26.1.2 sources.
+ * <p><b>Not verified in-game.</b> Written against 26.1.2 sources; the day pair is
+ * newer still.
+ *
+ * <h2>A day behaviour costs a cached lookup, not a parse</h2>
+ * The scan used to return before reading anything by day, so adding day verbs
+ * would otherwise have meant parsing every horse's genome every second, all day.
+ * {@link #TIMED} keeps each horse's four resolved abilities against the genetic
+ * code they came from, and a horse with none of them costs a map lookup and a
+ * string comparison.
  *
  * <h2>The supersede rule lives here, and could not live anywhere else</h2>
  * The temper locus beats the watch locus <b>whenever it actually has something
@@ -127,24 +140,17 @@ public final class NightBehaviourHandler {
      */
     private static void scan(Horse horse, Level level) {
         UUID id = horse.getUUID();
-        if (level.isBrightOutside()) {
-            // Daytime: both loci are silent, and so is the horse's own gate on
-            // being quiet. Clearing rather than leaving stale entries is what
-            // makes dawn actually end the behaviour.
+        Timed timed = timedOf(horse);
+        boolean day = level.isBrightOutside();
+        GeneAbility.NightTemper temper = day ? timed.dayTemper() : timed.nightTemper();
+        GeneAbility.NightWatch watch = day ? timed.dayWatch() : timed.nightWatch();
+        if (temper == null && watch == null) {
+            // Nothing for this half of the day: both loci are silent, and so is
+            // the horse's own gate on being quiet. Clearing rather than leaving
+            // stale entries is what makes dawn (or dusk) actually end the behaviour.
             WATCHING.remove(id);
             SILENT.remove(id);
             return;
-        }
-
-        List<HorseAbilities.Active> abilities = abilitiesOf(horse);
-        GeneAbility.NightTemper temper = null;
-        GeneAbility.NightWatch watch = null;
-        for (HorseAbilities.Active active : abilities) {
-            if (active.ability() instanceof GeneAbility.NightTemper t) {
-                temper = t;
-            } else if (active.ability() instanceof GeneAbility.NightWatch w) {
-                watch = w;
-            }
         }
 
         boolean temperActing = temper != null && applyTemper(temper, horse, level);
@@ -321,7 +327,51 @@ public final class NightBehaviourHandler {
         if (event.getEntity() instanceof Horse horse) {
             WATCHING.remove(horse.getUUID());
             SILENT.remove(horse.getUUID());
+            TIMED.remove(horse.getUUID());
         }
+    }
+
+    /**
+     * One horse's four time-of-day behaviours, resolved, and the genetic code
+     * they were resolved from. The day pair is stored as the night records -
+     * they have the same fields - so the rest of this class and
+     * {@link NightWatchGoal} never need to know which half of the day it is.
+     */
+    private record Timed(String code, GeneAbility.NightTemper nightTemper, GeneAbility.NightWatch nightWatch,
+                         GeneAbility.NightTemper dayTemper, GeneAbility.NightWatch dayWatch) {
+        static final Timed NONE = new Timed("", null, null, null, null);
+    }
+
+    private static final Map<UUID, Timed> TIMED = new ConcurrentHashMap<>();
+
+    private static Timed timedOf(Horse horse) {
+        HorseRecord record = HorseRecords.of(horse);
+        if (!record.hasName()) {
+            return Timed.NONE;
+        }
+        String code = record.geneticCode();
+        Timed cached = TIMED.get(horse.getUUID());
+        if (cached != null && cached.code().equals(code)) {
+            return cached;
+        }
+        GeneAbility.NightTemper nt = null;
+        GeneAbility.NightWatch nw = null;
+        GeneAbility.NightTemper dt = null;
+        GeneAbility.NightWatch dw = null;
+        for (HorseAbilities.Active active : abilitiesOf(horse)) {
+            switch (active.ability()) {
+                case GeneAbility.NightTemper t -> nt = t;
+                case GeneAbility.NightWatch w -> nw = w;
+                case GeneAbility.DayTemper t -> dt = new GeneAbility.NightTemper(t.mood(), t.towards(),
+                        t.radius(), t.intervalTicks(), t.maxTargets(), t.when(), t.minDose());
+                case GeneAbility.DayWatch w -> dw = new GeneAbility.NightWatch(w.mode(), w.radius(),
+                        w.silentSteps(), w.when(), w.minDose());
+                default -> { }
+            }
+        }
+        Timed fresh = new Timed(code, nt, nw, dt, dw);
+        TIMED.put(horse.getUUID(), fresh);
+        return fresh;
     }
 
     private static List<HorseAbilities.Active> abilitiesOf(Horse horse) {

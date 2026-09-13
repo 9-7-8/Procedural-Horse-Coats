@@ -879,6 +879,31 @@ window.HG = window.HG || {};
           "suppress the horse's footfall sound while the mode is active")
       ]
     },
+    day_temper: {
+      doc: "How the horse feels about other creatures WHILE IT IS LIGHT - night_temper's "
+        + "daylight twin, with the same fields.",
+      params: [
+        eChoice("mood", ["aggressive", "flee"], null,
+          "whether the horse goes for them or runs from them"),
+        eChoice("towards", ["players", "passive", "hostile", "all"], null,
+          "'passive' is animals, 'hostile' is monsters, 'all' is both plus players"),
+        eNum("radius", 16, "how far it notices, in blocks", { min: 1, max: 48, step: 1 }),
+        eNum("interval", 20, "ticks between scans", { min: 1, max: 200, step: 1 }),
+        eNum("max_targets", 8, "most entities one scan may consider", { min: 1, max: 64, step: 1 })
+      ]
+    },
+    day_watch: {
+      doc: "What the horse does about the nearest player while it is light - night_watch's "
+        + "daylight twin.",
+      params: [
+        eChoice("mode", ["stare", "approach", "line_of_sight", "unseen", "behind"], null,
+          "what it does about the nearest player"),
+        eNum("radius", 10, "the distance the mode is measured against, in blocks",
+          { min: 1, max: 48, step: 1 }),
+        e("silent_steps", "BOOL", true,
+          "suppress the horse's footfall sound while the mode is active")
+      ]
+    },
     combat: {
       doc: "What the horse hits for, in health points. A vanilla horse has no attack at all.",
       params: [

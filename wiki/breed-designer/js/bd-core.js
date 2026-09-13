@@ -34,10 +34,17 @@ window.HG = window.HG || {};
     "horsegenetics.magic_health", "horsegenetics.magic_jump"];
   bd.BASE_KEYS = ["horsegenetics.extension", "horsegenetics.agouti", "horsegenetics.shade"];
   bd.DIET_KEYS = ["horsegenetics.diet", "horsegenetics.food_preference"];
-  bd.AGGRO_KEYS = ["horsegenetics.magic_mob_aura", "horsegenetics.magic_night_temper",
-    "horsegenetics.magic_night_watch", "horsegenetics.lycan", "horsegenetics.intimidating",
+  // What the breed does by time of day - hunting, fleeing, stalking, shifting,
+  // burning - and what it does in a fight. Two steps, owner's call (2026-09-13):
+  // the dispositions were buried among the combat genes.
+  bd.HABIT_KEYS = ["horsegenetics.magic_night_temper", "horsegenetics.magic_night_watch",
+    "horsegenetics.magic_day_temper", "horsegenetics.magic_day_watch",
+    "horsegenetics.lycan", "horsegenetics.sun_sensitivity"];
+  bd.FIGHT_KEYS = ["horsegenetics.magic_mob_aura", "horsegenetics.intimidating",
     "horsegenetics.gladiator", "horsegenetics.guardian", "horsegenetics.pack_leader",
-    "horsegenetics.magic_fighter", "horsegenetics.holy_ward", "horsegenetics.sun_sensitivity"];
+    "horsegenetics.magic_fighter", "horsegenetics.holy_ward"];
+  /** Both, for the "everything else" step to leave out. */
+  bd.AGGRO_KEYS = bd.HABIT_KEYS.concat(bd.FIGHT_KEYS);
   // The natural eye loci every breed names from the start, at their wild type:
   // brown irises, white sclera. Champagne, cream and the white patterns still
   // change them when a horse is made (Eyes.force) - naming them only stops a

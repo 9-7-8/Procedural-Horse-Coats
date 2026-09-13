@@ -202,7 +202,6 @@ window.HG.pages = {
                 { href: "gene-squiggle.html", text: "Squiggle", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-starburst.html", text: "Starburst", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-suit.html", text: "Suit", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-sun-sensitivity.html", text: "Sun sensitivity", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-synort.html", text: "Synort", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-teardrop.html", text: "Teardrop", kind: "magical", views: ["gameplay","coding"] },
@@ -240,6 +239,8 @@ window.HG.pages = {
                 { href: "gene-intimidating.html", text: "Intimidating", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-pack-leader.html", text: "Leader of the pack", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-lycan.html", text: "LYCAN", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-day-temper.html", text: "Magic day temper", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-day-watch.html", text: "Magic day watch", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-mob-aura.html", text: "Magic mob aura", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-night-temper.html", text: "Magic night temper", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-night-watch.html", text: "Magic night watch", kind: "magical", views: ["gameplay","coding","science"] },
@@ -248,6 +249,7 @@ window.HG.pages = {
                 { href: "gene-ocean-born.html", text: "Ocean-born", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-spawner.html", text: "Spawner", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-spontaneous-breeding.html", text: "Spontaneous breeding", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-sun-sensitivity.html", text: "Sun sensitivity", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical", views: ["gameplay","coding"] }
             ]
         },

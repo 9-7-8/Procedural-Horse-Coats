@@ -274,6 +274,9 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.magic_mob_aura", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.magic_night_temper", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.magic_night_watch", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_day_temper", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.magic_day_watch", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.sun_sensitivity", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.lycan", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.verdant", MAGIC_BEHAVIOUR);
 

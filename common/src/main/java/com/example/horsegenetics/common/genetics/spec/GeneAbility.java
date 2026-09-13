@@ -231,6 +231,22 @@ public sealed interface GeneAbility {
                       Condition when, int minDose) implements GeneAbility {}
 
     /**
+     * <b>How the horse feels about other creatures while it is light</b> - the
+     * mirror of {@link NightTemper}, field for field, and active only by day.
+     *
+     * <p>A second verb rather than a flag on the first, as the night verb's own
+     * note said it would have to be: the time of day is what the verb
+     * <i>means</i>, and a {@code night_temper} that could quietly be a day one
+     * would make every file using it ambiguous.
+     */
+    record DayTemper(String mood, String towards, double radius, int intervalTicks,
+                     int maxTargets, Condition when, int minDose) implements GeneAbility {}
+
+    /** <b>What the horse does about the nearest player while it is light</b> - the mirror of {@link NightWatch}. */
+    record DayWatch(String mode, double radius, boolean silentSteps,
+                    Condition when, int minDose) implements GeneAbility {}
+
+    /**
      * <b>What the horse hits for</b>, in health points - two per heart. A
      * vanilla horse has no attack at all; this is the whole of the mod's combat
      * side, and the number is absolute rather than a modifier so that a reader

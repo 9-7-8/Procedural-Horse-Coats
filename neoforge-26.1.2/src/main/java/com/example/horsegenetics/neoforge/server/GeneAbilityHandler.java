@@ -201,6 +201,8 @@ public final class GeneAbilityHandler {
                 case GeneAbility.OnDeath ignored -> { /* read by GeneDeathHandler, when it dies */ }
                 case GeneAbility.NightTemper ignored -> { /* read by NightBehaviourHandler, after dark */ }
                 case GeneAbility.NightWatch ignored -> { /* read by NightBehaviourHandler, after dark */ }
+                case GeneAbility.DayTemper ignored -> { /* read by NightBehaviourHandler, by day */ }
+                case GeneAbility.DayWatch ignored -> { /* read by NightBehaviourHandler, by day */ }
                 case GeneAbility.ItemDrop ignored -> { /* read by GeneDeathHandler, when it dies */ }
                 case GeneAbility.SelfEffect se -> applyMobEffect(se, horse, active.geneKey());
                 case GeneAbility.Yield ignored -> { /* handled on interaction */ }

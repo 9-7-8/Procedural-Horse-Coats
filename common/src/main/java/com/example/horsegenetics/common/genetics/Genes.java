@@ -426,6 +426,15 @@ public final class Genes {
      */
     public static final MagicNightTemperGene MAGIC_NIGHT_TEMPER = new MagicNightTemperGene();
     public static final MagicNightWatchGene MAGIC_NIGHT_WATCH = new MagicNightWatchGene();
+    /**
+     * The <b>daylight twins</b> of the two night loci - the same variants on the
+     * same tokens, active only while it is light, and far rarer in the wild. The
+     * day temper supersedes the day watch by the same rule.
+     */
+    public static final com.example.horsegenetics.common.genetics.genes.MagicDayTemperGene MAGIC_DAY_TEMPER =
+            new com.example.horsegenetics.common.genetics.genes.MagicDayTemperGene();
+    public static final com.example.horsegenetics.common.genetics.genes.MagicDayWatchGene MAGIC_DAY_WATCH =
+            new com.example.horsegenetics.common.genetics.genes.MagicDayWatchGene();
     public static final ManeColorGene MANE_COLOR = new ManeColorGene();
     public static final TailColorGene TAIL_COLOR = new TailColorGene();
     public static final ParticleGene PARTICLE = new ParticleGene();
@@ -599,7 +608,7 @@ public final class Genes {
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,
             MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
-            MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH, SUN_SENSITIVITY,
+            MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH, MAGIC_DAY_TEMPER, MAGIC_DAY_WATCH, SUN_SENSITIVITY,
             MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, MOLTEN_HOOVES, LYCAN,
             FIREPROOF, BIRD_BONED, OCEAN_BORN, HYDROPHOBIC,
             HOT_BLOODED, DRYAD, INTIMIDATING, MEOWING,

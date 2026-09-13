@@ -2709,8 +2709,8 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     that merely happened to be gated on darkness would need that gate written onto every
     allele of every gene using it, and the point of the locus this was built for is that
     the animal is one thing by day and another after sunset &mdash; so the verb says so
-    once. There is no <code>day_temper</code>, and if one is ever wanted it is a second
-    verb rather than a flag on this one.
+    once. Its daylight twin is a second verb, <a href="#day-temper"><code>day_temper</code></a>,
+    rather than a flag on this one.
 </p>
 <p>
     The translator carries it but does not act on it in the ability pass:
@@ -2745,6 +2745,28 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     behaviour properly instead of teleporting it about.
     Built for <a href="gene-magic-night-watch.html">magic night watch</a>.
 </p>
+
+<h3 id="day-temper"><code>day_temper</code></h3>
+<p>
+    <a href="#night-temper"><code>night_temper</code></a> with the clock turned over: the
+    same fields, the same bounds and the same meaning, active only <strong>while it is
+    light</strong> (<code>isBrightOutside</code>) and silent after dark.
+</p>
+<pre><code class="language-json">{ "type": "day_temper", "mood": "flee", "towards": "players" }</code></pre>
+<p>
+    <code>NightBehaviourHandler</code> runs both pairs, and the supersede rule is the same:
+    a <code>day_temper</code> with a target in range withholds the
+    <code>day_watch</code>. Built for <a href="gene-magic-day-temper.html">magic day
+    temper</a>.
+</p>
+
+<h3 id="day-watch"><code>day_watch</code></h3>
+<p>
+    <a href="#night-watch"><code>night_watch</code></a> by day &mdash; the same five modes,
+    radius and <code>silent_steps</code>. Built for
+    <a href="gene-magic-day-watch.html">magic day watch</a>.
+</p>
+<pre><code class="language-json">{ "type": "day_watch", "mode": "unseen" }</code></pre>
 
 <h3 id="combat"><code>combat</code></h3>
 <p>What the horse hits for, in health points &mdash; two per heart.</p>
