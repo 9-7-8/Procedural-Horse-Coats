@@ -1304,6 +1304,7 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     /** Back to a plain horse - but a locked row is kept, which is the point of a lock. */
     private void reset() {
+        ClientActionTrace.button("CustomHorseSpawn", "Clear (reset genes)");
         for (Row row : rows) {
             if (row.locked) {
                 continue;
@@ -1330,6 +1331,7 @@ public final class CustomHorseSpawnScreen extends Screen {
      * an exact one.
      */
     private void copyHorse() {
+        ClientActionTrace.button("CustomHorseSpawn", "Copy horse");
         String breedName = breedIndex == 0 ? "" : breedChoices.get(breedIndex - 1).name();
         Minecraft.getInstance().keyboardHandler.setClipboard(HorseFile.write(
                 new HorseFile("", "", female, baby, breedName,
@@ -1346,6 +1348,7 @@ public final class CustomHorseSpawnScreen extends Screen {
      * one you copied.
      */
     private void pasteHorse() {
+        ClientActionTrace.button("CustomHorseSpawn", "Paste");
         String text = Minecraft.getInstance().keyboardHandler.getClipboard();
         HorseFile horse;
         try {
@@ -1405,6 +1408,7 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     private void spawn() {
+        ClientActionTrace.button("CustomHorseSpawn", "Spawn");
         send(false);
     }
 
@@ -1418,6 +1422,7 @@ public final class CustomHorseSpawnScreen extends Screen {
      * cannot drift into "the egg spawns a different horse from the button".
      */
     private void makeEgg() {
+        ClientActionTrace.button("CustomHorseSpawn", "Make egg");
         send(true);
     }
 

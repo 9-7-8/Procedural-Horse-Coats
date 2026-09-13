@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.neoforge.server.ActionTrace;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,6 +30,7 @@ public final class HorseBrowserKeyHandler {
         }
         boolean pressed = false;
         while (HorseBrowserKeyBindings.openBrowser.consumeClick()) {
+            ActionTrace.log("key H", "horse browser requested");
             pressed = true;
         }
         if (!pressed) {

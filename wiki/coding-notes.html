@@ -600,6 +600,32 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
     </p>
 </div>
 
+<div class="note" id="action-trace">
+    <span class="label">The log should be able to hear the player</span>
+    <p>
+        Three reports in one play session - "F8 only turns on", "Make egg does nothing",
+        "the game just crashed" - and two of them left <strong>nothing in the log at
+        all</strong>, because the code that logs was never reached. Diagnosing those took
+        static reading and a stack trace that arrived four minutes late.
+    </p>
+    <p>
+        So <code>ActionTrace</code> (and its client half) writes one
+        <code>[trace]</code> line per discrete thing a person does: a horse joining a
+        level with its whole genome, a right-click on an animal, a mod item or block
+        used, a mount or dismount, a taming, a foal, a death, a dimension change, every
+        mod keybind, every mod screen opening and every button pressed inside one. One
+        grep gives the session in order.
+    </p>
+    <p>
+        <strong>The button lines are called from inside the handlers on purpose.</strong>
+        A hook that reported presses the screen never received would report the one broken
+        press as if it had worked - and a covered button producing <em>silence</em> where
+        every other button produces a line is exactly the reading that was missing. The
+        rule this encodes: <b>instrument the thing that runs, not the thing that was
+        aimed at</b>.
+    </p>
+</div>
+
 <div class="note danger" id="debug-crash">
     <span class="label">A debug overlay took the world down, and hid its own bug for four minutes first</span>
     <p>

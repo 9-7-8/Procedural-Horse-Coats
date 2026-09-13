@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.neoforge.server.ActionTrace;
 import com.example.horsegenetics.neoforge.network.RequestDebugPensPayload;
 import com.example.horsegenetics.neoforge.network.RequestHighlightHorsesPayload;
 import com.example.horsegenetics.neoforge.network.RequestStallHighlightPayload;
@@ -27,12 +28,19 @@ public final class DebugKeyHandler {
         // never have been read at all.
         while (DebugKeyBindings.generateDebugPens != null
                 && DebugKeyBindings.generateDebugPens.consumeClick()) {
+            ActionTrace.log("key F6", "debug pens requested");
             ClientPacketDistributor.sendToServer(new RequestDebugPensPayload());
         }
         while (DebugKeyBindings.showStalls != null && DebugKeyBindings.showStalls.consumeClick()) {
+            ActionTrace.log("key F7", "stall overlay requested");
             ClientPacketDistributor.sendToServer(new RequestStallHighlightPayload());
         }
         while (DebugKeyBindings.highlightHorses != null && DebugKeyBindings.highlightHorses.consumeClick()) {
+            // Logged on the press rather than on the toggle's answer, so a key
+            // that is read but produces nothing is distinguishable from a key
+            // that was never read - which is exactly how the F8 toggle bug read
+            // from the outside (2026-09-12).
+            ActionTrace.log("key F8", "horse highlight toggle pressed");
             ClientPacketDistributor.sendToServer(new RequestHighlightHorsesPayload());
         }
     }

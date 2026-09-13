@@ -47,6 +47,25 @@ seed is that a screenshot from one session and one from the next are the same
 place.
 
 
+THE ACTION TRACE
+----------------
+With debug.tools on (the default in a dev run) the mod writes one line per
+thing you do, all prefixed [trace]. To read a session back:
+
+  grep "\[trace\]" neoforge-26.1.2/run/logs/latest.log
+
+Every horse that joins a level is dumped whole - name, genotype, epigenome,
+resolved traits, conditions, parents, position - so "that horse looked wrong"
+has the horse attached to it. Right-clicks on animals, mod items and blocks
+used, mounts and dismounts, tamings, foals, deaths, dimension changes, the F6 /
+F7 / F8 / H keybinds, every mod screen opening and every button pressed inside
+one are all there too.
+
+If you press a button in a mod screen and NO [trace] button line appears, the
+click did not reach the handler - that is the "Make egg does nothing" shape of
+bug, and the silence is the evidence.
+
+
 THE DROP-IN FILES
 -----------------
 Four of the things wiki/verification.html asks you to check are not items -
