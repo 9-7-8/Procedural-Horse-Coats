@@ -198,11 +198,27 @@ final class DebugYardCombat {
         arenaBox(level, gy, lx0, lx1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(lx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("GLADIATOR", "LEAVE IT ALONE: it", "fights while NOT", "ridden. Mount=stop"));
+        // ARMED THE WAY ITS OWN PAGE SAYS TO ARM IT: "it picks fights, so it
+        // takes damage; pair it with magic health and a real attack or expect
+        // losses." A bare Gld/Gld horse is a 22-health animal with a 3-damage
+        // kick, which is a zombie's exact statline - and the gene is about
+        // starting fights, not winning them.
         DebugTestYard.stock(level, gy, lx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.gladiator",
-                "GLADIATOR", 1, 0, "Gld/Gld", "horsegenetics.magic_fighter=Gld/Gld");
-        // Opponents restored. It fights these on its own - that IS the test -
-        // and with HorsePanicGoal it no longer bolts the moment one lands a hit.
-        arenaOpponents(level, gy, lx0, lx1, z1 - 3, 3);
+                "GLADIATOR", 1, 0, "Gld/Gld",
+                "horsegenetics.magic_fighter=Gld/Gld-horsegenetics.magic_health=Hardy/Hardy");
+
+        // ONE opponent, not three, and this is the second time I have got the
+        // number wrong in the same pen. Three zombies is nine damage a second
+        // against twenty-two health: dead inside three seconds of contact,
+        // whatever the horse does, and it died eleven seconds after spawning
+        // with two zombies still standing. That is not a gene failing and it is
+        // not a panic bug either - it is arithmetic, and no amount of attack
+        // speed fixes being outnumbered three to one.
+        //
+        // One is a fight the horse can win and therefore a fight worth
+        // watching. More are in the chest, and the choice of how many is the
+        // tester's - which is where it should have been from the start.
+        arenaOpponents(level, gy, lx0, lx1, z1 - 3, 1);
         DebugTestYard.saddleAll(level, gy, lx0, lx1, z0, z1);
         // The fight's scale is in the tester's hand, not the spawner's - see
         // arenaOpponents. A stick too, because the guardian next door has to be
