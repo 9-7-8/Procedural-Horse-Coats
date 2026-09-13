@@ -644,9 +644,9 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 1, new ItemStack(Items.STICK),
                         "stick - the yard's horses all come TAMED now, this is for anything else");
                 put(inv, legend, 2, new ItemStack(Items.GOLDEN_CARROT, 16),
-                        "golden carrots - rows L, M and N: ten splice-carrot pairs and NOTHING "
-                                + "has ever bred one. Zero foals, every session. Both ends of the "
-                                + "path log now, including 'window expired before breeding'");
+                        "golden carrots - rows L, M and N. The BREEDING half is confirmed (8 "
+                                + "carrots, 8 foals, 2026-09-13). What is left: breed a pair, then "
+                                + "OPEN THE FOAL and check the substituted locus is actually there");
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension now honours");
                 put(inv, legend, 4, new ItemStack(Items.SADDLE),
@@ -661,8 +661,9 @@ public final class DebugTestWorldHandler {
                 // hand-placed square grows, the gene's search is the bug; if it
                 // does not, the pen is.
                 put(inv, legend, 5, new ItemStack(Items.DARK_OAK_SAPLING, 8),
-                        "dark oak saplings - DRYAD DARK, row G: plant FOUR in a 2x2 yourself. "
-                                + "Grows = the gene's clustering is the bug; refuses = the pen is");
+                        "dark oak saplings - DRYAD DARK, row A WEST (row G is gone): plant FOUR "
+                                + "in a 2x2 yourself. Grows = the gene's clustering is the bug; "
+                                + "refuses = the pen is");
                 tellYard(player);
                 tell(player, Component.literal("BEFORE YOU LEAVE IT RUNNING - four things, in this "
                                 + "order:").withStyle(ChatFormatting.GOLD));

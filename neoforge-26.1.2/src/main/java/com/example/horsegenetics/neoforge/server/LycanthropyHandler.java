@@ -17,6 +17,7 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
@@ -191,6 +192,24 @@ public final class LycanthropyHandler {
             return;
         }
 
+        // A WERE-FISH ON DRY LAND IS A DELETED HORSE. Seen 2026-09-13: two
+        // horses shifted into salmon on the arrival road and both were dead of
+        // "drown" within three seconds - which for a fish means out of water.
+        // The horse's whole record travels inside the animal's LYCAN_SHIFT
+        // attachment, nothing anywhere handles that animal DYING, and so the
+        // horse, its pedigree and its epigenome went with them. Permanently.
+        //
+        // The comment on setPersistenceRequired below already saw half of this
+        // - "or a were-chicken quietly despawns overnight and takes a pedigreed
+        // horse with it" - and guarded the despawn while leaving the death.
+        //
+        // So an aquatic form simply does not shift on dry land. That is the
+        // same graceful degradation this method already uses for a mob id the
+        // build has never heard of: a form that cannot be taken safely is a
+        // gene that does nothing tonight, not a horse that stops existing.
+        if (isAquatic(type) && !horse.isInWater()) {
+            return;
+        }
         double healthLeft = horse.getHealth() / Math.max(1.0F, horse.getMaxHealth());
         animal.snapTo(horse.getX(), horse.getY(), horse.getZ(), horse.getYRot(), horse.getXRot());
         animal.setBaby(horse.isBaby());
@@ -207,6 +226,19 @@ public final class LycanthropyHandler {
         horse.discard();
         level.addFreshEntity(animal);
         puff(level, animal);
+    }
+
+    /**
+     * Does this form drown out of water? Read off the entity's own
+     * {@link MobCategory} rather than a hand-kept list of fish, so a form added
+     * to {@code LycanGene} later cannot quietly miss the guard.
+     */
+    private static boolean isAquatic(EntityType<?> type) {
+        MobCategory c = type.getCategory();
+        return c == MobCategory.WATER_CREATURE
+                || c == MobCategory.WATER_AMBIENT
+                || c == MobCategory.UNDERGROUND_WATER_CREATURE
+                || c == MobCategory.AXOLOTLS;
     }
 
     // ------------------------------------------------------------------

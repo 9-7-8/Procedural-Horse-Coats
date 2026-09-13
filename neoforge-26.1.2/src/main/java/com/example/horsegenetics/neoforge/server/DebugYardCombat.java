@@ -181,10 +181,22 @@ final class DebugYardCombat {
         // it follows you home afterwards - is the correct outcome for a horse
         // you actually tamed.
         DebugPenManager.placeSign(level, new BlockPos(gx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("GUARDIAN - TAME IT", "it needs a real", "OWNER. Then let a", "zombie hit YOU"));
+                List.of("GUARDIAN: TAME IT", "then let a zombie", "hit *YOU*, not it.", "Hurt the horse=NO"));
+        // HARDY/HARDY, for the same reason the gladiator got it and it is the
+        // second time this pen has been lost to arithmetic rather than to a
+        // gene. 2026-09-13: tamed at 14:16:42, one zombie at :49, a second at
+        // :59, DEAD at 14:17:14 - thirty-two seconds. A bare Grd/Grd horse is a
+        // 22-health animal and two zombies are six damage a second; nothing it
+        // could have done would have changed that.
+        //
+        // Worse, it dies with its gene switched OFF. Guardian fires on
+        // OnOwnerHurt - the OWNER has to be hit, not the horse - so a zombie
+        // that picks the horse (nearer, and not holding a sword) never
+        // triggers it at all. The horse has to OUTLIVE the setup for the test
+        // to start, and that is what the health is for.
         Horse guardian = DebugPenManager.spawnHorse(level, gy + 1, gx0 + 4.0, (z0 + z1) / 2.0,
                 com.example.horsegenetics.common.horse.Sex.FEMALE,
-                "horsegenetics.guardian=Grd/Grd", false);
+                "horsegenetics.guardian=Grd/Grd-horsegenetics.magic_health=Hardy/Hardy", false);
         DebugTestYard.label(guardian, "GUARDIAN - TAME ME");
         DebugTestYard.saddleAll(level, gy, gx0, gx1, z0, z1);
         DebugWorldWatch.watch("ARENA - GUARDIAN",
