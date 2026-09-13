@@ -62,13 +62,46 @@ public final class DhampirShadeGoal extends Goal {
         return shelter != null && !horse.isVehicle() && DhampirHandler.inSunlight(horse);
     }
 
+    /**
+     * <b>Say what it decided, because guessing has now cost four attempts.</b>
+     *
+     * <p>This gene has been "fixed" four times - the search named blocks a
+     * ground pathfinder cannot stand on; the shelter was built out of range;
+     * panic held {@code Flag.MOVE} at the same priority and starved the goal;
+     * the nearest cover was the roof's lip. Every one of those was real, and
+     * every one was arrived at by <em>reading code and reasoning</em>, which is
+     * exactly the method this project has spent the day proving unreliable.
+     *
+     * <p>One line per journey costs nothing and ends the argument: where it is
+     * going, how far, whether that spot has cover on all sides, and whether the
+     * path was accepted at all. If it dies again, the log will say which of
+     * those four is still wrong instead of inviting a fifth guess.
+     */
     @Override
     public void start() {
         repathCooldown = 0;
+        if (shelter != null && horse.level() instanceof ServerLevel level) {
+            boolean accepted = horse.getNavigation().moveTo(
+                    shelter.getX() + 0.5, shelter.getY(), shelter.getZ() + 0.5, SPEED);
+            ActionTrace.log("dhampir", ActionTrace.describeShort(horse) + " burning at "
+                    + horse.blockPosition().toShortString() + ", heading for "
+                    + shelter.toShortString() + " ("
+                    + String.format("%.1f", Math.sqrt(horse.blockPosition().distSqr(shelter)))
+                    + " blocks, " + (deeplySheltered(level, shelter) ? "deep cover" : "EDGE cover")
+                    + ", " + (accepted ? "path accepted" : "NO PATH") + ")");
+        }
     }
 
     @Override
     public void stop() {
+        if (shelter != null) {
+            ActionTrace.log("dhampir", ActionTrace.describeShort(horse) + " stopped at "
+                    + horse.blockPosition().toShortString() + " - "
+                    + (DhampirHandler.inSunlight(horse)
+                            ? "STILL IN THE SUN, so it gave up rather than arrived"
+                            : "in shade, health "
+                                    + String.format("%.0f/%.0f", horse.getHealth(), horse.getMaxHealth())));
+        }
         shelter = null;
         horse.getNavigation().stop();
     }
@@ -107,6 +140,7 @@ public final class DhampirShadeGoal extends Goal {
         BlockPos from = horse.blockPosition();
         BlockPos best = null;
         double bestDist = Double.MAX_VALUE;
+        boolean bestDeep = false;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dx = -SEARCH_RADIUS; dx <= SEARCH_RADIUS; dx++) {
             for (int dz = -SEARCH_RADIUS; dz <= SEARCH_RADIUS; dz++) {
@@ -124,7 +158,22 @@ public final class DhampirShadeGoal extends Goal {
                         continue;
                     }
                     double d = from.distSqr(cursor);
-                    if (d < bestDist) {
+                    // DEEP COVER BEATS NEAR COVER, and that is the whole of
+                    // "it's just not moving far enough under cover". The
+                    // nearest sheltered block is always the roof's outer LIP -
+                    // and a horse that arrives there is standing half in the
+                    // sun, because its body is 1.4 blocks across and the
+                    // navigator finishes a path within a tolerance rather than
+                    // dead on the square. It kept burning, re-looked, found the
+                    // same lip it was already standing on, and jittered there
+                    // until it died.
+                    //
+                    // So anything with cover on every side outranks anything
+                    // without, however much closer the lip is. Distance only
+                    // decides between blocks of the same kind.
+                    boolean deep = deeplySheltered(level, cursor);
+                    if (deep != bestDeep ? deep : d < bestDist) {
+                        bestDeep = deep;
                         bestDist = d;
                         best = cursor.immutable();
                     }
@@ -161,6 +210,26 @@ public final class DhampirShadeGoal extends Goal {
      * which is the point - a goal that picks destinations its own pathfinder
      * rejects is a goal that reports success and does nothing.
      */
+    /**
+     * <b>Cover on every side, not just overhead.</b> A block under the outer
+     * edge of a roof is sheltered and still a bad place to send a horse: it
+     * arrives approximately, it is wider than the block it stands on, and half
+     * of it ends up back in the sun. One ring of margin is enough to make
+     * "arrived" and "safe" the same thing.
+     *
+     * <p>Not required, only preferred - a lean-to one block deep is still
+     * shelter, and a dhampir that refused it because it was not deep enough
+     * would be worse off than one standing on the edge.
+     */
+    private static boolean deeplySheltered(ServerLevel level, BlockPos pos) {
+        for (Direction side : Direction.Plane.HORIZONTAL) {
+            if (level.canSeeSky(pos.relative(side))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static boolean standable(ServerLevel level, BlockPos pos) {
         if (!level.getBlockState(pos).isAir() || !level.getBlockState(pos.above()).isAir()) {
             return false;
