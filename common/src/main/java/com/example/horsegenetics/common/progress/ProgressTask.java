@@ -106,9 +106,11 @@ public enum ProgressTask {
     WHISTLE_BASIC(Group.CARE, "Use a basic whistle",
             "Calls every tamed horse you own nearby. Horse hair, an iron nugget and a stick."),
     WHISTLE_ECHO(Group.CARE, "Use an echo whistle",
-            "The middle tier - it reaches further."),
+            "The longest reach of the three area whistles."),
     WHISTLE_GOLDEN(Group.CARE, "Use a golden whistle",
-            "The longest reach of the three."),
+            "The middle tier - it reaches further than the basic one."),
+    WHISTLE_ENDER(Group.CARE, "Call a horse with an ender whistle",
+            "Bind one to a horse you own and it will come from anywhere, even another dimension."),
     FILL_SEED_JAR(Group.CARE, "Fill a seed jar",
             "Stores a stallion's genetics so a mare can be bred with him later, from anywhere."),
 

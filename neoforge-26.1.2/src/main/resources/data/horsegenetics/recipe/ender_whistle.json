@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:echo_whistle",
+    "minecraft:ender_eye",
+    "minecraft:ender_pearl"
+  ],
+  "result": {
+    "id": "horsegenetics:ender_whistle"
+  }
+}

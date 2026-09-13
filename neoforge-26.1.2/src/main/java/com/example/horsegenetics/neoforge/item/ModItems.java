@@ -205,6 +205,13 @@ public final class ModItems {
             register("golden_whistle", p -> new WhistleItem(p, 32));
     public static final DeferredItem<WhistleItem> ECHO_WHISTLE =
             register("echo_whistle", p -> new WhistleItem(p, 64));
+    /**
+     * Bound to one horse for good, and calls it from anywhere, across dimensions -
+     * see {@link EnderWhistleItem}. One to a stack: two bound whistles are never
+     * the same item.
+     */
+    public static final DeferredItem<EnderWhistleItem> ENDER_WHISTLE =
+            register("ender_whistle", p -> new EnderWhistleItem(p.stacksTo(1)));
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

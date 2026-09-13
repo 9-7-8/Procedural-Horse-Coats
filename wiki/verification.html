@@ -80,6 +80,57 @@
     </p>
 </div>
 
+<h2 id="evening-0913">&sect;0-DT &mdash; Built the evening of 2026-09-13, NOT played</h2>
+
+<p>
+    Behaviour first, as the rule above says. None of this has been in a game; everything
+    below is covered by unit tests on the genetics side only.
+</p>
+
+<h3 id="ender-whistle">The ender whistle</h3>
+<ul>
+    <li><strong>Bind.</strong> Craft one (echo whistle + eye of ender + ender pearl) and
+        right-click a tamed horse you own: &ldquo;bound to &hellip; for good&rdquo;. Try an
+        untamed horse and someone else&rsquo;s: both refused. Right-click another horse with
+        the bound whistle: nothing rebinds.</li>
+    <li><strong>Near call.</strong> Walk thirty blocks away and blow it: the horse appears in
+        front of you.</li>
+    <li><strong>Far call &mdash; the one that can fail invisibly.</strong> Ride a thousand
+        blocks away (so the horse&rsquo;s chunk unloads), then blow it. Expect &ldquo;echoes a
+        long way off&rdquo; and the horse within five seconds. If it always says nothing
+        answered, the portal ticket or the entity-section wait is wrong.</li>
+    <li><strong>Across dimensions.</strong> Leave the horse in the overworld, go through a
+        Nether portal, blow it. Then the reverse. Check the horse that arrives still has its
+        name, coat and genome (open its information screen) &mdash; a cross-dimension teleport
+        re-creates the entity.</li>
+    <li><strong>Sold.</strong> Transfer the horse to a second account with papers; the first
+        account blowing the whistle should be told the horse no longer answers.</li>
+    <li><strong>Dust.</strong> Put the whistle in a chest, kill the horse, take the whistle out:
+        it crumbles with the message. Kill another while holding its whistle: crumbles within a
+        second.</li>
+</ul>
+
+<h3 id="day-loci">The day temper and day watch loci</h3>
+<ul>
+    <li>With the custom spawn egg, a <code>magic_day_temper=Flp/Flp</code> horse should run
+        from you at noon and let you ride it at midnight &mdash; the night locus inverted.</li>
+    <li><code>magic_day_watch=Wbh/Wbh</code> should stand behind you by day, silently, and stop
+        when you turn round; at night it is an ordinary horse.</li>
+    <li>A horse carrying both a day and a night watcher should change behaviour at dusk and
+        dawn, not both at once.</li>
+</ul>
+
+<h3 id="breed-designer-steps">Breed designer: two steps where Temper was</h3>
+<ul>
+    <li><strong>Day &amp; night habits</strong> and <strong>Fighting &amp; defence</strong>
+        replace Temper, and nothing that used to be offered there is missing from both. (A
+        page check, not a game one.)</li>
+</ul>
+
+<p>
+    The Dhampir breed and its five loci are &sect;0-R, <a href="#dhampir">below</a>.
+</p>
+
 <h2 id="open-0913">&sect;0-DS &mdash; What is still open after 2026-09-13, and where to test it</h2>
 
 <p>

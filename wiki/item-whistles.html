@@ -18,12 +18,13 @@
 <p class="eyebrow">Item <span class="sep">/</span> tool</p>
 <h1>Whistles</h1>
 <p class="lede">
-    Right-click one and every tamed horse you own nearby comes to you at once.
-    Three tiers, each reaching further than the last.
+    Three area whistles call every tamed horse you own nearby, each reaching further than
+    the last. The fourth, the <strong>ender whistle</strong>, is bound to one horse for good
+    and brings it to you from anywhere &mdash; even another dimension.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
-<h2 id="use">What happens when you blow it</h2>
+<h2 id="use">What happens when you blow an area whistle</h2>
 
 <div class="plain">
     <p>
@@ -38,53 +39,120 @@
     There is a roughly <strong>3&nbsp;second cooldown</strong> between uses.
 </p>
 
-<h2 id="tiers">The three whistles</h2>
+<h2 id="tiers">The four whistles</h2>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Range</th></tr></thead>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Reach</th></tr></thead>
 <tbody>
-<tr><td><strong>Basic whistle</strong></td><td>horse hair + iron nugget + stick</td><td>16 blocks</td></tr>
-<tr><td><strong>Golden whistle</strong></td><td>basic whistle + gold ingot</td><td>32 blocks</td></tr>
-<tr><td><strong>Echo whistle</strong></td><td>golden whistle + echo shard</td><td>64 blocks</td></tr>
+<tr><td><strong>Basic whistle</strong></td><td>horse hair + iron nugget + stick</td><td>every horse of yours within 16 blocks</td></tr>
+<tr><td><strong>Golden whistle</strong></td><td>basic whistle + gold ingot</td><td>within 32 blocks</td></tr>
+<tr><td><strong>Echo whistle</strong></td><td>golden whistle + echo shard</td><td>within 64 blocks</td></tr>
+<tr><td><strong>Ender whistle</strong></td><td>echo whistle + eye of ender + ender pearl</td><td><strong>one</strong> horse, from anywhere, any dimension</td></tr>
 </tbody>
 </table>
 </div>
 
+<h2 id="ender">The ender whistle</h2>
+
+<ol>
+    <li><strong>Bind it.</strong> Right-click one of <em>your</em> tamed horses with an
+        unbound ender whistle. It hums, and it is bound to that horse <strong>for good</strong>
+        &mdash; it can never be unbound or moved to another horse. Craft one per horse you want
+        to call.</li>
+    <li><strong>Blow it</strong> anywhere. The horse appears in front of you in a puff of
+        portal particles, however far away it was, whatever dimension it was in. If it was a
+        long way off and nobody was near it, it takes a moment: the whistle says it
+        &ldquo;echoes a long way off&rdquo;, and the horse arrives within a few seconds.</li>
+    <li><strong>Use it as often as you like</strong>, with a five-second cooldown.</li>
+</ol>
+
+<ul>
+    <li><strong>Only the horse&rsquo;s owner can call it.</strong> If you sell the horse
+        with <a href="item-transfer-papers.html">transfer papers</a>, the whistle goes with it
+        in spirit: blow it after that and you are told the horse no longer answers to you.
+        Hand the whistle to the new owner and it works for them.</li>
+    <li><strong>A horse with somebody else riding it stays put.</strong></li>
+    <li><strong>If the horse dies, the whistle turns to dust</strong> &mdash; the next time
+        you are holding it, with a message saying so. One left in a chest crumbles the moment
+        you pick it up.</li>
+    <li>If the horse was never seen where it was last recorded &mdash; it wandered off in a
+        chunk nobody had loaded &mdash; nothing answers, and the whistle says so.</li>
+</ul>
+
 <div class="note warn">
-    <span class="label">All three look the same</span>
+    <span class="label">All four look the same</span>
     <p>
-        The three whistles share one texture, so the only way to tell which you are
-        holding is the name.
+        The whistles share one texture, and a bound ender whistle does not yet show which horse
+        it belongs to. Keep them apart in your hotbar, or rename them at an anvil.
     </p>
 </div>
 </section>
 
 <section class="tab-panel" data-tab="coding">
-<h2 id="reading">The design reading</h2>
+<h2 id="reading">The area whistles</h2>
 
 <p>
-    This is the &ldquo;area recall&rdquo; reading of the design. Bond gating, pathing
-    instead of teleporting, and what &ldquo;echo&rdquo; should add beyond range are all
-    still open &mdash; and all three have a proposed answer in
-    <a href="roadmap.html#callable-horses">callable horses</a>, which would bind a whistle
-    to one horse (reusing the stall sign&rsquo;s <code>BOUND_HORSE</code> component) and
-    make the three tiers mean <em>loaded chunk / any distance / any dimension</em>.
+    <code>item/WhistleItem</code>, one class and a radius per tier. Bond gating and pathing
+    instead of teleporting are still open on
+    <a href="roadmap.html#callable-horses">the roadmap</a>.
 </p>
 
-<h2 id="gaps">Known gaps</h2>
+<h2 id="ender-code">The ender whistle</h2>
 
 <ul>
-    <li>The three whistles share one texture.</li>
-    <li>Nothing gates recall on bond, so a barely-tamed horse answers exactly as a
-        long-kept one does.</li>
+    <li><strong><code>item/EnderWhistleItem</code></strong> &mdash; <code>use</code> calls,
+        <code>inventoryTick</code> checks for dust once a second. Stacks to one.</li>
+    <li><strong><code>server/EnderWhistleCalls</code></strong> &mdash; binding (an
+        <code>EntityInteract</code> handler using <code>HorseOwnership.bindRefusal</code>,
+        the same refusal stall signs use), calling, and the dust. The binding is the existing
+        <code>BOUND_HORSE</code> component.</li>
+    <li><strong><code>data/HorseWhereabouts</code></strong> &mdash; a server-global
+        <code>SavedData</code> of each tamed horse&rsquo;s last dimension and block, and
+        whether it died. Written by <code>server/HorseWhereaboutsHandler</code> on join, on
+        leave, every ten seconds (only when it moved more than 16 blocks or changed dimension),
+        and on death. The ancestry database keeps a dead horse&rsquo;s record for the pedigree,
+        so it cannot answer &ldquo;is it alive&rdquo; &mdash; this can.</li>
+</ul>
+
+<h3 id="call">How a call finds a horse</h3>
+<ol>
+    <li>Any level with the entity loaded: move it now.</li>
+    <li>Otherwise the last sighting&rsquo;s chunk gets a <code>TicketType.PORTAL</code> ticket
+        (radius 2, which expires by itself) and the call waits on the server tick for up to five
+        seconds for the entity section to load.</li>
+    <li>Same dimension: <code>snapTo</code>. Another dimension:
+        <code>Entity.teleport(TeleportTransition)</code>, which re-creates the entity in the
+        target level.</li>
+    <li>Ownership is checked <em>at call time</em>, never at bind time, which is what makes
+        the whistle follow a sale.</li>
+</ol>
+
+<p>
+    It moves an entity found by UUID and never creates one, so it cannot duplicate a horse.
+    A horse <em>deleted</em> rather than killed &mdash; the horse dimension clearing its pens
+    &mdash; is gone from the ancestry database, and that crumbles the whistle too.
+</p>
+
+<h2 id="ender-gaps">Known gaps</h2>
+
+<ul>
+    <li>All four whistles share one texture, and a bound ender whistle has no tooltip naming
+        its horse.</li>
+    <li>Nothing gates the area whistles or binding on bond.</li>
+    <li>The far-chunk wait and the cross-dimension teleport are written against 26.1.2
+        sources and <strong>not seen working</strong> &mdash; see
+        <a href="verification.html#ender-whistle">verification</a>.</li>
+    <li>A horse moved while its chunk was unloaded by something other than itself (a piston,
+        another mod) is looked for where it was last seen, and not found.</li>
 </ul>
 </section>
 
 <div class="page-foot">
     <div class="seealso">
         <a href="horse-care.html">Horse care &mdash; bond &amp; herds</a>
-        <a href="roadmap.html">Roadmap</a>
+        <a href="item-transfer-papers.html">Transfer papers</a>
+        <a href="roadmap.html#callable-horses">Roadmap &mdash; callable horses</a>
         <a href="items.html">All items</a>
     </div>
     Item objects in <code>item/ModItems.java</code>.

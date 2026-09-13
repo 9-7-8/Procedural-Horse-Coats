@@ -130,6 +130,17 @@
       "count": 1
     },
     {
+      "id": "ender_whistle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:echo_whistle",
+        "minecraft:ender_eye",
+        "minecraft:ender_pearl"
+      ],
+      "out": "horsegenetics:ender_whistle",
+      "count": 1
+    },
+    {
       "id": "equine_research_shelf",
       "kind": "shapeless",
       "in": [
