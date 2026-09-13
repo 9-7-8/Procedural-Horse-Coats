@@ -440,11 +440,31 @@ public final class DebugTestWorldHandler {
         server.getCommands().performPrefixedCommand(source, night ? "time set midnight" : "time set noon");
         server.getCommands().performPrefixedCommand(source,
                 "gamerule doDaylightCycle " + (night ? "false" : "true"));
+        // SAY WHETHER IT WORKED, in the dimension the player is actually standing
+        // in. The owner reported on 2026-09-13 that "night isn't working in the
+        // horse dimension, it still looks like day", and from a chat box there
+        // is no way to tell the three candidates apart: the clock did not move,
+        // the clock moved but this dimension does not follow it, or both are
+        // fine and the yard's glowstone is simply doing its job. isBrightOutside
+        // is the same test every gene condition in this mod uses, so an answer
+        // here is an answer for them too.
+        boolean bright = player.level().isBrightOutside();
         tell(player, Component.literal(night
-                        ? "Night, and the clock is held. The corridor and the yard are still lit by "
-                                + "glowstone - use the yard's GLOW ROOM to actually see a glow."
-                        : "Day, and the clock is running again.")
-                .withStyle(ChatFormatting.GOLD));
+                        ? "Night set. This dimension now reads " + (bright ? "DAY" : "NIGHT") + "."
+                        : "Day set. This dimension now reads " + (bright ? "DAY" : "NIGHT") + ".")
+                .withStyle(night == bright ? ChatFormatting.RED : ChatFormatting.GOLD));
+        if (night && bright) {
+            tell(player, Component.literal("That is the bug: the clock was set and this dimension "
+                            + "did not follow it. Worth saying in the report - the overworld "
+                            + "clock is shared by default_clock, so this is a sync problem "
+                            + "rather than a missing clock.")
+                    .withStyle(ChatFormatting.RED));
+        } else if (night) {
+            tell(player, Component.literal("The sky is dark. If it still LOOKS like day where you "
+                            + "are standing, that is the glowstone - the corridor and the yard are "
+                            + "lit by design. Use the yard's GLOW ROOM, which has a lid.")
+                    .withStyle(ChatFormatting.GOLD));
+        }
         ActionTrace.log("testkit", (night ? "night" : "day") + " set by " + player.getGameProfile().name());
         return 1;
     }

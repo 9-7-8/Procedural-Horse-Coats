@@ -81,7 +81,62 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 80;
+    private static final int YARD_DEPTH_Z = 135;
+
+    // ------------------------------------------------------------------
+    // THE GRID
+    // ------------------------------------------------------------------
+    //
+    // The pens were added one at a time and packed against each other, and on
+    // 2026-09-13 the owner hit all three consequences of that in one visit:
+    // "some have gates that are inaccessible and are getting their signs
+    // overwritten", and "I cannot access the glow room because of how you laid
+    // out the pens".
+    //
+    // All three are the same mistake. A pen built by fencedPlot puts its GATE
+    // in the middle of its north wall and its SIGN one block further north
+    // still - so a row butted up against the row in front of it writes its sign
+    // into that row's south wall and opens its gate into it. The glow room is
+    // the worst case because its door is the only way in at all.
+    //
+    // So: every row of pens owns a band of z, and between any two bands there
+    // is an AISLE. The sign lives in the aisle, the gate opens into the aisle,
+    // and the aisle runs the full width of the yard so it is reachable from the
+    // centre walkway. Nothing is allowed to cross that walkway - WEST_MAX and
+    // EAST_MIN are what keep the gate reachable from the door in the corridor
+    // wall, a hundred blocks away.
+
+    /** Clear blocks in front of every row: one for the sign, three to walk in. */
+    private static final int AISLE = 4;
+
+    /** The pens stop here either side, leaving the spur's width clear end to end. */
+    private static final int WEST_MAX = -3;
+    private static final int EAST_MIN = 3;
+
+    /** The widest a pen may be on one side of the walkway. */
+    private static final int BLOCK_W = 19;
+
+    /** Row north walls, as offsets from the yard's mouth. Each is the one before it plus its depth plus an aisle. */
+    private static final int ROW_A = 3;                         // bone meal | spawner room
+    private static final int ROW_A_D = 16;
+    private static final int ROW_B = ROW_A + ROW_A_D + AISLE;   // hydrophobic | lava channel
+    private static final int ROW_B_D = 6;
+    private static final int ROW_C = ROW_B + ROW_B_D + AISLE;   // molten hooves x4
+    private static final int ROW_C_D = 20;
+    private static final int ROW_D = ROW_C + ROW_C_D + AISLE;   // sound herd | intimidating
+    private static final int ROW_D_D = 16;
+    private static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // the display row x8
+    private static final int ROW_E_D = 7;
+    private static final int ROW_F = ROW_E + ROW_E_D + AISLE;   // starburst, F8 | glow room
+    private static final int ROW_F_D = 12;
+    private static final int ROW_G = ROW_F + ROW_F_D + AISLE;   // the growing row x4
+    private static final int ROW_G_D = 9;
+    private static final int ROW_H = ROW_G + ROW_G_D + AISLE;   // the retinue
+    private static final int ROW_H_D = 10;
+
+    /** The west block's left edge, and the east block's right edge. */
+    private static final int WEST_MIN = WEST_MAX - BLOCK_W;
+    private static final int EAST_MAX = EAST_MIN + BLOCK_W;
 
     /** Matches the corridor, so the yard reads as the same building. */
     private static final int WALL_TOP_DY = 10;
@@ -132,7 +187,6 @@ final class DebugTestYard {
 
         buildPath(level, gy, cx, mouthZ);
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
-        buildEggLayerPen(level, gy, cx, mouthZ);
         buildSpawnerRoom(level, gy, cx, mouthZ);
         buildSoundHerdPen(level, gy, cx, mouthZ);
         buildIntimidatingPen(level, gy, cx, mouthZ);
@@ -241,37 +295,6 @@ final class DebugTestYard {
     // ------------------------------------------------------------------
 
     /**
-     * <b>Egg layer, and the accumulation cap.</b> Four of them in one pen,
-     * which is the only arrangement that can make the cap fire at all.
-     *
-     * <p>The guard is {@code NEARBY_CAP = 8} of the item within six blocks, and
-     * the interval on a copy is 4 000 to 14 000 ticks. A dropped item despawns
-     * at 6 000. <b>So a single horse can essentially never reach its own
-     * cap</b> - the floor clears itself about as fast as one horse can fill it,
-     * and a morning with two eggs on the ground would be the despawn timer
-     * rather than the guard. Four horses laying into one six-block circle is
-     * what makes the question answerable overnight, and
-     * {@code DebugWorldWatch}'s item hooks log the age at removal so a despawn
-     * is never read as a cap.
-     *
-     * <p>What a pass looks like: the egg count climbs, sits at or below eight,
-     * and the log shows drops being <i>refused</i> rather than items vanishing.
-     * A floor carpeted in eggs is the failure this guard exists to stop.
-     */
-    private static void buildEggLayerPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx - YARD_HALF_X + 2;
-        int x1 = x0 + 15;
-        int z0 = mouthZ + 3;
-        int z1 = z0 + 16;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("EGG LAYER", "leave it: does", "it STOP at 8?", "or carpet it?"));
-        stock(level, gy, x0 + 6.0, (z0 + z1) / 2.0, "horsegenetics.egg_layer",
-                "the egg pen", 2, 2, null);
-        DebugWorldWatch.watch("EGG LAYER", box(x0, gy, z0, x1, gy + 1, z1), null);
-    }
-
-    /**
      * <b>The sound genes, as a number instead of an opinion.</b>
      *
      * <p>The open question on all four is "are these bearable in a herd", and
@@ -287,10 +310,10 @@ final class DebugTestYard {
      * gene. A test that cannot fire is worse than a missing one.
      */
     private static void buildSoundHerdPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx - YARD_HALF_X + 2;
-        int x1 = x0 + 14;
-        int z0 = mouthZ + 26;
-        int z1 = z0 + 16;
+        int x0 = cx + WEST_MIN;
+        int x1 = cx + WEST_MAX;
+        int z0 = mouthZ + ROW_D;
+        int z1 = z0 + ROW_D_D;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("SOUND HERD", "3 meow, 2 sing.", "census counts", "every play"));
@@ -316,10 +339,10 @@ final class DebugTestYard {
      * figure that wanders between one and six as the cows graze past.
      */
     private static void buildIntimidatingPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + 4;
-        int x1 = x0 + 16;
-        int z0 = mouthZ + 26;
-        int z1 = z0 + 16;
+        int x0 = cx + EAST_MIN;
+        int x1 = cx + EAST_MAX;
+        int z0 = mouthZ + ROW_D;
+        int z1 = z0 + ROW_D_D;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("INTIMIDATING", "6 cows in here.", "do they keep", "their DISTANCE?"));
@@ -355,8 +378,13 @@ final class DebugTestYard {
      * sessions.
      */
     private static void buildGrowingRow(ServerLevel level, int gy, int cx, int mouthZ) {
-        int z = mouthZ + 64;
-        int x = cx - YARD_HALF_X + 2;
+        int z = mouthZ + ROW_G;
+        // Two west, two east. Stepping straight across the yard put the third
+        // pen ON the centre walkway, which is how the back half of the yard
+        // walled itself off from the gate.
+        int[] at = {cx + WEST_MIN, cx + WEST_MIN + 10, cx + EAST_MIN, cx + EAST_MIN + 10};
+        int slot = 0;
+        int x = at[slot];
 
         // Verdant's three are CONFIRMED (2026-09-12) and their pens are gone.
         // What is left is the row of slow ones - the tests that cannot be
@@ -380,7 +408,7 @@ final class DebugTestYard {
         DebugWorldWatch.watch("DRYAD MIXED", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
                 Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG,
                 Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES);
-        x += PEN_W + 2;
+        x = at[++slot];
 
         // Snow and ice for the melt to eat. A floor rather than a scatter, so
         // "how far has it got" is answerable at a glance from the gate.
@@ -397,7 +425,7 @@ final class DebugTestYard {
         }
         DebugWorldWatch.watch("HOT-BLOODED", box(x, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
                 Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.WATER, Blocks.GRASS_BLOCK);
-        x += PEN_W + 2;
+        x = at[++slot];
 
         // 2. THE DARK OAK, which is the whole reason the locus was rebuilt.
         // A matched pair, so it plants only dark oak and they accumulate; the
@@ -411,7 +439,7 @@ final class DebugTestYard {
                 List.of("DRYAD DARK", "needs a 2x2 -", "do they CLUSTER?", "or scatter?"));
         DebugWorldWatch.watch("DRYAD DARK", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
                 Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
-        x += PEN_W + 2;
+        x = at[++slot];
 
         // 3. THE MUSHROOM, and its floor is the test. Half podzol, half grass:
         // a mushroom survives ANY light on podzol and needs darkness on grass,
@@ -446,10 +474,10 @@ final class DebugTestYard {
      * a strip of wheat on farmland that must never appear in that list.
      */
     private static void buildBoneMealPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + 16;
-        int x1 = cx + 22;
-        int z0 = mouthZ + 3;
-        int z1 = z0 + 16;
+        int x0 = cx + WEST_MIN;
+        int x1 = cx + WEST_MAX;
+        int z0 = mouthZ + ROW_A;
+        int z1 = z0 + ROW_A_D;
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
                 DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
@@ -502,14 +530,14 @@ final class DebugTestYard {
      * because they suit a night.
      */
     private static void buildStockedRow(ServerLevel level, int gy, int cx, int mouthZ) {
-        int z = mouthZ + 48;
-        int x = cx - YARD_HALF_X + 2;
+        int z = mouthZ + ROW_F;
+        int x = cx + WEST_MIN;
 
         // 0-CP: the shards at full size, the size range side by side, and a
         // stallion so the inheritance question can be asked at all.
         stockedPen(level, gy, x, z, "horsegenetics.starburst", "W/W", 3, 1,
                 List.of("STARBURST", "shards? sizes?", "breed one pair:", "foal like parents?"));
-        x += PEN_W + 2;
+        x = cx + WEST_MIN + 10;
 
         // 0-CQ needs no horse, but the highlight is easiest to judge with a
         // herd in front of you, and a lead only exists where there is one.
@@ -654,12 +682,12 @@ final class DebugTestYard {
      * where a 22% halo is distinguishable from a 100% one.
      */
     private static void buildGlowRoom(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + 4;
-        int x1 = cx + 18;
-        int z0 = mouthZ + 48;
-        int z1 = z0 + 12;
-        darkRoom(level, gy, x0, x1, z0, z1, cx + 10);
-        DebugPenManager.placeSign(level, new BlockPos(cx + 9, gy + 1, z0 - 1), Direction.NORTH,
+        int x0 = cx + EAST_MIN;
+        int x1 = cx + EAST_MAX;
+        int z0 = mouthZ + ROW_F;
+        int z1 = z0 + ROW_F_D;
+        darkRoom(level, gy, x0, x1, z0, z1, (x0 + x1) / 2);
+        DebugPenManager.placeSign(level, new BlockPos((x0 + x1) / 2 - 1, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("GLOW ROOM", "SHUT THE DOOR", "tron: box EDGES", "lit, panels dim"));
         stock(level, gy, x0 + 3.5, (z0 + z1) / 2.0, "horsegenetics.tron",
                 "the glow room (tron)", 1, 1, "Trs/Trg");
@@ -725,10 +753,10 @@ final class DebugTestYard {
      * already been caught on.
      */
     private static void buildSpawnerRoom(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + 4;
-        int x1 = cx + 14;
-        int z0 = mouthZ + 3;
-        int z1 = z0 + 10;
+        int x0 = cx + EAST_MIN;
+        int x1 = cx + EAST_MIN + 12;
+        int z0 = mouthZ + ROW_A;
+        int z1 = z0 + 12;
         darkRoom(level, gy, x0, x1, z0, z1, cx + 8);
         BlockPos spawner = new BlockPos((x0 + x1) / 2, gy + 1, (z0 + z1) / 2);
         DebugPenManager.fastSet(level, spawner, Blocks.SPAWNER.defaultBlockState());
@@ -769,10 +797,10 @@ final class DebugTestYard {
      * ever been able to state.
      */
     private static void buildRetinuePen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx - YARD_HALF_X + 2;
-        int x1 = x0 + 20;
-        int z0 = mouthZ + 74;
-        int z1 = mouthZ + 79;
+        int x0 = cx + WEST_MIN;
+        int x1 = cx + WEST_MAX;
+        int z0 = mouthZ + ROW_H;
+        int z1 = z0 + ROW_H_D;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
                 List.of("RETINUE COST", "4 leaders, 16", "cows. Watch the", "census ms/tick"));
@@ -850,9 +878,11 @@ final class DebugTestYard {
                 new Look("horsegenetics.tribal_claw", "TRIBAL CLAW",
                         "3 hairlines - do", "they read far off?"));
 
-        int z0 = mouthZ + 43;
-        int z1 = z0 + 4;
-        int[] starts = {cx - 22, cx - 17, cx - 12, cx - 7, cx + 3, cx + 8, cx + 13, cx + 18};
+        int z0 = mouthZ + ROW_E;
+        int z1 = z0 + ROW_E_D;
+        int[] starts = {
+                cx + WEST_MIN, cx + WEST_MIN + 5, cx + WEST_MIN + 10, cx + WEST_MIN + 15,
+                cx + EAST_MIN, cx + EAST_MIN + 5, cx + EAST_MIN + 10, cx + EAST_MIN + 15};
         for (int i = 0; i < row.size() && i < starts.length; i++) {
             Look look = row.get(i);
             int x0 = starts[i];
@@ -890,11 +920,18 @@ final class DebugTestYard {
                 {"MltB/MltB", "BLACK", "must NOT glow"},
                 {"MltC/MltC", "ONE COLOUR", "glowing, single"},
                 {"MltM/MltM", "MULTICOLOUR", "differs from <-"}};
-        int z0 = mouthZ + 21;
-        int z1 = z0 + 4;
+        // TWENTY DEEP AND NINE WIDE, not five by four. The first version was
+        // four narrow stalls and the owner's verdict was immediate: "the molten
+        // hooves pens are so small the horses can't move to show the marking".
+        // A hoofprint gene needs a horse that is WALKING, so the pen has to be
+        // somewhere a horse would choose to walk across - which is the one
+        // requirement a display stall gets exactly backwards.
+        int z0 = mouthZ + ROW_C;
+        int z1 = z0 + ROW_C_D;
+        int[] starts = {cx + WEST_MIN, cx + WEST_MIN + 10, cx + EAST_MIN, cx + EAST_MIN + 10};
         for (int i = 0; i < forms.length; i++) {
-            int x0 = cx + 4 + i * 5;
-            int x1 = x0 + 4;
+            int x0 = starts[i];
+            int x1 = x0 + 9;
             fencedPlot(level, gy, x0, x1, z0, z1);
             DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
                     List.of("MOLTEN HOOVES", forms[i][1], forms[i][2], "watch it WALK"));
@@ -931,10 +968,10 @@ final class DebugTestYard {
      * memorable way to lose a night's readings.
      */
     private static void buildLavaChannel(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + 0;
-        int x1 = cx + 22;
-        int z0 = mouthZ + 74;
-        int z1 = mouthZ + 79;
+        int x0 = cx + EAST_MIN;
+        int x1 = cx + EAST_MAX;
+        int z0 = mouthZ + ROW_B;
+        int z1 = z0 + ROW_B_D;
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
                 DebugPenManager.groundColumn(level, x, gy, z, Blocks.STONE.defaultBlockState());
@@ -978,10 +1015,10 @@ final class DebugTestYard {
      * whether you are left swimming a long way from either edge.
      */
     private static void buildHydrophobicPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx - YARD_HALF_X + 2;
-        int x1 = x0 + 18;
-        int z0 = mouthZ + 21;
-        int z1 = z0 + 4;
+        int x0 = cx + WEST_MIN;
+        int x1 = cx + WEST_MAX;
+        int z0 = mouthZ + ROW_B;
+        int z1 = z0 + ROW_B_D;
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
                 DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
