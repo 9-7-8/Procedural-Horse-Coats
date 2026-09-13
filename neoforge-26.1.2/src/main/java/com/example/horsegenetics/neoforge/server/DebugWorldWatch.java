@@ -104,6 +104,23 @@ public final class DebugWorldWatch {
      */
     private static final int LINES_PER_MINUTE = 400;
 
+    /**
+     * Milliseconds per tick above which the census says the server is behind.
+     *
+     * <p><b>Not 50, which is the number that looks right and is wrong.</b> This
+     * is wall-clock elapsed divided by ticks, and a server that is keeping up
+     * sleeps out the rest of each tick - so a perfectly healthy dimension reads
+     * <i>exactly</i> 50.0, every time, and cannot read less. Thresholding at 50
+     * therefore leaves the verdict to floating-point noise: the first two real
+     * censuses both printed 50.0 and only the second called it BEHIND.
+     *
+     * <p>A warning that fires on half the healthy readings is worse than no
+     * warning, because it makes a genuine slowdown unremarkable - which is the
+     * one thing this line exists to catch. Ten per cent of headroom, and the
+     * good reading says what it is rather than being silent.
+     */
+    private static final double BEHIND_MS = 55.0;
+
     private DebugWorldWatch() {
     }
 
@@ -319,7 +336,7 @@ public final class DebugWorldWatch {
                 TAG, censusNumber, upMinutes, gameTime,
                 level.isBrightOutside() ? "day" : "NIGHT",
                 String.format("%.1f", msPerTick), ticks,
-                msPerTick > 50.0 ? " - BEHIND, the server is not keeping up" : "",
+                msPerTick > BEHIND_MS ? " - BEHIND, the server is not keeping up" : " (20 TPS is 50.0)",
                 horses + items + other, horses, items, other);
         if (!SOUNDS.isEmpty()) {
             StringBuilder sb = new StringBuilder();

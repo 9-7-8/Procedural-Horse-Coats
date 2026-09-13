@@ -58,6 +58,20 @@
 
 <h2 id="overnight-watch">&sect;0-CX &mdash; The overnight watch, and a yard that runs itself (2026-09-12, NOT looked at)</h2>
 
+<div class="note">
+    <span class="label">The running build is one commit behind, deliberately</span>
+    <p>
+        The tick-time threshold fix (<code>BEHIND_MS</code>) is committed and
+        type-checked but <strong>not in the client that ran the night of
+        2026-09-12</strong>: rebuilding would have overwritten the classes under a
+        live client. So that night's log says <em>BEHIND, the server is not keeping
+        up</em> on roughly half its census lines at exactly <code>50.0</code> ms/tick,
+        <strong>and 50.0 is the healthy reading</strong> - this measure is wall-clock
+        divided by ticks, and a server that keeps up sleeps out the rest of each tick,
+        so it can never read less. Only a figure clearly above 55 means anything.
+    </p>
+</div>
+
 <div class="note danger">
     <span class="label">This is the whole night. If step 2 says nothing is being watched, stop and fix that first</span>
     <p>
@@ -152,14 +166,22 @@
         results. The watch reports the nearest non-horse every ten seconds.
         <em>Pass:</em> it climbs within a minute and sits at eight or more all night.
         <em>Fail:</em> a figure wandering between one and six as they graze past.</li>
-    <li><strong>SOUND HERD</strong> &mdash; three meowing and two singers. The open
-        question on the sound genes is &ldquo;are these bearable in a herd&rdquo; and the
-        cooldowns were guesses; that sounds like a question only ears can settle and it is
-        not. A herd firing eighty sounds in two minutes is unbearable by arithmetic, and
-        the census collects the arithmetic while everybody is asleep. Meowing and singer
-        rather than base alarm, which is gated on <code>hostile_near</code> and would sit
-        silent a hundred blocks from the spawner &mdash; a blank that looks exactly like a
-        broken gene.</li>
+    <li><strong>SOUND HERD</strong> &mdash; three meowing and two singers, and
+        <strong>the first census answered it</strong>: 24&nbsp;&times;
+        <code>entity.cat.ambient</code> and 4&nbsp;&times; <code>music_disc.cat</code> per
+        two minutes, which is <em>exactly</em> what a 300-tick and a 1&nbsp;200-tick
+        interval predict. The cooldowns do what they say. So the open question is no
+        longer &ldquo;is it working&rdquo; but &ldquo;is <strong>twelve meows a minute
+        from three horses</strong> bearable&rdquo;, which is a judgement, and one you can
+        make by standing in that pen for thirty seconds.
+        <p><strong>And it turned up a third sound nobody put there.</strong> 40&nbsp;&times;
+        <code>entity.bat.ambient</code> per two minutes &mdash;
+        <a href="gene-echolocate.html">echolocate</a>, which is
+        <code>Founders.EXPRESSING</code>, so the corridor's gallery horses draw it and the
+        hundred-and-forty of them are audibly echolocating at twenty calls a minute. That
+        is a &ldquo;feel&rdquo; question for the corridor rather than a bug, and it is one
+        nothing would ever have asked, because the noise is ambient and the mind edits it
+        out. The census counts by sound id, which is why it is separable at all.</p></li>
     <li><strong>WARD + SPAWNER</strong> &mdash; the best of them, because it is the one
         with the most data. Every hostile spawn is logged with its distance to the nearest
         <em>live</em> ward, so a night is a column of hundreds of numbers (&sect;0-CW).</li>
