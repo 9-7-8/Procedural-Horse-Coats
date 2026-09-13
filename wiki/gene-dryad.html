@@ -20,22 +20,23 @@
 <h1>Dryad</h1>
 
 <p class="lede">
-    Once a day, roughly, a sapling appears where the horse has been. Left in one
-    place for long enough it will grow a small wood around itself, one tree at a
-    time and entirely without hurrying.
+    Every so often the horse leaves something growing where it has been, and what
+    it leaves is written on the allele. Nine of them: six trees, mushrooms,
+    flowers, and one that plants nothing at all and hurries along whatever is
+    already there. Left in one place long enough, a dryad makes the place its
+    own &mdash; one block at a time and entirely without hurrying.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
 
-<div class="note warn">
-    <span class="label">Built, and not yet seen in game</span>
+<div class="note good">
+    <span class="label">Seen working, 2026-09-13</span>
     <p>
-        The gene, its inheritance and its founder table exist and are covered by
-        the test suite; the translator that turns it into behaviour was written
-        against the 26.1.2 sources and is flagged unverified in its own comments.
-        <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="verification.html">To be verified</a>.
+        The first dryad tree in the mod's history: a sapling appeared at
+        00:00:03 and was six logs and fifty-two leaves by 00:01:09. The gene had
+        never been watched doing anything before &mdash; not because it was
+        broken, but because the horse dimension forbade the spreading verb and,
+        before that, the test pen had the wrong floor under it.
     </p>
 </div>
 
@@ -44,26 +45,80 @@
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
     <tbody>
-        <tr><td><code>Dry/Dry</code></td><td>plants a sapling nearby, about once a day</td></tr>
-        <tr><td>anything else</td><td>nothing</td></tr>
+        <tr><td><code>n/n</code></td><td>nothing &mdash; the ground is left as it was</td></tr>
+        <tr><td>one variant and <code>n</code></td><td>nothing. A variant is recessive to the wild type, and the horse passes it on</td></tr>
+        <tr><td>two of the <strong>same</strong> variant</td><td>that one thing, at full rate</td></tr>
+        <tr><td>two <strong>different</strong> variants</td><td><strong>both</strong>, each at half rate</td></tr>
     </tbody>
 </table>
+
+<h2 id="alleles">The nine things a dryad can leave</h2>
+
+<table class="data">
+    <thead><tr><th>Allele</th><th>Leaves</th></tr></thead>
+    <tbody>
+        <tr><td><code>Oak</code></td><td>oak saplings &mdash; the common one, and the fastest to become a tree</td></tr>
+        <tr><td><code>Brch</code></td><td>birch saplings &mdash; tall, thin, and forgiving about where they stand</td></tr>
+        <tr><td><code>Spru</code></td><td>spruce saplings &mdash; a spruce horse makes a wood you cannot see through</td></tr>
+        <tr><td><code>Jung</code></td><td>jungle saplings &mdash; the tallest single sapling in the game, and the one that wants room</td></tr>
+        <tr><td><code>Aca</code></td><td>acacia saplings &mdash; grows crooked, so an acacia line never makes the same shape twice</td></tr>
+        <tr><td><code>Dark</code></td><td>dark oak saplings &mdash; <strong>the only one that needs four of itself in a square</strong>, so it plants beside what it has already planted and a grove takes a few days rather than one</td></tr>
+        <tr><td><code>Mush</code></td><td>mushrooms, red and brown &mdash; and only where they will survive: out of the light, or on mycelium and podzol where the light does not matter</td></tr>
+        <tr><td><code>Flwr</code></td><td>flowers, one at a time</td></tr>
+        <tr><td><code>Bone</code></td><td><strong>plants nothing.</strong> It fertilises what is already there &mdash; saplings, grass, flowers, moss, mushrooms &mdash; and pointedly never a crop</td></tr>
+    </tbody>
+</table>
+
+<h2 id="mixed">Two different alleles is not nothing, and it is not double</h2>
+
+<p>
+    This is the part worth understanding before breeding for it. A variant is
+    still <strong>recessive to the wild type</strong>: one copy and a wild type
+    does nothing at all, exactly as it always did. But two <em>different</em>
+    variants do not cancel out the way
+    <a href="gene-verdant.html">verdant</a>'s do. <strong>They both
+    express</strong>, each at half its usual rate.
+</p>
+
+<p>
+    So the total is the same either way, and the choice is about <em>what</em>
+    rather than <em>how much</em>:
+</p>
+
+<ul>
+    <li>A <strong>matched pair specialises.</strong> It is the only way to a
+        reliable dark oak grove, or to a wood that is all spruce.</li>
+    <li>A <strong>mixed pair diversifies.</strong> It leaves a bit of
+        everything, and will never make a monoculture &mdash; or a dark oak
+        grove.</li>
+</ul>
+
+<p>
+    Halving is what keeps that a real choice. If a mismatch planted two things
+    at full speed, every breeder would keep their lines deliberately mixed and a
+    matched pair would be strictly worse than the thing you get by accident.
+</p>
 
 <h2 id="rate">The rate is epigenetic</h2>
 
 <p>
-    Once a day is the default; the interval is written on the allele copy and
-    drifts with breeding, so a line can be pushed faster. Not much faster
-    &mdash; the cap is deliberate.
+    Roughly once a game day is the default; the interval is written on the
+    allele copy and drifts with breeding, so a line can be pushed faster. Not
+    much faster &mdash; the cap is deliberate. In a mixed horse <em>each copy
+    carries its own interval</em>, so the two halves are not identical twins:
+    one side of the pair can be quicker than the other, and that is inherited.
 </p>
 
-<h2 id="not-bonemeal">It plants; it does not fertilise</h2>
-
-<p>
-    An earlier specification had it bone-mealing the surrounding area. That would
-    make it a farm, which is a far bigger thing than this gene is asking to be.
-    It plants saplings and nothing else.
-</p>
+<div class="note">
+    <span class="label">It is slower in practice than the interval suggests</span>
+    <p>
+        Measured over three continuous hours: three plantings, not twenty. The
+        <code>spread</code> verb picks one block per interval and gives up if
+        that block will not take, and for something that builds <em>upward</em>
+        only one of its three vertical candidates can ever work. Expect roughly
+        a third of the nominal rate. <a href="known-gaps.html#gap-208">Gap 208</a>.
+    </p>
+</div>
 
 <h2 id="health">Health</h2>
 
@@ -77,41 +132,99 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd><code>horsegenetics.dryad</code></dd></div>
-    <div><dt>Alleles</dt><dd><code>Dry</code> dryad, <code>n</code></dd></div>
-    <div><dt>Inheritance</dt><dd>homozygous recessive</dd></div>
-    <div><dt>Reaches the game as</dt><dd>a <code>spread</code> effect with a sapling cover word</dd></div>
-    <div><dt>Epigenetic</dt><dd>interval</dd></div>
+    <div><dt>Alleles</dt><dd><code>Oak</code>, <code>Brch</code>, <code>Spru</code>, <code>Jung</code>, <code>Aca</code>, <code>Dark</code>, <code>Mush</code>, <code>Flwr</code>, <code>Bone</code>, <code>n</code></dd></div>
+    <div><dt>Inheritance</dt><dd>recessive to <code>n</code>; <strong>incompletely dominant</strong> between any two variants</dd></div>
+    <div><dt>Reaches the game as</dt><dd>one <code>spread</code> effect, or <em>two</em> at double interval</dd></div>
+    <div><dt>Epigenetic</dt><dd><code>interval</code>, per copy</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
 <div class="note good">
-    <span class="label">The daily cap does the safety work</span>
+    <span class="label">The half-rate rule needed no new machinery</span>
     <p>
-        One block change a day is nothing. Of the two <code>spread</code> genes in this batch this is by far the cheaper, and the epigenetic interval is bounded so breeding cannot turn it into a per-tick effect.
+        The interval is epigenetic and lives on the <em>copy</em>, so a mixed
+        horse reads <code>copy(0)</code> and <code>copy(1)</code> separately and
+        doubles each. <code>GeneEpigenetics.copy(int)</code>'s own documentation
+        already said it exists for &ldquo;a codominant gene, where both copies
+        contribute at once&rdquo; &mdash; the model was shaped for this before
+        anything needed it. Asking for <code>expressed()</code> here would count
+        one allele twice and the other never.
     </p>
 </div>
 
 <div class="note danger">
-    <span class="label">Bone meal was rejected, and the reason should survive</span>
+    <span class="label">Why the species is on the allele, and not picked by the translator</span>
     <p>
-        &ldquo;Occasionally activates a bone-meal effect on the surrounding area&rdquo; makes a horse that auto-farms every crop you own, which is an economy lever nobody asked for and very hard to walk back once players have it. <strong>Saplings only.</strong> Recorded here so it is not quietly &ldquo;improved&rdquo; later.
+        It used to be picked from <code>pos.hashCode()</code>, from a list of
+        six &mdash; and one of the six was <strong>dark oak</strong>, which
+        vanilla will only grow from a 2&nbsp;&times;&nbsp;2 block of saplings. A
+        gene that plants one at a time, at random, every few thousand ticks,
+        will essentially never make a square. <strong>A sixth of this gene's
+        entire output was permanent litter</strong>, and it also blocked the
+        square it stood on.
+    </p>
+    <p>
+        Measured the night of 2026-09-13: a dark oak planted at 01:28 was still
+        a sapling at 02:04, while an oak planted at 00:00 had been a tree since
+        00:01, and one position logged <strong>ten failed growth attempts</strong>
+        in forty-five minutes. Naming the species on the allele fixes it at the
+        root &mdash; a dark-oak horse plants only dark oak, so its saplings
+        accumulate in one place &mdash; and the translator then
+        <strong>clusters</strong> them, preferring a free spot beside one
+        already standing. The square completes on its own.
     </p>
 </div>
 
 <div class="note warn">
-    <span class="label">Do not plant on anything somebody built</span>
+    <span class="label">Never plant what cannot live there</span>
     <p>
-        Same rule as <a href="gene-hot-blooded.html">hot blooded</a>: the vocabulary word keeps &ldquo;what may be converted&rdquo; in the translator. A sapling through a stable floor is the failure to avoid.
+        Every planting word goes through <code>BlockState.canSurvive</code>
+        before the block is written. A mushroom placed into daylight pops off on
+        the next tick and a flower on the wrong ground never existed &mdash;
+        both look exactly like a broken gene, which is the failure this project
+        keeps rediscovering. One call covers every species, and it is why the
+        mushroom allele needs no light table of its own.
+    </p>
+    <p>
+        Note what it does <em>not</em> cover: a dark oak <em>can</em> survive
+        anywhere an oak can. It simply cannot grow. That is why the clustering
+        is a separate mechanism and not a stricter <code>canSurvive</code>.
     </p>
 </div>
 
-<h2 id="cheap">The cheapest world-editing gene</h2>
+<div class="note">
+    <span class="label">Bone meal was refused once, and the refusal was answered rather than overruled</span>
+    <p>
+        This gene's javadoc used to carry the sentence: <em>&ldquo;An earlier
+        specification had it bone-mealing the surrounding area. That makes a
+        horse which auto-farms every crop you own, which is an economy lever
+        nobody asked for and very hard to walk back once players have
+        it.&rdquo;</em> The owner asked for the allele on 2026-09-13, and that
+        note did exactly the job it was written for: it made the reversal
+        <strong>deliberate</strong> rather than quiet.
+    </p>
+    <p>
+        <strong>So the objection is met head-on.</strong> The
+        <code>bonemeal</code> cover refuses crops &mdash; wheat, carrots,
+        potatoes, beetroot, stems, nether wart, cocoa, berries. What is left is
+        a horse that hurries a wood along, which is the flavour the allele was
+        wanted for and none of the economy the old note was worried about. It
+        also rolls the block's own <code>isBonemealSuccess</code>, so it is no
+        faster than a player with a stack of the stuff.
+    </p>
+</div>
+
+<h2 id="frequency">Nine variants makes the arithmetic do something interesting</h2>
 
 <p>
-    One vocabulary word on an existing verb, one bounded interval, one block a
-    day. If <code>spread</code>'s new words are being built in one pass, this is
-    the one to do first &mdash; it exercises the whole path at a rate where
-    nothing can go wrong quickly.
+    Nine variants means nine matched pairs and <strong>thirty-six mixed
+    ones</strong>. At any allele frequency a wild dryad is overwhelmingly likely
+    to be mixed &mdash; which is the right texture (you find horses that leave a
+    bit of everything; a horse that plants only dark oak is something somebody
+    bred) but it also means the expressing rate climbs fast with frequency. The
+    per-variant figure is held low to keep the locus near the one per cent it
+    has always been. Name the constant, never the number:
+    <code>DryadGene.PER_VARIANT</code>.
 </p>
 
 </section>
@@ -127,15 +240,61 @@
     offers, and it is worth having one.
 </p>
 
+<h2 id="incomplete">Why this locus is incompletely dominant when the others are not</h2>
+
+<p>
+    <a href="gene-verdant.html">Verdant</a> and the
+    <a href="gene-egg-layer.html">matched-pair</a> loci all take the opposite
+    rule: two different variants are <em>inert</em>. That was a deliberate
+    design &mdash; a locus with dozens of alleles where any one showed would be
+    a slot machine, and requiring the same allele twice makes it a search with a
+    target.
+</p>
+
+<p>
+    Dryad is the one place that rule cost more than it bought, and the reason is
+    that <strong>its outcomes compose</strong>. Two different ground covers
+    genuinely conflict: a block is mycelium or it is moss. Two different
+    <em>plantings</em> do not conflict at all &mdash; a wood can hold oak and
+    birch, and a horse that leaves both is a coherent thing to be. So the
+    inert-mismatch rule was doing no work here except deleting outcomes, while
+    the dark oak needed a reason for a breeder to <em>fix</em> a line.
+</p>
+
+<p>
+    Halving the mixed rates supplies that reason without punishing the mix:
+    specialise and you get one thing reliably, including the only tree that
+    requires it; mix and you get variety at the same total pace. The locus now
+    has two ways to be played well, which is more than it had.
+</p>
+
+<h2 id="rejected">What was considered and not done</h2>
+
+<ul>
+    <li><strong>Dropping dark oak.</strong> Simplest, and it throws away the one
+        allele with a real breeding story attached &mdash; the only one where a
+        matched pair is not merely tidier but <em>necessary</em>.</li>
+    <li><strong>Planting the 2&nbsp;&times;&nbsp;2 outright.</strong>
+        Guaranteed, and it makes dark oak the only allele that produces a whole
+        tree per interval rather than a sapling. Clustering keeps every allele
+        on the same budget and keeps the owner's word for it, which was
+        &ldquo;eventually&rdquo;.</li>
+    <li><strong>Full rate for both halves of a mixed pair.</strong> Easier to
+        explain, and it makes a mismatch strictly better than a match &mdash;
+        which would give breeders a reason to never fix a line, at a locus whose
+        most interesting allele requires one.</li>
+</ul>
+
 </section>
 
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-hot-blooded.html">Hot blooded</a>
         <a href="gene-verdant.html">Verdant</a>
+        <a href="making-a-gene.html#spread">The <code>spread</code> verb</a>
         <a href="verification.html">What to check in-game</a>
     </div>
-    Planned source: <code>common/genetics/genes/DryadGene.java</code>
+    Source: <code>common/genetics/genes/DryadGene.java</code>
 </div>
 
 </article>

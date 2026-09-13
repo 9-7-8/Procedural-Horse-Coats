@@ -286,9 +286,12 @@ public final class GeneDescriptions {
                             + "horse stands. On a frozen lake it melts the ice it is standing on and is "
                             + "then in the water."),
             Map.entry("horsegenetics.dryad",
-                    "A magical recessive that paints nothing: about once a day the horse plants "
-                            + "a sapling near where it stands. It plants; it does not fertilise. How "
-                            + "often is drawn per allele copy and inherited with it."),
+                    "A magical locus that paints nothing: every so often the horse leaves "
+                            + "something growing near where it stands, and the allele says what - "
+                            + "six trees, mushrooms, flowers, or bone meal on what is already "
+                            + "there. Recessive to the wild type, but two DIFFERENT variants both "
+                            + "express, each at half rate. How often is drawn per allele copy and "
+                            + "inherited with it."),
             Map.entry("horsegenetics.intimidating",
                     "A magical recessive that paints nothing: two copies and everything that is "
                             + "not a horse - your cows as readily as any monster - is pushed out of a "

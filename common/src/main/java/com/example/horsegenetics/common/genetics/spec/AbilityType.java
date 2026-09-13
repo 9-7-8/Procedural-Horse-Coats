@@ -491,11 +491,17 @@ public final class AbilityType {
      */
     public static final AbilityType SPREAD = register(new AbilityType("spread",
             List.of(
-                    Param.requiredChoice("cover", List.of("mycelium", "moss", "grass", "sapling", "melt"),
-                            "what spreads from the horse. 'sapling' plants one; 'melt' takes snow "
-                                    + "and ice away. Both are vocabulary words, not block ids - "
-                                    + "which blocks may be converted stays with the translator, and "
-                                    + "is what stops either eating a block somebody placed"),
+                    Param.requiredChoice("cover", List.of("mycelium", "moss", "grass", "melt",
+                                    "sapling_oak", "sapling_birch", "sapling_spruce",
+                                    "sapling_jungle", "sapling_acacia", "sapling_dark_oak",
+                                    "mushroom", "flower", "bonemeal"),
+                            "what spreads from the horse. The three ground covers and 'melt' "
+                                    + "convert a block; the sapling words, 'mushroom' and 'flower' "
+                                    + "PLANT one above the ground; 'bonemeal' plants nothing and "
+                                    + "hurries what is already there. All of them are vocabulary "
+                                    + "words, not block ids - which blocks may be converted stays "
+                                    + "with the translator, and is what stops any of them eating a "
+                                    + "block somebody placed"),
                     Param.num("radius", 2, "reach in blocks, 1-8"),
                     Param.num("chance", 0.5, "per-beat probability, in (0, 1]"),
                     Param.num("interval", 40, "ticks between beats (at least 1)")),

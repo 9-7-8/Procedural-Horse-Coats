@@ -100,10 +100,53 @@
     </p>
 </div>
 
-<div class="note">
-    <span class="label">Repel is a shove, not a wall</span>
+<div class="note danger">
+    <span class="label">Repel was a shove, and the shove did not work &mdash; measured, 2026-09-13</span>
     <p>
-        It reuses the existing implementation: clear the mob&rsquo;s target if it was the horse or its rider, then push outward. Deliberately weaker than an avoidance goal, because a goal would have to be added to and removed from every mob that ever walked past &mdash; and a horse that stopped expressing would leave it behind on everything it had met.
+        The original implementation cleared the mob's target and then pushed
+        outward: <code>setDeltaMovement(away &times; 0.35)</code>, once every
+        twenty ticks. <strong>Three unattended hours with six cows and one
+        intimidating horse says that is not enough.</strong> The cows were
+        placed at three blocks; across sixty-four readings the nearest sat at a
+        <strong>median of 4.2 blocks</strong>, and <strong>63 of the 64 were
+        inside the eight blocks this gene promises</strong> (minimum 0.6,
+        maximum 8.0).
+    </p>
+    <p>
+        <strong>The aura was firing the whole time</strong> &mdash; the first
+        reading moved the cows from 3.0 to 5.6 within a minute, so &ldquo;it
+        never ran&rdquo; is ruled out. A shove simply loses to a pathfinder: the
+        cow's own navigation walks it straight back over the following second,
+        because nothing ever told the cow's <em>AI</em> anything. You cannot
+        out-poke a goal once a second.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">It issues a path now, which is the mechanism this file had already chosen</span>
+    <p>
+        <code>repelFrom</code> calls
+        <code>mob.getNavigation().moveTo(&hellip;)</code> toward the far edge of
+        the radius, so the mob's own pathfinder does the work instead of
+        fighting it. That is exactly what <code>followHorse</code> does for the
+        mirror-image case, and <strong>its comment already contains the
+        argument</strong>: a navigation nudge rather than an injected goal,
+        because &ldquo;a goal added to an arbitrary mob has to be taken off
+        again, and a horse that dies, despawns or stops expressing would leave
+        it behind on every creature it had ever met&rdquo;. A path expires by
+        itself. Repel is the same problem pointed the other way and should have
+        had the same answer from the start.
+    </p>
+    <p>
+        <strong>The shove is kept, at 0.2.</strong> Not as the mechanism &mdash;
+        as the <em>reading</em>. It is what makes the moment look like being
+        driven off rather than like a cow choosing to wander, and on a mob with
+        no navigation, or one that cannot path to the spot, it is the only thing
+        that happens at all.
+    </p>
+    <p>
+        <strong>The avoidance goal stays rejected.</strong> The lifecycle
+        objection was right and this change does not weaken it.
     </p>
 </div>
 

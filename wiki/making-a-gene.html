@@ -2485,7 +2485,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <table>
 <thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
 <tbody>
-<tr><td><code>cover</code></td><td><em>required</em></td><td>One of <code>mycelium</code>, <code>moss</code>, <code>grass</code>.</td></tr>
+<tr><td><code>cover</code></td><td><em>required</em></td><td>One vocabulary word, from three families. <strong>Converts a block:</strong> <code>mycelium</code>, <code>moss</code>, <code>grass</code>, <code>melt</code>. <strong>Plants above the ground:</strong> <code>sapling_oak</code>, <code>sapling_birch</code>, <code>sapling_spruce</code>, <code>sapling_jungle</code>, <code>sapling_acacia</code>, <code>sapling_dark_oak</code>, <code>mushroom</code>, <code>flower</code>. <strong>Plants nothing:</strong> <code>bonemeal</code>, which hurries along what is already there.</td></tr>
 <tr><td><code>radius</code></td><td><code>2</code></td><td>Reach in blocks, 1&ndash;8.</td></tr>
 <tr><td><code>chance</code></td><td><code>0.5</code></td><td>Per-beat probability, in (0, 1].</td></tr>
 <tr><td><code>interval</code></td><td><code>40</code></td><td>Ticks between beats, at least 1.</td></tr>
@@ -2504,11 +2504,54 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     At most <strong>one block per beat</strong>, and a random candidate near the horse
     rather than the nearest eligible one. Both are design: this is a horse changing
     the ground it walks over, not a terraforming tool, and picking randomly makes the
-    edge of a spread ragged instead of a perfect expanding disc. Skipped in the horse
-    dimension, like <code>glow</code>&rsquo;s light block.
+    edge of a spread ragged instead of a perfect expanding disc.
+</p>
+
+<div class="note danger">
+    <span class="label">A planting word must never plant something that cannot live there</span>
+    <p>
+        Every word in the <em>planting</em> family goes through
+        <code>BlockState.canSurvive</code> before it is written, and that one call is
+        load-bearing rather than tidy. A mushroom placed into daylight pops off on the
+        next tick; a flower on the wrong ground never existed. <strong>Both look
+        exactly like a broken gene</strong>, and a gene that silently does nothing is
+        the failure mode this project keeps rediscovering &mdash; it cost two sessions
+        on the spreading genes alone, where the answer each time turned out to be the
+        floor rather than the code.
+    </p>
+    <p>
+        <strong>The dark oak is the case that proves it, because
+        <code>canSurvive</code> is not enough on its own.</strong> A dark oak sapling
+        <em>can</em> stand anywhere an oak can; it simply cannot <em>grow</em> without
+        four of itself in a square. When the vocabulary had one word
+        (<code>sapling</code>) and the translator picked a species from
+        <code>pos.hashCode()</code>, one planting in six was permanent litter &mdash;
+        measured overnight, a dark oak sat as a sapling for forty minutes while its
+        oak neighbour had been a tree since a minute after planting, and one position
+        logged ten failed growth attempts in three quarters of an hour. The fix is
+        two-part and both halves matter: <strong>the species belongs to the
+        allele</strong>, so a horse plants one thing and its saplings accumulate, and
+        <code>sapling_dark_oak</code> <strong>clusters</strong> &mdash; it looks for a
+        free spot beside one already standing before falling back to anywhere, so the
+        square completes on its own.
+    </p>
+</div>
+
+<p>
+    <code>bonemeal</code> is the odd one and worth its own sentence: it is the only
+    word that answers &ldquo;what does this block do next&rdquo; rather than
+    &ldquo;what does this block become&rdquo;, so it does not go through the conversion
+    table at all. <strong>It refuses crops</strong> &mdash; wheat, carrots, potatoes,
+    beetroot, stems, nether wart, cocoa, berries &mdash; which is not a detail but the
+    whole reason it was allowed to exist: <a href="gene-dryad.html">dryad</a> had
+    rejected bone meal in its own javadoc as &ldquo;a horse which auto-farms every crop
+    you own&rdquo;, and the carve-out answers that objection exactly rather than
+    overruling it. It also rolls the block&rsquo;s own
+    <code>isBonemealSuccess</code>, so it is no faster than a player with a stack.
 </p>
 <p>
-    Built for <a href="gene-verdant.html">verdant</a>.
+    Built for <a href="gene-verdant.html">verdant</a>; the planting and fertilising
+    halves for <a href="gene-dryad.html">dryad</a>.
 </p>
 
 <h3 id="charges"><code>charges</code></h3>

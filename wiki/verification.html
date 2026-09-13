@@ -56,6 +56,66 @@
     </p>
 </div>
 
+<h2 id="dryad-rebuilt">&sect;0-CZ &mdash; Dryad is nine alleles now, and intimidating pushes properly (2026-09-13, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">This changes a locus's allele set, which is the most disruptive thing a change here can do</span>
+    <p>
+        Dryad went from <code>Dry</code>/<code>n</code> to <strong>nine variants</strong>
+        plus the wild type. That rewrites the locus's founder table and every
+        genotype string that mentions it. <strong>Any horse in an old save carrying
+        <code>Dry</code> has an allele that no longer exists.</strong> Dev-only, single
+        tester, no saves worth keeping (hard rule 6) &mdash; but start a fresh test
+        world rather than wondering why an old one reads oddly.
+    </p>
+</div>
+
+<h3>What to check, in order</h3>
+
+<ol>
+    <li><strong>A matched pair plants its own species and nothing else.</strong> Spawn
+        <code>Oak/Oak</code> and <code>Spru/Spru</code> and leave them in the yard. The
+        watch names the block, so the log answers this without anybody looking.</li>
+    <li><strong>A mixed pair plants both, at half rate.</strong> <code>Oak/Brch</code>
+        should leave roughly as many things per hour as <code>Oak/Oak</code> does, split
+        between the two. This is the new rule and nothing has ever exercised it.</li>
+    <li><strong>A carrier still does nothing.</strong> <code>Oak/n</code> is the control
+        &mdash; if it plants, the recessive-to-wild-type half has broken and the whole
+        locus is now dominant.</li>
+    <li><strong>Dark oak makes a square.</strong> <code>Dark/Dark</code>, left alone.
+        The saplings should cluster rather than scatter, and a tree should eventually
+        appear. <strong>This is the one most likely to be wrong</strong>, because the
+        clustering search is new code with no test behind it &mdash; and it fails
+        <em>invisibly</em>, as a pen of saplings that never become anything, which is
+        exactly the symptom it was written to cure.</li>
+    <li><strong>Mushrooms only appear where they survive.</strong> <code>Mush/Mush</code>
+        in daylight on grass should plant <em>nothing at all</em> &mdash; that is the
+        pass, not a failure. Put one in the yard's dark spawner room, or on mycelium, and
+        it should plant there. If mushrooms appear in the open and vanish a tick later,
+        <code>canSurvive</code> is not being consulted.</li>
+    <li><strong>Bone meal never touches a crop.</strong> <code>Bone/Bone</code> beside a
+        wheat field is the test that matters, and the one with a design decision riding
+        on it. It should hurry saplings and grass and leave every crop alone.</li>
+    <li><strong>Intimidating: the number should move.</strong> The yard measures it
+        automatically. Tonight's baseline is a <strong>median nearest-cow distance of
+        4.2 blocks with 63 of 64 readings inside 8</strong>. If the path-based repel
+        works, the median should sit at <strong>8 or more</strong> and stay there. This
+        is the first change in the mod measured against a number collected before it
+        was made.</li>
+</ol>
+
+<div class="note">
+    <span class="label">What the watch will tell you without being asked</span>
+    <p>
+        The <code>DRYAD</code> pen counts saplings, logs and leaves; the census names the
+        block and the delta. So most of the list above is answerable from
+        <code>grep '[watch]'</code> in the morning rather than by standing in a pen. What
+        it cannot see is a mushroom that was planted and popped &mdash; for that, the
+        <code>block placed</code> event lines are the evidence, and their absence is the
+        pass.
+    </p>
+</div>
+
 <h2 id="first-night">&sect;0-CY &mdash; The first night's readings (2026-09-13, read off the log)</h2>
 
 <div class="note good">
@@ -101,7 +161,9 @@
     block of saplings. A lone dark oak stands for ever: one was planted at 01:28 and was
     still a sapling at 02:04, while the oak next to it had become a tree in seventy
     seconds, and a third position logged <strong>ten failed growth attempts</strong>
-    between 01:15 and 02:01. <a href="known-gaps.html#gap-209">Gap 209</a>.
+    between 01:15 and 02:01. <strong>Fixed the same day</strong> by putting the species on
+    the allele and clustering the dark oaks - &sect;0-CZ, and
+    <a href="gene-dryad.html#what">the gene's page</a>.
 </p>
 
 <p>

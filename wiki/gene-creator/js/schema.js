@@ -720,10 +720,14 @@ window.HG = window.HG || {};
       ]
     },
     spread: {
-      doc: "Convert blocks under the hooves - mycelium, moss or grass.",
+      doc: "Change the ground under the hooves - convert it, plant on it, or fertilise it.",
       params: [
-        eChoice("cover", ["mycelium", "moss", "grass", "sapling", "melt"], null,
-          "what it spreads. 'sapling' plants one; 'melt' takes snow and ice away"),
+        eChoice("cover", ["mycelium", "moss", "grass", "melt",
+          "sapling_oak", "sapling_birch", "sapling_spruce", "sapling_jungle",
+          "sapling_acacia", "sapling_dark_oak", "mushroom", "flower", "bonemeal"], null,
+          "what it spreads. The first four CONVERT a block; the saplings, 'mushroom' and "
+          + "'flower' PLANT one above it (and are refused where it could not survive); "
+          + "'bonemeal' plants nothing and hurries what is already there, never a crop"),
         eNum("radius", 2, "reach in blocks", { min: 1, max: 8, step: 1 }),
         eNum("chance", 0.5, "odds of converting on any given beat", { min: 0, max: 1, step: 0.01 }),
         eNum("interval", 40, "ticks between beats", { min: 1, max: 200, step: 1 })
