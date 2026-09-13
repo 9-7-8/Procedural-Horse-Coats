@@ -128,7 +128,11 @@
 </p>
 
 <p>
-    <strong>If there is nowhere to stand, the ticket refuses and is not spent.</strong>
+    <strong>If there is nowhere to stand, the ticket refuses and is not spent</strong>
+    &mdash; and "somewhere to stand" means somewhere <em>this</em> horse's whole box fits.
+    It used to settle for dead centre when nothing fitted, which is a horse placed inside a
+    block; now it refuses, and every ticket writes a <code>[trace] ticket</code> line giving
+    the room it found and the spot it chose.
     The version before this scanned the bounding volume and, finding nothing, fell through
     to the sign&rsquo;s own block &mdash; flush against a wall, with wall material at head
     height, and the one position in the routine never checked for anything. The horse

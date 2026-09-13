@@ -318,9 +318,9 @@ public final class StallDetector {
      * arrived overhanging a side wall - owner-reported 2026-09-10 as "still
      * teleporting horses into walls". If the centre does not fit (the corner
      * of an L, a raised tile), the tile centres are tried nearest-first; if
-     * nothing fits at all - a stall narrower than the horse - it is the centre
-     * anyway, because that is the least-bad place and the caller only refuses
-     * when there is no floor.
+     * nothing fits at all - a stall narrower or lower than the horse - it
+     * refuses, because a horse put where its box collides is a horse inside a
+     * block.
      *
      * <p>The fallback box has no floor that was ever checked, so every cell in
      * it is tested here, nearest the middle first.
@@ -348,12 +348,15 @@ public final class StallDetector {
                     return at;
                 }
             }
-            // Nothing fits - a stall narrower than the horse. Dead centre anyway.
-            if (under != null) {
-                return new Vec3(c[0], footprintFloor(region, c[0], c[1], horse), c[1]);
-            }
-            StallFill.Column m = region.middle();
-            return new Vec3(m.x() + 0.5, m.y(), m.z() + 0.5);
+            // NOTHING FITS: refuse. This used to put the horse at dead centre
+            // anyway, as "the least-bad place" - which, for a horse whose box
+            // collides at every tile, is a horse placed inside a block. On
+            // 2026-09-13 a ticketed horse took inWall damage eight times in four
+            // seconds in the tight stall. Whether this branch is what did it is
+            // not yet established (TicketHandler now logs the room and the spot
+            // it chose, to settle that), but a spot that fails the fit test is
+            // never a safe answer whatever else is wrong.
+            return null;
         }
         BlockPos min = result.min();
         BlockPos max = result.max();

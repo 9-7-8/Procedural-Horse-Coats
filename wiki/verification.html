@@ -80,6 +80,66 @@
     </p>
 </div>
 
+<h2 id="ownership-and-landing">&sect;0-DR &mdash; Whose horse, one sign each, and the horse in the roof (2026-09-13, NOT looked at)</h2>
+
+<div class="note good">
+    <span class="label">Read off the log, and from the owner</span>
+    <ul>
+        <li><strong>The L-shaped stall binds now</strong> from the wall in front of its
+            notch: <code>Esoteric Lane @ 15,129,76 5x3x4 (16 blocks)</code>.</li>
+        <li><strong>The roofed stall lands a horse cleanly</strong> &mdash; owner:
+            <em>&ldquo;no teleporting into a wall issue on the roofed stall&rdquo;</em>.</li>
+    </ul>
+</div>
+
+<div class="note bad">
+    <span class="label">The tight stall put a horse in its roof</span>
+    <p>
+        <code>Esoteric Lane is back in its stall</code>, then eight <code>horse hurt &hellip; from
+        inWall</code> lines in four seconds, 22 down to 14. Owner: <em>&ldquo;its definitely
+        teleporting the horse to the block right above the sign instead of the center of the
+        open space&rdquo;</em>. <strong>That does not match either reading of the landing
+        code</strong>, which picks the room's centroid or the nearest tile that fits, so it is
+        not diagnosed yet. Two changes meet it halfway: a stall where nothing fits the horse
+        now <b>refuses</b> instead of placing it dead centre anyway, and <b>every ticket logs
+        the room it found and the spot it chose</b>. <a href="known-gaps.html#gap-223">Gap 223</a>.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Rules changed on the owner's call</span>
+    <ul>
+        <li><strong>Nothing binds to a horse you do not own, creative included</strong>
+            (<code>server/HorseOwnership</code>). A stall sign now refuses an untamed horse or
+            someone else's. The transfer paper already refused.</li>
+        <li><strong>A seed jar is made only from a stallion you own, and used on any mare you
+            own</strong> &mdash; the stallion need not be yours. Filling checked only that he
+            was tamed, and using checked only that she was.</li>
+        <li><strong>One stall sign per horse.</strong> A second refuses and says where the
+            first is; a second try within ten seconds moves the stall and pops the old sign off
+            as a bound sign.</li>
+        <li><strong>A crash that had not happened yet:</strong> since signs started refusing, a
+            stall opened up after it was bound makes the ticket's re-check come back empty,
+            and that was passed straight into the landing code. Guarded.</li>
+    </ul>
+</div>
+
+<div class="note">
+    <span class="label">NOT looked at &mdash; what to check</span>
+    <ol>
+        <li><strong>Ticket a horse into the tight stall again and read the
+            <code>[trace] ticket</code> line.</strong> It prints the room, the horse's box and
+            the landing point, or <code>NOTHING FITS - refused</code>. That line settles gap 223
+            either way.</li>
+        <li>Try a stall sign on an <strong>untamed</strong> horse and on a horse tamed by
+            nobody (the yard's stock): both should refuse and the sign should stay blank.</li>
+        <li>Hang a <strong>second</strong> sign for a horse with a stall: refused with the old
+            sign's position. Hang it again: the stall moves and the old sign drops.</li>
+        <li>Fill a seed jar from a stallion you do not own: refused. Use a jar on your own mare
+            when the stallion was someone else's: a foal.</li>
+    </ol>
+</div>
+
 <h2 id="stalls-and-swings">&sect;0-DQ &mdash; The L-shaped stall, the ticket mare, and a swing speed that never changed (2026-09-13, NOT looked at)</h2>
 
 <div class="note good">

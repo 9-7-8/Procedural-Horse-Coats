@@ -21,10 +21,10 @@ import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
  * The two server-side halves of the stall-sign flow that don't live on the item:
  *
  * <ul>
- *   <li><b>binding</b> - right-click a horse with a blank <b>or</b> bound
- *       {@code stall_sign} / {@code bound_stall_sign} rewrites the held sign to a
- *       {@code bound_stall_sign} carrying that horse's {@link BoundHorse}. Placing
- *       is done by {@link com.example.horsegenetics.neoforge.item.StallSignItem};</li>
+ *   <li><b>binding</b> - right-click a horse <b>you own</b> with a blank <b>or</b>
+ *       bound {@code stall_sign} / {@code bound_stall_sign} rewrites the held sign
+ *       to a {@code bound_stall_sign} carrying that horse's {@link BoundHorse}.
+ *       Placing is done by {@link com.example.horsegenetics.neoforge.item.StallSignItem};</li>
  *   <li><b>cleanup</b> - breaking a wall-sign block that a stall was registered
  *       against releases that stall from {@link StallData}.</li>
  * </ul>
@@ -36,24 +36,17 @@ import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 public final class StallSignHandler {
 
     /**
-     * <b>Say now what the ticket will say later.</b> A sign binds to any horse -
-     * a stall is only a place - but a ticket sends a horse only for its owner,
-     * so a sign bound to a horse you do not own is a stall you cannot use. On
-     * 2026-09-13 the owner bound a sign to an untamed test mare, hung it, and
-     * heard nothing was wrong until the ticket refused at the very end.
-     * Nothing about binding changes; it just stops being silent.
+     * <b>Only a horse you own, and creative is no exception.</b> Owner,
+     * 2026-09-13: <i>"you shouldn't be able to make any kind of bound item to a
+     * horse you don't own, even in creative mode."</i>
+     *
+     * <p>This briefly <i>warned</i> instead - a sign bound to an untamed test mare
+     * and hung on a wall said nothing until the ticket refused at the very end, so
+     * the first fix was to say so at bind time. The rule is stronger than that and
+     * right: a stall sign for a horse you cannot ticket is a stall you cannot use,
+     * so it should not be possible to make one. The refusal still cancels the
+     * interaction, so the attempt does not turn into mounting the horse.
      */
-    private static String bindWarning(Horse horse, Player player) {
-        if (!horse.isTamed()) {
-            return " It is not tamed yet - tame it before a ticket will send it here.";
-        }
-        var owner = horse.getOwnerReference();
-        if (owner == null || !player.getUUID().equals(owner.getUUID())) {
-            return " It is not your horse, so your tickets will not send it.";
-        }
-        return "";
-    }
-
     @SubscribeEvent
     static void onBindToHorse(PlayerInteractEvent.EntityInteract event) {
         if (!(event.getTarget() instanceof Horse horse)) return;
@@ -67,20 +60,24 @@ public final class StallSignHandler {
         if (!event.getLevel().isClientSide()) {
             String name = HorseRecords.hasRealRecord(horse)
                     ? HorseRecords.of(horse).displayName()
-                    : "horse";
-            ItemStack bound = new ItemStack(ModItems.BOUND_STALL_SIGN.get());
-            bound.set(ModDataComponents.BOUND_HORSE.get(), new BoundHorse(horse.getUUID(), name));
-
-            if (stack.getCount() <= 1) {
-                player.setItemInHand(event.getHand(), bound);
+                    : "That horse";
+            String refusal = HorseOwnership.bindRefusal(horse, player, name);
+            if (refusal != null) {
+                player.sendSystemMessage(Component.literal(refusal));
             } else {
-                stack.shrink(1);
-                if (!player.addItem(bound)) {
-                    player.drop(bound, false);
+                ItemStack bound = new ItemStack(ModItems.BOUND_STALL_SIGN.get());
+                bound.set(ModDataComponents.BOUND_HORSE.get(), new BoundHorse(horse.getUUID(), name));
+
+                if (stack.getCount() <= 1) {
+                    player.setItemInHand(event.getHand(), bound);
+                } else {
+                    stack.shrink(1);
+                    if (!player.addItem(bound)) {
+                        player.drop(bound, false);
+                    }
                 }
+                player.sendSystemMessage(Component.literal("Stall sign bound to " + name + "."));
             }
-            player.sendSystemMessage(Component.literal("Stall sign bound to " + name + "."
-                    + bindWarning(horse, player)));
         }
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);

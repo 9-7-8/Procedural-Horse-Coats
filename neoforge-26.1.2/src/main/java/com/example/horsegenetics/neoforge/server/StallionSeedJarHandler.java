@@ -104,8 +104,14 @@ public final class StallionSeedJarHandler {
 
     /** @return true if a sample was collected. */
     private static boolean collectFromStallion(Horse stallion, Player player, InteractionHand hand, ItemStack emptyJar) {
-        if (!stallion.isTamed()) {
-            message(player, HorseRecords.of(stallion).displayName() + " is not tamed.");
+        // YOUR stallion, not merely a tamed one, and creative is no exception.
+        // Owner, 2026-09-13: "you shouldn't be able to make any kind of bound
+        // item to a horse you don't own, even in creative mode." A jar carries
+        // one named stallion's genome away, so it is a bound item. This asked
+        // only isTamed(), which any stranger's riding horse passes.
+        String refusal = HorseOwnership.bindRefusal(stallion, player, HorseRecords.of(stallion).displayName());
+        if (refusal != null) {
+            message(player, refusal);
             return false;
         }
         if (!stallion.isInLove()) {
@@ -172,8 +178,20 @@ public final class StallionSeedJarHandler {
         if (!(mare.level() instanceof ServerLevel level)) {
             return false;
         }
+        // THE MARE MUST BE YOURS; the stallion need not be. Owner, 2026-09-13:
+        // "stallion seed should be only be able to be CREATED by the owner, but
+        // it can be USED on any mare the player owns, even if they didn't own the
+        // stallion." Making a jar binds a stallion to an item, so it is the
+        // owner's act; using one is breeding your own mare, and a jar that has
+        // changed hands is exactly how a stallion's line is meant to travel.
+        // This asked only isTamed(), so a jar could be used on a stranger's mare.
+        String mareName = HorseRecords.of(mare).displayName();
         if (!mare.isTamed()) {
-            message(player, "Tame the mare first.");
+            message(player, mareName + " is not tamed yet - tame her first.");
+            return false;
+        }
+        if (!HorseOwnership.isOwner(mare, player.getUUID())) {
+            message(player, mareName + " is not your mare - a seed jar can only be used on a mare you own.");
             return false;
         }
         if (!mare.isInLove()) {

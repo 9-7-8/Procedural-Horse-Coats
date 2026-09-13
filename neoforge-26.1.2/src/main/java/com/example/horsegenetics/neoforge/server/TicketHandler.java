@@ -116,8 +116,8 @@ public final class TicketHandler {
             // arrive is indistinguishable from a horse that was deleted, and
             // the version that guessed a spot instead of refusing put one
             // inside a wall, where it suffocated.
-            say(player, "There is no room to stand in that stall - check the sign is still up and "
-                    + "that the stall has a floor and two blocks of headroom.");
+            say(player, "There is nowhere in that stall this horse fits - check the sign is still up, "
+                    + "that the stall is still closed in, and that it is big enough for this horse.");
             return;
         }
         arrive(level, target, horse, landing);
@@ -228,7 +228,25 @@ public final class TicketHandler {
         Direction facing = sign.getValue(WallSignBlock.FACING);
         StallDetector.Result live =
                 StallDetector.forSign(level, signPos.relative(facing.getOpposite()), facing);
-        return StallDetector.landingSpot(level, live, horse);
+        // NULL-SAFE: forSign refuses now instead of inventing a box, so a stall
+        // whose gate has been taken out since it was bound comes back null. This
+        // passed that straight into landingSpot, which would have thrown.
+        Vec3 spot = live == null ? null : StallDetector.landingSpot(level, live, horse);
+        // ONE LINE PER TICKET, because "the horse landed in the roof" has two
+        // explanations the code alone cannot tell apart - the wrong room, or the
+        // right room and the wrong spot in it - and the owner's report that it
+        // arrived "right above the sign" matches neither reading of the code.
+        ActionTrace.log("ticket", ActionTrace.describeShort(horse) + " -> stall sign at "
+                + signPos.toShortString() + " facing " + facing.getName() + ": "
+                + (live == null
+                        ? "no enclosed room there any more"
+                        : "room " + live.min().toShortString() + " to " + live.max().toShortString()
+                                + " (" + live.blockCount() + " tiles)")
+                + ", horse box " + String.format("%.2f x %.2f", horse.getBbWidth(), horse.getBbHeight())
+                + " -> " + (spot == null
+                        ? "NOTHING FITS - refused"
+                        : String.format("landing at %.2f, %.2f, %.2f", spot.x, spot.y, spot.z)));
+        return spot;
     }
 
     private static boolean ownedBy(Horse horse, UUID playerId) {
