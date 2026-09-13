@@ -1277,6 +1277,12 @@ public final class GeneAbilityHandler {
             return false;   // the block's own dice, so this is no faster than a player
         }
         growable.performBonemeal(level, level.getRandom(), at, state);
+        // Named in the log, because this is the ONLY way the crop carve-out can
+        // be checked. A crop left unfertilised is invisible by observation - it
+        // grows on its own from random ticks anyway - so "did the gene touch a
+        // crop" is answerable from the list of what it DID touch and nothing
+        // else. Vanilla's BonemealEvent does not fire for a direct call.
+        DebugWorldWatch.noteBoneMeal(level, at, state);
         return true;
     }
 

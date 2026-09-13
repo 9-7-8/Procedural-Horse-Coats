@@ -622,6 +622,27 @@ public final class DebugWorldWatch {
     /** Sounds played since the last census, by sound id. */
     private static final Map<String, Integer> SOUNDS = new LinkedHashMap<>();
 
+    /**
+     * <b>A gene fertilised something.</b> Called from
+     * {@code GeneAbilityHandler.boneMeal}, and it is the only evidence that
+     * test can produce.
+     *
+     * <p>The dryad's bone-meal allele refuses crops, and that refusal is
+     * <i>invisible to observation</i>: a crop nobody fertilised still grows on
+     * its own from random ticks, so "the wheat came up" says nothing either
+     * way. The question is only answerable from the list of what the gene
+     * <b>did</b> touch - and a run of these lines with no crop in it is the
+     * pass. Vanilla's {@code BonemealEvent} does not fire for a direct call, so
+     * without this there would be no record at all.
+     */
+    static void noteBoneMeal(Level level, BlockPos at, BlockState state) {
+        if (!watching(level)) {
+            return;
+        }
+        note("gene fertilised", state.getBlock().builtInRegistryHolder().key().identifier()
+                + " at " + at.toShortString() + inArea(at));
+    }
+
     /** Which pen, if any, a position is in - so a line reads without a map. */
     private static String inArea(BlockPos pos) {
         for (Area area : AREAS) {

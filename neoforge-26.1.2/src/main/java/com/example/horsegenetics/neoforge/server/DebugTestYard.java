@@ -135,12 +135,13 @@ final class DebugTestYard {
         buildStockedRow(level, gy, cx, mouthZ);
         buildGlowRoom(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
+        buildBoneMealPen(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "eggs, ward, cows,", "dryad, thaw"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "eggs, ward, cows,", "4 dryads, thaw"));
 
         verify(level, gy, cx, mouthZ);
     }
@@ -352,21 +353,30 @@ final class DebugTestYard {
         // What is left is the row of slow ones - the tests that cannot be
         // answered by standing still and looking, only by leaving and coming
         // back, which is exactly what this dimension is for.
+        //
+        // THREE DRYAD PENS NOW, because the locus stopped being one thing on
+        // 2026-09-13 and a pen stocked with its first allele would exercise
+        // none of what changed. Each one asks a different question and the
+        // watch counts the actual block, so all three answer themselves.
+
+        // 1. THE MIXED PAIR - the new inheritance rule, and the only pen that
+        // can show it. Oak and birch are chosen because they are DIFFERENT
+        // BLOCKS: the watch counts them separately, so "both, each at half
+        // rate" is readable as a ratio rather than taken on trust.
         growPen(level, gy, x, z, Blocks.GRASS_BLOCK.defaultBlockState(),
-                "horsegenetics.dryad",
-                List.of("DRYAD - SLOW", "~a day between", "plantings. Come", "back to saplings"));
+                "horsegenetics.dryad", "Oak/Brch",
+                List.of("DRYAD MIXED", "Oak/Brch - BOTH", "at HALF rate.", "count each kind"));
         // Six blocks up, because the far end of this test is a grown TREE and a
         // two-block box would count the sapling and miss the wood.
-        DebugWorldWatch.watch("DRYAD", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
-                Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.SPRUCE_SAPLING,
-                Blocks.JUNGLE_SAPLING, Blocks.ACACIA_SAPLING, Blocks.DARK_OAK_SAPLING,
-                Blocks.OAK_LOG, Blocks.OAK_LEAVES);
+        DebugWorldWatch.watch("DRYAD MIXED", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
+                Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG,
+                Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES);
         x += PEN_W + 2;
 
         // Snow and ice for the melt to eat. A floor rather than a scatter, so
         // "how far has it got" is answerable at a glance from the gate.
         growPen(level, gy, x, z, Blocks.SNOW_BLOCK.defaultBlockState(),
-                "horsegenetics.hot_blooded",
+                "horsegenetics.hot_blooded", null,
                 List.of("HOT-BLOODED", "floor is SNOW", "+ a strip of ICE", "does it FLOOD?"));
         // A strip of ice in the same pen: ice becomes a water SOURCE rather
         // than air, which is the half of the gene that can flood something -
@@ -378,6 +388,82 @@ final class DebugTestYard {
         }
         DebugWorldWatch.watch("HOT-BLOODED", box(x, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
                 Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.WATER, Blocks.GRASS_BLOCK);
+        x += PEN_W + 2;
+
+        // 2. THE DARK OAK, which is the whole reason the locus was rebuilt.
+        // A matched pair, so it plants only dark oak and they accumulate; the
+        // translator then clusters them toward each other until a 2x2 closes.
+        // THIS IS THE ONE MOST LIKELY TO BE WRONG - the clustering search is
+        // new code with no test behind it, and it fails INVISIBLY, as a pen of
+        // saplings that never become anything, which is the exact symptom it
+        // was written to cure.
+        growPen(level, gy, x, z, Blocks.GRASS_BLOCK.defaultBlockState(),
+                "horsegenetics.dryad", "Dark/Dark",
+                List.of("DRYAD DARK", "needs a 2x2 -", "do they CLUSTER?", "or scatter?"));
+        DebugWorldWatch.watch("DRYAD DARK", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
+                Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
+        x += PEN_W + 2;
+
+        // 3. THE MUSHROOM, and its floor is the test. Half podzol, half grass:
+        // a mushroom survives ANY light on podzol and needs darkness on grass,
+        // so in a lit yard the pass is mushrooms on the podzol half and NONE on
+        // the grass half. A pen that is all one thing could not tell "canSurvive
+        // is being consulted" from "the gene does not work", which is the
+        // distinction this whole change is about.
+        growPen(level, gy, x, z, Blocks.PODZOL.defaultBlockState(),
+                "horsegenetics.dryad", "Mush/Mush",
+                List.of("DRYAD MUSH", "podzol half ONLY", "- none on the", "grass is a PASS"));
+        for (int gx = x + (PEN_W / 2) + 1; gx <= x + PEN_W; gx++) {
+            for (int gz = z; gz <= z + PEN_D; gz++) {
+                DebugPenManager.groundColumn(level, gx, gy, gz,
+                        Blocks.GRASS_BLOCK.defaultBlockState());
+            }
+        }
+        DebugWorldWatch.watch("DRYAD MUSH", box(x, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
+                Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.PODZOL, Blocks.GRASS_BLOCK);
+    }
+
+    /**
+     * <b>Bone meal, whose result is only ever visible in the log.</b>
+     *
+     * <p>The allele refuses crops, and that refusal <i>cannot be observed</i>:
+     * a crop nobody fertilised comes up anyway on random ticks, so a grown
+     * wheat proves nothing either way. What settles it is the list of what the
+     * gene <b>did</b> touch - {@code DebugWorldWatch.noteBoneMeal} writes one
+     * line per fertilising - and a night of those with no crop among them is
+     * the pass.
+     *
+     * <p>So the pen carries both: saplings and grass for it to hurry along, and
+     * a strip of wheat on farmland that must never appear in that list.
+     */
+    private static void buildBoneMealPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + 16;
+        int x1 = cx + 22;
+        int z0 = mouthZ + 3;
+        int z1 = z0 + 16;
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
+            }
+        }
+        // Something to hurry: a row of oak saplings it should turn into trees.
+        for (int x = x0 + 1; x <= x1 - 1; x += 2) {
+            DebugPenManager.fastSet(level, new BlockPos(x, gy + 1, z0 + 2),
+                    Blocks.OAK_SAPLING.defaultBlockState());
+        }
+        // And something it must leave alone, on farmland so it is a real crop.
+        for (int x = x0 + 1; x <= x1 - 1; x++) {
+            DebugPenManager.groundColumn(level, x, gy, z1 - 2, Blocks.FARMLAND.defaultBlockState());
+            DebugPenManager.fastSet(level, new BlockPos(x, gy + 1, z1 - 2),
+                    Blocks.WHEAT.defaultBlockState());
+        }
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("DRYAD BONE", "hurries saplings", "NEVER the wheat", "- read the log"));
+        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dryad",
+                "the bone meal pen", 2, 0, "Bone/Bone");
+        DebugWorldWatch.watch("DRYAD BONE", box(x0, gy, z0, x1, gy + 6, z1), null,
+                Blocks.OAK_SAPLING, Blocks.OAK_LOG, Blocks.WHEAT, Blocks.SHORT_GRASS);
     }
 
     /**
@@ -386,7 +472,7 @@ final class DebugTestYard {
      * "the one horse stood in a corner".
      */
     private static void growPen(ServerLevel level, int gy, int x0, int z0, BlockState floor,
-                                String key, List<String> sign) {
+                                String key, String tokens, List<String> sign) {
         int x1 = x0 + PEN_W;
         int z1 = z0 + PEN_D;
         for (int x = x0; x <= x1; x++) {
@@ -396,7 +482,7 @@ final class DebugTestYard {
         }
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
-        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), 2, 0, null);
+        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), 2, 0, tokens);
     }
 
     /**
