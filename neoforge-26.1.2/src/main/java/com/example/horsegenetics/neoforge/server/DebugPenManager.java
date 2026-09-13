@@ -863,7 +863,7 @@ public final class DebugPenManager {
                         continue;   // ring only; the inside was tried last time round
                     }
                     horse.setPos(x + dx, floorY, z + dz);
-                    if (level.noCollision(horse)) {
+                    if (level.noCollision(horse) && standsOnSomething(level, horse)) {
                         HorseGenetics.LOGGER.warn("[Debug] {} would have spawned inside a block at "
                                         + "{}, {}, {} - moved {} block(s)",
                                 horse.getType().toShortString(), (int) x, (int) floorY, (int) z, r);
@@ -876,6 +876,19 @@ public final class DebugPenManager {
         HorseGenetics.LOGGER.error("[Debug] nowhere clear within {} blocks of {}, {}, {} - a horse "
                 + "is about to suffocate there, and the pen around it is wrong",
                 CLEAR_RADIUS, (int) x, (int) floorY, (int) z);
+    }
+
+    /**
+     * <b>And there has to be a floor.</b> {@code noCollision} answers "is this
+     * space free", which over the void is emphatically yes - so the first
+     * version of the spiral could walk a horse off the edge of the yard to find
+     * room, and this dimension is a strip of floor surrounded by nothing. A
+     * horse died {@code outOfWorld} during the yard's first build after the
+     * spiral went in.
+     */
+    private static boolean standsOnSomething(ServerLevel level, Horse horse) {
+        BlockPos under = BlockPos.containing(horse.getX(), horse.getY() - 0.2, horse.getZ());
+        return !level.getBlockState(under).isAir();
     }
 
     /** How far {@link #placeClear} will look before it reports the pen as broken. */

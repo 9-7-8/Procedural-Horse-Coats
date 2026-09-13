@@ -833,6 +833,16 @@ final class DebugYardGameplay {
         for (int y = gy + 1; y <= gy + 2; y++) {
             DebugPenManager.fastSet(level, new BlockPos(doorX, y, z0), Blocks.AIR.defaultBlockState());
         }
+        // AND LIGHT IT, because a roofed stall is a sealed dark box and the
+        // dimension spawns zombies in those. Eighteen of the nineteen natural
+        // spawns in the yard's first run were inside these four stalls - they
+        // clear gy+1..gy+3 to air, which WIPES the yard's own invisible lamp at
+        // gy+3, and then roof it over and put nothing back. A stall that
+        // manufactures zombies and lets them out through its doorway is not a
+        // stall test, it is a mob farm in the middle of the walkway.
+        DebugPenManager.fastSet(level, new BlockPos(doorX, gy + 3, (z0 + z1) / 2),
+                Blocks.LIGHT.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.LightBlock.LEVEL, 15));
     }
 
     /**
