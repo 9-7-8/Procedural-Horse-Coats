@@ -1478,9 +1478,6 @@
         <a href="gene-dryad.html">dryad</a> (a sapling every 9&nbsp;000 to 32&nbsp;000
         ticks). They now count on the world&rsquo;s saved game time. <em>Look for:</em> a
         dryad horse left near you for a real half-hour should have planted something.</li>
-    <li><strong>Lava is still slow.</strong> Floating is confirmed; crossing a lava lake at
-        vanilla's fixed lava speed is the open question - see
-        <a href="known-gaps.html#gap-179">gap 179</a>.</li>
     <li><strong>The breed sheet still prints <em>decimal</em> hands</strong>
         (<code>15.5-17.0 hands</code>) where the horse now shows <code>15.2 hh</code>. Worth
         deciding whether it should switch.</li>
@@ -7409,15 +7406,27 @@
 </ul>
 
 <h3>The lethals</h3>
+<div class="note good">
+    <span class="label">Lethal at birth &mdash; owner-confirmed 2026-09-13</span>
+    <p>
+        &ldquo;Foals dying right after birth also works.&rdquo; <strong>The first thing in
+        &sect;0b ever confirmed in play</strong> &mdash; the whole trait, size and health
+        system has carried &ldquo;NOT play-tested&rdquo; since 2026-09-04, and the lethal
+        path is the part of it with the least margin for being quietly wrong: a foal that
+        should die and does not is a silent failure, and one that dies when it should not
+        is a ruined line.
+    </p>
+    <p>
+        <strong>What this does not yet cover</strong>, because it was not reported either
+        way: whether the death message <em>resolves</em> rather than printing the raw key
+        <code>death.attack.horsegenetics.genetic_defect</code>. The four bullets below are
+        untouched.
+    </p>
+</div>
+
 
 <ul>
-    <li><strong>Lethal at birth.</strong> Spawn a <code>plod1=ffs/ffs</code> <em>foal</em>.
-        It should appear normally, produce a chat line naming fragile foal syndrome, and
-        die in about four seconds to a &ldquo;did not survive a genetic defect&rdquo;
-        death message. Check the message actually resolves (the lang key is
-        <code>death.attack.horsegenetics.genetic_defect</code>) rather than showing a raw
-        translation key.</li>
-    <li><strong>It has to out-damage the healing.</strong> Stand a dying foal next to
+<li><strong>It has to out-damage the healing.</strong> Stand a dying foal next to
         water and a hay bale &mdash; <a href="horse-care.html">gated healing</a> must not
         save it.</li>
     <li><strong>Lethal at conception.</strong> Two <code>met=met/N</code> carriers should
