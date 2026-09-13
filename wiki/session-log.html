@@ -27,6 +27,121 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13e">2026-09-13 &mdash; a long play session, and the day a convention turned out to be breaking features</h2>
+
+<p>
+    Hours of live testing with fixes going in between reports. The useful
+    through-line is not any single bug; it is that <strong>three different
+    things kept producing the same symptom</strong>, and in each case the code
+    under suspicion was innocent.
+</p>
+
+<h3>One: the yard's own convention was breaking features</h3>
+<p>
+    The test yard stocks its horses <strong>tamed with no owner</strong>, and
+    that is deliberate &mdash; <code>evacuateTamedHorses</code> walks tamed
+    <em>and owned</em> horses back to the overworld when you leave, so an owned
+    yard is a yard that empties itself into the portal on the way out.
+</p>
+<p>
+    But <strong>every feature gated on &ldquo;your horse&rdquo; checks ownership,
+    not tameness.</strong> Guardian fires on <code>OnOwnerHurt</code> and scans
+    for horses whose owner is the hurt player: an ownerless horse matches nobody,
+    so the gene never once fired. The bound ticket answered <em>&ldquo;That is
+    not your horse&rdquo;</em> for the same reason. Two unrelated-looking reports,
+    one cause, and the rule is now written where both live: <b>in this yard,
+    anything gated on ownership must arrive wild.</b>
+</p>
+
+<h3>Two: the dhampir, five fixes deep, and the one that mattered</h3>
+<p>
+    Reported dying five separate times. Four fixes went in from reading code:
+    the shade search named blocks a ground pathfinder cannot stand on; the
+    shelter was built sixteen blocks from the spawn against a twelve-block search
+    radius; vanilla's <code>PanicGoal</code> sits at priority 1 alongside the
+    shade goal and took <code>Flag.MOVE</code> first, so a burning horse ran in
+    circles instead of walking to a roof it had already found; and the nearest
+    cover is always the roof's <em>lip</em>, where a 1.4-block-wide horse still
+    stands half in the sun.
+</p>
+<p>
+    All four were real. <strong>None of them was the thing killing it</strong>,
+    and it took adding a trace to find that out:
+</p>
+<pre><code>stopped at -11,163 - in shade, health 51/66
+stopped at  -6,163 - in shade, health 48/66
+stopped at  -7,166 - in shade, health 33/66
+stopped at  -8,166 - in shade, health  6/66</code></pre>
+<p>
+    It reached shade <em>every time</em>. The instant it did,
+    <code>canContinueToUse</code> went false, the goal released the movement
+    flag, and <code>WaterAvoidingRandomStrollGoal</code> walked it back into the
+    daylight &mdash; burning out and back, losing ground each cycle. Four fixes
+    aimed at getting it to cover; getting to cover was never the problem. It
+    holds until nightfall now.
+</p>
+<p>
+    <strong>The lesson is the one this project keeps re-learning and I keep
+    having to be taught:</strong> four consecutive plausible causes, each
+    confirmed by reading and each wrong about the outcome. One line of logging
+    settled it on its first run.
+</p>
+
+<h3>Three: two things I told the owner that were wrong</h3>
+<ul>
+    <li><strong>Gladiator fights <em>unridden</em>.</strong> Its own description
+        says so outright &mdash; <em>&ldquo;while nobody is riding it, the horse
+        attacks hostile mobs&hellip; mount it and it stops immediately&rdquo;</em>
+        &mdash; and its condition is <code>has_rider</code> negated. The pen's
+        sign told her to ride it, the class doc said the same, and I pulled the
+        zombies out of its arena reasoning the gene was off without a rider. The
+        specification was one line away in the file I was already editing.</li>
+    <li><strong>The egg-layer cap was not close to answerable.</strong>
+        <code>NEARBY_CAP</code> counts items within six blocks of <em>each laying
+        horse</em>, so eight layers spread over a nineteen-wide pen each have
+        their own neighbourhood and a pen total above the cap is legal. What
+        bounded that pen was the despawn timer, exactly as
+        <a href="known-gaps.html#gap-207">gap 207</a> predicted. Rebuilt as four
+        layers of one allele packed into a corner.</li>
+</ul>
+
+<h3>And the gladiator died three times for three different reasons</h3>
+<p>
+    Worth recording because each looked like the previous fix failing. A
+    <strong>spawner</strong> keeps six zombies alive and refills them as fast as
+    they die. Then <strong>panic</strong> at priority 1 starved the melee goal,
+    so it bolted from fights it had started. Then <strong>three placed
+    zombies</strong> &mdash; nine damage a second against twenty-two health,
+    which is arithmetic and not a gene. One opponent now, and armed the way its
+    own page says to arm it.
+</p>
+
+<h3>Shipped alongside</h3>
+<ul>
+    <li><strong>The F8 outline is fixed</strong>
+        (<a href="known-gaps.html#gap-205">gap 205</a>), in three parts: a
+        per-player register of what was lit, a pending set cleared on entity load
+        for horses in unloaded chunks whose effect timers are frozen, and a
+        reaper for the ones stranded before the fix existed.</li>
+    <li><strong>The ticket stalls were a mob farm.</strong> Eighteen of the
+        yard's nineteen natural spawns landed inside them: <code>stallBox</code>
+        clears the column to air, wiping the yard's own invisible lamp, then
+        roofs it and puts nothing back.</li>
+    <li><strong>The safe-spawn spiral could walk a horse off the edge of the
+        world.</strong> It asked <code>noCollision</code>, which over the void
+        answers yes. Added in the morning to stop horses suffocating; a horse
+        died <code>outOfWorld</code> during the next build.</li>
+    <li><strong>Echolocate</strong> was <code>Condition.ALWAYS</code> &mdash;
+        every echolocating horse in the world, wild ones included, lighting
+        everything within twenty blocks every six seconds for nobody. Gated on
+        tamed and ridden, and confirmed in play the same session.</li>
+    <li><strong>Grooming replaced shearing</strong> in word, sound and feedback;
+        the dairy is floored in stone so gated regen cannot heal the hurt mare
+        before anybody reaches her; ocean-born sinks on the sprint key; the
+        splice carrots became ten breeding pairs, one per carrot, each a divided
+        pen with a gate into both halves.</li>
+</ul>
+
 <h2 id="d2026-09-13d">2026-09-13 &mdash; reading the yard back, and a leak that was hiding inside the number meant to detect it</h2>
 
 <p>
