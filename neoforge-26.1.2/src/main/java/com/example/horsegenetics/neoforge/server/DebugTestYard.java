@@ -514,16 +514,64 @@ final class DebugTestYard {
         int x1 = cx + WEST_MAX;
         int z0 = mouthZ + ROW_I;
         int z1 = z0 + ROW_I_D;
-        fencedPlot(level, gy, x0, x1, z0, z1);
+        // WALLED, NOT FENCED, because this is the one horse in the yard that
+        // RUNS. Owner, 2026-09-13: "the dhampir keeps walking out of the pen."
+        // DhampirShadeGoal paths at speed 1.6 and holds Flag.JUMP, and a horse
+        // at a gallop with jump control clears a one-block fence - which no
+        // other pen here ever discovers, because nothing else in the yard is
+        // trying to be somewhere else at speed.
+        walledPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DHAMPIR", "CONFIRMED: burns,", "bites a cow, heals.", "Shelter at the back"));
-        shelter(level, gy, x1 - 7, x1 - 2, z1 - 6, z1 - 2);
+                List.of("DHAMPIR", "walled + open top:", "fly in. Shelter is", "5 blocks from spawn"));
+
+        // AND THE SHELTER MOVES BESIDE THE SPAWN. It was at the far corner,
+        // just under ten blocks away against a SEARCH_RADIUS of twelve - in
+        // range, but only barely, and the search runs from wherever the horse
+        // currently IS rather than from where it was placed. A few blocks of
+        // drift toward the south or east wall and the roofed arena one row over
+        // comes into range while its own roof drops out of it, and then the
+        // animal is correctly pathing to the nearest shade in the world and
+        // that shade is outside the fence.
+        //
+        // Five blocks now, so its own roof stays nearest wherever it wanders.
+        // Not inside the shelter, because it has to start in the sun for the
+        // burn-bite-heal loop to run at all.
+        shelter(level, gy, x0 + 8, x0 + 13, z0 + 8, z0 + 13);
         stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dhampir",
-                "the dhampir pen", 1, 0, null);
+                "THE DHAMPIR", 1, 0, null);
         for (int i = 0; i < 8; i++) {
-            spawnCow(level, gy, x0 + 7.0 + (i % 4) * 2.5, z0 + 3.0 + (i / 4) * 4.0);
+            spawnCow(level, gy, x0 + 3.0 + (i % 4) * 3.0, z0 + 3.0 + (i / 4) * 3.0);
         }
         DebugWorldWatch.watch("DHAMPIR", box(x0, gy, z0, x1, gy + 1, z1), null);
+    }
+
+    /**
+     * <b>A pen with stone walls and no lid.</b>
+     *
+     * <p>Between {@link #fencedPlot}, which anything determined can jump, and a
+     * roofed room, which would block the sky. The dhampir needs exactly this
+     * combination and is the only thing in the yard that does: it has to burn,
+     * so the top stays open, and it runs at a gallop the moment it does, so the
+     * sides cannot be a fence.
+     *
+     * <p><b>No gate</b>, on the same reasoning as the villagers' pen - a gap a
+     * horse can walk through is a gap it can gallop through, and the tester is
+     * in creative and comes in over the top.
+     */
+    private static void walledPlot(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+        BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
+                if (!edge) {
+                    continue;   // the yard's own grass floor stays, so the cows can graze
+                }
+                DebugPenManager.groundColumn(level, x, gy, z, wall);
+                for (int y = gy + 1; y <= gy + 5; y++) {
+                    DebugPenManager.fastSet(level, new BlockPos(x, y, z), wall);
+                }
+            }
+        }
     }
 
     /**
