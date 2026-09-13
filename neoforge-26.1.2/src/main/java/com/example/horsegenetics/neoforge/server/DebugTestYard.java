@@ -1,5 +1,8 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,7 +55,7 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 48;
+    private static final int YARD_DEPTH_Z = 64;
 
     /** Matches the corridor, so the yard reads as the same building. */
     private static final int WALL_TOP_DY = 10;
@@ -98,6 +101,7 @@ final class DebugTestYard {
         buildSpawnerRoom(level, gy, cx, mouthZ);
         buildWolfPen(level, gy, cx, mouthZ);
         buildDryadPlot(level, gy, cx, mouthZ);
+        buildStockedRow(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
@@ -155,7 +159,38 @@ final class DebugTestYard {
         BlockState state = level.getBlockState(new BlockPos(x, y, z));
         return state.is(Blocks.OAK_FENCE) || state.is(Blocks.OAK_SIGN) || state.is(Blocks.TORCH)
                 || state.is(Blocks.WALL_TORCH) || state.is(Blocks.STONE_BRICKS)
-                || state.is(Blocks.SPAWNER);
+                || state.is(Blocks.SPAWNER) || state.is(Blocks.OAK_PLANKS);
+    }
+
+    /**
+     * <b>The row along the back: one pen per open test, already stocked.</b>
+     *
+     * <p>What is in it is whatever <code>wiki/verification.html</code> is
+     * waiting on that needs a horse, which means it goes stale - a pen for a
+     * test that has been confirmed is exactly the waste this row exists to stop.
+     * It is audited with the test kit, at the same time and against the same
+     * page.
+     */
+    private static void buildStockedRow(ServerLevel level, int gy, int cx, int mouthZ) {
+        int z = mouthZ + 48;
+        int x = cx - YARD_HALF_X + 2;
+
+        // 0-CP: the shards at full size, the size range side by side, and a
+        // stallion so the inheritance question can be asked at all.
+        stockedPen(level, gy, x, z, "horsegenetics.starburst", "W/W", 3, 1,
+                List.of("STARBURST", "shards? sizes?", "breed one pair:", "foal like parents?"));
+        x += PEN_W + 2;
+
+        // 0-CP: the overlap case. Trs/Trg is the "both" outcome - two tube
+        // layers on one edge - and neither homozygote produces it.
+        stockedPen(level, gy, x, z, "horsegenetics.tron", "Trs/Trg", 1, 1,
+                List.of("TRON both", "at NIGHT:", "where tubes cross,", "blown out?"));
+        x += PEN_W + 2;
+
+        // 0-CQ needs no horse, but the highlight is easiest to judge with a
+        // herd in front of you, and a lead only exists where there is one.
+        stockedPen(level, gy, x, z, "horsegenetics.lantern", null, 3, 0,
+                List.of("F8 HERD", "press F8 twice:", "2nd says OFF?", "lead in red?"));
     }
 
     /** The spur itself: gravel floor, plank sides, a glowstone line above each. */
@@ -244,7 +279,9 @@ final class DebugTestYard {
         int z1 = z0 + 20;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("SPONTANEOUS", "BREEDING", "2 mares + 2", "studs, then go"));
+                List.of("SPONTANEOUS", "BREEDING", "4 are in here:", "leave, then COUNT"));
+        stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.spontaneous_breeding",
+                "the breeding field", 2, 2, null);
     }
 
     /**
@@ -289,7 +326,11 @@ final class DebugTestYard {
             be.setChanged();
         }
         DebugPenManager.placeSign(level, new BlockPos(cx + 8, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("HOLY WARD", "zombie spawner", "must KEEP", "producing"));
+                List.of("HOLY WARD", "one is already", "outside: spawner", "must KEEP going"));
+        // Outside the door rather than inside it: the ward's claim is about
+        // what happens NEAR it, and a horse shut in a dark box with a spawner
+        // is a horse being hit by zombies.
+        stock(level, gy, cx + 8.5, z0 - 3.5, "horsegenetics.holy_ward", "the ward post");
     }
 
     /** <b>Pack leader.</b> A pen to put three or four in and watch F3's tick line. */
@@ -300,13 +341,20 @@ final class DebugTestYard {
         int z1 = z0 + 16;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("PACK LEADER", "3-4 in here,", "then watch the", "tick time (F3)"));
+                List.of("PACK LEADER", "3 are in here:", "watch the tick", "time (F3)"));
+        stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.pack_leader",
+                "the wolf pen", 3, 0, null);
     }
 
     /**
-     * <b>The dryad.</b> Open grass, no fence - it plants things over real
-     * minutes and the question is whether anything appeared, so the plot is
-     * bare on purpose and anything standing in it afterwards was planted.
+     * <b>The dryad</b>, fenced, with a dryad horse already standing in it.
+     *
+     * <p>Bare grass and nothing else, so anything growing there later was
+     * planted rather than generated - but <i>fenced</i>, because the test is to
+     * leave it alone for a real half hour and an unfenced horse spends that
+     * half hour somewhere else. And stocked, because a test whose first step is
+     * "find the right spawn egg" is a test that gets skipped: the horse that
+     * has to be there is there.
      */
     private static void buildDryadPlot(ServerLevel level, int gy, int cx, int mouthZ) {
         int x0 = cx + 4;
@@ -318,32 +366,127 @@ final class DebugTestYard {
                 DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
             }
         }
+        fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DRYAD", "leave one here", "half an hour:", "did it plant?"));
+                List.of("DRYAD", "one is already", "in here: leave", "it half an hour"));
+        stock(level, gy, (x0 + x1) / 2.0, (z0 + z1) / 2.0,
+                "horsegenetics.dryad", "the dryad plot");
     }
+
+    /**
+     * <b>Put a homozygous carrier of one gene where its test happens.</b>
+     *
+     * <p>A test whose first step is "find the right spawn egg" is a test that
+     * gets skipped, and these two have to stand in a particular place anyway -
+     * the dryad inside its fence, the ward beside the spawner - so the yard
+     * puts them there rather than describing where they go.
+     *
+     * <p>The genotype names <i>only</i> that locus; every other gene falls to
+     * its default. So what is standing there is a plain horse that does one
+     * thing, and anything else it does is the gene. A gene this build does not
+     * have is logged and skipped rather than failing the yard, which is the
+     * trade the test kit's eggs make for the same reason.
+     */
+    private static void stock(ServerLevel level, int gy, double x, double z, String key, String what) {
+        stock(level, gy, x, z, key, what, 1, 0, null);
+    }
+
+    /**
+     * {@code mares} mares and {@code studs} stallions, spread along a short
+     * line so they are not standing inside one another.
+     *
+     * <p>{@code tokens} names the alleles when the test wants a specific pair -
+     * tron's two tube forms are a heterozygote, and a homozygote of either is a
+     * different outcome - otherwise the gene's first allele is used twice.
+     */
+    private static void stock(ServerLevel level, int gy, double x, double z, String key,
+                              String what, int mares, int studs, String tokens) {
+        Gene gene = Genes.byKeyOrNull(key);
+        if (gene == null) {
+            HorseGenetics.LOGGER.warn("[Debug] test yard: no {} gene, {} left empty", key, what);
+            return;
+        }
+        String pair = tokens != null ? tokens
+                : gene.alleles().get(0).token() + "/" + gene.alleles().get(0).token();
+        String code = gene.key() + "=" + pair;
+        int placed = 0;
+        try {
+            for (int i = 0; i < mares; i++) {
+                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.FEMALE, code);
+            }
+            for (int i = 0; i < studs; i++) {
+                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.MALE, code);
+            }
+            ActionTrace.log("test yard", "stocked " + what + " with " + placed + "x " + code
+                    + " (" + mares + " mare, " + studs + " stallion)");
+        } catch (RuntimeException e) {
+            HorseGenetics.LOGGER.warn("[Debug] test yard: could not stock {}", what, e);
+        }
+    }
+
+    /**
+     * <b>A signed, stocked pen in the row along the back of the yard.</b>
+     *
+     * <p>The yard used to be four plots you brought horses to. It is now the
+     * place the horses already are: the owner's time in the game is the
+     * scarcest thing here, and "walk to the yard, then go back for the right
+     * eggs" spends it on fetching. One pen per open test, each with the animals
+     * it needs standing in it.
+     */
+    private static void stockedPen(ServerLevel level, int gy, int x0, int z0,
+                                   String key, String tokens, int mares, int studs,
+                                   List<String> sign) {
+        int x1 = x0 + PEN_W;
+        int z1 = z0 + PEN_D;
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
+        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), mares, studs, tokens);
+    }
+
+    private static final int PEN_W = 9;
+    private static final int PEN_D = 9;
 
     /**
      * A rectangle of oak fence with a two-wide gate opening in its near wall -
      * two, because a horse will not cross a one-block gap, which is the same
      * reason the pens up the corridor have one.
+     *
+     * <h2>Two mistakes worth keeping the note for</h2>
+     * <b>Fences are placed with an update, not with {@code fastSet}.</b> That
+     * helper writes with flag 2 - clients only, no neighbour updates - which is
+     * right for bulk terrain and wrong for anything that has to <i>connect</i>:
+     * the first version of this yard came out as a row of unconnected posts
+     * with what read as gaps between them (owner, 2026-09-12).
+     *
+     * <p>And <b>{@code torchOnFence} places its torch one block ABOVE the y it
+     * is given</b>, so it takes the fence's own y, not the floor's. Handed the
+     * floor, it wrote the torch into the fence line and quietly replaced four
+     * corner posts with torches - a fence with four holes in it, and horses
+     * that walk out of them.
      */
     private static void fencedPlot(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
         BlockState fence = Blocks.OAK_FENCE.defaultBlockState();
+        int fenceY = gy + 1;
         int gateX = (x0 + x1) / 2;
         for (int x = x0; x <= x1; x++) {
             for (int z : new int[] {z0, z1}) {
                 boolean gate = z == z0 && (x == gateX || x == gateX + 1);
-                DebugPenManager.fastSet(level, new BlockPos(x, gy + 1, z),
-                        gate ? Blocks.AIR.defaultBlockState() : fence);
+                BlockPos at = new BlockPos(x, fenceY, z);
+                if (gate) {
+                    level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
+                } else {
+                    level.setBlockAndUpdate(at, fence);
+                }
             }
         }
         for (int z = z0 + 1; z < z1; z++) {
-            DebugPenManager.fastSet(level, new BlockPos(x0, gy + 1, z), fence);
-            DebugPenManager.fastSet(level, new BlockPos(x1, gy + 1, z), fence);
+            level.setBlockAndUpdate(new BlockPos(x0, fenceY, z), fence);
+            level.setBlockAndUpdate(new BlockPos(x1, fenceY, z), fence);
         }
-        DebugPenManager.torchOnFence(level, x0, gy, z0);
-        DebugPenManager.torchOnFence(level, x1, gy, z0);
-        DebugPenManager.torchOnFence(level, x0, gy, z1);
-        DebugPenManager.torchOnFence(level, x1, gy, z1);
+        // On TOP of the corner posts, which is what the pens do.
+        DebugPenManager.torchOnFence(level, x0, fenceY, z0);
+        DebugPenManager.torchOnFence(level, x1, fenceY, z0);
+        DebugPenManager.torchOnFence(level, x0, fenceY, z1);
+        DebugPenManager.torchOnFence(level, x1, fenceY, z1);
     }
 }

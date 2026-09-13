@@ -23,8 +23,10 @@ import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -78,14 +80,20 @@ public final class ActionTrace {
     // ------------------------------------------------------------------
 
     /**
-     * <b>Every horse that joins a level, dumped whole.</b>
+     * <b>Every horse that joins a level, dumped whole - a few ticks later.</b>
      *
-     * <p>Deferred to the end of the tick rather than logged in the handler,
-     * because the record this prints is applied by <i>another</i> listener on
-     * this same event: read it here and half the spawns would say "no record",
-     * which is exactly the sort of half-truth that sends somebody looking for a
-     * bug in the wrong place. The server's own task queue runs after the join
-     * completes, so by then there is either a real record or genuinely none.
+     * <p>Not in the handler, and not at the end of the tick either. A wild
+     * horse is claimed by {@code HorseFoundingTickHandler} on a <i>later
+     * tick</i> - deliberately, it is the deferred-join design - so both of
+     * those read the horse before it has a genome and print "NO RECORD" for
+     * every wild spawn in the world. The first version of this did exactly
+     * that, and a log full of confident "no record" lines is worse than no log:
+     * it looks like a finding.
+     *
+     * <p>So a joining horse is parked for {@link #SETTLE_TICKS} and dumped
+     * after. One that still has no record by then really is unclaimed - a
+     * vanilla horse from another mod's spawn, or one this mod has decided not
+     * to touch - and the line says so meaning it.
      */
     @SubscribeEvent
     static void onEntityJoin(EntityJoinLevelEvent event) {
@@ -93,17 +101,59 @@ public final class ActionTrace {
                 || !(event.getEntity() instanceof Horse horse)) {
             return;
         }
-        var server = event.getLevel().getServer();
-        if (server == null) {
+        if (PENDING.size() >= MAX_PENDING) {
+            // A burst big enough to fill this is itself worth knowing about,
+            // and a trace that grows without bound is a leak in the tool built
+            // to find leaks.
+            HorseGenetics.LOGGER.warn("[trace] more than {} horses waiting to be described - "
+                    + "dropping the oldest; something is spawning a lot of horses", MAX_PENDING);
+            PENDING.remove(0);
+        }
+        PENDING.add(new Pending(horse, tick + SETTLE_TICKS));
+    }
+
+    /** How long to let a horse settle before printing it. */
+    private static final int SETTLE_TICKS = 5;
+
+    /** Horses waiting to be described, and the tick each is due on. */
+    private record Pending(Horse horse, int dueTick) {}
+
+    private static final List<Pending> PENDING = new ArrayList<>();
+    private static final int MAX_PENDING = 512;
+    private static int tick;
+
+    @SubscribeEvent
+    static void onServerTick(ServerTickEvent.Post event) {
+        tick++;
+        if (PENDING.isEmpty()) {
             return;
         }
-        server.execute(() -> {
-            if (horse.isRemoved()) {
-                return;
+        // At most a few per tick. Walking into the horse dimension spawns a
+        // hundred and twenty horses in one go and each of these is a dozen
+        // lines of string building: dumped all at once that is a visible hitch,
+        // in the one place the player goes specifically to LOOK at horses.
+        // Spread over ticks it is the same information and no frame notices.
+        int budget = MAX_PER_TICK;
+        Iterator<Pending> it = PENDING.iterator();
+        while (it.hasNext() && budget > 0) {
+            Pending p = it.next();
+            if (p.dueTick() > tick) {
+                continue;
             }
-            log("horse-spawn", describe(horse));
-        });
+            it.remove();
+            if (!p.horse().isRemoved()) {
+                log("horse-spawn", describe(p.horse()));
+                budget--;
+            }
+        }
     }
+
+    /**
+     * How many horses may be described in one tick. Eight clears a whole
+     * dimension's worth in under a second, which is far faster than anybody can
+     * walk to the second pen.
+     */
+    private static final int MAX_PER_TICK = 8;
 
     /**
      * Everything about one horse, on one line: who it is, what it is carrying,

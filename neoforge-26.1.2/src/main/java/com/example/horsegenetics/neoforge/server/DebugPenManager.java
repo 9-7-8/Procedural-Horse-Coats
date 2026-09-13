@@ -737,7 +737,7 @@ public final class DebugPenManager {
         }
     }
 
-    private static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
+    static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
                                    String geneticCode) {
         Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.COMMAND);
         if (horse == null) {
