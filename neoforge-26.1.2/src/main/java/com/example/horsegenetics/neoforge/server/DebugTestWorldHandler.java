@@ -402,11 +402,24 @@ public final class DebugTestWorldHandler {
      * size and rebuilt-intake batches went that way on 2026-09-11. An egg whose breed or gene
      * is not loaded is simply left out.
      */
+    /**
+     * <b>Four batches, down from six, because the yard took two of them.</b>
+     *
+     * <p>Batches 3 and 4 were the item layer in a hotbar - pen signs, stall
+     * signs, tickets, hay, fences, bottles, the research shelf - and every one
+     * of those is now standing in the yard's rows B, C and D with a chest
+     * beside it. A hotbar of items whose legend reads "build a stall, then fill
+     * it solid" is a batch that gets taken and put away again, which is what
+     * happened to both of them for three days running.
+     *
+     * <p>What is left here is the residue: the things that need a
+     * <b>rider</b>, the one that needs to be <b>fed by hand</b>, and the intake
+     * genes that are just eggs to look at. If a batch can be replaced by a pen,
+     * it should be - see {@code wiki/horse-dimension.html}.
+     */
     private static final String[] BATCHES = {
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
-            "Ridden: ender echo, food preference, ocean-born - and the yard's lava and water pens (0-BT)",
-            "Holding pen and stalls - the refusals (0-BY, 0-BX)",
-            "Potion milk and the research shelf - the refusals (0-BY, 0-BX)",
+            "Ridden: gladiator, ender echo, ocean-born - all three are pens now, this is the saddle",
             "The sheep spawner - the one thing in 0-BY the yard cannot hand you",
             "Intake: the rest (0-BZ)",
     };
@@ -456,25 +469,53 @@ public final class DebugTestWorldHandler {
         // fine and the yard's glowstone is simply doing its job. isBrightOutside
         // is the same test every gene condition in this mod uses, so an answer
         // here is an answer for them too.
-        boolean bright = player.level().isBrightOutside();
-        tell(player, Component.literal(night
-                        ? "Night set. This dimension now reads " + (bright ? "DAY" : "NIGHT") + "."
-                        : "Day set. This dimension now reads " + (bright ? "DAY" : "NIGHT") + ".")
-                .withStyle(night == bright ? ChatFormatting.RED : ChatFormatting.GOLD));
-        if (night && bright) {
-            tell(player, Component.literal("That is the bug: the clock was set and this dimension "
-                            + "did not follow it. Worth saying in the report - the overworld "
-                            + "clock is shared by default_clock, so this is a sync problem "
-                            + "rather than a missing clock.")
-                    .withStyle(ChatFormatting.RED));
-        } else if (night) {
-            tell(player, Component.literal("The sky is dark. If it still LOOKS like day where you "
-                            + "are standing, that is the glowstone - the corridor and the yard are "
-                            + "lit by design. Use the yard's GLOW ROOM, which has a lid.")
-                    .withStyle(ChatFormatting.GOLD));
-        }
+        // READ IT THREE TICKS LATER, NOT NOW. This reported a false alarm for
+        // most of 2026-09-13: the command said "this dimension now reads DAY"
+        // immediately after setting midnight, and the owner reasonably took
+        // that at face value ("night isn't working") - twice, once when it was
+        // a real bug and once when it was not. The cause is ordering, not the
+        // clock. Level.updateSkyBrightness() runs during the level's own tick,
+        // so a read taken inside a command - which executes before that - gets
+        // the PREVIOUS tick's value, every time. A diagnostic that cries wolf
+        // is worse than none: it cost a whole second investigation into a
+        // dimension that was already fixed.
+        afterTicks(server, 3, () -> {
+            boolean bright = player.level().isBrightOutside();
+            tell(player, Component.literal(night
+                            ? "Night set. This dimension now reads " + (bright ? "DAY" : "NIGHT") + "."
+                            : "Day set. This dimension now reads " + (bright ? "DAY" : "NIGHT") + ".")
+                    .withStyle(night == bright ? ChatFormatting.RED : ChatFormatting.GOLD));
+            if (night && bright) {
+                tell(player, Component.literal("That is the bug: the clock was set and this dimension "
+                                + "did not follow it. Worth saying in the report - the overworld "
+                                + "clock is shared by default_clock, so this is a sync problem "
+                                + "rather than a missing clock.")
+                        .withStyle(ChatFormatting.RED));
+            } else if (night) {
+                tell(player, Component.literal("The sky is dark. If it still LOOKS like day where you "
+                                + "are standing, that is the glowstone - the corridor and the yard are "
+                                + "lit by design. Use the yard's GLOW ROOM, which has a lid.")
+                        .withStyle(ChatFormatting.GOLD));
+            }
+        });
         ActionTrace.log("testkit", (night ? "night" : "day") + " set by " + player.getGameProfile().name());
         return 1;
+    }
+
+    /**
+     * Run {@code task} {@code ticks} server ticks from now.
+     *
+     * <p>{@code server.execute} queues for the next task drain, and a task that
+     * queues another lands a tick after that - so chaining is the whole
+     * mechanism, and there is no scheduler here to add one to.
+     */
+    private static void afterTicks(net.minecraft.server.MinecraftServer server, int ticks,
+                                   Runnable task) {
+        if (ticks <= 0) {
+            task.run();
+            return;
+        }
+        server.execute(() -> afterTicks(server, ticks - 1, task));
     }
 
     /**
@@ -484,11 +525,28 @@ public final class DebugTestWorldHandler {
      * hotbar of eggs is a test somebody has to set up first.
      */
     private static void tellYard(ServerPlayer player) {
-        tell(player, Component.literal("The TEST YARD is the night shift: hay portal, then right "
-                        + "off the arrival road, 30 blocks. Egg layer, the ward's spawner, the "
-                        + "sound herd, six cows and an intimidating horse, the glow room, and "
-                        + "the dryad and the thaw in the growing row. Six of those run "
-                        + "themselves - walk in, then leave it alone.")
+        tell(player, Component.literal("The TEST YARD is most of the mod now: hay portal, then "
+                        + "right off the arrival road, and it runs in rows either side of "
+                        + "the walkway all the way to the back wall.")
+                .withStyle(ChatFormatting.GOLD));
+        tell(player, Component.literal("  A  bone meal | the ward's spawner       "
+                        + "B  tack room | horseman + cowboy")
+                .withStyle(ChatFormatting.WHITE));
+        tell(player, Component.literal("  C  ticket stalls | carrot bench         "
+                        + "D  dairy + shears | egg layer x8")
+                .withStyle(ChatFormatting.WHITE));
+        tell(player, Component.literal("  E  crackle, the pool | food preference  "
+                        + "F  starburst, F8 | the 3 stat pens")
+                .withStyle(ChatFormatting.WHITE));
+        tell(player, Component.literal("  G  the growing row x4                   "
+                        + "I  dhampir | eyesight, lit and dark")
+                .withStyle(ChatFormatting.WHITE));
+        tell(player, Component.literal("  J  guardian | gladiator | healer | cleansing light      "
+                        + "K  the deathbed | ender echo")
+                .withStyle(ChatFormatting.WHITE));
+        tell(player, Component.literal("Rows A, D, G, I and K run themselves - walk in, then "
+                        + "leave it alone. B and C need your hands, and every chest in them is "
+                        + "labelled.")
                 .withStyle(ChatFormatting.GOLD));
     }
 
@@ -605,59 +663,39 @@ public final class DebugTestWorldHandler {
                         .withStyle(ChatFormatting.RED));
             }
             case 2 -> {
+                // EVERY ONE OF THESE IS A PEN NOW, and all three come saddled
+                // in it - so this batch is no longer "here are three horses",
+                // it is the handful of things a rider needs that a pen cannot
+                // hold: a sword for the arena, a clock for timing, and the
+                // spare saddle for when one gets lost.
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick");
-                put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - the two below are ridden tests");
-                put(inv, legend, 2, preset(player, "Test: ender echo", Sex.FEMALE, false,
-                        "horsegenetics.ender_echo=End/End"),
-                        "RIDE it: the likeliest desync in the mod. Rubber-banding, or camera and horse disagreeing, is this");
+                put(inv, legend, 1, new ItemStack(Items.SADDLE),
+                        "spare saddle - the yard's ridden pens come saddled already");
+                put(inv, legend, 2, new ItemStack(Items.IRON_SWORD),
+                        "sword - the DEATHBED pen, row K west: six horses whose whole gene is "
+                                + "what happens when they die. Three drop something, three leave "
+                                + "something behind");
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
-                        "clock - for TIMING the lava crossing in the yard. Both ridden tests are "
-                                + "pens now: a saddled fireproof pair in a 19-block lava channel "
-                                + "(gap 179 - is it too slow?) and a saddled hydrophobic pair in a "
-                                + "half-flooded pen. Both horses come saddled");
-                put(inv, legend, 4, preset(player, "Test: food preference (carrot)", Sex.FEMALE, false,
-                        "horsegenetics.food_preference=Car/Car"),
-                        "offer it everything: only carrots. Silently does nothing if another mod took the event first");
-                put(inv, legend, 5, preset(player, "Test: ocean-born", Sex.FEMALE, false,
-                        "horsegenetics.ocean_born=Ocn/Ocn"), "the one rider-immunity gene never played");
-                put(inv, legend, 6, new ItemStack(Items.WATER_BUCKET), "water - for the two above");
-                put(inv, legend, 7, new ItemStack(Items.CARROT, 32), null);
-                put(inv, legend, 8, new ItemStack(Items.WHEAT, 32), "wheat and carrots - what food preference refuses");
+                        "clock - or /testkit night, which the dimension honours now");
+                put(inv, legend, 4, new ItemStack(Items.GLASS_BOTTLE, 16),
+                        "bottles - the DAIRY, row D west: the mare is already hurt and the foal "
+                                + "is already a foal, so all three refusals are one walk");
+                put(inv, legend, 5, new ItemStack(Items.SHEARS),
+                        "shears - two horses in the same pen are named SHEAR ME");
+                put(inv, legend, 6, new ItemStack(Items.APPLE, 16),
+                        "apples - FOOD PREFERENCE, row E east: four horses, four different loves, "
+                                + "one pen. Feed all four the same apple and exactly one should react");
+                tell(player, Component.literal("Row J is the ARENA: guardian on the west, "
+                                + "gladiator beside it, each with its own zombie spawner. Ride the "
+                                + "gladiator; for the guardian, let a zombie hit YOU.")
+                        .withStyle(ChatFormatting.GOLD));
+                tell(player, Component.literal("Rows B, C and D are the ITEM LAYER - tack room, "
+                                + "horseman and cowboy at their own workstations, the ticket "
+                                + "stalls, the carrot bench. Every chest is labelled; nothing "
+                                + "needs fetching.")
+                        .withStyle(ChatFormatting.GOLD));
             }
             case 3 -> {
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - both tickets need a horse you own");
-                put(inv, legend, 1, breedEgg("arabian"), "a horse to move around");
-                put(inv, legend, 2, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
-                        "holding pen sign - hang on a pen wall; a second one moves your pen");
-                put(inv, legend, 3, new ItemStack(ModItems.HOLDING_PEN_TICKET.get(), 8),
-                        "pen ticket - on your horse: it lands in the pen, dead centre. Try untamed / no pen / full");
-                put(inv, legend, 4, new ItemStack(ModItems.STALL_SIGN.get(), 4),
-                        "stall sign - bind it; the size message should give the real height");
-                put(inv, legend, 5, new ItemStack(ModItems.BOUND_TICKET.get(), 8),
-                        "stall ticket - dead centre even L-shaped or narrower than the horse");
-                put(inv, legend, 6, new ItemStack(Items.HAY_BLOCK, 64),
-                        "hay - fill a stall solid: the ticket must refuse and not be used up");
-                put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 64), null);
-                put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
-            }
-            case 4 -> {
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame each one first");
-                put(inv, legend, 1, preset(player, "Test: potion mare", Sex.FEMALE, false,
-                        "horsegenetics.potion_milk=Spd/Spd"), "hurt her, then bottle her: 'She's hurt' and no potion");
-                put(inv, legend, 2, preset(player, "Test: potion stallion", Sex.MALE, false,
-                        "horsegenetics.potion_milk=Spd/Str"), "bottle on him - he rears, kicks and says so");
-                put(inv, legend, 3, preset(player, "Test: potion foal", Sex.FEMALE, true,
-                        "horsegenetics.potion_milk=Spd/Spd"), "bottle on her - a foal has nothing to give");
-                put(inv, legend, 4, new ItemStack(Items.GLASS_BOTTLE, 16), "glass bottles");
-                put(inv, legend, 5, new ItemStack(Items.BUCKET), "bucket - a hurt mare refuses plain milk the same way");
-                put(inv, legend, 6, new ItemStack(ModItems.EQUINE_RESEARCH_SHELF.get(), 2),
-                        "research shelf - copy, CLOSE the screen, come back: it kept going; break it: everything drops");
-                put(inv, legend, 7, new ItemStack(Items.BOOK, 16), "books - the Copy tab, one copy per book");
-                ItemStack papers = new ItemStack(ModItems.RESEARCH_PAPER.get(), 2);
-                papers.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics.silver");
-                put(inv, legend, 8, papers, "two Silver papers - the second must refuse to go in");
-            }
-            case 5 -> {
                 // Molten hooves left this batch on 2026-09-13: its four alleles
                 // are four stalls in the yard now, side by side, which is the
                 // only arrangement that can answer "does this one differ from
@@ -671,7 +709,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 3, new ItemStack(Items.SADDLE),
                         "saddle - prints follow a ridden horse too; the molten stalls are in the yard");
             }
-            case 6 -> {
+            case 4 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {

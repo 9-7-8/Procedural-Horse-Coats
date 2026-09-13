@@ -84,7 +84,6 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 110;
 
     // ------------------------------------------------------------------
     // THE GRID
@@ -110,75 +109,78 @@ final class DebugTestYard {
     // wall, a hundred blocks away.
 
     /** Clear blocks in front of every row: one for the sign, three to walk in. */
-    private static final int AISLE = 4;
+    static final int AISLE = 4;
 
     /** The pens stop here either side, leaving the spur's width clear end to end. */
-    private static final int WEST_MAX = -3;
-    private static final int EAST_MIN = 3;
+    static final int WEST_MAX = -3;
+    static final int EAST_MIN = 3;
 
     /** The widest a pen may be on one side of the walkway. */
-    private static final int BLOCK_W = 19;
+    static final int BLOCK_W = 19;
 
     /** Row north walls, as offsets from the yard's mouth. Each is the one before it plus its depth plus an aisle. */
     private static final int ROW_A = 3;                         // bone meal | spawner room
     private static final int ROW_A_D = 16;
-    // THIRTY DEEP, AND THE NUMBER COMES FROM THE GENE. A shy horse paths
-    // FLEE_DISTANCE - twelve blocks - directly away from whatever frightened
-    // it, and it wants to be able to do that again on arrival. In the 4x7
-    // stalls these started in, the path was refused before it began: the owner
-    // reported "the shy genes don't seem to be doing anything", and a flee into
-    // a fence four blocks away is indistinguishable from no flee at all.
-    // B, C and D are EMPTY. The shy paddocks, the weather pens and everything
-    // before them are confirmed and gone, and a row kept at its old depth is
-    // seventy blocks of nothing in the middle of the walk. Held at zero rather
-    // than deleted because the rows below chain off them by name, and renaming
-    // six constants to save three lines is how a working layout gets broken.
-    private static final int ROW_B = ROW_A + ROW_A_D + AISLE;
-    private static final int ROW_B_D = 0;
-    private static final int ROW_C = ROW_B + ROW_B_D + AISLE;
-    private static final int ROW_C_D = 0;
-    private static final int ROW_D = ROW_C + ROW_C_D + AISLE;
-    private static final int ROW_D_D = 0;
-    private static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // the display row x8
-    private static final int ROW_E_D = 7;
-    private static final int ROW_F = ROW_E + ROW_E_D + AISLE;   // starburst, F8 | glow room
+    // B, C AND D ARE THE GAMEPLAY LAYER, which had never been in this yard at
+    // all. Owner, 2026-09-13: "add the entire item and gameplay layer as well
+    // as villagers. Add literally everything that CAN be tested in the yard."
+    // Until now every item test lived in the test kit's hotbar - which is to
+    // say it needed a person holding the right nine things, and got put off.
+    // A room with the props already placed and a chest of the items beside
+    // them costs a build and is then free for ever.
+    static final int ROW_B = ROW_A + ROW_A_D + AISLE;    // tack room | horseman's study
+    static final int ROW_B_D = 14;
+    static final int ROW_C = ROW_B + ROW_B_D + AISLE;    // ticket stalls | carrot bench
+    static final int ROW_C_D = 12;
+    static final int ROW_D = ROW_C + ROW_C_D + AISLE;    // dairy and clip | egg layer
+    static final int ROW_D_D = 12;
+    static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // crackle | food preference
+    static final int ROW_E_D = 7;
+    private static final int ROW_F = ROW_E + ROW_E_D + AISLE;   // starburst, F8 | the three stat pens
     private static final int ROW_F_D = 12;
     private static final int ROW_G = ROW_F + ROW_F_D + AISLE;   // the growing row x4
     private static final int ROW_G_D = 9;
-    private static final int ROW_H = ROW_G + ROW_G_D + AISLE;   // the retinue
-    private static final int ROW_H_D = 10;
-    private static final int ROW_I = ROW_H + ROW_H_D + AISLE;   // the night block, temper
-    private static final int ROW_I_D = 20;
-    private static final int ROW_J = ROW_I + ROW_I_D + AISLE;   // the night block, watch
-    private static final int ROW_J_D = 7;
+    // H is EMPTY: the retinue pen is gone (2026-09-13, a flat 50.0 ms/tick
+    // with twenty-four re-pathing mobs, which answered the question outright).
+    private static final int ROW_H = ROW_G + ROW_G_D + AISLE;
+    private static final int ROW_H_D = 0;
+    static final int ROW_I = ROW_H + ROW_H_D + AISLE;   // dhampir | eyesight
+    static final int ROW_I_D = 20;
+    /**
+     * <b>J and K are what removing the no-damage rule unlocked.</b>
+     *
+     * <p>Six genes - guardian, gladiator, healer, cleansing light, ender echo,
+     * and both of the death loci - are <i>entirely</i> about a horse taking or
+     * dealing damage, and this dimension cancelled every point of it. So they
+     * have never been in the yard, because there was nothing a pen here could
+     * have shown. Owner, 2026-09-13: <i>"remove the 'no horse damage'
+     * exception in the yard"</i>. That was the fifth time a protection in this
+     * dimension turned out to be the reason a gene "did nothing" - after the
+     * mob deleter, the spread verb, the missing night and the dhampir's
+     * sunburn - and it is the last of them.
+     *
+     * <p>They are put at the <b>far end</b> on purpose. Everything in J and K
+     * either fights, explodes, or floods its own floor, and the rest of the
+     * yard is full of pens whose whole result is a count of things that were
+     * standing quietly.
+     */
+    static final int ROW_J = ROW_I + ROW_I_D + AISLE;   // the arena | the infirmary
+    static final int ROW_J_D = 20;
+    static final int ROW_K = ROW_J + ROW_J_D + AISLE;   // the deathbed | ender echo
+    static final int ROW_K_D = 16;
 
     /**
-     * <b>Where the player stands for the ward test, and why it is so far from
-     * everything.</b>
-     *
-     * <p>Vanilla will not naturally spawn a monster within <b>24 blocks</b> of
-     * a player ({@code known-gaps.html} gap 180). That single rule is why the
-     * holy ward's real claim has never been tested: the ward reaches 8 to 16
-     * blocks, which is entirely inside the radius where nothing was going to
-     * spawn anyway, so standing next to a warded horse can only ever prove
-     * something you already had for free.
-     *
-     * <p>So the chambers are put {@value #WARD_RUN} blocks past the standing
-     * spot, which with their offset either side of the walkway puts both of
-     * them about thirty-five blocks away - comfortably outside the dead zone,
-     * and <b>equally far from both</b>, which is the part that makes the
-     * comparison fair.
+     * <b>The yard's depth is the last row, not a number somebody remembered to
+     * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
+     * read 110 deep while its rows chained past 150, so the back of it was
+     * outside the plot box that tears the plot down and carries tamed horses
+     * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int WARD_RUN = 30;
-
-    /** The teal wool, and the two chambers thirty blocks beyond it. */
-    private static final int WARD_STAND = ROW_J + ROW_J_D + AISLE + 2;
-    private static final int ROW_K = WARD_STAND + WARD_RUN;
-    private static final int ROW_K_D = 12;
+    private static final int YARD_DEPTH_Z = ROW_K + ROW_K_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
-    private static final int WEST_MIN = WEST_MAX - BLOCK_W;
-    private static final int EAST_MAX = EAST_MIN + BLOCK_W;
+    static final int WEST_MIN = WEST_MAX - BLOCK_W;
+    static final int EAST_MAX = EAST_MIN + BLOCK_W;
 
     /** Matches the corridor, so the yard reads as the same building. */
     private static final int WALL_TOP_DY = 10;
@@ -238,11 +240,17 @@ final class DebugTestYard {
         buildBoneMealPen(level, gy, cx, mouthZ);
         buildDisplayRow(level, gy, cx, mouthZ);
 
+        // The two halves of the mod this yard never had: the item, block and
+        // villager layer (rows B, C, D and E-east), and the six genes that
+        // removing the no-damage rule unlocked (rows I-east, J and K).
+        DebugYardGameplay.build(level, gy, cx, mouthZ);
+        DebugYardCombat.build(level, gy, cx, mouthZ);
+
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "NIGHT pens, ward,", "lava, dryads"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "items, villagers,", "arenas, dryads"));
 
         verify(level, gy, cx, mouthZ);
     }
@@ -297,7 +305,7 @@ final class DebugTestYard {
      * dimension until 2026-09-12 and thereby made three of the yard's own tests
      * impossible in the place built for them.
      */
-    private static void spawnCow(ServerLevel level, int gy, double x, double z) {
+    static void spawnCow(ServerLevel level, int gy, double x, double z) {
         Cow cow = EntityType.COW.create(level, EntitySpawnReason.COMMAND);
         if (cow == null) {
             return;
@@ -325,7 +333,16 @@ final class DebugTestYard {
                 || state.is(Blocks.BRICK_WALL) || state.is(Blocks.OAK_DOOR)
                 || state.is(Blocks.OAK_SIGN) || state.is(Blocks.TORCH)
                 || state.is(Blocks.WALL_TORCH) || state.is(Blocks.STONE_BRICKS)
-                || state.is(Blocks.SPAWNER) || state.is(Blocks.OAK_PLANKS);
+                || state.is(Blocks.SPAWNER) || state.is(Blocks.OAK_PLANKS)
+                // The gameplay rows put real furniture in the yard for the
+                // first time. Without these the walkability check reports a
+                // sound yard as broken, which is worse than not checking: a
+                // warning nobody can act on is a warning that gets ignored the
+                // next time it is real.
+                || state.is(Blocks.CHEST) || state.is(Blocks.HAY_BLOCK)
+                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF.get())
+                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.HORSEMANS_TABLE.get())
+                || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.COWBOY_HITCH.get());
     }
 
     /** One night stall: the gene, the allele, what it should do, and whether it needs a target. */
@@ -402,8 +419,12 @@ final class DebugTestYard {
         int z0 = mouthZ + ROW_F;
         int z1 = z0 + 9;
         for (int i = 0; i < pens.length; i++) {
+            // SIX WIDE, not seven: three sevens plus their gaps ran one block
+            // past EAST_MAX and into the strip that keeps the yard's own wall
+            // reachable. Caught by the layout audit rather than in game, which
+            // is the only way a one-block overrun ever gets caught.
             int x0 = cx + EAST_MIN + i * 7;
-            int x1 = x0 + 6;
+            int x1 = x0 + 5;
             fencedPlot(level, gy, x0, x1, z0, z1);
             DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
                     List.of(pens[i][1], "the census prints", "the number. Is it", "off baseline?"));
@@ -766,6 +787,41 @@ final class DebugTestYard {
             }
             wallColumn(level, gy, x, z1, planks, bedrock, glowstone);
         }
+
+        // THE YARD IS LIT NOW, AND IT HAS TO BE. Two changes landed a day
+        // apart and together they are a hazard: the dimension got a biome that
+        // spawns zombies in the dark (2026-09-13), and the rule that made
+        // horses invulnerable here is gone (2026-09-13, owner: "remove the 'no
+        // horse damage' exception in the yard"). Before either, a dark yard
+        // cost nothing. After both, every pen left running overnight is a pen
+        // whose subject can be eaten - and a dead horse reports nothing at all,
+        // so the morning's log would read as the gene having stopped.
+        //
+        // Invisible light blocks rather than lamp posts: full brightness, no
+        // collision, nothing in the way of a fleeing horse or a sight line,
+        // and nothing added to what the walkability check has to forgive. The
+        // wall glowstone only ever reached a few blocks in from the edges and
+        // this yard is forty-eight wide.
+        //
+        // It does NOT break the tests that want monsters. Every one of those
+        // has its own spawner - the ward room, both arenas, the cleansing
+        // light pen - and a spawner does not care about light. What it stops
+        // is the thing nobody asked for: hostiles appearing in the middle of a
+        // dryad pen (known-gaps, gap 212).
+        // FOUR APART AND TWO UP, and both numbers are load-bearing. Light falls
+        // off one per block by taxicab distance, so a level-15 source on a
+        // six-block grid at gy+4 bottoms out around SIX at the floor - and six
+        // is below GeneAbilityHandler.DARK_LEVEL, which is 7. That would have
+        // left the eyesight pen's LIT half reading as dark to the very gene it
+        // is the control for: a pen that agrees with its own experiment for the
+        // wrong reason, which is the worst kind of green. At gy+3 on a
+        // four-block grid the floor never drops below nine.
+        BlockState lamp = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15);
+        for (int z = z0 + 2; z < z1; z += 4) {
+            for (int x = cx - YARD_HALF_X + 2; x < cx + YARD_HALF_X; x += 4) {
+                DebugPenManager.fastSet(level, new BlockPos(x, gy + 3, z), lamp);
+            }
+        }
     }
 
     private static void wallColumn(ServerLevel level, int gy, int x, int z,
@@ -790,7 +846,7 @@ final class DebugTestYard {
      * is a horse you cannot see glowing. A room with a lid is the only place in
      * here that is actually dark.
      */
-    private static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
+    static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
                                  int doorX) {
         darkRoom(level, gy, x0, x1, z0, z1, doorX, true);
     }
@@ -804,7 +860,7 @@ final class DebugTestYard {
      * light block in them - which is exactly what they would have inherited,
      * because this method is shared.
      */
-    private static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
+    static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1,
                                  int doorX, boolean spawnProof) {
         BlockState stone = Blocks.STONE_BRICKS.defaultBlockState();
         for (int x = x0; x <= x1; x++) {
@@ -842,11 +898,21 @@ final class DebugTestYard {
         // light 0 exactly, so ONE is enough to stop it, and one is still black
         // to the eye: a glow is judged against the room, and a room at 1 looks
         // the same as a room at 0 while a room full of zombies does not.
+        //
+        // EVERY FLOOR BLOCK, at head height, and that is the whole fix. The
+        // first version put nine of these at gy+4 on a four-block grid and it
+        // did nothing at all: light falls off by one per block, so a source of
+        // level ONE lights its own position and nothing else. The room read
+        // zero at the floor and kept spawning - the log from 2026-09-13 has
+        // natural zombies in the ward room by the dozen, which is exactly what
+        // this was written to prevent and exactly what it failed to. There is
+        // no spacing that works for a level-1 source; the only grid that
+        // covers a floor is the floor.
         if (spawnProof) {
-            for (int x = x0 + 1; x < x1; x += 4) {
-                for (int z = z0 + 1; z < z1; z += 4) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z),
-                            Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 1));
+            BlockState dim = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 1);
+            for (int x = x0 + 1; x < x1; x++) {
+                for (int z = z0 + 1; z < z1; z++) {
+                    DebugPenManager.fastSet(level, new BlockPos(x, gy + 1, z), dim);
                 }
             }
         }
@@ -928,7 +994,7 @@ final class DebugTestYard {
      * and a white mark both stand out on, and it is the same base the test
      * kit's own intake eggs use.
      */
-    private static final String PALE = "horsegenetics.extension=e/e-horsegenetics.matp=Cr/N";
+    static final String PALE = "horsegenetics.extension=e/e-horsegenetics.matp=Cr/N";
 
     /**
      * One display stall: the gene, the thing to look for, and optionally a
@@ -1015,7 +1081,7 @@ final class DebugTestYard {
      * <p>A real saddle, not the bareback-steering phantom: this is the horse
      * being equipped, not a bond tier being simulated.
      */
-    private static void saddleAll(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+    static void saddleAll(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
         for (Horse horse : level.getEntitiesOfClass(Horse.class,
                 new AABB(x0, gy, z0, x1 + 1, gy + 4, z1 + 1))) {
             horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
@@ -1048,7 +1114,7 @@ final class DebugTestYard {
      * tron's two tube forms are a heterozygote, and a homozygote of either is a
      * different outcome - otherwise the gene's first allele is used twice.
      */
-    private static void stock(ServerLevel level, int gy, double x, double z, String key,
+    static void stock(ServerLevel level, int gy, double x, double z, String key,
                               String what, int mares, int studs, String tokens) {
         stock(level, gy, x, z, key, what, mares, studs, tokens, null);
     }
@@ -1058,7 +1124,7 @@ final class DebugTestYard {
      * appended to this locus's, for a marking that would be invisible on the
      * default black horse. See {@link #PALE}.
      */
-    private static void stock(ServerLevel level, int gy, double x, double z, String key,
+    static void stock(ServerLevel level, int gy, double x, double z, String key,
                               String what, int mares, int studs, String tokens, String base) {
         Gene gene = Genes.byKeyOrNull(key);
         if (gene == null) {
@@ -1099,7 +1165,7 @@ final class DebugTestYard {
      * animal and stays visible: five watchers loose in one yard are
      * indistinguishable otherwise, and telling them apart is the entire test.
      */
-    private static void label(Horse horse, String what) {
+    static void label(Horse horse, String what) {
         if (horse == null) {
             return;
         }
@@ -1129,7 +1195,7 @@ final class DebugTestYard {
     private static final int PEN_D = 9;
 
     /** A watch box, written the way a pen is: two corners in block coordinates. */
-    private static AABB box(int x0, int y0, int z0, int x1, int y1, int z1) {
+    static AABB box(int x0, int y0, int z0, int x1, int y1, int z1) {
         return new AABB(x0, y0, z0, x1, y1, z1);
     }
 
@@ -1141,7 +1207,7 @@ final class DebugTestYard {
      * replaced the corner posts, and an opening made of air that horses walked
      * straight out of. Now there is one pen builder and the yard calls it.
      */
-    private static void fencedPlot(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+    static void fencedPlot(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
         DebugPenManager.penWalls(level, gy + 1, x0, x1, z0, z1,
                 (x0 + x1) / 2, z0, Direction.NORTH);
     }

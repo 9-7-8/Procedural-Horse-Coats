@@ -12,14 +12,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.Level;
-import net.minecraft.tags.DamageTypeTags;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
@@ -63,36 +60,6 @@ public final class HorseGeneticsEventHandler {
         if (event.getLevel().isClientSide()) {
             return;
         }
-    }
-
-    /**
-     * Horses can't be <b>injured</b> in the debug-pen dimension - it's a viewing
-     * gallery, not a fight.
-     *
-     * <p><b>Fire is the exception, and it is not a loophole.</b> The rule exists
-     * to stop horses being <i>fought</i>: a zombie should not be able to whittle
-     * down the gallery while nobody is looking. A
-     * {@link com.example.horsegenetics.common.genetics.genes.DhampirGene dhampir}
-     * burning in daylight is not that - it is the gene happening to itself, and
-     * it is the <b>only</b> way that gene ever loses health, which is in turn
-     * the only thing that makes it hunt. Cancelling it made the whole animal
-     * inert in the one dimension built for watching it, which is the same shape
-     * of bug as the dimension deleting the ward's zombies and the spread verb
-     * returning early: a protection quietly turning a gene into a no-op.
-     *
-     * <p>Nothing else in that dimension produces fire. There is no lava, and
-     * {@code hot_blooded}'s melt only removes it.
-     */
-    @SubscribeEvent
-    static void noHorseDamageInDebugDimension(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof AbstractHorse)
-                || !event.getEntity().level().dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
-            return;
-        }
-        if (event.getSource().is(DamageTypeTags.IS_FIRE)) {
-            return;   // the dhampir's sunburn - see the note above
-        }
-        event.setCanceled(true);
     }
 
     /** The horse dimension is a fixed set - no breaking blocks there. */
