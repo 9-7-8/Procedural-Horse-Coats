@@ -419,7 +419,7 @@ public final class DebugTestWorldHandler {
      */
     private static final String[] BATCHES = {
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
-            "Ridden: gladiator, ender echo, ocean-born - all three are pens now, this is the saddle",
+            "Ridden: ender echo and ocean-born, plus the guardian, which needs YOU hurt",
             "The sheep spawner - the one thing in 0-BY the yard cannot hand you",
             "Intake: the rest (0-BZ)",
     };
@@ -637,15 +637,25 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 1, new ItemStack(Items.STICK),
                         "stick - the yard's horses all come TAMED now, this is for anything else");
                 put(inv, legend, 2, new ItemStack(Items.GOLDEN_CARROT, 16),
-                        "golden carrots - breed the starburst pair in the yard: does the foal's "
-                                + "emblem sit near its parents'?");
+                        "golden carrots - rows L, M and N: ten splice-carrot pairs and NOTHING "
+                                + "has ever bred one. Zero foals, every session. Both ends of the "
+                                + "path log now, including 'window expired before breeding'");
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension now honours");
                 put(inv, legend, 4, new ItemStack(Items.SADDLE),
                         "saddle - the ridden tests are batch 2");
-                put(inv, legend, 5, new ItemStack(Items.OAK_SAPLING, 8),
-                        "saplings - what the dryad pen should be growing on its own; these are "
-                                + "for comparison, not for planting");
+                // THE CONTROL FOR GAP 218, and the reason it is dark oak and not
+                // oak: the oak, birch, mushroom and bone-meal dryad pens all
+                // completed and are deleted, and dark oak planted saplings for a
+                // whole day without ever producing a log. Two explanations fit
+                // that - the clustering search never closes a 2x2, or a 2x2
+                // closes and the pen refuses to grow it - and hand-placing four
+                // saplings in a square separates them in ten seconds. If a
+                // hand-placed square grows, the gene's search is the bug; if it
+                // does not, the pen is.
+                put(inv, legend, 5, new ItemStack(Items.DARK_OAK_SAPLING, 8),
+                        "dark oak saplings - DRYAD DARK, row G: plant FOUR in a 2x2 yourself. "
+                                + "Grows = the gene's clustering is the bug; refuses = the pen is");
                 tellYard(player);
                 tell(player, Component.literal("BEFORE YOU LEAVE IT RUNNING - four things, in this "
                                 + "order:").withStyle(ChatFormatting.GOLD));
@@ -685,9 +695,11 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 6, new ItemStack(Items.APPLE, 16),
                         "apples - FOOD PREFERENCE, row E east: four horses, four different loves, "
                                 + "one pen. Feed all four the same apple and exactly one should react");
-                tell(player, Component.literal("Row J is the ARENA: guardian on the west, "
-                                + "gladiator beside it, each with its own zombie spawner. Ride the "
-                                + "gladiator; for the guardian, let a zombie hit YOU.")
+                tell(player, Component.literal("Row J west is the GUARDIAN, and it is the only "
+                                + "horse in the yard that arrives UNTAMED - on purpose, because "
+                                + "its gene fires on the owner being hurt and a horse with no "
+                                + "owner matches nobody. Tame it, stand next to it, then let a "
+                                + "zombie from the chest hit YOU. Gladiator is confirmed and gone.")
                         .withStyle(ChatFormatting.GOLD));
                 tell(player, Component.literal("Rows B, C and D are the ITEM LAYER - tack room, "
                                 + "horseman and cowboy at their own workstations, the ticket "
