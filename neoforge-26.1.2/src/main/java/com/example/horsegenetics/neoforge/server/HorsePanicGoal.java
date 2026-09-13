@@ -49,22 +49,61 @@ public final class HorsePanicGoal extends PanicGoal {
 
     @Override
     public boolean canUse() {
-        return !fighting() && super.canUse();
+        return !holdGround() && super.canUse();
     }
 
     @Override
     public boolean canContinueToUse() {
-        return !fighting() && super.canContinueToUse();
+        return !holdGround() && super.canContinueToUse();
     }
 
     /**
-     * Holding a live target - and not on fire. The fire clause is checked
-     * first on purpose: burning outranks fighting, for a dhampir above all.
+     * <b>Two reasons a horse should stand its ground instead of bolting.</b>
+     *
+     * <p><b>It is fighting.</b> A guardian or gladiator that has chosen a
+     * target holds position; anything without an aggression gene never has one,
+     * so it flees exactly as vanilla does.
+     *
+     * <p><b>Or it is a dhampir on fire</b> - and this one is the opposite of
+     * what it looks like. Panic is normally the right answer to burning, and
+     * the first version of this class said so in as many words. It is wrong for
+     * precisely one animal: a dhampir is not on fire because of a fire, it is
+     * on fire because of <em>the sky</em>, and there is nothing to run away
+     * from. It has a goal for this - {@link DhampirShadeGoal} finds a roof and
+     * walks to it - and that goal sits at <b>priority 1</b>, the same priority
+     * vanilla registers {@code PanicGoal} at. Same priority, same
+     * {@code Flag.MOVE}, and vanilla's is added first in {@code registerGoals},
+     * so panic took the flag and the shade goal never ran.
+     *
+     * <p>Which is the whole of <i>"the dhampir still died and couldn't escape
+     * the sun"</i>: it was not failing to find shade, it was being prevented
+     * from walking to shade it had already found, by a goal that was trying to
+     * help. The movement anybody watching saw was the panic, not the journey.
      */
-    private boolean fighting() {
+    private boolean holdGround() {
         if (horse.isOnFire() || horse.isFreezing()) {
-            return false;
+            return dhampir();
         }
         return horse.getTarget() != null && horse.getTarget().isAlive();
+    }
+
+    /**
+     * Resolved once and kept. {@code isDhampir} parses the horse's genotype and
+     * this is asked every tick by two methods, on every horse in the world -
+     * the same reasoning as {@code FoodTemptGoal}'s cached lookup. Lazy rather
+     * than done in the constructor because goals are attached on entity join
+     * and the record is filled on the founding tick, so there is often nothing
+     * to read yet.
+     */
+    private Boolean dhampir;
+
+    private boolean dhampir() {
+        if (dhampir == null) {
+            if (!HorseRecords.hasRealRecord(horse)) {
+                return false;   // ask again next tick
+            }
+            dhampir = DhampirHandler.isDhampir(horse);
+        }
+        return dhampir;
     }
 }
