@@ -3,11 +3,9 @@ package com.example.horsegenetics.neoforge.server;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
@@ -34,7 +32,6 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *
  * <ul>
  *   <li><b>Guardian</b> fires on its owner being hurt and retaliates.</li>
- *   <li><b>Gladiator</b> picks fights while ridden.</li>
  *   <li><b>Healer</b> heals horses that are below full - and nothing here could
  *       <i>get</i> below full.</li>
  *   <li><b>Cleansing light</b> damages undead, and the undead were being
@@ -193,33 +190,22 @@ final class DebugYardCombat {
         DebugWorldWatch.watch("ARENA - GUARDIAN",
                 DebugTestYard.box(gx0, gy, z0, gx1, gy + 4, z1), null);
 
-        int lx0 = gx0 + 10;
-        int lx1 = cx + WEST_MAX;
-        arenaBox(level, gy, lx0, lx1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(lx0 + 4, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("GLADIATOR", "LEAVE IT ALONE: it", "fights while NOT", "ridden. Mount=stop"));
-        // ARMED THE WAY ITS OWN PAGE SAYS TO ARM IT: "it picks fights, so it
-        // takes damage; pair it with magic health and a real attack or expect
-        // losses." A bare Gld/Gld horse is a 22-health animal with a 3-damage
-        // kick, which is a zombie's exact statline - and the gene is about
-        // starting fights, not winning them.
-        DebugTestYard.stock(level, gy, lx0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.gladiator",
-                "GLADIATOR", 1, 0, "Gld/Gld",
-                "horsegenetics.magic_fighter=Gld/Gld-horsegenetics.magic_health=Hardy/Hardy");
-
-        // ONE opponent, not three, and this is the second time I have got the
-        // number wrong in the same pen. Three zombies is nine damage a second
-        // against twenty-two health: dead inside three seconds of contact,
-        // whatever the horse does, and it died eleven seconds after spawning
-        // with two zombies still standing. That is not a gene failing and it is
-        // not a panic bug either - it is arithmetic, and no amount of attack
-        // speed fixes being outnumbered three to one.
+        // Nothing places opponents in this row any more: the helper that did,
+        // and the charged spawner before it, went with the gladiator. Zombies
+        // come out of the chest, by hand, which is the only arrangement in
+        // which the guardian's gene is switched on at all.
         //
-        // One is a fight the horse can win and therefore a fight worth
-        // watching. More are in the chest, and the choice of how many is the
-        // tester's - which is where it should have been from the start.
-        arenaOpponents(level, gy, lx0, lx1, z1 - 3, 1);
-        DebugTestYard.saddleAll(level, gy, lx0, lx1, z0, z1);
+        // THE GLADIATOR'S HALF OF THIS ROW IS GONE - confirmed 2026-09-13 and
+        // deleted rather than ticked, the way everything else that passes is.
+        // The yard was built at 12:47:03, its one placed zombie joined the
+        // arena in the same tick, and twelve seconds later the log read
+        // "creature died | minecraft:zombie ... from mob" with the rotten flesh
+        // inside the pen. The horse took three hits of 3.0 on the way and was
+        // alive at every census for the next ten minutes. Unridden, in a sealed
+        // box with one other mob in it, so there is nothing else to credit.
+        //
+        // The chest stays where it is: the guardian next door needs the stick
+        // and the zombie eggs more than the gladiator ever did.
         // The fight's scale is in the tester's hand, not the spawner's - see
         // arenaOpponents. A stick too, because the guardian next door has to be
         // tamed before its gene can see an owner at all.
@@ -229,8 +215,6 @@ final class DebugYardCombat {
                 new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD, 1),
                 new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SADDLE, 2),
                 new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GOLDEN_APPLE, 8)));
-        DebugWorldWatch.watch("ARENA - GLADIATOR",
-                DebugTestYard.box(lx0, gy, z0, lx1, gy + 4, z1), null);
     }
 
     // ==================================================================
@@ -446,68 +430,6 @@ final class DebugYardCombat {
         int doorX = (x0 + x1) / 2;
         for (int y = gy + 1; y <= gy + 2; y++) {
             DebugPenManager.fastSet(level, new BlockPos(doorX, y, z0), Blocks.AIR.defaultBlockState());
-        }
-    }
-
-    /**
-     * A charged zombie spawner. Charged here rather than left empty for the
-     * tester to fill: an empty spawner produces nothing, which is
-     * indistinguishable from the gene under test having stopped it - the exact
-     * confound the ward room was already caught on.
-     */
-    private static void zombieSpawner(ServerLevel level, int gy, int x, int z) {
-        BlockPos pos = new BlockPos(x, gy + 1, z);
-        level.setBlock(pos, Blocks.SPAWNER.defaultBlockState(), 3);
-        if (level.getBlockEntity(pos) instanceof SpawnerBlockEntity be) {
-            be.setEntityId(EntityType.ZOMBIE, level.getRandom());
-            be.setChanged();
-        }
-    }
-
-    /**
-     * <b>A bounded, placed group of opponents - ONE by default, and the reason
-     * the number is small is the whole design of these two
-     * pens.</b>
-     *
-     * <p>The arenas were given a charged spawner, then three placed zombies,
-     * and the gladiator died to both: <i>"gladiator died to a zombie"</i>, then
-     * <i>"the gladiator horse died to the zombie again"</i>. Faster swings did
-     * not save it and were never going to, because the horse was not fighting.
-     *
-     * <p><b>Neither of these genes acts unless the player is engaged.</b>
-     * Gladiator's temper is conditioned on {@code has_rider} - it picks fights
-     * <em>while ridden</em> and does nothing whatever on its own. Guardian
-     * fires on {@code OnOwnerHurt}: no owner, or an owner nobody is hitting,
-     * and it never takes a target. So a pen stocked with zombies and left alone
-     * is not an arena, it is an execution - the subject cannot defend itself by
-     * design, and every reading it produces is of a horse being killed while
-     * its gene is switched off.
-     *
-     * <p>The zombies are in the chest as <b>spawn eggs</b> instead. Mount the
-     * gladiator, then make the fight; tame the guardian, stand next to it, then
-     * make the fight. That is not a workaround for a pen that cannot hold
-     * monsters - it is the only arrangement in which either gene is <em>on</em>.
-     *
-     * <p>A spawner is the thing that is not used here: it keeps six alive within
-     * range and refills them as fast as they die, so one horse is not being
-     * tested, it is being counted down. One placed opponent, and more in the
-     * chest as spawn eggs, leaves the scale of the fight in the tester's hand.
-     *
-     * <p><b>It worked the first time it was tried.</b> 2026-09-13 12:47:03 the
-     * zombie joined the gladiator's arena; 12:47:15 it died {@code from mob},
-     * dropping rotten flesh inside the pen, having taken the horse from 23.3 to
-     * 14.3 on the way. Unridden, unassisted, and alive at the end of it.
-     */
-    private static void arenaOpponents(ServerLevel level, int gy, int x0, int x1, int z, int count) {
-        for (int i = 0; i < count; i++) {
-            var zombie = EntityType.ZOMBIE.create(level,
-                    net.minecraft.world.entity.EntitySpawnReason.COMMAND);
-            if (zombie == null) {
-                return;
-            }
-            zombie.setPos(x0 + 2.0 + i * 2.0, gy + 1, z);
-            zombie.setPersistenceRequired();
-            level.addFreshEntity(zombie);
         }
     }
 }

@@ -101,7 +101,63 @@
         attacks hostile mobs that come within reach</em> &mdash; and it worked the
         first time it was armed correctly, one commit after the pen stopped
         putting three zombies against one horse.
-        <strong>Nothing about it needs looking at.</strong>
+        <strong>Its half of row J is deleted</strong>, along with the two helpers
+        that placed its opponents &mdash; both of which had just gone dead, which
+        is how this section started.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">Dryad, out of the same log &mdash; three of the four answered, and the pens are gone</span>
+    <p>
+        The overnight run and the morning sessions carry the whole locus. Nobody
+        had to look at anything.
+    </p>
+    <ul>
+        <li><strong>Bone meal &mdash; confirmed, on its own stated terms.</strong>
+            Its pass was written when it was built: <em>a night of fertilisings
+            with no crop among them</em>. The day's list is <b>eight
+            fertilisings, every one of them <code>minecraft:grass_block</code>,
+            and not one crop</b>, while the wheat on farmland beside it sat at
+            eighteen from build to shutdown. It hurried saplings into trees on
+            its own at the same time &mdash; the pen's oak-log count climbed 5
+            &rarr; 51 across the day, one tree at a time, unattended.</li>
+        <li><strong>The mixed pair &mdash; confirmed.</strong> A
+            <code>Oak/Brch</code> heterozygote planted <em>both</em>: the watch
+            counts the two saplings separately and saw
+            <code>1x oak_sapling (+1)</code> and <code>1x birch_sapling (+1)</code>
+            as distinct events, and one of the oaks closed the loop by becoming a
+            tree (<code>6x oak_log, 53x oak_leaves</code>). That is the new
+            inheritance rule, which is what the pen was for.</li>
+        <li><strong>Mushroom &mdash; it plants, and the half that mattered was
+            unreadable.</strong> Red and brown both appeared, one at a time, on a
+            podzol floor. But the pen's actual question is <em>&ldquo;podzol half
+            only, none on the grass half&rdquo;</em>, and a single tally reading
+            <code>1x red_mushroom</code> for the whole pen says a mushroom exists
+            somewhere and nothing about which half. <strong>The pen now reports
+            as two areas</strong>, <code>DRYAD MUSH - PODZOL (should fill)</code>
+            and <code>DRYAD MUSH - GRASS (must stay empty)</code>, so the pass is
+            the shape of the pair rather than a number to be interpreted.</li>
+    </ul>
+</div>
+
+<div class="note bad">
+    <span class="label">Dark oak is the one that does not work</span>
+    <p>
+        <code>Dark/Dark</code> planted saplings all day and <strong>never once
+        produced a log</strong>. Across every session on 2026-09-13 the string
+        <code>dark_oak_log</code> appears in the logs <b>zero</b> times, and the
+        pen's sapling count never got past <code>2x dark_oak_sapling</code>.
+    </p>
+    <p>
+        Dark oak is the only tree in the game that needs a <b>2&times;2</b> of
+        saplings, and the clustering search that is supposed to walk new
+        saplings toward each other until a square closes is new code with no
+        test behind it &mdash; flagged when it was written as
+        <em>&ldquo;the one most likely to be wrong &hellip; it fails invisibly,
+        as a pen of saplings that never become anything&rdquo;</em>. That is
+        exactly what a day of it looks like. <a href="known-gaps.html#gap-218">Gap
+        218</a>. <b>Its pen stays.</b>
     </p>
 </div>
 
@@ -262,10 +318,13 @@
     <li><strong>Ender echo's ridden half</strong> (row K east). The on-foot blink
         is confirmed; it now also blinks when its <em>rider</em> is hit, which has
         never been tried.</li>
+    <li><strong>Dark oak dryad</strong> (row G). Saplings, never a tree, in a
+        full day &mdash; see <a href="#log-read-0913">&sect;0-DL</a> and
+        <a href="known-gaps.html#gap-218">gap 218</a>. The rest of the dryad row
+        is confirmed and deleted.</li>
     <li><strong>The horseman and the cowboy</strong> (row B east), the tack room,
-        food preference, the three magic stat pens, the dryad row, bone meal, the
-        ward's non-interference half. All built, none contradicted, none
-        confirmed.</li>
+        food preference, the three magic stat pens, the ward's non-interference
+        half. All built, none contradicted, none confirmed.</li>
     <li><strong>Visual, and therefore last:</strong> gilded crackle redrawn, and
         starburst's emblem inheritance.</li>
 </ol>

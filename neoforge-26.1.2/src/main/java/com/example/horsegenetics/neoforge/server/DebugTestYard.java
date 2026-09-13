@@ -270,7 +270,6 @@ final class DebugTestYard {
         buildBaseAlarmPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
-        buildBoneMealPen(level, gy, cx, mouthZ);
         buildDisplayRow(level, gy, cx, mouthZ);
 
         // The two halves of the mod this yard never had: the item, block and
@@ -656,27 +655,21 @@ final class DebugTestYard {
         // answered by standing still and looking, only by leaving and coming
         // back, which is exactly what this dimension is for.
         //
-        // THREE DRYAD PENS NOW, because the locus stopped being one thing on
-        // 2026-09-13 and a pen stocked with its first allele would exercise
-        // none of what changed. Each one asks a different question and the
-        // watch counts the actual block, so all three answer themselves.
+        // TWO DRYAD PENS LEFT of the four this row had on 2026-09-13, and the
+        // two that went were both answered out of one night's log rather than
+        // by looking at anything.
+        //
+        // DRYAD MIXED is gone: a heterozygote plants BOTH of its alleles, which
+        // was the new inheritance rule and the only thing that pen was for. The
+        // watch counted oak and birch separately and saw both appear, and one
+        // of the oaks closed the loop by becoming a tree (6 logs, 53 leaves).
+        // What it did NOT establish is the half-rate RATIO - the counts were
+        // ones and twos - and a pen is the wrong instrument for a rate anyway;
+        // that belongs with gaps 208 and 211, which are about exactly that.
+        //
+        // DRYAD BONE is gone with it - see the deleted buildBoneMealPen.
 
-        // 1. THE MIXED PAIR - the new inheritance rule, and the only pen that
-        // can show it. Oak and birch are chosen because they are DIFFERENT
-        // BLOCKS: the watch counts them separately, so "both, each at half
-        // rate" is readable as a ratio rather than taken on trust.
-        growPen(level, gy, x, z, Blocks.GRASS_BLOCK.defaultBlockState(),
-                "horsegenetics.dryad", "Oak/Brch",
-                List.of("DRYAD MIXED", "Oak/Brch - BOTH", "at HALF rate.", "count each kind"));
-        // Six blocks up, because the far end of this test is a grown TREE and a
-        // two-block box would count the sapling and miss the wood.
-        DebugWorldWatch.watch("DRYAD MIXED", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
-                Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG,
-                Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES);
-        x = at[++slot];
-
-
-        // 2. THE DARK OAK, which is the whole reason the locus was rebuilt.
+        // 1. THE DARK OAK, which is the whole reason the locus was rebuilt.
         // A matched pair, so it plants only dark oak and they accumulate; the
         // translator then clusters them toward each other until a 2x2 closes.
         // THIS IS THE ONE MOST LIKELY TO BE WRONG - the clustering search is
@@ -690,7 +683,7 @@ final class DebugTestYard {
                 Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
         x = at[++slot];
 
-        // 3. THE MUSHROOM, and its floor is the test. Half podzol, half grass:
+        // 2. THE MUSHROOM, and its floor is the test. Half podzol, half grass:
         // a mushroom survives ANY light on podzol and needs darkness on grass,
         // so in a lit yard the pass is mushrooms on the podzol half and NONE on
         // the grass half. A pen that is all one thing could not tell "canSurvive
@@ -705,53 +698,40 @@ final class DebugTestYard {
                         Blocks.GRASS_BLOCK.defaultBlockState());
             }
         }
-        DebugWorldWatch.watch("DRYAD MUSH", box(x, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
-                Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.PODZOL, Blocks.GRASS_BLOCK);
+        // TWO WATCH AREAS OVER ONE PEN, because one could not answer the
+        // question the pen was built to ask. The pass is "mushrooms on the
+        // podzol half and NONE on the grass half", and a single tally reading
+        // "1x red_mushroom" for the whole pen says a mushroom exists somewhere
+        // and nothing about which half it is on - so the canSurvive check, the
+        // entire point of the floor being split, was unreadable. It read that
+        // way all of 2026-09-13. Now the two halves report separately and the
+        // pass is the shape of the pair, not a number that needs interpreting.
+        int mid = x + (PEN_W / 2);
+        DebugWorldWatch.watch("DRYAD MUSH - PODZOL (should fill)",
+                box(x, gy, z, mid, gy + 1, z + PEN_D), null,
+                Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.PODZOL);
+        DebugWorldWatch.watch("DRYAD MUSH - GRASS (must stay empty)",
+                box(mid + 1, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
+                Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.GRASS_BLOCK);
     }
 
     /**
-     * <b>Bone meal, whose result is only ever visible in the log.</b>
+     * <b>The bone-meal pen is gone, and this note is what it produced.</b>
      *
-     * <p>The allele refuses crops, and that refusal <i>cannot be observed</i>:
-     * a crop nobody fertilised comes up anyway on random ticks, so a grown
-     * wheat proves nothing either way. What settles it is the list of what the
-     * gene <b>did</b> touch - {@code DebugWorldWatch.noteBoneMeal} writes one
-     * line per fertilising - and a night of those with no crop among them is
-     * the pass.
+     * <p>Its pass condition was stated when it was built and it met it exactly:
+     * <i>"what settles it is the list of what the gene DID touch - one line per
+     * fertilising - and a night of those with no crop among them is the
+     * pass."</i> Over 2026-09-13 that list was <b>eight fertilisings, every one
+     * of them {@code minecraft:grass_block}, and not one crop</b>, while the
+     * strip of wheat on farmland beside it sat at eighteen all day. The pen also
+     * hurried saplings into trees on its own: the oak-log count climbed from 5
+     * to 51 across the day, one tree at a time, without anybody in the room.
      *
-     * <p>So the pen carries both: saplings and grass for it to hurry along, and
-     * a strip of wheat on farmland that must never appear in that list.
+     * <p>Kept as a comment rather than a pen because the <em>refusal</em> is the
+     * interesting half and it is now recorded: {@code noteBoneMeal} is still
+     * hooked, so a future regression shows up as a crop in that list from
+     * anywhere in the dimension, which is broader than this pen ever was.
      */
-    private static void buildBoneMealPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + WEST_MIN;
-        int x1 = cx + WEST_MAX;
-        int z0 = mouthZ + ROW_A;
-        int z1 = z0 + ROW_A_D;
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
-            }
-        }
-        // Something to hurry: a row of oak saplings it should turn into trees.
-        for (int x = x0 + 1; x <= x1 - 1; x += 2) {
-            DebugPenManager.fastSet(level, new BlockPos(x, gy + 1, z0 + 2),
-                    Blocks.OAK_SAPLING.defaultBlockState());
-        }
-        // And something it must leave alone, on farmland so it is a real crop.
-        for (int x = x0 + 1; x <= x1 - 1; x++) {
-            DebugPenManager.groundColumn(level, x, gy, z1 - 2, Blocks.FARMLAND.defaultBlockState());
-            DebugPenManager.fastSet(level, new BlockPos(x, gy + 1, z1 - 2),
-                    Blocks.WHEAT.defaultBlockState());
-        }
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DRYAD BONE", "hurries saplings", "NEVER the wheat", "- read the log"));
-        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dryad",
-                "the bone meal pen", 2, 0, "Bone/Bone");
-        DebugWorldWatch.watch("DRYAD BONE", box(x0, gy, z0, x1, gy + 6, z1), null,
-                Blocks.OAK_SAPLING, Blocks.OAK_LOG, Blocks.WHEAT, Blocks.SHORT_GRASS);
-    }
-
     /**
      * One growing pen: the floor its gene needs, walls, a sign saying what the
      * floor should turn into, and two carriers - two, so a failure cannot be
