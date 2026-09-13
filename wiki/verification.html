@@ -83,10 +83,27 @@
 <h2 id="ownership-and-landing">&sect;0-DR &mdash; Whose horse, one sign each, and the horse in the roof (2026-09-13, NOT looked at)</h2>
 
 <div class="note good">
+    <span class="label">The roof landing is diagnosed &mdash; by the trace line, on its first use</span>
+    <p>
+        <code>[trace] ticket | Loyal Gooseberry -&gt; stall sign at 9, 130, 74 facing north: room
+        9, 131, 74 to 9, 138, 74 (1 tiles) &hellip; NOTHING FITS - refused</code>. The
+        &ldquo;room&rdquo; was the top of the stall's own sign: signs count as solid, so the
+        detector read one as floor, and with open sky above a sign hung outside it closed as
+        a one-tile room. It did not exist when the sign was placed, and it was smaller than
+        the real stall when the ticket looked again, so it won. A sign is never a floor now.
+        <strong>Retest:</strong> ticket into the tight stall &mdash; the trace should name the
+        12-tile room and a landing point inside it. <a href="known-gaps.html#gap-223">Gap 223</a>.
+    </p>
+</div>
+
+<div class="note good">
     <span class="label">Read off the log, and from the owner</span>
     <ul>
         <li><strong>The L-shaped stall binds now</strong> from the wall in front of its
             notch: <code>Esoteric Lane @ 15,129,76 5x3x4 (16 blocks)</code>.</li>
+        <li><strong>One stall sign per horse works</strong>: <code>Loyal Gooseberry already has a
+            stall - its sign is at 9, 130, 74</code>, then two seconds later <code>Stall moved
+            &hellip; The old sign popped off at 9, 130, 74</code>.</li>
         <li><strong>The roofed stall lands a horse cleanly</strong> &mdash; owner:
             <em>&ldquo;no teleporting into a wall issue on the roofed stall&rdquo;</em>.</li>
     </ul>

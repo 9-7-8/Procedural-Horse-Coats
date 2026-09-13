@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -267,8 +268,24 @@ public final class StallDetector {
     /** Room to stand in this column at {@code y}: something underfoot, and clear cells above. */
     private static boolean standable(LevelReader level, int x, int y, int z) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y - 1, z);
-        if (level.isOutsideBuildHeight(p) || !level.getBlockState(p).blocksMotion()) {
-            return false; // nothing to stand on - a drop, or open air
+        if (level.isOutsideBuildHeight(p)) {
+            return false;
+        }
+        BlockState under = level.getBlockState(p);
+        // A SIGN IS NOT A FLOOR - and the stall's own sign was being read as one.
+        // Signs are force-solid in vanilla, so blocksMotion() is true for them,
+        // which made the top of a sign hung on the outside of a stall a
+        // standable one-block "room": the sign underneath, open sky above,
+        // nothing beside it to spread into, so the fill closed at one tile. At
+        // bind time the sign did not exist yet and that square was open air, so
+        // the real stall won; at ticket time the sign was there, forSign found
+        // both, and smaller() picked the one-tile room. The trace said it
+        // outright on 2026-09-13 - "room 9, 131, 74 to 9, 138, 74 (1 tiles)" for
+        // a sign at 9, 130, 74 - and it is exactly the owner's report that the
+        // ticket put the horse "right above the sign": a 1.4-wide horse centred
+        // on that square overlaps the wall behind it, which is the inWall damage.
+        if (!under.blocksMotion() || under.getBlock() instanceof SignBlock) {
+            return false; // nothing to stand on - a drop, open air, or a sign
         }
         for (int i = 0; i < HEADROOM; i++) {
             p.set(x, y + i, z);
