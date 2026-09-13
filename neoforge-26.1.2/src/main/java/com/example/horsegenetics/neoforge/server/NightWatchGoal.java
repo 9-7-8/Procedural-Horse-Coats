@@ -220,12 +220,48 @@ public final class NightWatchGoal extends Goal {
         if (toHorse.lengthSqr() < 1.0e-4 || toGoal.lengthSqr() < 1.0e-4) {
             return goal;
         }
-        if (toHorse.dot(toGoal) >= 0) {
-            return goal;   // already on the right side; the straight line is fine
+        // HOW CLOSE THE STRAIGHT LINE PASSES, not which side the horse is on.
+        //
+        // The first version asked whether the horse was on the far side of the
+        // player from its goal, which only catches the head-on case; a horse
+        // beside you scores a dot product near zero and was let through, and its
+        // line still clipped you. Owner, after that fix: "watch behind still
+        // walks through the player."
+        //
+        // The deeper reason no choice of DESTINATION can fix this on its own:
+        // Minecraft's ground pathfinder does not treat entities as obstacles at
+        // all. It will walk a horse through a player as if they were not there.
+        // So the player has to be made an obstacle here, by hand, and the only
+        // honest test is the perpendicular distance from them to the segment the
+        // horse is about to walk.
+        Vec3 from = flatVec(horse.position());
+        Vec3 to = flatVec(goal);
+        Vec3 at = flatVec(player.position());
+        if (distanceToSegment(at, from, to) > CLEARANCE) {
+            return goal;   // the line already misses them; leave it alone
         }
         Vec3 right = new Vec3(-toGoal.z, 0, toGoal.x);
         double side = right.dot(toHorse) < 0 ? -1.0 : 1.0;
         return player.position().add(right.normalize().scale(side * SWING_WIDE));
+    }
+
+    /** How wide a berth the player gets. A horse is about 1.4 across. */
+    private static final double CLEARANCE = 2.2;
+
+    /** Same point with the height thrown away; none of this cares about y. */
+    private static Vec3 flatVec(Vec3 v) {
+        return new Vec3(v.x, 0, v.z);
+    }
+
+    /** Perpendicular distance from {@code p} to the segment {@code a}-{@code b}. */
+    private static double distanceToSegment(Vec3 p, Vec3 a, Vec3 b) {
+        Vec3 ab = b.subtract(a);
+        double len = ab.lengthSqr();
+        if (len < 1.0e-6) {
+            return p.distanceTo(a);
+        }
+        double t = Math.max(0.0, Math.min(1.0, p.subtract(a).dot(ab) / len));
+        return p.distanceTo(a.add(ab.scale(t)));
     }
 
     /** Flattened and normalised, because all of this is a question about yaw. */

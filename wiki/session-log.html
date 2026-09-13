@@ -50,6 +50,35 @@
     boring explanations; 39-and-0 beside 53-and-53 is consistent with one.
 </p>
 
+<h3>The hunters are done; the shy ones needed a bigger box</h3>
+
+<p>
+    <strong>Every hunting form of night temper is confirmed</strong> and their stalls are
+    gone. The shy forms were reported as doing nothing, then as <em>"working now, but hard
+    to tell in their tiny pens"</em> - and the pen was the whole of it. A shy horse paths
+    <code>FLEE_DISTANCE</code>, twelve blocks, directly away; in a
+    4&nbsp;&times;&nbsp;7 stall the navigator refuses that before it starts.
+</p>
+
+<p>
+    <strong>The asymmetry is the lesson.</strong> Hunt and flee are the same locus with the
+    sign flipped, they were built into identical stalls, and the stall confirmed one half
+    and hid the other &mdash; because a hunter closes on you and a wall <em>helps</em> it,
+    while a flee-er needs room, which is the one thing a stall cannot give. Four paddocks
+    at 19&nbsp;&times;&nbsp;30 now.
+</p>
+
+<p>
+    And a second pass on the stalker: <em>"watch behind still walks through the
+    player."</em> The first fix diverted only when the horse was on the far side of the
+    player from its goal, which catches the head-on case and nothing else. The real reason
+    no choice of destination can fix it alone is that
+    <strong>Minecraft's ground pathfinder does not treat entities as obstacles at
+    all</strong> - it will walk a horse through a player as though they were not there. So
+    the player is made an obstacle by hand, and the test is now the perpendicular distance
+    from them to the segment the horse is about to walk.
+</p>
+
 <h3>Owner-verified: the glow room, whole, and ooze in both forms</h3>
 
 <ul>

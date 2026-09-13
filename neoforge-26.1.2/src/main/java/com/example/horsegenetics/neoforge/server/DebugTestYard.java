@@ -84,7 +84,7 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 210;
+    private static final int YARD_DEPTH_Z = 185;
 
     // ------------------------------------------------------------------
     // THE GRID
@@ -122,10 +122,16 @@ final class DebugTestYard {
     /** Row north walls, as offsets from the yard's mouth. Each is the one before it plus its depth plus an aisle. */
     private static final int ROW_A = 3;                         // bone meal | spawner room
     private static final int ROW_A_D = 16;
-    private static final int ROW_B = ROW_A + ROW_A_D + AISLE;   // hydrophobic | lava channel
-    private static final int ROW_B_D = 6;
-    private static final int ROW_C = ROW_B + ROW_B_D + AISLE;   // molten hooves x4
-    private static final int ROW_C_D = 20;
+    // THIRTY DEEP, AND THE NUMBER COMES FROM THE GENE. A shy horse paths
+    // FLEE_DISTANCE - twelve blocks - directly away from whatever frightened
+    // it, and it wants to be able to do that again on arrival. In the 4x7
+    // stalls these started in, the path was refused before it began: the owner
+    // reported "the shy genes don't seem to be doing anything", and a flee into
+    // a fence four blocks away is indistinguishable from no flee at all.
+    private static final int ROW_B = ROW_A + ROW_A_D + AISLE;   // shy: riders | shy: herds
+    private static final int ROW_B_D = 30;
+    private static final int ROW_C = ROW_B + ROW_B_D + AISLE;   // shy: monsters | shy: all
+    private static final int ROW_C_D = 30;
     private static final int ROW_D = ROW_C + ROW_C_D + AISLE;   // sound herd | intimidating
     private static final int ROW_D_D = 16;
     private static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // the display row x8
@@ -395,28 +401,76 @@ final class DebugTestYard {
      * broken. The <b>herd</b>-targeted forms get a cow each, so they can.
      */
     private static void buildNightBlock(ServerLevel level, int gy, int cx, int mouthZ) {
-        List<Nightly> temper = List.of(
-                new Nightly(NIGHT_TEMPER, "Agp", "HUNT: RIDERS", "comes at YOU"),
-                new Nightly(NIGHT_TEMPER, "Agc", "HUNT: HERDS", "goes for the cow", true, false),
-                new Nightly(NIGHT_TEMPER, "Agh", "HUNT: MONSTERS", "zombies come to IT"),
-                new Nightly(NIGHT_TEMPER, "Aga", "HUNT: ALL", "you AND the cow", true, false),
-                new Nightly(NIGHT_TEMPER, "Flp", "SHY: RIDERS", "backs away from you"),
-                new Nightly(NIGHT_TEMPER, "Flc", "SHY: HERDS", "avoids the cow", true, false),
+        buildShyPaddocks(level, gy, cx, mouthZ);
+        buildWatchStalls(level, gy, cx, mouthZ);
+    }
+
+    /**
+     * <b>The four shy forms, in paddocks rather than stalls.</b>
+     *
+     * <p>The hunting forms are all confirmed and their stalls are gone. These
+     * four were not, and the reason turned out to be the pen: a shy horse paths
+     * {@code FLEE_DISTANCE} - <b>twelve blocks</b> - directly away from whatever
+     * frightened it, and in a 4&nbsp;&times;&nbsp;7 stall the navigator refuses
+     * the path before it starts. Owner, 2026-09-13: <i>"the shy genes don't seem
+     * to be doing anything"</i>, and then <i>"I think it's working now, but it's
+     * hard to tell in their tiny pens."</i>
+     *
+     * <p><b>Nineteen by thirty each</b>, which is a twelve-block run with room
+     * to land and run again. The hunting forms never needed this and that is
+     * exactly why they were confirmed first: a hunter closes on you and a pen
+     * wall helps it, while a flee-er needs the one thing a stall cannot give.
+     * The same test in the same box answered one and hid the other.
+     */
+    private static void buildShyPaddocks(ServerLevel level, int gy, int cx, int mouthZ) {
+        List<Nightly> shy = List.of(
+                new Nightly(NIGHT_TEMPER, "Flp", "SHY: RIDERS", "backs away from YOU"),
+                new Nightly(NIGHT_TEMPER, "Flc", "SHY: HERDS", "avoids the cows", true, false),
                 new Nightly(NIGHT_TEMPER, "Flh", "SHY: MONSTERS", "flees the zombies"),
                 new Nightly(NIGHT_TEMPER, "Fla", "SHY: ALL", "avoids everything", true, false));
+        int[][] at = {
+                {cx + WEST_MIN, cx + WEST_MAX, mouthZ + ROW_B, mouthZ + ROW_B + ROW_B_D},
+                {cx + EAST_MIN, cx + EAST_MAX, mouthZ + ROW_B, mouthZ + ROW_B + ROW_B_D},
+                {cx + WEST_MIN, cx + WEST_MAX, mouthZ + ROW_C, mouthZ + ROW_C + ROW_C_D},
+                {cx + EAST_MIN, cx + EAST_MAX, mouthZ + ROW_C, mouthZ + ROW_C + ROW_C_D}};
+        for (int i = 0; i < shy.size(); i++) {
+            Nightly n = shy.get(i);
+            int x0 = at[i][0];
+            int x1 = at[i][1];
+            int z0 = at[i][2];
+            int z1 = at[i][3];
+            fencedPlot(level, gy, x0, x1, z0, z1);
+            DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
+                    List.of(n.name(), "after dark:", n.what(), "ROOM to run now"));
+            stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, n.key(), n.name(), 1, 0,
+                    n.token() + "/" + n.token());
+            if (n.needsHerd()) {
+                for (int c = 0; c < 3; c++) {
+                    spawnCow(level, gy, x0 + 8.0 + c * 2.0, (z0 + z1) / 2.0);
+                }
+            }
+            DebugWorldWatch.watch(n.name(), box(x0, gy, z0, x1, gy + 1, z1), null);
+        }
+    }
+
+    /**
+     * <b>The five watchers and dhampir, still as stalls.</b>
+     *
+     * <p>Unlike the shy forms these do not need room - a watcher's whole
+     * behaviour is standing still and looking, and the two that reposition do it
+     * within a few blocks. They are <b>named</b> though, so the gates can be
+     * opened and the five told apart once they are loose, which is the only way
+     * to judge a stalker properly.
+     */
+    private static void buildWatchStalls(ServerLevel level, int gy, int cx, int mouthZ) {
         List<Nightly> watch = List.of(
                 new Nightly(NIGHT_WATCH, "Wst", "WATCH: FIXED", "stands and stares"),
                 new Nightly(NIGHT_WATCH, "Wnr", "WATCH: CLOSING", "watches what nears"),
                 new Nightly(NIGHT_WATCH, "Wsi", "WATCH: SIGHTED", "watches what it sees"),
-                new Nightly(NIGHT_WATCH, "Wun", "WATCH: UNSEEN", "watches the UNSEEN"),
-                new Nightly(NIGHT_WATCH, "Wbh", "WATCH: BEHIND", "watches close behind"),
+                new Nightly(NIGHT_WATCH, "Wun", "WATCH: UNSEEN", "NOT while you look"),
+                new Nightly(NIGHT_WATCH, "Wbh", "WATCH: BEHIND", "NOT while you look"),
                 new Nightly("horsegenetics.dhampir", null, "DHAMPIR", "night-gated too"));
-        // Lycan is CONFIRMED and its stall is gone: the horse became an ALLAY,
-        // which is the gene working - and also why a stall could never have
-        // held it, since allays fly and a pen wall is one block high.
-
-        nightRow(level, gy, cx, mouthZ + ROW_I, ROW_I_D, temper);
-        nightRow(level, gy, cx, mouthZ + ROW_J, ROW_J_D, watch);
+        nightRow(level, gy, cx, mouthZ + ROW_I, ROW_I_D, watch);
     }
 
     private static final String NIGHT_TEMPER = "horsegenetics.magic_night_temper";
