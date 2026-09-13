@@ -358,7 +358,17 @@ public final class DebugWorldWatch {
         int items = 0;
         int mobs = 0;
         double nearest = -1.0;
-        for (Entity e : level.getEntities((Entity) null, area.box(), e -> true)) {
+        // TALLER THAN THE BLOCK BOX, and it has to be. A pen's box is the floor
+        // and the block above it, because that is where a sapling or a snow
+        // layer appears - but an entity is only "in" an AABB if its own box
+        // OVERLAPS, strictly, and a horse standing on the floor at gy+1 has its
+        // feet exactly on that box's lid. So every pen read "horses 0" with two
+        // horses in it, and the intimidating pen - whose entire test is the
+        // distance to the nearest cow - would have reported "none in the pen"
+        // all night. Caught in the first fifteen seconds of the first real
+        // reading, by the watch contradicting a line of its own.
+        for (Entity e : level.getEntities((Entity) null, area.box().inflate(0.0, 2.0, 0.0),
+                e -> true)) {
             if (e instanceof Horse) {
                 horses++;
                 continue;
