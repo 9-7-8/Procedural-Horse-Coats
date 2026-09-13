@@ -80,6 +80,106 @@
     </p>
 </div>
 
+<h2 id="log-read-0913">&sect;0-DL &mdash; Read off the log, not played: the gladiator works, and the instrument did not (2026-09-13)</h2>
+
+<div class="note good">
+    <span class="label">Confirmed from the log alone &mdash; no play session needed</span>
+    <p>
+        <strong>Gladiator is done.</strong> The yard was built at
+        <code>12:47:03</code> and the arena&rsquo;s one placed zombie joined it in
+        the same tick. <strong>Twelve seconds later it was dead</strong> &mdash;
+        <code>creature died | minecraft:zombie at -5, 129, 194 from mob</code>,
+        with the rotten flesh dropping inside <code>[ARENA - GLADIATOR]</code>.
+        The horse took three hits of 3.0 <code>from mob</code> on the way
+        (23.3 &rarr; 14.3 of its <code>Hardy/Hardy</code> health) and was still
+        standing at every census for the remaining ten minutes.
+    </p>
+    <p>
+        Unridden, unassisted, and in a sealed arena with exactly one other mob in
+        it, so there is nothing else the kill can be attributed to. That is the
+        gene&rsquo;s whole claim &mdash; <em>while nobody is riding it, the horse
+        attacks hostile mobs that come within reach</em> &mdash; and it worked the
+        first time it was armed correctly, one commit after the pen stopped
+        putting three zombies against one horse.
+        <strong>Nothing about it needs looking at.</strong>
+    </p>
+</div>
+
+<h3>Three instrument bugs, which is why the rest of the list is still open</h3>
+
+<p>
+    The same log says why nine sessions of play have not closed anything else:
+    <strong>66% of what this mod logged in those twelve minutes was noise, and
+    one of the fixes for it had never been switched on.</strong>
+</p>
+
+<ul>
+    <li><strong>The per-horse attribute readout was dead code.</strong>
+        <code>DebugWorldWatch.attributeReadout</code> exists, is documented at
+        length, and was called from nowhere &mdash; the census still printed the
+        old min&ndash;max. So the eyesight pens reported
+        <code>movement_speed 0.165-0.221</code> in <em>both</em> halves for
+        another session, which is precisely the reading that cannot tell
+        &ldquo;no effect&rdquo; from &ldquo;the two values swapped&rdquo;. It is
+        wired in now, and it <strong>prints each horse against its own base
+        value</strong>: the lit pen and the dark pen hold different animals whose
+        speed differs genetically before any gene applies, so naming them was
+        never going to be enough on its own.</li>
+    <li><strong>725 heal lines that healed nothing.</strong> Every
+        <code>horse healed &hellip; by 1.0 - now 22.0/22.0</code> is a horse that
+        was already full. Counted per pen at the census now, not printed. Why
+        they happen at all is <a href="known-gaps.html#gap-217">gap 217</a> and is
+        deliberately not being guessed at.</li>
+    <li><strong>680 identical <code>[Cowboy]</code> heartbeats.</strong> One a
+        second, with only <code>pos</code> moving. It reports on change now, with
+        a two-minute heartbeat kept so that silence still means a cowboy who is
+        not ticking rather than one who is idle.</li>
+</ul>
+
+<div class="note">
+    <span class="label">NOT looked at &mdash; what the next session should see</span>
+    <p>
+        Enter the yard, press <b>F6</b>, and read the first census. The three
+        things to look for, none of which are visual:
+    </p>
+    <ol>
+        <li><code>EYESIGHT - LIT</code> and <code>EYESIGHT - DARK</code> should
+            now name four horses and give each one a base, e.g.
+            <code>EYES: CAVEBORN (dark)=0.221 (base 0.165)</code>. Any horse
+            reading <code>(unmodified)</code> in the half its allele is supposed
+            to favour is the gene not firing. <b>This answers the eyesight
+            question outright</b>, in one census, without comparing pens.</li>
+        <li>A line reading <code>N heals on horses already at full health, not
+            logged individually</code>, with the pens named. If that number is
+            zero the whole time, something about the 12:46 session was peculiar
+            and <a href="known-gaps.html#gap-217">gap 217</a> can close.</li>
+        <li>The <code>[Cowboy]</code> lines should now be rare, and each one
+            should carry a field that actually changed.</li>
+    </ol>
+</div>
+
+<div class="note bad">
+    <span class="label">The dhampir died again, and the fix for it is UNPROVEN</span>
+    <p>
+        The 12:46 session is <em>not</em> evidence against the shade goal: it ran
+        on the build from before the hold-all-day change (committed 12:51), and
+        the only launch after that change lasted twenty-five seconds and produced
+        no dhampir line at all. What it does record is the failure the change was
+        aimed at, in full: <code>stopped &hellip; in shade</code> at
+        <b>51/66</b>, then <b>48/66</b>, then <b>33/66</b>, then <b>6/66</b>,
+        each time followed within two seconds by <code>burning at</code> a square
+        one block away &mdash; and then <code>THE DHAMPIR burned to death</code>
+        at <code>12:49:35</code>, two and a half minutes after the yard was
+        built. Its pen read <code>horses 0</code> for the rest of the session.
+    </p>
+    <p>
+        So the question is unchanged and now has a stated pass condition:
+        <b>watch it survive a whole day.</b> If it dies again, the trace says
+        which of the four causes is still live rather than inviting a fifth
+        guess.
+    </p>
+</div>
+
 <h2 id="audit-0913">&sect;0-DK &mdash; Audit, and what is actually still open (2026-09-13)</h2>
 
 <p>
@@ -123,25 +223,23 @@
 
 <h3>Still open, in the order worth spending time on</h3>
 <ol>
-    <li><strong>Guardian and gladiator</strong> (row J west). Neither has ever
-        been seen working. Guardian arrives <b>untamed</b> on purpose &mdash; it
+    <li><strong>Guardian</strong> (row J west). <b>Gladiator is confirmed and
+        retired</b> &mdash; see <a href="#log-read-0913">&sect;0-DL</a>, it killed
+        its zombie twelve seconds after the yard was built. Guardian has still
+        never been seen working. It arrives <b>untamed</b> on purpose &mdash; it
         fires on <code>OnOwnerHurt</code> and the yard's tame-but-ownerless stock
-        matched nobody &mdash; so tame it, then let something hit you. Gladiator
-        fights <b>while nobody is riding it</b> (its condition is
-        <code>has_rider</code> negated, and this page said the opposite for most
-        of a day); it has one opponent now, not three, because three zombies is
-        nine damage a second against twenty-two health and no gene survives
-        that.</li>
+        matched nobody &mdash; so tame it, then let something hit you.</li>
     <li><strong>The dhampir's shade behaviour</strong>, which is now the only
         dhampir question. It reached cover every time and the stroll goal walked
         it back out; it holds until nightfall now, aims two rings in from every
         edge, and strikes off squares the navigator refuses. <b>Watch it survive
         a day</b> &mdash; the trace prints each journey and whether it arrived.</li>
-    <li><strong>Eyesight</strong> (row I east). The two halves have started
-        reading differently, which is the first sign of life. The readout names
-        each horse now, so the next census answers it outright rather than
-        showing a range that cannot distinguish "no effect" from "the two values
-        swapped".</li>
+    <li><strong>Eyesight</strong> (row I east). The readout that was supposed to
+        answer this <b>was never called</b> &mdash; see
+        <a href="#log-read-0913">&sect;0-DL</a>. It is wired in now and prints each
+        horse against its own base, so the next census answers it outright
+        instead of showing a range that cannot distinguish "no effect" from "the
+        two values swapped".</li>
     <li><strong>The egg-layer cap</strong>, re-built because the old pen could
         not test it. Four layers of the <em>same</em> allele packed into one
         corner so their six-block circles overlap: the pen total is now the local
