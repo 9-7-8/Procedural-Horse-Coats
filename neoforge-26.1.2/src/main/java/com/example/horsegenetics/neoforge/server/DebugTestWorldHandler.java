@@ -260,7 +260,12 @@ public final class DebugTestWorldHandler {
                 .then(Commands.literal("night")
                         .executes(c -> setNight(c.getSource().getPlayerOrException(), true)))
                 .then(Commands.literal("day")
-                        .executes(c -> setNight(c.getSource().getPlayerOrException(), false))));
+                        .executes(c -> setNight(c.getSource().getPlayerOrException(), false)))
+                // Print the whole watch now. Eight hours is a very long time to
+                // find out in the morning that nothing was being recorded, and
+                // one line of chat before bed is the entire check.
+                .then(Commands.literal("census")
+                        .executes(c -> census(c.getSource().getPlayerOrException()))));
 
         event.getDispatcher().register(Commands.literal("bond")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -390,7 +395,7 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     private static final String[] BATCHES = {
-            "What still needs your hands - the yard has the horses (0-CP, 0-CR, 0-CS)",
+            "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
             "Behaviour that is probably subtly wrong (0-BT)",
             "Holding pen and stalls - the refusals (0-BY, 0-BX)",
             "Potion milk and the research shelf - the refusals (0-BY, 0-BX)",
@@ -452,11 +457,37 @@ public final class DebugTestWorldHandler {
      * hotbar of eggs is a test somebody has to set up first.
      */
     private static void tellYard(ServerPlayer player) {
-        tell(player, Component.literal("The rest is in the TEST YARD: hay portal, then right off "
-                        + "the arrival road, 30 blocks. Starburst, the glow room (shut the door), "
-                        + "the breeding field, the ward's spawner, the pack leader's cows, and "
-                        + "verdant's three floors + the dryad in the growing row.")
+        tell(player, Component.literal("The TEST YARD is the night shift: hay portal, then right "
+                        + "off the arrival road, 30 blocks. Egg layer, the ward's spawner, the "
+                        + "sound herd, six cows and an intimidating horse, the glow room, and "
+                        + "the dryad and the thaw in the growing row. Six of those run "
+                        + "themselves - walk in, then leave it alone.")
                 .withStyle(ChatFormatting.GOLD));
+    }
+
+    /**
+     * <b>Print the watch now, and say in chat whether there is one.</b>
+     *
+     * <p>The whole overnight design rests on {@link DebugWorldWatch} having
+     * been started, which happens when the yard is built, which happens when
+     * you walk through the hay portal. Getting that wrong costs a night and is
+     * invisible until the morning - so this is the check, and it is one
+     * command.
+     */
+    private static int census(ServerPlayer player) {
+        ServerLevel debug = player.level().getServer() == null ? null
+                : player.level().getServer().getLevel(DebugPenManager.DEBUG_LEVEL);
+        if (debug == null) {
+            tell(player, Component.literal("No horse dimension on this server.")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        DebugWorldWatch.censusNow(debug);
+        tell(player, Component.literal("Census written to the log - grep [watch]. If it says "
+                        + "nothing is being watched, go through the hay portal first: the yard "
+                        + "registers its pens as it builds them.")
+                .withStyle(ChatFormatting.GOLD));
+        return 1;
     }
 
     private static void listBatches(ServerPlayer player) {
@@ -470,6 +501,8 @@ public final class DebugTestWorldHandler {
         // glow" into "check the glow tomorrow".
         tell(player, command("/testkit night", "night, clock held - then use the yard's GLOW ROOM"));
         tell(player, command("/testkit day", "and back to day"));
+        tell(player, command("/testkit census", "print every watched pen to the log now - the "
+                + "check to run before leaving it overnight"));
     }
 
     /** Empty the hotbar and fill it with batch {@code n} (1-based), then say what each slot is for. */
@@ -481,18 +514,19 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                // The yard stocks every horse these tests need - starburst, tron,
-                // the glow room, the breeding field, the ward, the pack leader,
-                // the dryad and verdant's three. So this batch is only what the
-                // yard CANNOT hand you: items, and the two checks that are not
-                // about a horse at all.
+                // THE NIGHT SHIFT. Six of the yard's pens now run on a clock
+                // and write their own readings (DebugWorldWatch), so this batch
+                // is not a list of things to do - it is the short list of
+                // things that have to happen ONCE before walking away, in
+                // order, because getting any of them wrong costs a whole night
+                // and none of them announces itself.
                 put(inv, legend, 0, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()),
                         "custom spawn egg - open it and press MAKE EGG (0-CR). It was being "
                                 + "clicked by a widget on top of it; the fix is untested");
                 put(inv, legend, 1, new ItemStack(Items.STICK),
-                        "stick - the yard's horses come tamed, this is for anything else");
+                        "stick - the yard's horses all come TAMED now, this is for anything else");
                 put(inv, legend, 2, new ItemStack(Items.GOLDEN_CARROT, 16),
-                        "golden carrots - breed a starburst pair in the yard: does the foal's "
+                        "golden carrots - breed the starburst pair in the yard: does the foal's "
                                 + "emblem sit near its parents'?");
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension now honours");
@@ -502,6 +536,20 @@ public final class DebugTestWorldHandler {
                         "saplings - what the dryad pen should be growing on its own; these are "
                                 + "for comparison, not for planting");
                 tellYard(player);
+                tell(player, Component.literal("BEFORE YOU LEAVE IT RUNNING - four things, in this "
+                                + "order:").withStyle(ChatFormatting.GOLD));
+                tell(player, Component.literal("  1. Go through the hay portal. The yard only "
+                                + "exists once you do, and so does the watch.")
+                        .withStyle(ChatFormatting.WHITE));
+                tell(player, command("/testkit census", "2. run this - it prints every pen to the "
+                        + "log. If it says nothing is being watched, the night is not running"));
+                tell(player, Component.literal("  3. Stay logged in and OUT of the pause menu - "
+                                + "singleplayer stops the server on Esc. The yard's chunks are "
+                                + "force-loaded, so you can stand anywhere in the dimension.")
+                        .withStyle(ChatFormatting.WHITE));
+                tell(player, Component.literal("  4. Do NOT leave the horse dimension: that tears "
+                                + "the plot down and the night with it.")
+                        .withStyle(ChatFormatting.RED));
             }
             case 2 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick");

@@ -128,6 +128,25 @@ public final class SpontaneousBreedingHandler {
             trace(horse, "on vanilla's breeding cooldown (this is the limit that governs the rate)");
             return;
         }
+        // THE POST-BREEDING COOLDOWN IS getAge(), AND canFallInLove() CANNOT
+        // SEE IT. Animal.aiStep() zeroes inLove on every tick where getAge() is
+        // not 0, and breeding sets both parents to 6000. So a pair that has
+        // just bred reads as "not in love" and "can fall in love" for the whole
+        // five-minute cooldown, and this handler happily put them in love again
+        // on every beat - hearts over both of them, cleared the following tick,
+        // for five minutes, and with the debug beat on that is a PAIRED line
+        // every four seconds saying a foal is coming that is not.
+        //
+        // Found in the owner's log of 2026-09-12: two foals at 22:22:50 and
+        // then 212 identical PAIRED lines with nothing behind any of them. The
+        // gene was working; its own account of itself was the thing that was
+        // wrong, which is the exact failure this file already has three
+        // comments about.
+        if (horse.getAge() != 0) {
+            trace(horse, "on the post-breeding cooldown - " + horse.getAge() + " ticks left of "
+                    + "the 6000 vanilla sets after a foal; hearts now would be cleared next tick");
+            return;
+        }
 
         AABB box = horse.getBoundingBox().inflate(RANGE);
         List<Horse> nearby = level.getEntitiesOfClass(Horse.class, box, Horse::isAlive);
@@ -146,8 +165,9 @@ public final class SpontaneousBreedingHandler {
                 continue;
             }
             carriers++;
-            if (other.isInLove() || !other.canFallInLove() || !canEverBreed(other)) {
-                continue;
+            if (other.isInLove() || !other.canFallInLove() || !canEverBreed(other)
+                    || other.getAge() != 0) {
+                continue;   // same three refusals as above, asked of the partner
             }
             // A MARE AND A STALLION, because HorseBreedingHandler cancels
             // same-sex pairings - so putting two mares in love produced hearts

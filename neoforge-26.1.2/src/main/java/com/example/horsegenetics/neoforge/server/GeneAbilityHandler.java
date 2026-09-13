@@ -1651,6 +1651,10 @@ public final class GeneAbilityHandler {
         }
         level.playSound(null, horse.getX(), horse.getY(), horse.getZ(), sound,
                 SoundSource.NEUTRAL, (float) so.volume(), (float) so.pitch());
+        // Counted, not logged - see DebugWorldWatch. There is no event for "a
+        // sound played", and "are these cooldowns bearable in a herd" is a
+        // question with a numeric answer that nobody has ever collected.
+        DebugWorldWatch.notePlayedSound(horse, so.sound());
         if (so.durationTicks() > 0) {
             STOPPING.put(horse.getUUID() + "/" + geneKey,
                     new PendingStop(level.getGameTime() + so.durationTicks(), so.sound()));

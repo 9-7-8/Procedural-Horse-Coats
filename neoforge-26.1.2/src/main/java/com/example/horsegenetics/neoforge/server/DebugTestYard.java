@@ -15,24 +15,42 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 
 /**
  * <b>The yard: somewhere to test the horses that can break a world.</b>
  *
- * <p>Four of the behaviour genes cannot be judged in a pen and cannot safely be
- * judged in a real save. Spontaneous breeding is a population that grows while
- * nobody is watching; the holy ward is a claim about a mob farm <i>continuing
- * to work</i>; the pack leader is a claim about tick cost; the dryad plants
- * things over real minutes. Each needs room, a controlled floor, and somewhere
- * that does not matter if it fills up with horses - which is exactly what the
- * horse dimension is for, and it did not have one.
+ * <p>Some of the behaviour genes cannot be judged in a pen and cannot safely be
+ * judged in a real save. Each needs room, a controlled floor, and somewhere that
+ * does not matter if it fills up with horses - which is exactly what the horse
+ * dimension is for, and it did not have one.
  *
  * <p>So: a five-wide path leaving the arrival road to the <b>right</b> (the
  * player arrives facing {@code +X}, so right is {@code +Z}), {@value #PATH_LEN_Z}
  * blocks of it, through a door cut in the corridor wall, opening into a walled
- * yard holding four plots with a sign on each.
+ * yard of signed pens.
+ *
+ * <h2>What is in it is whatever is still open, and nothing else</h2>
+ * A pen for a test that has been answered is the most expensive thing in this
+ * project: it spends the one resource that cannot be bought back, which is the
+ * owner's time in the game. So the yard is audited against
+ * {@code wiki/verification.html} every time that page moves, and a confirmed
+ * test's pen is <b>deleted</b> rather than left standing with a tick on it.
+ * Gone this way already: verdant's three floors, the pack leader's cows, and
+ * the spontaneous-breeding field (owner, 2026-09-12: "we're done with those
+ * tests").
+ *
+ * <h2>Now it is built for a night rather than a visit</h2>
+ * The owner's second ask, the same day: <i>"I'm going to leave the game and the
+ * horse dimension running over night. Add as many time-reliant tests as
+ * possible, focusing on those that don't require direct intervention from
+ * me."</i> That is a different design brief from the one the yard was built to,
+ * and it rules out more than it lets in. A test belongs in here now only if it
+ * <b>starts itself</b>, <b>runs on a clock</b> and <b>leaves a trace somebody
+ * can read in the morning</b> - which is what {@link DebugWorldWatch} is for,
+ * and why every pen below registers itself with it.
  *
  * <h2>Why it is flat and plain</h2>
  * Every one of these tests is a <i>count</i> or a <i>did it still work</i>, and
@@ -80,10 +98,8 @@ final class DebugTestYard {
      * <p>These exist because the yard is the first thing in the dimension that
      * lives <i>outside</i> the corridor's walls, and the plot's bounding box is
      * what tears a plot down and what carries tamed horses home. A yard outside
-     * that box would leak: the spontaneous-breeding field is a population that
-     * grows on purpose, and left out of the sweep it would outlive its plot and
-     * accumulate on a recycled origin for ever - a world-breaking horse
-     * breaking a world, in the room built to watch it not do that.
+     * that box would leak: it would outlive its plot and accumulate on a
+     * recycled origin for ever.
      */
     static final int FAR_Z = ROAD_EDGE_Z + PATH_LEN_Z + YARD_DEPTH_Z + 2;
     static final int WEST_DX = SPUR_CENTRE_DX - YARD_HALF_X - 2;
@@ -103,11 +119,19 @@ final class DebugTestYard {
         int cx = plot.originX + SPUR_CENTRE_DX;
         int mouthZ = ROAD_EDGE_Z + PATH_LEN_Z;          // where the path ends and the yard begins
 
+        // Before anything is placed: the watch's areas are registered as each
+        // pen is built, so it has to be empty first or a second visit doubles
+        // every reading.
+        DebugWorldWatch.start(level, new AABB(
+                cx - YARD_HALF_X - 2, gy - 4, ROAD_EDGE_Z,
+                cx + YARD_HALF_X + 2, gy + WALL_TOP_DY + 2, mouthZ + YARD_DEPTH_Z + 2));
+
         buildPath(level, gy, cx, mouthZ);
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
-        buildBreedingField(level, gy, cx, mouthZ);
+        buildEggLayerPen(level, gy, cx, mouthZ);
         buildSpawnerRoom(level, gy, cx, mouthZ);
-        buildWolfPen(level, gy, cx, mouthZ);
+        buildSoundHerdPen(level, gy, cx, mouthZ);
+        buildIntimidatingPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGlowRoom(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
@@ -116,7 +140,7 @@ final class DebugTestYard {
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "breeding, ward,", "wolves, dryad"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "eggs, ward, cows,", "dryad, thaw"));
 
         verify(level, gy, cx, mouthZ);
     }
@@ -164,9 +188,12 @@ final class DebugTestYard {
     }
 
     /**
-     * One cow, for the pack leader to lead. Non-horse mobs are allowed in the
-     * yard - see {@code HorseGeneticsEventHandler}, which deletes them
-     * everywhere else in this dimension and used to delete them here too.
+     * One cow, for something to be pushed around.
+     *
+     * <p>Non-horse mobs are allowed in the yard - see
+     * {@code HorseGeneticsEventHandler}, which deleted them everywhere in this
+     * dimension until 2026-09-12 and thereby made three of the yard's own tests
+     * impossible in the place built for them.
      */
     private static void spawnCow(ServerLevel level, int gy, double x, double z) {
         Cow cow = EntityType.COW.create(level, EntitySpawnReason.COMMAND);
@@ -174,6 +201,7 @@ final class DebugTestYard {
             return;
         }
         cow.setPos(x, gy + 1, z);
+        // Or it despawns overnight and an empty pen reads as the gene working.
         cow.setPersistenceRequired();
         level.addFreshEntity(cow);
     }
@@ -198,57 +226,158 @@ final class DebugTestYard {
                 || state.is(Blocks.SPAWNER) || state.is(Blocks.OAK_PLANKS);
     }
 
+    // ------------------------------------------------------------------
+    // The overnight pens
+    // ------------------------------------------------------------------
+
     /**
-     * <b>The row along the back: one pen per open test, already stocked.</b>
+     * <b>Egg layer, and the accumulation cap.</b> Four of them in one pen,
+     * which is the only arrangement that can make the cap fire at all.
      *
-     * <p>What is in it is whatever <code>wiki/verification.html</code> is
-     * waiting on that needs a horse, which means it goes stale - a pen for a
-     * test that has been confirmed is exactly the waste this row exists to stop.
-     * It is audited with the test kit, at the same time and against the same
-     * page.
+     * <p>The guard is {@code NEARBY_CAP = 8} of the item within six blocks, and
+     * the interval on a copy is 4 000 to 14 000 ticks. A dropped item despawns
+     * at 6 000. <b>So a single horse can essentially never reach its own
+     * cap</b> - the floor clears itself about as fast as one horse can fill it,
+     * and a morning with two eggs on the ground would be the despawn timer
+     * rather than the guard. Four horses laying into one six-block circle is
+     * what makes the question answerable overnight, and
+     * {@code DebugWorldWatch}'s item hooks log the age at removal so a despawn
+     * is never read as a cap.
+     *
+     * <p>What a pass looks like: the egg count climbs, sits at or below eight,
+     * and the log shows drops being <i>refused</i> rather than items vanishing.
+     * A floor carpeted in eggs is the failure this guard exists to stop.
      */
+    private static void buildEggLayerPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx - YARD_HALF_X + 2;
+        int x1 = x0 + 15;
+        int z0 = mouthZ + 3;
+        int z1 = z0 + 16;
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("EGG LAYER", "leave it: does", "it STOP at 8?", "or carpet it?"));
+        stock(level, gy, x0 + 6.0, (z0 + z1) / 2.0, "horsegenetics.egg_layer",
+                "the egg pen", 2, 2, null);
+        DebugWorldWatch.watch("EGG LAYER", box(x0, gy, z0, x1, gy + 1, z1), null);
+    }
+
+    /**
+     * <b>The sound genes, as a number instead of an opinion.</b>
+     *
+     * <p>The open question on all four is "are these bearable in a herd", and
+     * the cooldowns were chosen by guesswork. That reads like a question only
+     * ears can settle and it is not: a herd that fires eighty sounds in two
+     * minutes is unbearable arithmetically, and the arithmetic can be collected
+     * while everybody is asleep. So five of them in a pen, and
+     * {@code DebugWorldWatch} counts every play into the census.
+     *
+     * <p>Meowing and singer, not base alarm: base alarm is gated on
+     * {@code hostile_near} and would sit silent in a pen a hundred blocks from
+     * the spawner, which is a blank in the log that looks exactly like a broken
+     * gene. A test that cannot fire is worse than a missing one.
+     */
+    private static void buildSoundHerdPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx - YARD_HALF_X + 2;
+        int x1 = x0 + 14;
+        int z0 = mouthZ + 26;
+        int z1 = z0 + 16;
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("SOUND HERD", "3 meow, 2 sing.", "census counts", "every play"));
+        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.meowing",
+                "the sound herd (meowing)", 2, 1, null);
+        stock(level, gy, x0 + 9.0, (z0 + z1) / 2.0, "horsegenetics.singer",
+                "the sound herd (singer)", 1, 1, null);
+        DebugWorldWatch.watch("SOUND HERD", box(x0, gy, z0, x1, gy + 1, z1), null);
+    }
+
+    /**
+     * <b>Intimidating, measured as a distance rather than a count.</b>
+     *
+     * <p>The gene shoves every non-horse out of a radius of eight to fourteen
+     * blocks. In a fenced pen the cows cannot actually leave, so <i>counting</i>
+     * them proves nothing: four cows jammed in the far corner and four cows
+     * grazing round the horse's feet are the same number and opposite results.
+     * What separates them is the <b>nearest-cow distance</b>, which the watch
+     * takes from the horse's post every ten seconds.
+     *
+     * <p>What a pass looks like: the distance climbs within a minute and then
+     * sits high - eight or more - all night. A gene doing nothing reads as a
+     * figure that wanders between one and six as the cows graze past.
+     */
+    private static void buildIntimidatingPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + 4;
+        int x1 = x0 + 16;
+        int z0 = mouthZ + 26;
+        int z1 = z0 + 16;
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("INTIMIDATING", "6 cows in here.", "do they keep", "their DISTANCE?"));
+        int postX = (x0 + x1) / 2;
+        int postZ = (z0 + z1) / 2;
+        stock(level, gy, postX + 0.5, postZ + 0.5, "horsegenetics.intimidating",
+                "the intimidating pen", 1, 0, null);
+        // Ringed round the horse, so "they were pushed out" is a change from a
+        // known start rather than wherever six cows happened to wander to.
+        for (int i = 0; i < 6; i++) {
+            double angle = i * Math.PI / 3.0;
+            spawnCow(level, gy, postX + 0.5 + Math.cos(angle) * 3.0,
+                    postZ + 0.5 + Math.sin(angle) * 3.0);
+        }
+        DebugWorldWatch.watch("INTIMIDATING", box(x0, gy, z0, x1, gy + 1, z1),
+                new BlockPos(postX, gy + 1, postZ));
+    }
+
     /**
      * <b>The growing row: one pen per spreading gene, floored with what that
      * gene can actually convert.</b>
      *
-     * <p>All four fail in a way that looks exactly like the gene being broken,
-     * and the reason is always the floor. {@code GeneAbilityHandler.convert} is
-     * a whitelist per cover and they do not overlap: <b>grass</b> only converts
-     * bare dirt, so a grass pen floored with grass can never show anything;
-     * <b>moss</b> wants stone, cobble, andesite, gravel or dirt;
-     * <b>mycelium</b> wants dirt or grass; and a <b>sapling</b> is the only one
+     * <p>All of them fail in a way that looks exactly like the gene being
+     * broken, and the reason is always the floor. {@code
+     * GeneAbilityHandler.convert} is a whitelist per cover and they do not
+     * overlap: <b>grass</b> only converts bare dirt, so a grass pen floored
+     * with grass can never show anything; and a <b>sapling</b> is the only one
      * that builds upward, so it needs air with grass or dirt under it.
      *
      * <p>Each pen is floored for its own gene and nothing else, which is the
      * difference between "the gene does not work" and "the gene had nothing to
-     * work on" - the second of which is what the dryad plot was.
+     * work on" - the second of which is what the dryad plot was for two
+     * sessions.
      */
     private static void buildGrowingRow(ServerLevel level, int gy, int cx, int mouthZ) {
         int z = mouthZ + 64;
         int x = cx - YARD_HALF_X + 2;
 
         // Verdant's three are CONFIRMED (2026-09-12) and their pens are gone.
-        // What is left here is the row of slow ones - the tests that cannot be
+        // What is left is the row of slow ones - the tests that cannot be
         // answered by standing still and looking, only by leaving and coming
-        // back, which is exactly the kind this dimension is for.
+        // back, which is exactly what this dimension is for.
         growPen(level, gy, x, z, Blocks.GRASS_BLOCK.defaultBlockState(),
-                "horsegenetics.dryad", null,
+                "horsegenetics.dryad",
                 List.of("DRYAD - SLOW", "~a day between", "plantings. Come", "back to saplings"));
+        // Six blocks up, because the far end of this test is a grown TREE and a
+        // two-block box would count the sapling and miss the wood.
+        DebugWorldWatch.watch("DRYAD", box(x, gy, z, x + PEN_W, gy + 6, z + PEN_D), null,
+                Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.SPRUCE_SAPLING,
+                Blocks.JUNGLE_SAPLING, Blocks.ACACIA_SAPLING, Blocks.DARK_OAK_SAPLING,
+                Blocks.OAK_LOG, Blocks.OAK_LEAVES);
         x += PEN_W + 2;
 
         // Snow and ice for the melt to eat. A floor rather than a scatter, so
         // "how far has it got" is answerable at a glance from the gate.
         growPen(level, gy, x, z, Blocks.SNOW_BLOCK.defaultBlockState(),
-                "horsegenetics.hot_blooded", null,
-                List.of("HOT-BLOODED", "floor is SNOW", "should melt away", "around them"));
-        x += PEN_W + 2;
+                "horsegenetics.hot_blooded",
+                List.of("HOT-BLOODED", "floor is SNOW", "+ a strip of ICE", "does it FLOOD?"));
         // A strip of ice in the same pen: ice becomes a water SOURCE rather
-        // than air, which is the half of the gene that can flood something.
-        for (int ix = x - PEN_W - 2 + 2; ix <= x - PEN_W - 2 + PEN_W - 2; ix++) {
+        // than air, which is the half of the gene that can flood something -
+        // and the half a night of running is most likely to show.
+        for (int ix = x + 2; ix <= x + PEN_W - 2; ix++) {
             for (int iz = z + 6; iz <= z + PEN_D - 1; iz++) {
                 DebugPenManager.groundColumn(level, ix, gy, iz, Blocks.ICE.defaultBlockState());
             }
         }
+        DebugWorldWatch.watch("HOT-BLOODED", box(x, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
+                Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.WATER, Blocks.GRASS_BLOCK);
     }
 
     /**
@@ -257,7 +386,7 @@ final class DebugTestYard {
      * "the one horse stood in a corner".
      */
     private static void growPen(ServerLevel level, int gy, int x0, int z0, BlockState floor,
-                                String key, String tokens, List<String> sign) {
+                                String key, List<String> sign) {
         int x1 = x0 + PEN_W;
         int z1 = z0 + PEN_D;
         for (int x = x0; x <= x1; x++) {
@@ -267,9 +396,16 @@ final class DebugTestYard {
         }
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
-        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), 2, 0, tokens, true);
+        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), 2, 0, null);
     }
 
+    /**
+     * <b>The row along the back: the two tests that still want a person.</b>
+     *
+     * <p>Everything else in the yard now runs on a clock. These two do not, and
+     * they stay because they are cheap to do on the way past rather than
+     * because they suit a night.
+     */
     private static void buildStockedRow(ServerLevel level, int gy, int cx, int mouthZ) {
         int z = mouthZ + 48;
         int x = cx - YARD_HALF_X + 2;
@@ -376,33 +512,7 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>Spontaneous breeding.</b> The biggest plot, because the gene's own cap
-     * is a headcount within eight blocks and a field that crowds it would test
-     * the cap rather than the breeding. Fenced, because the point of the test is
-     * to leave and come back to a number.
-     */
-    private static void buildBreedingField(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx - YARD_HALF_X + 2;
-        int x1 = x0 + 20;
-        int z0 = mouthZ + 3;
-        int z1 = z0 + 20;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("BREEDING CAP", "it breeds: OK.", "LEAVE IT LONG:", "does it PLATEAU?"));
-        // TAMED, because vanilla will not breed an untamed horse.
-        //
-        // That it breeds at all is confirmed. What this pen is for now is the
-        // half that matters to a world: LOCAL_CAP is supposed to stop the
-        // population at six or so within eight blocks, and an uncapped
-        // automatic breeder is the classic way to kill a server. That cannot be
-        // answered by watching - only by leaving it running for a long time and
-        // counting what is there when you come back.
-        stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.spontaneous_breeding",
-                "the breeding field", 2, 2, null, true);
-    }
-
-    /**
-     * <b>A roofed, unlit stone box with a two-wide doorway.</b>
+     * <b>A roofed, unlit stone box with a door.</b>
      *
      * <p>Two things in this yard need the dark and they need it for opposite
      * reasons: a spawner will not run in the light, and a glow cannot be judged
@@ -428,9 +538,7 @@ final class DebugTestYard {
         // A DOOR, not a hole. A two-wide gap let the yard's glowstone straight
         // in - so the glow room was never dark - and let the horses straight
         // out. A closed wooden door blocks light and a horse cannot open one,
-        // which is both requirements with no redstone in it: a piston door
-        // would look better and is a contraption to place blind, and this is
-        // already pitch black with the door shut.
+        // which is both requirements with no redstone in it.
         BlockState lower = Blocks.OAK_DOOR.defaultBlockState()
                 .setValue(DoorBlock.FACING, Direction.NORTH)
                 .setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER);
@@ -469,6 +577,14 @@ final class DebugTestYard {
      * stand the warded horse outside and the spawner must keep producing.
      * Roofed and unlit, since a spawner that cannot spawn for ordinary reasons
      * proves nothing about the gene.
+     *
+     * <p><b>The best of the overnight tests, because it is the one with the
+     * most data.</b> Every hostile spawn goes to the log with its distance to
+     * the nearest <i>live</i> ward, so a night produces a column of hundreds of
+     * numbers. A working ward is a floor under that column - plenty of spawns,
+     * none of them close. A broken one is spawns at two blocks. Neither
+     * reading is available from standing and watching, because the mobs a ward
+     * stops are the ones nobody ever sees.
      */
     private static void buildSpawnerRoom(ServerLevel level, int gy, int cx, int mouthZ) {
         int x0 = cx + 4;
@@ -491,76 +607,31 @@ final class DebugTestYard {
         // Outside the door rather than inside it: the ward's claim is about
         // what happens NEAR it, and a horse shut in a dark box with a spawner
         // is a horse being hit by zombies.
-        // z0 - 1.5, not z0 - 3.5: the room's front wall is three blocks inside
-        // the yard's own, so the old spot was ON the yard wall and the horse
-        // never appeared at all. Right in front of the door instead, which is
-        // where a horse warding a spawner should stand anyway.
-        stock(level, gy, cx + 8.5, z0 - 1.5, "horsegenetics.holy_ward", "the ward post");
+        stock(level, gy, cx + 8.5, z0 - 1.5, "horsegenetics.holy_ward", "the ward post", 1, 0, null);
+        DebugWorldWatch.watch("WARD + SPAWNER", box(x0, gy, z0 - 3, x1, gy + 4, z1), null);
     }
 
     /**
-     * <b>Was the pack-leader pen; that gene is confirmed (2026-09-12).</b> The
-     * pen stays because the yard is short of fenced ground, and it is empty:
-     * somewhere to put whatever the next long test needs.
-     */
-    private static void buildWolfPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx - YARD_HALF_X + 2;
-        int x1 = x0 + 14;
-        int z0 = mouthZ + 28;
-        int z1 = z0 + 16;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("SPARE PEN", "pack leader is", "CONFIRMED -", "this is empty"));
-    }
-
-    /**
-     * <b>The dryad</b>, fenced, with a dryad horse already standing in it.
-     *
-     * <p>Bare grass and nothing else, so anything growing there later was
-     * planted rather than generated - but <i>fenced</i>, because the test is to
-     * leave it alone for a real half hour and an unfenced horse spends that
-     * half hour somewhere else. And stocked, because a test whose first step is
-     * "find the right spawn egg" is a test that gets skipped: the horse that
-     * has to be there is there.
-     */
-    private static void buildDryadPlot(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + 4;
-        int x1 = cx + 20;
-        int z0 = mouthZ + 28;
-        int z1 = z0 + 16;
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
-            }
-        }
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DRYAD", "one is already", "in here: leave", "it half an hour"));
-        stock(level, gy, (x0 + x1) / 2.0, (z0 + z1) / 2.0,
-                "horsegenetics.dryad", "the dryad plot");
-    }
-
-    /**
-     * <b>Put a homozygous carrier of one gene where its test happens.</b>
+     * <b>Put carriers of one gene where its test happens, tamed.</b>
      *
      * <p>A test whose first step is "find the right spawn egg" is a test that
-     * gets skipped, and these two have to stand in a particular place anyway -
-     * the dryad inside its fence, the ward beside the spawner - so the yard
-     * puts them there rather than describing where they go.
+     * gets skipped, and these all have to stand in a particular place anyway -
+     * so the yard puts them there rather than describing where they go.
+     *
+     * <p><b>Tamed, always.</b> Vanilla refuses to breed an untamed horse
+     * ({@code AbstractHorse.canParent}), the test kit's own legend has told the
+     * owner "the yard's horses come tamed" since the day the yard was stocked,
+     * and half these pens ask for a foal. Leaving it optional produced exactly
+     * the failure this class keeps rediscovering: an instruction ("breed a
+     * starburst pair in the yard") that nothing in the world could carry out.
+     * A tamed horse with no <i>owner</i> is deliberate and load-bearing - see
+     * {@code DebugPenManager.evacuateTamedHorses}, which takes the player's
+     * horses home on the way out and must not take the scenery with them.
      *
      * <p>The genotype names <i>only</i> that locus; every other gene falls to
      * its default. So what is standing there is a plain horse that does one
      * thing, and anything else it does is the gene. A gene this build does not
-     * have is logged and skipped rather than failing the yard, which is the
-     * trade the test kit's eggs make for the same reason.
-     */
-    private static void stock(ServerLevel level, int gy, double x, double z, String key, String what) {
-        stock(level, gy, x, z, key, what, 1, 0, null);
-    }
-
-    /**
-     * {@code mares} mares and {@code studs} stallions, spread along a short
-     * line so they are not standing inside one another.
+     * have is logged and skipped rather than failing the yard.
      *
      * <p>{@code tokens} names the alleles when the test wants a specific pair -
      * tron's two tube forms are a heterozygote, and a homozygote of either is a
@@ -568,11 +639,6 @@ final class DebugTestYard {
      */
     private static void stock(ServerLevel level, int gy, double x, double z, String key,
                               String what, int mares, int studs, String tokens) {
-        stock(level, gy, x, z, key, what, mares, studs, tokens, false);
-    }
-
-    private static void stock(ServerLevel level, int gy, double x, double z, String key,
-                              String what, int mares, int studs, String tokens, boolean tamed) {
         Gene gene = Genes.byKeyOrNull(key);
         if (gene == null) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: no {} gene, {} left empty", key, what);
@@ -584,13 +650,13 @@ final class DebugTestYard {
         int placed = 0;
         try {
             for (int i = 0; i < mares; i++) {
-                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.FEMALE, code, tamed);
+                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.FEMALE, code, true);
             }
             for (int i = 0; i < studs; i++) {
-                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.MALE, code, tamed);
+                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.MALE, code, true);
             }
             ActionTrace.log("test yard", "stocked " + what + " with " + placed + "x " + code
-                    + " (" + mares + " mare, " + studs + " stallion)");
+                    + " (" + mares + " mare, " + studs + " stallion), tamed");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: could not stock {}", what, e);
         }
@@ -602,8 +668,7 @@ final class DebugTestYard {
      * <p>The yard used to be four plots you brought horses to. It is now the
      * place the horses already are: the owner's time in the game is the
      * scarcest thing here, and "walk to the yard, then go back for the right
-     * eggs" spends it on fetching. One pen per open test, each with the animals
-     * it needs standing in it.
+     * eggs" spends it on fetching.
      */
     private static void stockedPen(ServerLevel level, int gy, int x0, int z0,
                                    String key, String tokens, int mares, int studs,
@@ -617,6 +682,11 @@ final class DebugTestYard {
 
     private static final int PEN_W = 9;
     private static final int PEN_D = 9;
+
+    /** A watch box, written the way a pen is: two corners in block coordinates. */
+    private static AABB box(int x0, int y0, int z0, int x1, int y1, int z1) {
+        return new AABB(x0, y0, z0, x1, y1, z1);
+    }
 
     /**
      * A pen, built by {@code DebugPenManager.penWalls} - the same brick wall,

@@ -850,8 +850,18 @@ public final class DebugPenManager {
      */
     public static int evacuateTamedHorses(ServerLevel debug, Plot plot, UUID onlyOwner,
                                           ServerLevel dest, BlockPos destPos) {
+        // TAMED AND OWNED, not merely tamed. The test yard stocks its pens with
+        // tamed horses on purpose - vanilla will not breed an untamed one, and
+        // half the yard's tests want a foal - but those are scenery, set tame
+        // by setTamed(true) with no owner behind it. Taking "tamed" as the test
+        // walked the entire yard out into the overworld every time the player
+        // left: two dozen horses at the portal, a breeding field's worth of
+        // them if it had been running, and an emptied yard on the way back in.
+        // A horse a player tamed has an owner (tameWithName sets one); the
+        // yard's do not, and that is the line between somebody's horse and the
+        // furniture.
         List<AbstractHorse> horses = debug.getEntitiesOfClass(AbstractHorse.class, plotBox(plot),
-                h -> h.isAlive() && h.isTamed());
+                h -> h.isAlive() && h.isTamed() && h.getOwnerReference() != null);
         List<BlockPos> spots = new ArrayList<>();
         int moved = 0;
         for (AbstractHorse horse : horses) {
@@ -894,6 +904,10 @@ public final class DebugPenManager {
      * way to leave, for nothing.
      */
     private static void tearDown(ServerLevel level, Plot plot) {
+        // The watch holds forced chunks on this plot's yard. They have to go
+        // before the plot does, or the dimension keeps ticking a yard that is
+        // no longer anybody's for the life of the world.
+        DebugWorldWatch.stop(level);
         HorseAncestryData ancestry = level.getServer() == null
                 ? null : HorseAncestryData.get(level.getServer());
         for (Entity e : level.getEntities((Entity) null, plotBox(plot), e -> !(e instanceof ServerPlayer))) {
