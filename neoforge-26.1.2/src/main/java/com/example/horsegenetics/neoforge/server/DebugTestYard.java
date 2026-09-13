@@ -143,6 +143,8 @@ final class DebugTestYard {
         buildRetinuePen(level, gy, cx, mouthZ);
         buildLavaChannel(level, gy, cx, mouthZ);
         buildHydrophobicPen(level, gy, cx, mouthZ);
+        buildDisplayRow(level, gy, cx, mouthZ);
+        buildMoltenRow(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
@@ -663,6 +665,23 @@ final class DebugTestYard {
                 "the glow room (tron)", 1, 1, "Trs/Trg");
         stock(level, gy, x1 - 3.5, (z0 + z1) / 2.0, "horsegenetics.lantern",
                 "the glow room (lantern)", 2, 0, null);
+        // 0-CO named the two that should actually show the falloff, and neither
+        // was in here. GAMMA is the softest lit mask in the mod (SPOTS at 1.8)
+        // and is the one the section says to look at; RIME at 0.5 is the
+        // distant fourth. Everything else glowing is hard-edged by
+        // construction, so coverage-times-level is level-or-nothing on it and
+        // an unchanged look is the CORRECT outcome rather than a missing one.
+        stock(level, gy, x0 + 3.5, z0 + 2.5, "horsegenetics.gamma",
+                "the glow room (gamma - the softest lit mask)", 1, 0, null);
+        stock(level, gy, x1 - 3.5, z0 + 2.5, "horsegenetics.rime",
+                "the glow room (rime)", 1, 0, null);
+        // And the one horse that answers a question neither of the others can:
+        // overlapping lit texels take the BRIGHTER of the two rather than
+        // summing, deliberately. Blown out to flat white where they cross means
+        // the max-not-sum rule has broken.
+        stock(level, gy, (x0 + x1) / 2.0, z1 - 2.5, "horsegenetics.lantern",
+                "the glow room (two glows at once)", 1, 0, "La/La",
+                "horsegenetics.tron=Trs/Trs");
     }
 
     /**
@@ -763,6 +782,125 @@ final class DebugTestYard {
             spawnCow(level, gy, x0 + 6.0 + (i % 8) * 1.7, z0 + 1.5 + (i / 8) * 2.0);
         }
         DebugWorldWatch.watch("RETINUE", box(x0, gy, z0, x1, gy + 1, z1), null);
+    }
+
+    /**
+     * <b>A base coat pale enough to show a dark mark AND a white one.</b>
+     *
+     * <p>A stocked horse names only the locus under test and every other locus
+     * falls to its default, which is a <b>black</b> horse - and on a black
+     * horse a dark marking simply is not there. The owner hit this on
+     * 2026-09-11 with a barred wing and a nightbell foxglove, both of which
+     * "vanished". Chestnut with one cream copy is pale gold, which a black mark
+     * and a white mark both stand out on, and it is the same base the test
+     * kit's own intake eggs use.
+     */
+    private static final String PALE = "horsegenetics.extension=e/e-horsegenetics.matp=Cr/N";
+
+    /**
+     * One display stall: the gene, the thing to look for, and optionally a
+     * <b>second form</b> to stand beside it.
+     *
+     * <p>{@code alt} exists for rainbow drip, which ships in a plain and a
+     * coloured form and was two separate eggs in the old kit. Two eggs is the
+     * wrong shape for "do these differ": a stall holding one of each answers it
+     * by looking, and costs nothing.
+     */
+    private record Look(String key, String name, String check1, String check2, String alt) {
+        Look(String key, String name, String check1, String check2) {
+            this(key, name, check1, check2, null);
+        }
+    }
+
+    /**
+     * <b>The display row: eight coat genes nobody has ever seen on a horse.</b>
+     *
+     * <p>These are the simplest tests in the project and they have been the
+     * most expensive to run, because the only way to do one was to find the
+     * right spawn egg, spawn it, look, and repeat - two whole hotbar batches of
+     * it. A stall each turns two batches into a walk, which is the entire
+     * point: the owner's time in the game is the scarcest thing here and
+     * fetching is the cheapest thing to delete.
+     *
+     * <p><b>Two horses per stall, not one.</b> Most of these are questions about
+     * <i>variation</i> - do the drips have their own lengths, does the emblem
+     * land somewhere new - and one horse cannot answer a question about
+     * variation. Every horse from one preset rolls its own epigenome, so two
+     * side by side is the comparison.
+     *
+     * <p>The row splits around the yard's centre line, because a stall sitting
+     * in the walkway is a wall between the gate and everything behind it.
+     */
+    private static void buildDisplayRow(ServerLevel level, int gy, int cx, int mouthZ) {
+        List<Look> row = List.of(
+                new Look("horsegenetics.ooze_drip", "OOZE DRIP",
+                        "separate drips?", "own lengths?"),
+                new Look("horsegenetics.rainbow_drip", "RAINBOW DRIP",
+                        "plain + coloured", "side by side", "Rdc"),
+                new Look("horsegenetics.contour_cells", "CONTOUR CELLS",
+                        "nested outlines", "check far flank"),
+                new Look("horsegenetics.gilded_crackle", "GILDED CRACKLE",
+                        "pale plates,", "gold seams"),
+                new Look("horsegenetics.holo_flake", "HOLO FLAKE",
+                        "SEPARATE flakes", "on the crest"),
+                new Look("horsegenetics.rime", "RIME",
+                        "must NOT look", "like maelstrom"),
+                new Look("horsegenetics.candelabra", "CANDELABRA",
+                        "small by design.", "jagged = bad"),
+                new Look("horsegenetics.tribal_claw", "TRIBAL CLAW",
+                        "3 hairlines - do", "they read far off?"));
+
+        int z0 = mouthZ + 43;
+        int z1 = z0 + 4;
+        int[] starts = {cx - 22, cx - 17, cx - 12, cx - 7, cx + 3, cx + 8, cx + 13, cx + 18};
+        for (int i = 0; i < row.size() && i < starts.length; i++) {
+            Look look = row.get(i);
+            int x0 = starts[i];
+            int x1 = x0 + 4;
+            fencedPlot(level, gy, x0, x1, z0, z1);
+            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                    List.of(look.name(), look.check1(), look.check2(), "(pale base)"));
+            if (look.alt() == null) {
+                stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, look.key(),
+                        look.name(), 2, 0, null, PALE);
+            } else {
+                stock(level, gy, x0 + 1.0, (z0 + z1) / 2.0, look.key(),
+                        look.name() + " (plain)", 1, 0, null, PALE);
+                stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, look.key(),
+                        look.name() + " (" + look.alt() + ")", 1, 0,
+                        look.alt() + "/" + look.alt(), PALE);
+            }
+        }
+    }
+
+    /**
+     * <b>Molten hooves' four alleles, side by side.</b>
+     *
+     * <p>The rendering is owner-confirmed; what is not is whether the four
+     * <i>differ</i>. The kit asked for them one egg at a time, and "must differ
+     * from the last one" is a question you cannot answer from memory two
+     * spawns later. Four stalls in a row answers it by looking left.
+     *
+     * <p>White is deliberately the <b>heterozygote</b> - one copy is supposed
+     * to be enough for it, and nothing has ever checked that it is.
+     */
+    private static void buildMoltenRow(ServerLevel level, int gy, int cx, int mouthZ) {
+        String[][] forms = {
+                {"MltW/n", "WHITE (1 copy)", "glowing white"},
+                {"MltB/MltB", "BLACK", "must NOT glow"},
+                {"MltC/MltC", "ONE COLOUR", "glowing, single"},
+                {"MltM/MltM", "MULTICOLOUR", "differs from <-"}};
+        int z0 = mouthZ + 21;
+        int z1 = z0 + 4;
+        for (int i = 0; i < forms.length; i++) {
+            int x0 = cx + 4 + i * 5;
+            int x1 = x0 + 4;
+            fencedPlot(level, gy, x0, x1, z0, z1);
+            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                    List.of("MOLTEN HOOVES", forms[i][1], forms[i][2], "watch it WALK"));
+            stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, "horsegenetics.molten_hooves",
+                    "molten " + forms[i][1], 2, 0, forms[i][0]);
+        }
     }
 
     /**
@@ -924,6 +1062,16 @@ final class DebugTestYard {
      */
     private static void stock(ServerLevel level, int gy, double x, double z, String key,
                               String what, int mares, int studs, String tokens) {
+        stock(level, gy, x, z, key, what, mares, studs, tokens, null);
+    }
+
+    /**
+     * The same, on a named base coat - {@code base} is a genotype fragment
+     * appended to this locus's, for a marking that would be invisible on the
+     * default black horse. See {@link #PALE}.
+     */
+    private static void stock(ServerLevel level, int gy, double x, double z, String key,
+                              String what, int mares, int studs, String tokens, String base) {
         Gene gene = Genes.byKeyOrNull(key);
         if (gene == null) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: no {} gene, {} left empty", key, what);
@@ -931,7 +1079,7 @@ final class DebugTestYard {
         }
         String pair = tokens != null ? tokens
                 : gene.alleles().get(0).token() + "/" + gene.alleles().get(0).token();
-        String code = gene.key() + "=" + pair;
+        String code = gene.key() + "=" + pair + (base == null ? "" : "-" + base);
         int placed = 0;
         try {
             for (int i = 0; i < mares; i++) {

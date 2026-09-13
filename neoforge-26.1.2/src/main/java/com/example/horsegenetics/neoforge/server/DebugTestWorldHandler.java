@@ -399,8 +399,7 @@ public final class DebugTestWorldHandler {
             "Ridden: ender echo, food preference, ocean-born - and the yard's lava and water pens (0-BT)",
             "Holding pen and stalls - the refusals (0-BY, 0-BX)",
             "Potion milk and the research shelf - the refusals (0-BY, 0-BX)",
-            "Molten hooves and the sheep spawner (0-BY)",
-            "Intake: drips, contour cells, crackle, flakes, small drawings (0-BZ)",
+            "The sheep spawner - the one thing in 0-BY the yard cannot hand you",
             "Intake: the rest (0-BZ)",
     };
 
@@ -605,34 +604,20 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 8, papers, "two Silver papers - the second must refuse to go in");
             }
             case 5 -> {
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
-                put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
-                put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltW/n"), "white glowing prints from ONE copy");
-                put(inv, legend, 3, preset(player, "Test: molten black", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltB/MltB"), "black prints that do NOT glow - check at night");
-                put(inv, legend, 4, preset(player, "Test: molten colour", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltC/MltC"), "glowing prints in one colour");
-                put(inv, legend, 5, preset(player, "Test: molten multicolour", Sex.FEMALE, false,
-                        "horsegenetics.molten_hooves=MltM/MltM"), "several colours - must differ from slot 5");
-                put(inv, legend, 6, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
+                // Molten hooves left this batch on 2026-09-13: its four alleles
+                // are four stalls in the yard now, side by side, which is the
+                // only arrangement that can answer "does this one differ from
+                // the last" - a question nobody can settle from memory two
+                // spawns apart. What is left here is the one test in 0-BY that
+                // needs a person: the spawner has to be FED.
+                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame it first");
+                put(inv, legend, 1, preset(player, "Test: sheep spawner", Sex.FEMALE, false,
                         "horsegenetics.spawner=Shp/Shp"), "tame, feed wheat - every sheep the SAME colour");
-                put(inv, legend, 7, new ItemStack(Items.WHEAT, 64), "wheat - the spawner's meals");
+                put(inv, legend, 2, new ItemStack(Items.WHEAT, 64), "wheat - the spawner's meals");
+                put(inv, legend, 3, new ItemStack(Items.SADDLE),
+                        "saddle - prints follow a ridden horse too; the molten stalls are in the yard");
             }
             case 6 -> {
-                intake(player, inv, legend, 0, "ooze_drip", null,
-                        "rebuilt on the GOO mask - spawn several: separate drips, own lengths, beads, no triangles");
-                intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too - and check the spine: no bare stripes now");
-                intake(player, inv, legend, 2, "rainbow_drip", "Rdc", "the coloured form");
-                intake(player, inv, legend, 3, "contour_cells", null,
-                        "nested outlines in dark patches - may take several eggs; check the far flank");
-                intake(player, inv, legend, 4, "gilded_crackle", null, "pale plates with gold seams");
-                intake(player, inv, legend, 5, "holo_flake", null, "separate glinting flakes on the crest");
-                intake(player, inv, legend, 6, "rime", null, "must look unlike maelstrom (in the custom egg)");
-                intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
-                intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
-            }
-            case 7 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {
