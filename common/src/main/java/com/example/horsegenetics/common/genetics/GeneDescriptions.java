@@ -27,20 +27,21 @@ public final class GeneDescriptions {
                             + "inherited rather than rolled: X/X is a mare, X/Y a stallion, and Y/Y "
                             + "cannot occur. It never touches the coat; it sits first so a future "
                             + "sex-linked gene can read an already-decided sex."),
-            Map.entry("horsegenetics.dhampir",
-                    "A magical recessive whose carrier is not silent: one copy gives red eyes with "
-                            + "glowing whites and nothing else, which is what makes the locus worth "
-                            + "hunting. Two copies give a white, red-eyed animal that burns in "
-                            + "daylight and runs for shade or water, with three times the health, "
-                            + "half again the speed and twice the jump - and which cannot be fed by "
-                            + "any means. It heals only by biting something living."),
+            Map.entry("horsegenetics.magic_white",
+                    "A magical recessive that paints the whole horse white. One copy is silent; two "
+                            + "paint white over whatever coat the horse really has, low enough in the "
+                            + "magical order that every marking it carries still draws on top."),
+            Map.entry("horsegenetics.sun_sensitivity",
+                    "A magical recessive. Two copies and daylight burns the horse: under open sky by "
+                            + "day it loses half a heart every two seconds and runs for deep cover or "
+                            + "water, and stays there until dark. One copy is silent."),
             Map.entry("horsegenetics.diet",
-                    "What the horse will eat. Twelve narrow diets - raw meat, fish, wheat, cake, "
-                            + "potions, lava, one metal, one gem and the rest - each of which needs "
-                            + "two identical copies to show, against a wild type that eats ordinary "
-                            + "horse feed. A narrow diet refuses almost everything, and what it does "
-                            + "accept feeds it far better: a single gold bar takes a metal-eater to "
-                            + "full health. No breed carries any of it."),
+                    "What the horse will eat. Narrow diets - raw meat, fish, wheat, cake, potions, "
+                            + "lava, one metal, one gem, blood and the rest - each need two identical "
+                            + "copies to show, against a wild type that eats ordinary horse feed. A "
+                            + "narrow diet refuses almost everything, and what it does accept feeds it "
+                            + "far better. Blood is the strangest: nothing feeds it, and it heals only "
+                            + "by biting something living."),
             Map.entry("horsegenetics.extension",
                     "Whether the horse can make black pigment at all. E lets black through; e/e "
                             + "removes it entirely, leaving only red - a chestnut - on which every "

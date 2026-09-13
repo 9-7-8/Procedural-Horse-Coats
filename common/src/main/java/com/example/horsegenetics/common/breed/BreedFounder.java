@@ -94,18 +94,26 @@ public final class BreedFounder {
         TargetBand sizeBand = breed.statTargets().band(StatAxis.SCALE);
         double size = sizeBand == null ? Double.NaN : sizeBand.lerp(rng.nextFloat());
 
+        // One strain for the whole founder, before any locus is drawn - that is
+        // what makes "white with everything OR brown with half" a single choice
+        // rather than a coin per gene. Null for a breed that has no strains.
+        Breed.Strain strain = breed.pickStrain(rng);
+
         Genotype g = base;
         for (Gene gene : Genes.codeOrder()) {
             String key = gene.key();
             if (key.equals("horsegenetics.sex")) {
                 continue; // 50/50 from the base roll, not a breed trait
             }
-            if (BODY_STAT_KEYS.contains(key)) {
-                g = g.with(bodyStatPair(breed, gene, size));
+            // A pool the sheet names wins, body-stat loci included: a breed that
+            // pins the vampiric allele on magic health means exactly that pair,
+            // and the stats block steps aside on that axis.
+            if (breed.constrains(key, strain)) {
+                g = g.with(breed.founderTable(key, strain).draw(rng));
                 continue;
             }
-            if (breed.constrains(key)) {
-                g = g.with(breed.founderTable(key).draw(rng));
+            if (BODY_STAT_KEYS.contains(key)) {
+                g = g.with(bodyStatPair(breed, gene, size));
                 continue;
             }
             if (gene.feralOnly()) {
@@ -129,7 +137,7 @@ public final class BreedFounder {
             // otherwise: keep the base roll (the natural performance genes)
         }
 
-        return stampBands(breed, stampStatTargets(breed, Genome.of(g, rng), rng, size), rng);
+        return stampBands(breed, stampStatTargets(breed, strain, Genome.of(g, rng), rng, size), rng);
     }
 
     /**
@@ -152,11 +160,15 @@ public final class BreedFounder {
      * gametes interchangeable, and half the interest in breeding one is that its
      * foals differ depending on which copy they drew.
      */
-    private static Genome stampStatTargets(Breed breed, Genome genome, Rng rng, double size) {
+    private static Genome stampStatTargets(Breed breed, Breed.Strain strain, Genome genome, Rng rng,
+                                           double size) {
         Epigenome epi = genome.epigenome();
         for (Gene gene : Genes.codeOrder()) {
             if (!BODY_STAT_KEYS.contains(gene.key())) {
                 continue;
+            }
+            if (breed.constrains(gene.key(), strain)) {
+                continue;   // the sheet named this locus's pairs outright - see roll()
             }
             TargetBand band = breed.statTargets().band(axisOf(gene));
             if (band == null) {

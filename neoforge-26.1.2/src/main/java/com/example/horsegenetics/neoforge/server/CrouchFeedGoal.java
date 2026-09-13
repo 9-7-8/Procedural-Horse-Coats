@@ -33,7 +33,7 @@ import java.util.EnumSet;
  *       every time somebody walks past a wild herd holding wheat.</li>
  *   <li><b>Holding food this horse eats.</b> Which is a genetic question, not a
  *       vanilla one - a carnivore is not coming over for a carrot, and a
- *       dhampir is not coming over at all. See {@link #tempting}.</li>
+ *       blood-drinker is not coming over at all. See {@link #tempting}.</li>
  *   <li><b>Looking at it.</b> Picks <i>which</i> horse out of a herd, without
  *       needing a click.</li>
  *   <li><b>Still.</b> Checked against where the player was standing when the
@@ -199,7 +199,7 @@ public final class CrouchFeedGoal extends Goal {
      *
      * <p>Split the way {@link HorseDietHandler} splits it, and for the same
      * reason: an ordinary horse is vanilla's business, and a horse with a diet
-     * locus has its own list. A dhampir eats nothing, which falls out of this
+     * locus has its own list. A blood-drinker eats nothing, which falls out of this
      * rather than needing saying - it is special, and nothing is accepted.
      */
     private boolean tempting(ItemStack stack) {

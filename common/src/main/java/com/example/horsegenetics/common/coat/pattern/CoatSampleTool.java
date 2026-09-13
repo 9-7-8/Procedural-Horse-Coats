@@ -168,10 +168,11 @@ public final class CoatSampleTool {
             {"cream_sunshine_bay", "agouti=A/a matp=Cr/sun"},
             {"cream_snowdrop_chestnut", "extension=e/e matp=Cr/sno"},
 
-            // dhampir - the carrier is the eyes alone, the homozygote is white
-            {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
-            {"dhampir", "dhampir=Dhmp/Dhmp"},
-            {"dhampir_over_leopard", "agouti=A/a leopard=LP/lp patn1=PATN1/n dhampir=Dhmp/Dhmp"},
+            // the dhampir's pieces - red eyes with lit whites, and magic white
+            {"red_eyed_bay", "agouti=A/a eye_colour_right=Red/Red eye_colour_left=Red/Red"
+                    + " eye_glow_sclera_right=Glo/Glo eye_glow_sclera_left=Glo/Glo"},
+            {"magic_white", "magic_white=Wm/Wm"},
+            {"magic_white_over_leopard", "agouti=A/a leopard=LP/lp patn1=PATN1/n magic_white=Wm/Wm"},
     };
 
     /**

@@ -49,7 +49,7 @@ import java.util.Locale;
  * back at dawn, banning riding, the walking cloud of particles and the "hit me
  * and I will follow you until sunrise" temper - is behaviour, and behaviour
  * lives in the game module: {@code neoforge/server/LycanthropyHandler} and its
- * goal. Same split as {@link DhampirGene}, for the same reason - each of those
+ * goal. Same split as {@link SunSensitivityGene}, for the same reason - each of those
  * would be an {@code effects} verb with exactly one user.
  *
  * <p>This file owns the genetics and the one thing about a shifted animal that

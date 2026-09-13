@@ -5718,7 +5718,7 @@ out by hand, four copies of a list none of them knew when to update. They call
 <li><a href="gene-opalized.html">Opalized</a> dropped below <a href="gene-voided.html">voided</a>
     (611 &rarr; 609), and <a href="gene-synort.html">synort</a> came down from the fields
     band to 106, among suit and hood at the bottom of the order. 106 rather than the 104
-    first tried: 104 put it <em>under</em> <a href="gene-dhampir.html">dhampir</a>, whose
+    first tried: 104 put it <em>under</em> <a href="breed-book.html#dhampir">dhampir</a>, whose
     own test says only suit and hood may be painted under a dhampir &mdash; being invisible
     on every dhampir is not what "one of the lowest" was asking for.</li>
 <li><strong>A test that failed for a reason that had nothing to do with its subject.</strong>
@@ -5824,7 +5824,7 @@ one.</li>
 
 <li><strong>The lock is seeded from phase 1 and grows as phase 3 runs.</strong> Seeded from the pigment field, because the texels the melanin genes left unpigmented <em>are</em> the natural white markings, exactly and by construction. Grown after each gene paints, because the owner asked for &ldquo;prevents the painter from ever changing a pixel if it&rsquo;s been set to white&rdquo; - so white a <em>magical</em> gene puts down is locked from the moment it lands too. The eyes are cut back out and never re-added: a blue eye on a white face is pigment biology rather than a marking, and locking it would silently delete every eye-colour gene on precisely the horses whose eyes are worth looking at.</li>
 
-<li><strong>The specific answer was to move nine genes.</strong> Anything that reads somebody else&rsquo;s marking has to be painted after it, so <a href="gene-fielded.html">fielded</a>, <a href="gene-yalia.html">yalia</a>, <a href="gene-voided.html">voided</a> and <a href="gene-opalized.html">opalized</a> went to 600+ and <a href="gene-invert.html">invert</a> to 700. In the other direction, <a href="gene-dhampir.html">dhampir</a> paints the whole horse absolute white and sat at 135, above every data-driven gene in the mod - so a dhampir was a plain white horse whatever else it carried, which is a dead end rather than a phenotype. It is at 105 now, and <a href="gene-suit.html">suit</a> (102) and <a href="gene-hood.html">hood</a> (103) below it. <a href="paint-order.html">The paint order</a> is a new page that draws the whole stack from the registry at run time, highest first, so this is the last session that has to describe it in prose.</li>
+<li><strong>The specific answer was to move nine genes.</strong> Anything that reads somebody else&rsquo;s marking has to be painted after it, so <a href="gene-fielded.html">fielded</a>, <a href="gene-yalia.html">yalia</a>, <a href="gene-voided.html">voided</a> and <a href="gene-opalized.html">opalized</a> went to 600+ and <a href="gene-invert.html">invert</a> to 700. In the other direction, <a href="breed-book.html#dhampir">dhampir</a> paints the whole horse absolute white and sat at 135, above every data-driven gene in the mod - so a dhampir was a plain white horse whatever else it carried, which is a dead end rather than a phenotype. It is at 105 now, and <a href="gene-suit.html">suit</a> (102) and <a href="gene-hood.html">hood</a> (103) below it. <a href="paint-order.html">The paint order</a> is a new page that draws the whole stack from the registry at run time, highest first, so this is the last session that has to describe it in prose.</li>
 
 <li><strong>Waves was not a gene, it was Cleave backwards.</strong> Owner&rsquo;s call, and once said it is obviously true - both split the horse in half along a boundary, one taking the front and one the back. They are one locus now with four alleles (white and coloured, each way round) and Cleave&rsquo;s spear boundary drawn on both. Cleave also gained the half-opaque outline it was asked for, built by subtracting the hard-edged tooth field from a wide-edged one: <code>SpecPainter.band</code> ramps <em>outside</em> the band, so the difference is a strip on the coat side of the boundary, hugging it and following the teeth. The three hard masks are subtracted one after another rather than <code>MAX</code>ed first, which the fold cannot express and does not need to - over-subtraction can only happen where one of them is 1, which is inside the field, where the field has already painted.</li>
 
@@ -6620,7 +6620,7 @@ one.</li>
 
 <h3 id="dhampir-2026-09-07">Built 2026-09-07, NOT yet looked at: the dhampir, a recessive whose carrier is the advertisement.</h3>
 
-<p><a href="gene-dhampir.html">Dhampir</a>; checklist <a href="verification.html#dhampir">&sect;0-R</a>.</p>
+<p><a href="breed-book.html#dhampir">Dhampir</a>; checklist <a href="verification.html#dhampir">&sect;0-R</a>.</p>
 
 <ul>
 <li><strong>One copy gives red eyes with glowing scleras and costs nothing at all.</strong> That is the point of the gene: two red-eyed horses in a field are a promise rather than a lottery ticket, and a silent dhampir carrier would be a locus nobody would ever meet. Two copies give the animal - white nose to tail, red eyes, triple health, 1.5&times; speed, double jump, and it cannot be fed.</li>

@@ -184,8 +184,8 @@ public final class HorseCareHandler {
         }
 
         // --- gated healing: only pay for the block scan if hurt, and only for
-        // a horse that can regenerate at all. A dhampir cannot be fed by any
-        // means, and that has to include standing next to a hay bale.
+        // a horse that can regenerate at all. A blood-drinker cannot be fed by
+        // any means, and that has to include standing next to a hay bale.
         if (horse.getHealth() < horse.getMaxHealth() && HorseDietHandler.canRegenerate(horse)
                 && nearWaterAndFood(level, horse)) {
             horse.heal(after.inHerd() ? HERD_HEAL_AMOUNT : HEAL_AMOUNT);

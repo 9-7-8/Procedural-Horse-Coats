@@ -26,7 +26,7 @@ patn2
 shade
 suit
 hood
-dhampir
+magic_white
 synort
 serpentine
 coastline

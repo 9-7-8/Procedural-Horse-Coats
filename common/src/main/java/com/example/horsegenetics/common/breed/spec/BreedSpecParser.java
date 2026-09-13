@@ -56,7 +56,7 @@ public final class BreedSpecParser {
     /** Keys a breed file may carry. Anything else is a hard error. */
     private static final Set<String> KEYS = Set.of(
             "id", "name", "description", "kind", "commonness", "spawn_weight", "biomes",
-            "spawn", "spawn_time", "price", "stats", "genes", "bands", "notes");
+            "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes");
 
     private BreedSpecParser() {
     }
@@ -186,8 +186,66 @@ public final class BreedSpecParser {
 
         readStats(root, b);
         readGenes(root, b, source, warn);
+        readStrains(root, b, source, warn);
         readBands(root, b, source, warn);
-        return b.build();
+        Breed breed = b.build();
+        warnStatsPinnedByPools(breed, source, warn);
+        return breed;
+    }
+
+    /**
+     * A body-stat locus the sheet names in a pool is drawn from that pool, and
+     * the {@code stats} score for its axis no longer applies to it - so a file
+     * that says both is told which one wins, rather than finding out from a
+     * founder that ignored its score.
+     */
+    private static void warnStatsPinnedByPools(Breed breed, String source, Consumer<String> warn) {
+        Breed.StatScores s = breed.scores();
+        String[][] axes = {
+                {"horsegenetics.magic_speed", "speed"}, {"horsegenetics.magic_jump", "jump"},
+                {"horsegenetics.magic_health", "health"}, {"horsegenetics.body_size", "size"}};
+        for (String[] axis : axes) {
+            boolean scored = switch (axis[1]) {
+                case "speed" -> s.speed().isPresent();
+                case "jump" -> s.jump().isPresent();
+                case "health" -> s.health().isPresent();
+                default -> s.size().isPresent();
+            };
+            if (scored && breed.constrains(axis[0])) {
+                warn.accept(source + ": \"stats." + axis[1] + "\" is ignored wherever a pool names "
+                        + axis[0] + " - the pool decides that locus");
+            }
+        }
+    }
+
+    /**
+     * {@code "strains": [{"name": "White", "weight": 1, "genes": {...}}, ...]}
+     *
+     * <p>Each strain's {@code genes} is read exactly as the top-level block is,
+     * and forgiven the same way. A strain with no genes is legal - it is "the
+     * breed as written" at that weight.
+     */
+    private static void readStrains(Map<String, Object> root, Breed.Builder b,
+                                    String source, Consumer<String> warn) {
+        if (!root.containsKey("strains")) {
+            return;
+        }
+        List<Object> list = asArray(root.get("strains"), "strains");
+        for (int i = 0; i < list.size(); i++) {
+            String at = "strains[" + i + "]";
+            Map<String, Object> strain = asObject(list.get(i), at);
+            expectKeys(strain, Set.of("name", "weight", "genes"));
+            String name = requireString(strain, "name");
+            double weight = strain.containsKey("weight") ? asNumber(strain.get("weight"), at + ".weight") : 1.0;
+            if (weight <= 0.0) {
+                warn.accept(source + ": " + at + " (\"" + name + "\") has a weight of " + weight + " - dropped");
+                continue;
+            }
+            Map<String, List<Breed.Combo>> pools = strain.containsKey("genes")
+                    ? readPools(strain.get("genes"), at + ".genes", source, warn)
+                    : new java.util.LinkedHashMap<>();
+            b.strain(name, weight, pools);
+        }
     }
 
     /**
@@ -238,7 +296,18 @@ public final class BreedSpecParser {
         if (!root.containsKey("genes")) {
             return;
         }
-        Map<String, Object> genes = asObject(root.get("genes"), "genes");
+        for (Map.Entry<String, List<Breed.Combo>> e : readPools(root.get("genes"), "genes", source, warn).entrySet()) {
+            for (Breed.Combo c : e.getValue()) {
+                b.gene(e.getKey(), c.a(), c.b(), c.weight());
+            }
+        }
+    }
+
+    /** One {@code genes} object - the breed's own, or a strain's - into ordered pools. */
+    private static Map<String, List<Breed.Combo>> readPools(Object raw, String where,
+                                                            String source, Consumer<String> warn) {
+        Map<String, List<Breed.Combo>> out = new java.util.LinkedHashMap<>();
+        Map<String, Object> genes = asObject(raw, where);
         for (Map.Entry<String, Object> e : genes.entrySet()) {
             String key = e.getKey();
             Gene gene = Genes.byKeyOrNull(key);
@@ -246,14 +315,14 @@ public final class BreedSpecParser {
                 warn.accept(source + ": no gene \"" + key + "\" is installed - the breed will roll that locus wild");
                 continue;
             }
-            List<Object> combos = asArray(e.getValue(), "genes." + key);
+            List<Object> combos = asArray(e.getValue(), where + "." + key);
             if (combos.isEmpty()) {
-                warn.accept(source + ": \"genes." + key + "\" is empty - the breed will roll that locus wild");
+                warn.accept(source + ": \"" + where + "." + key + "\" is empty - the breed will roll that locus wild");
                 continue;
             }
             List<Breed.Combo> parsed = new ArrayList<>();
             for (int i = 0; i < combos.size(); i++) {
-                String at = "genes." + key + "[" + i + "]";
+                String at = where + "." + key + "[" + i + "]";
                 Map<String, Object> combo = asObject(combos.get(i), at);
                 expectKeys(combo, Set.of("pair", "weight"));
                 String[] tokens = splitPair(requireString(combo, "pair"), at);
@@ -271,14 +340,13 @@ public final class BreedSpecParser {
                 parsed.add(new Breed.Combo(tokens[0], tokens[1], weight));
             }
             if (parsed.isEmpty()) {
-                warn.accept(source + ": nothing in \"genes." + key
+                warn.accept(source + ": nothing in \"" + where + "." + key
                         + "\" survived - the breed will roll that locus wild");
                 continue;
             }
-            for (Breed.Combo c : parsed) {
-                b.gene(key, c.a(), c.b(), c.weight());
-            }
+            out.put(key, parsed);
         }
+        return out;
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.example.horsegenetics.common.genetics.genes;
 
-import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
@@ -10,7 +9,6 @@ import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.EpigeneticTraitContribution;
-import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
@@ -24,9 +22,9 @@ import java.util.List;
  * {@link MagicHealthGene} and {@link MagicJumpGene}. It is the
  * {@link MagicSizeGene} pattern generalised to the three additive stats:
  * <ul>
- *   <li>a <b>codominant</b> locus with three alleles - one that pushes the stat
- *       up, one that pushes it down, and the wild type;</li>
- *   <li>every allele copy carries a percentage drawn from <b>its own</b>
+ *   <li>a <b>codominant</b> locus - one allele that pushes the stat up, one that
+ *       pushes it down, the <b>vampiric</b> allele, and the wild type;</li>
+ *   <li>every up or down copy carries a percentage drawn from <b>its own</b>
  *       epigenetic seed, and <b>both copies add</b>, the "up" allele counting
  *       positive and the "down" allele negative;</li>
  *   <li>the percentage is a bounded normal draw about {@value #MEAN_DELTA} with
@@ -38,13 +36,22 @@ import java.util.List;
  *       than a magically fast racehorse.</li>
  * </ul>
  *
+ * <h2>The vampiric allele</h2>
+ * The dhampir's strength, split out of the old dhampir gene and put where the
+ * body's magic already lives. A {@code Vmp} copy is worth a <b>fixed</b> amount -
+ * {@link #vampiricPerCopy()}, half of the dhampir's old multiplier on this axis -
+ * rather than an epigenetic percentage, so {@code Vmp/n} is exactly half the
+ * boost and {@code Vmp/Vmp} is the whole of it (triple health, half again the
+ * speed, twice the jump). It adds into the same sum as the other copy, so a
+ * {@code Vmp/Swift} horse gets both. Owner's call: "a brown dhampir will carry
+ * magic strength, so it is still stronger than a normal horse, but not as
+ * dramatic as a full white dhampir."
+ *
  * <h2>Only heterozygotes are born wild</h2>
- * The founder table lists the two carriers and the plain horse and nothing
- * else, so {@value #WILD_CARRIER_PERCENT}% of wild horses carry one copy and
- * <b>every doubled horse is one somebody bred</b>. Combined with the sibling
- * loci - most wild horses carry a copy of all four - the wild population has a
- * quiet continuous spread on every axis, and a horse that is remarkable on any
- * one of them is a breeding result.
+ * The founder table lists the carriers and the plain horse and nothing else, so
+ * {@value #WILD_CARRIER_PERCENT}% of wild horses carry one copy and <b>every
+ * doubled horse is one somebody bred</b>. Vampiric carriers are a small slice of
+ * that ({@value #WILD_VAMPIRIC_PERCENT}%).
  *
  * <h2>Paints nothing</h2>
  * Every outcome is a {@link Expression#wildType() wild type}, so
@@ -68,13 +75,18 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
     /** The floor on a copy's percentage - an "up" allele can never come out subtracting. */
     public static final double MIN_DELTA = 0.01;
 
-    /** Two copies at the {@code +6}&sigma; bound - the most one of these genes can do. */
+    /** Two copies at the {@code +6}&sigma; bound - the most the percentage alleles can do. */
     public static final double MAX_FACTOR_APPROX = 1.0 + 2 * (MEAN_DELTA + 6 * SIGMA_DELTA);
 
-    /** Share of wild horses carrying one variant copy. Most of them, by design. */
-    public static final double WILD_CARRIER_PERCENT = 80.0;
     private static final double WILD_UP_PERCENT = 40.0;
     private static final double WILD_DOWN_PERCENT = 40.0;
+    /** Share of wild horses carrying one vampiric copy. */
+    public static final double WILD_VAMPIRIC_PERCENT = 2.0;
+    /** Share of wild horses carrying one variant copy of any kind. Most of them, by design. */
+    public static final double WILD_CARRIER_PERCENT = WILD_UP_PERCENT + WILD_DOWN_PERCENT + WILD_VAMPIRIC_PERCENT;
+
+    /** The vampiric allele's token, the same on all three loci. */
+    public static final String VAMPIRIC_TOKEN = "Vmp";
 
     private final String key;
     private final int priority;
@@ -84,7 +96,9 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
     public final Allele up;
     /** The allele that pushes the stat <b>down</b> ({@code order() == 1}). */
     public final Allele down;
-    /** The wild type ({@code order() == 2}). */
+    /** The dhampir's allele - a fixed boost per copy ({@code order() == 2}). */
+    public final Allele vampiric;
+    /** The wild type ({@code order() == 3}). */
     public final Allele n;
     private final List<Allele> alleles;
 
@@ -94,27 +108,33 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
     private final Expression LESS;
     private final Expression DOUBLE_LESS;
     private final Expression BALANCED;
+    private final Expression VAMPIRIC;
+    private final Expression VAMPIRIC_MORE;
+    private final Expression VAMPIRIC_LESS;
+    private final Expression DOUBLE_VAMPIRIC;
     private final List<Expression> expressions;
 
     private final FounderTable founders;
 
     /**
      * @param upToken     the "up" allele's text in a genotype code (e.g. {@code "Swift"})
-     * @param downToken    the "down" allele's text (e.g. {@code "Sluggish"})
+     * @param downToken   the "down" allele's text (e.g. {@code "Sluggish"})
      * @param text        the six outcome descriptions and their four display names
+     * @param statWords   how this stat is spoken of in a sentence - "hearts", "speed", "jump"
      */
     protected AbstractMagicStatGene(String key, int priority, String displayName,
                                     String upToken, String upLabel,
                                     String downToken, String downLabel,
-                                    Vocabulary text) {
+                                    Vocabulary text, String statWords) {
         this.key = key;
         this.priority = priority;
         this.displayName = displayName;
 
         this.up = new Allele(key, 0, upToken, upLabel);
         this.down = new Allele(key, 1, downToken, downLabel);
-        this.n = new Allele(key, 2, "n", "Wild-type (n)");
-        this.alleles = List.of(up, down, n);
+        this.vampiric = new Allele(key, 2, VAMPIRIC_TOKEN, "Vampiric (" + VAMPIRIC_TOKEN + ")");
+        this.n = new Allele(key, 3, "n", "Wild-type (n)");
+        this.alleles = List.of(up, down, vampiric, n);
 
         this.WILD = Expression.wildType(text.wild());
         this.MORE = Expression.wildType("more", text.moreName(), text.more());
@@ -122,17 +142,39 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
         this.LESS = Expression.wildType("less", text.lessName(), text.less());
         this.DOUBLE_LESS = Expression.wildType("double-less", text.doubleLessName(), text.doubleLess());
         this.BALANCED = Expression.wildType("balanced", text.balancedName(), text.balanced());
-        this.expressions = List.of(WILD, MORE, DOUBLE_MORE, LESS, DOUBLE_LESS, BALANCED);
+        this.VAMPIRIC = Expression.wildType("vampiric", "Vampiric",
+                "One vampiric copy - the dhampir's strength, at half measure. A fixed boost to "
+                        + statWords + " rather than a percentage rolled per horse, so every carrier "
+                        + "gets exactly the same.");
+        this.VAMPIRIC_MORE = Expression.wildType("vampiric-more", "Vampiric and boosted",
+                "One vampiric copy and one that pushes " + statWords + " up. Both add: the fixed "
+                        + "half-dhampir boost, and that copy's own percentage on top.");
+        this.VAMPIRIC_LESS = Expression.wildType("vampiric-less", "Vampiric, held back",
+                "One vampiric copy and one that pulls " + statWords + " down. The fixed half-dhampir "
+                        + "boost, less that copy's percentage.");
+        this.DOUBLE_VAMPIRIC = Expression.wildType("double-vampiric", "Fully vampiric",
+                "Two vampiric copies - the whole of a white dhampir's strength on this axis. No "
+                        + "wild horse is born with two.");
+        this.expressions = List.of(WILD, MORE, DOUBLE_MORE, LESS, DOUBLE_LESS, BALANCED,
+                VAMPIRIC, VAMPIRIC_MORE, VAMPIRIC_LESS, DOUBLE_VAMPIRIC);
 
         this.founders = FounderTable.builder()
                 .weight(up, n, WILD_UP_PERCENT)
                 .weight(down, n, WILD_DOWN_PERCENT)
-                .weight(n, n, 100.0 - WILD_UP_PERCENT - WILD_DOWN_PERCENT)
+                .weight(vampiric, n, WILD_VAMPIRIC_PERCENT)
+                .weight(n, n, 100.0 - WILD_CARRIER_PERCENT)
                 .build();
     }
 
     /** Push {@code factor} into this stat's unclamped magical multiplier on {@link TraitBuilder}. */
     protected abstract void applyMagic(TraitBuilder out, double factor);
+
+    /**
+     * What one vampiric copy adds to this stat's sum - half of what a
+     * {@code Vmp/Vmp} horse gets, so two copies are exactly the dhampir's old
+     * multiplier. Fixed, not epigenetic.
+     */
+    public abstract double vampiricPerCopy();
 
     /**
      * Which body axis this gene drives. A breed uses it at <b>founder time</b>
@@ -154,8 +196,15 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
 
     @Override
     public Expression expressionOf(AllelePair pair) {
+        int vamp = pair.count(vampiric);
         int more = pair.count(up);
         int less = pair.count(down);
+        if (vamp == 2) {
+            return DOUBLE_VAMPIRIC;
+        }
+        if (vamp == 1) {
+            return more == 1 ? VAMPIRIC_MORE : less == 1 ? VAMPIRIC_LESS : VAMPIRIC;
+        }
         if (more > 0 && less > 0) {
             return BALANCED;
         }
@@ -171,9 +220,9 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
     }
 
     /**
-     * Both copies, added. {@code up} counts positive and {@code down} negative,
-     * so every combination falls out of one line and the balanced pair cancels
-     * without a special case.
+     * Both copies, added. {@code up} counts positive, {@code down} negative and
+     * {@code vampiric} its fixed share, so every combination falls out of one
+     * line and the balanced pair cancels without a special case.
      */
     @Override
     public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics,
@@ -192,13 +241,17 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
         if (allele.equals(down)) {
             return -epigenetics.get(DELTA);
         }
+        if (allele.equals(vampiric)) {
+            return vampiricPerCopy();
+        }
         return 0.0; // the baseline allele is worth nothing, as everywhere else
     }
 
     /**
      * The one number a copy of this locus carries: the percentage it is worth.
      * Always positive - the sign is the allele's job, not the value's - and
-     * always readable, which is the entire point of storing it.
+     * always readable, which is the entire point of storing it. A vampiric
+     * copy carries one too and ignores it.
      */
     @Override
     public EpiSchema epiSchema() {

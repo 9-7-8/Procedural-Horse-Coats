@@ -9,13 +9,19 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import java.util.EnumSet;
 
 /**
- * <b>Get out of the sun.</b> While a dhampir is caught in open daylight it
- * looks for the nearest square that is either under cover or in water, and runs
- * for it - jumping anything in the way it can clear.
+ * <b>Get out of the sun.</b> While a sun-sensitive horse is caught in open
+ * daylight it looks for the nearest square that is either under cover or in
+ * water, and runs for it - jumping anything in the way it can clear.
+ *
+ * <p>Written for the dhampir before it was split into loci; the history in the
+ * comments below is that animal's, and every fix in it still applies.
  *
  * <p>Runs at the top goal priority. A burning horse has nothing more urgent to
- * be doing, and a dhampir that stood still grazing while the sky killed it would
+ * be doing, and one that stood still grazing while the sky killed it would
  * read as a bug rather than as a vampire.
+ *
+ * <p>It sits on <b>every</b> horse and does nothing for one that is not
+ * sun-sensitive - see {@link SunSensitivityHandler} for why.
  *
  * <h4>Fences</h4>
  * There is no pathfinding-with-jumps in vanilla horse AI, so this does the
@@ -26,7 +32,7 @@ import java.util.EnumSet;
  * can". It is an approximation of intent, not a pathfinder, and it is flagged
  * as such in {@code wiki/verification.html}.
  */
-public final class DhampirShadeGoal extends Goal {
+public final class SunShadeGoal extends Goal {
 
     /** How far to look for cover. Beyond this it simply runs, and re-searches. */
     private static final int SEARCH_RADIUS = 12;
@@ -62,17 +68,37 @@ public final class DhampirShadeGoal extends Goal {
      */
     private final java.util.Set<BlockPos> unreachable = new java.util.HashSet<>();
 
-    public DhampirShadeGoal(Horse horse) {
+    public SunShadeGoal(Horse horse) {
         this.horse = horse;
         setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP));
     }
 
+    /**
+     * Resolved once and kept - {@code canUse} runs every tick on every horse, and
+     * a genome parse per tick per horse is the cost {@code FoodTemptGoal} already
+     * learned to avoid. Lazy because the record is written a tick after join.
+     */
+    private Boolean sensitive;
+
+    private boolean sensitive() {
+        if (sensitive == null) {
+            if (!HorseRecords.hasRealRecord(horse)) {
+                return false;   // ask again next tick
+            }
+            sensitive = SunSensitivityHandler.isSensitive(horse);
+        }
+        return sensitive;
+    }
+
     @Override
     public boolean canUse() {
+        if (!sensitive()) {
+            return false;
+        }
         if (horse.isVehicle() || horse.isLeashed()) {
             return false;   // a ridden or tied horse is the rider's problem
         }
-        if (!DhampirHandler.inSunlight(horse)) {
+        if (!SunSensitivityHandler.inSunlight(horse)) {
             return false;
         }
         shelter = findShelter();
@@ -128,7 +154,7 @@ public final class DhampirShadeGoal extends Goal {
         if (shelter != null && horse.level() instanceof ServerLevel level) {
             boolean accepted = horse.getNavigation().moveTo(
                     shelter.getX() + 0.5, shelter.getY(), shelter.getZ() + 0.5, SPEED);
-            ActionTrace.log("dhampir", ActionTrace.describeShort(horse) + " burning at "
+            ActionTrace.log("sun",ActionTrace.describeShort(horse) + " burning at "
                     + horse.blockPosition().toShortString() + ", heading for "
                     + shelter.toShortString() + " ("
                     + String.format("%.1f", Math.sqrt(horse.blockPosition().distSqr(shelter)))
@@ -140,9 +166,9 @@ public final class DhampirShadeGoal extends Goal {
     @Override
     public void stop() {
         if (shelter != null) {
-            ActionTrace.log("dhampir", ActionTrace.describeShort(horse) + " stopped at "
+            ActionTrace.log("sun",ActionTrace.describeShort(horse) + " stopped at "
                     + horse.blockPosition().toShortString() + " - "
-                    + (DhampirHandler.inSunlight(horse)
+                    + (SunSensitivityHandler.inSunlight(horse)
                             ? "STILL IN THE SUN, so it gave up rather than arrived"
                             : "in shade, health "
                                     + String.format("%.0f/%.0f", horse.getHealth(), horse.getMaxHealth())));
@@ -160,7 +186,7 @@ public final class DhampirShadeGoal extends Goal {
         // SHELTERED: stand still, and keep holding the movement flag. Doing
         // nothing here is the entire point - it is what stops the stroll goal
         // taking over and wandering back out into the daylight.
-        if (!DhampirHandler.inSunlight(horse)) {
+        if (!SunSensitivityHandler.inSunlight(horse)) {
             horse.getNavigation().stop();
             repathCooldown = REPATH_INTERVAL;
             return;
@@ -278,7 +304,7 @@ public final class DhampirShadeGoal extends Goal {
      * <p>Owner, 2026-09-13: <i>"the dhampir ran to the shelter, but it's still
      * dying. We need a better way to detect 'sun' exposure, not just light
      * exposure."</i> The <em>detection</em> was never the problem -
-     * {@link DhampirHandler#inSunlight} has always used
+     * {@link SunSensitivityHandler#inSunlight} has always used
      * {@code canSeeSky} on the eye block, which is sky exposure and not light at
      * all, and it correctly reads false under this roof. What failed was the
      * search: it found real shade and then named a square the animal could not

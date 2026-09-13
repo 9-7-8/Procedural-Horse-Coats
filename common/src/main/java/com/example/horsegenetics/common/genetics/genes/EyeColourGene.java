@@ -22,6 +22,7 @@ import java.util.List;
  *   <tr><td>{@code Gld/Gld}</td><td>gold - the shade tiger eye and champagne used to paint directly</td></tr>
  *   <tr><td>{@code DBl/DBl}, {@code MBl/MBl}, {@code LBl/LBl}</td><td>the three blues</td></tr>
  *   <tr><td>{@code Wht/Wht}</td><td>a white iris</td></tr>
+ *   <tr><td>{@code Red/Red}</td><td>a deep red iris - the dhampir's</td></tr>
  *   <tr><td>{@code Cha/Cha}</td><td>chaos - a colour off the allele copy, so no two are alike</td></tr>
  *   <tr><td>{@code Inv/Inv}</td><td>invisible - <b>no iris is painted at all</b></td></tr>
  *   <tr><td>{@code Grn/Gld} and every other mismatched pair</td><td>a wild type - brown</td></tr>
@@ -67,7 +68,10 @@ public final class EyeColourGene extends AbstractEyeGene {
                     + "as an iris at two texels."},
             {EyeHue.WHITE, 0.15, "A white iris in a white sclera - an eye that is all one colour, "
                     + "with only the antialiased rim to say where it ends."},
-            {EyeHue.CHAOS, 0.08, "A colour written on the allele copy rather than on the allele, so "
+            {EyeHue.RED, 0.05, "A deep blood red - the dhampir's eye. With a glowing sclera beside "
+                    + "it, it is the face the Dhampir breed is known by; on its own it is simply "
+                    + "a rare and unsettling horse."},
+            {EyeHue.CHAOS, 0.08,"A colour written on the allele copy rather than on the allele, so "
                     + "no two chaos-eyed horses match and a line of them drifts."},
             {EyeHue.INVISIBLE, 0.05, "No iris is painted at all - the coat on the head shows straight "
                     + "through where the eye should be. Nothing further down this eye's stack "
@@ -125,8 +129,8 @@ public final class EyeColourGene extends AbstractEyeGene {
     @Override
     public String description() {
         return "What colour this horse's " + side(locus()).toLowerCase() + " iris is. Brown is "
-                + "dominant to all eight variants and to a horse carrying two different ones, so "
-                + "green, gold, the three blues, white, chaos and invisible each take a matched "
+                + "dominant to every variant and to a horse carrying two different ones, so "
+                + "green, gold, the three blues, white, red, chaos and invisible each take a matched "
                 + "pair. The two eyes are separate loci, which is what makes complete "
                 + "heterochromia something you can breed for rather than wait for - but a wild "
                 + "horse's second eye usually copies its first. Cream, champagne, tiger eye and "

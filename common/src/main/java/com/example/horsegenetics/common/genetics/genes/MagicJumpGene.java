@@ -53,7 +53,14 @@ public final class MagicJumpGene extends AbstractMagicStatGene {
                         "Balanced",
                         "One springy copy and one leaden copy. Their percentages very nearly cancel, so "
                                 + "the horse jumps close to its ordinary height while carrying, and "
-                                + "passing on, both extremes."));
+                                + "passing on, both extremes."),
+                "jump height");
+    }
+
+    /** Half the dhampir's old 2x - so {@code Vmp/Vmp} jumps twice as high. */
+    @Override
+    public double vampiricPerCopy() {
+        return 0.5;
     }
 
     @Override

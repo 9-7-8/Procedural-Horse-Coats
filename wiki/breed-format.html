@@ -155,7 +155,20 @@
     <td><code>genes</code></td>
     <td>gene key &rarr; weighted <code>{ "pair": "E/e", "weight": 44 }</code> entries</td>
     <td>the locus is rolled <strong>wild</strong> if it paints, and left at its global
-        founder rate if it does not.</td>
+        founder rate if it does not. A pool on one of the four body-stat genes
+        <strong>wins over <code>stats</code></strong> for that axis.</td>
+</tr>
+<tr id="strains">
+    <td><code>strains</code></td>
+    <td>an array of <code>{ "name": "White", "weight": 1, "genes": { &hellip; } }</code>;
+        each <code>genes</code> is read exactly as the top-level one</td>
+    <td>none. Each founder picks one strain by weight, and every gene the strain names
+        is drawn from its pool instead of the breed&rsquo;s &mdash; so a whole founder is
+        <em>this</em> or <em>that</em>, never half of each. A gene named only by another
+        strain rolls as unnamed. See <a href="breeds.html#strains">strains</a>; the
+        <a href="breed-book.html#dhampir">Dhampir</a> file is the worked example. The
+        breed designer carries strains through import and export but has no editor for
+        them yet.</td>
 </tr>
 <tr>
     <td><code>bands</code></td>

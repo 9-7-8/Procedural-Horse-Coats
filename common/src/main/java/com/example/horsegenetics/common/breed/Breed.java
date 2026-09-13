@@ -75,10 +75,33 @@ public record Breed(
         List<String> notes,
         Optional<PriceRange> price,
         String description,
-        SpawnTime spawnTime) {
+        SpawnTime spawnTime,
+        List<Strain> strains) {
 
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
+
+    /**
+     * <b>A whole-founder variant of the breed</b> - a name, a relative weight,
+     * and gene pools that override the breed's own for every key they name.
+     *
+     * <p>A breed's pools are drawn <b>independently per locus</b>, which cannot
+     * say "either this set of alleles <i>or</i> that one". A strain can. Each
+     * founder picks one strain by weight first, and then every locus the strain
+     * names draws from the strain's pool instead of the breed's. A locus named
+     * only by <i>another</i> strain is not on this founder's sheet at all, and
+     * rolls exactly as an unnamed locus would - wild, for anything a breed pins.
+     *
+     * <p>It exists for the Dhampir: a founder is either white with two copies of
+     * everything, or seal brown with the eyes and one copy of each - never a mix
+     * of the two. Owner's call, 2026-09-13.
+     */
+    public record Strain(String name, double weight, Map<String, List<Combo>> genePools) {
+        public Strain {
+            name = name == null ? "" : name;
+            genePools = ordered(genePools);
+        }
+    }
 
     /** A closed {@code lo..hi}; a single-number score is a zero-width one. */
     public record Range(double lo, double hi) {
@@ -164,6 +187,7 @@ public record Breed(
         price = price == null ? Optional.empty() : price;
         description = description == null ? "" : description;
         spawnTime = spawnTime == null ? SpawnTime.ANY : spawnTime;
+        strains = strains == null ? List.of() : List.copyOf(strains);
     }
 
     private static Map<String, List<Combo>> ordered(Map<String, List<Combo>> pools) {
@@ -174,8 +198,45 @@ public record Breed(
         return Collections.unmodifiableMap(copy);
     }
 
+    /** Does the breed sheet name this gene anywhere - in its own pools or in any strain's? */
     public boolean constrains(String geneKey) {
-        return genePools.containsKey(geneKey);
+        if (genePools.containsKey(geneKey)) {
+            return true;
+        }
+        for (Strain s : strains) {
+            if (s.genePools().containsKey(geneKey)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Does a founder of {@code strain} (or of no strain, when {@code null}) have this gene on its sheet? */
+    public boolean constrains(String geneKey, Strain strain) {
+        return genePools.containsKey(geneKey)
+                || (strain != null && strain.genePools().containsKey(geneKey));
+    }
+
+    /**
+     * One strain by weight, or {@code null} for a breed that has none. A founder
+     * path, so the draw is free.
+     */
+    public Strain pickStrain(com.example.horsegenetics.common.Rng rng) {
+        if (strains.isEmpty()) {
+            return null;
+        }
+        double total = 0.0;
+        for (Strain s : strains) {
+            total += Math.max(0.0, s.weight());
+        }
+        double roll = rng.nextFloat() * total;
+        for (Strain s : strains) {
+            roll -= Math.max(0.0, s.weight());
+            if (roll < 0.0) {
+                return s;
+            }
+        }
+        return strains.get(strains.size() - 1);
     }
 
     /** May this breed turn up from {@code source}? */
@@ -218,8 +279,31 @@ public record Breed(
      * founder roll log the same "does not sum to 100" error.
      */
     public FounderTable founderTable(String geneKey) {
+        return founderTable(geneKey, null);
+    }
+
+    /**
+     * The founder table for a gene as a founder of {@code strain} draws it: the
+     * strain's pool where it names the gene, else the breed's own, else the
+     * first strain that names it (so a caller asking about the sheet as a whole
+     * still gets an answer).
+     */
+    public FounderTable founderTable(String geneKey, Strain strain) {
         Gene gene = Genes.byKey(geneKey);
-        List<Combo> pool = genePools.get(geneKey);
+        List<Combo> pool = strain != null && strain.genePools().containsKey(geneKey)
+                ? strain.genePools().get(geneKey)
+                : genePools.get(geneKey);
+        if (pool == null) {
+            for (Strain s : strains) {
+                if (s.genePools().containsKey(geneKey)) {
+                    pool = s.genePools().get(geneKey);
+                    break;
+                }
+            }
+        }
+        if (pool == null) {
+            throw new IllegalArgumentException(id + " does not name " + geneKey);
+        }
         double total = 0.0;
         for (Combo c : pool) {
             total += c.weight();
@@ -266,6 +350,7 @@ public record Breed(
         private Optional<PriceRange> price = Optional.empty();
         private String description = "";
         private SpawnTime spawnTime = SpawnTime.ANY;
+        private final List<Strain> strains = new ArrayList<>();
 
         private Builder(String id, String name) {
             this.id = id;
@@ -435,6 +520,12 @@ public record Breed(
             return this;
         }
 
+        /** Add a whole-founder variant - see {@link Strain}. */
+        public Builder strain(String name, double weight, Map<String, List<Combo>> pools) {
+            strains.add(new Strain(name, weight, pools));
+            return this;
+        }
+
         /**
          * What a breeder asks for one, in emeralds, inclusive. Leave it unset
          * and {@code HorsePrices} uses its default - which is what almost every
@@ -450,7 +541,7 @@ public record Breed(
                     sourcesNamed ? sources : BreedSource.ALL, pools,
                     new StatScores(speed, jump, health, size), bands.build(),
                     notes, price,
-                    description, spawnTime);
+                    description, spawnTime, strains);
         }
     }
 }

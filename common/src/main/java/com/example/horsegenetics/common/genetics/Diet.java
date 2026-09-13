@@ -47,6 +47,15 @@ public enum Diet {
      */
     NOTHING("nothing", "Cannot be fed", 0.0, 0),
 
+    /**
+     * <b>Blood.</b> Nothing from a hand feeds it and nothing heals it passively
+     * - it heals only by biting something living, which the game module does
+     * ({@code server/BloodHuntGoal}). A diet allele like the others, but the one
+     * whose food is not an item: {@link #healPoints()} is zero because the
+     * number lives on the bite, not on anything a player can hold out.
+     */
+    BLOOD("blood", "Blood only", 0.0, 0),
+
     /** Every edible thing there is, and the least out of each. */
     ANYTHING("anything", "Anything edible", 4.0, 0),
 
@@ -120,5 +129,15 @@ public enum Diet {
     /** Is this a diet the mod actually intervenes for? False only for {@link #NORMAL}. */
     public boolean isSpecial() {
         return this != NORMAL;
+    }
+
+    /**
+     * Can anything a player holds out feed this horse? False for
+     * {@link #NOTHING} and {@link #BLOOD}, and for those two it also means the
+     * gated regen beside hay and water does not apply - a horse nothing in the
+     * world can feed must not quietly heal itself standing by a hay bale.
+     */
+    public boolean fedByItems() {
+        return this != NOTHING && this != BLOOD;
     }
 }

@@ -268,6 +268,25 @@
     <a href="stables.html">stables</a>.)
 </p>
 
+<h2 id="strains">Strains: either this, or that</h2>
+<p>
+    A breed&rsquo;s gene pools are drawn <strong>independently per locus</strong>, so a pool
+    cannot say &ldquo;a founder is either white with everything, or brown with half of
+    it&rdquo; &mdash; it would roll white on one locus and brown on the next.
+    <strong>Strains</strong> can. Each founder picks one strain by weight first, and every
+    gene that strain names is drawn from the strain&rsquo;s pool instead of the
+    breed&rsquo;s. A gene named only by <em>another</em> strain is simply not on this
+    founder&rsquo;s sheet, and rolls as an unnamed gene would.
+</p>
+<p>
+    The <a href="breed-book.html#dhampir">Dhampir</a> is the reason they exist: one strain
+    in ten is the white animal, the other nine are seal browns carrying every piece of it.
+    The file format is on <a href="breed-format.html#strains">the breed format page</a>.
+    One consequence worth knowing: <strong>a pool on a body-stat locus wins over the
+    breed&rsquo;s stat score</strong> for that axis, so a breed can pin the vampiric allele
+    outright. The parser warns if a file does both.
+</p>
+
 <h2 id="sources">Where a breed may come from</h2>
 <p>
     A breed names any subset of four sources, and naming none means all four. They are a
@@ -434,7 +453,7 @@
     <li><strong>Won&rsquo;t model</strong> &mdash; the Akhal-Teke / Karabakh metallic sheen (a shader), the Marwari&rsquo;s inward-curving ear tips (a mesh change), and dished / convex / Roman head profiles (Arabian, Lusitano, Percheron, Lipizzan, Shire).</li>
 </ul>
 
-<h2 id="commonness">The 49 breeds</h2>
+<h2 id="commonness">Every breed</h2>
 
 <p>Every one of them also has an entry in <a href="breed-book.html">the breed
     book</a> &mdash; what the breed <em>is</em>, what it was made for, and how it
@@ -468,6 +487,7 @@
 <tr><td>Clydesdale</td><td>taiga, snowy taiga, grove, river</td><td>16.2&ndash;18.0</td><td>3</td><td>3</td><td>5</td><td>Uncommon</td><td>black-biased; tobiano; heavy sabino + splash &rarr; big white legs / face. Feathering not built.</td></tr>
 <tr><td>Connemara Pony</td><td>windswept hills / gravelly hills / forest, stony shore</td><td>13.0&ndash;14.2</td><td>5</td><td>8</td><td>8</td><td>Moderate</td><td>often grey; occasional cream / dun.</td></tr>
 <tr><td>Dales Pony</td><td>windswept hills / gravelly hills, taiga</td><td>13.2&ndash;14.2</td><td>5</td><td>6</td><td>9</td><td>Rare</td><td>black-biased; some grey / roan; occasional dun. Feathering not built.</td></tr>
+<tr><td><a href="breed-book.html#dhampir">Dhampir</a></td><td>most overworld grassland and forest &mdash; <strong>night only</strong></td><td>15.0&ndash;17.3</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Rare</td><td>magical. Fixed seal brown (<code>E/E</code> <code>A/a</code> <code>ShD/ShD</code>), red irises with glowing scleras. Two <a href="#strains">strains</a>: 1 in 10 white with two copies of magic white, sun sensitivity, blood diet and the vampiric stat allele; 9 in 10 carrying one copy of each. No S/J/H scores &mdash; the vampiric allele sets its body.</td></tr>
 <tr><td>Dartmoor Pony</td><td>windswept hills, meadow, forest</td><td>11.2&ndash;12.2</td><td>4</td><td>5</td><td>8</td><td>Rare</td><td>any base; some grey / roan; occasional cream.</td></tr>
 <tr><td>Exmoor Pony</td><td>windswept hills, taiga, snowy slopes</td><td>11.2&ndash;12.3</td><td>4</td><td>4</td><td>10</td><td>Rare</td><td>landrace; bay-biased; nd1 primitive marks, no white/dilution. Pangare not built.</td></tr>
 <tr><td>Falabella</td><td>plains, sunflower plains, meadow</td><td>6.0&ndash;8.0</td><td>2</td><td>1</td><td>3</td><td>Uncommon</td><td>every dilution + tobiano + sabino + splash. Smallest breed &mdash; size band at the minimum scale.</td></tr>

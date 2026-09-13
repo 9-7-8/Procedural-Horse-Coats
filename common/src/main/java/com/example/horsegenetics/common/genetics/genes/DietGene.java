@@ -25,8 +25,9 @@ import java.util.Optional;
  * <b>Diet</b> ({@code horsegenetics.diet}) - what the horse will eat, and what
  * it gets out of it.
  *
- * <p>Thirteen alleles: the wild type {@code n}, which is an ordinary horse
- * eating ordinary horse feed, and twelve <b>narrow</b> diets. Every narrow
+ * <p>The wild type {@code n}, which is an ordinary horse eating ordinary horse
+ * feed, and one allele per <b>narrow</b> diet - blood among them, which is the
+ * odd one out twice over (below). Every narrow
  * allele is recessive to {@code n} <i>and to every other diet allele</i> - it
  * takes <b>two identical copies</b> to express, so {@code Dlava/Ding} is a
  * horse that eats hay like any other and carries two surprises. That is the
@@ -49,10 +50,11 @@ import java.util.Optional;
  *       so {@code BreedFounder} forces {@code n/n} on every breed that does not
  *       name the locus. A lava-eating Shire is not a breed trait, it is a
  *       curiosity of the unbred population.</li>
- *   <li><b>A founder is never a carrier.</b> The founder table lists {@code n/n}
- *       and the twelve <i>homozygotes</i> and nothing else, so a feral horse
- *       that rolls into this gene has the diet outright. The heterozygote
- *       exists only as something you breed.</li>
+ *   <li><b>A founder is never a carrier</b> - except of blood. The founder table
+ *       lists {@code n/n} and the <i>homozygotes</i>, so a feral horse that
+ *       rolls into this gene has the diet outright; the heterozygote exists only
+ *       as something you breed. Blood is the mirror: never outright in the
+ *       wild, a few silent carriers - see {@link #BLOOD_CARRIER_PERCENT}.</li>
  *   <li><b>The random splice cannot hand one to a foal.</b> Its
  *       {@link #spliceTable()} is the mirror image - {@code n/n} and the twelve
  *       <i>carriers</i> - because an unasked-for horse that only eats gold is a
@@ -82,19 +84,29 @@ public final class DietGene implements Gene, DietContribution {
     /** Ahead of everything that paints - see the class note. */
     public static final int PRIORITY = 5;
 
-    /** The twelve narrow diets, in declaration order, then the wild type. */
+    /** The narrow diets, in declaration order, then the wild type. */
     private static final Diet[] NARROW = {
             Diet.ANYTHING, Diet.RAW_MEAT, Diet.FISH, Diet.RAW_VEGETABLES, Diet.WHEAT,
             Diet.HUMAN_FOOD, Diet.CAKE, Diet.POTION, Diet.LAVA, Diet.WATER,
-            Diet.INGOT, Diet.GEM};
+            Diet.INGOT, Diet.GEM, Diet.BLOOD};
 
     private static final String[] TOKENS = {
             "Dany", "Dmeat", "Dfish", "Dveg", "Dwht",
             "Dhum", "Dcake", "Dpot", "Dlava", "Dwat",
-            "Ding", "Dgem"};
+            "Ding", "Dgem", "Dbld"};
 
     /** How many founders in a hundred have each narrow diet outright. */
     private static final double EACH_PERCENT = 1.0;
+
+    /**
+     * <b>Blood is the exception to "never a carrier".</b> A wild horse that
+     * could only heal by biting would not have lived to be caught, so no
+     * founder has it outright - but a few carry one silent copy, the way the
+     * other magical survivors' loci do, and two of those bred together is how a
+     * blood-drinker turns up outside the Dhampir breed. It is also the one diet
+     * the random splice never hands over, carrier or not.
+     */
+    public static final double BLOOD_CARRIER_PERCENT = 3.0;
 
     private final Map<Diet, Allele> byDiet = new LinkedHashMap<>();
     private final Map<Diet, Expression> expressionByDiet = new LinkedHashMap<>();
@@ -131,13 +143,22 @@ public final class DietGene implements Gene, DietContribution {
 
         FounderTable.Builder wild = FounderTable.builder();
         FounderTable.Builder splice = FounderTable.builder();
-        for (Allele a : byDiet.values()) {
+        double wildSpent = 0.0;
+        double spliceSpent = 0.0;
+        for (Map.Entry<Diet, Allele> e : byDiet.entrySet()) {
+            Allele a = e.getValue();
+            if (e.getKey() == Diet.BLOOD) {
+                wild.weight(a, n, BLOOD_CARRIER_PERCENT);   // a carrier only - see the constant
+                wildSpent += BLOOD_CARRIER_PERCENT;
+                continue;                                   // and never a splice
+            }
             wild.weight(a, a, EACH_PERCENT);        // outright, never a carrier
             splice.weight(a, n, EACH_PERCENT);      // a carrier, never outright
+            wildSpent += EACH_PERCENT;
+            spliceSpent += EACH_PERCENT;
         }
-        double rest = 100.0 - EACH_PERCENT * NARROW.length;
-        this.founders = wild.weight(n, n, rest).build();
-        this.splices = splice.weight(n, n, rest).build();
+        this.founders = wild.weight(n, n, 100.0 - wildSpent).build();
+        this.splices = splice.weight(n, n, 100.0 - spliceSpent).build();
     }
 
     /**
@@ -145,6 +166,13 @@ public final class DietGene implements Gene, DietContribution {
      * the number it is about cannot drift apart.
      */
     private static String describe(Diet diet) {
+        if (diet == Diet.BLOOD) {
+            return "Blood diet. The horse eats nothing a hand can offer and does not heal beside hay "
+                    + "and water. Hurt, it hunts: it bites a living mob for half a heart and heals "
+                    + "three, then leaves that animal alone for a day. It never bites another horse "
+                    + "or anything undead, and it only goes for a player - or a tamed cat or dog - "
+                    + "when there is nothing else within reach.";
+        }
         StringBuilder sb = new StringBuilder("The horse will eat nothing but ")
                 .append(diet.label().toLowerCase().replace(" only", ""))
                 .append(", and refuses everything else. ");

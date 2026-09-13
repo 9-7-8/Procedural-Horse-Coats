@@ -131,7 +131,7 @@ class LycanGeneTest {
     /**
      * Thirty-seven alleles for one gallery entry. It also grants no
      * {@code effects} verb at all - the shift is hand-written behaviour on the
-     * game side, the same split {@link DhampirGene} makes - so a shifter's
+     * game side, the same split {@link SunSensitivityGene} makes - so a shifter's
      * ability list must be empty here.
      */
     @Test

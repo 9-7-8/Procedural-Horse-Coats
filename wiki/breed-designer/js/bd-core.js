@@ -37,7 +37,7 @@ window.HG = window.HG || {};
   bd.AGGRO_KEYS = ["horsegenetics.magic_mob_aura", "horsegenetics.magic_night_temper",
     "horsegenetics.magic_night_watch", "horsegenetics.lycan", "horsegenetics.intimidating",
     "horsegenetics.gladiator", "horsegenetics.guardian", "horsegenetics.pack_leader",
-    "horsegenetics.magic_fighter", "horsegenetics.holy_ward", "horsegenetics.dhampir"];
+    "horsegenetics.magic_fighter", "horsegenetics.holy_ward", "horsegenetics.sun_sensitivity"];
   // The natural eye loci every breed names from the start, at their wild type:
   // brown irises, white sclera. Champagne, cream and the white patterns still
   // change them when a horse is made (Eyes.force) - naming them only stops a
@@ -72,7 +72,7 @@ window.HG = window.HG || {};
       // size starts as "an ordinary horse" rather than unset, because an unset
       // size is not an obvious thing to leave alone.
       stats: { size: [0.95, 1.05], health: 5, speed: 5, jump: 5 },
-      genes: genes, bands: {}, notes: [],
+      genes: genes, strains: [], bands: {}, notes: [],
       // Not in the file: the base step's colour weights, so reopening the step
       // shows the sliders where they were left.
       _base: null
@@ -97,6 +97,9 @@ window.HG = window.HG || {};
     var pools = {};
     Object.keys(s.genes).forEach(function (k) { if (s.genes[k].length) pools[k] = s.genes[k]; });
     if (Object.keys(pools).length) out.genes = pools;
+    // Strains are carried through untouched - the designer has no editor for
+    // them yet, but a breed that has them must not lose them on a round trip.
+    if (s.strains && s.strains.length) out.strains = s.strains;
     var bands = {};
     Object.keys(s.bands).forEach(function (k) { if (Object.keys(s.bands[k]).length) bands[k] = s.bands[k]; });
     if (Object.keys(bands).length) out.bands = bands;
@@ -106,10 +109,13 @@ window.HG = window.HG || {};
 
   /** Any magical gene named in a pool - what "kind: auto" resolves to. */
   bd.anyMagical = function (s) {
-    return Object.keys(s.genes).some(function (k) {
-      var g = bd.geneByKey[k];
-      return g && !g.natural && s.genes[k].length && BODY_STATS.indexOf(k) < 0;
-    });
+    function magical(pools) {
+      return Object.keys(pools || {}).some(function (k) {
+        var g = bd.geneByKey[k];
+        return g && !g.natural && pools[k].length && BODY_STATS.indexOf(k) < 0;
+      });
+    }
+    return magical(s.genes) || (s.strains || []).some(function (st) { return magical(st.genes); });
   };
 
   bd.fromJson = function (text) {
@@ -122,6 +128,7 @@ window.HG = window.HG || {};
     // The file is the truth, including about the eyes: a breed file that names
     // no eye locus gets none named here either.
     s.genes = parsed.genes || {};
+    s.strains = parsed.strains || [];
     s.bands = parsed.bands || {};
     s.notes = parsed.notes || [];
     return s;

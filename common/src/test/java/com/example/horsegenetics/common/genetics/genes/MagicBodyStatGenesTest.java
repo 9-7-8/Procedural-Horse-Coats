@@ -50,14 +50,14 @@ class MagicBodyStatGenesTest {
     // The table
     // ------------------------------------------------------------------
 
-    /** Three alleles, six combinations, six distinct outcomes - which is what codominance is. */
+    /** Four alleles, ten combinations, ten distinct outcomes - which is what codominance is. */
     @Test
-    void everyLocusIsCodominantWithSixOutcomes() {
+    void everyLocusIsCodominantWithTenOutcomes() {
         for (Locus l : LOCI) {
             AbstractMagicStatGene g = l.gene();
-            assertEquals(3, g.alleles().size(), g.key());
-            assertEquals(6, g.expressions().size(), g.key());
-            assertEquals(6, GenotypeCatalog.allPairsOf(g).size(), g.key());
+            assertEquals(4, g.alleles().size(), g.key());
+            assertEquals(10, g.expressions().size(), g.key());
+            assertEquals(10, GenotypeCatalog.allPairsOf(g).size(), g.key());
 
             Set<String> ids = new HashSet<>();
             Set<Expression> declared = new HashSet<>(g.expressions());
@@ -66,7 +66,27 @@ class MagicBodyStatGenesTest {
                 assertTrue(declared.contains(e), g.key() + " " + pair.toTokens() + " -> undeclared");
                 assertTrue(ids.add(e.id()), g.key() + " two combinations share an outcome");
             }
-            assertEquals(6, ids.size(), g.key());
+            assertEquals(10, ids.size(), g.key());
+        }
+    }
+
+    /**
+     * <b>The vampiric allele is the dhampir's strength, split in half.</b> One
+     * copy is exactly half the old multiplier on every epigenome, two copies the
+     * whole of it - triple health, half again the speed, twice the jump.
+     */
+    @Test
+    void theVampiricAlleleIsAFixedHalfPerCopy() {
+        double[] full = {1.5, 3.0, 2.0};   // speed, health, jump - LOCI order
+        for (int i = 0; i < LOCI.size(); i++) {
+            Locus l = LOCI.get(i);
+            String v = l.gene().vampiric.token();
+            for (long seed = 0; seed < 20; seed++) {
+                Epigenome epi = Epigenome.fromSeed(seed);
+                assertEquals(full[i], statWith(l, v + "/" + v, epi) / l.baseline(), 1e-9, l.gene().key());
+                assertEquals(1.0 + (full[i] - 1.0) / 2, statWith(l, v + "/n", epi) / l.baseline(), 1e-9,
+                        l.gene().key());
+            }
         }
     }
 
@@ -303,6 +323,7 @@ class MagicBodyStatGenesTest {
                 assertFalse(pair.homozygousFor(g.up), g.key() + " wild up/up at " + seed);
                 assertFalse(pair.homozygousFor(g.down), g.key() + " wild down/down at " + seed);
                 assertFalse(pair.has(g.up) && pair.has(g.down), g.key() + " wild up/down at " + seed);
+                assertFalse(pair.count(g.vampiric) == 2, g.key() + " wild vampiric/vampiric at " + seed);
                 if (!pair.homozygousFor(g.n)) {
                     carriers++;
                 }

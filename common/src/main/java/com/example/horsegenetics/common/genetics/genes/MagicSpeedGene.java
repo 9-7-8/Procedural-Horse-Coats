@@ -54,7 +54,14 @@ public final class MagicSpeedGene extends AbstractMagicStatGene {
                         "Balanced",
                         "One swift copy and one sluggish copy. Their percentages very nearly cancel, so "
                                 + "the horse runs close to its ordinary speed while carrying, and passing "
-                                + "on, both extremes."));
+                                + "on, both extremes."),
+                "speed");
+    }
+
+    /** Half the dhampir's old 1.5x - so {@code Vmp/Vmp} runs half again as fast. */
+    @Override
+    public double vampiricPerCopy() {
+        return 0.25;
     }
 
     @Override

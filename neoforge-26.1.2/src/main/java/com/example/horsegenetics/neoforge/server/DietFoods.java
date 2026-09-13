@@ -111,6 +111,7 @@ public final class DietFoods {
         switch (diet.diet()) {
             case NORMAL:
             case NOTHING:
+            case BLOOD:     // it bites; nothing a hand holds feeds it
                 return false;
             case ANYTHING:
                 return isEdible(stack);
@@ -182,7 +183,7 @@ public final class DietFoods {
         require(Diet.INGOT, INGOTS.size());
         require(Diet.GEM, GEMS.size());
         for (Diet diet : Diet.values()) {
-            if (diet.variants() == 0 && diet != Diet.NORMAL && diet != Diet.NOTHING
+            if (diet.variants() == 0 && diet.fedByItems() && diet != Diet.NORMAL
                     && diet != Diet.ANYTHING && !BY_DIET.containsKey(diet)) {
                 throw new IllegalStateException("DietFoods has no items for " + diet);
             }

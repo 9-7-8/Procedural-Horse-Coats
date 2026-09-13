@@ -34,9 +34,9 @@ import net.minecraft.world.entity.animal.equine.Horse;
  * stands and fights, and goes back to fleeing the instant the target is gone.
  *
  * <p>Fire is the deliberate exception, and it matters for
- * {@link DhampirHandler dhampir}: a burning horse panics whatever it was doing,
- * because running is the correct response to being on fire and a dhampir that
- * stood in the sun trading blows would burn to death doing it.
+ * {@link SunSensitivityHandler sun sensitivity}: a burning horse panics whatever
+ * it was doing, because running is the correct response to being on fire - unless
+ * the fire is the sky, below.
  */
 public final class HorsePanicGoal extends PanicGoal {
 
@@ -64,12 +64,13 @@ public final class HorsePanicGoal extends PanicGoal {
      * target holds position; anything without an aggression gene never has one,
      * so it flees exactly as vanilla does.
      *
-     * <p><b>Or it is a dhampir on fire</b> - and this one is the opposite of
-     * what it looks like. Panic is normally the right answer to burning, and
-     * the first version of this class said so in as many words. It is wrong for
-     * precisely one animal: a dhampir is not on fire because of a fire, it is
-     * on fire because of <em>the sky</em>, and there is nothing to run away
-     * from. It has a goal for this - {@link DhampirShadeGoal} finds a roof and
+     * <p><b>Or it is a sun-sensitive horse on fire</b> - and this one is the
+     * opposite of what it looks like. Panic is normally the right answer to
+     * burning, and the first version of this class said so in as many words. It
+     * is wrong for precisely one animal: a sun-sensitive horse (the dhampir, when
+     * this was written) is not on fire because of a fire, it is on fire because
+     * of <em>the sky</em>, and there is nothing to run away from. It has a goal
+     * for this - {@link SunShadeGoal} finds a roof and
      * walks to it - and that goal sits at <b>priority 1</b>, the same priority
      * vanilla registers {@code PanicGoal} at. Same priority, same
      * {@code Flag.MOVE}, and vanilla's is added first in {@code registerGoals},
@@ -82,28 +83,28 @@ public final class HorsePanicGoal extends PanicGoal {
      */
     private boolean holdGround() {
         if (horse.isOnFire() || horse.isFreezing()) {
-            return dhampir();
+            return sunSensitive();
         }
         return horse.getTarget() != null && horse.getTarget().isAlive();
     }
 
     /**
-     * Resolved once and kept. {@code isDhampir} parses the horse's genotype and
+     * Resolved once and kept. {@code isSensitive} parses the horse's genotype and
      * this is asked every tick by two methods, on every horse in the world -
      * the same reasoning as {@code FoodTemptGoal}'s cached lookup. Lazy rather
      * than done in the constructor because goals are attached on entity join
      * and the record is filled on the founding tick, so there is often nothing
      * to read yet.
      */
-    private Boolean dhampir;
+    private Boolean sunSensitive;
 
-    private boolean dhampir() {
-        if (dhampir == null) {
+    private boolean sunSensitive() {
+        if (sunSensitive == null) {
             if (!HorseRecords.hasRealRecord(horse)) {
                 return false;   // ask again next tick
             }
-            dhampir = DhampirHandler.isDhampir(horse);
+            sunSensitive = SunSensitivityHandler.isSensitive(horse);
         }
-        return dhampir;
+        return sunSensitive;
     }
 }

@@ -20,11 +20,11 @@
 <h1>Diet &mdash; what the horse will eat</h1>
 
 <p class="lede">
-    Thirteen alleles. Twelve of them are <strong>narrow diets</strong> &mdash;
-    raw meat, fish, wheat, cake, potions, lava, one metal, one gem &mdash; each
-    needing <strong>two identical copies</strong> to show, against a wild type
-    that eats what any horse eats. A narrow diet refuses almost everything, and
-    what it does accept feeds it far better: a single gold bar takes a
+    A wild type that eats what any horse eats, and a set of <strong>narrow
+    diets</strong> &mdash; raw meat, fish, wheat, cake, potions, lava, one metal,
+    one gem, and <a href="#blood">blood</a> &mdash; each needing <strong>two
+    identical copies</strong> to show. A narrow diet refuses almost everything,
+    and what it does accept feeds it far better: a single gold bar takes a
     metal-eater to full health however hurt it was.
 </p>
 
@@ -66,6 +66,37 @@
     drift apart.
 </p>
 
+<h2 id="blood">Blood diet</h2>
+
+<p>
+    The strangest diet, and the Dhampir&rsquo;s. Two <code>Dbld</code> copies and the horse
+    eats <strong>nothing a hand can offer</strong>, and does not heal beside hay and water
+    either. It heals only by <strong>biting</strong>.
+</p>
+
+<ul>
+    <li><strong>When it is hurt, it hunts.</strong> It walks up to something living, bites
+        it for half a heart, and heals three hearts. Then it leaves that animal alone for a
+        whole day, so a cow bitten today is fine and gets bitten again tomorrow.</li>
+    <li><strong>Any living mob will do</strong> &mdash; a cow, a sheep, a villager, a
+        creeper &mdash; nearest first.</li>
+    <li><strong>A player only if there is nothing else.</strong> If no other mob it can bite
+        is within reach, it will bite a player, its owner included. Creative players are left
+        alone.</li>
+    <li><strong>Tamed cats and dogs last of all</strong> &mdash; below players.</li>
+    <li><strong>Never another horse</strong>, and never anything undead.</li>
+    <li><strong>Not in the sun</strong>, if it is also
+        <a href="gene-sun-sensitivity.html">sun-sensitive</a>: shelter comes first, dinner
+        after dark.</li>
+</ul>
+
+<p>
+    Keep one beside a pen of livestock and it looks after itself without emptying the pen;
+    keep one alone and it starves slowly. No wild horse is born drinking blood, but about
+    three in a hundred carry one silent copy &mdash; and the random splice carrot never hands
+    it over.
+</p>
+
 <h2 id="carrot">Its gene carrot</h2>
 
 <div class="gene-carrot" data-gene="horsegenetics.diet"></div>
@@ -76,8 +107,8 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.diet</dd></div>
-    <div><dt>Alleles</dt><dd>12 diets + <span class="allele">n</span> &mdash; see <code>DietGene</code></dd></div>
-    <div><dt>Outcomes</dt><dd>13, and <strong>all of them wild type</strong> &mdash; it paints nothing</dd></div>
+    <div><dt>Alleles</dt><dd>one per narrow diet + <span class="allele">n</span> &mdash; see <code>DietGene</code></dd></div>
+    <div><dt>Outcomes</dt><dd>one per allele, and <strong>all of them wild type</strong> &mdash; it paints nothing</dd></div>
     <div><dt>Shows when</dt><dd>homozygous for one diet allele, and only then</dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
     <div><dt>Priority</dt><dd><code>DietGene.PRIORITY</code> &mdash; ahead of every gene that paints</dd></div>
@@ -131,13 +162,16 @@
         now; <code>feralOnly</code> predates that and says the same thing louder.) A lava-eating
         Shire is not a breed trait. A breed that genuinely wanted one could still
         name the locus in its own pool &mdash; that check runs first.</li>
-    <li><strong>A founder is never a carrier.</strong> The founder table lists
-        <span class="allele">n/n</span> and the twelve <em>homozygotes</em> and
-        nothing between, so a feral horse that rolls into this gene has the diet
-        outright. The heterozygote exists only as something you breed.</li>
+    <li><strong>A founder is never a carrier &mdash; except of blood.</strong> The
+        founder table lists <span class="allele">n/n</span> and the
+        <em>homozygotes</em> and nothing between, so a feral horse that rolls into this
+        gene has the diet outright. <code>Dbld</code> is the mirror: never outright in
+        the wild (a horse that could only heal by biting would not have lived to be
+        caught), a few silent carriers at <code>DietGene.BLOOD_CARRIER_PERCENT</code>.</li>
     <li><strong>The random splice carrot cannot hand one to a foal.</strong> Its
         <code>spliceTable()</code> is the mirror image &mdash;
-        <span class="allele">n/n</span> and the twelve <em>carriers</em>. An
+        <span class="allele">n/n</span> and the <em>carriers</em>, with blood left out
+        entirely. An
         unasked-for horse that only eats gold is a trap; a carrier is a gift.
         The named Known Gene Splice carrot is heterozygous too, so a player who
         wants the diet still has to breed for it.</li>
@@ -161,7 +195,17 @@
     &ldquo;and <em>this</em> horse cannot be fed at all&rdquo; wins by sorting
     after it, with no special case anywhere and nothing to register.
     <code>Diet.NOTHING</code> exists for exactly that and is <strong>not</strong>
-    an allele of this locus.
+    an allele of this locus. Nothing claims it today &mdash; the dhampir did, until it
+    was split and its appetite became the <code>Dbld</code> allele here.
+</p>
+
+<p>
+    <code>Diet.fedByItems()</code> is false for <code>NOTHING</code> and
+    <code>BLOOD</code>, and it is the one test both halves of the game module ask:
+    <code>HorseDietHandler.canRegenerate</code> (so the gated regen skips them) and
+    <code>DietFoods.accepts</code>. The hunt itself is
+    <code>neoforge/server/BloodHuntGoal</code>, wired onto every horse by
+    <code>BloodDietHandler</code> and resolving the diet once, lazily.
 </p>
 
 <h2>What the game module does with it</h2>

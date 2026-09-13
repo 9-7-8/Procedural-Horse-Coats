@@ -42,17 +42,29 @@
 <pre><code class="language-java">FounderTable.builder()
         .weight(Hardy,   n, 40.0)
         .weight(Frail, n, 40.0)
-        .weight(n,      n, 20.0)
+        .weight(Vmp,   n,  2.0)
+        .weight(n,      n, 18.0)
         .build();</code></pre>
 </div>
 
 <p>
     Written out rather than derived from Hardy-Weinberg, because random mating
-    is exactly what this table is <em>not</em>: about <strong>80%</strong> of
+    is exactly what this table is <em>not</em>: about <strong>82%</strong> of
     wild horses carry one copy, and <strong>no</strong> wild horse carries two
     of anything. Every doubled horse in the world, in either direction, is
     something somebody bred &mdash; the health loci&rsquo;s rule, pointed at
     something worth having.
+</p>
+
+<h2 id="vampiric">The vampiric allele</h2>
+
+<p>
+    A third kind of copy, <code>Vmp</code>, and the Dhampir&rsquo;s strength. Unlike
+    <code>Hardy</code> it is worth a <strong>fixed</strong> amount, the same on every horse:
+    one copy gives <strong>twice</strong> the hearts, two copies <strong>three times</strong>.
+    Beside a <code>Hardy</code> or <code>Frail</code> copy, both count. About two wild horses
+    in a hundred carry one; none carry two. A <a href="breed-book.html#dhampir">seal brown
+    Dhampir</a> has one, a white Dhampir two.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>
@@ -70,11 +82,11 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.magic_health</dd></div>
     <div><dt>Priority</dt><dd>142 (magical band)</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">Hardy</span> <span class="allele dom">Frail</span> <span class="allele wild">n</span></dd></div>
-    <div><dt>Combinations</dt><dd>6, all carryable &mdash; <strong>6 outcomes</strong>, one each</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Hardy</span> <span class="allele dom">Frail</span> <span class="allele dom">Vmp</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>10, all carryable &mdash; <strong>10 outcomes</strong>, one each</dd></div>
     <div><dt>Inheritance</dt><dd><strong>codominant</strong> &mdash; both copies contribute and the percentages add</dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>In the wild</dt><dd><strong>heterozygotes only</strong> &mdash; 40% <code>Hardy/n</code>, 40% <code>Frail/n</code>, 20% <code>n/n</code></dd></div>
+    <div><dt>In the wild</dt><dd><strong>heterozygotes only</strong> &mdash; 40% <code>Hardy/n</code>, 40% <code>Frail/n</code>, 2% <code>Vmp/n</code>, 18% <code>n/n</code></dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Epigenetic draws</dt><dd>12 &times; nextFloat() per copy (one <code>nextGaussian()</code>)</dd></div>
     <div><dt>Per copy</dt><dd>normal, mean <strong>10%</strong>, &sigma; <strong>7%</strong>, floor 1%</dd></div>
@@ -121,11 +133,18 @@
         <tr><td><code>Frail/n</code></td><td><code>less</code></td><td>one copy&rsquo;s percentage off</td><td>&times;~0.90</td></tr>
         <tr><td><code>Frail/Frail</code></td><td><code>double-less</code></td><td>both percentages off</td><td>&times;~0.80</td></tr>
         <tr><td><code>Hardy/Frail</code></td><td><code>balanced</code></td><td>the two nearly cancel</td><td>&times;~1.00</td></tr>
+        <tr><td><code>Vmp/n</code></td><td><code>vampiric</code></td><td>a fixed +1.0</td><td>&times;2.00</td></tr>
+        <tr><td><code>Vmp/Hardy</code></td><td><code>vampiric-more</code></td><td>+1.0 and that copy&rsquo;s percentage</td><td>&times;~2.10</td></tr>
+        <tr><td><code>Vmp/Frail</code></td><td><code>vampiric-less</code></td><td>+1.0 less that copy&rsquo;s percentage</td><td>&times;~1.90</td></tr>
+        <tr><td><code>Vmp/Vmp</code></td><td><code>double-vampiric</code></td><td>a fixed +2.0</td><td><strong>&times;3.00</strong></td></tr>
     </tbody>
 </table>
 
 <p>
-    <strong>Six combinations, six outcomes.</strong> A codominant locus is the
+    <strong>Ten combinations, ten outcomes.</strong> <code>Vmp</code> adds
+    <code>vampiricPerCopy()</code> into the same sum as the other copy rather than an
+    epigenetic percentage, so it is identical on every horse &mdash; it is the old dhampir
+    gene&rsquo;s triple health, split in half across the two copies. A codominant locus is the
     case where every combination genuinely differs, so collapsing any two rows
     would be a lie about the gene. The contribution is signed &mdash;
     <code>Hardy</code> positive, <code>Frail</code> negative &mdash; so the whole

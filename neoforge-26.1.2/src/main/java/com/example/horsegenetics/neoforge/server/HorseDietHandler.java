@@ -161,6 +161,11 @@ public final class HorseDietHandler {
         level.sendParticles(ParticleTypes.SMOKE,
                 horse.getX(), horse.getY() + horse.getBbHeight() * 0.8, horse.getZ(),
                 6, 0.3, 0.2, 0.3, 0.01);
+        if (diet.diet() == Diet.BLOOD) {
+            player.sendSystemMessage(Component.literal(
+                    "The horse turns its head away. Nothing you can hold out will feed it."));
+            return;
+        }
         Item wanted = DietFoods.wantedBy(diet);
         Component what = wanted != null
                 ? Component.translatable(wanted.getDescriptionId())
@@ -177,17 +182,17 @@ public final class HorseDietHandler {
     }
 
     /**
-     * <b>Can this horse regenerate at all?</b> False for a
-     * {@link Diet#NOTHING} horse - a dhampir - and that is the whole reason the
-     * value exists: "cannot be fed" has to mean the gated regen in
+     * <b>Can this horse regenerate at all?</b> False for a diet nothing a hand
+     * holds can feed - {@link Diet#NOTHING}, and {@link Diet#BLOOD}, which heals
+     * only by biting - because "cannot be fed" has to mean the gated regen in
      * {@link HorseCareHandler} too, or a horse that nothing in the world can
      * feed would still quietly heal itself standing beside a hay bale.
      *
-     * <p>Stated once, here, in terms of the diet rather than in terms of the
-     * gene: any future gene that claims {@code NOTHING} inherits it.
+     * <p>Stated once, in terms of the diet rather than of any gene:
+     * {@link Diet#fedByItems()}.
      */
     public static boolean canRegenerate(Horse horse) {
-        return dietOf(horse).diet() != Diet.NOTHING;
+        return dietOf(horse).diet().fedByItems();
     }
 
     /**

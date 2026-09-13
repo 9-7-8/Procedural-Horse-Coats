@@ -105,13 +105,39 @@ class DietGeneTest {
     @Test
     void aFounderIsNeverACarrier() {
         Set<Diet> seen = new HashSet<>();
+        Allele blood = DIET.alleleFor(Diet.BLOOD);
+        boolean sawBloodCarrier = false;
         for (long seed = 0; seed < 4000; seed++) {
             AllelePair pair = Genotype.random(new SeededRng(seed)).pair(DIET);
+            assertFalse(pair.homozygousFor(blood), "a founder drinks blood outright at seed " + seed);
+            if (pair.has(blood)) {
+                // the one exception, and the mirror image of the rule
+                assertTrue(pair.has(DIET.n), "blood is only ever carried beside the wild type");
+                sawBloodCarrier = true;
+                continue;
+            }
             assertTrue(pair.homozygous(), "founder at seed " + seed + " is a carrier: " + pair.toTokens());
             seen.add(HorseDiet.resolve(Genotype.wildType().with(pair), null).diet());
         }
         assertTrue(seen.size() > 6, "4000 founders should turn up a spread of diets, saw " + seen);
         assertTrue(seen.contains(Diet.NORMAL), "most founders should be ordinary");
+        assertTrue(sawBloodCarrier, "4000 founders should turn up a blood carrier");
+    }
+
+    /** A blood diet is fed by nothing a hand holds, and does not regenerate beside hay. */
+    @Test
+    void bloodIsNotFedByItems() {
+        assertEquals(Diet.BLOOD, HorseDiet.resolve(homozygous(Diet.BLOOD), null).diet());
+        assertFalse(Diet.BLOOD.fedByItems());
+        assertFalse(Diet.NOTHING.fedByItems());
+        assertTrue(Diet.RAW_MEAT.fedByItems());
+    }
+
+    /** The random splice never hands over blood, not even as a carrier. */
+    @Test
+    void theSpliceNeverHandsOverBlood() {
+        Allele blood = DIET.alleleFor(Diet.BLOOD);
+        assertFalse(DIET.spliceTable().orElseThrow().pairs().stream().anyMatch(p -> p.has(blood)));
     }
 
     /** The mirror image: a random splice hands over a carrier and never the diet itself. */
@@ -125,13 +151,16 @@ class DietGeneTest {
         }
     }
 
-    /** No named breed carries any of it - {@link com.example.horsegenetics.common.genetics.Gene#feralOnly()}. */
+    /**
+     * No named breed carries any of it - {@link com.example.horsegenetics.common.genetics.Gene#feralOnly()} -
+     * unless its sheet names the locus, which only the Dhampir does.
+     */
     @Test
     void noBreedCarriesADiet() {
         assertTrue(DIET.feralOnly());
         for (Breed breed : Breeds.all()) {
-            if (breed == Breeds.FERAL_MIXED) {
-                continue;   // the unbred population is the one place it lives
+            if (breed == Breeds.FERAL_MIXED || breed.constrains(DIET.key())) {
+                continue;   // the unbred population, and a breed that asked for it
             }
             for (long seed = 0; seed < 40; seed++) {
                 Genome g = BreedFounder.roll(breed, new SeededRng(seed));
@@ -187,7 +216,8 @@ class DietGeneTest {
     void aNarrowerDietFeedsBetterThanEatingAnything() {
         double anything = Diet.ANYTHING.healPoints();
         for (Diet diet : Diet.values()) {
-            if (diet == Diet.NORMAL || diet == Diet.NOTHING || diet == Diet.ANYTHING) {
+            if (diet == Diet.NORMAL || diet == Diet.NOTHING || diet == Diet.ANYTHING
+                    || diet == Diet.BLOOD) {   // blood heals by the bite, not by an item
                 continue;
             }
             assertTrue(diet.healsFully() || diet.healPoints() > anything,

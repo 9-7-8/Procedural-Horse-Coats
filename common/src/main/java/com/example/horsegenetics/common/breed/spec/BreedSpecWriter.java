@@ -78,7 +78,10 @@ public final class BreedSpecWriter {
             fields.add(field("stats", stats));
         }
         if (!breed.genePools().isEmpty()) {
-            fields.add(field("genes", genes(breed.genePools())));
+            fields.add(field("genes", genes(breed.genePools(), 2)));
+        }
+        if (!breed.strains().isEmpty()) {
+            fields.add(field("strains", strains(breed.strains())));
         }
         if (!breed.bands().isEmpty()) {
             fields.add(field("bands", bands(breed.bands())));
@@ -110,18 +113,35 @@ public final class BreedSpecWriter {
         return r.isPoint() ? number(r.lo()) : inlineArray(List.of(number(r.lo()), number(r.hi())));
     }
 
-    private static String genes(Map<String, List<Breed.Combo>> pools) {
+    /** A {@code genes} object whose closing brace sits at {@code indent} spaces. */
+    private static String genes(Map<String, List<Breed.Combo>> pools, int indent) {
+        String keyPad = " ".repeat(indent + 2);
+        String comboPad = " ".repeat(indent + 4);
         List<String> byGene = new ArrayList<>();
         for (Map.Entry<String, List<Breed.Combo>> e : pools.entrySet()) {
             List<String> combos = new ArrayList<>();
             for (Breed.Combo c : e.getValue()) {
-                combos.add("      { \"pair\": " + quote(c.a() + "/" + c.b())
+                combos.add(comboPad + "{ \"pair\": " + quote(c.a() + "/" + c.b())
                         + ", \"weight\": " + number(c.weight()) + " }");
             }
-            byGene.add("    " + quote(e.getKey()) + ": [\n"
-                    + String.join(",\n", combos) + "\n    ]");
+            byGene.add(keyPad + quote(e.getKey()) + ": [\n"
+                    + String.join(",\n", combos) + "\n" + keyPad + "]");
         }
-        return "{\n" + String.join(",\n", byGene) + "\n  }";
+        return "{\n" + String.join(",\n", byGene) + "\n" + " ".repeat(indent) + "}";
+    }
+
+    private static String strains(List<Breed.Strain> strains) {
+        List<String> out = new ArrayList<>();
+        for (Breed.Strain s : strains) {
+            List<String> parts = new ArrayList<>();
+            parts.add(field("name", quote(s.name()), 6));
+            parts.add(field("weight", number(s.weight()), 6));
+            if (!s.genePools().isEmpty()) {
+                parts.add(field("genes", genes(s.genePools(), 6), 6));
+            }
+            out.add("    {\n" + String.join(",\n", parts) + "\n    }");
+        }
+        return "[\n" + String.join(",\n", out) + "\n  ]";
     }
 
     private static String bands(BreedBands bands) {

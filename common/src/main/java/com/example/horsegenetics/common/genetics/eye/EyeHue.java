@@ -65,6 +65,16 @@ public enum EyeHue {
     /** The wild type of both sclera loci, and a rare iris. */
     WHITE("Wht", "White", 0xE8E6E0),
 
+    /**
+     * A deep red iris - the colour that used to belong to the dhampir gene alone
+     * and is an allele now, so a red eye is something a line inherits rather
+     * than something one gene paints. Deep and slightly dark rather than a
+     * signal red: at two texels a pure {@code #FF0000} reads as a bright dot
+     * rather than as an eye, the same argument that keeps {@link #MID_BLUE}
+     * desaturated.
+     */
+    RED("Red", "Red", 0xB4131B),
+
     /** Sclera only - the iris loci do not offer it, the template already is it. */
     BLACK("Blk", "Black", 0x14100E),
 
@@ -157,7 +167,7 @@ public enum EyeHue {
      * two agree.
      */
     public static final EyeHue[] IRIS_PALETTE = {
-            BROWN, GREEN, GOLD, DARK_BLUE, MID_BLUE, LIGHT_BLUE, WHITE, CHAOS, INVISIBLE};
+            BROWN, GREEN, GOLD, DARK_BLUE, MID_BLUE, LIGHT_BLUE, WHITE, RED, CHAOS, INVISIBLE};
 
     /**
      * The hues a sector-colour locus offers. {@link #MID_BLUE} first, because

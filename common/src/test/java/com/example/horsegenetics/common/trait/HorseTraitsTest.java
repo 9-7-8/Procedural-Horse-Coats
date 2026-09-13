@@ -197,7 +197,7 @@ class HorseTraitsTest {
      * that a gene which contributes to the body is still declaring it, so it
      * names them: the performance, size and health loci, the colour loci that
      * carry a disorder, milk's embryonic lethal, the leopard complex's CSNB,
-     * grey's melanoma risk flag, and the dhampir's multipliers.
+     * and grey's melanoma risk flag.
      */
     @Test
     void everyTraitGeneIsVisitedInCodeOrder() {
@@ -212,12 +212,11 @@ class HorseTraitsTest {
                 // colour loci that carry a disorder, milk's embryonic lethal,
                 // the leopard complex's CSNB, grey's melanoma risk flag
                 Genes.EDNRB, Genes.MITF, Genes.PAX3, Genes.SILVER, Genes.MILK, Genes.LEOPARD,
-                Genes.GREY,
-                // the dhampir's multiplier set. The four magical body-stat loci
-                // are NOT here - they go through EpigeneticTraitContribution,
-                // because their magnitude is on the allele copy rather than on
-                // the allele.
-                Genes.DHAMPIR);
+                // The four magical body-stat loci are NOT here - they go through
+                // EpigeneticTraitContribution, because their magnitude is on the
+                // allele copy rather than on the allele. The dhampir's multipliers
+                // live there now too, as the vampiric allele.
+                Genes.GREY);
 
         List<Gene> found = new ArrayList<>();
         for (Gene g : Genes.codeOrder()) {

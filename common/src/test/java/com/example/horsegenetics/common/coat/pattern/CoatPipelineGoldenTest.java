@@ -56,11 +56,13 @@ class CoatPipelineGoldenTest {
             override("agouti=A/A", "shade=ShD/ShD"),
             override("agouti=A/a", "shade=Sh/ShD", "extension=E/e"),
             override("extension=e/e", "shade=ShD/ShD"),   // silent on a chestnut
-            // dhampir: the carrier is the eyes alone, the homozygote is white
-            override("agouti=A/a", "dhampir=Dhmp/n"),
-            override("dhampir=Dhmp/Dhmp"),
-            override("agouti=A/a", "dhampir=Dhmp/Dhmp"),
-            override("kit=W22/N", "dhampir=Dhmp/n"),      // red must beat the depigmented blue
+            // the dhampir's face and coat, now loci of their own: red iris with a
+            // lit sclera, and magic white under and over a bay
+            override("agouti=A/a", "eye_colour_right=Red/Red", "eye_colour_left=Red/Red",
+                    "eye_glow_sclera_right=Glo/Glo", "eye_glow_sclera_left=Glo/Glo"),
+            override("magic_white=Wm/Wm"),
+            override("agouti=A/a", "magic_white=Wm/Wm"),
+            override("kit=W22/N", "eye_colour_right=Red/Red", "eye_colour_left=Red/Red"),
             override("kit=W4/N"),                        // Camarillo white, one copy
             override("agouti=A/a", "kit=W4/W4"),         // ...and the viable homozygote
             // the boosters: mild, viable, additive, and most of what KIT does

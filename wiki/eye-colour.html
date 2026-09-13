@@ -68,7 +68,7 @@
 <table>
     <tr><th>Locus</th><th>Band</th><th>Wild type</th><th>Variants</th></tr>
     <tr><td>Iris colour, left / right</td><td>natural</td><td>Brown</td>
-        <td>Green, Gold, Dark blue, Mid blue, Light blue, White, Chaos, Invisible</td></tr>
+        <td>Green, Gold, Dark blue, Mid blue, Light blue, White, Red, Chaos, Invisible</td></tr>
     <tr><td>Sector, left / right</td><td>natural</td><td>none</td>
         <td>Upper left, Top, Upper right, Right, Lower right, Bottom, Lower left, Left,
             and the two diagonals</td></tr>
@@ -336,17 +336,12 @@ bit 2   bit 3        lower left   lower right</code></pre>
 
 <h2 id="magical">The magical genes that still paint eyes directly</h2>
 <p>
-    Four hand-written Java genes predate the loci and still overrule them, painting in the
+    A few hand-written Java genes predate the loci and still overrule them, painting in the
     overlay phase <em>after</em> the eye loci have run. They are not a pattern to copy, and a
     gene file cannot do what they do at all.
 </p>
 <table>
     <tr><th>Gene</th><th>What it does to an eye</th><th>Could the loci do it?</th></tr>
-    <tr><td><a href="gene-dhampir.html">Dhampir</a></td>
-        <td>Red iris at <code>EyeColor.RANK_MAGICAL</code>, plus glowing scleras &mdash; on
-            the <em>carrier</em> as well as the homozygote</td>
-        <td>Partly. The glowing sclera is now an allele; the red is not &mdash; red is the
-            one iris colour in the mod with no allele behind it.</td></tr>
     <tr><td><a href="gene-shadowcreature.html">Shadowcreature</a></td>
         <td><code>shadeEyes</code> gold over the whole eye, with no white left round it, and
             the whole eye emissive</td>
@@ -415,8 +410,6 @@ bit 2   bit 3        lower left   lower right</code></pre>
         rather than iris pigment, and is not an inherited eye-colour category at all.</li>
     <li><strong>Pupil shape.</strong> A real horse&rsquo;s pupil is a horizontal slot. At two
         texels there is no room to say so.</li>
-    <li><strong>A red iris allele.</strong> The dhampir has one and nothing else can. Whether
-        red joins the palette is an open question on <a href="roadmap.html">the roadmap</a>.</li>
 </ul>
 
 </article>

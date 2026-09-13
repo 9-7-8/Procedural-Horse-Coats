@@ -42,17 +42,29 @@
 <pre><code class="language-java">FounderTable.builder()
         .weight(Swift,   n, 40.0)
         .weight(Sluggish, n, 40.0)
-        .weight(n,      n, 20.0)
+        .weight(Vmp,     n,  2.0)
+        .weight(n,      n, 18.0)
         .build();</code></pre>
 </div>
 
 <p>
     Written out rather than derived from Hardy-Weinberg, because random mating
-    is exactly what this table is <em>not</em>: about <strong>80%</strong> of
+    is exactly what this table is <em>not</em>: about <strong>82%</strong> of
     wild horses carry one copy, and <strong>no</strong> wild horse carries two
     of anything. Every doubled horse in the world, in either direction, is
     something somebody bred &mdash; the health loci&rsquo;s rule, pointed at
     something worth having.
+</p>
+
+<h2 id="vampiric">The vampiric allele</h2>
+
+<p>
+    A third kind of copy, <code>Vmp</code>, and the Dhampir&rsquo;s speed. Unlike
+    <code>Swift</code> it is worth a <strong>fixed</strong> amount, the same on every horse:
+    one copy runs a <strong>quarter</strong> faster, two copies <strong>half again</strong>
+    as fast. Beside a <code>Swift</code> or <code>Sluggish</code> copy, both count. About two
+    wild horses in a hundred carry one; none carry two. A
+    <a href="breed-book.html#dhampir">seal brown Dhampir</a> has one, a white Dhampir two.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>
@@ -70,11 +82,11 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.magic_speed</dd></div>
     <div><dt>Priority</dt><dd>141 (magical band)</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">Swift</span> <span class="allele dom">Sluggish</span> <span class="allele wild">n</span></dd></div>
-    <div><dt>Combinations</dt><dd>6, all carryable &mdash; <strong>6 outcomes</strong>, one each</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Swift</span> <span class="allele dom">Sluggish</span> <span class="allele dom">Vmp</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>10, all carryable &mdash; <strong>10 outcomes</strong>, one each</dd></div>
     <div><dt>Inheritance</dt><dd><strong>codominant</strong> &mdash; both copies contribute and the percentages add</dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>In the wild</dt><dd><strong>heterozygotes only</strong> &mdash; 40% <code>Swift/n</code>, 40% <code>Sluggish/n</code>, 20% <code>n/n</code></dd></div>
+    <div><dt>In the wild</dt><dd><strong>heterozygotes only</strong> &mdash; 40% <code>Swift/n</code>, 40% <code>Sluggish/n</code>, 2% <code>Vmp/n</code>, 18% <code>n/n</code></dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Epigenetic draws</dt><dd>12 &times; nextFloat() per copy (one <code>nextGaussian()</code>)</dd></div>
     <div><dt>Per copy</dt><dd>normal, mean <strong>10%</strong>, &sigma; <strong>7%</strong>, floor 1%</dd></div>
@@ -125,7 +137,11 @@
 </table>
 
 <p>
-    <strong>Six combinations, six outcomes.</strong> A codominant locus is the
+    <strong>Ten combinations, ten outcomes</strong> once the vampiric allele is counted:
+    <code>Vmp/n</code> &times;1.25, <code>Vmp/Swift</code> and <code>Vmp/Sluggish</code>
+    that plus or minus the other copy&rsquo;s percentage, and <code>Vmp/Vmp</code>
+    <strong>&times;1.50</strong> exactly &mdash; the old dhampir&rsquo;s speed, split across
+    two copies. A codominant locus is the
     case where every combination genuinely differs, so collapsing any two rows
     would be a lie about the gene. The contribution is signed &mdash;
     <code>Swift</code> positive, <code>Sluggish</code> negative &mdash; so the whole

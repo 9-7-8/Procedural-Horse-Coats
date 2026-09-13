@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.neoforge.data.HorseCooldownsAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.particles.ParticleTypes;
@@ -9,6 +10,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
@@ -19,39 +21,43 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * <b>The only way a dhampir heals.</b> Below full health it goes looking for
- * something living and takes one bite out of it: half a heart of damage dealt,
- * three hearts healed, and then it leaves that animal alone for a day.
+ * <b>The only way a blood-diet horse heals.</b> Below full health it goes
+ * looking for something living and takes one bite out of it: half a heart of
+ * damage dealt, three hearts healed, and then it leaves that animal alone for a
+ * day. Written for the dhampir, and moved to the diet locus's {@code Dbld}
+ * allele when that gene was split.
  *
  * <p>It is deliberately <b>not</b> a predator. One bite per animal per day
  * against a cow with five hearts means the cow lives, walks off, and is bitten
- * again tomorrow - so a dhampir kept beside a pen of livestock sustains itself
- * without emptying the pen, and one kept alone starves slowly. That balance is
- * the whole design: the triple health is paid for by needing a herd of
- * something else nearby.
+ * again tomorrow - so a blood-drinker kept beside a pen of livestock sustains
+ * itself without emptying the pen, and one kept alone starves slowly.
  *
- * <h4>What it will bite</h4>
- * Anything living and <b>not undead</b> - so the passive animals, and creepers
- * and spiders, but never a zombie or a skeleton. Two exclusions on top:
- * <ul>
- *   <li><b>players</b>, because a horse that bit its owner to heal would be a
- *       hostile mob wearing a saddle;</li>
- *   <li><b>other horses</b>, which keeps a herd of dhampirs from eating each
- *       other and means a dhampir alone in a paddock of horses genuinely has
- *       nothing to live on.</li>
- * </ul>
+ * <h4>What it will bite, and in what order</h4>
+ * Owner, 2026-09-13: <i>"They can feed on any mob in the game, including
+ * players, but they'll only bite players if there's literally nothing else
+ * around. Same with tamed cats and dogs: those are the lowest priority."</i>
+ * <ol>
+ *   <li><b>Any living mob</b> - passive or hostile - nearest first;</li>
+ *   <li>then, only when there is no such mob in reach, <b>a player</b> (never
+ *       one in creative or spectator), its owner included;</li>
+ *   <li>then, lowest of all, <b>a tamed animal</b> - a cat, a dog, a parrot.</li>
+ * </ol>
+ * Never <b>another horse</b> (owner's call - it keeps a herd of them from eating
+ * each other) and never anything <b>undead</b>, which has no living blood to take.
  *
  * <h4>Where the day is counted</h4>
  * On the <b>prey</b>, not on the horse: {@link HorseCooldownsAttachment} under
  * {@link #BITTEN_KEY}. Storing it on the horse would mean a growing map of every
  * animal it has ever met; storing it on the animal is one number that goes away
  * with the animal. It also makes the rule "one bite per animal per day" rather
- * than "per pair", which is the reading that keeps two dhampirs from
- * double-draining the same cow.
+ * than "per pair", so two blood-drinkers cannot double-drain the same cow.
+ *
+ * <p>Sits on every horse, like {@link SunShadeGoal}, and asks the diet once.
+ * <b>Not play-tested</b> in this form - biting a player is new.
  */
-public final class DhampirHuntGoal extends Goal {
+public final class BloodHuntGoal extends Goal {
 
-    /** The cooldown key stamped on the <i>prey</i>. */
+    /** The cooldown key stamped on the <i>prey</i>. Kept from the dhampir, so an old stamp still counts. */
     public static final String BITTEN_KEY = "dhampir-bitten";
 
     private static final double SEARCH_RADIUS = 16.0;
@@ -62,25 +68,52 @@ public final class DhampirHuntGoal extends Goal {
     private static final int REPATH_INTERVAL = 20;
     /** Give up on one animal after this long rather than trailing it forever. */
     private static final int MAX_PURSUIT = 300;
+    /** Re-check the surroundings no more often than this while idle and hurt. */
+    private static final int SEARCH_INTERVAL = 20;
 
     private final Horse horse;
     private LivingEntity prey;
     private int repathCooldown;
     private int pursuitTicks;
+    private int searchCooldown;
 
-    public DhampirHuntGoal(Horse horse) {
+    /** Resolved once - see {@link SunShadeGoal#sensitive}. */
+    private Boolean drinksBlood;
+    private Boolean sunSensitive;
+
+    public BloodHuntGoal(Horse horse) {
         this.horse = horse;
         setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
+    private boolean drinksBlood() {
+        if (drinksBlood == null) {
+            if (!HorseRecords.hasRealRecord(horse)) {
+                return false;
+            }
+            drinksBlood = HorseDietHandler.dietOf(horse).diet() == Diet.BLOOD;
+            sunSensitive = SunSensitivityHandler.isSensitive(horse);
+        }
+        return drinksBlood;
+    }
+
     @Override
     public boolean canUse() {
+        if (!drinksBlood()) {
+            return false;
+        }
         if (horse.isVehicle() || horse.isLeashed() || horse.getHealth() >= horse.getMaxHealth()) {
             return false;
         }
-        if (DhampirHandler.inSunlight(horse)) {
+        if (sunSensitive && SunSensitivityHandler.inSunlight(horse)) {
             return false;   // shelter first; the shade goal owns it while it burns
         }
+        // The entity scan is the expensive part - once a second is plenty for
+        // an animal that is only mildly hungry.
+        if (--searchCooldown > 0) {
+            return false;
+        }
+        searchCooldown = SEARCH_INTERVAL;
         prey = findPrey();
         return prey != null;
     }
@@ -139,8 +172,10 @@ public final class DhampirHuntGoal extends Goal {
     }
 
     /**
-     * The nearest thing worth biting that has not been bitten today. Sorted by
-     * distance so a dhampir works its way round a pen rather than fixating.
+     * The best thing worth biting that has not been bitten today: the lowest
+     * {@link #tier}, and the nearest within it - so a blood-drinker works its way
+     * round a pen rather than fixating, and reaches for a player only when the
+     * pen is empty.
      */
     private LivingEntity findPrey() {
         if (!(horse.level() instanceof ServerLevel level)) {
@@ -151,17 +186,29 @@ public final class DhampirHuntGoal extends Goal {
                 horse.getBoundingBox().inflate(SEARCH_RADIUS),
                 e -> isValidPrey(e) && readyToBite(e, now));
         return nearby.stream()
-                .min(Comparator.comparingDouble(horse::distanceToSqr))
+                .min(Comparator.<LivingEntity>comparingInt(BloodHuntGoal::tier)
+                        .thenComparingDouble(horse::distanceToSqr))
                 .orElse(null);
     }
 
-    /** See the class note: living, not undead, not a player, not a horse. */
+    /** 0 an ordinary mob, 1 a player, 2 a tamed animal - see the class note. */
+    static int tier(LivingEntity entity) {
+        if (entity instanceof Player) {
+            return 1;
+        }
+        if (entity instanceof TamableAnimal pet && pet.isTame()) {
+            return 2;
+        }
+        return 0;
+    }
+
+    /** Living, not undead, not a horse; a mob, or a player who can be hurt. */
     private boolean isValidPrey(LivingEntity entity) {
-        if (!entity.isAlive() || entity == horse) {
+        if (!entity.isAlive() || entity == horse || entity instanceof AbstractHorse) {
             return false;
         }
-        if (entity instanceof Player || entity instanceof AbstractHorse) {
-            return false;
+        if (entity instanceof Player player) {
+            return !player.isCreative() && !player.isSpectator();
         }
         if (!(entity instanceof Mob)) {
             return false;

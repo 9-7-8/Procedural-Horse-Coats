@@ -61,7 +61,14 @@ public final class MagicHealthGene extends AbstractMagicStatGene {
                         "Balanced",
                         "One hardy copy and one frail copy. Their percentages very nearly cancel, so "
                                 + "the horse keeps close to its ordinary number of hearts while carrying, "
-                                + "and passing on, both extremes."));
+                                + "and passing on, both extremes."),
+                "hearts");
+    }
+
+    /** Half the dhampir's old 3x - so {@code Vmp/Vmp} has triple the hearts. */
+    @Override
+    public double vampiricPerCopy() {
+        return 1.0;
     }
 
     @Override

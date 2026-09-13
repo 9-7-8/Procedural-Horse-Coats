@@ -9,7 +9,8 @@ import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.CkmGene;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.genetics.genes.CvmGene;
-import com.example.horsegenetics.common.genetics.genes.DhampirGene;
+import com.example.horsegenetics.common.genetics.genes.MagicWhiteGene;
+import com.example.horsegenetics.common.genetics.genes.SunSensitivityGene;
 import com.example.horsegenetics.common.genetics.genes.DietGene;
 import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
@@ -489,7 +490,7 @@ public final class Genes {
      * the same allele shift. It paints nothing and grants no
      * {@link AbilityContribution} - the whole effect is a night-time entity swap
      * in {@code neoforge/server/LycanthropyHandler}, the same split
-     * {@link #DHAMPIR} makes.
+     * {@link #SUN_SENSITIVITY} makes.
      */
     public static final LycanGene LYCAN = new LycanGene();
     public static final LightGene LIGHT = new LightGene();
@@ -507,13 +508,18 @@ public final class Genes {
     public static final MagicSectoralHeterochromiaGene SECTORAL_EYES = new MagicSectoralHeterochromiaGene();
     public static final VerdantGene VERDANT = new VerdantGene();
     /**
-     * <b>Dhampir</b> - the magical recessive whose <i>carrier</i> is visible:
-     * one copy gives red eyes and glowing scleras and nothing else, two gives a
-     * white, sun-shy animal with triple health that cannot be fed and heals
-     * only by hunting. It sorts after {@link #DIET} on purpose - the diet
-     * channel keeps the last claim, so this one's {@code NOTHING} wins.
+     * <b>Magic white</b> - a magical recessive that paints the whole horse white,
+     * low in the magical order so every marking still draws on top. The coat
+     * half of the old dhampir gene; the Dhampir breed puts it back together with
+     * {@link #SUN_SENSITIVITY}, blood diet, the vampiric stat allele and red eyes.
      */
-    public static final DhampirGene DHAMPIR = new DhampirGene();
+    public static final MagicWhiteGene MAGIC_WHITE = new MagicWhiteGene();
+    /**
+     * <b>Sun sensitivity</b> - a magical recessive whose homozygote burns in
+     * daylight and runs for cover. Paints nothing; the whole effect is in
+     * {@code neoforge/server/SunSensitivityHandler}.
+     */
+    public static final SunSensitivityGene SUN_SENSITIVITY = new SunSensitivityGene();
     /**
      * <b>Shadowcreature</b> - blacks out the head and neck outright, burns the
      * eyes gold with no white round them, and runs tentacles out of the join
@@ -593,7 +599,7 @@ public final class Genes {
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,
             MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
-            MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH,
+            MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH, SUN_SENSITIVITY,
             MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, MOLTEN_HOOVES, LYCAN,
             FIREPROOF, BIRD_BONED, OCEAN_BORN, HYDROPHOBIC,
             HOT_BLOODED, DRYAD, INTIMIDATING, MEOWING,
@@ -603,7 +609,7 @@ public final class Genes {
             FOOD_PREFERENCE, POTION_MILK, EGG_LAYER, SINGER,
             PACK_LEADER, SPAWNER,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
-            DHAMPIR, SHADOWCREATURE,
+            MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,
             PPIB, PRKDC, MYO5A, TOE1, CVM, GBE1, MEGAESOPHAGUS, SCN4A, GYS1);

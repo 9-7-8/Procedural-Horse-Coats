@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sun sensitivity &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> behaviour</p>
+
+<h1>Sun sensitivity</h1>
+
+<p class="lede">
+    Two copies and daylight burns the horse. Caught under open sky by day it runs for
+    the nearest deep cover or water &mdash; jumping a fence if it can &mdash; and stays
+    there until dark. One copy shows nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.sun_sensitivity"></div>
+
+<h2 id="what">What happens to the horse</h2>
+
+<ul>
+    <li><strong>It burns.</strong> Half a heart every two seconds while it is outdoors,
+        by day, with nothing overhead. Smoke comes off it.</li>
+    <li><strong>Rain, water and a roof all save it.</strong> A horse standing in a pond
+        is safe; so is one under trees thick enough to hide the sky, or in a barn.</li>
+    <li><strong>It runs for shelter</strong> and prefers somewhere deep &mdash; at least
+        two blocks in from the edge of the roof &mdash; so it does not end up half in the
+        sun. It will jump a fence on the way if its jump is good enough.</li>
+    <li><strong>It stays put until night.</strong> Once sheltered it stands still rather
+        than wandering back out.</li>
+    <li><strong>Ridden or on a lead, it is your problem.</strong> It will not bolt out
+        from under a rider or pull a lead; it will just burn.</li>
+</ul>
+
+<p>
+    It is not fire in the ordinary sense, so it does not panic and run in circles the
+    way a horse that walked into lava does &mdash; it goes to its shelter. A few wild
+    horses in a hundred carry one silent copy, and none carry two. The
+    <a href="breed-book.html#dhampir">white Dhampir</a> has two.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.sun_sensitivity"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.sun_sensitivity</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Sun</span> <span class="allele dom">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>sun-sensitivity-carrier</code>, <code>sun-sensitive</code> &mdash; all wild type, it paints nothing</dd></div>
+    <div><dt>Shows when</dt><dd><code>Sun/Sun</code></dd></div>
+    <div><dt>Priority</dt><dd><code>SunSensitivityGene.PRIORITY</code> &mdash; the magical behaviour band</dd></div>
+    <div><dt>Founders</dt><dd>carriers only, at <code>SunSensitivityGene.CARRIER_PERCENT</code></dd></div>
+    <div><dt>Random splice</dt><dd><strong>never</strong> &mdash; <code>spliceable()</code> is false</dd></div>
+    <div><dt>Model</dt><dd>genetics.genes.SunSensitivityGene; neoforge/server/SunSensitivityHandler and SunShadeGoal</dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Confirmed on the dhampir; unplayed as its own locus</span>
+    <p>
+        Burning and running for shade were confirmed in-game on the old dhampir gene on
+        2026-09-13, after four rounds of fixes that all still live in
+        <code>SunShadeGoal</code>'s comments. The split onto this locus is not
+        play-tested &mdash; see <a href="verification.html">verification</a>.
+    </p>
+</div>
+
+<h2 id="handler">The handler and its goal</h2>
+
+<ul>
+    <li><strong><code>SunSensitivityHandler.onTick</code></strong> &mdash; every
+        40 ticks, staggered by entity id. It checks sunlight <em>first</em> (a few block
+        reads) and only then parses the genome, so the parse only happens for a horse
+        actually standing in the open by day. Damage is <code>onFire</code> at half a
+        heart, not vanilla ignition.</li>
+    <li><strong><code>SunShadeGoal</code></strong> at priority 1, on
+        <strong>every horse</strong>. It asks the genome once, lazily, and does nothing
+        for a horse that is not sensitive. It used to be added only to a horse already
+        known to be a dhampir at the moment it joined the level &mdash; but a wild
+        founder's record is written a tick <em>after</em> it joins, so a wild horse never
+        got the goal until its chunk reloaded.</li>
+    <li><strong>Panic yields to it.</strong> <code>HorsePanicGoal</code> holds its
+        ground when the horse is on fire <em>and</em> sun-sensitive, because vanilla's
+        panic sits at the same priority, holds the same movement flag, and was added
+        first &mdash; it starved the shade goal and the horse ran in circles until it
+        died.</li>
+    <li><strong>Blood diet reads it too.</strong> A sun-sensitive
+        <a href="gene-diet.html#blood">blood-drinker</a> does not go hunting while it is
+        in the sun.</li>
+</ul>
+
+<p>
+    Not an <a href="making-a-gene.html#block"><code>effects</code> verb</a>, for the
+    reason the dhampir gene gave: a verb with exactly one user is a hand-written handler
+    wearing a disguise.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="photosensitivity">Horses really do burn</h2>
+
+<p>
+    <strong>Sunburn</strong> is common on pink-skinned horses &mdash; white faces and
+    socks, cremellos, heavily white paints &mdash; because unpigmented skin has nothing
+    to absorb ultraviolet light. That is a coat question, not a gene of its own.
+</p>
+
+<p>
+    <strong>Photosensitisation</strong> is different and worse: something in the blood
+    reacts to sunlight and damages the skin from within. In horses it is almost always
+    acquired rather than inherited &mdash; eating plants such as St John's wort or
+    buckwheat, or liver damage that lets a chlorophyll breakdown product (phylloerythrin)
+    build up. Affected horses seek shade on their own, which is the one piece of real
+    behaviour this gene borrows.
+</p>
+
+<p>
+    The inherited version belongs to other animals and to people: the
+    <strong>porphyrias</strong>, a family of mostly recessive enzyme defects in which
+    light-reactive compounds accumulate in the skin. Congenital erythropoietic porphyria
+    turns up in cattle and cats, stains the teeth red, and has been suggested &mdash; not
+    convincingly &mdash; as a root of the vampire legend. A heritable recessive that makes a
+    horse burn in daylight is fantasy; the mechanism it would need is not.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-white.html">Magic white</a>
+        <a href="gene-diet.html#blood">Blood diet</a>
+        <a href="breed-book.html#dhampir">The Dhampir</a>
+        <a href="horse-care.html">Horse care</a>
+    </div>
+    Source: <code>common/genetics/genes/SunSensitivityGene.java</code>,
+    <code>neoforge/server/SunSensitivityHandler.java</code>,
+    <code>neoforge/server/SunShadeGoal.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>
