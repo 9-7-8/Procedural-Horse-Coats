@@ -751,10 +751,20 @@ final class DebugYardGameplay {
                 }
             }
         }
+        // A GATE, NOT A HOLE - and this is why none of the four stalls could be
+        // detected. StallDetector walks the floor and treats a door, a trapdoor
+        // or a fence gate as the edge of the room IN EVERY STATE; open air is
+        // none of those, so the fill went straight out through the gap, across
+        // the open yard, past MAX_COLUMNS and gave up. Every one of these
+        // stalls then fell back to the blind box that used to stand in for a
+        // failed search, which is what the owner was looking at when she said
+        // the tight stall "detects an area in front of the sign, which includes
+        // the wall".
         int doorX = (x0 + x1) / 2;
-        for (int y = gy + 1; y <= gy + 2; y++) {
-            DebugPenManager.fastSet(level, new BlockPos(doorX, y, z0), Blocks.AIR.defaultBlockState());
-        }
+        DebugPenManager.fastSet(level, new BlockPos(doorX, gy + 2, z0), Blocks.AIR.defaultBlockState());
+        DebugPenManager.fastSet(level, new BlockPos(doorX, gy + 1, z0),
+                Blocks.OAK_FENCE_GATE.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.FenceGateBlock.FACING, Direction.NORTH));
         // AND LIGHT IT, because a roofed stall is a sealed dark box and the
         // dimension spawns zombies in those. Eighteen of the nineteen natural
         // spawns in the yard's first run were inside these four stalls - they

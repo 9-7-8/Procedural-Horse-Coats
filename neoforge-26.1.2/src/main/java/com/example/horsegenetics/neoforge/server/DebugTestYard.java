@@ -280,7 +280,14 @@ final class DebugTestYard {
         buildBaseAlarmPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
-        buildDhampirPen(level, gy, cx, mouthZ);
+
+        // ROW I WEST IS EMPTY: dhampir is confirmed, all three of it. Owner,
+        // 2026-09-13: "dhampir successfully flees the sun" - which was the last
+        // question it had, after the burning and the feeding were confirmed
+        // earlier the same day. The pen went away once before on a weaker claim
+        // and had to be put back within the hour; this time the whole cycle is
+        // sun to shelter to bite to heal, and the log shows it holding shade at
+        // 66/66 rather than bleeding out a journey at a time.
         buildDisplayRow(level, gy, cx, mouthZ);
 
         // The two halves of the mod this yard never had: the item, block and
@@ -486,158 +493,8 @@ final class DebugTestYard {
         }
     }
 
-    /**
-     * <b>Dhampir: a paddock, a herd, and an open sky - PUT BACK.</b>
-     *
-     * <p>This pen was deleted on 2026-09-13 on the grounds that two of the
-     * gene's three questions were confirmed - <i>"dhampirs burn to death and
-     * smoke during the day"</i> and <i>"dhampirs can attack cows and feed on
-     * them, one per animal, non-fatal"</i> - and that what remained was
-     * behaviour rather than a test. <b>That was wrong, and the same commit
-     * said so two screens further down</b>, where the shade behaviour is
-     * listed as the second open question in the yard.
-     *
-     * <p>It is also the pen where the failure was actually observed: on the
-     * build from ten minutes before the fix, the trace read <i>stopped - in
-     * shade</i> at 51/66, then 48/66, then 33/66, then 6/66, each arrival
-     * followed within two seconds by <i>burning at</i> a square one block
-     * away, and then the animal was dead. A horse in a field cannot produce
-     * that sequence on demand; a paddock with a shelter five blocks from spawn
-     * produces it every single build.
-     *
-     * <h2>The pass condition, which needs no new instrument</h2>
-     * The shade goal now holds {@code Flag.MOVE} for as long as it is daylight
-     * rather than releasing the moment it is sheltered, so the stroll goal
-     * cannot walk it back into the sun. If that works, the log shows
-     * <b>one</b> {@code [trace] dhampir} journey and then silence, and
-     * <b>no further {@code onFire} lines</b> after it arrives. If it does not,
-     * the journeys keep coming every thirty seconds the way they did before,
-     * and the trace says which of the four known causes is still live.
-     *
-     * <h2>Why it is big, open, and full of cows</h2>
-     * <b>No roof and no trees</b> except the shelter, so it burns rather than
-     * sheltering by accident. <b>Eight cows</b>, because a bitten animal is off
-     * the menu for a day and the triple health is meant to be something a herd
-     * pays for - and because a dhampir that cannot feed cannot survive a day
-     * whatever the shade goal does. <b>Room</b>, because hunting is
-     * pathfinding.
-     */
-    private static void buildDhampirPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + WEST_MIN;
-        int x1 = cx + WEST_MAX;
-        int z0 = mouthZ + ROW_I;
-        int z1 = z0 + ROW_I_D;
-        // WALLED, NOT FENCED, because this is the one horse in the yard that
-        // RUNS. Owner, 2026-09-13: "the dhampir keeps walking out of the pen."
-        // DhampirShadeGoal paths at speed 1.6 and holds Flag.JUMP, and a horse
-        // at a gallop with jump control clears a one-block fence - which no
-        // other pen here ever discovers, because nothing else in the yard is
-        // trying to be somewhere else at speed.
-        walledPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DHAMPIR - LEAVE IT", "pass = ONE journey", "in the log, then", "quiet until dusk"));
 
-        // THE SHELTER SITS BESIDE THE SPAWN. It was at the far corner, just
-        // under ten blocks away against a SEARCH_RADIUS of twelve - in range,
-        // but only barely, and the search runs from wherever the horse
-        // currently IS rather than from where it was placed. A few blocks of
-        // drift and the roofed arena one row over comes into range while its
-        // own roof drops out of it, and then the animal is correctly pathing to
-        // the nearest shade in the world and that shade is outside the wall.
-        //
-        // NINE BY NINE, because PREFERRED_MARGIN is two: a block two rings in
-        // from every edge needs a 5x5 of cover around it, and the 6x6 roof this
-        // started as offered exactly four such blocks - one of which had the
-        // hay bale on it. A 9x9 leaves a 5x5 core, so there is somewhere to
-        // stand however the horse drifts.
-        shelter(level, gy, x0 + 7, x0 + 15, z0 + 6, z0 + 14);
-        // Stocked OUTSIDE the shelter on purpose: it has to start in the sun or
-        // the journey the trace is there to record never happens.
-        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dhampir",
-                "THE DHAMPIR", 1, 0, null);
-        for (int i = 0; i < 8; i++) {
-            spawnCow(level, gy, x0 + 3.0 + (i % 4) * 3.0, z0 + 3.0 + (i / 4) * 3.0);
-        }
-        DebugWorldWatch.watch("DHAMPIR", box(x0, gy, z0, x1, gy + 1, z1), null);
-    }
 
-    /**
-     * <b>A pen with stone walls and no lid.</b>
-     *
-     * <p>Between {@link #fencedPlot}, which anything determined can jump, and a
-     * roofed room, which would block the sky. The dhampir needs exactly this
-     * combination and is the only thing in the yard that does: it has to burn,
-     * so the top stays open, and it runs at a gallop the moment it does, so the
-     * sides cannot be a fence.
-     *
-     * <p><b>No gate</b>, on the same reasoning as the villagers' pen - a gap a
-     * horse can walk through is a gap it can gallop through, and the tester is
-     * in creative and comes in over the top.
-     */
-    private static void walledPlot(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
-        BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
-                if (!edge) {
-                    continue;   // the yard's own grass floor stays, so the cows can graze
-                }
-                DebugPenManager.groundColumn(level, x, gy, z, wall);
-                for (int y = gy + 1; y <= gy + 5; y++) {
-                    DebugPenManager.fastSet(level, new BlockPos(x, y, z), wall);
-                }
-            }
-        }
-    }
-
-    /**
-     * <b>A roof on four posts, for a horse that is on fire.</b>
-     *
-     * <p>Owner, 2026-09-13: <em>"can you build a shelter for the dhampir horse
-     * in its pen, so it can flee and be safe during the day?"</em> The pen was
-     * built open to the sky on purpose - a dhampir that shelters never burns,
-     * never drops below full, and never hunts, so the whole loop stays shut -
-     * and with both halves now confirmed in one morning ("dhampirs burn to
-     * death and smoke during the day", "dhampirs can attack cows and feed on
-     * them, one per animal, non-fatal") that reason has expired. What is left
-     * is a horse burning to death in a box, which proves nothing twice.
-     *
-     * <p>It also fixes something that reads as a separate bug and is not.
-     * <b>The hunt is already gated on being below full health</b> -
-     * {@code DhampirHuntGoal.canUse} refuses at {@code getHealth() >=
-     * getMaxHealth()} and {@code canContinueToUse} re-checks it - so "it should
-     * only attack animals if its health is less than 100%" is already the rule.
-     * It looked otherwise because a horse with no shade is <em>never</em> at
-     * full health: it takes a point every two seconds, for ever. Shade is what
-     * lets it top up and stop, which is the only way anybody can watch the gate
-     * work rather than take it on trust.
-     *
-     * <p>Open-sided rather than a hut, because {@code DhampirShadeGoal} tests
-     * {@code !level.canSeeSky(pos)} and wants somewhere it can <b>stand</b> -
-     * a roof on posts is sheltered at every block under it and needs no door
-     * for a horse to find its way through.
-     */
-    private static void shelter(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
-        BlockState post = Blocks.OAK_FENCE.defaultBlockState();
-        BlockState roof = Blocks.OAK_PLANKS.defaultBlockState();
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z), roof);
-            }
-        }
-        for (int[] corner : new int[][] {{x0, z0}, {x0, z1}, {x1, z0}, {x1, z1}}) {
-            for (int y = gy + 1; y <= gy + 3; y++) {
-                DebugPenManager.fastSet(level, new BlockPos(corner[0], y, corner[1]), post);
-            }
-        }
-        // Hay under it, so the shelter is somewhere to be rather than somewhere
-        // to stand - and so the pen reads as a stable rather than a slab on
-        // sticks.
-        // In a corner, not the middle: the middle is the best-covered square in
-        // the shelter and a solid block there is one the horse cannot stand on.
-        DebugPenManager.fastSet(level, new BlockPos(x0 + 1, gy + 1, z0 + 1),
-                Blocks.HAY_BLOCK.defaultBlockState());
-    }
 
     private static final String NIGHT_TEMPER = "horsegenetics.magic_night_temper";
     private static final String NIGHT_WATCH = "horsegenetics.magic_night_watch";

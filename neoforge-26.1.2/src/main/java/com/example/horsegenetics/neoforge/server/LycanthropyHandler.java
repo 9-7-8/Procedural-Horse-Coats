@@ -17,7 +17,7 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
@@ -192,24 +193,18 @@ public final class LycanthropyHandler {
             return;
         }
 
-        // A WERE-FISH ON DRY LAND IS A DELETED HORSE. Seen 2026-09-13: two
-        // horses shifted into salmon on the arrival road and both were dead of
-        // "drown" within three seconds - which for a fish means out of water.
-        // The horse's whole record travels inside the animal's LYCAN_SHIFT
-        // attachment, nothing anywhere handles that animal DYING, and so the
-        // horse, its pedigree and its epigenome went with them. Permanently.
+        // IT SHIFTS WHEREVER IT IS STANDING, including into a fish on dry
+        // land. That was briefly guarded here and the guard was wrong: owner,
+        // 2026-09-13, "if someone has a horse that's a FISH lycanthrope, they
+        // have to take care of it, and make sure it doesn't die at night.
+        // That's brutal, but it's just part of the gene. It should absolutely
+        // still shift and then just die."
         //
-        // The comment on setPersistenceRequired below already saw half of this
-        // - "or a were-chicken quietly despawns overnight and takes a pedigreed
-        // horse with it" - and guarded the despawn while leaving the death.
-        //
-        // So an aquatic form simply does not shift on dry land. That is the
-        // same graceful degradation this method already uses for a mob id the
-        // build has never heard of: a form that cannot be taken safely is a
-        // gene that does nothing tonight, not a horse that stops existing.
-        if (isAquatic(type) && !horse.isInWater()) {
-            return;
-        }
+        // What was actually broken was the other half - see onWereAnimalDeath.
+        // A were-animal that died took its horse out of the world with no
+        // death, no drops and no line in the log, which is not a harsh gene, it
+        // is a horse that stops existing. It dies properly now, and a
+        // were-salmon on dry land is exactly as lethal as it sounds.
         double healthLeft = horse.getHealth() / Math.max(1.0F, horse.getMaxHealth());
         animal.snapTo(horse.getX(), horse.getY(), horse.getZ(), horse.getYRot(), horse.getXRot());
         animal.setBaby(horse.isBaby());
@@ -228,28 +223,35 @@ public final class LycanthropyHandler {
         puff(level, animal);
     }
 
-    /**
-     * Does this form drown out of water? Read off the entity's own
-     * {@link MobCategory} rather than a hand-kept list of fish, so a form added
-     * to {@code LycanGene} later cannot quietly miss the guard.
-     */
-    private static boolean isAquatic(EntityType<?> type) {
-        MobCategory c = type.getCategory();
-        return c == MobCategory.WATER_CREATURE
-                || c == MobCategory.WATER_AMBIENT
-                || c == MobCategory.UNDERGROUND_WATER_CREATURE
-                || c == MobCategory.AXOLOTLS;
-    }
-
     // ------------------------------------------------------------------
     // Dawn
     // ------------------------------------------------------------------
 
     /** Put the horse back where the animal is standing, with the night's damage carried over. */
     private static void revert(Mob animal, ServerLevel level, LycanShift shift) {
-        Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.LOAD);
+        Horse horse = restore(animal, level, shift);
         if (horse == null) {
             return;
+        }
+        double healthLeft = animal.getHealth() / Math.max(1.0F, animal.getMaxHealth());
+        horse.setHealth((float) Math.max(1.0, healthLeft * horse.getMaxHealth()));
+        animal.setData(ModAttachments.LYCAN_SHIFT.get(), LycanShift.NONE);
+        animal.ejectPassengers();
+        animal.discard();
+        level.addFreshEntity(horse);
+        puff(level, horse);
+    }
+
+    /**
+     * Build the horse back out of the tag the animal is carrying, standing
+     * where the animal is standing. Health is <b>not</b> set here - dawn carries
+     * the night's damage across proportionally, and a death does not care.
+     */
+    @Nullable
+    private static Horse restore(Mob animal, ServerLevel level, LycanShift shift) {
+        Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.LOAD);
+        if (horse == null) {
+            return null;
         }
         try (ProblemReporter.ScopedCollector reporter =
                      new ProblemReporter.ScopedCollector(animal.problemPath(), HorseGenetics.LOGGER)) {
@@ -257,19 +259,69 @@ public final class LycanthropyHandler {
         } catch (RuntimeException bad) {
             HorseGenetics.LOGGER.error("[lycan] could not restore the horse inside a {} - it stays an animal",
                     shift.mob(), bad);
-            return;
+            return null;
         }
         // The tag's position is where it stood at dusk; the animal has walked
         // since, and where it walked to is where the horse wakes up.
         horse.snapTo(animal.getX(), animal.getY(), animal.getZ(), animal.getYRot(), animal.getXRot());
-        double healthLeft = animal.getHealth() / Math.max(1.0F, animal.getMaxHealth());
-        horse.setHealth((float) Math.max(1.0, healthLeft * horse.getMaxHealth()));
+        return horse;
+    }
 
+    /**
+     * <b>A were-animal dying IS the horse dying.</b>
+     *
+     * <p>Owner, 2026-09-13: <i>"We need a horse dying of lycanthropy to be
+     * handled just like a horse dying any other way &hellip; A were-animal
+     * dying in its animal form is a death, same as any other."</i>
+     *
+     * <p>Before this there was no death handling on the animal <em>at all</em>,
+     * and the consequence was not a harsh gene, it was a disappearance: {@link
+     * #shift} calls {@code horse.discard()} and hangs the horse's whole saved
+     * state on the animal, so when the animal died the record, the pedigree and
+     * the epigenome went with it - no body, no drops, no line in any log, and
+     * nothing to tell a player their horse had died rather than vanished. Two
+     * horses went that way as were-salmon on dry land the day this was written.
+     *
+     * <h2>Restore, then kill, rather than a second death path</h2>
+     * The horse is rebuilt out of the tag where the animal fell and then killed
+     * with <b>the same damage source</b>. That is deliberate and is the whole
+     * point: it means the death runs through every hook a horse death already
+     * has - {@code GeneDeathHandler}'s {@code OnDeath} effects and item drops,
+     * {@code ActionTrace}'s <i>horse died</i> line with the real cause, the
+     * ancestry database, vanilla's own drops - rather than through a parallel
+     * implementation that would drift out of step with them. "Handled just like
+     * a horse dying any other way" is most cheaply achieved by <em>actually
+     * being</em> a horse dying.
+     *
+     * <p>The fallback kill exists because the restored horse may be immune to
+     * what killed the animal (a fire-immune horse inside a burning were-cow),
+     * and a horse that shrugs off the blow that killed its own body would be a
+     * resurrection rather than a death.
+     */
+    @SubscribeEvent
+    static void onWereAnimalDeath(LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof Mob animal) || animal instanceof Horse) {
+            return;
+        }
+        if (!(animal.level() instanceof ServerLevel level)) {
+            return;
+        }
+        LycanShift shift = animal.getData(ModAttachments.LYCAN_SHIFT.get());
+        if (!shift.active()) {
+            return;
+        }
+        Horse horse = restore(animal, level, shift);
+        if (horse == null) {
+            return;     // the tag would not load; the animal dies as an animal
+        }
         animal.setData(ModAttachments.LYCAN_SHIFT.get(), LycanShift.NONE);
-        animal.ejectPassengers();
-        animal.discard();
         level.addFreshEntity(horse);
-        puff(level, horse);
+        ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " died as a " + shift.mob()
+                + " (" + event.getSource().getMsgId() + ") - the horse dies with it");
+        horse.hurtServer(level, event.getSource(), Float.MAX_VALUE);
+        if (horse.isAlive()) {
+            horse.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+        }
     }
 
     // ------------------------------------------------------------------

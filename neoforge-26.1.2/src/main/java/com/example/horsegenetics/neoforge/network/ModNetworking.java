@@ -141,6 +141,19 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                ToggleDivePayload.TYPE,
+                ToggleDivePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    // Gameplay, not a debug tool: ocean-born is unusable without
+                    // it, so this ships in a real jar like the highlight key.
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.GeneAbilityHandler
+                                .toggleDive(serverPlayer);
+                    }
+                })
+        );
+
+        registrar.playToServer(
                 RequestHighlightHorsesPayload.TYPE,
                 RequestHighlightHorsesPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {

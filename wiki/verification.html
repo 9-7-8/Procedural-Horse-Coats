@@ -80,6 +80,96 @@
     </p>
 </div>
 
+<h2 id="confirmed-1430">&sect;0-DO &mdash; Six confirmed, three fixed, and a fallback that made every stall look like it worked (2026-09-13)</h2>
+
+<div class="note good">
+    <span class="label">Owner-confirmed, pens deleted</span>
+    <ul>
+        <li><strong>Dhampir</strong> &mdash; <em>&ldquo;dhampir successfully flees
+            the sun&rdquo;</em>. That was its last question; the burning and the
+            feeding went earlier the same day. The pen came back once on a weaker
+            claim and had to be rebuilt within the hour &mdash; this time the log
+            shows it <b>holding shade at 66/66</b> rather than bleeding out a
+            journey at a time. Row I west is empty.</li>
+        <li><strong>Eyesight</strong> &mdash; four consecutive censuses, all four
+            cells right. Row I east is empty.</li>
+        <li><strong>Ender echo</strong> &mdash; <em>&ldquo;horses teleport upon
+            being struck&rdquo;</em>.</li>
+        <li><strong>Shears</strong>, and <strong>milking a mare for both milk and
+            potion</strong>.</li>
+    </ul>
+    <p>
+        <strong>Ender echo's and the dairy's pens are still standing on purpose</strong>
+        &mdash; see the question at the end of this section. Getting that wrong
+        already cost one unanswered test today.
+    </p>
+</div>
+
+<div class="note bad">
+    <span class="label">The stalls: a fallback that turned every failure into a plausible success</span>
+    <p>
+        Owner: <em>&ldquo;the tight stall detects an area in front of the sign,
+        which includes the wall &hellip; l shaped stall, same issue. roofed stall
+        isn't successfully detecting either, it looks like none of them
+        are.&rdquo;</em> All four read the same because all four were failing the
+        same way, and <strong>the failure was disguised</strong>.
+    </p>
+    <p>
+        <code>StallDetector</code> was written to <em>never refuse</em>: when
+        neither side of the wall enclosed anything it returned a blind
+        5&times;3&times;5 box centred in front of the sign &mdash; not a room,
+        never checked, and routinely containing the wall the sign hangs on.
+    </p>
+    <p>
+        <strong>Why every stall fell into it:</strong> the yard builds each stall
+        with a two-block <em>hole</em> for a doorway and nothing in it.
+        <code>isDoorway</code> counts a door, a trapdoor or a fence gate as the
+        edge of the room in every state, and <b>air is none of those</b> &mdash;
+        so the floor fill walked straight out through the gap, across the open
+        yard, past <code>MAX_COLUMNS</code> (512) and gave up. Both halves are
+        fixed: the detector <b>refuses and the sign pops off</b> with a message
+        saying to close the pen in, and the yard's stalls get a real
+        <code>OAK_FENCE_GATE</code> so they can close at all.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Two behaviour changes on the owner's call</span>
+    <ul>
+        <li><strong>Diving is F now, and a toggle.</strong> <em>&ldquo;Oceanborn
+            + ctrl still doesn't dive: change it to f to ask a horse to dive /
+            stop floating.&rdquo;</em> It conflicts with vanilla swap-hands,
+            which is a deliberate trade &mdash; the key has to reach the server
+            while mounted and the comfortable ones are taken. Rebindable in
+            Controls.</li>
+        <li><strong>Lycanthropy: my guard was wrong and is reverted.</strong>
+            <em>&ldquo;if someone has a horse that's a FISH lycanthrope, they
+            have to take care of it &hellip; It should absolutely still shift and
+            then just die. A were-animal dying in its animal form is a death,
+            same as any other.&rdquo;</em> It shifts wherever it stands again.
+            What was actually broken was the other half: a were-animal's death
+            was <em>not a death</em>, it was a disappearance &mdash; no body, no
+            drops, no line in any log. The animal's death now <b>rebuilds the
+            horse where it fell and kills it with the same damage source</b>, so
+            it runs through every hook a horse death already has rather than
+            through a parallel path that would drift.
+            <a href="known-gaps.html#gap-220">Gap 220</a> closes.</li>
+    </ul>
+</div>
+
+<div class="note">
+    <span class="label">Needs a word before the pens go</span>
+    <p>
+        <strong>Ender echo</strong> &mdash; the on-foot blink is what was
+        confirmed; the <em>ridden</em> half (it blinks when its <b>rider</b> is
+        hit) has never been tried, and that pen is the only place set up for it.
+        <strong>The dairy</strong> &mdash; milking and shears are confirmed, but
+        the pen also holds the three potion-milk <em>refusals</em> (a foal, a
+        hurt mare, one already milked), which are a different test. Both kept
+        until somebody says otherwise.
+    </p>
+</div>
+
 <h2 id="play-1400">&sect;0-DN &mdash; A ten-minute run that closed two questions and caught a regression I had just shipped (2026-09-13)</h2>
 
 <div class="note bad">

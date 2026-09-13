@@ -64,7 +64,13 @@ final class DebugYardCombat {
     }
 
     static void build(ServerLevel level, int gy, int cx, int mouthZ) {
-        buildEyesightPen(level, gy, cx, mouthZ);
+
+        // ROW I EAST IS EMPTY: eyesight is confirmed in all four cells, over
+        // four consecutive censuses (2026-09-13). Caveborn faster in the dark
+        // and slower in the light, daywalker the reverse, each read against its
+        // own base value. It took the per-horse readout and a light=N column to
+        // get there - the aggregate the pen shipped with could not tell "the
+        // gene does nothing" from "the two horses swapped places".
         buildArena(level, gy, cx, mouthZ);
         buildInfirmary(level, gy, cx, mouthZ);
         buildDeathbed(level, gy, cx, mouthZ);
@@ -75,55 +81,6 @@ final class DebugYardCombat {
     // ROW I EAST - eyesight
     // ==================================================================
 
-    /**
-     * <b>Half in the dark, half in the light, and the census reads the
-     * number.</b>
-     *
-     * <p>Eyesight is a speed modifier gated on {@code dark} - caveborn is
-     * faster in it, daywalker is slower - so it is exactly the shape that the
-     * weather loci turned out to be: a <b>conditional</b> attribute modifier,
-     * invisible to the eye in both states, and reported as broken on 2026-09-13
-     * for precisely that reason before an attribute readout settled it.
-     *
-     * <p>So this pen is built the way that one should have been from the start.
-     * The pen's south half is a sealed unlit room and the north half is open
-     * yard; a {@code watchAttribute} on each half prints {@code movement_speed}
-     * for the horses in it. Two horses, one of each allele, and the pass is a
-     * <b>difference between the halves</b> rather than any particular value.
-     *
-     * <p>The dark half carries the same invisible light-1 blocks the glow room
-     * does, which needs saying because it sounds like it defeats the purpose:
-     * light level 1 is still {@code dark} for the gene's condition, and it is
-     * what stops the room filling with zombies overnight. Without them this pen
-     * would measure the speed of a horse being eaten.
-     */
-    private static void buildEyesightPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
-        int z0 = mouthZ + ROW_I;
-        int z1 = z0 + ROW_I_D;
-        int split = z0 + 9;
-
-        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, split);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("EYESIGHT: LIGHT", "the control half.", "Census prints the", "speed of both"));
-        DebugTestYard.stock(level, gy, x0 + 4.0, z0 + 4.0, "horsegenetics.eyesight",
-                "EYES: CAVEBORN (lit)", 1, 0, "Cav/Cav");
-        DebugTestYard.stock(level, gy, x0 + 8.0, z0 + 4.0, "horsegenetics.eyesight",
-                "EYES: DAYWALKER (lit)", 1, 0, "Day/Day");
-        DebugWorldWatch.watchAttribute("EYESIGHT - LIT",
-                DebugTestYard.box(x0, gy, z0, x1, gy + 1, split), Attributes.MOVEMENT_SPEED);
-
-        DebugTestYard.darkRoom(level, gy, x0, x1, split + 3, z1, x0 + 9, true);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 9, gy + 1, split + 2), Direction.NORTH,
-                List.of("EYESIGHT: DARK", "same two alleles.", "The DIFFERENCE is", "the gene"));
-        DebugTestYard.stock(level, gy, x0 + 4.0, split + 6.0, "horsegenetics.eyesight",
-                "EYES: CAVEBORN (dark)", 1, 0, "Cav/Cav");
-        DebugTestYard.stock(level, gy, x0 + 8.0, split + 6.0, "horsegenetics.eyesight",
-                "EYES: DAYWALKER (dark)", 1, 0, "Day/Day");
-        DebugWorldWatch.watchAttribute("EYESIGHT - DARK",
-                DebugTestYard.box(x0, gy, split + 3, x1, gy + 1, z1), Attributes.MOVEMENT_SPEED);
-    }
 
     // ==================================================================
     // ROW J WEST - the arena

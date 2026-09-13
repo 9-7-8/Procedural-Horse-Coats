@@ -47,6 +47,14 @@ public final class DebugKeyBindings {
      */
     public static KeyMapping highlightHorses;
 
+    /**
+     * Ask the horse under you to go down, or to stop. Ocean-born grants
+     * underwater breathing to horse and rider and a vanilla horse floats, so
+     * without this the one thing the gene does is the one thing you cannot
+     * arrange. Ships in a real jar - it is gameplay, not a debug tool.
+     */
+    public static KeyMapping diveHorse;
+
     @SubscribeEvent
     static void register(RegisterKeyMappingsEvent event) {
         // The one binding a real build keeps. Registered before the production
@@ -59,6 +67,21 @@ public final class DebugKeyBindings {
                 KeyMapping.Category.MISC
         );
         event.register(highlightHorses);
+
+        // F, on the owner's call. It CONFLICTS with vanilla's swap-hands, which
+        // is a deliberate trade rather than an oversight: the key had to be one
+        // that reaches the server while mounted, and every comfortable one is
+        // taken (sneak already means dismount, and sprint is a state the client
+        // refuses to enter for a passenger at all). Minecraft shows the clash in
+        // Controls and both actions fire; anybody who minds can rebind it.
+        diveHorse = new KeyMapping(
+                "key.horsegenetics.dive_horse",
+                KeyConflictContext.IN_GAME,
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F,
+                KeyMapping.Category.MISC
+        );
+        event.register(diveHorse);
 
         if (!ClientConfig.debugTools()) {
             return;

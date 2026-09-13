@@ -75,6 +75,15 @@ public class StallSignItem extends Item {
         // Whichever side of the wall is a room - see StallDetector, which
         // measures the stall rather than passing judgement on it.
         StallDetector.Result r = StallDetector.forSign(level, wall, face);
+        if (r == null) {
+            // POP OFF RATHER THAN PLACE. Owner, 2026-09-13: "If it doesn't find
+            // a good area, it should just pop off and refuse to place." A sign
+            // that binds to a made-up box reports a stall the player does not
+            // have, and they find out when a horse is standing in a wall.
+            message(ctx, "That is not an enclosed stall - close it in on every side, with a gate "
+                    + "or a door where you walk in, then try again.");
+            return InteractionResult.FAIL;
+        }
 
         BlockState signState = Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, face);
         level.setBlock(signPos, signState, Block.UPDATE_ALL);
@@ -100,14 +109,14 @@ public class StallSignItem extends Item {
         }
         if (ctx.getPlayer() instanceof ServerPlayer sp) {
             StallDebug.showOne(sp, record);
-            // Say which of the two it got: a player who meant to build a room
-            // and got the fallback box should be able to tell from the message
-            // rather than from the particles.
-            sp.sendSystemMessage(Component.literal(r.enclosed()
-                    ? "Stall set for " + bound.name() + " - " + r.blockCount() + " blocks, "
-                            + r.sizeX() + "x" + r.sizeY() + "x" + r.sizeZ() + "."
-                    : "Stall set for " + bound.name() + " - no walls found, so it is the open "
-                            + "ground in front of the sign."));
+            // There is only one outcome to report now. The other branch said
+            // "no walls found, so it is the open ground in front of the sign",
+            // which was the fallback box announcing itself politely - and a
+            // player who read that had a stall the mod did not really have.
+            // A failed search refuses before it ever reaches here.
+            sp.sendSystemMessage(Component.literal(
+                    "Stall set for " + bound.name() + " - " + r.blockCount() + " blocks, "
+                            + r.sizeX() + "x" + r.sizeY() + "x" + r.sizeZ() + "."));
         }
         return InteractionResult.SUCCESS;
     }

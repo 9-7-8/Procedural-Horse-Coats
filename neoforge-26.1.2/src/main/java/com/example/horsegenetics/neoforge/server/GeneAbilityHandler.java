@@ -1161,37 +1161,45 @@ public final class GeneAbilityHandler {
     private static void sinkIfAsked(Horse horse) {
         if (!horse.isInWater()
                 || !(horse.getControllingPassenger() instanceof Player rider)
-                || !holdingSprint(rider)) {
+                || !DIVING.contains(rider.getUUID())) {
             return;
         }
         Vec3 v = horse.getDeltaMovement();
         horse.setDeltaMovement(v.x, -SINK_SPEED, v.z);
     }
 
+    /** Riders who have asked to go down and not yet asked to stop. */
+    private static final java.util.Set<UUID> DIVING = ConcurrentHashMap.newKeySet();
+
     /**
-     * <b>The sprint KEY, not the sprinting STATE.</b>
+     * <b>F: go down, or stop going down.</b> Called from {@code ToggleDivePayload}.
      *
-     * <p>Owner, 2026-09-13: <i>"still no way to dive on oceanborn"</i>, against
-     * a {@code rider.isSprinting()} test that reads correctly and is never true
-     * here. Sprinting is a state the client decides to enter and then reports;
-     * {@code LocalPlayer} will not enter it while the player is a passenger, so
-     * the server's flag stays false however hard the key is held, and the gene
-     * had no way to fire.
+     * <p>A toggle rather than a held key, on the owner's call - "change it to f
+     * to ask a horse to dive / stop floating". Holding a key for the length of
+     * a dive is the kind of thing that is fine in a test pen and miserable in a
+     * real swim.
      *
-     * <p>{@link ServerPlayer#getLastClientInput()} is the raw key state off
-     * {@code ServerboundPlayerInputPacket}, which the client sends every tick
-     * regardless of what it thinks about sprinting - seven booleans, one of
-     * them {@code sprint()}. That is what "is she holding ctrl" actually means.
-     *
-     * <p>The {@code isSprinting()} fallback is kept for a non-{@code
-     * ServerPlayer} rider, which is not a case this mod creates but is one
-     * another mod could.
+     * <p>Cleared on dismount rather than remembered: surfacing by getting off is
+     * the one move every rider already knows, and a flag that outlived the ride
+     * would send the next horse to the bottom for reasons its rider could not
+     * see. It is deliberately NOT gated on the horse having the gene - a horse
+     * that cannot breathe down there simply floats, and telling the player
+     * "this horse will not dive" is the horse's job, not the key's.
      */
-    private static boolean holdingSprint(Player rider) {
-        return rider instanceof ServerPlayer sp
-                ? sp.getLastClientInput().sprint()
-                : rider.isSprinting();
+    public static void toggleDive(ServerPlayer player) {
+        if (!DIVING.add(player.getUUID())) {
+            DIVING.remove(player.getUUID());
+        }
     }
+
+    /** Forget a rider's dive the moment they are off, so it cannot carry to the next horse. */
+    @SubscribeEvent
+    static void clearDiveOnDismount(net.neoforged.neoforge.event.entity.EntityMountEvent event) {
+        if (!event.isMounting() && event.getEntityMounting() instanceof ServerPlayer player) {
+            DIVING.remove(player.getUUID());
+        }
+    }
+
 
     /** Blocks per tick downward while the rider holds sprint. Brisk, but not a stone. */
     private static final double SINK_SPEED = 0.30;

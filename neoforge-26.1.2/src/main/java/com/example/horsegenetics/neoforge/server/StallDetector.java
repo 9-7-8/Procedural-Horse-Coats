@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,8 +18,25 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Works out what volume a stall sign is naming. <b>It never refuses</b> - it
- * measures, and says which of the two answers it got.
+ * Works out what volume a stall sign is naming, or <b>refuses</b>.
+ *
+ * <h2>It used to never refuse, and that was the bug</h2>
+ * When neither side of the wall enclosed anything it returned a blind
+ * {@code 5x3x5} box centred in front of the sign - which is not a room, was
+ * never checked, and routinely contains the wall the sign is hung on. Owner,
+ * 2026-09-13: <i>"the tight stall detects an area in front of the sign, which
+ * includes the wall &hellip; If it doesn't find a good area, it should just pop
+ * off and refuse to place. l shaped stall, same issue. roofed stall isn't
+ * successfully detecting either, it looks like none of them are."</i>
+ *
+ * <p>All four read the same because all four were falling back: the yard built
+ * them with a two-block <em>hole</em> for a doorway and nothing in it, so the
+ * fill walked out through the gap into the open yard, ran past
+ * {@link #MAX_COLUMNS} and gave up. A hole is not a doorway -
+ * {@link #isDoorway} counts a door, a trapdoor or a gate, and air is none of
+ * them. <b>The fallback box turned every one of those failures into a
+ * plausible-looking success</b>, which is why it took a person standing in one
+ * to notice.
  *
  * <h2>What this is and is not</h2>
  * The search itself is {@link StallFill}, in {@code common/}, where it has
@@ -59,8 +77,6 @@ public final class StallDetector {
     private static final int FLOOR_BELOW = 3;
     private static final int FLOOR_ABOVE = 1;
 
-    /** Half-width of the box used when neither side of the wall encloses anything. */
-    public static final int FALLBACK_RADIUS = 2;
 
     /**
      * The stall a sign names: the floor tiles it covers ({@code region}), the
@@ -69,11 +85,9 @@ public final class StallDetector {
      * <p><b>{@code region} is the authority and {@code min}/{@code max} are only
      * a drawing hint.</b> A bounding box around an L-shaped room contains the
      * wall between the arms; choosing a spot from the box is what put a horse
-     * inside one. Anything placing a horse must walk {@link #region}, and gets
-     * {@code null} for the fallback box, which is not a room and has no floor
-     * that was ever checked.
+     * inside one. Anything placing a horse must walk {@link #region}.
      */
-    public record Result(StallFill.Region region, BlockPos min, BlockPos max, int blockCount, boolean enclosed) {
+    public record Result(StallFill.Region region, BlockPos min, BlockPos max, int blockCount) {
 
         public int sizeX() {
             return max.getX() - min.getX() + 1;
@@ -92,25 +106,22 @@ public final class StallDetector {
     }
 
     /**
-     * The stall a sign on {@code wall}'s {@code face} names. Always answers.
+     * The stall a sign on {@code wall}'s {@code face} names, or {@code null} if
+     * neither side of the wall is an enclosed room.
      *
      * @param wall the block the sign is hung on
      * @param face the face it is hung on - so the sign itself is at
      *             {@code wall.relative(face)} and the two candidate rooms are
      *             the cells either side of it
      */
+    @Nullable
     public static Result forSign(LevelReader level, BlockPos wall, Direction face) {
         BlockPos front = wall.relative(face);
         BlockPos behind = wall.relative(face.getOpposite());
 
-        Result closed = smaller(fill(level, front), fill(level, behind));
-        if (closed != null) {
-            return closed;
-        }
-        // Neither side is a room. The horse still lives in front of its sign -
-        // and "in front" means the side the player was standing on when they
-        // hung it, which is the only statement of intent available here.
-        return box(front);
+        // Null when neither side closes. The caller refuses to place rather
+        // than inventing a room - see the class note.
+        return smaller(fill(level, front), fill(level, behind));
     }
 
     /** Whichever of the two closed, and the tighter one if both did. */
@@ -144,7 +155,7 @@ public final class StallDetector {
                 // to stop at HEADROOM, so every stall read as two blocks tall
                 // (owner-reported 2026-09-10).
                 new BlockPos(region.maxX(), region.maxY() + ceilingHeight(level, region) - 1, region.maxZ()),
-                region.size(), true);
+                region.size());
     }
 
     /** How far up a room is measured before it is called open-topped. */
@@ -362,18 +373,4 @@ public final class StallDetector {
         return v * v;
     }
 
-    /**
-     * The fallback: a plain box in front of the sign, for an open pen that
-     * encloses nothing.
-     *
-     * <p>It carries a {@code null} region, which is the point - <b>no cell in
-     * this box has been checked for a floor or for headroom</b>, so nothing may
-     * teleport a horse into it without checking first.
-     */
-    private static Result box(BlockPos at) {
-        BlockPos min = new BlockPos(at.getX() - FALLBACK_RADIUS, at.getY() - 1, at.getZ() - FALLBACK_RADIUS);
-        BlockPos max = new BlockPos(at.getX() + FALLBACK_RADIUS, at.getY() + 1, at.getZ() + FALLBACK_RADIUS);
-        int cells = (FALLBACK_RADIUS * 2 + 1) * (FALLBACK_RADIUS * 2 + 1) * 3;
-        return new Result(null, min, max, cells, false);
-    }
 }

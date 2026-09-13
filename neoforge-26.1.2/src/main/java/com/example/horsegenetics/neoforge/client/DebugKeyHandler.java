@@ -35,6 +35,10 @@ public final class DebugKeyHandler {
             ActionTrace.log("key F7", "stall overlay requested");
             ClientPacketDistributor.sendToServer(new RequestStallHighlightPayload());
         }
+        while (DebugKeyBindings.diveHorse != null && DebugKeyBindings.diveHorse.consumeClick()) {
+            ClientPacketDistributor.sendToServer(
+                    new com.example.horsegenetics.neoforge.network.ToggleDivePayload());
+        }
         while (DebugKeyBindings.highlightHorses != null && DebugKeyBindings.highlightHorses.consumeClick()) {
             // Logged on the press rather than on the toggle's answer, so a key
             // that is read but produces nothing is distinguishable from a key

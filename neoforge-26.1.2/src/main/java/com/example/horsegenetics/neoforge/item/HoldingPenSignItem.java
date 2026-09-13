@@ -69,6 +69,16 @@ public class HoldingPenSignItem extends Item {
         }
 
         StallDetector.Result r = StallDetector.forSign(level, wall, face);
+        if (r == null) {
+            // POP OFF RATHER THAN PLACE. Owner, 2026-09-13: "If it doesn't find
+            // a good area, it should just pop off and refuse to place." A sign
+            // that binds to a made-up box reports a stall the player does not
+            // have, and they find out when a horse is standing in a wall.
+            player.sendSystemMessage(Component.literal(
+                    "That is not an enclosed pen - close it in on every side, with a gate or a "
+                            + "door where you walk in, then try again.").withStyle(ChatFormatting.RED));
+            return InteractionResult.FAIL;
+        }
 
         BlockState signState = Blocks.SPRUCE_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, face);
         level.setBlock(signPos, signState, Block.UPDATE_ALL);
@@ -95,10 +105,9 @@ public class HoldingPenSignItem extends Item {
         if (player instanceof ServerPlayer sp) {
             StallDebug.showOne(sp, new StallRecord(player.getUUID(), "Holding pen", level.dimension(),
                     signPos, r.min(), r.max(), r.blockCount()));
-            sp.sendSystemMessage(Component.literal(r.enclosed()
-                    ? "Holding pen set - " + r.blockCount() + " blocks, "
-                            + r.sizeX() + "x" + r.sizeY() + "x" + r.sizeZ() + "."
-                    : "Holding pen set - no walls found, so it is the open ground in front of the sign."));
+            sp.sendSystemMessage(Component.literal(
+                    "Holding pen set - " + r.blockCount() + " blocks, "
+                            + r.sizeX() + "x" + r.sizeY() + "x" + r.sizeZ() + "."));
         }
         return InteractionResult.SUCCESS;
     }
