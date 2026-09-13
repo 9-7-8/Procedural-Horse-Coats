@@ -204,7 +204,7 @@ final class DebugTestYard {
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "eggs, ward, cows,", "dryads, LAVA"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "ward, cows, lava,", "dryads, molten"));
 
         verify(level, gy, cx, mouthZ);
     }
@@ -410,22 +410,6 @@ final class DebugTestYard {
                 Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES);
         x = at[++slot];
 
-        // Snow and ice for the melt to eat. A floor rather than a scatter, so
-        // "how far has it got" is answerable at a glance from the gate.
-        growPen(level, gy, x, z, Blocks.SNOW_BLOCK.defaultBlockState(),
-                "horsegenetics.hot_blooded", null,
-                List.of("HOT-BLOODED", "floor is SNOW", "+ a strip of ICE", "does it FLOOD?"));
-        // A strip of ice in the same pen: ice becomes a water SOURCE rather
-        // than air, which is the half of the gene that can flood something -
-        // and the half a night of running is most likely to show.
-        for (int ix = x + 2; ix <= x + PEN_W - 2; ix++) {
-            for (int iz = z + 6; iz <= z + PEN_D - 1; iz++) {
-                DebugPenManager.groundColumn(level, ix, gy, iz, Blocks.ICE.defaultBlockState());
-            }
-        }
-        DebugWorldWatch.watch("HOT-BLOODED", box(x, gy, z, x + PEN_W, gy + 1, z + PEN_D), null,
-                Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.WATER, Blocks.GRASS_BLOCK);
-        x = at[++slot];
 
         // 2. THE DARK OAK, which is the whole reason the locus was rebuilt.
         // A matched pair, so it plants only dark oak and they accumulate; the
@@ -860,29 +844,24 @@ final class DebugTestYard {
      * in the walkway is a wall between the gate and everything behind it.
      */
     private static void buildDisplayRow(ServerLevel level, int gy, int cx, int mouthZ) {
+        // FOUR, not eight. Rime, candelabra, tribal claw and holo flake all
+        // came back "look fine" on 2026-09-13 and their stalls are gone - the
+        // row is audited like every other pen, and a stall for an answered
+        // question is the thing this yard exists to keep deleting.
         List<Look> row = List.of(
                 new Look("horsegenetics.ooze_drip", "OOZE DRIP",
-                        "separate drips?", "own lengths?"),
+                        "1-colour: GREAT.", "check the others"),
                 new Look("horsegenetics.rainbow_drip", "RAINBOW DRIP",
-                        "plain + coloured", "side by side", "Rdc"),
+                        "SHAPE is wrong -", "should match drip", "Rdc"),
                 new Look("horsegenetics.contour_cells", "CONTOUR CELLS",
-                        "nested outlines", "check far flank"),
+                        "UNCHANGED - one", "patch ate a barrel"),
                 new Look("horsegenetics.gilded_crackle", "GILDED CRACKLE",
-                        "pale plates,", "gold seams"),
-                new Look("horsegenetics.holo_flake", "HOLO FLAKE",
-                        "SEPARATE flakes", "on the crest"),
-                new Look("horsegenetics.rime", "RIME",
-                        "must NOT look", "like maelstrom"),
-                new Look("horsegenetics.candelabra", "CANDELABRA",
-                        "small by design.", "jagged = bad"),
-                new Look("horsegenetics.tribal_claw", "TRIBAL CLAW",
-                        "3 hairlines - do", "they read far off?"));
+                        "wants more depth", "- does it read gold?"));
 
         int z0 = mouthZ + ROW_E;
         int z1 = z0 + ROW_E_D;
         int[] starts = {
-                cx + WEST_MIN, cx + WEST_MIN + 5, cx + WEST_MIN + 10, cx + WEST_MIN + 15,
-                cx + EAST_MIN, cx + EAST_MIN + 5, cx + EAST_MIN + 10, cx + EAST_MIN + 15};
+                cx + WEST_MIN, cx + WEST_MIN + 5, cx + WEST_MIN + 10, cx + WEST_MIN + 15};
         for (int i = 0; i < row.size() && i < starts.length; i++) {
             Look look = row.get(i);
             int x0 = starts[i];
@@ -934,7 +913,7 @@ final class DebugTestYard {
             int x1 = x0 + 9;
             fencedPlot(level, gy, x0, x1, z0, z1);
             DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of("MOLTEN HOOVES", forms[i][1], forms[i][2], "watch it WALK"));
+                    List.of("MOLTEN " + (i + 1) + " of 4", forms[i][1], forms[i][2], "DO THE 4 DIFFER?"));
             stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, "horsegenetics.molten_hooves",
                     "molten " + forms[i][1], 2, 0, forms[i][0]);
         }

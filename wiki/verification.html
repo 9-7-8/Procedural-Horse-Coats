@@ -104,12 +104,9 @@
         horse survives lava whether or not it is fireproof (the dimension cancels horse
         damage) and so does the rider (creative). Both are confirmed already; this is
         about speed alone.</li>
-    <li><strong>The hydrophobic pen</strong>, half flooded two deep. Ride from the dry
-        half into the water. <strong>Expect to be dumped and expect it to be
-        unfinished</strong> &mdash; the &ldquo;heads for the nearest shore&rdquo; half was
-        never implemented, so the interesting question is not <em>whether</em> it throws
-        you but <em>where it leaves you</em>: in the shallows, or swimming in the middle
-        with the horse wandering off.</li>
+    <li><strong>The hydrophobic pen &mdash; CONFIRMED 2026-09-13</strong>, and it does
+        more than its page claimed: it throws the rider <em>and</em> heads for an edge.
+        The pen stays only because it costs nothing; the gene is done.</li>
 </ul>
 
 <div class="note warn">
@@ -1619,11 +1616,14 @@
         priority so it sees the interaction before the diet handler and cancels. If another
         mod also wants that event at HIGH, the gene silently does nothing - which is the
         exact failure this project already tracks by name.</li>
-    <li><strong><a href="gene-hydrophobic.html">Hydrophobic</a> only does half of what its
-        page says.</strong> It ejects the rider in deep water. The "and then heads for the
-        nearest shore" half is <em>not implemented</em> - the horse is simply dumped where
-        it stood. Worse, it may dump the rider in the middle of a lake. I would treat this
-        gene as incomplete rather than untested.</li>
+    <li><strong><a href="gene-hydrophobic.html">Hydrophobic</a> is CONFIRMED, and this
+        entry was wrong about it</strong> (owner, 2026-09-13: "hydrophobic works AND it
+        seems like the horse moves for an edge after too?"). It used to say the "and then
+        heads for the nearest shore" half was <em>not implemented</em> and that the horse
+        was "simply dumped where it stood" - written from reading the translator, which
+        only ejects. <strong>The heading-out is vanilla's own behaviour</strong> for a
+        horse in deep water, and the gene inherits it for nothing. A good reminder that
+        reading the code tells you what your code does, not what the player sees.</li>
     <li><strong><a href="gene-pack-leader.html">Leader of the pack</a> is the performance
         one.</strong> Six followers pathfinding continuously, and pathfinding is the most
         expensive thing a mob does. One horse is certainly fine. A stable with several
