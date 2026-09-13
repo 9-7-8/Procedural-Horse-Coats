@@ -29,30 +29,7 @@
     <a href="roadmap.html#bond">the roadmap</a>.
 </p>
 
-<h2>Where it lives</h2>
-<ul>
-    <li><code>data/HorseCareAttachment</code> &mdash; the per-horse state
-        (<code>bond</code>, <code>herd</code> id, the <code>bondToday</code> /
-        <code>dayStamp</code> daily-cap pair, a <code>bondTicks</code>
-        fractional accumulator, a <code>togetherTicks</code> herd-formation
-        counter). Registered as <code>horsegenetics:horse_care</code> in
-        <code>ModAttachments</code>, <code>copyOnDeath</code>, serialized by its
-        own <code>MAP_CODEC</code>.</li>
-    <li><code>server/HorseCareHandler</code> &mdash; the shared tick
-        (<code>EntityTickEvent.Post</code>, every <strong>30 ticks</strong>,
-        phase-staggered by <code>tickCount + entityId</code>), plus the
-        <code>PlayerInteractEvent.EntityInteract</code> hook for feed-bond and
-        the <code>EntityJoinLevelEvent</code> hook that adds the goal.</li>
-    <li><code>server/BondFollowGoal</code> &mdash; the one AI goal, added at
-        priority 4 to every <code>Horse</code>, that reads the bond tier.</li>
-    <li><code>network/HorseCareSyncPayload</code> &rarr;
-        <code>client/ClientHorseCareCache</code> &mdash; bond + in-herd flag
-        pushed to trackers on change and on start-tracking, shown on the
-        <a href="breeding.html#H">horse information screen</a>'s Overview tab
-        (the <strong>i</strong> button on the horse inventory).</li>
-    <li>Block tags <code>data/horsegenetics/tags/block/horse_water.json</code>
-        and <code>horse_food.json</code>.</li>
-</ul>
+<section class="tab-panel" data-tab="gameplay">
 
 <h2>1. Gated healing</h2>
 <p>
@@ -148,6 +125,34 @@
     <code>awardBond</code>, whose job is metering against a daily cap a well-bonded dam
     would blow straight through.</p>
 
+<p>
+    A "day" is <strong>24 000 game ticks</strong> (<code>DAY_TICKS</code>);
+    <code>dayStamp = getGameTime() / 24000</code>, monotonic and reload-safe.
+    <code>bondToday</code> resets when it rolls over. This answers
+    the <a href="roadmap.html#settled">once-per-Minecraft-day rule</a> for the bond side.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Source</th><th>Rate</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Proximity</td><td>~+0.5 / min</td><td>Owner within 10 blocks at scan time &rarr; +15 ticks into <code>bondTicks</code></td></tr>
+<tr><td>Riding</td><td>~+1 / min</td><td>Owner is <em>on</em> the horse (<code>hasPassenger</code>) &rarr; +30 ticks into <code>bondTicks</code>. <strong>Bareback counts</strong> &mdash; see above</td></tr>
+<tr><td>Feeding</td><td>+2 each</td><td>Owner right-clicks with any <code>isFood</code> item (event not cancelled &mdash; vanilla feeding still happens)</td></tr>
+<tr><td>Shearing</td><td>+5 each</td><td>A tamed horse sheared with shears (<code>server/HorseShearHandler</code>, see <a href="item-horse-hair.html#get">items</a>), via the new <code>HorseCareHandler.awardBondFor</code> entry point. Honours the daily cap.</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    <code>bondTicks</code> converts to one bond point every
+    <strong>1 200</strong> ticks (one real minute). A <strong>foal in a
+    herd</strong> gains at <strong>double</strong> rate (the doubling is applied
+    before the daily cap).
+</p>
+<div class="note"><span class="label">Not built yet</span>
+    <p>"Sleeping nearby +1/night" is not wired. Proximity already covers the
+    common "near my owner" case.</p>
+</div>
+
 <h3 id="hand-taming">Taming by hand</h3>
 
 <p>Crouch, hold out something the horse eats, look at it and keep still. It comes over,
@@ -197,21 +202,6 @@
     three mean somebody else is already deciding where it goes.
 </p>
 
-<div class="note">
-    <span class="label">Why it caches the genotype</span>
-    <p>
-        The goal resolves the horse's diet and favourite <strong>once</strong> and keeps
-        them. Both lookups parse the genetic code out of the record and
-        <code>dietOf</code> parses the <a href="known-gaps.html#gap-66">epigenome</a> as
-        well, and a goal's <code>canUse</code> runs <em>every tick for every horse</em> -
-        so without the cache a paddock of thirty horses would have been doing sixty full
-        genome parses a tick, doubled for two hands, for as long as anyone stood nearby
-        holding anything. Both facts are fixed at birth, so resolving once is correct as
-        well as cheap. It is lazy rather than done in the constructor because the goal is
-        added on entity join and the record is filled on the founding tick.
-    </p>
-</div>
-
 <p>A saddle buys you steering, and steering is what lets you go far enough for the
     proximity gain and the riding gain to stack for any length of time. So a saddle is
     worth having; it is simply not what the horse is counting &mdash; and at the top
@@ -235,63 +225,6 @@
     is there, so the only thing between this and an item duplicator is the sweep that removes
     it (<a href="known-gaps.html#gap-156">gap 156</a>), and a horse whose bond falls loses the
     ability mid-ride rather than at a tidy moment.
-</p>
-
-<p>
-    A "day" is <strong>24 000 game ticks</strong> (<code>DAY_TICKS</code>);
-    <code>dayStamp = getGameTime() / 24000</code>, monotonic and reload-safe.
-    <code>bondToday</code> resets when it rolls over. This answers
-    the <a href="roadmap.html#settled">once-per-Minecraft-day rule</a> for the bond side.
-</p>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Source</th><th>Rate</th><th>How</th></tr></thead>
-<tbody>
-<tr><td>Proximity</td><td>~+0.5 / min</td><td>Owner within 10 blocks at scan time &rarr; +15 ticks into <code>bondTicks</code></td></tr>
-<tr><td>Riding</td><td>~+1 / min</td><td>Owner is <em>on</em> the horse (<code>hasPassenger</code>) &rarr; +30 ticks into <code>bondTicks</code>. <strong>Bareback counts</strong> &mdash; see below</td></tr>
-<tr><td>Feeding</td><td>+2 each</td><td>Owner right-clicks with any <code>isFood</code> item (event not cancelled &mdash; vanilla feeding still happens)</td></tr>
-<tr><td>Shearing</td><td>+5 each</td><td>A tamed horse sheared with shears (<code>server/HorseShearHandler</code>, see <a href="item-horse-hair.html#get">items</a>), via the new <code>HorseCareHandler.awardBondFor</code> entry point. Honours the daily cap.</td></tr>
-</tbody>
-</table>
-</div>
-<p>
-    <code>bondTicks</code> converts to one bond point every
-    <strong>1 200</strong> ticks (one real minute). A <strong>foal in a
-    herd</strong> gains at <strong>double</strong> rate (the doubling is applied
-    before the daily cap).
-</p>
-<div class="note"><span class="label">Not built yet</span>
-    <p>"Sleeping nearby +1/night" is not wired. Proximity already covers the
-    common "near my owner" case.</p>
-</div>
-
-<h3 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h3>
-
-<p>
-    <code>/bond &lt;0-100&gt;</code> sets the bond of the horse you are
-    <strong>riding</strong>, or failing that the one you are looking at within 12
-    blocks; <code>/bond</code> on its own reports the number, the behaviour tier and
-    whether the horse is in a herd. Dev runs only &mdash; it is registered behind the
-    same <code>FMLEnvironment.isProduction()</code> guard as
-    <a href="verification.html">the test kit</a>, in
-    <code>server/DebugTestWorldHandler</code>.
-</p>
-
-<p>
-    It exists because every real source above is <em>deliberately</em> slow: a daily
-    cap of 15 and a point per real minute of proximity means reaching tier 3 honestly
-    is about an hour of standing about. Before this, exercising a tier meant grinding
-    it or temporarily lowering the thresholds and rebuilding &mdash; and the second
-    changes the thing under test.
-</p>
-
-<p>
-    <strong>It is not a back door.</strong> It writes through the same
-    <code>HorseCareHandler.syncCare</code> every other bond source ends at, so the
-    client is told and the <a href="items.html">bond progress tasks are credited</a>
-    exactly as if the horse had earned it. A command that set the number without
-    crediting would leave the progress surface lying, and the progress surface is one
-    of the things being tested with it.
 </p>
 
 <h2>3. Herds</h2>
@@ -332,6 +265,79 @@
         per scan instead of +1 when the water/food gate is met.</li>
 </ul>
 
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2>Where it lives</h2>
+<ul>
+    <li><code>data/HorseCareAttachment</code> &mdash; the per-horse state
+        (<code>bond</code>, <code>herd</code> id, the <code>bondToday</code> /
+        <code>dayStamp</code> daily-cap pair, a <code>bondTicks</code>
+        fractional accumulator, a <code>togetherTicks</code> herd-formation
+        counter). Registered as <code>horsegenetics:horse_care</code> in
+        <code>ModAttachments</code>, <code>copyOnDeath</code>, serialized by its
+        own <code>MAP_CODEC</code>.</li>
+    <li><code>server/HorseCareHandler</code> &mdash; the shared tick
+        (<code>EntityTickEvent.Post</code>, every <strong>30 ticks</strong>,
+        phase-staggered by <code>tickCount + entityId</code>), plus the
+        <code>PlayerInteractEvent.EntityInteract</code> hook for feed-bond and
+        the <code>EntityJoinLevelEvent</code> hook that adds the goal.</li>
+    <li><code>server/BondFollowGoal</code> &mdash; the one AI goal, added at
+        priority 4 to every <code>Horse</code>, that reads the bond tier.</li>
+    <li><code>network/HorseCareSyncPayload</code> &rarr;
+        <code>client/ClientHorseCareCache</code> &mdash; bond + in-herd flag
+        pushed to trackers on change and on start-tracking, shown on the
+        <a href="breeding.html#H">horse information screen</a>'s Overview tab
+        (the <strong>i</strong> button on the horse inventory).</li>
+    <li>Block tags <code>data/horsegenetics/tags/block/horse_water.json</code>
+        and <code>horse_food.json</code>.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Why the food goals cache the genotype</span>
+    <p>
+        The goal resolves the horse's diet and favourite <strong>once</strong> and keeps
+        them. Both lookups parse the genetic code out of the record and
+        <code>dietOf</code> parses the <a href="known-gaps.html#gap-66">epigenome</a> as
+        well, and a goal's <code>canUse</code> runs <em>every tick for every horse</em> -
+        so without the cache a paddock of thirty horses would have been doing sixty full
+        genome parses a tick, doubled for two hands, for as long as anyone stood nearby
+        holding anything. Both facts are fixed at birth, so resolving once is correct as
+        well as cheap. It is lazy rather than done in the constructor because the goal is
+        added on entity join and the record is filled on the founding tick.
+    </p>
+</div>
+
+<h2 id="bond-command">Setting bond for testing &mdash; <code>/bond</code></h2>
+
+<p>
+    <code>/bond &lt;0-100&gt;</code> sets the bond of the horse you are
+    <strong>riding</strong>, or failing that the one you are looking at within 12
+    blocks; <code>/bond</code> on its own reports the number, the behaviour tier and
+    whether the horse is in a herd. Dev runs only &mdash; it is registered behind the
+    same <code>FMLEnvironment.isProduction()</code> guard as
+    <a href="verification.html">the test kit</a>, in
+    <code>server/DebugTestWorldHandler</code>.
+</p>
+
+<p>
+    It exists because every real source above is <em>deliberately</em> slow: a daily
+    cap of 15 and a point per real minute of proximity means reaching tier 3 honestly
+    is about an hour of standing about. Before this, exercising a tier meant grinding
+    it or temporarily lowering the thresholds and rebuilding &mdash; and the second
+    changes the thing under test.
+</p>
+
+<p>
+    <strong>It is not a back door.</strong> It writes through the same
+    <code>HorseCareHandler.syncCare</code> every other bond source ends at, so the
+    client is told and the <a href="items.html">bond progress tasks are credited</a>
+    exactly as if the horse had earned it. A command that set the number without
+    crediting would leave the progress surface lying, and the progress surface is one
+    of the things being tested with it.
+</p>
+
 <h2>Performance</h2>
 <p>
     One handler, 30-tick interval, staggered by entity id. Per scan: one entity
@@ -340,6 +346,170 @@
     when a field actually changed, and the sync packet only when bond or
     in-herd changed.
 </p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="science-bands">How free-roaming horses actually live</h2>
+
+<p>
+    The herd system models the <strong>American mustang</strong> on Bureau of Land
+    Management range, because it is the best-studied free-roaming horse population and
+    the one the sources below describe. The headline: a &ldquo;herd&rdquo; is not one
+    group with a leader. It is a <strong>network of small bands</strong> sharing
+    overlapping ground.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Level</th><th>What it is</th><th>How stable</th></tr></thead>
+<tbody>
+<tr><td>Individual bond</td><td>Mare and foal, grooming partners, a stallion and his mares</td><td>Can last for years</td></tr>
+<tr><td>Family band</td><td>One breeding stallion, several mares, their young; sometimes a subordinate stallion</td><td>The main stable unit</td></tr>
+<tr><td>Bachelor band</td><td>Colts and adult males without mares</td><td>Fluid and temporary</td></tr>
+<tr><td>Aggregation</td><td>Several bands at water, good forage or a salt lick</td><td>Short-lived</td></tr>
+<tr><td>Population</td><td>Every horse on one management area</td><td>A management unit, not a social group</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="science-family">Family bands</h3>
+<ul>
+    <li><strong>Size</strong> runs from two to twenty or more; about eight in open
+        sage-steppe and four or five in wooded country.</li>
+    <li><strong>The stallion defends mares, not ground.</strong> He spends much of his
+        time on the edge: watching other males, putting himself between a rival and his
+        band, and <em>herding</em> &mdash; driving a straying mare back with a lowered
+        &ldquo;snake neck&rdquo;, pinned ears, nips and short chases.</li>
+    <li><strong>Mares are the social core.</strong> Older mares often decide where the
+        band moves, rests and drinks; the stallion commonly travels at the rear. The most
+        dominant horse in a band is frequently a mare, and mares&rsquo; friendships
+        outlast any one stallion&rsquo;s tenure.</li>
+    <li><strong>Mutual grooming</strong> (neck, withers, mane) is both insect control and
+        bonding. Resting horses stand head-to-tail so each tail keeps flies off a
+        neighbour&rsquo;s face.</li>
+</ul>
+
+<h3 id="science-bachelors">Bachelor bands and how a stallion gets mares</h3>
+<p>
+    Bachelor bands hold dispersed colts, young males not yet able to keep mares, and old
+    stallions who lost theirs. They are where males learn to spar, read threats and
+    approach a band without provoking a full fight. A male acquires a band by
+    <strong>recruiting a dispersing young mare</strong> (the common route), attracting a
+    mare away from another band, replacing an old, injured or dead stallion, building a
+    band one mare at a time, or succeeding the resident in a multi-male band. Stallions
+    cycle between bachelor, solitary, subordinate and band-stallion roles over a lifetime.
+</p>
+
+<h3 id="science-dispersal">Growing up and leaving</h3>
+<ul>
+    <li><strong>Colts leave at about one to two years</strong> (some stay to three), pushed
+        out by an increasingly intolerant stallion, drawn off by nearby bachelors, or
+        nudged by the arrival of a new foal.</li>
+    <li><strong>Fillies leave later</strong>, near sexual maturity, usually into another
+        band or with a bachelor. Female dispersal is what keeps bands from inbreeding and
+        is a major source of band turnover without any fight at all.</li>
+    <li><strong>Maturity is not one switch.</strong> Physical maturity, confidence, rank,
+        familiarity with local horses and the resident stallion&rsquo;s tolerance all
+        move separately.</li>
+</ul>
+
+<h3 id="science-resources">Food, water and territory</h3>
+<ul>
+    <li><strong>Most competition is indirect</strong> &mdash; one horse eats grass another
+        could have eaten, and the cost shows up as body condition and foaling success, not
+        as fights.</li>
+    <li><strong>Direct competition happens at clumped resources.</strong> A higher-ranked
+        horse displaces a lower one from a patch, a water edge or a salt lick with a threat
+        or a nip; the subordinate usually just moves. Water, being scarcer than grass, is
+        the sharpest pressure point.</li>
+    <li><strong>Bands are not territorial.</strong> They keep a familiar home range that
+        overlaps other bands&rsquo;, and defend a <em>resource</em> briefly while they are
+        using it &mdash; never a map boundary.</li>
+</ul>
+
+<h3 id="science-rank">Rank is pairwise, not an alpha</h3>
+<p>
+    Dominance is real but local: who displaces whom at a feeding spot, who drinks first,
+    who can refuse a grooming invitation. Age, confidence, size and past encounters all
+    feed it, and a mare can outrank the stallion in day-to-day access. The stallion&rsquo;s
+    advantage is reproductive control and his willingness to fight outside males, not
+    command over every mare. The useful model is a set of <strong>&ldquo;A yields to
+    B&rdquo;</strong> relationships rather than one ladder.
+</p>
+
+<h3 id="science-sparring">Sparring is not fighting</h3>
+<p>
+    Most aggression between bachelors is <strong>sparring</strong>: ritualised, graded, and
+    usually over before anyone is hurt. A bout escalates through detection, assessment
+    (sniffing dung, flehmen, arched-neck prancing), posture exchange, contact (neck
+    wrestling, nipping, circling), possibly rearing and striking, and then a
+    <strong>yield</strong> &mdash; a turned shoulder or a short retreat is enough to settle
+    it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>Play sparring</th><th>Rank-testing</th><th>Serious conflict</th></tr></thead>
+<tbody>
+<tr><td>Who</td><td>Foals, yearlings, friendly bachelors</td><td>Familiar bachelors and adult males</td><td>A band stallion and a challenger</td></tr>
+<tr><td>What for</td><td>Practice and bonding</td><td>Settling who yields</td><td>Access to mares; a takeover</td></tr>
+<tr><td>Biting</td><td>Inhibited</td><td>Purposeful, minor marks</td><td>Hard, at legs, flank and neck</td></tr>
+<tr><td>How it ends</td><td>Back to grazing together</td><td>One yields space</td><td>Retreat, exclusion, a lost mare</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Shorthand from the literature: <em>play says &ldquo;try this with me&rdquo;; sparring
+    says &ldquo;how do we compare?&rdquo;; a serious fight says &ldquo;move away or lose
+    access.&rdquo;</em> Serious fights are rare because an injured horse loses water, pace
+    and standing &mdash; and when they happen they are about an estrous mare, a bachelor
+    pressing close, or a declining stallion.
+</p>
+
+<h3 id="science-model">What a simulation should take from this</h3>
+<ul>
+    <li>Bands of one stallion, one to six or more mares and their young, with occasional
+        subordinate males; bachelor groups alongside.</li>
+    <li>Mare&ndash;mare bonds that persist across stallion changes.</li>
+    <li>Stallions that herd and guard mares rather than patrol ground.</li>
+    <li>Probabilistic dispersal: colts at one to three years, fillies nearer maturity.</li>
+    <li>Sparring that updates a pairwise rank and rarely injures; serious fights rare but
+        consequential.</li>
+    <li>Displacement at concentrated food and water, not constant food fights.</li>
+    <li>After a stallion&rsquo;s death or a disturbance: mare transfers, band splits and
+        takeovers, not an instant snap back.</li>
+</ul>
+
+<h3 id="science-sources">Sources</h3>
+<ul>
+    <li>U.S. Geological Survey, <a href="https://pubs.usgs.gov/tm/02a09/">free-roaming
+        horse behaviour and ethogram (TM 2-A9)</a>.</li>
+    <li>Bureau of Land Management, <a href="https://www.blm.gov/sites/blm.gov/files/uploads/Media_Library_BLM_Policy_H-4700-1.pdf">Wild
+        Horses and Burros Management Handbook H-4700-1</a>, and
+        <a href="https://www.blm.gov/programs/wild-horse-and-burro/herd-management/herd-management-areas">Herd
+        Management Areas</a>.</li>
+    <li>U.S. Geological Survey, <a href="https://pubs.usgs.gov/publication/70248126">GPS
+        movement of harems and bachelors in the Conger and Frisco HMAs</a>.</li>
+    <li>University of Pennsylvania Equine Behavior Laboratory,
+        <a href="https://www.vet.upenn.edu/docs/default-source/research/equine-behavior-laboratory/95bachelu.pdf?sfvrsn=6a5ee0ba_0">aggression
+        among bachelor stallions</a>.</li>
+    <li><a href="https://link.springer.com/article/10.1007/s10211-023-00421-9">Acta
+        Ethologica (2023)</a>, on ritualised encounters between familiar horses.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="breeds.html#bands">Breeds &mdash; bands</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="verification.html">To be verified</a>
+    </div>
+    Source: <code>neoforge-26.1.2/{data,server}/</code>
+</div>
 
 </article>
 </main>

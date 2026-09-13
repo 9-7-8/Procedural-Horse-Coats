@@ -25,6 +25,46 @@
     from.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="play">Breeding, as a player sees it</h2>
+
+<div class="plain">
+    <p>
+        Feed a <strong>mare and a stallion</strong> the usual golden food and they make a
+        foal, the vanilla way. What is different is what the foal <em>is</em>: every
+        gene is inherited, one copy from each parent, so its coat, its eyes, its speed,
+        health, jump and size all come from its parents rather than from a dice roll.
+        Two horses of the same sex will not breed.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Stats are genetic.</strong> A fast pair tends to make fast foals, and
+        the horse information screen colours each number green or red against the
+        parents&rsquo;.</li>
+    <li><strong>Carriers are real.</strong> A plain-looking horse can hand on something
+        it does not show; the Genes tab lists every locus a horse is carrying anything
+        at.</li>
+    <li><strong>Breed labels combine.</strong> Two of the same breed breed true, two
+        breeds make a named cross, and anything messier is Mixed.</li>
+    <li><strong>A pairing can fail.</strong> Some pairs share a hidden lethal: the mare
+        <a href="#miscarriage">miscarries</a> and loses half a heart, with a line saying
+        what it looked like but never which gene. Other foals are born with a disorder
+        and die within seconds.</li>
+    <li><strong>Names follow the family.</strong> A pair&rsquo;s first foal takes the
+        dam&rsquo;s first name and the sire&rsquo;s last; later foals drift toward fresh
+        names.</li>
+    <li><strong>Everything is remembered.</strong> The family tree shows great-grandparents
+        with their coats, and the Offspring tab reads the pedigree downward.</li>
+    <li><strong>A foal of your tamed mare is yours</strong>, tamed to you and starting at
+        a quarter of her bond.</li>
+</ul>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <h2>What &ldquo;breeding&rdquo; covers</h2>
 
 <ol>
@@ -1074,6 +1114,118 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         <a href="verification.html">To be verified</a>.
     </p>
 </div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="science-cycle">How horses actually reproduce</h2>
+
+<p>
+    The two sexes run on completely different clocks. <strong>Mares cycle seasonally and
+    have a short fertile window; stallions are fertile all year.</strong> And a mare can
+    conceive again while still nursing, often within about a week of foaling.
+</p>
+
+<h3 id="science-mares">Mares: a 21-day cycle, in season</h3>
+<p>
+    Mares are <em>long-day seasonal</em> breeders: they begin cycling as spring days
+    lengthen, cycle through summer, and mostly stop in winter, so that an eleven-month
+    pregnancy lands a foal in the next spring.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Stage</th><th>Length</th><th>What is happening</th><th>Fertile?</th></tr></thead>
+<tbody>
+<tr><td>Estrus (&ldquo;heat&rdquo;)</td><td>2&ndash;8 days</td><td>A follicle matures; ovulation near the end</td><td>Receptive; most fertile in the last day or two</td></tr>
+<tr><td>Diestrus</td><td>14&ndash;16 days</td><td>Progesterone from the corpus luteum</td><td>No</td></tr>
+<tr><td>Anestrus</td><td>Usually winter</td><td>Ovaries largely inactive</td><td>No</td></tr>
+<tr><td>Spring transition</td><td>Weeks</td><td>Heat-like behaviour, often without ovulation</td><td>Unreliable</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A mare in heat approaches the stallion, raises her tail, &ldquo;winks&rdquo;,
+    urinates in small amounts and stands to be mounted. Those signs mean
+    <em>receptive</em>, not <em>ovulating</em> &mdash; breeders confirm timing with
+    ultrasound.
+</p>
+
+<h3 id="science-stallions">Stallions: no cycle</h3>
+<p>
+    A mature, sound stallion can breed year-round. He is still somewhat seasonal &mdash;
+    semen output and libido peak in the long days and dip in winter &mdash; but it is a
+    quality modifier, not an on/off state. Fertility also depends on semen quality and on
+    how often he is used.
+</p>
+
+<h3 id="science-foaling">Pregnancy, foal heat and nursing</h3>
+<ul>
+    <li><strong>Gestation</strong> averages about <strong>340 days</strong>, commonly 320
+        to 370. Almost always one foal; twins are high-risk.</li>
+    <li><strong>Foal heat</strong> &mdash; the first estrus after birth &mdash; starts about
+        5 to 12 days after foaling, with ovulation around day 7 to 10.</li>
+    <li><strong>Nursing does not prevent conception.</strong> A healthy mare can foal in
+        spring, conceive on foal heat, and spend most of the next year both pregnant and
+        nursing. That is how annual foaling happens.</li>
+    <li><strong>Breeders sometimes skip foal heat</strong> after a hard birth, a retained
+        placenta, infection, poor body condition or an older mare &mdash; because of the
+        uterus&rsquo;s recovery and her condition, not because of the milk.</li>
+</ul>
+
+<h3 id="science-game">The problem with putting this in a game</h3>
+<p>
+    Vanilla Minecraft produces a foal the instant two horses are fed. A realistic model
+    separates courtship, mating, conception, pregnancy and birth &mdash; which is also what
+    would let a foal&rsquo;s genes be drawn at birth from a stored sire. The hard part is
+    time:
+</p>
+<ul>
+    <li><strong>Straight compression breaks the short stages.</strong> Squeeze a 340-day
+        pregnancy into one Minecraft day (20 minutes) and the whole 21-day cycle becomes 74
+        seconds, with heat lasting 18 seconds &mdash; accurate and unplayable.</li>
+    <li><strong>The usual fix is a floor.</strong> Scale every stage from one gestation
+        setting, then clamp each independent stage (heat, diestrus, recovery, foal heat,
+        lactation) to a minimum such as one Minecraft day. The proportions come back as the
+        gestation setting grows.</li>
+    <li><strong>Nested windows are not stages.</strong> Peak fertility is the end of heat,
+        not a day after it, and a cycle is heat plus diestrus &mdash; clamping those
+        separately double-counts.</li>
+    <li><strong>Lactation is a condition, not a lock.</strong> The biologically honest
+        version lets a nursing mare conceive and charges her body condition for it
+        instead.</li>
+    <li><strong>Clock choice matters.</strong> Counting world ticks means sleep does not
+        skip a pregnancy; counting world days means it does. A hybrid (pregnancy follows
+        world time, heat follows active ticks) stops a player sleeping through every
+        breeding window.</li>
+</ul>
+
+<div class="note">
+    <span class="label">None of this is built</span>
+    <p>
+        The mod still uses vanilla&rsquo;s instant foal with a genetic draw on top, and
+        whether to change that at all is an open design question &mdash; it would replace a
+        vanilla behaviour, not add to it.
+    </p>
+</div>
+
+<h3 id="science-sources">Sources</h3>
+<ul>
+    <li>MSD Veterinary Manual,
+        <a href="https://www.msdvetmanual.com/management-and-nutrition/management-of-reproduction-horses/the-reproductive-cycle-of-horses">the
+        reproductive cycle of horses</a> and
+        <a href="https://www.msdvetmanual.com/horse-owners/reproductive-disorders-of-horses/management-of-reproduction-in-horses">management
+        of reproduction</a>.</li>
+    <li>PetMD, <a href="https://www.petmd.com/horse/horse-breeding-cycles-everything-you-need-know">horse
+        breeding cycles</a>.</li>
+    <li>Wikipedia, <a href="https://en.wikipedia.org/wiki/Mare">Mare</a>.</li>
+    <li>Minecraft Wiki, <a href="https://minecraft.wiki/w/Horse">Horse</a>, for vanilla
+        breeding and growth times.</li>
+</ul>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">

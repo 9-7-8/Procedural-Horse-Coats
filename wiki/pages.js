@@ -20,7 +20,7 @@ window.HG.pages = {
                 { href: "../index.html", text: "Wiki home", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "philosophy.html", text: "Philosophy", kind: "core", views: ["coding","science"] },
                 { href: "genetics-model.html", text: "The genetics model", kind: "core", views: ["gameplay","coding","science"] },
-                { href: "breeding.html", text: "Breeding & pedigree", kind: "core", views: ["gameplay","coding"] },
+                { href: "breeding.html", text: "Breeding & pedigree", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "breeds.html", text: "Breeds", kind: "core", views: ["gameplay","coding"] },
                 { href: "breed-book.html", text: "The breed book", kind: "core", views: ["gameplay"] },
                 { href: "horse-body.html", text: "The horse's body", kind: "core", views: ["gameplay","coding"] }
@@ -29,7 +29,7 @@ window.HG.pages = {
         {
             title: "Gameplay",
             items: [
-                { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core", views: ["gameplay"] },
+                { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "carrots.html", text: "Breeding carrots & the gene database", kind: "magical", views: ["gameplay","coding"] },
                 { href: "items.html", text: "Items & recipes", kind: "core", views: ["gameplay","coding"] },
                 { href: "villagers.html", text: "Villagers & transfer papers", kind: "core", views: ["gameplay","coding"] },
