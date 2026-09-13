@@ -30,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
@@ -536,6 +537,30 @@ public final class DebugPenManager {
                 }
                 // glowstone line directly above the gravel strip
                 fastSet(level, new BlockPos(x, gy + WALL_TOP_DY, side * GRAVEL_STRIP_Z), glowstone);
+            }
+
+            // AND THE FLOOR, which the glowstone line never reached. The lines
+            // run at gy+10 along the walls; a horse standing in the middle of a
+            // pen is nine blocks below one and eleven across from it, which is
+            // twenty by the arithmetic light actually uses - so the back of
+            // every pen in this gallery reads ZERO. That cost nothing for as
+            // long as the dimension spawned no monsters and its horses could
+            // not be hurt. Both of those stopped being true on 2026-09-13: the
+            // biome spawns zombies now, and the rule that made horses
+            // invulnerable here was removed on the owner's word. A hundred and
+            // forty showcase horses standing in the dark is a hundred and forty
+            // horses that can be eaten overnight, and unlike the test yard's
+            // stock they are not replaceable by rebuilding one pen - the whole
+            // point of the gallery is that each draw is a different animal.
+            //
+            // Invisible full-brightness blocks rather than more glowstone: the
+            // corridor is a place you look AT horses, and a lamp every four
+            // blocks at eye level would be in front of half of them.
+            BlockState lamp = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15);
+            if ((x & 3) == 0) {
+                for (int z = -PEN_FAR_Z + 2; z <= PEN_FAR_Z; z += 4) {
+                    fastSet(level, new BlockPos(x, gy + 3, z), lamp);
+                }
             }
         }
     }
