@@ -36,7 +36,13 @@ window.HG = window.HG || {};
   var RIGHT_W = 128;      // was 96 - several labels were wider than the button
   var RIGHT_STEP = 24;    // 20-high buttons with a 4px gutter (was 22, i.e. 2px)
   var RIGHT_STEP_MIN = 20;    // the tightest gutter, i.e. buttons touching
-  var RIGHT_ROWS = 7;     // Age, Sex, Breed, Randomize, Add, Rnd health, Clear
+  // Age, Sex, Breed, Randomize, Add, then "Rnd health" and "Clear" SHARING one
+  // row - six, not seven. The screen pairs those two because seven full-width
+  // rows plus the pinned group below them do not fit a 270px window (1080p at
+  // GUI scale 4): they overlapped, and the top group is registered first, so
+  // "Clear genes" silently ate "Make egg"'s clicks in a real play session.
+  // Mirrored here by value, like every other constant in this file.
+  var RIGHT_ROWS = 6;
   var BLURB_W = 224;      // the hover blurb panel - see drawGeneBlurb
   var BLURB_LINE_H = 10;
   var BLURB_PAD = 5;
@@ -596,11 +602,13 @@ window.HG = window.HG || {};
         function () { opts.edit("addRandom"); },
         function () { openMenu("add", rx, addY + 20, addScopes, state.addScope); });
       step();
-      button(rx, ry, RIGHT_W, 20,
+      // Paired on one row, exactly as the screen does it.
+      var halfRow = Math.floor((RIGHT_W - 4) / 2);
+      button(rx, ry, halfRow, 20,
         state.randomizeInvisible ? "Rnd health: on" : "Rnd health: off",
         function () { opts.edit("setRandomizeInvisible", !state.randomizeInvisible); });
-      step();
-      button(rx, ry, RIGHT_W, 20, "Clear genes", function () { opts.edit("clearGenes"); });
+      button(rx + halfRow + 4, ry, halfRow, 20, "Clear",
+        function () { opts.edit("clearGenes"); });
 
       // Where the screen has Spawn / Cancel there is nothing to spawn - the
       // horse is already standing in the field. These are the browser's own,

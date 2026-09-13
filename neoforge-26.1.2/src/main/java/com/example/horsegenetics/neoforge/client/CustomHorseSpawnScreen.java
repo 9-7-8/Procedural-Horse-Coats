@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.BreedLineage;
@@ -212,7 +213,15 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final int RIGHT_STEP_MIN = 20;
 
     /** Rows in the top group: Age, Sex, Breed, Randomize, Add, Rnd health, Clear. */
-    private static final int RIGHT_ROWS = 7;
+    /**
+     * Rows in the top right-hand group. <b>Six, since the randomize toggle and
+     * Clear share one</b> - see the note where they are built. The spacing in
+     * {@link #rightStep()} is derived from this, so a new row here is not free:
+     * it costs 20px of a column that has already collided with the pinned group
+     * below it once, and that collision is invisible (the top group is added
+     * first, so it silently wins the click).
+     */
+    private static final int RIGHT_ROWS = 6;
 
     /** How much the preview gives up to the Spawn button beneath it. */
     private static final int SPAWN_BAND = 22;
@@ -851,6 +860,28 @@ public final class CustomHorseSpawnScreen extends Screen {
         return Math.max(RIGHT_STEP_MIN, Math.min(RIGHT_STEP, fits));
     }
 
+    /**
+     * <b>Say so when the two groups collide.</b> The spacing gives what it can
+     * and then stops at {@link #RIGHT_STEP_MIN}; past that the top group grows
+     * into the pinned one, and because the top group is registered first it
+     * takes the clicks of whatever it covers - a button that looks alive, is
+     * alive, and cannot be pressed. That cost a play session once and left
+     * nothing in the log to find, so now it leaves this.
+     *
+     * <p>Warned once per screen open rather than per frame, and it is a warning
+     * rather than a layout hack: the honest fix at that size is a column that
+     * scrolls, which is <code>known-gaps.html</code>'s business.
+     */
+    private void warnIfColumnsCollide() {
+        int topGroupBottom = LIST_TOP + 4 + (RIGHT_ROWS - 1) * rightStep() + 20;
+        if (topGroupBottom > bottomStackTop()) {
+            HorseGenetics.LOGGER.warn("[Custom Horse] the right column does not fit this window "
+                    + "({}px): the gene buttons reach y={} and the Make egg / Copy / Cancel group "
+                    + "starts at y={}, so the overlap will swallow clicks. Raise the window or "
+                    + "lower the GUI scale.", this.height, topGroupBottom, bottomStackTop());
+        }
+    }
+
     private int previewLeft() {
         return LIST_X + listWidth() + 8;
     }
@@ -1060,6 +1091,15 @@ public final class CustomHorseSpawnScreen extends Screen {
                         b -> openDropdown(Dd.ADD, rx, addY + 20))
                 .bounds(rx + RIGHT_W - ARROW_W, ry, ARROW_W, 20).build());
         ry += rightStep;
+        // The last two share a row. That is worth a sentence, because it is the
+        // fix for a bug rather than a tidy-up: seven full-width rows plus the
+        // three pinned to the bottom do not fit a 270px window (1080p at GUI
+        // scale 4), the two groups overlapped, and the top one is added first -
+        // so "Clear genes" sat on top of "Make egg" and ATE ITS CLICK. Since
+        // reset() on an untouched horse changes nothing visible, the report was
+        // "Make egg does nothing" (owner, 2026-09-12), with no egg, no refusal
+        // and nothing in the log, because no packet was ever sent.
+        int halfRow = (RIGHT_W - 4) / 2;
         addRenderableWidget(Button.builder(
                         Component.literal(randomizeInvisible ? "Rnd health: on" : "Rnd health: off"),
                         b -> {
@@ -1071,10 +1111,11 @@ public final class CustomHorseSpawnScreen extends Screen {
                                 + "nothing you can see - the disorders, the stat loci, the ability "
                                 + "genes - so rolling a coat cannot quietly roll a lethal. On: it "
                                 + "rolls those too.")))
-                .bounds(rx, ry, RIGHT_W, 20).build());
-        ry += rightStep;
-        addRenderableWidget(Button.builder(Component.literal("Clear genes"), b -> reset())
-                .bounds(rx, ry, RIGHT_W, 20).build());
+                .bounds(rx, ry, halfRow, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Clear"), b -> reset())
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal("Put every gene back to its default allele.")))
+                .bounds(rx + halfRow + 4, ry, halfRow, 20).build());
 
         // Creative-only, and the server re-checks it. Saying so on the button
         // rather than only in a chat line after the click: the one report of
@@ -1126,6 +1167,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         addRenderableWidget(eggButton);
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
                 .bounds(rx, bottomStackTop() + 2 * RIGHT_STEP, RIGHT_W, 20).build());
+        warnIfColumnsCollide();
     }
 
     /**

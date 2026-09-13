@@ -59,28 +59,6 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
-<li id="gap-203"><strong>The test kit hands out mares only, so any kit test that needs
-    breeding cannot pass.</strong> Opened 2026-09-12, found by the owner playing it:
-    &ldquo;your spontaneous breeding egg only gives mares&rdquo;. Every
-    <code>preset(...)</code> in <code>DebugTestWorldHandler</code> but two passes
-    <code>Sex.FEMALE</code>, and <code>HorseBreedingHandler</code> cancels same-sex
-    pairings - so batch 3's &ldquo;spawn FOUR in a wide fenced field, walk away for
-    several in-game days, come back and COUNT&rdquo; has never been able to produce a
-    foal, and the starburst breeding slot written the same day inherits the fault. The fix
-    is small (a stallion egg in each batch that breeds) and the lesson is not: <b>a test
-    that cannot pass sits on the checklist looking like coverage</b>, which is worse than
-    an absent one. Worth a sweep of the kit for other instructions nothing can satisfy.</li>
-<li id="gap-202"><strong>&ldquo;Make egg&rdquo; in the custom horse spawn screen does
-    nothing.</strong> Opened 2026-09-12. No egg, no refusal in chat and nothing in the log
-    - and every refusal on that path logs at INFO - so the payload never left the client.
-    The button is not greyed out (owner checked, so <code>eggButton.active = creative</code>
-    is true and the creative read is fine), which leaves a widget overlapping it and
-    eating the click: the same family as <a href="#gap-139">gap 139</a>, where "Clear
-    genes" and "Make egg" overlapped in a real window and the bottom stack was rebuilt to
-    fix it. The Spawn button on the same screen works, and it is the one at a different
-    anchor (<code>spawnButtonBounds</code>) rather than in that column - which is itself a
-    hint about where to look. Needs the screen driven at a real window size with the
-    widget bounds printed, not read.</li>
 <li id="gap-201"><strong>The gene creator cannot show a glow, so the one property
     it writes blind is the one it writes most often.</strong> Opened 2026-09-12 with
     <a href="making-a-gene.html#emissive">glow intensity</a>. A layer's

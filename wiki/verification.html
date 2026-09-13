@@ -142,6 +142,52 @@
         is wrong rather than the levels.</li>
 </ul>
 
+<h2 id="kit-and-egg">&sect;0-CR &mdash; The kit breeds, and Make egg works (2026-09-12, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Two tools that did not work, both found by using them</span>
+    <p>
+        <strong>The kit only ever handed out mares</strong>, and
+        <code>HorseBreedingHandler</code> cancels same-sex pairings - so batch 3's
+        spontaneous-breeding test ("spawn FOUR in a wide fenced field, come back and
+        COUNT") had never once been runnable, and the starburst breeding slot written the
+        same morning inherited the fault. Every batch that breeds now carries both sexes,
+        and that is written into the class as a rule rather than left to the next author.
+    </p>
+    <p>
+        <strong>"Make egg" sent no packet at all.</strong> The right-hand column's seven
+        full-width rows plus the three pinned below them do not fit a 270px window (1080p
+        at GUI scale 4); the groups overlapped, the top one is registered first, and so
+        "Clear genes" sat on top of "Make egg" and took its clicks. Since
+        <code>reset()</code> on an untouched horse changes nothing you can see, it read as
+        a dead button. The toggle and Clear now share a row (six rows, not seven), and the
+        screen <strong>warns in the log</strong> if the two groups ever collide again
+        rather than silently eating clicks.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Press Make egg</strong> in the custom spawn screen at your usual GUI
+        scale. It should say <em>wrote this horse into a preset spawn egg</em> and the egg
+        should be in your inventory - note it goes to the first free slot, so with a full
+        hotbar it lands in the backpack rather than in front of you.</li>
+    <li><strong>Then try it at GUI scale 4 and at scale 2</strong>, and look for
+        <em>[Custom Horse] the right column does not fit this window</em> in the log. At
+        some small size it will appear - that is the honest limit, and the fix for it is a
+        scrolling column rather than more pairing.</li>
+    <li><strong>Check "Clear" still clears</strong>. It is half-width and renamed from
+        "Clear genes"; the tooltip carries the full sentence.</li>
+    <li><strong>The horse designer was mirrored</strong> (hard rule 5) - open
+        <a href="horse-designer/index.html">the designer</a> and confirm its right column
+        matches, since it copies these constants by value.</li>
+    <li><strong>Batch 3: spawn two mares and two stallions</strong> from slots 2 and 3 in
+        a fenced field and leave them. A foal means the test can finally run; it has never
+        been able to before, so nothing about spontaneous breeding has ever been
+        verified.</li>
+    <li><strong>Batch 1: breed a starburst mare with a starburst stallion</strong> (slots
+        2 and 3). The foal's emblem should sit near its parents' rather than re-rolling.</li>
+</ul>
+
 <h2 id="highlight-crash">&sect;0-CQ &mdash; F8's highlight no longer crashes the server (2026-09-12, NOT looked at)</h2>
 
 <div class="note danger">

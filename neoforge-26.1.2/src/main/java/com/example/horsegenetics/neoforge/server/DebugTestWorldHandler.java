@@ -360,6 +360,15 @@ public final class DebugTestWorldHandler {
      * test each new part"). Preset eggs are the lever: a horse built for one
      * test, named for it, one right-click from existing.
      *
+     * <p><b>A batch that breeds carries both sexes.</b>
+     * {@code HorseBreedingHandler} cancels same-sex pairings, so a slot that
+     * says "breed these" and hands out mares is an instruction nothing can
+     * follow - which is exactly what batch 3's spontaneous-breeding test was
+     * from the day it was written ("spawn FOUR in a wide fenced field, come
+     * back and COUNT" - of four mares), found by the owner playing it on
+     * 2026-09-12. <b>A test that cannot pass is worse than a missing one</b>,
+     * because it sits on the checklist looking like coverage.
+     *
      * <p><b>One hotbar at a time.</b> A kit that filled all 36 slots, with a
      * 30-line legend, was "SUPER overwhelming" (owner, 2026-09-11) - so the
      * checklist is cut into themed batches of at most nine, the first handed out
@@ -414,28 +423,33 @@ public final class DebugTestWorldHandler {
                         "horsegenetics.starburst=W/W"), 8),
                         "SPAWN SIX AND LINE THEM UP. The emblem scales 45-100% per horse: is that "
                                 + "natural variation, or two sizes with a gap?");
-                put(inv, legend, 2, many(preset(player, "Test: starburst (coloured)", Sex.FEMALE, false,
+                // A stallion, because the slot below says "breed the starbursts"
+                // and four mares cannot. Pale rather than coloured so the foal
+                // expresses the same outcome as both parents and the only thing
+                // that varies between them is the dial.
+                put(inv, legend, 2, many(preset(player, "Test: starburst STALLION (pale)", Sex.MALE, false,
+                        "horsegenetics.starburst=W/W"), 4),
+                        "STALLIONS - the mares above cannot breed with each other");
+                put(inv, legend, 3, many(preset(player, "Test: starburst (coloured)", Sex.FEMALE, false,
                         "horsegenetics.starburst=C/C"), 6),
                         "the coloured form - check the rings stay concentric at the small end");
-                put(inv, legend, 3, many(preset(player, "Test: lantern", Sex.FEMALE, false,
+                put(inv, legend, 4, many(preset(player, "Test: lantern", Sex.FEMALE, false,
                         "horsegenetics.lantern=La/La"), 6),
                         "AT NIGHT. The bloom either side of the line is lit at 22% now: the light "
                                 + "should spill and fade, not stop at the core's edge");
-                put(inv, legend, 4, many(preset(player, "Test: tron (solid)", Sex.FEMALE, false,
+                put(inv, legend, 5, many(preset(player, "Test: tron (solid)", Sex.FEMALE, false,
                         "horsegenetics.tron=Trs/Trs"), 6), "lit tubes on every box edge, haloes at 25%");
-                put(inv, legend, 5, many(preset(player, "Test: tron (BOTH forms)", Sex.MALE, false,
+                put(inv, legend, 6, many(preset(player, "Test: tron (BOTH forms)", Sex.MALE, false,
                         "horsegenetics.tron=Trs/Trg"), 4),
                         "the overlap case: solid and gradient tubes are separate layers and where "
                                 + "they cross the BRIGHTER wins rather than the two summing. Blown "
                                 + "out means that rule is broken");
-                put(inv, legend, 6, new ItemStack(Items.GOLDEN_CARROT, 16),
-                        "golden carrots - breed the starbursts: does a foal's emblem sit near its "
-                                + "parents' rather than re-rolling?");
-                put(inv, legend, 7, new ItemStack(Items.CLOCK),
+                put(inv, legend, 7, new ItemStack(Items.GOLDEN_CARROT, 16),
+                        "golden carrots - breed a mare from slot 2 with a stallion from slot 3: "
+                                + "does the foal's emblem sit near its parents' rather than "
+                                + "re-rolling?");
+                put(inv, legend, 8, new ItemStack(Items.CLOCK),
                         "clock - the two glow genes above are night tests");
-                put(inv, legend, 8, new ItemStack(Items.WHITE_WOOL, 64),
-                        "white wool - stand a starburst against it: the emblem is read against its "
-                                + "background and plains grass is the reference");
             }
             case 2 -> {
                 // 0-CO. EMISSIVE_THRESHOLD is gone, so every one of these fades
@@ -467,11 +481,19 @@ public final class DebugTestWorldHandler {
                 // at: the failures are an entity storm and a farm that quietly
                 // stopped, and ten minutes of watching proves nothing.
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame what needs taming");
-                put(inv, legend, 1, preset(player, "Test: spontaneous breeding", Sex.FEMALE, false,
-                        "horsegenetics.spontaneous_breeding=Spb/Spb"),
-                        "spawn FOUR in a wide fenced field, walk away for several in-game days, come back and COUNT");
-                put(inv, legend, 2, new ItemStack(Items.OAK_FENCE, 64), "fence - make that field a big one");
-                put(inv, legend, 3, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
+                put(inv, legend, 1, many(preset(player, "Test: spontaneous breeding MARE", Sex.FEMALE, false,
+                        "horsegenetics.spontaneous_breeding=Spb/Spb"), 4),
+                        "MARES - spawn two of these and two of the stallions beside them in a wide "
+                                + "fenced field, walk away for several in-game days, come back and COUNT");
+                // The gate's old slot. Four mares could never breed with each
+                // other, so this test had never once been runnable; a gate is
+                // the cheapest thing in the batch to lose, since the field is
+                // built in creative and you fly into it.
+                put(inv, legend, 2, many(preset(player, "Test: spontaneous breeding STALLION", Sex.MALE, false,
+                        "horsegenetics.spontaneous_breeding=Spb/Spb"), 4),
+                        "STALLIONS - and the pair the holy-ward breeding pen below needs too");
+                put(inv, legend, 3, new ItemStack(Items.OAK_FENCE, 64),
+                        "fence - make that field a big one (no gate: you are in creative, fly in)");
                 put(inv, legend, 4, preset(player, "Test: holy ward", Sex.FEMALE, false,
                         "horsegenetics.holy_ward=Hly/Hly"),
                         "stand it beside a working spawner farm: the farm must keep producing. Then a spawn egg, then a breeding pen");
