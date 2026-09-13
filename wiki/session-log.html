@@ -27,6 +27,146 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13c">2026-09-13 &mdash; the yard stopped protecting the horses, and grew the half of the mod it never had</h2>
+
+<p>
+    Two instructions, and the second one is the interesting half. <em>&ldquo;Add the yard
+    able and entire item and gameplay layer as well as villagers. Add literally everything
+    that CAN be tested in the yard. Remove the 'no horse damage' exception in the
+    yard.&rdquo;</em>
+</p>
+
+<p>
+    <strong>That rule was the fifth protection in this dimension to turn out to be the
+    reason a gene &ldquo;did nothing&rdquo;.</strong> The others were the handler that
+    deleted every non-horse mob (so the ward had no zombies and the pack leader had no
+    cows), the <code>spread</code> verb returning early here (so no dryad ever planted
+    anything), the missing <code>timelines</code> in the dimension type (so there was no
+    night for eight temper alleles and five watcher alleles to happen in), and the same
+    damage rule cancelling the dhampir's sunburn (so the animal never dropped below full
+    health and never hunted). This one held back <strong>six</strong> genes at once:
+    guardian and gladiator need a fight, healer needs a patient below full, cleansing light
+    needs undead, ender echo is <em>triggered</em> by being hit, and both death loci need
+    the horse to die.
+</p>
+
+<p>
+    The pattern has now been written down five times and it is worth saying once more in
+    plain words, because it is the single most expensive thing in this project's history:
+    <strong>a gene that does nothing and a gene that is forbidden from doing anything are
+    identical from inside the game.</strong> No log line, no sign, nothing on the horse
+    distinguishes them. Every one of the five was found by adding an instrument, never by
+    reasoning &mdash; and four of the five were found <em>while looking for something
+    else</em>.
+</p>
+
+<h3>Rows J and K: what the removal unlocked</h3>
+<p>
+    Guardian and gladiator went into <strong>separate</strong> roofed arenas with a zombie
+    spawner each, and the separation is the design decision worth recording. They are the
+    same ability verb &mdash; <code>Temper("aggressive")</code> &mdash; with different
+    triggers: guardian fires on <code>OnOwnerHurt</code> and only retaliates, gladiator
+    fires <code>Continuous</code> while <code>has_rider</code> and starts the fight itself.
+    In one pen with one batch of zombies, a dead zombie says nothing about which horse
+    killed it, and &ldquo;retaliates&rdquo; against &ldquo;starts it&rdquo; is the entire
+    distinction between the two genes. A shared pen would have been a cheaper build and a
+    test that could not fail informatively.
+</p>
+<p>
+    The healer's pen has three companions <strong>already at half health when the yard is
+    built</strong>, which was impossible until this morning &mdash; a healer pen full of
+    healthy horses measures nothing and would have read as the gene being dead. The
+    deathbed holds six horses on a stone floor, because two of the six leave a fluid
+    behind and a third detonates. Ender echo got a wide pen: a sixteen-block blink inside a
+    nine-block stall either fails or puts the horse through a wall, and both look like a
+    broken gene.
+</p>
+
+<h3>Rows B, C and D: the item layer, with the fetching taken out</h3>
+<p>
+    None of the item, block or villager layer had ever been in the yard. It lived in the
+    test kit's hotbar &mdash; nine slots at a time, batches that overwrote each other &mdash;
+    and the legends were full of <em>building work</em>: &ldquo;hang on a pen wall&rdquo;,
+    &ldquo;fill a stall solid&rdquo;, &ldquo;even L-shaped or narrower than the horse&rdquo;.
+    Those are instructions nobody follows twice. Batches 3 and 4 were taken and put away
+    three days running.
+</p>
+<p>
+    So the awkward cases are <strong>standing there</strong>: a stall barely wider than a
+    horse, an L-shaped one (where &ldquo;dead centre&rdquo; is not the centre of the
+    bounding box), one packed solid with hay so the ticket has to refuse <em>without being
+    consumed</em>, and a roofed one so the bind's height message can be checked against a
+    real lid. Beside them, a tack room of five labelled chests holding one of every item in
+    the mod; a horseman at his table and a cowboy at his hitch with no village to find; all
+    nine splice carrots with four horses whose genotypes nobody has read; and the three
+    potion-milk refusals with the mare already hurt and the foal already a foal.
+</p>
+<p>
+    <strong>Nothing here is cleverer than the kit was.</strong> It is the same list with
+    the fetching removed, which is the only part that was ever expensive &mdash; and two of
+    the six hotbar batches were retired the same day, because every prop their legends
+    described is now standing in the yard with a chest beside it. The rule that fell out of
+    it: <em>if a batch can be replaced by a pen, it should be.</em>
+</p>
+
+<h3>Lighting the yard found a bug that had been live all day</h3>
+<p>
+    A biome that spawns zombies plus horses that can be hurt is every unattended pen losing
+    its subject overnight, so the open yard is lit now. Doing it turned up two things.
+</p>
+<p>
+    <strong>The spawn-proofing in the dark rooms had never worked.</strong> It placed nine
+    <code>LightBlock</code>s at level 1 on a four-block grid at <code>gy+4</code> &mdash;
+    and light falls off one per block, so a level-1 source lights its own position and
+    nothing else. The floor read zero. The ward room had been filling with natural zombies
+    all day and the log says so, dozens of times, with the reason column reading
+    <code>NATURAL</code> rather than <code>SPAWNER</code> &mdash; which is only legible at
+    all because that reason column was added yesterday for a different question. There is
+    no spacing that works for a level-1 source, so it fills the floor layer instead. Level 1
+    is still black to the eye and still <code>dark</code> to a gene, whose threshold is 7.
+</p>
+<p>
+    <strong>And the first version of the yard's own grid would have broken the pen it was
+    protecting.</strong> Level 15 on a six-block grid at <code>gy+4</code> bottoms out
+    around six at the floor, which is <em>below</em> <code>DARK_LEVEL</code> &mdash; so the
+    new eyesight pen's <em>lit</em> control would have read as dark to the very gene it is
+    the control for. A pen that agrees with its own experiment for the wrong reason is the
+    worst kind of green, and it would have been indistinguishable from the gene working.
+    Four apart and two up; the floor never drops below nine.
+</p>
+
+<h3>Smaller things, all of which were something being wrong quietly</h3>
+<ul>
+    <li><strong>The yard's depth was a literal, and it was seventy-five blocks short.</strong>
+        <code>YARD_DEPTH_Z</code> read 110 while the rows chained past 150, so the back of
+        the yard sat outside the plot box that tears a plot down and walks tamed horses
+        home. It is derived from the last row now, which retires the whole class of bug.</li>
+    <li><strong>A layout audit caught a stat pen one block past the wall.</strong> Three
+        seven-wide pens plus their gaps overran <code>EAST_MAX</code> by one, into the strip
+        that keeps the yard's own wall reachable. Found by mirroring the grid constants in a
+        throwaway script and asserting no rectangle overlaps &mdash; not in game, which is
+        the only way a one-block overrun ever gets caught.</li>
+    <li><strong><code>/testkit night</code> stopped crying wolf.</strong> It read the sky in
+        the same tick it set the clock, and <code>Level.updateSkyBrightness()</code> runs
+        during the level tick, so it returned the previous tick's value every time &mdash;
+        including after the real bug was fixed. The owner had to tell the diagnostic it was
+        wrong: <em>&ldquo;okay, it now visually changes to night even if the kit says an
+        error&rdquo;</em>. It reads three ticks later now.</li>
+    <li><strong>A chest's label sign would have popped off.</strong> A standing sign needs a
+        sturdy block under it and a chest lid is not one, so every label in the new rows
+        would have been an item on the floor by the time anybody walked in. They go beside
+        the chest instead.</li>
+</ul>
+
+<p>
+    <strong>What is not being worked on, by the owner's call:</strong> <em>&ldquo;we're not
+    going to worry about older worlds for older versions of the mod until we get to 1.0.
+    Nor am I super worried about wild spawn frequencies yet.&rdquo;</em> Old-world migration
+    (<a href="known-gaps.html#gap-193">gap 193</a>) and founder-table frequency tuning are
+    marked as <em>deferred decisions</em> rather than open gaps, which is a different thing
+    and should not be counted as one.
+</p>
+
 <h2 id="d2026-09-13b">2026-09-13 &mdash; the ward proved itself unattended, and the project took its first mixin</h2>
 
 <p>

@@ -364,26 +364,74 @@
     </p>
 </div>
 
+<div class="note danger">
+    <span class="label">Since 2026-09-13 it is most of the mod, and the horses can die in it</span>
+    <p>
+        Two changes on the same day, both on the owner's word. <strong>The item, block and
+        villager layer is in the yard</strong> &mdash; <em>&ldquo;add the yard able and
+        entire item and gameplay layer as well as villagers. Add literally everything that
+        CAN be tested in the yard.&rdquo;</em> &mdash; and <strong>the rule that made
+        horses invulnerable here is gone</strong>: <em>&ldquo;remove the 'no horse damage'
+        exception in the yard.&rdquo;</em>
+    </p>
+    <p>
+        The second is the fifth time a protection in this dimension turned out to be the
+        reason a gene &ldquo;did nothing&rdquo;, after the mob deleter, the
+        <code>spread</code> verb's early return, the missing night and the dhampir's
+        cancelled sunburn. It made six genes untestable here: guardian, gladiator, healer,
+        cleansing light, ender echo and both death loci are <em>entirely</em> about a horse
+        taking or dealing damage.
+    </p>
+    <p>
+        It has a price and the yard pays it in two places. <strong>The open yard is lit</strong>
+        with invisible full-brightness light blocks, four apart, so nothing spawns in the
+        middle of a pen that is being left to run; and <strong>every monster in the yard now
+        comes from a spawner inside a roofed arena</strong>, so a fight happens where one is
+        wanted and nowhere else.
+    </p>
+</div>
+
+<p>
+    The yard is a <strong>grid</strong>, not a packing. Every row owns a band of
+    <code>z</code>; between any two bands is a four-block aisle; a pen's sign lives in the
+    aisle and its gate opens into it; and nothing crosses the centre walkway, which is what
+    keeps every gate reachable from the door a hundred blocks back up the corridor. That
+    arrangement is a fix, not a design: pens used to be added one at a time and butted
+    against each other, and on 2026-09-13 the owner hit all three consequences in one visit
+    &mdash; <em>&ldquo;some have gates that are inaccessible and are getting their signs
+    overwritten&rdquo;</em>, <em>&ldquo;I cannot access the glow room&rdquo;</em>. The
+    yard's depth is <strong>derived from its last row</strong> rather than written down,
+    after the literal was found to be seventy-five blocks short of the rows it was meant to
+    contain.
+</p>
+
 <div class="table-wrap">
 <table>
-<thead><tr><th>Pen</th><th>For</th><th>What it is, and what a pass looks like</th></tr></thead>
+<thead><tr><th>Row</th><th>West of the walkway</th><th>East of the walkway</th></tr></thead>
 <tbody>
-<tr><td><strong>Egg layer</strong></td><td>the <code>produce</code> accumulation cap</td><td>Four layers in one 16&nbsp;&times;&nbsp;17 pen &mdash; four, because <strong>one horse can essentially never reach its own cap</strong>. The guard is eight of the item within six blocks; a copy's interval is 4&nbsp;000&ndash;14&nbsp;000 ticks and a dropped item despawns at 6&nbsp;000, so a single layer's floor clears itself about as fast as it fills. Pass: the count climbs, stops at or below eight, and the log shows drops refused rather than items quietly expiring.</td></tr>
-<tr><td><strong>Spawner room</strong></td><td>holy ward</td><td>A roofed, unlit stone box with a real zombie spawner, charged with zombies at build time rather than left empty &mdash; an empty spawner produces nothing, which is indistinguishable from the ward having stopped it. The warded horse stands outside the door, because a horse shut in with a spawner is a horse being hit by zombies. Pass: hundreds of <code>monster spawned</code> lines with a <em>floor</em> under their distance column.</td></tr>
-
-
-
-<tr><td><strong>Dhampir</strong></td><td>the one night gene left</td><td>Every variant of both night loci &mdash; eight tempers, five watchers &mdash; was confirmed on 2026-09-13 and their stalls are gone. Dhampir stays because the only sighting of it is "it did damage a cow, though I'm not sure what else that did", and its neighbour at the time was a night-hunter with a cow of its own. That is a thing happening near the horse, not a confirmation.</td></tr>
-<tr><td><strong>Growing row</strong></td><td>dryad &times;3, hot blooded</td><td>Four pens, each floored with what its own gene acts on. <strong>Three dryads</strong>, because the locus stopped being one thing on 2026-09-13 and each pen asks a different question: <code>Oak/Brch</code> for the new half-rate mixed rule (oak and birch are <em>different blocks</em>, so the watch reads the ratio rather than taking it on trust); <code>Dark/Dark</code> for whether the dark oaks cluster into a 2&nbsp;&times;&nbsp;2; and <code>Mush/Mush</code> on a floor that is <em>half podzol and half grass</em> - a mushroom survives any light on podzol and needs darkness on grass, so in a lit yard the pass is mushrooms on one half and <strong>none</strong> on the other. A pen that was all one thing could not tell &ldquo;<code>canSurvive</code> is being consulted&rdquo; from &ldquo;the gene does not work&rdquo;, which is the distinction the whole change is about. <strong>The floor is the test</strong>: <code>convert()</code> is a whitelist per cover, so a spreading gene given the wrong ground fails in a way indistinguishable from a broken one. The dryad's is grass, for saplings to stand on, and its watch box is six blocks tall because the far end of that test is a grown tree. The hot-blooded pen is snow with a strip of <em>ice</em> in it &mdash; ice being the half that melts to a water <strong>source</strong> rather than to air, and therefore the half that could flood something.</td></tr>
-<tr><td><strong>Bone meal</strong></td><td>dryad <code>Bone/Bone</code></td><td>Saplings and grass for it to hurry along, and a strip of <strong>wheat on farmland that it must never touch</strong>. The crop carve-out <em>cannot be observed</em> - a crop nobody fertilised comes up anyway on random ticks, so a grown wheat proves nothing either way. What settles it is the list of what the gene <strong>did</strong> touch: every fertilising writes a line, and a night of them with no crop among them is the pass.</td></tr>
-<tr><td><strong>Display row</strong></td><td>eight unverified coat genes</td><td>Eight stalls, two horses each, on a <strong>pale base</strong> &mdash; chestnut with one cream copy, because a stocked horse names only the locus under test and every other locus falls to black, where a dark marking simply is not there. Two horses and not one, because most of these are questions about <em>variation</em> (do the drips have their own lengths, does the emblem land somewhere new) and one horse cannot answer one. The row splits around the yard's centre line so it does not wall the gate off from everything behind it. <strong>This replaces two whole hotbar batches</strong>: the only way to run one of these used to be find the egg, spawn, look, repeat.</td></tr>
-
-
-<tr><td><strong>Hydrophobic</strong></td><td>hydrophobic, <em>ridden</em></td><td>Half the pen is a pool two blocks deep &mdash; the gene ejects above 0.6, so this is well past the threshold. <strong>Half and not all</strong>, because you have to be riding before the test can happen and you cannot comfortably mount a swimming horse: a pen that was all water would be a test whose first step is impossible. The gate is on the dry side and the pair come saddled. Expect it to be <em>half-built</em> rather than broken &mdash; the &ldquo;then heads for the nearest shore&rdquo; half was never written, so it will happily dump you in the middle, and that is the finding.</td></tr>
-<tr><td><strong>Starburst, F8 herd</strong></td><td>&sect;0-CP, &sect;0-CQ</td><td>The two that still want a person. The <strong>glow room is gone</strong> &mdash; every glow question it held came back confirmed on 2026-09-13, which is what a room with a lid and one horse per question buys.</td></tr>
+<tr><td><strong>A</strong></td><td><strong>Bone meal</strong> &mdash; dryad <code>Bone/Bone</code>, with saplings and grass to hurry and a strip of <strong>wheat on farmland it must never touch</strong>. The carve-out <em>cannot be observed</em>: a crop nobody fertilised comes up anyway on random ticks. What settles it is the list of what the gene <em>did</em> touch.</td><td><strong>The spawner room</strong> &mdash; holy ward's non-interference half. A roofed unlit box with a zombie spawner charged at build time, the warded horse outside the door. An empty spawner produces nothing, which is indistinguishable from the ward having stopped it.</td></tr>
+<tr><td><strong>B</strong></td><td><strong>The tack room</strong> &mdash; five labelled chests holding one of every item in the mod, the tools they need, and every one of the twelve foods the food-preference locus knows, in the gene's own order.</td><td><strong>The horseman's study</strong> &mdash; a horseman at a <code>horsemans_table</code> with two research shelves, a cowboy at a <code>cowboy_hitch</code>, two tamed horses and a chest of papers. <strong>No village to find and no barn to hunt.</strong> It does not test acquisition (<a href="known-gaps.html#gap-214">gap 214</a>).</td></tr>
+<tr><td><strong>C</strong></td><td><strong>The ticket stalls</strong> &mdash; a plain holding pen as the control, then four awkward enclosures already built: barely wider than a horse, L-shaped, packed solid with hay, and roofed. Those are the cases the kit used to ask the tester to <em>build</em>, which is why they were never built.</td><td><strong>The carrot bench</strong> &mdash; all nine splice carrots plus the magnifier and the stabiliser, and four horses stocked with <strong>no named locus at all</strong>. Every other pen here avoids that; these are the one thing designed for it.</td></tr>
+<tr><td><strong>D</strong></td><td><strong>The dairy and the clip</strong> &mdash; the three potion-milk refusals with the setup done: the mare is already hurt and the foal is already a foal. Nothing happening is correct three times over here, so the <em>message</em> is the evidence. Two more horses to shear.</td><td><strong>Egg layer &times;8</strong> &mdash; all eight alleles in one pen. Not a confound, because each pair drops a <em>different item</em> and the watch counts the item. It also trips <code>NEARBY_CAP</code>, which one horse essentially never can (<a href="known-gaps.html#gap-207">gap 207</a>).</td></tr>
+<tr><td><strong>E</strong></td><td><strong>Gilded crackle</strong> on a pale base, and <strong>the pool</strong> &mdash; five blocks of water in a sealed stone tank with a saddled ocean-born pair in it. No doorway anywhere below the surface: a gap drains the tank into the walkway and the yard's floor is all there is between here and the void.</td><td><strong>Food preference</strong> &mdash; four horses, four different loves, one pen, each wearing the name of what it loves. Feed all four the same apple; exactly one should react.</td></tr>
+<tr><td><strong>F</strong></td><td><strong>Starburst</strong> (breed a pair: does the foal's emblem sit near its parents'?) and the <strong>F8 herd</strong>.</td><td><strong>The three magic stat pens</strong> &mdash; speed, health and jump. Their whole effect is a number, which is why looking at one never helped; the census prints the attribute's range across the pen.</td></tr>
+<tr><td><strong>G</strong></td><td colspan="2"><strong>The growing row</strong> &mdash; four pens, each floored with what its own gene acts on, two either side of the walkway. <strong>Three dryads:</strong> <code>Oak/Brch</code> for the half-rate mixed rule (different blocks, so the watch reads a ratio rather than taking it on trust), <code>Dark/Dark</code> for whether the dark oaks cluster, and <code>Mush/Mush</code> on a floor that is <strong>half podzol and half grass</strong> &mdash; a mushroom survives any light on podzol and needs darkness on grass, so the pass is mushrooms on one half and <em>none</em> on the other. <strong>The floor is the test</strong>: <code>convert()</code> is a whitelist per cover, so a spreading gene on the wrong ground fails exactly like a broken one. The fourth is hot blooded, on snow with a strip of <em>ice</em> &mdash; ice being the half that melts to a water <strong>source</strong> and therefore the half that could flood something.</td></tr>
+<tr><td><strong>I</strong></td><td><strong>Dhampir</strong> &mdash; open to the sky so it burns, eight cows because a bitten animal is off the menu for a day. Read the sequence: burn, burn, burn, bite, <code>+6.0 health</code>.</td><td><strong>Eyesight</strong>, as a <strong>lit half and a dark half</strong> with an attribute readout on each. A conditional modifier is invisible in both states &mdash; the same shape that had the weather loci reported as broken &mdash; so the pass is a <em>difference between the halves</em>.</td></tr>
+<tr><td><strong>J</strong></td><td><strong>The arena</strong> &mdash; guardian and gladiator in <em>separate</em> roofed pens with a spawner each. Same ability verb, different trigger: guardian retaliates on <code>OnOwnerHurt</code>, gladiator starts it <code>Continuous</code>ly while ridden. One pen holding both could not say which horse killed the zombie, and that distinction is the entire difference between the genes.</td><td><strong>The infirmary</strong> &mdash; a healer with three companions already at half health when the yard is built, and cleansing light in its own arena with undead to cleanse. Both are read off the watch's <code>horse hurt</code> and <code>horse healed</code> lines.</td></tr>
+<tr><td><strong>K</strong></td><td><strong>The deathbed</strong> &mdash; six horses whose whole gene is what happens when they die, on a stone floor because two leave fluid behind and a third detonates. Three drop something and answer themselves in the log; three leave something and have to be watched.</td><td><strong>Ender echo</strong> &mdash; a wide pen and a saddled pair. A sixteen-block blink inside a nine-block stall either fails or puts the horse through a wall, and both read as the gene being broken.</td></tr>
 </tbody>
 </table>
 </div>
+
+<p>
+    <strong>Rows B and C need your hands; everything else runs itself.</strong> That split is
+    deliberate and it is why the item layer took so long to get here: a gene test can be
+    started and walked away from, while an item only does anything when somebody is holding
+    it. The answer was not to make the items automatic &mdash; it was to remove the
+    <em>fetching</em>, which is the part that was actually expensive. Two of the test kit's
+    six hotbar batches were retired the day these rows were built, because every prop their
+    legends described is now standing in the yard with a chest beside it.
+</p>
 
 <p>
     <strong>Every horse in the yard is tamed.</strong> Vanilla refuses to breed an untamed
@@ -483,20 +531,38 @@
         DAY"</em> - one line, and the glowstone explanation was eliminated in a second.
     </p>
     <p>
+        <strong>And then it cried wolf, which cost a second investigation into a dimension
+        that was already fixed.</strong> It kept saying DAY after the
+        <code>timelines</code> fix had landed, because it read the sky in the <em>same
+        tick</em> it set the clock and <code>Level.updateSkyBrightness()</code> runs during
+        the level tick - so the read always returned the previous tick's value. The owner
+        said <em>"okay, it now visually changes to night even if the kit says an error"</em>,
+        which is the tester doing the diagnostic's job for it. It reads three ticks later
+        now (<code>afterTicks</code>). A readout that is wrong in a fixed direction is worse
+        than no readout: the first time it was right and the second time it was not, and
+        nothing on the line distinguished them.
+    </p>
+    <p>
         <strong>And the clock is only half of it.</strong> The corridor and the yard are
-        lit by glowstone lines by design, and block light does not care what time it is -
-        a glowing horse under one is still a horse you cannot see glowing. The yard's
-        <strong>glow room</strong> is a roofed, unlit stone box holding a tron
-        <code>Trs/Trg</code> pair and two lanterns, and it is the only genuinely dark
-        place in the dimension. <strong>Three more went in on 2026-09-13</strong>, because
-        &sect;0-CO had named the genes that should actually show the new glow falloff and
-        none of them was in here: <a href="gene-gamma.html">gamma</a>, whose
-        <code>SPOTS</code> at softness 1.8 is the softest lit mask in the mod and the one
-        that section says to look at; <a href="gene-rime.html">rime</a> at 0.5 as the
-        distant fourth; and one horse carrying <em>two</em> glowing genes at once, because
-        overlapping lit texels are supposed to take the brighter of the two rather than
-        summing &mdash; blown out to flat white where they cross means that rule has
-        broken.
+        lit by design - the yard's whole floor since 2026-09-13, because a biome that
+        spawns zombies and horses that can be hurt is every unattended pen losing its
+        subject overnight - and block light does not care what time it is. A glowing horse
+        under a lamp is still a horse you cannot see glowing. The answer was the yard's
+        <strong>glow room</strong>: a roofed, unlit stone box, one horse per question, the
+        only genuinely dark place in the dimension. It held a tron <code>Trs/Trg</code>
+        pair, <a href="gene-gamma.html">gamma</a> (whose <code>SPOTS</code> at softness 1.8
+        is the softest lit mask in the mod), <a href="gene-rime.html">rime</a> at 0.5, and
+        one horse carrying <em>two</em> glowing genes at once to check that overlapping lit
+        texels take the brighter of the two rather than summing.
+    </p>
+    <p>
+        <strong>It is gone, and that is what it was for.</strong> Owner, 2026-09-13:
+        <em>&ldquo;glow looks perfect on all the horses in the glow room&rdquo;</em> - every
+        question in it answered in one visit, so the room came down the same day. A room
+        with a lid and one horse per question is the most efficient shape this yard has
+        found for a visual test, and the reason is that it makes the <em>comparison</em>
+        the thing you are looking at rather than asking anybody to remember what the last
+        horse looked like.
     </p>
 </div>
 
