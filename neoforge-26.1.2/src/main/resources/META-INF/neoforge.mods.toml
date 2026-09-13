@@ -22,3 +22,11 @@ description = "Genetics-based coat generation for horses, starting with extensio
     versionRange = "[26.1.2,)"
     ordering = "NONE"
     side = "BOTH"
+
+# THE ONE MIXIN. LivingEntity.travelInLava hardcodes lava's speed and reads no
+# attribute, so a fireproof horse crawled and nothing in the gene format could
+# change it (known-gaps gap 179). It is a single ModifyConstant that returns
+# vanilla's own value unless the entity carries this mod's lava_movement
+# attribute - horses only, and only horses with the gene ever get a modifier.
+[[mixins]]
+config = "horsegenetics.mixins.json"

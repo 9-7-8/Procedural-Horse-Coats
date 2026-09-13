@@ -3,7 +3,10 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -147,7 +150,12 @@ public final class DebugWorldWatch {
      *                fence" and "four cows grazing round the horse" are the same
      *                number and opposite outcomes.
      */
-    record Area(String name, AABB box, List<Block> blocks, @Nullable BlockPos focus) {}
+    record Area(String name, AABB box, List<Block> blocks, @Nullable BlockPos focus,
+                @Nullable Holder<Attribute> attribute) {
+        Area(String name, AABB box, List<Block> blocks, @Nullable BlockPos focus) {
+            this(name, box, blocks, focus, null);
+        }
+    }
 
     private static final List<Area> AREAS = new ArrayList<>();
 
@@ -166,6 +174,26 @@ public final class DebugWorldWatch {
     /** Register a pen for the scan to read. Called by {@link DebugTestYard}. */
     static void watch(String name, AABB box, @Nullable BlockPos focus, Block... blocks) {
         AREAS.add(new Area(name, box, List.of(blocks), focus));
+    }
+
+    /**
+     * <b>A pen whose reading is a NUMBER ON THE HORSE rather than a block or a
+     * headcount.</b>
+     *
+     * <p>This is what a whole family of genes has been waiting for. &sect;0-BT
+     * says of the weather loci: <i>"are they noticeable at all? They only
+     * express when the sky agrees, and the magnitudes are a first guess. It is
+     * the one locus family you cannot check on demand."</i> That is true of
+     * looking at a horse and false of reading its attributes - a conditional
+     * modifier is either present or it is not, and the number says which.
+     *
+     * <p>So the scan reports the horse's resolved value for one named
+     * attribute, and the test becomes: read it, change the world, read it
+     * again. The same trick reaches eyesight (light-dependent speed) and every
+     * other gene whose whole effect is a conditional modifier.
+     */
+    static void watchAttribute(String name, AABB box, Holder<Attribute> attribute) {
+        AREAS.add(new Area(name, box, List.of(), null, attribute));
     }
 
     // ------------------------------------------------------------------
@@ -451,10 +479,27 @@ public final class DebugWorldWatch {
                 + (mobs > 0 || (was != null && was.otherMobs() > 0)
                         ? ", other creatures " + mobs + delta(was == null ? mobs : was.otherMobs(), mobs)
                         : "");
+        String attr = "";
+        if (area.attribute() != null) {
+            double lo = Double.MAX_VALUE;
+            double hi = -Double.MAX_VALUE;
+            int seen = 0;
+            for (Horse h : level.getEntitiesOfClass(Horse.class, area.box().inflate(0.0, 2.0, 0.0))) {
+                AttributeInstance inst = h.getAttribute(area.attribute());
+                if (inst != null) {
+                    lo = Math.min(lo, inst.getValue());
+                    hi = Math.max(hi, inst.getValue());
+                    seen++;
+                }
+            }
+            attr = seen == 0 ? " | no horse carries that attribute"
+                    : String.format(" | %s %.3f-%.3f",
+                            area.attribute().getRegisteredName(), lo, hi);
+        }
         String distance = area.focus() == null ? ""
                 : " | nearest non-horse " + (nearest < 0 ? "none in the pen"
                         : String.format("%.1f blocks", nearest));
-        HorseGenetics.LOGGER.info("{} {}{}{} | {}", TAG, area.name(), creatures, distance,
+        HorseGenetics.LOGGER.info("{} {}{}{}{} | {}", TAG, area.name(), creatures, distance, attr,
                 sb.length() == 0 ? (area.blocks().isEmpty() ? "no blocks watched here"
                         : "none of its watched blocks are present") : sb);
     }

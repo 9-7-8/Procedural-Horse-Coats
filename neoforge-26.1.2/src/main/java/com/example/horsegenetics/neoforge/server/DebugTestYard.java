@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -218,15 +219,13 @@ final class DebugTestYard {
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
         buildSpawnerRoom(level, gy, cx, mouthZ);
         buildNightBlock(level, gy, cx, mouthZ);
-        buildWardArrangement(level, gy, cx, mouthZ);
         buildBaseAlarmPen(level, gy, cx, mouthZ);
-        buildIntimidatingPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGlowRoom(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
         buildBoneMealPen(level, gy, cx, mouthZ);
-        buildRetinuePen(level, gy, cx, mouthZ);
         buildLavaChannel(level, gy, cx, mouthZ);
+        buildWeatherPens(level, gy, cx, mouthZ);
         buildDisplayRow(level, gy, cx, mouthZ);
         buildMoltenRow(level, gy, cx, mouthZ);
 
@@ -320,82 +319,48 @@ final class DebugTestYard {
                 || state.is(Blocks.SPAWNER) || state.is(Blocks.OAK_PLANKS);
     }
 
-    // ------------------------------------------------------------------
-    // The overnight pens
-    // ------------------------------------------------------------------
-
     /**
-     * <b>The ward arrangement: a warded chamber, an unwarded control, and a
-     * block of teal wool to stand on.</b>
+     * <b>The weather loci - the family &sect;0-BT said could not be checked at all.</b>
      *
-     * <p>This is the test <a href="known-gaps.html">gap 210</a> said could not
-     * be run, and two separate things had to change before it could. The
-     * dimension needed <b>a biome that spawns hostiles</b> - it generated
-     * {@code the_void}, whose spawner lists are empty, so there was nothing
-     * anywhere in it for a ward to stop. And the geometry had to respect gap
-     * 180: <b>vanilla never naturally spawns a monster within 24 blocks of a
-     * player</b>, and the ward reaches 8 to 16, so every previous attempt was
-     * measuring a radius that sat entirely inside the radius where nothing was
-     * going to spawn anyway.
+     * <p>Its words: <i>"are the weather loci noticeable at all? They only
+     * express when the sky agrees, and the magnitudes are a first guess. It is
+     * the one locus family you cannot check on demand."</i> That is true of
+     * <i>looking</i> at a horse and false of reading its numbers. A conditional
+     * attribute modifier is either on the horse or it is not, and
+     * {@code DebugWorldWatch.watchAttribute} prints which.
      *
-     * <h2>Why there are two chambers and not one</h2>
-     * A warded chamber with no zombies in it proves nothing on its own: it is
-     * equally consistent with a working ward, a broken spawn rule, a mistake in
-     * the biome, and the player having wandered too close. <b>The control is
-     * the experiment.</b> Two identical dark boxes, the same distance from the
-     * same standing spot, one with a warded horse and one with a plain one -
-     * and the reading is the difference between their two counts, which is
-     * immune to every one of those confounders at once.
+     * <p>So this is a two-reading test and the whole of it fits in one line:
+     * <b>read the census, {@code /weather rain}, read it again.</b> If the
+     * range moves, the locus works and the number is its magnitude - which also
+     * answers the second half of the complaint, because "a first guess" stops
+     * being a guess the moment somebody can see it.
      *
-     * <p>They sit on opposite sides of the walkway, about thirty-six blocks
-     * apart, because the ward reaches at most sixteen: any closer and the
-     * warded horse could be suppressing the control, which would quietly turn a
-     * working ward into a null result.
-     *
-     * <h2>What to do, and what a pass looks like</h2>
-     * Stand on the teal wool overnight. In the morning the census has counted
-     * the creatures in each chamber every two minutes, and every spawn has
-     * logged its reason and its distance to the nearest live ward.
-     * <b>Pass: the control fills and the warded chamber does not.</b> Both
-     * empty means the spawn rule is wrong rather than the gene - which is what
-     * the control is there to tell you.
+     * <p>Two pens, because the two loci move different attributes and a single
+     * pen could only report one of them.
      */
-    private static void buildWardArrangement(ServerLevel level, int gy, int cx, int mouthZ) {
-        int z0 = mouthZ + ROW_K;
-        int z1 = z0 + ROW_K_D;
+    private static void buildWeatherPens(ServerLevel level, int gy, int cx, int mouthZ) {
+        int z0 = mouthZ + ROW_D;
+        int z1 = z0 + ROW_D_D;
 
-        int wx0 = cx + WEST_MIN;
-        int wx1 = wx0 + 10;
-        darkRoom(level, gy, wx0, wx1, z0, z1, (wx0 + wx1) / 2, false);
-        DebugPenManager.placeSign(level, new BlockPos(wx0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("WARDED", "should stay", "EMPTY overnight", "SHUT THE DOOR"));
-        stock(level, gy, (wx0 + wx1) / 2.0, (z0 + z1) / 2.0, "horsegenetics.holy_ward",
-                "the warded chamber", 1, 0, null);
-        DebugWorldWatch.watch("WARDED CHAMBER", box(wx0, gy, z0, wx1, gy + 4, z1), null);
+        int x0 = cx + EAST_MIN;
+        int x1 = x0 + 9;
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("WEATHER SPEED", "read the census,", "/weather rain,", "read it AGAIN"));
+        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, "horsegenetics.weather_speed",
+                "the weather speed pen", 2, 0, null);
+        DebugWorldWatch.watchAttribute("WEATHER SPEED",
+                box(x0, gy, z0, x1, gy + 1, z1), Attributes.MOVEMENT_SPEED);
 
-        int ex1 = cx + EAST_MAX;
-        int ex0 = ex1 - 10;
-        darkRoom(level, gy, ex0, ex1, z0, z1, (ex0 + ex1) / 2, false);
-        DebugPenManager.placeSign(level, new BlockPos(ex0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("CONTROL", "no ward. This one", "SHOULD fill up.", "SHUT THE DOOR"));
-        // A plain horse, so the two chambers differ in ONE thing. An empty
-        // control would also differ in "has a horse in it", and a horse is an
-        // entity that other entities crowd against.
-        stock(level, gy, (ex0 + ex1) / 2.0, (z0 + z1) / 2.0, "horsegenetics.lantern",
-                "the control chamber", 1, 0, null);
-        DebugWorldWatch.watch("CONTROL CHAMBER", box(ex0, gy, z0, ex1, gy + 4, z1), null);
-
-        // THE TEAL WOOL. Thirty blocks short of both chambers, on the walkway,
-        // because where the player stands IS the experiment's apparatus here -
-        // a step too close and the dead zone swallows the whole thing.
-        int standZ = mouthZ + WARD_STAND;
-        for (int x = cx - 1; x <= cx + 1; x++) {
-            for (int z = standZ - 1; z <= standZ + 1; z++) {
-                DebugPenManager.groundColumn(level, x, gy, z, Blocks.CYAN_WOOL.defaultBlockState());
-            }
-        }
-        DebugPenManager.placeSign(level, new BlockPos(cx + 2, gy + 1, standZ), Direction.WEST,
-                List.of("STAND HERE", "all night. Both", "chambers are 30+", "blocks off - gap 180"));
+        int jx0 = cx + EAST_MIN + 11;
+        int jx1 = jx0 + 9;
+        fencedPlot(level, gy, jx0, jx1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(jx0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("WEATHER JUMP", "same test, jump", "instead of speed", "/weather rain"));
+        stock(level, gy, jx0 + 2.5, (z0 + z1) / 2.0, "horsegenetics.weather_jump",
+                "the weather jump pen", 2, 0, null);
+        DebugWorldWatch.watchAttribute("WEATHER JUMP",
+                box(jx0, gy, z0, jx1, gy + 1, z1), Attributes.JUMP_STRENGTH);
     }
 
     /** One night stall: the gene, the allele, what it should do, and whether it needs a target. */
@@ -435,11 +400,11 @@ final class DebugTestYard {
         List<Nightly> temper = List.of(
                 new Nightly(NIGHT_TEMPER, "Agp", "HUNT: RIDERS", "comes at YOU"),
                 new Nightly(NIGHT_TEMPER, "Agc", "HUNT: HERDS", "goes for the cow", true, false),
-                new Nightly(NIGHT_TEMPER, "Agh", "HUNT: MONSTERS", "NEEDS the spawner", false, true),
+                new Nightly(NIGHT_TEMPER, "Agh", "HUNT: MONSTERS", "zombies come to IT"),
                 new Nightly(NIGHT_TEMPER, "Aga", "HUNT: ALL", "you AND the cow", true, false),
                 new Nightly(NIGHT_TEMPER, "Flp", "SHY: RIDERS", "backs away from you"),
                 new Nightly(NIGHT_TEMPER, "Flc", "SHY: HERDS", "avoids the cow", true, false),
-                new Nightly(NIGHT_TEMPER, "Flh", "SHY: MONSTERS", "NEEDS the spawner", false, true),
+                new Nightly(NIGHT_TEMPER, "Flh", "SHY: MONSTERS", "flees the zombies"),
                 new Nightly(NIGHT_TEMPER, "Fla", "SHY: ALL", "avoids everything", true, false));
         List<Nightly> watch = List.of(
                 new Nightly(NIGHT_WATCH, "Wst", "WATCH: FIXED", "stands and stares"),
@@ -447,8 +412,10 @@ final class DebugTestYard {
                 new Nightly(NIGHT_WATCH, "Wsi", "WATCH: SIGHTED", "watches what it sees"),
                 new Nightly(NIGHT_WATCH, "Wun", "WATCH: UNSEEN", "watches the UNSEEN"),
                 new Nightly(NIGHT_WATCH, "Wbh", "WATCH: BEHIND", "watches close behind"),
-                new Nightly("horsegenetics.dhampir", null, "DHAMPIR", "night-gated too"),
-                new Nightly("horsegenetics.lycan", null, "LYCAN", "night-gated too"));
+                new Nightly("horsegenetics.dhampir", null, "DHAMPIR", "night-gated too"));
+        // Lycan is CONFIRMED and its stall is gone: the horse became an ALLAY,
+        // which is the gene working - and also why a stall could never have
+        // held it, since allays fly and a pen wall is one block high.
 
         nightRow(level, gy, cx, mouthZ + ROW_I, ROW_I_D, temper);
         nightRow(level, gy, cx, mouthZ + ROW_J, ROW_J_D, watch);
@@ -471,7 +438,7 @@ final class DebugTestYard {
             fencedPlot(level, gy, x0, x1, z0, z1);
             DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
                     List.of(n.name(), "after dark:", n.what(),
-                            n.needsMonsters() ? "CANNOT FIRE HERE" : "/testkit night"));
+                            "/testkit night"));
             String pair = n.token() == null ? null : n.token() + "/" + n.token();
             stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, n.key(), n.name(), 1, 0, pair);
             if (n.needsHerd()) {
@@ -507,43 +474,6 @@ final class DebugTestYard {
         stock(level, gy, x0 + 2.0, (z0 + z1) / 2.0, "horsegenetics.base_alarm",
                 "the base alarm pen", 2, 0, null);
         DebugWorldWatch.watch("BASE ALARM", box(x0, gy, z0, x1, gy + 1, z1), null);
-    }
-
-    /**
-     * <b>Intimidating, measured as a distance rather than a count.</b>
-     *
-     * <p>The gene shoves every non-horse out of a radius of eight to fourteen
-     * blocks. In a fenced pen the cows cannot actually leave, so <i>counting</i>
-     * them proves nothing: four cows jammed in the far corner and four cows
-     * grazing round the horse's feet are the same number and opposite results.
-     * What separates them is the <b>nearest-cow distance</b>, which the watch
-     * takes from the horse's post every ten seconds.
-     *
-     * <p>What a pass looks like: the distance climbs within a minute and then
-     * sits high - eight or more - all night. A gene doing nothing reads as a
-     * figure that wanders between one and six as the cows graze past.
-     */
-    private static void buildIntimidatingPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MAX;
-        int z0 = mouthZ + ROW_D;
-        int z1 = z0 + ROW_D_D;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("INTIMIDATING", "6 cows in here.", "do they keep", "their DISTANCE?"));
-        int postX = (x0 + x1) / 2;
-        int postZ = (z0 + z1) / 2;
-        stock(level, gy, postX + 0.5, postZ + 0.5, "horsegenetics.intimidating",
-                "the intimidating pen", 1, 0, null);
-        // Ringed round the horse, so "they were pushed out" is a change from a
-        // known start rather than wherever six cows happened to wander to.
-        for (int i = 0; i < 6; i++) {
-            double angle = i * Math.PI / 3.0;
-            spawnCow(level, gy, postX + 0.5 + Math.cos(angle) * 3.0,
-                    postZ + 0.5 + Math.sin(angle) * 3.0);
-        }
-        DebugWorldWatch.watch("INTIMIDATING", box(x0, gy, z0, x1, gy + 1, z1),
-                new BlockPos(postX, gy + 1, postZ));
     }
 
     /**
@@ -978,41 +908,6 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>Four pack leaders and a crowd, for the one performance worry the
-     * census can already answer.</b>
-     *
-     * <p>&sect;0-BT's own ranking: <i>"Leader of the pack is the performance
-     * one. Six followers pathfinding continuously, and pathfinding is the most
-     * expensive thing a mob does. One horse is certainly fine. A stable with
-     * several pack leaders in it is the case I have no feel for at all."</i>
-     * That the gene <i>works</i> is confirmed; what it costs is not, and it is
-     * the kind of question that cannot be answered by looking at anything.
-     *
-     * <p><b>It needs no new apparatus, which is why it is worth adding now.</b>
-     * The census already prints real milliseconds per tick every two minutes.
-     * Four leaders at {@code MAX_TARGETS} each is twenty-four mobs re-pathing
-     * on a forty-tick beat, all night, in a dimension whose baseline is a flat
-     * 50.0 - so the answer is simply whether that number moves. A night of
-     * 50.0 is "no measurable cost", which is a real result and one nobody has
-     * ever been able to state.
-     */
-    private static void buildRetinuePen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + WEST_MIN;
-        int x1 = cx + WEST_MAX;
-        int z0 = mouthZ + ROW_H;
-        int z1 = z0 + ROW_H_D;
-        fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("RETINUE COST", "4 leaders, 16", "cows. Watch the", "census ms/tick"));
-        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.pack_leader",
-                "the retinue pen", 4, 0, null);
-        for (int i = 0; i < 16; i++) {
-            spawnCow(level, gy, x0 + 6.0 + (i % 8) * 1.7, z0 + 1.5 + (i / 8) * 2.0);
-        }
-        DebugWorldWatch.watch("RETINUE", box(x0, gy, z0, x1, gy + 1, z1), null);
-    }
-
-    /**
      * <b>A base coat pale enough to show a dark mark AND a white one.</b>
      *
      * <p>A stocked horse names only the locus under test and every other locus
@@ -1184,7 +1079,7 @@ final class DebugTestYard {
         }
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("LAVA - " + LAVA_LEN + " LONG", "saddled already.", "RIDE it and time", "it. Gap 179"));
+                List.of("LAVA " + LAVA_LEN + " LONG", "speed is EPIGENETIC", "ride BOTH - do they", "DIFFER? then breed"));
         stock(level, gy, x0 + 0.5, z0 + 0.5, "horsegenetics.fireproof",
                 "the lava channel", 1, 1, null);
         saddleAll(level, gy, x0, x1, z0, z1);

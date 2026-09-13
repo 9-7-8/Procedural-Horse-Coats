@@ -631,7 +631,7 @@ window.HG = window.HG || {};
         eChoice("attribute", ["movement_speed", "jump_strength", "max_health", "armor",
           "armor_toughness", "knockback_resistance", "step_height", "safe_fall_distance",
           "scale", "water_movement_efficiency", "movement_efficiency", "oxygen_bonus",
-          "gravity"], null,
+          "gravity", "lava_movement"], null,
           "the attribute to modify. There is no 'swim_speed' - vanilla has no such attribute; "
           + "what it has is 'water_movement_efficiency', the share of its land speed a mob "
           + "keeps in water"),

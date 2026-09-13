@@ -261,7 +261,12 @@ public final class GeneAbilityHandler {
             Map.entry("water_movement_efficiency", Attributes.WATER_MOVEMENT_EFFICIENCY),
             Map.entry("movement_efficiency", Attributes.MOVEMENT_EFFICIENCY),
             Map.entry("oxygen_bonus", Attributes.OXYGEN_BONUS),
-            Map.entry("gravity", Attributes.GRAVITY));
+            Map.entry("gravity", Attributes.GRAVITY),
+            // Not vanilla's. See ModAttributes - lava travel hardcodes its
+            // speed, so this mod adds the attribute and a mixin makes the
+            // constant read it.
+            Map.entry("lava_movement",
+                    com.example.horsegenetics.neoforge.entity.ModAttributes.LAVA_MOVEMENT));
 
     /**
      * {@code scale} is the one entry in that table a world may switch off. An

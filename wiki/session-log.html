@@ -27,6 +27,74 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13b">2026-09-13 &mdash; the ward proved itself unattended, and the project took its first mixin</h2>
+
+<p>
+    <strong>The holy ward works.</strong> Thirty-nine spawn attempts inside the warded
+    chamber and <em>none</em> of them arrived; fifty-three attempts in the control and all
+    fifty-three did. Ten minutes, nobody watching, the player parked on a block of teal
+    wool thirty blocks away. This is a gene whose headline claim had never once been
+    tested, and two separate structural blockers had to be cleared first &mdash; the
+    dimension generated <code>the_void</code>, which spawns nothing, and every previous
+    attempt stood next to the horse, inside the 24-block radius where vanilla was never
+    going to spawn anything anyway.
+</p>
+
+<p>
+    <strong>The evidence came out stronger than the test was designed to produce, by
+    luck.</strong> Two hooks happen to straddle the cancellation:
+    <code>FinalizeSpawnEvent</code> fires before the ward can cancel, so it counts
+    <em>attempts</em>; <code>EntityJoinLevelEvent</code> only fires if nothing cancelled,
+    so it counts <em>arrivals</em>. The gap between those columns <em>is</em> the gene.
+    The design had aimed at "the warded room is empty", which is consistent with a dozen
+    boring explanations; 39-and-0 beside 53-and-53 is consistent with one.
+</p>
+
+<h3>The first mixin, and why it is allowed to exist</h3>
+
+<p>
+    <code>LivingEntity.travelInLava</code> is <code>moveRelative(0.02F, input)</code> with
+    hardcoded drag and reads no attribute &mdash; in 26.1.2 and in 1.12.2 alike. Three
+    cheaper repairs were tried on paper and all three fail on the case that matters, a
+    horse with somebody <em>riding</em> it: a velocity nudge is overwritten by the rider's
+    client, there is no existing attribute, and NeoForge's <code>FluidType.move</code>
+    belongs to the fluid type.
+</p>
+
+<p>
+    What makes it defensible is that <strong>it does nothing unless asked</strong>: a
+    <code>ModifyConstant</code> on one float in one private method, returning vanilla's own
+    value unless the entity carries this mod's <code>lava_movement</code> attribute, which
+    is horses only. A mixin on <code>LivingEntity</code> sits in a hot path shared with
+    every mod in the pack, and "no-op by default" is not a nicety there; it is the licence.
+    And it costs the backport nothing that matters &mdash; the epigenetic speed, the
+    founder floor and the breeding all live in <code>common/</code>, and the mixin is the
+    translation, which is what the platform module is for.
+</p>
+
+<h3>Four more settled, and a yard that keeps shrinking</h3>
+
+<p>
+    Intimidating holds its radius now (min 7.9, median 8.1, against a pre-fix median of
+    4.2) &mdash; the path-based repel was the right mechanism and the shove never was. The
+    retinue costs nothing measurable: a flat 50.0&nbsp;ms/tick with twenty-four
+    continuously re-pathing mobs, which answers &sect;0-BT's one open performance worry by
+    saying there was nothing to worry about. Lycanthropy works, found by accident in a log
+    line &mdash; the horse became an <em>allay</em>, which is also why its stall could
+    never have held it. And the new biome spawns: forty-two hostiles in two minutes.
+</p>
+
+<p>
+    All of those pens are gone. What went in on the freed ground is aimed at what the
+    biome and a new attribute readout just made possible: the two monster-targeted night
+    stalls stopped saying <em>CANNOT FIRE HERE</em>, and the <strong>weather loci</strong>
+    got a pen at last. &sect;0-BT called them "the one locus family you cannot check on
+    demand", which is true of looking at a horse and false of reading its numbers &mdash;
+    a conditional modifier is either on the horse or it is not. The watch prints a named
+    attribute's range across a pen now, so the test is: read the census,
+    <code>/weather rain</code>, read it again.
+</p>
+
 <h2 id="d2026-09-13">2026-09-13 &mdash; the night's findings turned into a locus, and a shove that lost to a pathfinder</h2>
 
 <p>
@@ -72,7 +140,7 @@
         clause that matters is <em>as long as they are mounted</em> &mdash; dismounting
         mid-lake leaves the rider standing in it, which is correct and worth knowing before
         somebody &ldquo;fixes&rdquo; it. Only the speed decision is still open
-        (<a href="known-gaps.html#gap-179">gap 179</a>: whether a crossing that slow is
+        (gap 179 (closed 2026-09-13): whether a crossing that slow is
         acceptable, or worth the project's first mixin).</li>
     <li><strong>Lethal foals die at birth.</strong> <strong>The first thing in &sect;0b
         ever confirmed in play</strong> &mdash; the trait, size and health system has

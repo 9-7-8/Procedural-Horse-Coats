@@ -282,10 +282,16 @@ public final class AbilityType {
                             "movement_speed", "jump_strength", "max_health", "armor", "armor_toughness",
                             "knockback_resistance", "step_height", "safe_fall_distance", "scale",
                             "water_movement_efficiency", "movement_efficiency", "oxygen_bonus",
-                            "gravity"),
+                            "gravity", "lava_movement"),
                             "the attribute to modify. There is no 'swim_speed' - vanilla has no "
                                     + "such attribute; what it has is 'water_movement_efficiency', "
-                                    + "the share of its land speed a mob keeps in water"),
+                                    + "the share of its land speed a mob keeps in water. "
+                                    + "'lava_movement' is NOT vanilla's either - it is this "
+                                    + "mod's own, and it exists because vanilla's lava travel "
+                                    + "hardcodes its speed and reads no attribute at all; a "
+                                    + "mixin makes that constant consult this. Its default is "
+                                    + "vanilla's 0.02, so an entity with no modifier on it "
+                                    + "swims exactly as it always did"),
                     Param.choice("op", List.of("add", "multiply_base", "multiply_total"), "add",
                             "how 'amount' is applied - vanilla modifier operations"),
                     Param.num("amount", 0, "signed modifier amount")),

@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.example.horsegenetics.neoforge.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "horsegenetics.refmap.json",
+  "mixins": [
+    "LavaTravelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

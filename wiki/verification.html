@@ -56,59 +56,116 @@
     </p>
 </div>
 
-<h2 id="ward-arrangement">&sect;0-DD &mdash; The ward test that gap 210 said could not be run (2026-09-13, NOT looked at)</h2>
+<h2 id="conclusive">&sect;0-DE &mdash; Five things settled, and the pens are gone (2026-09-13)</h2>
 
 <div class="note good">
-    <span class="label">Stand on the teal wool. That is the whole instruction.</span>
+    <span class="label">The holy ward works. First demonstration in the project's history.</span>
+    <table class="data">
+        <thead><tr><th></th><th>spawns attempted</th><th>spawns arrived</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Warded chamber</strong></td><td>39</td><td><strong>0</strong></td></tr>
+            <tr><td><strong>Control chamber</strong></td><td>53</td><td><strong>53</strong></td></tr>
+        </tbody>
+    </table>
     <p>
-        At the far end of the yard: a <strong>block of cyan wool on the walkway</strong>,
-        and thirty blocks past it two identical dark chambers, one holding a warded horse
-        and one holding a plain one. Stand on the wool overnight.
+        Ten minutes, unattended, with the player standing on the teal wool thirty blocks
+        off. <strong>Thirty-nine consecutive cancellations and not one leak.</strong>
+    </p>
+    <p>
+        <strong>The evidence is stronger than the test was designed to produce</strong>,
+        by luck. The two hooks straddle the cancellation:
+        <code>FinalizeSpawnEvent</code> fires <em>before</em> the ward can cancel, so it
+        counts <b>attempts</b>; <code>EntityJoinLevelEvent</code> only fires if nothing
+        cancelled, so it counts <b>arrivals</b>. The gap between the columns <em>is</em>
+        the gene. An empty room would have been consistent with a dozen boring
+        explanations; 39-and-0 beside 53-and-53 is not consistent with any of them.
     </p>
 </div>
-
-<h3>Why it is built this way, because every dimension of it is load-bearing</h3>
 
 <ul>
-    <li><strong>Two chambers, not one.</strong> A warded chamber with no zombies in it
-        proves nothing on its own &mdash; it is equally consistent with a working ward, a
-        broken spawn rule, a mistake in the biome, and the player having wandered too
-        close. <strong>The control is the experiment.</strong> The reading is the
-        <em>difference</em> between two counts, which is immune to all four at once.</li>
-    <li><strong>Thirty blocks away, and that is the point.</strong>
-        <a href="known-gaps.html#gap-180">Gap 180</a>: vanilla never naturally spawns a
-        monster within <strong>24 blocks of a player</strong>, and the ward reaches 8 to
-        16 &mdash; entirely inside the radius where nothing was going to spawn anyway.
-        Every previous attempt at this test was standing next to the horse, which can only
-        ever prove something you already had for free. Measured, the nearest corner of
-        each chamber is <strong>32.3 blocks</strong> from the wool.</li>
-    <li><strong>Equally far from both</strong>, to 0.00 blocks, by symmetry about the
-        walkway &mdash; otherwise the nearer chamber spawns more for a reason that has
-        nothing to do with the gene.</li>
-    <li><strong>Thirty-four blocks apart from each other</strong>, because the ward
-        reaches at most sixteen. Any closer and the warded horse could be suppressing the
-        control, which would turn a working ward into a null result.</li>
-    <li><strong>The control has a horse in it too</strong>, a plain one, so the two
-        chambers differ in exactly one thing. An empty control would also differ in
-        &ldquo;has an entity in it&rdquo;.</li>
+    <li><strong>Intimidating holds its radius now.</strong> n=5, <strong>min 7.9, median
+        8.1, max 8.8</strong>, against a pre-fix baseline of median 4.2 and min 0.6. The
+        path-based repel was the right mechanism; the velocity shove never was.</li>
+    <li><strong>The retinue costs nothing measurable.</strong> A flat
+        <strong>50.0&nbsp;ms/tick</strong> with 213 entities including twenty-four
+        continuously re-pathing mobs. That answers &sect;0-BT's <em>"a stable with several
+        pack leaders in it is the case I have no feel for at all"</em> &mdash; there is no
+        feel to have.</li>
+    <li><strong>Lycanthropy works</strong>, found by accident:
+        <code>creature joined | minecraft:allay [LYCAN]</code>. The horse became an allay.
+        Its stall is gone and could never have worked anyway &mdash; allays fly and a pen
+        wall is one block high.</li>
+    <li><strong>The biome spawns.</strong> 42 hostiles in two minutes, every one logged
+        <code>by NATURAL</code>. <code>the_void</code> to
+        <code>horsegenetics:debug_pens</code> did exactly what it had to.</li>
 </ul>
 
-<p>
-    <strong>Pass: the control fills and the warded chamber does not.</strong>
-    <strong>Both empty</strong> means the spawn rule is wrong rather than the gene &mdash;
-    which is precisely what the control is there to tell you, and what no previous version
-    of this test could have distinguished. The census counts the creatures in each chamber
-    every two minutes and every spawn logs its reason, so the morning reading is two
-    columns of numbers rather than an impression.
-</p>
+<h2 id="lava-mixin">&sect;0-DF &mdash; Lava speed is epigenetic, and the project has a mixin (2026-09-13, NOT looked at)</h2>
 
-<div class="note warn">
-    <span class="label">Shut both doors</span>
+<div class="note danger">
+    <span class="label">The first mixin. Read this before adding a second.</span>
     <p>
-        A chamber with its door open is a lit chamber, and a lit chamber spawns nothing.
-        That would read as a perfect ward on both sides.
+        <code>LivingEntity.travelInLava</code> is
+        <code>moveRelative(0.02F, input)</code> with hardcoded drag and <strong>reads no
+        attribute</strong> &mdash; verified by reading 26.1.2's source, and the same shape
+        exists in 1.12.2's <code>moveEntityWithHeading</code>. Three cheaper repairs were
+        tried on paper and all three fail on the case that matters, a horse with somebody
+        <em>riding</em> it: a velocity nudge is overwritten by the rider's client, there
+        is no existing attribute to lean on, and NeoForge's <code>FluidType.move</code>
+        hook belongs to the fluid type rather than to us.
+    </p>
+    <p>
+        <strong>What makes it defensible</strong> is that it does nothing unless asked. It
+        is a <code>ModifyConstant</code> on one float in one private method, returning
+        vanilla's own value unless the entity carries this mod's
+        <code>lava_movement</code> attribute &mdash; which is on horses only, and only a
+        horse with the gene ever gets a modifier. A mixin on
+        <code>LivingEntity</code> sits in a hot path shared with every mod in the pack, so
+        that is not a nicety; it is the whole licence to be there.
+    </p>
+    <p>
+        <strong>And it costs the backport nothing that matters.</strong> The epigenetic
+        speed, its founder floor and the breeding all live in <code>common/</code> as
+        plain Java. The mixin is the <em>translation</em>, which is what the platform
+        module is for.
     </p>
 </div>
+
+<ul>
+    <li><strong>Ride both horses in the lava channel.</strong> The floor is five times
+        vanilla (about a walk) and the ceiling twenty times, drawn per allele copy &mdash;
+        so <strong>the two should visibly differ</strong>. If they move identically the
+        epigenetic value is not reaching the attribute.</li>
+    <li><strong>Then breed them</strong>, which is the actual feature: a foal's speed is
+        drawn from its parents' copies, so a line can be bred faster.</li>
+    <li><strong>Check an ordinary horse still crawls.</strong> That is the control for the
+        mixin itself &mdash; if everything now swims fast, the attribute default or the
+        constant match is wrong and every mob in the game is affected.</li>
+    <li><strong>Boot a server.</strong> Done once already: <em>Mixing LavaTravelMixin into
+        net.minecraft.world.entity.LivingEntity</em>, no injection failures. With
+        <code>defaultRequire: 1</code> a missed constant crashes the boot, so a clean boot
+        is proof the injection found its target &mdash; but it is worth re-running after
+        any Minecraft update, because that is exactly when a constant moves.</li>
+</ul>
+
+<h2 id="new-stalls">&sect;0-DG &mdash; What the biome and the attribute readout unlocked (2026-09-13, NOT looked at)</h2>
+
+<ul>
+    <li><strong>The two monster-targeted night stalls can fire now.</strong> They used to
+        say <em>CANNOT FIRE HERE</em> on the sign, because the only hostiles in the
+        dimension came from a spawner that needs a player beside it. Natural zombies
+        arrive on their own now, so <code>Agh</code> (hunts monsters) and <code>Flh</code>
+        (flees them) are live tests rather than labelled blanks.</li>
+    <li><strong>Base alarm can fire anywhere dark</strong>, for the same reason.</li>
+    <li><strong>The weather loci, which &sect;0-BT called uncheckable.</strong> Its words:
+        <em>"they only express when the sky agrees, and the magnitudes are a first guess.
+        It is the one locus family you cannot check on demand."</em> True of looking at a
+        horse, false of reading its numbers &mdash; a conditional modifier is either on
+        the horse or it is not. The watch reports a named attribute's range across a pen
+        now, so the whole test is <strong>read the census, <code>/weather rain</code>,
+        read it again</strong>. If the range moves, the locus works and the number is its
+        magnitude, which retires "a first guess" as well.</li>
+</ul>
 
 <h2 id="art-pass">&sect;0-DC &mdash; Four coat genes redrawn, and a biome that spawns zombies (2026-09-13, NOT looked at)</h2>
 
@@ -150,7 +207,7 @@
     <p>
         A new biome, <code>horsegenetics:debug_pens</code>, replaces
         <code>minecraft:the_void</code> and carries zombies in its monster spawner list.
-        <strong>That is the thing <a href="known-gaps.html#gap-210">gap 210</a> said was
+        <strong>That is the thing gap 210 (closed 2026-09-13) said was
         impossible</strong>: the ward's real claim &mdash; that hostiles do not spawn near
         a warded horse &mdash; can finally be tested, because there is finally something
         for it to stop.
@@ -263,7 +320,7 @@
 <ul>
     <li><strong>The lava channel</strong>, 19 blocks, two deep, dry stone at both ends.
         Ride in and <em>time it</em>. That is the whole test:
-        <a href="known-gaps.html#gap-179">gap 179</a> asks whether a crossing this slow is
+        gap 179 (closed 2026-09-13) asks whether a crossing this slow is
         acceptable or worth the project's first mixin, and it is a judgement that needs a
         run long enough to be boring. <strong>Note what the pen cannot show</strong>: the
         horse survives lava whether or not it is fireproof (the dimension cancels horse
@@ -796,66 +853,6 @@
     <li><strong>The ward's spawner</strong> &mdash; &sect;0-CW, and the one with real
         numbers behind it.</li>
 </ul>
-
-<h2 id="ward-audit">&sect;0-CW &mdash; Holy ward: the yard tests the half that is not the headline (2026-09-13, NOT looked at)</h2>
-
-<div class="note danger">
-    <span class="label">This section used to claim the opposite, and it was wrong twice over</span>
-    <p>
-        It said a night of spawn distances would show the ward working. It cannot,
-        for two independent reasons either of which is enough
-        (<a href="known-gaps.html#gap-210">gap 210</a>):
-    </p>
-    <ul>
-        <li><strong>The ward lets spawner mobs through on purpose.</strong>
-            <code>GeneWardHandler.isNatural</code> gates on the spawn reason, and
-            spawners, eggs, breeding, structures and commands all pass &mdash; because a
-            gene that silently broke somebody's mob farm is the failure that whole design
-            exists to avoid. The yard's zombies are mobs a <em>working</em> ward is
-            supposed to ignore.</li>
-        <li><strong>Natural spawning cannot happen in that dimension at all.</strong>
-            <code>debug_pens</code> generates <code>minecraft:the_void</code>, and the
-            void biome has no mob spawn entries. There is nothing there for a ward to
-            cancel, at any light level, at any distance.</li>
-    </ul>
-    <p>
-        And in a real world the warding half only bites <strong>more than 24 blocks from
-        every player</strong>, since vanilla never naturally spawns a monster closer and
-        the ward reaches 8&ndash;16 (<a href="known-gaps.html#gap-180">gap 180</a>). So
-        the gene's headline claim has never been tested, and cannot be tested here.
-    </p>
-</div>
-
-<div class="note">
-    <span class="label">What the pen does test, and &sect;0-BT ranks it higher anyway</span>
-    <p>
-        <strong>That a warded horse does not break a mob farm.</strong> The ward hooks
-        <code>FinalizeSpawnEvent</code> &mdash; a global, high-frequency event shared with
-        every other mod in the pack &mdash; and if its allow-list is wrong, a spawner
-        stops producing and nothing anywhere says why. That is the failure that damages
-        somebody else's world, and it is the one this pen can actually catch.
-    </p>
-    <p>
-        <strong>Pass:</strong> a steady stream of <code>monster spawned</code> lines beside
-        the warded horse. <strong>Fail:</strong> silence. <strong>And this is the pen that
-        needs you</strong> &mdash; a vanilla spawner will not run unless a player is within
-        16 blocks (<code>BaseSpawner.requiredPlayerRange</code>), which is why three hours
-        unattended produced nothing at all last night. <strong>AFK in the spawner
-        room.</strong> Everything else in the yard is force-loaded and does not care where
-        you stand, so that room is simply the right place to leave the character.
-    </p>
-</div>
-
-<div class="note">
-    <span class="label">Testing the real claim, when somebody wants to</span>
-    <p>
-        It needs a real world, not the yard: a dark room, a warded horse and an
-        <strong>unwarded control room</strong> the same distance away, both more than 24
-        blocks from where the player stands, left overnight. The watch already logs every
-        hostile spawn with its distance to the nearest live ward, so the apparatus exists
-        &mdash; it is the <em>place</em> that does not.
-    </p>
-</div>
 
 <h2 id="test-yard">&sect;0-CS &mdash; The horse dimension's test yard (2026-09-12, NOT looked at)</h2>
 
