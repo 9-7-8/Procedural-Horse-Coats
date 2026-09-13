@@ -4,11 +4,12 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Client-only settings for this mod: how the Family Tree screen handles a chart
- * taller than the window, and whether a horse's nameplate carries a sex symbol.
+ * taller than the window, whether a horse's nameplate carries a sex symbol, and
+ * how hard this machine works to give every horse its own coat.
  *
  * <p>What makes a setting belong here rather than in
  * {@link ServerConfig} is that <b>nothing about the world changes</b> - two
- * players on one server can disagree about either of these and still be looking
+ * players on one server can disagree about any of these and still be looking
  * at the same horses.
  */
 public final class ClientConfig {
@@ -36,6 +37,20 @@ public final class ClientConfig {
     public static final ModConfigSpec.BooleanValue TUTORIAL_SEEN;
 
     /**
+     * <b>How close a horse must be before it gets a coat of its own.</b> In
+     * blocks. Further out it wears a shared stand-in until you approach; a coat
+     * already made is kept at any range. See {@code GeneticCoatTextureFactory}.
+     */
+    public static final ModConfigSpec.IntValue COAT_DETAIL_DISTANCE;
+
+    /**
+     * <b>Milliseconds of coat baking allowed per 50 ms.</b> The first bake in a
+     * window always runs, so zero means "one at a time". Added after walking
+     * toward a herd froze the owner's machine outright (2026-09-13).
+     */
+    public static final ModConfigSpec.IntValue COAT_BAKE_BUDGET_MS;
+
+    /**
      * <b>Do this client's debug tools exist?</b> The F6 pen generator and F7
      * stall overlay keybinds, the "Spawn Test Horse World" title-screen button
      * and the cleanup that removes those worlds again, and the per-coat texture
@@ -48,6 +63,9 @@ public final class ClientConfig {
      * on does not give you the server-side tools, and vice versa.
      */
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
+
+    private static final int DEFAULT_COAT_DETAIL_DISTANCE = 32;
+    private static final int DEFAULT_COAT_BAKE_BUDGET_MS = 4;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -69,6 +87,18 @@ public final class ClientConfig {
                         "tab. It does that once, and sets this the first time you leave the tab.",
                         "Set it back to false to be shown the introduction again.")
                 .define("tutorial.seen", false);
+        COAT_DETAIL_DISTANCE = builder
+                .comment("How close, in blocks, a horse must be before this machine makes its",
+                        "own coat texture. Further away it wears a plain stand-in coat until you",
+                        "come closer; a coat that has already been made stays at any distance.",
+                        "Lower it if walking toward a big herd stutters.")
+                .defineInRange("coats.detailDistance", DEFAULT_COAT_DETAIL_DISTANCE, 8, 256);
+        COAT_BAKE_BUDGET_MS = builder
+                .comment("Milliseconds per 50 ms that may be spent making new coat textures.",
+                        "Coats that do not fit wait a frame or two and wear the stand-in",
+                        "meanwhile. The first coat in each 50 ms always runs, so 0 means",
+                        "\"one at a time\". Lower it on a slow machine, raise it on a fast one.")
+                .defineInRange("coats.bakeBudgetMs", DEFAULT_COAT_BAKE_BUDGET_MS, 0, 50);
         DEBUG_TOOLS = builder
                 .comment("Whether this client's debug tools exist at all.",
                         "  The F6 debug-pen and F7 stall-overlay keys, the \"Spawn Test",
@@ -118,6 +148,24 @@ public final class ClientConfig {
             }
         } catch (IllegalStateException notLoaded) {
             // Config not up yet - it will simply be shown once more.
+        }
+    }
+
+    /** Safe read, in blocks. Read every frame for every horse, so it must never throw. */
+    public static int coatDetailDistance() {
+        try {
+            return COAT_DETAIL_DISTANCE.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_COAT_DETAIL_DISTANCE;
+        }
+    }
+
+    /** Safe read, in milliseconds. */
+    public static int coatBakeBudgetMs() {
+        try {
+            return COAT_BAKE_BUDGET_MS.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_COAT_BAKE_BUDGET_MS;
         }
     }
 

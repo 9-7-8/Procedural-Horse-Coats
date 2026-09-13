@@ -687,11 +687,76 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
 
 <p>
     A <a href="making-a-gene.html#glow"><code>glow</code></a> gene adds a second
-    consumer: <code>getOrCreateEmissive</code> re-runs <code>compose</code>, copies
-    the resulting colour on the gene's emissive parts into a fresh mask (transparent
-    elsewhere), and caches it under <code>coat_glow/&lt;hash&gt;</code>.
+    texture: the resulting colour on the gene's emissive parts, copied into a fresh
+    mask (transparent elsewhere) and cached under <code>coat_glow/&lt;hash&gt;</code>.
     <code>EmissiveCoatLayer</code> draws that mask full-bright over the base coat.
-    The pipeline itself is untouched &mdash; the emissive path only reads its output.
+    Both come out of <strong>one</strong> run of <code>bake</code> &mdash; see below
+    &mdash; and the pipeline itself is untouched; the emissive path only reads its
+    output.
+</p>
+
+<h3 id="bake-budget">When a coat is baked, and how many at once</h3>
+
+<p>
+    The renderer resolves a horse's textures <em>while extracting a frame</em>, so a
+    bake is paid for inside that frame. Until 2026-09-13 every horse seen for the
+    first time was composed and uploaded right there, and <strong>twice</strong>
+    &mdash; once for its glow mask and again for its coat, even for the large
+    majority that glow with nothing. Walking toward a herd was dozens of full bakes
+    inside single frames, and it froze the owner's whole machine badly enough to
+    need a reboot. A thread dump put it on the render thread (173&nbsp;s of CPU
+    against the server thread's 32&nbsp;s), not on the server.
+</p>
+
+<p>Three rules now govern it, all in <code>GeneticCoatTextureFactory.resolve</code>:</p>
+
+<ul>
+    <li><strong>One bake per horse.</strong> A single <code>bake</code> fills the
+        coat cache and the glow cache together; whichever already exists is a cache
+        hit and ignores the result.</li>
+    <li><strong>A time budget.</strong> A new bake may start only while less than
+        <code>coats.bakeBudgetMs</code> (default 4) has been spent in the current
+        50&nbsp;ms window. The first bake in a window always runs, so nothing is
+        starved and <code>0</code> means &ldquo;one at a time&rdquo;. A horse that
+        has to wait wears the <strong>stand-in</strong> &mdash; the wild-type coat,
+        baked once per mesh and shared &mdash; for a frame or two.</li>
+    <li><strong>Distance.</strong> A horse beyond <code>coats.detailDistance</code>
+        (default 32 blocks) may use a coat that already exists but never starts a
+        new one. Because an existing coat is kept at any range, crossing the line
+        swaps nothing and nothing flickers. A distant horse that glows shows no glow
+        until it has been seen up close once, for the same reason.</li>
+</ul>
+
+<p>
+    Whether a horse is <em>on screen</em> needs no rule of ours: vanilla's
+    <code>LevelRenderer.extractVisibleEntities</code> calls
+    <code>EntityRenderDispatcher.shouldRender</code> against the frustum before it
+    extracts anything (checked in bytecode, not assumed), so an off-screen horse
+    never reaches the renderer. The stand-in is not vanilla's horse texture, which
+    was the obvious first idea &mdash; the adult HD model moves the legs and ears onto
+    patches of their own (<a href="architecture.html#hd-models">HD models</a>), so a
+    vanilla sheet would put the wrong texels on exactly the parts a moving horse
+    shows most.
+</p>
+
+<p>
+    The screens that draw a coat &mdash; the family tree, the portrait well, a
+    transfer paper &mdash; go through the same budget with no distance, since a
+    family tree of thirty strangers used to bake thirty coats in one frame too. Each
+    session's log ends with a <code>coat baking:</code> line giving the number of
+    bakes, the total and slowest milliseconds, and how many frames drew the stand-in
+    while a coat waited, so the defaults can be tuned from a measurement rather than
+    a guess.
+</p>
+
+<p>
+    The server half of the same freeze is founding: each new wild horse costs
+    10&ndash;24&nbsp;ms (a clump scan, a breed pick, a genome, a body resolve, a coat
+    sync), and fresh terrain or a world reload asks for dozens in one tick.
+    <code>HorseFoundingTickHandler</code> gives founding 15&nbsp;ms of each tick
+    across every dimension &mdash; always at least one horse &mdash; and a horse over
+    budget simply comes back next tick. When it has had to defer anything, a
+    <code>[Founding]</code> line says so, at most every five seconds.
 </p>
 
 <div class="note danger">

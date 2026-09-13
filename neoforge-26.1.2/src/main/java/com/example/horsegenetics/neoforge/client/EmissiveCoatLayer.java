@@ -12,7 +12,7 @@ import net.minecraft.util.LightCoordsUtil;
 
 /**
  * Draws a {@code glow} gene's emissive coat regions - the mask baked by
- * {@link GeneticCoatTextureFactory#getOrCreateEmissive} - a second time over the
+ * {@link GeneticCoatTextureFactory#resolve} - a second time over the
  * base coat at <b>full brightness</b>, so a Suntouched horse's gold mane keeps
  * glowing in the dark.
  *

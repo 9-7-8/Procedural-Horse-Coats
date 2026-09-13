@@ -20,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * Runs the {@code CoatTextureComposer} pipeline for a horse and uploads the
@@ -42,6 +44,34 @@ import java.util.concurrent.ConcurrentHashMap;
  * distinct genome it had ever drawn and free them only on logging out. The
  * budget is in texels rather than entries so it still means the same amount of
  * memory if {@link HorseSkinGeometry#SHEET_SIZE} ever changes.
+ *
+ * <h2>Baking is rationed, and a horse is baked once</h2>
+ * On 2026-09-13 walking toward a herd froze the owner's whole machine badly
+ * enough to need a reboot. A thread dump put it on the render thread (173 s of
+ * CPU against the server thread's 32 s), and the cause was here: the renderer
+ * asks for a horse's textures <i>while extracting a frame</i>, and every horse
+ * seen for the first time was composed and uploaded right then - <b>twice</b>,
+ * once for its glow mask and again for its coat, even though most horses glow
+ * with nothing. A herd coming into view was dozens of full bakes inside single
+ * frames.
+ *
+ * <p>Three things fix that, and all three live here or in the renderer:
+ * <ul>
+ *   <li><b>One bake per horse.</b> {@link #resolve} runs the composer once and
+ *       fills the coat and the glow cache from the same result.</li>
+ *   <li><b>A time budget.</b> {@link #mayBake} lets a new bake start only
+ *       while less than {@code coats.bakeBudgetMs} has been spent in the
+ *       current {@value #WINDOW_MS} ms window - always at least one, so a coat
+ *       is never starved. A horse that has to wait shows {@link #placeholder}
+ *       for a frame or two.</li>
+ *   <li><b>Distance.</b> The renderer only allows a new bake for a horse inside
+ *       {@code coats.detailDistance}; one further out wears the stand-in until
+ *       you come closer. A coat that already exists is used at any range, so
+ *       nothing flickers at the boundary.</li>
+ * </ul>
+ * Whether a horse is on screen needs no check of ours: vanilla's
+ * {@code LevelRenderer.extractVisibleEntities} culls against the frustum
+ * before it extracts, so an off-screen horse never reaches the renderer.
  *
  * <p>Everything here is loaded lazily and dropped by {@link #clear()}, which
  * runs on logging out <i>and</i> on a client resource reload
@@ -99,8 +129,22 @@ public final class GeneticCoatTextureFactory {
      */
     private static final Map<Identifier, String> KEY_BY_ID = new ConcurrentHashMap<>();
 
+    /**
+     * <b>Which keys each cache holds right now</b>, as membership only. This is
+     * what lets a caller ask "is this coat already made?" without the cache's
+     * loader running - the question the budget and the distance check both
+     * need, and one {@link TexelBudgetCache} cannot answer on its own because
+     * {@code get} always loads on a miss. Kept in step through the eviction
+     * hooks, so an evicted coat stops counting as made the moment it is freed.
+     */
+    private static final Set<String> LIVE_COATS = ConcurrentHashMap.newKeySet();
+    private static final Set<String> LIVE_GLOWS = ConcurrentHashMap.newKeySet();
+
     private static final TexelBudgetCache<String, Identifier> CACHE =
-            new TexelBudgetCache<>(BUDGET, SHEET_COST, (key, id) -> release(id, KEY_BY_ID));
+            new TexelBudgetCache<>(BUDGET, SHEET_COST, (key, id) -> {
+                LIVE_COATS.remove(key);
+                release(id, KEY_BY_ID);
+            });
 
     /**
      * Emissive-mask textures, one per (coat, foal/adult, emissive part set). The
@@ -116,7 +160,10 @@ public final class GeneticCoatTextureFactory {
     private static final Map<Identifier, String> EMISSIVE_KEY_BY_ID = new ConcurrentHashMap<>();
 
     private static final TexelBudgetCache<String, Identifier> EMISSIVE_CACHE =
-            new TexelBudgetCache<>(BUDGET, SHEET_COST, (key, id) -> release(id, EMISSIVE_KEY_BY_ID));
+            new TexelBudgetCache<>(BUDGET, SHEET_COST, (key, id) -> {
+                LIVE_GLOWS.remove(key);
+                release(id, EMISSIVE_KEY_BY_ID);
+            });
 
     /** The one place a generated texture is handed back to the game. */
     private static void release(Identifier id, Map<Identifier, String> reverse) {
@@ -132,17 +179,183 @@ public final class GeneticCoatTextureFactory {
     /** The natural red/black gradient plus every alternate LUT the LUT locus can select. */
     private static volatile LutSet lutSet;
 
+    // ------------------------------------------------------------------
+    // The bake budget. Render thread only, like every caller of this class.
+    // ------------------------------------------------------------------
+
+    /** The window the time budget is counted over. */
+    private static final int WINDOW_MS = 50;
+    private static final long WINDOW_NANOS = WINDOW_MS * 1_000_000L;
+
+    /**
+     * Started one window in the past, so the first call opens a fresh one.
+     * Deliberately a difference of two {@code nanoTime} readings and never a
+     * sentinel: {@code nanoTime} may be negative, and a subtraction against a
+     * made-up extreme overflows - which is exactly how the world-flag cache
+     * switched itself off earlier the same day.
+     */
+    private static long windowStart = System.nanoTime() - WINDOW_NANOS;
+    private static long spentInWindow;
+    private static boolean bakedInWindow;
+
+    /** Session diagnostics, reported by {@link #clear()} and then reset. */
+    private static long bakes;
+    private static long bakeNanos;
+    private static long slowestBakeNanos;
+    private static long deferrals;
+
     private GeneticCoatTextureFactory() {
+    }
+
+    /** A horse's two textures for one frame: its coat, and its glow mask or {@code null}. */
+    public record Resolved(Identifier coat, @Nullable Identifier glow) {
+    }
+
+    /**
+     * <b>The renderer's one call.</b> The coat and the glow mask for a horse,
+     * baked together if either is missing and the budget allows - or, when it
+     * does not, whatever already exists plus the {@linkplain #placeholder
+     * stand-in} for whatever does not.
+     *
+     * @param parts        body parts a {@code glow} effect lights outright
+     * @param breedLabel   dev-build cosmetic only - the {@code [coat]} log line
+     * @param mayStartBake {@code false} for a horse beyond the detail distance:
+     *                     it may use a coat that exists, never cause a new one
+     */
+    public static Resolved resolve(CoatData coat, boolean baby, @Nullable Set<Part> parts,
+                                   @Nullable String breedLabel, boolean mayStartBake) {
+        Set<Part> wanted = parts == null ? Set.of() : parts;
+        String coatKey = coatKey(coat, baby);
+        String glowKey = glowKey(coatKey, wanted);
+        boolean haveCoat = LIVE_COATS.contains(coatKey);
+        boolean haveGlow = LIVE_GLOWS.contains(glowKey);
+
+        if (!(haveCoat && haveGlow) && mayStartBake && mayBake()) {
+            // ONE composer run feeds both caches. Whichever of the two already
+            // exists is a cache hit and ignores the loader.
+            return timed(() -> {
+                CoatTextureComposer.Baked baked = bake(coat, baby);
+                Identifier coatId = CACHE.get(coatKey,
+                        k -> registerCoat(coat, baby, k, baked.argb(), breedLabel));
+                Identifier glowId = EMISSIVE_CACHE.get(glowKey,
+                        k -> registerGlow(baby, wanted, k, baked));
+                return new Resolved(coatId, glowId);
+            });
+        }
+        // Counted only when the BUDGET said no. A horse beyond the detail
+        // distance is not waiting its turn, it is not asking - counting it would
+        // add every distant horse on every frame and bury the one number the
+        // shutdown line exists to report.
+        if (!(haveCoat && haveGlow) && mayStartBake) {
+            deferrals++;
+        }
+        // The loaders below only run if an entry vanished between the membership
+        // check and the lookup, which a single render thread cannot do - they
+        // are there so a surprise costs a bake rather than a missing texture.
+        Identifier coatId = haveCoat
+                ? CACHE.get(coatKey, coatLoader(coat, baby, breedLabel))
+                : placeholder(baby);
+        Identifier glowId = haveGlow
+                ? EMISSIVE_CACHE.get(glowKey, glowLoader(coat, baby, wanted))
+                : null;
+        return new Resolved(coatId, glowId);
     }
 
     public static Identifier getOrCreate(CoatData coat, boolean baby) {
         return getOrCreate(coat, baby, null);
     }
 
-    /** {@code breedLabel} is dev-build cosmetic only - the [coat] chat line. */
-    public static Identifier getOrCreate(CoatData coat, boolean baby, String breedLabel) {
-        String key = coat.textureKey() + (baby ? ":foal" : ":adult");
-        return CACHE.get(key, k -> generate(coat, baby, k, breedLabel));
+    /**
+     * The coat alone, for a screen or an item rather than a horse in the world:
+     * the family tree, the portrait well, a transfer paper. Budgeted like
+     * everything else - a family tree of thirty strangers used to bake thirty
+     * coats in one frame - but with no distance, because nothing on a screen is
+     * far away. A coat that has to wait shows the stand-in and is asked for
+     * again next frame.
+     */
+    public static Identifier getOrCreate(CoatData coat, boolean baby, @Nullable String breedLabel) {
+        String key = coatKey(coat, baby);
+        if (LIVE_COATS.contains(key) || mayBake()) {
+            return CACHE.get(key, coatLoader(coat, baby, breedLabel));
+        }
+        deferrals++;
+        return placeholder(baby);
+    }
+
+    /**
+     * <b>What a horse wears while its own coat waits.</b> The wild-type coat,
+     * baked through the ordinary pipeline and shared by every horse still in
+     * the queue - so it costs one bake per mesh for a whole session, not one
+     * per horse.
+     *
+     * <p>Not vanilla's horse texture, although that was the obvious idea: the
+     * adult HD model moves the legs and ears onto patches of their own, so a
+     * vanilla sheet would put the wrong texels on exactly the parts a moving
+     * horse shows most. Exempt from the budget, because the fallback cannot
+     * itself be something that waits.
+     */
+    private static Identifier placeholder(boolean baby) {
+        return CACHE.get(coatKey(CoatData.DEFAULT, baby), coatLoader(CoatData.DEFAULT, baby, null));
+    }
+
+    /**
+     * May a new bake start now? Always the first one in a window, so a coat can
+     * never be starved; after that only while the window's spend is under
+     * {@code coats.bakeBudgetMs}. A budget of zero is therefore "one bake per
+     * {@value #WINDOW_MS} ms, whatever it costs".
+     */
+    private static boolean mayBake() {
+        long now = System.nanoTime();
+        if (now - windowStart >= WINDOW_NANOS) {
+            windowStart = now;
+            spentInWindow = 0L;
+            bakedInWindow = false;
+        }
+        return !bakedInWindow || spentInWindow < ClientConfig.coatBakeBudgetMs() * 1_000_000L;
+    }
+
+    /** Run a bake-and-upload and put what it cost against the window and the session. */
+    private static <T> T timed(Supplier<T> work) {
+        long started = System.nanoTime();
+        try {
+            return work.get();
+        } finally {
+            long took = System.nanoTime() - started;
+            bakedInWindow = true;
+            spentInWindow += took;
+            bakes++;
+            bakeNanos += took;
+            slowestBakeNanos = Math.max(slowestBakeNanos, took);
+        }
+    }
+
+    private static String coatKey(CoatData coat, boolean baby) {
+        return coat.textureKey() + (baby ? ":foal" : ":adult");
+    }
+
+    /** The gene-written half of a mask is a function of the texture key already, so only spec parts join it. */
+    private static String glowKey(String coatKey, Set<Part> parts) {
+        StringBuilder tag = new StringBuilder();
+        for (Part part : new TreeSet<>(parts)) {
+            tag.append(tag.isEmpty() ? "" : "+").append(part.name());
+        }
+        return coatKey + ":glow:" + tag;
+    }
+
+    private static TexelBudgetCache.Loader<String, Identifier> coatLoader(CoatData coat, boolean baby,
+                                                                         @Nullable String breedLabel) {
+        return k -> timed(() -> registerCoat(coat, baby, k, bake(coat, baby).argb(), breedLabel));
+    }
+
+    private static TexelBudgetCache.Loader<String, Identifier> glowLoader(CoatData coat, boolean baby,
+                                                                         Set<Part> parts) {
+        return k -> timed(() -> registerGlow(baby, parts, k, bake(coat, baby)));
+    }
+
+    private static CoatTextureComposer.Baked bake(CoatData coat, boolean baby) {
+        ensureAssetsLoaded();
+        return CoatTextureComposer.bake(coat.genotype(), coat.epigenome(),
+                baby ? Skin.BABY : Skin.ADULT, !baby, baby ? babyTemplate : adultTemplate, lutSet);
     }
 
     /**
@@ -160,24 +373,16 @@ public final class GeneticCoatTextureFactory {
      * Whatever is emissive is painted with the coat colour the composer produced
      * there; the rest is transparent.
      */
-    public static Identifier getOrCreateEmissive(CoatData coat, boolean baby, Set<Part> parts) {
-        Set<Part> wanted = parts == null ? Set.of() : parts;
-        StringBuilder tag = new StringBuilder();
-        for (Part part : new TreeSet<>(wanted)) {
-            tag.append(tag.isEmpty() ? "" : "+").append(part.name());
-        }
-        // The gene-written half of the mask is a function of the texture key
-        // already, so only the spec parts need to appear in the cache key.
-        String key = coat.textureKey() + (baby ? ":foal" : ":adult") + ":glow:" + tag;
-        return EMISSIVE_CACHE.get(key, k -> generateEmissive(coat, baby, wanted, k));
+    private static @Nullable Identifier registerGlow(boolean baby, Set<Part> parts, String key,
+                                                     CoatTextureComposer.Baked baked) {
+        Identifier id = buildGlow(baby, parts, key, baked);
+        LIVE_GLOWS.add(key); // a null answer is an answer too - see EMISSIVE_CACHE
+        return id;
     }
 
-    private static Identifier generateEmissive(CoatData coat, boolean baby, Set<Part> parts, String key) {
-        ensureAssetsLoaded();
+    private static @Nullable Identifier buildGlow(boolean baby, Set<Part> parts, String key,
+                                                  CoatTextureComposer.Baked baked) {
         Skin skin = baby ? Skin.BABY : Skin.ADULT;
-        int[] template = baby ? babyTemplate : adultTemplate;
-        CoatTextureComposer.Baked baked =
-                CoatTextureComposer.bake(coat.genotype(), coat.epigenome(), skin, !baby, template, lutSet);
         int[] argb = baked.argb();
         float[] byGene = baked.emissive();
 
@@ -241,14 +446,10 @@ public final class GeneticCoatTextureFactory {
         return id;
     }
 
-    private static Identifier generate(CoatData coat, boolean baby, String key, String breedLabel) {
-        ensureAssetsLoaded();
-        Skin skin = baby ? Skin.BABY : Skin.ADULT;
-        int[] template = baby ? babyTemplate : adultTemplate;
-        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, lutSet);
-
+    private static Identifier registerCoat(CoatData coat, boolean baby, String key, int[] argb,
+                                           @Nullable String breedLabel) {
         if (ClientConfig.debugTools()) {
-            debugLogCoat(coat, baby, argb, template, breedLabel);
+            debugLogCoat(coat, baby, argb, baby ? babyTemplate : adultTemplate, breedLabel);
         }
 
         NativeImage image = new NativeImage(N, N, false);
@@ -265,6 +466,7 @@ public final class GeneticCoatTextureFactory {
                     + ": '" + previous + "' vs '" + key + "' - CoatTextureId is no longer injective");
         }
         Minecraft.getInstance().getTextureManager().register(id, texture);
+        LIVE_COATS.add(key);
         return id;
     }
 
@@ -276,7 +478,8 @@ public final class GeneticCoatTextureFactory {
      * transparent and the horse renders as the bare white template
      * ("FLAT WHITE").
      */
-    private static void debugLogCoat(CoatData coat, boolean baby, int[] argb, int[] template, String breedLabel) {
+    private static void debugLogCoat(CoatData coat, boolean baby, int[] argb, int[] template,
+                                     @Nullable String breedLabel) {
         Minecraft mc = Minecraft.getInstance();
         boolean bareTemplate = Arrays.equals(argb, template);
         String msg = "[coat] " + (baby ? "foal  " : "adult ")
@@ -370,18 +573,30 @@ public final class GeneticCoatTextureFactory {
      * one release path rather than two.
      */
     public static void clear() {
-        // The session's only report on the LRU, and the one place the owner can
-        // see from a log whether it ever had to evict anything. Written before
-        // the clear, because after it every number is zero.
+        // The session's only report on the LRU and on the bake budget, and the
+        // one place the owner can see from a log whether either ever had to
+        // act. Written before the clear, because after it every number is zero.
         HorseGenetics.LOGGER.info(
                 "releasing {} coat textures and {} glow masks; {} coats and {} masks were recycled "
                         + "for space during the session (budget {} texels each)",
                 CACHE.size(), EMISSIVE_CACHE.size(),
                 CACHE.evictionCount(), EMISSIVE_CACHE.evictionCount(), BUDGET);
+        HorseGenetics.LOGGER.info(
+                "coat baking: {} bakes, {} ms in total, slowest {} ms; {} times a horse close enough "
+                        + "for its own coat drew the stand-in because the budget was spent "
+                        + "(budget {} ms per {} ms window)",
+                bakes, bakeNanos / 1_000_000L, String.format("%.1f", slowestBakeNanos / 1_000_000.0),
+                deferrals, ClientConfig.coatBakeBudgetMs(), WINDOW_MS);
         CACHE.clear();
         EMISSIVE_CACHE.clear();
         KEY_BY_ID.clear();
         EMISSIVE_KEY_BY_ID.clear();
+        LIVE_COATS.clear();
+        LIVE_GLOWS.clear();
+        bakes = 0L;
+        bakeNanos = 0L;
+        slowestBakeNanos = 0L;
+        deferrals = 0L;
         adultTemplate = null;
         babyTemplate = null;
         lutSet = null;

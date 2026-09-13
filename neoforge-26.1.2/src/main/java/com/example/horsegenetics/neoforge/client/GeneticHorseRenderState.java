@@ -24,6 +24,14 @@ public class GeneticHorseRenderState extends HorseRenderState {
     public String breedLabel = null;
 
     /**
+     * The coat texture resolved for this frame: the horse's own once it has been
+     * baked, or the shared stand-in while it waits its turn or is beyond
+     * {@code coats.detailDistance}. Filled in {@code extractRenderState}; still
+     * {@code null} only on a state that renderer never extracted.
+     */
+    public Identifier coatId = null;
+
+    /**
      * Full-bright mask texture for a {@code glow} gene's emissive coat regions,
      * or {@code null} when no expressed gene wants one. Drawn by
      * {@link EmissiveCoatLayer} on top of the base coat.

@@ -115,6 +115,12 @@ folder, for a launcher other than vanilla's): `genes/` and `breeds/` for the fil
 drop in, and three settings files - `breed-spawning.toml`, `server.toml` and
 `client.toml`. Nothing goes in `config/`.
 
+**If walking toward a big herd stutters, look in `client.toml`.** Every horse gets a
+coat texture made just for it, and making one takes real work. Horses further away than
+`coats.detailDistance` (32 blocks by default) wear a plain stand-in coat until you come
+closer, and `coats.bakeBudgetMs` caps how much time per moment goes into making new
+ones. Lower either on a slower computer.
+
 **`breed-spawning.toml` decides which horses your world has.** Every breed the mod
 ships has a section - switch it off, make it rarer or commoner, move it to other
 biomes, or give it day or night hours - and one switch turns all of them off at

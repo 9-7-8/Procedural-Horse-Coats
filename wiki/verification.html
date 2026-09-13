@@ -80,6 +80,53 @@
     </p>
 </div>
 
+<h2 id="coat-budget">&sect;0-DP &mdash; The freeze that needed a reboot: coats and foundings are rationed now (2026-09-13, NOT looked at)</h2>
+
+<div class="note bad">
+    <span class="label">What happened</span>
+    <p>
+        Loading in stuttered for about thirty seconds; riding toward the ocean-born
+        pen then froze the client, and the whole computer, badly enough to need a
+        reboot. <strong>It was the client, not the server.</strong> A thread dump
+        gave the render thread 173&nbsp;s of CPU in 427&nbsp;s, against the server
+        thread's 32&nbsp;s spent mostly waiting. The renderer composed and uploaded
+        every newly-seen horse's coat inside the frame that first showed it &mdash;
+        twice per horse, once for a glow mask most horses do not have &mdash; and
+        95 coats plus 95 masks were live at shutdown with nothing ever evicted.
+        Server founding added its own spikes on load: 10&ndash;24&nbsp;ms per horse,
+        measured from consecutive founders in one burst.
+    </p>
+    <p>
+        Full write-up and the three rules: <a href="pipeline.html#bake-budget">pipeline &rarr; when a coat is baked</a>.
+        Two settings in <code>client.toml</code>: <code>coats.detailDistance</code>
+        (32) and <code>coats.bakeBudgetMs</code> (4).
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">NOT looked at &mdash; what to check, none of it visual except the last</span>
+    <ol>
+        <li><strong>Load a test world and ride toward a herd.</strong> The pass is
+            that nothing freezes. The log's <code>Can't keep up</code> count is the
+            number: the lag session logged <b>eleven</b>, up to 44&nbsp;s behind.</li>
+        <li><strong>At shutdown, read the <code>coat baking:</code> line.</strong>
+            It gives bakes, total and slowest milliseconds, and how many frames drew
+            the stand-in. The slowest figure is the first real measurement of what
+            one bake costs, and it decides whether the 4&nbsp;ms budget is right.</li>
+        <li><strong>Look for <code>[Founding]</code> lines during load-in.</strong>
+            They appear only when the per-tick budget deferred a horse, so seeing
+            them on a fresh world is the budget working, and seeing none on a quiet
+            one is correct too.</li>
+        <li><strong>Herds still form properly</strong> when their founding is spread
+            over several ticks &mdash; one breed per herd, a lead, joiners. It was
+            already founded a horse per tick and derives the herd from the lead's
+            UUID, so it should, but the spread is new.</li>
+        <li><em>Visual, so last:</em> distant horses wear the plain wild-type
+            stand-in and change to their own coat as you approach, once, without
+            flickering back.</li>
+    </ol>
+</div>
+
 <h2 id="confirmed-1430">&sect;0-DO &mdash; Six confirmed, three fixed, and a fallback that made every stall look like it worked (2026-09-13)</h2>
 
 <div class="note good">

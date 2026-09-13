@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
 import net.minecraft.client.model.animal.equine.HorseModel;
@@ -27,6 +28,12 @@ import java.util.EnumSet;
  * {@link HdHorseModel} and the foal on {@link HdBabyHorseModel} (both 128px,
  * per-part UV). The models are handed straight to the super constructor as the
  * adult / baby model, so there's no per-entity model swap.
+ *
+ * <p><b>Both textures are resolved once, in {@link #extractRenderState}</b>,
+ * and read back from the state - the coat by {@link #getTextureLocation}, the
+ * glow mask by {@link EmissiveCoatLayer}. The factory rations new bakes and a
+ * horse beyond {@code coats.detailDistance} may not start one; see
+ * {@link GeneticCoatTextureFactory} for the freeze that made both necessary.
  */
 public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRenderState, HorseModel> {
 
@@ -90,11 +97,30 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             if (coatData != null) {
                 geneticState.coatData = coatData;
             }
-            geneticState.emissiveCoatId = emissiveCoatFor(geneticState.coatData, renderState.isBaby);
             com.example.horsegenetics.common.horse.HorseRecord rec =
                     ClientHorseRecordCache.get(horse.getId());
             geneticState.breedLabel = rec == null ? null : rec.lineage().displayName();
+            GeneticCoatTextureFactory.Resolved textures = GeneticCoatTextureFactory.resolve(
+                    geneticState.coatData, renderState.isBaby, emissivePartsOf(geneticState.coatData),
+                    geneticState.breedLabel, withinDetailDistance(renderState));
+            geneticState.coatId = textures.coat();
+            geneticState.emissiveCoatId = textures.glow();
         }
+    }
+
+    /**
+     * <b>Close enough to be worth a coat of its own?</b> {@code distanceToCameraSq}
+     * is written by vanilla's {@code EntityRenderer.extractRenderState}, which
+     * the call to {@code super} above has already run (checked in bytecode,
+     * 2026-09-13 - not assumed).
+     *
+     * <p>This only decides whether a horse may <i>start</i> a bake. One whose
+     * coat already exists keeps it at any range, so walking back and forth
+     * across the line swaps nothing and nothing flickers.
+     */
+    private static boolean withinDetailDistance(HorseRenderState renderState) {
+        double blocks = ClientConfig.coatDetailDistance();
+        return renderState.distanceToCameraSq <= blocks * blocks;
     }
 
     /**
@@ -135,34 +161,33 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
     }
 
     /**
-     * The full-bright mask for whatever this horse glows with, or {@code null}
-     * if nothing does. Cheap: the ability scan is a handful of allele checks and
-     * the bake is cached by coat key - including the "nothing glows" answer, so
-     * an ordinary horse costs one map lookup a frame.
+     * The body parts a {@code glow} effect lights outright on this horse -
+     * usually none. A handful of allele checks, and part of the glow cache key.
      *
-     * <p>The factory is asked <b>every</b> time, even with no {@code glow}
-     * effect in the list, because a built-in gene writes its emissive texels in
-     * the coat bake rather than declaring body parts here - which is what lets
-     * the light locus glow four hooves and two eyes instead of four whole legs
-     * and a head.
+     * <p>The factory is asked for a mask <b>every</b> time, even with an empty
+     * list, because a built-in gene writes its emissive texels in the coat bake
+     * rather than declaring body parts here - which is what lets the light locus
+     * glow four hooves and two eyes instead of four whole legs and a head.
      */
-    private static Identifier emissiveCoatFor(CoatData coatData, boolean baby) {
+    private static EnumSet<Part> emissivePartsOf(CoatData coatData) {
         EnumSet<Part> parts = EnumSet.noneOf(Part.class);
         for (HorseAbilities.Active active : HorseAbilities.activeFor(coatData.genotype())) {
             if (active.ability() instanceof GeneAbility.Glow glow) {
                 parts.addAll(glow.emissiveParts());
             }
         }
-        return GeneticCoatTextureFactory.getOrCreateEmissive(coatData, baby, parts);
+        return parts;
     }
 
     @Override
     public Identifier getTextureLocation(HorseRenderState renderState) {
-        CoatData coatData = (renderState instanceof GeneticHorseRenderState geneticState)
-                ? geneticState.coatData
-                : CoatData.DEFAULT;
-        String breedLabel = (renderState instanceof GeneticHorseRenderState g) ? g.breedLabel : null;
-        return coatTextureFor(coatData, renderState.isBaby, breedLabel);
+        if (renderState instanceof GeneticHorseRenderState geneticState) {
+            if (geneticState.coatId != null) {
+                return geneticState.coatId;
+            }
+            return coatTextureFor(geneticState.coatData, renderState.isBaby, geneticState.breedLabel);
+        }
+        return coatTextureFor(CoatData.DEFAULT, renderState.isBaby, null);
     }
 
     /** The generated coat texture for one horse - shared with the family-tree node. */

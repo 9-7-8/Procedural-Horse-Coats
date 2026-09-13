@@ -108,7 +108,7 @@
 </li>
 <li>Client caches in <code>ClientCoatCache</code> (<code>CoatData</code>) / <code>ClientHorseRecordCache</code>, cleared on <code>LoggingOut</code>.
 </li>
-<li><code>GeneticHorseRenderer.extractRenderState</code> reads <code>ClientCoatCache</code> -&gt; <code>GeneticHorseRenderState.coatData</code>; <code>getTextureLocation</code> -&gt; <code>GeneticCoatTextureFactory.getOrCreate(coatData, renderState.isBaby)</code> - generated for adult and foal alike (<code>HdHorseModel</code> / <code>HdBabyHorseModel</code> handed to the super ctor; no per-entity model swap).
+<li><code>GeneticHorseRenderer.extractRenderState</code> reads <code>ClientCoatCache</code> -&gt; <code>GeneticHorseRenderState.coatData</code>, then resolves both textures in one call: <code>GeneticCoatTextureFactory.resolve</code> fills <code>coatId</code> and <code>emissiveCoatId</code> on the state, baking at most once per horse, within a per-window time budget and only inside <code>coats.detailDistance</code> (<a href="pipeline.html#bake-budget">pipeline &rarr; when a coat is baked</a>); <code>getTextureLocation</code> returns <code>coatId</code> - generated for adult and foal alike (<code>HdHorseModel</code> / <code>HdBabyHorseModel</code> handed to the super ctor; no per-entity model swap).
 </li>
 </ol>
 
