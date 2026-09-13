@@ -135,6 +135,47 @@
               "type": "CRACKLE",
               "seed": "$crackleSeed",
               "scale": 4.5,
+              "gap": 1.15,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6b4a06",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
               "gap": 0.6,
               "warp": 0.42,
               "softness": 0.1,
@@ -144,6 +185,47 @@
           "op": {
             "type": "TOWARD",
             "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.28,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffe9a3",
             "strength": 100
           }
         },
@@ -286,6 +368,47 @@
               "type": "CRACKLE",
               "seed": "$crackleSeed",
               "scale": 4.5,
+              "gap": 1.15,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6b4a06",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
               "gap": 0.6,
               "warp": 0.42,
               "softness": 0.1,
@@ -295,6 +418,47 @@
           "op": {
             "type": "TOWARD",
             "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.28,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffe9a3",
             "strength": 100
           }
         },
@@ -434,6 +598,47 @@
               "type": "CRACKLE",
               "seed": "$crackleSeed",
               "scale": 4.5,
+              "gap": 1.15,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6b4a06",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
               "gap": 0.6,
               "warp": 0.42,
               "softness": 0.1,
@@ -443,6 +648,47 @@
           "op": {
             "type": "TOWARD",
             "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.28,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffe9a3",
             "strength": 100
           }
         },

@@ -58,7 +58,7 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             }
@@ -81,23 +81,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 0.7,
+              "scale": 6,
+              "gap": 0.47,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 1.7,
+              "scale": 6,
+              "gap": 1.13,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -121,23 +121,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 2.7,
+              "scale": 6,
+              "gap": 1.8,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 3.7,
+              "scale": 6,
+              "gap": 2.47,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -161,15 +161,15 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 5.2,
+              "scale": 6,
+              "gap": 3.47,
               "warp": 0.3,
               "softness": 0.07
             }
@@ -202,7 +202,7 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             }
@@ -225,23 +225,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 0.7,
+              "scale": 6,
+              "gap": 0.47,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 1.7,
+              "scale": 6,
+              "gap": 1.13,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -267,23 +267,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 2.7,
+              "scale": 6,
+              "gap": 1.8,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 3.7,
+              "scale": 6,
+              "gap": 2.47,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -309,15 +309,15 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 5.2,
+              "scale": 6,
+              "gap": 3.47,
               "warp": 0.3,
               "softness": 0.07
             }

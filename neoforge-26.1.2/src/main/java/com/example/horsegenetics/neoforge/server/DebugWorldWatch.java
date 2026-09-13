@@ -19,6 +19,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
+import net.minecraft.world.entity.monster.Monster;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.BonemealEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -552,6 +554,29 @@ public final class DebugWorldWatch {
         note("creature died", event.getEntity().getType().builtInRegistryHolder().key().identifier()
                 + " at " + event.getEntity().blockPosition().toShortString()
                 + " from " + event.getSource().getMsgId());
+    }
+
+    /**
+     * <b>Every monster spawn, with the REASON it spawned for.</b>
+     *
+     * <p>{@code ActionTrace} already logs each hostile with its distance to the
+     * nearest live ward, and until 2026-09-13 every one of them came from the
+     * yard's spawner because the dimension's biome was {@code the_void} and
+     * could spawn nothing itself. Now that it has a biome with zombies in it,
+     * those two sources are mixed - and they mean opposite things.
+     * <b>{@code GeneWardHandler.isNatural} lets spawner mobs through on
+     * purpose</b>, so a spawner zombie beside a warded horse is expected and a
+     * NATURAL one is the gene failing. Without the reason on the line, the
+     * distance column stops meaning anything at all.
+     */
+    @SubscribeEvent
+    static void onFinalizeSpawn(FinalizeSpawnEvent event) {
+        if (!watching(event.getEntity().level()) || !(event.getEntity() instanceof Monster)) {
+            return;
+        }
+        note("monster spawn reason", event.getEntity().getType().builtInRegistryHolder().key()
+                .identifier() + " by " + event.getSpawnType() + " at "
+                + event.getEntity().blockPosition().toShortString());
     }
 
     /** Bone meal, by anybody. Nothing in the yard uses it - which is the point of watching. */

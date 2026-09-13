@@ -9628,7 +9628,7 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             }
@@ -9651,23 +9651,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 0.7,
+              "scale": 6,
+              "gap": 0.47,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 1.7,
+              "scale": 6,
+              "gap": 1.13,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -9691,23 +9691,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 2.7,
+              "scale": 6,
+              "gap": 1.8,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 3.7,
+              "scale": 6,
+              "gap": 2.47,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -9731,15 +9731,15 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 5.2,
+              "scale": 6,
+              "gap": 3.47,
               "warp": 0.3,
               "softness": 0.07
             }
@@ -9772,7 +9772,7 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             }
@@ -9795,23 +9795,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 0.7,
+              "scale": 6,
+              "gap": 0.47,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 1.7,
+              "scale": 6,
+              "gap": 1.13,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -9837,23 +9837,23 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 2.7,
+              "scale": 6,
+              "gap": 1.8,
               "warp": 0.3,
               "softness": 0.07
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 3.7,
+              "scale": 6,
+              "gap": 2.47,
               "warp": 0.3,
               "softness": 0.07,
               "invert": true
@@ -9879,15 +9879,15 @@
             {
               "type": "PATCHES",
               "seed": "$patchSeed",
-              "scale": 14,
+              "scale": 10,
               "threshold": 0.54,
               "softness": 0.1
             },
             {
               "type": "CRACKLE",
               "seed": "$cellSeed",
-              "scale": 9,
-              "gap": 5.2,
+              "scale": 6,
+              "gap": 3.47,
               "warp": 0.3,
               "softness": 0.07
             }
@@ -23541,6 +23541,47 @@
               "type": "CRACKLE",
               "seed": "$crackleSeed",
               "scale": 4.5,
+              "gap": 1.15,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6b4a06",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
               "gap": 0.6,
               "warp": 0.42,
               "softness": 0.1,
@@ -23550,6 +23591,47 @@
           "op": {
             "type": "TOWARD",
             "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.28,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffe9a3",
             "strength": 100
           }
         },
@@ -23692,6 +23774,47 @@
               "type": "CRACKLE",
               "seed": "$crackleSeed",
               "scale": 4.5,
+              "gap": 1.15,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6b4a06",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
               "gap": 0.6,
               "warp": 0.42,
               "softness": 0.1,
@@ -23701,6 +23824,47 @@
           "op": {
             "type": "TOWARD",
             "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.28,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffe9a3",
             "strength": 100
           }
         },
@@ -23840,6 +24004,47 @@
               "type": "CRACKLE",
               "seed": "$crackleSeed",
               "scale": 4.5,
+              "gap": 1.15,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#6b4a06",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
               "gap": 0.6,
               "warp": 0.42,
               "softness": 0.1,
@@ -23849,6 +24054,47 @@
           "op": {
             "type": "TOWARD",
             "color": "#d29713",
+            "strength": 100
+          }
+        },
+        {
+          "name": "gold seam",
+          "masks": [
+            {
+              "type": "AXIS",
+              "axis": "X",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0,
+              "to": 0.42,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "axis": "Y",
+              "space": "part",
+              "parts": [
+                "BODY"
+              ],
+              "from": 0.12,
+              "to": 1,
+              "softness": 0.18
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$crackleSeed",
+              "scale": 4.5,
+              "gap": 0.28,
+              "warp": 0.42,
+              "softness": 0.1,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffe9a3",
             "strength": 100
           }
         },
@@ -45238,24 +45484,47 @@
       ],
       "layers": [
         {
-          "name": "black field above the drip line",
           "masks": [
             {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
-              "from": 0.7,
-              "to": 1.45,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "space": "part",
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.74,
+              "to": 1.7,
+              "drop": 6.0,
+              "width": 2.9,
+              "bulb": 1.45,
+              "wobble": 0.85
+            },
+            {
+              "type": "GOO",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "space": "part",
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85,
+              "invert": true
             }
           ],
           "op": {
@@ -45265,140 +45534,34 @@
           }
         },
         {
-          "name": "upper ribbon",
           "masks": [
             {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
-              "from": 0.63,
-              "to": 0.7,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "space": "part",
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85
             }
           ],
           "op": {
             "type": "RAMP",
             "axis": "Y",
             "space": "part",
-            "from": 0.42,
-            "to": 0.7,
-            "colors": [
-              "#787878",
-              "#a0a0a0",
-              "#d0d0d0",
-              "#ffffff"
-            ],
-            "strength": 100
-          }
-        },
-        {
-          "name": "second ribbon",
-          "masks": [
-            {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
-              "parts": [
-                "BODY"
-              ],
-              "from": 0.56,
-              "to": 0.63,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
-            }
-          ],
-          "op": {
-            "type": "RAMP",
-            "axis": "Y",
-            "space": "part",
-            "from": 0.42,
-            "to": 0.7,
-            "colors": [
-              "#787878",
-              "#a0a0a0",
-              "#d0d0d0",
-              "#ffffff"
-            ],
-            "strength": 100
-          }
-        },
-        {
-          "name": "third ribbon",
-          "masks": [
-            {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
-              "parts": [
-                "BODY"
-              ],
-              "from": 0.49,
-              "to": 0.56,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
-            }
-          ],
-          "op": {
-            "type": "RAMP",
-            "axis": "Y",
-            "space": "part",
-            "from": 0.42,
-            "to": 0.7,
-            "colors": [
-              "#787878",
-              "#a0a0a0",
-              "#d0d0d0",
-              "#ffffff"
-            ],
-            "strength": 100
-          }
-        },
-        {
-          "name": "leading ribbon",
-          "masks": [
-            {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
-              "parts": [
-                "BODY"
-              ],
-              "from": 0.42,
-              "to": 0.49,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
-            }
-          ],
-          "op": {
-            "type": "RAMP",
-            "axis": "Y",
-            "space": "part",
-            "from": 0.42,
-            "to": 0.7,
+            "from": 0.1,
+            "to": 1.7,
             "colors": [
               "#787878",
               "#a0a0a0",
@@ -45419,24 +45582,47 @@
       ],
       "layers": [
         {
-          "name": "black field above the drip line",
           "masks": [
             {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
-              "from": 0.7,
-              "to": 1.45,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "space": "part",
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.74,
+              "to": 1.7,
+              "drop": 6.0,
+              "width": 2.9,
+              "bulb": 1.45,
+              "wobble": 0.85
+            },
+            {
+              "type": "GOO",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "space": "part",
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85,
+              "invert": true
             }
           ],
           "op": {
@@ -45446,134 +45632,34 @@
           }
         },
         {
-          "name": "upper ribbon",
           "masks": [
             {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
+              "type": "GOO",
               "parts": [
                 "BODY"
               ],
-              "from": 0.63,
-              "to": 0.7,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
+              "seed": "$dripSeed",
+              "axis": "X",
+              "across": "Y",
+              "space": "part",
+              "spacing": 4.5,
+              "vary": 0.92,
+              "chance": 0.72,
+              "softness": 0.1,
+              "from": 0.8,
+              "to": 1.7,
+              "drop": 5.4,
+              "width": 1.7,
+              "bulb": 1.7,
+              "wobble": 0.85
             }
           ],
           "op": {
             "type": "RAMP",
             "axis": "Y",
             "space": "part",
-            "from": 0.42,
-            "to": 0.7,
-            "hue": "$hue",
-            "hueSpan": 300,
-            "saturation": 0.95,
-            "lightness": 0.58,
-            "strength": 100
-          }
-        },
-        {
-          "name": "second ribbon",
-          "masks": [
-            {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
-              "parts": [
-                "BODY"
-              ],
-              "from": 0.56,
-              "to": 0.63,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
-            }
-          ],
-          "op": {
-            "type": "RAMP",
-            "axis": "Y",
-            "space": "part",
-            "from": 0.42,
-            "to": 0.7,
-            "hue": "$hue",
-            "hueSpan": 300,
-            "saturation": 0.95,
-            "lightness": 0.58,
-            "strength": 100
-          }
-        },
-        {
-          "name": "third ribbon",
-          "masks": [
-            {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
-              "parts": [
-                "BODY"
-              ],
-              "from": 0.49,
-              "to": 0.56,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
-            }
-          ],
-          "op": {
-            "type": "RAMP",
-            "axis": "Y",
-            "space": "part",
-            "from": 0.42,
-            "to": 0.7,
-            "hue": "$hue",
-            "hueSpan": 300,
-            "saturation": 0.95,
-            "lightness": 0.58,
-            "strength": 100
-          }
-        },
-        {
-          "name": "leading ribbon",
-          "masks": [
-            {
-              "type": "WAVES",
-              "seed": "$dripSeed",
-              "axis": "X",
-              "across": "Y",
-              "shape": "sine",
-              "space": "part",
-              "parts": [
-                "BODY"
-              ],
-              "from": 0.42,
-              "to": 0.49,
-              "wavelength": 6,
-              "amplitude": 0.2,
-              "phase": 0,
-              "softness": 0.025
-            }
-          ],
-          "op": {
-            "type": "RAMP",
-            "axis": "Y",
-            "space": "part",
-            "from": 0.42,
-            "to": 0.7,
+            "from": 0.1,
+            "to": 1.7,
             "hue": "$hue",
             "hueSpan": 300,
             "saturation": 0.95,
@@ -52804,7 +52890,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#dedede"
+            "color": "#b4b4b4"
           }
         },
         {
@@ -52908,7 +52994,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#7a7a7a"
+            "color": "#3d3d3d"
           }
         },
         {
@@ -53045,7 +53131,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#bcbcbc"
+            "color": "#8a8a8a"
           }
         },
         {
@@ -53182,7 +53268,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#9b9b9b"
+            "color": "#666666"
           }
         },
         {
@@ -53285,7 +53371,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#dedede"
+            "color": "#b4b4b4"
           }
         }
       ]

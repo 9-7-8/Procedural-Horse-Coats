@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -743,6 +744,20 @@ final class DebugTestYard {
         // putting any light inside the room.
         DebugPenManager.fastSet(level, new BlockPos(doorX + 1, gy + 2, z0 - 1),
                 Blocks.TORCH.defaultBlockState());
+
+        // LIGHT LEVEL ONE, AND INVISIBLE. From 2026-09-13 the dimension has a
+        // biome that spawns zombies in the dark, which is what the ward test
+        // has always needed - and it turns a sealed unlit box into a zombie
+        // trap that fills overnight. The dimension spawns monsters at block
+        // light 0 exactly, so ONE is enough to stop it, and one is still black
+        // to the eye: a glow is judged against the room, and a room at 1 looks
+        // the same as a room at 0 while a room full of zombies does not.
+        for (int x = x0 + 1; x < x1; x += 4) {
+            for (int z = z0 + 1; z < z1; z += 4) {
+                DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z),
+                        Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 1));
+            }
+        }
     }
 
     /**

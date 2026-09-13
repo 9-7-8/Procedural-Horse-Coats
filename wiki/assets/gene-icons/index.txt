@@ -159,6 +159,7 @@ iridescent_rosette
 moth_eyes
 agate_eye
 corolla
+contour_cells
 beadscale
 scuted
 stars

@@ -56,6 +56,64 @@
     </p>
 </div>
 
+<h2 id="art-pass">&sect;0-DC &mdash; Four coat genes redrawn, and a biome that spawns zombies (2026-09-13, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Each of these fixes something the owner named, and three of them are shape rather than colour</span>
+</div>
+
+<ul>
+    <li><strong>Rainbow drip was never drip-shaped.</strong> It was five stacked
+        <code>WAVES</code> &mdash; horizontal <em>sine bands</em> &mdash; where
+        <a href="gene-ooze-drip.html">ooze drip</a>, the one that came back
+        &ldquo;looks GREAT&rdquo;, is built on <code>GOO</code>: the mask that actually
+        makes a drip, with separate runs, their own lengths, a bulb and a wobble. It now
+        uses ooze's exact geometry and keeps its own colouring. <strong>The ramp had to be
+        respanned too</strong> &mdash; it ran 0.42 to 0.7, which was where the bands sat,
+        and the drips hang from 0.74 <em>downward</em>, so the whole rainbow would have
+        been painted above them.</li>
+    <li><strong>Gilded crackle's seam was one flat gold.</strong> Metal needs a value
+        range across the groove, so the seam is three concentric bands now &mdash; a dark
+        shadowed groove, the gold, and a bright specular lip &mdash; by painting the same
+        inverted <code>CRACKLE</code> at three widths, widest first. Three layers became
+        five.</li>
+    <li><strong>Contour cells, at the third attempt.</strong> One patch was swallowing a
+        barrel. Raising the threshold and shrinking the patch alone were both refused by
+        <code>DeadLayerTest</code>, which is the thing worth remembering: <strong>the
+        nested rings have to fit inside a patch and the gaps are measured in
+        cells</strong>, so the motif only shrinks <em>proportionally</em>. Patch 14&rarr;10,
+        cell 9&rarr;6, and every gap scaled by two thirds. That passed.</li>
+    <li><strong>Starburst's pale form read as one flat white shape</strong> because its
+        whole palette ran <code>#7a7a7a</code> to <code>#ffffff</code> &mdash; six layers
+        of structure inside a third of the value range, several of them thin rings, with a
+        white core to swallow them. The structure was always there; it had no contrast to
+        show it with. The spikes, shards, outline and inline are pulled well down; the
+        core stays white, because the core is the light.</li>
+</ul>
+
+<div class="note danger">
+    <span class="label">And the dimension can spawn hostiles now, which changes what two tests mean</span>
+    <p>
+        A new biome, <code>horsegenetics:debug_pens</code>, replaces
+        <code>minecraft:the_void</code> and carries zombies in its monster spawner list.
+        <strong>That is the thing <a href="known-gaps.html#gap-210">gap 210</a> said was
+        impossible</strong>: the ward's real claim &mdash; that hostiles do not spawn near
+        a warded horse &mdash; can finally be tested, because there is finally something
+        for it to stop.
+    </p>
+    <p>
+        <strong>Two consequences, both handled.</strong> A sealed unlit box now fills with
+        zombies overnight, so the glow room carries invisible <code>light</code> blocks at
+        level <strong>1</strong> &mdash; enough to stop spawning, still black to the eye,
+        and a glow is judged against the room rather than against absolute dark. And
+        &ldquo;is the spawner producing&rdquo; stops being answerable if a natural zombie
+        looks identical to a spawner one, so <strong>every monster spawn now logs its
+        reason</strong>. That distinction is load-bearing: the ward lets spawner mobs
+        through <em>on purpose</em>, so a spawner zombie beside a warded horse is expected
+        and a natural one is the gene failing.
+    </p>
+</div>
+
 <h2 id="night-loci">&sect;0-DB &mdash; The night loci, testable for the first time (2026-09-13, NOT looked at)</h2>
 
 <div class="note good">

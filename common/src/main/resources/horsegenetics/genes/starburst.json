@@ -174,7 +174,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#dedede"
+            "color": "#b4b4b4"
           }
         },
         {
@@ -278,7 +278,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#7a7a7a"
+            "color": "#3d3d3d"
           }
         },
         {
@@ -415,7 +415,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#bcbcbc"
+            "color": "#8a8a8a"
           }
         },
         {
@@ -552,7 +552,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#9b9b9b"
+            "color": "#666666"
           }
         },
         {
@@ -655,7 +655,7 @@
           "op": {
             "type": "TOWARD",
             "strength": 100,
-            "color": "#dedede"
+            "color": "#b4b4b4"
           }
         }
       ]
