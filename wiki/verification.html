@@ -102,10 +102,25 @@
     <p>
         Caveborn in the dark should be the <em>faster</em> one and instead
         carries the same penalty as the daywalker next to it &mdash; not its
-        base, the penalty. The dark condition is applying one modifier to both
-        alleles rather than branching on which the horse carries.
-        <a href="known-gaps.html#gap-219">Gap 219</a>, and it is a code fix
-        rather than another play session.
+        base, the penalty. Since caveborn's penalty is gated on <em>not</em>
+        dark and daywalker's on <em>dark</em>, and both were active at one
+        census, <strong>the two horses disagreed about whether the room was
+        dark</strong>.
+    </p>
+    <p>
+        <strong>The gene is not the bug.</strong>
+        <code>EyesightGene.abilitiesFor</code>, <code>conditionHolds</code>'s
+        <code>flag ^ negate</code>, and both halves of the attribute
+        apply/clear path were read and are correct. A real defect was found
+        upstream of all of them &mdash; <code>worldFlag</code> cached four
+        world-reading flags behind <em>one</em> timestamp while only ever
+        computing the flag that was asked for, so it could answer a question it
+        had never computed &mdash; and that is fixed, per-flag. <strong>It is
+        not established that it is what produced this reading</strong>: the
+        caveborn names no second world flag, so the obvious story does not
+        hold. The census now prints <code>light=N</code> beside each horse,
+        read with the same call the gene uses, and one census settles it.
+        <a href="known-gaps.html#gap-219">Gap 219</a>.
     </p>
 </div>
 
@@ -380,10 +395,12 @@
         it back out; it holds until nightfall now, aims two rings in from every
         edge, and strikes off squares the navigator refuses. <b>Watch it survive
         a day</b> &mdash; the trace prints each journey and whether it arrived.</li>
-    <li><strong>Eyesight</strong> &mdash; <b>answered, and it is a bug, not a
-        test</b>: caveborn carries the daylight penalty in the dark instead of
-        its bonus. <a href="#eyesight-answered">&sect;0-DM</a> and
-        <a href="known-gaps.html#gap-219">gap 219</a>. Nothing further to play.</li>
+    <li><strong>Eyesight</strong> &mdash; caveborn carries the daylight penalty
+        in the dark instead of its bonus. One flag-cache defect found and fixed;
+        whether that was the cause is <b>not</b> established, so the next census
+        is the test: read <code>light=N</code> on the four horses.
+        <a href="#eyesight-answered">&sect;0-DM</a>,
+        <a href="known-gaps.html#gap-219">gap 219</a>.</li>
     <li><strong>The egg-layer cap</strong>, re-built because the old pen could
         not test it. Four layers of the <em>same</em> allele packed into one
         corner so their six-block circles overlap: the pen total is now the local

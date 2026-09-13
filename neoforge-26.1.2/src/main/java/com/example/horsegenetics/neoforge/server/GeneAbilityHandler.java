@@ -1602,99 +1602,143 @@ public final class GeneAbilityHandler {
     /** How far {@code hostile_near} looks. The alarm range, and an entity scan rather than a block one. */
     private static final double HOSTILE_NEAR_RANGE = 16.0;
 
-    private record WorldSample(long tick, boolean dark, boolean nearJukebox, boolean snowing,
-                               boolean hostileNear) {}
+    /**
+     * The four world-reading flags, in a fixed order, so each one can carry its
+     * own freshness stamp. The order is the array index and nothing else.
+     */
+    private static final List<String> WORLD_FLAG_NAMES =
+            List.of("dark", "near_jukebox", "snowing", "hostile_near");
+
+    /**
+     * <b>One sample per horse, with a timestamp PER FLAG.</b>
+     *
+     * <p>It used to be a single {@code tick} for the whole entry, and that was
+     * the bug: {@link #sampleWorld} deliberately computes only the flag that
+     * was asked for and carries the other three forward, so an entry stamped
+     * "fresh" could be fresh for {@code snowing} and hold a {@code dark} that
+     * was never computed at all. Whichever flag got asked first after the
+     * entry went stale won the refresh, and the others were pinned at whatever
+     * they happened to be - which for a horse's first sample is {@code false}.
+     *
+     * <p>Per-flag stamps keep the cost design exactly - one flag computed per
+     * ask, cached for {@link #WORLD_FLAG_SAMPLE_TICKS} - and remove the
+     * cross-flag staleness. See the comment on {@code worldFlag} for what it
+     * cost in the yard.
+     */
+    private static final class WorldSample {
+        final long[] sampledAt = new long[WORLD_FLAG_NAMES.size()];
+        final boolean[] value = new boolean[WORLD_FLAG_NAMES.size()];
+
+        WorldSample() {
+            java.util.Arrays.fill(sampledAt, Long.MIN_VALUE);
+        }
+    }
 
     private static final Map<UUID, WorldSample> WORLD_FLAGS = new ConcurrentHashMap<>();
 
     /**
-     * A world-reading flag, answered from a per-horse sample refreshed every
+     * A world-reading flag, answered from a per-horse sample in which
+     * <b>each flag is refreshed on its own clock</b>, every
      * {@link #WORLD_FLAG_SAMPLE_TICKS}.
      *
-     * <p>Every other flag in {@code flagHolds} is a getter. These three are a
-     * block-light read, a block search and a biome query, and a condition is
-     * evaluated <i>once per ability per tick</i> - so a horse expressing three
-     * conditioned effects would do three block searches a tick without this.
-     * {@code AbilityType.WORLD_FLAGS} is the list of which flags need it.
+     * <p>Every other flag in {@code flagHolds} is a getter. These four are a
+     * block-light read, a block search, a biome query and an entity scan, and a
+     * condition is evaluated <i>once per ability per tick</i> - so a horse
+     * expressing three conditioned effects would do three block searches a tick
+     * without this. {@code AbilityType.WORLD_FLAGS} is the list of which flags
+     * need it.
+     *
+     * <h2>Why the stamp was moved, and what is NOT being claimed</h2>
+     * The eyesight pens read <code>CAVEBORN=0.165 (base 0.188)</code> in the
+     * <em>dark</em> half on 2026-09-13 - the daylight penalty, in the dark,
+     * where that allele is supposed to get its bonus - while the daywalker
+     * beside it read correctly. Two horses, one room, disagreeing about whether
+     * it was dark. The gene is right and {@code conditionHolds} is right, so
+     * something upstream of both was answering {@code dark} differently for the
+     * two animals, and this cache is the only thing between them.
+     *
+     * <p><b>That is a reason to fix a defect, not a diagnosis.</b> The shared
+     * timestamp is wrong on its own terms - it can answer a question it never
+     * computed - and it is fixed here for that reason alone. Whether it is what
+     * produced that reading is <em>not</em> established: the caveborn's
+     * genotype carries no second world-flag locus, so the obvious version of
+     * the story does not hold. The census now prints each horse's block light
+     * beside its attribute, which decides it by measurement rather than by
+     * another round of reasoning about code.
      */
     private static boolean worldFlag(String name, Horse horse) {
+        int index = WORLD_FLAG_NAMES.indexOf(name);
+        if (index < 0) {
+            return false;
+        }
         Level level = horse.level();
-        WorldSample sample = WORLD_FLAGS.get(horse.getUUID());
         long now = level.getGameTime();
-        if (sample == null || now - sample.tick() >= WORLD_FLAG_SAMPLE_TICKS) {
+        WorldSample sample = WORLD_FLAGS.get(horse.getUUID());
+        if (sample == null) {
+            if (WORLD_FLAGS.size() > 4096) {
+                WORLD_FLAGS.clear(); // dev-mod housekeeping; it re-samples next tick
+            }
+            sample = new WorldSample();
+            WORLD_FLAGS.put(horse.getUUID(), sample);
+        }
+        if (now - sample.sampledAt[index] >= WORLD_FLAG_SAMPLE_TICKS) {
             // Only what was actually asked for. Computing all four together was
             // the first version and it was a real cost: a caveborn horse asks
             // for "dark" - one block-light read - and was paying for a ~2000
             // block jukebox search and a 16-block entity scan it has no use for,
             // every twenty ticks, for ever. The flags a horse never names are
-            // never computed.
-            sample = sampleWorld(horse, level, now, name);
-            if (WORLD_FLAGS.size() > 4096) {
-                WORLD_FLAGS.clear(); // dev-mod housekeeping; it re-samples next tick
-            }
-            WORLD_FLAGS.put(horse.getUUID(), sample);
+            // still never computed - each one simply keeps its own clock now.
+            sample.value[index] = sampleWorld(horse, level, name);
+            sample.sampledAt[index] = now;
         }
-        return switch (name) {
-            case "dark" -> sample.dark();
-            case "near_jukebox" -> sample.nearJukebox();
-            case "snowing" -> sample.snowing();
-            case "hostile_near" -> sample.hostileNear();
-            default -> false;
-        };
+        return sample.value[index];
     }
 
     /**
-     * Sample the world for <b>one</b> flag.
+     * Sample the world for <b>one</b> flag, and return just that flag.
      *
-     * <p>The other three are carried forward from whatever the previous sample
-     * said, which is deliberately a little stale rather than expensive: a horse
-     * that names two world flags pays for both on alternate refreshes, and a
-     * horse that names one never computes the other three at all. The costs
-     * differ by orders of magnitude - a light read is nothing, the jukebox
-     * search is a couple of thousand blocks - so treating them alike was never
-     * defensible.
+     * <p>It used to return a whole {@link WorldSample} with the other three
+     * carried forward, which is what made a "fresh" entry able to hold a value
+     * that had never been computed. Each flag now owns its own slot and its own
+     * timestamp in the caller, so this only has to answer the question it was
+     * asked. The costs differ by orders of magnitude - a light read is nothing,
+     * the jukebox search is a couple of thousand blocks - so computing all four
+     * on every refresh was never defensible either.
      */
-    private static WorldSample sampleWorld(Horse horse, Level level, long now, String wanted) {
+    private static boolean sampleWorld(Horse horse, Level level, String wanted) {
         BlockPos at = horse.blockPosition();
-        WorldSample prev = WORLD_FLAGS.get(horse.getUUID());
-
-        boolean dark = prev != null && prev.dark();
-        boolean snowing = prev != null && prev.snowing();
-        boolean jukebox = prev != null && prev.nearJukebox();
-        boolean hostile = prev != null && prev.hostileNear();
-
-        if ("dark".equals(wanted)) {
-            dark = level.getMaxLocalRawBrightness(at) <= DARK_LEVEL;
-        }
-        if ("snowing".equals(wanted)) {
-            // Snow is not weather in Minecraft - it is rain in a cold biome, so
-            // the flag is a biome query and not a level one.
-            snowing = level.isRaining()
-                    && level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
-        }
-        if ("near_jukebox".equals(wanted)) {
-            jukebox = false;
-            for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
-                    at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {
-                BlockState state = level.getBlockState(p);
-                if (state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD)) {
-                    jukebox = true;
-                    break;
+        switch (wanted) {
+            case "dark":
+                return level.getMaxLocalRawBrightness(at) <= DARK_LEVEL;
+            case "snowing":
+                // Snow is not weather in Minecraft - it is rain in a cold biome,
+                // so the flag is a biome query and not a level one.
+                return level.isRaining()
+                        && level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
+            case "near_jukebox":
+                for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
+                        at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {
+                    BlockState state = level.getBlockState(p);
+                    if (state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD)) {
+                        return true;
+                    }
                 }
-            }
-        }
-        if ("hostile_near".equals(wanted) && level instanceof ServerLevel sl) {
-            // An entity scan, which is why this is a sampled flag and not a live one.
-            hostile = false;
-            AABB box = horse.getBoundingBox().inflate(HOSTILE_NEAR_RANGE);
-            for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, box)) {
-                if (MobGroups.isHostile(e)) {
-                    hostile = true;
-                    break;
+                return false;
+            case "hostile_near":
+                if (!(level instanceof ServerLevel sl)) {
+                    return false;
                 }
-            }
+                // An entity scan, which is why this is a sampled flag and not a live one.
+                AABB box = horse.getBoundingBox().inflate(HOSTILE_NEAR_RANGE);
+                for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, box)) {
+                    if (MobGroups.isHostile(e)) {
+                        return true;
+                    }
+                }
+                return false;
+            default:
+                return false;
         }
-        return new WorldSample(now, dark, jukebox, snowing, hostile);
     }
 
     // ------------------------------------------------------------------

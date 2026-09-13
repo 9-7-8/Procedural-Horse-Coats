@@ -571,7 +571,23 @@ public final class DebugWorldWatch {
                     .append(String.format("%.3f", inst.getValue()))
                     .append(Math.abs(inst.getValue() - inst.getBaseValue()) < 1.0e-4
                             ? " (unmodified)"
-                            : String.format(" (base %.3f)", inst.getBaseValue()));
+                            : String.format(" (base %.3f)", inst.getBaseValue()))
+                    // THE LIGHT THE HORSE IS ACTUALLY STANDING IN. Added
+                    // 2026-09-13 because the eyesight pens produced a reading
+                    // that needs it: the caveborn in the DARK half carried the
+                    // daylight penalty while the daywalker beside it read
+                    // correctly, which means the two disagreed about whether it
+                    // was dark. Everything between the gene and that answer has
+                    // been read and is correct, so the next question is not
+                    // about code at all - it is what the block light is at each
+                    // horse's own feet, and that was the one number nobody had.
+                    //
+                    // getMaxLocalRawBrightness is the SAME call the dark flag
+                    // uses (GeneAbilityHandler.sampleWorld), so this cannot
+                    // disagree with the gene by construction - which is the
+                    // whole point of printing it rather than the room's
+                    // nominal state.
+                    .append(String.format(" light=%d", level.getMaxLocalRawBrightness(h.blockPosition())));
             seen++;
             if (seen >= ATTRIBUTE_NAMES_MAX) {
                 out.append(", ...");
