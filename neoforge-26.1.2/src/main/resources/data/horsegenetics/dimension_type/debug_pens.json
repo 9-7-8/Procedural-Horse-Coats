@@ -10,5 +10,6 @@
   "infiniburn": "#minecraft:infiniburn_overworld",
   "monster_spawn_light_level": 0,
   "monster_spawn_block_light_limit": 0,
-  "skybox": "overworld"
+  "skybox": "overworld",
+  "default_clock": "minecraft:overworld"
 }

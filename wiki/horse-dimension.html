@@ -369,6 +369,26 @@
     did not stall because something spawned in a cave.
 </p>
 
+<div class="note danger">
+    <span class="label">It had no night until 2026-09-12, and glowstone means night is not enough</span>
+    <p>
+        <strong>26.1.2 made time per dimension.</strong> A <code>dimension_type</code>
+        names a <code>default_clock</code>, and one that names none has no time of day at
+        all - <code>/time set midnight</code> in the overworld leaves it in permanent
+        daylight. <code>debug_pens</code> named none, so the one place built for looking
+        at horses could not show a glowing one. It runs on
+        <code>minecraft:overworld</code>'s clock now; <code>/testkit night</code> sets it.
+    </p>
+    <p>
+        <strong>And the clock is only half of it.</strong> The corridor and the yard are
+        lit by glowstone lines by design, and block light does not care what time it is -
+        a glowing horse under one is still a horse you cannot see glowing. The yard's
+        <strong>glow room</strong> is a roofed, unlit stone box holding a tron
+        <code>Trs/Trg</code> pair and two lanterns, and it is the only genuinely dark
+        place in the dimension.
+    </p>
+</div>
+
 <div class="note">
     <span class="label">Two things that would have leaked, and one that says so</span>
     <p>

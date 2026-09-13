@@ -252,7 +252,15 @@ public final class DebugTestWorldHandler {
                         .executes(c -> {
                             reportSpawnBiome(c.getSource().getPlayerOrException());
                             return 1;
-                        })));
+                        }))
+                // The horse dimension has a sky and no fixed time, so it runs
+                // on the world's clock - which means "make it night to look at
+                // a glow" is a thing you do from in there, and hunting for two
+                // vanilla commands is the friction that stops it happening.
+                .then(Commands.literal("night")
+                        .executes(c -> setNight(c.getSource().getPlayerOrException(), true)))
+                .then(Commands.literal("day")
+                        .executes(c -> setNight(c.getSource().getPlayerOrException(), false))));
 
         event.getDispatcher().register(Commands.literal("bond")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -392,6 +400,52 @@ public final class DebugTestWorldHandler {
             "Intake: the rest (0-BZ)",
     };
 
+    /**
+     * Midnight with the cycle held, or noon with it running again.
+     *
+     * <p>Both levels are set, not just the one the player is standing in: the
+     * glow tests are done in the horse dimension and judged against how the
+     * same horse looked outside, and a clock that disagreed between the two
+     * would make that comparison a lie.
+     *
+     * <h2>The horse dimension had no night at all until 2026-09-12</h2>
+     * 26.1.2 made time <b>per dimension</b>: a {@code dimension_type} names a
+     * {@code default_clock} and one that names none does not have a time of day
+     * to set. {@code debug_pens} named none, so {@code /time set midnight} in
+     * the overworld left it in permanent daylight and a glowing horse could not
+     * be judged in the one place built for looking at horses (owner: "day and
+     * night are different in different dimensions and the horse dimension
+     * doesn't have a night"). It runs on {@code minecraft:overworld}'s clock
+     * now, so this command reaches it.
+     *
+     * <p>It still does not make the dimension <b>dark</b> - the corridor and
+     * the yard are lit by glowstone by design, and block light does not care
+     * what time it is. That is what the yard's glow room is for; this is the
+     * other half of the same problem.
+     */
+    private static int setNight(ServerPlayer player, boolean night) {
+        var server = player.level().getServer();
+        if (server == null) {
+            return 0;
+        }
+        // Through the vanilla commands rather than the clock API directly.
+        // 26.1.2 replaced day-time with a ServerClockManager of WorldClock
+        // holders and time markers, and "set it to midnight" is several lookups
+        // deep in an API this does not otherwise touch - where /time already
+        // does exactly the right thing and will keep doing it across versions.
+        var source = server.createCommandSourceStack().withSuppressedOutput();
+        server.getCommands().performPrefixedCommand(source, night ? "time set midnight" : "time set noon");
+        server.getCommands().performPrefixedCommand(source,
+                "gamerule doDaylightCycle " + (night ? "false" : "true"));
+        tell(player, Component.literal(night
+                        ? "Night, and the clock is held. The corridor and the yard are still lit by "
+                                + "glowstone - use the yard's GLOW ROOM to actually see a glow."
+                        : "Day, and the clock is running again.")
+                .withStyle(ChatFormatting.GOLD));
+        ActionTrace.log("testkit", (night ? "night" : "day") + " set by " + player.getGameProfile().name());
+        return 1;
+    }
+
     private static void listBatches(ServerPlayer player) {
         tell(player, Component.literal("Test kit batches - click one, then press Enter:")
                 .withStyle(ChatFormatting.GOLD));
@@ -401,8 +455,8 @@ public final class DebugTestWorldHandler {
         // Two of the first three batches can only be judged after dark, and
         // hunting for the command is the sort of friction that turns "check the
         // glow" into "check the glow tomorrow".
-        tell(player, command("/time set midnight", "make it night - batches 1 and 2 are glow tests"));
-        tell(player, command("/gamerule doDaylightCycle false", "and keep it night"));
+        tell(player, command("/testkit night", "night, clock held - then use the yard's GLOW ROOM"));
+        tell(player, command("/testkit day", "and back to day"));
     }
 
     /** Empty the hotbar and fill it with batch {@code n} (1-based), then say what each slot is for. */

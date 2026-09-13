@@ -553,25 +553,7 @@ public final class DebugPenManager {
         int gateX = x0 + PEN_LEN_X / 2 - 1;
         int zLo = Math.min(pen.zRoad(), pen.zBack());
         int zHi = Math.max(pen.zRoad(), pen.zBack());
-        BlockState wall = Blocks.BRICK_WALL.defaultBlockState();
-        BlockState gate = Blocks.OAK_FENCE_GATE.defaultBlockState()
-                .setValue(FenceGateBlock.FACING, pen.roadFacing());
-
-        for (int x = x0; x <= xMax; x++) {
-            boolean isGate = x == gateX || x == gateX + 1;
-            level.setBlockAndUpdate(new BlockPos(x, floorY, pen.zRoad()), isGate ? gate : wall);
-            level.setBlockAndUpdate(new BlockPos(x, floorY, pen.zBack()), wall);
-        }
-        for (int z = zLo + 1; z < zHi; z++) {
-            level.setBlockAndUpdate(new BlockPos(x0, floorY, z), wall);
-            level.setBlockAndUpdate(new BlockPos(xMax, floorY, z), wall);
-        }
-
-        // torches on the four corner wall posts only (corners get up=true, so a solid top)
-        torchOnFence(level, x0, floorY, zLo);
-        torchOnFence(level, xMax, floorY, zLo);
-        torchOnFence(level, x0, floorY, zHi);
-        torchOnFence(level, xMax, floorY, zHi);
+        penWalls(level, floorY, x0, xMax, zLo, zHi, gateX, pen.zRoad(), pen.roadFacing());
 
         // Amenities in the two gate-side interior corners: a full water cauldron
         // in one, a hay bale in the other (one block in from the road-side wall).
@@ -607,6 +589,44 @@ public final class DebugPenManager {
         if (level.getServer() != null && HorseRecords.hasRealRecord(horse)) {
             HorseAncestryData.get(level.getServer()).forget(HorseRecords.of(horse).id());
         }
+    }
+
+    /**
+     * <b>One pen's perimeter: brick wall, a two-wide gate, torches on the four
+     * corner posts.</b> The corridor's pens are built from this and so is
+     * everything in the test yard, because the yard's first version rolled its
+     * own and got three separate things wrong that this had already solved -
+     * fences written without neighbour updates (so they never connected),
+     * torches placed into the wall line instead of on top of it, and an opening
+     * made of <i>air</i> rather than gates, which is not an opening but a
+     * missing wall. Two implementations of "a pen" is one too many.
+     *
+     * <p>{@code gateZ} is the wall the opening goes in and {@code gateFacing}
+     * is the way you walk through it. A single-wide gate lets horses slip out,
+     * hence two side by side.
+     */
+    static void penWalls(ServerLevel level, int floorY, int x0, int xMax, int zLo, int zHi,
+                         int gateX, int gateZ, Direction gateFacing) {
+        BlockState wall = Blocks.BRICK_WALL.defaultBlockState();
+        BlockState gate = Blocks.OAK_FENCE_GATE.defaultBlockState()
+                .setValue(FenceGateBlock.FACING, gateFacing);
+        int otherZ = gateZ == zLo ? zHi : zLo;
+
+        for (int x = x0; x <= xMax; x++) {
+            boolean isGate = x == gateX || x == gateX + 1;
+            level.setBlockAndUpdate(new BlockPos(x, floorY, gateZ), isGate ? gate : wall);
+            level.setBlockAndUpdate(new BlockPos(x, floorY, otherZ), wall);
+        }
+        for (int z = zLo + 1; z < zHi; z++) {
+            level.setBlockAndUpdate(new BlockPos(x0, floorY, z), wall);
+            level.setBlockAndUpdate(new BlockPos(xMax, floorY, z), wall);
+        }
+
+        // torches on the four corner wall posts only (corners get up=true, so a solid top)
+        torchOnFence(level, x0, floorY, zLo);
+        torchOnFence(level, xMax, floorY, zLo);
+        torchOnFence(level, x0, floorY, zHi);
+        torchOnFence(level, xMax, floorY, zHi);
     }
 
     static void torchOnFence(ServerLevel level, int x, int floorY, int z) {

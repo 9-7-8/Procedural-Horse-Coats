@@ -60,6 +60,10 @@ final class DebugTestYard {
     /** Matches the corridor, so the yard reads as the same building. */
     private static final int WALL_TOP_DY = 10;
 
+    /** The corridor's own outer wall, which the spur passes through rather than repeats. */
+    private static final int WALL_PLANK_Z = 25;
+    private static final int WALL_BEDROCK_Z = 26;
+
     /** Where the spur leaves the road, relative to the plot origin. */
     private static final int SPUR_CENTRE_DX = 3;
 
@@ -102,6 +106,7 @@ final class DebugTestYard {
         buildWolfPen(level, gy, cx, mouthZ);
         buildDryadPlot(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
+        buildGlowRoom(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
@@ -181,34 +186,45 @@ final class DebugTestYard {
                 List.of("STARBURST", "shards? sizes?", "breed one pair:", "foal like parents?"));
         x += PEN_W + 2;
 
-        // 0-CP: the overlap case. Trs/Trg is the "both" outcome - two tube
-        // layers on one edge - and neither homozygote produces it.
-        stockedPen(level, gy, x, z, "horsegenetics.tron", "Trs/Trg", 1, 1,
-                List.of("TRON both", "at NIGHT:", "where tubes cross,", "blown out?"));
-        x += PEN_W + 2;
-
         // 0-CQ needs no horse, but the highlight is easiest to judge with a
         // herd in front of you, and a lead only exists where there is one.
         stockedPen(level, gy, x, z, "horsegenetics.lantern", null, 3, 0,
                 List.of("F8 HERD", "press F8 twice:", "2nd says OFF?", "lead in red?"));
     }
 
-    /** The spur itself: gravel floor, plank sides, a glowstone line above each. */
+    /**
+     * The spur. <b>It only builds walls where there is nothing to walk on.</b>
+     *
+     * <p>The first version walled the whole thirty blocks, which meant it built
+     * a corridor <em>inside</em> the corridor: from the road out to the far
+     * wall it is crossing ground the pens already stand on, and a second set of
+     * planks there cuts into them for no reason. The owner's words: "the far
+     * wall is enough, you don't need to duplicate it to create a hallway".
+     *
+     * <p>So there are three stretches. Across the pen zone: gravel underfoot to
+     * show the way, nothing else. At the corridor's own wall: a doorway cut
+     * through it. Past it, over open void: floor, walls and lights, because out
+     * there the alternative is falling.
+     */
     private static void buildPath(ServerLevel level, int gy, int cx, int mouthZ) {
         BlockState gravel = Blocks.GRAVEL.defaultBlockState();
         BlockState planks = Blocks.OAK_PLANKS.defaultBlockState();
         BlockState glowstone = Blocks.GLOWSTONE.defaultBlockState();
         BlockState bedrock = Blocks.BEDROCK.defaultBlockState();
+        int wallInner = WALL_PLANK_Z - 1;   // last z the corridor's own floor covers
 
         for (int z = ROAD_EDGE_Z; z < mouthZ; z++) {
+            boolean overVoid = z > WALL_BEDROCK_Z;
             for (int x = cx - PATH_HALF_X; x <= cx + PATH_HALF_X; x++) {
                 DebugPenManager.groundColumn(level, x, gy, z, gravel);
-                // Cut the doorway: the corridor's wall and everything above the
-                // path has to be air, or the spur runs into the plank wall it
-                // was meant to pass through.
+                // Head room the whole way: across the pens this is just air
+                // that was already air, and at the wall it is the doorway.
                 for (int y = gy + 1; y <= gy + WALL_TOP_DY; y++) {
                     DebugPenManager.fastSet(level, new BlockPos(x, y, z), Blocks.AIR.defaultBlockState());
                 }
+            }
+            if (!overVoid && z <= wallInner) {
+                continue;   // inside the corridor: its walls and floor already exist
             }
             for (int side : new int[] {1, -1}) {
                 int x = cx + side * (PATH_HALF_X + 1);
@@ -217,7 +233,6 @@ final class DebugTestYard {
                     DebugPenManager.fastSet(level, new BlockPos(x, y, z), planks);
                 }
                 DebugPenManager.fastSet(level, new BlockPos(x, gy + WALL_TOP_DY, z), glowstone);
-                // Bedrock skin outside the planks, as the corridor has.
                 int outer = cx + side * (PATH_HALF_X + 2);
                 for (int y = gy - 3; y <= gy + WALL_TOP_DY; y++) {
                     DebugPenManager.fastSet(level, new BlockPos(outer, y, z), bedrock);
@@ -285,17 +300,18 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>The holy ward.</b> A dark stone box with a real zombie spawner in it:
-     * stand the warded horse outside and the spawner must keep producing.
-     * Roofed and unlit, since a spawner that cannot spawn for ordinary reasons
-     * proves nothing about the gene.
+     * <b>A roofed, unlit stone box with a two-wide doorway.</b>
+     *
+     * <p>Two things in this yard need the dark and they need it for opposite
+     * reasons: a spawner will not run in the light, and a glow cannot be judged
+     * in it. The dimension has a sky and follows the world's clock, so
+     * {@code /testkit night} makes it night - but the corridor and the yard are
+     * lit by glowstone lines by design, and a glowing horse standing under one
+     * is a horse you cannot see glowing. A room with a lid is the only place in
+     * here that is actually dark.
      */
-    private static void buildSpawnerRoom(ServerLevel level, int gy, int cx, int mouthZ) {
+    private static void darkRoom(ServerLevel level, int gy, int x0, int x1, int z0, int z1, int doorX) {
         BlockState stone = Blocks.STONE_BRICKS.defaultBlockState();
-        int x0 = cx + 4;
-        int x1 = cx + 14;
-        int z0 = mouthZ + 3;
-        int z1 = z0 + 10;
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
                 boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
@@ -304,17 +320,47 @@ final class DebugTestYard {
                     DebugPenManager.fastSet(level, new BlockPos(x, y, z),
                             edge ? stone : Blocks.AIR.defaultBlockState());
                 }
-                // Roof: a spawner needs the dark, and the yard's glowstone line
-                // would otherwise light the whole floor.
                 DebugPenManager.fastSet(level, new BlockPos(x, gy + 5, z), stone);
             }
         }
-        // A two-wide doorway, so you can see in and a horse could follow you.
-        for (int x = cx + 8; x <= cx + 9; x++) {
+        for (int x = doorX; x <= doorX + 1; x++) {
             for (int y = gy + 1; y <= gy + 2; y++) {
                 DebugPenManager.fastSet(level, new BlockPos(x, y, z0), Blocks.AIR.defaultBlockState());
             }
         }
+    }
+
+    /**
+     * <b>The dark room for looking at glows.</b> Tron's two-form heterozygote
+     * and a lantern, indoors, with the lid on - the only place in the dimension
+     * where a 22% halo is distinguishable from a 100% one.
+     */
+    private static void buildGlowRoom(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + 4;
+        int x1 = cx + 18;
+        int z0 = mouthZ + 48;
+        int z1 = z0 + 12;
+        darkRoom(level, gy, x0, x1, z0, z1, cx + 10);
+        DebugPenManager.placeSign(level, new BlockPos(cx + 9, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("GLOW ROOM", "dark on purpose", "tron BOTH +", "lantern inside"));
+        stock(level, gy, x0 + 3.5, (z0 + z1) / 2.0, "horsegenetics.tron",
+                "the glow room (tron)", 1, 1, "Trs/Trg");
+        stock(level, gy, x1 - 3.5, (z0 + z1) / 2.0, "horsegenetics.lantern",
+                "the glow room (lantern)", 2, 0, null);
+    }
+
+    /**
+     * <b>The holy ward.</b> A dark stone box with a real zombie spawner in it:
+     * stand the warded horse outside and the spawner must keep producing.
+     * Roofed and unlit, since a spawner that cannot spawn for ordinary reasons
+     * proves nothing about the gene.
+     */
+    private static void buildSpawnerRoom(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + 4;
+        int x1 = cx + 14;
+        int z0 = mouthZ + 3;
+        int z1 = z0 + 10;
+        darkRoom(level, gy, x0, x1, z0, z1, cx + 8);
         BlockPos spawner = new BlockPos((x0 + x1) / 2, gy + 1, (z0 + z1) / 2);
         DebugPenManager.fastSet(level, spawner, Blocks.SPAWNER.defaultBlockState());
         // Set it to zombies here rather than leaving an empty spawner for the
@@ -447,46 +493,16 @@ final class DebugTestYard {
     private static final int PEN_D = 9;
 
     /**
-     * A rectangle of oak fence with a two-wide gate opening in its near wall -
-     * two, because a horse will not cross a one-block gap, which is the same
-     * reason the pens up the corridor have one.
-     *
-     * <h2>Two mistakes worth keeping the note for</h2>
-     * <b>Fences are placed with an update, not with {@code fastSet}.</b> That
-     * helper writes with flag 2 - clients only, no neighbour updates - which is
-     * right for bulk terrain and wrong for anything that has to <i>connect</i>:
-     * the first version of this yard came out as a row of unconnected posts
-     * with what read as gaps between them (owner, 2026-09-12).
-     *
-     * <p>And <b>{@code torchOnFence} places its torch one block ABOVE the y it
-     * is given</b>, so it takes the fence's own y, not the floor's. Handed the
-     * floor, it wrote the torch into the fence line and quietly replaced four
-     * corner posts with torches - a fence with four holes in it, and horses
-     * that walk out of them.
+     * A pen, built by {@code DebugPenManager.penWalls} - the same brick wall,
+     * the same two-wide gate, the same corner torches as the pens up the
+     * corridor. This used to be its own fence-laying loop and every difference
+     * between the two was a bug: posts that did not connect, torches that
+     * replaced the corner posts, and an opening made of air that horses walked
+     * straight out of. Now there is one pen builder and the yard calls it.
      */
     private static void fencedPlot(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
-        BlockState fence = Blocks.OAK_FENCE.defaultBlockState();
-        int fenceY = gy + 1;
-        int gateX = (x0 + x1) / 2;
-        for (int x = x0; x <= x1; x++) {
-            for (int z : new int[] {z0, z1}) {
-                boolean gate = z == z0 && (x == gateX || x == gateX + 1);
-                BlockPos at = new BlockPos(x, fenceY, z);
-                if (gate) {
-                    level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
-                } else {
-                    level.setBlockAndUpdate(at, fence);
-                }
-            }
-        }
-        for (int z = z0 + 1; z < z1; z++) {
-            level.setBlockAndUpdate(new BlockPos(x0, fenceY, z), fence);
-            level.setBlockAndUpdate(new BlockPos(x1, fenceY, z), fence);
-        }
-        // On TOP of the corner posts, which is what the pens do.
-        DebugPenManager.torchOnFence(level, x0, fenceY, z0);
-        DebugPenManager.torchOnFence(level, x1, fenceY, z0);
-        DebugPenManager.torchOnFence(level, x0, fenceY, z1);
-        DebugPenManager.torchOnFence(level, x1, fenceY, z1);
+        DebugPenManager.penWalls(level, gy + 1, x0, x1, z0, z1,
+                (x0 + x1) / 2, z0, Direction.NORTH);
     }
+
 }
