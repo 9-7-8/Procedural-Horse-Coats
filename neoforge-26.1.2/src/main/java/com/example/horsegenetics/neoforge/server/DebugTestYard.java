@@ -9,7 +9,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -137,12 +141,14 @@ final class DebugTestYard {
         buildGrowingRow(level, gy, cx, mouthZ);
         buildBoneMealPen(level, gy, cx, mouthZ);
         buildRetinuePen(level, gy, cx, mouthZ);
+        buildLavaChannel(level, gy, cx, mouthZ);
+        buildHydrophobicPen(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "eggs, ward, cows,", "4 dryads, thaw"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "eggs, ward, cows,", "dryads, LAVA"));
 
         verify(level, gy, cx, mouthZ);
     }
@@ -757,6 +763,137 @@ final class DebugTestYard {
             spawnCow(level, gy, x0 + 6.0 + (i % 8) * 1.7, z0 + 1.5 + (i / 8) * 2.0);
         }
         DebugWorldWatch.watch("RETINUE", box(x0, gy, z0, x1, gy + 1, z1), null);
+    }
+
+    /**
+     * <b>A long lava channel, to time a crossing.</b>
+     *
+     * <p>The float and the rider's immunity are owner-confirmed (2026-09-13).
+     * What is left is a number: {@code known-gaps.html} gap 179 asks whether a
+     * lava crossing at vanilla's fixed 0.02 with half-speed drag is
+     * <i>acceptable</i>, or whether it is worth this project's first mixin -
+     * and that cannot be answered by looking at one block of lava. It needs a
+     * run long enough to be boring, which is the entire design of this pen.
+     *
+     * <p>{@value #LAVA_LEN} blocks of it, with dry stone at both ends to get on
+     * and off. Ride in at one end, count.
+     *
+     * <h2>Two things this pen cannot tell you, and both are fine</h2>
+     * The horse survives the lava whether or not it is fireproof, because
+     * {@code HorseGeneticsEventHandler} cancels all horse damage in this
+     * dimension. And the <i>rider</i> survives it whether or not the gene
+     * protects them, because the test world is creative. Neither matters here:
+     * both of those are already confirmed, and what is being measured is
+     * <b>speed</b>. Worth writing down so nobody later reads a fireproof-less
+     * horse strolling through and concludes the gene does nothing.
+     *
+     * <h2>Stone, not grass, and the lava two blocks from the gate</h2>
+     * Lava sets fire to what it can reach, the pens are built with oak fence
+     * gates, and a yard that burns its own fences down overnight would be a
+     * memorable way to lose a night's readings.
+     */
+    private static void buildLavaChannel(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx + 0;
+        int x1 = cx + 22;
+        int z0 = mouthZ + 74;
+        int z1 = mouthZ + 79;
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, Blocks.STONE.defaultBlockState());
+            }
+        }
+        // The channel itself: two wide, and two DEEP, so the horse is properly
+        // in the lava rather than paddling at the edge of it.
+        for (int x = x0 + 2; x <= x0 + 1 + LAVA_LEN; x++) {
+            for (int z = z0 + 2; z <= z0 + 3; z++) {
+                poolColumn(level, x, gy, z, Blocks.LAVA.defaultBlockState());
+            }
+        }
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("LAVA - " + LAVA_LEN + " LONG", "saddled already.", "RIDE it and time", "it. Gap 179"));
+        stock(level, gy, x0 + 0.5, z0 + 0.5, "horsegenetics.fireproof",
+                "the lava channel", 1, 1, null);
+        saddleAll(level, gy, x0, x1, z0, z1);
+    }
+
+    /** How long the crossing is. Long enough that "is this too slow" is a real question. */
+    private static final int LAVA_LEN = 19;
+
+    /**
+     * <b>Half a pen of deep water, for hydrophobic to throw you into.</b>
+     *
+     * <p>The gene ejects its rider once the water under it is more than 0.6 of
+     * a block deep, so the pool is <b>two</b> deep - far past the threshold,
+     * and deep enough that being dumped in it is the real experience rather
+     * than a technicality.
+     *
+     * <p><b>Half, and not all.</b> You have to be riding before the test can
+     * happen, and you cannot mount a swimming horse comfortably; a pen that was
+     * all water would be a test whose first step is impossible. So: dry ground
+     * to get on, water to ride into, and the gate on the dry side.
+     *
+     * <p>Expect it to be <i>half-built</i>, and that is the finding rather than
+     * a bug to report. Its own page says so: it ejects the rider and the "then
+     * heads for the nearest shore" half was never written, so it will happily
+     * dump you in the middle. Watch which way the horse goes afterwards, and
+     * whether you are left swimming a long way from either edge.
+     */
+    private static void buildHydrophobicPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx - YARD_HALF_X + 2;
+        int x1 = x0 + 18;
+        int z0 = mouthZ + 21;
+        int z1 = z0 + 4;
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, Blocks.GRASS_BLOCK.defaultBlockState());
+            }
+        }
+        // The western half floods; the gate is on the dry eastern half.
+        for (int x = x0 + 1; x <= (x0 + x1) / 2; x++) {
+            for (int z = z0 + 1; z <= z1 - 1; z++) {
+                poolColumn(level, x, gy, z, Blocks.WATER.defaultBlockState());
+            }
+        }
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x1 - 3, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("HYDROPHOBIC", "saddled already.", "ride into the", "water: thrown?"));
+        stock(level, gy, x1 - 3.0, (z0 + z1) / 2.0, "horsegenetics.hydrophobic",
+                "the hydrophobic pen", 1, 1, null);
+        saddleAll(level, gy, x0, x1, z0, z1);
+    }
+
+    /**
+     * A two-deep pool of {@code fluid}, dug into the floor rather than poured
+     * on top of it.
+     *
+     * <p>Poured on top it would need walls to hold it and would flow the moment
+     * anything updated; dug in, every neighbour at both levels is already solid
+     * ({@code groundColumn} lays dirt at {@code gy-1}), so the sources simply
+     * sit there. Stone under it rather than dirt, because a lava channel on
+     * dirt is a lava channel that has burned its own floor out.
+     */
+    private static void poolColumn(ServerLevel level, int x, int gy, int z, BlockState fluid) {
+        DebugPenManager.fastSet(level, new BlockPos(x, gy - 3, z), Blocks.BEDROCK.defaultBlockState());
+        DebugPenManager.fastSet(level, new BlockPos(x, gy - 2, z), Blocks.STONE.defaultBlockState());
+        DebugPenManager.fastSet(level, new BlockPos(x, gy - 1, z), fluid);
+        DebugPenManager.fastSet(level, new BlockPos(x, gy, z), fluid);
+    }
+
+    /**
+     * <b>Saddle everything in a pen.</b> A ridden test whose first step is
+     * "find a saddle" is a ridden test that gets put off, and these two are the
+     * only pens in the yard that need one - everything else is watched rather
+     * than sat on.
+     *
+     * <p>A real saddle, not the bareback-steering phantom: this is the horse
+     * being equipped, not a bond tier being simulated.
+     */
+    private static void saddleAll(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+        for (Horse horse : level.getEntitiesOfClass(Horse.class,
+                new AABB(x0, gy, z0, x1 + 1, gy + 4, z1 + 1))) {
+            horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+        }
     }
 
     /**

@@ -396,7 +396,7 @@ public final class DebugTestWorldHandler {
      */
     private static final String[] BATCHES = {
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
-            "Behaviour that is probably subtly wrong (0-BT)",
+            "Ridden: ender echo, food preference, ocean-born - and the yard's lava and water pens (0-BT)",
             "Holding pen and stalls - the refusals (0-BY, 0-BX)",
             "Potion milk and the research shelf - the refusals (0-BY, 0-BX)",
             "Molten hooves and the sheep spawner (0-BY)",
@@ -557,9 +557,11 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 2, preset(player, "Test: ender echo", Sex.FEMALE, false,
                         "horsegenetics.ender_echo=End/End"),
                         "RIDE it: the likeliest desync in the mod. Rubber-banding, or camera and horse disagreeing, is this");
-                put(inv, legend, 3, preset(player, "Test: hydrophobic", Sex.FEMALE, false,
-                        "horsegenetics.hydrophobic=Hyd/Hyd"),
-                        "ride into deep water: it ejects you - and may dump you mid-lake. Half-built, per its page");
+                put(inv, legend, 3, new ItemStack(Items.CLOCK),
+                        "clock - for TIMING the lava crossing in the yard. Both ridden tests are "
+                                + "pens now: a saddled fireproof pair in a 19-block lava channel "
+                                + "(gap 179 - is it too slow?) and a saddled hydrophobic pair in a "
+                                + "half-flooded pen. Both horses come saddled");
                 put(inv, legend, 4, preset(player, "Test: food preference (carrot)", Sex.FEMALE, false,
                         "horsegenetics.food_preference=Car/Car"),
                         "offer it everything: only carrots. Silently does nothing if another mod took the event first");
