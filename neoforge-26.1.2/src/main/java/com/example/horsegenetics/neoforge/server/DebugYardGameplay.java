@@ -375,8 +375,15 @@ final class DebugYardGameplay {
                 stack(ModItems.BOUND_TICKET.get(), 16),
                 new ItemStack(Items.STICK, 8),
                 new ItemStack(Items.HAY_BLOCK, 64)));
+        // UNTAMED, for the same reason the guardian is. Owner, 2026-09-13: the
+        // bound ticket answered "That is not your horse." It was not - the yard
+        // stocks TAMED WITH NO OWNER so that leaving the dimension does not walk
+        // the whole yard home with you, and every ticket in this mod checks
+        // OWNERSHIP rather than tameness. That convention has now broken two
+        // separate features this way, which makes it worth stating plainly: in
+        // this yard, anything gated on "your horse" must arrive wild.
         DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1, hx0 + 6.0, (z0 + z1) / 2.0,
-                Sex.FEMALE, DebugTestYard.PALE, true), "TICKET MARE");
+                Sex.FEMALE, DebugTestYard.PALE, false), "TICKET MARE - TAME ME");
 
         // AND THE FOUR AWKWARD STALLS GET THE WHOLE EAST BLOCK, two by two.
         // Owner, on the first version: "stall testing is too close to another
@@ -545,9 +552,24 @@ final class DebugYardGameplay {
         int x1 = cx + WEST_MAX;
         int z0 = mouthZ + ROW_D;
         int z1 = z0 + ROW_D_D;
+        // STONE, NOT GRASS, AND THAT IS THE WHOLE TEST. Owner, 2026-09-13: "I
+        // was able to milk the injured horse I think, or it healed before I got
+        // there." It healed. HorseCareHandler's gated regen needs a food block
+        // and a water block near the horse, and the yard's floor is grass -
+        // which is in the HORSE_FOOD tag - so the mare this pen hurts at build
+        // time was back to full within a minute or two, every time, and "a hurt
+        // mare refuses milk" could never be reached.
+        //
+        // A stone floor shuts the gate. No new machinery and no debug damager:
+        // the injury simply stays put, which is what the pen always assumed.
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, Blocks.SMOOTH_STONE.defaultBlockState());
+            }
+        }
         DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DAIRY + CLIP", "3 milk refusals.", "Shear the greys", "for horse hair"));
+                List.of("DAIRY + CLIP", "3 milk refusals.", "Stone floor: the", "mare STAYS hurt"));
         chest(level, gy, x0 + 1, z0 - 2, "BOTTLES + SHEARS", List.of(
                 new ItemStack(Items.GLASS_BOTTLE, 32),
                 new ItemStack(Items.BUCKET, 4),

@@ -6,11 +6,15 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -51,6 +55,9 @@ public final class DebugHighlightHandler {
     private static final double RADIUS = 96.0;
     private static final int REFRESH = 40;
 
+    /** How often the stale-outline sweep runs. Ten seconds, and only while the highlight is off. */
+    private static final int REAP_INTERVAL = 200;
+
     private static final Set<UUID> ON = ConcurrentHashMap.newKeySet();
 
     /**
@@ -66,6 +73,43 @@ public final class DebugHighlightHandler {
 
     /** Server tick at which each player's toggle expires. */
     private static final java.util.Map<UUID, Long> EXPIRES = new ConcurrentHashMap<>();
+
+    /**
+     * <b>Which horses each player has actually lit.</b>
+     *
+     * <p>This is the whole fix for the outline that would not go away, and the
+     * bug it replaces is a mismatch rather than an oversight: {@link #glowNear}
+     * lit horses <b>by proximity at the time</b> and {@code clearNear} cleared
+     * them <b>by proximity later</b>. Ride away from a lit group, press F8 off,
+     * and nothing ever visits them again - they are not near you any more, so
+     * the sweep looks straight past them.
+     *
+     * <p>Ordinarily the effect would expire on its own in three seconds. It does
+     * not, because <b>effect timers do not tick in unloaded chunks</b>: a horse
+     * lit and then left behind holds the outline <i>frozen</i> until somebody
+     * walks back into its chunk. That is exactly the shape the owner reported,
+     * twice - "there's an area of the horse dimension where a bunch of horses
+     * had an outline, F8 was not on", and then "there's STILL horses outlined
+     * in the distance".
+     *
+     * <p>So: remember what was lit and clear that, which is the only set that
+     * can be right.
+     */
+    private static final java.util.Map<UUID, Set<UUID>> LIT = new ConcurrentHashMap<>();
+
+    /**
+     * <b>Lit horses that were in an unloaded chunk when the sweep ran.</b>
+     *
+     * <p>Tracking is necessary but not sufficient: an entity in an unloaded
+     * chunk cannot be reached to have its effect removed, which is the same
+     * wall the plot teardown hit. The answer is the same shape - do it when
+     * they come back. Anything left here is cleared by
+     * {@link #onHorseLoaded} the moment it joins a level again, so the fix
+     * survives a horse that is never revisited in this session, and survives a
+     * restart, because the effect is re-applied by nothing and removed by the
+     * first load.
+     */
+    private static final Set<UUID> PENDING_CLEAR = ConcurrentHashMap.newKeySet();
 
     private DebugHighlightHandler() {
     }
@@ -121,6 +165,15 @@ public final class DebugHighlightHandler {
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
+        // BEFORE the early-out, because the sweep's whole job is what happens
+        // while the highlight is OFF - which is exactly when ON is empty.
+        if (event.getServer().getTickCount() % REAP_INTERVAL == 0) {
+            try {
+                reapStaleGlow(event.getServer());
+            } catch (RuntimeException e) {
+                HorseGenetics.LOGGER.warn("[Debug] stale-glow sweep failed", e);
+            }
+        }
         if (ON.isEmpty()) {
             return;
         }
@@ -174,6 +227,17 @@ public final class DebugHighlightHandler {
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         ON.remove(event.getEntity().getUUID());
         EXPIRES.remove(event.getEntity().getUUID());
+        // Logging out with the highlight ON used to strand every lit horse:
+        // the register was dropped and nothing ever cleared them. Anything that
+        // cannot be reached right now goes to PENDING_CLEAR and is dealt with
+        // when it next loads - which may be after a restart, and still works.
+        if (event.getEntity() instanceof ServerPlayer player) {
+            safely(player, () -> clearNear(player));
+        }
+        Set<UUID> stranded = LIT.remove(event.getEntity().getUUID());
+        if (stranded != null) {
+            PENDING_CLEAR.addAll(stranded);
+        }
     }
 
     private static void glowNear(ServerPlayer player) {
@@ -181,8 +245,10 @@ public final class DebugHighlightHandler {
             return;
         }
         PlayerTeam lead = leadTeam(level);
+        Set<UUID> lit = LIT.computeIfAbsent(player.getUUID(), id -> ConcurrentHashMap.newKeySet());
         for (Horse h : level.getEntitiesOfClass(Horse.class, player.getBoundingBox().inflate(RADIUS))) {
             h.addEffect(new MobEffectInstance(MobEffects.GLOWING, REFRESH + 20, 0, false, false, false));
+            lit.add(h.getUUID());
             if (isHerdLead(h)) {
                 level.getScoreboard().addPlayerToTeam(h.getStringUUID(), lead);
             }
@@ -204,18 +270,99 @@ public final class DebugHighlightHandler {
      * world down, which is also why the tick that calls this is wrapped.
      */
     private static void clearNear(ServerPlayer player) {
-        if (!(player.level() instanceof ServerLevel level)) {
+        if (player.level().getServer() == null) {
+            return;
+        }
+        Set<UUID> lit = LIT.remove(player.getUUID());
+        if (lit == null) {
+            return;
+        }
+        for (UUID id : lit) {
+            Entity found = null;
+            for (ServerLevel candidate : player.level().getServer().getAllLevels()) {
+                found = candidate.getEntity(id);
+                if (found != null) {
+                    break;
+                }
+            }
+            if (found instanceof Horse horse) {
+                unlight(horse);
+            } else {
+                // Unloaded. It cannot be reached now and its effect timer is
+                // frozen, so it would hold the outline indefinitely - hand it
+                // to onHorseLoaded instead of dropping it.
+                PENDING_CLEAR.add(id);
+            }
+        }
+    }
+
+    /**
+     * <b>Take the outline off one horse</b>, wherever it turned up.
+     *
+     * <p>The team half is not optional and not symmetric with the effect:
+     * {@code Scoreboard.removePlayerFromTeam} <b>throws</b> when the entry is
+     * not on that team - it is written for the {@code /team leave} command,
+     * where membership is the precondition - and every horse here but a herd
+     * lead was never added. That threw on the very first horse once and took
+     * two things with it: the exception escaped the packet handler on the OFF
+     * press, so the toggle removed the player from {@link #ON}, never said
+     * "OFF", and read as "F8 only turns on"; and four minutes later the same
+     * line ran from {@link #onServerTick} and <b>crashed the server</b>
+     * (2026-09-12, owner's session). A debug overlay is not allowed to take a
+     * world down, which is also why the tick that calls this is wrapped.
+     */
+    private static void unlight(Horse horse) {
+        horse.removeEffect(MobEffects.GLOWING);
+        if (!(horse.level() instanceof ServerLevel level)) {
             return;
         }
         Scoreboard scoreboard = level.getScoreboard();
         PlayerTeam lead = leadTeam(level);
-        for (Horse h : level.getEntitiesOfClass(Horse.class, player.getBoundingBox().inflate(RADIUS + 32))) {
-            h.removeEffect(MobEffects.GLOWING);
-            // Off the team as well, so a lead does not keep a red name after
-            // the highlight is off - but only if it is actually on it.
-            if (scoreboard.getPlayersTeam(h.getStringUUID()) == lead) {
-                scoreboard.removePlayerFromTeam(h.getStringUUID(), lead);
+        if (scoreboard.getPlayersTeam(horse.getStringUUID()) == lead) {
+            scoreboard.removePlayerFromTeam(horse.getStringUUID(), lead);
+        }
+    }
+
+    /**
+     * <b>And a reaper for the ones already stranded.</b>
+     *
+     * <p>Tracking only helps horses lit <em>after</em> the fix. The owner's
+     * world already holds an unknown number wearing a frozen outline from
+     * before it, scattered wherever she happened to ride - and telling her the
+     * bug is fixed while she can still see them is not fixing it.
+     *
+     * <p>Safe to do bluntly because of one fact: <b>this mod applies
+     * {@code GLOWING} in exactly one place</b>, {@link #glowNear}. So a horse
+     * wearing it while <em>nobody</em> has the highlight on is stale by
+     * definition, whatever lit it and whenever. Gated on {@link #ON} being
+     * empty, so it costs nothing during normal use and cannot fight the feature
+     * it is cleaning up after.
+     */
+    private static void reapStaleGlow(MinecraftServer server) {
+        if (!ON.isEmpty()) {
+            return;
+        }
+        for (ServerLevel level : server.getAllLevels()) {
+            for (Horse horse : level.getEntities(EntityType.HORSE,
+                    h -> h.hasEffect(MobEffects.GLOWING))) {
+                unlight(horse);
             }
+        }
+    }
+
+    /**
+     * <b>The other half of the fix: clear on the way back in.</b> A horse that
+     * was in an unloaded chunk when the highlight went off is unreachable at
+     * that moment and its effect timer is frozen, so it holds the outline until
+     * something touches it. This is that something.
+     */
+    @SubscribeEvent
+    static void onHorseLoaded(EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide() || PENDING_CLEAR.isEmpty()) {
+            return;
+        }
+        if (event.getEntity() instanceof Horse horse && PENDING_CLEAR.remove(horse.getUUID())) {
+            unlight(horse);
         }
     }
 }
