@@ -59,6 +59,29 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-204"><strong>The horse dimension's three protections are switched OFF, and must
+    go back before 1.0.</strong> Opened 2026-09-12, owner's call, while the behaviour genes
+    are being tested. All three existed to keep the gallery a gallery, and all three made
+    the test yard - the only place built for watching these genes - unable to show them:
+    <ul>
+        <li><strong>Non-horse mobs were deleted on arrival</strong>
+            (<code>HorseGeneticsEventHandler.keepDebugDimensionHorsesOnly</code>), so the
+            holy ward had no spawner output to protect and the pack leader had nothing to
+            lead.</li>
+        <li><strong>Spreading genes refused to run</strong>
+            (<code>GeneAbilityHandler.spread</code>), so dryad, and verdant's moss, grass
+            and mycelium, were silent no-ops. This is the one the owner hit: "dryad does
+            not work".</li>
+        <li><strong>Glow genes placed no light block</strong>, so their light could not be
+            judged there either.</li>
+    </ul>
+    Each site carries a <code>RESTORE BEFORE 1.0</code> comment. <b>The version that comes
+    back should not be the version that left</b>: all three treated the whole dimension as
+    a display case, when what they meant was the <em>corridor</em>. The yard is past the
+    corridor's outer wall and <code>DebugPenManager.corridorWallZ()</code> is the line, so
+    a restored rule can protect the gallery and still let the pens be pens. Left off rather
+    than narrowed today because the owner asked for them off, and a half-narrowed rule is
+    the kind of thing that silently blocks the next test instead.</li>
 <li id="gap-201"><strong>The gene creator cannot show a glow, so the one property
     it writes blind is the one it writes most often.</strong> Opened 2026-09-12 with
     <a href="making-a-gene.html#emissive">glow intensity</a>. A layer's

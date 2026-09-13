@@ -109,6 +109,21 @@ public final class SpontaneousBreedingHandler {
             trace(horse, "already in love - vanilla's breeding takes it from here");
             return;
         }
+        // VANILLA WILL NOT BREED AN UNTAMED OR HURT HORSE. AbstractHorse
+        // .canParent() requires isTamed() and full health, and this handler
+        // deliberately does not implement breeding itself - it puts a pair in
+        // love and lets the ordinary path run. So on an untamed pair setInLove
+        // succeeds, hearts appear over both, the love timer runs out and
+        // nothing happens, for ever. That is what "the heart particle is not
+        // followed by any babies appearing" was (owner, 2026-09-12) once the
+        // same-sex bug behind it was fixed and it still did not breed.
+        //
+        // Refusing here rather than putting them in love is the point: hearts
+        // that cannot lead to a foal are a lie the gene tells about itself.
+        if (!canEverBreed(horse)) {
+            trace(horse, describeBlock(horse));
+            return;
+        }
         if (!horse.canFallInLove()) {
             trace(horse, "on vanilla's breeding cooldown (this is the limit that governs the rate)");
             return;
@@ -131,7 +146,7 @@ public final class SpontaneousBreedingHandler {
                 continue;
             }
             carriers++;
-            if (other.isInLove() || !other.canFallInLove()) {
+            if (other.isInLove() || !other.canFallInLove() || !canEverBreed(other)) {
                 continue;
             }
             // A MARE AND A STALLION, because HorseBreedingHandler cancels
@@ -154,6 +169,24 @@ public final class SpontaneousBreedingHandler {
         }
         trace(horse, "no partner: " + carriers + " other carrier(s) in range, none of them "
                 + "available (wrong sex, a cooldown, or already in love)");
+    }
+
+    /**
+     * The two things vanilla insists on that this gene cannot supply: a tamed
+     * horse at full health. Checked here so the gene never puts a horse in love
+     * that cannot act on it.
+     */
+    private static boolean canEverBreed(Horse horse) {
+        return horse.isTamed() && horse.getHealth() >= horse.getMaxHealth();
+    }
+
+    private static String describeBlock(Horse horse) {
+        if (!horse.isTamed()) {
+            return "UNTAMED - vanilla refuses to breed untamed horses (AbstractHorse.canParent), "
+                    + "so this gene cannot do anything with it. Tame it and it will pair.";
+        }
+        return "hurt (" + Math.round(horse.getHealth()) + "/" + Math.round(horse.getMaxHealth())
+                + ") - vanilla wants full health before breeding";
     }
 
     /** One line per scan, only when the testing tools are on. */

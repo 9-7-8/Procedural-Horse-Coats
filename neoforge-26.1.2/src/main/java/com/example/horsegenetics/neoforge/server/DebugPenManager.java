@@ -769,9 +769,22 @@ public final class DebugPenManager {
 
     static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
                                    String geneticCode) {
+        spawnHorse(level, floorY, x, z, sex, geneticCode, false);
+    }
+
+    /**
+     * {@code tamed} matters more than it looks: vanilla refuses to breed an
+     * untamed horse ({@code AbstractHorse.canParent}), so any pen whose test
+     * involves a foal has to be stocked tame or nothing can ever happen in it.
+     */
+    static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
+                                   String geneticCode, boolean tamed) {
         Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.COMMAND);
         if (horse == null) {
             return;
+        }
+        if (tamed) {
+            horse.setTamed(true);
         }
         horse.setPos(x, floorY, z);
         // Record applied before the entity joins, so HorseGeneticsEventHandler

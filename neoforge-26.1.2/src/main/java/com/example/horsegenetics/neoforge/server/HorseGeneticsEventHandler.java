@@ -45,25 +45,23 @@ public final class HorseGeneticsEventHandler {
      */
     @SubscribeEvent
     static void keepDebugDimensionHorsesOnly(EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide()) return;
-        if (!event.getLevel().dimension().equals(DebugPenManager.DEBUG_LEVEL)) return;
-        if (!(event.getEntity() instanceof Mob) || event.getEntity() instanceof Horse) {
-            return;
-        }
-        // ...except in the test yard, which is past the corridor's outer wall.
+        // RESTORE BEFORE 1.0.
         //
-        // This rule keeps the gallery a gallery: a corridor of pens you walk to
-        // look at coats, with nothing wandering it. It also made two of the
-        // yard's four tests impossible, silently - the holy ward's whole claim
-        // is that a mob farm KEEPS PRODUCING near a warded horse, and the pack
-        // leader's is about wolves. Both were being judged in a dimension that
-        // deleted every zombie and every wolf on arrival (owner, 2026-09-12).
-        // The yard is the one place in here that is not a gallery, so the rule
-        // stops at the wall it stops at.
-        if (Math.abs(event.getEntity().getBlockZ()) > DebugPenManager.corridorWallZ()) {
+        // This cancelled every non-horse Mob joining the horse dimension, which
+        // is what kept the gallery a gallery. It also made two of the test
+        // yard's tests impossible: the holy ward's whole claim is that a mob
+        // farm KEEPS PRODUCING near a warded horse, and the pack leader's is
+        // about other creatures following one - and both were being judged
+        // somewhere that deleted zombies and cows on arrival.
+        //
+        // Off entirely by the owner's call (2026-09-12) while the behaviour
+        // genes are being tested. What it wants on the way back is a rule that
+        // distinguishes the corridor from the yard rather than one that treats
+        // the whole dimension as a display case; the geometry for that is
+        // DebugPenManager.corridorWallZ(). Tracked in wiki/known-gaps.html.
+        if (event.getLevel().isClientSide()) {
             return;
         }
-        event.setCanceled(true);
     }
 
     /** Horses can't be injured in the debug-pen dimension - it's a viewing gallery, not a fight. */

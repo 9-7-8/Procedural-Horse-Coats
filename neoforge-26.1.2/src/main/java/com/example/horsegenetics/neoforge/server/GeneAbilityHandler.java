@@ -941,8 +941,11 @@ public final class GeneAbilityHandler {
         UUID id = horse.getUUID();
         BlockPos current = GLOW_LIGHT.get(id);
 
-        // Don't litter the read-only gallery dimension with light blocks.
-        if (want <= 0 || level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+        // RESTORE BEFORE 1.0: the dimension check here ("don't litter the
+        // read-only gallery with light blocks") is off with the rest of them. A
+        // glow gene that places no light in the horse dimension cannot be
+        // judged there either.
+        if (want <= 0) {
             if (current != null) {
                 clearLight(level, current);
                 GLOW_LIGHT.remove(id);
@@ -1105,9 +1108,14 @@ public final class GeneAbilityHandler {
         if (!beat(horse, interval)) {
             return;
         }
-        if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
-            return;
-        }
+        // RESTORE BEFORE 1.0. This refused to run in the horse dimension, so
+        // nothing could rewrite the gallery's floor - which made every
+        // spreading gene a silent no-op in the one place built for watching
+        // them ("dryad does not work", owner 2026-09-12). Off entirely by the
+        // owner's call while the behaviour genes are being tested; the version
+        // that comes back wants to tell the corridor from the test yard rather
+        // than treat the whole dimension as a display case
+        // (DebugPenManager.corridorWallZ()). wiki/known-gaps.html.
         if (level.getRandom().nextDouble() > s.chance()) {
             return;
         }

@@ -390,8 +390,7 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     private static final String[] BATCHES = {
-            "The dial: what is left of it, and the yard (0-CP, 0-CS)",
-            "World-breakers, in the test yard (0-BT)",
+            "What still needs your hands - the yard has the horses (0-CP, 0-CR, 0-CS)",
             "Behaviour that is probably subtly wrong (0-BT)",
             "Holding pen and stalls - the refusals (0-BY, 0-BX)",
             "Potion milk and the research shelf - the refusals (0-BY, 0-BX)",
@@ -446,6 +445,20 @@ public final class DebugTestWorldHandler {
         return 1;
     }
 
+    /**
+     * Where the horses are. The kit used to carry them; the test yard stocks
+     * them now, which is better - a pen with the right floor and the right
+     * animals already standing in it is a test somebody can start, and a
+     * hotbar of eggs is a test somebody has to set up first.
+     */
+    private static void tellYard(ServerPlayer player) {
+        tell(player, Component.literal("The rest is in the TEST YARD: hay portal, then right off "
+                        + "the arrival road, 30 blocks. Starburst, the glow room (shut the door), "
+                        + "the breeding field, the ward's spawner, the pack leader's cows, and "
+                        + "verdant's three floors + the dryad in the growing row.")
+                .withStyle(ChatFormatting.GOLD));
+    }
+
     private static void listBatches(ServerPlayer player) {
         tell(player, Component.literal("Test kit batches - click one, then press Enter:")
                 .withStyle(ChatFormatting.GOLD));
@@ -468,77 +481,29 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
-                // 0-CP. The first three genes whose VARIATION is the point
-                // rather than their pattern, so every slot here is "spawn
-                // several and compare", not "spawn one and look".
-                put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame what you want to keep");
-                put(inv, legend, 1, many(preset(player, "Test: starburst (pale)", Sex.FEMALE, false,
-                        "horsegenetics.starburst=W/W"), 8),
-                        "the SHARDS at full size: a shattered star, or speckle? (the scaling "
-                                + "itself is confirmed - 2026-09-12)");
-                // A stallion, because the slot below says "breed the starbursts"
-                // and four mares cannot. Pale rather than coloured so the foal
-                // expresses the same outcome as both parents and the only thing
-                // that varies between them is the dial.
-                put(inv, legend, 2, many(preset(player, "Test: starburst STALLION (pale)", Sex.MALE, false,
-                        "horsegenetics.starburst=W/W"), 4),
-                        "STALLIONS - the mares above cannot breed with each other");
-                put(inv, legend, 3, many(preset(player, "Test: starburst (coloured)", Sex.FEMALE, false,
-                        "horsegenetics.starburst=C/C"), 6),
-                        "the coloured form - check the rings stay concentric at the small end");
-                put(inv, legend, 4, many(preset(player, "Test: lantern", Sex.FEMALE, false,
-                        "horsegenetics.lantern=La/La"), 6),
-                        "confirmed lit and varying - here for comparison with tron below");
-                put(inv, legend, 5, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()),
-                        "custom spawn egg - press MAKE EGG in it (0-CR): the fix for a button that "
-                                + "was being clicked by something else");
-                put(inv, legend, 6, many(preset(player, "Test: tron (BOTH forms)", Sex.MALE, false,
-                        "horsegenetics.tron=Trs/Trg"), 4),
-                        "the overlap case: solid and gradient tubes are separate layers and where "
-                                + "they cross the BRIGHTER wins rather than the two summing. Blown "
-                                + "out means that rule is broken");
-                put(inv, legend, 7, new ItemStack(Items.GOLDEN_CARROT, 16),
-                        "golden carrots - breed a mare from slot 2 with a stallion from slot 3: "
-                                + "does the foal's emblem sit near its parents' rather than "
-                                + "re-rolling?");
-                put(inv, legend, 8, new ItemStack(Items.CLOCK),
-                        "clock - the two glow genes above are night tests");
+                // The yard stocks every horse these tests need - starburst, tron,
+                // the glow room, the breeding field, the ward, the pack leader,
+                // the dryad and verdant's three. So this batch is only what the
+                // yard CANNOT hand you: items, and the two checks that are not
+                // about a horse at all.
+                put(inv, legend, 0, new ItemStack(ModItems.CUSTOM_HORSE_SPAWN_EGG.get()),
+                        "custom spawn egg - open it and press MAKE EGG (0-CR). It was being "
+                                + "clicked by a widget on top of it; the fix is untested");
+                put(inv, legend, 1, new ItemStack(Items.STICK),
+                        "stick - the yard's horses come tamed, this is for anything else");
+                put(inv, legend, 2, new ItemStack(Items.GOLDEN_CARROT, 16),
+                        "golden carrots - breed a starburst pair in the yard: does the foal's "
+                                + "emblem sit near its parents'?");
+                put(inv, legend, 3, new ItemStack(Items.CLOCK),
+                        "clock - or /testkit night, which the dimension now honours");
+                put(inv, legend, 4, new ItemStack(Items.SADDLE),
+                        "saddle - the ridden tests are batch 2");
+                put(inv, legend, 5, new ItemStack(Items.OAK_SAPLING, 8),
+                        "saplings - what the dryad pen should be growing on its own; these are "
+                                + "for comparison, not for planting");
+                tellYard(player);
             }
             case 2 -> {
-                // The checklist's own ranking of what could go wrong badly
-                // rather than visibly (0-BT). These are left running, not looked
-                // at: the failures are an entity storm and a farm that quietly
-                // stopped, and ten minutes of watching proves nothing.
-                put(inv, legend, 0, new ItemStack(Items.STICK),
-                        "stick - TAKE ALL OF THIS TO THE TEST YARD: into the hay portal, then "
-                                + "right off the arrival road, 30 blocks. It has a fenced field, a "
-                                + "zombie spawner, a wolf pen and a dryad already standing in one");
-                put(inv, legend, 1, many(preset(player, "Test: spontaneous breeding MARE", Sex.FEMALE, false,
-                        "horsegenetics.spontaneous_breeding=Spb/Spb"), 4),
-                        "MARES - spawn two of these and two of the stallions beside them in a wide "
-                                + "fenced field, walk away for several in-game days, come back and COUNT");
-                // The gate's old slot. Four mares could never breed with each
-                // other, so this test had never once been runnable; a gate is
-                // the cheapest thing in the batch to lose, since the field is
-                // built in creative and you fly into it.
-                put(inv, legend, 2, many(preset(player, "Test: spontaneous breeding STALLION", Sex.MALE, false,
-                        "horsegenetics.spontaneous_breeding=Spb/Spb"), 4),
-                        "STALLIONS - and the pair the holy-ward breeding pen below needs too");
-                put(inv, legend, 3, new ItemStack(Items.OAK_FENCE, 64),
-                        "fence - make that field a big one (no gate: you are in creative, fly in)");
-                put(inv, legend, 4, preset(player, "Test: holy ward", Sex.FEMALE, false,
-                        "horsegenetics.holy_ward=Hly/Hly"),
-                        "stand it beside the YARD'S SPAWNER: it must keep producing. Check the spawner works with no ward near it first");
-                put(inv, legend, 5, new ItemStack(Items.SPAWNER), "spawner - right-click it with the egg below");
-                put(inv, legend, 6, new ItemStack(Items.ZOMBIE_SPAWN_EGG, 4), "zombie egg - sets the spawner, and tests the ward's allow-list");
-                put(inv, legend, 7, preset(player, "Test: pack leader (wolves)", Sex.FEMALE, false,
-                        "horsegenetics.pack_leader=Wlf/Wlf"),
-                        "three or four in the yard's WOLF PEN, then watch the tick time (F3)");
-                put(inv, legend, 8, preset(player, "Test: dryad", Sex.FEMALE, false,
-                        "horsegenetics.dryad=Dry/Dry"),
-                        "the yard already has one fenced in - this is a spare. Half a real hour, then look for saplings");
-            }
-            case 3 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick");
                 put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - the two below are ridden tests");
                 put(inv, legend, 2, preset(player, "Test: ender echo", Sex.FEMALE, false,
@@ -556,7 +521,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.CARROT, 32), null);
                 put(inv, legend, 8, new ItemStack(Items.WHEAT, 32), "wheat and carrots - what food preference refuses");
             }
-            case 4 -> {
+            case 3 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - both tickets need a horse you own");
                 put(inv, legend, 1, breedEgg("arabian"), "a horse to move around");
                 put(inv, legend, 2, new ItemStack(ModItems.HOLDING_PEN_SIGN.get(), 2),
@@ -572,7 +537,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 64), null);
                 put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 8), null);
             }
-            case 5 -> {
+            case 4 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame each one first");
                 put(inv, legend, 1, preset(player, "Test: potion mare", Sex.FEMALE, false,
                         "horsegenetics.potion_milk=Spd/Spd"), "hurt her, then bottle her: 'She's hurt' and no potion");
@@ -589,7 +554,7 @@ public final class DebugTestWorldHandler {
                 papers.set(ModDataComponents.RESEARCH_GENE.get(), "horsegenetics.silver");
                 put(inv, legend, 8, papers, "two Silver papers - the second must refuse to go in");
             }
-            case 6 -> {
+            case 5 -> {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick - tame before saddling");
                 put(inv, legend, 1, new ItemStack(Items.SADDLE), "saddle - ride them: prints follow a ridden horse too");
                 put(inv, legend, 2, preset(player, "Test: molten white (dominant)", Sex.FEMALE, false,
@@ -604,7 +569,7 @@ public final class DebugTestWorldHandler {
                         "horsegenetics.spawner=Shp/Shp"), "tame, feed wheat - every sheep the SAME colour");
                 put(inv, legend, 7, new ItemStack(Items.WHEAT, 64), "wheat - the spawner's meals");
             }
-            case 7 -> {
+            case 6 -> {
                 intake(player, inv, legend, 0, "ooze_drip", null,
                         "rebuilt on the GOO mask - spawn several: separate drips, own lengths, beads, no triangles");
                 intake(player, inv, legend, 1, "rainbow_drip", null, "hangs down too - and check the spine: no bare stripes now");
@@ -617,7 +582,7 @@ public final class DebugTestWorldHandler {
                 intake(player, inv, legend, 7, "candelabra", null, "small by design; a jagged edge is the simplified path");
                 intake(player, inv, legend, 8, "tribal_claw", null, "three hairline strokes - do they read at a distance?");
             }
-            case 8 -> {
+            case 7 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {

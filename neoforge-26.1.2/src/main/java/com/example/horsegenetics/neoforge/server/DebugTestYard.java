@@ -59,7 +59,7 @@ final class DebugTestYard {
 
     /** The yard's floor, measured from the spur's centre line and its mouth. */
     private static final int YARD_HALF_X = 24;
-    private static final int YARD_DEPTH_Z = 64;
+    private static final int YARD_DEPTH_Z = 80;
 
     /** Matches the corridor, so the yard reads as the same building. */
     private static final int WALL_TOP_DY = 10;
@@ -108,9 +108,9 @@ final class DebugTestYard {
         buildBreedingField(level, gy, cx, mouthZ);
         buildSpawnerRoom(level, gy, cx, mouthZ);
         buildWolfPen(level, gy, cx, mouthZ);
-        buildDryadPlot(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
         buildGlowRoom(level, gy, cx, mouthZ);
+        buildGrowingRow(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
@@ -178,10 +178,22 @@ final class DebugTestYard {
         level.addFreshEntity(cow);
     }
 
-    /** Fences, signs, torches and the spawner room are meant to be in the way. */
+    /**
+     * Things that are <b>meant</b> to be at head height: pen walls and their
+     * gates, the dark rooms and their doors, signs, torches, the spawner.
+     *
+     * <p>This list has to be kept honest or the check is worse than nothing.
+     * When the pens moved to {@code DebugPenManager.penWalls} they stopped
+     * being oak fence and became <b>brick wall</b> with fence <b>gates</b>, and
+     * the dark rooms gained <b>doors</b> - none of which were in here, so a
+     * perfectly good yard reported "NOT sound: 21 blocked at head height" and
+     * the warning that exists to be believed cried wolf on its second outing.
+     */
     private static boolean isFurniture(ServerLevel level, int x, int y, int z) {
         BlockState state = level.getBlockState(new BlockPos(x, y, z));
-        return state.is(Blocks.OAK_FENCE) || state.is(Blocks.OAK_SIGN) || state.is(Blocks.TORCH)
+        return state.is(Blocks.OAK_FENCE) || state.is(Blocks.OAK_FENCE_GATE)
+                || state.is(Blocks.BRICK_WALL) || state.is(Blocks.OAK_DOOR)
+                || state.is(Blocks.OAK_SIGN) || state.is(Blocks.TORCH)
                 || state.is(Blocks.WALL_TORCH) || state.is(Blocks.STONE_BRICKS)
                 || state.is(Blocks.SPAWNER) || state.is(Blocks.OAK_PLANKS);
     }
@@ -195,6 +207,62 @@ final class DebugTestYard {
      * It is audited with the test kit, at the same time and against the same
      * page.
      */
+    /**
+     * <b>The growing row: one pen per spreading gene, floored with what that
+     * gene can actually convert.</b>
+     *
+     * <p>All four fail in a way that looks exactly like the gene being broken,
+     * and the reason is always the floor. {@code GeneAbilityHandler.convert} is
+     * a whitelist per cover and they do not overlap: <b>grass</b> only converts
+     * bare dirt, so a grass pen floored with grass can never show anything;
+     * <b>moss</b> wants stone, cobble, andesite, gravel or dirt;
+     * <b>mycelium</b> wants dirt or grass; and a <b>sapling</b> is the only one
+     * that builds upward, so it needs air with grass or dirt under it.
+     *
+     * <p>Each pen is floored for its own gene and nothing else, which is the
+     * difference between "the gene does not work" and "the gene had nothing to
+     * work on" - the second of which is what the dryad plot was.
+     */
+    private static void buildGrowingRow(ServerLevel level, int gy, int cx, int mouthZ) {
+        int z = mouthZ + 64;
+        int x = cx - YARD_HALF_X + 2;
+
+        growPen(level, gy, x, z, Blocks.DIRT.defaultBlockState(),
+                "horsegenetics.verdant", "grass/grass",
+                List.of("VERDANT grass", "floor is DIRT", "should turn to", "GRASS blocks"));
+        x += PEN_W + 2;
+        growPen(level, gy, x, z, Blocks.STONE.defaultBlockState(),
+                "horsegenetics.verdant", "moss/moss",
+                List.of("VERDANT moss", "floor is STONE", "should turn to", "MOSS blocks"));
+        x += PEN_W + 2;
+        growPen(level, gy, x, z, Blocks.DIRT.defaultBlockState(),
+                "horsegenetics.verdant", "mush/mush",
+                List.of("VERDANT mycel", "floor is DIRT", "should turn to", "MYCELIUM"));
+        x += PEN_W + 2;
+        growPen(level, gy, x, z, Blocks.GRASS_BLOCK.defaultBlockState(),
+                "horsegenetics.dryad", null,
+                List.of("DRYAD", "floor is GRASS", "SAPLINGS should", "appear on it"));
+    }
+
+    /**
+     * One growing pen: the floor its gene needs, walls, a sign saying what the
+     * floor should turn into, and two carriers - two, so a failure cannot be
+     * "the one horse stood in a corner".
+     */
+    private static void growPen(ServerLevel level, int gy, int x0, int z0, BlockState floor,
+                                String key, String tokens, List<String> sign) {
+        int x1 = x0 + PEN_W;
+        int z1 = z0 + PEN_D;
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, floor);
+            }
+        }
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
+        stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, key, sign.get(0), 2, 0, tokens, true);
+    }
+
     private static void buildStockedRow(ServerLevel level, int gy, int cx, int mouthZ) {
         int z = mouthZ + 48;
         int x = cx - YARD_HALF_X + 2;
@@ -313,9 +381,11 @@ final class DebugTestYard {
         int z1 = z0 + 20;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("SPONTANEOUS", "BREEDING", "4 are in here:", "leave, then COUNT"));
+                List.of("SPONTANEOUS", "BREEDING", "4 TAMED here:", "leave, then COUNT"));
+        // TAMED, because vanilla will not breed an untamed horse and this is
+        // the pen whose entire result is a foal.
         stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.spontaneous_breeding",
-                "the breeding field", 2, 2, null);
+                "the breeding field", 2, 2, null, true);
     }
 
     /**
@@ -491,6 +561,11 @@ final class DebugTestYard {
      */
     private static void stock(ServerLevel level, int gy, double x, double z, String key,
                               String what, int mares, int studs, String tokens) {
+        stock(level, gy, x, z, key, what, mares, studs, tokens, false);
+    }
+
+    private static void stock(ServerLevel level, int gy, double x, double z, String key,
+                              String what, int mares, int studs, String tokens, boolean tamed) {
         Gene gene = Genes.byKeyOrNull(key);
         if (gene == null) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: no {} gene, {} left empty", key, what);
@@ -502,10 +577,10 @@ final class DebugTestYard {
         int placed = 0;
         try {
             for (int i = 0; i < mares; i++) {
-                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.FEMALE, code);
+                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.FEMALE, code, tamed);
             }
             for (int i = 0; i < studs; i++) {
-                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.MALE, code);
+                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.MALE, code, tamed);
             }
             ActionTrace.log("test yard", "stocked " + what + " with " + placed + "x " + code
                     + " (" + mares + " mare, " + studs + " stallion)");

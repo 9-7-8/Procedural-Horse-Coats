@@ -163,7 +163,54 @@
     </ol>
 </div>
 
-<h2 id="behaviour-bugs">&sect;0-CT &mdash; Three behaviour bugs found by playing (2026-09-12, NOT looked at)</h2>
+<h2 id="behaviour-bugs">&sect;0-CT &mdash; Behaviour genes: two confirmed, the spreaders unblocked (2026-09-12)</h2>
+
+<div class="note good">
+    <span class="label">Confirmed in play, both for the first time</span>
+    <p>
+        <strong>Spontaneous breeding works</strong> - six pairings and foals on the ground.
+        It needed the horses <em>tamed</em>, which vanilla requires
+        (<code>AbstractHorse.canParent</code>) and this gene cannot supply, so the field is
+        stocked tamed now and the handler refuses pairs vanilla would refuse instead of
+        showing hearts that lead nowhere. <strong>Pack leader works</strong>: the cows
+        follow. Both had been unrunnable rather than untested - the kit only ever handed
+        out mares, and the dimension deleted the cows.
+    </p>
+</div>
+
+<h2 id="spreaders">&sect;0-CU &mdash; The spreading genes, on floors they can convert (2026-09-12, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">They were forbidden, and then they need the right ground</span>
+    <p>
+        <code>GeneAbilityHandler.spread</code> refused to run in the horse dimension, so
+        the dryad and verdant's three were silent no-ops in the only place built to watch
+        them. That restriction is off (<a href="known-gaps.html#gap-204">gap 204</a>, to
+        be restored before 1.0), and the yard has a <strong>growing row</strong>: four
+        pens, each floored with what its own gene converts.
+    </p>
+    <p>
+        <strong>The floors are the test.</strong> <code>convert()</code> is a whitelist per
+        cover and they do not overlap: grass only converts <em>bare dirt</em>, so a grass
+        gene in a grass field can never show anything; moss wants stone, cobble, andesite,
+        gravel or dirt; mycelium wants dirt or grass; a sapling needs air with grass or
+        dirt beneath it. Each sign says what that floor should become.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Verdant grass, on dirt</strong> - dirt should turn to grass blocks.</li>
+    <li><strong>Verdant moss, on stone</strong> - stone should turn to moss.</li>
+    <li><strong>Verdant mycelium, on dirt</strong> - dirt should turn to mycelium.</li>
+    <li><strong>Dryad, on grass</strong> - saplings should appear standing on it. Slowest
+        of the four by design (about a day between plantings), so it is the one to leave
+        and come back to.</li>
+    <li><strong>If a pen does nothing, check the sign before the gene.</strong> Wrong floor
+        is the failure this row exists to rule out, and it is indistinguishable from a
+        broken gene without it.</li>
+</ul>
+
+
 
 <div class="note danger">
     <span class="label">All three were invisible to every test in the repo, and two of them made other tests impossible</span>
