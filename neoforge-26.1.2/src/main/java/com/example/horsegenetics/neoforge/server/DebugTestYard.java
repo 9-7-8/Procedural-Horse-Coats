@@ -227,21 +227,28 @@ final class DebugTestYard {
         int z = mouthZ + 64;
         int x = cx - YARD_HALF_X + 2;
 
-        growPen(level, gy, x, z, Blocks.DIRT.defaultBlockState(),
-                "horsegenetics.verdant", "grass/grass",
-                List.of("VERDANT grass", "floor is DIRT", "should turn to", "GRASS blocks"));
-        x += PEN_W + 2;
-        growPen(level, gy, x, z, Blocks.STONE.defaultBlockState(),
-                "horsegenetics.verdant", "moss/moss",
-                List.of("VERDANT moss", "floor is STONE", "should turn to", "MOSS blocks"));
-        x += PEN_W + 2;
-        growPen(level, gy, x, z, Blocks.DIRT.defaultBlockState(),
-                "horsegenetics.verdant", "mush/mush",
-                List.of("VERDANT mycel", "floor is DIRT", "should turn to", "MYCELIUM"));
-        x += PEN_W + 2;
+        // Verdant's three are CONFIRMED (2026-09-12) and their pens are gone.
+        // What is left here is the row of slow ones - the tests that cannot be
+        // answered by standing still and looking, only by leaving and coming
+        // back, which is exactly the kind this dimension is for.
         growPen(level, gy, x, z, Blocks.GRASS_BLOCK.defaultBlockState(),
                 "horsegenetics.dryad", null,
-                List.of("DRYAD", "floor is GRASS", "SAPLINGS should", "appear on it"));
+                List.of("DRYAD - SLOW", "~a day between", "plantings. Come", "back to saplings"));
+        x += PEN_W + 2;
+
+        // Snow and ice for the melt to eat. A floor rather than a scatter, so
+        // "how far has it got" is answerable at a glance from the gate.
+        growPen(level, gy, x, z, Blocks.SNOW_BLOCK.defaultBlockState(),
+                "horsegenetics.hot_blooded", null,
+                List.of("HOT-BLOODED", "floor is SNOW", "should melt away", "around them"));
+        x += PEN_W + 2;
+        // A strip of ice in the same pen: ice becomes a water SOURCE rather
+        // than air, which is the half of the gene that can flood something.
+        for (int ix = x - PEN_W - 2 + 2; ix <= x - PEN_W - 2 + PEN_W - 2; ix++) {
+            for (int iz = z + 6; iz <= z + PEN_D - 1; iz++) {
+                DebugPenManager.groundColumn(level, ix, gy, iz, Blocks.ICE.defaultBlockState());
+            }
+        }
     }
 
     /**
@@ -381,9 +388,15 @@ final class DebugTestYard {
         int z1 = z0 + 20;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("SPONTANEOUS", "BREEDING", "4 TAMED here:", "leave, then COUNT"));
-        // TAMED, because vanilla will not breed an untamed horse and this is
-        // the pen whose entire result is a foal.
+                List.of("BREEDING CAP", "it breeds: OK.", "LEAVE IT LONG:", "does it PLATEAU?"));
+        // TAMED, because vanilla will not breed an untamed horse.
+        //
+        // That it breeds at all is confirmed. What this pen is for now is the
+        // half that matters to a world: LOCAL_CAP is supposed to stop the
+        // population at six or so within eight blocks, and an uncapped
+        // automatic breeder is the classic way to kill a server. That cannot be
+        // answered by watching - only by leaving it running for a long time and
+        // counting what is there when you come back.
         stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.spontaneous_breeding",
                 "the breeding field", 2, 2, null, true);
     }
@@ -485,7 +498,11 @@ final class DebugTestYard {
         stock(level, gy, cx + 8.5, z0 - 1.5, "horsegenetics.holy_ward", "the ward post");
     }
 
-    /** <b>Pack leader.</b> A pen to put three or four in and watch F3's tick line. */
+    /**
+     * <b>Was the pack-leader pen; that gene is confirmed (2026-09-12).</b> The
+     * pen stays because the yard is short of fenced ground, and it is empty:
+     * somewhere to put whatever the next long test needs.
+     */
     private static void buildWolfPen(ServerLevel level, int gy, int cx, int mouthZ) {
         int x0 = cx - YARD_HALF_X + 2;
         int x1 = x0 + 14;
@@ -493,17 +510,7 @@ final class DebugTestYard {
         int z1 = z0 + 16;
         fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("PACK LEADER", "2 horses, 4 cows", "do the cows", "follow them?"));
-        // COWS, not wolves. The gene has one allele per non-hostile mob, so
-        // "test it with cows" is a different allele rather than a different
-        // gene - and a cow that follows you is a thing you can SEE happening,
-        // where a wolf that follows you looks like a wolf. Four of them go in
-        // with the horses, since the test is whether they trail it about.
-        stock(level, gy, x0 + 4.0, (z0 + z1) / 2.0, "horsegenetics.pack_leader",
-                "the pack-leader pen", 2, 0, "Cow/Cow");
-        for (int i = 0; i < 4; i++) {
-            spawnCow(level, gy, x0 + 8.0 + i * 1.5, (z0 + z1) / 2.0 + 2.0);
-        }
+                List.of("SPARE PEN", "pack leader is", "CONFIRMED -", "this is empty"));
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.Traits;
@@ -7,10 +9,12 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -154,6 +158,74 @@ public final class ActionTrace {
      * walk to the second pen.
      */
     private static final int MAX_PER_TICK = 8;
+
+    /**
+     * <b>Every hostile mob that spawns, and how far it was from the nearest
+     * warded horse.</b>
+     *
+     * <p>The holy ward's whole claim is a negative - that hostile things do
+     * <i>not</i> appear near the horse - and a negative cannot be seen. Standing
+     * in a dark room counting zombies tells you the spawner works; it does not
+     * tell you whether the ward moved any of them, because the ones it stopped
+     * are the ones you never saw.
+     *
+     * <p>So each spawn is logged with its distance to the nearest horse
+     * carrying the gene. A working ward reads as a floor under that distance:
+     * plenty of spawns, none of them closer than the radius. A broken one reads
+     * as spawns at two or three blocks. Either way it is a number rather than
+     * an impression.
+     */
+    @SubscribeEvent
+    static void onMonsterSpawn(EntityJoinLevelEvent event) {
+        if (!ServerConfig.debugTools() || event.getLevel().isClientSide()
+                || !(event.getEntity() instanceof Monster monster)) {
+            return;
+        }
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        String near = "no warded horse within 48 blocks";
+        double best = Double.MAX_VALUE;
+        for (Horse horse : level.getEntitiesOfClass(Horse.class,
+                monster.getBoundingBox().inflate(48.0), Horse::isAlive)) {
+            if (!wards(horse)) {
+                continue;
+            }
+            double d = Math.sqrt(horse.distanceToSqr(monster));
+            if (d < best) {
+                best = d;
+                near = String.format("%.1f blocks from warded %s", d, shortName(horse));
+            }
+        }
+        log("monster spawned", monster.getType().builtInRegistryHolder().key().identifier()
+                + " at " + monster.blockPosition().toShortString() + " - " + near);
+    }
+
+    /**
+     * Does this horse actually carry a live holy ward?
+     *
+     * <p>Asked of the resolved ability list rather than of the genotype, which
+     * is the stricter question and the right one: a horse can carry the gene
+     * and still ward nothing, because an ability can be conditional. If the
+     * ward is not in this list it is not running, and a monster spawning next
+     * to that horse is not evidence of anything.
+     */
+    private static boolean wards(Horse horse) {
+        if (!HorseRecords.hasRealRecord(horse)) {
+            return false;
+        }
+        try {
+            String code = HorseRecords.of(horse).geneticCode();
+            for (HorseAbilities.Active active : HorseAbilities.activeFor(Genotype.parse(code))) {
+                if (active.geneKey().equals("horsegenetics.holy_ward")) {
+                    return true;
+                }
+            }
+        } catch (RuntimeException e) {
+            return false;
+        }
+        return false;
+    }
 
     /**
      * Everything about one horse, on one line: who it is, what it is carrying,
