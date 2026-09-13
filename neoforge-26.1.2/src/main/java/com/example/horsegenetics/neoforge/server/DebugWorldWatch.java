@@ -520,6 +520,60 @@ public final class DebugWorldWatch {
                         : "none of its watched blocks are present") : sb);
     }
 
+    /**
+     * <b>Every horse by name, not a min and a max.</b>
+     *
+     * <p>The range was enough for the weather loci and it is <em>actively
+     * misleading</em> for the eyesight pen, which is the same idea done
+     * properly and caught it out. Both halves of that pen reported
+     * {@code movement_speed 0.165-0.221} at almost every census - identical to
+     * three decimals, lit and dark, which reads as "the gene does nothing".
+     *
+     * <p>It is very probably the opposite. Caveborn is faster in the dark and
+     * daywalker is slower in it, so the two horses' values <b>swap</b> when the
+     * condition flips - and a set whose members have exchanged places has
+     * exactly the same minimum and maximum as one that has not moved at all.
+     * The three censuses that read {@code 0.165-0.165} and the four that read
+     * {@code 0.221-0.221} are the tell: those are the moments mid-swap, when
+     * one horse had flipped and the other had not, and an aggregate cannot say
+     * which is which.
+     *
+     * <p>So this prints the horse's <b>name</b> beside its number, and the yard
+     * names every stocked horse for what it is ({@code EYES: CAVEBORN (dark)}).
+     * The reading then answers the question directly - the same allele in the
+     * two halves, side by side - instead of describing a set that happens to
+     * contain it. <b>Same lesson as gap 211:</b> a measurement aggregated over
+     * the things being compared cannot see the comparison.
+     */
+    private static String attributeReadout(ServerLevel level, Area area) {
+        StringBuilder out = new StringBuilder();
+        int seen = 0;
+        for (Horse h : level.getEntitiesOfClass(Horse.class, area.box().inflate(0.0, 2.0, 0.0))) {
+            AttributeInstance inst = h.getAttribute(area.attribute());
+            if (inst == null) {
+                continue;
+            }
+            out.append(seen == 0 ? " | " + area.attribute().getRegisteredName() + " " : ", ")
+                    .append(h.hasCustomName() ? h.getCustomName().getString()
+                            : ActionTrace.describeShort(h))
+                    .append('=')
+                    .append(String.format("%.3f", inst.getValue()));
+            seen++;
+            if (seen >= ATTRIBUTE_NAMES_MAX) {
+                out.append(", ...");
+                break;
+            }
+        }
+        return seen == 0 ? " | no horse carries that attribute" : out.toString();
+    }
+
+    /**
+     * How many horses get named before the line is truncated. The pens that
+     * carry an attribute readout hold two to eight; a pen with thirty in it
+     * would drown the census line.
+     */
+    private static final int ATTRIBUTE_NAMES_MAX = 8;
+
     private static String delta(int was, int now) {
         return was == now ? "" : (now > was ? " (+" : " (") + (now - was) + ")";
     }
@@ -664,6 +718,23 @@ public final class DebugWorldWatch {
     @SubscribeEvent
     static void onHorseHeal(LivingHealEvent event) {
         if (!watching(event.getEntity().level()) || !(event.getEntity() instanceof Horse horse)) {
+            return;
+        }
+        // ONLY INSIDE A WATCHED PEN. This hook was dimension-wide and the first
+        // run with it produced SEVEN THOUSAND FOUR HUNDRED heal lines in
+        // eighteen minutes - almost all of them HorseCareHandler's ordinary
+        // gated regen ticking the hundred and forty gallery horses back to
+        // full, one point at a time, for ever. The healer pen's own readings
+        // were in there and unfindable.
+        //
+        // Exactly the shape of gap 211, which is about the spread counter and
+        // is really about this: an instrument scoped to the DIMENSION measures
+        // the gallery, and the gallery is bigger than every test in the yard
+        // put together. Damage stays dimension-wide on purpose - a horse dying
+        // anywhere is worth a line, and today's log is the argument for it -
+        // but healing is background noise outside a pen that is asking about
+        // healing.
+        if (inArea(horse.blockPosition()).isEmpty()) {
             return;
         }
         note("horse healed", ActionTrace.describeShort(horse) + " by "
