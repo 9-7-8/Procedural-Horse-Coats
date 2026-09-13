@@ -600,6 +600,34 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
     </p>
 </div>
 
+<div class="note danger" id="debug-crash">
+    <span class="label">A debug overlay took the world down, and hid its own bug for four minutes first</span>
+    <p>
+        F8's horse highlight put herd leads on a scoreboard team and took every nearby
+        horse <em>off</em> it again when the toggle went off. Only leads were ever added,
+        and <code>Scoreboard.removePlayerFromTeam(name, team)</code>
+        <a href="api-notes.html">throws</a> for an entry that is not on the team - so it
+        threw on the first ordinary horse it reached.
+    </p>
+    <p>
+        <strong>What it looked like from the chair was two unrelated bugs.</strong> The
+        throw escaped the packet handler on the OFF press, after the player had already
+        been removed from the on-set and before the "OFF" message, so the owner reported
+        &ldquo;F8 isn't toggling off, only turning on&rdquo;. Four minutes later the
+        auto-off ran the same line from <code>ServerTickEvent.Post</code>, where nothing
+        catches it, and the server died with <em>Exception in server tick loop</em>. One
+        cause, two reports, and the crash arrived long enough after the last keypress to
+        look unrelated to it.
+    </p>
+    <p>
+        Two fixes, and the second is the general one: ask the scoreboard before removing,
+        <strong>and wrap anything a debug overlay does in a guard that switches the
+        overlay off rather than ending the tick loop</strong>. This one ships in real
+        builds - it was registered outside the production gate on purpose, because testers
+        asked for it - so "it is only a dev tool" was never true of it.
+    </p>
+</div>
+
 <div class="note danger">
     <span class="label">And two Gradle builds in the same module at once corrupt its class files</span>
     <p>

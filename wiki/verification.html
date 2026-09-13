@@ -58,6 +58,31 @@
 
 <h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit (2026-09-12, NOT looked at)</h2>
 
+<div class="note good">
+    <span class="label">Confirmed 2026-09-12 &mdash; and the predictions held</span>
+    <p>
+        <strong>Gamma, geode and angler look right</strong>, and <strong>ember veins and
+        data rain have no falloff at all</strong> &mdash; which is what the measurements said should
+        happen before anybody looked: those two are hard-edged by construction (0.04 to
+        0.2, and soft bands times a <code>SPECKLE</code>), so coverage-times-level is
+        level-or-nothing there. The softest lit mask in the mod is gamma's
+        <code>SPOTS</code> at 1.8 and it is the one that shows the change.
+    </p>
+    <p>
+        So the glow level works, it is scaled by coverage, and it is invisible exactly
+        where the geometry says it should be invisible.
+    </p>
+    <p>
+        <strong>And the control held</strong>: <a href="gene-suntouched.html">suntouched</a>
+        &ldquo;does indeed look the same as before&rdquo;. That is the one that mattered
+        most, because it lights whole parts at full alpha through the <code>glow</code>
+        effect rather than through a coat layer &mdash; so it exercises the same new alpha
+        path with none of the new arithmetic. Unchanged there plus changed everywhere the
+        masks are soft is the pair of readings that says the level reached the renderer
+        without disturbing what was already right. <strong>&sect;0-CO is closed.</strong>
+    </p>
+</div>
+
 <div class="note danger">
     <span class="label">Every glowing gene in the game changed, and nothing here can see it &mdash; test kit batch 2</span>
     <p>
@@ -74,13 +99,31 @@
 </div>
 
 <ul>
-    <li><strong>Look at a soft-edged glow at night, before and after.</strong> The
-        genes to bring are the ones whose glow sits behind a noise or band mask rather
-        than a part list &mdash; <a href="gene-emberveins.html">ember veins</a>,
-        <a href="gene-datarain.html">data rain</a>, <a href="gene-geode.html">geode</a>,
-        <a href="gene-gamma.html">gamma</a>, <a href="gene-angler.html">angler</a>. The
-        question is whether the fade reads as a glow falling off or as a glow that has
-        gone weak and patchy.</li>
+    <li><strong>Look at a soft-edged glow at night.</strong> <strong>The list this entry
+        first gave was wrong</strong>, and the owner found it in about a minute: &ldquo;I
+        don't think ember veins has any fall off.&rdquo; It does not, and it should not.
+        The genes were picked by whether their glow sat behind a field mask rather than a
+        part list, which is not the same question as whether that mask has a soft
+        <em>edge</em>. Measured, the lit layers are:
+        <a href="gene-emberveins.html">ember veins</a> 0.04&ndash;0.2,
+        <a href="gene-angler.html">angler</a> 0.12&ndash;0.18,
+        <a href="gene-geode.html">geode</a> a soft <code>AXIS</code> times a
+        <code>WAVES</code> at 0.09, <a href="gene-datarain.html">data rain</a> soft bands
+        times a <code>SPECKLE</code> &mdash; all hard-edged by construction, and all
+        correct to look unchanged.</li>
+    <li><strong>The one to actually look at is <a href="gene-gamma.html">gamma</a></strong>
+        (<code>SPOTS</code> at softness <strong>1.8</strong>, the softest lit mask in the
+        mod), and the two already confirmed: <a href="gene-lantern.html">lantern</a>'s
+        bloom (<code>CENTERLINE</code> 1.2) and <a href="gene-tron.html">tron</a>'s halo
+        (<code>EDGE</code> 0.55). <a href="gene-rime.html">Rime</a> at 0.5 is a distant
+        fourth.</li>
+    <li><strong>Why the rest cannot show it, and it is worth knowing:</strong> a layer's
+        masks fold by <code>MULTIPLY</code>, so <strong>the hardest mask in a layer
+        governs its edge</strong>. Geode's glints are a <code>WAVES</code> at 0.09 inside
+        an <code>AXIS</code> at 3.0 and the product is as hard as the 0.09; data rain's
+        flecks are soft bands times a <code>SPECKLE</code>. Coverage there goes 0 to 1
+        over almost no distance, so coverage-times-level is level-or-nothing and the
+        change is invisible - which is the correct outcome, not a missing feature.</li>
     <li><strong>Is a dim glow visible at all?</strong> The intensity is the second
         texture's alpha over a blended pass, so a 0.2 texel is a fifth of full bright
         over the coat as the world lit it. In daylight that may be nothing at all.
@@ -99,7 +142,37 @@
         is wrong rather than the levels.</li>
 </ul>
 
-<h2 id="dialled-genes">&sect;0-CP &mdash; Starburst scales, Lantern and Tron burn (2026-09-12, NOT looked at)</h2>
+<h2 id="highlight-crash">&sect;0-CQ &mdash; F8's highlight no longer crashes the server (2026-09-12, NOT looked at)</h2>
+
+<div class="note danger">
+    <span class="label">A crash in a feature that ships in real builds</span>
+    <p>
+        The horse highlight took every nearby horse off the herd-lead scoreboard team,
+        including the ones never on it, and
+        <code>Scoreboard.removePlayerFromTeam</code> throws for those. It hid as
+        &ldquo;F8 only turns on&rdquo; for four minutes and then killed the integrated
+        server from the auto-off tick. <strong>This is not dev-only</strong>: the binding
+        is registered outside the production gate because the testers asked for it, so a
+        real jar can hit it.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Press F8 twice.</strong> Second press must say <em>Horse highlight
+        OFF</em> and the outlines must go. That is the half that never worked.</li>
+    <li><strong>Then leave it on for four minutes</strong> near a herd with a lead in it.
+        It should say <em>Horse highlight timed out</em> and stay up. That is the path
+        that crashed.</li>
+    <li><strong>Check a herd lead's name goes back to white</strong> when the highlight
+        goes off - it is red only while on the team, and the removal is now conditional,
+        so a lead that somehow ends up on another team is left alone rather than throwing.</li>
+    <li><strong>Nothing else should be able to take the world down either.</strong> The
+        tick now switches the overlay off and says so instead of propagating. If you ever
+        see <em>Horse highlight hit an error and switched itself off</em>, that guard did
+        its job and there is a stack trace in the log worth reading.</li>
+</ul>
+
+<h2 id="dialled-genes">&sect;0-CP &mdash; Starburst scales, Lantern and Tron burn (2026-09-12, the scaling is confirmed)</h2>
 
 <div class="note">
     <span class="label">The first three genes to use the dial &mdash; and the first horses that differ in a way you can measure by eye</span>
@@ -119,30 +192,59 @@
     </p>
 </div>
 
+<div class="note good">
+    <span class="label">The scaling reads right &mdash; owner-confirmed 2026-09-12</span>
+    <p>
+        &ldquo;The starburst does indeed look like a smooth variety of sizes.&rdquo; That
+        was the open question and the one nothing in the repo could answer: a
+        <code>pointsMin</code> floor of 45% with a uniform dial over 0.45&ndash;1.0 gives a
+        <strong>continuum</strong> rather than two sizes with a gap, so the floor does not
+        want raising and the morph is doing what it was built to do on a real horse.
+    </p>
+    <p>
+        It is the first evidence that <a href="making-a-gene.html#pointsmin">a drawn
+        marking that erases down</a> is worth having at all, which is the thing the whole
+        feature rested on. What is still unseen below is everything else about these three
+        genes.
+    </p>
+</div>
+
 <ul>
-    <li><strong><a href="gene-starburst.html">Starburst</a>: the emblem is a different
-        size on every horse.</strong> Every one of its twenty-one paths is centred on the
-        same point, so <code>pointsMin</code> is each one scaled about that centre to 45%
-        and the whole emblem grows and shrinks as one thing. <strong>Breed a few and line
-        them up.</strong> The question is whether the range reads as natural variation or
-        as two sizes with a gap: the dial is uniform over 0.45&ndash;1.0, and if the small
-        end looks like a different marking rather than a smaller one, the floor wants
-        raising.</li>
     <li><strong>Its shards were retuned on the way past</strong> (spacing 3.4 &rarr; 2.8,
         chance 0.4 &rarr; 0.5) because they were <em>already</em> a coin flip &mdash;
         measured over twenty horses, the layer painted nothing on five of them. Look at a
         big emblem and check the shards read as a shattered star rather than as speckle.</li>
     <li><strong><a href="gene-lantern.html">Lantern</a>'s bloom is lit now</strong>, at
-        22%, with the mane carry at 18% and the core on the dial (0.35&ndash;1.0). The
-        light should <em>spill</em> off the line and fade, rather than stopping at the
-        core's edge. <strong>At night, and up close.</strong> Two horses side by side,
-        one near each end of the dial, is the check that the dial is doing anything.</li>
+        22%, with the mane carry at 18% and the core on the dial (0.35&ndash;1.0).
+        <strong>Partly confirmed 2026-09-12</strong>: &ldquo;it does seem like lantern has
+        different light levels&rdquo;, which is the dial reaching the renderer &mdash; a
+        knob-driven glow is a level per horse and it is visibly one. <strong>What that
+        does not yet say is whether the light FALLS OFF.</strong> One horse, at night, up
+        close: the bloom either side of the line should fade out over its own soft mask
+        rather than ending on a line at the core's edge. That is the half of the change
+        that touches every glowing gene in the game, and it is a different observation
+        from horse-to-horse variation.</li>
     <li><strong><a href="gene-tron.html">Tron</a>'s haloes are lit at 25%</strong> and its
-        tubes are on the dial (0.4&ndash;1.0). The <code>both</code> expression is the
-        interesting one: the solid tube and the gradient tube are separate layers, they
-        light independently, and where they overlap the <strong>brighter</strong> wins
-        rather than the two summing. If an overlap looks blown out, that rule is not
-        working.</li>
+        tubes are on the dial (0.4&ndash;1.0). <strong>Confirmed 2026-09-12</strong>:
+        &ldquo;Tron does indeed have a glowing diffuse painted along the body for both
+        forms, though more noticeable in the gradient form.&rdquo; A soft-masked layer
+        carrying light is the whole of what the threshold removal bought, so this is the
+        first sighting of it working on a horse.</li>
+    <li><strong>Why the gradient reads stronger &mdash; and it is not the level.</strong>
+        Both haloes are <code>"emissive": 0.25</code> and both paint at
+        <code>strength 34</code>; the only difference is that the gradient's op is a
+        <code>RAMP</code> sweeping hue 300&deg; along the body where the solid's is one
+        flat hue. <strong>A glow has no colour of its own</strong> - the emissive texture
+        is written with whatever colour the coat ended up being at that texel - so two
+        layers lit to exactly the same level read differently depending on what they
+        painted. Worth knowing before somebody &ldquo;fixes&rdquo; a dim-looking glow by
+        raising its level when the answer is its colour.</li>
+    <li><strong>Still unseen: the <code>both</code> egg's overlap.</strong> That horse
+        carries solid and gradient tubes as separate layers on the same edges, and where
+        they cross <code>CoatOverlay</code> takes the <strong>brighter</strong> rather
+        than summing. Blown out to flat white there means the max-not-sum rule is broken.
+        Note the two haloes' <em>paint</em> does sum, so that horse's wash is more
+        colourful than either form alone - that part is expected.</li>
     <li><strong>Is a flat halo beside a varying core right?</strong> The haloes are
         constants because the format has no arithmetic - "a quarter of the core" cannot
         be written - so a dim Lantern has a proportionally brighter bloom than a bright

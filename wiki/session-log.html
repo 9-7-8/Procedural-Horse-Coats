@@ -163,6 +163,106 @@
         only the fixture was stale.</li>
 </ul>
 
+<h3>And then somebody played it, which found four things no test had</h3>
+
+<p>
+    The owner ran the client on this machine and worked through the kit. Everything
+    below came out of about twenty minutes of that, and none of it was reachable from
+    the repo: two confirmations, a wrong instruction of mine, a crash, and two
+    tools that do not work.
+</p>
+
+<p>
+    <strong>The features are right.</strong> Starburst's emblem &ldquo;does indeed look
+    like a smooth variety of sizes&rdquo; - the 45% floor gives a continuum rather than
+    two sizes with a gap, which was the open question and the whole bet of the minimal
+    shape. Lantern shows &ldquo;different light levels&rdquo; per horse, Tron has
+    &ldquo;a glowing diffuse painted along the body for both forms&rdquo;, gamma, geode
+    and angler read right, and <a href="gene-suntouched.html">suntouched</a> - the
+    control, which lights whole parts at full alpha and must look untouched -
+    &ldquo;does indeed look the same as before&rdquo;. <a href="verification.html">&sect;0-CO</a>
+    is closed on that pair of readings: changed where the masks are soft, identical
+    where the path is old.
+</p>
+
+<div class="note">
+    <span class="label">&ldquo;I don't think ember veins has any fall off&rdquo; - and it should not</span>
+    <p>
+        The checklist I wrote for &sect;0-CO named five genes to look at and picked them
+        by the wrong property: whether the glow sat behind a field mask rather than a part
+        list. That is not the same question as whether the mask has a soft <em>edge</em>.
+        Measured afterwards, ember veins' lit layers are 0.04 to 0.2 and data rain's are
+        soft bands multiplied by a <code>SPECKLE</code> - hard by construction, so
+        coverage-times-level is level-or-nothing and the change cannot show. The owner
+        found both in a minute.
+    </p>
+    <p>
+        The rule worth keeping: <strong>masks fold by MULTIPLY, so the hardest mask in a
+        layer governs its edge</strong>. Geode's glints are a <code>WAVES</code> at 0.09
+        inside an <code>AXIS</code> at 3.0 and the product is as hard as the 0.09. The
+        softest lit mask in the mod is gamma's <code>SPOTS</code> at 1.8, and gamma is the
+        gene that actually demonstrates the feature. On <a href="making-a-gene.html#emissive">the
+        format page</a> now, next to the other thing that session taught: a glow has no
+        colour of its own, so Tron's two haloes at an identical 0.25 read differently
+        because one sweeps 300&deg; of hue and the other is flat.
+    </p>
+</div>
+
+<h3>F8 crashed the server, and had been lying about it for four minutes first</h3>
+
+<p>
+    Reported as &ldquo;F8 isn't toggling off, only turning on&rdquo;, and then, minutes
+    later, &ldquo;the game just crashed&rdquo;. <strong>One cause.</strong> The horse
+    highlight puts herd leads on a scoreboard team and took every nearby horse
+    <em>off</em> it again - but only leads were ever added, and
+    <code>Scoreboard.removePlayerFromTeam(name, team)</code> throws for an entry that is
+    not on that team. It threw on the first ordinary horse it reached.
+</p>
+
+<ul>
+    <li>On the <strong>OFF press</strong> it threw inside the packet handler, after the
+        player had been removed from the on-set and before the "OFF" message - so the
+        toggle silently un-toggled and the next press said ON again.</li>
+    <li>Four minutes later the <strong>auto-off</strong> ran the same line from
+        <code>ServerTickEvent.Post</code>, where nothing catches it, and the server died
+        with <em>Exception in server tick loop</em>. The gap between the last keypress and
+        the crash is exactly why the two reports did not look related.</li>
+</ul>
+
+<p>
+    Fixed by asking the scoreboard first, and by wrapping what the overlay does so that
+    anything else going wrong in there <strong>switches the overlay off rather than ending
+    the tick loop</strong>. Worth being blunt about: this binding is registered
+    <em>outside</em> the production gate on purpose, because the testers asked for it, so
+    "it is only a dev tool" was never true of it and a released jar could hit this.
+    <a href="verification.html#highlight-crash">&sect;0-CQ</a>, with the API asymmetry on
+    <a href="api-notes.html">api-notes</a> - <code>addPlayerToTeam</code> is forgiving,
+    <code>removePlayerFromTeam</code> is not.
+</p>
+
+<h3>Two tools that do not work, found by using them</h3>
+
+<ul>
+    <li><strong>The test kit only ever hands out mares.</strong> Every preset egg in it is
+        <code>Sex.FEMALE</code>, and <code>HorseBreedingHandler</code> cancels same-sex
+        pairings - so batch 3's spontaneous-breeding test ("spawn FOUR in a wide fenced
+        field, come back and count") <strong>cannot ever have produced a foal</strong>,
+        and neither can the starburst breeding slot written the same day. A test that
+        cannot pass is worse than no test: it was on the checklist looking like coverage.</li>
+    <li><strong>"Make egg" in the custom spawn screen does nothing.</strong> No egg, no
+        refusal, and - decisively - <em>nothing in the log</em>, where every refusal on
+        that path logs at INFO. So the packet never left the client. The button is not
+        greyed (the owner checked), which leaves a widget sitting on top of it eating the
+        click: the same family as <a href="known-gaps.html">gap 139</a>, where "Clear
+        genes" and "Make egg" overlapped in a real window.</li>
+</ul>
+
+<p class="muted">
+    Both are recorded rather than fixed, because the session ran out before them. The kit
+    is the one to do first - it is three <code>Sex.MALE</code> arguments and it unblocks a
+    test that has never run.
+</p>
+
 <h3>Then three genes picked it up</h3>
 
 <p>

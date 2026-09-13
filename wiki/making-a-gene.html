@@ -1689,6 +1689,27 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
         summing would make a horse carrying two faint glows brighter than one
         carrying a real one.
     </p>
+    <p>
+        <strong>The hardest mask in the layer governs the falloff.</strong> Masks fold by
+        <code>MULTIPLY</code>, so a soft <code>AXIS</code> times a <code>SPECKLE</code>
+        is as hard as the speckle, and a glow behind it goes from nothing to its full
+        level over almost no distance. That is usually what a gene wants - ember veins'
+        filament is a <code>FRACTAL</code> at softness 0.04 because a vein of light
+        should be a <em>line</em> - and it does mean the level and the falloff are two
+        separate decisions. If you want a glow that fades, every mask in the layer has to
+        be soft, not just one of them.
+    </p>
+    <p>
+        <strong>A glow has no colour of its own.</strong> The emissive texture is
+        written with whatever colour the coat ended up being at that texel, so the
+        level says <em>how much</em> and the layer's op says <em>what colour</em>. Two
+        layers at the same level can therefore read very differently:
+        <a href="gene-tron.html">Tron</a>'s two haloes are both
+        <code>"emissive": 0.25</code> at <code>strength 34</code>, and the gradient one
+        is visibly the stronger on a horse because its <code>RAMP</code> sweeps 300&deg;
+        of hue where the solid one is flat (owner-confirmed 2026-09-12). If a glow looks
+        too faint, look at what the layer is painting before reaching for the level.
+    </p>
 </div>
 
 <p>

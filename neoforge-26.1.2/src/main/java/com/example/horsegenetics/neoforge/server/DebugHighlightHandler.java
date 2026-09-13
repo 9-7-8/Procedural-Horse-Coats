@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -76,7 +77,7 @@ public final class DebugHighlightHandler {
     public static void toggle(ServerPlayer player) {
         EXPIRES.remove(player.getUUID());
         if (ON.remove(player.getUUID())) {
-            clearNear(player);
+            safely(player, () -> clearNear(player));
             player.sendSystemMessage(Component.literal("Horse highlight OFF")
                     .withStyle(ChatFormatting.GRAY));
         } else {
@@ -85,7 +86,7 @@ public final class DebugHighlightHandler {
                 EXPIRES.put(player.getUUID(),
                         (long) player.level().getServer().getTickCount() + AUTO_OFF_TICKS);
             }
-            glowNear(player);
+            safely(player, () -> glowNear(player));
             player.sendSystemMessage(Component.literal("Horse highlight ON - herd leads in ")
                     .withStyle(ChatFormatting.GRAY)
                     .append(Component.literal("red").withStyle(ChatFormatting.RED))
@@ -138,12 +139,34 @@ public final class DebugHighlightHandler {
             if (expires != null && now >= expires) {
                 ON.remove(id);
                 EXPIRES.remove(id);
-                clearNear(player);
+                safely(player, () -> clearNear(player));
                 player.sendSystemMessage(Component.literal(
                         "Horse highlight timed out.").withStyle(ChatFormatting.GRAY));
                 continue;
             }
-            glowNear(player);
+            safely(player, () -> glowNear(player));
+        }
+    }
+
+    /**
+     * <b>A debug overlay may not take a world down.</b> This one did: a
+     * scoreboard call that throws on an entry it was never given ran from the
+     * tick loop and ended the server (see {@link #clearNear}). The call is
+     * fixed, and this is the belt beside it - anything that still goes wrong in
+     * here turns the highlight off for that player and says so, rather than
+     * ending the tick loop for everybody.
+     */
+    private static void safely(ServerPlayer player, Runnable work) {
+        try {
+            work.run();
+        } catch (RuntimeException e) {
+            ON.remove(player.getUUID());
+            EXPIRES.remove(player.getUUID());
+            HorseGenetics.LOGGER.error("[Debug] horse highlight failed for {} - switching it off",
+                    player.getGameProfile().name(), e);
+            player.sendSystemMessage(Component.literal(
+                    "Horse highlight hit an error and switched itself off.")
+                    .withStyle(ChatFormatting.RED));
         }
     }
 
@@ -166,15 +189,33 @@ public final class DebugHighlightHandler {
         }
     }
 
+    /**
+     * <b>Ask before removing.</b> {@code Scoreboard.removePlayerFromTeam(name,
+     * team)} <i>throws</i> when the entry is not on that team - it is written
+     * for the {@code /team leave} command, where being on the team is the
+     * precondition - and every horse here but a herd lead was never added.
+     *
+     * <p>That threw on the very first horse and took two things with it: the
+     * exception escaped the packet handler on the OFF press, so the toggle
+     * removed the player from {@link #ON}, never said "OFF", and read as "F8
+     * only turns on"; and four minutes later the same line ran from
+     * {@link #onServerTick} and <b>crashed the server</b>
+     * (2026-09-12, owner's session). A debug overlay is not allowed to take a
+     * world down, which is also why the tick that calls this is wrapped.
+     */
     private static void clearNear(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel level)) {
             return;
         }
+        Scoreboard scoreboard = level.getScoreboard();
+        PlayerTeam lead = leadTeam(level);
         for (Horse h : level.getEntitiesOfClass(Horse.class, player.getBoundingBox().inflate(RADIUS + 32))) {
             h.removeEffect(MobEffects.GLOWING);
             // Off the team as well, so a lead does not keep a red name after
-            // the highlight is off.
-            level.getScoreboard().removePlayerFromTeam(h.getStringUUID(), leadTeam(level));
+            // the highlight is off - but only if it is actually on it.
+            if (scoreboard.getPlayersTeam(h.getStringUUID()) == lead) {
+                scoreboard.removePlayerFromTeam(h.getStringUUID(), lead);
+            }
         }
     }
 }
