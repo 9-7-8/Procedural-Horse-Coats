@@ -664,18 +664,34 @@ final class DebugYardGameplay {
      * that fills for ever is the cap not working.
      */
     private static void buildEggLayerPen(ServerLevel level, int gy, int cx, int mouthZ) {
+        // ALL EIGHT ALLELES ARE CONFIRMED. The log caught every one of them
+        // dropping its own item - leather, wool, bone, slime, ink, feather,
+        // string and egg - so the "does each allele produce its own thing"
+        // half is finished and its eight horses are gone.
+        //
+        // WHAT IS LEFT IS THE CAP, AND THE OLD PEN COULD NOT TEST IT. I said
+        // it was close to answerable and that was wrong: NEARBY_CAP counts
+        // items within six blocks OF EACH LAYING HORSE, and eight horses spread
+        // over a nineteen-wide pen each have their own neighbourhood, so a pen
+        // total of eleven is perfectly legal and proves nothing. What bounded
+        // that pen was the 6000-tick despawn timer, exactly as gap 207
+        // predicted.
+        //
+        // Four layers of the SAME allele, packed into one corner so their
+        // six-block circles overlap almost completely. Now the pen total IS the
+        // local count, the cap is reachable, and a floor that fills and then
+        // STOPS is the pass.
         String[][] lays = {
-                {"Egg", "EGGS"}, {"Fthr", "FEATHERS"}, {"Wl", "WOOL"}, {"Slm", "SLIME"},
-                {"Ink", "INK"}, {"Str", "STRING"}, {"Bne", "BONE"}, {"Lthr", "LEATHER"}};
+                {"Egg", "EGGS 1"}, {"Egg", "EGGS 2"}, {"Egg", "EGGS 3"}, {"Egg", "EGGS 4"}};
         int x0 = cx + EAST_MIN;
         int x1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
         int z0 = mouthZ + ROW_D;
         int z1 = z0 + ROW_D_D;
         DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("EGG LAYER x8", "one per allele.", "Does it fill, then", "STOP? (the cap)"));
+                List.of("EGG LAYER: THE CAP", "4 layers, ONE spot.", "All 8 alleles are", "confirmed already"));
         for (int i = 0; i < lays.length; i++) {
-            DebugTestYard.stock(level, gy, x0 + 2.0 + (i % 4) * 4.0, z0 + 3.0 + (i / 4) * 5.0,
+            DebugTestYard.stock(level, gy, x0 + 3.0 + (i % 2) * 2.0, z0 + 3.0 + (i / 2) * 2.0,
                     "horsegenetics.egg_layer", "LAYS " + lays[i][1], 1, 0,
                     lays[i][0] + "/" + lays[i][0]);
         }

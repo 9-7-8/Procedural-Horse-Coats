@@ -341,13 +341,21 @@ final class DebugYardCombat {
      * sword on the ground is not an answer unless you know which one died.
      */
     private static void buildDeathbed(ServerLevel level, int gy, int cx, int mouthZ) {
+        // FIVE OF THE SIX ARE CONFIRMED and their horses are gone. Owner,
+        // 2026-09-13: "on death now works perfectly", and the log backs every
+        // word of it - an iron_sword and a preset_horse_spawn_egg in the drop
+        // list, brick_wall and cobblestone debris where the volatile one went
+        // off, and a neighbouring horse killed "from lava" by the spring the
+        // next one left behind.
+        //
+        // The diamond allele is the exception, and only because she ran out of
+        // horses: the census read "THE DEATHBED | horses 1" when the killing
+        // stopped, so the one still standing was the one that had not been
+        // tested. It is not in doubt - it shares its code path with the sword
+        // and the egg - it is simply unseen, and unseen is what this yard
+        // exists to fix.
         String[][] rows = {
-                {"horsegenetics.magic_item_drop", "Dia", "DROPS DIAMOND"},
-                {"horsegenetics.magic_item_drop", "Egg", "DROPS ITS OWN EGG"},
-                {"horsegenetics.magic_item_drop", "Swd", "DROPS A SWORD"},
-                {"horsegenetics.magic_on_death", "Lav", "DIES: LAVA SPRING"},
-                {"horsegenetics.magic_on_death", "Wat", "DIES: WATER SPRING"},
-                {"horsegenetics.magic_on_death", "Xpl", "DIES: EXPLODES"}};
+                {"horsegenetics.magic_item_drop", "Dia", "DROPS DIAMOND"}};
         int x0 = cx + WEST_MIN;
         int x1 = cx + WEST_MAX;
         int z0 = mouthZ + ROW_K;
@@ -360,7 +368,7 @@ final class DebugYardCombat {
         }
         DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("THE DEATHBED", "KILL THESE SIX.", "Sword is in the", "tack room chest"));
+                List.of("THE DEATHBED", "one left: KILL IT.", "The other five are", "confirmed + gone"));
         // Kept apart: the explosive one must not take the other five with it
         // before anybody has killed them, and a lava spring next to a
         // neighbour is a second death nobody asked for.

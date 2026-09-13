@@ -433,7 +433,6 @@ final class DebugTestYard {
      * its neighbour at the time was a night-hunter with a cow of its own.</p>
      */
     private static void buildNightBlock(ServerLevel level, int gy, int cx, int mouthZ) {
-        buildDhampirPen(level, gy, cx, mouthZ);
     }
 
     /**
@@ -478,76 +477,20 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>Dhampir: a paddock, a herd, and an open sky.</b>
+     * <b>Gone: dhampir is confirmed, both halves.</b> Owner, 2026-09-13:
+     * <i>"confirmed that dhampirs burn to death and smoke during the day"</i>
+     * and <i>"confirmed that dhampirs can attack cows and feed on them, one per
+     * animal, non-fatal"</i> - which is the whole cycle, sun to bite to heal.
      *
-     * <p>The gene is a <i>cycle</i>, and no single moment of it looks like
-     * anything: it burns in daylight, runs for shade, and when it is below full
-     * health it hunts an animal, bites it for half a heart, heals three, and
-     * then leaves that one alone for a day. The only previous sighting was "it
-     * did damage a cow, though I'm not sure what else that did" - which is one
-     * frame of a five-step loop.
-     *
-     * <h2>The damage source is the sun, and it was being cancelled</h2>
-     * No debug damager is needed and none was added. Daylight <i>is</i> the
-     * damage: {@code DhampirHandler} calls {@code hurtServer(onFire)} every two
-     * seconds under an open sky. What stopped it was the dimension's own rule
-     * cancelling <b>all</b> horse damage - so the horse never lost health, never
-     * dropped below full, and the hunt goal's first condition was never true.
-     * Fire is exempt from that rule now, which is the fourth time today a
-     * protection in this dimension turned out to be the reason a gene "did
-     * nothing".
-     *
-     * <h2>Why it is big, open, and full of cows</h2>
-     * <b>No roof and no trees</b>, so it burns rather than sheltering - the
-     * shade goal would otherwise park it in a corner and the loop would never
-     * start. <b>Eight cows</b>, because a bitten animal is off the menu for a
-     * day and the design deliberately makes the triple health something a herd
-     * pays for. And <b>room</b>, because hunting is pathfinding and the shy
-     * paddocks taught that lesson already.
-     *
-     * <p>The evidence is in the log rather than the eye: every horse hurt and
-     * every horse healed writes a line, so the sequence reads as
-     * burn, burn, burn, bite, <b>+6.0 health</b>.
+     * <p>The pen outlived the test by several hours, because once the gene was
+     * proven the remaining work was keeping the animal <em>alive</em> - a
+     * shelter, then walls, then a shade goal that aims two rings in, holds
+     * until nightfall, and gives up on squares the navigator refuses. All of
+     * that is real and none of it needed a pen: it is behaviour, it applies to
+     * every dhampir in every world, and the place to confirm it is a horse in
+     * a field rather than a paddock with eight cows in it.
      */
-    private static void buildDhampirPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + WEST_MIN;
-        int x1 = cx + WEST_MAX;
-        int z0 = mouthZ + ROW_I;
-        int z1 = z0 + ROW_I_D;
-        // WALLED, NOT FENCED, because this is the one horse in the yard that
-        // RUNS. Owner, 2026-09-13: "the dhampir keeps walking out of the pen."
-        // DhampirShadeGoal paths at speed 1.6 and holds Flag.JUMP, and a horse
-        // at a gallop with jump control clears a one-block fence - which no
-        // other pen here ever discovers, because nothing else in the yard is
-        // trying to be somewhere else at speed.
-        walledPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("DHAMPIR", "walled + open top:", "fly in. Shelter is", "5 blocks from spawn"));
-
-        // AND THE SHELTER MOVES BESIDE THE SPAWN. It was at the far corner,
-        // just under ten blocks away against a SEARCH_RADIUS of twelve - in
-        // range, but only barely, and the search runs from wherever the horse
-        // currently IS rather than from where it was placed. A few blocks of
-        // drift toward the south or east wall and the roofed arena one row over
-        // comes into range while its own roof drops out of it, and then the
-        // animal is correctly pathing to the nearest shade in the world and
-        // that shade is outside the fence.
-        //
-        // Five blocks now, so its own roof stays nearest wherever it wanders.
-        // Not inside the shelter, because it has to start in the sun for the
-        // burn-bite-heal loop to run at all.
-        // NINE BY NINE, because PREFERRED_MARGIN is two: a block two rings in
-        // from every edge needs a 5x5 of cover around it, and the 6x6 roof this
-        // started as offered exactly four such blocks - one of which had the
-        // hay bale on it. A 9x9 leaves a 5x5 core, so there is somewhere to
-        // stand however the horse drifts.
-        shelter(level, gy, x0 + 7, x0 + 15, z0 + 6, z0 + 14);
-        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.dhampir",
-                "THE DHAMPIR", 1, 0, null);
-        for (int i = 0; i < 8; i++) {
-            spawnCow(level, gy, x0 + 3.0 + (i % 4) * 3.0, z0 + 3.0 + (i / 4) * 3.0);
-        }
-        DebugWorldWatch.watch("DHAMPIR", box(x0, gy, z0, x1, gy + 1, z1), null);
+    private static void buildDhampirPenRetired() {
     }
 
     /**

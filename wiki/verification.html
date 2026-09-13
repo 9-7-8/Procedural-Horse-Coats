@@ -80,231 +80,115 @@
     </p>
 </div>
 
-<h2 id="yard-whole-mod">&sect;0-DJ &mdash; The yard is most of the mod now, and the horses can be killed in it (2026-09-13, NOT looked at)</h2>
+<h2 id="audit-0913">&sect;0-DK &mdash; Audit, and what is actually still open (2026-09-13)</h2>
 
-<div class="note danger">
-    <span class="label">The fifth protection that was the reason a gene &ldquo;did nothing&rdquo;</span>
-    <p>
-        Owner: <em>&ldquo;remove the 'no horse damage' exception in the yard.&rdquo;</em>
-        <code>HorseGeneticsEventHandler.noHorseDamageInDebugDimension</code> is
-        <strong>gone</strong>, not narrowed. It cancelled every
-        <code>LivingIncomingDamageEvent</code> aimed at a horse in this dimension, and it
-        made <strong>six genes</strong> untestable in the one dimension built for testing:
-        guardian and gladiator need a fight, healer needs a patient below full, cleansing
-        light needs undead, ender echo is <em>triggered</em> by being hit, and both death
-        loci need the horse to die.
-    </p>
-    <p>
-        That is the <strong>fifth</strong> time a protection here turned out to be why a
-        gene looked dead &mdash; after the mob deleter, the spread verb's early return, the
-        missing night, and the dhampir's cancelled sunburn. The shape never changes and is
-        worth writing down one more time: <strong>a gene that does nothing and a gene that
-        is forbidden from doing anything are identical from inside the game.</strong>
-    </p>
-    <p>
-        <strong>It costs something, and the cost is real.</strong> Horses in this dimension
-        can now be killed &mdash; by a zombie, by a fall, by you. The unattended pens run
-        all night and a dead subject reports nothing, so the morning's log would read as
-        the gene having stopped. Two mitigations: the whole open yard is lit (below), and
-        every monster in it now comes from a spawner inside a roofed arena.
-    </p>
-</div>
-
-<h3>What to check, in order &mdash; the six that could not be tested at all before today</h3>
-<ul>
-    <li><strong>Guardian</strong>, row J west. Tamed to you, saddled, with its own zombie
-        spawner. <strong>Let a zombie hit YOU</strong> and watch what the horse does. It
-        only <em>retaliates</em> &mdash; it must never pick the fight, which is the whole
-        difference from its neighbour.</li>
-    <li><strong>Gladiator</strong>, row J west, beside it, deliberately <em>not</em> in the
-        same pen. Same ability verb, different trigger: <code>Continuous</code> while
-        <code>has_rider</code>. <strong>Ride it.</strong> It should start the fight itself,
-        and should do nothing at all while nobody is on it. One pen holding both could not
-        have told you which horse killed the zombie.</li>
-    <li><strong>Healer</strong>, row J east. Three companions named <code>PATIENT 1-3</code>,
-        already at <strong>half health</strong> when the yard is built &mdash; which was
-        impossible until today. Read the <code>horse healed</code> lines: a run of heals
-        with no damage between them is the pass. A pen of healthy horses measures nothing
-        and would have read as the gene being dead.</li>
-    <li><strong>Cleansing light</strong>, row J east. A healing verb pointed at undead,
-        doing damage instead. Its arena has a spawner so it does not have to wait for
-        night. <strong>Zombies must die near it and nothing else should.</strong></li>
-    <li><strong>The deathbed</strong>, row K west. Six horses, each named for what it does
-        when killed: three drop something (diamond, its own egg, a sword) and three leave
-        something behind (a lava spring, a water spring, an explosion). A sword is in
-        batch 2 and in the tack room. The three that drop answer themselves in the log;
-        the three that do not have to be watched.</li>
-    <li><strong>Ender echo</strong>, row K east, a wide pen and a saddled pair. Hit it
-        unridden: it should blink. Then ride one and hit it again &mdash; the kit called
-        this <em>&ldquo;the likeliest desync in the mod&rdquo;</em> and the unridden half
-        has never fired here at all, because nothing could hurt a horse.</li>
-</ul>
-
-<h3>And three more that were simply never in the yard</h3>
-<ul>
-    <li><strong>Eyesight</strong>, row I east, built as a <strong>lit half and a dark
-        half</strong> with an attribute readout on each. It is the same shape as the
-        weather loci &mdash; a conditional modifier, invisible either way &mdash; and the
-        weather loci were reported as broken for exactly that reason before a readout
-        settled them. <strong>The pass is a difference between the halves</strong>, not any
-        particular number.</li>
-    <li><strong>Egg layer</strong>, row D east: <strong>all eight alleles in one pen</strong>.
-        Legitimate rather than a confound, because each pair drops a different item and the
-        watch counts the item &mdash; a feather can only have come from the feather horse.
-        It also tests <code>NEARBY_CAP</code> for free: a pen that fills and then
-        <strong>stops</strong> is the pass; one that fills for ever is the cap not working.</li>
-    <li><strong>Ocean-born</strong>, row E west, the last rider-immunity gene never played.
-        A five-deep stone tank, open at the top, with a saddled pair already in it. Ride
-        it under: <strong>does your own air bar move?</strong> The kit handed out a water
-        bucket for this twice, and a bucket makes a puddle.</li>
-</ul>
-
-<h3>Rows B, C and D: the item and gameplay layer, with the fetching taken out</h3>
 <p>
-    Owner: <em>&ldquo;add the yard able and entire item and gameplay layer as well as
-    villagers. Add literally everything that CAN be tested in the yard.&rdquo;</em> None of
-    it had ever been in the yard. It lived in the test kit's hotbar, nine slots at a time,
-    with a legend full of <em>building work</em> &mdash; &ldquo;hang on a pen wall&rdquo;,
-    &ldquo;fill a stall solid&rdquo;, &ldquo;even L-shaped or narrower than the horse&rdquo;
-    &mdash; that the tester had to do before the item could be tried. Those are the
-    instructions nobody follows twice, and batches 3 and 4 were taken and put away three
-    days running.
-</p>
-<ul>
-    <li><strong>The tack room</strong> (B west) &mdash; five labelled chests holding
-        <strong>one of every item in the mod</strong>, plus the tools they need. The feed
-        chest is every one of the twelve foods the food-preference locus knows, in the
-        gene's own order.</li>
-    <li><strong>The horseman and the cowboy</strong> (B east) &mdash; both standing at
-        their own workstation, with a <code>horsemans_table</code>, two research shelves, a
-        <code>cowboy_hitch</code>, two tamed horses and a chest of papers. <strong>No
-        village to find and no barn to hunt</strong>, which
-        <a href="villagers.html">villagers.html</a> calls most of the cost of testing
-        either of them. What this room does <em>not</em> test is acquisition: whether a
-        horseman actually spawns in a real village, and whether the barn generates, are
-        worldgen questions a hand-placed villager says nothing about.</li>
-    <li><strong>The ticket stalls</strong> (C west) &mdash; a plain holding pen as the
-        control, then four deliberately awkward enclosures already built: one barely wider
-        than a horse, one <strong>L-shaped</strong> (where &ldquo;dead centre&rdquo; is not
-        the centre of the bounding box), one <strong>packed solid with hay</strong> (the
-        ticket must refuse <em>and not be consumed</em> &mdash; a spent ticket on a failed
-        teleport is the worst outcome here, because it looks like it worked), and one
-        roofed, so the bind's height message can be checked against a real lid.</li>
-    <li><strong>The carrot bench</strong> (C east) &mdash; all nine splice carrots plus the
-        magnifier and the stabiliser, and four horses stocked with <strong>no named locus
-        at all</strong>. Every other pen in this yard deliberately avoids that; the carrots
-        are the one thing designed for it, and a carrot fed to a horse whose genotype you
-        already know cannot surprise you.</li>
-    <li><strong>The dairy and the clip</strong> (D west) &mdash; the three potion-milk
-        refusals with the setup already done: <strong>the mare is already hurt and the foal
-        is already a foal</strong>. Nothing happening is the correct behaviour three times
-        over here, which is what makes it so easy to pass by accident &mdash; the
-        <em>message</em> is the evidence, not the absence of a potion. Two more horses
-        named <code>SHEAR ME</code> for the horse-hair chain.</li>
-    <li><strong>Food preference</strong> (E east) &mdash; four horses, four different
-        loves, one pen, each wearing the name of what it loves. <strong>Feed all four the
-        same apple.</strong> One reacting is the gene; none is another mod eating the
-        event; all four is the favourite not being read.</li>
-</ul>
-
-<div class="note">
-    <span class="label">Two lighting bugs came out of lighting the yard, and one of them had been live all day</span>
-    <p>
-        A biome that spawns zombies plus horses that can be hurt is every unattended pen
-        losing its subject overnight, so the open yard is lit now &mdash; invisible light
-        blocks, full brightness, no collision, nothing in the way of a fleeing horse. It
-        also closes <a href="known-gaps.html">gap 212</a>: hostiles were appearing in the
-        middle of the dryad pens.
-    </p>
-    <p>
-        <strong>The spawn-proofing in the dark rooms was doing nothing.</strong> It placed
-        nine level-1 light blocks on a four-block grid &mdash; and light falls off by one
-        per block, so a level-1 source lights its own position and no other. The floor read
-        zero and kept spawning; today's log has natural zombies in the ward room by the
-        dozen. There is no spacing that works for a level-1 source, so it fills the floor
-        layer instead. Level 1 is still black to the eye and still
-        <code>dark</code> to a gene, whose threshold is 7.
-    </p>
-    <p>
-        <strong>And the first yard grid would have broken the pen it was protecting.</strong>
-        Level 15 on a six-block grid at <code>gy+4</code> bottoms out around
-        <strong>six</strong> at the floor, which is below <code>DARK_LEVEL</code> &mdash; so
-        the eyesight pen's <em>lit</em> control would have read as dark to the very gene it
-        is the control for. A pen that agrees with its own experiment for the wrong reason
-        is the worst kind of green. Four apart and two up; the floor never drops below nine.
-    </p>
-</div>
-
-<div class="note">
-    <span class="label">The kit is four batches now, and that is the point</span>
-    <p>
-        Batches 3 and 4 <em>were</em> the item layer in a hotbar and both are gone, because
-        every prop they described is standing in rows B, C and D with a chest beside it.
-        What is left is the residue that a pen genuinely cannot hold: the things that need
-        a <strong>rider</strong> (batch 2, re-aimed at the yard's own saddled pens), the
-        sheep spawner, which needs to be <strong>fed by hand</strong>, and the intake genes,
-        which are eggs to look at. <strong>If a batch can be replaced by a pen, it should
-        be.</strong>
-    </p>
-    <p>
-        <code>/testkit night</code> also stops crying wolf. It read the sky in the same tick
-        it set the clock, and <code>Level.updateSkyBrightness()</code> runs during the level
-        tick &mdash; so it reported &ldquo;this dimension now reads DAY&rdquo; every single
-        time, including after the real bug was fixed. It reads three ticks later now. That
-        false alarm cost a second investigation into a dimension that was already working.
-    </p>
-</div>
-
-<h3>Explicitly out of scope, by the owner</h3>
-<p>
-    Two things on this page and in <a href="known-gaps.html">known-gaps.html</a> are
-    <strong>parked until 1.0</strong>, said outright: <em>&ldquo;we're not going to worry
-    about older worlds for older versions of the mod until we get to 1.0. Nor am I super
-    worried about wild spawn frequencies yet.&rdquo;</em> So old-world migration and
-    founder-table frequency tuning are not open questions at the moment &mdash; they are
-    decisions deferred, which is a different thing from a gap and should not be counted as
-    one.
+    Asked for directly: <em>&ldquo;run an audit. Clear all the completed tests
+    out of the debug area, clear them out of the verification, and make sure
+    we're up to date on what's still open as a test.&rdquo;</em> Everything below
+    this section that was confirmed today has been <strong>deleted</strong>
+    rather than ticked, and the pens have gone with it.
 </p>
 
-<h2 id="dhampir-loop">&sect;0-DI &mdash; Dhampir, and the three stat loci (2026-09-13, NOT looked at)</h2>
+<h3>Confirmed and retired today</h3>
+<ul>
+    <li><strong>Dhampir, both halves</strong> &mdash; <em>&ldquo;dhampirs burn to
+        death and smoke during the day&rdquo;</em>, <em>&ldquo;dhampirs can attack
+        cows and feed on them, one per animal, non-fatal&rdquo;</em>. That is the
+        whole cycle. Its pen is gone; everything after the confirmation was about
+        keeping the animal <em>alive</em>, which is behaviour rather than a
+        test.</li>
+    <li><strong>Both death loci, five of six alleles</strong> &mdash;
+        <em>&ldquo;on death now works perfectly&rdquo;</em>, and the log carries
+        every word: an <code>iron_sword</code> and a
+        <code>preset_horse_spawn_egg</code> in the drop list, brick and
+        cobblestone debris where the volatile one detonated, and a neighbouring
+        horse killed <code>from lava</code> by the spring the next one left.</li>
+    <li><strong>Egg layer, all eight alleles</strong> &mdash; the log caught each
+        one dropping its own item: leather, wool, bone, slime, ink, feather,
+        string, egg. A feather can only have come from the feather horse, which
+        is what made one pen legitimate for eight genes.</li>
+    <li><strong>Cleansing light</strong> &mdash; <em>&ldquo;cleansing light
+        works&rdquo;</em>. Built and retired the same afternoon.</li>
+    <li><strong>Echolocate</strong> &mdash; <em>&ldquo;it only procs when you're
+        riding the horse&rdquo;</em>, after being gated on tamed-and-ridden. It
+        was <code>Condition.ALWAYS</code>, so every echolocating horse in the
+        world lit everything within twenty blocks every six seconds, for
+        nobody.</li>
+    <li><strong>Favourite food draws a horse to you</strong> &mdash; it could not
+        see a creative player at all before, because
+        <code>Level.getNearestPlayer(Entity, double)</code> hard-codes its
+        creative flag to false. Following along a fence is still open, below.</li>
+</ul>
 
-<div class="note danger">
-    <span class="label">The fourth time today a protection turned out to be why a gene "did nothing"</span>
+<h3>Still open, in the order worth spending time on</h3>
+<ol>
+    <li><strong>Guardian and gladiator</strong> (row J west). Neither has ever
+        been seen working. Guardian arrives <b>untamed</b> on purpose &mdash; it
+        fires on <code>OnOwnerHurt</code> and the yard's tame-but-ownerless stock
+        matched nobody &mdash; so tame it, then let something hit you. Gladiator
+        fights <b>while nobody is riding it</b> (its condition is
+        <code>has_rider</code> negated, and this page said the opposite for most
+        of a day); it has one opponent now, not three, because three zombies is
+        nine damage a second against twenty-two health and no gene survives
+        that.</li>
+    <li><strong>The dhampir's shade behaviour</strong>, which is now the only
+        dhampir question. It reached cover every time and the stroll goal walked
+        it back out; it holds until nightfall now, aims two rings in from every
+        edge, and strikes off squares the navigator refuses. <b>Watch it survive
+        a day</b> &mdash; the trace prints each journey and whether it arrived.</li>
+    <li><strong>Eyesight</strong> (row I east). The two halves have started
+        reading differently, which is the first sign of life. The readout names
+        each horse now, so the next census answers it outright rather than
+        showing a range that cannot distinguish "no effect" from "the two values
+        swapped".</li>
+    <li><strong>The egg-layer cap</strong>, re-built because the old pen could
+        not test it. Four layers of the <em>same</em> allele packed into one
+        corner so their six-block circles overlap: the pen total is now the local
+        count. Fills and <b>stops</b> is the pass.</li>
+    <li><strong>The ten carrot pairs</strong> (rows L, M, N) &mdash; one per
+        splice carrot, each a divided pen with a gate into each half. Nothing has
+        ever bred a carrot-influenced foal; zero foals all session. Both ends of
+        the path log now, including <em>window expired before breeding</em>.</li>
+    <li><strong>The ticket stalls</strong> (row C). The bound ticket answered
+        <em>"That is not your horse"</em> &mdash; the mare arrives untamed now for
+        the same reason the guardian does. Then the four awkward shapes: tight,
+        L-shaped, packed with hay (must refuse <em>and not be consumed</em>), and
+        roofed.</li>
+    <li><strong>The dairy</strong> (row D west), floored in stone so the hurt
+        mare <em>stays</em> hurt &mdash; gated regen needs a food block nearby and
+        the yard's grass was one, so she healed before anybody reached her.</li>
+    <li><strong>Ocean-born</strong> (row E west). Newly rideable underwater: hold
+        <b>sprint</b> while mounted and in water and the horse sinks. Sneak was
+        not available &mdash; it already means dismount.</li>
+    <li><strong>Ender echo's ridden half</strong> (row K east). The on-foot blink
+        is confirmed; it now also blinks when its <em>rider</em> is hit, which has
+        never been tried.</li>
+    <li><strong>The horseman and the cowboy</strong> (row B east), the tack room,
+        food preference, the three magic stat pens, the dryad row, bone meal, the
+        ward's non-interference half. All built, none contradicted, none
+        confirmed.</li>
+    <li><strong>Visual, and therefore last:</strong> gilded crackle redrawn, and
+        starburst's emblem inheritance.</li>
+</ol>
+
+<div class="note">
+    <span class="label">Two things I said this session that were wrong, corrected here</span>
     <p>
-        Dhampir is a <em>cycle</em>: it burns in daylight, runs for shade, and below full
-        health it hunts an animal, bites it for half a heart, heals three, and leaves that
-        one alone for a day. <strong>The dimension was cancelling step one.</strong>
-        <code>DhampirHandler</code> calls <code>hurtServer(onFire)</code> every two seconds
-        under an open sky, and the horse-dimension rule cancelled <em>all</em> horse
-        damage - so it never lost health, never dropped below full, and the hunt goal's
-        first condition was never true. Fire is exempt from that rule now.
+        <strong>Gladiator fights unridden, not ridden.</strong> Its own
+        description says so outright. The pen's sign told her to ride it, this
+        page said the same, and the zombies were pulled from its arena on the
+        strength of that misreading.
     </p>
     <p>
-        <strong>No debug damager was needed and none was added.</strong> The sun already
-        is one; it was being blocked. Nothing else in that dimension makes fire - there is
-        no lava, and hot blooded's melt only removes it.
+        <strong>The egg-layer cap was not "close to answerable".</strong>
+        <code>NEARBY_CAP</code> counts items within six blocks of <em>each laying
+        horse</em>, so eight horses spread across a wide pen each have their own
+        neighbourhood and a pen total above the cap is perfectly legal. What
+        bounded that pen was the despawn timer, exactly as
+        <a href="known-gaps.html#gap-207">gap 207</a> predicted.
     </p>
 </div>
-
-<ul>
-    <li><strong>The pen is open to the sky, on purpose.</strong> No roof and no trees, so
-        it burns rather than sheltering - the shade goal would otherwise park it in a
-        corner and the loop would never start.</li>
-    <li><strong>Eight cows</strong>, because a bitten animal is off the menu for a day and
-        the triple health is meant to be something a <em>herd</em> pays for.</li>
-    <li><strong>Read the sequence, not the moment.</strong> Every horse hurt and every
-        horse healed now writes a line, so a working dhampir reads as
-        <em>burn, burn, burn, bite, +6.0 health</em>. The only previous sighting was "it
-        did damage a cow, though I'm not sure what else that did" &mdash; which is one
-        frame of a five-step loop, and is exactly what a single glance can give you.</li>
-    <li><strong>The three magic stat loci</strong> (&sect;0d, "NOT play-tested" since
-        2026-09-05) got a pen each for nothing, because the attribute readout built for
-        weather already does the work. Their whole effect is a number on the horse, which
-        is why looking at one never helped. Unlike weather they are <em>unconditional</em>,
-        so there is no second reading: the value is either off the breed's baseline or it
-        is not &mdash; and the range across two horses also shows whether the magnitude is
-        per allele copy.</li>
-</ul>
 
 <h2 id="night-and-weather">&sect;0-DH &mdash; The night loci and the weather loci, all of them (2026-09-13)</h2>
 
@@ -918,33 +802,6 @@
         nothing behind any of them. The gene was working; its account of itself was not.</li>
 </ul>
 
-<h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit &mdash; CONFIRMED (2026-09-13)</h2>
-
-<div class="note good">
-    <span class="label">"Glow looks perfect on all the horses in the glow room"</span>
-    <p>
-        That room held every question this section had left, one horse each:
-        <a href="gene-gamma.html">gamma</a>, whose <code>SPOTS</code> at softness 1.8 is
-        the softest lit mask in the mod and the only one that could show the falloff;
-        <a href="gene-rime.html">rime</a> at 0.5 as the distant fourth;
-        <a href="gene-lantern.html">lantern</a>'s bloom;
-        <a href="gene-tron.html">tron</a>'s <code>Trs/Trg</code> heterozygote, whose two
-        tube forms cross on the same edges; and <strong>one horse carrying two glowing
-        genes at once</strong>, which was the only way to check that overlapping lit texels
-        take the <em>brighter</em> of the two rather than summing. All of them read right.
-        The room is gone.
-    </p>
-    <p>
-        <strong>One question here was never about that room and is still open</strong>:
-        whether a <em>dim</em> glow is visible at all in daylight. The intensity is the
-        second texture's alpha over a blended pass, so a 0.2 texel is a fifth of full
-        bright over a coat the world is already lighting - which in a bright field may be
-        nothing. If the bottom of the range is invisible in practice then the useful range
-        is narrower than 0&ndash;1 and the genes should say so. That wants a sunny
-        overworld, not a dark box.
-    </p>
-</div>
-
 <h2 id="slow-tests">&sect;0-CV &mdash; The pens that run themselves (2026-09-12, NOT looked at)</h2>
 
 <div class="note">
@@ -1122,7 +979,7 @@
     <span class="label">The first three genes to use the dial &mdash; and the first horses that differ in a way you can measure by eye</span>
     <p>
         These are what make <a href="#dial-slider">&sect;0-CN</a> and
-        <a href="#glow-intensity">&sect;0-CO</a> real. All three changed their own coat
+        <a href="session-log.html#glow-confirmed">&sect;0-CO, confirmed</a> real. All three changed their own coat
         golden rows and nothing else's, so the blast radius is exactly these loci.
     </p>
     <p>
@@ -1471,46 +1328,6 @@
         and sixty full genome parses a tick.</li>
 </ul>
 
-<h2 id="tester-confirms-0911">&sect;0-CG &mdash; Confirmed by playtesters (2026-09-11)</h2>
-
-<div class="note good">
-    <span class="label">Five things now stand confirmed, from outside testers rather than the dev machine</span>
-    <ul>
-        <li><strong>Bareback steering at a high bond works.</strong> This is the one worth
-            noting twice: it was still listed on the roadmap as <em>unbuilt</em> (&ldquo;riding
-            without a saddle gives no control today&rdquo;) while
-            <code>server/BarebackSteeringHandler</code> had been shipping it all along. Written
-            up now on <a href="horse-care.html#bareback-steering">horse care</a>.</li>
-        <li><strong>A horse can be ridden through water</strong> &mdash; wanted, not a bug.
-            Vanilla swims a ridden horse; the <code>water_averse</code> ability is what
-            <em>adds</em> ejection, so a plain horse swimming is correct.</li>
-        <li><strong>Breaking the equine research shelf drops what is inside it.</strong></li>
-        <li><strong>Setting a barn name works</strong>, and so does clearing one &mdash; the
-            first report said it could not be erased, and it could; it takes a beat to refresh.
-            <em>That refresh lag is the only thing left here</em>: the client's cached record
-            updates a tick late, which is cosmetic but reads as a failure.</li>
-        <li><strong>Destroying a horse-dimension portal stops its animations.</strong></li>
-    </ul>
-</div>
-
-<div class="note warn">
-    <span class="label">One report still open: an &ldquo;aura&rdquo; of glowing entities round a horse</span>
-    <p>
-        A tester saw entities near a horse in the horse dimension outlined by the
-        <b>glowing status effect</b>, while not riding it. <code>MobEffects.GLOWING</code> is
-        applied in <strong>exactly one place in the mod</strong> &mdash;
-        <code>server/DebugHighlightHandler</code>, the F8 toggle &mdash; which lights every
-        horse within 96 blocks, and the horse dimension is wall-to-wall pens. So the first
-        thing to check is whether pressing F8 again stops it.
-    </p>
-    <p>
-        <strong>If she is on a released jar, that does not fit</strong>: F8 was dev-only until
-        2026-09-11, so a real build could not reach it. Establish which jar before looking
-        further. The toggle now times out after four minutes and says how to stop itself,
-        which is hardening rather than a fix.
-    </p>
-</div>
-
 <h2 id="goo-mask">&sect;0-CF &mdash; A GOO mask, and the drips rebuilt on it (2026-09-11, NOT looked at in game)</h2>
 
 <p>Owner's report on the first look at the drips: ooze drip &ldquo;looks like triangles&rdquo; and needed to be
@@ -1533,36 +1350,6 @@
         using it should preview the same shape the game draws; that is what parity checks, with the caveat in
         <a href="known-gaps.html#gap-194">gap 194</a>.</li>
 </ul>
-
-<h2 id="stick-tame">&sect;0-CE &mdash; The breeds and size test batches: confirmed (2026-09-11)</h2>
-
-<p><em>Owner-confirmed and removed from &sect;0-CA / &sect;0-CB / &sect;0-CC</em>, kept here for
-    the session log: the custom egg's Breed list starts at Feral Mixed and carries drop-in
-    breeds; the gene hover picture on the custom egg; a drop-in breed registers, fills its
-    Breeds row and shows its About text; its herds spawn wild in the biome it names (15
-    <code>kit_forest_paint</code> herd founders logged in a dark forest - the
-    <code>breed_herds</code> biome modifier works); a drop-in gene loads and draws; a switched-off
-    Morgan keeps its label and entry; a moved Friesian's entry gives the new biome. The log
-    confirmed the broken-gene breed loads with a warning and the duplicate Friesian is
-    refused.</p>
-
-<p><em>Then, from the log of the dark-forest trip and the size batch:</em> Friesian herds found
-    in the dark forest (the moved biome); <code>kit_night_cremello</code> herds founded only after
-    nightfall (9 after <code>/time set night</code>, none before); no Morgan egg in the creative
-    tab; a Shire towers and a Falabella stands below the waist; each size founder carries the
-    number of copies its band says; and two <code>Small/n</code> Connemaras threw all three
-    kinds of foal - <code>Small/Small</code> (0.73x, 0.84x), <code>Small/n</code> (0.88x) and an
-    ordinary-sized <code>n/n</code> at 1.00x.</p>
-
-<p><strong>Fixed and confirmed the same day:</strong> the debug stick now fires the tame event
-    (it called <code>tameWithName</code> bare, so a stick-tamed horse never filled its Breeds
-    row). <strong>New:</strong> every breed founder the server rolls - egg, wild herd, cowboy,
-    stable - logs a <code>[breed-health]</code> line of its health genes against its sheet, and
-    <code>WARN ... NOT ON ITS SHEET</code> for any disorder or magical gene the sheet does not
-    list. Twenty-four Quarter Horses and twenty-five Thoroughbreds logged no warning; three
-    Quarter Horses carried HYPP, and none carried PSSM1 or HERDA (listed, rare). &ldquo;Health
-    genes&rdquo; is the breed book's rule (<code>HealthContribution</code>), so leopard complex,
-    splash white and grey appear beside the true disorders.</p>
 
 <h2 id="village-tag">&sect;0-CD &mdash; Vanilla's village POI tag loads again (2026-09-11, NOT looked at in game)</h2>
 
