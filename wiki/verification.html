@@ -26,6 +26,30 @@
     entries are the permanent record.
 </p>
 
+<div class="note danger">
+    <span class="label">How this page is ordered: "does it look right" goes LAST</span>
+    <p>
+        Owner's rule, 2026-09-13. <strong>Rank every open test by whether it can be wrong
+        <em>invisibly</em>.</strong> A gene that paints wrongly announces itself the moment
+        anybody looks at it. A gene that <em>behaves</em> wrongly, damages a save, costs
+        tick time, or silently does nothing does not &mdash; and that is what her time in
+        the game is worth spending on.
+    </p>
+    <p>
+        The tell is that six visual confirmations were cleared in about twenty minutes on
+        the day this rule was written, while the holy ward needed a warded chamber
+        <em>and</em> an unwarded control thirty blocks from where she stood, the weather
+        loci needed an attribute readout built first, and the lava speed needed a log line
+        before anyone could tell a dead feature from a slow one. <strong>Cheap checks
+        should not occupy the top of a list that exists to spend the scarcest thing in the
+        project.</strong>
+    </p>
+    <p>
+        So: behavioural, structural and unattended tests first; "look at it and say"
+        last, and retired outright the moment it is confirmed.
+    </p>
+</div>
+
 <div class="note">
     <span class="label">The test kit</span>
     <p>
@@ -663,111 +687,31 @@
         nothing behind any of them. The gene was working; its account of itself was not.</li>
 </ul>
 
-<h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit (2026-09-12, the levels are confirmed; the list below is what is left)</h2>
+<h2 id="glow-intensity">&sect;0-CO &mdash; Glow is a level, not a bit &mdash; CONFIRMED (2026-09-13)</h2>
 
 <div class="note good">
-    <span class="label">Confirmed 2026-09-12 &mdash; and the predictions held</span>
+    <span class="label">"Glow looks perfect on all the horses in the glow room"</span>
     <p>
-        <strong>Gamma, geode and angler look right</strong>, and <strong>ember veins and
-        data rain have no falloff at all</strong> &mdash; which is what the measurements said should
-        happen before anybody looked: those two are hard-edged by construction (0.04 to
-        0.2, and soft bands times a <code>SPECKLE</code>), so coverage-times-level is
-        level-or-nothing there. The softest lit mask in the mod is gamma's
-        <code>SPOTS</code> at 1.8 and it is the one that shows the change.
+        That room held every question this section had left, one horse each:
+        <a href="gene-gamma.html">gamma</a>, whose <code>SPOTS</code> at softness 1.8 is
+        the softest lit mask in the mod and the only one that could show the falloff;
+        <a href="gene-rime.html">rime</a> at 0.5 as the distant fourth;
+        <a href="gene-lantern.html">lantern</a>'s bloom;
+        <a href="gene-tron.html">tron</a>'s <code>Trs/Trg</code> heterozygote, whose two
+        tube forms cross on the same edges; and <strong>one horse carrying two glowing
+        genes at once</strong>, which was the only way to check that overlapping lit texels
+        take the <em>brighter</em> of the two rather than summing. All of them read right.
+        The room is gone.
     </p>
     <p>
-        So the glow level works, it is scaled by coverage, and it is invisible exactly
-        where the geometry says it should be invisible.
+        <strong>One question here was never about that room and is still open</strong>:
+        whether a <em>dim</em> glow is visible at all in daylight. The intensity is the
+        second texture's alpha over a blended pass, so a 0.2 texel is a fifth of full
+        bright over a coat the world is already lighting - which in a bright field may be
+        nothing. If the bottom of the range is invisible in practice then the useful range
+        is narrower than 0&ndash;1 and the genes should say so. That wants a sunny
+        overworld, not a dark box.
     </p>
-    <p>
-        <strong>And the control held</strong>: <a href="gene-suntouched.html">suntouched</a>
-        &ldquo;does indeed look the same as before&rdquo;. That is the one that mattered
-        most, because it lights whole parts at full alpha through the <code>glow</code>
-        effect rather than through a coat layer &mdash; so it exercises the same new alpha
-        path with none of the new arithmetic. Unchanged there plus changed everywhere the
-        masks are soft is the pair of readings that says the level reached the renderer
-        without disturbing what was already right. <strong>&sect;0-CO is closed.</strong>
-    </p>
-</div>
-
-<div class="note danger">
-    <span class="label">Every glowing gene in the game changed, and nothing here can see it &mdash; test kit batch 2</span>
-    <p>
-        A layer's <code>emissive</code> is a number now, and <strong>the mask's coverage
-        scales it</strong>: the old threshold at coverage 0.5 is gone, so every
-        soft-edged glow that used to end on a line now fades out. Fifty-two layers
-        across the shipped genes say <code>"emissive": true</code> and every one of
-        them is affected. The arithmetic is covered by
-        <code>GlowIntensityTest</code>; what no test here can reach is <em>what it
-        looks like</em>, because the glow only exists in a render, at night, in a
-        world. The creator does not draw it either &mdash; its preview is a flat sheet
-        with no lighting to be brighter than.
-    </p>
-</div>
-
-<ul>
-    <li><strong>Look at a soft-edged glow at night.</strong> <strong>The list this entry
-        first gave was wrong</strong>, and the owner found it in about a minute: &ldquo;I
-        don't think ember veins has any fall off.&rdquo; It does not, and it should not.
-        The genes were picked by whether their glow sat behind a field mask rather than a
-        part list, which is not the same question as whether that mask has a soft
-        <em>edge</em>. Measured, the lit layers are:
-        <a href="gene-emberveins.html">ember veins</a> 0.04&ndash;0.2,
-        <a href="gene-angler.html">angler</a> 0.12&ndash;0.18,
-        <a href="gene-geode.html">geode</a> a soft <code>AXIS</code> times a
-        <code>WAVES</code> at 0.09, <a href="gene-datarain.html">data rain</a> soft bands
-        times a <code>SPECKLE</code> &mdash; all hard-edged by construction, and all
-        correct to look unchanged.</li>
-    <li><strong>The one to actually look at is <a href="gene-gamma.html">gamma</a></strong>
-        (<code>SPOTS</code> at softness <strong>1.8</strong>, the softest lit mask in the
-        mod), and the two already confirmed: <a href="gene-lantern.html">lantern</a>'s
-        bloom (<code>CENTERLINE</code> 1.2) and <a href="gene-tron.html">tron</a>'s halo
-        (<code>EDGE</code> 0.55). <a href="gene-rime.html">Rime</a> at 0.5 is a distant
-        fourth.</li>
-    <li><strong>Why the rest cannot show it, and it is worth knowing:</strong> a layer's
-        masks fold by <code>MULTIPLY</code>, so <strong>the hardest mask in a layer
-        governs its edge</strong>. Geode's glints are a <code>WAVES</code> at 0.09 inside
-        an <code>AXIS</code> at 3.0 and the product is as hard as the 0.09; data rain's
-        flecks are soft bands times a <code>SPECKLE</code>. Coverage there goes 0 to 1
-        over almost no distance, so coverage-times-level is level-or-nothing and the
-        change is invisible - which is the correct outcome, not a missing feature.</li>
-    <li><strong>Is a dim glow visible at all?</strong> The intensity is the second
-        texture's alpha over a blended pass, so a 0.2 texel is a fifth of full bright
-        over the coat as the world lit it. In daylight that may be nothing at all.
-        If the bottom of the range is invisible in practice, the useful range is
-        narrower than 0&ndash;1 and the genes should say so.</li>
-    <li><strong>Two glows on one horse.</strong> Overlapping lit texels take the
-        brighter of the two rather than summing, deliberately &mdash; check that a
-        horse carrying two glowing genes does not look like it is carrying one.</li>
-    <li><strong>A glow pointed at the gene's <a href="#dial-slider">dial</a></strong>
-        is the new thing worth building on purpose: a gene whose glow varies per horse,
-        bred over a few generations, so some of the line smoulders and some blazes.
-        Nothing ships like that yet.</li>
-    <li><strong>The eye glows and <a href="gene-suntouched.html">Suntouched</a>'s
-        parts are unchanged</strong> &mdash; they light whole regions outright at full
-        alpha, and they are the control group. If those look different, the alpha path
-        is wrong rather than the levels.</li>
-</ul>
-
-<div class="note danger">
-    <span class="label">Before asking for a play session, do these three things</span>
-    <p>
-        Owner's rule, 2026-09-12. She is the only person who can run the game, so time in
-        it is the scarcest thing in the project - and a session that re-checks finished
-        work spends it twice.
-    </p>
-    <ol>
-        <li><strong>Audit the test kit.</strong> Every batch in
-            <code>DebugTestWorldHandler.BATCHES</code>, against this page: a batch whose
-            section is confirmed is <em>deleted</em> and the rest move up; a batch with a
-            confirmed item in it gets that slot re-aimed. Batch 1 is always the next thing
-            that needs a person.</li>
-        <li><strong>Audit the horse dimension.</strong> Are the structures in it still for
-            something open, or is one of them left over from a test that finished?</li>
-        <li><strong>Put the whole list in chat</strong> - numbered, in order, each step
-            saying what a pass looks like. &ldquo;Go and look at the yard&rdquo; is not a
-            test; it is a thing to work out first.</li>
-    </ol>
 </div>
 
 <h2 id="slow-tests">&sect;0-CV &mdash; The pens that run themselves (2026-09-12, NOT looked at)</h2>
@@ -922,7 +866,26 @@
         its job and there is a stack trace in the log worth reading.</li>
 </ul>
 
-<h2 id="dialled-genes">&sect;0-CP &mdash; Starburst scales, Lantern and Tron burn (2026-09-12, the scaling is confirmed)</h2>
+<h2 id="dialled-genes">&sect;0-CP &mdash; The dial: the look is confirmed, the INHERITANCE is not (2026-09-13)</h2>
+
+<div class="note good">
+    <span class="label">Everything visual here is now confirmed</span>
+    <p>
+        "Starburst looks fine" (2026-09-13), on top of the smooth size range confirmed on
+        2026-09-12 and the lantern and tron glows closed with the rest of the glow room.
+        The pale form's flatness was a real fault and was redrawn &mdash; its whole palette
+        ran <code>#7a7a7a</code> to <code>#ffffff</code>, six layers of structure inside a
+        third of the value range.
+    </p>
+    <p>
+        <strong>What is left is not a visual question, which is why it outranks the ones
+        that were.</strong> The emblem's size rides the gene's <em>dial</em>, drawn per
+        allele copy &mdash; so a foal's emblem should sit near its parents' rather than
+        re-rolling. That is the only claim the dial has ever made and nothing has tested
+        it. Three mares and a stallion are standing in the pen with golden carrots in
+        batch 1.
+    </p>
+</div>
 
 <div class="note">
     <span class="label">The first three genes to use the dial &mdash; and the first horses that differ in a way you can measure by eye</span>

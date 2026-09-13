@@ -265,7 +265,15 @@ public final class DebugTestWorldHandler {
                 // find out in the morning that nothing was being recorded, and
                 // one line of chat before bed is the entire check.
                 .then(Commands.literal("census")
-                        .executes(c -> census(c.getSource().getPlayerOrException()))));
+                        .executes(c -> census(c.getSource().getPlayerOrException())))
+                // The weather loci are conditional modifiers and nothing else,
+                // so the whole test is "read it, change the sky, read it again"
+                // - and hunting for the vanilla command is exactly the friction
+                // that turns that into "check the weather genes tomorrow".
+                .then(Commands.literal("rain")
+                        .executes(c -> setWeather(c.getSource().getPlayerOrException(), "rain")))
+                .then(Commands.literal("clear")
+                        .executes(c -> setWeather(c.getSource().getPlayerOrException(), "clear"))));
 
         event.getDispatcher().register(Commands.literal("bond")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -493,6 +501,32 @@ public final class DebugTestWorldHandler {
      * invisible until the morning - so this is the check, and it is one
      * command.
      */
+    /**
+     * <b>Set the weather, then say what the dimension actually reads.</b>
+     *
+     * <p>Built the same way {@code /testkit night} was and for the same reason:
+     * "I don't think weather works in the horse realm" has more than one cause
+     * and a chat box cannot separate them. The reading is taken a few ticks
+     * later, which is the lesson night taught - {@code rainLevel} moves during
+     * the level tick, so asking in the same tick as the command returns the
+     * value from before it.
+     */
+    private static int setWeather(ServerPlayer player, String what) {
+        var server = player.level().getServer();
+        if (server == null) {
+            return 0;
+        }
+        var source = server.createCommandSourceStack().withSuppressedOutput();
+        server.getCommands().performPrefixedCommand(source,
+                "rain".equals(what) ? "weather rain" : "weather clear");
+        tell(player, Component.literal("Weather set to " + what
+                        + " - run /testkit census in a moment; the header says what this "
+                        + "dimension reads, and the weather pens print their attribute.")
+                .withStyle(ChatFormatting.GOLD));
+        ActionTrace.log("testkit", "weather " + what + " by " + player.getGameProfile().name());
+        return 1;
+    }
+
     private static int census(ServerPlayer player) {
         ServerLevel debug = player.level().getServer() == null ? null
                 : player.level().getServer().getLevel(DebugPenManager.DEBUG_LEVEL);

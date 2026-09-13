@@ -361,10 +361,24 @@ public final class DebugWorldWatch {
         // condition in this mod already uses, which makes the census and the
         // genes agree about what "night" means by construction.
         long gameTime = level.getGameTime();
+        // WEATHER ON THE HEADER, for the same reason day/night is there. Owner,
+        // 2026-09-13: "I don't think weather works in the horse realm... it
+        // looks like nothing changed". A weather-gated gene that does nothing
+        // and a dimension that is not raining are indistinguishable from a pen,
+        // and the weather loci are ONLY conditional modifiers - so without this
+        // line there is no way to tell a broken gene from a dry sky.
+        //
+        // canHaveWeather() is printed beside it deliberately: it is
+        // hasSkyLight() && !hasCeiling() && !END, all three of which debug_pens
+        // satisfies, so if it ever reads false the dimension_type has drifted
+        // and that is the answer rather than the gene.
+        String sky = (level.isBrightOutside() ? "day" : "NIGHT")
+                + (level.canHaveWeather() ? "" : ", CANNOT have weather")
+                + (level.isThundering() ? ", THUNDER" : level.isRaining() ? ", RAIN" : ", dry");
         HorseGenetics.LOGGER.info("{} ==== census {} | up {}m | game tick {} ({}) | {} ms/tick over "
                         + "the last {} ticks{} | entities {}: {} horses, {} items, {} other ====",
                 TAG, censusNumber, upMinutes, gameTime,
-                level.isBrightOutside() ? "day" : "NIGHT",
+                sky,
                 String.format("%.1f", msPerTick), ticks,
                 msPerTick > BEHIND_MS ? " - BEHIND, the server is not keeping up" : " (20 TPS is 50.0)",
                 horses + items + other, horses, items, other);

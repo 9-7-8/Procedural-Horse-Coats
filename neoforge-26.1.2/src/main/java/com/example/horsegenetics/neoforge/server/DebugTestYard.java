@@ -222,7 +222,6 @@ final class DebugTestYard {
         buildNightBlock(level, gy, cx, mouthZ);
         buildBaseAlarmPen(level, gy, cx, mouthZ);
         buildStockedRow(level, gy, cx, mouthZ);
-        buildGlowRoom(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
         buildBoneMealPen(level, gy, cx, mouthZ);
         buildWeatherPens(level, gy, cx, mouthZ);
@@ -631,10 +630,14 @@ final class DebugTestYard {
         int z = mouthZ + ROW_F;
         int x = cx + WEST_MIN;
 
-        // 0-CP: the shards at full size, the size range side by side, and a
-        // stallion so the inheritance question can be asked at all.
+        // THE LOOK IS CONFIRMED (2026-09-13, "starburst looks fine"). What is
+        // left is not a visual question at all: the emblem's size rides the
+        // gene's DIAL, drawn per allele copy, so a foal's should sit near its
+        // parents' rather than re-rolling. That is the only thing the dial has
+        // ever claimed and nothing has tested it - hence three mares and a
+        // stallion, and golden carrots in batch 1.
         stockedPen(level, gy, x, z, "horsegenetics.starburst", "W/W", 3, 1,
-                List.of("STARBURST", "shards? sizes?", "breed one pair:", "foal like parents?"));
+                List.of("STARBURST", "LOOK is confirmed.", "BREED a pair: foal", "like its parents?"));
         x = cx + WEST_MIN + 10;
 
         // 0-CQ needs no horse, but the highlight is easiest to judge with a
@@ -806,42 +809,6 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>The dark room for looking at glows.</b> Tron's two-form heterozygote
-     * and a lantern, indoors, with the lid on - the only place in the dimension
-     * where a 22% halo is distinguishable from a 100% one.
-     */
-    private static void buildGlowRoom(ServerLevel level, int gy, int cx, int mouthZ) {
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MAX;
-        int z0 = mouthZ + ROW_F;
-        int z1 = z0 + ROW_F_D;
-        darkRoom(level, gy, x0, x1, z0, z1, (x0 + x1) / 2);
-        DebugPenManager.placeSign(level, new BlockPos((x0 + x1) / 2 - 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("GLOW ROOM", "SHUT THE DOOR", "tron: box EDGES", "lit, panels dim"));
-        stock(level, gy, x0 + 3.5, (z0 + z1) / 2.0, "horsegenetics.tron",
-                "the glow room (tron)", 1, 1, "Trs/Trg");
-        stock(level, gy, x1 - 3.5, (z0 + z1) / 2.0, "horsegenetics.lantern",
-                "the glow room (lantern)", 2, 0, null);
-        // 0-CO named the two that should actually show the falloff, and neither
-        // was in here. GAMMA is the softest lit mask in the mod (SPOTS at 1.8)
-        // and is the one the section says to look at; RIME at 0.5 is the
-        // distant fourth. Everything else glowing is hard-edged by
-        // construction, so coverage-times-level is level-or-nothing on it and
-        // an unchanged look is the CORRECT outcome rather than a missing one.
-        stock(level, gy, x0 + 3.5, z0 + 2.5, "horsegenetics.gamma",
-                "the glow room (gamma - the softest lit mask)", 1, 0, null);
-        stock(level, gy, x1 - 3.5, z0 + 2.5, "horsegenetics.rime",
-                "the glow room (rime)", 1, 0, null);
-        // And the one horse that answers a question neither of the others can:
-        // overlapping lit texels take the BRIGHTER of the two rather than
-        // summing, deliberately. Blown out to flat white where they cross means
-        // the max-not-sum rule has broken.
-        stock(level, gy, (x0 + x1) / 2.0, z1 - 2.5, "horsegenetics.lantern",
-                "the glow room (two glows at once)", 1, 0, "La/La",
-                "horsegenetics.tron=Trs/Trs");
-    }
-
-    /**
      * <b>The holy ward's NON-INTERFERENCE half, which is the only half this
      * dimension can test.</b> A dark stone box with a real zombie spawner in
      * it: stand the warded horse outside and the spawner must keep producing.
@@ -966,15 +933,15 @@ final class DebugTestYard {
         // These two stay because each has forms nobody has seen. Ooze was
         // confirmed in its PLAIN form ("looks GREAT") and has a coloured one;
         // gilded crackle was seen in one of its three.
+        // Ooze is CONFIRMED in both its forms now - plain "looks GREAT" and
+        // coloured "looks perfect" - so its stall is gone and the row is one.
         List<Look> row = List.of(
-                new Look("horsegenetics.ooze_drip", "OOZE - COLOURED",
-                        "plain is CONFIRMED", "this is the other", "oz"),
                 new Look("horsegenetics.gilded_crackle", "CRACKLE - BLACK",
-                        "1 of 3 forms seen.", "wants more depth", "Gck"));
+                        "redrawn: 3 seams", "now. Shiny enough?", "Gck"));
 
         int z0 = mouthZ + ROW_E;
         int z1 = z0 + ROW_E_D;
-        int[] starts = {cx + WEST_MIN, cx + WEST_MIN + 5};
+        int[] starts = {cx + WEST_MIN};
         for (int i = 0; i < row.size() && i < starts.length; i++) {
             Look look = row.get(i);
             int x0 = starts[i];
