@@ -136,6 +136,7 @@ final class DebugTestYard {
         buildGlowRoom(level, gy, cx, mouthZ);
         buildGrowingRow(level, gy, cx, mouthZ);
         buildBoneMealPen(level, gy, cx, mouthZ);
+        buildRetinuePen(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
@@ -659,18 +660,44 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>The holy ward.</b> A dark stone box with a real zombie spawner in it:
-     * stand the warded horse outside and the spawner must keep producing.
-     * Roofed and unlit, since a spawner that cannot spawn for ordinary reasons
-     * proves nothing about the gene.
+     * <b>The holy ward's NON-INTERFERENCE half, which is the only half this
+     * dimension can test.</b> A dark stone box with a real zombie spawner in
+     * it: stand the warded horse outside and the spawner must keep producing.
      *
-     * <p><b>The best of the overnight tests, because it is the one with the
-     * most data.</b> Every hostile spawn goes to the log with its distance to
-     * the nearest <i>live</i> ward, so a night produces a column of hundreds of
-     * numbers. A working ward is a floor under that column - plenty of spawns,
-     * none of them close. A broken one is spawns at two blocks. Neither
-     * reading is available from standing and watching, because the mobs a ward
-     * stops are the ones nobody ever sees.
+     * <h2>It cannot show the ward working, and two separate facts say so</h2>
+     * This pen was signed "the spawner must KEEP going" and then written up as
+     * though the distance column would prove the ward <i>wards</i>. It will
+     * not, ever:
+     *
+     * <ul>
+     *   <li><b>The ward does not cancel spawner spawns on purpose.</b>
+     *       {@code GeneWardHandler.isNatural} gates on the spawn reason and
+     *       lets spawner blocks, eggs, breeding, structures, dispensers and
+     *       commands straight through - because a gene that silently broke
+     *       somebody's mob farm is the failure that whole design is avoiding.
+     *       So every zombie this spawner makes is <i>expected</i> to appear,
+     *       warded horse or not.</li>
+     *   <li><b>Natural spawning cannot happen in this dimension at all.</b>
+     *       {@code debug_pens} generates {@code minecraft:the_void}, and the
+     *       void biome carries no mob spawn entries - so there is nothing for
+     *       the ward to cancel anywhere in the horse dimension, at any light
+     *       level, at any distance.</li>
+     * </ul>
+     *
+     * <p>And even in a real world the warding half only matters <b>more than 24
+     * blocks from every player</b>, because vanilla never naturally spawns a
+     * monster closer than that and the ward reaches 8 to 16
+     * ({@code known-gaps.html} gap 180).
+     *
+     * <p><b>So what is left here is the test that actually mattered</b>, and
+     * {@code wiki/verification.html} &sect;0-BT ranks it above the other:
+     * <i>holy ward can break somebody's mob farm without erroring</i>. It hooks
+     * a global, high-frequency event shared with every other mod in the pack,
+     * and if the allow-list is wrong a spawner stops producing and nothing
+     * anywhere says why. <b>A steady stream of zombies beside a warded horse is
+     * the pass.</b> Silence is the bug - and silence is also what a player
+     * standing too far away produces, which is the other thing this pen has
+     * already been caught on.
      */
     private static void buildSpawnerRoom(ServerLevel level, int gy, int cx, int mouthZ) {
         int x0 = cx + 4;
@@ -689,12 +716,47 @@ final class DebugTestYard {
             be.setChanged();
         }
         DebugPenManager.placeSign(level, new BlockPos(cx + 8, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("HOLY WARD", "one is already", "outside: spawner", "must KEEP going"));
+                List.of("WARD: NO HARM", "STAND HERE - a", "spawner needs you", "within 16 blocks"));
         // Outside the door rather than inside it: the ward's claim is about
         // what happens NEAR it, and a horse shut in a dark box with a spawner
         // is a horse being hit by zombies.
         stock(level, gy, cx + 8.5, z0 - 1.5, "horsegenetics.holy_ward", "the ward post", 1, 0, null);
         DebugWorldWatch.watch("WARD + SPAWNER", box(x0, gy, z0 - 3, x1, gy + 4, z1), null);
+    }
+
+    /**
+     * <b>Four pack leaders and a crowd, for the one performance worry the
+     * census can already answer.</b>
+     *
+     * <p>&sect;0-BT's own ranking: <i>"Leader of the pack is the performance
+     * one. Six followers pathfinding continuously, and pathfinding is the most
+     * expensive thing a mob does. One horse is certainly fine. A stable with
+     * several pack leaders in it is the case I have no feel for at all."</i>
+     * That the gene <i>works</i> is confirmed; what it costs is not, and it is
+     * the kind of question that cannot be answered by looking at anything.
+     *
+     * <p><b>It needs no new apparatus, which is why it is worth adding now.</b>
+     * The census already prints real milliseconds per tick every two minutes.
+     * Four leaders at {@code MAX_TARGETS} each is twenty-four mobs re-pathing
+     * on a forty-tick beat, all night, in a dimension whose baseline is a flat
+     * 50.0 - so the answer is simply whether that number moves. A night of
+     * 50.0 is "no measurable cost", which is a real result and one nobody has
+     * ever been able to state.
+     */
+    private static void buildRetinuePen(ServerLevel level, int gy, int cx, int mouthZ) {
+        int x0 = cx - YARD_HALF_X + 2;
+        int x1 = x0 + 20;
+        int z0 = mouthZ + 74;
+        int z1 = mouthZ + 79;
+        fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 2, gy + 1, z0 - 1), Direction.NORTH,
+                List.of("RETINUE COST", "4 leaders, 16", "cows. Watch the", "census ms/tick"));
+        stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, "horsegenetics.pack_leader",
+                "the retinue pen", 4, 0, null);
+        for (int i = 0; i < 16; i++) {
+            spawnCow(level, gy, x0 + 6.0 + (i % 8) * 1.7, z0 + 1.5 + (i / 8) * 2.0);
+        }
+        DebugWorldWatch.watch("RETINUE", box(x0, gy, z0, x1, gy + 1, z1), null);
     }
 
     /**

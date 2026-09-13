@@ -346,6 +346,22 @@ public final class DebugWorldWatch {
             HorseGenetics.LOGGER.info("{} gene sounds since the last census: {}", TAG, sb);
             SOUNDS.clear();
         }
+        if (!SPREADS.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, int[]> e : SPREADS.entrySet()) {
+                int tried = e.getValue()[0];
+                int placed = e.getValue()[1];
+                sb.append(sb.length() == 0 ? "" : ", ").append(e.getKey()).append(' ')
+                        .append(placed).append('/').append(tried)
+                        .append(tried == 0 ? "" : String.format(" (%.0f%%)", 100.0 * placed / tried));
+            }
+            // placed/tried. A planting word near 33% is gap 208 doing exactly
+            // what the arithmetic says; near 100% would mean the vertical offset
+            // stopped mattering and the gap can be closed.
+            HorseGenetics.LOGGER.info("{} spread attempts that landed, since the last census: {}",
+                    TAG, sb);
+            SPREADS.clear();
+        }
     }
 
     /**
@@ -621,6 +637,41 @@ public final class DebugWorldWatch {
 
     /** Sounds played since the last census, by sound id. */
     private static final Map<String, Integer> SOUNDS = new LinkedHashMap<>();
+
+    /**
+     * <b>How often a spread verb tries, and how often it lands.</b>
+     *
+     * <p>This exists to turn <a href="known-gaps.html">gap 208</a> from an
+     * inference into a number. {@code spread} picks one random block per
+     * interval, from a cube with a vertical offset of &minus;1, 0 or +1, and
+     * gives up silently if it will not convert - and for a planting word only
+     * offset 0 can ever succeed, because &minus;1 is the ground itself and +1
+     * is air over air. That predicts a hit rate near <b>one in three</b>, and
+     * nothing had ever measured it: the only visible evidence was "the dryad
+     * planted three times in three hours when its interval says twenty", which
+     * is consistent with a dozen explanations.
+     *
+     * <p>Counted per cover and reported at the census, because the attempt rate
+     * for the ground covers is one every sixty ticks and a line each would be
+     * thousands a night.
+     */
+    private static final Map<String, int[]> SPREADS = new LinkedHashMap<>();
+
+    /** A spread verb picked a block. */
+    static void noteSpreadTried(Horse horse, String cover) {
+        if (!watching(horse.level())) {
+            return;
+        }
+        SPREADS.computeIfAbsent(cover, k -> new int[2])[0]++;
+    }
+
+    /** ...and it actually changed something. */
+    static void noteSpreadPlaced(Horse horse, String cover) {
+        if (!watching(horse.level())) {
+            return;
+        }
+        SPREADS.computeIfAbsent(cover, k -> new int[2])[1]++;
+    }
 
     /**
      * <b>A gene fertilised something.</b> Called from

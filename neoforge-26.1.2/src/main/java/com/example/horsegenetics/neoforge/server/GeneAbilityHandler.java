@@ -1161,6 +1161,7 @@ public final class GeneAbilityHandler {
         }
 
         int r = (int) Math.ceil(s.radius());
+        DebugWorldWatch.noteSpreadTried(horse, s.cover());
         BlockPos target = horse.blockPosition().offset(
                 level.getRandom().nextInt(2 * r + 1) - r,
                 level.getRandom().nextInt(3) - 1,
@@ -1173,6 +1174,7 @@ public final class GeneAbilityHandler {
         // is a different question and cannot be squeezed into convert().
         if ("bonemeal".equals(s.cover())) {
             if (boneMeal(level, target)) {
+                DebugWorldWatch.noteSpreadPlaced(horse, s.cover());
                 grewParticles(level, target);
             }
             return;
@@ -1206,6 +1208,7 @@ public final class GeneAbilityHandler {
             return;
         }
         level.setBlockAndUpdate(target, converted);
+        DebugWorldWatch.noteSpreadPlaced(horse, s.cover());
         grewParticles(level, target);
     }
 

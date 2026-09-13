@@ -56,6 +56,45 @@
     </p>
 </div>
 
+<h2 id="more-for-the-night">&sect;0-DA &mdash; Two more things the night can answer for free (2026-09-13, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Both were already-open questions that needed no new apparatus</span>
+    <p>
+        The measuring half is built, so the marginal cost of another test is a pen or a
+        counter. These two were picked because the thing that would answer them was
+        <em>already running</em>.
+    </p>
+</div>
+
+<ul>
+    <li><strong>The retinue's cost.</strong> &sect;0-BT ranked this itself: <em>&ldquo;leader
+        of the pack is the performance one&hellip; one horse is certainly fine. A stable
+        with several pack leaders in it is the case I have no feel for at all.&rdquo;</em>
+        The new pen holds <strong>four leaders and sixteen cows</strong> &mdash; twenty-four
+        mobs re-pathing on a forty-tick beat, all night. The census already prints real
+        milliseconds per tick, and the dimension's baseline is a flat 50.0.
+        <strong>Pass: it stays at 50.0</strong>, which would be the first time anyone could
+        say what this gene costs. A climb, with the entity count flat, is the finding.</li>
+    <li><strong>How often a <code>spread</code> actually lands.</strong>
+        <a href="known-gaps.html#gap-208">Gap 208</a> predicts a hit rate near
+        <strong>one in three</strong> for anything that plants, because the verb picks one
+        block per interval with a vertical offset of &minus;1, 0 or +1 and only 0 can work
+        for something that builds upward. That was an inference from reading the code and
+        a single suggestive observation (three plantings where the interval says twenty).
+        The census now prints <code>placed/tried</code> per cover.
+        <strong>Near 33% confirms the gap; near 100% means the offset stopped mattering
+        and it can be closed.</strong> Either way it stops being an argument.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">And one that was quietly measuring nothing</span>
+    <p>
+        The ward pen. See &sect;0-CW, which now says the opposite of what it said this
+        morning &mdash; it is worth reading before the night rather than after.
+    </p>
+</div>
+
 <h2 id="dryad-rebuilt">&sect;0-CZ &mdash; Dryad is nine alleles now, and intimidating pushes properly (2026-09-13, NOT looked at)</h2>
 
 <div class="note danger">
@@ -571,40 +610,65 @@
         numbers behind it.</li>
 </ul>
 
-<h2 id="ward-audit">&sect;0-CW &mdash; Holy ward, as a number instead of an impression (2026-09-12, NOT looked at)</h2>
+<h2 id="ward-audit">&sect;0-CW &mdash; Holy ward: the yard tests the half that is not the headline (2026-09-13, NOT looked at)</h2>
 
-<div class="note">
-    <span class="label">The ward's claim is a negative, and a negative cannot be watched</span>
+<div class="note danger">
+    <span class="label">This section used to claim the opposite, and it was wrong twice over</span>
     <p>
-        Standing in the spawner room counting zombies tells you the spawner works. It does
-        not tell you whether the ward moved anything, because <em>the ones it stopped are
-        the ones you never saw</em>. So every hostile spawn goes to the log with its
-        distance to the nearest horse whose ward is actually live &mdash; asked of the
-        resolved ability list, not the genotype, since a carried gene can still be running
-        nothing.
+        It said a night of spawn distances would show the ward working. It cannot,
+        for two independent reasons either of which is enough
+        (<a href="known-gaps.html#gap-210">gap 210</a>):
     </p>
+    <ul>
+        <li><strong>The ward lets spawner mobs through on purpose.</strong>
+            <code>GeneWardHandler.isNatural</code> gates on the spawn reason, and
+            spawners, eggs, breeding, structures and commands all pass &mdash; because a
+            gene that silently broke somebody's mob farm is the failure that whole design
+            exists to avoid. The yard's zombies are mobs a <em>working</em> ward is
+            supposed to ignore.</li>
+        <li><strong>Natural spawning cannot happen in that dimension at all.</strong>
+            <code>debug_pens</code> generates <code>minecraft:the_void</code>, and the
+            void biome has no mob spawn entries. There is nothing there for a ward to
+            cancel, at any light level, at any distance.</li>
+    </ul>
     <p>
-        <strong>What to do:</strong> nothing. It is beside the spawner already and the
-        spawner is already charged with zombies. <strong>What a pass looks like:</strong>
-        plenty of <code>monster spawned</code> lines, and a <em>floor</em> under the
-        distance column &mdash; none of them close. A broken ward reads as spawns at two or
-        three blocks. An overnight run turns this from a handful of readings into
-        hundreds, which is the whole reason it is the best test in the yard.
+        And in a real world the warding half only bites <strong>more than 24 blocks from
+        every player</strong>, since vanilla never naturally spawns a monster closer and
+        the ward reaches 8&ndash;16 (<a href="known-gaps.html#gap-180">gap 180</a>). So
+        the gene's headline claim has never been tested, and cannot be tested here.
     </p>
 </div>
 
-<ul>
-    <li><strong>The spawner must produce zombies at all.</strong> That is the control the
-        whole test rests on: if the log has no <code>monster spawned</code> lines
-        anywhere, stop there, because a silent spawner and a perfect ward look identical.</li>
-    <li><strong>Check the distances against the radius the gene claims</strong>, not
-        against zero. The ward is a radius, and a spawn just outside it is the gene
-        working exactly as specified.</li>
-    <li><strong>And check the ward horse is still alive in the morning.</strong> Entries
-        expire after 40 ticks rather than being removed on death, so a dead warder is a
-        ward that lingers for two seconds - which is fine, and which the distance column
-        would show as a brief gap rather than a wall.</li>
-</ul>
+<div class="note">
+    <span class="label">What the pen does test, and &sect;0-BT ranks it higher anyway</span>
+    <p>
+        <strong>That a warded horse does not break a mob farm.</strong> The ward hooks
+        <code>FinalizeSpawnEvent</code> &mdash; a global, high-frequency event shared with
+        every other mod in the pack &mdash; and if its allow-list is wrong, a spawner
+        stops producing and nothing anywhere says why. That is the failure that damages
+        somebody else's world, and it is the one this pen can actually catch.
+    </p>
+    <p>
+        <strong>Pass:</strong> a steady stream of <code>monster spawned</code> lines beside
+        the warded horse. <strong>Fail:</strong> silence. <strong>And this is the pen that
+        needs you</strong> &mdash; a vanilla spawner will not run unless a player is within
+        16 blocks (<code>BaseSpawner.requiredPlayerRange</code>), which is why three hours
+        unattended produced nothing at all last night. <strong>AFK in the spawner
+        room.</strong> Everything else in the yard is force-loaded and does not care where
+        you stand, so that room is simply the right place to leave the character.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Testing the real claim, when somebody wants to</span>
+    <p>
+        It needs a real world, not the yard: a dark room, a warded horse and an
+        <strong>unwarded control room</strong> the same distance away, both more than 24
+        blocks from where the player stands, left overnight. The watch already logs every
+        hostile spawn with its distance to the nearest live ward, so the apparatus exists
+        &mdash; it is the <em>place</em> that does not.
+    </p>
+</div>
 
 <h2 id="test-yard">&sect;0-CS &mdash; The horse dimension's test yard (2026-09-12, NOT looked at)</h2>
 
