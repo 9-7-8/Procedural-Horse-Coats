@@ -67,8 +67,17 @@ public final class MagicNightWatchGene implements Gene, AbilityContribution {
     /** How far the others look for a player, in blocks. */
     public static final double WATCH_RADIUS = 24.0;
 
-    /** How close the one that gets behind you tries to be, in blocks. */
-    public static final double BEHIND_RADIUS = 2.0;
+    /**
+     * How close the one that gets behind you tries to be, in blocks.
+     *
+     * <p><b>Four, not two.</b> This is the distance to the horse's CENTRE, and
+     * a horse is about 1.4 wide with a head and neck that reach well past that
+     * - so aiming its middle two blocks behind a player put its face inside
+     * theirs. Owner, 2026-09-13: "the watch behind horse keeps sticking its
+     * head into my head." Four leaves it at your shoulder rather than in your
+     * skull, which is both less silly and considerably more unsettling.
+     */
+    public static final double BEHIND_RADIUS = 4.0;
 
     /** Share of the wild population each variant takes. Five of them, adding to one hundred. */
     public static final double WILD_EACH_PERCENT = 100.0 / 5;
@@ -104,7 +113,9 @@ public final class MagicNightWatchGene implements Gene, AbilityContribution {
                             + "sound doing any of it."),
             new Variant("Wbh", "Watcher, close behind (Wbh)", "behind", BEHIND_RADIUS,
                     "Stands directly behind you",
-                    "Two copies. It gets as close behind you as it can and stays there, "
+                    "Two copies. It gets as close behind you as it can and stays there - "
+                            + "but only while you are not looking at it. Turn round and it is "
+                            + "an ordinary horse again, which is the whole point of it. "
                             + "silently, all night. It is the last step of the progression and "
                             + "the one people ask for."));
 

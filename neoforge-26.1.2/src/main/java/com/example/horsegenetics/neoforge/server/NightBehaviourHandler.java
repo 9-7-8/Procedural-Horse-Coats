@@ -215,9 +215,25 @@ public final class NightBehaviourHandler {
             away = new Vec3(1, 0, 0);
         }
         Vec3 to = horse.position().add(away.normalize().scale(FLEE_DISTANCE));
-        horse.getNavigation().moveTo(to.x, to.y, to.z, FLEE_SPEED);
+        boolean pathed = horse.getNavigation().moveTo(to.x, to.y, to.z, FLEE_SPEED);
+        // SAY WHETHER THE PATH WAS EVEN ACCEPTED. Owner, 2026-09-13: "the shy
+        // genes don't seem to be doing anything" - and from outside, a flee
+        // that never fired and a flee that fired into a fence four blocks away
+        // look exactly alike. moveTo returns false when the navigator cannot
+        // reach the point, which is the difference, and it was being thrown
+        // away. Logged on a CHANGE of target rather than per beat, or a penned
+        // horse would write a line a second all night.
+        if (FLEEING.put(horse.getUUID(), nearest.getUUID()) != nearest.getUUID()) {
+            ActionTrace.log("night flee", ActionTrace.describeShort(horse) + " from "
+                    + nearest.getType().builtInRegistryHolder().key().identifier()
+                    + (pathed ? " - path accepted" : " - NO PATH: nowhere to run to"));
+        }
         return true;
     }
+
+    /** Who each horse is currently running from, so the trace fires on a change only. */
+    private static final java.util.Map<java.util.UUID, java.util.UUID> FLEEING =
+            new java.util.concurrent.ConcurrentHashMap<>();
 
     /** Does this creature fall into the group the allele names? */
     private static boolean matches(String towards, LivingEntity candidate) {

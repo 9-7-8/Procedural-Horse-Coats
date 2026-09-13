@@ -421,6 +421,11 @@ public final class ActionTrace {
         return id + (name.isEmpty() ? "" : " (\"" + name + "\")");
     }
 
+    /** The one-line name, for callers outside this class. */
+    public static String describeShort(Entity entity) {
+        return shortName(entity);
+    }
+
     private static String shortName(Entity entity) {
         if (entity instanceof Horse horse && HorseRecords.hasRealRecord(horse)) {
             HorseRecord record = HorseRecords.of(horse);

@@ -767,9 +767,9 @@ public final class DebugPenManager {
         }
     }
 
-    static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
+    static Horse spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
                                    String geneticCode) {
-        spawnHorse(level, floorY, x, z, sex, geneticCode, false);
+        return spawnHorse(level, floorY, x, z, sex, geneticCode, false);
     }
 
     /**
@@ -777,11 +777,11 @@ public final class DebugPenManager {
      * untamed horse ({@code AbstractHorse.canParent}), so any pen whose test
      * involves a foal has to be stocked tame or nothing can ever happen in it.
      */
-    static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
+    static Horse spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
                                    String geneticCode, boolean tamed) {
         Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.COMMAND);
         if (horse == null) {
-            return;
+            return null;
         }
         if (tamed) {
             horse.setTamed(true);
@@ -792,6 +792,7 @@ public final class DebugPenManager {
         HorseRecords.apply(horse,
                 HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex, Genotype.parse(geneticCode)));
         level.addFreshEntity(horse);
+        return horse;
     }
 
     // --- hay-bale return portal at the start of the plot ---

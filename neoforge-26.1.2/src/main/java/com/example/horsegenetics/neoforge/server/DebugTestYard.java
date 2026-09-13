@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -1176,16 +1177,40 @@ final class DebugTestYard {
         int placed = 0;
         try {
             for (int i = 0; i < mares; i++) {
-                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.FEMALE, code, true);
+                label(DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z,
+                        Sex.FEMALE, code, true), what);
             }
             for (int i = 0; i < studs; i++) {
-                DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z, Sex.MALE, code, true);
+                label(DebugPenManager.spawnHorse(level, gy + 1, x + placed++ * 1.5, z,
+                        Sex.MALE, code, true), what);
             }
             ActionTrace.log("test yard", "stocked " + what + " with " + placed + "x " + code
                     + " (" + mares + " mare, " + studs + " stallion), tamed");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: could not stock {}", what, e);
         }
+    }
+
+    /**
+     * <b>Write what a horse IS on the horse, not only on the pen's sign.</b>
+     *
+     * <p>Owner, 2026-09-13: <i>"can you change the names of the watcher horses
+     * after generation to describe what they are? I need to let them out of
+     * their pens to fully test."</i> Which is the right way to test half of
+     * these - a stalker in a nine-block stall cannot really stalk, and a gene
+     * about where it stands relative to you needs room to stand.
+     *
+     * <p>The sign is the only label a stocked horse has, and it stops being
+     * attached to anything the moment the gate opens. So the name goes on the
+     * animal and stays visible: five watchers loose in one yard are
+     * indistinguishable otherwise, and telling them apart is the entire test.
+     */
+    private static void label(Horse horse, String what) {
+        if (horse == null) {
+            return;
+        }
+        horse.setCustomName(Component.literal(what));
+        horse.setCustomNameVisible(true);
     }
 
     /**

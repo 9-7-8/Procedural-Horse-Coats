@@ -83,6 +83,25 @@ public final class NightWatchGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
+        // THE ONE THAT GETS BEHIND YOU STOPS THE MOMENT YOU TURN ROUND.
+        //
+        // Owner, 2026-09-13: "watch behind has the horse stare at me even if I'm
+        // looking at it. If I'm looking at it, it should behave like a normal
+        // horse." That is the right rule and it is better than what was written:
+        // the whole appeal of this variant is what happens where you are NOT
+        // looking, and a horse that keeps creeping into your back while you
+        // stare straight at it is not eerie, it is broken-looking.
+        //
+        // 'unseen' already had this instinct half-built - it repositions when
+        // seen - but 'behind' moved to your back unconditionally. Turning to
+        // face it now ends the goal outright, so it drops the stare and the
+        // walk together and goes back to being a horse.
+        if ("behind".equals(w.mode()) && inView()) {
+            return false;
+        }
+        // 'unseen' keeps running while it is seen - unlike 'behind' - because
+        // slipping OUT of the arc is the whole of that variant. It just does it
+        // without staring at you on the way (see tick).
         // Only this mode is stopped by a closed door; the rest see through it.
         return !"line_of_sight".equals(w.mode()) || horse.hasLineOfSight(target);
     }
@@ -109,9 +128,23 @@ public final class NightWatchGoal extends Goal {
         if (w == null || target == null) {
             return;
         }
-        // The stare is the constant. Every mode looks at the player every tick;
-        // what differs is whether the horse is also trying to be somewhere.
-        horse.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        // THE STARE IS NOT THE CONSTANT ANY MORE.
+        //
+        // It used to be: every mode looked at the player every tick, and only
+        // the movement differed. Two of them read badly for it. Owner,
+        // 2026-09-13: "watch unseen is indeed staring at me", and of the other,
+        // "if I'm looking at it, it should behave like a normal horse".
+        //
+        // She is right, and the reason is what the two modes are ABOUT. The
+        // fixed and sighted watchers are meant to hold your eye - being stared
+        // at is the whole of them. 'unseen' and 'behind' are the opposite: they
+        // are about what happens where you are NOT looking, and a horse that
+        // keeps its eyes locked on you while you stare straight back is not
+        // eerie, it just looks broken. So those two drop the stare the moment
+        // they are in your arc, and pick it up again when you turn away.
+        if (!avoidsBeingSeen(w) || !inView()) {
+            horse.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
 
         Vec3 want = destination(w);
         if (want == null) {
@@ -143,14 +176,14 @@ public final class NightWatchGoal extends Goal {
                     ? target.position()
                     : null;
 
-            // Directly behind the player, at arm's length. The player's look
-            // vector points forward, so behind is minus it.
-            case "behind" -> target.position()
-                    .subtract(target.getLookAngle().normalize().scale(w.radius()));
+            // Directly behind the player. The look vector points forward, so
+            // behind is minus it - approached the long way round, never through.
+            case "behind" -> goRound(target, target.position()
+                    .subtract(flat(target.getLookAngle()).scale(w.radius())));
 
             // Out of the player's view arc. If the horse is already outside it,
             // it stays; otherwise it walks round to the player's back.
-            case "unseen" -> inView() ? behindOffset(target) : null;
+            case "unseen" -> inView() ? goRound(target, behindOffset(target)) : null;
 
             default -> null;
         };
@@ -158,8 +191,55 @@ public final class NightWatchGoal extends Goal {
 
     /** A point behind the player, used by {@code unseen} to leave the arc. */
     private Vec3 behindOffset(Player player) {
-        Vec3 back = player.getLookAngle().normalize().scale(-Math.max(3.0, horse.getBbWidth() * 2));
+        Vec3 back = flat(player.getLookAngle()).scale(-Math.max(3.0, horse.getBbWidth() * 2));
         return player.position().add(back);
+    }
+
+    /** How wide to swing when the direct line would cross the player. */
+    private static final double SWING_WIDE = 3.5;
+
+    /**
+     * <b>Walk AROUND the player, never through them.</b>
+     *
+     * <p>Owner, 2026-09-13: <i>"if I turn to look at it, it tries to get behind
+     * me by WALKING THROUGH ME, which looks too unnatural. It's meant to behave
+     * more sneaky."</i> Exactly so - and the cause is that the destination was
+     * handed straight to the navigator, which quite reasonably drew the
+     * shortest line, and the shortest line from in front of you to behind you
+     * goes through you.
+     *
+     * <p>So: if the horse is on the far side of the player from where it wants
+     * to be, it is given a waypoint <b>out to whichever side it is already
+     * nearest</b> instead. It arcs out, the geometry is recomputed on the next
+     * re-path, and it comes round the back. The horse never chooses the shorter
+     * way past your face, which is what "sneaky" means in movement terms.
+     */
+    private Vec3 goRound(Player player, Vec3 goal) {
+        Vec3 toHorse = flat(horse.position().subtract(player.position()));
+        Vec3 toGoal = flat(goal.subtract(player.position()));
+        if (toHorse.lengthSqr() < 1.0e-4 || toGoal.lengthSqr() < 1.0e-4) {
+            return goal;
+        }
+        if (toHorse.dot(toGoal) >= 0) {
+            return goal;   // already on the right side; the straight line is fine
+        }
+        Vec3 right = new Vec3(-toGoal.z, 0, toGoal.x);
+        double side = right.dot(toHorse) < 0 ? -1.0 : 1.0;
+        return player.position().add(right.normalize().scale(side * SWING_WIDE));
+    }
+
+    /** Flattened and normalised, because all of this is a question about yaw. */
+    private static Vec3 flat(Vec3 v) {
+        Vec3 f = new Vec3(v.x, 0, v.z);
+        return f.lengthSqr() < 1.0e-4 ? new Vec3(1, 0, 0) : f.normalize();
+    }
+
+    /**
+     * Modes whose whole identity is being unobserved, and which therefore go
+     * quiet when they are observed.
+     */
+    private static boolean avoidsBeingSeen(GeneAbility.NightWatch w) {
+        return "behind".equals(w.mode()) || "unseen".equals(w.mode());
     }
 
     /**
