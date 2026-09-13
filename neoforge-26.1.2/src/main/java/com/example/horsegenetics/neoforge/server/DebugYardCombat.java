@@ -465,7 +465,8 @@ final class DebugYardCombat {
     }
 
     /**
-     * <b>NOT CALLED ANY MORE, and the reason is the whole design of these two
+     * <b>A bounded, placed group of opponents - ONE by default, and the reason
+     * the number is small is the whole design of these two
      * pens.</b>
      *
      * <p>The arenas were given a charged spawner, then three placed zombies,
@@ -487,11 +488,15 @@ final class DebugYardCombat {
      * make the fight. That is not a workaround for a pen that cannot hold
      * monsters - it is the only arrangement in which either gene is <em>on</em>.
      *
-     * <p>Kept rather than deleted because a pen that wants a bounded, repeatable
-     * group of opponents is a reasonable thing to want, and this is how to place
-     * one. A spawner is not: it keeps six alive within range and refills them as
-     * fast as they die, so one horse is not being tested, it is being counted
-     * down.
+     * <p>A spawner is the thing that is not used here: it keeps six alive within
+     * range and refills them as fast as they die, so one horse is not being
+     * tested, it is being counted down. One placed opponent, and more in the
+     * chest as spawn eggs, leaves the scale of the fight in the tester's hand.
+     *
+     * <p><b>It worked the first time it was tried.</b> 2026-09-13 12:47:03 the
+     * zombie joined the gladiator's arena; 12:47:15 it died {@code from mob},
+     * dropping rotten flesh inside the pen, having taken the horse from 23.3 to
+     * 14.3 on the way. Unridden, unassisted, and alive at the end of it.
      */
     private static void arenaOpponents(ServerLevel level, int gy, int x0, int x1, int z, int count) {
         for (int i = 0; i < count; i++) {

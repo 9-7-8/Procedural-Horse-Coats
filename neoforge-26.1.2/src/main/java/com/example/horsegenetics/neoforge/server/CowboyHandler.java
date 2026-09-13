@@ -184,26 +184,65 @@ public final class CowboyHandler {
     }
 
     /**
-     * One line a second about the man themselves, whether or not they are on a horse.
+     * A line about the man themselves <b>when something about him changes</b>,
+     * whether or not he is on a horse.
      *
      * <p>{@code CowboyMountGoal}'s own report only runs while that goal is
      * running, so it is silent in precisely the case that needs explaining. This
      * one runs off the cowboy's tick, which is the same tick that founds them, so
      * it cannot be silent for a cowboy that exists at all.
+     *
+     * <h2>On change, not on the clock</h2>
+     * It was one line a second regardless, and in the 2026-09-13 12:46 session
+     * that was 680 identical lines - 32% of everything the mod logged, in a
+     * session whose actual subject produced nine. The only field that moved was
+     * {@code pos}, and a wandering villager's coordinate is the least
+     * informative thing on the line: the question this instrument exists for is
+     * <i>founded, home, herd, live, stock, target, trading</i>, all of which
+     * change rarely and are exactly what a change-triggered line catches.
+     *
+     * <p>The heartbeat is kept at {@link #COWBOY_QUIET_INTERVAL} so that "no
+     * cowboy line at all" still means a cowboy who is not ticking, rather than
+     * one who is simply not doing anything - opposite bugs that would otherwise
+     * look identical, which is the mistake this whole class of diagnostic was
+     * written to stop making.
      */
     private static void reportCowboy(Cowboy cowboy, ServerLevel level) {
         if (!DebugAnnounce.enabled()) {
             return;
         }
-        DebugAnnounce.log("Cowboy", String.format(
-                "%s founded=%s pos=%d,%d,%d home=%s herd=%d live=%d stock=%d target=%d trading=%s",
-                cowboy.cowboyName(), cowboy.isFounded(),
-                cowboy.blockPosition().getX(), cowboy.blockPosition().getY(), cowboy.blockPosition().getZ(),
+        String state = String.format(
+                "founded=%s home=%s herd=%d live=%d stock=%d target=%d trading=%s",
+                cowboy.isFounded(),
                 cowboy.home().map(Object::toString).orElse("none"),
                 cowboy.herdIds().size(), cowboy.liveHerd(level).size(),
                 sellableStock(cowboy, level).size(), cowboy.stockTarget(),
-                cowboy.isTrading()));
+                cowboy.isTrading());
+        String previous = LAST_COWBOY_STATE.get(cowboy.getUUID());
+        boolean heartbeat = cowboy.tickCount % COWBOY_QUIET_INTERVAL == 0;
+        if (state.equals(previous) && !heartbeat) {
+            return;
+        }
+        LAST_COWBOY_STATE.put(cowboy.getUUID(), state);
+        DebugAnnounce.log("Cowboy", String.format("%s %s pos=%d,%d,%d%s",
+                cowboy.cowboyName(), state,
+                cowboy.blockPosition().getX(), cowboy.blockPosition().getY(), cowboy.blockPosition().getZ(),
+                state.equals(previous) ? " (unchanged)" : ""));
     }
+
+    /**
+     * How long a cowboy may go without a line while nothing about him changes.
+     * Two minutes, which is {@code DebugWorldWatch}'s census interval - so a
+     * quiet cowboy appears once per census rather than once per second.
+     */
+    private static final int COWBOY_QUIET_INTERVAL = 2400;
+
+    /**
+     * The last state string logged for each cowboy, so an unchanged one stays
+     * quiet. Keyed by UUID and never pruned: a world holds a handful of
+     * cowboys, and a stale entry costs one string.
+     */
+    private static final java.util.Map<UUID, String> LAST_COWBOY_STATE = new java.util.HashMap<>();
 
     private static void found(Cowboy cowboy, ServerLevel level) {
         Rng rng = new NeoRng(cowboy.getRandom());

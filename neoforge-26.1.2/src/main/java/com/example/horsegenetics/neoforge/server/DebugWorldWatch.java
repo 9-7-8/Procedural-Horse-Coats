@@ -392,6 +392,17 @@ public final class DebugWorldWatch {
             HorseGenetics.LOGGER.info("{} gene sounds since the last census: {}", TAG, sb);
             SOUNDS.clear();
         }
+        if (!TOPUPS.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            int total = 0;
+            for (Map.Entry<String, Integer> e : TOPUPS.entrySet()) {
+                sb.append(sb.length() == 0 ? "" : ", ").append(e.getValue()).append("x ").append(e.getKey());
+                total += e.getValue();
+            }
+            HorseGenetics.LOGGER.info("{} {} heals on horses already at full health, not logged "
+                    + "individually: {}", TAG, total, sb);
+            TOPUPS.clear();
+        }
         if (!SPREADS.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, int[]> e : SPREADS.entrySet()) {
@@ -495,23 +506,11 @@ public final class DebugWorldWatch {
                 + (mobs > 0 || (was != null && was.otherMobs() > 0)
                         ? ", other creatures " + mobs + delta(was == null ? mobs : was.otherMobs(), mobs)
                         : "");
-        String attr = "";
-        if (area.attribute() != null) {
-            double lo = Double.MAX_VALUE;
-            double hi = -Double.MAX_VALUE;
-            int seen = 0;
-            for (Horse h : level.getEntitiesOfClass(Horse.class, area.box().inflate(0.0, 2.0, 0.0))) {
-                AttributeInstance inst = h.getAttribute(area.attribute());
-                if (inst != null) {
-                    lo = Math.min(lo, inst.getValue());
-                    hi = Math.max(hi, inst.getValue());
-                    seen++;
-                }
-            }
-            attr = seen == 0 ? " | no horse carries that attribute"
-                    : String.format(" | %s %.3f-%.3f",
-                            area.attribute().getRegisteredName(), lo, hi);
-        }
+        // PER HORSE, NOT A RANGE - see attributeReadout, which was written to
+        // replace an inline min/max here and then never called from it. The
+        // eyesight census reported the aggregate for another whole session
+        // because of that, which is the one reading the aggregate cannot give.
+        String attr = area.attribute() == null ? "" : attributeReadout(level, area);
         String distance = area.focus() == null ? ""
                 : " | nearest non-horse " + (nearest < 0 ? "none in the pen"
                         : String.format("%.1f blocks", nearest));
@@ -553,11 +552,26 @@ public final class DebugWorldWatch {
             if (inst == null) {
                 continue;
             }
+            // THE BASE VALUE BESIDE THE CURRENT ONE, which is what finally
+            // removes the confound rather than moving it. Naming the horses
+            // fixes an aggregate that hid a swap; it does NOT fix the fact
+            // that the lit pen and the dark pen hold DIFFERENT ANIMALS, whose
+            // speed differs genetically before any gene condition is applied,
+            // so a number from one pen and a number from the other are not
+            // comparable in the first place.
+            //
+            // A horse against its own unmodified base is comparable, always:
+            // 0.221 with a base of 0.165 is the gene doing something to THIS
+            // animal, and 0.165 with a base of 0.165 is the gene doing
+            // nothing, and neither reading needs the other pen at all.
             out.append(seen == 0 ? " | " + area.attribute().getRegisteredName() + " " : ", ")
                     .append(h.hasCustomName() ? h.getCustomName().getString()
                             : ActionTrace.describeShort(h))
                     .append('=')
-                    .append(String.format("%.3f", inst.getValue()));
+                    .append(String.format("%.3f", inst.getValue()))
+                    .append(Math.abs(inst.getValue() - inst.getBaseValue()) < 1.0e-4
+                            ? " (unmodified)"
+                            : String.format(" (base %.3f)", inst.getBaseValue()));
             seen++;
             if (seen >= ATTRIBUTE_NAMES_MAX) {
                 out.append(", ...");
@@ -734,13 +748,43 @@ public final class DebugWorldWatch {
         // anywhere is worth a line, and today's log is the argument for it -
         // but healing is background noise outside a pen that is asking about
         // healing.
-        if (inArea(horse.blockPosition()).isEmpty()) {
+        String area = inArea(horse.blockPosition());
+        if (area.isEmpty()) {
+            return;
+        }
+        // COUNTED, NOT LOGGED, when the horse has nothing to gain - same
+        // decision as notePlayedSound and for the same reason. The event fires
+        // BEFORE the heal, so a horse already at (or within a rounding error
+        // of) its maximum produces a line that reads "healed by 1.0 - now
+        // 22.0/22.0" and means nothing happened. Those were 725 of the 745
+        // heal lines in the 2026-09-13 12:46 session - 34% of everything this
+        // mod logged, against five to sixteen lines per pen for the tests that
+        // were actually being run.
+        //
+        // The tally is kept rather than dropped because the top-ups are
+        // themselves an open question: every guarded caller checks
+        // getHealth() < getMaxHealth() first, so a pen of undamaged horses
+        // should not produce any, and it produces one or two per horse per
+        // minute. See known-gaps: this counter is the measurement that
+        // question needs.
+        if (horse.getMaxHealth() - horse.getHealth() < TOPUP_EPSILON) {
+            TOPUPS.merge(area.substring(2, area.length() - 1), 1, Integer::sum);
             return;
         }
         note("horse healed", ActionTrace.describeShort(horse) + " by "
                 + String.format("%.1f", event.getAmount()) + " - now "
-                + String.format("%.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
+                + String.format("%.2f/%.2f", horse.getHealth(), horse.getMaxHealth()));
     }
+
+    /**
+     * How far below maximum a horse has to be for its heal to be worth a line.
+     * Below this it cannot gain a visible half-heart, so the line would be
+     * reporting the regen timer rather than anything about the horse.
+     */
+    private static final float TOPUP_EPSILON = 0.5F;
+
+    /** No-op heals since the last census, by the pen they happened in. */
+    private static final Map<String, Integer> TOPUPS = new LinkedHashMap<>();
 
     /** Bone meal, by anybody. Nothing in the yard uses it - which is the point of watching. */
     @SubscribeEvent
