@@ -40,8 +40,9 @@
     <td>A <strong>pregnancy</strong>, if the mare is in heat and it takes.</td></tr>
 <tr><td>Use a <a href="item-seed-jars.html">seed jar</a> on your mare</td>
     <td>A <strong>pregnancy</strong>, if she is in heat and it takes.</td></tr>
-<tr><td>Keep two horses with the <a href="gene-spontaneous-breeding.html">Spontaneous Breeding</a> gene together</td>
-    <td>They pair by themselves while she is in heat, and she becomes pregnant.</td></tr>
+<tr><td>Leave a <strong>stallion with mares</strong></td>
+    <td>He covers each mare once per heat, and she may become <strong>pregnant</strong>.
+    See <a href="#natural">below</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -116,6 +117,40 @@
         cycle carries on.</li>
 </ul>
 
+<h2 id="natural">A stallion left with mares</h2>
+
+<p>
+    Every adult horse, tamed or wild, breeds on its own. When a mare is in heat and a
+    stallion comes within about three blocks of her, he covers her <strong>once that
+    heat</strong> (a burst of hearts), at the odds above. If it does not take, nothing more
+    happens until her next heat. The foal is credited to her owner.
+</p>
+<p>It does not happen if:</p>
+<ul>
+    <li>either horse is hurt, ridden or on a lead;</li>
+    <li>he is a <a href="#gelding">gelding</a>, or has already covered three mares today;</li>
+    <li><strong>eight or more other horses</strong>, foals included, are within 16 blocks of
+        her;</li>
+    <li>the horses are a cowboy's, whose string never breeds;</li>
+    <li>nobody is near enough for that area to be loaded.</li>
+</ul>
+
+<h2 id="gelding">Geldings and the vet&rsquo;s kit</h2>
+
+<p>
+    A <a href="item-vet-kit.html">vet&rsquo;s kit</a>, used while sneaking on your own
+    stallion or colt, gelds him for good. A gelding never breeds, never fills a seed jar, and
+    sires nothing from golden carrots. He does not spar, guard mares or go looking for a mare
+    in heat, and he bonds with you a quarter faster. His information screen says
+    <em>Gelding</em> and his nameplate symbol is grey. About half a cowboy&rsquo;s males are
+    geldings, and they cost a little less.
+</p>
+<p>
+    Used without sneaking, the kit examines a horse: where a mare is in her heat and when it
+    ends, whether a pregnant mare is carrying twins, and how many covers a stallion has made
+    today.
+</p>
+
 <h2 id="setting">The setting</h2>
 
 <p>
@@ -173,8 +208,18 @@
     <li><strong><code>StallionSeedJarHandler</code></strong>: filling counts a cover and moves
         the stallion&rsquo;s armed carrots into the jar. Using it requires
         <code>ReproHandler.receptive</code> instead of vanilla love.</li>
-    <li><strong><code>SpontaneousBreedingHandler</code></strong> calls
-        <code>breed</code> directly instead of setting love.</li>
+    <li><strong><code>NaturalBreedingHandler</code></strong>: every 40 ticks an adult mare
+        asks <code>ReproRules.mayTryNaturally</code> (in heat, and her
+        <code>lastNaturalTry</code> is before this heat began). She finds the nearest entire
+        stallion within <code>NATURAL_REACH</code> who is under the cover limit, checks
+        <code>NATURAL_CAP</code>, stamps the try, and calls <code>breed</code> with her
+        owner as <code>bredBy</code>. Cowboy-branded horses are skipped. It is an entity tick,
+        so only loaded chunks ever breed.</li>
+    <li><strong>Gelding</strong> is <code>HorseRecord.gelded</code>, and
+        <code>HorseRecord.entire()</code> is what every stallion check asks: the herd goals,
+        rivalry, the jar and <code>onBabySpawn</code>. <code>VetKitHandler</code> gelds and
+        examines (<code>ReproHandler.vetReport</code>). See
+        <a href="known-gaps.html#gap-229">gap 229</a> for what still reads sex alone.</li>
     <li><strong><code>BreedingCooldownHandler</code></strong> refuses vanilla love items to a
         pregnant mare, server side only; see
         <a href="known-gaps.html#gap-226">gap 226</a>.</li>
@@ -191,7 +236,7 @@
     With <code>debug.tools</code> on, <code>ServerConfig.reproTiming()</code> uses
     <code>DEBUG_REPRO_DAY_TICKS</code> for the day. A clock on an adult mare is
     <code>ReproHandler.debugStep</code>: out of heat to peak heat, pregnant to due now,
-    postpartum to foal heat. Test kit batch 1 is built for this. Every attempt, loss and
+    postpartum to foal heat. Test kit batches 1 and 2 are built for this. Every attempt, loss and
     birth writes an <code>ActionTrace</code> line under <code>fertility</code>, and carrot
     folds are under <code>carrot</code>.
 </p>
@@ -249,6 +294,12 @@
     <li><strong>Carrots that wait.</strong> A 30-second carrot made sense when a carrot was
         fed at the moment of breeding. Once a mare has to be in heat, it would mostly have
         been wasted, so a carrot now waits on the horse until a conception uses it.</li>
+    <li><strong>Every horse breeds, once per heat.</strong> The Spontaneous Breeding gene made
+        automatic breeding a rare trait. The owner removed it: a stallion left with mares
+        making foals is simply what horses do. Heat and pregnancy already slow the rate to
+        roughly one foal per mare every few Minecraft days. The one-try-per-heat rule stops a
+        pair rolling until it succeeds, and the local cap bounds what is left. Whether that
+        cap holds over days is <a href="known-gaps.html#gap-206">gap 206</a>.</li>
     <li><strong>Game time, not the day counter.</strong> The mod&rsquo;s other day-based
         rules (a horse&rsquo;s age, the daily bond cap) already count game time, and on a
         server where people sleep, day time would push pregnancies through in bursts.</li>

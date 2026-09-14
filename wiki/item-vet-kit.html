@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vet's kit &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> breeding</p>
+<h1>Vet&rsquo;s kit</h1>
+<p class="lede">
+    Geld a stallion so he never breeds, or examine a horse: where a mare is in her heat, and
+    whether she is carrying twins.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">How to use it</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Do this</th><th>On</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Sneak</strong> + right-click</td><td>A stallion or colt <em>you own</em></td>
+    <td>He becomes a <strong>gelding</strong>, for good.</td></tr>
+<tr><td>Right-click</td><td>A mare</td>
+    <td>Where she is in her heat and when it ends, or how long her pregnancy has to go and
+    whether it is twins. It also says if a stallion has already covered her this heat, and
+    whether she is nursing.</td></tr>
+<tr><td>Right-click</td><td>A stallion</td>
+    <td>How many of his three covers for today he has used, or that he is a gelding.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Every use costs one of its 64 uses. Make one from <strong>shears, leather and an iron
+    ingot</strong>, or buy one from the <a href="villagers.html#horseman">horseman</a>.
+</p>
+
+<h2 id="gelding">What gelding does</h2>
+<ul>
+    <li>He never breeds: not with a mare in heat, not with golden carrots, and a seed jar
+        cannot be filled from him. A jar filled <em>before</em> still works.</li>
+    <li>He stops acting like a stallion. He doesn&rsquo;t spar, guard mares, lead a bachelor
+        band or walk to a mare in heat, and keeps company the way mares do.</li>
+    <li>He bonds with you a quarter faster.</li>
+    <li>His info screen says <em>Gelding</em>, and his nameplate symbol is grey.</li>
+    <li>It stays with him if he dies and is summoned back, or is sold on a transfer
+        paper.</li>
+</ul>
+<p>
+    It does not change his genes or his health. About half the males a cowboy sells are
+    already geldings, and cost a little less. More on breeding on
+    <a href="fertility.html#gelding">fertility &amp; gestation</a>.
+</p>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="code">Where it lives</h2>
+<ul>
+    <li><code>ModItems.VET_KIT</code>, a plain <code>Item</code> with
+        <code>durability(64)</code>. The model borrows vanilla&rsquo;s bundle texture as a
+        placeholder.</li>
+    <li><code>server/VetKitHandler</code> handles <code>PlayerInteractEvent.EntityInteract</code>
+        and cancels on both sides. Sneaking gelds: male, not already gelded, tamed, and
+        <code>HorseOwnership.isOwner</code>, then
+        <code>HorseRecords.apply(horse, record.withGelded(true))</code>, which syncs the record
+        to tracking clients. A plain use prints <code>ReproHandler.vetReport</code>.</li>
+    <li>The flag is <code>HorseRecord.gelded</code> (codec field <code>gelded</code>), and
+        <code>HorseRecord.entire()</code> is the stallion test.
+        <code>HorseRecord.sexLabel</code> is the display word.</li>
+    <li>Recipe <code>data/horsegenetics/recipe/vet_kit.json</code>; trade
+        <code>villager_trade/horseman/level_2/sell_vet_kit.json</code>.</li>
+</ul>
+
+<h2 id="gaps">Known gaps</h2>
+<ul>
+    <li>A few stallion checks still read sex alone; see
+        <a href="known-gaps.html#gap-229">gap 229</a>.</li>
+    <li>The texture is a placeholder.</li>
+</ul>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="fertility.html">Fertility &amp; gestation</a>
+        <a href="item-seed-jars.html">Seed jars</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>server/VetKitHandler</code>; the flag on <code>HorseRecord</code>.
+</div>
+
+</article>
+</main>
+</body>
+</html>

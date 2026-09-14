@@ -1278,14 +1278,6 @@
 </p>
 
 <ul>
-    <li><strong>Wild band breeding</strong> &mdash; the next slice of
-        <a href="fertility.html">fertility &amp; gestation</a>, deliberately left out of the
-        first. A band stallion and his mares in heat conceiving through
-        <code>ReproHandler.breed</code> with nobody present. It needs its own answers before
-        it is built: a population cap per band and per area (the Spontaneous Breeding
-        gene&rsquo;s local cap of six is the only precedent), whether a bachelor can sneak a
-        cover, and what a foal born into a band does to <code>BandLife</code>&rsquo;s
-        dispersal numbers.</li>
     <li><strong>The pedigree edge.</strong> It is settled that the jar must store enough
         of the sire&rsquo;s record &mdash; not just his UUID &mdash; for the family tree
         to render his node. It stores name and sex already, but the synthetic sire record
@@ -1667,8 +1659,7 @@
 <ul>
     <li><strong>Scope: fertility genes plus pregnancy on the mod's own paths.</strong> Plain
         golden-carrot breeding stays instant. Pregnancy happens through the seed jar,
-        a carrot-armed parent on either side, the Spontaneous Breeding gene, and later wild
-        band breeding. There is no "gestation everywhere" setting.</li>
+        a carrot-armed parent on either side, and a stallion left with mares (see below). There is no "gestation everywhere" setting.</li>
     <li><strong>A gene that sometimes gives no foal from golden carrots does not count as
         removing vanilla behaviour.</strong> Only the subfertile allele can cause a miss:
         the chance is the product of both parents' allele factors, where <code>+</code> is 1
@@ -1724,6 +1715,19 @@
         A carrot no longer puts a horse in love, so breeding is always a separate act. A
         jar filled from an armed stallion carries his effects, and a jar used on an armed
         mare applies hers.</li>
+    <li><strong>The Spontaneous Breeding gene is gone; every horse breeds on its own.</strong>
+        The owner: it was &ldquo;now basically just base game behavior. If you leave a stallion
+        around mares, he's going to make babies.&rdquo; Tamed and wild, once per heat when they
+        meet, in loaded chunks only. Both must be at full health, and neither ridden nor
+        leashed. Eight other horses within sixteen blocks of her stops it. Three natural covers
+        in a day is a hard stop for him. The foal is credited to the mare's owner. Cowboy herds
+        are exempt; the yard and the horse dimension are not.</li>
+    <li><strong>Gelding, with a vet's kit.</strong> Sneak-use on your own stallion or colt. It is
+        permanent, and a flag on the horse record, so it survives death and sale. A gelding is
+        shown as one, has no stallion behaviour, refuses a jar and bonds 25% faster. Plain use
+        examines a heat or a pregnancy, and is where twins are revealed. The kit is crafted
+        (shears, leather, iron; 64 uses) and sold by the horseman. About half a cowboy's males
+        are geldings, priced lower.</li>
 </ul>
 
 <h3>Settled 2026-09-10</h3>

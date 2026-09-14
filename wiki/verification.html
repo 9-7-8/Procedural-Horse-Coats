@@ -83,7 +83,7 @@
 <h2 id="fertility">&sect;0-DV &mdash; Fertility and gestation (built 2026-09-13 late, NOT played)</h2>
 
 <p>
-    <strong>Test kit batch 1.</strong> With <code>debug.tools</code> on, a heat and a pregnancy
+    <strong>Test kit batches 1 and 2.</strong> With <code>debug.tools</code> on, a heat and a pregnancy
     each last one real minute, and the clock steps an adult mare along. The genetics side is
     unit-tested (<code>ReproRulesTest</code>, <code>FertilityGeneTest</code>). Nothing in the
     world has run. Every attempt, loss and birth logs a <code>[fertility]</code> line, and
@@ -116,9 +116,26 @@
     <li><strong>A pregnant mare refuses golden carrots.</strong> A yellow line, carrot kept.
         Watch for a client-side flicker: a mount or eat animation before the server says no.
         See <a href="known-gaps.html#gap-226">gap 226</a>.</li>
-    <li><strong>The Spontaneous Breeding gene</strong> (two expressing, tamed, full-health
-        horses): hearts only when a mare in heat actually conceives, and the debug trace says
-        <code>CONCEIVED</code> or <code>DID_NOT_TAKE</code>.</li>
+    <li><strong>Natural breeding (batch 2) &mdash; the one that can damage a save.</strong> A
+        tamed stallion and three mares in a paddock. Clock one mare into heat: he walks over and
+        covers her <em>once</em> (hearts, and a <code>[fertility] natural cover</code> line). If it
+        did not take, nothing more happens until her next heat. Then add horses until eight others
+        stand within 16 blocks of a mare: the log says <code>the cap is 8</code> and nobody is
+        covered. <strong>Leave a paddock running for several in-game days and count.</strong> A
+        population that creeps past the cap is the failure that matters
+        (<a href="known-gaps.html#gap-206">gap 206</a>).</li>
+    <li><strong>What stops a cover:</strong> a leashed or ridden horse, a hurt mare (tap her with
+        the sword), a gelding, a stallion who has covered three mares today, and a cowboy's string,
+        none of which should ever foal.</li>
+    <li><strong>The vet's kit.</strong> Plain use on a mare: where she is in her heat and when it
+        ends; on a pregnant mare, <em>twins</em> or <em>one foal</em>. Sneak-use on your own
+        stallion: &ldquo;is now a gelding&rdquo;, the info screen says <em>Gelding</em>, his nameplate
+        symbol turns grey, a seed jar refuses him, and golden carrots with a mare say &ldquo;is a
+        gelding - no foal&rdquo;. On someone else's stallion: refused. One durability per use; the
+        horseman sells it at level 2.</li>
+    <li><strong>A gelding's company.</strong> He never spars, guards a band or walks to a mare in
+        heat, and he bonds a quarter faster. A cowboy's string should now include some geldings,
+        a little cheaper.</li>
     <li><strong>The yard's carrot pens</strong> (rows L, M, N) read &ldquo;carrot ONE, clock /
         mare, gold both&rdquo;, and the chest has a clock. Follow the sign once, end to
         end.</li>
@@ -919,14 +936,6 @@
         the portal on every exit and an empty yard on the way back in. It takes tamed
         <em>and owned</em> horses now &mdash; a horse a player tamed has an owner, and the
         yard's scenery does not.</li>
-    <li><strong>Spontaneous breeding stops claiming foals that are not coming.</strong>
-        The post-breeding cooldown is <code>getAge()</code> and
-        <code>canFallInLove()</code> cannot see it: <code>Animal.aiStep</code> zeroes
-        <code>inLove</code> every tick while the age is non-zero, so a pair that had just
-        bred read as available and were put in love again on every beat &mdash; hearts
-        cleared the following tick, for five minutes. The owner's log of 2026-09-12 has
-        two foals and then <strong>212 identical <em>PAIRED</em> lines</strong> with
-        nothing behind any of them. The gene was working; its account of itself was not.</li>
 </ul>
 
 <h2 id="slow-tests">&sect;0-CV &mdash; The pens that run themselves (2026-09-12, NOT looked at)</h2>
@@ -942,11 +951,9 @@
         <strong>Gone from the yard, by the owner's call (2026-09-12):</strong> the
         spontaneous-breeding field and the pack leader's pen &mdash; &ldquo;we're done
         with those tests&rdquo;. Verdant's three floors went the same way when they were
-        confirmed. <strong>One question leaves with the breeding field and is worth
-        recording as dropped rather than answered</strong>: whether
-        <code>LOCAL_CAP</code> actually stops an automatic breeder. The breeding is
-        confirmed; the cap never was, and an uncapped one is the classic way to kill a
-        server. Say the word and the pen comes back.
+        confirmed. The gene itself was removed on 2026-09-13, when every horse started breeding
+        on its own; whether that <em>natural</em> cap holds is
+        <a href="known-gaps.html#gap-206">gap 206</a> and batch 2 of the kit.
     </p>
 </div>
 
@@ -1785,19 +1792,18 @@
 
 <ol>
     <li>
-        <p><strong><a href="gene-spontaneous-breeding.html">Spontaneous breeding</a> is the
-        only gene here that can ruin a world while nobody is looking.</strong> Everything
-        else fails in front of you. This one runs on a 600-tick beat whether or not a
-        player is nearby, and if the local cap does not hold, the failure is an entity
-        storm discovered hours later in a save that is already damaged.</p>
-        <p>The cap counts horses within eight blocks and refuses above six, so a single
-        pasture should settle and stay. <strong>What I am not sure about is a large
-        field</strong>: the count is per-horse and local, so two clusters twenty blocks
-        apart are two separate caps, and a big paddock could hold several. That is probably
-        fine and might not be. <strong>Test it by leaving it alone</strong> - four
-        expressing horses, a wide fenced field, walk away for several in-game days, come
-        back and count. This is the one to do first and the one where "it looked fine for
-        ten minutes" proves nothing.</p>
+        <p><strong><a href="fertility.html#natural">Natural breeding</a> is the one thing
+        here that can ruin a world while nobody is looking.</strong> Everything else fails in
+        front of you. Every adult pair breeds on its own now, wild bands included, in any loaded
+        chunk, and if the local cap does not hold, the failure is an entity storm discovered
+        hours later in a save that is already damaged.</p>
+        <p>The cap counts every horse within sixteen blocks of a mare and refuses at eight, and a
+        mare is covered at most once per heat. <strong>What I am not sure about is a large field
+        or a spread-out band</strong>: the count is per mare and local, so two clusters twenty
+        blocks apart are two separate caps. <strong>Test it by leaving it alone</strong> - a wide
+        fenced field with a stallion and several mares, walk away for several in-game days, come
+        back and count. This is the one to do first and the one where "it looked fine for ten
+        minutes" proves nothing.</p>
     </li>
     <li>
         <p><strong><a href="gene-holy-ward.html">Holy ward</a> can break somebody's mob farm
@@ -1885,10 +1891,10 @@
 <h3>Start here &mdash; what is left that can damage a world</h3>
 
 <ul>
-    <li><strong><a href="gene-spontaneous-breeding.html">Spontaneous breeding</a> is the
-        one to watch first, and the hardest to see.</strong> It runs while you are asleep.
-        Put four expressing horses in a paddock, leave the world running, and come back:
-        the local cap should hold the population at six and then stop <em>for ever</em>,
+    <li><strong><a href="fertility.html#natural">Natural breeding</a> is the
+        one to watch first, and the hardest to see.</strong> It runs while you are away.
+        Put a stallion and several mares in a paddock, leave the world running, and come back:
+        the cap should hold at eight horses around each mare and then stop <em>for ever</em>,
         not creep. If it creeps, nothing else in this list matters.</li>
     <li><strong><a href="gene-holy-ward.html">Holy ward</a> must not break a mob farm.</strong>
         Build or borrow a spawner-based farm, stand a warding horse next to it, and check
@@ -1955,7 +1961,7 @@
 <h3>Frequencies, which want a few hundred wild horses</h3>
 
 <p>Every carriers-only locus &mdash; fireproof, holy ward, ocean-born, bird boned,
-    gladiator, guardian, ender echo, spontaneous breeding, and all four matched-pair loci
+    gladiator, guardian, ender echo, and all four matched-pair loci
     &mdash; is invisible in the wild by design, so the only way to judge the rates is to
     test a lot of horses through the gene database. The matched-pair loci are the ones to
     doubt: with dozens of alleles, finding two carriers of the <em>same</em> one may prove

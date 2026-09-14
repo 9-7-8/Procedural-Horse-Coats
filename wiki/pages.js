@@ -48,6 +48,7 @@ window.HG.pages = {
                 { href: "item-research-shelf.html", text: "Equine Research Shelf", kind: "core", views: ["gameplay","coding"] },
                 { href: "progression.html", text: "The checklist \u0026 the collection", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-seed-jars.html", text: "Seed jars", kind: "core", views: ["gameplay","coding"] },
+                { href: "item-vet-kit.html", text: "Vet's kit", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-whistles.html", text: "Whistles", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-stall-signs.html", text: "Stall signs", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-tickets.html", text: "Tickets", kind: "core", views: ["gameplay","coding"] },
@@ -252,7 +253,6 @@ window.HG.pages = {
                 { href: "gene-music-enjoyer.html", text: "Music enjoyer", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-ocean-born.html", text: "Ocean-born", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-spawner.html", text: "Spawner", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-spontaneous-breeding.html", text: "Spontaneous breeding", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-sun-sensitivity.html", text: "Sun sensitivity", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical", views: ["gameplay","coding"] }
             ]

@@ -27,6 +27,36 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13i">2026-09-13, later still &mdash; every horse breeds, and the vet&rsquo;s kit</h2>
+
+<p>
+    Straight after fertility shipped, the owner removed the Spontaneous Breeding gene:
+    &ldquo;that's now basically just base game behavior&rdquo;, with heat and pregnancy slowing
+    the rate and conception limited to loaded chunks. The follow-up questions turned it into
+    natural breeding for every horse, and a way to stop it. The calls are under
+    <a href="roadmap.html#settled">settled decisions</a>. Nothing has been played:
+    <a href="verification.html#fertility">&sect;0-DV</a>, test kit batch 2.
+</p>
+
+<ul>
+    <li><strong>The gene is gone</strong>: class, handler, registry, family, description and
+        wiki page. Both coat goldens lose its locus again.</li>
+    <li><strong><code>NaturalBreedingHandler</code></strong>: tamed and wild, once per heat
+        (<code>Reproduction.lastNaturalTry</code>, <code>ReproRules.mayTryNaturally</code>),
+        within three blocks. Both at full health, not ridden or leashed. A cap of eight other
+        horses within sixteen blocks, and three covers a day as a hard stop. Cowboy stock is
+        exempt. The foal is credited to the mare's owner, falling back to her tamer when the
+        owner is offline (<a href="known-gaps.html#gap-228">gap 228</a>).
+        <a href="known-gaps.html#gap-206">Gap 206</a>, whether an automatic breeder's cap holds,
+        was reopened for it rather than closed with the gene.</li>
+    <li><strong>Gelding</strong> is a flag on <code>HorseRecord</code>, and
+        <code>entire()</code> replaced the sex test in every stallion behaviour. A gelding bonds
+        25% faster, and about half a cowboy's males are geldings, priced lower.</li>
+    <li><strong><a href="item-vet-kit.html">The vet&rsquo;s kit</a></strong>: sneak-use gelds,
+        plain use examines, and it is the one place twins are revealed before birth. Crafted, and
+        sold by the horseman. The texture is a borrowed vanilla bundle for now.</li>
+</ul>
+
 <h2 id="d2026-09-13h">2026-09-13, late &mdash; fertility and gestation, designed with the owner and built</h2>
 
 <p>
@@ -2491,7 +2521,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     The owner asked for the game-breaking, compatibility and performance risks to be
     flagged on each gene&rsquo;s <code>coding</code> tab, and that turned out to be the
     most useful thing written all session. Five genes can damage a world -
-    <a href="gene-spontaneous-breeding.html">spontaneous breeding</a> is uncapped automatic
+    spontaneous breeding (a gene since removed) is uncapped automatic
     breeding that runs while the player is asleep; <a href="gene-holy-ward.html">holy
     ward</a> hooks every spawn attempt in the world and can break a mob farm invisibly;
     <a href="gene-spawner.html">spawner</a> can bypass other mods&rsquo; protections;
