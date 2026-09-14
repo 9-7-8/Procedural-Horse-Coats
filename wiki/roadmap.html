@@ -1661,6 +1661,69 @@
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
 
+<h3>Settled 2026-09-13 &mdash; fertility &amp; gestation</h3>
+
+<p>
+    Settled with the owner question by question; the design is written up on
+    <a href="fertility.html">fertility &amp; gestation</a>. The first slice is everything below
+    except wild band breeding.
+</p>
+
+<ul>
+    <li><strong>Scope: fertility genes plus pregnancy on the mod's own paths.</strong> Plain
+        golden-carrot breeding stays instant. Pregnancy happens through the seed jar,
+        breeding carrots (any live carrot window on either parent), the Spontaneous Breeding
+        gene, and later wild band breeding. There is no "gestation everywhere" setting.</li>
+    <li><strong>A gene that sometimes gives no foal from golden carrots does not count as
+        removing vanilla behaviour.</strong> Only the subfertile allele can cause a miss:
+        the chance is the product of both parents' allele factors, where <code>+</code> is 1
+        and <code>sf/sf</code> is 0.5. The fertility epigenome number never touches plain
+        golden-carrot breeding, and plain golden carrots never give twins.</li>
+    <li><strong>Mares cycle, and heat gates only the mod's paths.</strong> Out of heat, a
+        mare refuses a breeding carrot or a seed jar, and nothing is used up. Heat replaces
+        vanilla love as the jar's window. A mare shows heat as an info-screen line, and she
+        and a nearby stallion walk toward each other.</li>
+    <li><strong>Game time, not day time.</strong> Every deadline is an absolute
+        <code>getGameTime()</code> tick, so sleeping and <code>/time set</code> advance
+        nothing. The mare's state is derived from stored anchors, not advanced by
+        transitions.</li>
+    <li><strong>Timing: one master setting, <code>gestation_days</code> (default 1).</strong>
+        Every other stage is <code>gestation &times; reference / 340</code>, floored at one
+        Minecraft day. Peak fertility is the second half of estrus.</li>
+    <li><strong>The genome is drawn at conception</strong>, while carrot bias is still in
+        hand, and stored on the mare as embryos in a new <code>HORSE_REPRO</code> attachment
+        (not kept on death). The client receives only a summary.</li>
+    <li><strong>A due date that passes while unloaded</strong> foals the next time the mare
+        is loaded, and every clock starts from then.</li>
+    <li><strong>A failed conception says so at once</strong>, on the action bar. Odds on the
+        mod's paths: 80% in the second half of heat, 50% in the first, 60% on foal heat.
+        These are scaled by the mare's fertility number and the stallion's covers penalty,
+        and capped at 95%.</li>
+    <li><strong>A lethal-at-conception embryo is a pregnancy lost early</strong>, using the
+        existing miscarriage signs, and she returns to cycling.</li>
+    <li><strong>Pregnant mares</strong> show "Pregnant, about N days left", are 15% slower
+        in the last third, and refuse golden carrots. If she dies, the pregnancy is
+        lost.</li>
+    <li><strong>Twins are possible, and rare.</strong> 75% both live, 20% one lost, 5% both
+        lost.</li>
+    <li><strong>Foal heat and a lactation flag</strong> follow birth. Lactation ends when
+        the foal grows up, or has been more than 32 blocks from her for a day.</li>
+    <li><strong>Ownership:</strong> the foal is tamed to whoever owns the mare at birth.
+        <code>bredBy</code> is the player who arranged the mating, stored in the
+        embryo.</li>
+    <li><strong>Stallions</strong> have no cycle. Beyond three covers or jar fills in a
+        Minecraft day, his conception odds halve.</li>
+    <li><strong>One Java gene, <code>horsegenetics.fertility</code>:</strong> alleles wild
+        <code>+</code>, subfertile <code>sf</code> (recessive) and twinning <code>tw</code>
+        (additive). Each copy carries a Gaussian <code>fertility</code> number, and the
+        expressed copy counts. Wild founders are carriers only, rarely. Named breeds may
+        name the gene. It is filed as a natural gene with an honest science tab saying the
+        real trait is polygenic.</li>
+    <li><strong>Testing:</strong> <code>debug.tools</code> speeds the reproductive day, the
+        debug clock steps a mare's state, and a <code>/testkit</code> batch covers
+        fertility.</li>
+</ul>
+
 <h3>Settled 2026-09-10</h3>
 
 <ul>
