@@ -2,8 +2,6 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.BreedLineage;
-import com.example.horsegenetics.common.genetics.SpliceOutcome;
-import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.GameteBias;
 import com.example.horsegenetics.common.genetics.Gene;
@@ -11,7 +9,6 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
-import com.example.horsegenetics.neoforge.data.CarrotWindowAttachment;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
@@ -25,6 +22,9 @@ import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
 import com.example.horsegenetics.common.name.HorseNames;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.common.repro.Conception;
+import com.example.horsegenetics.common.repro.Embryo;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,8 +35,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 /**
- * Real breeding. On {@link BabyEntitySpawnEvent} (fired from
+ * Real breeding. <b>Plain golden carrots give a foal at once; a breeding
+ * carrot on either parent gives a pregnancy instead</b> ({@link ReproHandler},
+ * {@code common.repro}), and so do the seed jar and the Spontaneous Breeding
+ * gene. Both kinds of foal are finished by the same {@link #populateFoal}. On {@link BabyEntitySpawnEvent} (fired from
  * {@code Animal#spawnChildFromBreeding} before the foal is added to the
  * world):
  *
@@ -63,10 +68,9 @@ import org.jetbrains.annotations.Nullable;
  *   <li>if the dam is tamed, the foal is auto-tamed to the dam's owner.</li>
  * </ul>
  *
- * <p>The foal-building step is {@link #applyBredFoal} - split out so the
- * <b>stallion seed jar</b> ({@code server/StallionSeedJarHandler}) can reuse it
- * with a synthetic sire record built from the jar's stored genome, instead of a
- * live stallion entity. The foal's coat attachment is written there rather than
+ * <p>The foal-finishing step is {@link #populateFoal}, shared by the instant
+ * foal ({@link #applyBredFoal}) and birth from a pregnancy
+ * ({@link #bornFromPregnancy}). The foal's record is written there rather than
  * at join time - the inherited epigenetics can only be read while both genomes
  * are in hand. {@link HorseGeneticsEventHandler} founds one from scratch for
  * everything that arrives without one (wild spawns, {@code /summon}, gallery
@@ -101,15 +105,44 @@ public final class HorseBreedingHandler {
 
         Genome damGenome = genomeOf(damHorse, damRecord, rng);
         Genome sireGenome = genomeOf(sireHorse, sireRecord, rng);
+        Player breeder = event.getCausedByPlayer();
 
-        // Breeding-carrot windows (roadmap §14): fold each fed parent's live
-        // window into a GameteBias, then consume both windows.
-        GameteBias damBias = takeCarrotBias(damHorse, damGenome, rng);
-        GameteBias sireBias = takeCarrotBias(sireHorse, sireGenome, rng);
+        // A mare already carrying is not bred again. Breeding foods are refused
+        // before this (BreedingCooldownHandler); this catches love from anywhere else.
+        if (ReproHandler.of(damHorse).pregnant()) {
+            event.setCanceled(true);
+            return;
+        }
+
+        // A CARROT-ARMED PARENT MAKES THIS A PREGNANCY, not a foal (owner,
+        // 2026-09-13) - either parent. A mare out of heat simply does not take,
+        // and the carrots stay armed for next time. Cancelling is what vanilla
+        // expects: Animal.spawnChildFromBreeding resets both parents' love and
+        // sets their 6000-tick cooldown on a cancelled BabyEntitySpawnEvent
+        // (checked in the patched 26.1.2 source).
+        if (ReproHandler.armed(damHorse) || ReproHandler.armed(sireHorse)) {
+            Conception.Result result = ReproHandler.breed(damHorse, damRecord, damGenome,
+                    sireGenome, sireRecord, sireHorse, java.util.List.of(), breeder);
+            ReproHandler.announce(damHorse, breeder, result);
+            event.setCanceled(true);
+            return;
+        }
+
+        // PLAIN GOLDEN CARROTS STAY INSTANT. The one thing fertility may do here
+        // is the subfertile allele, and it is only rolled when it could matter,
+        // so a pair nobody bred for it draws exactly the foal it always did.
+        double foalChance = Conception.vanillaFoalChance(damGenome.genotype(), sireGenome.genotype());
+        if (foalChance < 1.0 && rng.nextFloat() >= foalChance) {
+            ReproHandler.overlay(breeder, "It didn't take - no foal this time.", ChatFormatting.YELLOW);
+            ActionTrace.log("fertility", ActionTrace.describeShort(damHorse) + " x "
+                    + ActionTrace.describeShort(sireHorse) + ": a subfertile pairing missed (chance "
+                    + foalChance + ")");
+            event.setCanceled(true);
+            return;
+        }
 
         boolean born = applyBredFoal(child, damHorse,
-                damGenome, damRecord, sireGenome, sireRecord,
-                event.getCausedByPlayer(), rng, damBias, sireBias);
+                damGenome, damRecord, sireGenome, sireRecord, breeder, rng);
         if (!born) {
             // the drawn genotype was an embryonic lethal - the embryo never
             // implants, so there is no foal to add to the world
@@ -123,12 +156,10 @@ public final class HorseBreedingHandler {
      * dam-owner taming, the {@link HorseRecord}, and the attributes resolved
      * from the genome. Everything except adding the child to the world.
      *
-     * <p>Shared by natural breeding and the stallion seed jar - the jar path
-     * passes a synthetic {@code sireRecord} built from its stored genome and a
-     * {@code null} live sire.
+     * <p>Plain golden-carrot breeding only. Every other path makes a pregnancy
+     * and finishes its foal through {@link #bornFromPregnancy}.
      *
-     * @param child    the foal entity (already spawned for natural breeding;
-     *                 created-but-not-yet-added for the seed-jar path)
+     * @param child    the foal entity vanilla has just made
      * @param damHorse the live dam - only its tame state / owner is read here
      * @param breeder  the player who caused the breeding, or {@code null}
      * @return {@code false} if the drawn genotype is an embryonic lethal, in
@@ -139,33 +170,14 @@ public final class HorseBreedingHandler {
                                  Genome damGenome, HorseRecord damRecord,
                                  Genome sireGenome, HorseRecord sireRecord,
                                  @Nullable Player breeder, Rng rng) {
-        return applyBredFoal(child, damHorse, damGenome, damRecord, sireGenome, sireRecord, breeder, rng,
-                GameteBias.NONE,
-                GameteBias.NONE);
-    }
-
-    static boolean applyBredFoal(Horse child, Horse damHorse,
-                                 Genome damGenome, HorseRecord damRecord,
-                                 Genome sireGenome, HorseRecord sireRecord,
-                                 @Nullable Player breeder, Rng rng,
-                                 GameteBias damBias,
-                                 GameteBias sireBias) {
-        Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng, damBias, sireBias);
-        tickBreedingTasks(breeder, childGenome.genotype());
+        // No carrot bias on this path: an armed parent never reaches it.
+        Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng,
+                GameteBias.NONE, GameteBias.NONE);
 
         // The foal's breed label: same-breed -> that breed, two breeds -> a
         // "A x B cross", cross-of-the-same-pair stays that cross, anything
         // messier -> "Mixed" (see BreedLineage.combine).
         BreedLineage childLineage = BreedLineage.combine(damRecord.lineage(), sireRecord.lineage());
-
-        // A gene splice carrot that actually landed marks the foal Spliced
-        // (its breed), for good and down its whole line. It is checked against
-        // the genotype that was just drawn rather than against the carrot,
-        // because feeding one is a gamble - see SpliceOutcome.
-        if (SpliceOutcome.spliceReached(childGenome.genotype(),
-                damGenome.genotype(), sireGenome.genotype(), damBias, sireBias)) {
-            childLineage = childLineage.spliced();
-        }
 
         // The draw happens first and is never conditioned on viability - it is
         // the ordinary Mendelian one, and this only reads its result. That is
@@ -191,34 +203,75 @@ public final class HorseBreedingHandler {
             return false;
         }
 
-        int childGeneration = 1 + Math.max(damRecord.generation(), sireRecord.generation());
-        int priorFoals = HorseRecords.offspringCount(child, damRecord.id(), sireRecord.id());
+        populateFoal(child, damHorse, damRecord, childGenome, childLineage.toToken(),
+                sireRecord.id(), sireRecord.firstName(), sireRecord.lastName(), sireRecord.generation(),
+                HorseRecords.traitsOf(sireRecord), childTraits,
+                breeder == null ? "" : breeder.getGameProfile().name(), breeder, rng);
+        return true;
+    }
+
+    /**
+     * <b>Birth at the end of a pregnancy</b> ({@code ReproHandler}). The genome,
+     * breed label and viability were all settled at conception and are in the
+     * {@link Embryo}; the sire need not be loaded, owned, or alive. The foal is
+     * tamed to whoever owns the mare <i>now</i>, and credited to whoever arranged
+     * the mating then (owner, 2026-09-13).
+     */
+    static void bornFromPregnancy(Horse child, Horse damHorse, HorseRecord damRecord, Embryo embryo, Rng rng) {
+        boolean health = ServerConfig.healthGeneticsActive();
+        Genome childGenome = embryo.foal();
+        Genome sire = embryo.sire().genome();
+        var server = damHorse.level().getServer();
+        Player breeder = embryo.bredBy().isEmpty() || server == null
+                ? null : server.getPlayerList().getPlayerByName(embryo.bredBy());
+        populateFoal(child, damHorse, damRecord, childGenome, embryo.breedToken(), embryo.sireId(),
+                embryo.sireFirstName(), embryo.sireLastName(), embryo.sireGeneration(),
+                HorseTraits.resolve(sire.genotype(), sire.epigenome(), health),
+                HorseTraits.resolve(childGenome.genotype(), childGenome.epigenome(), health),
+                embryo.bredBy(), breeder, rng);
+    }
+
+    /**
+     * Everything about a foal that is not its genome: name, record, taming, body,
+     * band and age. Shared by instant golden-carrot breeding and birth from a
+     * pregnancy.
+     *
+     * @param bredBy  the breeder's name, or {@code ""}
+     * @param breeder that player if they are online, for the checklist and gene
+     *                discovery; {@code null} otherwise
+     */
+    private static void populateFoal(Horse child, Horse damHorse, HorseRecord damRecord, Genome childGenome,
+                                     String breedToken, UUID sireId, String sireFirstName, String sireLastName,
+                                     int sireGeneration, Traits sireTraits, Traits childTraits,
+                                     String bredBy, @Nullable Player breeder, Rng rng) {
+        tickBreedingTasks(breeder, childGenome.genotype());
+
+        int childGeneration = 1 + Math.max(damRecord.generation(), sireGeneration);
+        int priorFoals = HorseRecords.offspringCount(child, damRecord.id(), sireId);
         NameParts childName = HorseNames.breedNth(
                 new NameParts(damRecord.firstName(), damRecord.lastName()),
-                new NameParts(sireRecord.firstName(), sireRecord.lastName()),
+                new NameParts(sireFirstName, sireLastName),
                 priorFoals, HorseRecords.names(), rng);
 
         // What the parents' bodies were, so the UI can say whether this foal came
-        // out above both of them, between, or below. Resolved from their
-        // genotypes - there is no stored stat field to read any more.
-        ParentStats parentStats = ParentStats.of(
-                HorseRecords.traitsOf(damRecord), HorseRecords.traitsOf(sireRecord));
+        // out above both of them, between, or below.
+        ParentStats parentStats = ParentStats.of(HorseRecords.traitsOf(damRecord), sireTraits);
 
-        // No sex argument: the foal's sex came out of the Mendelian draw above,
-        // like every other locus, and HorseRecord reads it back off the code.
+        // No sex argument: the foal's sex came out of the Mendelian draw, like
+        // every other locus, and HorseRecord reads it back off the code.
         HorseRecord childRecord = HorseRecord.bred(
                 child.getUUID(),
                 childName.first(),
                 childName.last(),
                 childGenome,
-                childLineage.toToken(),
+                breedToken,
                 damRecord.id(),
-                sireRecord.id(),
+                sireId,
                 childGeneration)
                 .withParentStats(parentStats);
 
-        if (breeder != null) {
-            childRecord = childRecord.withBredBy(breeder.getGameProfile().name());
+        if (!bredBy.isEmpty()) {
+            childRecord = childRecord.withBredBy(bredBy);
         }
 
         // Foals born to a tamed dam are tamed to the dam's owner.
@@ -260,8 +313,8 @@ public final class HorseBreedingHandler {
         if (childTraits.viability() == Viability.LETHAL_AT_BIRTH) {
             LethalFoalHandler.announceLethalBirth(child, childRecord, childTraits, breeder);
         }
-        return true;
     }
+
 
     /**
      * The parent's full genome, straight off its record. A parent whose record
@@ -275,46 +328,6 @@ public final class HorseBreedingHandler {
         Genome genome = Genome.of(record.genotype(), rng);
         HorseRecords.apply(parent, record.withGenome(genome));
         return genome;
-    }
-
-    /**
-     * Fold a fed parent's live breeding-carrot window into a {@link GameteBias}
-     * and <b>consume</b> the window. {@link GameteBias#NONE} for an unfed parent
-     * (or a {@code null} one - the seed-jar path has no live sire).
-     */
-    private static GameteBias takeCarrotBias(@Nullable Horse parent, Genome parentGenome, Rng rng) {
-        if (parent == null) {
-            return GameteBias.NONE;
-        }
-        long now = parent.level().getGameTime();
-        CarrotWindowAttachment window = parent.getData(ModAttachments.CARROT_WINDOW.get());
-        java.util.List<CarrotEffect> effects = window.activeEffects(now);
-        boolean hadStale = !window.effects().isEmpty() && effects.isEmpty();
-        if (!window.effects().isEmpty()) {
-            parent.setData(ModAttachments.CARROT_WINDOW.get(), CarrotWindowAttachment.EMPTY);
-        }
-        GameteBias bias = CarrotEffect.fold(effects, parentGenome.genotype(), rng);
-        // THE OTHER END OF THE CARROT. Feeding one is separated from its effect
-        // by a window, a courtship and a second parent, so a log line at the
-        // feed says only that an item was consumed. This is where it either
-        // does something or does not, and the three outcomes it has to
-        // distinguish look identical from outside: no carrot was fed, one was
-        // fed and EXPIRED before the pair got round to it, or one was fed and
-        // folded to a bias that happens to change nothing.
-        if (hadStale) {
-            ActionTrace.log("carrot", ActionTrace.describeShort(parent)
-                    + " had a carrot window that EXPIRED before breeding - the carrot was "
-                    + "spent and this foal is unaffected");
-        } else if (!effects.isEmpty()) {
-            ActionTrace.log("carrot", ActionTrace.describeShort(parent) + " breeds with "
-                    + effects.size() + " live carrot effect(s): "
-                    + effects.stream().map(CarrotEffect::id).collect(java.util.stream.Collectors.joining(", "))
-                    + (bias.isNone()
-                            ? " - which folded to NO bias, so the foal is unchanged"
-                            : " - bias: reroll epi=" + bias.rerollEpigenetics()
-                                    + ", substitutes " + bias.substitutePairs().size() + " locus/loci"));
-        }
-        return bias;
     }
 
     /**

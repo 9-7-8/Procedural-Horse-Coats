@@ -53,6 +53,19 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // Fertility and gestation (common.repro): a mare's cycle phase, what she is
+    // carrying, her last birth and the foals she nurses; a stallion's covers today.
+    // Keyed to the entity id so an unset mare still has a cycle. NOT copyOnDeath:
+    // a pregnancy dies with the mare. Not synced - the info screen gets a line of
+    // words through the social summary, and no client needs an embryo's genome.
+    public static final Supplier<AttachmentType<com.example.horsegenetics.common.repro.Reproduction>> HORSE_REPRO =
+            ATTACHMENT_TYPES.register("horse_repro", () -> AttachmentType
+                    .<com.example.horsegenetics.common.repro.Reproduction>builder(holder ->
+                            com.example.horsegenetics.common.repro.Reproduction.fresh(
+                                    holder instanceof Entity entity ? entity.getUUID() : new UUID(0L, 0L)))
+                    .serialize(ReproCodecs.MAP_CODEC)
+                    .build());
+
     // Timed-interaction stamps (last shear, last per-gene yield, ...). Gated
     // "once per Minecraft day". Replaces the static cooldown map that used to
     // live in GeneYieldHandler. copyOnDeath so a re-summoned horse keeps them.
@@ -63,13 +76,12 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
-    // A live breeding-carrot window (roadmap §14): the effects fed to this
-    // horse and when they lapse. Stored only while active, consumed on
-    // breeding, part of the determinism input. NOT copyOnDeath.
-    public static final Supplier<AttachmentType<CarrotWindowAttachment>> CARROT_WINDOW =
-            ATTACHMENT_TYPES.register("carrot_window", () -> AttachmentType
-                    .builder(() -> CarrotWindowAttachment.EMPTY)
-                    .serialize(CarrotWindowAttachment.MAP_CODEC)
+    // Breeding-carrot effects waiting on this horse until its next conception
+    // (data/ArmedCarrotsAttachment). They do not expire. NOT copyOnDeath.
+    public static final Supplier<AttachmentType<ArmedCarrotsAttachment>> ARMED_CARROTS =
+            ATTACHMENT_TYPES.register("armed_carrots", () -> AttachmentType
+                    .builder(() -> ArmedCarrotsAttachment.EMPTY)
+                    .serialize(ArmedCarrotsAttachment.MAP_CODEC)
                     .build());
 
     // Whose horse this is while it is nobody's: the cowboy who bred it and has

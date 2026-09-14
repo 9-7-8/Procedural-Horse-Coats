@@ -114,6 +114,16 @@ public final class ServerConfig {
 
     public static final ModConfigSpec.BooleanValue BODY_SIZE;
 
+    public static final ModConfigSpec.DoubleValue GESTATION_DAYS;
+
+    /**
+     * <b>The reproductive day while {@code debug.tools} is on</b> - one real
+     * minute instead of twenty. Owner's call, 2026-09-13: a heat, a pregnancy
+     * and half a cycle each become a minute, which is long enough to walk
+     * between horses and short enough to watch a whole pregnancy.
+     */
+    public static final long DEBUG_REPRO_DAY_TICKS = 1_200L;
+
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
@@ -143,6 +153,16 @@ public final class ServerConfig {
                         "Like health.mode, a change reaches horses already in the world when",
                         "they next load - each horse re-resolves its body once per level load.")
                 .define("body.size", true);
+        GESTATION_DAYS = builder
+                .comment("How long a pregnancy lasts, in Minecraft days (one day = 20 minutes). (default: 1)",
+                        "Only the mod's own breeding makes a pregnancy - seed jars, breeding carrots and",
+                        "the Spontaneous Breeding gene. Plain golden carrots still give a foal at once.",
+                        "Every other stage is scaled from this by its real-world ratio to a 340-day",
+                        "pregnancy and never shorter than one day, so at 1 a mare is in heat for a day",
+                        "and out of it for a day; at 340 she keeps a real 21-day cycle.",
+                        "Game time, not the day counter: sleeping and /time set move nothing.")
+                .defineInRange("fertility.gestation_days",
+                        com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS, 1.0, 340.0);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking the horseman job, a stable",
@@ -191,6 +211,25 @@ public final class ServerConfig {
         } catch (IllegalStateException notLoaded) {
             return true;
         }
+    }
+
+    /** {@code fertility.gestation_days}, safely. */
+    public static double gestationDays() {
+        try {
+            return GESTATION_DAYS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS;
+        }
+    }
+
+    /**
+     * <b>Every reproductive stage length, for this world, now.</b> The gestation
+     * setting on the normal day, or on {@link #DEBUG_REPRO_DAY_TICKS} while the
+     * testing tools are on.
+     */
+    public static com.example.horsegenetics.common.repro.ReproTiming reproTiming() {
+        return com.example.horsegenetics.common.repro.ReproTiming.of(gestationDays(),
+                debugTools() ? DEBUG_REPRO_DAY_TICKS : com.example.horsegenetics.common.repro.ReproTiming.DAY_TICKS);
     }
 
     /** Shorthand: may a lethal genotype actually kill a foal, or refuse a pairing? */

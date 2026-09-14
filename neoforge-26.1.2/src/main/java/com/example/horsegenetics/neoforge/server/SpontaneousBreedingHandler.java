@@ -1,6 +1,8 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.repro.Conception;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
@@ -31,10 +33,11 @@ import java.util.List;
  *       because it is a limit on the <i>outcome</i> rather than on the rate.</li>
  *   <li>{@link #CHECK_TICKS} - the pair are only even considered occasionally,
  *       and the scan is what costs anything here.</li>
- *   <li>Vanilla's own breeding cooldown, which is left entirely alone: this
- *       handler puts a horse <i>in love</i> and lets the ordinary breeding path
- *       do the rest, so age, cooldown, pedigree and stat inheritance all still
- *       run. It must never become a second breeding implementation.</li>
+ *   <li><b>Heat and pregnancy.</b> Only a mare in heat pairs, and a pregnant
+ *       mare is out of heat until after she foals. The pair conceives through
+ *       {@link ReproHandler#tryConceive}, the one path the seed jar and the
+ *       breeding carrots use too - so it is still never a second breeding
+ *       implementation, just no longer vanilla's (owner, 2026-09-13).</li>
  * </ul>
  *
  * <h2>It takes two</h2>
@@ -105,46 +108,19 @@ public final class SpontaneousBreedingHandler {
         if (horse.isBaby() || horse.isVehicle()) {
             return;     // not a refusal worth a line: it is not a candidate at all
         }
-        if (horse.isInLove()) {
-            trace(horse, "already in love - vanilla's breeding takes it from here");
-            return;
-        }
-        // VANILLA WILL NOT BREED AN UNTAMED OR HURT HORSE. AbstractHorse
-        // .canParent() requires isTamed() and full health, and this handler
-        // deliberately does not implement breeding itself - it puts a pair in
-        // love and lets the ordinary path run. So on an untamed pair setInLove
-        // succeeds, hearts appear over both, the love timer runs out and
-        // nothing happens, for ever. That is what "the heart particle is not
-        // followed by any babies appearing" was (owner, 2026-09-12) once the
-        // same-sex bug behind it was fixed and it still did not breed.
-        //
-        // Refusing here rather than putting them in love is the point: hearts
-        // that cannot lead to a foal are a lie the gene tells about itself.
+        // TAMED AND AT FULL HEALTH, still. That was vanilla's rule
+        // (AbstractHorse.canParent) when this gene only put a pair in love, and
+        // it stays the gene's rule now that it conceives directly: a wild pasture
+        // breeding itself is band breeding, which is its own slice.
         if (!canEverBreed(horse)) {
             trace(horse, describeBlock(horse));
             return;
         }
-        if (!horse.canFallInLove()) {
-            trace(horse, "on vanilla's breeding cooldown (this is the limit that governs the rate)");
-            return;
-        }
-        // THE POST-BREEDING COOLDOWN IS getAge(), AND canFallInLove() CANNOT
-        // SEE IT. Animal.aiStep() zeroes inLove on every tick where getAge() is
-        // not 0, and breeding sets both parents to 6000. So a pair that has
-        // just bred reads as "not in love" and "can fall in love" for the whole
-        // five-minute cooldown, and this handler happily put them in love again
-        // on every beat - hearts over both of them, cleared the following tick,
-        // for five minutes, and with the debug beat on that is a PAIRED line
-        // every four seconds saying a foal is coming that is not.
-        //
-        // Found in the owner's log of 2026-09-12: two foals at 22:22:50 and
-        // then 212 identical PAIRED lines with nothing behind any of them. The
-        // gene was working; its own account of itself was the thing that was
-        // wrong, which is the exact failure this file already has three
-        // comments about.
-        if (horse.getAge() != 0) {
-            trace(horse, "on the post-breeding cooldown - " + horse.getAge() + " ticks left of "
-                    + "the 6000 vanilla sets after a foal; hearts now would be cleared next tick");
+        // A MARE OUT OF HEAT HAS NOTHING TO PAIR FOR - and a pregnant one is out
+        // of heat until after she foals, which is now the limit on the rate.
+        if (isMare(horse) && !ReproHandler.receptive(horse)) {
+            trace(horse, "a mare who is " + ReproHandler.stateOf(horse).label().toLowerCase()
+                    + " - nothing to pair for");
             return;
         }
 
@@ -165,30 +141,40 @@ public final class SpontaneousBreedingHandler {
                 continue;
             }
             carriers++;
-            if (other.isInLove() || !other.canFallInLove() || !canEverBreed(other)
-                    || other.getAge() != 0) {
-                continue;   // same three refusals as above, asked of the partner
+            if (!canEverBreed(other)) {
+                continue;
             }
-            // A MARE AND A STALLION, because HorseBreedingHandler cancels
-            // same-sex pairings - so putting two mares in love produced hearts
-            // over both of them and then nothing at all, for ever. Reported as
-            // "the heart particle is not followed by any babies appearing"
-            // (owner, 2026-09-12), and it had been true of every same-sex pair
-            // since the gene was written: the one visible sign of this gene
-            // working is also exactly what it looks like when it cannot.
+            // A MARE AND A STALLION. Two mares used to go into love together and
+            // produce hearts and nothing else (owner, 2026-09-12).
             if (HorseRecords.of(horse).sex() == HorseRecords.of(other).sex()) {
                 continue;
             }
-            // In love, not bred: the ordinary breeding path takes it from here,
-            // so cooldowns, pedigree and stat inheritance all still apply.
-            horse.setInLove(null);
-            other.setInLove(null);
-            trace(horse, "PAIRED with " + other.getUUID().toString().substring(0, 8)
-                    + " - both in love; vanilla breeds them and a foal follows");
+            Horse mare = isMare(horse) ? horse : other;
+            Horse stallion = mare == horse ? other : horse;
+            if (!ReproHandler.receptive(mare)) {
+                continue;
+            }
+            // CONCEIVED DIRECTLY, through the same path as the seed jar and the
+            // breeding carrots (owner, 2026-09-13) - not vanilla love any more,
+            // so there are no hearts that do not mean anything.
+            HorseRecord mareRecord = HorseBreedingHandler.ensureParentRecord(mare);
+            HorseRecord stallionRecord = HorseBreedingHandler.ensureParentRecord(stallion);
+            Rng rng = HorseRecords.rng(mare);
+            Conception.Result result = ReproHandler.breed(mare, mareRecord,
+                    HorseBreedingHandler.genomeOf(mare, mareRecord, rng),
+                    HorseBreedingHandler.genomeOf(stallion, stallionRecord, rng),
+                    stallionRecord, stallion, List.of(), null);
+            level.broadcastEntityEvent(mare, (byte) 18);
+            trace(horse, "PAIRED with " + other.getUUID().toString().substring(0, 8) + " - "
+                    + result.outcome() + String.format(" (chance %.2f)", result.chance()));
             return;
         }
         trace(horse, "no partner: " + carriers + " other carrier(s) in range, none of them "
-                + "available (wrong sex, a cooldown, or already in love)");
+                + "available (same sex, untamed or hurt, or no mare in heat)");
+    }
+
+    private static boolean isMare(Horse horse) {
+        return HorseRecords.of(horse).sex() == com.example.horsegenetics.common.horse.Sex.FEMALE;
     }
 
     /**

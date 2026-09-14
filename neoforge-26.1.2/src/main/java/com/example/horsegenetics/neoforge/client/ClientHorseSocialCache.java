@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ClientHorseSocialCache {
 
     public record Social(String role, String roleDescription, String standing, List<String> companions,
-                         String rival) {
+                         String rival, String breeding) {
     }
 
     private static final Map<Integer, Social> BY_ENTITY = new ConcurrentHashMap<>();

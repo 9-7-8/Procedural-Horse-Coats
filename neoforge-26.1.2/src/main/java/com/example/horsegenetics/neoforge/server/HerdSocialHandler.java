@@ -374,7 +374,7 @@ public final class HerdSocialHandler {
         String rival = ledger.rival().map(r -> nameOf(level, r.other())).orElse("");
 
         PacketDistributor.sendToPlayer(player, new HorseSocialSyncPayload(entityId, role.label(),
-                role.description(), standing, companions, rival));
+                role.description(), standing, companions, rival, ReproHandler.breedingLine(horse)));
     }
 
     private static String nameOf(ServerLevel level, UUID id) {

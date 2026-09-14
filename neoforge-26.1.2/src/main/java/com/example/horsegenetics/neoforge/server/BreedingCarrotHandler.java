@@ -3,7 +3,8 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.SpliceCategory;
-import com.example.horsegenetics.neoforge.data.CarrotWindowAttachment;
+import net.minecraft.ChatFormatting;
+import com.example.horsegenetics.neoforge.data.ArmedCarrotsAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
@@ -26,11 +27,13 @@ import java.util.List;
 
 /**
  * Feeding a <b>breeding carrot</b> to a horse (roadmap wiki &sect;14). The
- * carrot puts a temporary {@link CarrotWindowAttachment} on the horse - the
- * same shape as vanilla breeding-mode love, which it also triggers - carrying
- * the carrot's effect tokens. {@link HorseBreedingHandler} reads both parents'
- * windows when a foal is made, folds each into a
- * {@link com.example.horsegenetics.common.genetics.GameteBias}, and clears them.
+ * carrot <b>arms</b> the horse ({@link ArmedCarrotsAttachment}) with its effect
+ * tokens, at any time and for as long as it takes. Whenever that horse next
+ * breeds through the mod's own paths, {@link ReproHandler#breed} folds each
+ * parent's effects into a
+ * {@link com.example.horsegenetics.common.genetics.GameteBias}, and uses them up
+ * only if the mare conceives. An armed parent also turns golden-carrot breeding
+ * into a pregnancy rather than an instant foal.
  *
  * <p>The effect biases the <b>gamete</b> the fed parent contributes; it never
  * rewrites the horse's own genotype (the determinism contract). Each carrot type
@@ -118,16 +121,16 @@ public final class BreedingCarrotHandler {
             return;
         }
 
-        long now = level.getGameTime();
-        CarrotWindowAttachment window = horse.getData(ModAttachments.CARROT_WINDOW.get());
-        if (!window.isActiveAt(now)) {
-            window = CarrotWindowAttachment.EMPTY;
-        }
-        horse.setData(ModAttachments.CARROT_WINDOW.get(), window.plus(tokens, now));
+        // A CARROT ARMS THE HORSE UNTIL ITS NEXT CONCEPTION (owner, 2026-09-13).
+        // It used to open a 30-second window and put the horse in love. Now it
+        // waits on the horse - in heat or out of it, through a breeding that did
+        // not take - and only one that takes uses it up. Breeding is a separate
+        // act: golden carrots, a seed jar, or the Spontaneous Breeding gene.
+        ArmedCarrotsAttachment armed = horse.getData(ModAttachments.ARMED_CARROTS.get());
+        horse.setData(ModAttachments.ARMED_CARROTS.get(), armed.plus(tokens));
         tickCarrotTasks(player, tokens);
-
-        // A carrot also puts the horse in breeding mode, like a golden one.
-        horse.setInLove(player);
+        ReproHandler.overlay(player, ReproHandler.nameOf(horse) + " will pass this on at the next breeding "
+                + "that takes.", ChatFormatting.GREEN);
 
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
@@ -157,15 +160,14 @@ public final class BreedingCarrotHandler {
         // three indistinguishable answers from inside the game: it worked, it
         // correctly declined, or the item is not wired up.
         //
-        // Worse, the effect does not happen here. A carrot opens a WINDOW on
-        // the parent and the genetics only happen at the foal, which may be
-        // several minutes and a second parent later. Logging the feed alone
-        // would still leave that gap, so takeCarrotBias logs the other end.
+        // Worse, the effect does not happen here. A carrot ARMS the horse and
+        // the genetics only happen at the next conception, which may be a heat,
+        // a breeding and a second horse later. Logging the feed alone would
+        // still leave that gap, so ReproHandler.breed logs the other end.
         ActionTrace.log("carrot", player.getName().getString() + " fed "
                 + stack.getItem().getName(stack).getString() + " to "
                 + ActionTrace.describeShort(horse) + " - effects "
-                + String.join(", ", tokens) + ", window open for "
-                + CarrotWindowAttachment.WINDOW_TICKS + " ticks");
+                + String.join(", ", tokens) + ", armed until its next conception");
 
         int rgb = colourFor(tokens);
         DustParticleOptions dust = new DustParticleOptions(rgb, 1.2F);

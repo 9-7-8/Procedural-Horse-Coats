@@ -39,6 +39,11 @@ public class SeedJarItem extends Item {
         }
         String sire = stored.sourceName().isBlank() ? "unknown stallion" : stored.sourceName();
         adder.accept(Component.literal("Sire: " + sire).withStyle(ChatFormatting.GRAY));
+        if (!stored.carrotEffects().isEmpty()) {
+            adder.accept(Component.literal("Carries " + stored.carrotEffects().size()
+                    + (stored.carrotEffects().size() == 1 ? " carrot effect" : " carrot effects"))
+                    .withStyle(ChatFormatting.GOLD));
+        }
         try {
             adder.accept(Component.literal(GeneCodeDisplay.shortForm(Genotype.parse(stored.genotypeCode())))
                     .withStyle(ChatFormatting.DARK_GRAY));

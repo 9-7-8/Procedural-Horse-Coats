@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.genes.CvmGene;
 import com.example.horsegenetics.common.genetics.genes.MagicWhiteGene;
 import com.example.horsegenetics.common.genetics.genes.SunSensitivityGene;
 import com.example.horsegenetics.common.genetics.genes.DietGene;
+import com.example.horsegenetics.common.genetics.genes.FertilityGene;
 import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
@@ -172,6 +173,11 @@ public final class Genes {
 
     /** Sex, at priority 1 - the first gene resolved, and the only one that paints nothing. */
     public static final SexGene SEX = new SexGene();
+    /**
+     * <b>Fertility</b> - subfertility and twinning, at priority 3. Paints nothing;
+     * {@code common.repro} reads it at every breeding.
+     */
+    public static final FertilityGene FERTILITY = new FertilityGene();
     /**
      * <b>Diet</b> - what the horse will eat, at priority 5, ahead of every gene
      * that paints. The order is the point: {@link HorseDiet#resolve} keeps the
@@ -596,7 +602,7 @@ public final class Genes {
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
-            SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
+            SEX, FERTILITY, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, EXTREME_WHITE_DOMINANT, DUN, SILVER, FLAXEN, SOOTY, PANGARE, HUED_PANGARE,
             MUSHROOM, BRINDLE, TIGER_EYE,
             EYE_COLOUR_RIGHT, EYE_COLOUR_LEFT, EYE_SECTOR_RIGHT, EYE_SECTOR_LEFT,

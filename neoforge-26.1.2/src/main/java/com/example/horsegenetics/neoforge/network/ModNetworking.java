@@ -260,7 +260,7 @@ public final class ModNetworking {
                         com.example.horsegenetics.neoforge.client.ClientHorseSocialCache.put(payload.entityId(),
                                 new com.example.horsegenetics.neoforge.client.ClientHorseSocialCache.Social(
                                         payload.role(), payload.roleDescription(), payload.standing(),
-                                        payload.companions(), payload.rival())))
+                                        payload.companions(), payload.rival(), payload.breeding())))
         );
 
     }

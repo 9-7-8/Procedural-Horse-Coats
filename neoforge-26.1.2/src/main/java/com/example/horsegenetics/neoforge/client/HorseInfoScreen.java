@@ -601,6 +601,12 @@ public final class HorseInfoScreen extends Screen {
             double scale = horse.getAttributeValue(Attributes.SCALE);
             c.pair("Size", sizeWord(scale) + "  " + heightText(scale, horse.isBaby())
                     + String.format("  (%.2f)", scale));
+            // A mare's heat / pregnancy / nursing, in words from the server. It
+            // rides the social summary, so it appears a second after opening.
+            ClientHorseSocialCache.Social summary = ClientHorseSocialCache.get(horse.getId());
+            if (summary != null && !summary.breeding().isEmpty()) {
+                c.pair("Breeding", summary.breeding());
+            }
         } else {
             Traits t = traits();
             c.pair("Health", String.format("%.1f", t.health()) + "  (from the genotype)");

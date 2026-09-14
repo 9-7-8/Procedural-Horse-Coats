@@ -79,7 +79,7 @@ public enum GeneFamily {
                     + "wild horse can carry a disorder but never have one.", true),
     NATURAL_OTHER("Other natural genes", true, "Other natural genes",
             "The naturals that are neither pigment nor pattern nor disorder - what the horse "
-                    + "will eat, and what colour its eyes are."),
+                    + "will eat, how readily it breeds, and what colour its eyes are."),
 
     /** The hand-written magical genes that <b>paint</b>. */
     MAGIC_CORE("Magical coat genes", false, "Magical coat genes",
@@ -326,6 +326,9 @@ public enum GeneFamily {
         // Diet decides what a horse eats. It paints nothing, so the "invisible
         // is health" rule would file it under the disorders.
         NATURAL_OVERRIDES.put("horsegenetics.diet", NATURAL_OTHER);
+        // Fertility paints nothing either, and subfertility is not a disorder the
+        // info screen should list - it is how readily a horse breeds.
+        NATURAL_OVERRIDES.put("horsegenetics.fertility", NATURAL_OTHER);
         // Shade paints through agouti and sits at 95 for it - see the class note.
         NATURAL_OVERRIDES.put("horsegenetics.shade", NATURAL_COAT);
         // Countershading and brindle sit in the dilution band because they run

@@ -198,8 +198,8 @@ final class DebugTestYard {
      * visible on that horse at all - it is visible in a <i>foal</i>, which
      * means every test needs a named mare, a named stallion, and certainty
      * about which carrot went into which. One pen with a shared chest gives you
-     * none of that: feed two carrots in one visit and the window merges them
-     * ({@code CarrotWindowAttachment.plus}), and the foal cannot tell you which
+     * none of that: feed two carrots and the horse carries both
+     * ({@code ArmedCarrotsAttachment.plus}), and the foal cannot tell you which
      * one it came from.
      *
      * <p>So each carrot gets a pair of pens with a gate between them, its own

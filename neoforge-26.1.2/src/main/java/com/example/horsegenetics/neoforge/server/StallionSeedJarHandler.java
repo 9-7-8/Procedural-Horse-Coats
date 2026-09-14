@@ -10,12 +10,12 @@ import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.StoredGenome;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.common.repro.Conception;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -32,22 +32,18 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  *       {@code empty_seed_jar} -&gt; the jar becomes a {@code stallion_seed_jar}
  *       stamped with a {@link StoredGenome} (his genotype + epigenome, sex,
  *       UUID, name, speed / health), and his love state is consumed;</li>
- *   <li>right-click a tamed adult <b>mare in breeding mode</b> with a filled jar
- *       -&gt; a foal is bred immediately from her live genome and the jar's
- *       stored one, through the same {@link HorseBreedingHandler#applyBredFoal}
- *       path natural breeding uses; the jar is consumed and the mare goes on the
- *       vanilla breeding cooldown.</li>
+ *   <li>right-click an adult <b>mare you own, in heat</b> with a filled jar -&gt;
+ *       one conception attempt ({@link ReproHandler#tryConceive}) from her live
+ *       genome and the jar's stored one. If it takes she is <b>pregnant</b> and
+ *       the foal comes at the due date. The jar is spent either way; a mare out
+ *       of heat refuses it and it is kept.</li>
  * </ul>
  *
- * <p>The {@code isInLove()} check is the stand-in for roadmap &sect;15.1's
- * "feed a breeding carrot for a 30-second window" - vanilla love already lasts
- * ~30 s and works in creative, and collecting / impregnating consumes it.
+ * <p>Filling the jar still takes the stallion's vanilla love, and counts as one
+ * of his covers for the day.
  *
- * <p><b>Not yet</b> (deliberately - this is "begin"): the gate is vanilla love,
- * not one of this mod's breeding carrots (they do nothing yet); no gestation
- * state (the foal is immediate, exactly as vanilla breeding is); and the jar
- * carries no carrot effects. See {@code wiki/roadmap.html} &sect;&sect;14-15 and
- * {@code wiki/verification.html}.
+ * <p><b>Not yet:</b> the jar carries no carrot effects. See
+ * {@code wiki/roadmap.html#ivf} and {@code wiki/fertility.html}.
  *
  * <p>Mirrors {@link HorseInteractionHandler}'s pattern: cancel the interaction
  * on <b>both</b> sides so the client doesn't predict a mount, do the mutation
@@ -127,7 +123,8 @@ public final class StallionSeedJarHandler {
                 genome.epigenomeCode(),
                 stallion.getUUID(),
                 record.displayName(),
-                record.breed().orElse(""));
+                record.breed().orElse(""),
+                ReproHandler.armedTokens(stallion));   // his armed carrots go into the jar
 
         ItemStack filled = new ItemStack(ModItems.STALLION_SEED_JAR.get());
         filled.set(ModDataComponents.STORED_GENOME.get(), stored);
@@ -145,6 +142,8 @@ public final class StallionSeedJarHandler {
             }
         }
         stallion.resetLove(); // consume the breeding window, like a real pairing does
+        ReproHandler.recordCover(stallion); // a fill counts against his three a day
+        ReproHandler.disarm(stallion);      // ...and his carrots left with the jar
         message(player, "Collected a seed sample from " + record.displayName() + ".");
         return true;
     }
@@ -194,19 +193,16 @@ public final class StallionSeedJarHandler {
             message(player, mareName + " is not your mare - a seed jar can only be used on a mare you own.");
             return false;
         }
-        if (!mare.isInLove()) {
-            message(player, HorseRecords.of(mare).displayName()
-                    + " must be in breeding mode - feed it first.");
-            return false;
-        }
-        if (mare.getAge() > 0) {
-            message(player, "The mare is still on breeding cooldown.");
-            return false;
-        }
-
         Rng rng = HorseRecords.rng(mare);
         HorseRecord mareRecord = HorseBreedingHandler.ensureParentRecord(mare);
         if (mareRecord.sex() != Sex.FEMALE) {
+            return false;
+        }
+        // HEAT IS THE WINDOW. This used to ask for vanilla love, the stand-in for
+        // a timed window; owner, 2026-09-13: heat replaces it, and a mare out of
+        // heat refuses the jar without spending it.
+        if (!ReproHandler.receptive(mare)) {
+            ReproHandler.overlay(player, ReproHandler.notReceptive(mare), ChatFormatting.YELLOW);
             return false;
         }
         Genome mareGenome = HorseBreedingHandler.genomeOf(mare, mareRecord, rng);
@@ -223,33 +219,15 @@ public final class StallionSeedJarHandler {
         HorseRecord sireRecord = HorseRecord
                 .founder(stored.sourceId(), name[0], name[1], sireGenome, stored.breed());
 
-        Horse foal = EntityType.HORSE.create(level, EntitySpawnReason.BREEDING);
-        if (foal == null) {
-            return false;
-        }
-        foal.setAge(-24000); // newborn
-        foal.snapTo(mare.getX(), mare.getY(), mare.getZ(), mare.getYRot(), 0.0F);
-
-        boolean born = HorseBreedingHandler.applyBredFoal(
-                foal, mare, mareGenome, mareRecord, sireGenome, sireRecord, player, rng);
-        if (!born) {
-            // an embryonic lethal - the jar is spent and the mare has used her
-            // breeding window, exactly as a real pairing would have, but there
-            // is no foal. applyBredFoal has already told the player why.
-            foal.discard();
-            jar.shrink(1);
-            mare.resetLove();
-            mare.setAge(6000);
-            return true;
-        }
-        level.addFreshEntity(foal);
-        level.broadcastEntityEvent(mare, (byte) 18); // heart particles, like vanilla breeding
-
+        // A pregnancy, not a foal. The stallion's cover was counted when the
+        // jar was filled, so none is counted here. A jar that does not take is
+        // still spent - it was a real try. The mare's armed carrots and the
+        // jar's both act on the draw; hers are used up only if it takes.
+        Conception.Result result = ReproHandler.breed(mare, mareRecord, mareGenome, sireGenome, sireRecord,
+                null, stored.carrots(), player);
         jar.shrink(1);
-        mare.resetLove();
-        mare.setAge(6000); // vanilla post-breeding cooldown
-
-        message(player, HorseRecords.of(foal).displayName() + " was born.");
+        level.broadcastEntityEvent(mare, (byte) 18); // heart particles, like vanilla breeding
+        ReproHandler.announce(mare, player, result);
         return true;
     }
 

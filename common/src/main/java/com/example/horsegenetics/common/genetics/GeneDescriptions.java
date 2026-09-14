@@ -42,6 +42,11 @@ public final class GeneDescriptions {
                             + "narrow diet refuses almost everything, and what it does accept feeds it "
                             + "far better. Blood is the strangest: nothing feeds it, and it heals only "
                             + "by biting something living."),
+            Map.entry("horsegenetics.fertility",
+                    "How readily a horse breeds. Two copies of sf make every breeding half as likely "
+                            + "to take - the only thing that can make plain golden carrots fail. tw makes "
+                            + "a pregnancy more likely to be twins, and each copy carries a number that "
+                            + "nudges a mare's odds of conceiving."),
             Map.entry("horsegenetics.extension",
                     "Whether the horse can make black pigment at all. E lets black through; e/e "
                             + "removes it entirely, leaving only red - a chestnut - on which every "

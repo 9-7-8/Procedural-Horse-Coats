@@ -1,7 +1,5 @@
 package com.example.horsegenetics.neoforge.server;
 
-import com.example.horsegenetics.neoforge.data.ModDataComponents;
-import com.example.horsegenetics.neoforge.item.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -38,13 +36,11 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  * keeping a timer beside it.
  *
  * <h2>What counts as a breeding food</h2>
- * Both halves of the question, because a player does not distinguish them:
- * vanilla's love items ({@link DietFoods#isVanillaLoveItem}) and
- * <b>this mod's breeding carrots</b>, which are ordinary items that only mean
- * anything at the moment of breeding. Feeding one of those on cooldown is worse
- * than losing a golden carrot - a Known Gene Splice carrot is an expensive,
- * hand-made object, and silently eating one is the version of this bug that
- * actually costs something.
+ * Vanilla's love items ({@link DietFoods#isVanillaLoveItem}). This mod's
+ * breeding carrots used to count too, because each one opened a short window
+ * and was wasted on a horse that could not breed in it. Since 2026-09-13 a
+ * carrot arms the horse until its next conception, so there is no wrong moment
+ * to feed one and nothing here stops it.
  *
  * <p><b>{@link EventPriority#HIGH}</b> so this runs before the diet and yield
  * handlers: the point is that nothing else gets to consume the stack first.
@@ -62,6 +58,18 @@ public final class BreedingCooldownHandler {
         }
         ItemStack stack = event.getItemStack();
         if (!isBreedingFood(stack)) {
+            return;
+        }
+        // A PREGNANT MARE REFUSES EVERY BREEDING FOOD, golden carrots included
+        // (owner, 2026-09-13), and keeps it. The pregnancy lives only on the
+        // server, so the client cannot make this call and may briefly predict a
+        // feed before the server says no - unverified in-game.
+        if (!event.getLevel().isClientSide() && HorseRecords.hasRealRecord(horse)
+                && ReproHandler.of(horse).pregnant()) {
+            event.getEntity().sendSystemMessage(Component.literal(ReproHandler.notReceptive(horse))
+                    .withStyle(ChatFormatting.YELLOW));
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
             return;
         }
         // A foal's age is negative - that is "too young", not "on cooldown",
@@ -90,12 +98,7 @@ public final class BreedingCooldownHandler {
      * identity, because it is one item parameterised by {@code carrot_effects}.
      */
     private static boolean isBreedingFood(ItemStack stack) {
-        return DietFoods.isVanillaLoveItem(stack)
-                || stack.is(ModItems.UNKNOWN_EPIGENETIC_SPLICE_CARROT.get())
-                || stack.is(ModItems.UNKNOWN_GENE_SPLICE_CARROT.get())
-                || stack.is(ModItems.STABILIZER_CARROT.get())
-                || stack.is(ModItems.MAGNIFIER_CARROT.get())
-                || stack.has(ModDataComponents.CARROT_EFFECTS.get());
+        return DietFoods.isVanillaLoveItem(stack);
     }
 
     /**

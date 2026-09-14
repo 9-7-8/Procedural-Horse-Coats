@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -21,7 +22,9 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  *       registered first / last name and consumes one tag
  *       (see {@code RenameHorsePayload});</li>
  *   <li>in the debug-pen dimension only: a <b>stick</b> instantly tames an
- *       untamed horse, a <b>clock</b> instantly ages a foal to an adult;</li>
+ *       untamed horse, a <b>clock</b> instantly ages a foal to an adult, and
+ *       steps an adult mare through heat, pregnancy and foal heat
+ *       ({@link ReproHandler#debugStep});</li>
  *   <li><b>shift-right-click on a tamed foal</b> opens its inventory screen -
  *       see {@link #onFoalInventory}.</li>
  * </ul>
@@ -84,6 +87,13 @@ public final class HorseInteractionHandler {
                 if (player.getVehicle() == horse) {
                     player.stopRiding(); // belt-and-braces if a mount slipped through
                 }
+            }
+            consume(event, InteractionResult.SUCCESS);
+        } else if (stack.is(Items.CLOCK) && HorseRecords.hasRealRecord(horse)
+                && HorseRecords.of(horse).sex() == Sex.FEMALE) {
+            // An adult mare: one step through heat, pregnancy and foal heat.
+            if (!client) {
+                ReproHandler.debugStep(horse, player);
             }
             consume(event, InteractionResult.SUCCESS);
         }

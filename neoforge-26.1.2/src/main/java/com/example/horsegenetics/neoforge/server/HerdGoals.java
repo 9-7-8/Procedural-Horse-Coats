@@ -38,6 +38,7 @@ import java.util.UUID;
  *   <tr><td>{@link DamAndFoal}</td><td>4</td><td>a foal and its dam - tamed too</td></tr>
  *   <tr><td>{@link StallionGuard}</td><td>5</td><td>wild band stallions</td></tr>
  *   <tr><td>{@link Displace}</td><td>5</td><td>any horse at food or water - tamed too</td></tr>
+ *   <tr><td>{@link HeatAttraction}</td><td>6</td><td>a mare in heat and the nearest stallion - tamed too</td></tr>
  *   <tr><td>{@link GroomAndRest}</td><td>7</td><td>grooming partners - tamed too</td></tr>
  * </table>
  *
@@ -67,6 +68,7 @@ public final class HerdGoals {
         horse.goalSelector.addGoal(4, new DamAndFoal(horse));
         horse.goalSelector.addGoal(5, new StallionGuard(horse));
         horse.goalSelector.addGoal(5, new Displace(horse));
+        horse.goalSelector.addGoal(6, new HeatAttraction(horse));
         horse.goalSelector.addGoal(7, new GroomAndRest(horse));
     }
 
@@ -502,6 +504,108 @@ public final class HerdGoals {
                 }
             }
             return false;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Heat
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>A mare in heat and a stallion find each other</b> (owner, 2026-09-13:
+     * "both, mutual"). An idle adult mare in heat walks to the nearest idle
+     * adult stallion within {@link #RANGE}; an idle adult stallion walks to the
+     * nearest mare in heat - one at a time, so two mares in heat do not pull him
+     * back and forth. Both stop about {@link #CLOSE} blocks apart. Wild and tamed
+     * alike. It breeds nothing: that is still a carrot, a jar or the gene.
+     */
+    public static final class HeatAttraction extends Goal {
+        private static final double RANGE = 16.0;
+        private static final double CLOSE = 3.0;
+        /** Which mare each stallion is walking to. */
+        private static final Map<UUID, UUID> ANSWERING = new HashMap<>();
+
+        private final Horse horse;
+        private Horse partner;
+        private boolean mareSide;
+        private int checkCooldown;
+
+        HeatAttraction(Horse horse) {
+            this.horse = horse;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            if (!free(horse) || horse.isBaby() || !(horse.level() instanceof ServerLevel level)
+                    || --checkCooldown > 0 || !HorseRecords.hasRealRecord(horse)) {
+                return false;
+            }
+            checkCooldown = 40;
+            Sex sex = HorseRecords.of(horse).sex();
+            mareSide = sex == Sex.FEMALE;
+            if (mareSide && !ReproHandler.receptive(horse)) {
+                return false;
+            }
+            Horse best = null;
+            if (!mareSide) {
+                UUID claimed = ANSWERING.get(horse.getUUID());
+                Horse current = claimed == null ? null : loaded(horse, claimed);
+                if (current != null && ReproHandler.receptive(current)
+                        && current.distanceToSqr(horse) < RANGE * RANGE) {
+                    best = current;
+                }
+            }
+            if (best == null) {
+                for (Horse h : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(RANGE),
+                        h -> h != horse && !h.isBaby() && free(h) && HorseRecords.hasRealRecord(h)
+                                && HorseRecords.of(h).sex() != sex)) {
+                    if (!mareSide && !ReproHandler.receptive(h)) {
+                        continue;
+                    }
+                    if (best == null || h.distanceToSqr(horse) < best.distanceToSqr(horse)) {
+                        best = h;
+                    }
+                }
+            }
+            if (best == null || best.distanceToSqr(horse) <= CLOSE * CLOSE) {
+                return false;
+            }
+            partner = best;
+            if (!mareSide) {
+                ANSWERING.put(horse.getUUID(), best.getUUID());
+            }
+            return true;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            if (partner == null || !partner.isAlive() || !free(horse)) {
+                return false;
+            }
+            double d2 = horse.distanceToSqr(partner);
+            return d2 > CLOSE * CLOSE && d2 < (RANGE + 8.0) * (RANGE + 8.0)
+                    && ReproHandler.receptive(mareSide ? horse : partner);
+        }
+
+        @Override
+        public void tick() {
+            if (partner == null) {
+                return;
+            }
+            horse.getLookControl().setLookAt(partner, 30.0F, 30.0F);
+            if (horse.getNavigation().isDone()) {
+                horse.getNavigation().moveTo(partner, 1.0);
+            }
+        }
+
+        @Override
+        public void stop() {
+            if (partner != null && !mareSide) {
+                ANSWERING.remove(horse.getUUID(), partner.getUUID());
+            }
+            partner = null;
+            horse.getNavigation().stop();
         }
     }
 

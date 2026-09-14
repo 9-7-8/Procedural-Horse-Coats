@@ -279,23 +279,22 @@ final class DebugYardGameplay {
      * the gamete that parent contributes, so the whole result lives in a
      * <i>foal</i>. That makes three things mandatory, and the bench had none of
      * them: a known mare, a known stallion, and certainty about which carrot
-     * went into which parent. Feed two different carrots during one visit and
-     * {@code CarrotWindowAttachment.plus} <b>merges</b> them into one window, so
-     * the foal cannot tell you which one it came from - and with eleven carrots
-     * in one chest beside four horses, that is the likely outcome rather than a
-     * corner case.
+     * went into which parent. Feed two different carrots and the horse carries
+     * both ({@code ArmedCarrotsAttachment.plus}), so the foal cannot tell you
+     * which one it came from - and with eleven carrots in one chest beside four
+     * horses, that is the likely outcome rather than a corner case.
      *
      * <h2>Why a divided pen rather than one pen or two</h2>
-     * A carrot also puts its eater straight into breeding mode
-     * ({@code horse.setInLove}), so two horses in one pen breed <b>the moment
-     * the second one is fed</b> - before you have had a chance to feed only one
-     * of them, which is the more interesting half of the test. Two separate
-     * pens fix that and make it impossible to breed them at all without
-     * carrying a horse about.
+     * It was built when a carrot put its eater straight into breeding mode, so
+     * two horses in one pen bred the moment the second was fed. A carrot only
+     * arms the horse now (2026-09-13), and breeding is a golden carrot on both
+     * with the mare in heat - but keeping them apart still means knowing
+     * exactly which one ate what.
      *
      * <p>So: one enclosure, a fence down the middle, and a <b>gate in it</b>.
-     * Mare on the left, stallion on the right, feed whichever you mean to feed,
-     * open the gate when you want the foal. The pair is small on purpose -
+     * Mare on the left, stallion on the right: feed the carrot to whichever you
+     * mean to, clock the mare into heat, open the gate, and golden-carrot both.
+     * The foal comes when the pregnancy ends. The pair is small on purpose -
      * these horses are being fed and bred, never chased, and a big paddock only
      * means walking after them.
      */
@@ -363,8 +362,11 @@ final class DebugYardGameplay {
             }
         }
 
+        // Since 2026-09-13 a carrot only ARMS the horse, the mare has to be in
+        // heat, and breeding makes a pregnancy - so the sign is three steps, and
+        // the chest has the clock that puts her in heat.
         DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                List.of(carrot.name(), carrot.claim(), "feed ONE, then open", "the middle gate"));
+                List.of(carrot.name(), carrot.claim(), "carrot ONE, clock", "mare, gold both"));
 
         DebugTestYard.stock(level, gy, x0 + 2.0, gateZ - 2.0,
                 "horsegenetics.extension", carrot.name() + " MARE", 1, 0, "E/e");
@@ -374,6 +376,7 @@ final class DebugYardGameplay {
         chest(level, gy, x0 + 5, z0 - 2, carrot.name(), List.of(
                 stack(carrot.item().get(), 16),
                 new ItemStack(Items.GOLDEN_CARROT, 16),
+                new ItemStack(Items.CLOCK),
                 new ItemStack(Items.STICK, 4)));
     }
 
