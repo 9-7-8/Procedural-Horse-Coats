@@ -27,6 +27,53 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13j">2026-09-13, overnight &mdash; breeding finished, its gaps closed, and a yard built to audit it</h2>
+
+<p>
+    The owner went to bed asking for breeding to be finished, the gaps closed, tests designed, and
+    the debug area rebuilt so that everything could be audited in the morning. Nobody was awake
+    to ask, so the calls that were not purely technical are on the roadmap as
+    <a href="roadmap.html#provisional">provisional</a>, to confirm or reverse. Nothing was played.
+    The audit is <a href="verification.html#fertility">&sect;0-DV</a>, in order.
+</p>
+
+<ul>
+    <li><strong>Gaps closed in code:</strong>
+        <ul>
+            <li><a href="known-gaps.html#gap-225">225</a>: impossible genotypes are embryonic
+                lethals, through <code>Conceivable</code>. The code read was confirmed; two
+                stabilised carriers would have made one every time.</li>
+            <li><a href="known-gaps.html#gap-226">226</a>: a synced pregnant flag.</li>
+            <li><a href="known-gaps.html#gap-228">228</a>: offline owner names from the server
+                and NeoForge caches.</li>
+            <li><a href="known-gaps.html#gap-229">229</a>: geldings through the roster, the
+                filters, the sire picker, band challenges and bond grants.</li>
+        </ul>
+        Also the seed jar's pedigree edge: a jar foal now takes its generation and names from the
+        real sire's record. Found on the way: <a href="known-gaps.html#gap-230">230</a>, a cover
+        through a fence, and <a href="known-gaps.html#gap-231">231</a>, the client never
+        cancelling jar and clock clicks.</li>
+    <li><strong>Designed for testing:</strong> the natural-cover decision and all the wording moved
+        into <code>common/</code> (<code>NaturalCover</code>, <code>ReproText</code>) so they could
+        be unit-tested. New tests: <code>NaturalCoverTest</code>, <code>ReproTextTest</code>,
+        <code>ConceivableTest</code> and <code>GeldingListingTest</code>. 98 tests pass across the
+        eleven affected classes. The full suite was not run.</li>
+    <li><strong>The yard grew rows O to T</strong> (<code>DebugYardFertility</code>):
+        <ul>
+            <li>twelve pens, one scenario each, spaced so no pen caps another;</li>
+            <li>maternity mares made pregnant through the real conception path until the dice gave
+                what the sign promises;</li>
+            <li>a new <code>DebugWorldWatch.watchBreeding</code> that logs every horse's breeding
+                state;</li>
+            <li>natural covers switched off in the carrot pens, which would otherwise breed through
+                their dividers.</li>
+        </ul>
+        The heat-attraction goal now stops at 2.5 blocks, inside the 3-block cover reach, so a
+        pair that walks together can actually breed.</li>
+    <li><strong>The test kit</strong> lost the paddock batch to those pens. Batch 1 is now only
+        what the yard cannot do.</li>
+</ul>
+
 <h2 id="d2026-09-13i">2026-09-13, later still &mdash; every horse breeds, and the vet&rsquo;s kit</h2>
 
 <p>

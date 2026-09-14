@@ -73,14 +73,17 @@
 </p>
 
 <div class="note">
-    <span class="label">Breeding can still make an impossible foal</span>
+    <span class="label">Breeding cannot make an impossible foal (since 2026-09-13)</span>
     <p>
-        <code>canOccur</code> is consulted by the catalogue and the founder table, not by
-        <code>breedWith</code> &mdash; so crossing two <code>W5</code> carriers can still
-        produce a <code>W5/W5</code> foal, which is born and renders as
-        <code>near-white</code>. Making it not exist needs the health system
-        (<a href="roadmap.html">roadmap</a> &sect;6.4); until then the tolerant answer beats
-        throwing.
+        <code>breedWith</code> still draws alleles without consulting <code>canOccur</code>, so two
+        <code>W5</code> carriers can still <em>draw</em> <code>W5/W5</code>. What happens next
+        changed. <code>genetics.Conceivable</code> is now checked beside the viability check on
+        both breeding paths, so that draw is an embryonic lethal. Golden carrots give no foal, and a
+        pregnancy is lost early, both with the &ldquo;could never have become a horse&rdquo;
+        miscarriage line (<a href="known-gaps.html#gap-225">gap 225</a>). KIT itself still declares
+        no lethal condition, which is why the random splice carrot can still hand over a
+        <code>W5</code> carrier. A hand-typed <code>W5/W5</code> in the spawn egg is still accepted
+        and still shows as viable.
     </p>
 </div>
 

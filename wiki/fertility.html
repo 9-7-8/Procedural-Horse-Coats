@@ -176,6 +176,9 @@
 <tr><td><code>common/repro/ReproRules</code></td><td><code>stateAt(record, now, timing)</code>, the odds, twins, early loss, the late slowdown, weaning. Every constant the owner settled.</td></tr>
 <tr><td><code>common/repro/Pregnancy</code>, <code>Embryo</code></td><td>What she carries. An embryo is the foal&rsquo;s genome already drawn, its breed label, whether it is lost early, and the sire&rsquo;s id, names, generation and whole <code>GenomeSample</code>.</td></tr>
 <tr><td><code>common/repro/Conception</code></td><td><code>attempt(mating, mare, now, timing, sireCovers, health, lethals, rng)</code>: the one draw every pregnancy path uses. Also <code>vanillaFoalChance</code>, the only thing fertility does to plain golden carrots.</td></tr>
+<tr><td><code>common/repro/NaturalCover</code></td><td><code>decide(mare, record, now, timing, stallions, othersNearby)</code>: every rule of a natural cover, as a verdict (<code>COVER</code>, <code>NOT_A_BREEDING_MARE</code>, <code>NOT_NOW</code>, <code>NO_STALLION</code>, <code>CROWDED</code>) plus which stallion. <code>NaturalBreedingHandler</code> only gathers the facts.</td></tr>
+<tr><td><code>common/repro/ReproText</code></td><td>Every sentence: durations, refusals, the info screen's Breeding line, the vet's kit report. Tested, above all, so that twins show only through the kit.</td></tr>
+<tr><td><code>common/genetics/Conceivable</code></td><td>A genotype a gene rules out (<code>canOccur</code>) is treated as an embryonic lethal on both breeding paths, with a synthetic cause.</td></tr>
 <tr><td><code>neoforge/data/ReproCodecs</code></td><td>The save format of <code>horsegenetics:horse_repro</code>. Not <code>copyOnDeath</code>, not synced.</td></tr>
 <tr><td><code>neoforge/server/ReproHandler</code></td><td><code>breed(...)</code>, the entry point that folds armed carrots and calls <code>Conception</code>; the 40-tick tick (early loss, birth, slowdown, weaning); the action-bar lines; <code>breedingLine</code>; the clock&rsquo;s <code>debugStep</code>.</td></tr>
 </tbody>
@@ -236,7 +239,13 @@
     With <code>debug.tools</code> on, <code>ServerConfig.reproTiming()</code> uses
     <code>DEBUG_REPRO_DAY_TICKS</code> for the day. A clock on an adult mare is
     <code>ReproHandler.debugStep</code>: out of heat to peak heat, pregnant to due now,
-    postpartum to foal heat. Test kit batches 1 and 2 are built for this. Every attempt, loss and
+    postpartum to foal heat. <strong>Rows O to T of the test yard</strong>
+    (<a href="horse-dimension.html#test-yard">horse dimension</a>, <code>DebugYardFertility</code>)
+    are one pen per scenario: a natural pair, a gelding control, the cap, maternity, weaning, the
+    jar bench and more. Each pen is registered with
+    <code>DebugWorldWatch.watchBreeding</code>, so its horses' breeding states are in the log. Test
+    kit batch 1 is for the two things the yard cannot do: a birth while unloaded, and a reload.
+    The audit, in order, is <a href="verification.html#fertility">verification &sect;0-DV</a>. Every attempt, loss and
     birth writes an <code>ActionTrace</code> line under <code>fertility</code>, and carrot
     folds are under <code>carrot</code>.
 </p>

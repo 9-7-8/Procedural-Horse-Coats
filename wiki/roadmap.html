@@ -1278,11 +1278,6 @@
 </p>
 
 <ul>
-    <li><strong>The pedigree edge.</strong> It is settled that the jar must store enough
-        of the sire&rsquo;s record &mdash; not just his UUID &mdash; for the family tree
-        to render his node. It stores name and sex already, but the synthetic sire record
-        still uses the stored UUID as its pedigree edge, so the tree may not find the
-        node. Wire it through.</li>
     <li>A <code>collectedFrom</code> marker (player-made vs villager-sold) and the
         &ldquo;no Known Gene Splice carrot on a jar&rdquo; recipe restriction are both
         trivial once the above exists.</li>
@@ -1647,6 +1642,37 @@
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
+
+<h3 id="provisional">Provisional 2026-09-13, night &mdash; made while the owner slept: confirm or reverse</h3>
+
+<p>
+    The owner asked for breeding to be finished and its gaps closed overnight, with nobody awake
+    to ask. These are the calls that were not purely technical. Each one is built the conservative
+    way and is cheap to reverse. Move each into a settled list, or undo it.
+</p>
+
+<ul>
+    <li><strong>Impossible genotypes are embryonic lethals through a check, not through new
+        conditions on KIT, MITF and PAX3</strong> (<a href="known-gaps.html#gap-225">gap 225</a>).
+        Real lethal conditions on those genes would also remove all three loci from the random
+        splice carrot's pool: sabino, the W boosters, dominant white, SW1 and SW2. That is a
+        gameplay change, so it is not made.</li>
+    <li><strong>A cover needs no line of sight</strong>, so a stallion can breed a mare through a
+        fence (<a href="known-gaps.html#gap-230">gap 230</a>). Adding a line-of-sight fact is a few
+        lines if a fence should stop him.</li>
+    <li><strong>A gelded wild colt still disperses to a bachelor band</strong>, rather than being
+        treated as a mare by <code>BandLife</code>. Geldings only happen to owned horses, so this
+        almost never matters.</li>
+    <li><strong>A gelding's one-off bond grants</strong> (feeding, shearing) get a quarter more,
+        rounded down, so a +2 feed stays +2.</li>
+    <li><strong>The test yard can switch natural breeding off per mare</strong>
+        (<code>DebugYardFertility.noNaturalCovers</code>), and does so in the carrot pens and every
+        fertility pen whose test is something else. The owner's &ldquo;the yard is not
+        exempt&rdquo; still holds for every other pen, which will now breed on its own.</li>
+    <li><strong>Test kit batch 2 (the paddock) was deleted</strong>, because yard rows O to Q do the
+        same thing without building a paddock. Batch 1 was re-aimed at the two things the yard
+        cannot do: a birth while unloaded, and a reload.</li>
+</ul>
 
 <h3>Settled 2026-09-13 &mdash; fertility &amp; gestation</h3>
 

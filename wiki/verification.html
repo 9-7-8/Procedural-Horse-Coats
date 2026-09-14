@@ -80,72 +80,114 @@
     </p>
 </div>
 
-<h2 id="fertility">&sect;0-DV &mdash; Fertility and gestation (built 2026-09-13 late, NOT played)</h2>
+<h2 id="fertility">&sect;0-DV &mdash; Breeding and fertility: the audit (built 2026-09-13, NOT played)</h2>
 
 <p>
-    <strong>Test kit batches 1 and 2.</strong> With <code>debug.tools</code> on, a heat and a pregnancy
-    each last one real minute, and the clock steps an adult mare along. The genetics side is
-    unit-tested (<code>ReproRulesTest</code>, <code>FertilityGeneTest</code>). Nothing in the
-    world has run. Every attempt, loss and birth logs a <code>[fertility]</code> line, and
-    carrot folds log under <code>[carrot]</code>. Behaviour first:
+    Everything about breeding in one walk: fertility, pregnancy, natural breeding, gelding, the
+    vet's kit, and tonight's gap fixes. <strong>The yard does most of it</strong>, in rows
+    <strong>O to T</strong> past the carrot pens (<a href="horse-dimension.html#test-yard">the
+    table</a>). Every pen is one claim, and its sign says what should happen. With
+    <code>debug.tools</code> on (the dev default), a heat and a pregnancy each last one real minute.
+    The logic is unit-tested: <code>ReproRulesTest</code>, <code>NaturalCoverTest</code>,
+    <code>ReproTextTest</code>, <code>ConceivableTest</code>, <code>GeldingListingTest</code>,
+    <code>FertilityGeneTest</code>. Nothing in the world has run.
 </p>
+<p>
+    <strong>What the log gives you:</strong> every fertility pen is watched, so
+    <code>[watch]</code> lines carry <code>breeding:</code> with each horse's state (in heat,
+    pregnant, nursing, covers today) whenever one changes, and at every census.
+    <code>[fertility]</code> lines are covers, conceptions, losses and births; <code>[carrot]</code>
+    lines are carrot folds. <code>/testkit census</code> prints every pen at once.
+</p>
+
+<h3 id="fertility-yard">In the yard, in this order</h3>
+<ol>
+    <li><strong>Walk in and check the log first.</strong> Expect <code>fertility rows O-T
+        built</code>, and <em>no</em> <code>could not make ... pregnant as promised</code>. That
+        warning means the maternity pen came up empty, usually because <code>health.mode</code>
+        is not FULL.</li>
+    <li><strong>Row R west, MATERNITY &mdash; it runs on a clock, so go there first.</strong>
+        Three mares were made pregnant when the yard was built. Before anything happens, use the
+        vet's kit (chest) on each:
+        <ul>
+            <li>DUE 1 MIN says <em>one foal</em>;</li>
+            <li>TWINS DUE 2 MIN says <em>twins</em>, while her info screen's Breeding line only says
+                <em>Pregnant</em>;</li>
+            <li>LOSS AT 1, DUE 3 says one foal.</li>
+        </ul>
+        Then: at about 1 minute DUE 1 MIN foals, with a gold chat line naming the foal, and LOSS
+        loses hers with a grey &ldquo;did not carry&rdquo; line (MET's sign). At about 2 minutes
+        TWINS foals, usually &ldquo;has foaled twins&rdquo;. After a minute and twenty seconds,
+        TWINS' Speed on the info screen is 15% lower.</li>
+    <li><strong>Row O west, NATURAL PAIR.</strong> The mare arrives in heat. Within seconds the
+        two walk together, there are hearts and a <code>[fertility] natural cover</code> line, and
+        a minute later there is a foal. If the cover did not take, the watch shows her in heat and
+        nothing more until her next heat, about two minutes on.
+        <br><strong>East, GELDING CONTROL:</strong> nothing, for ever. His nameplate symbol is grey,
+        his info screen says <em>Gelding</em>, and the watch says <code>gelding</code>. He never
+        walks to the mare.</li>
+    <li><strong>Row P west, SUBFERTILE PAIR:</strong> exactly <strong>one</strong> natural cover
+        line per heat (every two minutes), mostly <code>DID_NOT_TAKE</code> (about 20%).
+        <br><strong>East, HURT MARE:</strong> never covered while hurt. Nothing heals her in the
+        pen; let her out to hay and water and she is covered at a heat after she heals.</li>
+    <li><strong>Row Q west, THE CAP &mdash; the one that protects a save.</strong> Eight mares and
+        a stallion, all in heat. Nobody is covered, and the log says <code>the cap is 8</code>
+        once a minute per mare. Take one mare out with a lead (chest): covers start within
+        seconds. Each birth adds a horse back, so the pen settles again. <strong>Pass: the pen
+        never grows beyond the cap however long it runs</strong>
+        (<a href="known-gaps.html#gap-206">gap 206</a>).
+        <br><strong>East, COWBOY STOCK:</strong> a branded pair in heat, never covered.</li>
+    <li><strong>Row S west, GOLD ANY HEAT.</strong> The kit says she is <em>not in heat</em>.
+        Golden carrots on both give a foal <strong>at once</strong> anyway: vanilla, untouched.
+        <br><strong>East, JAR &amp; KIT BENCH</strong> (these horses arrive untamed; tame all three
+        with the chest's stick):
+        <ul>
+            <li>Feed the stud a stabilizer carrot, then a golden carrot, and fill a jar. The tooltip
+                says <em>Carries 1 carrot effect</em>.</li>
+            <li>Use the jar on OUT OF HEAT: refused, jar kept.</li>
+            <li>Use it on IN HEAT: <em>is pregnant</em> or <em>didn't take</em>.</li>
+            <li>Clock the other mare into heat and use a second jar.</li>
+            <li>When that foal is born, its Family tab shows the stud as sire (the pedigree edge),
+                and its generation counts his.</li>
+            <li>Finally, sneak-use the kit on the stud: <em>is now a gelding</em>. A new jar is now
+                refused, and golden carrots with a mare say <em>is a gelding - no foal</em>.</li>
+        </ul></li>
+    <li><strong>Row R east, WEANING.</strong> NURSING MARE's watch line ends
+        <em>&bull; nursing</em>. Lead WEAN ME more than 32 blocks away and keep it there a minute:
+        the line loses it.</li>
+    <li><strong>Row T west, MET NATURAL &mdash; leave it running.</strong> Two MET carriers
+        breeding on their own. Over the night the log should show births and, roughly one time in
+        four, an early loss, and the horse count should level off at the cap.
+        <br><strong>East, SUBFERTILE GOLD:</strong> golden carrots on the <code>sf/sf</code> pair
+        again and again. About one foal in four, otherwise <em>It didn't take - no foal this
+        time</em>.</li>
+    <li><strong>Rows L to N, the carrot pens:</strong> follow one sign end to end. The pair must
+        <strong>not</strong> breed through the divider on their own; natural covers are switched off
+        in those pens (<a href="known-gaps.html#gap-230">gap 230</a>).</li>
+    <li><strong>Leave the yard running</strong> and read the census in the morning: every fertility
+        pen prints its breeding readout.</li>
+</ol>
+
+<h3 id="fertility-overworld">Outside the yard (test kit batch 1)</h3>
 <ul>
-    <li><strong>Plain golden carrots are still instant &mdash; the one that must not
-        break.</strong> Two tamed adults, no breeding carrot on either: a foal at once, as
-        before, whether or not she is in heat.</li>
-    <li><strong>A carrot-armed pair makes a pregnancy, not a foal.</strong> Feed a stabilizer
-        carrot to the mare (no hearts; an action-bar line). Clock her into heat, then
-        golden-carrot the pair. Expect no foal, and &ldquo;is pregnant&rdquo; or &ldquo;It
-        didn't take&rdquo; on the action bar. If it did not take, feed golden carrots again
-        after the cooldown: <strong>the carrot must still be on her</strong> (the
-        <code>[carrot]</code> line says &ldquo;still armed&rdquo;).</li>
-    <li><strong>Birth.</strong> About a minute later, or clock her for &ldquo;due now&rdquo;:
-        a foal beside her, a gold chat line naming it, tamed to you, <em>Bred by</em> you on
-        its info screen, with the carrot's effect in its genes.</li>
-    <li><strong>Birth while away.</strong> Get a mare pregnant, go far enough that her chunk
-        unloads for more than a minute, come back. She should foal within two seconds of
-        loading.</li>
-    <li><strong>Save and reload mid-pregnancy.</strong> Quit to title and back. The Breeding
-        line should still say <em>Pregnant</em>, and she should still foal.</li>
-    <li><strong>The seed jar.</strong> Out of heat: refused on the action bar, jar kept. In
-        heat: a pregnancy, jar spent. Fill a jar from a stallion that ate a carrot: the
-        tooltip says &ldquo;Carries 1 carrot effect&rdquo;.</li>
-    <li><strong>An early loss.</strong> Breed the two MET carriers (slots 7 and 8) by jar a
-        few times. About one pregnancy in four ends early with the grey &ldquo;did not
-        carry&rdquo; line, and she comes back into heat.</li>
-    <li><strong>A pregnant mare refuses golden carrots.</strong> A yellow line, carrot kept.
-        Watch for a client-side flicker: a mount or eat animation before the server says no.
-        See <a href="known-gaps.html#gap-226">gap 226</a>.</li>
-    <li><strong>Natural breeding (batch 2) &mdash; the one that can damage a save.</strong> A
-        tamed stallion and three mares in a paddock. Clock one mare into heat: he walks over and
-        covers her <em>once</em> (hearts, and a <code>[fertility] natural cover</code> line). If it
-        did not take, nothing more happens until her next heat. Then add horses until eight others
-        stand within 16 blocks of a mare: the log says <code>the cap is 8</code> and nobody is
-        covered. <strong>Leave a paddock running for several in-game days and count.</strong> A
-        population that creeps past the cap is the failure that matters
-        (<a href="known-gaps.html#gap-206">gap 206</a>).</li>
-    <li><strong>What stops a cover:</strong> a leashed or ridden horse, a hurt mare (tap her with
-        the sword), a gelding, a stallion who has covered three mares today, and a cowboy's string,
-        none of which should ever foal.</li>
-    <li><strong>The vet's kit.</strong> Plain use on a mare: where she is in her heat and when it
-        ends; on a pregnant mare, <em>twins</em> or <em>one foal</em>. Sneak-use on your own
-        stallion: &ldquo;is now a gelding&rdquo;, the info screen says <em>Gelding</em>, his nameplate
-        symbol turns grey, a seed jar refuses him, and golden carrots with a mare say &ldquo;is a
-        gelding - no foal&rdquo;. On someone else's stallion: refused. One durability per use; the
-        horseman sells it at level 2.</li>
-    <li><strong>A gelding's company.</strong> He never spars, guards a band or walks to a mare in
-        heat, and he bonds a quarter faster. A cowboy's string should now include some geldings,
-        a little cheaper.</li>
-    <li><strong>The yard's carrot pens</strong> (rows L, M, N) read &ldquo;carrot ONE, clock /
-        mare, gold both&rdquo;, and the chest has a clock. Follow the sign once, end to
-        end.</li>
-    <li><strong>Weaning.</strong> Lead a foal more than 32 blocks from its dam and keep it there
-        a minute. The dam's line loses &ldquo;&bull; nursing&rdquo;.</li>
-    <li><strong>Heat walk.</strong> A mare in heat and a stallion within 16 blocks walk to
-        about three blocks apart and stop. Two mares in heat should not pull one stallion back
-        and forth.</li>
-    <li><strong>Looking at it (last):</strong> the Breeding line's wording in each state; in the
-        last third the Speed value on the info screen drops by 15%.</li>
+    <li><strong>Plain golden carrots are still instant</strong> for two ordinary tamed horses.</li>
+    <li><strong>Birth while away.</strong> Get a mare pregnant, ride far enough that her chunk
+        unloads for more than a minute, come back: she foals within two seconds of loading.
+        Leaving the horse dimension tears the yard down, which is why this is not a pen.</li>
+    <li><strong>Save and reload mid-pregnancy.</strong> The Breeding line still says
+        <em>Pregnant</em>, and she still foals.</li>
+    <li><strong>A pregnant mare refuses golden carrots, with no flicker.</strong> Gap 226's fix syncs
+        the pregnancy to the client, so there should be no mount or eat animation before the yellow
+        line.</li>
+    <li><strong>The horse browser (H) and a gelding:</strong> he is not in the breeding picker's
+        stallion list, the <code>gelding</code> filter finds him, and <code>stallion</code> does
+        not.</li>
+    <li><strong>A cowboy's string</strong> shows some geldings, a little cheaper than his
+        stallions.</li>
+    <li><strong>Wild bands</strong> foal over a few days of play, and never grow past eight around a
+        mare.</li>
+    <li><strong>Looking at it (last):</strong> the Breeding line's wording in each state; a mare in
+        heat and a stallion walking together; a gelding keeping company like a mare.</li>
 </ul>
 
 <h2 id="ai-helpers">&sect;0-DU &mdash; The AI helpers (built 2026-09-13, checkable from a phone)</h2>
