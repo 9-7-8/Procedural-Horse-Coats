@@ -1370,6 +1370,47 @@ public final class GeneAbilityHandler {
     }
 
     /**
+     * <b>No tree grows through a horse</b> (2026-09-14). A sapling becomes its tree whatever
+     * stands in the way - vanilla does that to players too - and a dryad plants within a
+     * few blocks of itself, so its saplings grow up around it: the DRYAD OAK+BIRCH mare
+     * suffocated in a trunk the moment one grew, and a wild mare lost half her health to
+     * another. A grow with a horse anywhere a tree can reach is cancelled; the sapling stays
+     * a sapling and tries again on a later random tick or bone meal, by which time the horse
+     * has usually moved.
+     *
+     * <p>UNVERIFIED API: that {@code BlockGrowFeatureEvent} fires for every sapling and huge
+     * mushroom grow in this version, natural and bone-mealed, and that cancelling it leaves
+     * the sapling standing. The class, {@code getPos} and {@code setCanceled} were checked
+     * with javap against neoforge-26.1.2.100; where it is fired from was not read.
+     */
+    @SubscribeEvent
+    static void onTreeGrow(net.neoforged.neoforge.event.level.BlockGrowFeatureEvent event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        BlockPos at = event.getPos();
+        AABB reach = new AABB(at).inflate(TREE_REACH, 1.0, TREE_REACH).expandTowards(0.0, TREE_HEIGHT, 0.0);
+        if (level.getEntitiesOfClass(Horse.class, reach, Horse::isAlive).isEmpty()) {
+            return;
+        }
+        event.setCanceled(true);
+        long now = level.getGameTime();
+        if (now - treeHeldLogged >= 200L) {     // a sapling under a resting horse asks often
+            treeHeldLogged = now;
+            ActionTrace.log("dryad", "tree held back at " + at.toShortString()
+                    + " - a horse is standing where it would grow");
+        }
+    }
+
+    /** From a 2x2 sapling's corner to the edge of the widest vanilla canopy. */
+    private static final double TREE_REACH = 4.0;
+
+    /** Taller than any vanilla tree a sapling grows (a mega jungle tops out near 15). */
+    private static final double TREE_HEIGHT = 16.0;
+
+    private static long treeHeldLogged = Long.MIN_VALUE / 2;
+
+    /**
      * What one cover does to one block, or {@code null} for "leave it alone".
      * The lists are deliberately narrow, and every entry is ground a player
      * would expect to green over - never a block anyone built with. This is the

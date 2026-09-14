@@ -177,6 +177,42 @@ class BrindleGeneTest {
         }
     }
 
+    /**
+     * <b>The same rule through {@code Genome.breedWith}</b> - the draw every real foal
+     * comes through: seed jar, carrots, natural covers and plain golden carrots. Only the
+     * genotype-level draw was tested, and the in-game ratio pen caught the genome's copy
+     * throwing brindle colts and plain fillies (2026-09-14). Both directions, because
+     * which parent is "this" must not matter.
+     */
+    @Test
+    void theGenomeDrawEveryRealFoalComesThroughIsSexLinkedToo() {
+        com.example.horsegenetics.common.genetics.Genome dam = new com.example.horsegenetics.common.genetics.Genome(
+                horse("X/X", "n/n"), com.example.horsegenetics.common.genetics.Epigenome.fromSeed(1L));
+        com.example.horsegenetics.common.genetics.Genome sire = new com.example.horsegenetics.common.genetics.Genome(
+                horse("X/Y", "Brn/Y"), com.example.horsegenetics.common.genetics.Epigenome.fromSeed(2L));
+        Allele brn = GENE.fromToken("Brn");
+        int fillies = 0;
+        int colts = 0;
+        for (int i = 0; i < 400; i++) {
+            for (boolean damFirst : new boolean[]{true, false}) {
+                com.example.horsegenetics.common.genetics.Genome foal = damFirst
+                        ? dam.breedWith(sire, new SeededRng(i))
+                        : sire.breedWith(dam, new SeededRng(i));
+                AllelePair p = foal.genotype().pair(GENE);
+                assertEquals(Inheritance.X_LINKED.copiesIn(foal.sex()), GENE.realAlleles(p).size(),
+                        "a " + foal.sex() + " foal came out " + p.toTokens());
+                if (foal.sex() == Sex.FEMALE) {
+                    fillies++;
+                    assertTrue(p.has(brn), "every filly carries her sire's brindle X, got " + p.toTokens());
+                } else {
+                    colts++;
+                    assertFalse(p.has(brn), "a colt gets his sire's Y, not his X, got " + p.toTokens());
+                }
+            }
+        }
+        assertTrue(fillies > 200 && colts > 200, fillies + " fillies, " + colts + " colts");
+    }
+
     // ------------------------------------------------------------------
     // The population
     // ------------------------------------------------------------------

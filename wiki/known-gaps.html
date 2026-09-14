@@ -59,6 +59,28 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-238"><strong>Open 2026-09-14: a lycan horse that shifts into a pufferfish on land drowns, and the horse dies with it.</strong>
+    Two did in the first hour of the all-day yard (<code>[trace] lycan | ... died as a minecraft:pufferfish (drown) - the horse dies with it</code>).
+    The form list offers water animals to horses standing on grass. Either a water form needs water nearby to be chosen, or a
+    shifted water animal should turn back before it suffocates. The owner has not decided which.</li>
+<li id="gap-237"><strong>Fixed 2026-09-14, not yet played: a sapling grew into a tree through a horse and suffocated it.</strong>
+    The DRYAD OAK+BIRCH mare died in a trunk 11 seconds after <code>tree grew</code>. Her pen-mate fell to 4 hp, and a wild
+    mare lost half her health to another tree. The damage began on the same tick as the growth each time.
+    <em>Fix:</em> <code>GeneAbilityHandler.onTreeGrow</code> cancels <code>BlockGrowFeatureEvent</code> while a live horse is
+    within four blocks sideways and sixteen up. The sapling tries again later. <em>Unverified:</em> that the event fires for
+    natural and bone-mealed growth alike in this version (the class was checked with javap; its firing sites were not read).
+    Checklist: <a href="verification.html#fixes-0914">&sect;0-DZ</a>.</li>
+<li id="gap-236"><strong>Fixed 2026-09-14, not yet played: lethal foals never died in the test yard.</strong>
+    <code>LethalFoalHandler</code> skipped the whole <code>debug_pens</code> dimension to spare the gallery, and the yard is in
+    that dimension. An overo lethal white foal stood for two minutes, until the ratio pen removed it, and no foal took
+    <code>genetic_defect</code> damage all day. <em>Fix:</em> the skip applies only inside the corridor
+    (<code>|z| &lt;= DebugPenManager.corridorWallZ()</code>). Checklist: <a href="verification.html#fixes-0914">&sect;0-DZ</a>.</li>
+<li id="gap-235"><strong>Fixed 2026-09-14, not yet played: brindle did not follow sex in any real breeding.</strong>
+    <code>Genotype.breedWith</code> applies the X-linked rule; <code>Genome.breedWith</code>, the draw every foal actually
+    comes through (golden carrots, breeding carrots, the seed jar and natural covers), had its own allele loop and never did.
+    So a brindle stallion threw brindle colts and plain fillies, and the ratio pen tallied both. <code>BrindleGeneTest</code>
+    only bred genotypes. <em>Fix:</em> the genome draw applies the same rule with the same two coins per gene, and a new test
+    breeds through <code>Genome</code> in both directions. Checklist: <a href="verification.html#fixes-0914">&sect;0-DZ</a>.</li>
 <li id="gap-234"><strong>Open, the owner's call: a dispersing filly can be recruited by her own brother.</strong> <code>BandLife.disperse</code> sends a grown filly to the nearest bachelor or the nearest family band within 64 blocks, whichever is closer. Nothing excludes a male from her natal band, so a colt who left the same band a few minutes earlier is usually the nearest bachelor she can find, and the two start a band together. Female dispersal exists to avoid exactly that (the science tab of <a href="horse-care.html">horse care</a>). <em>Options:</em>
     <ul>
         <li>exclude a suitor whose record shares a parent with hers;</li>

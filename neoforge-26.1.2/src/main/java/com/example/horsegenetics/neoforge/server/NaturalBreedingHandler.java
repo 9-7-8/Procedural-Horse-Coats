@@ -54,6 +54,11 @@ public final class NaturalBreedingHandler {
     /** When each capped mare last said so. Transient; a restart just says it again. */
     private static final java.util.Map<java.util.UUID, Long> CROWDED_LOGGED = new java.util.HashMap<>();
 
+    /** Wild mares the cap held back since {@link #wildCappedSince}, summarised every ten minutes. */
+    private static final java.util.Set<java.util.UUID> WILD_CAPPED = new java.util.HashSet<>();
+    private static long wildCappedSince = -1L;
+    private static final long WILD_CAP_SUMMARY_TICKS = 12_000L;
+
     @SubscribeEvent
     static void onTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Horse mare) || !mare.isAlive() || mare.isBaby()) {
@@ -109,6 +114,23 @@ public final class NaturalBreedingHandler {
                 }
             }
             case CROWDED -> {
+                if (!YardPens.inPen(mare)) {
+                    // A WILD MARE GETS ONE SUMMARY, NOT A LINE (2026-09-14). Wild bands live
+                    // eight to sixteen blocks, so nearly every wild mare is capped every heat,
+                    // and a line each a minute was 2,900 of 3,400 fertility lines in a
+                    // morning - burying the pen that tests the cap. They are counted instead.
+                    if (wildCappedSince < 0L) {
+                        wildCappedSince = now;
+                    } else if (now - wildCappedSince >= WILD_CAP_SUMMARY_TICKS) {
+                        ActionTrace.log("fertility", "crowding cap held back " + WILD_CAPPED.size()
+                                + " wild mares in the last 10 minutes (more than " + ReproRules.NATURAL_CAP
+                                + " horses within " + (int) ReproRules.NATURAL_CAP_RADIUS + " blocks)");
+                        WILD_CAPPED.clear();
+                        wildCappedSince = now;
+                    }
+                    WILD_CAPPED.add(mare.getUUID());
+                    break;
+                }
                 // Once a minute per mare: a capped paddock asks every two seconds, and
                 // eight mares saying so each time buries the log the cap is read from.
                 Long last = CROWDED_LOGGED.get(mare.getUUID());

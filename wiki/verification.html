@@ -80,6 +80,36 @@
     </p>
 </div>
 
+<h2 id="fixes-0914">&sect;0-DZ &mdash; Four fixes from the all-day run (2026-09-14, built after the owner's session, NOT played)</h2>
+
+<p>
+    Found in the first 72 minutes of the all-day pens and fixed without restarting the game, so
+    they arrive with the next launch. Everything here is read from <code>latest.log</code>; none of
+    it needs your hands.
+</p>
+<ul>
+    <li><strong>Brindle follows sex</strong> (<a href="known-gaps.html#gap-235">gap 235</a>). In the
+        <code>RATIO BRINDLE</code> tally every colt should be <code>n/Y</code> and every filly
+        <code>Brn/n</code>. <strong>Pass:</strong> no <code>colt Brn/n</code> and no
+        <code>filly n/Y</code> in the tally after twenty foals.</li>
+    <li><strong>Lethal foals die in the yard</strong> (<a href="known-gaps.html#gap-236">gap 236</a>).
+        Look in <code>RATIO LETHAL WHITE</code> and <code>RATIO HYPP</code>.
+        <strong>Pass:</strong> each <code>foal N is O/O</code> or <code>H/H</code> line is followed by
+        <code>a O/O foal died</code> (or <code>H/H</code>) at the next scan, with
+        <code>[watch] horse hurt | ... from horsegenetics.genetic_defect</code> lines on the foal in
+        between. No N/N, O/N or H/N foal dies. This is the first time the lethal-foal death has been
+        seen at all; see <a href="known-gaps.html">the trait-layer gap</a>.</li>
+    <li><strong>No tree grows through a horse</strong> (<a href="known-gaps.html#gap-237">gap 237</a>).
+        <strong>Pass:</strong> the dryad pens still log <code>[watch] tree grew</code>, some
+        <code>[trace] dryad | tree held back at</code> lines appear, and no horse takes
+        <code>inWall</code> damage. The trees still have to grow; if <code>tree grew</code> stops
+        entirely, the reach box is too big.</li>
+    <li><strong>Wild mares stop flooding the log.</strong> <strong>Pass:</strong>
+        <code>not covered:</code> lines come only from yard mares (THE CAP, the fertility rows), and a
+        <code>crowding cap held back N wild mares in the last 10 minutes</code> line appears about
+        every ten minutes.</li>
+</ul>
+
 <h2 id="tutorial-0914">&sect;0-DY &mdash; Getting started, brought up to date (2026-09-14, NOT looked at)</h2>
 
 <p>

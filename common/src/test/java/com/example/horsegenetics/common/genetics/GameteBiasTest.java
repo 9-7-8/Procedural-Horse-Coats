@@ -21,6 +21,25 @@ class GameteBiasTest {
         return Genome.random(new SeededRng(seed));
     }
 
+    /** A genotype code with the loci {@code Eyes.force} may rewrite taken out. */
+    private static String withoutEyeLoci(String code) {
+        StringBuilder sb = new StringBuilder();
+        for (String segment : code.split("-")) {
+            boolean forced = false;
+            for (com.example.horsegenetics.common.genetics.eye.EyeLocus locus
+                    : com.example.horsegenetics.common.genetics.eye.EyeLocus.values()) {
+                if (segment.startsWith(locus.key() + "=")) {
+                    forced = true;
+                    break;
+                }
+            }
+            if (!forced) {
+                sb.append(segment).append('-');
+            }
+        }
+        return sb.toString();
+    }
+
     private static Genome withExtension(String pair, long seed) {
         return Genome.of(Genotype.parse("horsegenetics.extension=" + pair), new SeededRng(seed));
     }
@@ -81,7 +100,13 @@ class GameteBiasTest {
         for (long s = 0; s < 15; s++) {
             Genome plain = dam.breedWith(sire, new SeededRng(s));
             Genome spliced = dam.breedWith(sire, new SeededRng(s), GameteBias.epigeneticSplice(), GameteBias.NONE);
-            assertEquals(plain.genotypeCode(), spliced.genotypeCode(), "seed " + s + ": alleles unchanged");
+            // Every allele but the FORCED EYE LOCI. Those are written from the epigenome on
+            // purpose - a white locus rolls how far the blue got off its own copy - so a
+            // splice that re-rolls a KIT W23 copy may well move the eyes, and that is the
+            // design (Genome.withForcedEyes). Seed 0 does exactly that since 2026-09-14,
+            // when emptied wild-type copies shifted the drift stream; before, it was luck.
+            assertEquals(withoutEyeLoci(plain.genotypeCode()), withoutEyeLoci(spliced.genotypeCode()),
+                    "seed " + s + ": alleles unchanged");
             assertNotEquals(plain.epigenomeCode(), spliced.epigenomeCode(), "seed " + s + ": some seeds re-rolled");
         }
     }

@@ -27,6 +27,49 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-14f">2026-09-14 &mdash; what the all-day pens found in their first hour</h2>
+
+<p>
+    The owner loaded the all-day yard after the fertility crash fix and asked how it was looking.
+    The dam defence, leaderless band and takeover tests passed, and so did natural breeding. The
+    log also showed four things wrong, all fixed with the game still running (owner: "Just don't
+    restart the game"). The common tests were run with <code>:common:test</code>. The NeoForge
+    files were checked with a bare <code>javac</code> into a scratch folder against the module's
+    printed compile classpath, because a Gradle build would have replaced classes the running
+    client had loaded.
+</p>
+<ul>
+    <li><strong>Brindle did not follow sex in any real breeding</strong>
+        (<a href="known-gaps.html#gap-235">gap 235</a>). <code>Genotype.breedWith</code> applies the
+        X-linked rule. <code>Genome.breedWith</code>, the draw every foal actually comes through, had
+        its own allele loop and never did. The ratio pen tallied brindle colts and plain fillies, a
+        result the tests could not see because they only bred genotypes.</li>
+    <li><strong>Lethal foals never died in the test yard</strong>
+        (<a href="known-gaps.html#gap-236">gap 236</a>). <code>LethalFoalHandler</code> skipped the
+        whole debug dimension to protect the gallery, and the yard is in that dimension too. An O/O
+        foal was still standing two minutes after birth. The skip is now the corridor only, which is
+        the rule two other handlers' comments had already asked for.</li>
+    <li><strong>Dryad trees suffocated horses</strong> (<a href="known-gaps.html#gap-237">gap 237</a>).
+        A tree grew onto the DRYAD OAK+BIRCH mare, who died 11 seconds later. The inWall damage
+        started at the same tick as the <code>tree grew</code> line in all three cases.
+        <code>BlockGrowFeatureEvent</code> is cancelled when a horse is within reach of the tree.</li>
+    <li><strong>The crowding cap was 2,914 of 3,358 fertility lines</strong>, from 97 wild mares each
+        repeating once a minute. Wild mares are now one ten-minute summary. Yard mares still get
+        their line.</li>
+    <li><strong>A second bug from the wild-type change turned up in <code>GameteBiasTest</code>.</strong>
+        An epigenetic splice re-rolled numbers onto wild copies, and then the white-pattern eye roll
+        read them. Wild copies are now emptied after pass 2, with the same draws spent. The test
+        still failed after that, and a diagnostic showed why: the eye request came from a real
+        <code>KIT W23</code> copy that the splice re-rolls by design. The forced eye loci are written
+        from the epigenome on purpose, so the test's "alleles unchanged" now excludes them. It
+        passed before only because of where the drift stream happened to land.</li>
+    <li><strong>Not a bug:</strong> the twins mare delivering neither foal is the 5% outcome of
+        <code>ReproRules.twinSurvivors</code>. <strong>Open:</strong> lycan horses shifted into
+        pufferfish drown on land and take the horse with them
+        (<a href="known-gaps.html#gap-238">gap 238</a>). The DRYAD DARK pen had planted nothing
+        after 72 minutes.</li>
+</ul>
+
 <h2 id="d2026-09-14e">2026-09-14 &mdash; a wild-type copy carries no epigenetics</h2>
 
 <p>

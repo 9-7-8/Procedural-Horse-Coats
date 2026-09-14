@@ -132,6 +132,7 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
         // --- Pass 1: the allele draw, and nothing else. Two nextBoolean() per
         // gene, in a fixed order, whatever the carrots say - so a bias that only
         // touches epigenetics cannot shift a single allele, and neither can drift.
+        com.example.horsegenetics.common.horse.Sex childSex = null;
         for (Gene g : Genes.codeOrder()) {
             AllelePair mine = mineBias.pairFor(g.key(), genotype.pair(g));
             AllelePair theirs = theirsBias.pairFor(g.key(), other.genotype().pair(g));
@@ -156,9 +157,40 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
                 bEpi = lower ? theirEpi.first() : theirEpi.second();
             }
 
+            // SEX-LINKED LOCI (2026-09-14). The foal's sex - drawn at the sex locus, which is
+            // first in codeOrder - decides what the sire can give: his X-borne allele to a
+            // filly and his Y, which is nothing, to a colt (the mirror for a Y-linked locus).
+            // Genotype.breedWith always did this. This draw, which every real foal comes
+            // through, did not, and the brindle ratio pen threw brindle colts. Both coins
+            // above are still spent, so no other gene's draw moves.
+            if (childSex != null && g.inheritance().sexLinked()) {
+                boolean mineIsDam = genotype.sex() == com.example.horsegenetics.common.horse.Sex.FEMALE
+                        || other.genotype().sex() != com.example.horsegenetics.common.horse.Sex.FEMALE;
+                AllelePair sirePair = mineIsDam ? theirs : mine;
+                Epigenome.Copies sireEpi = mineIsDam ? theirEpi : myEpi;
+                Allele placeholder = g.hemizygousPlaceholder();
+                List<Allele> sireReal = g.realAlleles(sirePair);
+                boolean filly = childSex == com.example.horsegenetics.common.horse.Sex.FEMALE;
+                boolean xLinked = g.inheritance() == Inheritance.X_LINKED;
+                boolean sireGives = xLinked == filly && !sireReal.isEmpty();
+                Allele fromSire = sireGives ? sireReal.get(0) : placeholder;
+                AlleleEpigenetics fromSireEpi = !sireGives ? AlleleEpigenetics.NONE
+                        : sirePair.first().equals(fromSire) ? sireEpi.first() : sireEpi.second();
+                // X-linked: the dam's ordinary pick stands. Y-linked: the dam gives nothing.
+                Allele damSide = xLinked ? (mineIsDam ? a : b) : placeholder;
+                AlleleEpigenetics damSideEpi = xLinked ? (mineIsDam ? aEpi : bEpi) : AlleleEpigenetics.NONE;
+                a = mineIsDam ? damSide : fromSire;
+                aEpi = mineIsDam ? damSideEpi : fromSireEpi;
+                b = mineIsDam ? fromSire : damSide;
+                bEpi = mineIsDam ? fromSireEpi : damSideEpi;
+            }
+
             AllelePair pair = new AllelePair(a, b);
             boolean aFirst = pair.first().equals(a);
             pairs.put(g.key(), pair);
+            if (g == Genes.SEX) {
+                childSex = Genes.SEX.sexOf(pair);
+            }
             copies.put(g.key(), aFirst
                     ? new Epigenome.Copies(aEpi, bEpi)
                     : new Epigenome.Copies(bEpi, aEpi));
@@ -182,6 +214,17 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
 
             AlleleEpigenetics first = inherit(c.first(), aFirst ? rerollMine : rerollTheirs, schema, rng);
             AlleleEpigenetics second = inherit(c.second(), aFirst ? rerollTheirs : rerollMine, schema, rng);
+            // A wild-type copy carries nothing, re-rolled or not (2026-09-14). The draws above
+            // are still spent so the stream is unchanged; only the result is dropped. Without
+            // this an epigenetic splice handed a wild white locus numbers before the eyes were
+            // forced, and a spliced foal's eye alleles differed from its unspliced twin's.
+            AllelePair childPair = pairs.get(g.key());
+            if (Epigenome.silent(g, childPair.first())) {
+                first = AlleleEpigenetics.NONE;
+            }
+            if (Epigenome.silent(g, childPair.second())) {
+                second = AlleleEpigenetics.NONE;
+            }
             copies.put(g.key(), new Epigenome.Copies(
                     first, AlleleEpigenetics.deconflict(first, second, rng)));
         }

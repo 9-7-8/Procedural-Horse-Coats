@@ -57,6 +57,11 @@ final class YardPens {
         return null;
     }
 
+    /** Is {@code e} inside one of the yard's registered pens? */
+    static boolean inPen(Entity e) {
+        return !PENS.isEmpty() && e.level().dimension().equals(DebugPenManager.DEBUG_LEVEL) && groupOf(e) != null;
+    }
+
     /** May {@code a} take {@code b} into account at all? */
     static boolean together(Entity a, Entity b) {
         if (PENS.isEmpty() || !a.level().dimension().equals(DebugPenManager.DEBUG_LEVEL)) {

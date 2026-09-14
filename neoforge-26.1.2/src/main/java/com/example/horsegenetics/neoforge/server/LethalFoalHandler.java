@@ -89,7 +89,12 @@ public final class LethalFoalHandler {
         if (!(horse.level() instanceof ServerLevel level)) return;
         if (!horse.isBaby() || horse.isDeadOrDying()) return;
         if (!ServerConfig.lethalsActive()) return;
-        if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) return;
+        // The GALLERY only, not the whole dimension (2026-09-14). The test yard lives in the
+        // same dimension past the corridor wall, and a dimension-wide skip meant no lethal
+        // foal in it ever died: the ratio pens counted O/O and H/H foals standing two
+        // minutes after birth, and this death handler had never been seen working.
+        if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)
+                && Math.abs(horse.getBlockZ()) <= DebugPenManager.corridorWallZ()) return;
         if (horse.tickCount % INTERVAL_TICKS != 0) return;
 
         HorseRecord record = HorseRecords.of(horse);
