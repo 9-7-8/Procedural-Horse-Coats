@@ -615,6 +615,22 @@ public final class HorseInfoScreen extends Screen {
                     + (care.inHerd() ? "   • in a herd" : ""));
         }
 
+        ClientHorseSocialCache.Social social = horse == null ? null : ClientHorseSocialCache.get(horse.getId());
+        if (social != null) {
+            c.rule();
+            c.label("Social");
+            c.pair("Role", social.role());
+            c.wrapped(social.roleDescription(), DESC, 8);
+            if (!social.standing().isEmpty()) {
+                c.pair("Standing", social.standing());
+            }
+            c.pair("Companions", social.companions().isEmpty()
+                    ? "none yet" : String.join(", ", social.companions()));
+            if (!social.rival().isEmpty()) {
+                c.pair("Rival", social.rival());
+            }
+        }
+
         List<Condition> conditions = traits().conditions();
         if (!conditions.isEmpty()) {
             c.rule();

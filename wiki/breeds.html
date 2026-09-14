@@ -109,16 +109,13 @@
         can no longer be overridden, so the intended "up to 3 foals" is a
         follow-up.</li>
     <li><strong>Bachelor</strong> &mdash; a band of 3&ndash;5 stallions, no
-        mares, no foals. The first one spawned is the lead.</li>
+        mares, no foals. The lowest-UUID member of the spawned clump is the lead.</li>
 </ul>
 <p>
-    Every member of the herd shares the lead's breed and band. <code>WildHerdGoal</code>
-    (a follow goal on every untamed horse) keeps non-leads within a few blocks
-    of the lead, re-pathing every ~15 ticks, so a spawned pack stays clumped and
-    wanders together. If the lead dies or unloads for 10&nbsp;s, the first
-    member to notice promotes itself. <code>HorseCareHandler</code>'s
-    together-timer herd formation now skips any horse already in one of these
-    natural herds.
+    Every member of the herd shares the lead's breed and band. What a band does
+    after it spawns &mdash; following its lead mare, herding, sparring, dispersal,
+    takeovers &mdash; is <a href="horse-care.html#bands">band life on the horse care
+    page</a>.
 </p>
 
 <h2 id="aggro">Wild horses aggro like wolves</h2>

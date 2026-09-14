@@ -119,6 +119,10 @@ public final class HorseAggroHandler {
         if (attacker == victim || (attacker instanceof Horse h && sameHerd(h, victim))) {
             return;
         }
+        // A takeover fight is between two stallions; the band does not pile in.
+        if (BandLife.inFight(victim)) {
+            return;
+        }
 
         aggro(victim, attacker);
         HorseCareAttachment care = victim.getData(ModAttachments.HORSE_CARE.get());

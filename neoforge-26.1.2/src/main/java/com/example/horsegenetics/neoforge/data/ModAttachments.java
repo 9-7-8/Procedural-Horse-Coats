@@ -44,6 +44,15 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // Social life: age, dam, natal band and the relationship ledger (common.herd).
+    // Non-genetic. copyOnDeath like HORSE_CARE, so a re-summoned horse keeps its friends.
+    public static final Supplier<AttachmentType<HorseSocialAttachment>> HORSE_SOCIAL =
+            ATTACHMENT_TYPES.register("horse_social", () -> AttachmentType
+                    .builder(() -> HorseSocialAttachment.DEFAULT)
+                    .serialize(HorseSocialAttachment.MAP_CODEC)
+                    .copyOnDeath()
+                    .build());
+
     // Timed-interaction stamps (last shear, last per-gene yield, ...). Gated
     // "once per Minecraft day". Replaces the static cooldown map that used to
     // live in GeneYieldHandler. copyOnDeath so a re-summoned horse keeps them.

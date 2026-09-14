@@ -164,6 +164,10 @@ public final class HerdManager {
             PacketDistributor.sendToPlayersTrackingEntity(horse,
                     new HorseCareSyncPayload(horse.getId(), care.bond(), care.inHerd()));
         }
+        // An age and a day to leave the band, now that its herd is known - a foal
+        // founded into a band is born into it.
+        horse.setData(ModAttachments.HORSE_SOCIAL.get(), HerdSocialHandler.ensureBorn(horse,
+                horse.getData(ModAttachments.HORSE_SOCIAL.get()), level.getGameTime()));
     }
 
     /** Remove a wild spawn that has nothing to be - see "Nothing to be" above. */

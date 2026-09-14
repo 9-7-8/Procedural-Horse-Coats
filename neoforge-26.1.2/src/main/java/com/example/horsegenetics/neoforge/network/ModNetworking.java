@@ -244,8 +244,23 @@ public final class ModNetworking {
                     if (context.player() instanceof ServerPlayer serverPlayer) {
                         com.example.horsegenetics.neoforge.server.HorseInspectHold.set(
                                 serverPlayer, payload.entityId(), payload.watching());
+                        if (payload.watching()) {
+                            // The Social section rides on the same once-a-second lease.
+                            com.example.horsegenetics.neoforge.server.HerdSocialHandler.sendSummary(
+                                    serverPlayer, payload.entityId());
+                        }
                     }
                 })
+        );
+
+        registrar.playToClient(
+                HorseSocialSyncPayload.TYPE,
+                HorseSocialSyncPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientHorseSocialCache.put(payload.entityId(),
+                                new com.example.horsegenetics.neoforge.client.ClientHorseSocialCache.Social(
+                                        payload.role(), payload.roleDescription(), payload.standing(),
+                                        payload.companions(), payload.rival())))
         );
 
     }

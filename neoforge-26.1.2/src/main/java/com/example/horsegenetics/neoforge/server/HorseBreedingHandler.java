@@ -237,6 +237,21 @@ public final class HorseBreedingHandler {
         HorseRecords.apply(child, childRecord);
         HorseRecords.applyTraitsToEntity(child, childTraits, true);
 
+        // Born into its dam's band, if she has one - which is how a wild band
+        // grows - and with an age, a dam and a day to leave it, for the herd system.
+        HorseCareAttachment damCare = damHorse.getData(ModAttachments.HORSE_CARE.get());
+        boolean wildDam = !damHorse.isTamed() && damCare.inWildHerd();
+        if (wildDam) {
+            child.setData(ModAttachments.HORSE_CARE.get(), child.getData(ModAttachments.HORSE_CARE.get())
+                    .withWildHerd(damCare.herd().orElseThrow(), damCare.herdBreed().orElse(""),
+                            damCare.herdBand().orElse("TRADITIONAL")));
+        }
+        child.setData(ModAttachments.HORSE_SOCIAL.get(),
+                com.example.horsegenetics.neoforge.data.HorseSocialAttachment.DEFAULT.withBirth(
+                        child.level().getGameTime(), java.util.Optional.of(damRecord.id()),
+                        wildDam ? damCare.herd() : java.util.Optional.empty(),
+                        com.example.horsegenetics.common.herd.HerdRules.disperseAfterDays(childRecord.sex(), rng)));
+
         // Breeding a foal with a gene discovers that gene for the breeder.
         if (breeder != null) {
             GeneDiscoveryHandler.discoverFrom(breeder, childGenome.genotype());

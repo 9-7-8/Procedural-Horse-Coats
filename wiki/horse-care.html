@@ -228,18 +228,75 @@
     ability mid-ride rather than at a tidy moment.
 </p>
 
-<h2>3. Herds</h2>
+<h2 id="bands">3. Wild bands</h2>
+
+<p>
+    Wild horses live the way free-roaming horses really do (the
+    <a href="?view=science#science-bands">science tab</a> has the research): not in one
+    herd with a leader, but in small <strong>bands</strong> that change over time.
+    Nothing here has been played yet &mdash; see
+    <a href="verification.html#herd-life">verification</a>.
+</p>
+
+<h3 id="roles">Who is who</h3>
+<ul>
+    <li><strong>Family bands</strong> have one <strong>band stallion</strong>, his mares
+        and their young. The band follows its <strong>lead mare</strong> &mdash; the oldest
+        mare &mdash; while the stallion keeps to the edge.</li>
+    <li><strong>Bachelor bands</strong> are stallions without mares, following one of
+        their own.</li>
+    <li>Open a horse&rsquo;s information screen and its <strong>Social</strong> section
+        shows its role, where it stands among its band-mates, its closest companions and
+        any rival, by name.</li>
+</ul>
+
+<h3 id="what-they-do">What you will see</h3>
+<ul>
+    <li><strong>Herding.</strong> A mare that wanders off gets driven back by her stallion,
+        who comes round behind her with his ears pinned (angry particles over his head).</li>
+    <li><strong>Guarding.</strong> An outside stallion who comes near a band finds its
+        stallion standing between him and the mares &mdash; and if he keeps coming, a short
+        chase.</li>
+    <li><strong>Sparring.</strong> Colts and stallions who know each other square up, rear
+        and shove for a few seconds until one gives way and backs off. It never does
+        damage; it decides who yields to whom.</li>
+    <li><strong>Pushing in at food and water.</strong> A horse at a hay bale, a trough or
+        a pond gets shouldered off by a horse that outranks it. No kicks.</li>
+    <li><strong>Mothers and foals.</strong> A foal stays near its mother, she goes to it if
+        it strays, and she goes for anything that hurts it.</li>
+    <li><strong>Grooming partners</strong> &mdash; usually mares &mdash; now and then stand
+        head to tail together.</li>
+</ul>
+
+<h3 id="changes">How bands change</h3>
+<ul>
+    <li><strong>Growing up and leaving.</strong> A colt leaves the band he was born in a day
+        or three after he grows up, and joins a bachelor band. A filly leaves later, three
+        to five days on, for another family band &mdash; or with a bachelor, who then has a
+        band of his own.</li>
+    <li><strong>Takeovers.</strong> Now and then a bachelor challenges a band stallion. It is
+        a real fight, but it stops short: the first to fall below about 40% of his health
+        breaks off and runs, so nobody dies of it. A winning challenger takes the band; the
+        loser becomes a bachelor.</li>
+    <li><strong>A band outlives its stallion.</strong> If he dies, the band stays together
+        behind its lead mare until a bachelor claims it.</li>
+    <li><strong>Mares move.</strong> Occasionally a mare drifts to a nearby band where she
+        already knows the mares.</li>
+    <li><strong>Tamed horses</strong> keep their friendships, sparring, grooming and
+        mothering &mdash; but never leave, get taken over or get stolen.</li>
+</ul>
+
+<h3 id="kept-herds">Tamed herds</h3>
 
 <div class="note">
     <span class="label">Natural wild herds (2026-09-05)</span>
     <p>
-        Wild horses now spawn into a <strong>natural herd</strong> right away
+        Wild horses spawn into a <strong>natural herd</strong> right away
         &mdash; a <a href="breeds.html#bands">traditional or bachelor band</a>
         built by <code>server/HerdManager</code>, not the together-timer below.
         Its members share a lead (<code>HorseCareAttachment.herd</code> = the
         lead horse's UUID), a breed (<code>herdBreed</code>) and a band
-        (<code>herdBand</code>); <code>server/WildHerdGoal</code> keeps them
-        clumped and following the lead. The together-timer herd formation here
+        (<code>herdBand</code>). The together-timer herd formation here
         <strong>skips</strong> any horse that is <code>inWildHerd()</code>, so
         it only ever applies to tamed horses now.
     </p>
@@ -347,6 +404,49 @@
     when a field actually changed, and the sync packet only when bond or
     in-herd changed.
 </p>
+
+<h2 id="band-code">Band life</h2>
+
+<ul>
+    <li><strong><code>common/herd/</code></strong> &mdash; the model, free of Minecraft and
+        unit-tested (<code>HerdModelTest</code>). <code>Relationship</code> is one
+        horse&rsquo;s view of another: familiarity, rank (&ldquo;who yields&rdquo;, &minus;1..1),
+        grooming bond and rivalry. <code>SocialLedger</code> is a capped set of them with
+        growth, decay and contests; <code>HerdRules</code> holds every rate, written
+        <em>per Minecraft day</em> and converted to per-scan odds by
+        <code>perScan</code>, plus contest odds, dispersal timing and the lead-mare choice;
+        <code>BandRole</code> is the label the Social section shows.</li>
+    <li><strong><code>data/HorseSocialAttachment</code></strong> &mdash; birth tick (game
+        time, so sleep does not age a horse), dam, natal band, dispersal day and the
+        ledger. <code>copyOnDeath</code> like the care attachment.</li>
+    <li><strong><code>server/HerdSocialHandler</code></strong> &mdash; the social tick, every
+        <code>SCAN</code> ticks: relationship bookkeeping for every horse, and for a wild
+        band member the lead-mare cache, bachelor-band succession, and adopting the band of
+        the horse it knows best when its own is gone. It also builds the Social summary,
+        sent with the inspect lease (<code>HorseSocialSyncPayload</code>).</li>
+    <li><strong><code>server/BandLife</code></strong> &mdash; dispersal, takeovers and mare
+        transfers. A takeover is a registered pair; a <code>LivingIncomingDamageEvent</code>
+        hook at high priority cancels the blow that would take either fighter under
+        <code>HerdRules.FIGHT_YIELD_HEALTH</code> and ends the fight there, and
+        <code>HorseAggroHandler</code> skips a registered fight so the band does not pile
+        in. Fights and bouts are transient: a restart ends them.</li>
+    <li><strong><code>server/HerdGoals</code></strong> &mdash; <code>Spar</code> (3),
+        <code>DamAndFoal</code> (4), <code>StallionGuard</code> (5), <code>Displace</code> (5)
+        and <code>GroomAndRest</code> (7), on every horse; each throttles its own
+        <code>canUse</code> scan. <code>WildHerdGoal</code> now follows the lead mare, and no
+        longer promotes a member when the lead is missing &mdash; that promotion is what used
+        to split a band into herds of one.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">Every number is a first guess</span>
+    <p>
+        The rates in <code>HerdRules</code> are chosen to make things happen on the pace the
+        owner asked for (a Minecraft day), not measured against play. Displacement ignores
+        plain grass &mdash; it is in the food tag, and every field would otherwise be a spot
+        worth fighting over.
+    </p>
+</div>
 
 </section>
 
