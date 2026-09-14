@@ -3,7 +3,10 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -135,6 +138,33 @@ public final class HorseAggroHandler {
                 h -> h != victim && !h.isTamed() && sameHerd(h, victim) && YardPens.together(victim, h));
         for (Horse mate : herd) {
             aggro(mate, attacker);
+        }
+    }
+
+    /** How much harder a horse's kick lands on a monster than on anything else. */
+    static final float HOSTILE_KICK_MULTIPLIER = 2.0F;
+
+    /**
+     * <b>A horse hits a monster harder than the monster hits back</b> (owner,
+     * 2026-09-14: "It should be greater than a zombie when it's attacking hostile mobs
+     * (not players or passive mobs)"). An ordinary horse's kick is
+     * {@code MagicFighterGene.BASELINE_DAMAGE}, 3 - exactly a zombie's hit on Normal - and
+     * a guardian lost that trade twice, because a horse also spends part of every second
+     * repositioning. Doubled against anything that is an {@link Enemy}, a plain horse
+     * kicks for 6 and a gladiator keeps its lead over it; a player, a cow or another
+     * horse still takes the gene's own number.
+     *
+     * <p>Only the melee kick (a {@code mob_attack} from the horse itself), so a gene that
+     * deals damage in the horse's name - cleansing light, say - is not doubled with it.
+     */
+    @SubscribeEvent
+    static void onHorseKicksMonster(LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Enemy) || event.getEntity() instanceof Player) {
+            return;
+        }
+        if (event.getSource().getDirectEntity() instanceof Horse
+                && event.getSource().is(DamageTypes.MOB_ATTACK)) {
+            event.setAmount(event.getAmount() * HOSTILE_KICK_MULTIPLIER);
         }
     }
 

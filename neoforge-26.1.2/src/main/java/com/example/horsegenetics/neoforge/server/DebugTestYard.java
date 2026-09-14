@@ -213,7 +213,7 @@ final class DebugTestYard {
     static final int ROW_N_D = 10;
 
     /**
-     * <b>Rows O-T: breeding (O-Q, and MET NATURAL in S) and band life (R-T)</b>, built
+     * <b>Rows O-R: breeding (O-P, and MET NATURAL in R) and band life (Q-R)</b>, built
      * by {@link DebugYardFertility} and {@link DebugYardHerd}. <b>Packed since
      * 2026-09-14</b> (owner: "condense down the testing area"): every pen registers
      * with {@link YardPens}, so a horse's breeding and band checks see only its own
@@ -221,7 +221,8 @@ final class DebugTestYard {
      * those checks count neighbours by distance through walls - a cap of eight within
      * sixteen, a 64-block dispersal search - and a packed pen would have read its
      * neighbours. Pens that are fed golden carrots still keep an air gap: vanilla's
-     * breeding goal is not one of those checks.
+     * breeding goal is not one of those checks. Six pens confirmed the same morning
+     * were deleted rather than packed.
      */
     static final int PACKED_AISLE = AISLE + 1;     // a chest and a sign in front of every pen
     static final int ROW_O = ROW_N + ROW_N_D + PACKED_AISLE;
@@ -229,14 +230,9 @@ final class DebugTestYard {
     static final int ROW_P = ROW_O + ROW_O_D + PACKED_AISLE;
     static final int ROW_P_D = 8;
     static final int ROW_Q = ROW_P + ROW_P_D + PACKED_AISLE;
-    static final int ROW_Q_D = 8;
+    static final int ROW_Q_D = 9;
     static final int ROW_R = ROW_Q + ROW_Q_D + PACKED_AISLE;
-    static final int ROW_R_D = 9;
-    static final int ROW_S = ROW_R + ROW_R_D + PACKED_AISLE;
-    static final int ROW_S_D = 12;
-    static final int ROW_T = ROW_S + ROW_S_D + PACKED_AISLE;
-    /** Long: HERDING's stray has to land more than fourteen blocks from her band's centre. */
-    static final int ROW_T_D = 28;
+    static final int ROW_R_D = 12;
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -245,7 +241,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_T + ROW_T_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_R + ROW_R_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
