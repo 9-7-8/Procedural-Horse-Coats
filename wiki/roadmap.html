@@ -1643,6 +1643,21 @@
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
 
+<h3>Settled 2026-09-14 &mdash; the two breeding gaps left open overnight</h3>
+
+<ul>
+    <li><strong>A natural cover works the way vanilla breeding does</strong>
+        (<a href="known-gaps.html#gap-230">gap 230</a>). The owner: &ldquo;figure out how
+        minecraft normally handles that for vanilla, then do the same thing.&rdquo; Vanilla ignores
+        line of sight for breeding partners and requires sixty ticks of approach inside three
+        blocks, so a cover does exactly that. A fence does not stop a stallion, just as it does not
+        stop two cows.</li>
+    <li><strong>Seed-jar and debug-clock clicks are server-authoritative</strong>
+        (<a href="known-gaps.html#gap-231">gap 231</a>). The owner: fine, &ldquo;as long as it
+        doesn't break single-player games&rdquo;. It doesn't: the click packet reaches the server
+        before the client's cancel, and the integrated server runs the same handlers.</li>
+</ul>
+
 <h3 id="provisional">Provisional 2026-09-13, night &mdash; made while the owner slept: confirm or reverse</h3>
 
 <p>
@@ -1657,9 +1672,6 @@
         Real lethal conditions on those genes would also remove all three loci from the random
         splice carrot's pool: sabino, the W boosters, dominant white, SW1 and SW2. That is a
         gameplay change, so it is not made.</li>
-    <li><strong>A cover needs no line of sight</strong>, so a stallion can breed a mare through a
-        fence (<a href="known-gaps.html#gap-230">gap 230</a>). Adding a line-of-sight fact is a few
-        lines if a fence should stop him.</li>
     <li><strong>A gelded wild colt still disperses to a bachelor band</strong>, rather than being
         treated as a mare by <code>BandLife</code>. Geldings only happen to owned horses, so this
         almost never matters.</li>

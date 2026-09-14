@@ -121,9 +121,10 @@
 
 <p>
     Every adult horse, tamed or wild, breeds on its own. When a mare is in heat and a
-    stallion comes within about three blocks of her, he covers her <strong>once that
+    stallion stays within three blocks of her for a few seconds, as any vanilla animal must before breeding, he covers her <strong>once that
     heat</strong> (a burst of hearts), at the odds above. If it does not take, nothing more
-    happens until her next heat. The foal is credited to her owner.
+    happens until her next heat. The foal is credited to her owner. A fence between them does not
+    stop it, just as it does not stop two vanilla cows.
 </p>
 <p>It does not happen if:</p>
 <ul>
@@ -216,8 +217,11 @@
         <code>lastNaturalTry</code> is before this heat began). She finds the nearest entire
         stallion within <code>NATURAL_REACH</code> who is under the cover limit, checks
         <code>NATURAL_CAP</code>, stamps the try, and calls <code>breed</code> with her
-        owner as <code>bredBy</code>. Cowboy-branded horses are skipped. It is an entity tick,
-        so only loaded chunks ever breed.</li>
+        owner as <code>bredBy</code>. Before that, the same stallion must stay in reach for
+        <code>NaturalCover.COURTSHIP_TICKS</code> (a transient <code>Courtship</code> per mare),
+        exactly as vanilla's <code>BreedGoal</code> waits out <code>loveTime &gt;= 60</code> inside
+        <code>distanceToSqr &lt; 9</code>. Like vanilla, there is no line of sight check. Cowboy-branded
+        horses are skipped. It is an entity tick, so only loaded chunks ever breed.</li>
     <li><strong>Gelding</strong> is <code>HorseRecord.gelded</code>, and
         <code>HorseRecord.entire()</code> is what every stallion check asks: the herd goals,
         rivalry, the jar and <code>onBabySpawn</code>. <code>VetKitHandler</code> gelds and

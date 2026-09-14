@@ -27,6 +27,28 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-14a">2026-09-14 &mdash; the last two breeding gaps, the vanilla way</h2>
+
+<p>
+    The owner settled the two gaps left open overnight and ended the session. The morning's
+    audit is unchanged: <a href="verification.html#fertility">&sect;0-DV</a>.
+</p>
+
+<ul>
+    <li><strong>Gap 230, covers through a fence: done as vanilla does it.</strong> The patched
+        sources show vanilla's <code>BreedGoal</code> ignores line of sight on purpose
+        (<code>ignoreLineOfSight()</code>) and instead requires sixty ticks of approach, strictly
+        inside three blocks. A natural cover now requires exactly that (a
+        <code>NaturalCover.Courtship</code>), instead of covering on the first scan. So a fence
+        still does not stop a stallion; it does not stop a cow either.</li>
+    <li><strong>Gap 231, server-authoritative:</strong> the seed jar and debug clock cancel
+        unconditionally on the client and decide on the server. That is safe because the
+        interact packet is sent before the event fires, and in single-player the integrated server
+        runs the same handler.</li>
+    <li>Both behaviours are recorded in the API notes, since each is a vanilla rule that looks like
+        the opposite from the outside.</li>
+</ul>
+
 <h2 id="d2026-09-13j">2026-09-13, overnight &mdash; breeding finished, its gaps closed, and a yard built to audit it</h2>
 
 <p>
