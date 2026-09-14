@@ -403,8 +403,26 @@ public final class Epigenome {
 
     /** The literal numbers the coat pipeline paints {@code gene} with, for this horse. */
     public EpiValues expressedValues(Gene gene, Genotype genotype) {
-        return expressed(gene, genotype).values();
+        return readable(gene, expressed(gene, genotype));
     }
+
+    /**
+     * What a reader gets from {@code copy}: its numbers, or the gene's schema midpoints
+     * for a copy that carries none. An empty copy describes nothing, so it reads as the
+     * gene's default (owner: "eyes should default to brown if nothing else describes
+     * them") instead of throwing inside a server tick - which is how the fertility locus
+     * crashed a world on 2026-09-14. A reader that must tell "nothing" from "the
+     * middle" asks {@link AlleleEpigenetics#isEmpty()} on the copy itself.
+     */
+    public static EpiValues readable(Gene gene, AlleleEpigenetics copy) {
+        if (!copy.isEmpty()) {
+            return copy.values();
+        }
+        return MIDPOINTS.computeIfAbsent(gene.key(), k -> gene.epiSchema().midpoint());
+    }
+
+    private static final Map<String, EpiValues> MIDPOINTS =
+            new java.util.concurrent.ConcurrentHashMap<>();
 
     /**
      * A 64-bit digest of just the epigenetics that <i>can change this horse's

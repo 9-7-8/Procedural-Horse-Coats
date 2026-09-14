@@ -51,10 +51,15 @@ class CoatDataTest {
     @Test
     void equalityIsGenotypePlusEpigenome() {
         assertEquals(coat(BLACK, 7L), coat(BLACK, 7L));
-        // A bay, not a black: a horse that is wild type everywhere carries no numbers at all,
-        // so two blacks from different seeds are now the same horse - which is the point.
+        // A bay, not a black: a horse that is wild type everywhere carries no numbers except
+        // fertility's (the one gene whose wild type reads its copy), so two blacks from
+        // different seeds differ there and nowhere else.
         assertNotEquals(coat(BAY, 7L), coat(BAY, 8L));
-        assertEquals(coat(BLACK, 7L), coat(BLACK, 8L));
+        String fertility = com.example.horsegenetics.common.genetics.genes.FertilityGene.KEY;
+        Epigenome seven = coat(BLACK, 7L).epigenome();
+        Epigenome eight = coat(BLACK, 8L).epigenome();
+        assertNotEquals(seven, eight);
+        assertEquals(seven, eight.with(fertility, seven.copies(fertility)));
     }
 
     @Test

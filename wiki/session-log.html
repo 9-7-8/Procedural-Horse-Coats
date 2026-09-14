@@ -59,6 +59,14 @@
         threshold, so a horse past it always has a variant white locus to roll.
         <code>WildCopySurveyTest.theEyeForceNeverReadsAnEmptyCopy</code> runs every white
         combination through the eye force.</li>
+    <li><strong>And it missed fertility, which crashed the owner&rsquo;s world</strong> at the
+        first natural cover (<code>FertilityGene.fertility</code>, 08:51). The wild outcome
+        changes nothing visible, but an <code>n/n</code> mare&rsquo;s number is her fertility,
+        so the survey&rsquo;s question could not catch it. Fertility now keeps its wild numbers
+        (<code>wildTypeCarriesEpigenetics</code>). As a backstop, every read of an empty copy
+        returns the gene&rsquo;s schema midpoints (<code>Epigenome.readable</code>) instead of
+        throwing, so any other unseen reader gets a default rather than a crash. The earlier
+        claim that &ldquo;most&rdquo; meant &ldquo;all&rdquo; was wrong by one gene.</li>
     <li><strong>The whole genome is back on the <code>[trace] horse-spawn</code> line</strong>, as
         only what the horse has. The genotype is <code>Genotype.presentCode()</code>: it leaves
         out every gene at two wild-type copies that do nothing (owner: "that gene just doesn't

@@ -616,10 +616,14 @@ public Expression expressionOf(AllelePair pair) {
         drifted for nothing.
     </p>
     <p>
-        A survey of every gene that stores epigenetics found <strong>no exception</strong>:
-        no gene expresses its wild-type copy in an outcome that does anything.
-        <code>WildCopySurveyTest</code> keeps that true; a future gene whose wild type really
-        does read its copy has to say so with <code>Gene.wildTypeCarriesEpigenetics()</code>.
+        A survey of every gene that stores epigenetics found no gene that expresses its
+        wild-type copy in an outcome that does anything, and <code>WildCopySurveyTest</code>
+        keeps that true. The survey could not see <strong>fertility</strong>, whose wild outcome
+        does nothing visible but whose number <em>is</em> an <code>n/n</code> mare&rsquo;s
+        fertility. Emptying it crashed a world at the first natural cover, so
+        <code>FertilityGene</code> overrides <code>Gene.wildTypeCarriesEpigenetics()</code>.
+        That makes it the one exception. A future gene whose wild type reads its number has to
+        say so the same way.
         One reader the survey could not see: the white-pattern eye roll
         (<code>WhitePatternEyes.blueIf</code>) reads a white locus&rsquo;s copy whenever the
         <em>horse</em> is white enough, even at a wild locus. An empty copy there asks for nothing
@@ -628,7 +632,10 @@ public Expression expressionOf(AllelePair pair) {
         <code>Genome</code> fits its epigenome to its alleles when it is built
         (<code>Epigenome.alignedTo</code>), so every horse passes through the rule. A copy that
         arrives empty on a variant allele &mdash; forced eyes, or an editor changing the
-        allele &mdash; is given deterministic numbers, so nothing ever reads a blank.
+        allele &mdash; is given deterministic numbers. And a reader that still lands on an
+        empty copy gets the gene&rsquo;s schema <strong>midpoints</strong>
+        (<code>Epigenome.readable</code>), not an exception. An empty copy describes nothing,
+        so it reads as the gene&rsquo;s default.
     </p>
 </div>
 

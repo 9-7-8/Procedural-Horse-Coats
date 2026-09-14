@@ -121,6 +121,16 @@ public final class FertilityGene implements Gene {
         }
     }
 
+    /**
+     * The one gene whose wild type reads its number: an {@code n/n} mare's fertility
+     * <i>is</i> her copies' values, and that is most mares. Emptying them crashed a world
+     * at the first natural cover (2026-09-14).
+     */
+    @Override
+    public boolean wildTypeCarriesEpigenetics() {
+        return true;
+    }
+
     @Override
     public EpiSchema epiSchema() {
         // mean +/- 6 sigma is the design span, so a founder sits in 0.7..1.3

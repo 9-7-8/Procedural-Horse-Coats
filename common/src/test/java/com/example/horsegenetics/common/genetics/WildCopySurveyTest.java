@@ -79,6 +79,30 @@ class WildCopySurveyTest {
         }
     }
 
+    /**
+     * The survey cannot see a reader that uses a wild copy's number without changing the
+     * outcome - fertility did exactly that and crashed a world. So an empty copy reads as
+     * its gene's midpoint rather than throwing, and fertility keeps its wild numbers.
+     */
+    @Test
+    void anEmptyCopyReadsAsItsGenesDefaultAndFertilityKeepsItsWildNumber() {
+        Gene speed = Genes.byKeyOrNull("horsegenetics.magic_speed");
+        Genotype genotype = Genotype.parse("horsegenetics.magic_speed=Swift/n");
+        Genome genome = new Genome(genotype, Epigenome.fromSeed(7L));
+        GeneEpigenetics epi = GeneEpigenetics.forGene(speed, genotype, genome.epigenome());
+        int wildSlot = genotype.pair(speed).first().equals(speed.defaultAllele()) ? 0 : 1;
+        assertEquals(speed.epiSchema().midpoint().get("delta"), epi.copy(wildSlot).get("delta"), 0.0);
+
+        com.example.horsegenetics.common.genetics.genes.FertilityGene fertility =
+                (com.example.horsegenetics.common.genetics.genes.FertilityGene)
+                        Genes.byKeyOrNull(com.example.horsegenetics.common.genetics.genes.FertilityGene.KEY);
+        Genome plain = new Genome(Genotype.parse(""), Epigenome.fromSeed(7L));
+        assertFalse(plain.epigenome().copies(fertility).first().isEmpty(), "an n/n mare keeps her number");
+        assertFalse(plain.epigenome().copies(fertility).second().isEmpty());
+        double factor = fertility.mareFactor(plain);
+        assertTrue(factor > 0.5 && factor < 1.5, "fertility reads a real number, got " + factor);
+    }
+
     @Test
     void aGenomesWildTypeCopiesCarryNothingAndItsVariantsCarrySomething() {
         Genotype genotype = Genotype.parse("horsegenetics.magic_speed=Swift/n");

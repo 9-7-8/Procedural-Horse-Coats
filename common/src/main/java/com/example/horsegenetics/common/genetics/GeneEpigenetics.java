@@ -77,7 +77,7 @@ public interface GeneEpigenetics {
 
             @Override
             public EpiValues copy(int slot) {
-                return (slot == 0 ? copies.first() : copies.second()).values();
+                return Epigenome.readable(gene, slot == 0 ? copies.first() : copies.second());
             }
         };
     }

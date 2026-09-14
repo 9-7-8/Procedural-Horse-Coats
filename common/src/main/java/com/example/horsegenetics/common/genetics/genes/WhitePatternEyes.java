@@ -124,7 +124,7 @@ public final class WhitePatternEyes {
             return EyeRequest.none();
         }
         EpiValues values = GeneEpigenetics.forGene(gene, genotype, epigenome).expressed();
-        if (values.isEmpty()) {
+        if (epigenome != null && epigenome.expressed(gene, genotype).isEmpty()) {
             // A wild-type copy carries no numbers (owner, 2026-09-14), so it describes no
             // spread and asks for nothing: an eye nothing describes stays brown. It never
             // costs a white horse its blue - tobiano alone is under the threshold, so a
