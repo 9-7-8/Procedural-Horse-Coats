@@ -1,0 +1,255 @@
+package com.example.horsegenetics.neoforge.server;
+
+import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.neoforge.HorseGenetics;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
+
+/**
+ * <b>Rows S-U: pens that only answer after a whole day</b> (owner, 2026-09-14: "I'm
+ * going to leave this up all day, so add more pens which benefit from being run for a
+ * very long time", and "add more dryad testing pens").
+ *
+ * <table>
+ *   <tr><th>row</th><th>west</th><th>east</th></tr>
+ *   <tr><td>S</td><td>DRYAD SPRUCE, DRYAD JUNGLE</td><td>DRYAD ACACIA, DRYAD CARRIER (Oak/n, plants nothing)</td></tr>
+ *   <tr><td>T</td><td>DRYAD OAK, DRYAD FLOWER</td><td>DRYAD OAK+BIRCH (half rate each), DRYAD DARK SMALL</td></tr>
+ *   <tr><td>U</td><td>RATIO HYPP, RATIO LETHAL WHITE</td><td>RATIO BRINDLE, RATIO SIZE</td></tr>
+ * </table>
+ *
+ * <h2>The dryad rows stand on stone</h2>
+ * A dryad plants anywhere within four blocks of itself, and a fence is not a wall to a
+ * radius: on the first night saplings turned up three blocks outside their pen, and the
+ * watch box under-counted. So rows S and T are floored with stone from four blocks
+ * before the pens to four after, pens keep a four-block stone gap, and only the inside of
+ * each pen is grass. Nothing can take root outside a pen, so every sapling a pen's watch
+ * counts is that pen's. Every planting is also a {@code [watch] dryad planted} line
+ * naming the horse, which is the rate.
+ *
+ * <h2>The ratio pens breed all day and clear their own foals</h2>
+ * A pair breeds on its own (natural covers; with {@code debug.tools} a heat and a
+ * pregnancy each last a minute), so a pen makes a foal every few minutes. Left alone it
+ * would fill to the cap of eight and stop. So a clock reads every foal as it appears -
+ * its pair for the locus, and its sex where that matters - notes whether it dies, and
+ * removes it two minutes after birth. Each event logs the running tally beside what it
+ * should converge on, and a day is a few hundred foals: enough to settle a "one in
+ * four" that nobody could count by hand.
+ */
+final class DebugYardLong {
+
+    private DebugYardLong() {
+    }
+
+    private static final int SCAN = 200;
+    /** A foal is counted, watched for a lethal-at-birth death, then taken away. */
+    private static final long FOAL_KEEP = 2400L;
+
+    static void build(ServerLevel level, int gy, int cx, int mouthZ) {
+        int west = cx + WEST_MIN;
+        int east = cx + EAST_MIN + 1;
+        try {
+            stoneBand(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
+            stoneBand(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
+
+            dryad(level, gy, west, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD SPRUCE", "Spru/Spru", 2,
+                    List.of("DRYAD SPRUCE", "Spru/Spru: spruce", "ONLY, then trees", "(all day)"),
+                    Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
+            dryad(level, gy, west + 11, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD JUNGLE", "Jung/Jung", 2,
+                    List.of("DRYAD JUNGLE", "Jung/Jung: jungle", "ONLY, then trees", "(all day)"),
+                    Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
+            dryad(level, gy, east, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD ACACIA", "Aca/Aca", 2,
+                    List.of("DRYAD ACACIA", "Aca/Aca: acacia", "ONLY, then trees", "(all day)"),
+                    Blocks.ACACIA_SAPLING, Blocks.ACACIA_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
+            dryad(level, gy, east + 11, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD CARRIER", "Oak/n", 2,
+                    List.of("DRYAD CARRIER", "Oak/n: must plant", "NOTHING all day", "(the control)"),
+                    Blocks.OAK_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_SAPLING);
+
+            dryad(level, gy, west, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD OAK", "Oak/Oak", 2,
+                    List.of("DRYAD OAK", "Oak/Oak: count its", "plantings - vs", "OAK+BIRCH east"),
+                    Blocks.OAK_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_SAPLING);
+            dryad(level, gy, west + 11, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD FLOWER", "Flwr/Flwr", 2,
+                    List.of("DRYAD FLOWER", "Flwr/Flwr: flowers", "on grass only", "(all day)"),
+                    Blocks.DANDELION, Blocks.POPPY, Blocks.OAK_SAPLING);
+            dryad(level, gy, east, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
+                    List.of("DRYAD OAK+BIRCH", "both, each at half", "rate: total about", "DRYAD OAK's"),
+                    Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
+            dryad(level, gy, east + 11, mouthZ + ROW_T, 5, 6, "DRYAD DARK SMALL", "Dark/Dark", 1,
+                    List.of("DARK OAK, SMALL", "one horse, small", "pen: a 2x2 and a", "tree by evening?"),
+                    Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
+
+            ratio(level, gy, west, mouthZ + ROW_U, "RATIO HYPP", "horsegenetics.scn4a", "H/N", "H/N", false,
+                    List.of("RATIO: HYPP", "H/N x H/N all day:", "1 in 4 H/H, and", "every H/H dies"),
+                    "about 1 in 4 H/H, 1 in 2 H/N; every H/H dies at birth");
+            ratio(level, gy, west + 9, mouthZ + ROW_U, "RATIO LETHAL WHITE", "horsegenetics.ednrb", "O/N", "O/N", false,
+                    List.of("RATIO: OVERO", "O/N x O/N all day:", "1 in 4 O/O, and", "every O/O dies"),
+                    "about 1 in 4 O/O, 1 in 2 O/N; every O/O dies at birth");
+            ratio(level, gy, east, mouthZ + ROW_U, "RATIO BRINDLE", "horsegenetics.brindle", "n/n", "Brn/Y", true,
+                    List.of("RATIO: BRINDLE", "Brn stallion x n", "mare: every filly", "Brn/n, no colt Brn"),
+                    "every filly Brn/n, every colt n/Y - a brindle colt is a FAIL");
+            ratio(level, gy, east + 9, mouthZ + ROW_U, "RATIO SIZE", "horsegenetics.body_size", "Big/n", "Big/n", false,
+                    List.of("RATIO: SIZE", "Big/n x Big/n all", "day: 1 Big/Big to", "2 Big/n to 1 n/n"),
+                    "about 1 Big/Big : 2 Big/n : 1 n/n");
+            ActionTrace.log("test yard", "all-day pens built (rows S-U: dryads, inheritance ratios)");
+        } catch (RuntimeException e) {
+            HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Dryads
+    // ------------------------------------------------------------------
+
+    /** Stone across the whole yard for a dryad row, from four blocks before it to four after. */
+    private static void stoneBand(ServerLevel level, int gy, int cx, int z0, int depth) {
+        BlockState stone = Blocks.STONE.defaultBlockState();
+        for (int x = cx - 24; x <= cx + 24; x++) {
+            for (int z = z0 - 4; z <= z0 + depth + 4; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, stone);
+            }
+        }
+    }
+
+    private static void dryad(ServerLevel level, int gy, int x0, int z0, int width, int depth, String name,
+                              String tokens, int horses, List<String> sign, Block... watched) {
+        int x1 = x0 + width;
+        int z1 = z0 + depth;
+        BlockState grass = Blocks.GRASS_BLOCK.defaultBlockState();
+        for (int x = x0 + 1; x < x1; x++) {
+            for (int z = z0 + 1; z < z1; z++) {
+                DebugPenManager.groundColumn(level, x, gy, z, grass);
+            }
+        }
+        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
+        DebugTestYard.stock(level, gy, x0 + 2.5, (z0 + z1) / 2.0, "horsegenetics.dryad", name, horses, 0, tokens);
+        YardPens.register(gy, x0, x1, z0, z1, name);
+        // Four past the walls, which is as far as a planting can reach; tall enough for a tree.
+        DebugWorldWatch.watch(name, DebugTestYard.box(x0 - 4, gy, z0 - 4, x1 + 4, gy + 10, z1 + 4), null, watched);
+    }
+
+    // ------------------------------------------------------------------
+    // Ratios
+    // ------------------------------------------------------------------
+
+    private static final class Tally {
+        final String name;
+        final String key;
+        final boolean bySex;
+        final String expect;
+        final Map<UUID, Long> living = new LinkedHashMap<>();
+        final Map<UUID, String> classOf = new LinkedHashMap<>();
+        final Set<UUID> done = new HashSet<>();
+        final Map<String, int[]> counts = new LinkedHashMap<>();    // [born, died]
+        int born;
+        int died;
+
+        Tally(String name, String key, boolean bySex, String expect) {
+            this.name = name;
+            this.key = key;
+            this.bySex = bySex;
+            this.expect = expect;
+        }
+
+        String summary() {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, int[]> e : counts.entrySet()) {
+                int b = e.getValue()[0];
+                sb.append(sb.length() == 0 ? "" : ", ").append(e.getKey()).append(' ').append(b)
+                        .append(String.format(" (%.0f%%)", born == 0 ? 0.0 : 100.0 * b / born));
+                if (e.getValue()[1] > 0) {
+                    sb.append(", ").append(e.getValue()[1]).append(" died");
+                }
+            }
+            return born + " foals: " + sb + " | expect " + expect;
+        }
+    }
+
+    private static void ratio(ServerLevel level, int gy, int x0, int z0, String name, String key, String mare,
+                              String stallion, boolean bySex, List<String> sign, String expect) {
+        int x1 = x0 + 9;
+        int z1 = z0 + ROW_U_D;
+        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
+        DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
+        Horse dam = spawn(level, gy, x0 + 3.0, z0 + 5.0, Sex.FEMALE, key + "=" + mare, name + " MARE");
+        spawn(level, gy, x0 + 6.0, z0 + 5.0, Sex.MALE, key + "=" + stallion, name + " STUD");
+        DebugYardFertility.inHeat(dam);
+        YardPens.register(gy, x0, x1, z0, z1, name);
+        DebugWorldWatch.watchBreeding(name, DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1));
+        Tally tally = new Tally(name, key, bySex, expect);
+        scan(level, tally, DebugTestYard.box(x0, gy, z0, x1, gy + 4, z1), 0);
+    }
+
+    private static @Nullable Horse spawn(ServerLevel level, int gy, double x, double z, Sex sex, String code,
+                                         String label) {
+        Horse h = DebugPenManager.spawnHorse(level, gy + 1, x, z, sex, code, true);
+        DebugTestYard.label(h, label);
+        return h;
+    }
+
+    private static void scan(ServerLevel level, Tally t, AABB box, int round) {
+        DebugYardHerd.after(level, SCAN, () -> {
+            long now = level.getGameTime();
+            for (Horse foal : level.getEntitiesOfClass(Horse.class, box, h -> h.isBaby() && h.isAlive()
+                    && HorseRecords.hasRealRecord(h))) {
+                UUID id = foal.getUUID();
+                if (t.living.containsKey(id) || t.done.contains(id)) {
+                    continue;
+                }
+                HorseRecord record = HorseRecords.of(foal);
+                AllelePair pair = record.genotype().pair(t.key);
+                String cls = (t.bySex ? (record.sex() == Sex.FEMALE ? "filly " : "colt ") : "")
+                        + (pair == null ? "?" : pair.toTokens());
+                t.living.put(id, now);
+                t.classOf.put(id, cls);
+                t.counts.computeIfAbsent(cls, k -> new int[2])[0]++;
+                t.born++;
+                ActionTrace.log("test yard", t.name + ": foal " + t.born + " is " + cls + " | " + t.summary());
+            }
+            for (var it = t.living.entrySet().iterator(); it.hasNext(); ) {
+                var e = it.next();
+                Horse h = level.getEntity(e.getKey()) instanceof Horse x ? x : null;
+                String cls = t.classOf.get(e.getKey());
+                if (h == null || !h.isAlive()) {
+                    t.counts.computeIfAbsent(cls, k -> new int[2])[1]++;
+                    t.died++;
+                    ActionTrace.log("test yard", t.name + ": a " + cls + " foal died | " + t.summary());
+                    it.remove();
+                    t.done.add(e.getKey());
+                } else if (now - e.getValue() >= FOAL_KEEP) {
+                    h.discard();    // counted and outlived a birth lethal: out of the way of the cap
+                    it.remove();
+                    t.done.add(e.getKey());
+                }
+            }
+            if (round % 60 == 59) {     // every ten minutes, whether or not anything changed
+                ActionTrace.log("test yard", t.name + " tally | " + t.summary());
+            }
+            scan(level, t, box, round + 1);
+        });
+    }
+}

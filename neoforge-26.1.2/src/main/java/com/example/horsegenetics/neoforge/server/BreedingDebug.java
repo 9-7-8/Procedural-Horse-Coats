@@ -66,10 +66,10 @@ public final class BreedingDebug {
         String heading = damRecord.displayName() + " x " + sireRecord.displayName();
 
         DebugAnnounce.log("Breeding", "--- " + heading + " ---");
-        DebugAnnounce.log("Breeding", "dam   " + GeneCodeDisplay.shortForm(dam.genotype()));
-        DebugAnnounce.log("Breeding", "sire  " + GeneCodeDisplay.shortForm(sire.genotype()));
-        DebugAnnounce.log("Breeding", "foal  " + GeneCodeDisplay.shortForm(foal.genotype()));
-        DebugAnnounce.log("Breeding", "foal code " + foal.genotype().toCode());
+        // The dam/sire/foal short forms, the foal's full code and the locus-by-locus table
+        // are gone (owner, 2026-09-14, cutting the log down): about eighty lines a foal,
+        // and the yard now makes a foal every few minutes in a dozen pens. What a birth is
+        // read for is below - the body and any condition.
         DebugAnnounce.log("Breeding", String.format(
                 "foal body: speed %.4f  health %.2f  jump %.3f  size %.3f  viability %s",
                 foalTraits.speed(), foalTraits.health(), foalTraits.jump(), foalTraits.scale(),
@@ -77,9 +77,6 @@ public final class BreedingDebug {
         for (Condition condition : foalTraits.conditions()) {
             DebugAnnounce.log("Breeding", "condition: " + condition.name()
                     + " [" + condition.severity() + "]");
-        }
-        for (String line : BreedingReport.full(dam.genotype(), sire.genotype(), foal.genotype())) {
-            DebugAnnounce.log("Breeding", "  " + line);
         }
 
         if (!ServerConfig.debugTools() || breeder == null) {

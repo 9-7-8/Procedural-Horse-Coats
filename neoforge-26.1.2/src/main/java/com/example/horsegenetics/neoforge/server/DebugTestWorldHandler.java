@@ -566,6 +566,9 @@ public final class DebugTestWorldHandler {
         tell(player, Component.literal("  O-P  breeding, one scenario a pen      "
                         + "Q-R  band life, on a clock (leave it)")
                 .withStyle(ChatFormatting.WHITE));
+        tell(player, Component.literal("  S-T  dryads, on stone (all day)        "
+                        + "U  inheritance ratios, tallied (all day)")
+                .withStyle(ChatFormatting.WHITE));
         // G AND H ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - the growing
         // row's last two pens moved into A's west block when oak/birch and bone
         // meal were confirmed, and H had been depth zero since the retinue pen

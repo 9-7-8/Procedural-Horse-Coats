@@ -80,6 +80,64 @@
     </p>
 </div>
 
+<h2 id="all-day">&sect;0-DX &mdash; The all-day pens: dryads and inheritance ratios, rows S to U (built 2026-09-14, NOT played)</h2>
+
+<p>
+    Built to be left running for a whole day. Nothing here needs your hands, and nothing here
+    means much in the first hour. Read it in the evening with <code>grep</code>.
+</p>
+
+<h3 id="all-day-dryad">Rows S and T: dryads, on a stone floor</h3>
+<p>
+    A dryad plants within four blocks of itself, fence or not, so these two rows are floored
+    with stone and only the inside of each pen is grass. A sapling that lands outside a pen
+    cannot survive there, which means every sapling a pen counts is its own. Every planting is a
+    <code>[watch] dryad planted | sapling_… by DRYAD …</code> line naming the pen, so a pen's rate is
+    how many of those lines it has.
+</p>
+<ul>
+    <li><strong>DRYAD SPRUCE, JUNGLE, ACACIA</strong> (row S) and <strong>DRYAD FLOWER</strong> (row
+        T): each plants <strong>only its own species</strong>, and trees grow from them. The watch
+        also counts oak and birch saplings in these pens, and a count above zero is a failure.</li>
+    <li><strong>DRYAD CARRIER</strong> (row S east, <code>Oak/n</code>): <strong>no</strong>
+        <code>dryad planted</code> line for it all day. One line means the variant has stopped being
+        recessive.</li>
+    <li><strong>DRYAD OAK</strong> (row T west) against <strong>DRYAD OAK+BIRCH</strong> (row T
+        east): by evening the mixed pen should have about as many plantings as the oak pen, split
+        roughly evenly between oak and birch. This is the half-rate rule, which the first run
+        planted too few saplings to judge.</li>
+    <li><strong>DRYAD DARK SMALL</strong> (row T east): one dark-oak horse in a small pen. Its
+        saplings should end up in a 2&times;2 and grow a tree, with <code>dark_oak_log</code> above
+        zero. Row A's big DRYAD DARK has never grown one. If the small pen does, the clustering
+        works and the big pen is too big; if neither does, the clustering search is the bug
+        (<a href="known-gaps.html#gap-218">gap 218</a>).</li>
+</ul>
+
+<h3 id="all-day-ratio">Row U: inheritance ratios</h3>
+<p>
+    Each pen is one pair, breeding on its own all day. A clock counts each foal's pair for the
+    locus, notes whether it dies, and removes it two minutes after birth, so the pen never
+    reaches the cap and never stops. Each foal logs <code>[trace] test yard | RATIO …: foal N is
+    … | N foals: …</code> with the running tally and the expected answer, and there is a summary
+    every ten minutes. By evening each pen should have a few hundred foals.
+</p>
+<ul>
+    <li><strong>RATIO HYPP</strong> (<code>H/N</code> &times; <code>H/N</code>): about 25%
+        <code>H/H</code>, and <strong>every</strong> <code>H/H</code> foal dies. Any other class
+        dying is a failure.</li>
+    <li><strong>RATIO LETHAL WHITE</strong> (<code>O/N</code> &times; <code>O/N</code>): about 25%
+        <code>O/O</code>, every one of them dead.</li>
+    <li><strong>RATIO BRINDLE</strong> (brindle stallion &times; plain mare): every filly is
+        <code>Brn/n</code> and every colt <code>n/Y</code>. A single brindle colt is a failure.</li>
+    <li><strong>RATIO SIZE</strong> (<code>Big/n</code> &times; <code>Big/n</code>): roughly 1 : 2
+        : 1 across <code>Big/Big</code>, <code>Big/n</code> and <code>n/n</code>.</li>
+</ul>
+<p>
+    Grep <code>RATIO</code> and <code>dryad planted</code>. With a few hundred foals, a share
+    within a few points of the expected number is a pass, and a class that never appears is a
+    failure.
+</p>
+
 <h2 id="herd-yard">&sect;0-DW &mdash; Band life in the yard: rows Q and R (built 2026-09-14, NOT played)</h2>
 
 <div class="note">
@@ -131,13 +189,23 @@
     </p>
 </div>
 <ol>
-    <li><strong>Row Q east, LEADERLESS: a vacant band is claimed.</strong> At 5 minutes two bachelors
-        are put in with the leaderless band. Within the hour, one should <code>took over band</code>
-        <em>without</em> a <code>challenged</code> line before it, because a vacant band is claimed
-        rather than fought for. Next should come <code>the bachelors &hellip; left behind re-formed
-        round</code> the other one (<a href="known-gaps.html#gap-232">gap 232</a>). None had
-        happened ten minutes after they arrived.</li>
-    <li><strong>Row R west, TAKEOVER: nobody dies.</strong> A band and three bachelors in one pen.
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 (second run, 07:26 to 07:43)</span>
+    <p>
+        <strong>A vacant band is claimed, not fought for.</strong> Ten minutes after the bachelors
+        arrived, one <code>took over band</code> with no <code>challenged</code> line before it,
+        and <code>the bachelors … left behind re-formed round</code> the other one. That confirms
+        <a href="known-gaps.html#gap-232">gap 232</a>. <strong>Dam defence works</strong>, rounds 2
+        to 5 included: each time the dam went for the zombie within three seconds, killed it within
+        a second, and was targeting nothing twenty seconds later. That confirms
+        <a href="known-gaps.html#gap-233">gap 233</a> and the doubled kick against monsters.
+        <strong>A takeover fight ends without a death</strong>: <code>challenged</code> then
+        <code>saw off</code> nine seconds later. Deleted below.
+    </p>
+</div>
+    <li><strong>Row R west, TAKEOVER: a challenger wins.</strong> A fight that was seen off is
+        confirmed. What is left is a <code>took over band</code> won in a fight, after which the old
+        stallion should read <em>Bachelor</em>. A band and three bachelors in one pen.
         <strong>Pass:</strong>
         <ul>
             <li><code>challenged</code> lines, each ending in <code>took over band</code> or
@@ -152,21 +220,6 @@
     <li><strong>Row Q west, LEAVING HOME: mares move.</strong> Over the night, MOVER MARE 1 or 2 may
         log <code>moved from band &hellip; to HOST MARE &hellip;'s</code>. That is about one chance
         in twenty a day each, or roughly two chances in three by morning.</li>
-    <li><strong>Row R west, DAM DEFENCE</strong> (beside TAKEOVER). <strong>The first run
-        failed on the setup, not the gene.</strong> Horses now also kick monsters twice as hard,
-        so this pen checks that too. The dam went for a full-health zombie four
-        seconds after it hurt her foal, took five hits and died, and the zombie was untouched. A
-        plain horse cannot win that fight. The zombie now arrives at four health. At 30 seconds,
-        then every 3 minutes for five rounds, it is put beside FOAL and hurts it once.
-        <strong>Pass, every round:</strong>
-        <ul>
-            <li><code>DAM &hellip; went for zombie</code> within a few seconds;</li>
-            <li><code>[watch] creature died | minecraft:zombie</code> soon after;</li>
-            <li>the clock's <code>20 s later: zombie dead</code>.</li>
-        </ul>
-        <strong>Rounds 2 to 5 test the fix for <a href="known-gaps.html#gap-233">gap
-        233</a>.</strong> Before it, a tamed dam kept the dead zombie as her target and never
-        defended again.</li>
     <li><strong>Row R east, DISPLACEMENT</strong> (beside MET NATURAL): four tamed mares ranked 1 to
         4, with hay. Every <code>displaced &hellip; at food or water</code> line should name the
         higher-ranked mare (the lower number) first. A reversed line is a failure. <strong>None in
@@ -234,12 +287,10 @@
         The chat lines should be a gold one naming the foal, a grey &ldquo;did not carry&rdquo; for
         the loss, and &ldquo;has foaled twins&rdquo;. After a minute and twenty seconds,
         TWINS' Speed on the info screen is 15% lower.</li>
-    <li><strong>Row O west, HURT MARE: run it again.</strong> The first run could not test it.
-        Her half health was set at spawn and undone when her traits were applied, so she was covered
-        at full-health odds seven seconds in and had five foals. She is now hurt a second after the
-        build, and the log says <code>HURT MARE set to 11.0/22.0</code>. <strong>Pass:</strong> no
-        cover line for her while that holds. Let her out to hay and water, and she is covered at a
-        heat after she heals.</li>
+    <li><strong>Row O west, HURT MARE: confirmed on the second run, 2026-09-14.</strong> She was set
+        to 11/22 at 07:26:48 and healed a point at a time. Through eight minutes of heats at part
+        health she was never covered, and she was covered at 07:34:32, seconds after reaching full
+        health. The pen stays only until it is next tidied away.</li>
     <li><strong>Row O west, THE CAP, with a lead.</strong> Take one mare out with the chest's lead:
         covers start within seconds. Each birth adds a horse back, so the pen settles again.
         <strong>Pass: the pen never grows beyond the cap however long it runs</strong>

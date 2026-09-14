@@ -249,8 +249,10 @@ public final class ActionTrace {
         sb.append(horse.isBaby() ? " FOAL" : " adult");
         sb.append(horse.isTamed() ? " tamed" : " untamed");
         record.breed().ifPresent(b -> sb.append(" breed=").append(b));
-        sb.append("\n         genotype: ").append(record.geneticCode());
-        sb.append("\n         epigenome: ").append(record.epigenomeCode());
+        // NO GENOTYPE OR EPIGENOME HERE ANY MORE (owner, 2026-09-14: "remove some of the
+        // stuff that prints to the log that's no longer relevant"). Those two lines were
+        // about 58 KB per horse - 88% of an 18 MB log after twenty minutes of the yard -
+        // and nothing reads them: the code is on the horse, one info-screen Copy away.
         sb.append("\n         traits: speed=").append(round(traits.speed()))
                 .append(" health=").append(round(traits.health()))
                 .append(" jump=").append(round(traits.jump()))

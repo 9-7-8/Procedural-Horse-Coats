@@ -1041,6 +1041,13 @@ public final class DebugWorldWatch {
             return;
         }
         SPREADS.computeIfAbsent(cover, k -> new int[2])[1]++;
+        // ONE LINE PER DRYAD PLANTING, naming the horse - which in the yard is its pen.
+        // The ground covers try every sixty ticks and stay counted only; a sapling, a
+        // flower or a mushroom lands a few times an hour, and a rate is a list of those.
+        if (cover.startsWith("sapling_") || cover.equals("flower") || cover.equals("mushroom")) {
+            note("dryad planted", cover + " by " + (horse.hasCustomName() ? horse.getCustomName().getString()
+                    : ActionTrace.describeShort(horse)) + " at " + horse.blockPosition().toShortString());
+        }
     }
 
     /**
