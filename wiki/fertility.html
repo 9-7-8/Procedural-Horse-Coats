@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fertility &amp; gestation &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Start here <span class="sep">/</span> in progress</p>
+<h1>Fertility &amp; gestation</h1>
+<p class="lede">
+    A design page for a system that does not exist yet. Mares would come into heat and carry
+    a pregnancy, and stallions would vary in how fertile they are. Everything here is a
+    proposal or an open question. <strong>Nothing on this page is built</strong>, and the
+    decision about how far it may change vanilla breeding is still being made.
+</p>
+
+<div class="note warn">
+    <span class="label">Unfinished &mdash; to be completed next session</span>
+    <p>
+        Started at the end of the 2026-09-13 evening session, as the last item on that
+        list. The options and questions below were put to the owner and have <strong>not
+        been answered yet</strong>. Next session: settle <a href="#questions">the
+        questions</a>, record the calls in <a href="roadmap.html#settled">settled
+        decisions</a>, rewrite this page as a real reference with Gameplay / Coding /
+        Science tabs, and delete everything on it that turned out not to be the plan.
+    </p>
+</div>
+
+<h2 id="constraint">The constraint: vanilla breeding stays</h2>
+
+<p>
+    The owner&rsquo;s standing rule is that this mod <strong>adds to vanilla behaviour
+    and does not remove it</strong>. Fertility is where that rule bites hardest. In their
+    words, when the research came in: they were &ldquo;worried about that violating my
+    &lsquo;we don&rsquo;t remove vanilla behavior&rsquo; too much&rdquo;.
+</p>
+
+<p>What vanilla does today, and what this mod already puts on top of it:</p>
+<ul>
+    <li><strong>Vanilla:</strong> feed two tamed adults golden carrots or golden apples,
+        and a foal appears at once. Both parents then wait about five minutes before
+        breeding again, and the foal grows up in about twenty
+        (<a href="https://minecraft.wiki/w/Horse">Minecraft Wiki</a>).</li>
+    <li><strong>This mod:</strong> the foal&rsquo;s genotype and epigenome are drawn from
+        its parents at that same instant (<a href="breeding.html">breeding</a>), and it
+        joins its dam&rsquo;s wild band if she has one
+        (<a href="horse-care.html#bands">band life</a>). The seed jar breeds a mare from a
+        stored stallion through the same instant path. Its gestation step is the open item
+        on the roadmap (<a href="roadmap.html#ivf">assisted reproduction</a>).</li>
+</ul>
+
+<p>
+    A <strong>pregnancy</strong> means the foal does not appear at the moment of breeding.
+    Applied to golden-carrot breeding, that replaces vanilla behaviour outright. Everything
+    below is sorted by how much of vanilla each option touches.
+</p>
+
+<h2 id="options">Three ways to add it</h2>
+
+<p class="muted">As proposed to the owner. None is chosen.</p>
+
+<ol>
+    <li><strong>Fertility as genes only &mdash; vanilla untouched.</strong> Fertility loci
+        change the odds and timing <em>inside</em> vanilla&rsquo;s own breeding, and
+        nothing else. Such a locus could give a pairing some chance of no foal, lengthen or
+        shorten the wait before breeding again, and rarely produce twins. A horse carrying
+        the wild type breeds exactly as vanilla does, so the rule holds for every horse that
+        has not been bred for it. This is the research&rsquo;s &ldquo;overlay model&rdquo;,
+        with genes deciding the overlay.</li>
+    <li><strong>Gestation only through this mod&rsquo;s own breeding.</strong> The seed jar
+        (and any later assisted-reproduction tier) makes a mare pregnant, and the foal comes
+        some Minecraft days later. Golden carrots stay instant. Vanilla breeding keeps its
+        behaviour, and the new system lives entirely on paths vanilla never had. The
+        roadmap&rsquo;s gestation item already scoped this.</li>
+    <li><strong>Gestation everywhere, as a server setting that is off by default.</strong>
+        The research&rsquo;s &ldquo;full reproduction model&rdquo;: golden-carrot breeding
+        makes a mating record, and a foal arrives at the due date. It is the only option
+        that replaces vanilla, and only on a server that opts in.</li>
+</ol>
+
+<p>
+    <strong>Recommendation, not yet agreed: 1 and 2 now, 3 later if at all.</strong>
+    Option 1 makes fertility heritable, which is what this mod is about. Option 2 gives
+    pregnancy a home that breaks no rule. Option 3 needs everything 2 builds anyway, so
+    nothing is lost by leaving it for last.
+</p>
+
+<h2 id="biology">What the research says</h2>
+
+<p>
+    The abbreviated research is on <a href="breeding.html#science-cycle">breeding&rsquo;s
+    science tab</a> and is not repeated here. The parts that shape the design:
+</p>
+<ul>
+    <li><strong>The sexes run on different clocks.</strong> Mares cycle, about 21 days,
+        with a heat of 2&ndash;8 days and most fertile at its end, and mostly only in the
+        long-day season. Stallions have no cycle, just a seasonal quality modifier.</li>
+    <li><strong>Nursing does not stop conception.</strong> Foal heat comes about a week
+        after birth, so a mare can be pregnant and nursing at once. Lactation costs her
+        condition. It does not lock her.</li>
+    <li><strong>Straight time compression is unplayable.</strong> Squeeze 340 days into one
+        Minecraft day and heat lasts 18 seconds. The fix the research lands on: scale every
+        stage from one gestation setting, then give each <em>independent</em> stage a floor
+        of one Minecraft day.</li>
+</ul>
+
+<h2 id="model">A draft model, for whichever option is chosen</h2>
+
+<p class="muted">
+    Research suggestions carried over so next session does not start from the intake file.
+    No number here is decided.
+</p>
+
+<h3 id="states">Mare states</h3>
+<ul>
+    <li>One state at a time, in priority order: <code>PREGNANT</code> &gt;
+        <code>POSTPARTUM</code> &gt; <code>ESTRUS</code> &gt; <code>DIESTRUS</code> &gt;
+        <code>ANESTRUS</code>.</li>
+    <li><code>LACTATING</code> is a <em>flag</em> beside the state, not a state. It can
+        be set together with pregnancy or heat.</li>
+    <li><strong>Peak fertility is a window inside estrus</strong> (its last part), not a
+        stage after it. A cycle is estrus plus diestrus, so the two are not floored
+        separately. Getting this wrong double-counts days.</li>
+    <li>Every deadline is stored as an <strong>absolute tick</strong>
+        (<code>dueTick</code>, <code>estrusEndTick</code>). A counter that pauses when the
+        horse&rsquo;s chunk unloads would never catch up.</li>
+    <li>Stallions have no state. They get a fertility <em>quality</em> (a gene, age,
+        condition) and perhaps a limit on covers per day.</li>
+</ul>
+
+<h3 id="timing">Timing</h3>
+<ul>
+    <li>One master setting, <code>gestation_days</code>. Every other stage is
+        <code>gestation_days &times; reference_days / 340</code>, floored at one Minecraft
+        day. At a one-day gestation that gives a two-day cycle (one day in heat, one
+        not).</li>
+    <li><strong>The clock.</strong> The research suggests a hybrid: pregnancy follows world
+        time, so sleeping speeds it up, and heat follows active ticks, so a player cannot
+        sleep through every window. This is undecided, and it has to agree with how the
+        mod&rsquo;s other day-based rules already count days.</li>
+    <li>Seasons are optional and invisible: Minecraft has none, so a &ldquo;breeding
+        season&rdquo; would be its own repeating timer that the player only sees as
+        &ldquo;in season&rdquo; or &ldquo;out of season&rdquo;.</li>
+</ul>
+
+<h3 id="odds">Conception odds (the research&rsquo;s starting point)</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Mare</th><th>Chance per well-timed breeding</th></tr></thead>
+<tbody>
+<tr><td>Peak of heat, healthy adult</td><td>70&ndash;85%</td></tr>
+<tr><td>Early or late in heat</td><td>35&ndash;60%</td></tr>
+<tr><td>Foal heat, normal recovery</td><td>45&ndash;70%</td></tr>
+<tr><td>Nursing, in poor condition</td><td>20&ndash;45%</td></tr>
+<tr><td>Out of heat, or pregnant</td><td>0%</td></tr>
+</tbody>
+</table>
+</div>
+<p class="muted">
+    Repeated covers in one heat can add up, but should be capped around 90&ndash;95%, so
+    that feeding one pair twenty items is not a guarantee. Under option 1, a fertility gene
+    would move these numbers, not replace them.
+</p>
+
+<h2 id="hooks">What it would plug into</h2>
+<ul>
+    <li><strong>The breeding handler</strong> (<code>HorseBreedingHandler</code>), where the
+        foal&rsquo;s genotype is drawn and its social attachment and band are set. A
+        pregnancy moves that to birth, so the sire&rsquo;s genome has to be <em>stored</em>
+        on the mare at conception. The seed jar already does this for its sire.</li>
+    <li><strong>Band life</strong> already knows a foal&rsquo;s dam and birth tick, and the
+        dam-and-foal goal. A foal born from a pregnancy should arrive into that the same
+        way.</li>
+    <li><strong>The roadmap&rsquo;s gestation edge cases</strong>
+        (<a href="roadmap.html#ivf">assisted reproduction</a>): the mare is killed while
+        carrying, the chunk unloads, the world reloads mid-term, and a carrying mare is fed
+        golden carrots.</li>
+    <li><strong>Where the code goes.</strong> The state machine and every number are pure
+        logic, so they belong in <code>common/</code> with unit tests, and the day
+        arithmetic stays Java 8-safe. The NeoForge side is one attachment and a check when
+        the horse ticks or loads.</li>
+    <li><strong>What a player sees:</strong> a line on the horse&rsquo;s information screen
+        (in heat, pregnant with days left, nursing), probably next to the Social section.</li>
+</ul>
+
+<h2 id="questions">Open questions for the owner</h2>
+
+<ol>
+    <li>Does a fertility locus that sometimes gives <em>no foal</em> already count as
+        removing vanilla behaviour, or is a gene that changes the odds fine?</li>
+    <li>Which of the <a href="#options">three options</a>, or which combination?</li>
+    <li>For a pregnancy through the mod&rsquo;s own breeding: how long should it last, and
+        should a pregnant mare act differently (slower, cannot be ridden)?</li>
+    <li>Should wild bands breed on their own through this system, or stay out of it?</li>
+    <li>Heat at all? Option 2 could have pregnancy without any cycle: a seed jar works
+        whenever it is used.</li>
+    <li>Does sleeping advance a pregnancy?</li>
+    <li>Twins: a rare outcome of a fertility gene, or left out because they are a medical
+        risk in real horses?</li>
+</ol>
+
+<h2 id="next">Next session, in order</h2>
+<ol>
+    <li>Get the answers above, and write the decisions into
+        <a href="roadmap.html#settled">settled decisions</a>.</li>
+    <li>Replace the roadmap&rsquo;s gestation bullet with the agreed scope.</li>
+    <li>Rewrite this page as the reference for what will be built, with Gameplay / Coding /
+        Science tabs. The fertility science could move here from breeding&rsquo;s science
+        tab, as long as it stays in only one of the two places.</li>
+    <li>Build the <code>common/</code> model and its tests first, then the attachment, then
+        the handler hook.</li>
+</ol>
+
+<h3 id="sources">Sources</h3>
+<ul>
+    <li>MSD Veterinary Manual,
+        <a href="https://www.msdvetmanual.com/management-and-nutrition/management-of-reproduction-horses/the-reproductive-cycle-of-horses">the
+        reproductive cycle of horses</a>.</li>
+    <li>PetMD, <a href="https://www.petmd.com/horse/horse-breeding-cycles-everything-you-need-know">horse
+        breeding cycles</a>.</li>
+    <li>Minecraft Wiki, <a href="https://minecraft.wiki/w/Horse">Horse</a>.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="horse-care.html">Horse care</a>
+        <a href="roadmap.html#ivf">Roadmap: assisted reproduction</a>
+    </div>
+    Source: nothing yet.
+</div>
+
+</article>
+</main>
+</body>
+</html>
