@@ -25,6 +25,21 @@
 
     var HG = window.HG || (window.HG = {});
 
+    // The AI helpers (wiki/ai/) - the chat bubble on every page. They send
+    // nothing anywhere until the reader puts in a key of their own; see
+    // wiki/ai-setup.html. Read here, while currentScript is still this file.
+    (function loadAi() {
+        var self = document.currentScript;
+        if (!self || !self.src) { return; }
+        var dir = self.src.replace(/nav\.js(\?.*)?$/, "");
+        ["ai/ai-core.js", "ai/ai-chat.js"].forEach(function (file) {
+            var s = document.createElement("script");
+            s.src = dir + file;
+            s.async = false;             // in order: the chat needs the core
+            document.head.appendChild(s);
+        });
+    })();
+
     function sections() {
         return (HG.pages && HG.pages.SECTIONS) || [];
     }

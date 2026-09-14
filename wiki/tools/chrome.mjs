@@ -69,7 +69,8 @@ export async function open(pageUrl, options = {}) {
   for (let i = 0; i < 80 && !target; i++) {
     try {
       const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-      target = list.find((t) => t.type === "page" && t.url.startsWith("file:"));
+      // options.match: a page served over http (the breed designer will not run from file://).
+      target = list.find((t) => t.type === "page" && t.url.startsWith(options.match || "file:"));
     } catch { /* not listening yet */ }
     if (!target) await sleep(250);
   }

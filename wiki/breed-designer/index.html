@@ -17,6 +17,7 @@
       <option value="">Open a built-in breed&hellip;</option>
     </select>
     <label class="btn small file-btn" title="Open a breed file you exported before">Import JSON<input type="file" id="file-input" accept=".json,application/json" /></label>
+    <button type="button" class="btn small primary" id="btn-ai" title="Describe a breed, or show a picture of one, and an AI of your choosing writes the file">&#x2726; Draft with AI</button>
     <button type="button" class="btn small" id="btn-export" title="Download the breed as it stands - at any step">Export JSON</button>
     <button type="button" class="btn small ghost" id="btn-new">New breed</button>
   </div>
@@ -86,6 +87,11 @@
 <script src="js/bd-core.js"></script>
 <script src="js/bd-steps.js"></script>
 <script src="js/bd-app.js"></script>
+
+<!-- The AI helpers: the chat bubble, and "Draft with AI". Idle without a key. -->
+<script src="../ai/ai-core.js"></script>
+<script src="../ai/ai-chat.js"></script>
+<script src="js/bd-ai.js"></script>
 <script>window.HG.breedDesigner.start();</script>
 </body>
 </html>

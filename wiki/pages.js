@@ -80,6 +80,7 @@ window.HG.pages = {
                 { href: "gene-creator/index.html", text: "Gene creator", kind: "tool", views: ["coding"] },
                 { href: "horse-designer/index.html", text: "Horse designer", kind: "tool", views: ["gameplay","coding"] },
                 { href: "breed-designer/index.html", text: "Breed designer", kind: "tool", views: ["coding"] },
+                { href: "ai-setup.html", text: "AI helpers", kind: "tool", views: ["gameplay","coding"] },
                 { href: "gene-lut.html?view=lab", text: "LUT lab", kind: "tool", views: ["gameplay","coding"] },
                 { href: "breed-format.html", text: "Breed file format", kind: "tool", views: ["coding"] }
             ]

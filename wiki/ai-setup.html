@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI helpers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow tool">Tools</p>
+<h1>AI helpers</h1>
+<p class="lede">
+    Put in an AI key of your own and the wiki gets a chat that answers from its own pages
+    and helps you report bugs, and both designers get a <em>Draft with AI</em> button that
+    writes a breed or a gene from a description or a picture. It is optional, it costs
+    nothing with a free OpenRouter key, and until you add a key nothing is sent anywhere.
+</p>
+
+<div class="note">
+    <span class="label">Your key stays in your browser</span>
+    <p>
+        There is no server of ours in the middle. The key is saved in this browser&rsquo;s
+        storage and goes straight to the provider you pick, with each message. Nobody else
+        sees it, including the mod&rsquo;s author. <strong>Forget key</strong> removes it,
+        and <strong>Forget everything</strong> removes every key, the GitHub token and your
+        model choices.
+    </p>
+</div>
+
+<h2 id="settings">Your key</h2>
+
+<div data-ai-settings data-ai-github></div>
+
+<p class="muted">
+    Every page of this wiki uses what you save here. It stays in this browser on this
+    device, so a phone and a computer each need it put in once.
+</p>
+
+<h2 id="what">What it does</h2>
+
+<ul>
+    <li><strong>The chat.</strong> The <em>Ask</em> button in the bottom corner of every
+        page. Each question is matched against the wiki, and the best passages go to the AI
+        along with the page you are reading, so its answers come from the wiki and link back
+        to it. It can be wrong. The pages it links to are the real answer.</li>
+    <li><strong>Bug reports.</strong> Press <em>Report a bug</em> in the chat, or just
+        describe what went wrong. It asks for what the developer will need, one or two
+        questions at a time, and checks the <a href="known-gaps.html">known gaps</a> as it
+        goes. When it has enough, the report turns into a form: you read it, fix anything,
+        and send it. It never files anything on its own. See <a href="#github">below</a>
+        for how sending works.</li>
+    <li><strong>Draft with AI in the <a href="breed-designer/index.html">breed
+        designer</a>.</strong> Describe a breed (&ldquo;small mountain ponies, mostly dun,
+        good jumpers, snowy taiga&rdquo;), or attach a photo of the horses you want. The AI
+        writes the breed file. The game&rsquo;s own breed parser checks it, and anything it
+        rejects goes back to the AI to fix, up to three times. You only get offered a file
+        the game will load. <em>Use it</em> puts it in the designer, and <em>Put back what I
+        had</em> undoes that.</li>
+    <li><strong>Draft with AI in the <a href="gene-creator/index.html">gene
+        creator</a>.</strong> The same for a gene: &ldquo;a silver frost over the back and
+        hips&rdquo;, or a picture of a coat. It is checked against the creator&rsquo;s own
+        rules, and drawn once, before you are offered it.</li>
+    <li><strong>Pictures.</strong> Only models that can see images get them. The model
+        list says which those are, and you are told when a picture was left out. Big photos
+        are shrunk before sending. Small ones, like a 64-pixel coat sheet, are blown up
+        pixel-sharp so the AI can make them out.</li>
+</ul>
+
+<h2 id="openrouter">A free key from OpenRouter</h2>
+
+<p>
+    <a href="https://openrouter.ai">OpenRouter</a> gives you one key for hundreds of AI
+    models from many companies, and some of those models are free. It is the default here.
+</p>
+
+<ol>
+    <li><strong>The quick way:</strong> press <strong>Connect with OpenRouter</strong> in
+        <a href="#settings">the form above</a>. OpenRouter opens, you sign in or sign up (with
+        Google, GitHub or an email address), approve, and you land back here with the key
+        already saved. That only works on the published wiki, not on a copy opened as a
+        file.</li>
+    <li><strong>The manual way:</strong> sign up at <a href="https://openrouter.ai">openrouter.ai</a>,
+        open <a href="https://openrouter.ai/settings/keys">Settings &rarr; Keys</a>, press
+        <em>Create key</em>, give it a name (and a credit limit, if you like), and copy it. It
+        starts <code>sk-or-</code>. Paste it into <em>API key</em> above and press
+        <em>Save</em>.</li>
+    <li>Leave the model on <strong>Any free model (<code>openrouter/free</code>)</strong>,
+        which sends each request to whichever free model is available, or pick one from the
+        list. Models marked <em>free</em> cost nothing. Those marked <em>sees images</em>
+        can read the pictures you attach.</li>
+    <li>Press <strong>Test it</strong>. If it answers, you are done.</li>
+</ol>
+
+<p>
+    <strong>The catch with free models</strong> is a limit on how much you can ask. When
+    this page was written, OpenRouter allowed 20 requests a minute and 50 a day on free
+    models, or 1,000 a day once an account had bought at least $10 of credit. A
+    <em>Draft with AI</em> that needs fixing uses a request per try. Free models are often
+    hosted by companies that may keep what you send, so check a model&rsquo;s page on
+    OpenRouter if that matters to you. With paid credit you can pick any model on the list.
+</p>
+
+<p>
+    <strong>What a draft costs on a paid model.</strong> Each <em>Draft with AI</em> try
+    sends the format page, the gene list and two example files along with your words:
+    about 30,000 tokens. On a mid-priced model that is a few cents a try, and on the
+    priciest ones it is more. A chat message is far smaller, a few thousand tokens.
+</p>
+
+<h2 id="providers">Using another provider</h2>
+
+<p>
+    A web page can only talk to an AI company whose service accepts requests straight from
+    a browser. Many do not, because a key in a web page is usually a mistake. It is not here,
+    since the key is your own and stays in your browser. The providers below all accepted a
+    browser&rsquo;s request when they were checked (13 September 2026). Pick one in
+    <a href="#settings">the form</a>, paste its key, and choose a model from the list that
+    loads.
+</p>
+
+<div class="table-wrap">
+<table>
+    <thead><tr><th>Provider</th><th>Where to get a key</th><th>Good to know</th></tr></thead>
+    <tbody>
+        <tr><td>OpenRouter</td><td><a href="https://openrouter.ai/settings/keys">openrouter.ai/settings/keys</a></td>
+            <td>Free models; one key reaches Claude, GPT, Gemini, Llama, Mistral and more.</td></tr>
+        <tr><td>Anthropic (Claude)</td><td><a href="https://platform.claude.com/settings/keys">platform.claude.com/settings/keys</a></td>
+            <td>Paid, with billing set up first. Every Claude model can see images.
+                Defaults to Claude Opus 5; the list has the cheaper ones.</td></tr>
+        <tr><td>OpenAI</td><td><a href="https://platform.openai.com/api-keys">platform.openai.com/api-keys</a></td>
+            <td>Paid. A ChatGPT subscription is not an API key &mdash; the API is billed
+                separately.</td></tr>
+        <tr><td>Groq</td><td><a href="https://console.groq.com/keys">console.groq.com/keys</a></td>
+            <td>Very fast open models, with a free tier.</td></tr>
+        <tr><td>Mistral</td><td><a href="https://console.mistral.ai/api-keys">console.mistral.ai/api-keys</a></td>
+            <td>Has a free tier for trying things out.</td></tr>
+        <tr><td>DeepSeek</td><td><a href="https://platform.deepseek.com/api_keys">platform.deepseek.com/api_keys</a></td>
+            <td>Cheap; its models read text only.</td></tr>
+        <tr><td>xAI (Grok)</td><td><a href="https://console.x.ai">console.x.ai</a></td><td>Paid.</td></tr>
+        <tr><td>Together AI</td><td><a href="https://api.together.ai/settings/api-keys">api.together.ai/settings/api-keys</a></td>
+            <td>Many open models.</td></tr>
+    </tbody>
+</table>
+</div>
+
+<p>
+    <strong>Not usable from here:</strong> Google&rsquo;s own Gemini API turned the
+    browser&rsquo;s request away when checked, so use Gemini through OpenRouter instead.
+    Anything that needs a cloud account&rsquo;s credentials (Azure, Amazon Bedrock, Google
+    Vertex) cannot work from a web page either. A ChatGPT Plus, Claude Pro or Gemini
+    subscription is not a key and cannot be used at all.
+</p>
+
+<h3 id="local">A model on your own computer</h3>
+<p>
+    Pick <em>Another OpenAI-compatible server</em> and give its address. For
+    <a href="https://lmstudio.ai">LM Studio</a>, start its local server with CORS switched
+    on in the server settings, and use <code>http://localhost:1234/v1</code>. For
+    <a href="https://ollama.com">Ollama</a>, use <code>http://localhost:11434/v1</code> and
+    start it with <code>OLLAMA_ORIGINS</code> set to allow this site. Some browsers will not
+    let a page on the internet reach your own computer. If yours refuses, open the wiki from a
+    local copy instead.
+</p>
+
+<h2 id="github">Bug reports and GitHub</h2>
+
+<p>
+    Reports go to the mod&rsquo;s issue tracker,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues">github.com/9-7-8/Procedural-Horse-Coats/issues</a>.
+    Before you send, the form lists issues that already look similar, so a problem that is
+    already reported can get a comment instead of a second report.
+</p>
+
+<ul>
+    <li><strong>Without a GitHub token</strong> (the default): <em>Open it on GitHub</em>
+        opens GitHub&rsquo;s new-issue page in a new tab with the title and text filled in.
+        You need a GitHub account; check the text and press <em>Submit new issue</em>. A very
+        long log gets cut to fit in the link, and the report says so, so paste the rest in
+        there.</li>
+    <li><strong>With a token</strong>, <em>File it on GitHub</em> sends it for you, under your
+        own GitHub name, and links to it. To make one:
+        <ol>
+            <li>Open <a href="https://github.com/settings/tokens/new">github.com/settings/tokens/new</a>
+                (a <em>classic</em> token).</li>
+            <li>Name it something like &ldquo;Horse wiki bug reports&rdquo; and pick a short
+                expiry, such as 30 days.</li>
+            <li>Tick <strong><code>public_repo</code></strong> and nothing else.</li>
+            <li>Press <em>Generate token</em>, copy it (it starts <code>ghp_</code>), paste it
+                into the GitHub token box in <a href="#settings">the form</a>, and press
+                <em>Save</em>.</li>
+        </ol>
+        That token can open issues, and change code, in any public repository you have access
+        to, acting as you. That is why the expiry should be short, and why you should press
+        <em>Forget token</em> when you are done. GitHub&rsquo;s newer <em>fine-grained</em>
+        tokens are tied to repositories you own, so they are not a reliable way to file on
+        somebody else&rsquo;s.</li>
+</ul>
+
+<h2 id="privacy">What gets sent where</h2>
+
+<ul>
+    <li><strong>To the AI provider you picked:</strong> your messages and any pictures you
+        attach. With them go passages of this wiki that match the conversation, and up to a
+        few thousand characters of the page you are on. In the designers it also gets the
+        file you have open (if you are changing it), the format page, the gene list and two
+        of the mod&rsquo;s own breed or gene files as examples. What happens to it after that
+        is up to that provider&rsquo;s policy.</li>
+    <li><strong>To GitHub:</strong> a search for similar issues when a report is ready, and
+        the report itself, only when you send it.</li>
+    <li><strong>Kept in this browser:</strong> your keys, the model choices and the GitHub
+        token, until you forget them. The current conversation is also kept, without its
+        pictures, but only until the tab is closed.</li>
+    <li><strong>Never:</strong> anything to the mod&rsquo;s author, other than an issue you
+        send yourself.</li>
+</ul>
+
+<p class="muted">
+    A key saved in a browser can be read by anyone who can use that browser profile, and by
+    any browser extension allowed to read pages. Use a key with a spending limit (OpenRouter
+    and most providers let you set one), and forget it on a shared computer.
+</p>
+
+<h2 id="how">How it is built</h2>
+
+<p>
+    Three files in <code>wiki/ai/</code>, all classic scripts with no build step:
+</p>
+<ul>
+    <li><code>ai-core.js</code> handles the provider list, the settings in
+        <code>localStorage</code>, streaming replies from both request formats (the
+        <code>/chat/completions</code> one most providers speak, and Anthropic&rsquo;s Messages
+        API), the model lists, picture shrinking, looking things up in the wiki, GitHub, the
+        OpenRouter sign-in, the settings form and the <em>Draft with AI</em> dialog.
+        <code>wiki/nav.js</code> loads it on every page; <code>index.html</code> and both
+        designers load it themselves.</li>
+    <li><code>ai-chat.js</code> is the bubble and its panel.</li>
+    <li><code>ai.css</code> styles both. Everything sits under <code>.phc-ai</code> with its
+        own colours, because it appears on pages that share no stylesheet.</li>
+</ul>
+<p>
+    <strong>The wiki as context.</strong> The chat uses the same index as the search box
+    (<code>wiki/search-index.js</code>), scored differently. A chat message is a sentence, so a
+    passage earns points for each word it has, rather than being dropped for missing one. The
+    designers send whole pages out of that index, <code>breed-format.html</code> and the file
+    and mask sections of <code>making-a-gene.html</code>, so the format the AI is told is
+    exactly what the wiki says, with no second copy to fall out of date.
+</p>
+<p>
+    <strong>The draft loop.</strong> The breed designer checks a reply with
+    <code>checkBreedJson</code>. That is the real <code>BreedSpecParser</code>, compiled to
+    WebAssembly, so &ldquo;the AI&rsquo;s file loads&rdquo; means the game loads it. The gene
+    creator checks with its own validation and a trial bake. A reply that fails goes back to
+    the model with the error message, up to three times.
+</p>
+<p>
+    <strong>Adding a provider.</strong> First check that it answers a browser:
+    <code>curl -X OPTIONS &lt;its chat endpoint&gt; -H "Origin: https://9-7-8.github.io"
+    -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers:
+    authorization,content-type" -i</code> must come back with an
+    <code>access-control-allow-origin</code> header. Then add a row to
+    <code>PROVIDERS</code> in <code>ai-core.js</code> and to the table <a href="#providers">above</a>.
+</p>
+
+</article>
+</main>
+</body>
+</html>

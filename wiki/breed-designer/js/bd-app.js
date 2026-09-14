@@ -315,5 +315,15 @@ window.HG = window.HG || {};
     return img;
   }
 
-  HG.breedDesigner = { start: start };
+  /** Back to a blank breed - what "Put back what I had" does when there was nothing. */
+  function reset() {
+    bd.state = bd.blank();
+    current = 0;
+    tab = "step";
+    changed();
+    renderPanel();
+  }
+
+  // importJson and reset are for js/bd-ai.js, the "Draft with AI" dialog.
+  HG.breedDesigner = { start: start, importJson: importJson, reset: reset };
 })(window.HG);

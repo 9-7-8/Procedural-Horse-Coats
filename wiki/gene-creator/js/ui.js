@@ -1742,5 +1742,22 @@ window.HG = window.HG || {};
     });
   }
 
-  HG.ui = { start: start, state: state, goToStep: goToStep, steps: STEPS };
+  /**
+   * For js/gc-ai.js: read a gene file the way "Paste JSON" does, and list what
+   * would stop it - problems() plus a trial bake, because a file can pass the
+   * one and still throw in the other.
+   */
+  function tryJson(text) {
+    var spec = normalise(JSON.parse(text));
+    var issues = model.problems(spec);
+    try {
+      HG.preview.bake({ spec: spec, skin: "ADULT", baseCoatId: state.baseCoatId, seed: state.seed,
+        dose: 2, dial: state.dial, coverageLayer: -1 });
+    } catch (e) {
+      issues.push("The preview could not draw it: " + e.message);
+    }
+    return { spec: spec, issues: issues };
+  }
+
+  HG.ui = { start: start, state: state, goToStep: goToStep, steps: STEPS, tryJson: tryJson, loadSpec: loadSpec };
 })(window.HG);
