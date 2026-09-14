@@ -64,6 +64,13 @@
         hostile mobs only, not players or passive animals.
         <code>HorseAggroHandler.onHorseKicksMonster</code> doubles a horse's melee hit on any
         <code>Enemy</code>, so an ordinary horse kicks for 6 and a gladiator keeps its lead.</li>
+    <li><strong>A For Testers page</strong> (<a href="for-testers.html">for-testers.html</a>, Coding
+        view): the open overworld tests rewritten for volunteers, one action per step, with what a
+        pass and a fail look like. It leaves out what needs dev tools (<code>/testkit</code>, the
+        clock on a horse, stick-taming) and what a release jar cannot show (a wild horse's info
+        screen). Each test has a report button: with the AI helper set up it opens the chat
+        already reporting that test (<code>HG.aiChat.report</code>), otherwise it opens GitHub's
+        new-issue form filled in.</li>
     <li><strong>Three test setups were wrong, and are fixed.</strong> DAM DEFENCE put a full-health
         zombie against a plain horse, which killed the dam. HURT MARE's half health was undone when
         her traits applied as she joined the level. Both geldings lost their labels to the record

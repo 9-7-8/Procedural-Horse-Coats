@@ -505,7 +505,25 @@ window.HG = window.HG || {};
     if (wasOpen) setOpen(true);
   }
 
-  HG.aiChat = { open: function () { if (panel) setOpen(true); } };
+  HG.aiChat = {
+    open: function () { if (panel) setOpen(true); },
+    /**
+     * Open the panel and start a bug report with {@code starter} as the reader's
+     * first message - what the panel's own Report a bug button does, with words a
+     * page chose (wiki/for-testers.html names the test). Returns false when no AI
+     * is set up, so the page can fall back to GitHub's plain new-issue form.
+     */
+    report: function (starter) {
+      if (!panel || !ai.ready()) return false;
+      setOpen(true);
+      if (!settingsView.hidden) {
+        panel.querySelector(".phc-ai-panel-head button:nth-of-type(2)").click();   // Settings -> Back to chat
+      }
+      input.value = starter || "I'd like to report a bug.";
+      submit();
+      return true;
+    }
+  };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
   else start();

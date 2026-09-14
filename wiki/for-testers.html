@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Testers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+<style>
+    .tester-test { border: 1px solid rgba(127, 127, 127, 0.35); border-radius: 8px; padding: 0.2rem 1.1rem 1rem; margin: 1.2rem 0; }
+    .tester-test h3 { margin-top: 0.9rem; }
+    .tester-test ol { margin-bottom: 0.6rem; }
+    .tester-test ol li { margin: 0.15rem 0; }
+    .tester-need, .tester-pass, .tester-fail { margin: 0.45rem 0; }
+    .tester-pass strong { color: #2e8b57; }
+    .tester-fail strong { color: #c0392b; }
+    .report-btn { cursor: pointer; font: inherit; padding: 0.35rem 0.8rem; border-radius: 6px; border: 1px solid rgba(127, 127, 127, 0.6); background: transparent; color: inherit; }
+    .report-btn:hover { background: rgba(127, 127, 127, 0.15); }
+    .report-btn.big { font-weight: 600; padding: 0.5rem 1rem; }
+</style>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Project <span class="sep">/</span> for volunteer testers</p>
+<h1>For Testers</h1>
+<p class="lede">
+    Thank you for helping. This page is a list of things that still need someone to try in a
+    normal Minecraft world. Each test is a short list of steps, one action per step. Do the steps
+    in order. At the end, each test says what it looks like when it works and when something is
+    wrong. If something is wrong, press the <strong>Report a problem with this test</strong>
+    button under that test.
+</p>
+
+<div class="note">
+    <span class="label">You do not need to do all of them</span>
+    <p>
+        Pick any test. The ones near the top matter most, because they can break a save or crash
+        the game without anyone noticing. The ones at the bottom are about how things look.
+        Even one test done carefully is a real help.
+    </p>
+</div>
+
+<h2 id="before">Before you start</h2>
+
+<h3 id="need">What you need</h3>
+<ul>
+    <li>Minecraft with NeoForge 26.1.2, and the Horse Genetics mod jar in your <code>mods</code> folder.</li>
+    <li>A <strong>new, throwaway world</strong> for most tests. Some tests kill horses or break things on purpose.</li>
+    <li><strong>Cheats turned on</strong>, so you can switch to creative mode and use commands like <code>/time set night</code>.</li>
+    <li>For a few tests, a second player. Those tests say so.</li>
+</ul>
+
+<h3 id="basics">Things the tests assume you know</h3>
+<ul>
+    <li><strong>The horse browser:</strong> press <kbd>H</kbd>. It lists your horses, the gene database, recipes and a "Getting started" page.</li>
+    <li><strong>A horse's information screen:</strong> ride or tame the horse, open its inventory, then click the small <strong>i</strong> button. Only tamed horses have an inventory.</li>
+    <li><strong>Taming:</strong> ride a wild horse until hearts appear, the normal Minecraft way. Some horses also come to you if you crouch while holding food.</li>
+    <li><strong>The vet's kit</strong> tells you about a horse. Use it on a horse <em>without</em> crouching: it says whether a mare is in heat, whether she is pregnant (and with twins), or how many times a stallion has bred today. Crouch-using it on your own stallion turns him into a gelding, so be careful.</li>
+    <li><strong>Heat and pregnancy:</strong> a mare is in heat for one Minecraft day (20 real minutes), then out of heat for one day. A pregnancy lasts one Minecraft day. Plain golden carrots still make an instant foal, like normal Minecraft.</li>
+    <li><strong>Making a horse with a particular gene:</strong> in creative mode, open the <em>Horse Genetics</em> creative tab and take the <strong>Custom Horse Spawn Egg</strong>. Right-click the ground to open its editor. Type the gene's name into the search box, add the gene, and set both of its buttons to the variant the test names. Then press <strong>Spawn</strong>. A test that says "a <em>Holy ward</em> horse" means a horse made this way.</li>
+</ul>
+
+<details>
+<summary><strong>Recipes you might need</strong> (click to open)</summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>How to make it</th></tr></thead>
+<tbody>
+<tr><td>Horse hair</td><td>Use shears on an adult horse: 1 to 3 hair, once a day per horse.</td></tr>
+<tr><td>Hair bundle</td><td>4 horse hair.</td></tr>
+<tr><td>Hair cloth</td><td>4 hair bundles.</td></tr>
+<tr><td>Braided rope</td><td>3 hair bundles.</td></tr>
+<tr><td>Vet's kit</td><td>Shears, leather and an iron ingot.</td></tr>
+<tr><td>Empty seed jar</td><td>A glass bottle and horse hair.</td></tr>
+<tr><td>Stall sign</td><td>An oak sign and horse hair.</td></tr>
+<tr><td>Holding pen sign</td><td>A spruce sign and horse hair.</td></tr>
+<tr><td>Blank ticket</td><td>Paper and horse hair.</td></tr>
+<tr><td>Holding pen ticket</td><td>A blank ticket and wheat.</td></tr>
+<tr><td>Basic ticket</td><td>A blank ticket and horse hair.</td></tr>
+<tr><td>Basic whistle</td><td>Horse hair, an iron nugget and a stick.</td></tr>
+<tr><td>Golden whistle</td><td>A basic whistle and a gold ingot.</td></tr>
+<tr><td>Echo whistle</td><td>A golden whistle and an echo shard.</td></tr>
+<tr><td>Ender whistle</td><td>An echo whistle, an eye of ender and an ender pearl.</td></tr>
+<tr><td>Blank transfer paper</td><td>8 paper around 1 horse hair.</td></tr>
+<tr><td>Equine Research Shelf</td><td>A bookshelf and 2 horse hair.</td></tr>
+<tr><td>Cowboy Hitch</td><td>2 hair cloth, 3 braided rope and 2 fences.</td></tr>
+<tr><td>Horseman's Table</td><td>3 hair cloth, 2 leather and 2 fences.</td></tr>
+<tr><td>Stabilizer carrot</td><td>A golden carrot, horse hair and quartz.</td></tr>
+<tr><td>Magnifier carrot</td><td>A golden carrot, horse hair and glowstone dust.</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+
+<h2 id="reporting">How to report a problem</h2>
+<p>
+    Every test has a <strong>Report a problem with this test</strong> button. What it does depends
+    on whether you have set up the wiki's AI helper (<a href="ai-setup.html">how</a>):
+</p>
+<ul>
+    <li><strong>With the AI helper:</strong> a chat opens and helps you write the report, asking
+        only for what is missing. You check it and send it.</li>
+    <li><strong>Without it:</strong> GitHub opens a new issue with the test's name and a short form
+        already filled in. You need a free GitHub account to press Submit.</li>
+</ul>
+<p>
+    Either way, it helps a lot to say <strong>which step</strong> went wrong, what you saw, the
+    mod version, and whether you were in single player or on a server. If the game crashed,
+    attach the newest file from the <code>crash-reports</code> folder.
+</p>
+<p><button type="button" class="report-btn big" data-report="Something not on this page">Report a problem that is not on this page</button></p>
+
+<!-- ================================================================== -->
+<h2 id="safety">1. Crashes and save safety (most important)</h2>
+
+<div class="tester-test" id="t-join">
+<h3>Joining a world near horses does not kick you</h3>
+<p class="tester-need"><strong>You need:</strong> a new world. A server and a second player if you can.</p>
+<ol>
+    <li>Create a new world.</li>
+    <li>Travel until you can see wild horses.</li>
+    <li>Stay near them for one minute.</li>
+    <li>Switch to creative mode.</li>
+    <li>Take a Custom Horse Spawn Egg from the Horse Genetics tab.</li>
+    <li>Open it and press <strong>Make egg</strong>.</li>
+    <li>Keep the egg it gives you in your hotbar.</li>
+    <li>Press <kbd>H</kbd> and open <em>My horses</em>.</li>
+    <li>If you are on a server, ask a second player to join while horses are in view.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> nobody is disconnected.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> anyone is kicked with a message like "Failed to encode packet".</p>
+<button type="button" class="report-btn" data-report="Joining a world near horses does not kick you">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-clean-install">
+<h3>The mod works in a plain install</h3>
+<p class="tester-need"><strong>You need:</strong> a fresh NeoForge 26.1.2 profile with only this mod.</p>
+<ol>
+    <li>Launch the game.</li>
+    <li>Create a world with cheats on.</li>
+    <li>Tame a wild horse.</li>
+    <li>Open its information screen.</li>
+    <li>In creative, take any filled breed spawn egg from the Horse Genetics tab.</li>
+    <li>Use it on the ground.</li>
+    <li>Type <code>/locate structure horsegenetics:horse_stable</code> in chat.</li>
+    <li>Press <kbd>H</kbd>.</li>
+    <li>Open the <em>Gene database</em> tab.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the world loads, the tamed horse has a generated name, the egg makes a horse of its breed, the command finds a stable, and the gene list is filled.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the game crashes, the horse has no name, the breed egg makes a "Feral Mixed" horse, or the gene list is empty.</p>
+<button type="button" class="report-btn" data-report="The mod works in a plain install">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-f8">
+<h3>The F8 horse highlight does not crash the game</h3>
+<p class="tester-need"><strong>You need:</strong> a wild herd nearby.</p>
+<ol>
+    <li>Press <kbd>F8</kbd>.</li>
+    <li>Press <kbd>F8</kbd> again.</li>
+    <li>Press <kbd>F8</kbd> once more.</li>
+    <li>Stay near the herd for 4 minutes.</li>
+    <li>Look at the name of the herd's leader.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the second press says "Horse highlight OFF" and the outlines go away; after 4 minutes it says "Horse highlight timed out"; the leader's name turns back to white; the game keeps running.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the game crashes, or chat says "Horse highlight hit an error and switched itself off". Report that message even though nothing crashed.</p>
+<button type="button" class="report-btn" data-report="The F8 horse highlight does not crash the game">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-fly">
+<h3>Flying through new land does not crash</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and a new world. A server too, if you can.</p>
+<ol>
+    <li>Switch to creative mode.</li>
+    <li>Fly quickly in one direction through land nobody has explored.</li>
+    <li>Keep flying for at least 10 minutes, through as many biomes as you can.</li>
+    <li>If you can, do the same on a server.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> nothing crashes.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the game or server crashes. Attach the newest file from <code>crash-reports</code>.</p>
+<button type="button" class="report-btn" data-report="Flying through new land does not crash">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-overbreed">
+<h3>Horses left alone do not breed without end</h3>
+<p class="tester-need"><strong>You need:</strong> a fenced paddock about 30 by 30 with hay bales and water inside, one stallion and 6 to 8 mares at full health. Horses only breed while you are nearby, so you will stay close by (being away from the keyboard is fine, but do not pause).</p>
+<ol>
+    <li>Put all the horses in the paddock.</li>
+    <li>Count them and write the number down.</li>
+    <li>Stay near the paddock, with the game not paused, for several Minecraft days.</li>
+    <li>Count the horses once every Minecraft day.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> foals appear at first, then the number stops growing and stays about the same.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the number keeps going up day after day.</p>
+<button type="button" class="report-btn" data-report="Horses left alone do not breed without end">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-reload">
+<h3>Horses are the same after saving and reloading</h3>
+<p class="tester-need"><strong>You need:</strong> three tamed horses that are easy to tell apart (spotted or grey, a very big one, and one that is hurt).</p>
+<ol>
+    <li>Take a screenshot of each horse.</li>
+    <li>Open each horse's information screen.</li>
+    <li>Write down its speed, health, jump, size, sex and bond.</li>
+    <li>Press <em>Save and Quit to Title</em>.</li>
+    <li>Open the world again.</li>
+    <li>Compare each horse with your notes and screenshots.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the markings, numbers and sex are all the same, and the hurt horse is still hurt.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a marking moved, a number changed, a horse's sex changed, or the hurt horse is suddenly healed.</p>
+<button type="button" class="report-btn" data-report="Horses are the same after saving and reloading">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-pregnant-reload">
+<h3>A pregnancy survives saving and reloading</h3>
+<p class="tester-need"><strong>You need:</strong> a pregnant mare (see <a href="#t-natural">the breeding test</a>) and a vet's kit.</p>
+<ol>
+    <li>Use the vet's kit on the mare, without crouching.</li>
+    <li>Check that it says she is pregnant.</li>
+    <li>Press <em>Save and Quit to Title</em>.</li>
+    <li>Open the world again.</li>
+    <li>Open her information screen and read the Breeding line.</li>
+    <li>Wait up to one Minecraft day (20 real minutes) nearby.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the Breeding line still says Pregnant, and she gives birth.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the pregnancy is gone, or she never gives birth.</p>
+<button type="button" class="report-btn" data-report="A pregnancy survives saving and reloading">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-birth-away">
+<h3>A mare gives birth while you are far away</h3>
+<p class="tester-need"><strong>You need:</strong> a pregnant mare and a vet's kit.</p>
+<ol>
+    <li>Use the vet's kit on her and check she is pregnant.</li>
+    <li>Travel more than 1000 blocks away.</li>
+    <li>Stay away for more than 20 real minutes.</li>
+    <li>Travel back to her.</li>
+    <li>Watch her as she comes into view.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> a foal appears within a couple of seconds of you arriving.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> there is no foal, or she still says pregnant long after she was due.</p>
+<button type="button" class="report-btn" data-report="A mare gives birth while you are far away">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-freeze">
+<h3>Looking at a horse does not freeze it forever</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed horse that is wandering around.</p>
+<ol>
+    <li>Open the horse's inventory.</li>
+    <li>Click the <strong>i</strong> button.</li>
+    <li>Watch the horse behind the screen. It should stand still.</li>
+    <li>Close all the screens.</li>
+    <li>Watch the horse for 5 seconds.</li>
+    <li>Open the information screen again.</li>
+    <li>Press <kbd>T</kbd> and type <code>/kill</code> to die with the screen open, then respawn.</li>
+    <li>Watch the horse for 5 seconds.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse stands still while the screen is open and starts moving again within about 3 seconds after you close it or die.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the horse stays frozen.</p>
+<button type="button" class="report-btn" data-report="Looking at a horse does not freeze it forever">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-stables">
+<h3>Stables do not fill up twice</h3>
+<p class="tester-need"><strong>You need:</strong> cheats on.</p>
+<ol>
+    <li>Type <code>/locate structure horsegenetics:horse_stable</code>.</li>
+    <li>Go to the stable it finds.</li>
+    <li>Count the horses there.</li>
+    <li>Fly 500 blocks away.</li>
+    <li>Fly back.</li>
+    <li>Count the horses again.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the count is the same both times, and no horse is stuck in a wall, on a roof or stacked on another horse.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the number of horses doubles, or horses are stuck.</p>
+<button type="button" class="report-btn" data-report="Stables do not fill up twice">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-ward">
+<h3>A Holy ward horse does not break a mob farm</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a zombie spawner and a <em>Holy ward</em> horse.</p>
+<ol>
+    <li>Place a zombie spawner.</li>
+    <li>Stand close to it for 2 minutes.</li>
+    <li>Count how many zombies it makes.</li>
+    <li>Spawn the Holy ward horse right next to the spawner.</li>
+    <li>Count the zombies for another 2 minutes.</li>
+    <li>Use a zombie spawn egg next to the horse.</li>
+    <li>Breed two cows next to the horse.</li>
+    <li>Kill the horse.</li>
+    <li>At night, watch how monsters spawn near where the horse died.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the spawner keeps making zombies at the same speed, the spawn egg works, the cows breed, and normal night spawns come back within a couple of seconds after the horse dies.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the spawner slows down or stops, or monsters still do not spawn after the horse is dead.</p>
+<button type="button" class="report-btn" data-report="A Holy ward horse does not break a mob farm">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-hot-blooded">
+<h3>A Hot blooded horse does not make holes or floods</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, two <em>Hot blooded</em> horses, a frozen lake, and a snowy slope with a small house below it.</p>
+<ol>
+    <li>Put one horse on the frozen lake.</li>
+    <li>Wait 10 minutes.</li>
+    <li>Put the other horse on the snow above the house.</li>
+    <li>Wait 10 minutes.</li>
+    <li>Look at the lake and the house.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the ice under the first horse turns to water and it swims, and melted snow does not flood the house.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a horse falls into a hole, or water floods the house.</p>
+<button type="button" class="report-btn" data-report="A Hot blooded horse does not make holes or floods">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-verdant">
+<h3>A Verdant horse does not change what you built</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a <em>Verdant</em> horse set to grass and one set to moss.</p>
+<ol>
+    <li>Stand the grass horse on bare dirt.</li>
+    <li>Stand the moss horse on a cobblestone path next to some planks.</li>
+    <li>Wait 20 minutes.</li>
+    <li>Look at the ground around both.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the dirt slowly grows some grass, and the cobblestone and planks are untouched.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> blocks you placed turn into something else.</p>
+<button type="button" class="report-btn" data-report="A Verdant horse does not change what you built">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-suntouched">
+<h3>A Suntouched horse does not leave light blocks behind</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and a <em>Suntouched</em> horse.</p>
+<ol>
+    <li>Type <code>/time set night</code>.</li>
+    <li>Spawn the horse and ride it around for a minute.</li>
+    <li>Take a <em>Light</em> block from the creative menu and hold it. This makes hidden light blocks visible.</li>
+    <li>Look back along the path you rode.</li>
+    <li>Kill the horse.</li>
+    <li>Look around where it died.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> you see no leftover light blocks anywhere.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> light blocks stay behind in the world.</p>
+<button type="button" class="report-btn" data-report="A Suntouched horse does not leave light blocks behind">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-shelf-reload">
+<h3>The Equine Research Shelf keeps its papers</h3>
+<p class="tester-need"><strong>You need:</strong> a research shelf, 3 research papers and some books.</p>
+<ol>
+    <li>Place the shelf.</li>
+    <li>Put 3 research papers into it.</li>
+    <li>Press <em>Save and Quit to Title</em>.</li>
+    <li>Open the world again.</li>
+    <li>Open the shelf and look at the list.</li>
+    <li>Break the shelf.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> all 3 genes are still listed after reloading, and breaking the shelf drops every paper and book.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> any paper is lost.</p>
+<button type="button" class="report-btn" data-report="The Equine Research Shelf keeps its papers">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-werewolf">
+<h3>A werewolf horse comes back as the same horse</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and a horse with <em>Lycanthropy</em> set to the wolf form.</p>
+<ol>
+    <li>Give the horse a name with a name tag.</li>
+    <li>Type <code>/time set night</code>.</li>
+    <li>Watch it turn into a wolf.</li>
+    <li>Walk the wolf about 100 blocks.</li>
+    <li>Press <em>Save and Quit to Title</em> while it is still a wolf.</li>
+    <li>Open the world again.</li>
+    <li>Type <code>/time set day</code>.</li>
+    <li>Find the horse and open its information screen.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> it turns back into a horse where the wolf was standing, with the same name and family tree.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the horse is lost, comes back with a new name, or there are two of it.</p>
+<button type="button" class="report-btn" data-report="A werewolf horse comes back as the same horse">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="breeding">2. Breeding</h2>
+
+<div class="tester-test" id="t-golden">
+<h3>Plain golden carrots still make an instant foal</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed mare, a tamed stallion and golden carrots.</p>
+<ol>
+    <li>Feed the mare a golden carrot.</li>
+    <li>Feed the stallion a golden carrot.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> a foal appears right away.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> no foal appears.</p>
+<button type="button" class="report-btn" data-report="Plain golden carrots still make an instant foal">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-natural">
+<h3>A stallion and a mare in heat breed on their own</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed mare and stallion at full health, a vet's kit, and a small fenced area.</p>
+<ol>
+    <li>Use the vet's kit on the mare, without crouching.</li>
+    <li>If she is not in heat, wait a few minutes and use it again.</li>
+    <li>When she is in heat, put the stallion in with her.</li>
+    <li>Watch them.</li>
+    <li>When hearts appear, use the vet's kit on her again.</li>
+    <li>Wait one Minecraft day (20 real minutes) nearby.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> they walk to each other and stand close for a few seconds before hearts appear; the kit then says she is pregnant (or that it did not take); and a foal is born about a day later.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it never happens, or it happens while she is not in heat.</p>
+<button type="button" class="report-btn" data-report="A stallion and a mare in heat breed on their own">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-hurt-mare">
+<h3>A hurt mare is not bred until she heals</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed mare in heat, a stallion, a vet's kit.</p>
+<ol>
+    <li>Hurt the mare a little, for example with a small fall.</li>
+    <li>Put her in a fenced area with the stallion, away from hay and water.</li>
+    <li>Watch them for 5 minutes.</li>
+    <li>Let her heal by standing near water and a hay bale.</li>
+    <li>Watch again while she is still in heat.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> no hearts appear while she is hurt, and they breed after she heals.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the stallion breeds her while she is hurt.</p>
+<button type="button" class="report-btn" data-report="A hurt mare is not bred until she heals">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-pregnant-refuse">
+<h3>A pregnant mare refuses golden carrots cleanly</h3>
+<p class="tester-need"><strong>You need:</strong> a pregnant mare and a golden carrot. A server too, if you can.</p>
+<ol>
+    <li>Hold a golden carrot.</li>
+    <li>Right-click the pregnant mare.</li>
+    <li>If you can, do the same on a server.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> a yellow message says no, and you do not start climbing on her or see her eat.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you start to mount her, or she eats the carrot.</p>
+<button type="button" class="report-btn" data-report="A pregnant mare refuses golden carrots cleanly">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-jar">
+<h3>Seed jars</h3>
+<p class="tester-need"><strong>You need:</strong> two players, empty seed jars, golden carrots, a vet's kit, a chest, and a stallion and mare of your own.</p>
+<ol>
+    <li>Use an empty jar on your stallion without feeding him first.</li>
+    <li>Feed your stallion a golden carrot.</li>
+    <li>Use an empty jar on him again.</li>
+    <li>Hover over the filled jar to read it.</li>
+    <li>Try to fill a jar from the other player's stallion.</li>
+    <li>Use your filled jar on your mare while she is <em>not</em> in heat.</li>
+    <li>Use it on your mare when the vet's kit says she <em>is</em> in heat.</li>
+    <li>Ask the other player to fill a jar from their own stallion and give it to you.</li>
+    <li>Use their jar on your mare the next time she is in heat.</li>
+    <li>Put a filled jar in a chest.</li>
+    <li>Save and quit, open the world again, and hover over that jar.</li>
+    <li>When a foal is born, open its Family tab.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the unfed stallion says he must be fed first; the fed one fills the jar and its tooltip names him; the other player's stallion refuses; the out-of-heat mare refuses and you keep the jar; the in-heat mare says pregnant or "didn't take"; their jar works on your mare; the jar still names the stallion after reloading; the foal's family tab shows the stallion; and a jar never makes you start riding a horse.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a refusal is missing, a jar is used up on a mare that was not in heat, you start mounting a horse, or the jar forgets its stallion.</p>
+<button type="button" class="report-btn" data-report="Seed jars">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-geld">
+<h3>Gelding a stallion with the vet's kit</h3>
+<p class="tester-need"><strong>You need:</strong> a vet's kit, your own tamed stallion, a mare, golden carrots, a wild stallion, and another player's stallion.</p>
+<ol>
+    <li>Crouch and use the kit on the wild stallion.</li>
+    <li>Crouch and use it on the other player's stallion.</li>
+    <li>Crouch and use it on a mare.</li>
+    <li>Crouch and use it on your own stallion.</li>
+    <li>Look at the symbol on his nameplate.</li>
+    <li>Open his information screen.</li>
+    <li>Try to fill a seed jar from him.</li>
+    <li>Feed golden carrots to him and to a mare.</li>
+    <li>Leave him with a mare in heat for one Minecraft day.</li>
+    <li>Press <kbd>H</kbd>, open <em>My horses</em>, and type <code>gelding</code> in the filter.</li>
+    <li>Type <code>stallion</code> in the filter instead.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the wild stallion, the other player's stallion and the mare all refuse; your stallion "is now a gelding"; his symbol turns grey and his screen says Gelding; the jar and the golden carrots both say he is a gelding; he never breeds the mare; the <code>gelding</code> filter finds him and <code>stallion</code> does not.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> any of those does not happen.</p>
+<button type="button" class="report-btn" data-report="Gelding a stallion with the vet's kit">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-met">
+<h3>A lost pregnancy does not name the gene</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a mare and a stallion both with <em>MET</em> set to one copy (<code>met/N</code>), and golden carrots.</p>
+<ol>
+    <li>Breed the pair with golden carrots.</li>
+    <li>Read the chat message.</li>
+    <li>Repeat about 12 times, reading each message.</li>
+    <li>When a pairing gives no foal, look at the mare's health.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> about 1 time in 4 there is no foal, a message describes what happened, and the mare loses half a heart. The message never says "MET" or "embryonic lethal".</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the gene is named, or it happens every time or never.</p>
+<button type="button" class="report-btn" data-report="A lost pregnancy does not name the gene">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-lethal">
+<h3>Foals that cannot survive, do not</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a hay bale and water.</p>
+<ol>
+    <li>In the spawn egg editor, add <em>SCN4A (HYPP)</em> and set it to <code>H/H</code>.</li>
+    <li>Choose the foal age.</li>
+    <li>Spawn it next to water and a hay bale.</li>
+    <li>Read its death message.</li>
+    <li>Do the same with <em>PLOD1</em> set to <code>ffs/ffs</code>.</li>
+    <li>Now spawn an adult with <em>PLOD1</em> set to <code>ffs/ffs</code>.</li>
+    <li>Wait one Minecraft day.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> each foal dies even with hay and water, the death message is readable, and the adult lives.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a foal lives, the message shows raw text like <code>death.attack.horsegenetics…</code>, or the adult dies.</p>
+<button type="button" class="report-btn" data-report="Foals that cannot survive, do not">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-carrots">
+<h3>Stabilizer and magnifier carrots</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a vet's kit, golden carrots, a stabilizer carrot and a magnifier carrot, a stallion with <em>Extension</em> set to <code>E/e</code> and a mare set to <code>e/e</code>.</p>
+<ol>
+    <li>Feed the stabilizer carrot to the stallion.</li>
+    <li>Wait until the vet's kit says the mare is in heat.</li>
+    <li>Feed golden carrots to both.</li>
+    <li>When the foal is born, open its Genes tab and read <em>Extension</em>.</li>
+    <li>Do it again with the magnifier carrot instead.</li>
+    <li>Feed any carrot to a foal.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the stabilizer foal always gets <code>E</code>, the magnifier foal always gets <code>e</code>, and the foal says it cannot be bred.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the foal gets the other copy, or the carrot does nothing you can see.</p>
+<button type="button" class="report-btn" data-report="Stabilizer and magnifier carrots">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-cross-names">
+<h3>Crossbred foals get the right breed name</h3>
+<p class="tester-need"><strong>You need:</strong> breed spawn eggs for at least three breeds, and golden carrots.</p>
+<ol>
+    <li>Breed two horses of the same breed and read the foal's breed.</li>
+    <li>Breed two different breeds and read the foal's breed.</li>
+    <li>Breed that cross to one of its parent breeds and read the foal's breed.</li>
+    <li>Breed that cross to a third breed and read the foal's breed.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the foals read, in order: that breed; "A × B cross"; the same cross; "Mixed".</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a foal reads "… × Feral Mixed cross" or anything else unexpected.</p>
+<button type="button" class="report-btn" data-report="Crossbred foals get the right breed name">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-same-sex">
+<h3>Two mares or two stallions do not breed</h3>
+<p class="tester-need"><strong>You need:</strong> two tamed mares, two tamed stallions, golden carrots.</p>
+<ol>
+    <li>Feed golden carrots to both mares.</li>
+    <li>Feed golden carrots to both stallions.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> no foal appears and a message tells you why.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a foal appears, or nothing is said at all.</p>
+<button type="button" class="report-btn" data-report="Two mares or two stallions do not breed">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-weaning">
+<h3>Weaning a foal</h3>
+<p class="tester-need"><strong>You need:</strong> a mare that has just given birth, and a lead.</p>
+<ol>
+    <li>Open the mare's information screen and read the Breeding line.</li>
+    <li>Put a lead on the foal.</li>
+    <li>Lead the foal more than 32 blocks away.</li>
+    <li>Wait there for one minute.</li>
+    <li>Go back and read the mare's Breeding line again.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the line ends with "• nursing" at first, and that part is gone afterwards.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> "nursing" never appears, or never goes away.</p>
+<button type="button" class="report-btn" data-report="Weaning a foal">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-wild-bands">
+<h3>Wild herds have foals but stay small</h3>
+<p class="tester-need"><strong>You need:</strong> a wild herd near your base.</p>
+<ol>
+    <li>Count the horses in the herd.</li>
+    <li>Play near the herd for several Minecraft days.</li>
+    <li>Count the herd once every day.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> foals appear, and the herd stops growing.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the herd keeps getting bigger every day.</p>
+<button type="button" class="report-btn" data-report="Wild herds have foals but stay small">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-cowboy-geldings">
+<h3>The cowboy sells geldings a little cheaper</h3>
+<p class="tester-need"><strong>You need:</strong> a cowboy (see <a href="#t-cowboy">the cowboy test</a>).</p>
+<ol>
+    <li>Open the cowboy's trades.</li>
+    <li>Look at the sex and price of each horse he sells.</li>
+    <li>If you can, check two or three different cowboys.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> some horses are geldings, and they cost less than the stallions.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> no cowboy ever sells a gelding, or geldings cost the same.</p>
+<button type="button" class="report-btn" data-report="The cowboy sells geldings a little cheaper">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="care">3. Looking after horses</h2>
+
+<div class="tester-test" id="t-healing">
+<h3>Healing needs water and food nearby</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed horse, water, a hay bale, wheat.</p>
+<ol>
+    <li>Hurt the horse a little with a small fall.</li>
+    <li>Stand it next to water and a hay bale.</li>
+    <li>Watch its health for 20 seconds.</li>
+    <li>Lead it away from the water.</li>
+    <li>Watch its health for 20 seconds.</li>
+    <li>Feed it wheat by hand.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> it heals, with hearts, next to water and hay; stops healing away from them; and wheat still heals it.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it heals anywhere, or never heals.</p>
+<button type="button" class="report-btn" data-report="Healing needs water and food nearby">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-bond">
+<h3>Bond goes up, but only so much a day</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed horse and plenty of wheat or apples.</p>
+<ol>
+    <li>Open its information screen and write down its bond.</li>
+    <li>Ride it for a few minutes.</li>
+    <li>Open the information screen again and write down its bond.</li>
+    <li>Feed it by hand, again and again.</li>
+    <li>Watch for hearts each time you feed it.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> bond goes up, you see hearts while it is going up, and the hearts stop after the bond has gone up by 15 in one day.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> bond never stops going up, or never goes up.</p>
+<button type="button" class="report-btn" data-report="Bond goes up, but only so much a day">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-bond-tiers">
+<h3>A horse with a strong bond follows you</h3>
+<p class="tester-need"><strong>You need:</strong> one horse you look after for several Minecraft days (bond can only rise 15 a day), a lead.</p>
+<ol>
+    <li>Raise the horse's bond every day until it reaches 31.</li>
+    <li>Get off within 10 blocks of it and walk around it.</li>
+    <li>Keep raising the bond until it reaches 61.</li>
+    <li>Walk around it again.</li>
+    <li>Keep raising the bond until it reaches 81.</li>
+    <li>Walk around a fence and see what it does.</li>
+    <li>Put a lead on it and walk around it again.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> at 31 it turns to face you; at 61 it walks towards you; at 81 it follows you around the fence and stops about 3 blocks away; on a lead it ignores you.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it does these at the wrong bond, or follows you while on a lead.</p>
+<button type="button" class="report-btn" data-report="A horse with a strong bond follows you">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-feeding-messages">
+<h3>Feeding tells you when it did nothing</h3>
+<p class="tester-need"><strong>You need:</strong> a hurt horse, a horse at full health with full bond, and food.</p>
+<ol>
+    <li>Feed the hurt horse.</li>
+    <li>Feed the healthy, full-bond horse.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the hurt horse eats with no message, and the healthy horse eats and says it "did not seem to need it" (the food is still used up).</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> food disappears with no message at all, or a horse refuses food it should eat.</p>
+<button type="button" class="report-btn" data-report="Feeding tells you when it did nothing">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-favourite-food">
+<h3>Horses come for food, and run for their favourite</h3>
+<p class="tester-need"><strong>You need:</strong> a herd of tamed horses, wheat, and a horse whose favourite food you know (its information screen shows it).</p>
+<ol>
+    <li>Hold wheat near the herd.</li>
+    <li>Walk away slowly.</li>
+    <li>Stand across a paddock holding the horse's favourite food.</li>
+    <li>Watch how fast it comes.</li>
+    <li>Put the food away while it is on its way.</li>
+    <li>Ride one horse, and put a lead on another, while holding food.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> wheat makes horses drift slowly towards you; the favourite is noticed from further away and the horse gallops; it stops a couple of blocks from you; it stops coming when you put the food away; ridden and led horses ignore the food.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the favourite and wheat look exactly the same, or the horse refuses its favourite.</p>
+<button type="button" class="report-btn" data-report="Horses come for food, and run for their favourite">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-milking">
+<h3>Milking rules</h3>
+<p class="tester-need"><strong>You need:</strong> empty buckets, a tamed mare at full health, a hurt tamed mare, a wild mare, a stallion and a foal.</p>
+<ol>
+    <li>Use a bucket on the healthy tamed mare.</li>
+    <li>Use a bucket on her again straight away.</li>
+    <li>Use a bucket on the hurt mare.</li>
+    <li>Use a bucket on the wild mare.</li>
+    <li>Use a bucket on the stallion.</li>
+    <li>Use a bucket on the foal.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the healthy mare gives milk once a day and then says there is nothing yet; the hurt mare says she won't until she heals; you simply ride the wild mare; the stallion kicks you and says so; the foal says it has no milk.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a click does nothing at all and says nothing.</p>
+<button type="button" class="report-btn" data-report="Milking rules">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-shearing">
+<h3>Shearing a horse</h3>
+<p class="tester-need"><strong>You need:</strong> shears, a tamed adult horse and a foal.</p>
+<ol>
+    <li>Shear the adult horse.</li>
+    <li>Shear it again straight away.</li>
+    <li>Shear the foal.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the adult gives 1 to 3 horse hair; the second time says the hair hasn't grown back; the foal says it has no coat to shear yet.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you can shear it again straight away, or nothing happens.</p>
+<button type="button" class="report-btn" data-report="Shearing a horse">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-dam">
+<h3>A mare and her foal</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed mare and stallion, golden carrots, a lead.</p>
+<ol>
+    <li>Breed the pair with golden carrots.</li>
+    <li>Put a lead on the mare.</li>
+    <li>Lead her 20 blocks away.</li>
+    <li>Watch the foal.</li>
+    <li>Hit the foal once, gently.</li>
+    <li>Watch the mare.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the foal follows its mother, and the mare does <em>not</em> attack you.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the foal stays behind, or the tamed mare attacks you.</p>
+<button type="button" class="report-btn" data-report="A mare and her foal">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-wild-herds">
+<h3>Wild herds stick together</h3>
+<p class="tester-need"><strong>You need:</strong> a wild herd and a lead.</p>
+<ol>
+    <li>Look at the breed of several horses in one herd.</li>
+    <li>Put a lead on one wild mare.</li>
+    <li>Lead her 20 blocks away from her herd.</li>
+    <li>Take the lead off.</li>
+    <li>Watch for a minute.</li>
+    <li>Hit a wild horse once.</li>
+    <li>Run out of sight for 3 seconds.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> every horse in one herd is the same breed; the mare goes back to her herd, or her stallion comes to fetch her; the herd chases you after you hit one, then calms down.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the mare stays lost, the herd is a mix of breeds, or the herd never calms down.</p>
+<button type="button" class="report-btn" data-report="Wild herds stick together">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="items">4. Items</h2>
+
+<div class="tester-test" id="t-ender-whistle">
+<h3>The ender whistle</h3>
+<p class="tester-need"><strong>You need:</strong> an ender whistle, your own tamed horse, a wild horse, and a way to the Nether. A second player for the last steps.</p>
+<ol>
+    <li>Right-click the wild horse with the whistle.</li>
+    <li>Right-click your own tamed horse with it.</li>
+    <li>Right-click a different horse with the same whistle.</li>
+    <li>Walk 30 blocks away.</li>
+    <li>Right-click the air to blow the whistle.</li>
+    <li>Ride more than 1000 blocks away.</li>
+    <li>Blow the whistle again.</li>
+    <li>Leave the horse and go through a Nether portal.</li>
+    <li>Blow the whistle in the Nether.</li>
+    <li>Open the horse's information screen.</li>
+    <li>Put the whistle in a chest.</li>
+    <li>Kill that horse.</li>
+    <li>Take the whistle out of the chest.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the wild horse refuses; your horse is "bound for good"; the other horse does not change it; the horse appears in front of you from 30 blocks; from far away it says it "echoes a long way off" and the horse arrives within 5 seconds; it crosses into the Nether with the same name, coat and genes; and the whistle crumbles to dust after the horse dies.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it always says nothing answered from far away, or the horse changes when it arrives.</p>
+<button type="button" class="report-btn" data-report="The ender whistle">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-whistles">
+<h3>The basic and golden whistles</h3>
+<p class="tester-need"><strong>You need:</strong> a basic whistle, a golden whistle, 2 or 3 tamed horses, a lead.</p>
+<ol>
+    <li>Walk 10 blocks from your horses.</li>
+    <li>Blow the basic whistle.</li>
+    <li>Walk 20 blocks away.</li>
+    <li>Blow the basic whistle.</li>
+    <li>Blow the golden whistle from the same spot.</li>
+    <li>Put a lead on one horse and tie it to a fence.</li>
+    <li>Walk away and blow the golden whistle.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> at 10 blocks the horses arrive side by side with a chime; at 20 blocks the basic whistle says no horses are in range but the golden one brings them; the tied horse is freed and comes too.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> horses land inside blocks, or the ranges are wrong.</p>
+<button type="button" class="report-btn" data-report="The basic and golden whistles">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-stall">
+<h3>Stall signs and tickets</h3>
+<p class="tester-need"><strong>You need:</strong> stall signs, basic tickets, your own tamed horse, a wild horse, hay bales, and a small enclosed stall you build.</p>
+<ol>
+    <li>Right-click the wild horse with a stall sign.</li>
+    <li>Right-click a wall with a blank stall sign.</li>
+    <li>Right-click your own horse with a stall sign.</li>
+    <li>Place that sign on the outside wall of your stall.</li>
+    <li>Walk away with the horse.</li>
+    <li>Use a ticket on the horse.</li>
+    <li>Fill the stall with hay bales.</li>
+    <li>Use another ticket on the horse.</li>
+    <li>Break the sign.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the first two say why and leave the sign blank; the sign binds and places; the ticket puts the horse in the middle of the stall; the full stall refuses and you keep the ticket; breaking the sign says "Stall released".</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the horse ends up in a wall, or a ticket is used up when it refused.</p>
+<button type="button" class="report-btn" data-report="Stall signs and tickets">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-holding-pen">
+<h3>The holding pen</h3>
+<p class="tester-need"><strong>You need:</strong> a holding pen sign, holding pen tickets, your own tamed horse, a wild horse, and a fenced pen.</p>
+<ol>
+    <li>Use a holding pen ticket on your horse before you have a pen.</li>
+    <li>Hang the holding pen sign on the pen's wall.</li>
+    <li>Use a ticket on your horse.</li>
+    <li>Use a ticket on the wild horse.</li>
+    <li>Take your horse into the Nether and use a ticket there.</li>
+    <li>Break the sign.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the first ticket says you have no holding pen yet; your horse arrives in the middle of the pen; the wild horse refuses; it works from the Nether; breaking the sign releases the pen.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the horse lands in the fence, or a ticket is lost when it refused.</p>
+<button type="button" class="report-btn" data-report="The holding pen">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-transfer">
+<h3>Selling a horse with transfer papers</h3>
+<p class="tester-need"><strong>You need:</strong> two players, a crafted blank transfer paper, your own tamed horse.</p>
+<ol>
+    <li>Hover over the crafted paper.</li>
+    <li>Right-click the other player's horse with it.</li>
+    <li>Right-click your own horse with it.</li>
+    <li>Give the signed paper to the other player.</li>
+    <li>Ask them to use it.</li>
+    <li>Ask them to open the horse's family tree.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the paper says it is bound to you; the other player's horse refuses; the horse becomes theirs; the family tree still shows you as the breeder.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you can sign someone else's horse, or the breeder changes.</p>
+<button type="button" class="report-btn" data-report="Selling a horse with transfer papers">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-shelf">
+<h3>Copying genes on the Equine Research Shelf</h3>
+<p class="tester-need"><strong>You need:</strong> a research shelf, research papers, books.</p>
+<ol>
+    <li>Place the shelf.</li>
+    <li>Put a research paper in on the Store tab.</li>
+    <li>Put a second paper for the same gene in.</li>
+    <li>Open the Copy tab and pick the gene.</li>
+    <li>Add some books.</li>
+    <li>Close the shelf and walk away for 2 minutes.</li>
+    <li>Come back and open it.</li>
+    <li>Take the book out halfway through a copy.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> it looks like a bookshelf; the second paper for the same gene stays in its slot; copies keep being made while you are away, with a progress bar; taking the book out resets the progress.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> no copies are made while you are away, or items disappear.</p>
+<button type="button" class="report-btn" data-report="Copying genes on the Equine Research Shelf">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-name-tag">
+<h3>Renaming a horse with a name tag</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed horse and two name tags.</p>
+<ol>
+    <li>Right-click the horse with a name tag.</li>
+    <li>Change the name and confirm.</li>
+    <li>Right-click it with the second name tag.</li>
+    <li>Press Cancel.</li>
+    <li>Count your name tags.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> a rename window opens with the current name, confirming renames the horse and uses one tag, and Cancel changes nothing and uses no tag.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a tag is used up when you cancelled, or the horse gets a floating name tag instead.</p>
+<button type="button" class="report-btn" data-report="Renaming a horse with a name tag">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-spawn-egg">
+<h3>The custom horse spawn egg</h3>
+<p class="tester-need"><strong>You need:</strong> a Custom Horse Spawn Egg, and both survival and creative mode.</p>
+<ol>
+    <li>In survival, right-click the ground with the egg.</li>
+    <li>Look at the Spawn button.</li>
+    <li>Switch to creative mode.</li>
+    <li>Right-click the ground with the egg again.</li>
+    <li>Build a horse that looks very different from normal.</li>
+    <li>Press Spawn.</li>
+    <li>Press Make egg, and use the egg it gives you.</li>
+    <li>Press Copy, then Clear, then Paste.</li>
+    <li>Change your GUI scale to 4 in Video Settings and open the editor again.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> in survival the Spawn button is greyed out; the spawned horse and the egg's horse both match the preview; Paste brings the horse back; nothing overlaps at GUI scale 4.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a horse looks different from its preview, or buttons overlap.</p>
+<button type="button" class="report-btn" data-report="The custom horse spawn egg">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="menus">5. The horse browser and information screen</h2>
+
+<div class="tester-test" id="t-my-horses">
+<h3>My horses lists all your horses</h3>
+<p class="tester-need"><strong>You need:</strong> several tamed horses, one left in the Nether and one left far away.</p>
+<ol>
+    <li>Press <kbd>H</kbd> and open <em>My horses</em>.</li>
+    <li>Find the horse in the Nether and the far-away horse in the list.</li>
+    <li>Type <code>mare</code> in the filter box.</li>
+    <li>Type <code>foal</code> instead.</li>
+    <li>Type <code>bond&gt;50</code> instead.</li>
+    <li>Click a column heading twice.</li>
+    <li>Close the browser, tame a new horse, and open My horses again.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the far-away horses show as "not loaded"; each filter shows sensible results; clicking a heading twice reverses the order; the new horse appears.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> horses are missing, a filter shows an error, or the list does not update.</p>
+<button type="button" class="report-btn" data-report="My horses lists all your horses">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-info-screen">
+<h3>The information screen</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed horse and a tamed foal.</p>
+<ol>
+    <li>Open the horse's inventory and click <strong>i</strong>.</li>
+    <li>Type a barn name and press Set.</li>
+    <li>Close the screen and open it again.</li>
+    <li>Press Done.</li>
+    <li>Open the Offspring tab and press Refresh.</li>
+    <li>Crouch and right-click the tamed foal.</li>
+    <li>Change your GUI scale to 4 and look for the <strong>i</strong> button.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the barn name stays; Done goes back to a working inventory; Offspring lists each foal once; the foal's inventory has no saddle slot but still has <strong>i</strong>; the <strong>i</strong> button is on screen at scale 4.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the name is lost, or a button is off the screen.</p>
+<button type="button" class="report-btn" data-report="The information screen">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-discovery">
+<h3>Finding research papers and discovering genes</h3>
+<p class="tester-need"><strong>You need:</strong> a survival world with dungeons or villages.</p>
+<ol>
+    <li>Open 10 or more dungeon or village chests.</li>
+    <li>Count how many research papers you find.</li>
+    <li>Right-click a research paper.</li>
+    <li>Press <kbd>H</kbd> and open the Gene database.</li>
+    <li>Log out and back in.</li>
+    <li>Check the Gene database again.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> you find papers now and then (about 1 chest in 5); using one adds its gene; the gene is still there after logging back in.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you never find a paper. Say how many chests you opened.</p>
+<button type="button" class="report-btn" data-report="Finding research papers and discovering genes">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="villages">6. Villages, the cowboy and the horseman</h2>
+
+<div class="tester-test" id="t-barn">
+<h3>The cowboy's barn appears in villages</h3>
+<p class="tester-need"><strong>You need:</strong> cheats on.</p>
+<ol>
+    <li>Type <code>/locate structure minecraft:village_plains</code>.</li>
+    <li>Go to the village.</li>
+    <li>Look for a barn and a small house at the end of a street.</li>
+    <li>Walk from the street onto the path in front of the barn.</li>
+    <li>Open the chests in the house.</li>
+    <li>Check 3 or 4 villages.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> most villages have the barn and house; the path is level with the road; the house is not broken; the chests hold horse feed.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> most villages have no barn, there is a step up onto the path, or the house has missing or strange blocks.</p>
+<button type="button" class="report-btn" data-report="The cowboy's barn appears in villages">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-cowboy">
+<h3>The cowboy and his horses</h3>
+<p class="tester-need"><strong>You need:</strong> a village with a cowboy barn, emeralds, a zombie spawn egg.</p>
+<ol>
+    <li>Find the cowboy in the morning.</li>
+    <li>Close all four barn doors.</li>
+    <li>Watch him for a few minutes.</li>
+    <li>Open his trades.</li>
+    <li>Buy one horse's paper.</li>
+    <li>Open his trades again.</li>
+    <li>At night, spawn a zombie next to him.</li>
+    <li>Leave for a while, come back, and count his horses.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> he stands in a field near the barn; he opens the doors in the day and his horses follow; he sells 4 to 10 named horses; the horse you bought is no longer offered; zombies ignore him; his horses never vanish while you are nearby.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> he is on a roof, his horses disappear, or zombies attack him.</p>
+<button type="button" class="report-btn" data-report="The cowboy and his horses">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-horseman">
+<h3>Every horseman level has trades</h3>
+<p class="tester-need"><strong>You need:</strong> a horseman (place a Horseman's Table near a villager with no job), and plenty of horse hair to trade.</p>
+<ol>
+    <li>Place a Horseman's Table near a villager with no job.</li>
+    <li>Wait a minute for him to take the job.</li>
+    <li>Trade with him again and again.</li>
+    <li>Look at the new trades at each level, up to Master.</li>
+    <li>Buy a research paper or carrot and use it.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> he takes the job; every level has about 3 trades; what you buy works.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a level has no trades. Say which level.</p>
+<button type="button" class="report-btn" data-report="Every horseman level has trades">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-quiet-chat">
+<h3>A normal game is quiet in chat</h3>
+<p class="tester-need"><strong>You need:</strong> nothing special.</p>
+<ol>
+    <li>Play normally near villages and horses for a while.</li>
+    <li>Keep an eye on chat.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> you never see grey lines starting with <code>[Cowboy]</code>, <code>[Horseman]</code>, <code>[coat]</code> or <code>[Breeding]</code>.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> those lines show up. Copy one into the report.</p>
+<button type="button" class="report-btn" data-report="A normal game is quiet in chat">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-stable-look">
+<h3>The three stables look right</h3>
+<p class="tester-need"><strong>You need:</strong> cheats on.</p>
+<ol>
+    <li>Type <code>/locate structure horsegenetics:horse_stable</code> and go there.</li>
+    <li>Look at how the stable sits on the ground.</li>
+    <li>Open the information screen of a few horses there.</li>
+    <li>Find the other two stables the same way (their names are on the <a href="stables.html">stables page</a>).</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> no stable is buried or floating, and no stable horse is sick or dying.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a stable is half underground or in the air, or its horses are ill.</p>
+<button type="button" class="report-btn" data-report="The three stables look right">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="genes">7. Special horses</h2>
+
+<div class="tester-test" id="t-guardian">
+<h3>A Guardian horse protects you</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode to set up, then survival; a horse with <em>Guardian</em> and with <em>Magic health</em> set to Hardy on both buttons; a zombie spawn egg.</p>
+<ol>
+    <li>Spawn the Guardian horse.</li>
+    <li>Tame it.</li>
+    <li>Switch to survival mode.</li>
+    <li>Stand right next to the horse.</li>
+    <li>Use the zombie spawn egg a few blocks away.</li>
+    <li>Let the zombie hit you.</li>
+    <li>Watch the horse.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse goes for the zombie, fights it, kills it, and survives.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the horse ignores the zombie, runs away, or dies.</p>
+<button type="button" class="report-btn" data-report="A Guardian horse protects you">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-day-loci">
+<h3>Day temper and day watch</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode; a horse with <em>Magic day temper</em> set to <code>Flp</code> on both buttons, and one with <em>Magic day watch</em> set to <code>Wbh</code> on both.</p>
+<ol>
+    <li>Type <code>/time set noon</code>.</li>
+    <li>Walk towards the day temper horse.</li>
+    <li>Type <code>/time set midnight</code>.</li>
+    <li>Try to ride the day temper horse.</li>
+    <li>Type <code>/time set noon</code>.</li>
+    <li>Walk around near the day watch horse.</li>
+    <li>Turn around to face it.</li>
+    <li>Type <code>/time set midnight</code> and walk around again.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the day temper horse runs from you at noon and lets you ride it at midnight; the day watch horse stands quietly behind you in the day and stops when you turn round; at night it acts like a normal horse.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> they act the same at noon and midnight.</p>
+<button type="button" class="report-btn" data-report="Day temper and day watch">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-dhampir">
+<h3>The Dhampir horses</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode; a horse with <em>Sun sensitivity</em> set to <code>Sun</code> on both buttons, and one with <em>Diet</em> set to blood (<code>Dbld</code>) on both; a cow.</p>
+<ol>
+    <li>Type <code>/time set night</code>.</li>
+    <li>Spawn both horses and the cow.</li>
+    <li>Type <code>/time set day</code>.</li>
+    <li>Watch the Sun sensitivity horse.</li>
+    <li>Offer it some wheat.</li>
+    <li>Hurt the blood diet horse a little.</li>
+    <li>Watch it near the cow.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the Sun sensitivity horse smokes and looks for shade in daylight but still eats wheat; the blood diet horse goes for the cow in daylight and never burns. Neither ever bites another horse.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the wrong horse burns, or a horse bites another horse.</p>
+<button type="button" class="report-btn" data-report="The Dhampir horses">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-diets">
+<h3>Horses with special diets</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode; a horse with a special <em>Diet</em> (for example a metal or lava eater), an apple, and its own food.</p>
+<ol>
+    <li>Offer the special-diet horse an apple.</li>
+    <li>Hurt it a little.</li>
+    <li>Offer it its own food.</li>
+    <li>Put a saddle on it and ride it.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> it refuses the apple with smoke and a message naming what it does eat; its own food heals it; saddling and riding work.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it eats the apple, or refuses its own food.</p>
+<button type="button" class="report-btn" data-report="Horses with special diets">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-ender-echo">
+<h3>An Ender echo horse keeps its rider</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a horse with <em>Ender echo</em>, a saddle, and a skeleton spawn egg.</p>
+<ol>
+    <li>Saddle the horse and ride it.</li>
+    <li>Switch to survival mode.</li>
+    <li>Spawn a skeleton nearby.</li>
+    <li>Let the skeleton shoot the horse.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse teleports to a safe spot and you are still sitting on it.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you fall off, land inside a block, or the horse jumps back and forth.</p>
+<button type="button" class="report-btn" data-report="An Ender echo horse keeps its rider">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-ocean-born">
+<h3>Diving with an Ocean-born horse</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a saddled horse with <em>Ocean-born</em>, deep water.</p>
+<ol>
+    <li>Ride the horse into deep water.</li>
+    <li>Press <kbd>F</kbd>.</li>
+    <li>Press <kbd>F</kbd> again.</li>
+    <li>Dive again, then get off.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse goes down, stops when you press F again, and getting off stops the dive. You do not run out of air while riding.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it will not dive, or you drown while riding.</p>
+<button type="button" class="report-btn" data-report="Diving with an Ocean-born horse">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="body">8. Size, speed and health</h2>
+
+<div class="tester-test" id="t-size">
+<h3>Very big and very small horses work</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode; horses with <em>Magic body size</em> set to <code>Big</code> on both buttons and to <code>Small</code> on both.</p>
+<ol>
+    <li>Spawn the big horse and the small horse side by side.</li>
+    <li>Ride each one.</li>
+    <li>Hit each one once.</li>
+    <li>Watch each one walk.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the sizes are clearly different; you can ride and hit both; you sit in the right place; their feet do not slide when they walk.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you cannot hit or ride one, you float above it, or it slides.</p>
+<button type="button" class="report-btn" data-report="Very big and very small horses work">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-stats">
+<h3>Magic speed, jump and health</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode; a normal horse; horses with <em>Magic speed</em>, <em>Magic jump</em> and <em>Magic health</em> set to their strongest variant on both buttons.</p>
+<ol>
+    <li>Race the Magic speed horse against the normal horse on flat ground.</li>
+    <li>Jump the Magic jump horse at a 2-block wall.</li>
+    <li>Look at the hearts on the Magic health horse.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the speed horse is clearly faster, the jump horse clears higher walls, and the health horse has more hearts.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you cannot tell them apart from a normal horse.</p>
+<button type="button" class="report-btn" data-report="Magic speed, jump and health">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-same-code">
+<h3>The same genes give the same horse</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and the custom spawn egg.</p>
+<ol>
+    <li>Open the spawn egg editor and build a horse.</li>
+    <li>Press Copy.</li>
+    <li>Press Spawn.</li>
+    <li>Press Paste, then Spawn again.</li>
+    <li>Open both horses' information screens.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> both horses have the same speed, health, jump and size.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the numbers are different.</p>
+<button type="button" class="report-btn" data-report="The same genes give the same horse">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-slow-horse">
+<h3>The slowest horse can still outrun a zombie</h3>
+<p class="tester-need"><strong>You need:</strong> a horse whose information screen shows a very low speed (0.113 is the slowest), a saddle, a zombie.</p>
+<ol>
+    <li>Saddle the slow horse and ride it.</li>
+    <li>Switch to survival mode.</li>
+    <li>Let a zombie chase you on flat ground.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> you slowly pull away from the zombie.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the zombie catches you.</p>
+<button type="button" class="report-btn" data-report="The slowest horse can still outrun a zombie">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="performance">9. Performance</h2>
+
+<div class="tester-test" id="t-crowds">
+<h3>Lots of horses do not slow the game down</h3>
+<p class="tester-need"><strong>You need:</strong> a place with many horses (a big herd area, or a paddock of 20+ different horses).</p>
+<ol>
+    <li>Press <kbd>F3</kbd> to show the debug screen.</li>
+    <li>Stand among the horses for 5 minutes.</li>
+    <li>Watch the FPS number.</li>
+    <li>Hold some food so the horses come to you.</li>
+    <li>Press <kbd>H</kbd> and scroll the horse list quickly for a minute.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the FPS stays steady, and no horse flashes plain white.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the game stutters more and more over time, or horses flash white.</p>
+<button type="button" class="report-btn" data-report="Lots of horses do not slow the game down">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="looks">10. How things look (last)</h2>
+<p>
+    These can only be judged by eye, so they come last. If something looks clearly wrong, report
+    it with a screenshot.
+</p>
+
+<div class="tester-test" id="t-look-coats">
+<h3>Coats, nameplates and eyes</h3>
+<p class="tester-need"><strong>You need:</strong> a few different horses, and a foal next to its mother.</p>
+<ol>
+    <li>Walk towards some horses from far away.</li>
+    <li>Look at the pink and blue symbols on their nameplates.</li>
+    <li>Look closely at a foal's eyes next to its mother's.</li>
+    <li>Look at a horse with a <em>Cutie mark</em> from both sides.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> a plain coat switches to the real coat once as you get close, without flickering; the symbols are real ♀ and ♂ shapes, not boxes; the foal's eyes look like its mother's; the cutie mark is on both hindquarters and upright.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> coats flicker, symbols are boxes, eyes look broken, or the mark is missing or sideways.</p>
+<button type="button" class="report-btn" data-report="Coats, nameplates and eyes">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-look-glow">
+<h3>Glowing horses at night</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and horses with <em>Lantern</em>, <em>Tron</em> or <em>Emberveins</em>.</p>
+<ol>
+    <li>Type <code>/time set midnight</code>.</li>
+    <li>Spawn the glowing horses in a dark place.</li>
+    <li>Look at them.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> they glow in the dark, with soft edges and no flat white blotches.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> they do not glow, or the glow is a flat white shape.</p>
+<button type="button" class="report-btn" data-report="Glowing horses at night">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-opinions">
+<h3>Tell us what you think</h3>
+<p>No pass or fail here: your opinion is the result.</p>
+<ol>
+    <li>Do the sounds of <em>Meowing</em>, <em>Singer</em> or <em>Base alarm</em> horses get annoying in a herd?</li>
+    <li>Does an <em>Intimidating</em> horse clearing mobs off a farm feel fair?</li>
+    <li>Do you notice the weather speed genes when it rains?</li>
+    <li>Is anything in the horse browser confusing?</li>
+</ol>
+<button type="button" class="report-btn" data-report="Tell us what you think (feedback)">Send your thoughts</button>
+</div>
+
+</article>
+</main>
+
+<script>
+/* Each "Report a problem" button names its test. With the AI helper set up, the chat
+ * opens and starts the report (HG.aiChat.report, wiki/ai/ai-chat.js); otherwise GitHub's
+ * new-issue form opens with the test's name and a short form filled in. */
+(function () {
+    "use strict";
+    var ISSUES = "https://github.com/9-7-8/Procedural-Horse-Coats/issues/new";
+
+    function template(test) {
+        return "## Test\n" + test + " (from the For Testers wiki page)\n\n" +
+            "## Which step went wrong\n\n\n" +
+            "## What happened\n\n\n" +
+            "## What I expected\n\n\n" +
+            "## Setup\n- Mod version: \n- Minecraft / NeoForge version: \n- Single player or server: \n- Other mods: \n";
+    }
+
+    document.addEventListener("click", function (e) {
+        var button = e.target.closest ? e.target.closest("[data-report]") : null;
+        if (!button) {
+            return;
+        }
+        var test = button.getAttribute("data-report");
+        var HG = window.HG || {};
+        var starter = "I'm a volunteer tester. I was doing the test \"" + test +
+            "\" from the For Testers page, and something went wrong.";
+        if (HG.aiChat && HG.aiChat.report && HG.aiChat.report(starter)) {
+            return;
+        }
+        var issue = { title: "[Tester] " + test + ": ", body: template(test), labels: ["bug"] };
+        var url = HG.ai && HG.ai.newIssueUrl ? HG.ai.newIssueUrl(issue)
+            : ISSUES + "?title=" + encodeURIComponent(issue.title) + "&body=" + encodeURIComponent(issue.body)
+                + "&labels=bug";
+        window.open(url, "_blank", "noopener");
+    });
+})();
+</script>
+</body>
+</html>
