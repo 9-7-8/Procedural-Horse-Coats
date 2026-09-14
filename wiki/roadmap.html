@@ -1278,19 +1278,14 @@
 </p>
 
 <ul>
-    <li><strong>Gestation &mdash; the genuinely new part.</strong> The foal appears
-        immediately, like vanilla. A gestation state means an attachment plus a tick, and
-        answers for: the mare is killed, the chunk unloads, the world reloads mid-term,
-        the mare is bred normally while carrying. Whether gestation stays on this path
-        only or reaches golden-carrot breeding too is undecided; the options are on
-        <a href="fertility.html">fertility &amp; gestation</a> (in progress).</li>
-    <li><strong>The real breeding-carrot gate.</strong> Vanilla love
-        (<code>isInLove()</code>) currently stands in for &ldquo;fed a breeding
-        carrot&rdquo;. The carrot window <em>is</em> the timed window, so there is no
-        separate timer to build.</li>
-    <li><strong>The donor cooldown</strong> &mdash; once per Minecraft day, the mod-wide
-        rule &mdash; is not applied; only the mare gets the vanilla breeding
-        cooldown.</li>
+    <li><strong>Wild band breeding</strong> &mdash; the next slice of
+        <a href="fertility.html">fertility &amp; gestation</a>, deliberately left out of the
+        first. A band stallion and his mares in heat conceiving through
+        <code>ReproHandler.breed</code> with nobody present. It needs its own answers before
+        it is built: a population cap per band and per area (the Spontaneous Breeding
+        gene&rsquo;s local cap of six is the only precedent), whether a bachelor can sneak a
+        cover, and what a foal born into a band does to <code>BandLife</code>&rsquo;s
+        dispersal numbers.</li>
     <li><strong>The pedigree edge.</strong> It is settled that the jar must store enough
         of the sire&rsquo;s record &mdash; not just his UUID &mdash; for the family tree
         to render his node. It stores name and sex already, but the synthetic sire record
@@ -1672,16 +1667,16 @@
 <ul>
     <li><strong>Scope: fertility genes plus pregnancy on the mod's own paths.</strong> Plain
         golden-carrot breeding stays instant. Pregnancy happens through the seed jar,
-        breeding carrots (any live carrot window on either parent), the Spontaneous Breeding
-        gene, and later wild band breeding. There is no "gestation everywhere" setting.</li>
+        a carrot-armed parent on either side, the Spontaneous Breeding gene, and later wild
+        band breeding. There is no "gestation everywhere" setting.</li>
     <li><strong>A gene that sometimes gives no foal from golden carrots does not count as
         removing vanilla behaviour.</strong> Only the subfertile allele can cause a miss:
         the chance is the product of both parents' allele factors, where <code>+</code> is 1
         and <code>sf/sf</code> is 0.5. The fertility epigenome number never touches plain
         golden-carrot breeding, and plain golden carrots never give twins.</li>
     <li><strong>Mares cycle, and heat gates only the mod's paths.</strong> Out of heat, a
-        mare refuses a breeding carrot or a seed jar, and nothing is used up. Heat replaces
-        vanilla love as the jar's window. A mare shows heat as an info-screen line, and she
+        mare refuses a seed jar and it is kept; a carrot-armed pairing out of heat does not
+        take. Heat replaces vanilla love as the jar's window. A mare shows heat as an info-screen line, and she
         and a nearby stallion walk toward each other.</li>
     <li><strong>Game time, not day time.</strong> Every deadline is an absolute
         <code>getGameTime()</code> tick, so sleeping and <code>/time set</code> advance
@@ -1722,6 +1717,13 @@
     <li><strong>Testing:</strong> <code>debug.tools</code> speeds the reproductive day, the
         debug clock steps a mare's state, and a <code>/testkit</code> batch covers
         fertility.</li>
+    <li><strong>Breeding carrots wait until the next breeding that takes.</strong> The owner,
+        mid-build: they &ldquo;should just apply indefinitely until the next successful
+        breeding&rdquo;. A carrot arms the horse, and only a conception uses it up; it
+        survives a breeding that did not take. A mare accepts a carrot in or out of heat.
+        A carrot no longer puts a horse in love, so breeding is always a separate act. A
+        jar filled from an armed stallion carries his effects, and a jar used on an armed
+        mare applies hers.</li>
 </ul>
 
 <h3>Settled 2026-09-10</h3>

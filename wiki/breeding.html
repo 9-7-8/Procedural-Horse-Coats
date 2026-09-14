@@ -753,7 +753,12 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <p>
     <code>HorseBreedingHandler.onBabySpawn</code> on
     <code>BabyEntitySpawnEvent</code> (fired <em>before</em> the foal is added to the
-    world):
+    world). This is <strong>plain golden-carrot breeding</strong>, and it is the only path
+    left that makes a foal at once. Before step 5: a pregnant dam cancels the event; a parent
+    armed with a breeding carrot turns the pair into a
+    <a href="fertility.html#hooks">pregnancy attempt</a> and cancels; and a
+    <a href="gene-fertility.html">subfertile</a> pair may miss. What follows is the instant
+    foal:
 </p>
 
 <ol>
@@ -794,19 +799,17 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </ol>
 
 <p>
-    Steps 5&ndash;12 are factored into
-    <code>HorseBreedingHandler.applyBredFoal(child, damHorse, damGenome, damRecord,
-    sireGenome, sireRecord, breeder, rng)</code> so a second entry point can reuse
-    them: the <strong>stallion seed jar</strong>
-    (<code>server/StallionSeedJarHandler</code>) builds the foal
-    <code>Horse</code> itself, passes the mare&rsquo;s live genome and a
-    <em>synthetic</em> sire <code>HorseRecord</code> reconstructed from the jar&rsquo;s
+    Steps 5&ndash;7 are <code>HorseBreedingHandler.applyBredFoal</code>; steps 8&ndash;13
+    are <code>populateFoal</code>, which birth from a pregnancy shares
+    (<code>bornFromPregnancy</code>). Every other path &mdash; the
+    <strong>stallion seed jar</strong>, a carrot-armed pair, the Spontaneous Breeding gene
+    &mdash; draws the genome at conception through <code>common.repro.Conception</code>,
+    stores it on the mare as an embryo, and finishes the foal at the due date. The jar
+    passes a <em>synthetic</em> sire <code>HorseRecord</code> reconstructed from its
     <code>stored_genome</code> component (a <code>GenomeSample</code> + the donor&rsquo;s
-    UUID / name / stats &mdash; his sex is in the stored genotype), and adds the foal
-    after. Same Mendelian +
-    carrier-faithful draw, drawn at impregnation &mdash; no gamete is frozen at
-    collection. There is no gestation delay yet and no breeding-carrot gate; the foal
-    is immediate, exactly as flow B.
+    UUID / name &mdash; his sex is in the stored genotype). Same Mendelian +
+    carrier-faithful draw everywhere &mdash; no gamete is frozen at collection. See
+    <a href="fertility.html">fertility &amp; gestation</a>.
 </p>
 
 <h4>The foal-name schedule</h4>

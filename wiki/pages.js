@@ -21,7 +21,7 @@ window.HG.pages = {
                 { href: "philosophy.html", text: "Philosophy", kind: "core", views: ["coding","science"] },
                 { href: "genetics-model.html", text: "The genetics model", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "breeding.html", text: "Breeding & pedigree", kind: "core", views: ["gameplay","coding","science"] },
-                { href: "fertility.html", text: "Fertility & gestation (in progress)", kind: "core", views: ["coding","science"] },
+                { href: "fertility.html", text: "Fertility & gestation", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "breeds.html", text: "Breeds", kind: "core", views: ["gameplay","coding"] },
                 { href: "breed-book.html", text: "The breed book", kind: "core", views: ["gameplay"] },
                 { href: "horse-body.html", text: "The horse's body", kind: "core", views: ["gameplay","coding"] }
@@ -172,6 +172,7 @@ window.HG.pages = {
             title: "Other natural genes",
             items: [
                 { href: "gene-sex.html", text: "Sex", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-fertility.html", text: "Fertility", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-diet.html", text: "Diet", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-tiger-eye.html", text: "Tiger eye (SLC24A5)", kind: "natural", views: ["gameplay","coding","science"] }
             ]

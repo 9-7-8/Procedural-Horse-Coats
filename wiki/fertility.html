@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fertility &amp; gestation &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
 <script defer src="pages.js"></script>
 <script defer src="tabs.js"></script>
@@ -14,211 +15,244 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow core">Start here <span class="sep">/</span> in progress</p>
+<p class="eyebrow core">Start here <span class="sep">/</span> breeding</p>
 <h1>Fertility &amp; gestation</h1>
 <p class="lede">
-    A design page for a system that does not exist yet. Mares would come into heat and carry
-    a pregnancy, and stallions would vary in how fertile they are. Everything here is a
-    proposal or an open question. <strong>Nothing on this page is built</strong>, and the
-    decision about how far it may change vanilla breeding is still being made.
+    Mares come into heat, and breeding through this mod&rsquo;s own tools makes a
+    <strong>pregnancy</strong>. The foal arrives when it ends, not the moment the pair is
+    bred. Plain golden carrots still give a foal at once, exactly as in vanilla.
+    Fertility is inherited: the <a href="gene-fertility.html">fertility gene</a> decides
+    how readily a horse breeds and how often a mare carries twins.
 </p>
 
-<div class="note warn">
-    <span class="label">Unfinished &mdash; to be completed next session</span>
-    <p>
-        Started at the end of the 2026-09-13 evening session, as the last item on that
-        list. The options and questions below were put to the owner and have <strong>not
-        been answered yet</strong>. Next session: settle <a href="#questions">the
-        questions</a>, record the calls in <a href="roadmap.html#settled">settled
-        decisions</a>, rewrite this page as a real reference with Gameplay / Coding /
-        Science tabs, and delete everything on it that turned out not to be the plan.
-    </p>
-</div>
+<section class="tab-panel" data-tab="gameplay">
 
-<h2 id="constraint">The constraint: vanilla breeding stays</h2>
+<h2 id="two-kinds">Two kinds of breeding</h2>
 
-<p>
-    The owner&rsquo;s standing rule is that this mod <strong>adds to vanilla behaviour
-    and does not remove it</strong>. Fertility is where that rule bites hardest. In their
-    words, when the research came in: they were &ldquo;worried about that violating my
-    &lsquo;we don&rsquo;t remove vanilla behavior&rsquo; too much&rdquo;.
-</p>
-
-<p>What vanilla does today, and what this mod already puts on top of it:</p>
-<ul>
-    <li><strong>Vanilla:</strong> feed two tamed adults golden carrots or golden apples,
-        and a foal appears at once. Both parents then wait about five minutes before
-        breeding again, and the foal grows up in about twenty
-        (<a href="https://minecraft.wiki/w/Horse">Minecraft Wiki</a>).</li>
-    <li><strong>This mod:</strong> the foal&rsquo;s genotype and epigenome are drawn from
-        its parents at that same instant (<a href="breeding.html">breeding</a>), and it
-        joins its dam&rsquo;s wild band if she has one
-        (<a href="horse-care.html#bands">band life</a>). The seed jar breeds a mare from a
-        stored stallion through the same instant path. Its gestation step is the open item
-        on the roadmap (<a href="roadmap.html#ivf">assisted reproduction</a>).</li>
-</ul>
-
-<p>
-    A <strong>pregnancy</strong> means the foal does not appear at the moment of breeding.
-    Applied to golden-carrot breeding, that replaces vanilla behaviour outright. Everything
-    below is sorted by how much of vanilla each option touches.
-</p>
-
-<h2 id="options">Three ways to add it</h2>
-
-<p class="muted">As proposed to the owner. None is chosen.</p>
-
-<ol>
-    <li><strong>Fertility as genes only &mdash; vanilla untouched.</strong> Fertility loci
-        change the odds and timing <em>inside</em> vanilla&rsquo;s own breeding, and
-        nothing else. Such a locus could give a pairing some chance of no foal, lengthen or
-        shorten the wait before breeding again, and rarely produce twins. A horse carrying
-        the wild type breeds exactly as vanilla does, so the rule holds for every horse that
-        has not been bred for it. This is the research&rsquo;s &ldquo;overlay model&rdquo;,
-        with genes deciding the overlay.</li>
-    <li><strong>Gestation only through this mod&rsquo;s own breeding.</strong> The seed jar
-        (and any later assisted-reproduction tier) makes a mare pregnant, and the foal comes
-        some Minecraft days later. Golden carrots stay instant. Vanilla breeding keeps its
-        behaviour, and the new system lives entirely on paths vanilla never had. The
-        roadmap&rsquo;s gestation item already scoped this.</li>
-    <li><strong>Gestation everywhere, as a server setting that is off by default.</strong>
-        The research&rsquo;s &ldquo;full reproduction model&rdquo;: golden-carrot breeding
-        makes a mating record, and a foal arrives at the due date. It is the only option
-        that replaces vanilla, and only on a server that opts in.</li>
-</ol>
-
-<p>
-    <strong>Recommendation, not yet agreed: 1 and 2 now, 3 later if at all.</strong>
-    Option 1 makes fertility heritable, which is what this mod is about. Option 2 gives
-    pregnancy a home that breaks no rule. Option 3 needs everything 2 builds anyway, so
-    nothing is lost by leaving it for last.
-</p>
-
-<h2 id="biology">What the research says</h2>
-
-<p>
-    The abbreviated research is on <a href="breeding.html#science-cycle">breeding&rsquo;s
-    science tab</a> and is not repeated here. The parts that shape the design:
-</p>
-<ul>
-    <li><strong>The sexes run on different clocks.</strong> Mares cycle, about 21 days,
-        with a heat of 2&ndash;8 days and most fertile at its end, and mostly only in the
-        long-day season. Stallions have no cycle, just a seasonal quality modifier.</li>
-    <li><strong>Nursing does not stop conception.</strong> Foal heat comes about a week
-        after birth, so a mare can be pregnant and nursing at once. Lactation costs her
-        condition. It does not lock her.</li>
-    <li><strong>Straight time compression is unplayable.</strong> Squeeze 340 days into one
-        Minecraft day and heat lasts 18 seconds. The fix the research lands on: scale every
-        stage from one gestation setting, then give each <em>independent</em> stage a floor
-        of one Minecraft day.</li>
-</ul>
-
-<h2 id="model">A draft model, for whichever option is chosen</h2>
-
-<p class="muted">
-    Research suggestions carried over so next session does not start from the intake file.
-    No number here is decided.
-</p>
-
-<h3 id="states">Mare states</h3>
-<ul>
-    <li>One state at a time, in priority order: <code>PREGNANT</code> &gt;
-        <code>POSTPARTUM</code> &gt; <code>ESTRUS</code> &gt; <code>DIESTRUS</code> &gt;
-        <code>ANESTRUS</code>.</li>
-    <li><code>LACTATING</code> is a <em>flag</em> beside the state, not a state. It can
-        be set together with pregnancy or heat.</li>
-    <li><strong>Peak fertility is a window inside estrus</strong> (its last part), not a
-        stage after it. A cycle is estrus plus diestrus, so the two are not floored
-        separately. Getting this wrong double-counts days.</li>
-    <li>Every deadline is stored as an <strong>absolute tick</strong>
-        (<code>dueTick</code>, <code>estrusEndTick</code>). A counter that pauses when the
-        horse&rsquo;s chunk unloads would never catch up.</li>
-    <li>Stallions have no state. They get a fertility <em>quality</em> (a gene, age,
-        condition) and perhaps a limit on covers per day.</li>
-</ul>
-
-<h3 id="timing">Timing</h3>
-<ul>
-    <li>One master setting, <code>gestation_days</code>. Every other stage is
-        <code>gestation_days &times; reference_days / 340</code>, floored at one Minecraft
-        day. At a one-day gestation that gives a two-day cycle (one day in heat, one
-        not).</li>
-    <li><strong>The clock.</strong> The research suggests a hybrid: pregnancy follows world
-        time, so sleeping speeds it up, and heat follows active ticks, so a player cannot
-        sleep through every window. This is undecided, and it has to agree with how the
-        mod&rsquo;s other day-based rules already count days.</li>
-    <li>Seasons are optional and invisible: Minecraft has none, so a &ldquo;breeding
-        season&rdquo; would be its own repeating timer that the player only sees as
-        &ldquo;in season&rdquo; or &ldquo;out of season&rdquo;.</li>
-</ul>
-
-<h3 id="odds">Conception odds (the research&rsquo;s starting point)</h3>
 <div class="table-wrap">
 <table>
-<thead><tr><th>Mare</th><th>Chance per well-timed breeding</th></tr></thead>
+<thead><tr><th>You do this</th><th>You get</th></tr></thead>
 <tbody>
-<tr><td>Peak of heat, healthy adult</td><td>70&ndash;85%</td></tr>
-<tr><td>Early or late in heat</td><td>35&ndash;60%</td></tr>
-<tr><td>Foal heat, normal recovery</td><td>45&ndash;70%</td></tr>
-<tr><td>Nursing, in poor condition</td><td>20&ndash;45%</td></tr>
-<tr><td>Out of heat, or pregnant</td><td>0%</td></tr>
+<tr><td>Feed two horses <strong>golden carrots</strong> (neither has eaten a breeding carrot)</td>
+    <td>A foal <strong>at once</strong>, as in vanilla. Heat does not matter.</td></tr>
+<tr><td>Feed golden carrots to a pair where either horse has eaten a
+    <a href="carrots.html">breeding carrot</a></td>
+    <td>A <strong>pregnancy</strong>, if the mare is in heat and it takes.</td></tr>
+<tr><td>Use a <a href="item-seed-jars.html">seed jar</a> on your mare</td>
+    <td>A <strong>pregnancy</strong>, if she is in heat and it takes.</td></tr>
+<tr><td>Keep two horses with the <a href="gene-spontaneous-breeding.html">Spontaneous Breeding</a> gene together</td>
+    <td>They pair by themselves while she is in heat, and she becomes pregnant.</td></tr>
 </tbody>
 </table>
 </div>
-<p class="muted">
-    Repeated covers in one heat can add up, but should be capped around 90&ndash;95%, so
-    that feeding one pair twenty items is not a guarantee. Under option 1, a fertility gene
-    would move these numbers, not replace them.
+
+<h2 id="heat">Heat</h2>
+
+<p>
+    A mare is in heat for about <strong>one Minecraft day</strong>, then out of it for about
+    one day, and so on. No two mares share the same timing. Her information screen shows it
+    on the <strong>Breeding</strong> line in the Body section: <em>In heat</em>, <em>In heat
+    &ndash; best time now</em>, or <em>Not in heat &ndash; about 12 min to go</em>. A mare in
+    heat and a nearby stallion also walk toward each other.
+</p>
+<p>
+    The second half of a heat is the best time. Out of heat, a mare refuses a seed jar and
+    the jar is kept. Stallions have no heat.
 </p>
 
-<h2 id="hooks">What it would plug into</h2>
+<h2 id="odds">Will it take?</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>When</th><th>Chance</th></tr></thead>
+<tbody>
+<tr><td>Second half of a heat</td><td>80%</td></tr>
+<tr><td>First half of a heat</td><td>50%</td></tr>
+<tr><td>Foal heat, the first heat after she foals</td><td>60%</td></tr>
+<tr><td>Not in heat, pregnant, or just foaled</td><td>no chance</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Her own fertility moves these a little either way, and a <a href="gene-fertility.html">subfertile</a>
+    horse halves them. A stallion can cover three mares, or fill three jars, in one
+    Minecraft day; after that his odds are halved for the rest of the day. Nothing is ever
+    more certain than 95%. The action bar says straight away whether it took.
+</p>
+
+<h2 id="pregnant">Pregnancy</h2>
+
 <ul>
-    <li><strong>The breeding handler</strong> (<code>HorseBreedingHandler</code>), where the
-        foal&rsquo;s genotype is drawn and its social attachment and band are set. A
-        pregnancy moves that to birth, so the sire&rsquo;s genome has to be <em>stored</em>
-        on the mare at conception. The seed jar already does this for its sire.</li>
-    <li><strong>Band life</strong> already knows a foal&rsquo;s dam and birth tick, and the
-        dam-and-foal goal. A foal born from a pregnancy should arrive into that the same
-        way.</li>
-    <li><strong>The roadmap&rsquo;s gestation edge cases</strong>
-        (<a href="roadmap.html#ivf">assisted reproduction</a>): the mare is killed while
-        carrying, the chunk unloads, the world reloads mid-term, and a carrying mare is fed
-        golden carrots.</li>
-    <li><strong>Where the code goes.</strong> The state machine and every number are pure
-        logic, so they belong in <code>common/</code> with unit tests, and the day
-        arithmetic stays Java 8-safe. The NeoForge side is one attachment and a check when
-        the horse ticks or loads.</li>
-    <li><strong>What a player sees:</strong> a line on the horse&rsquo;s information screen
-        (in heat, pregnant with days left, nursing), probably next to the Social section.</li>
+    <li><strong>It lasts one Minecraft day</strong> (twenty minutes) by default. A server can
+        make it longer.</li>
+    <li>Her Breeding line says <em>Pregnant &ndash; about 14 min to go</em>. In the last
+        third she is <strong>15% slower</strong>, and the line adds <em>heavy and slow</em>.</li>
+    <li>A pregnant mare <strong>refuses golden carrots</strong>.</li>
+    <li>She foals where she stands. The foal belongs to whoever owns her <em>then</em>, and
+        is credited as bred by whoever arranged the breeding.</li>
+    <li>If she is somewhere unloaded when she is due, she foals as soon as you come back.</li>
+    <li>If she dies, the pregnancy is lost.</li>
+    <li><strong>Twins</strong> are rare, and more common with the twinning allele. Usually
+        both are born alive; sometimes only one, and occasionally neither.</li>
+    <li>Two parents that both carry a lethal like <a href="gene-met.html">MET</a> sometimes
+        make a pregnancy that is <strong>lost early</strong>. She comes back into heat
+        afterwards.</li>
 </ul>
 
-<h2 id="questions">Open questions for the owner</h2>
+<p>
+    Pregnancy does not affect her health.
+</p>
 
-<ol>
-    <li>Does a fertility locus that sometimes gives <em>no foal</em> already count as
-        removing vanilla behaviour, or is a gene that changes the odds fine?</li>
-    <li>Which of the <a href="#options">three options</a>, or which combination?</li>
-    <li>For a pregnancy through the mod&rsquo;s own breeding: how long should it last, and
-        should a pregnant mare act differently (slower, cannot be ridden)?</li>
-    <li>Should wild bands breed on their own through this system, or stay out of it?</li>
-    <li>Heat at all? Option 2 could have pregnancy without any cycle: a seed jar works
-        whenever it is used.</li>
-    <li>Does sleeping advance a pregnancy?</li>
-    <li>Twins: a rare outcome of a fertility gene, or left out because they are a medical
-        risk in real horses?</li>
-</ol>
+<h2 id="after">After the birth</h2>
 
-<h2 id="next">Next session, in order</h2>
-<ol>
-    <li>Get the answers above, and write the decisions into
-        <a href="roadmap.html#settled">settled decisions</a>.</li>
-    <li>Replace the roadmap&rsquo;s gestation bullet with the agreed scope.</li>
-    <li>Rewrite this page as the reference for what will be built, with Gameplay / Coding /
-        Science tabs. The fertility science could move here from breeding&rsquo;s science
-        tab, as long as it stays in only one of the two places.</li>
-    <li>Build the <code>common/</code> model and its tests first, then the attachment, then
-        the handler hook.</li>
-</ol>
+<ul>
+    <li>For about a day she cannot be bred. Then comes <strong>foal heat</strong>, a heat
+        at slightly lower odds, and then her normal cycle again.</li>
+    <li>She is <strong>nursing</strong> (shown on the Breeding line) until her foal grows up,
+        or until it has been more than 32 blocks from her for a whole day. Nursing does not
+        stop her being bred again.</li>
+    <li>Foals from plain golden carrots do none of this. Their dam is not nursing and her
+        cycle carries on.</li>
+</ul>
+
+<h2 id="setting">The setting</h2>
+
+<p>
+    <code>fertility.gestation_days</code> in the server config, from 1 to 340. Every other
+    stage grows with it in proportion, but is never shorter than one day, so at 340 a mare
+    keeps a realistic three-week cycle. The clock is game time: sleeping and
+    <code>/time set</code> do not move anything. With the server&rsquo;s testing tools on,
+    each of those &ldquo;days&rdquo; is one real minute.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="where">Where it lives</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Class</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>common/repro/ReproTiming</code></td><td>Stage lengths in ticks from one gestation setting: <code>max(day, gestation &times; reference / 340)</code>. Takes <code>dayTicks</code> as a parameter so the testing tools can shrink everything at once.</td></tr>
+<tr><td><code>common/repro/Reproduction</code></td><td>The attachment value: cycle phase, optional <code>Pregnancy</code>, last foaling tick, the foals being nursed, when they were last all away, and a stallion&rsquo;s covers today. Holds no current state.</td></tr>
+<tr><td><code>common/repro/ReproRules</code></td><td><code>stateAt(record, now, timing)</code>, the odds, twins, early loss, the late slowdown, weaning. Every constant the owner settled.</td></tr>
+<tr><td><code>common/repro/Pregnancy</code>, <code>Embryo</code></td><td>What she carries. An embryo is the foal&rsquo;s genome already drawn, its breed label, whether it is lost early, and the sire&rsquo;s id, names, generation and whole <code>GenomeSample</code>.</td></tr>
+<tr><td><code>common/repro/Conception</code></td><td><code>attempt(mating, mare, now, timing, sireCovers, health, lethals, rng)</code>: the one draw every pregnancy path uses. Also <code>vanillaFoalChance</code>, the only thing fertility does to plain golden carrots.</td></tr>
+<tr><td><code>neoforge/data/ReproCodecs</code></td><td>The save format of <code>horsegenetics:horse_repro</code>. Not <code>copyOnDeath</code>, not synced.</td></tr>
+<tr><td><code>neoforge/server/ReproHandler</code></td><td><code>breed(...)</code>, the entry point that folds armed carrots and calls <code>Conception</code>; the 40-tick tick (early loss, birth, slowdown, weaning); the action-bar lines; <code>breedingLine</code>; the clock&rsquo;s <code>debugStep</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="state">State is derived, never stepped</h2>
+
+<p>
+    <code>stateAt</code> returns the first that applies: <code>PREGNANT</code> (a pregnancy is
+    stored), <code>POSTPARTUM</code> then <code>FOAL_HEAT</code> (measured from
+    <code>foaledTick</code>), then <code>ESTRUS</code> or <code>DIESTRUS</code> from
+    <code>floorMod(now + phase &times; cycle, cycle)</code>. The phase is a fraction taken
+    from the entity UUID by <code>Reproduction.fresh</code>, so a mare nobody has bred needs
+    no attachment at all. <code>ReproHandler.of</code> deliberately does not attach a
+    default. Nursing is a list beside the state, not a state.
+</p>
+
+<h2 id="hooks">The hooks</h2>
+
+<ul>
+    <li><strong><code>HorseBreedingHandler.onBabySpawn</code></strong>: a pregnant dam
+        cancels the event. An <a href="carrots.html#window">armed</a> parent sends the pair
+        to <code>ReproHandler.breed</code> and cancels. The patched
+        <code>Animal.spawnChildFromBreeding</code> resets love and sets both 6000-tick
+        cooldowns on a cancel. Otherwise the instant foal goes through
+        <code>applyBredFoal</code>, after one roll against
+        <code>vanillaFoalChance</code> made only when it is below 1, so a wild-type pair
+        draws exactly what it used to.</li>
+    <li><strong><code>StallionSeedJarHandler</code></strong>: filling counts a cover and moves
+        the stallion&rsquo;s armed carrots into the jar. Using it requires
+        <code>ReproHandler.receptive</code> instead of vanilla love.</li>
+    <li><strong><code>SpontaneousBreedingHandler</code></strong> calls
+        <code>breed</code> directly instead of setting love.</li>
+    <li><strong><code>BreedingCooldownHandler</code></strong> refuses vanilla love items to a
+        pregnant mare, server side only; see
+        <a href="known-gaps.html#gap-226">gap 226</a>.</li>
+    <li><strong>Birth</strong> is <code>HorseBreedingHandler.bornFromPregnancy</code>, which
+        shares <code>populateFoal</code> with the instant foal. The breeder is looked up by
+        name, and only gets checklist ticks and gene discovery if they are online.</li>
+    <li><strong><code>HerdGoals.HeatAttraction</code></strong> at priority 6. The
+        info-screen line rides <code>HorseSocialSyncPayload.breeding</code>.</li>
+</ul>
+
+<h2 id="testing">Testing it</h2>
+
+<p>
+    With <code>debug.tools</code> on, <code>ServerConfig.reproTiming()</code> uses
+    <code>DEBUG_REPRO_DAY_TICKS</code> for the day. A clock on an adult mare is
+    <code>ReproHandler.debugStep</code>: out of heat to peak heat, pregnant to due now,
+    postpartum to foal heat. Test kit batch 1 is built for this. Every attempt, loss and
+    birth writes an <code>ActionTrace</code> line under <code>fertility</code>, and carrot
+    folds are under <code>carrot</code>.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="vanilla">Why golden carrots stay instant</h2>
+
+<p>
+    The owner&rsquo;s standing rule is that this mod adds to vanilla and does not take
+    vanilla away, and a pregnancy replaces the instant foal outright. So the pregnancy lives
+    only on paths vanilla never had: the jar, the carrots and the gene. The one thing
+    fertility may do to plain breeding is the subfertile allele, which takes two copies in a
+    parent. An unbred horse is never <code>sf/sf</code>, so unbred stock breeds exactly as
+    vanilla does. The epigenetic number is kept off that path for the same reason. The three
+    options this was chosen from, and every other call, are under
+    <a href="roadmap.html#settled">settled decisions</a>.
+</p>
+
+<h2 id="real-horses">What real mares do</h2>
+
+<p>
+    The biology is on <a href="breeding.html#science-cycle">breeding&rsquo;s science tab</a>.
+    In short: a mare cycles about every 21 days with a heat of a few days, most fertile at its
+    end. A stallion has no cycle. Gestation is about 340 days. Foal heat comes about a week
+    after birth. Nursing does not prevent conception.
+</p>
+
+<h2 id="compression">Compressing 340 days</h2>
+
+<p>
+    Scale everything evenly into a twenty-minute pregnancy and a heat lasts 18 seconds:
+    accurate, and unplayable. So each <em>independent</em> stage is scaled and then floored at
+    one day. The cycle is estrus plus diestrus, derived rather than floored a third time. Peak
+    fertility is the second half of estrus, not a stage after it. At the default setting the
+    ratios collapse to &ldquo;a day in heat, a day out&rdquo;. They come back as the setting
+    grows: estrus leaves its floor at 68 days, and at 340 every stage is real.
+</p>
+
+<h2 id="choices">Why it is built this way</h2>
+
+<ul>
+    <li><strong>Absolute ticks, derived state.</strong> A countdown pauses when a chunk
+        unloads, and a stored state has to be stepped through every transition it missed. A
+        state computed from three anchors and the time has nothing to catch up on.</li>
+    <li><strong>Drawn at conception.</strong> A carrot&rsquo;s bias and both live genomes
+        exist then and not at birth. It also means an embryo is a real object, which
+        embryo extraction on the <a href="roadmap.html#ivf">assisted-reproduction
+        roadmap</a> can read.</li>
+    <li><strong>The sire&rsquo;s whole genome in every embryo.</strong> Birth may come after
+        he is sold, unloaded or dead. The parent-stats comparison needs his body, and a stored
+        genome is the only honest source for it.</li>
+    <li><strong>Carrots that wait.</strong> A 30-second carrot made sense when a carrot was
+        fed at the moment of breeding. Once a mare has to be in heat, it would mostly have
+        been wasted, so a carrot now waits on the horse until a conception uses it.</li>
+    <li><strong>Game time, not the day counter.</strong> The mod&rsquo;s other day-based
+        rules (a horse&rsquo;s age, the daily bond cap) already count game time, and on a
+        server where people sleep, day time would push pregnancies through in bursts.</li>
+</ul>
 
 <h3 id="sources">Sources</h3>
 <ul>
@@ -230,16 +264,21 @@
     <li>Minecraft Wiki, <a href="https://minecraft.wiki/w/Horse">Horse</a>.</li>
 </ul>
 
+</section>
+
 <div class="page-foot">
     <div class="seealso">
+        <a href="gene-fertility.html">The fertility gene</a>
         <a href="breeding.html">Breeding &amp; pedigree</a>
-        <a href="horse-care.html">Horse care</a>
-        <a href="roadmap.html#ivf">Roadmap: assisted reproduction</a>
+        <a href="carrots.html">Breeding carrots</a>
+        <a href="item-seed-jars.html">Seed jars</a>
     </div>
-    Source: nothing yet.
+    Source: <code>common/repro/</code>, <code>neoforge/server/ReproHandler</code>.
 </div>
 
 </article>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 </body>
 </html>

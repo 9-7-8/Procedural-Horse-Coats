@@ -27,6 +27,48 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13h">2026-09-13, late &mdash; fertility and gestation, designed with the owner and built</h2>
+
+<p>
+    The in-progress design page from the evening had seven open questions. This session put
+    them to the owner one at a time, along with every implementation choice the breeding
+    code raised, then built the whole first slice. The calls are under
+    <a href="roadmap.html#settled">settled decisions</a>, and the reference is
+    <a href="fertility.html">fertility &amp; gestation</a>. Nothing has been played:
+    <a href="verification.html#fertility">&sect;0-DV</a>, test kit batch 1.
+</p>
+
+<ul>
+    <li><strong>Where the line was drawn.</strong> Plain golden carrots stay instant; the
+        owner's &ldquo;we don't remove vanilla behavior&rdquo; was the constraint that shaped
+        every other answer. Pregnancy lives on the mod's own paths: the seed jar, a
+        carrot-armed pair, the Spontaneous Breeding gene. The one thing fertility does to
+        vanilla is the subfertile allele, which no unbred horse has.</li>
+    <li><strong><code>common/repro</code></strong>: timing scaled from one
+        <code>gestation_days</code> and floored at a day; a mare's state <em>derived</em>
+        from a UUID phase and three ticks rather than stepped; and <code>Conception</code>,
+        the single draw. The genome is drawn at conception and stored as embryos carrying the
+        sire's whole sample, so birth needs no sire. 28 tests.</li>
+    <li><strong><a href="gene-fertility.html">The fertility gene</a></strong>: a natural Java
+        gene with <code>n</code>, <code>sf</code> and <code>tw</code> and a Gaussian number
+        per copy. Both coat goldens moved only because the genotype code gained a locus: the
+        whole-horse file was checked byte-identical with the token stripped before it was
+        copied back.</li>
+    <li><strong>The owner changed breeding carrots mid-build.</strong> They now wait on a horse
+        until a conception uses them, where they had been a 30-second window that also started
+        love. <code>CarrotWindowAttachment</code> became <code>ArmedCarrotsAttachment</code>, a
+        jar carries a stallion's, and the yard's carrot pens were re-signed.</li>
+    <li><strong>Checked, not assumed:</strong> vanilla's
+        <code>spawnChildFromBreeding</code> resets love and sets both cooldowns when
+        <code>BabyEntitySpawnEvent</code> is cancelled (the patched 26.1.2 sources), which is
+        what lets a carrot pair become a pregnancy with no extra bookkeeping.</li>
+    <li><strong>Found on the way:</strong> impossible KIT / MITF / PAX3 genotypes may be
+        breedable (<a href="known-gaps.html#gap-225">gap 225</a>, a code read only).</li>
+    <li><strong>Deliberately not built:</strong> wild band breeding (its own slice, on
+        <a href="roadmap.html#ivf">the roadmap</a>), body condition, seasons, a stallion
+        covers line on the info screen, and revealing twins before birth.</li>
+</ul>
+
 <h2 id="d2026-09-13g">2026-09-13, evening &mdash; the dhampir taken apart, bands that stay together, an ender whistle, and AI on the wiki</h2>
 
 <p>

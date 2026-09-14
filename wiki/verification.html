@@ -80,6 +80,57 @@
     </p>
 </div>
 
+<h2 id="fertility">&sect;0-DV &mdash; Fertility and gestation (built 2026-09-13 late, NOT played)</h2>
+
+<p>
+    <strong>Test kit batch 1.</strong> With <code>debug.tools</code> on, a heat and a pregnancy
+    each last one real minute, and the clock steps an adult mare along. The genetics side is
+    unit-tested (<code>ReproRulesTest</code>, <code>FertilityGeneTest</code>). Nothing in the
+    world has run. Every attempt, loss and birth logs a <code>[fertility]</code> line, and
+    carrot folds log under <code>[carrot]</code>. Behaviour first:
+</p>
+<ul>
+    <li><strong>Plain golden carrots are still instant &mdash; the one that must not
+        break.</strong> Two tamed adults, no breeding carrot on either: a foal at once, as
+        before, whether or not she is in heat.</li>
+    <li><strong>A carrot-armed pair makes a pregnancy, not a foal.</strong> Feed a stabilizer
+        carrot to the mare (no hearts; an action-bar line). Clock her into heat, then
+        golden-carrot the pair. Expect no foal, and &ldquo;is pregnant&rdquo; or &ldquo;It
+        didn't take&rdquo; on the action bar. If it did not take, feed golden carrots again
+        after the cooldown: <strong>the carrot must still be on her</strong> (the
+        <code>[carrot]</code> line says &ldquo;still armed&rdquo;).</li>
+    <li><strong>Birth.</strong> About a minute later, or clock her for &ldquo;due now&rdquo;:
+        a foal beside her, a gold chat line naming it, tamed to you, <em>Bred by</em> you on
+        its info screen, with the carrot's effect in its genes.</li>
+    <li><strong>Birth while away.</strong> Get a mare pregnant, go far enough that her chunk
+        unloads for more than a minute, come back. She should foal within two seconds of
+        loading.</li>
+    <li><strong>Save and reload mid-pregnancy.</strong> Quit to title and back. The Breeding
+        line should still say <em>Pregnant</em>, and she should still foal.</li>
+    <li><strong>The seed jar.</strong> Out of heat: refused on the action bar, jar kept. In
+        heat: a pregnancy, jar spent. Fill a jar from a stallion that ate a carrot: the
+        tooltip says &ldquo;Carries 1 carrot effect&rdquo;.</li>
+    <li><strong>An early loss.</strong> Breed the two MET carriers (slots 7 and 8) by jar a
+        few times. About one pregnancy in four ends early with the grey &ldquo;did not
+        carry&rdquo; line, and she comes back into heat.</li>
+    <li><strong>A pregnant mare refuses golden carrots.</strong> A yellow line, carrot kept.
+        Watch for a client-side flicker: a mount or eat animation before the server says no.
+        See <a href="known-gaps.html#gap-226">gap 226</a>.</li>
+    <li><strong>The Spontaneous Breeding gene</strong> (two expressing, tamed, full-health
+        horses): hearts only when a mare in heat actually conceives, and the debug trace says
+        <code>CONCEIVED</code> or <code>DID_NOT_TAKE</code>.</li>
+    <li><strong>The yard's carrot pens</strong> (rows L, M, N) read &ldquo;carrot ONE, clock /
+        mare, gold both&rdquo;, and the chest has a clock. Follow the sign once, end to
+        end.</li>
+    <li><strong>Weaning.</strong> Lead a foal more than 32 blocks from its dam and keep it there
+        a minute. The dam's line loses &ldquo;&bull; nursing&rdquo;.</li>
+    <li><strong>Heat walk.</strong> A mare in heat and a stallion within 16 blocks walk to
+        about three blocks apart and stop. Two mares in heat should not pull one stallion back
+        and forth.</li>
+    <li><strong>Looking at it (last):</strong> the Breeding line's wording in each state; in the
+        last third the Speed value on the info screen drops by 15%.</li>
+</ul>
+
 <h2 id="ai-helpers">&sect;0-DU &mdash; The AI helpers (built 2026-09-13, checkable from a phone)</h2>
 
 <p>

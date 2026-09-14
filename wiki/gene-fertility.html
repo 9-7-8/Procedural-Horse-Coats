@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fertility &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> paints nothing</p>
+
+<h1>Fertility &mdash; how readily a horse breeds</h1>
+
+<p class="lede">
+    Three alleles. <strong>n</strong> is ordinary. Two copies of <strong>sf</strong> make
+    every breeding half as likely to take. <strong>tw</strong> makes a pregnancy more
+    likely to be twins. Every copy also carries a small number that nudges a mare&rsquo;s
+    odds. What a pregnancy is, and when a mare can have one, is on
+    <a href="fertility.html">fertility &amp; gestation</a>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.fertility"></div>
+
+<h2 id="alleles">What each combination does</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Horse</th><th>Shown as</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td><code>n/n</code>, <code>sf/n</code></td><td>Wild type</td><td>Ordinary. One <code>sf</code> copy is silent.</td></tr>
+<tr><td><code>sf/sf</code></td><td>Subfertile</td><td>Every breeding is half as likely to take. <strong>Even plain golden carrots sometimes give no foal</strong>, the only thing in the mod that can make them miss.</td></tr>
+<tr><td><code>tw/n</code>, <code>tw/sf</code></td><td>Twin-prone</td><td>A pregnancy is twins about one time in ten.</td></tr>
+<tr><td><code>tw/tw</code></td><td>Strongly twin-prone</td><td>A pregnancy is twins about one time in four.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    An ordinary mare&rsquo;s pregnancy is twins about one time in fifty. Twins only happen
+    in a <a href="fertility.html#two-kinds">pregnancy</a>, never from plain golden carrots.
+    It is the mare&rsquo;s alleles that count for twins. For subfertility, either parent
+    counts, and two subfertile parents make it a quarter.
+</p>
+
+<p>
+    It has no effect on health.
+</p>
+
+<h2 id="wild">Where it turns up</h2>
+
+<p>
+    Wild horses sometimes <em>carry</em> <code>sf</code> or <code>tw</code>, and a few are
+    <code>tw/tw</code>, but no wild horse is subfertile. That is something you breed.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="class">The class</h2>
+
+<p>
+    <code>common/genetics/genes/FertilityGene</code>, registered as
+    <code>Genes.FERTILITY</code> at priority 3, between sex and diet. It paints nothing, and
+    <code>GeneFamily</code> files it under <em>Other natural genes</em> by override. Without
+    that, the &ldquo;invisible is health&rdquo; rule would list it with the disorders.
+</p>
+
+<ul>
+    <li><code>alleleFactor(pair)</code> &mdash; <code>SUBFERTILE_FACTOR</code> for
+        <code>sf/sf</code>, else 1. <code>Conception.vanillaFoalChance</code> is the product
+        of both parents&rsquo;.</li>
+    <li><code>twinChance(pair)</code> &mdash; by <code>pair.count(tw)</code>.</li>
+    <li><code>fertility(genome)</code> &mdash; the <strong>expressed</strong> copy&rsquo;s
+        <code>fertility</code> value (<code>Epigenome.expressed</code>).</li>
+    <li><code>mareFactor(genome)</code> &mdash; the allele factor times that value; what
+        <code>Conception.attempt</code> multiplies the stage&rsquo;s odds by. The sire
+        contributes only his allele factor and his covers today.</li>
+</ul>
+
+<p>
+    <code>epiSchema()</code> is one Gaussian, mean 1.0 and sigma 0.05, floored at 0.7. The
+    design span is mean &plusmn; 6&nbsp;sigma, so a founder sits in 0.7&ndash;1.3. Founders
+    come from a table of carriers only (<code>n/n</code>, <code>sf/n</code>,
+    <code>tw/n</code>, <code>tw/tw</code>). It is not <code>feralOnly</code>, so a breed file
+    may name it. Tests: <code>FertilityGeneTest</code>, and the conception odds in
+    <code>ReproRulesTest</code>.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="not-one-locus">There is no fertility locus</h2>
+
+<p>
+    Nothing in a real horse&rsquo;s genome matches this gene. Fertility in horses is
+    polygenic and strongly shaped by age, condition and management. The part that is
+    inherited is small and spread across many genes. This locus is a game abstraction of a
+    real heritable trait: something a breeder can select for and see results from, which a
+    diffuse polygenic score would not give a player. That is also why the epigenetic number
+    exists: it drifts a little each generation, so fertility stays a matter of degree even
+    between two horses with the same alleles.
+</p>
+
+<h2 id="twins">Twins in real horses</h2>
+
+<p>
+    A mare fairly often releases two eggs in one heat, more often in some breeds. But a
+    live twin <em>birth</em> is rare. Most twin pregnancies end with one or both lost, and
+    breeders usually reduce a twin pregnancy to one early. The mod&rsquo;s twins are more
+    forgiving than that on purpose. Offered a harsher, more realistic outcome table, the
+    owner chose &ldquo;rare, and usually both live&rdquo; (2026-09-13).
+</p>
+
+<h2 id="subfertility">Subfertility</h2>
+
+<p>
+    A stallion or mare that is reliably hard to get in foal is a familiar problem in real
+    breeding. Its causes range from semen quality to uterine health, and are rarely a
+    single inherited cause. The allele here stands in for the heritable part only.
+    Making it recessive and absent from the wild keeps it something a breeder produces by
+    breeding, which matches how a closed line accumulates problems rather than how wild
+    populations carry them.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="fertility.html">Fertility &amp; gestation</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="gene-diet.html">Diet</a>
+    </div>
+    Source: <code>common/genetics/genes/FertilityGene.java</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

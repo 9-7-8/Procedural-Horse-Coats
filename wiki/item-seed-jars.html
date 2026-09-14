@@ -28,17 +28,22 @@
 <div class="plain">
     <ol>
         <li>Craft an <strong>empty seed jar</strong>: glass bottle + horse hair.</li>
-        <li>Right-click an adult <strong>stallion you own, in breeding mode</strong>. The jar
-            fills and is stamped with his genetics.</li>
-        <li>Right-click an adult <strong>mare you own, in breeding mode</strong> &mdash; the stallion in the jar does not have to be yours. A foal is
-            bred immediately. The jar is used up.</li>
+        <li>Right-click an adult <strong>stallion you own, in breeding mode</strong> (fed a
+            golden carrot). The jar fills and is stamped with his genetics, plus any
+            <a href="carrots.html#window">breeding carrots</a> he was carrying.</li>
+        <li>Right-click an adult <strong>mare you own, in heat</strong> &mdash; the stallion in
+            the jar does not have to be yours. If it takes she is
+            <a href="fertility.html">pregnant</a>, and the foal comes when the pregnancy ends.
+            The jar is used up either way.</li>
     </ol>
 </div>
 
 <p>
-    The jar&rsquo;s tooltip names the stallion it holds, so a shelf of jars reads as a
-    list of sires. The foal is bred exactly as it would be if the two horses had met, so
-    everything on <a href="breeding.html">breeding &amp; pedigree</a> applies.
+    A mare who is not in heat refuses the jar, and you keep it. Her information screen says
+    how long until she is. The jar&rsquo;s tooltip names the stallion it holds and says if it
+    carries carrot effects, so a shelf of jars reads as a list of sires. The foal is bred
+    exactly as it would be if the two horses had met, so everything on
+    <a href="breeding.html">breeding &amp; pedigree</a> applies.
 </p>
 
 <div class="table-wrap">
@@ -46,7 +51,7 @@
 <thead><tr><th>Item</th><th>How you get it</th><th>What it does</th></tr></thead>
 <tbody>
 <tr><td><strong>Empty seed jar</strong></td><td>glass bottle + horse hair</td><td>Right-click a stallion <em>you own</em> in breeding mode to fill it.</td></tr>
-<tr><td><strong>Stallion seed jar</strong></td><td>The above</td><td>Right-click a mare <em>you own</em> in breeding mode &rarr; a foal, immediately. The stallion need not be yours &mdash; a jar is how a line changes hands.</td></tr>
+<tr><td><strong>Stallion seed jar</strong></td><td>The above</td><td>Right-click a mare <em>you own</em> in heat &rarr; a pregnancy, if it takes. The stallion need not be yours &mdash; a jar is how a line changes hands.</td></tr>
 </tbody>
 </table>
 </div>
@@ -54,9 +59,9 @@
 <div class="note">
     <span class="label">What it costs</span>
     <p>
-        Filling the jar uses up the stallion&rsquo;s breeding mode, and the mare takes the
-        ordinary breeding cooldown afterwards. There is no gestation and no extra cooldown
-        on the stallion.
+        Filling the jar uses up the stallion&rsquo;s breeding mode, and counts as one of the
+        three covers he can make in a day before his odds drop. A jar that does not take is
+        still used up.
     </p>
 </div>
 </section>
@@ -67,18 +72,20 @@
 <p>
     The jar stores a <code>GenomeSample</code> &mdash; a genotype <em>and</em> an epigenome
     frozen to code strings &mdash; in a <code>stored_genome</code> data component, and the
-    allele draw happens <strong>at impregnation</strong>, exactly like natural breeding.
-    The foal is bred from the mare&rsquo;s live genome and the jar&rsquo;s stored one
-    through the ordinary <code>applyBredFoal</code> path, so there is no second breeding
-    code path to keep in step. Full flow on
-    <a href="breeding.html">breeding &amp; pedigree</a>.
+    allele draw happens <strong>at conception</strong>, exactly as for every other
+    pregnancy. <code>StallionSeedJarHandler</code> checks
+    <code>ReproHandler.receptive</code> and calls <code>ReproHandler.breed</code> with the
+    mare&rsquo;s live genome, the jar&rsquo;s stored one, and the jar&rsquo;s
+    <code>carrot_effects</code> as the sire&rsquo;s. There is no second breeding code path.
+    Filling calls <code>ReproHandler.recordCover</code> and <code>disarm</code> on the
+    stallion. Full flow on <a href="fertility.html#hooks">fertility &amp; gestation</a>.
 </p>
 
 <h2 id="gaps">Known gaps</h2>
 
 <ul>
-    <li>Gestation, a donor cooldown, and carrot effects applied to the jar are all
-        unbuilt.</li>
+    <li>The synthetic sire record still uses the stored UUID as its pedigree edge, and its
+        generation is 0; see <a href="roadmap.html#ivf">the roadmap</a>.</li>
 </ul>
 </section>
 
@@ -88,7 +95,7 @@
         <a href="items.html">All items</a>
     </div>
     <code>stored_genome</code> data component; breeding through
-    <code>applyBredFoal</code>.
+    <code>ReproHandler.breed</code>.
 </div>
 
 </article>
