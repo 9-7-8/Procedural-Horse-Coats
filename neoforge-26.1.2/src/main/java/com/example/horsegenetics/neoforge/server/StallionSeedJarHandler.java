@@ -64,8 +64,20 @@ public final class StallionSeedJarHandler {
         Player player = event.getEntity();
         boolean client = event.getLevel().isClientSide();
 
+        // SERVER-AUTHORITATIVE (known gap 231). The client holds no horse record -
+        // HORSE_RECORD is not synced - so it cannot tell a mare from a stallion. It
+        // cancels every jar click, so it never predicts a mount, and the server decides
+        // and says what happened. The server still hears the click: the interact
+        // packet is sent before this event fires (MultiPlayerGameMode.interact). In
+        // single-player the integrated server runs this same handler with
+        // isClientSide() false, so nothing differs.
+        if (client) {
+            consume(event, InteractionResult.SUCCESS);
+            return;
+        }
         if (!HorseRecords.hasRealRecord(horse)) {
-            return; // record not assigned yet - let the join handler run first
+            consume(event, InteractionResult.FAIL); // record not assigned yet - try again in a moment
+            return;
         }
         if (horse.isBaby()) {
             if (!client) message(player, "That horse is too young.");

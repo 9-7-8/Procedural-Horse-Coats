@@ -45,6 +45,12 @@ public final class NaturalBreedingHandler {
     /** Two seconds; a heat is at least a Minecraft day, so this is plenty. */
     static final int SCAN = 40;
 
+    /**
+     * Each mare's courtship in progress. Transient on purpose, like vanilla's
+     * {@code BreedGoal.loveTime}: a restart mid-courtship costs three seconds.
+     */
+    private static final java.util.Map<java.util.UUID, NaturalCover.Courtship> COURTSHIPS = new java.util.HashMap<>();
+
     /** When each capped mare last said so. Transient; a restart just says it again. */
     private static final java.util.Map<java.util.UUID, Long> CROWDED_LOGGED = new java.util.HashMap<>();
 
@@ -87,7 +93,21 @@ public final class NaturalBreedingHandler {
 
         NaturalCover.Decision decision = NaturalCover.decide(party(mare), r, now, t, candidates, crowd);
         switch (decision.verdict()) {
-            case COVER -> cover(level, mare, mareRecord, r, near.get(decision.stallion()), now);
+            case COVER -> {
+                // VANILLA'S COURTSHIP FIRST (gap 230): the same stallion in reach for three
+                // seconds, as BreedGoal waits out loveTime >= 60 before it breeds.
+                Horse stallion = near.get(decision.stallion());
+                NaturalCover.Courtship before = COURTSHIPS.get(mare.getUUID());
+                NaturalCover.Courtship courtship = before == null
+                        ? NaturalCover.Courtship.start(stallion.getUUID(), now)
+                        : before.seen(stallion.getUUID(), now);
+                if (courtship.complete(now)) {
+                    COURTSHIPS.remove(mare.getUUID());
+                    cover(level, mare, mareRecord, r, stallion, now);
+                } else {
+                    COURTSHIPS.put(mare.getUUID(), courtship);
+                }
+            }
             case CROWDED -> {
                 // Once a minute per mare: a capped paddock asks every two seconds, and
                 // eight mares saying so each time buries the log the cap is read from.

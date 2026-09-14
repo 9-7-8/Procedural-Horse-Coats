@@ -89,11 +89,21 @@ public final class HorseInteractionHandler {
                 }
             }
             consume(event, InteractionResult.SUCCESS);
-        } else if (stack.is(Items.CLOCK) && HorseRecords.hasRealRecord(horse)
-                && HorseRecords.of(horse).sex() == Sex.FEMALE) {
-            // An adult mare: one step through heat, pregnancy and foal heat.
+        } else if (stack.is(Items.CLOCK)) {
+            // An adult horse. SERVER-AUTHORITATIVE (known gap 231): the client has no
+            // horse record to read a sex from, so it cancels for every adult and the
+            // server decides - the interact packet is sent before this event fires, so
+            // the server still hears the click, single-player included. A mare steps
+            // through heat, pregnancy and foal heat; anything else is told so, and the
+            // click is consumed on both sides so neither predicts a mount.
             if (!client) {
-                ReproHandler.debugStep(horse, player);
+                if (HorseRecords.hasRealRecord(horse) && HorseRecords.of(horse).sex() == Sex.FEMALE) {
+                    ReproHandler.debugStep(horse, player);
+                } else {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component
+                            .literal("[clock] Only a mare has a cycle to step.")
+                            .withStyle(net.minecraft.ChatFormatting.GOLD));
+                }
             }
             consume(event, InteractionResult.SUCCESS);
         }

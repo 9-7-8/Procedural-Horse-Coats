@@ -17,6 +17,49 @@ public final class NaturalCover {
     private NaturalCover() {
     }
 
+    /**
+     * How long a stallion must stay within reach of her before he covers her -
+     * vanilla's own number. {@code BreedGoal.tick} walks an animal to its partner and
+     * breeds only once {@code loveTime >= 60} <i>and</i> the two are closer than three
+     * blocks.
+     */
+    public static final long COURTSHIP_TICKS = 60L;
+
+    /**
+     * <b>A courtship in progress</b> - which stallion, since when, last seen when.
+     *
+     * <p>This is how known gap 230 was settled (owner, 2026-09-14: "figure out how
+     * minecraft normally handles that for vanilla, then do the same thing").
+     * Vanilla does <b>not</b> check line of sight for breeding: {@code BreedGoal}
+     * finds its partner with {@code TargetingConditions...ignoreLineOfSight()}, so
+     * two cows three blocks apart through a fence breed. What vanilla does require is
+     * the approach, three seconds of it inside three blocks, and that is what a
+     * natural cover lacked - it covered the first scan a stallion was in reach. Now
+     * the same stallion must still be in reach {@link #COURTSHIP_TICKS} later, and a
+     * pair that drifts apart starts again.
+     */
+    public record Courtship(java.util.UUID stallion, long since, long lastSeen) {
+
+        /** A courtship survives one missed look this long; any longer and it starts again. */
+        public static final long MAY_LAPSE = 100L;
+
+        public static Courtship start(java.util.UUID stallion, long now) {
+            return new Courtship(stallion, now, now);
+        }
+
+        /** He is in reach again at {@code now}: carry on, or start over if it is someone else or too long. */
+        public Courtship seen(java.util.UUID who, long now) {
+            if (!who.equals(stallion) || now - lastSeen > MAY_LAPSE) {
+                return start(who, now);
+            }
+            return new Courtship(stallion, since, now);
+        }
+
+        public boolean complete(long now) {
+            return now - since >= COURTSHIP_TICKS;
+        }
+    }
+
     /** One horse, as far as a natural cover cares. */
     public record Party(boolean adult, boolean female, boolean gelded, boolean fullHealth,
                         boolean ridden, boolean leashed, boolean cowboyStock) {
@@ -75,8 +118,9 @@ public final class NaturalCover {
         int best = -1;
         for (int i = 0; i < candidates.size(); i++) {
             Stallion s = candidates.get(i);
+            // Strictly inside the reach, as vanilla's BreedGoal is (distanceToSqr < 9.0).
             if (!s.party().entireStallion() || s.coversToday() >= ReproRules.FREE_COVERS_PER_DAY
-                    || s.distanceSq() > reachSq) {
+                    || s.distanceSq() >= reachSq) {
                 continue;
             }
             if (best < 0 || s.distanceSq() < candidates.get(best).distanceSq()) {

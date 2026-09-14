@@ -79,6 +79,33 @@ class NaturalCoverTest {
     }
 
     @Test
+    void exactlyThreeBlocksIsOutOfReachAsInVanilla() {
+        double three = ReproRules.NATURAL_REACH * ReproRules.NATURAL_REACH;
+        assertEquals(NaturalCover.Verdict.NO_STALLION,
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, three, 0)), 1).verdict());
+        assertEquals(NaturalCover.Verdict.COVER,
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, three - 0.01, 0)), 1).verdict());
+    }
+
+    /** Gap 230, settled the vanilla way: three seconds in reach of the same stallion, then a cover. */
+    @Test
+    void aCoverWaitsForVanillasThreeSecondCourtship() {
+        java.util.UUID him = new java.util.UUID(1L, 1L);
+        java.util.UUID other = new java.util.UUID(2L, 2L);
+        NaturalCover.Courtship c = NaturalCover.Courtship.start(him, 1000);
+        assertEquals(false, c.complete(1000));
+        c = c.seen(him, 1040);
+        assertEquals(false, c.complete(1040), "two seconds is not enough");
+        c = c.seen(him, 1080);
+        assertEquals(true, c.complete(1080), "four seconds is");
+
+        assertEquals(1080, NaturalCover.Courtship.start(him, 1000).seen(other, 1080).since(),
+                "another stallion starts his own courtship");
+        assertEquals(2000, NaturalCover.Courtship.start(him, 1000).seen(him, 2000).since(),
+                "a pair that drifted apart starts over");
+    }
+
+    @Test
     void outOfReachDoesNotCount() {
         double justOut = (ReproRules.NATURAL_REACH + 0.1) * (ReproRules.NATURAL_REACH + 0.1);
         assertEquals(NaturalCover.Verdict.NO_STALLION,
