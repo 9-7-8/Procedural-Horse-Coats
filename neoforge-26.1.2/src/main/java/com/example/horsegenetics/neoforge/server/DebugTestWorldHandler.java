@@ -403,7 +403,16 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     /**
-     * <b>Four batches, down from six, because the yard took two of them.</b>
+     * <b>Six batches: this evening's two, then the four the yard left.</b>
+     *
+     * <p>Batches 1 and 2 are 2026-09-13 evening's unplayed work
+     * ({@code wiki/verification.html} 0-DT and 0-R): the ender whistle and band
+     * life, then the Dhampir's loci and the day loci. They are eggs and items
+     * rather than pens because every one of those tests is about the horse
+     * reacting to <i>you</i> - binding, calling across dimensions, biting the
+     * nearest thing that is not you - and a pen cannot stand in for the player.
+     *
+     * <p><b>The four below were four batches, down from six, because the yard took two of them.</b>
      *
      * <p>Batches 3 and 4 were the item layer in a hotbar - pen signs, stall
      * signs, tickets, hay, fences, bottles, the research shelf - and every one
@@ -418,6 +427,8 @@ public final class DebugTestWorldHandler {
      * it should be - see {@code wiki/horse-dimension.html}.
      */
     private static final String[] BATCHES = {
+            "NEW: the ender whistle, and wild bands (0-DT)",
+            "NEW: the Dhampir's loci - white, sun, blood - and the day loci (0-R, 0-DT)",
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
             "Ridden: ender echo and ocean-born, plus the guardian, which needs YOU hurt",
             "The sheep spawner - the one thing in 0-BY the yard cannot hand you",
@@ -538,7 +549,7 @@ public final class DebugTestWorldHandler {
         tell(player, Component.literal("  E  crackle, the pool | food preference  "
                         + "F  starburst, F8 | the 3 stat pens")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  I  dhampir | eyesight, lit and dark     "
+        tell(player, Component.literal("  I  (west empty) | eyesight, lit and dark "
                         + "J  guardian | the infirmary")
                 .withStyle(ChatFormatting.WHITE));
         tell(player, Component.literal("  K  the deathbed | ender echo            "
@@ -632,6 +643,78 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
+                // THE ENDER WHISTLE, and the one band-life test that needs a
+                // hand on the horse. The whistle's far call is the test that can
+                // fail without a sound - a portal ticket that never loads the
+                // chunk reads exactly like "nothing answered" - so the saddle is
+                // here to get a thousand blocks away, and the obsidian to prove
+                // the cross-dimension half.
+                put(inv, legend, 0, new ItemStack(ModItems.ENDER_WHISTLE.get()),
+                        "ENDER WHISTLE - right-click one of YOUR tamed horses to bind it for good. "
+                                + "Then walk off and right-click the air to call it");
+                put(inv, legend, 1, new ItemStack(ModItems.ENDER_WHISTLE.get()),
+                        "a second whistle - bind it to a horse, put it in a chest, kill that horse, "
+                                + "take the whistle out: it should crumble to dust");
+                put(inv, legend, 2, new ItemStack(Items.STICK),
+                        "stick - tame the eggs in slot 4. Also try binding to an UNTAMED horse: refused");
+                put(inv, legend, 3, many(preset(player, "Test: whistle horse", Sex.FEMALE, false, PALOMINO), 3),
+                        "three plain horses to bind, call and (one of them) kill");
+                put(inv, legend, 4, new ItemStack(Items.SADDLE),
+                        "saddle - ride a THOUSAND blocks out so the horse's chunk unloads, then call: "
+                                + "\"echoes a long way off\" and the horse within five seconds");
+                put(inv, legend, 5, new ItemStack(Items.OBSIDIAN, 10),
+                        "obsidian - a Nether portal. Call the horse across it both ways, then open its "
+                                + "info screen: same name, coat and genes");
+                put(inv, legend, 6, new ItemStack(Items.FLINT_AND_STEEL), "flint and steel - to light it");
+                put(inv, legend, 7, new ItemStack(Items.IRON_SWORD),
+                        "sword - for the crumble test. Kill a bound horse while HOLDING its whistle too");
+                put(inv, legend, 8, new ItemStack(Items.LEAD),
+                        "lead - BAND LIFE: lead a WILD mare twenty blocks from her band and let go. "
+                                + "Her stallion should come round and push her back");
+                tell(player, Component.literal("Band life is mostly watching wild horses in the "
+                                + "overworld. The one that matters most: kill a family band's "
+                                + "stallion and watch two minutes - the mares keep following ONE "
+                                + "mare instead of scattering. Open a wild mare's info screen for "
+                                + "the new Social section.").withStyle(ChatFormatting.GOLD));
+            }
+            case 2 -> {
+                // THE DHAMPIR, TAKEN APART. Each locus gets its own egg, so a
+                // behaviour can be pinned on the allele that owns it: the white
+                // one is everything at once, and the two singles are the check
+                // that burning and biting really did come apart. The hunt's
+                // order (mob, then you, then a tamed pet) needs a cow and a
+                // wolf in reach, which is what slots 4-6 are.
+                put(inv, legend, 0, preset(player, "Test: white dhampir", Sex.FEMALE, false,
+                                "horsegenetics.magic_white=Wm/Wm", "horsegenetics.sun_sensitivity=Sun/Sun",
+                                "horsegenetics.diet=Dbld/Dbld", "horsegenetics.magic_health=Vmp/Vmp",
+                                "horsegenetics.magic_speed=Vmp/Vmp", "horsegenetics.magic_jump=Vmp/Vmp"),
+                        "the whole animal - burns and hides at dawn, turns all food away, hunts after dark");
+                put(inv, legend, 1, preset(player, "Test: blood diet only", Sex.FEMALE, false,
+                                "horsegenetics.diet=Dbld/Dbld"),
+                        "blood diet ONLY - hunts at any hour, sunlight included, and never burns");
+                put(inv, legend, 2, preset(player, "Test: sun only", Sex.FEMALE, false,
+                                "horsegenetics.sun_sensitivity=Sun/Sun"),
+                        "sun sensitivity ONLY - burns and hides at dawn, but eats hay like any horse");
+                put(inv, legend, 3, new ItemStack(Items.COW_SPAWN_EGG, 4),
+                        "cows - hurt the white one after dark beside a cow and yourself: it bites the COW. "
+                                + "Take the cow away: now you (survival mode)");
+                put(inv, legend, 4, new ItemStack(Items.WOLF_SPAWN_EGG, 2),
+                        "wolves - tame one, go creative: the pet is bitten only once nothing else is near");
+                put(inv, legend, 5, new ItemStack(Items.BONE, 8), "bones - to tame the wolf");
+                put(inv, legend, 6, new ItemStack(Items.STICK),
+                        "stick - tame the day-shy horse so you can try to ride it");
+                put(inv, legend, 7, preset(player, "Test: day-shy", Sex.FEMALE, false,
+                                "horsegenetics.magic_day_temper=Flp/Flp"),
+                        "day temper Flp/Flp - runs from you at noon, lets you ride it at midnight");
+                put(inv, legend, 8, preset(player, "Test: day watcher", Sex.FEMALE, false,
+                                "horsegenetics.magic_day_watch=Wbh/Wbh"),
+                        "day watch Wbh/Wbh - stands behind you by day, stops when you turn round");
+                tell(player, Component.literal("It must NEVER bite another horse or a zombie. "
+                                + "One bite per animal per day.").withStyle(ChatFormatting.GOLD));
+                tell(player, command("/testkit night", "night - for the hunt"));
+                tell(player, command("/testkit day", "day - for the burning and the day loci"));
+            }
+            case 3 -> {
                 // THE NIGHT SHIFT. Six of the yard's pens now run on a clock
                 // and write their own readings (DebugWorldWatch), so this batch
                 // is not a list of things to do - it is the short list of
@@ -650,7 +733,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension now honours");
                 put(inv, legend, 4, new ItemStack(Items.SADDLE),
-                        "saddle - the ridden tests are batch 2");
+                        "saddle - the ridden tests are batch 4");
                 // THE CONTROL FOR GAP 218, and the reason it is dark oak and not
                 // oak: the oak, birch, mushroom and bone-meal dryad pens all
                 // completed and are deleted, and dark oak planted saplings for a
@@ -680,7 +763,7 @@ public final class DebugTestWorldHandler {
                                 + "the plot down and the night with it.")
                         .withStyle(ChatFormatting.RED));
             }
-            case 2 -> {
+            case 4 -> {
                 // EVERY ONE OF THESE IS A PEN NOW, and all three come saddled
                 // in it - so this batch is no longer "here are three horses",
                 // it is the handful of things a rider needs that a pen cannot
@@ -715,7 +798,7 @@ public final class DebugTestWorldHandler {
                                 + "needs fetching.")
                         .withStyle(ChatFormatting.GOLD));
             }
-            case 3 -> {
+            case 5 -> {
                 // Molten hooves left this batch on 2026-09-13: its four alleles
                 // are four stalls in the yard now, side by side, which is the
                 // only arrangement that can answer "does this one differ from
@@ -729,7 +812,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 3, new ItemStack(Items.SADDLE),
                         "saddle - prints follow a ridden horse too; the molten stalls are in the yard");
             }
-            case 4 -> {
+            case 6 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {
