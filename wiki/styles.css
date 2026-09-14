@@ -1376,3 +1376,62 @@ a.card .card-text {
     border-radius: 4px;
     color: var(--text-faint);
 }
+
+/* ---- behaviour-hierarchy.html ----------------------------------------------
+   The timeline's rail, one dot per priority, and each goal as a card whose left
+   edge says whose it is. Flags are small pills so a shared one catches the eye. */
+.bh-summary, .bh-lede { color: var(--text-dim); }
+.bh-rail { margin: 0.75rem 0 2rem; }
+.bh-level {
+    position: relative;
+    border-left: 2px solid var(--border);
+    margin-left: 0.4rem;
+    padding: 0 0 1.25rem 1.4rem;
+}
+.bh-level h3.bh-priority { margin: 0 0 0.6rem; font-size: 1.05rem; }
+.bh-level h3.bh-priority::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: 0.25rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--view-accent);
+    box-shadow: 0 0 0 3px var(--bg);
+}
+.bh-count { color: var(--text-faint); font-size: 0.85rem; font-weight: normal; margin-left: 0.5rem; }
+.bh-goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.bh-goal {
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--magical);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    min-width: 0;
+}
+.bh-goal.bh-vanilla { border-left-color: var(--text-faint); }
+.bh-goal.bh-replaced { border-left-color: var(--border); opacity: 0.6; }
+.bh-goal.bh-replaced code { text-decoration: line-through; }
+.bh-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+.bh-head code { font-weight: 600; }
+.bh-tag { color: var(--text-faint); font-size: 0.8rem; margin-right: 0.25rem; }
+.bh-flag {
+    font-size: 0.72rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+}
+.bh-flag-move { border-color: var(--view-edge); }
+.bh-flag-none { border-style: dashed; }
+.bh-words { margin: 0.3rem 0 0; font-size: 0.9rem; }
+.bh-where { margin: 0.25rem 0 0; color: var(--text-faint); font-size: 0.8rem; overflow-wrap: anywhere; }
+.bh-conflict {
+    margin: 0.5rem 0 0;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    background: var(--view-soft);
+    font-size: 0.85rem;
+}

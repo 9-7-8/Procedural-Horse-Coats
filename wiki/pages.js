@@ -70,7 +70,8 @@ window.HG.pages = {
             items: [
                 { href: "making-a-gene.html", text: "Making a gene", kind: "core", views: ["coding"] },
                 { href: "api-reference.html", text: "Class abstractions", kind: "core", views: ["coding"] },
-                { href: "horse-traits.html", text: "Trait & effect architecture", kind: "magical", views: ["coding"] }
+                { href: "horse-traits.html", text: "Trait & effect architecture", kind: "magical", views: ["coding"] },
+                { href: "behaviour-hierarchy.html", text: "Horse behaviour hierarchy", kind: "core", views: ["coding"] }
             ]
         },
         {
