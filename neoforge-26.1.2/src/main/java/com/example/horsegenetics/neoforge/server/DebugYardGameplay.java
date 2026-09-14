@@ -90,7 +90,7 @@ final class DebugYardGameplay {
         buildCarrotPens(level, gy, cx, mouthZ);
         buildDairyAndClip(level, gy, cx, mouthZ);
         buildEggLayerPen(level, gy, cx, mouthZ);
-        buildFoodPreferencePen(level, gy, cx, mouthZ);
+        // ROW E EAST IS EMPTY: owner, 2026-09-14, "you can remove the 'loves X' food pen".
         buildDeepWaterPen(level, gy, cx, mouthZ);
     }
 
@@ -238,15 +238,11 @@ final class DebugYardGameplay {
                 stack(ModItems.BOUND_TICKET.get(), 16),
                 new ItemStack(Items.STICK, 8),
                 new ItemStack(Items.HAY_BLOCK, 64)));
-        // UNTAMED, for the same reason the guardian is. Owner, 2026-09-13: the
-        // bound ticket answered "That is not your horse." It was not - the yard
-        // stocks TAMED WITH NO OWNER so that leaving the dimension does not walk
-        // the whole yard home with you, and every ticket in this mod checks
-        // OWNERSHIP rather than tameness. That convention has now broken two
-        // separate features this way, which makes it worth stating plainly: in
-        // this yard, anything gated on "your horse" must arrive wild.
-        DebugTestYard.label(DebugPenManager.spawnHorse(level, gy + 1, hx0 + 6.0, (z0 + z1) / 2.0,
-                Sex.FEMALE, DebugTestYard.PALE, false), "TICKET MARE - TAME ME");
+        // NO TICKET MARE: owner, 2026-09-14, "remove the ticket mare, we finished with
+        // the bound signs for now. We'll go back in and test the holding pen more
+        // later." The pen and its chest stay for that. A horse put back for it must
+        // arrive UNTAMED: every ticket checks OWNERSHIP, and the yard's tamed stock
+        // has no owner, so a tamed one answers "That is not your horse."
 
         // ROW C EAST IS EMPTY: the four awkward stalls are confirmed and gone.
         // Owner, 2026-09-13: "all the stalls that should work, do." The tight
@@ -531,49 +527,6 @@ final class DebugYardGameplay {
                     lays[i][0] + "/" + lays[i][0]);
         }
         DebugWorldWatch.watch("EGG LAYER", DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1), null);
-    }
-
-    // ==================================================================
-    // ROW E EAST - food preference
-    // ==================================================================
-
-    /**
-     * <b>Four favourites, named on the horse, with the feed chest one row
-     * north.</b>
-     *
-     * <p>The kit's own legend for this gene is the reason it is here: "offer it
-     * everything: only carrots. <i>Silently does nothing if another mod took
-     * the event first.</i>" That is a failure with no symptom - the horse
-     * accepts the food the ordinary way and nothing says the locus was skipped
-     * - so the test is a <i>comparison</i>, and a comparison needs more than
-     * one horse.
-     *
-     * <p>Four different favourites in one pen, each wearing the name of what it
-     * loves. Feed all four the same apple: exactly one should react. One
-     * reacting is the gene; none reacting is the event being eaten; all four
-     * reacting is the favourite not being read at all.
-     */
-    private static void buildFoodPreferencePen(ServerLevel level, int gy, int cx, int mouthZ) {
-        String[][] loves = {{"App", "LOVES APPLES"}, {"Sug", "LOVES SUGAR"},
-                {"Cke", "LOVES CAKE"}, {"Bef", "LOVES STEAK"}};
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
-        int z0 = mouthZ + ROW_E;
-        int z1 = z0 + ROW_E_D;
-        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("FOOD PREFERENCE", "4 loves, 1 pen.", "Feed all four the", "SAME thing"));
-        for (int i = 0; i < loves.length; i++) {
-            DebugTestYard.stock(level, gy, x0 + 3.0 + i * 4.0, (z0 + z1) / 2.0,
-                    "horsegenetics.food_preference", loves[i][1], 1, 0,
-                    loves[i][0] + "/" + loves[i][0]);
-        }
-        chest(level, gy, x0 + 1, z0 - 2, "THE SAME FOUR", List.of(
-                new ItemStack(Items.APPLE, 16),
-                new ItemStack(Items.SUGAR, 16),
-                new ItemStack(Items.CAKE, 4),
-                new ItemStack(Items.COOKED_BEEF, 16),
-                new ItemStack(Items.WHEAT, 32)));
     }
 
     // ==================================================================

@@ -106,7 +106,7 @@ public final class HerdSocialHandler {
         HorseSocialAttachment social = ensureBorn(horse, before, now);
 
         List<Horse> nearby = level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(RIVAL_NEAR),
-                h -> h != horse && h.isAlive() && HorseRecords.hasRealRecord(h));
+                h -> h != horse && h.isAlive() && HorseRecords.hasRealRecord(h) && YardPens.together(horse, h));
 
         SocialLedger ledger = social.ledger();
         long elapsed = social.lastDecay() == 0L ? 0L : now - social.lastDecay();
@@ -222,7 +222,7 @@ public final class HerdSocialHandler {
     /** The loaded members of {@code herd} within {@link #BAND_REACH} of {@code around}, untamed. */
     static List<Horse> bandMembers(ServerLevel level, UUID herd, Entity around) {
         return level.getEntitiesOfClass(Horse.class, around.getBoundingBox().inflate(BAND_REACH),
-                h -> h.isAlive() && !h.isTamed()
+                h -> h.isAlive() && !h.isTamed() && YardPens.together(around, h)
                         && h.getData(ModAttachments.HORSE_CARE.get()).herd().map(herd::equals).orElse(false));
     }
 
@@ -304,7 +304,7 @@ public final class HerdSocialHandler {
         Horse best = null;
         double bestFamiliarity = 0.0;
         for (Horse other : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(BAND_REACH / 1.5),
-                h -> h != horse && h.isAlive() && !h.isTamed()
+                h -> h != horse && h.isAlive() && !h.isTamed() && YardPens.together(horse, h)
                         && h.getData(ModAttachments.HORSE_CARE.get()).inWildHerd())) {
             double f = ledger.with(other.getUUID()).map(Relationship::familiarity).orElse(0.0);
             if (f > bestFamiliarity) {

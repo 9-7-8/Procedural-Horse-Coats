@@ -28,39 +28,37 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.FERTILITY_ROW_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_P;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_P_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Q;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_R;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Q_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
- * <b>Rows O-T of the test yard: breeding and fertility, one scenario per pen</b>
- * (2026-09-13, built for the owner to audit the whole system in one walk).
+ * <b>Rows O-Q of the test yard, and MET NATURAL in S: breeding and fertility, one
+ * scenario per pen</b> (2026-09-13, packed 2026-09-14).
  *
  * <p>Every pen is a single claim with its expected outcome on the sign, and every
  * pen registers {@link DebugWorldWatch#watchBreeding}, so the log carries each
  * horse's breeding state - in heat, pregnant, nursing, covers today - whenever it
- * changes and at every census. Most of them run themselves: a pen whose claim is
- * "this never happens" only needs its horse count to stay put.
+ * changes and at every census. Every pen is also its own {@link YardPens} pen, so the
+ * natural-cover cap and partner search see nothing over the wall.
+ *
+ * <p><b>A three-block gap, not a shared wall, between breeding pens.</b> Golden-carrot
+ * breeding is vanilla's goal, which pairs two horses in love within three blocks
+ * regardless of walls, and {@code YardPens} does not reach it. So the jar stud has his
+ * own pen apart from the jar mares (owner, 2026-09-14), and no two pens share a wall.
  *
  * <table>
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>O</td><td>NATURAL PAIR - covered on arrival, foal in a minute</td>
- *       <td>GELDING CONTROL - never a foal</td></tr>
- *   <tr><td>P</td><td>SUBFERTILE PAIR - one cover a heat, most miss</td>
- *       <td>HURT MARE - never covered while hurt</td></tr>
- *   <tr><td>Q</td><td>THE CAP - nine horses, nobody covered</td>
- *       <td>COWBOY STOCK - never covered</td></tr>
- *   <tr><td>R</td><td>MATERNITY - births at 1, 2, 3 minutes: single, twins, loss</td>
- *       <td>WEANING - lead the foal away</td></tr>
- *   <tr><td>S</td><td>GOLD ANY HEAT - instant foal out of heat</td>
- *       <td>JAR BENCH - seed jar, vet's kit, clock</td></tr>
- *   <tr><td>T</td><td>MET NATURAL - left to breed; early losses and a plateau</td>
- *       <td>SUBFERTILE GOLD - golden carrots, mostly "didn't take"</td></tr>
+ *   <tr><td>O</td><td>NATURAL PAIR, GELDING CONTROL</td><td>SUBFERTILE PAIR, HURT MARE</td></tr>
+ *   <tr><td>P</td><td>THE CAP, COWBOY STOCK</td><td>MATERNITY, WEANING</td></tr>
+ *   <tr><td>Q</td><td>JAR STUD, JAR &amp; KIT BENCH</td><td>GOLD ANY HEAT, SUBFERTILE GOLD</td></tr>
+ *   <tr><td>S</td><td>(herd rows)</td><td>MET NATURAL</td></tr>
  * </table>
  *
  * <p>Timings assume {@code debug.tools} is on, the dev default: a reproductive
@@ -72,10 +70,6 @@ final class DebugYardFertility {
     private DebugYardFertility() {
     }
 
-    /** A pen's inside width; the cap pen is wider. */
-    private static final int W = 8;
-    private static final int CAP_W = 18;
-
     private static final String FERT = "horsegenetics.fertility=";
     private static final String MET_CARRIER = "horsegenetics.met=met/N";
 
@@ -84,21 +78,21 @@ final class DebugYardFertility {
 
     static void build(ServerLevel level, int gy, int cx, int mouthZ) {
         int west = cx + WEST_MIN;
-        int east = cx + EAST_MIN + 10;
+        int east = cx + EAST_MIN;
         try {
             naturalPair(level, gy, west, mouthZ + ROW_O);
-            geldingControl(level, gy, east, mouthZ + ROW_O);
-            subfertilePair(level, gy, west, mouthZ + ROW_P);
-            hurtMare(level, gy, east, mouthZ + ROW_P);
-            theCap(level, gy, west, mouthZ + ROW_Q);
-            cowboyStock(level, gy, east, mouthZ + ROW_Q);
-            maternity(level, gy, west, mouthZ + ROW_R);
-            weaning(level, gy, east, mouthZ + ROW_R);
-            goldAnyHeat(level, gy, west, mouthZ + ROW_S);
-            jarBench(level, gy, east, mouthZ + ROW_S);
-            metNatural(level, gy, west, mouthZ + ROW_T);
-            subfertileGold(level, gy, east, mouthZ + ROW_T);
-            ActionTrace.log("test yard", "fertility rows O-T built");
+            geldingControl(level, gy, west + 10, mouthZ + ROW_O);
+            subfertilePair(level, gy, east, mouthZ + ROW_O);
+            hurtMare(level, gy, east + 10, mouthZ + ROW_O);
+            theCap(level, gy, west, mouthZ + ROW_P);
+            cowboyStock(level, gy, west + 14, mouthZ + ROW_P);
+            maternity(level, gy, east, mouthZ + ROW_P);
+            weaning(level, gy, east + 12, mouthZ + ROW_P);
+            jarBench(level, gy, west, mouthZ + ROW_Q);
+            goldAnyHeat(level, gy, east, mouthZ + ROW_Q);
+            subfertileGold(level, gy, east + 10, mouthZ + ROW_Q);
+            metNatural(level, gy, east, mouthZ + ROW_S);
+            ActionTrace.log("test yard", "fertility pens built (rows O-Q, and MET NATURAL in S)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: fertility rows failed to build", e);
         }
@@ -109,69 +103,78 @@ final class DebugYardFertility {
     // ------------------------------------------------------------------
 
     private static void naturalPair(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "NATURAL PAIR",
+        pen(level, gy, x0, z0, 7, ROW_O_D, "NATURAL PAIR",
                 List.of("NATURAL PAIR", "mare in heat now:", "hearts in seconds,", "foal in ~1 min"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "n/n", true, "NATURAL MARE");
-        horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, FERT + "n/n", true, "NATURAL STUD");
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "NATURAL MARE");
+        horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "n/n", true, "NATURAL STUD");
         inHeat(mare);
     }
 
     private static void geldingControl(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "GELDING CONTROL",
+        pen(level, gy, x0, z0, 7, ROW_O_D, "GELDING CONTROL",
                 List.of("GELDING CONTROL", "mare in heat,", "gelded stallion:", "NO foal, ever"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "n/n", true, "CONTROL MARE");
-        Horse gelding = horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, FERT + "n/n", true, "GELDING");
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "CONTROL MARE");
+        Horse gelding = horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "n/n", true, "GELDING");
         inHeat(mare);
         if (gelding != null) {
             HorseRecords.apply(gelding, HorseRecords.of(gelding).withGelded(true));
+            DebugTestYard.label(gelding, "GELDING");    // applying a record clears the label
         }
+    }
+
+    private static void subfertilePair(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 7, ROW_O_D, "SUBFERTILE PAIR",
+                List.of("SUBFERTILE PAIR", "sf/sf both: ONE", "cover per heat,", "most do not take"));
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "sf/sf", true, "SF MARE");
+        horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "sf/sf", true, "SF STUD");
+        inHeat(mare);
+    }
+
+    private static void hurtMare(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 7, ROW_O_D, "HURT MARE",
+                List.of("HURT MARE", "half health, in", "heat: NOT covered", "until she heals"));
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "HURT MARE");
+        horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "n/n", true, "HURT PEN STUD");
+        inHeat(mare);
+        if (mare == null) {
+            return;
+        }
+        // HALF HEALTH A SECOND LATER, NOT NOW. Set at spawn, it was undone before the
+        // first scan: the horse's traits are applied as it joins the level, and a
+        // new max-health attribute takes the health with it. First run, 2026-09-14:
+        // covered at 0.80 seven seconds after the build - the full-health chance -
+        // and five foals by the first quarter hour.
+        UUID id = mare.getUUID();
+        DebugYardHerd.after(level, 20, () -> {
+            if (level.getEntity(id) instanceof Horse h && h.isAlive()) {
+                h.setHealth(h.getMaxHealth() / 2.0F);
+                ActionTrace.log("test yard", "HURT MARE set to " + h.getHealth() + "/" + h.getMaxHealth());
+            }
+        });
     }
 
     // ------------------------------------------------------------------
     // Row P
     // ------------------------------------------------------------------
 
-    private static void subfertilePair(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "SUBFERTILE PAIR",
-                List.of("SUBFERTILE PAIR", "sf/sf both: ONE", "cover per heat,", "most do not take"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "sf/sf", true, "SF MARE");
-        horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, FERT + "sf/sf", true, "SF STUD");
-        inHeat(mare);
-    }
-
-    private static void hurtMare(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "HURT MARE",
-                List.of("HURT MARE", "half health, in", "heat: NOT covered", "until she heals"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "n/n", true, "HURT MARE");
-        horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, FERT + "n/n", true, "HURT PEN STUD");
-        if (mare != null) {
-            mare.setHealth(mare.getMaxHealth() / 2.0F);
-        }
-        inHeat(mare);
-    }
-
-    // ------------------------------------------------------------------
-    // Row Q
-    // ------------------------------------------------------------------
-
     private static void theCap(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, CAP_W, "THE CAP",
+        pen(level, gy, x0, z0, 11, ROW_P_D, "THE CAP",
                 List.of("THE CAP", "8 mares + 1 stud,", "all in heat: NOBODY", "is covered"));
         for (int i = 0; i < 8; i++) {
-            inHeat(horse(level, gy, x0 + 2.5 + (i % 4) * 2.0, z0 + 3.0 + (i / 4) * 3.0, Sex.FEMALE,
+            inHeat(horse(level, gy, x0 + 2.0 + (i % 4) * 2.0, z0 + 2.5 + (i / 4) * 3.0, Sex.FEMALE,
                     FERT + "n/n", true, "CAP MARE " + (i + 1)));
         }
-        horse(level, gy, x0 + 14.5, z0 + 5, Sex.MALE, FERT + "n/n", true, "CAP STUD");
-        DebugYardGameplay.chest(level, gy, x0 + 10, z0 - 2, "THE CAP", List.of(
+        horse(level, gy, x0 + 9.2, z0 + 6, Sex.MALE, FERT + "n/n", true, "CAP STUD");
+        DebugYardGameplay.chest(level, gy, x0 + 8, z0 - 2, "THE CAP", List.of(
                 new ItemStack(Items.LEAD, 2),
                 new ItemStack(ModItems.VET_KIT.get())));
     }
 
     private static void cowboyStock(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "COWBOY STOCK",
+        pen(level, gy, x0, z0, 5, ROW_P_D, "COWBOY STOCK",
                 List.of("COWBOY STOCK", "branded pair in", "heat: NEVER", "covered"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "n/n", true, "BRANDED MARE");
-        Horse stud = horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, FERT + "n/n", true, "BRANDED STUD");
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 2.5, Sex.FEMALE, FERT + "n/n", true, "BRANDED MARE");
+        Horse stud = horse(level, gy, x0 + 2.5, z0 + 5.5, Sex.MALE, FERT + "n/n", true, "BRANDED STUD");
         inHeat(mare);
         for (Horse h : new Horse[]{mare, stud}) {
             if (h != null) {
@@ -180,12 +183,8 @@ final class DebugYardFertility {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Row R
-    // ------------------------------------------------------------------
-
     private static void maternity(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "MATERNITY",
+        pen(level, gy, x0, z0, 9, ROW_P_D, "MATERNITY",
                 List.of("MATERNITY", "foals at 1, 2, 3 min", "TWINS mare: two;", "LOSS mare: none"));
         ReproTiming t = ServerConfig.reproTiming();
         long day = t.dayTicks();
@@ -196,21 +195,21 @@ final class DebugYardFertility {
         Genome metSire = Genome.of(Genotype.parse(MET_CARRIER), rng).withSex(Sex.MALE);
         HorseRecord metSireRecord = HorseRecord.founder(new UUID(0x51EL, 2L), "Carrier", "Sire", metSire);
 
-        pregnant(horse(level, gy, x0 + 2.0, z0 + 3, Sex.FEMALE, FERT + "n/n", true, "DUE 1 MIN"),
+        pregnant(horse(level, gy, x0 + 2.0, z0 + 2.5, Sex.FEMALE, FERT + "n/n", true, "DUE 1 MIN"),
                 plainSire, plainSireRecord, false, false, day);
-        pregnant(horse(level, gy, x0 + 4.5, z0 + 5, Sex.FEMALE, FERT + "tw/tw", true, "TWINS DUE 2 MIN"),
+        pregnant(horse(level, gy, x0 + 4.5, z0 + 4.5, Sex.FEMALE, FERT + "tw/tw", true, "TWINS DUE 2 MIN"),
                 plainSire, plainSireRecord, true, false, 2 * day);
-        pregnant(horse(level, gy, x0 + 7.0, z0 + 7, Sex.FEMALE, MET_CARRIER, true, "LOSS AT 1, DUE 3"),
+        pregnant(horse(level, gy, x0 + 7.0, z0 + 6.5, Sex.FEMALE, MET_CARRIER, true, "LOSS AT 1, DUE 3"),
                 metSire, metSireRecord, false, true, 3 * day);
         DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "MATERNITY", List.of(
                 new ItemStack(ModItems.VET_KIT.get())));
     }
 
     private static void weaning(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "WEANING",
+        pen(level, gy, x0, z0, 7, ROW_P_D, "WEANING",
                 List.of("WEANING", "mare nursing: lead", "foal 32+ blocks", "away 1 min"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "n/n", true, "NURSING MARE");
-        Horse foal = horse(level, gy, x0 + 5.5, z0 + 5, Sex.FEMALE, FERT + "n/n", true, "WEAN ME");
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "NURSING MARE");
+        Horse foal = horse(level, gy, x0 + 4.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "WEAN ME");
         if (mare == null || foal == null) {
             return;
         }
@@ -223,32 +222,29 @@ final class DebugYardFertility {
     }
 
     // ------------------------------------------------------------------
-    // Row S
+    // Row Q
     // ------------------------------------------------------------------
 
-    private static void goldAnyHeat(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "GOLD ANY HEAT",
-                List.of("GOLD, ANY HEAT", "mare OUT of heat:", "gold both = foal", "AT ONCE anyway"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "n/n", true, "GOLD MARE");
-        horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, FERT + "n/n", true, "GOLD STUD");
-        outOfHeat(mare);
-        noNaturalCovers(mare);
-        DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "GOLD ANY HEAT", List.of(
-                new ItemStack(Items.GOLDEN_CARROT, 16),
-                new ItemStack(ModItems.VET_KIT.get())));
-    }
-
+    /**
+     * Two pens with a gap between them: the stud on his own, the two mares next door.
+     * Owner, 2026-09-14: "the jar stud shouldn't be physically in the same pen as the
+     * mares or else he'll just breed them as normal".
+     */
     private static void jarBench(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "JAR BENCH",
-                List.of("JAR & KIT BENCH", "TAME all 3 first,", "fill a jar, use on", "both; geld stud"));
-        horse(level, gy, x0 + 1.5, z0 + 3, Sex.MALE, FERT + "n/n", false, "JAR STUD");
-        Horse ready = horse(level, gy, x0 + 4.5, z0 + 5, Sex.FEMALE, FERT + "n/n", false, "IN HEAT: JAR TAKES");
-        Horse notReady = horse(level, gy, x0 + 7.0, z0 + 7, Sex.FEMALE, FERT + "n/n", false, "OUT OF HEAT: REFUSES");
+        pen(level, gy, x0, z0, 5, ROW_Q_D, "JAR STUD",
+                List.of("JAR STUD", "TAME, carrot him,", "fill a jar, then", "use it next door"));
+        horse(level, gy, x0 + 2.5, z0 + 4, Sex.MALE, FERT + "n/n", false, "JAR STUD");
+
+        int mx = x0 + 8;
+        pen(level, gy, mx, z0, 11, ROW_Q_D, "JAR BENCH",
+                List.of("JAR & KIT BENCH", "TAME both first;", "jar on each mare;", "geld the stud"));
+        Horse ready = horse(level, gy, mx + 3.0, z0 + 4, Sex.FEMALE, FERT + "n/n", false, "IN HEAT: JAR TAKES");
+        Horse notReady = horse(level, gy, mx + 7.5, z0 + 4, Sex.FEMALE, FERT + "n/n", false, "OUT OF HEAT: REFUSES");
         inHeat(ready);
         outOfHeat(notReady);
         noNaturalCovers(ready);
         noNaturalCovers(notReady);
-        DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "JAR BENCH", List.of(
+        DebugYardGameplay.chest(level, gy, mx + 5, z0 - 2, "JAR BENCH", List.of(
                 new ItemStack(Items.STICK, 3),
                 new ItemStack(ModItems.EMPTY_SEED_JAR.get(), 3),
                 new ItemStack(Items.GOLDEN_CARROT, 8),
@@ -257,40 +253,54 @@ final class DebugYardFertility {
                 new ItemStack(Items.CLOCK)));
     }
 
-    // ------------------------------------------------------------------
-    // Row T
-    // ------------------------------------------------------------------
-
-    private static void metNatural(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "MET NATURAL",
-                List.of("MET CARRIERS", "left to breed: ~1", "in 4 lost early;", "stops at the cap"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, MET_CARRIER, true, "MET MARE");
-        horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, MET_CARRIER, true, "MET STUD");
-        inHeat(mare);
+    private static void goldAnyHeat(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 7, ROW_Q_D, "GOLD ANY HEAT",
+                List.of("GOLD, ANY HEAT", "mare OUT of heat:", "gold both = foal", "AT ONCE anyway"));
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "n/n", true, "GOLD MARE");
+        horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "n/n", true, "GOLD STUD");
+        outOfHeat(mare);
+        noNaturalCovers(mare);
+        DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "GOLD ANY HEAT", List.of(
+                new ItemStack(Items.GOLDEN_CARROT, 16),
+                new ItemStack(ModItems.VET_KIT.get())));
     }
 
     private static void subfertileGold(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, "SUBFERTILE GOLD",
+        pen(level, gy, x0, z0, 7, ROW_Q_D, "SUBFERTILE GOLD",
                 List.of("SUBFERTILE GOLD", "sf/sf pair: gold", "both. ~1 foal in 4,", "else didn't take"));
-        Horse mare = horse(level, gy, x0 + 2.5, z0 + 5, Sex.FEMALE, FERT + "sf/sf", true, "SF GOLD MARE");
-        horse(level, gy, x0 + 5.5, z0 + 5, Sex.MALE, FERT + "sf/sf", true, "SF GOLD STUD");
+        Horse mare = horse(level, gy, x0 + 2.5, z0 + 4, Sex.FEMALE, FERT + "sf/sf", true, "SF GOLD MARE");
+        horse(level, gy, x0 + 4.5, z0 + 4, Sex.MALE, FERT + "sf/sf", true, "SF GOLD STUD");
         noNaturalCovers(mare);
         DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "SUBFERTILE GOLD", List.of(
                 new ItemStack(Items.GOLDEN_CARROT, 32)));
     }
 
     // ------------------------------------------------------------------
+    // Row S east
+    // ------------------------------------------------------------------
+
+    /** Deeper than the others: it breeds on its own until it holds nine horses. */
+    private static void metNatural(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 9, ROW_S_D, "MET NATURAL",
+                List.of("MET CARRIERS", "left to breed: ~1", "in 4 lost early;", "stops at the cap"));
+        Horse mare = horse(level, gy, x0 + 3.0, z0 + 5, Sex.FEMALE, MET_CARRIER, true, "MET MARE");
+        horse(level, gy, x0 + 6.0, z0 + 5, Sex.MALE, MET_CARRIER, true, "MET STUD");
+        inHeat(mare);
+    }
+
+    // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
 
-    /** Walls, sign, and a breeding watch over the inside. */
-    private static void pen(ServerLevel level, int gy, int x0, int z0, int width, String watchName,
+    /** Walls, sign, a breeding watch over the inside, and a pen of its own for the checks. */
+    private static void pen(ServerLevel level, int gy, int x0, int z0, int width, int depth, String watchName,
                             List<String> sign) {
         int x1 = x0 + width;
-        int z1 = z0 + FERTILITY_ROW_D;
+        int z1 = z0 + depth;
         DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
         DebugWorldWatch.watchBreeding(watchName, DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1));
+        YardPens.register(gy, x0, x1, z0, z1, watchName);
     }
 
     private static @Nullable Horse horse(ServerLevel level, int gy, double x, double z, Sex sex, String code,

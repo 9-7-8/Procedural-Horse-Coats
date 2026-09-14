@@ -179,6 +179,7 @@ public final class DebugWorldWatch {
         LAST.clear();
         LAST_BREEDING.clear();
         LAST_SOCIAL.clear();
+        YardPens.clear();
     }
 
     /** Register a pen for the scan to read. Called by {@link DebugTestYard}. */

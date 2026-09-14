@@ -141,7 +141,7 @@ public final class HerdGoals {
                 return false;
             }
             for (Horse other : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(10.0),
-                    h -> h != horse && !h.isBaby() && free(h) && !BOUTS.containsKey(h.getUUID())
+                    h -> h != horse && !h.isBaby() && free(h) && !BOUTS.containsKey(h.getUUID()) && YardPens.together(horse, h)
                             && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).entire()
                             && h.isTamed() == horse.isTamed())) {
                 double familiarity = BandLife.relationship(horse, other).map(Relationship::familiarity).orElse(0.0);
@@ -257,7 +257,7 @@ public final class HerdGoals {
                 return false;
             }
             for (Horse foal : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(32.0),
-                    h -> h.isBaby() && h.isAlive()
+                    h -> h.isBaby() && h.isAlive() && YardPens.together(horse, h)
                             && h.getData(ModAttachments.HORSE_SOCIAL.get()).dam().map(horse.getUUID()::equals).orElse(false))) {
                 LivingEntity attacker = foal.getLastHurtByMob();
                 if (attacker != null && attacker.isAlive() && foal.tickCount - foal.getLastHurtByMobTimestamp() < 100
@@ -357,7 +357,7 @@ public final class HerdGoals {
             }
             Vec3 centre = centre(band);
             for (Horse h : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(INTRUDER),
-                    h -> h != horse && h.isAlive() && !h.isTamed() && !h.isBaby()
+                    h -> h != horse && h.isAlive() && !h.isTamed() && !h.isBaby() && YardPens.together(horse, h)
                             && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).entire()
                             && !h.getData(ModAttachments.HORSE_CARE.get()).herd().map(herd::equals).orElse(false))) {
                 subject = h;
@@ -484,7 +484,8 @@ public final class HerdGoals {
                 return false;
             }
             for (Horse other : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(6.0),
-                    h -> h != horse && h.isAlive() && !h.isVehicle() && HorseRecords.hasRealRecord(h))) {
+                    h -> h != horse && h.isAlive() && !h.isVehicle() && HorseRecords.hasRealRecord(h)
+                            && YardPens.together(horse, h))) {
                 if (social.ledger().rankOver(other.getUUID()) >= HerdRules.DISPLACE_MARGIN
                         && atFoodOrWater(level, other.blockPosition())) {
                     subject = other;
@@ -592,7 +593,7 @@ public final class HerdGoals {
             }
             if (best == null) {
                 for (Horse h : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(RANGE),
-                        h -> h != horse && !h.isBaby() && free(h) && HorseRecords.hasRealRecord(h)
+                        h -> h != horse && !h.isBaby() && free(h) && HorseRecords.hasRealRecord(h) && YardPens.together(horse, h)
                                 && (mareSide ? HorseRecords.of(h).entire()
                                         : HorseRecords.of(h).sex() == Sex.FEMALE))) {
                     if (!mareSide && !ReproHandler.receptive(h)) {

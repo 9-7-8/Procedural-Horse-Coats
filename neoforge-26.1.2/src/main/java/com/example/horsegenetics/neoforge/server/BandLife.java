@@ -292,7 +292,7 @@ public final class BandLife {
         Horse best = null;
         double bestPull = 0.0;
         for (Horse other : level.getEntitiesOfClass(Horse.class, mare.getBoundingBox().inflate(TRANSFER_REACH),
-                h -> h != mare && h.isAlive() && !h.isTamed())) {
+                h -> h != mare && h.isAlive() && !h.isTamed() && YardPens.together(mare, h))) {
             HorseCareAttachment c = other.getData(ModAttachments.HORSE_CARE.get());
             if (!c.inWildHerd() || HerdSocialHandler.isBachelor(c) || c.herd().map(own::equals).orElse(true)) {
                 continue;
@@ -360,7 +360,8 @@ public final class BandLife {
         Horse best = null;
         double bestD = Double.MAX_VALUE;
         for (Horse h : level.getEntitiesOfClass(Horse.class, from.getBoundingBox().inflate(reach),
-                h -> h != from && h.isAlive() && !h.isTamed() && HorseRecords.hasRealRecord(h))) {
+                h -> h != from && h.isAlive() && !h.isTamed() && HorseRecords.hasRealRecord(h)
+                        && YardPens.together(from, h))) {
             if (!test.test(h)) {
                 continue;
             }

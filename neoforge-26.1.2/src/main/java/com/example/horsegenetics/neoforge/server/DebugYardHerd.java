@@ -36,18 +36,18 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.HERD_LONG_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.HERD_ROW_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_V;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_W;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_R;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_R_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
- * <b>Rows U-X of the test yard: band life, with nobody at the controls</b>
+ * <b>Rows R-T of the test yard: band life, with nobody at the controls</b>
  * (2026-09-14; owner: "make sure we have tests that work with me afk in game for the
- * new herd dynamics system").
+ * new herd dynamics system", then "condense down the testing area").
  *
  * <p>Every herd event is a roll against a per-day rate ({@link HerdRules}), and a
  * Minecraft day is twenty minutes, so the pens do two things a wild band in the
@@ -59,20 +59,18 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  * clocks do is a {@code [trace] test yard} line beside the {@code [trace] herd} lines.
  *
  * <table>
- *   <tr><th>row</th><th>west (wild)</th><th>east</th></tr>
- *   <tr><td>U</td><td>LEAVING HOME - a filly due now, a colt due in 3 min</td>
- *       <td>HOST BAND (wild) - where the filly goes; two west mares may move in</td></tr>
- *   <tr><td>V</td><td>LEADERLESS - stallion killed at 1 min, bachelors arrive at 5</td>
- *       <td>SPARRING - three tamed stallions who know each other</td></tr>
- *   <tr><td>W</td><td>HERDING - one mare put 20+ blocks out every 4 min</td>
- *       <td>GROOMING (north) and DISPLACEMENT (south), tamed</td></tr>
- *   <tr><td>X</td><td>TAKEOVER - a band and three bachelors</td>
- *       <td>DAM DEFENCE - a zombie hurts a tamed foal every 3 min, five times</td></tr>
+ *   <tr><th>row</th><th>west</th><th>east</th></tr>
+ *   <tr><td>R</td><td>LEAVING HOME and HOST BAND (wild, one group)</td>
+ *       <td>LEADERLESS (wild), SPARRING (tamed)</td></tr>
+ *   <tr><td>S</td><td>TAKEOVER (wild), DAM DEFENCE (tamed)</td>
+ *       <td>MET NATURAL (fertility), DISPLACEMENT (tamed)</td></tr>
+ *   <tr><td>T</td><td>HERDING (wild, long), GROOMING (tamed)</td><td></td></tr>
  * </table>
  *
- * <p>Rows are {@code DebugTestYard.HERD_GAP} apart because a wild horse's reach does
- * not stop at a fence. Mares have natural covers switched off here, so no heat pulls a
- * stallion off what he is being tested for.
+ * <p><b>The pens share walls</b>: each is its own {@link YardPens} pen, so no band
+ * decision reaches over one. LEAVING HOME and HOST BAND are one group on purpose - a
+ * filly needs a band next door to leave <i>for</i>. Mares have natural covers switched
+ * off here, so no heat pulls a stallion off what he is being tested for.
  */
 @EventBusSubscriber
 final class DebugYardHerd {
@@ -80,7 +78,6 @@ final class DebugYardHerd {
     private DebugYardHerd() {
     }
 
-    private static final int W = 18;
     private static final String CODE = "horsegenetics.fertility=n/n";
     private static final String BREED = "feral_mixed";
 
@@ -100,7 +97,8 @@ final class DebugYardHerd {
         taskLevel = null;
     }
 
-    private static void after(ServerLevel level, long ticks, Runnable run) {
+    /** Run {@code run} {@code ticks} game ticks from now. The breeding rows use it too. */
+    static void after(ServerLevel level, long ticks, Runnable run) {
         taskLevel = level;
         TASKS.add(new Task(level.getGameTime() + ticks, run));
     }
@@ -138,43 +136,48 @@ final class DebugYardHerd {
     // Build
     // ------------------------------------------------------------------
 
+    /**
+     * Pending steps are cleared by {@code DebugWorldWatch.stop}, which every yard build
+     * runs first - not here, because the breeding rows are built before these and
+     * schedule steps of their own.
+     */
     static void build(ServerLevel level, int gy, int cx, int mouthZ) {
-        cancel();
         int west = cx + WEST_MIN;
-        int east = cx + EAST_MIN + 1;
+        int east = cx + EAST_MIN;
         try {
-            leavingHome(level, gy, west, east, mouthZ + ROW_U);
-            leaderless(level, gy, west, mouthZ + ROW_V);
-            sparring(level, gy, east, mouthZ + ROW_V);
-            herding(level, gy, west, mouthZ + ROW_W);
-            grooming(level, gy, east, mouthZ + ROW_W);
-            displacement(level, gy, east, mouthZ + ROW_W + 20);
-            takeover(level, gy, west, mouthZ + ROW_X);
-            damDefence(level, gy, east, mouthZ + ROW_X);
-            ActionTrace.log("test yard", "herd rows U-X built");
+            leavingHome(level, gy, west, mouthZ + ROW_R);
+            leaderless(level, gy, east, mouthZ + ROW_R);
+            sparring(level, gy, east + 11, mouthZ + ROW_R);
+            takeover(level, gy, west, mouthZ + ROW_S);
+            damDefence(level, gy, west + 12, mouthZ + ROW_S);
+            displacement(level, gy, east + 12, mouthZ + ROW_S);
+            herding(level, gy, west, mouthZ + ROW_T);
+            grooming(level, gy, west + 11, mouthZ + ROW_T);
+            ActionTrace.log("test yard", "herd pens built (rows R-T)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: herd rows failed to build", e);
         }
     }
 
     // ------------------------------------------------------------------
-    // Row U - dispersal, and mare transfers
+    // Row R - dispersal and mare transfers; a band that loses its stallion; sparring
     // ------------------------------------------------------------------
 
     /**
      * The filly is due to leave at once and the colt three minutes later, <b>on
      * purpose</b>: a filly takes the nearest bachelor over the nearest band, and a
-     * brother who left first is the nearest bachelor there is. The two west mares know
-     * the host band's mares already (their side only), so either may move over.
+     * brother who left first is the nearest bachelor there is (gap 234). The two mover
+     * mares know the host band's mares already (their side only), so either may move
+     * over. Two pens, one {@link YardPens} group.
      */
-    private static void leavingHome(ServerLevel level, int gy, int west, int east, int z0) {
-        pen(level, gy, west, z0, W, HERD_ROW_D, "LEAVING HOME",
+    private static void leavingHome(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 10, ROW_R_D, "LEAVING HOME", "LEAVING HOME",
                 List.of("LEAVING HOME", "filly leaves now,", "colt in 3 min;", "mares may move E"));
-        Horse sire = horse(level, gy, west + 4.5, z0 + 5, Sex.MALE, false, "NATAL STALLION", 9.0);
-        Horse m1 = horse(level, gy, west + 8.5, z0 + 4, Sex.FEMALE, false, "MOVER MARE 1", 8.5);
-        Horse m2 = horse(level, gy, west + 10.5, z0 + 7, Sex.FEMALE, false, "MOVER MARE 2", 8.0);
-        Horse filly = horse(level, gy, west + 12.5, z0 + 5, Sex.FEMALE, false, "FILLY: LEAVES NOW", 0.0);
-        Horse colt = horse(level, gy, west + 14.5, z0 + 9, Sex.MALE, false, "COLT: LEAVES AT 3M", 0.0);
+        Horse sire = horse(level, gy, x0 + 2.5, z0 + 3, Sex.MALE, false, "NATAL STALLION", 9.0);
+        Horse m1 = horse(level, gy, x0 + 5.5, z0 + 3, Sex.FEMALE, false, "MOVER MARE 1", 8.5);
+        Horse m2 = horse(level, gy, x0 + 8.0, z0 + 3, Sex.FEMALE, false, "MOVER MARE 2", 8.0);
+        Horse filly = horse(level, gy, x0 + 3.5, z0 + 6.5, Sex.FEMALE, false, "FILLY: LEAVES NOW", 0.0);
+        Horse colt = horse(level, gy, x0 + 7.0, z0 + 6.5, Sex.MALE, false, "COLT: LEAVES AT 3M", 0.0);
         band(sire, BandType.TRADITIONAL, sire, m1, m2, filly, colt);
         if (sire != null) {
             Optional<UUID> natal = Optional.of(sire.getUUID());
@@ -184,11 +187,12 @@ final class DebugYardHerd {
             born(colt, 1.0 - 3.0 * 1200.0 / HerdRules.DAY_TICKS, natal, 1.0);
         }
 
-        pen(level, gy, east, z0, W, HERD_ROW_D, "HOST BAND",
+        int hx = x0 + 10;
+        pen(level, gy, hx, z0, 9, ROW_R_D, "HOST BAND", "LEAVING HOME",
                 List.of("HOST BAND", "the filly joins", "this band; W mares", "may move here"));
-        Horse host = horse(level, gy, east + 12.5, z0 + 5, Sex.MALE, false, "HOST STALLION", 9.0);
-        Horse h1 = horse(level, gy, east + 4.5, z0 + 5, Sex.FEMALE, false, "HOST MARE 1", 8.5);
-        Horse h2 = horse(level, gy, east + 6.5, z0 + 9, Sex.FEMALE, false, "HOST MARE 2", 8.0);
+        Horse host = horse(level, gy, hx + 6.0, z0 + 4.5, Sex.MALE, false, "HOST STALLION", 9.0);
+        Horse h1 = horse(level, gy, hx + 2.5, z0 + 3, Sex.FEMALE, false, "HOST MARE 1", 8.5);
+        Horse h2 = horse(level, gy, hx + 2.5, z0 + 6.5, Sex.FEMALE, false, "HOST MARE 2", 8.0);
         band(host, BandType.TRADITIONAL, host, h1, h2);
         for (Horse mover : new Horse[]{m1, m2}) {
             for (Horse friend : new Horse[]{h1, h2}) {
@@ -197,23 +201,20 @@ final class DebugYardHerd {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Row V - a band that loses its stallion; sparring
-    // ------------------------------------------------------------------
-
     private static void leaderless(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, HERD_ROW_D, "LEADERLESS",
+        int w = 11;
+        pen(level, gy, x0, z0, w, ROW_R_D, "LEADERLESS", "LEADERLESS",
                 List.of("LEADERLESS BAND", "stallion dies 1m:", "mares stay ONE band", "bachelors at 5m"));
-        Horse stallion = horse(level, gy, x0 + 9.5, z0 + 7, Sex.MALE, false, "DOOMED STALLION", 9.0);
-        Horse lead = horse(level, gy, x0 + 4.5, z0 + 4, Sex.FEMALE, false, "ELDEST MARE", 9.5);
-        Horse m2 = horse(level, gy, x0 + 6.5, z0 + 8, Sex.FEMALE, false, "BAND MARE 2", 7.0);
-        Horse m3 = horse(level, gy, x0 + 12.5, z0 + 5, Sex.FEMALE, false, "BAND MARE 3", 6.0);
+        Horse stallion = horse(level, gy, x0 + 5.5, z0 + 4.5, Sex.MALE, false, "DOOMED STALLION", 9.0);
+        Horse lead = horse(level, gy, x0 + 2.5, z0 + 2.5, Sex.FEMALE, false, "ELDEST MARE", 9.5);
+        Horse m2 = horse(level, gy, x0 + 2.5, z0 + 6.5, Sex.FEMALE, false, "BAND MARE 2", 7.0);
+        Horse m3 = horse(level, gy, x0 + 8.5, z0 + 2.5, Sex.FEMALE, false, "BAND MARE 3", 6.0);
         band(stallion, BandType.TRADITIONAL, stallion, lead, m2, m3);
         if (stallion == null) {
             return;
         }
         UUID stallionId = stallion.getUUID();
-        AABB inside = DebugTestYard.box(x0, gy, z0, x0 + W, gy + 3, z0 + HERD_ROW_D);
+        AABB inside = DebugTestYard.box(x0, gy, z0, x0 + w, gy + 3, z0 + ROW_R_D);
 
         after(level, 1200, () -> {
             if (level.getEntity(stallionId) instanceof Horse s && s.isAlive()) {
@@ -242,8 +243,8 @@ final class DebugYardHerd {
             if (lead != null && level.getEntity(anchor) == null) {
                 return;     // the yard is gone
             }
-            Horse a = horse(level, gy, x0 + 15.5, z0 + 11, Sex.MALE, false, "BACHELOR A", 5.0);
-            Horse b = horse(level, gy, x0 + 14.5, z0 + 12, Sex.MALE, false, "BACHELOR B", 4.0);
+            Horse a = horse(level, gy, x0 + 8.5, z0 + 6.5, Sex.MALE, false, "BACHELOR A", 5.0);
+            Horse b = horse(level, gy, x0 + 6.0, z0 + 7.0, Sex.MALE, false, "BACHELOR B", 4.0);
             band(a, BandType.BACHELOR, a, b);
             seed(a, b, 0.6, 0.0, 0.0);
             ActionTrace.log("test yard", "LEADERLESS: two bachelors put in with the vacant band. Expect, "
@@ -253,32 +254,126 @@ final class DebugYardHerd {
     }
 
     private static void sparring(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, HERD_ROW_D, "SPARRING",
+        pen(level, gy, x0, z0, 8, ROW_R_D, "SPARRING", "SPARRING",
                 List.of("SPARRING", "3 tame stallions:", "rear, shove, yield", "NO damage, ever"));
-        Horse a = horse(level, gy, x0 + 4.5, z0 + 5, Sex.MALE, true, "SPAR A", 6.0);
-        Horse b = horse(level, gy, x0 + 9.5, z0 + 8, Sex.MALE, true, "SPAR B", 5.0);
-        Horse c = horse(level, gy, x0 + 13.5, z0 + 5, Sex.MALE, true, "SPAR C", 4.0);
+        Horse a = horse(level, gy, x0 + 2.5, z0 + 2.5, Sex.MALE, true, "SPAR A", 6.0);
+        Horse b = horse(level, gy, x0 + 5.5, z0 + 4.5, Sex.MALE, true, "SPAR B", 5.0);
+        Horse c = horse(level, gy, x0 + 2.5, z0 + 6.5, Sex.MALE, true, "SPAR C", 4.0);
         seed(a, b, 0.6, 0.0, 0.0);
         seed(a, c, 0.6, 0.0, 0.0);
         seed(b, c, 0.6, 0.0, 0.0);
     }
 
     // ------------------------------------------------------------------
-    // Row W - herding; grooming; displacement
+    // Row S - a takeover; a dam defending her foal; displacement
+    // ------------------------------------------------------------------
+
+    private static void takeover(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 12, ROW_S_D, "TAKEOVER", "TAKEOVER",
+                List.of("TAKEOVER", "band + 3 bachelors:", "fights stop at 40%", "NOBODY dies"));
+        Horse stallion = horse(level, gy, x0 + 4.0, z0 + 3.5, Sex.MALE, false, "BAND STALLION", 9.0);
+        Horse m1 = horse(level, gy, x0 + 2.0, z0 + 2.0, Sex.FEMALE, false, "TAKEOVER MARE 1", 9.5);
+        Horse m2 = horse(level, gy, x0 + 6.0, z0 + 2.0, Sex.FEMALE, false, "TAKEOVER MARE 2", 8.0);
+        Horse m3 = horse(level, gy, x0 + 2.5, z0 + 5.5, Sex.FEMALE, false, "TAKEOVER MARE 3", 7.0);
+        band(stallion, BandType.TRADITIONAL, stallion, m1, m2, m3);
+        Horse c1 = horse(level, gy, x0 + 8.5, z0 + 8.5, Sex.MALE, false, "CHALLENGER 1", 6.0);
+        Horse c2 = horse(level, gy, x0 + 10.0, z0 + 10.0, Sex.MALE, false, "CHALLENGER 2", 5.0);
+        Horse c3 = horse(level, gy, x0 + 6.5, z0 + 10.0, Sex.MALE, false, "CHALLENGER 3", 4.0);
+        band(c1, BandType.BACHELOR, c1, c2, c3);
+        seed(c1, c2, 0.6, 0.0, 0.0);
+        seed(c1, c3, 0.6, 0.0, 0.0);
+        seed(c2, c3, 0.6, 0.0, 0.0);
+    }
+
+    private static void damDefence(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 7, 8, "DAM DEFENCE", "DAM DEFENCE",
+                List.of("DAM DEFENCE", "a zombie hurts the", "foal every 3 min:", "the dam kills it"));
+        Horse dam = horse(level, gy, x0 + 2.5, z0 + 3, Sex.FEMALE, true, "DAM", 7.0);
+        Horse foal = horse(level, gy, x0 + 3.5, z0 + 5.5, Sex.FEMALE, true, "FOAL", 0.0);
+        if (dam == null || foal == null) {
+            return;
+        }
+        foal.setAge(-24000);
+        HorseSocialAttachment s = foal.getData(ModAttachments.HORSE_SOCIAL.get());
+        foal.setData(ModAttachments.HORSE_SOCIAL.get(), s.withBirth(level.getGameTime(),
+                Optional.of(dam.getUUID()), Optional.empty(), 1.0));
+        poke(level, dam.getUUID(), foal.getUUID(), 600, 1);
+    }
+
+    private static void poke(ServerLevel level, UUID damId, UUID foalId, long in, int n) {
+        after(level, in, () -> {
+            if (!(level.getEntity(foalId) instanceof Horse foal) || !foal.isAlive() || !foal.isBaby()) {
+                return;
+            }
+            Zombie zombie = EntityType.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
+            if (zombie == null) {
+                return;
+            }
+            // A helmet, or the yard's open sky burns it before anything else can.
+            zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+            zombie.setPersistenceRequired();
+            zombie.setPos(foal.getX(), foal.getY(), foal.getZ() + 1.2);
+            level.addFreshEntity(zombie);
+            // WEAK ENOUGH TO LOSE. The first run, 2026-09-14: the dam went for a
+            // full-health zombie four seconds after it hurt her foal, took five hits of
+            // 3.0 and died with the zombie untouched - the arithmetic that killed the
+            // guardian twice. A plain horse cannot win that fight, so the pen was
+            // testing the fight, not whether she starts it. Two kicks' worth now.
+            zombie.setHealth(4.0F);
+            foal.hurtServer(level, level.damageSources().mobAttack(zombie), 1.0F);
+            ActionTrace.log("test yard", "DAM DEFENCE #" + n + " of 5: a zombie hurt FOAL. Expect '[trace] herd | "
+                    + "... went for zombie' within a second and '[watch] creature died | minecraft:zombie' soon after");
+            UUID zombieId = zombie.getUUID();
+            after(level, 400, () -> {
+                boolean alive = level.getEntity(zombieId) instanceof Zombie z && z.isAlive();
+                String target = level.getEntity(damId) instanceof Horse d && d.getTarget() != null
+                        ? d.getTarget().getType().builtInRegistryHolder().key().identifier().getPath()
+                        + (d.getTarget().isAlive() ? "" : " (dead)") : "nothing";
+                ActionTrace.log("test yard", "DAM DEFENCE #" + n + ", 20 s later: zombie "
+                        + (alive ? "STILL ALIVE" : "dead") + ", DAM targeting " + target);
+            });
+            if (n < 5) {
+                poke(level, damId, foalId, 3600, n + 1);
+            }
+        });
+    }
+
+    private static void displacement(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 7, 8, "DISPLACEMENT", "DISPLACEMENT",
+                List.of("DISPLACEMENT", "4 ranked mares, hay:", "a higher one moves", "a lower one off"));
+        Horse[] mares = {
+                horse(level, gy, x0 + 1.8, z0 + 2.0, Sex.FEMALE, true, "RANK 1 MARE", 9.0),
+                horse(level, gy, x0 + 5.2, z0 + 2.0, Sex.FEMALE, true, "RANK 2 MARE", 8.0),
+                horse(level, gy, x0 + 1.8, z0 + 6.2, Sex.FEMALE, true, "RANK 3 MARE", 7.0),
+                horse(level, gy, x0 + 5.2, z0 + 6.2, Sex.FEMALE, true, "RANK 4 MARE", 6.0)};
+        for (int i = 0; i < mares.length; i++) {
+            for (int j = i + 1; j < mares.length; j++) {
+                seed(mares[i], mares[j], 0.8, 0.6, 0.0);
+            }
+        }
+        for (int x = x0 + 3; x <= x0 + 4; x++) {
+            level.setBlock(new BlockPos(x, gy + 1, z0 + 4), Blocks.HAY_BLOCK.defaultBlockState(), 3);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Row T - herding; grooming
     // ------------------------------------------------------------------
 
     /**
      * A lead let go twenty blocks out, done by the clock. The stray is never the lead
      * mare, whom everyone follows - so she may well walk back on her own before the
      * stallion moves, and the log says which: a {@code went to herd} line, or none.
+     * Long because the stallion only herds a mare more than fourteen blocks from the
+     * band's centre, and the stray herself counts toward that centre.
      */
     private static void herding(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, HERD_LONG_D, "HERDING",
+        pen(level, gy, x0, z0, 8, ROW_T_D, "HERDING", "HERDING",
                 List.of("HERDING", "a mare is put far", "off every 4 min:", "who brings her?"));
-        Horse stallion = horse(level, gy, x0 + 12.5, z0 + 6, Sex.MALE, false, "HERD STALLION", 9.0);
-        Horse lead = horse(level, gy, x0 + 5.5, z0 + 4, Sex.FEMALE, false, "HERD LEAD MARE", 9.5);
-        Horse m2 = horse(level, gy, x0 + 8.5, z0 + 7, Sex.FEMALE, false, "HERD MARE", 7.0);
-        Horse stray = horse(level, gy, x0 + 10.5, z0 + 4, Sex.FEMALE, false, "STRAY MARE", 5.0);
+        Horse stallion = horse(level, gy, x0 + 4.5, z0 + 5, Sex.MALE, false, "HERD STALLION", 9.0);
+        Horse lead = horse(level, gy, x0 + 2.5, z0 + 2.5, Sex.FEMALE, false, "HERD LEAD MARE", 9.5);
+        Horse m2 = horse(level, gy, x0 + 5.5, z0 + 2.5, Sex.FEMALE, false, "HERD MARE", 7.0);
+        Horse stray = horse(level, gy, x0 + 3.0, z0 + 7.5, Sex.FEMALE, false, "STRAY MARE", 5.0);
         band(stallion, BandType.TRADITIONAL, stallion, lead, m2, stray);
         seed(lead, m2, 0.8, 0.0, 0.0);
         seed(lead, stray, 0.8, 0.0, 0.0);
@@ -295,7 +390,7 @@ final class DebugYardHerd {
                 return;
             }
             stray.getNavigation().stop();
-            stray.teleportTo(x0 + 9.5, gy + 1, z0 + HERD_LONG_D - 3.5);
+            stray.teleportTo(x0 + 4.0, gy + 1, z0 + ROW_T_D - 3.0);
             ActionTrace.log("test yard", "HERDING #" + n + ": put STRAY MARE "
                     + String.format("%.0f", distanceFromBand(level, stray)) + " blocks from her band");
             after(level, 1200, () -> {
@@ -330,101 +425,16 @@ final class DebugYardHerd {
 
     /** A small pen, so the two mares and the gelding stand within grooming reach often. */
     private static void grooming(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 9, 9, "GROOMING",
+        pen(level, gy, x0, z0, 7, 7, "GROOMING", "GROOMING",
                 List.of("GROOMING", "mares + gelding pair", "up in ~30 min;", "stallion never"));
-        horse(level, gy, x0 + 2.5, z0 + 3, Sex.FEMALE, true, "GROOM MARE A", 6.0);
-        horse(level, gy, x0 + 6.5, z0 + 3, Sex.FEMALE, true, "GROOM MARE B", 5.0);
-        Horse gelding = horse(level, gy, x0 + 2.5, z0 + 7, Sex.MALE, true, "GROOM GELDING", 5.0);
-        horse(level, gy, x0 + 6.5, z0 + 7, Sex.MALE, true, "GROOM STALLION (never)", 5.0);
+        horse(level, gy, x0 + 2.0, z0 + 2.0, Sex.FEMALE, true, "GROOM MARE A", 6.0);
+        horse(level, gy, x0 + 5.0, z0 + 2.0, Sex.FEMALE, true, "GROOM MARE B", 5.0);
+        Horse gelding = horse(level, gy, x0 + 2.0, z0 + 5.0, Sex.MALE, true, "GROOM GELDING", 5.0);
+        horse(level, gy, x0 + 5.0, z0 + 5.0, Sex.MALE, true, "GROOM STALLION (never)", 5.0);
         if (gelding != null) {
             HorseRecords.apply(gelding, HorseRecords.of(gelding).withGelded(true));
+            DebugTestYard.label(gelding, "GROOM GELDING");     // applying a record clears the label
         }
-    }
-
-    private static void displacement(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, 10, "DISPLACEMENT",
-                List.of("DISPLACEMENT", "4 ranked mares, hay:", "a higher one moves", "a lower one off"));
-        Horse[] mares = {
-                horse(level, gy, x0 + 4.5, z0 + 3, Sex.FEMALE, true, "RANK 1 MARE", 9.0),
-                horse(level, gy, x0 + 13.5, z0 + 3, Sex.FEMALE, true, "RANK 2 MARE", 8.0),
-                horse(level, gy, x0 + 4.5, z0 + 7, Sex.FEMALE, true, "RANK 3 MARE", 7.0),
-                horse(level, gy, x0 + 13.5, z0 + 7, Sex.FEMALE, true, "RANK 4 MARE", 6.0)};
-        for (int i = 0; i < mares.length; i++) {
-            for (int j = i + 1; j < mares.length; j++) {
-                seed(mares[i], mares[j], 0.8, 0.6, 0.0);
-            }
-        }
-        for (int x = x0 + 7; x <= x0 + 11; x += 2) {
-            level.setBlock(new BlockPos(x, gy + 1, z0 + 5), Blocks.HAY_BLOCK.defaultBlockState(), 3);
-        }
-    }
-
-    // ------------------------------------------------------------------
-    // Row X - a takeover; a dam defending her foal
-    // ------------------------------------------------------------------
-
-    private static void takeover(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, HERD_ROW_D, "TAKEOVER",
-                List.of("TAKEOVER", "band + 3 bachelors:", "fights stop at 40%", "NOBODY dies"));
-        Horse stallion = horse(level, gy, x0 + 5.5, z0 + 4, Sex.MALE, false, "BAND STALLION", 9.0);
-        Horse m1 = horse(level, gy, x0 + 3.5, z0 + 3, Sex.FEMALE, false, "TAKEOVER MARE 1", 9.5);
-        Horse m2 = horse(level, gy, x0 + 7.5, z0 + 3, Sex.FEMALE, false, "TAKEOVER MARE 2", 8.0);
-        Horse m3 = horse(level, gy, x0 + 5.5, z0 + 6, Sex.FEMALE, false, "TAKEOVER MARE 3", 7.0);
-        band(stallion, BandType.TRADITIONAL, stallion, m1, m2, m3);
-        Horse c1 = horse(level, gy, x0 + 13.5, z0 + 10, Sex.MALE, false, "CHALLENGER 1", 6.0);
-        Horse c2 = horse(level, gy, x0 + 15.5, z0 + 11, Sex.MALE, false, "CHALLENGER 2", 5.0);
-        Horse c3 = horse(level, gy, x0 + 11.5, z0 + 12, Sex.MALE, false, "CHALLENGER 3", 4.0);
-        band(c1, BandType.BACHELOR, c1, c2, c3);
-        seed(c1, c2, 0.6, 0.0, 0.0);
-        seed(c1, c3, 0.6, 0.0, 0.0);
-        seed(c2, c3, 0.6, 0.0, 0.0);
-    }
-
-    private static void damDefence(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, W, HERD_ROW_D, "DAM DEFENCE",
-                List.of("DAM DEFENCE", "a zombie hurts the", "foal every 3 min:", "the dam kills it"));
-        Horse dam = horse(level, gy, x0 + 6.5, z0 + 6, Sex.FEMALE, true, "DAM", 7.0);
-        Horse foal = horse(level, gy, x0 + 9.5, z0 + 6, Sex.FEMALE, true, "FOAL", 0.0);
-        if (dam == null || foal == null) {
-            return;
-        }
-        foal.setAge(-24000);
-        HorseSocialAttachment s = foal.getData(ModAttachments.HORSE_SOCIAL.get());
-        foal.setData(ModAttachments.HORSE_SOCIAL.get(), s.withBirth(level.getGameTime(),
-                Optional.of(dam.getUUID()), Optional.empty(), 1.0));
-        poke(level, dam.getUUID(), foal.getUUID(), 600, 1);
-    }
-
-    private static void poke(ServerLevel level, UUID damId, UUID foalId, long in, int n) {
-        after(level, in, () -> {
-            if (!(level.getEntity(foalId) instanceof Horse foal) || !foal.isAlive() || !foal.isBaby()) {
-                return;
-            }
-            Zombie zombie = EntityType.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
-            if (zombie == null) {
-                return;
-            }
-            // A helmet, or the yard's open sky burns it before anything else can.
-            zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
-            zombie.setPersistenceRequired();
-            zombie.setPos(foal.getX() + 1.5, foal.getY(), foal.getZ());
-            level.addFreshEntity(zombie);
-            foal.hurtServer(level, level.damageSources().mobAttack(zombie), 1.0F);
-            ActionTrace.log("test yard", "DAM DEFENCE #" + n + " of 5: a zombie hurt FOAL. Expect '[trace] herd | "
-                    + "... went for zombie' within a second and '[watch] creature died | minecraft:zombie' soon after");
-            UUID zombieId = zombie.getUUID();
-            after(level, 400, () -> {
-                boolean alive = level.getEntity(zombieId) instanceof Zombie z && z.isAlive();
-                String target = level.getEntity(damId) instanceof Horse d && d.getTarget() != null
-                        ? d.getTarget().getType().builtInRegistryHolder().key().identifier().getPath()
-                        + (d.getTarget().isAlive() ? "" : " (dead)") : "nothing";
-                ActionTrace.log("test yard", "DAM DEFENCE #" + n + ", 20 s later: zombie "
-                        + (alive ? "STILL ALIVE" : "dead") + ", DAM targeting " + target);
-            });
-            if (n < 5) {
-                poke(level, damId, foalId, 3600, n + 1);
-            }
-        });
     }
 
     // ------------------------------------------------------------------
@@ -432,10 +442,11 @@ final class DebugYardHerd {
     // ------------------------------------------------------------------
 
     private static void pen(ServerLevel level, int gy, int x0, int z0, int width, int depth, String watchName,
-                            List<String> sign) {
+                            String group, List<String> sign) {
         DebugTestYard.fencedPlot(level, gy, x0, x0 + width, z0, z0 + depth);
         DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH, sign);
         DebugWorldWatch.watchSocial(watchName, DebugTestYard.box(x0, gy, z0, x0 + width, gy + 1, z0 + depth));
+        YardPens.register(gy, x0, x0 + width, z0, z0 + depth, group);
     }
 
     /** A named horse, {@code adultDays} past growing up, with natural covers off if she is a mare. */

@@ -79,7 +79,7 @@ public final class NaturalBreedingHandler {
         List<Horse> near = level.getEntitiesOfClass(Horse.class,
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_REACH),
                 h -> h != mare && h.isAlive() && HorseRecords.hasRealRecord(h)
-                        && HorseRecords.of(h).sex() == Sex.MALE);
+                        && HorseRecords.of(h).sex() == Sex.MALE && YardPens.together(mare, h));
         if (near.isEmpty()) {
             return;
         }
@@ -89,7 +89,7 @@ public final class NaturalBreedingHandler {
                     ReproHandler.of(h).coversOn(now, t.dayTicks())));
         }
         int crowd = level.getEntitiesOfClass(Horse.class,
-                mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS), h -> h != mare && h.isAlive()).size();
+                mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS), h -> h != mare && h.isAlive() && YardPens.together(mare, h)).size();
 
         NaturalCover.Decision decision = NaturalCover.decide(party(mare), r, now, t, candidates, crowd);
         switch (decision.verdict()) {

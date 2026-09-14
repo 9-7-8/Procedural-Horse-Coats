@@ -213,42 +213,30 @@ final class DebugTestYard {
     static final int ROW_N_D = 10;
 
     /**
-     * <b>Rows O-T: breeding and fertility</b>, built by {@link DebugYardFertility}
-     * (2026-09-13). One scenario per pen, only a row's two outer pens, and a wider
-     * aisle - because every horse now breeds on its own and a mare's natural cover
-     * is refused when eight other horses stand within sixteen blocks of her. Pens
-     * packed as tightly as the rest of the yard would cap each other and every
-     * breeding test would read as broken. The cap pen (row Q) gets extra room on
-     * both sides for the same reason.
+     * <b>Rows O-T: breeding (O-Q, and MET NATURAL in S) and band life (R-T)</b>, built
+     * by {@link DebugYardFertility} and {@link DebugYardHerd}. <b>Packed since
+     * 2026-09-14</b> (owner: "condense down the testing area"): every pen registers
+     * with {@link YardPens}, so a horse's breeding and band checks see only its own
+     * pen. Before that these rows ran more than three hundred blocks deep, because
+     * those checks count neighbours by distance through walls - a cap of eight within
+     * sixteen, a 64-block dispersal search - and a packed pen would have read its
+     * neighbours. Pens that are fed golden carrots still keep an air gap: vanilla's
+     * breeding goal is not one of those checks.
      */
-    static final int FERTILITY_AISLE = AISLE + 8;
-    static final int FERTILITY_ROW_D = 10;
-    static final int ROW_O = ROW_N + ROW_N_D + FERTILITY_AISLE;
-    static final int ROW_P = ROW_O + FERTILITY_ROW_D + FERTILITY_AISLE;
-    static final int ROW_Q = ROW_P + FERTILITY_ROW_D + FERTILITY_AISLE + 8;
-    static final int ROW_R = ROW_Q + FERTILITY_ROW_D + FERTILITY_AISLE + 8;
-    static final int ROW_S = ROW_R + FERTILITY_ROW_D + FERTILITY_AISLE;
-    static final int ROW_T = ROW_S + FERTILITY_ROW_D + FERTILITY_AISLE;
-
-    /**
-     * <b>Rows U-X: band life</b>, built by {@link DebugYardHerd}. Spaced by the
-     * herd code's own reaches rather than by the yard's grid, because a wild
-     * horse's decisions do not stop at a fence: a bachelor challenges a stallion
-     * whose mare is within 24 blocks, a stallion squares up to any outside male
-     * within 16, a mare moves to a band within 32. Each row holds one wild group
-     * and tamed pens beside it (tamed horses are invisible to all of that), and
-     * {@link #HERD_GAP} keeps the wild groups out of each other's reach. The first
-     * row also stands clear of row T, so no herd horse counts toward a fertility
-     * pen's cap of eight within sixteen blocks.
-     */
-    static final int HERD_GAP = 30;
-    static final int HERD_ROW_D = 14;
-    /** Row W is long: its stray mare is put down twenty-odd blocks from her band. */
-    static final int HERD_LONG_D = 30;
-    static final int ROW_U = ROW_T + FERTILITY_ROW_D + 24;
-    static final int ROW_V = ROW_U + HERD_ROW_D + HERD_GAP;
-    static final int ROW_W = ROW_V + HERD_ROW_D + HERD_GAP;
-    static final int ROW_X = ROW_W + HERD_LONG_D + HERD_GAP;
+    static final int PACKED_AISLE = AISLE + 1;     // a chest and a sign in front of every pen
+    static final int ROW_O = ROW_N + ROW_N_D + PACKED_AISLE;
+    static final int ROW_O_D = 8;
+    static final int ROW_P = ROW_O + ROW_O_D + PACKED_AISLE;
+    static final int ROW_P_D = 8;
+    static final int ROW_Q = ROW_P + ROW_P_D + PACKED_AISLE;
+    static final int ROW_Q_D = 8;
+    static final int ROW_R = ROW_Q + ROW_Q_D + PACKED_AISLE;
+    static final int ROW_R_D = 9;
+    static final int ROW_S = ROW_R + ROW_R_D + PACKED_AISLE;
+    static final int ROW_S_D = 12;
+    static final int ROW_T = ROW_S + ROW_S_D + PACKED_AISLE;
+    /** Long: HERDING's stray has to land more than fourteen blocks from her band's centre. */
+    static final int ROW_T_D = 28;
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -257,7 +245,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_X + HERD_ROW_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_T + ROW_T_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;

@@ -80,7 +80,22 @@
     </p>
 </div>
 
-<h2 id="herd-yard">&sect;0-DW &mdash; Band life in the yard: rows U to X (built 2026-09-14, NOT played)</h2>
+<h2 id="herd-yard">&sect;0-DW &mdash; Band life in the yard: rows R to T (built 2026-09-14, NOT played)</h2>
+
+<div class="note">
+    <span class="label">The yard was packed on 2026-09-14</span>
+    <p>
+        Rows O to T used to run more than three hundred blocks deep. Now they share walls,
+        because inside the yard <strong>a horse's breeding and band checks only see the horses in its own
+        pen</strong> (<code>YardPens</code>). Outside the yard nothing changed. Before that, the
+        breeding cap and every band decision counted horses through walls, so pens had to stand
+        far apart. The breeding pens still keep a three-block gap between them, because vanilla's
+        golden-carrot breeding ignores walls. The jar stud now has his own pen, two blocks from the
+        mares. Pass for the packing itself: no pen's <code>[watch]</code> line ever lists a horse
+        from the pen next door, and no <code>not covered: … other horses</code> line counts more
+        horses than its pen holds.
+    </p>
+</div>
 
 <p>
     Everything band life can do without a player now happens in the yard, on a clock. Go
@@ -99,19 +114,28 @@
     <em>per Minecraft day</em> (twenty minutes), so &ldquo;within the hour&rdquo; means likely,
     not certain.
 </p>
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 morning (first 15 minutes, nobody touching the pens)</span>
+    <p>
+        <strong>A band stays one band when its stallion dies</strong>: &ldquo;stays one band: 3
+        horses, following lead mare&rdquo; two minutes after the kill, and the clock's own check read
+        PASS. That was the old split bug. <strong>Dispersal, both sexes</strong>: the filly left at
+        once and joined the host band, and the colt left at three minutes as his own bachelor lead.
+        <strong>Herding fires</strong>: the stallion fetched the stray from 16 blocks in eight
+        seconds, and in the three later rounds she walked back on her own. <strong>Sparring does no
+        damage</strong>, and the three stallions settled into an order (C, A, B). <strong>Grooming
+        partners form</strong> between mares, and the stallion never gets one. <strong>Tick
+        time</strong> was a steady 50.0 ms with about 270 horses in the dimension. All deleted below.
+    </p>
+</div>
 <ol>
-    <li><strong>Row V west, LEADERLESS: the old split bug, and the most important check.</strong>
-        At 1 minute the clock kills DOOMED STALLION. About two minutes later the log should say
-        <code>[trace] herd | band &hellip; has lost its stallion and stays one band: 3 horses,
-        following lead mare ELDEST MARE</code>. At about 4&frac12; minutes the clock checks for
-        itself: <code>LEADERLESS check &hellip; PASS, still one band</code> or <code>FAIL, the band
-        split</code>.
-        <br>At 5 minutes two bachelors are put in. Within the hour, one should
-        <code>took over band</code> <em>without</em> a <code>challenged</code> line before it,
-        because a vacant band is claimed rather than fought for. Next should come
-        <code>the bachelors &hellip; left behind re-formed round</code> the other one
-        (<a href="known-gaps.html#gap-232">gap 232</a>).</li>
-    <li><strong>Row X west, TAKEOVER: nobody dies.</strong> A band and three bachelors in one pen.
+    <li><strong>Row R east, LEADERLESS: a vacant band is claimed.</strong> At 5 minutes two bachelors
+        are put in with the leaderless band. Within the hour, one should <code>took over band</code>
+        <em>without</em> a <code>challenged</code> line before it, because a vacant band is claimed
+        rather than fought for. Next should come <code>the bachelors &hellip; left behind re-formed
+        round</code> the other one (<a href="known-gaps.html#gap-232">gap 232</a>). None had
+        happened ten minutes after they arrived.</li>
+    <li><strong>Row S west, TAKEOVER: nobody dies.</strong> A band and three bachelors in one pen.
         <strong>Pass:</strong>
         <ul>
             <li><code>challenged</code> lines, each ending in <code>took over band</code> or
@@ -123,45 +147,34 @@
                 pile in.</li>
         </ul>
         After a takeover, the old stallion's role reads <em>Bachelor</em>.</li>
-    <li><strong>Row U, LEAVING HOME.</strong> Within seconds, FILLY: LEAVES NOW <code>left the
-        band it was born into</code>, and her band in the watch line becomes HOST BAND's. At 3
-        minutes COLT does the same and reads <em>Bachelor lead</em>: there is no bachelor band in
-        reach, so he strikes out alone. Over the night, MOVER MARE 1 or 2 may log <code>moved
-        from band &hellip; to HOST MARE &hellip;'s</code>. That is about one chance in twenty a
-        day each, or roughly two chances in three by morning.
-        <br>The filly goes first on purpose, because of
-        <a href="known-gaps.html#gap-234">gap 234</a>.</li>
-    <li><strong>Row V east, SPARRING.</strong> Three tamed stallions who already know each other.
-        <strong>Pass:</strong> a <code>yielded to &hellip; in a spar</code> line every few minutes,
-        and <strong>no</strong> <code>horse hurt</code> line for SPAR A, B or C. Their outranks and
-        yields-to counts should settle into an order.</li>
-    <li><strong>Row X east, DAM DEFENCE.</strong> At 30 seconds, then every 3 minutes for five
-        rounds, a zombie is put beside FOAL and hurts it once. <strong>Pass, every round:</strong>
+    <li><strong>Row R west, LEAVING HOME: mares move.</strong> Over the night, MOVER MARE 1 or 2 may
+        log <code>moved from band &hellip; to HOST MARE &hellip;'s</code>. That is about one chance
+        in twenty a day each, or roughly two chances in three by morning.</li>
+    <li><strong>Row S west, DAM DEFENCE</strong> (beside TAKEOVER). <strong>The first run
+        failed on the setup, not the gene.</strong> The dam went for a full-health zombie four
+        seconds after it hurt her foal, took five hits and died, and the zombie was untouched. A
+        plain horse cannot win that fight. The zombie now arrives at four health. At 30 seconds,
+        then every 3 minutes for five rounds, it is put beside FOAL and hurts it once.
+        <strong>Pass, every round:</strong>
         <ul>
-            <li><code>DAM &hellip; went for zombie</code> within a second;</li>
+            <li><code>DAM &hellip; went for zombie</code> within a few seconds;</li>
             <li><code>[watch] creature died | minecraft:zombie</code> soon after;</li>
             <li>the clock's <code>20 s later: zombie dead</code>.</li>
         </ul>
         <strong>Rounds 2 to 5 test the fix for <a href="known-gaps.html#gap-233">gap
         233</a>.</strong> Before it, a tamed dam kept the dead zombie as her target and never
         defended again.</li>
-    <li><strong>Row W west, HERDING.</strong> From 1 minute, every 4 minutes, STRAY MARE is put
-        twenty-odd blocks from her band, and a minute later the clock logs whether she is back.
-        <strong>Report <em>who</em> brought her back:</strong> either HERD STALLION, with a <code>went
-        to herd STRAY MARE back</code> line, or nobody, because she followed the lead mare home by
-        herself. Both can happen by design, since a family band follows its lead mare. So this pen
-        answers whether herding ever fires, not just whether it works.</li>
-    <li><strong>Row W east, GROOMING</strong> (the small pen). Within about half an hour, the two
-        mares and the gelding show <code>grooms</code> partners and <code>went to rest head to
-        tail</code> lines. GROOM STALLION never gets a grooming partner.
-        <br><strong>DISPLACEMENT</strong> (south of it): four tamed mares ranked 1 to 4, with hay.
-        Every <code>displaced &hellip; at food or water</code> line should name the higher-ranked
-        mare (the lower number) first. A reversed line is a failure.</li>
-    <li><strong>Tick time.</strong> The census header's ms per tick should not move now that
-        these rows add about thirty horses.</li>
+    <li><strong>Row S east, DISPLACEMENT</strong> (beside MET NATURAL): four tamed mares ranked 1 to
+        4, with hay. Every <code>displaced &hellip; at food or water</code> line should name the
+        higher-ranked mare (the lower number) first. A reversed line is a failure. <strong>None in
+        the first fifteen minutes</strong>, so the next question is whether the mares ever stand
+        beside the hay at all.</li>
+    <li><strong>Row T west, GROOMING: the gelding.</strong> The mares paired within fifteen minutes.
+        The open half is GROOM GELDING, who should find a partner the way a mare does. On the first
+        run his label was wiped by the gelding step, so he read as a random name; that is fixed.</li>
     <li><strong>With your hands, only if you are passing:</strong> open a wild horse's
         information screen in these pens and check its Social section matches its watch line. Then
-        take the chest's lead in row W and walk STRAY MARE out yourself.</li>
+        take the chest's lead in row T and walk STRAY MARE out yourself.</li>
 </ol>
 <p>
     Grep <code>[trace] herd</code>, <code>[trace] test yard</code>, and <code>[watch]</code>
@@ -173,7 +186,7 @@
 <p>
     Everything about breeding in one walk: fertility, pregnancy, natural breeding, gelding, the
     vet's kit, and tonight's gap fixes. <strong>The yard does most of it</strong>, in rows
-    <strong>O to T</strong> past the carrot pens (<a href="horse-dimension.html#test-yard">the
+    <strong>O to Q</strong> past the carrot pens, plus MET NATURAL in row S (<a href="horse-dimension.html#test-yard">the
     table</a>). Every pen is one claim, and its sign says what should happen. With
     <code>debug.tools</code> on (the dev default), a heat and a pregnancy each last one real minute.
     The logic is unit-tested: <code>ReproRulesTest</code>, <code>NaturalCoverTest</code>,
@@ -188,48 +201,56 @@
     lines are carrot folds. <code>/testkit census</code> prints every pen at once.
 </p>
 
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 morning (the first quarter hour, unattended)</span>
+    <p>
+        <strong>Maternity ran to the minute</strong>: the single foal at 1 minute, twins (&ldquo;foaled
+        2 of 2&rdquo;) at 2, and the early loss at 1, with its genetic-defect damage.
+        <strong>Natural covers</strong> conceive and foal: NATURAL PAIR had two foals.
+        <strong>SUBFERTILE PAIR</strong> got exactly one cover per heat, about two minutes apart,
+        at 20% and then 12% odds, none taking. <strong>GELDING CONTROL</strong> had no foal
+        across several heats. <strong>THE CAP</strong> held all nine horses and nobody was covered.
+        <strong>COWBOY STOCK</strong> was never covered. <strong>MET NATURAL</strong> foaled and
+        had an early loss. All deleted below.
+    </p>
+</div>
+
 <h3 id="fertility-yard">In the yard, in this order</h3>
 <ol>
-    <li><strong>Walk in and check the log first.</strong> Expect <code>fertility rows O-T
-        built</code>, and <em>no</em> <code>could not make ... pregnant as promised</code>. That
+    <li><strong>Walk in and check the log first.</strong> Expect <code>fertility pens built
+        (rows O-Q, and MET NATURAL in S)</code>, and <em>no</em> <code>could not make ... pregnant as promised</code>. That
         warning means the maternity pen came up empty, usually because <code>health.mode</code>
         is not FULL.</li>
-    <li><strong>Row R west, MATERNITY &mdash; it runs on a clock, so go there first.</strong>
-        Three mares were made pregnant when the yard was built. Before anything happens, use the
-        vet's kit (chest) on each:
+    <li><strong>Row P east, MATERNITY, what needs your hands.</strong> Before the first birth (a
+        minute after the yard builds), use the vet's kit (chest) on each mare:
         <ul>
             <li>DUE 1 MIN says <em>one foal</em>;</li>
             <li>TWINS DUE 2 MIN says <em>twins</em>, while her info screen's Breeding line only says
                 <em>Pregnant</em>;</li>
             <li>LOSS AT 1, DUE 3 says one foal.</li>
         </ul>
-        Then: at about 1 minute DUE 1 MIN foals, with a gold chat line naming the foal, and LOSS
-        loses hers with a grey &ldquo;did not carry&rdquo; line (MET's sign). At about 2 minutes
-        TWINS foals, usually &ldquo;has foaled twins&rdquo;. After a minute and twenty seconds,
+        The chat lines should be a gold one naming the foal, a grey &ldquo;did not carry&rdquo; for
+        the loss, and &ldquo;has foaled twins&rdquo;. After a minute and twenty seconds,
         TWINS' Speed on the info screen is 15% lower.</li>
-    <li><strong>Row O west, NATURAL PAIR.</strong> The mare arrives in heat. The two walk together,
-        stand within three blocks for about three seconds (vanilla's courtship,
-        <a href="known-gaps.html#gap-230">gap 230</a>), then there are hearts and a
-        <code>[fertility] natural cover</code> line, and a minute later there is a foal. If the cover did not take, the watch shows her in heat and
-        nothing more until her next heat, about two minutes on.
-        <br><strong>East, GELDING CONTROL:</strong> nothing, for ever. His nameplate symbol is grey,
-        his info screen says <em>Gelding</em>, and the watch says <code>gelding</code>. He never
-        walks to the mare.</li>
-    <li><strong>Row P west, SUBFERTILE PAIR:</strong> exactly <strong>one</strong> natural cover
-        line per heat (every two minutes), mostly <code>DID_NOT_TAKE</code> (about 20%).
-        <br><strong>East, HURT MARE:</strong> never covered while hurt. Nothing heals her in the
-        pen; let her out to hay and water and she is covered at a heat after she heals.</li>
-    <li><strong>Row Q west, THE CAP &mdash; the one that protects a save.</strong> Eight mares and
-        a stallion, all in heat. Nobody is covered, and the log says <code>the cap is 8</code>
-        once a minute per mare. Take one mare out with a lead (chest): covers start within
-        seconds. Each birth adds a horse back, so the pen settles again. <strong>Pass: the pen
-        never grows beyond the cap however long it runs</strong>
-        (<a href="known-gaps.html#gap-206">gap 206</a>).
-        <br><strong>East, COWBOY STOCK:</strong> a branded pair in heat, never covered.</li>
-    <li><strong>Row S west, GOLD ANY HEAT.</strong> The kit says she is <em>not in heat</em>.
+    <li><strong>Row O, the parts to look at:</strong> in NATURAL PAIR, the two walk together and
+        stand close for about three seconds before the hearts (vanilla's courtship,
+        <a href="known-gaps.html#gap-230">gap 230</a>). In GELDING CONTROL, his nameplate symbol is
+        grey, his info screen says <em>Gelding</em>, and he never walks to the mare.</li>
+    <li><strong>Row O east, HURT MARE: run it again.</strong> The first run could not test it.
+        Her half health was set at spawn and undone when her traits were applied, so she was covered
+        at full-health odds seven seconds in and had five foals. She is now hurt a second after the
+        build, and the log says <code>HURT MARE set to 11.0/22.0</code>. <strong>Pass:</strong> no
+        cover line for her while that holds. Let her out to hay and water, and she is covered at a
+        heat after she heals.</li>
+    <li><strong>Row P west, THE CAP, with a lead.</strong> Take one mare out with the chest's lead:
+        covers start within seconds. Each birth adds a horse back, so the pen settles again.
+        <strong>Pass: the pen never grows beyond the cap however long it runs</strong>
+        (<a href="known-gaps.html#gap-206">gap 206</a>).</li>
+    <li><strong>Row Q east, GOLD ANY HEAT.</strong> The kit says she is <em>not in heat</em>.
         Golden carrots on both give a foal <strong>at once</strong> anyway: vanilla, untouched.
-        <br><strong>East, JAR &amp; KIT BENCH</strong> (these horses arrive untamed; tame all three
-        with the chest's stick):
+        <br><strong>Row Q west, JAR STUD and JAR &amp; KIT BENCH</strong>. The stud has his own
+        pen, two blocks from the mares', so he cannot breed them the ordinary way. All three
+        arrive untamed; tame them with the chest's stick.
         <ul>
             <li>Feed the stud a stabilizer carrot, then a golden carrot, and fill a jar. The tooltip
                 says <em>Carries 1 carrot effect</em>.</li>
@@ -241,13 +262,12 @@
             <li>Finally, sneak-use the kit on the stud: <em>is now a gelding</em>. A new jar is now
                 refused, and golden carrots with a mare say <em>is a gelding - no foal</em>.</li>
         </ul></li>
-    <li><strong>Row R east, WEANING.</strong> NURSING MARE's watch line ends
+    <li><strong>Row P east, WEANING</strong> (beside MATERNITY). NURSING MARE's watch line ends
         <em>&bull; nursing</em>. Lead WEAN ME more than 32 blocks away and keep it there a minute:
         the line loses it.</li>
-    <li><strong>Row T west, MET NATURAL &mdash; leave it running.</strong> Two MET carriers
-        breeding on their own. Over the night the log should show births and, roughly one time in
-        four, an early loss, and the horse count should level off at the cap.
-        <br><strong>East, SUBFERTILE GOLD:</strong> golden carrots on the <code>sf/sf</code> pair
+    <li><strong>Row S east, MET NATURAL &mdash; leave it running.</strong> Births and early losses
+        are confirmed. What is left is that the horse count levels off at the cap, at nine.
+        <br><strong>Row Q east, SUBFERTILE GOLD</strong> (beside GOLD ANY HEAT): golden carrots on the <code>sf/sf</code> pair
         again and again. About one foal in four, otherwise <em>It didn't take - no foal this
         time</em>.</li>
     <li><strong>Rows L to N, the carrot pens:</strong> follow one sign end to end. The pair must
@@ -353,7 +373,7 @@
 
 <h3 id="herd-life">Band life</h3>
 <p>
-    Everything here that runs without a player is now in the yard's rows U to X
+    Everything here that runs without a player is now in the yard's rows R to T
     (<a href="#herd-yard">&sect;0-DW</a>): the leaderless band, takeovers, sparring,
     dispersal, transfers, herding, grooming, displacement and a dam defending her foal. What is
     left needs the overworld or your hands:
@@ -413,14 +433,19 @@
         when the stallion was someone else's: a foal. Also: clicking a wall with a
         <em>blank</em> stall sign now says so. <a href="known-gaps.html#gap-223">Gap 223</a>
         has the stall history.</li>
-    <li><strong>The holding pen</strong> (row C west). Hang the holding pen sign, tame the
-        <code>TICKET MARE</code> with a stick from the chest, send her with a pen ticket. Row
-        C's four test stalls are confirmed and gone.</li>
+    <li><strong>The holding pen</strong> (row C west). Parked by the owner on 2026-09-14: the
+        bound signs are done for now, and the ticket mare was removed. When it comes back, the
+        horse must arrive <em>untamed</em>, because a ticket checks ownership. Hang the holding
+        pen sign, tame a horse of your own, and send it with a pen ticket.</li>
     <li><strong>The guardian</strong> (row J west, <code>Hardy/Hardy</code>, arrives
         untamed). Tame it, then let a zombie from the chest hit <em>you</em> &mdash; not the
         horse. Horses now swing every 10 ticks against a zombie's 20
         (<a href="known-gaps.html#gap-222">gap 222</a>); a fighting horse should still close
-        on its target rather than stand reared.</li>
+        on its target rather than stand reared.
+        <br><strong>It died again on 2026-09-14.</strong> It was tamed at 06:57:20 and hit
+        nine times for 3.0 from 06:57:48; it died at 06:58:01 and no zombie died. The log does
+        not say whether you were hit first, so it cannot tell a gene that never fired from a
+        fight it lost. Next time, stand close enough to be hit before the horse is.</li>
     <li><strong>Ocean-born diving</strong> (row E west). Mounted and in water, <b>F</b> goes
         down, <b>F</b> again stops; dismounting clears it. F also swaps hands &mdash;
         rebindable.</li>

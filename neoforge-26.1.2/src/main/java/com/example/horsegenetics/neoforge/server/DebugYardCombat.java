@@ -73,7 +73,9 @@ final class DebugYardCombat {
         // gene does nothing" from "the two horses swapped places".
         buildArena(level, gy, cx, mouthZ);
         buildInfirmary(level, gy, cx, mouthZ);
-        buildDeathbed(level, gy, cx, mouthZ);
+        // ROW K WEST IS EMPTY: the deathbed is gone. Owner, 2026-09-14: "remove the
+        // drops diamond pen, we've confirmed 'on death' works" - the diamond allele
+        // was its last horse, and it shares its code path with the sword and the egg.
         buildEnderEchoPen(level, gy, cx, mouthZ);
     }
 
@@ -266,70 +268,6 @@ final class DebugYardCombat {
                 horse.setHealth(horse.getMaxHealth() * 0.5F);
             }
         }
-    }
-
-    // ==================================================================
-    // ROW K WEST - the deathbed
-    // ==================================================================
-
-    /**
-     * <b>Six horses whose entire gene is what happens when they die.</b>
-     *
-     * <p>Three drop something ({@code Dia} diamonds, {@code Egg} another egg of
-     * itself, {@code Swd} a sword) and three leave something behind
-     * ({@code Lav} a lava spring, {@code Wat} water, {@code Xpl} an explosion).
-     * A test that needs a horse killed is one no other pen in this yard can
-     * host, and the reason is the rule removed today.
-     *
-     * <p><b>Stone floor, stone walls, and the watch already counts the
-     * drops.</b> The floor is stone because two of these six leave fluid on it
-     * and a third detonates; grass would burn through into whatever is below
-     * and the yard's floor is the only thing between a pen and the void.
-     * {@code DebugWorldWatch.onItemJoin} logs every item that appears, so the
-     * three dropping alleles answer themselves from the log - what the tester
-     * has to judge is the three that do not drop anything, which have to be
-     * <i>seen</i>.
-     *
-     * <p>Each is named for its allele, because six horses in one pen and one
-     * sword on the ground is not an answer unless you know which one died.
-     */
-    private static void buildDeathbed(ServerLevel level, int gy, int cx, int mouthZ) {
-        // FIVE OF THE SIX ARE CONFIRMED and their horses are gone. Owner,
-        // 2026-09-13: "on death now works perfectly", and the log backs every
-        // word of it - an iron_sword and a preset_horse_spawn_egg in the drop
-        // list, brick_wall and cobblestone debris where the volatile one went
-        // off, and a neighbouring horse killed "from lava" by the spring the
-        // next one left behind.
-        //
-        // The diamond allele is the exception, and only because she ran out of
-        // horses: the census read "THE DEATHBED | horses 1" when the killing
-        // stopped, so the one still standing was the one that had not been
-        // tested. It is not in doubt - it shares its code path with the sword
-        // and the egg - it is simply unseen, and unseen is what this yard
-        // exists to fix.
-        String[][] rows = {
-                {"horsegenetics.magic_item_drop", "Dia", "DROPS DIAMOND"}};
-        int x0 = cx + WEST_MIN;
-        int x1 = cx + WEST_MAX;
-        int z0 = mouthZ + ROW_K;
-        int z1 = z0 + ROW_K_D;
-        BlockState stone = Blocks.STONE.defaultBlockState();
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                DebugPenManager.groundColumn(level, x, gy, z, stone);
-            }
-        }
-        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("THE DEATHBED", "one left: KILL IT.", "The other five are", "confirmed + gone"));
-        // Kept apart: the explosive one must not take the other five with it
-        // before anybody has killed them, and a lava spring next to a
-        // neighbour is a second death nobody asked for.
-        for (int i = 0; i < rows.length; i++) {
-            DebugTestYard.stock(level, gy, x0 + 3.0 + (i % 3) * 6.0, z0 + 4.0 + (i / 3) * 7.0,
-                    rows[i][0], rows[i][2], 1, 0, rows[i][1] + "/" + rows[i][1]);
-        }
-        DebugWorldWatch.watch("THE DEATHBED", DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1), null);
     }
 
     // ==================================================================

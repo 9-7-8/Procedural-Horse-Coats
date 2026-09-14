@@ -132,7 +132,7 @@ public final class HorseAggroHandler {
         }
         List<Horse> herd = victim.level().getEntitiesOfClass(Horse.class,
                 victim.getBoundingBox().inflate(HERD_ALERT_RADIUS),
-                h -> h != victim && !h.isTamed() && sameHerd(h, victim));
+                h -> h != victim && !h.isTamed() && sameHerd(h, victim) && YardPens.together(victim, h));
         for (Horse mate : herd) {
             aggro(mate, attacker);
         }

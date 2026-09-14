@@ -435,7 +435,7 @@ public final class DebugTestWorldHandler {
      */
     private static final String[] BATCHES = {
             "NEW: fertility OUTSIDE the yard - birth while away, reloads (rows O-T do the rest)",
-            "NEW: the ender whistle, and wild bands in the OVERWORLD (yard rows U-X run the rest)",
+            "NEW: the ender whistle, and wild bands in the OVERWORLD (yard rows R-T run the rest)",
             "NEW: the Dhampir's loci - white, sun, blood - and the day loci (0-R, 0-DT)",
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
             "Ridden: ender echo and ocean-born, plus the guardian, which needs YOU hurt",
@@ -554,17 +554,17 @@ public final class DebugTestWorldHandler {
         tell(player, Component.literal("  C  ticket stalls | carrot bench         "
                         + "D  dairy + shears | egg layer x8")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  E  crackle, the pool | food preference  "
+        tell(player, Component.literal("  E  crackle, the pool | (empty)          "
                         + "F  starburst, F8 | the 3 stat pens")
                 .withStyle(ChatFormatting.WHITE));
         tell(player, Component.literal("  I  (west empty) | eyesight, lit and dark "
                         + "J  guardian | the infirmary")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  K  the deathbed | ender echo            "
+        tell(player, Component.literal("  K  (empty) | ender echo                 "
                         + "L, M, N  the ten splice-carrot pairs")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  O-T  breeding, one scenario a pen      "
-                        + "U-X  band life, on a clock (leave it)")
+        tell(player, Component.literal("  O-Q  breeding, one scenario a pen      "
+                        + "R-T  band life, on a clock (leave it)")
                 .withStyle(ChatFormatting.WHITE));
         // G AND H ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - the growing
         // row's last two pens moved into A's west block when oak/birch and bone
@@ -719,7 +719,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 8, new ItemStack(Items.LEAD),
                         "lead - on a REAL wild band in the overworld: lead a mare twenty blocks out and "
                                 + "let go. Does she walk back alone, or does her stallion fetch her?");
-                tell(player, Component.literal("Band life runs itself in the yard now: rows U-X, past "
+                tell(player, Component.literal("Band life runs itself in the yard now: rows R-T, past "
                                 + "the breeding rows. Walk through once, then leave it an hour and grep "
                                 + "[trace] herd and [trace] test yard. What is left out here: a real "
                                 + "wild band's info screen (the Social section) and the lead test.")
@@ -820,10 +820,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 0, new ItemStack(Items.STICK), "stick");
                 put(inv, legend, 1, new ItemStack(Items.SADDLE),
                         "spare saddle - the yard's ridden pens come saddled already");
-                put(inv, legend, 2, new ItemStack(Items.IRON_SWORD),
-                        "sword - the DEATHBED pen, row K west: six horses whose whole gene is "
-                                + "what happens when they die. Three drop something, three leave "
-                                + "something behind");
+                put(inv, legend, 2, new ItemStack(Items.IRON_SWORD), "sword - for the arena, row J");
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension honours now");
                 put(inv, legend, 4, new ItemStack(Items.GLASS_BOTTLE, 16),
@@ -831,9 +828,6 @@ public final class DebugTestWorldHandler {
                                 + "is already a foal, so all three refusals are one walk");
                 put(inv, legend, 5, new ItemStack(Items.SHEARS),
                         "shears - two horses in the same pen are named SHEAR ME");
-                put(inv, legend, 6, new ItemStack(Items.APPLE, 16),
-                        "apples - FOOD PREFERENCE, row E east: four horses, four different loves, "
-                                + "one pen. Feed all four the same apple and exactly one should react");
                 tell(player, Component.literal("Row J west is the GUARDIAN, and it is the only "
                                 + "horse in the yard that arrives UNTAMED - on purpose, because "
                                 + "its gene fires on the owner being hurt and a horse with no "
