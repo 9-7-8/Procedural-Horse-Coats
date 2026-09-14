@@ -231,13 +231,33 @@ final class DebugTestYard {
     static final int ROW_T = ROW_S + FERTILITY_ROW_D + FERTILITY_AISLE;
 
     /**
+     * <b>Rows U-X: band life</b>, built by {@link DebugYardHerd}. Spaced by the
+     * herd code's own reaches rather than by the yard's grid, because a wild
+     * horse's decisions do not stop at a fence: a bachelor challenges a stallion
+     * whose mare is within 24 blocks, a stallion squares up to any outside male
+     * within 16, a mare moves to a band within 32. Each row holds one wild group
+     * and tamed pens beside it (tamed horses are invisible to all of that), and
+     * {@link #HERD_GAP} keeps the wild groups out of each other's reach. The first
+     * row also stands clear of row T, so no herd horse counts toward a fertility
+     * pen's cap of eight within sixteen blocks.
+     */
+    static final int HERD_GAP = 30;
+    static final int HERD_ROW_D = 14;
+    /** Row W is long: its stray mare is put down twenty-odd blocks from her band. */
+    static final int HERD_LONG_D = 30;
+    static final int ROW_U = ROW_T + FERTILITY_ROW_D + 24;
+    static final int ROW_V = ROW_U + HERD_ROW_D + HERD_GAP;
+    static final int ROW_W = ROW_V + HERD_ROW_D + HERD_GAP;
+    static final int ROW_X = ROW_W + HERD_LONG_D + HERD_GAP;
+
+    /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
      * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
      * read 110 deep while its rows chained past 150, so the back of it was
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_T + FERTILITY_ROW_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_X + HERD_ROW_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -316,6 +336,8 @@ final class DebugTestYard {
         // Rows O-T: every breeding and fertility scenario, self-running where it
         // can be, each pen logging its horses' breeding state to the watch.
         DebugYardFertility.build(level, gy, cx, mouthZ);
+        // Rows U-X: band life, every test starting itself on a clock.
+        DebugYardHerd.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.

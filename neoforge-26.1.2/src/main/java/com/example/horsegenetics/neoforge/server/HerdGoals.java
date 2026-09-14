@@ -72,10 +72,23 @@ public final class HerdGoals {
         horse.goalSelector.addGoal(7, new GroomAndRest(horse));
     }
 
+    /**
+     * Idle enough for band life. <b>A dead target counts as no target</b>: vanilla's
+     * {@code MeleeAttackGoal.stop} clears a target only when it is a creative or
+     * spectator player, and a tamed horse has no forget-target goal
+     * ({@code HorseAggroHandler.WildHorseForgetTargetGoal} is wild-only) - so a tamed
+     * dam that killed whatever hurt her foal kept pointing at the corpse, and every
+     * goal here stayed off for her for good. Checked in the patched sources.
+     */
     private static boolean free(Horse horse) {
-        return horse.isAlive() && !horse.isVehicle() && !horse.isLeashed() && horse.getTarget() == null
+        LivingEntity target = horse.getTarget();
+        return horse.isAlive() && !horse.isVehicle() && !horse.isLeashed()
+                && (target == null || !target.isAlive())
                 && !BandLife.inFight(horse) && !HorseInspectHold.isHeld(horse);
     }
+
+    /** When each stallion last logged squaring up, so a penned intruder is one line a minute, not one a scan. */
+    private static final Map<UUID, Long> GUARD_LOGGED = new HashMap<>();
 
     private static Horse loaded(Horse horse, UUID id) {
         return horse.level() instanceof ServerLevel level && level.getEntity(id) instanceof Horse h && h.isAlive()
@@ -249,6 +262,11 @@ public final class HerdGoals {
                 LivingEntity attacker = foal.getLastHurtByMob();
                 if (attacker != null && attacker.isAlive() && foal.tickCount - foal.getLastHurtByMobTimestamp() < 100
                         && (!horse.isTamed() || !(attacker instanceof Player))) {
+                    if (horse.getTarget() != attacker) {
+                        ActionTrace.log("herd", ActionTrace.describeShort(horse) + " went for "
+                                + ActionTrace.describeShort(attacker) + ", which hurt her foal "
+                                + ActionTrace.describeShort(foal));
+                    }
                     horse.setTarget(attacker);      // the melee goal takes it from here
                     return false;
                 }
@@ -344,6 +362,13 @@ public final class HerdGoals {
                             && !h.getData(ModAttachments.HORSE_CARE.get()).herd().map(herd::equals).orElse(false))) {
                 subject = h;
                 herding = false;
+                long now = level.getGameTime();
+                Long last = GUARD_LOGGED.get(horse.getUUID());
+                if (last == null || now - last >= 1200L) {
+                    GUARD_LOGGED.put(horse.getUUID(), now);
+                    ActionTrace.log("herd", ActionTrace.describeShort(horse) + " put himself between his mares and "
+                            + ActionTrace.describeShort(h));
+                }
                 return true;
             }
             for (Horse m : band) {
@@ -351,6 +376,10 @@ public final class HerdGoals {
                         && m.position().distanceToSqr(centre) > STRAY * STRAY) {
                     subject = m;
                     herding = true;
+                    ActionTrace.log("herd", ActionTrace.describeShort(horse) + " went to herd "
+                            + ActionTrace.describeShort(m) + " back - "
+                            + String.format("%.0f", Math.sqrt(m.position().distanceToSqr(centre)))
+                            + " blocks from the band");
                     return true;
                 }
             }
@@ -380,6 +409,8 @@ public final class HerdGoals {
                     BandLife.threat(level, horse);
                 }
                 if (subject.position().distanceToSqr(centre) < 36.0) {
+                    ActionTrace.log("herd", ActionTrace.describeShort(subject) + " is back with her band, herded by "
+                            + ActionTrace.describeShort(horse));
                     subject = null;     // she is back
                 }
             } else {
@@ -478,6 +509,8 @@ public final class HerdGoals {
                 BandLife.threat(level, horse);
                 BandLife.retreat(subject, horse, 5.0);
                 BandLife.settle(horse, subject, HerdRules.STAKES_DISPLACEMENT, level.getGameTime());
+                ActionTrace.log("herd", ActionTrace.describeShort(horse) + " displaced "
+                        + ActionTrace.describeShort(subject) + " at food or water");
                 subject = null;
                 checkCooldown = 600;    // one shove, then graze
             }
@@ -650,6 +683,8 @@ public final class HerdGoals {
             }
             partner = p;
             remaining = 120 + horse.getRandom().nextInt(120);
+            ActionTrace.log("herd", ActionTrace.describeShort(horse) + " went to rest head to tail with "
+                    + ActionTrace.describeShort(p));
             return true;
         }
 

@@ -80,6 +80,94 @@
     </p>
 </div>
 
+<h2 id="herd-yard">&sect;0-DW &mdash; Band life in the yard: rows U to X (built 2026-09-14, NOT played)</h2>
+
+<p>
+    Everything band life can do without a player now happens in the yard, on a clock. Go
+    through the hay portal once, since the yard builds as you arrive. Then leave it for an hour, or
+    for the night: stay in the dimension and out of the pause menu, the same as
+    <a href="#overnight-watch">&sect;0-CX</a>. <strong>Do the breeding audit
+    (<a href="#fertility">&sect;0-DV</a>) while this runs</strong>, because these rows start
+    themselves the moment they are built.
+</p>
+<p>
+    <strong>What the log gives you:</strong> each pen's <code>[watch]</code> line carries
+    <code>social:</code>. For every horse that is its role, its band, how many pen-mates it
+    outranks and yields to, its grooming partner, its rival, its health and its target.
+    <code>[trace] herd</code> lines are the events. <code>[trace] test yard</code> lines are what
+    the clocks did, and each one says what to expect next. Every rate is a first guess
+    <em>per Minecraft day</em> (twenty minutes), so &ldquo;within the hour&rdquo; means likely,
+    not certain.
+</p>
+<ol>
+    <li><strong>Row V west, LEADERLESS: the old split bug, and the most important check.</strong>
+        At 1 minute the clock kills DOOMED STALLION. About two minutes later the log should say
+        <code>[trace] herd | band &hellip; has lost its stallion and stays one band: 3 horses,
+        following lead mare ELDEST MARE</code>. At about 4&frac12; minutes the clock checks for
+        itself: <code>LEADERLESS check &hellip; PASS, still one band</code> or <code>FAIL, the band
+        split</code>.
+        <br>At 5 minutes two bachelors are put in. Within the hour, one should
+        <code>took over band</code> <em>without</em> a <code>challenged</code> line before it,
+        because a vacant band is claimed rather than fought for. Next should come
+        <code>the bachelors &hellip; left behind re-formed round</code> the other one
+        (<a href="known-gaps.html#gap-232">gap 232</a>).</li>
+    <li><strong>Row X west, TAKEOVER: nobody dies.</strong> A band and three bachelors in one pen.
+        <strong>Pass:</strong>
+        <ul>
+            <li><code>challenged</code> lines, each ending in <code>took over band</code> or
+                <code>saw off</code>;</li>
+            <li><code>[watch] horse hurt</code> lines during a fight that stop with both horses
+                above 40% of their health;</li>
+            <li>no horse ever dies in the pen;</li>
+            <li>no mare ever shows in the <code>target</code> column, because the band does not
+                pile in.</li>
+        </ul>
+        After a takeover, the old stallion's role reads <em>Bachelor</em>.</li>
+    <li><strong>Row U, LEAVING HOME.</strong> Within seconds, FILLY: LEAVES NOW <code>left the
+        band it was born into</code>, and her band in the watch line becomes HOST BAND's. At 3
+        minutes COLT does the same and reads <em>Bachelor lead</em>: there is no bachelor band in
+        reach, so he strikes out alone. Over the night, MOVER MARE 1 or 2 may log <code>moved
+        from band &hellip; to HOST MARE &hellip;'s</code>. That is about one chance in twenty a
+        day each, or roughly two chances in three by morning.
+        <br>The filly goes first on purpose, because of
+        <a href="known-gaps.html#gap-234">gap 234</a>.</li>
+    <li><strong>Row V east, SPARRING.</strong> Three tamed stallions who already know each other.
+        <strong>Pass:</strong> a <code>yielded to &hellip; in a spar</code> line every few minutes,
+        and <strong>no</strong> <code>horse hurt</code> line for SPAR A, B or C. Their outranks and
+        yields-to counts should settle into an order.</li>
+    <li><strong>Row X east, DAM DEFENCE.</strong> At 30 seconds, then every 3 minutes for five
+        rounds, a zombie is put beside FOAL and hurts it once. <strong>Pass, every round:</strong>
+        <ul>
+            <li><code>DAM &hellip; went for zombie</code> within a second;</li>
+            <li><code>[watch] creature died | minecraft:zombie</code> soon after;</li>
+            <li>the clock's <code>20 s later: zombie dead</code>.</li>
+        </ul>
+        <strong>Rounds 2 to 5 test the fix for <a href="known-gaps.html#gap-233">gap
+        233</a>.</strong> Before it, a tamed dam kept the dead zombie as her target and never
+        defended again.</li>
+    <li><strong>Row W west, HERDING.</strong> From 1 minute, every 4 minutes, STRAY MARE is put
+        twenty-odd blocks from her band, and a minute later the clock logs whether she is back.
+        <strong>Report <em>who</em> brought her back:</strong> either HERD STALLION, with a <code>went
+        to herd STRAY MARE back</code> line, or nobody, because she followed the lead mare home by
+        herself. Both can happen by design, since a family band follows its lead mare. So this pen
+        answers whether herding ever fires, not just whether it works.</li>
+    <li><strong>Row W east, GROOMING</strong> (the small pen). Within about half an hour, the two
+        mares and the gelding show <code>grooms</code> partners and <code>went to rest head to
+        tail</code> lines. GROOM STALLION never gets a grooming partner.
+        <br><strong>DISPLACEMENT</strong> (south of it): four tamed mares ranked 1 to 4, with hay.
+        Every <code>displaced &hellip; at food or water</code> line should name the higher-ranked
+        mare (the lower number) first. A reversed line is a failure.</li>
+    <li><strong>Tick time.</strong> The census header's ms per tick should not move now that
+        these rows add about thirty horses.</li>
+    <li><strong>With your hands, only if you are passing:</strong> open a wild horse's
+        information screen in these pens and check its Social section matches its watch line. Then
+        take the chest's lead in row W and walk STRAY MARE out yourself.</li>
+</ol>
+<p>
+    Grep <code>[trace] herd</code>, <code>[trace] test yard</code>, and <code>[watch]</code>
+    followed by any pen's name.
+</p>
+
 <h2 id="fertility">&sect;0-DV &mdash; Breeding and fertility: the audit (built 2026-09-13, NOT played)</h2>
 
 <p>
@@ -235,9 +323,9 @@
 
 <p>
     Behaviour first, as the rule above says. None of this has been in a game; everything
-    below is covered by unit tests on the genetics side only. <strong>Test kit batch 1</strong>
-    is the ender whistle and band life; <strong>batch 2</strong> is the Dhampir&rsquo;s loci
-    (&sect;0-R) and the day loci, one egg per locus.
+    below is covered by unit tests on the genetics side only. <strong>Test kit batch 2</strong>
+    is the ender whistle and the overworld half of band life; <strong>batch 3</strong> is the
+    Dhampir&rsquo;s loci (&sect;0-R) and the day loci, one egg per locus.
 </p>
 
 <h3 id="ender-whistle">The ender whistle</h3>
@@ -264,31 +352,24 @@
 </ul>
 
 <h3 id="herd-life">Band life</h3>
+<p>
+    Everything here that runs without a player is now in the yard's rows U to X
+    (<a href="#herd-yard">&sect;0-DW</a>): the leaderless band, takeovers, sparring,
+    dispersal, transfers, herding, grooming, displacement and a dam defending her foal. What is
+    left needs the overworld or your hands:
+</p>
 <ul>
-    <li><strong>A band stays one band when its stallion dies.</strong> Kill a family
-        band&rsquo;s stallion and watch for two minutes: the mares should keep following one
-        mare, not scatter. This is the old split bug, and the most important check here.</li>
-    <li><strong>The Social section.</strong> Open a wild mare&rsquo;s information screen: a
-        role (lead mare or band mare), a standing, and after a few minutes companions by
-        name.</li>
-    <li><strong>Herding.</strong> Lead a mare twenty blocks from her band on a lead, let go:
-        the stallion should come round and push her back.</li>
-    <li><strong>Sparring does no damage.</strong> Watch a bachelor band for ten minutes:
-        rearing and shoving, one backs off, and nobody&rsquo;s health drops.</li>
-    <li><strong>A takeover fight stops short.</strong> Hardest to catch naturally &mdash;
-        leave a bachelor band near a family band across a Minecraft day or two and read
-        <code>latest.log</code> for <code>[herd] &hellip; challenged</code> and
-        <code>took over</code>/<code>saw off</code>. Neither horse should die, and the rest of
-        the band should not join in.</li>
-    <li><strong>Displacement.</strong> Put a hay bale by a trough in a paddock of tamed
-        horses; over time lower-ranked horses should get pushed off it.</li>
-    <li><strong>Dam and foal.</strong> Breed a tamed pair, lead the mare away: the foal
-        follows. Hit the foal with a zombie nearby &mdash; the mare should go for the zombie
-        (and, being tamed, not for you).</li>
-    <li><strong>Dispersal</strong> takes days: a foal born into a wild band should leave it a
-        few days after growing up. The log says <code>left the band it was born into</code>.</li>
-    <li><strong>Tick time.</strong> The horse dimension with hundreds of horses: no new lag.
-        Every goal throttles its scan, but this is the check that proves it.</li>
+    <li><strong>The Social section on a real wild band.</strong> Open a wild mare&rsquo;s
+        information screen. You should see a role (lead mare or band mare), a standing, and after
+        a few minutes companions by name.</li>
+    <li><strong>Herding by hand.</strong> Lead a wild mare twenty blocks from her band and let
+        go. Does her stallion fetch her, or does she walk back on her own?</li>
+    <li><strong>Dam and foal.</strong> Breed a tamed pair and lead the mare away: the foal
+        follows. Hit the foal yourself: a tamed dam must <em>not</em> go for you.</li>
+    <li><strong>Dispersal from birth</strong> takes days. A foal actually born into a wild band
+        should leave it a few days after growing up, and the log says <code>left the band it was
+        born into</code>.</li>
+    <li><strong>Tick time with hundreds of wild horses in the overworld.</strong></li>
 </ul>
 
 <h3 id="day-loci">The day temper and day watch loci</h3>

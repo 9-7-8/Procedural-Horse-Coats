@@ -27,6 +27,38 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-14b">2026-09-14 &mdash; band life gets yard rows that run with nobody there</h2>
+
+<p>
+    The owner asked for the debug area to be read, especially the fertility rows, and for band life
+    to have tests that work with her away from the keyboard, ready for a new round of testing. Until
+    then band life had no pens at all: every check on the list meant watching wild horses in the
+    overworld, which cannot be left running.
+</p>
+<ul>
+    <li><strong>Rows U to X</strong> (<code>DebugYardHerd</code>): leaving home, a host band, a
+        leaderless band, sparring, herding, grooming, displacement, a takeover and a dam defending
+        her foal. Each pen sets up the state its event needs, such as a colt already due to leave or
+        stallions who already know each other, then acts on a clock where a player would have. The
+        audit is <a href="verification.html#herd-yard">&sect;0-DW</a>.</li>
+    <li><strong>Rows thirty blocks apart, not the yard's grid.</strong> A wild horse's reach does not
+        stop at a fence (challenge 24, guard 16, transfer 32, dispersal 64), so each row holds one wild
+        group, and the tamed pens sit beside it where no band decision can see them.</li>
+    <li><strong>The watch reads band life:</strong> <code>watchSocial</code> logs role, band, rank
+        counts, grooming partner, rival, health and target, and the goals that were silent
+        (displacement, herding, guarding, grooming, a dam's defence, a band holding together without
+        its stallion) now write <code>[trace] herd</code> lines.</li>
+    <li><strong>Two bugs found while designing the pens, both fixed unplayed:</strong>
+        <a href="known-gaps.html#gap-232">gap 232</a>, where a bachelor who took a band kept his
+        bachelors as band-mates; and <a href="known-gaps.html#gap-233">gap 233</a>, where a tamed
+        dam kept a dead target for good, which vanilla does not clear. One design gap is left for
+        the owner: <a href="known-gaps.html#gap-234">gap 234</a>, a filly recruited by her own
+        brother.</li>
+    <li>The fertility rows were read against the new rows' reaches. The herd rows start 24 blocks
+        past row T, so no herd horse counts toward a fertility pen's cap. Test kit batch 2 now keeps
+        only the overworld half of band life.</li>
+</ul>
+
 <h2 id="d2026-09-14a">2026-09-14 &mdash; the last two breeding gaps, the vanilla way</h2>
 
 <p>

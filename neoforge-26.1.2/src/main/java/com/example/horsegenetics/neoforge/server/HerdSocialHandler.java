@@ -77,6 +77,9 @@ public final class HerdSocialHandler {
     /** When each horse first found its band's lead missing. Transient: a restart just restarts the wait. */
     private static final Map<UUID, Long> LEAD_MISSING_SINCE = new HashMap<>();
 
+    /** Family bands already reported as holding together without a stallion. Transient. */
+    private static final java.util.Set<UUID> VACANT_LOGGED = new java.util.HashSet<>();
+
     /** Each band's lead mare, recomputed at most once per scan. */
     private record CachedMare(Optional<UUID> mare, long at) {
     }
@@ -284,6 +287,12 @@ public final class HerdSocialHandler {
                 BandLife.repoint(members, top.getUUID(), care.herdBreed().orElse(""), BandType.BACHELOR);
                 ActionTrace.log("herd", "bachelor band " + short8(herd) + " re-formed round "
                         + ActionTrace.describeShort(top));
+            } else if (VACANT_LOGGED.add(herd)) {
+                // The one line that says the old split bug is gone: nothing else
+                // happens here, so without it a band holding together is silence.
+                ActionTrace.log("herd", "band " + short8(herd) + " has lost its stallion and stays one band: "
+                        + members.size() + " horses, following lead mare "
+                        + leadMare(level, herd, horse).map(id -> nameOf(level, id)).orElse("(none loaded)"));
             }
             // A family band keeps its id and follows its lead mare until a stallion
             // takes it over - it is vacant, not gone.
@@ -347,15 +356,10 @@ public final class HerdSocialHandler {
         HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
         HorseSocialAttachment social = horse.getData(ModAttachments.HORSE_SOCIAL.get());
         SocialLedger ledger = social.ledger();
-        boolean male = HorseRecords.of(horse).entire();   // a gelding's role reads like a mare's
 
         boolean inBand = !horse.isTamed() && care.inWildHerd();
         UUID herd = care.herd().orElse(null);
-        boolean leadMare = inBand && !isBachelor(care)
-                && leadMare(level, herd, horse).map(horse.getUUID()::equals).orElse(false);
-        boolean natal = social.natalHerd().isPresent() && social.natalHerd().equals(care.herd());
-        BandRole role = BandRole.of(horse.isTamed(), inBand, isBachelor(care),
-                herd != null && herd.equals(horse.getUUID()), male, horse.isBaby(), leadMare, natal);
+        BandRole role = roleOf(level, horse);
 
         String standing = "";
         if (inBand) {
@@ -386,7 +390,21 @@ public final class HerdSocialHandler {
                 role.description(), standing, companions, rival, ReproHandler.breedingLine(horse)));
     }
 
-    private static String nameOf(ServerLevel level, UUID id) {
+    /** The role the information screen shows - also what the test yard's herd watch logs. */
+    static BandRole roleOf(ServerLevel level, Horse horse) {
+        HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
+        HorseSocialAttachment social = horse.getData(ModAttachments.HORSE_SOCIAL.get());
+        boolean male = HorseRecords.of(horse).entire();   // a gelding's role reads like a mare's
+        boolean inBand = !horse.isTamed() && care.inWildHerd();
+        UUID herd = care.herd().orElse(null);
+        boolean leadMare = inBand && !isBachelor(care)
+                && leadMare(level, herd, horse).map(horse.getUUID()::equals).orElse(false);
+        boolean natal = social.natalHerd().isPresent() && social.natalHerd().equals(care.herd());
+        return BandRole.of(horse.isTamed(), inBand, isBachelor(care),
+                herd != null && herd.equals(horse.getUUID()), male, horse.isBaby(), leadMare, natal);
+    }
+
+    static String nameOf(ServerLevel level, UUID id) {
         Entity e = level.getEntity(id);
         if (e instanceof Horse h && HorseRecords.hasRealRecord(h)) {
             return HorseRecords.of(h).displayName();

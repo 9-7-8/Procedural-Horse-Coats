@@ -435,7 +435,7 @@ public final class DebugTestWorldHandler {
      */
     private static final String[] BATCHES = {
             "NEW: fertility OUTSIDE the yard - birth while away, reloads (rows O-T do the rest)",
-            "NEW: the ender whistle, and wild bands (0-DT)",
+            "NEW: the ender whistle, and wild bands in the OVERWORLD (yard rows U-X run the rest)",
             "NEW: the Dhampir's loci - white, sun, blood - and the day loci (0-R, 0-DT)",
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
             "Ridden: ender echo and ocean-born, plus the guardian, which needs YOU hurt",
@@ -562,6 +562,9 @@ public final class DebugTestWorldHandler {
                 .withStyle(ChatFormatting.WHITE));
         tell(player, Component.literal("  K  the deathbed | ender echo            "
                         + "L, M, N  the ten splice-carrot pairs")
+                .withStyle(ChatFormatting.WHITE));
+        tell(player, Component.literal("  O-T  breeding, one scenario a pen      "
+                        + "U-X  band life, on a clock (leave it)")
                 .withStyle(ChatFormatting.WHITE));
         // G AND H ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - the growing
         // row's last two pens moved into A's west block when oak/birch and bone
@@ -714,13 +717,13 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 7, new ItemStack(Items.IRON_SWORD),
                         "sword - for the crumble test. Kill a bound horse while HOLDING its whistle too");
                 put(inv, legend, 8, new ItemStack(Items.LEAD),
-                        "lead - BAND LIFE: lead a WILD mare twenty blocks from her band and let go. "
-                                + "Her stallion should come round and push her back");
-                tell(player, Component.literal("Band life is mostly watching wild horses in the "
-                                + "overworld. The one that matters most: kill a family band's "
-                                + "stallion and watch two minutes - the mares keep following ONE "
-                                + "mare instead of scattering. Open a wild mare's info screen for "
-                                + "the new Social section.").withStyle(ChatFormatting.GOLD));
+                        "lead - on a REAL wild band in the overworld: lead a mare twenty blocks out and "
+                                + "let go. Does she walk back alone, or does her stallion fetch her?");
+                tell(player, Component.literal("Band life runs itself in the yard now: rows U-X, past "
+                                + "the breeding rows. Walk through once, then leave it an hour and grep "
+                                + "[trace] herd and [trace] test yard. What is left out here: a real "
+                                + "wild band's info screen (the Social section) and the lead test.")
+                        .withStyle(ChatFormatting.GOLD));
             }
             case 3 -> {
                 // THE DHAMPIR, TAKEN APART. Each locus gets its own egg, so a

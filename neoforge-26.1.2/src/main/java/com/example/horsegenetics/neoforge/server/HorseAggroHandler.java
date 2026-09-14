@@ -32,8 +32,9 @@ import java.util.List;
  *       an {@code ATTACK_DAMAGE} attribute (vanilla horses have none), so a kick
  *       actually hurts.</li>
  *   <li><b>{@link #addAggroGoals}</b> - every horse gets a {@link MeleeAttackGoal}
- *       and a {@link WildHorseForgetTargetGoal}; both self-gate on
- *       {@code !isTamed()}.</li>
+ *       and a {@link WildHorseForgetTargetGoal}. Only the forget goal gates on
+ *       {@code !isTamed()}: the melee goal runs for anything with a target, which
+ *       is how a tamed guardian or a tamed dam fights at all.</li>
  *   <li><b>{@link #onHorseHurt}</b> - on damage from a living attacker, the
  *       victim and every herd-mate within {@value #HERD_ALERT_RADIUS} blocks
  *       target the attacker.</li>

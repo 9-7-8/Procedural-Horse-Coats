@@ -248,8 +248,24 @@ public final class BandLife {
         if (deposed != null) {
             members.remove(deposed);
         }
+        // THE BACHELORS HE LED STAY BACHELORS. Their herd id is his UUID, which is
+        // about to become a family band's id - so without this they were counted
+        // as his mares' band-mates: never intruders to him, and following him
+        // about as a harem of stallions. Found building the yard's herd rows,
+        // before anyone saw it; they re-form round the best of those left.
+        HorseCareAttachment own = newStallion.getData(ModAttachments.HORSE_CARE.get());
+        List<Horse> leftBehind = HerdSocialHandler.isBachelor(own)
+                && own.herd().map(newStallion.getUUID()::equals).orElse(false)
+                ? HerdSocialHandler.bandMembers(level, newStallion.getUUID(), newStallion) : new java.util.ArrayList<>();
+        leftBehind.remove(newStallion);
         join(newStallion, newStallion.getUUID(), breed, BandType.TRADITIONAL);
         repoint(members, newStallion.getUUID(), breed, BandType.TRADITIONAL);
+        if (!leftBehind.isEmpty()) {
+            Horse top = HerdSocialHandler.topRanked(leftBehind);
+            repoint(leftBehind, top.getUUID(), own.herdBreed().orElse(breed), BandType.BACHELOR);
+            ActionTrace.log("herd", "the bachelors " + ActionTrace.describeShort(newStallion) + " left behind re-formed round "
+                    + ActionTrace.describeShort(top));
+        }
         if (deposed != null) {
             Horse bachelors = nearest(level, deposed, DISPERSE_REACH, h -> {
                 HorseCareAttachment c = h.getData(ModAttachments.HORSE_CARE.get());

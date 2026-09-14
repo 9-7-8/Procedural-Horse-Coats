@@ -408,8 +408,17 @@
     <strong>Rows O to T are spaced differently, on purpose.</strong> Every horse breeds on its own
     now, and a mare is not covered when eight other horses stand within sixteen blocks of her.
     The breeding rows use only a row's two outer pens and a twelve-block aisle, with extra room
-    either side of the cap pen, so that no pen's horses count toward another pen's cap. The table
-    below is in yard order, rows L to T after K.
+    either side of the cap pen, so that no pen's horses count toward another pen's cap.
+</p>
+<p>
+    <strong>Rows U to X, band life, are thirty blocks apart</strong>, because a wild horse's
+    decisions do not stop at a fence. A bachelor challenges a stallion whose mare is within
+    24 blocks, a stallion squares up to any outside male within 16, and a mare moves to a band
+    within 32. So each row holds one wild group, with tamed pens beside it (every band-changing
+    decision ignores tamed horses). Every test there <strong>starts itself on a clock</strong>
+    (<code>DebugYardHerd</code>): it sets up the state the event needs, then does whatever a
+    player would have done. Each pen logs a <code>social:</code> readout. The table below is in
+    yard order, rows L to X after K.
 </p>
 
 <div class="table-wrap">
@@ -431,6 +440,10 @@
 <tr><td><strong>R</strong></td><td><strong>MATERNITY</strong> &mdash; three mares made pregnant at build time, due at one, two and three minutes: a single foal, twins, and an early loss. The vet's kit is in the chest.</td><td><strong>WEANING</strong> &mdash; a nursing mare and her foal; lead the foal away.</td></tr>
 <tr><td><strong>S</strong></td><td><strong>GOLD ANY HEAT</strong> &mdash; a mare out of heat still gives an instant golden-carrot foal.</td><td><strong>JAR &amp; KIT BENCH</strong> &mdash; an untamed stud and two mares (in heat, out of heat), with jars, carrots, the kit and a clock.</td></tr>
 <tr><td><strong>T</strong></td><td><strong>MET NATURAL</strong> &mdash; two MET carriers left to breed: early losses, and a population that levels off at the cap.</td><td><strong>SUBFERTILE GOLD</strong> &mdash; golden carrots on an <code>sf/sf</code> pair: about one foal in four.</td></tr>
+<tr><td><strong>U</strong></td><td><strong>LEAVING HOME</strong> &mdash; a wild band whose grown filly is due to leave at once, and whose colt is due three minutes later. Two of its mares already know the band next door.</td><td><strong>HOST BAND</strong> &mdash; the wild band next door, where the filly should go and where those mares may move.</td></tr>
+<tr><td><strong>V</strong></td><td><strong>LEADERLESS</strong> &mdash; the clock kills the stallion at one minute and checks the band is still one band; two bachelors arrive at five minutes to claim it.</td><td><strong>SPARRING</strong> &mdash; three tamed stallions who already know each other.</td></tr>
+<tr><td><strong>W</strong></td><td><strong>HERDING</strong> &mdash; a long pen. Every four minutes the clock puts one mare twenty-odd blocks from her band, and logs whether she came back. A lead is in the chest.</td><td><strong>GROOMING</strong>, a small pen of two mares, a gelding and a stallion; and south of it <strong>DISPLACEMENT</strong>, four tamed mares ranked 1 to 4, with hay.</td></tr>
+<tr><td><strong>X</strong></td><td><strong>TAKEOVER</strong> &mdash; a family band and a bachelor band of three in one pen. Fights stop at 40% health.</td><td><strong>DAM DEFENCE</strong> &mdash; every three minutes, five times, the clock has a zombie hurt a tamed foal.</td></tr>
 <tr><td><strong>K</strong></td><td><strong>The deathbed</strong> &mdash; six horses whose whole gene is what happens when they die, on a stone floor because two leave fluid behind and a third detonates. Three drop something and answer themselves in the log; three leave something and have to be watched.</td><td><strong>Ender echo</strong> &mdash; a wide pen and a saddled pair. A sixteen-block blink inside a nine-block stall either fails or puts the horse through a wall, and both read as the gene being broken.</td></tr>
 </tbody>
 </table>

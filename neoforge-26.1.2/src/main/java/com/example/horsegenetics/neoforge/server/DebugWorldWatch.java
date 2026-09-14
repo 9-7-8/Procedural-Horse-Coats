@@ -153,14 +153,17 @@ public final class DebugWorldWatch {
      *                number and opposite outcomes.
      */
     record Area(String name, AABB box, List<Block> blocks, @Nullable BlockPos focus,
-                @Nullable Holder<Attribute> attribute, boolean breeding) {
+                @Nullable Holder<Attribute> attribute, boolean breeding, boolean social) {
         Area(String name, AABB box, List<Block> blocks, @Nullable BlockPos focus) {
-            this(name, box, blocks, focus, null, false);
+            this(name, box, blocks, focus, null, false, false);
         }
     }
 
     /** Last breeding readout per area, with durations blanked, for "did it change". */
     private static final Map<String, String> LAST_BREEDING = new LinkedHashMap<>();
+
+    /** Last social readout per area, with health blanked, for "did it change". */
+    private static final Map<String, String> LAST_SOCIAL = new LinkedHashMap<>();
 
     private static final List<Area> AREAS = new ArrayList<>();
 
@@ -175,6 +178,7 @@ public final class DebugWorldWatch {
         AREAS.clear();
         LAST.clear();
         LAST_BREEDING.clear();
+        LAST_SOCIAL.clear();
     }
 
     /** Register a pen for the scan to read. Called by {@link DebugTestYard}. */
@@ -199,7 +203,7 @@ public final class DebugWorldWatch {
      * other gene whose whole effect is a conditional modifier.
      */
     static void watchAttribute(String name, AABB box, Holder<Attribute> attribute) {
-        AREAS.add(new Area(name, box, List.of(), null, attribute, false));
+        AREAS.add(new Area(name, box, List.of(), null, attribute, false, false));
     }
 
     /**
@@ -211,7 +215,68 @@ public final class DebugWorldWatch {
      * census logs it regardless.
      */
     static void watchBreeding(String name, AABB box) {
-        AREAS.add(new Area(name, box, List.of(), null, null, true));
+        AREAS.add(new Area(name, box, List.of(), null, null, true, false));
+    }
+
+    /**
+     * <b>A pen whose reading is band life</b> (2026-09-14): each horse's role, its
+     * band, how many pen-mates it outranks and yields to, its grooming partner, its
+     * rival, its health and what it is targeting. Every herd event is a roll on a
+     * per-day rate, so the evidence is the sequence of these states between the
+     * {@code [trace] herd} lines. Logged when any of it changes (health aside), and at
+     * every census.
+     */
+    static void watchSocial(String name, AABB box) {
+        AREAS.add(new Area(name, box, List.of(), null, null, false, true));
+    }
+
+    private static String socialReadout(ServerLevel level, Area area) {
+        List<Horse> horses = level.getEntitiesOfClass(Horse.class, area.box().inflate(0.0, 2.0, 0.0),
+                h -> h.isAlive() && HorseRecords.hasRealRecord(h));
+        StringBuilder sb = new StringBuilder();
+        for (Horse h : horses) {
+            var care = h.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get());
+            var ledger = h.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_SOCIAL.get()).ledger();
+            StringBuilder one = new StringBuilder(watchName(h)).append(": ")
+                    .append(HerdSocialHandler.roleOf(level, h).label());
+            if (!h.isTamed()) {
+                care.herd().ifPresent(id -> one.append(" of ").append(HerdSocialHandler.short8(id)));
+            }
+            int over = 0;
+            int under = 0;
+            for (Horse o : horses) {
+                if (o == h) {
+                    continue;
+                }
+                double r = ledger.rankOver(o.getUUID());
+                if (r > 0.05) {
+                    over++;
+                } else if (r < -0.05) {
+                    under++;
+                }
+            }
+            one.append(", outranks ").append(over).append(" yields to ").append(under);
+            ledger.groomingPartner().ifPresent(r -> one.append(", grooms ").append(watchName(level, r.other())));
+            ledger.rival().ifPresent(r -> one.append(", rival ").append(watchName(level, r.other())));
+            one.append(String.format(", hp %.0f/%.0f", h.getHealth(), h.getMaxHealth()));
+            LivingEntity target = h.getTarget();
+            if (target != null) {
+                one.append(", target ").append(target instanceof Horse th ? watchName(th)
+                                : target.getType().builtInRegistryHolder().key().identifier().getPath())
+                        .append(target.isAlive() ? "" : " (dead)");
+            }
+            sb.append(sb.length() == 0 ? "" : "; ").append(one);
+        }
+        return sb.length() == 0 ? "" : " | social: " + sb;
+    }
+
+    private static String watchName(Horse h) {
+        return h.getCustomName() != null ? h.getCustomName().getString() : HorseRecords.of(h).displayName();
+    }
+
+    private static String watchName(ServerLevel level, java.util.UUID id) {
+        return level.getEntity(id) instanceof Horse h && HorseRecords.hasRealRecord(h)
+                ? watchName(h) : HerdSocialHandler.nameOf(level, id);
     }
 
     private static String breedingReadout(ServerLevel level, Area area) {
@@ -296,6 +361,7 @@ public final class DebugWorldWatch {
         }
         FORCED.clear();
         clearAreas();
+        DebugYardHerd.cancel();
     }
 
     /**
@@ -546,6 +612,13 @@ public final class DebugWorldWatch {
             String before = LAST_BREEDING.put(area.name(), key);
             moved |= before != null && !before.equals(key);
         }
+        String social = area.social() ? socialReadout(level, area) : "";
+        if (area.social()) {
+            // Health drifts back up a point at a time; a role, a rank or a target changing is news.
+            String key = social.replaceAll(", hp \\d+/\\d+", "");
+            String before = LAST_SOCIAL.put(area.name(), key);
+            moved |= before != null && !before.equals(key);
+        }
         if (!census && !moved) {
             return;
         }
@@ -562,7 +635,7 @@ public final class DebugWorldWatch {
         String distance = area.focus() == null ? ""
                 : " | nearest non-horse " + (nearest < 0 ? "none in the pen"
                         : String.format("%.1f blocks", nearest));
-        HorseGenetics.LOGGER.info("{} {}{}{}{}{} | {}", TAG, area.name(), creatures, distance, attr, breeding,
+        HorseGenetics.LOGGER.info("{} {}{}{}{}{}{} | {}", TAG, area.name(), creatures, distance, attr, breeding, social,
                 sb.length() == 0 ? (area.blocks().isEmpty() ? "no blocks watched here"
                         : "none of its watched blocks are present") : sb);
     }
