@@ -147,6 +147,11 @@ public final class ModItems {
     public static final DeferredItem<SeedJarItem> EMPTY_SEED_JAR = register("empty_seed_jar", SeedJarItem::new);
     public static final DeferredItem<SeedJarItem> STALLION_SEED_JAR = register("stallion_seed_jar", SeedJarItem::new);
 
+    // The vet's kit: sneak-use gelds your stallion, plain use examines any horse.
+    // Behaviour in server/VetKitHandler. Durable, like shears.
+    @SuppressWarnings("deprecation") // Item(Properties) - see SeedJarItem
+    public static final DeferredItem<Item> VET_KIT = register("vet_kit", p -> new Item(p.durability(64)));
+
     // --- tickets (roadmap §11) - send a horse to its stall ----------------
     // The blank is the crafting base and stays inert; the other three are one
     // use each and differ only in reach. See TicketItem / server.TicketHandler.

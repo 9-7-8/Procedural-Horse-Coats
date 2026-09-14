@@ -156,7 +156,7 @@ public final class ServerConfig {
         GESTATION_DAYS = builder
                 .comment("How long a pregnancy lasts, in Minecraft days (one day = 20 minutes). (default: 1)",
                         "Only the mod's own breeding makes a pregnancy - seed jars, breeding carrots and",
-                        "the Spontaneous Breeding gene. Plain golden carrots still give a foal at once.",
+                        "a stallion left with a mare in heat. Plain golden carrots still give a foal at once.",
                         "Every other stage is scaled from this by its real-world ratio to a 340-day",
                         "pregnancy and never shorter than one day, so at 1 a mare is in heat for a day",
                         "and out of it for a day; at 340 she keeps a real 21-day cycle.",

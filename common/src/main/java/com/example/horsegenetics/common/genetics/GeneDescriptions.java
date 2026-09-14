@@ -348,11 +348,6 @@ public final class GeneDescriptions {
                             + "about eight blocks away when something damages it, carrying its rider. "
                             + "Against skeletons it is close to immunity; against a skeleton across a "
                             + "ravine it is a trip you did not plan."),
-            Map.entry("horsegenetics.spontaneous_breeding",
-                    "A magical recessive that paints nothing and grants no effect at all: two "
-                            + "copies, AND another horse nearby with two copies, and the pair breed on "
-                            + "their own with no golden carrots. Wild horses carry it and never show it, "
-                            + "so the first pair in a world is one somebody bred."),
             Map.entry("horsegenetics.eyesight",
                     "A magical recessive that paints nothing: Cav/Cav is faster in the dark and "
                             + "slower in light, Day/Day the reverse, and one of each cancels. It reads "

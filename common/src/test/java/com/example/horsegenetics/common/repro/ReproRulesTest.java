@@ -91,11 +91,35 @@ class ReproRulesTest {
     @Test
     void peakIsTheSecondHalfOfHeat() {
         Reproduction r = new Reproduction(0.0, Optional.empty(), Reproduction.NEVER, List.of(),
-                Reproduction.NEVER, Reproduction.NEVER, 0);
+                Reproduction.NEVER, Reproduction.NEVER, 0, Reproduction.NEVER);
         assertEquals(ReproRules.EARLY_CHANCE, ReproRules.baseChance(r, 10, T));
         assertEquals(ReproRules.PEAK_CHANCE, ReproRules.baseChance(r, DAY / 2 + 10, T));
         assertEquals(0.0, ReproRules.baseChance(r, DAY + 10, T), "diestrus");
         assertEquals(DAY - 10, ReproRules.ticksUntilReceptive(r, DAY + 10, T));
+    }
+
+    @Test
+    void aNaturalCoverIsOncePerHeat() {
+        Reproduction r = cycleStart();   // in heat from tick 0 to DAY
+        assertTrue(ReproRules.mayTryNaturally(r, 100, T));
+        r = r.withNaturalTry(100);
+        assertFalse(ReproRules.mayTryNaturally(r, DAY / 2, T), "the same heat");
+        assertFalse(ReproRules.mayTryNaturally(r, DAY + 10, T), "out of heat");
+        assertTrue(ReproRules.mayTryNaturally(r, T.cycleTicks() + 10, T), "her next heat");
+        assertEquals(T.cycleTicks(), ReproRules.heatStartAt(r, T.cycleTicks() + 10, T));
+        assertEquals(T.cycleTicks() + T.estrusTicks(), ReproRules.heatEndsAt(r, T.cycleTicks() + 10, T));
+        assertEquals(Reproduction.NEVER, ReproRules.heatStartAt(r, DAY + 10, T));
+    }
+
+    @Test
+    void foalHeatIsAHeatOfItsOwn() {
+        long born = 50 * DAY;
+        Reproduction r = cycleStart().withNaturalTry(born - 5).foaled(born, List.of());
+        long inFoalHeat = born + T.postpartumTicks() + 10;
+        assertEquals(born + T.postpartumTicks(), ReproRules.heatStartAt(r, inFoalHeat, T));
+        assertEquals(born + T.postpartumTicks() + T.foalHeatTicks(), ReproRules.heatEndsAt(r, inFoalHeat, T));
+        assertTrue(ReproRules.mayTryNaturally(r, inFoalHeat, T), "a cover before birth does not use up foal heat");
+        assertFalse(ReproRules.mayTryNaturally(r, born + 10, T), "postpartum");
     }
 
     @Test
@@ -112,7 +136,7 @@ class ReproRulesTest {
     void afterBirthComesPostpartumThenFoalHeatThenTheCycle() {
         long born = 50 * DAY;
         Reproduction r = new Reproduction(0.5, Optional.empty(), Reproduction.NEVER, List.of(),
-                Reproduction.NEVER, Reproduction.NEVER, 0).foaled(born, List.of(UUID.randomUUID()));
+                Reproduction.NEVER, Reproduction.NEVER, 0, Reproduction.NEVER).foaled(born, List.of(UUID.randomUUID()));
         assertEquals(ReproState.POSTPARTUM, ReproRules.stateAt(r, born + 1, T));
         assertEquals(ReproState.FOAL_HEAT, ReproRules.stateAt(r, born + DAY + 1, T));
         assertEquals(ReproRules.FOAL_HEAT_CHANCE, ReproRules.baseChance(r, born + DAY + 1, T));
@@ -291,7 +315,7 @@ class ReproRulesTest {
     /** A mare whose cycle starts at tick 0: in heat for the first day, peak from half a day. */
     private static Reproduction cycleStart() {
         return new Reproduction(0.0, Optional.empty(), Reproduction.NEVER, List.of(),
-                Reproduction.NEVER, Reproduction.NEVER, 0);
+                Reproduction.NEVER, Reproduction.NEVER, 0, Reproduction.NEVER);
     }
 
     private static Conception.Mating mating(Genotype dam, Genotype sire) {

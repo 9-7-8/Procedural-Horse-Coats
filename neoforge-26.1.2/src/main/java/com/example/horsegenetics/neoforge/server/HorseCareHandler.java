@@ -168,6 +168,9 @@ public final class HorseCareHandler {
             if (horse.hasPassenger(owner)) {
                 add += SCAN_INTERVAL;                     // riding ~ +1/min, saddle or not
             }
+            if (add > 0 && HorseRecords.of(horse).gelded()) {
+                add = Math.round(add * GELDING_BOND_FACTOR);   // a gelding settles to you faster
+            }
             if (add > 0) {
                 long ticks = after.bondTicks() + add;
                 int points = 0;
@@ -240,6 +243,14 @@ public final class HorseCareHandler {
     // ------------------------------------------------------------------
     // helpers
     // ------------------------------------------------------------------
+
+    /**
+     * How much faster a gelding's bond grows from riding and company (owner,
+     * 2026-09-13: +25%). It scales the ticks that turn into bond points, so the
+     * daily cap is unchanged. One-off grants ({@link #awardBondFor}) are not
+     * scaled.
+     */
+    static final double GELDING_BOND_FACTOR = 1.25;
 
     private static HorseCareAttachment awardBond(ServerLevel level, Horse horse,
                                                  HorseCareAttachment care, int amount) {

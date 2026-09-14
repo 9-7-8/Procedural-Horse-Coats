@@ -585,7 +585,7 @@ public final class HorseInfoScreen extends Screen {
     private void drawOverview(Cursor c) {
         boolean adult = horse == null || !horse.isBaby();
 
-        c.pair("Sex", record.sex().label(adult));
+        c.pair("Sex", record.sexLabel(adult));
         c.pair("Generation", Integer.toString(record.generation()));
         c.pair("Breed", record.lineage().displayName());
         c.rule();

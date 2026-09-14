@@ -336,6 +336,13 @@ public final class CowboyHandler {
                 .founder(horse.getUUID(), name.first(), name.last(), genome,
                         BreedLineage.pure(breed.id()).toToken())
                 .withBredBy(cowboy.cowboyName());
+        // ABOUT HALF HIS MALES ARE GELDINGS (owner, 2026-09-13): the riding stock a
+        // dealer actually sells, a little cheaper than an entire horse
+        // (HorsePrices). His herd is also exempt from natural breeding, so his
+        // string stays the horses he rolled.
+        if (record.sex() == com.example.horsegenetics.common.horse.Sex.MALE && rng.nextFloat() < 0.5F) {
+            record = record.withGelded(true);
+        }
 
         level.addFreshEntity(horse);
         HorseRecords.apply(horse, record);

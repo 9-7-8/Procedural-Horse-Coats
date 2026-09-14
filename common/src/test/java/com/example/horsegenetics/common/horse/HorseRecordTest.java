@@ -26,7 +26,8 @@ class HorseRecordTest {
 
     private static HorseRecord raw(UUID id, String first, String last, String code) {
         return new HorseRecord(id, first, last, Optional.empty(), code, GENOME.epigenomeCode(),
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty(),
+                false);
     }
 
     /**
@@ -107,9 +108,23 @@ class HorseRecordTest {
     }
 
     @Test
+    void aGeldingIsNotEntireAndSaysSo() {
+        HorseRecord colt = HorseRecord.founder(ID, "a", "b", GENOME.withSex(Sex.MALE));
+        assertTrue(colt.entire());
+        HorseRecord gelding = colt.withGelded(true);
+        assertFalse(gelding.entire());
+        assertEquals(Sex.MALE, gelding.sex(), "the genotype is untouched");
+        assertEquals("Gelding", gelding.sexLabel(true));
+        assertEquals("Gelded colt", gelding.sexLabel(false));
+        assertTrue(gelding.withBarnName(Optional.of("Barn")).withTamedBy("x").withBredBy("y").gelded(),
+                "every wither keeps it");
+        assertFalse(HorseRecord.founder(ID, "a", "b", GENOME.withSex(Sex.FEMALE)).entire());
+    }
+
+    @Test
     void negativeGenerationClamped() {
         assertEquals(0, new HorseRecord(ID, "a", "b", null, "EeAa", "",
-                null, null, null, null, null, -9, null).generation());
+                null, null, null, null, null, -9, null, false).generation());
     }
 
     /**

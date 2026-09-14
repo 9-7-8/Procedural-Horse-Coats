@@ -48,8 +48,8 @@ import java.util.UUID;
  *
  * <ul>
  *   <li>{@link #breed} is the one entry point every pregnancy path calls:
- *       the seed jar, breeding carrots ({@code HorseBreedingHandler}) and the
- *       Spontaneous Breeding gene. The draw and the odds are
+ *       the seed jar, breeding carrots ({@code HorseBreedingHandler}) and a
+ *       stallion left with a mare ({@code NaturalBreedingHandler}). The draw and the odds are
  *       {@link Conception#attempt}; this only fetches the facts and stores the
  *       answer.</li>
  *   <li>The tick, every {@link #SCAN} ticks, for a horse that has a record:
@@ -134,7 +134,7 @@ public final class ReproHandler {
 
     /**
      * <b>One breeding on the mod's own paths</b> - the entry point for breeding
-     * carrots, the seed jar and the Spontaneous Breeding gene. Folds whatever
+     * carrots, the seed jar and natural covers. Folds whatever
      * carrot effects are armed on the mare and on the sire (or carried in the
      * jar) into the draw, tries once, and <b>uses the carrots up only if it
      * takes</b> (owner, 2026-09-13).
@@ -145,6 +145,18 @@ public final class ReproHandler {
     public static Conception.Result breed(Horse mare, HorseRecord mareRecord, Genome mareGenome,
                                           Genome sireGenome, HorseRecord sireRecord, @Nullable Horse liveSire,
                                           List<CarrotEffect> jarCarrots, @Nullable Player breeder) {
+        return breed(mare, mareRecord, mareGenome, sireGenome, sireRecord, liveSire, jarCarrots,
+                breeder == null ? "" : breeder.getGameProfile().name(), breeder);
+    }
+
+    /**
+     * The same, crediting {@code bredBy} rather than the player at hand - a
+     * natural cover has nobody at hand, and the foal is credited to the mare's
+     * owner.
+     */
+    public static Conception.Result breed(Horse mare, HorseRecord mareRecord, Genome mareGenome,
+                                          Genome sireGenome, HorseRecord sireRecord, @Nullable Horse liveSire,
+                                          List<CarrotEffect> jarCarrots, String bredBy, @Nullable Player breeder) {
         Rng rng = HorseRecords.rng(mare);
         List<CarrotEffect> damCarrots = CarrotEffect.parseList(armedTokens(mare));
         List<CarrotEffect> sireCarrots = liveSire != null ? CarrotEffect.parseList(armedTokens(liveSire)) : jarCarrots;
@@ -152,7 +164,7 @@ public final class ReproHandler {
         GameteBias sireBias = CarrotEffect.fold(sireCarrots, sireGenome.genotype(), rng);
 
         Conception.Result result = tryConceive(mare, mareRecord, mareGenome, sireGenome, sireRecord, liveSire,
-                damBias, sireBias, breeder);
+                damBias, sireBias, bredBy, breeder);
         boolean took = result.outcome() == Conception.Outcome.CONCEIVED;
 
         // THE OTHER END OF THE CARROT. Feeding one is separated from its effect
@@ -192,11 +204,11 @@ public final class ReproHandler {
      */
     private static Conception.Result tryConceive(Horse mare, HorseRecord mareRecord, Genome mareGenome,
                                                 Genome sireGenome, HorseRecord sireRecord, @Nullable Horse liveSire,
-                                                GameteBias damBias, GameteBias sireBias, @Nullable Player breeder) {
+                                                GameteBias damBias, GameteBias sireBias, String bredBy,
+                                                @Nullable Player breeder) {
         long now = mare.level().getGameTime();
         ReproTiming t = ServerConfig.reproTiming();
         int covers = liveSire == null ? 0 : of(liveSire).coversOn(now, t.dayTicks());
-        String bredBy = breeder == null ? "" : breeder.getGameProfile().name();
         Conception.Mating mating = new Conception.Mating(mareGenome, mareRecord.lineage(),
                 sireGenome, sireRecord.lineage(), sireRecord.id(), sireRecord.firstName(), sireRecord.lastName(),
                 sireRecord.generation(), damBias, sireBias, bredBy);
@@ -295,6 +307,65 @@ public final class ReproHandler {
             case DIESTRUS -> "Not in heat - " + duration(ReproRules.ticksUntilReceptive(r, now, t)) + " to go";
         };
         return r.lactating() ? line + " • nursing" : line;
+    }
+
+    /**
+     * <b>What the vet's kit says</b> - everything the info screen's one line
+     * leaves out: twins, where in her heat she is and when it ends, and a
+     * stallion's covers today. It does not diagnose a lethal embryo; that is
+     * still something a player works out from a pedigree.
+     */
+    public static List<String> vetReport(Horse horse) {
+        List<String> lines = new ArrayList<>();
+        HorseRecord record = HorseRecords.of(horse);
+        String name = nameOf(horse);
+        long now = horse.level().getGameTime();
+        ReproTiming t = ServerConfig.reproTiming();
+        Reproduction r = of(horse);
+        if (record.sex() == Sex.MALE) {
+            if (record.gelded()) {
+                lines.add(name + " is a gelding.");
+            } else if (horse.isBaby()) {
+                lines.add(name + " is a colt, too young to breed.");
+            } else {
+                lines.add(name + " is an entire stallion: " + r.coversOn(now, t.dayTicks()) + " of "
+                        + ReproRules.FREE_COVERS_PER_DAY + " covers made today.");
+            }
+            return lines;
+        }
+        if (horse.isBaby()) {
+            lines.add(name + " is a filly, too young to breed.");
+            return lines;
+        }
+        switch (ReproRules.stateAt(r, now, t)) {
+            case PREGNANT -> {
+                Pregnancy p = r.pregnancy().get();
+                lines.add(name + " is pregnant with " + (p.twins() ? "twins" : "one foal") + " - "
+                        + duration(p.ticksLeft(now)) + " to go.");
+            }
+            case POSTPARTUM -> lines.add(name + " foaled recently. Foal heat begins in "
+                    + duration(ReproRules.ticksUntilReceptive(r, now, t)) + ".");
+            case FOAL_HEAT -> lines.add(name + " is in foal heat. It ends in "
+                    + duration(ReproRules.heatEndsAt(r, now, t) - now) + ".");
+            case ESTRUS -> {
+                long start = ReproRules.heatStartAt(r, now, t);
+                String half = ReproRules.inPeak(r, now, t)
+                        ? "in the better half"
+                        : "in the first half - the better half starts in "
+                                + duration(start + t.estrusTicks() / 2 - now);
+                lines.add(name + " is in heat, " + half + ". It ends in "
+                        + duration(ReproRules.heatEndsAt(r, now, t) - now) + ".");
+            }
+            case DIESTRUS -> lines.add(name + " is not in heat. Her next heat begins in "
+                    + duration(ReproRules.ticksUntilReceptive(r, now, t)) + ".");
+        }
+        if (ReproRules.stateAt(r, now, t).receptive() && !ReproRules.mayTryNaturally(r, now, t)) {
+            lines.add("A stallion has already covered her this heat.");
+        }
+        if (r.lactating()) {
+            lines.add("She is nursing.");
+        }
+        return lines;
     }
 
     // ------------------------------------------------------------------

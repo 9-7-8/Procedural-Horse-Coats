@@ -403,14 +403,17 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     /**
-     * <b>Seven batches: fertility, this evening's two, then the four the yard left.</b>
+     * <b>Eight batches: fertility, natural breeding, this evening's two, then the four the yard left.</b>
      *
      * <p>Batch 1 is fertility and gestation, built 2026-09-13 late. Eggs and items
      * rather than a pen, because every step is the player doing something to a
      * mare - feeding, filling a jar, stepping her with the clock - and watching
-     * what the info screen and the action bar say back.
+     * what the info screen and the action bar say back. Batch 2 is natural
+     * breeding and the vet's kit, which replaced the Spontaneous Breeding gene
+     * the same night: a paddock the player builds, because the local cap is
+     * about where horses stand.
      *
-     * <p>Batches 2 and 3 are 2026-09-13 evening's unplayed work
+     * <p>Batches 3 and 4 are 2026-09-13 evening's unplayed work
      * ({@code wiki/verification.html} 0-DT and 0-R): the ender whistle and band
      * life, then the Dhampir's loci and the day loci. They are eggs and items
      * rather than pens because every one of those tests is about the horse
@@ -433,6 +436,7 @@ public final class DebugTestWorldHandler {
      */
     private static final String[] BATCHES = {
             "NEW: fertility and gestation - heat, pregnancy, the clock, an early loss",
+            "NEW: natural breeding, the local cap, and gelding with the vet's kit",
             "NEW: the ender whistle, and wild bands (0-DT)",
             "NEW: the Dhampir's loci - white, sun, blood - and the day loci (0-R, 0-DT)",
             "START THE NIGHT - walk the yard, check the census, then leave it alone (0-CX)",
@@ -684,6 +688,31 @@ public final class DebugTestWorldHandler {
                                 + "she is visibly slower.").withStyle(ChatFormatting.GOLD));
             }
             case 2 -> {
+                // NATURAL BREEDING AND GELDING. No carrots and no jar: a stallion
+                // left with mares covers each one once per heat, and the vet's kit
+                // is the only way to stop him.
+                put(inv, legend, 0, new ItemStack(ModItems.VET_KIT.get()),
+                        "VET'S KIT - use on a mare: where she is in her heat, and twins if pregnant. "
+                                + "SNEAK-use on your stallion: he becomes a gelding");
+                put(inv, legend, 1, many(preset(player, "Test: paddock mare", Sex.FEMALE, false), 3),
+                        "three mares - fence them in with one stallion and leave them");
+                put(inv, legend, 2, many(preset(player, "Test: paddock stallion", Sex.MALE, false), 2),
+                        "two stallions - one to breed, one to geld and turn out with the mares as a control");
+                put(inv, legend, 3, new ItemStack(Items.STICK), "stick - tame them all");
+                put(inv, legend, 4, new ItemStack(Items.CLOCK),
+                        "clock - put a mare in heat now; the stallion walks over and covers her ONCE this heat");
+                put(inv, legend, 5, new ItemStack(Items.LEAD, 2),
+                        "leads - a leashed mare or stallion is never covered or covers");
+                put(inv, legend, 6, new ItemStack(Items.WOODEN_SWORD),
+                        "wooden sword - tap a mare in heat: hurt, she is not covered until she has healed");
+                put(inv, legend, 7, new ItemStack(Items.OAK_FENCE, 48), "fence - build a paddock");
+                put(inv, legend, 8, new ItemStack(Items.OAK_FENCE_GATE, 2), "gates");
+                tell(player, Component.literal("The cap: with 8 other horses, foals included, within 16 "
+                                + "blocks of a mare, nobody covers her. A gelding never covers, never spars, and "
+                                + "his nameplate symbol is grey. Cowboy stock never breeds.")
+                        .withStyle(ChatFormatting.GOLD));
+            }
+            case 3 -> {
                 // THE ENDER WHISTLE, and the one band-life test that needs a
                 // hand on the horse. The whistle's far call is the test that can
                 // fail without a sound - a portal ticket that never loads the
@@ -718,7 +747,7 @@ public final class DebugTestWorldHandler {
                                 + "mare instead of scattering. Open a wild mare's info screen for "
                                 + "the new Social section.").withStyle(ChatFormatting.GOLD));
             }
-            case 3 -> {
+            case 4 -> {
                 // THE DHAMPIR, TAKEN APART. Each locus gets its own egg, so a
                 // behaviour can be pinned on the allele that owns it: the white
                 // one is everything at once, and the two singles are the check
@@ -755,7 +784,7 @@ public final class DebugTestWorldHandler {
                 tell(player, command("/testkit night", "night - for the hunt"));
                 tell(player, command("/testkit day", "day - for the burning and the day loci"));
             }
-            case 4 -> {
+            case 5 -> {
                 // THE NIGHT SHIFT. Six of the yard's pens now run on a clock
                 // and write their own readings (DebugWorldWatch), so this batch
                 // is not a list of things to do - it is the short list of
@@ -774,7 +803,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension now honours");
                 put(inv, legend, 4, new ItemStack(Items.SADDLE),
-                        "saddle - the ridden tests are batch 5");
+                        "saddle - the ridden tests are batch 6");
                 // THE CONTROL FOR GAP 218, and the reason it is dark oak and not
                 // oak: the oak, birch, mushroom and bone-meal dryad pens all
                 // completed and are deleted, and dark oak planted saplings for a
@@ -804,7 +833,7 @@ public final class DebugTestWorldHandler {
                                 + "the plot down and the night with it.")
                         .withStyle(ChatFormatting.RED));
             }
-            case 5 -> {
+            case 6 -> {
                 // EVERY ONE OF THESE IS A PEN NOW, and all three come saddled
                 // in it - so this batch is no longer "here are three horses",
                 // it is the handful of things a rider needs that a pen cannot
@@ -839,7 +868,7 @@ public final class DebugTestWorldHandler {
                                 + "needs fetching.")
                         .withStyle(ChatFormatting.GOLD));
             }
-            case 6 -> {
+            case 7 -> {
                 // Molten hooves left this batch on 2026-09-13: its four alleles
                 // are four stalls in the yard now, side by side, which is the
                 // only arrangement that can answer "does this one differ from
@@ -853,7 +882,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 3, new ItemStack(Items.SADDLE),
                         "saddle - prints follow a ridden horse too; the molten stalls are in the yard");
             }
-            case 7 -> {
+            case 8 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {

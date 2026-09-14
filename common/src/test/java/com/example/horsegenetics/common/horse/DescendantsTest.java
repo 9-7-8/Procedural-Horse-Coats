@@ -32,7 +32,7 @@ class DescendantsTest {
                 GENOME.genotypeCode(), GENOME.epigenomeCode(), Optional.empty(),
                 dam == null ? Optional.empty() : Optional.of(id(dam)),
                 sire == null ? Optional.empty() : Optional.of(id(sire)),
-                Optional.empty(), Optional.empty(), 0, Optional.empty());
+                Optional.empty(), Optional.empty(), 0, Optional.empty(), false);
     }
 
     private static List<String> names(List<HorseRecord> records) {

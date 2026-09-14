@@ -110,6 +110,10 @@ public final class StallionSeedJarHandler {
             message(player, refusal);
             return false;
         }
+        if (HorseRecords.of(stallion).gelded()) {
+            message(player, HorseRecords.of(stallion).displayName() + " is a gelding - there is nothing to collect.");
+            return false;
+        }
         if (!stallion.isInLove()) {
             message(player, HorseRecords.of(stallion).displayName()
                     + " must be in breeding mode - feed it first.");

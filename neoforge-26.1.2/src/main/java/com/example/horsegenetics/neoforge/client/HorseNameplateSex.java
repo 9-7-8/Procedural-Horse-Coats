@@ -69,11 +69,14 @@ public final class HorseNameplateSex {
             return;
         }
         boolean mare = sex == Sex.FEMALE;
+        HorseRecord record = ClientHorseRecordCache.get(horse.getId());
+        boolean gelding = !mare && record != null && record.gelded();
         // Coloured as well as shaped. The glyphs are small at range and the two
         // are not that different in silhouette; the colour is what actually does
-        // the work of "tell them apart across a paddock".
+        // the work of "tell them apart across a paddock". A gelding keeps the
+        // male glyph in grey - a breeding stallion is the one worth spotting.
         event.setContent(content.copy().append(Component.literal(mare ? FEMALE : MALE)
-                .withStyle(mare ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.AQUA)));
+                .withStyle(mare ? ChatFormatting.LIGHT_PURPLE : gelding ? ChatFormatting.GRAY : ChatFormatting.AQUA)));
     }
 
     /** The record if the client has it, else the coat, else {@code null}. */

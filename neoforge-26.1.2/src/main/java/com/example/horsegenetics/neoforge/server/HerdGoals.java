@@ -111,7 +111,7 @@ public final class HerdGoals {
 
         @Override
         public boolean canUse() {
-            if (!free(horse) || horse.isBaby() || HorseRecords.of(horse).sex() != Sex.MALE
+            if (!free(horse) || horse.isBaby() || !HorseRecords.of(horse).entire()
                     || !(horse.level() instanceof ServerLevel level)) {
                 return false;
             }
@@ -129,7 +129,7 @@ public final class HerdGoals {
             }
             for (Horse other : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(10.0),
                     h -> h != horse && !h.isBaby() && free(h) && !BOUTS.containsKey(h.getUUID())
-                            && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).sex() == Sex.MALE
+                            && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).entire()
                             && h.isTamed() == horse.isTamed())) {
                 double familiarity = BandLife.relationship(horse, other).map(Relationship::familiarity).orElse(0.0);
                 if (familiarity >= 0.3) {
@@ -340,7 +340,7 @@ public final class HerdGoals {
             Vec3 centre = centre(band);
             for (Horse h : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(INTRUDER),
                     h -> h != horse && h.isAlive() && !h.isTamed() && !h.isBaby()
-                            && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).sex() == Sex.MALE
+                            && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).entire()
                             && !h.getData(ModAttachments.HORSE_CARE.get()).herd().map(herd::equals).orElse(false))) {
                 subject = h;
                 herding = false;
@@ -544,8 +544,8 @@ public final class HerdGoals {
             checkCooldown = 40;
             Sex sex = HorseRecords.of(horse).sex();
             mareSide = sex == Sex.FEMALE;
-            if (mareSide && !ReproHandler.receptive(horse)) {
-                return false;
+            if (mareSide ? !ReproHandler.receptive(horse) : !HorseRecords.of(horse).entire()) {
+                return false;   // a mare out of heat, or a gelding
             }
             Horse best = null;
             if (!mareSide) {
@@ -559,7 +559,8 @@ public final class HerdGoals {
             if (best == null) {
                 for (Horse h : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(RANGE),
                         h -> h != horse && !h.isBaby() && free(h) && HorseRecords.hasRealRecord(h)
-                                && HorseRecords.of(h).sex() != sex)) {
+                                && (mareSide ? HorseRecords.of(h).entire()
+                                        : HorseRecords.of(h).sex() == Sex.FEMALE))) {
                     if (!mareSide && !ReproHandler.receptive(h)) {
                         continue;
                     }

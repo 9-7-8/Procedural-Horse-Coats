@@ -53,7 +53,7 @@ public final class HorsePaperInspectHandler {
         sb.append("\n id: ").append(record.id());
         sb.append("\n registered name: ").append(record.firstName()).append(" ").append(record.lastName());
         record.barnName().ifPresent(b -> sb.append("\n barn name: ").append(b));
-        sb.append("\n ").append(record.sex().label(!horse.isBaby()).toLowerCase());
+        sb.append("\n ").append(record.sexLabel(!horse.isBaby()).toLowerCase());
         sb.append("\n breed: ").append(record.lineage().displayName());
         appendHerd(sb, player, horse);
         sb.append("\n genetic code: ").append(GeneCodeDisplay.shortForm(record.geneticCode()));

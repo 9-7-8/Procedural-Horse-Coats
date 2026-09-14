@@ -55,6 +55,7 @@ public final class ReproCodecs {
             UUIDUtil.CODEC.listOf().optionalFieldOf("nursing", List.of()).forGetter(Reproduction::nursing),
             Codec.LONG.optionalFieldOf("apart_since", Reproduction.NEVER).forGetter(Reproduction::apartSince),
             Codec.LONG.optionalFieldOf("cover_day", Reproduction.NEVER).forGetter(Reproduction::coverDay),
-            Codec.INT.optionalFieldOf("covers", 0).forGetter(Reproduction::covers)
+            Codec.INT.optionalFieldOf("covers", 0).forGetter(Reproduction::covers),
+            Codec.LONG.optionalFieldOf("last_natural_try", Reproduction.NEVER).forGetter(Reproduction::lastNaturalTry)
     ).apply(i, Reproduction::new));
 }

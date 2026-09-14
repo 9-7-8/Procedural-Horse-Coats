@@ -19,8 +19,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * <b>One breeding on this mod's own paths</b> - seed jar, breeding carrot,
- * spontaneous pairing, later wild bands - and whether it makes a pregnancy.
+ * <b>One breeding on this mod's own paths</b> - seed jar, breeding carrot, a
+ * stallion left with a mare in heat - and whether it makes a pregnancy.
  *
  * <p>All of those paths call {@link #attempt}; none of them draws a genome for
  * itself. The draw is the ordinary Mendelian one ({@link GeneticCodeCombiner})

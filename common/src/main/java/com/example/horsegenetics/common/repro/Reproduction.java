@@ -29,10 +29,13 @@ import java.util.UUID;
  *       or {@link #NEVER} while one is near. A day apart weans them.</li>
  *   <li><b>{@code coverDay} / {@code covers}</b> - the stallion side: which day
  *       he last covered a mare or filled a jar, and how many times that day.</li>
+ *   <li><b>{@code lastNaturalTry}</b> - when a stallion last covered her on his
+ *       own, so that happens once per heat ({@link ReproRules#mayTryNaturally}).</li>
  * </ul>
  */
 public record Reproduction(double cyclePhase, Optional<Pregnancy> pregnancy, long foaledTick,
-                           List<UUID> nursing, long apartSince, long coverDay, int covers) {
+                           List<UUID> nursing, long apartSince, long coverDay, int covers,
+                           long lastNaturalTry) {
 
     public static final long NEVER = Long.MIN_VALUE;
 
@@ -49,7 +52,7 @@ public record Reproduction(double cyclePhase, Optional<Pregnancy> pregnancy, lon
         Objects.requireNonNull(id, "id");
         // the top 53 bits of the low half, as a double in [0, 1)
         double phase = (id.getLeastSignificantBits() >>> 11) * 0x1.0p-53;
-        return new Reproduction(phase, Optional.empty(), NEVER, List.of(), NEVER, NEVER, 0);
+        return new Reproduction(phase, Optional.empty(), NEVER, List.of(), NEVER, NEVER, 0, NEVER);
     }
 
     public boolean pregnant() {
@@ -61,34 +64,40 @@ public record Reproduction(double cyclePhase, Optional<Pregnancy> pregnancy, lon
     }
 
     public Reproduction withPregnancy(Pregnancy p) {
-        return new Reproduction(cyclePhase, Optional.of(p), foaledTick, nursing, apartSince, coverDay, covers);
+        return withPregnancy(Optional.of(p));
     }
 
     public Reproduction withPregnancy(Optional<Pregnancy> p) {
-        return new Reproduction(cyclePhase, p, foaledTick, nursing, apartSince, coverDay, covers);
+        return new Reproduction(cyclePhase, p, foaledTick, nursing, apartSince, coverDay, covers, lastNaturalTry);
     }
 
     /** She has given birth at {@code now} to {@code foals} (empty if none survived). */
     public Reproduction foaled(long now, List<UUID> foals) {
-        return new Reproduction(cyclePhase, Optional.empty(), now, foals, NEVER, coverDay, covers);
+        return new Reproduction(cyclePhase, Optional.empty(), now, foals, NEVER, coverDay, covers, lastNaturalTry);
     }
 
     /** Her cycle moved - the testing clock's "into heat now". */
     public Reproduction withCyclePhase(double phase) {
-        return new Reproduction(phase, pregnancy, foaledTick, nursing, apartSince, coverDay, covers);
+        return new Reproduction(phase, pregnancy, foaledTick, nursing, apartSince, coverDay, covers, lastNaturalTry);
     }
 
     /** Her last birth moved - the testing clock's "skip to foal heat". */
     public Reproduction withFoaledTick(long tick) {
-        return new Reproduction(cyclePhase, pregnancy, tick, nursing, apartSince, coverDay, covers);
+        return new Reproduction(cyclePhase, pregnancy, tick, nursing, apartSince, coverDay, covers, lastNaturalTry);
     }
 
     public Reproduction weaned() {
-        return new Reproduction(cyclePhase, pregnancy, foaledTick, List.of(), NEVER, coverDay, covers);
+        return new Reproduction(cyclePhase, pregnancy, foaledTick, List.of(), NEVER, coverDay, covers,
+                lastNaturalTry);
     }
 
     public Reproduction withApartSince(long tick) {
-        return new Reproduction(cyclePhase, pregnancy, foaledTick, nursing, tick, coverDay, covers);
+        return new Reproduction(cyclePhase, pregnancy, foaledTick, nursing, tick, coverDay, covers, lastNaturalTry);
+    }
+
+    /** A stallion covered her on his own at {@code tick} - her one natural try this heat. */
+    public Reproduction withNaturalTry(long tick) {
+        return new Reproduction(cyclePhase, pregnancy, foaledTick, nursing, apartSince, coverDay, covers, tick);
     }
 
     /** Covers he has already made on the day containing {@code now}. */
@@ -100,6 +109,6 @@ public record Reproduction(double cyclePhase, Optional<Pregnancy> pregnancy, lon
     public Reproduction withCover(long now, long dayTicks) {
         long day = Math.floorDiv(now, dayTicks);
         int count = day == coverDay ? covers + 1 : 1;
-        return new Reproduction(cyclePhase, pregnancy, foaledTick, nursing, apartSince, day, count);
+        return new Reproduction(cyclePhase, pregnancy, foaledTick, nursing, apartSince, day, count, lastNaturalTry);
     }
 }

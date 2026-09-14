@@ -1,7 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.genetics.genes.FireproofGene;
-import com.example.horsegenetics.common.genetics.genes.SpontaneousBreedingGene;
+import com.example.horsegenetics.common.genetics.genes.SunSensitivityGene;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,8 +29,8 @@ class EditorSearchTest {
         assertTrue(EditorRules.matchesSearch(fireproof, "FIREPROOF"));
         assertTrue(EditorRules.matchesSearch(fireproof, "frp"), "an allele token finds its gene");
 
-        Gene spontaneous = Genes.byKey(SpontaneousBreedingGene.KEY);
-        assertTrue(EditorRules.matchesSearch(spontaneous, "spontaneous breeding"),
+        Gene sun = Genes.byKey(SunSensitivityGene.KEY);
+        assertTrue(EditorRules.matchesSearch(sun, "sun sensitivity"),
                 "the key's underscore reads as a space");
     }
 

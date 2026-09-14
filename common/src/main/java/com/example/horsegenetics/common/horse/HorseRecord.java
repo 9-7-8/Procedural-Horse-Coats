@@ -62,7 +62,8 @@ public record HorseRecord(
         Optional<String> tamedBy,
         Optional<String> bredBy,
         int generation,
-        Optional<ParentStats> parentStats) {
+        Optional<ParentStats> parentStats,
+        boolean gelded) {
 
     public static final int MAX_BARN_NAME = 16;
 
@@ -101,7 +102,7 @@ public record HorseRecord(
         return new HorseRecord(id, "", "", Optional.empty(),
                 Genotype.wildType().toCode(), "", Optional.empty(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0,
-                Optional.empty());
+                Optional.empty(), false);
     }
 
     /**
@@ -113,7 +114,8 @@ public record HorseRecord(
                                       String breedToken) {
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(), breedToken(breedToken),
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty(),
+                false);
     }
 
     /** A foundation horse with no breed identity ({@code "feral_mixed"}). */
@@ -131,7 +133,7 @@ public record HorseRecord(
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(), breedToken(breedToken),
                 Optional.of(motherId), Optional.of(fatherId), Optional.empty(), Optional.empty(), generation,
-                Optional.empty());
+                Optional.empty(), false);
     }
 
     /** A bred foal with no breed identity carried through - test / legacy convenience. */
@@ -182,12 +184,12 @@ public record HorseRecord(
     public HorseRecord withGenome(Genome genome) {
         return new HorseRecord(id, firstName, lastName, barnName,
                 genome.genotypeCode(), genome.epigenomeCode(), breed,
-                motherId, fatherId, tamedBy, bredBy, generation, parentStats);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
     }
 
     public HorseRecord withBreed(String breedToken) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
-                breedToken(breedToken), motherId, fatherId, tamedBy, bredBy, generation, parentStats);
+                breedToken(breedToken), motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
     }
 
     /** What to show in-game: the barn name if set, otherwise "first last". */
@@ -223,30 +225,59 @@ public record HorseRecord(
 
     public HorseRecord withNames(String newFirst, String newLast) {
         return new HorseRecord(id, newFirst, newLast, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, bredBy, generation, parentStats);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
     }
 
     public HorseRecord withBarnName(Optional<String> newBarnName) {
         return new HorseRecord(id, firstName, lastName, newBarnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, bredBy, generation, parentStats);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, gelded);
     }
 
     public HorseRecord withTamedBy(String username) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, Optional.of(username), bredBy, generation, parentStats);
+                motherId, fatherId, Optional.of(username), bredBy, generation, parentStats, gelded);
     }
 
     public HorseRecord withBredBy(String username) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, Optional.of(username), generation, parentStats);
+                motherId, fatherId, tamedBy, Optional.of(username), generation, parentStats, gelded);
     }
 
     public HorseRecord withParentStats(ParentStats newParentStats) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
-                motherId, fatherId, tamedBy, bredBy, generation, Optional.ofNullable(newParentStats));
+                motherId, fatherId, tamedBy, bredBy, generation, Optional.ofNullable(newParentStats), gelded);
     }
 
     public boolean hasKnownParents() {
         return motherId.isPresent() || fatherId.isPresent();
+    }
+
+    // --- gelding --------------------------------------------------------
+
+    /**
+     * Gelded with a vet's kit. Permanent, and a fact about the animal rather
+     * than about its genes: the sex locus still reads {@code X/Y}, a jar filled
+     * before still holds his genome, and the flag goes wherever the record goes
+     * - death, a transfer paper, the family tree.
+     */
+    public HorseRecord withGelded(boolean value) {
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats, value);
+    }
+
+    /**
+     * An ungelded male - the only horse that covers a mare, fills a seed jar,
+     * spars, guards a band or answers a mare in heat. A gelding is none of those.
+     */
+    public boolean entire() {
+        return sex() == Sex.MALE && !gelded;
+    }
+
+    /** Stallion, colt, mare, filly - or gelding. */
+    public String sexLabel(boolean adult) {
+        if (gelded && sex() == Sex.MALE) {
+            return adult ? "Gelding" : "Gelded colt";
+        }
+        return sex().label(adult);
     }
 }

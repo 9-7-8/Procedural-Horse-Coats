@@ -27,7 +27,7 @@ public enum ReproState {
         this.label = label;
     }
 
-    /** Does a breeding carrot, seed jar or spontaneous pairing have any chance now? */
+    /** Does a carrot-armed breeding, a seed jar or a natural cover have any chance now? */
     public boolean receptive() {
         return this == ESTRUS || this == FOAL_HEAT;
     }

@@ -175,15 +175,24 @@ public final class HerdSocialHandler {
             return 1.0;
         }
         boolean twoMares = !horse.isBaby() && !other.isBaby()
-                && HorseRecords.of(horse).sex() == Sex.FEMALE && HorseRecords.of(other).sex() == Sex.FEMALE;
+                && socialMare(horse) && socialMare(other);
         return twoMares ? 1.0 : 0.0;
+    }
+
+    /**
+     * A mare - or a gelding, who keeps company the way mares do (owner,
+     * 2026-09-13: "no stallion behaviour").
+     */
+    static boolean socialMare(Horse horse) {
+        HorseRecord record = HorseRecords.of(horse);
+        return record.sex() == Sex.FEMALE || record.gelded();
     }
 
     private static double rivalWeight(Horse horse, HorseCareAttachment care, Horse other) {
         if (horse.isTamed() || other.isTamed() || horse.isBaby() || other.isBaby()) {
             return 0.0;
         }
-        if (HorseRecords.of(horse).sex() != Sex.MALE || HorseRecords.of(other).sex() != Sex.MALE) {
+        if (!HorseRecords.of(horse).entire() || !HorseRecords.of(other).entire()) {
             return 0.0;
         }
         HorseCareAttachment theirs = other.getData(ModAttachments.HORSE_CARE.get());
@@ -307,7 +316,7 @@ public final class HerdSocialHandler {
         Horse best = members.get(0);
         double bestScore = Double.NEGATIVE_INFINITY;
         for (Horse m : members) {
-            if (m.isBaby() || HorseRecords.of(m).sex() != Sex.MALE) {
+            if (m.isBaby() || !HorseRecords.of(m).entire()) {
                 continue;
             }
             SocialLedger l = m.getData(ModAttachments.HORSE_SOCIAL.get()).ledger();
@@ -338,7 +347,7 @@ public final class HerdSocialHandler {
         HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
         HorseSocialAttachment social = horse.getData(ModAttachments.HORSE_SOCIAL.get());
         SocialLedger ledger = social.ledger();
-        boolean male = HorseRecords.of(horse).sex() == Sex.MALE;
+        boolean male = HorseRecords.of(horse).entire();   // a gelding's role reads like a mare's
 
         boolean inBand = !horse.isTamed() && care.inWildHerd();
         UUID herd = care.herd().orElse(null);

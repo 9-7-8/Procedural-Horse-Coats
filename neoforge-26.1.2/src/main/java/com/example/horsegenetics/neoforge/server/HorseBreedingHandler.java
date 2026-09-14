@@ -40,8 +40,8 @@ import java.util.UUID;
 /**
  * Real breeding. <b>Plain golden carrots give a foal at once; a breeding
  * carrot on either parent gives a pregnancy instead</b> ({@link ReproHandler},
- * {@code common.repro}), and so do the seed jar and the Spontaneous Breeding
- * gene. Both kinds of foal are finished by the same {@link #populateFoal}. On {@link BabyEntitySpawnEvent} (fired from
+ * {@code common.repro}), and so do the seed jar and a stallion left with a mare
+ * ({@link NaturalBreedingHandler}). Both kinds of foal are finished by the same {@link #populateFoal}. On {@link BabyEntitySpawnEvent} (fired from
  * {@code Animal#spawnChildFromBreeding} before the foal is added to the
  * world):
  *
@@ -102,6 +102,15 @@ public final class HorseBreedingHandler {
         HorseRecord sireRecord = aIsDam ? recordB : recordA;
         Horse damHorse = aIsDam ? parentA : parentB;
         Horse sireHorse = aIsDam ? parentB : parentA;
+
+        // A GELDING SIRES NOTHING. Vanilla love does not know it, so a mare and a
+        // gelding fed golden carrots court like any pair and arrive here.
+        if (sireRecord.gelded()) {
+            ReproHandler.overlay(event.getCausedByPlayer(), sireRecord.displayName() + " is a gelding - no foal.",
+                    ChatFormatting.YELLOW);
+            event.setCanceled(true);
+            return;
+        }
 
         Genome damGenome = genomeOf(damHorse, damRecord, rng);
         Genome sireGenome = genomeOf(sireHorse, sireRecord, rng);

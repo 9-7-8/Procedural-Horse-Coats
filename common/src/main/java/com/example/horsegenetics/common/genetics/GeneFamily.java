@@ -303,7 +303,6 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.gladiator", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.guardian", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.ender_echo", MAGIC_BEHAVIOUR);
-        MAGICAL_OVERRIDES.put("horsegenetics.spontaneous_breeding", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.eyesight", MAGIC_BODY);
         MAGICAL_OVERRIDES.put("horsegenetics.weather_speed", MAGIC_BODY);
         MAGICAL_OVERRIDES.put("horsegenetics.weather_jump", MAGIC_BODY);

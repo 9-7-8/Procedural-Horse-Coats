@@ -30,8 +30,21 @@ public final class ReproRules {
 
     /** Covers (or jar fills) a stallion makes in one day before his odds drop. */
     public static final int FREE_COVERS_PER_DAY = 3;
-    /** What his odds are multiplied by once he is past them. */
+    /**
+     * What his odds are multiplied by once he is past them - on the carrot and
+     * jar paths. A natural cover is a hard stop at the same number instead.
+     */
     public static final double TIRED_STALLION_FACTOR = 0.5;
+
+    // ------------------------------------------------------------------
+    // Natural covers - a stallion left with mares
+    // ------------------------------------------------------------------
+
+    /** How close a stallion must be to a mare in heat to cover her. */
+    public static final double NATURAL_REACH = 3.0;
+    /** With this many other horses, foals included, within {@link #NATURAL_CAP_RADIUS}, nobody covers. */
+    public static final int NATURAL_CAP = 8;
+    public static final double NATURAL_CAP_RADIUS = 16.0;
 
     // ------------------------------------------------------------------
     // Pregnancy
@@ -94,6 +107,40 @@ public final class ReproRules {
     public static double phaseFor(long now, long position, ReproTiming t) {
         long cycle = t.cycleTicks();
         return Math.floorMod(position - now, cycle) / (double) cycle;
+    }
+
+    /** When the heat she is in now began, or {@link Reproduction#NEVER} when she is not in heat. */
+    public static long heatStartAt(Reproduction r, long now, ReproTiming t) {
+        switch (stateAt(r, now, t)) {
+            case FOAL_HEAT:
+                return r.foaledTick() + t.postpartumTicks();
+            case ESTRUS:
+                return now - cyclePosition(r, now, t);
+            default:
+                return Reproduction.NEVER;
+        }
+    }
+
+    /** When the heat she is in now ends, or {@link Reproduction#NEVER} when she is not in heat. */
+    public static long heatEndsAt(Reproduction r, long now, ReproTiming t) {
+        switch (stateAt(r, now, t)) {
+            case FOAL_HEAT:
+                return r.foaledTick() + t.postpartumTicks() + t.foalHeatTicks();
+            case ESTRUS:
+                return heatStartAt(r, now, t) + t.estrusTicks();
+            default:
+                return Reproduction.NEVER;
+        }
+    }
+
+    /**
+     * May a stallion cover her on his own now? In heat, and not yet this heat
+     * (owner, 2026-09-13: once per heat, when they meet). A failed cover waits
+     * for her next heat, which is what keeps a paddock from breeding flat out.
+     */
+    public static boolean mayTryNaturally(Reproduction r, long now, ReproTiming t) {
+        long start = heatStartAt(r, now, t);
+        return start != Reproduction.NEVER && r.lastNaturalTry() < start;
     }
 
     /** In the second half of an ordinary heat. Foal heat has one flat chance and no peak. */

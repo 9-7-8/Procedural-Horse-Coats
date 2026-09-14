@@ -50,9 +50,14 @@ public final class HorsePrices {
     private HorsePrices() {
     }
 
-    /** Emeralds for one signed transfer paper naming this horse. */
+    /**
+     * Emeralds for one signed transfer paper naming this horse. A gelding goes
+     * for three quarters of it, never under one emerald: a riding horse, not a
+     * line to breed from.
+     */
     public static int emeraldsFor(HorseRecord record) {
-        return roll(rangeFor(record.lineage()), record.id());
+        int price = roll(rangeFor(record.lineage()), record.id());
+        return record.gelded() ? Math.max(1, price * 3 / 4) : price;
     }
 
     private static Breed.PriceRange rangeFor(BreedLineage lineage) {

@@ -47,7 +47,8 @@ public final class HorseRecordCodecs {
             Codec.STRING.optionalFieldOf("tamed_by").forGetter(HorseRecord::tamedBy),
             Codec.STRING.optionalFieldOf("bred_by").forGetter(HorseRecord::bredBy),
             Codec.INT.optionalFieldOf("generation", 0).forGetter(HorseRecord::generation),
-            PARENT_STATS.optionalFieldOf("parent_stats").forGetter(HorseRecord::parentStats)
+            PARENT_STATS.optionalFieldOf("parent_stats").forGetter(HorseRecord::parentStats),
+            Codec.BOOL.optionalFieldOf("gelded", false).forGetter(HorseRecord::gelded)
     ).apply(instance, HorseRecord::new));
 
     public static final Codec<HorseRecord> CODEC = MAP_CODEC.codec();

@@ -125,7 +125,7 @@ public final class BreedingCarrotHandler {
         // It used to open a 30-second window and put the horse in love. Now it
         // waits on the horse - in heat or out of it, through a breeding that did
         // not take - and only one that takes uses it up. Breeding is a separate
-        // act: golden carrots, a seed jar, or the Spontaneous Breeding gene.
+        // act: golden carrots, a seed jar, or a stallion left with her in heat.
         ArmedCarrotsAttachment armed = horse.getData(ModAttachments.ARMED_CARROTS.get());
         horse.setData(ModAttachments.ARMED_CARROTS.get(), armed.plus(tokens));
         tickCarrotTasks(player, tokens);

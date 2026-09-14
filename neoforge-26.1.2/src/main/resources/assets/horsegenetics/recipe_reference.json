@@ -340,6 +340,17 @@
       "count": 1
     },
     {
+      "id": "vet_kit",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:shears",
+        "minecraft:leather",
+        "minecraft:iron_ingot"
+      ],
+      "out": "horsegenetics:vet_kit",
+      "count": 1
+    },
+    {
       "id": "white_gene_splice_carrot",
       "kind": "shapeless",
       "in": [

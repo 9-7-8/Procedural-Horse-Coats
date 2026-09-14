@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:shears",
+    "minecraft:leather",
+    "minecraft:iron_ingot"
+  ],
+  "result": {
+    "id": "horsegenetics:vet_kit"
+  }
+}
