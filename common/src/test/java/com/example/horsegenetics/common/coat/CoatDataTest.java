@@ -26,7 +26,8 @@ class CoatDataTest {
     void carriesGenotypeAndEpigenomeAndDerivesPhenotype() {
         CoatData c = coat(BLACK, 42L);
         assertEquals(CoatPhenotype.BLACK, c.phenotype());
-        assertEquals(Epigenome.fromSeed(42L), c.epigenome());
+        // Fitted to the alleles: a wild-type copy carries no numbers (2026-09-14).
+        assertEquals(Epigenome.fromSeed(42L).alignedTo(Genotype.parse(BLACK)), c.epigenome());
     }
 
     @Test
@@ -50,7 +51,10 @@ class CoatDataTest {
     @Test
     void equalityIsGenotypePlusEpigenome() {
         assertEquals(coat(BLACK, 7L), coat(BLACK, 7L));
-        assertNotEquals(coat(BLACK, 7L), coat(BLACK, 8L));
+        // A bay, not a black: a horse that is wild type everywhere carries no numbers at all,
+        // so two blacks from different seeds are now the same horse - which is the point.
+        assertNotEquals(coat(BAY, 7L), coat(BAY, 8L));
+        assertEquals(coat(BLACK, 7L), coat(BLACK, 8L));
     }
 
     @Test

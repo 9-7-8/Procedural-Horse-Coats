@@ -598,11 +598,39 @@ public Expression expressionOf(AllelePair pair) {
 </ul>
 
 <p>
-    So a horse carrying <code>A/a</code> has one set of numbers on its <code>A</code>
-    and another on its <code>a</code>, and a foal that inherits the <code>A</code>
-    inherits <strong>that copy&rsquo;s</strong> numbers. Bay point heights run in
-    families rather than being reinvented every generation.
+    So a foal that inherits a copy inherits <strong>that copy&rsquo;s</strong> numbers
+    &mdash; the <code>A</code> a bay got from its dam brings the dam&rsquo;s point
+    height with it. Bay point heights run in families rather than being reinvented
+    every generation.
 </p>
+
+<div class="note">
+    <span class="label">A wild-type copy carries nothing</span>
+    <p>
+        Since 2026-09-14 (owner: <em>&ldquo;wildtype for most genes should not carry any
+        epigene data&rdquo;</em>), only a copy of a <strong>variant</strong> allele carries
+        numbers. A copy of a gene&rsquo;s wild-type allele &mdash; the <code>a</code> in
+        <code>A/a</code>, the <code>n</code> in <code>Swift/n</code> &mdash; carries none,
+        not even a priority. That copy is never the one a painter or an ability reads, so
+        its numbers were dead weight: about half of every stored epigenome, inherited and
+        drifted for nothing.
+    </p>
+    <p>
+        A survey of every gene that stores epigenetics found <strong>no exception</strong>:
+        no gene expresses its wild-type copy in an outcome that does anything.
+        <code>WildCopySurveyTest</code> keeps that true; a future gene whose wild type really
+        does read its copy has to say so with <code>Gene.wildTypeCarriesEpigenetics()</code>.
+        One reader the survey could not see: the white-pattern eye roll
+        (<code>WhitePatternEyes.blueIf</code>) reads a white locus&rsquo;s copy whenever the
+        <em>horse</em> is white enough, even at a wild locus. An empty copy there asks for nothing
+        (owner: <em>&ldquo;eyes should default to brown if nothing else describes them&rdquo;</em>);
+        the variant white locus that made the horse white still rolls the blue.
+        <code>Genome</code> fits its epigenome to its alleles when it is built
+        (<code>Epigenome.alignedTo</code>), so every horse passes through the rule. A copy that
+        arrives empty on a variant allele &mdash; forced eyes, or an editor changing the
+        allele &mdash; is given deterministic numbers, so nothing ever reads a blank.
+    </p>
+</div>
 
 <div class="note rule">
     <span class="label">These used to be one opaque seed</span>
@@ -698,11 +726,13 @@ public Expression expressionOf(AllelePair pair) {
     <strong>per gene that declares a schema</strong>, joined by <code>;</code>.
     Each copy is <code>p:&lt;priority&gt;</code> followed by that gene&rsquo;s named
     values: a plain number, <code>#</code> for a hex noise seed,
-    <code>[a|b|c|d]</code> for a per-leg value.
+    <code>[a|b|c|d]</code> for a per-leg value. A wild-type copy, which carries nothing,
+    is written <code>-</code>, and a gene whose two copies are both wild type writes no
+    segment at all.
 </p>
 
 <div class="codebox">
-<pre><code class="language-none">horsegenetics.body_size=p:1734,delta:0.34215/p:9871,delta:0.31049;horsegenetics.ednrb=p:44,seed:#8f3a21c4b70e1d55,face:0.61,cover:0.4113,&hellip;</code></pre>
+<pre><code class="language-none">horsegenetics.body_size=p:1734,delta:0.34215/-;horsegenetics.ednrb=p:44,seed:#8f3a21c4b70e1d55,face:0.61,cover:0.4113,&hellip;/-</code></pre>
 </div>
 
 <p>

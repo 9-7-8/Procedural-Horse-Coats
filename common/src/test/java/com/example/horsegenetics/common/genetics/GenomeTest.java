@@ -90,8 +90,8 @@ class GenomeTest {
         Epigenome.Copies c = foal.epigenome().copies(Genes.AGOUTI);
         assertShade(0.11, c.first(), "the A copy kept the dam's numbers");
         assertEquals(10, c.first().priority(), "...and her priority, exactly - priority does not drift");
-        assertShade(0.21, c.second(), "the a copy kept the sire's numbers");
-        assertEquals(30, c.second().priority());
+        // a is agouti's wild type, and a wild-type copy carries nothing (owner, 2026-09-14).
+        assertTrue(c.second().isEmpty(), "the a copy carries no numbers");
     }
 
     @Test
@@ -108,7 +108,7 @@ class GenomeTest {
         assertEquals("A/a", segment(foal, Genes.AGOUTI));
         Epigenome.Copies c = foal.epigenome().copies(Genes.AGOUTI);
         assertShade(0.21, c.first(), "the A copy is the sire's");
-        assertShade(0.11, c.second(), "the a copy is the dam's");
+        assertTrue(c.second().isEmpty(), "the a copy is wild type, and carries nothing");
     }
 
     @Test
@@ -125,6 +125,9 @@ class GenomeTest {
 
         for (Gene g : Genes.codeOrder()) {
             Epigenome.Copies c = foal.epigenome().copies(g);
+            if (c.first().isEmpty() || c.second().isEmpty()) {
+                continue;   // a wild-type copy carries nothing, priority included
+            }
             assertNotEquals(c.first().priority(), c.second().priority(), g.key());
             assertTrue(c.second().priority() >= AlleleEpigenetics.MIN_PRIORITY);
         }

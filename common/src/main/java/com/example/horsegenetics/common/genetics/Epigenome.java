@@ -29,11 +29,25 @@ import java.util.Objects;
  * what keeps the code readable now that each stored gene carries a couple of
  * hundred characters of literal numbers rather than a sixteen-digit seed.
  *
+ * <h2>A wild-type copy carries nothing</h2>
+ * Owner, 2026-09-14: <i>"wildtype for most genes should not carry any epigene
+ * data"</i>. A copy of a gene's {@link Gene#defaultAllele() wild-type allele} is
+ * never the copy a painter or an ability reads - {@code WildTypeCopyTest} checks
+ * that for every registered gene - so its numbers were dead weight: about half of
+ * every horse's code, inherited and drifted for nothing. {@link #alignedTo} empties
+ * those copies ({@link AlleleEpigenetics#NONE}), and gives an empty copy that has
+ * become a variant (forced eyes, an editor changing an allele) deterministic numbers,
+ * so nothing ever reads a blank. {@link Genome} aligns in its constructor, which every
+ * horse passes through. A gene whose wild type really does read its copy opts out
+ * with {@link Gene#wildTypeCarriesEpigenetics()}.
+ *
  * <h2>The code string</h2>
  * One {@code <geneKey>=<copy>/<copy>} segment per varying gene in
  * {@link Genes#codeOrder()}, joined by {@code ;}. Each copy is
  * {@code p:<priority>} followed by that gene's named values - see
- * {@link EpiCodec} for the field grammar. Parsing is <b>tolerant</b> the same
+ * {@link EpiCodec} for the field grammar - or {@code -} for a copy that carries
+ * nothing, and a gene whose two copies both carry nothing writes no segment at
+ * all. Parsing is <b>tolerant</b> the same
  * way {@link Genotype#parse} is: a segment naming an unregistered gene is
  * dropped, a registered gene with no segment is rolled deterministically from
  * its key, and a value the text omits is rolled deterministically from the gene
@@ -220,6 +234,9 @@ public final class Epigenome {
     }
 
     private static AlleleEpigenetics parseCopy(Gene g, String text) {
+        if (EMPTY_COPY.equals(text.trim())) {
+            return AlleleEpigenetics.NONE;
+        }
         Map<String, String> fields = EpiCodec.fields(text);
         String p = fields.remove(PRIORITY_FIELD);
         int priority = p == null ? AlleleEpigenetics.MIN_PRIORITY : Integer.parseInt(p.trim());
@@ -258,10 +275,13 @@ public final class Epigenome {
             if (!stores(g)) {
                 continue;
             }
+            Copies c = byGene.get(g.key());
+            if (c.first().isEmpty() && c.second().isEmpty()) {
+                continue;   // two wild-type copies: nothing to write
+            }
             if (sb.length() > 0) {
                 sb.append(EpiCodec.GENE_SEP);
             }
-            Copies c = byGene.get(g.key());
             sb.append(g.key()).append(NAME_SEP);
             appendCopy(sb, c.first());
             sb.append(EpiCodec.COPY_SEP);
@@ -270,9 +290,68 @@ public final class Epigenome {
         return sb.toString();
     }
 
+    /** How a copy that carries nothing is written. */
+    private static final String EMPTY_COPY = "-";
+
     private static void appendCopy(StringBuilder sb, AlleleEpigenetics e) {
+        if (e.isEmpty()) {
+            sb.append(EMPTY_COPY);
+            return;
+        }
         sb.append(PRIORITY_FIELD).append(EpiCodec.NAME_SEP).append(e.priority());
         EpiCodec.write(sb, e.values()); // each field is written with its leading comma
+    }
+
+    // ------------------------------------------------------------------
+    // Wild-type copies
+    // ------------------------------------------------------------------
+
+    /**
+     * Is a copy of {@code allele} at {@code gene} one that carries nothing? True for
+     * a gene's wild-type allele, unless the gene says its wild type reads its copy.
+     */
+    public static boolean silent(Gene gene, Allele allele) {
+        return stores(gene) && !gene.wildTypeCarriesEpigenetics() && allele.equals(gene.defaultAllele());
+    }
+
+    /**
+     * <b>This epigenome, fitted to the alleles it rides on</b> - see the class note.
+     * A silent copy is emptied; a copy of any other allele that carries nothing is
+     * given deterministic numbers (seeded from the gene key and the slot, the same
+     * way {@link #parse} fills a gene the code omits), so every reader of a variant
+     * copy finds a value. Returns {@code this} when nothing needs to change.
+     */
+    public Epigenome alignedTo(Genotype genotype) {
+        Map<String, Copies> next = null;
+        for (Gene g : Genes.codeOrder()) {
+            if (!stores(g)) {
+                continue;
+            }
+            Copies c = copies(g);
+            AllelePair pair = genotype.pair(g);
+            AlleleEpigenetics first = fit(g, pair.first(), c.first(), 0);
+            AlleleEpigenetics second = fit(g, pair.second(), c.second(), 1);
+            if (!first.isEmpty() && !second.isEmpty() && first.priority() == second.priority()) {
+                second = second.bumped(true);   // a filled copy must not tie its partner
+            }
+            if (first != c.first() || second != c.second()) {
+                if (next == null) {
+                    next = new LinkedHashMap<>(byGene);
+                }
+                next.put(g.key(), new Copies(first, second));
+            }
+        }
+        return next == null ? this : new Epigenome(next);
+    }
+
+    private static AlleleEpigenetics fit(Gene g, Allele allele, AlleleEpigenetics copy, int slot) {
+        if (silent(g, allele)) {
+            return copy.isEmpty() ? copy : AlleleEpigenetics.NONE;
+        }
+        if (!copy.isEmpty()) {
+            return copy;
+        }
+        return AlleleEpigenetics.founder(g.epiSchema(), new SeededRng(g.key().hashCode() * 31L + slot));
     }
 
     // ------------------------------------------------------------------

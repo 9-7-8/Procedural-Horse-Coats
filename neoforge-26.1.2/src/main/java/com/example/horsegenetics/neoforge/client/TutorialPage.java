@@ -120,7 +120,10 @@ public final class TutorialPage {
                         "You do not have to guess. Look at the name above a horse's head: a pink "
                                 + "♀ is a mare and a blue ♂ is a stallion, readable right "
                                 + "across a paddock. (If you would rather not see them, there is a "
-                                + "switch in the client config.)"),
+                                + "switch in the client config.)",
+                        "A grey ♂ is a gelding - a stallion who has been gelded with a vet's kit. "
+                                + "He sires nothing, keeps company the way a mare does, and comes to "
+                                + "like you a little faster than a stallion would."),
                 List.of(), Art.NONE));
 
         out.add(new Step("Feed a golden carrot",
@@ -129,8 +132,38 @@ public final class TutorialPage {
                         "The foal is not a copy of either parent. Each parent passes on one of its "
                                 + "two copies of every gene, and which one is a coin flip - which is "
                                 + "why breeding the same pair twice gives you two different horses, "
-                                + "and why breeding is worth doing at all."),
+                                + "and why breeding is worth doing at all.",
+                        "Golden carrots are the quick way, and they work whenever you like. They "
+                                + "are not the only way: leave a stallion with a mare and, sooner or "
+                                + "later, they will see to it themselves."),
                 List.of(new ItemStack(Items.GOLDEN_CARROT)), Art.NONE));
+
+        out.add(new Step("Heat, pregnancy and foals",
+                List.of("A mare comes into heat for about a day, then goes out of it for about a "
+                                + "day, round and round. While she is in heat, a stallion near her will "
+                                + "walk over, court her for a few seconds, and cover her on his own - "
+                                + "no carrot needed. Most covers take; some do not, and she tries "
+                                + "again next time she is in heat.",
+                        "A covered mare is pregnant for about a day, then foals. She cannot be bred "
+                                + "again while she carries, and will turn a golden carrot away. Now "
+                                + "and then a pregnancy is twins, and some genes mean a pregnancy is "
+                                + "lost early.",
+                        "Horses are fussy about when. Both have to be at full health, neither can "
+                                + "be ridden or on a lead, and a mare with eight or more horses "
+                                + "crowded round her will not be covered at all - so a packed paddock "
+                                + "stops breeding by itself. A stallion slows down after three covers "
+                                + "in a day.",
+                        "After a foal she is nursing it, and soon comes back into heat. Keep the "
+                                + "foal more than about thirty blocks from her for a day and she weans "
+                                + "it.",
+                        "A vet's kit tells you all of it. Use it on a mare to hear whether she is "
+                                + "in heat or pregnant, twins included, or on a stallion to hear how "
+                                + "busy he has been. Crouch and use it on a stallion of your own and "
+                                + "he becomes a gelding - which cannot be undone.",
+                        "A seed jar lets a stallion breed a mare he has never met: fill it from him, "
+                                + "and use it on a mare while she is in heat."),
+                List.of(new ItemStack(ModItems.VET_KIT.get()), new ItemStack(ModItems.EMPTY_SEED_JAR.get()),
+                        new ItemStack(Items.GOLDEN_CARROT)), Art.NONE));
 
         out.add(new Step("Milk a mare",
                 List.of("Right-click a tamed adult mare with an empty bucket. Stallions "
@@ -154,8 +187,9 @@ public final class TutorialPage {
                                 + "owner gains a point every couple of minutes, and one you are "
                                 + "riding gains a point every forty seconds or so. Feeding it by "
                                 + "hand is worth two at once, or four if you hit on the food that "
-                                + "particular horse actually wants; shearing it is worth five. "
-                                + "Nothing takes bond away again.",
+                                + "particular horse actually wants; grooming it with shears is worth "
+                                + "two. A gelding earns a quarter more of all of it. Nothing takes "
+                                + "bond away again.",
                         "There is a ceiling of fifteen a day, and it is deliberate. Filling the "
                                 + "bar takes a week or so of a horse's life however hard you work "
                                 + "at it, because bonding is meant to be the thing that happens "
@@ -174,6 +208,30 @@ public final class TutorialPage {
                                 + "instead, so none of this applies until you get off."),
                 List.of(new ItemStack(Items.WHEAT), new ItemStack(Items.SUGAR),
                         new ItemStack(Items.SHEARS)), Art.NONE));
+
+        out.add(new Step("Horses live in bands",
+                List.of("Horses keep opinions of each other as well as of you: who they know, who "
+                                + "they groom with, who gives way to whom, and who they cannot stand. "
+                                + "The Social section of a horse's information screen shows its place "
+                                + "in its band, its closest companions and its rival.",
+                        "Wild horses live the way free-roaming horses do. A family band is a "
+                                + "stallion and his mares, and it goes where its eldest mare goes - "
+                                + "he keeps to the edge, fetches a mare who wanders off, and stands "
+                                + "between his mares and any other stallion. Stallions without mares "
+                                + "run together as bachelors.",
+                        "Young horses leave home a few days after they grow up: colts to the "
+                                + "bachelors, fillies to another band. Now and then a bachelor "
+                                + "challenges a band stallion for his mares. It is a real fight, but "
+                                + "it stops before either horse is badly hurt, and the loser leaves. A "
+                                + "band that loses its stallion stays together until another one "
+                                + "claims it.",
+                        "Tamed horses keep their friendships too. Stallions who know each other "
+                                + "spar - rearing and shoving, no harm done - and one learns to give "
+                                + "way. Grooming partners stand head to tail. A horse that outranks "
+                                + "another shoulders it away from the hay and the water. And a mare "
+                                + "goes for anything that hurts her foal, though a tamed one will "
+                                + "never go for you."),
+                List.of(new ItemStack(Items.HAY_BLOCK), new ItemStack(Items.LEAD)), Art.NONE));
 
         out.add(new Step("Research a gene with a book",
                 List.of("Hold a book and right-click a horse. The book grabs one of that "
@@ -237,11 +295,14 @@ public final class TutorialPage {
                 List.of("Once a gene is in your database you can make its gene carrot - a golden "
                                 + "carrot, that gene's research paper, some horse hair, and an ingot "
                                 + "whose metal depends on how rare the gene is.",
-                        "Feed the carrot to one of the parents before they breed, and that parent "
-                                + "will pass the gene on instead of leaving it to a coin flip. "
-                                + "Whether the foal actually shows it still depends on what the "
-                                + "other parent brought - some genes need two copies before they do "
-                                + "anything at all.",
+                        "Feed the carrot to one of the parents, any time. It waits on that horse "
+                                + "until its next foal is conceived, and that parent will pass the gene "
+                                + "on instead of leaving it to a coin flip. Whether the foal actually "
+                                + "shows it still depends on what the other parent brought - some genes "
+                                + "need two copies before they do anything at all.",
+                        "A carrot changes how the foal arrives, too. Golden carrots on a pair when "
+                                + "one of them is carrying a breeding carrot do not give an instant "
+                                + "foal: the mare has to be in heat, and she becomes pregnant instead.",
                         "The Recipes tab has every recipe the mod adds, with the gene carrots on "
                                 + "their own list. You craft them at an ordinary crafting table."),
                 List.of(new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get()),

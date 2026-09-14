@@ -1,5 +1,7 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
+
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
@@ -192,15 +194,17 @@ public abstract class AbstractWeatherGene implements Gene, EpigeneticAbilityCont
     public List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype,
                                           GeneEpigenetics epigenetics) {
         List<GeneAbility> out = new ArrayList<>(2);
-        addCopy(out, pair.first(), epigenetics.copy(0).get(DELTA));
-        addCopy(out, pair.second(), epigenetics.copy(1).get(DELTA));
+        addCopy(out, pair.first(), epigenetics.copy(0));
+        addCopy(out, pair.second(), epigenetics.copy(1));
         return List.copyOf(out);
     }
 
-    private void addCopy(List<GeneAbility> out, Allele allele, double delta) {
+    /** The copy's number is read only for a variant: a wild-type copy carries none. */
+    private void addCopy(List<GeneAbility> out, Allele allele, EpiValues copy) {
         if (allele.order() == n.order()) {
             return;
         }
+        double delta = copy.get(DELTA);
         Variant v = variants.get(allele.order());
         double amount = v.positive() ? delta : -delta;
         out.add(new GeneAbility.AttributeMod(attribute, "multiply_total", amount,

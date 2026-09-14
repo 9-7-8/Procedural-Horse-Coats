@@ -554,4 +554,15 @@ public interface Gene {
     default EpiSchema epiSchema() {
         return EpiSchema.EMPTY;
     }
+
+    /**
+     * <b>Does a copy of this gene's wild-type allele keep its numbers?</b> Almost
+     * never: a wild-type copy is not the copy a painter or an ability reads, so it
+     * carries nothing ({@link Epigenome#alignedTo}; owner, 2026-09-14). Return
+     * {@code true} only for a gene whose wild type genuinely reads its own copy - the
+     * test {@code WildCopySurveyTest} fails for any gene that does so without saying.
+     */
+    default boolean wildTypeCarriesEpigenetics() {
+        return false;
+    }
 }

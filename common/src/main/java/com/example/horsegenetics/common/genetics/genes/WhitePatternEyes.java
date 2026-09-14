@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.EyePatch;
 import com.example.horsegenetics.common.genetics.EyeSpread;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 import com.example.horsegenetics.common.genetics.eye.EyeHue;
 import com.example.horsegenetics.common.genetics.eye.EyeLocus;
 import com.example.horsegenetics.common.genetics.eye.EyeRequest;
@@ -122,8 +123,15 @@ public final class WhitePatternEyes {
         if (!locusQualifies && whiteScore(genotype) < WHITE_SCORE_THRESHOLD) {
             return EyeRequest.none();
         }
-        EyeSpread spread = EyeSpread.roll(
-                GeneEpigenetics.forGene(gene, genotype, epigenome).expressed());
+        EpiValues values = GeneEpigenetics.forGene(gene, genotype, epigenome).expressed();
+        if (values.isEmpty()) {
+            // A wild-type copy carries no numbers (owner, 2026-09-14), so it describes no
+            // spread and asks for nothing: an eye nothing describes stays brown. It never
+            // costs a white horse its blue - tobiano alone is under the threshold, so a
+            // horse past it always has a variant white locus, and that one's copy rolls.
+            return EyeRequest.none();
+        }
+        EyeSpread spread = EyeSpread.roll(values);
         EyeRequest request = EyeRequest.none();
         request = apply(request, EyeLocus.EyeSideRef.RIGHT, spread.right());
         request = apply(request, EyeLocus.EyeSideRef.LEFT, spread.left());

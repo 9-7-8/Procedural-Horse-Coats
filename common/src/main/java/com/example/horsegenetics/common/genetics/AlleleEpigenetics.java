@@ -44,6 +44,19 @@ public record AlleleEpigenetics(int priority, EpiValues values) {
     public static final int MIN_PRIORITY = 1;
     public static final int MAX_PRIORITY = Integer.MAX_VALUE;
 
+    /**
+     * <b>A copy that carries nothing</b> - what a wild-type allele's copy holds (owner,
+     * 2026-09-14: "wildtype for most genes should not carry any epigene data"). A
+     * silent wild-type copy is never the one a painter or an ability reads, so it has
+     * no numbers to carry; see {@link Epigenome#alignedTo}. Written {@code -} in a code.
+     */
+    public static final AlleleEpigenetics NONE = new AlleleEpigenetics(MIN_PRIORITY, EpiValues.EMPTY);
+
+    /** Does this copy carry no numbers at all? */
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
     public AlleleEpigenetics {
         if (priority < MIN_PRIORITY) {
             throw new IllegalArgumentException("priority must be >= " + MIN_PRIORITY + ", got " + priority);

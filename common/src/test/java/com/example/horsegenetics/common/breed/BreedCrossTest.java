@@ -31,9 +31,11 @@ class BreedCrossTest {
     private static final String SIZE = MagicSizeGene.KEY;
 
     /** The size percentage on one copy of a horse's body-size locus. */
+    /** A copy's size percentage, or NaN for a wild-type copy - which carries no numbers (2026-09-14). */
     private static double delta(Genome g, boolean firstCopy) {
         Epigenome.Copies c = g.epigenome().copies(Genes.byKey(SIZE));
-        return (firstCopy ? c.first() : c.second()).values().get(AbstractMagicStatGene.DELTA);
+        var copy = firstCopy ? c.first() : c.second();
+        return copy.isEmpty() ? Double.NaN : copy.values().get(AbstractMagicStatGene.DELTA);
     }
 
     /** A breed that pins scale writes real numbers onto its founders' copies. */
@@ -77,6 +79,9 @@ class BreedCrossTest {
             Genome g = BreedFounder.roll(Breeds.get("percheron"), new SeededRng(seed));
             double a = delta(g, true);
             double b = delta(g, false);
+            if (Double.isNaN(a) || Double.isNaN(b)) {
+                continue;   // one wild-type copy: it carries no number to differ with
+            }
             if (a <= AbstractMagicStatGene.MIN_DELTA && b <= AbstractMagicStatGene.MIN_DELTA) {
                 floored++;
                 continue;
@@ -86,7 +91,10 @@ class BreedCrossTest {
                     "a founder with room to differ must differ, seed " + seed
                             + " has " + a + " and " + b);
         }
-        assertTrue(free > 150, "most founders should have room to differ, only " + free + " did");
+        // Most Percherons carry one Big and one wild-type copy, and a wild-type copy has no
+        // number (2026-09-14) - so only the double-Big founders are asked, and there are
+        // still plenty of them.
+        assertTrue(free > 20, "enough founders should carry two numbered copies, only " + free + " did");
         assertTrue(floored < 40, floored + " of 200 founders were floored - the band moved");
     }
 
@@ -108,6 +116,9 @@ class BreedCrossTest {
             };
             for (boolean first : new boolean[]{true, false}) {
                 double got = delta(foal, first);
+                if (Double.isNaN(got)) {
+                    continue;   // the foal drew a wild-type copy, which carries nothing to match
+                }
                 assertTrue(matchesAParent(got, parents),
                         "foal copy " + got + " is not one of its parents' "
                                 + java.util.Arrays.toString(parents)

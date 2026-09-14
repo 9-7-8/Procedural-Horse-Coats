@@ -178,6 +178,34 @@ public final class Genotype {
         return new Genotype(m);
     }
 
+    /**
+     * <b>The genotype a person reads</b>: {@link #toCode()} without every gene sitting at
+     * two copies of its wild-type allele where that combination does nothing (owner,
+     * 2026-09-14: "it doesn't print double wild type for the genes where double wild has
+     * no effect ... that gene just doesn't exist"). A carrier still prints - its hidden
+     * copy is what breeding is about - and so does the sex locus, whose every combination
+     * reads as "no coat effect" and still decides mare or stallion.
+     *
+     * <p>Same format as {@link #toCode()}, so it parses back to this genotype: a gene it
+     * leaves out is filled from its default allele, which is exactly what was left out.
+     */
+    public String presentCode() {
+        StringBuilder sb = new StringBuilder();
+        for (AllelePair pair : byGene.values()) {
+            Gene gene = pair.gene();
+            boolean absent = pair.count(gene.defaultAllele()) == 2 && gene.expressionOf(pair).wildType()
+                    && !"horsegenetics.sex".equals(gene.key());
+            if (absent) {
+                continue;
+            }
+            if (sb.length() > 0) {
+                sb.append('-');
+            }
+            sb.append(gene.key()).append('=').append(pair.toTokens());
+        }
+        return sb.toString();
+    }
+
     public String toCode() {
         return code(g -> true);
     }

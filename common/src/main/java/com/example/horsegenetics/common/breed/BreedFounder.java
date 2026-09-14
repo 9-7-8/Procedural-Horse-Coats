@@ -285,6 +285,9 @@ public final class BreedFounder {
     }
 
     private static AlleleEpigenetics withValue(AlleleEpigenetics copy, EpiValue value, int leg, double raw) {
+        if (copy.isEmpty()) {
+            return copy;    // a wild-type copy carries no numbers, so a band has nothing to set
+        }
         double v = value.clamp(raw);
         return new AlleleEpigenetics(copy.priority(),
                 value.arity() == 1
@@ -296,6 +299,9 @@ public final class BreedFounder {
     private static final double COPY_SKEW = 0.30;
 
     private static AlleleEpigenetics withDelta(AlleleEpigenetics copy, double delta) {
+        if (copy.isEmpty()) {
+            return copy;
+        }
         return new AlleleEpigenetics(copy.priority(),
                 copy.values().with(AbstractMagicStatGene.DELTA, delta));
     }

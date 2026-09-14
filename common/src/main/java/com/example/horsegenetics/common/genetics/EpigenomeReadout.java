@@ -41,6 +41,9 @@ public final class EpigenomeReadout {
     /** The mark on the copy the horse expresses. */
     public static final String EXPRESSED = "›";
 
+    /** What a wild-type copy, which carries no numbers, shows. */
+    public static final String NONE = "—";
+
     private EpigenomeReadout() {
     }
 
@@ -69,11 +72,12 @@ public final class EpigenomeReadout {
                 done.add(colour + "_r");
                 done.add(colour + "_g");
                 done.add(colour + "_b");
-                out.add(row(colour, firstExpressed, hex(a.rgb(colour)), hex(b.rgb(colour))));
+                out.add(row(colour, firstExpressed, a.isEmpty() ? NONE : hex(a.rgb(colour)),
+                        b.isEmpty() ? NONE : hex(b.rgb(colour))));
                 continue;
             }
             done.add(v.name());
-            out.add(row(v.name(), firstExpressed, show(v, a), show(v, b)));
+            out.add(row(v.name(), firstExpressed, a.isEmpty() ? NONE : show(v, a), b.isEmpty() ? NONE : show(v, b)));
         }
         return List.copyOf(out);
     }

@@ -32,6 +32,10 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
     public Genome {
         Objects.requireNonNull(genotype, "genotype");
         Objects.requireNonNull(epigenome, "epigenome");
+        // Every horse passes through here, so this is where a wild-type copy loses its
+        // numbers and a variant copy that arrived with none gets some - see
+        // Epigenome.alignedTo.
+        epigenome = epigenome.alignedTo(genotype);
     }
 
     /** A founder / wild horse: random alleles, random epigenetics on each copy. */
