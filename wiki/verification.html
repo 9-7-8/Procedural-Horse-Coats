@@ -122,12 +122,53 @@
     list, and nothing runs off the panel at GUI scale 4.
 </p>
 
-<h2 id="all-day">&sect;0-DX &mdash; The all-day pens: dryads and inheritance ratios, rows S to U (built 2026-09-14, NOT played)</h2>
+<h2 id="all-day">&sect;0-DX &mdash; The all-day pens: dryads and inheritance ratios, rows S to U (built 2026-09-14, first run read 09:07&ndash;12:15)</h2>
 
 <p>
     Built to be left running for a whole day. Nothing here needs your hands, and nothing here
     means much in the first hour. Read it in the evening with <code>grep</code>.
 </p>
+
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 (09:07 to 12:15, unattended)</span>
+    <p>
+        <strong>The carrier plants nothing</strong>: no <code>dryad planted</code> line for DRYAD
+        CARRIER in three hours. <strong>Each dryad plants only its own species</strong>, and the mixed
+        pen plants both (4 oak, 1 birch). <strong>Real trees grow</strong> in DRYAD OAK (17 logs),
+        DRYAD JUNGLE (20 logs) and DRYAD OAK+BIRCH (10 oak, 5 birch logs). <strong>Dark oak clustering
+        works</strong>: DRYAD DARK SMALL's saplings closed a 2&times;2 at 11:16 and grew a 44-log tree,
+        which answers <a href="known-gaps.html#gap-218">gap 218</a>. Row A's big DRYAD DARK planted
+        ten saplings in the same time and grew nothing, so that pen is too big, not the gene. All
+        deleted below.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Failed or unreadable on the first run</span>
+    <p>
+        <strong>Two dryad horses suffocated</strong> in trees that grew where they stood (10:02 and
+        11:16), which is <a href="known-gaps.html#gap-237">gap 237</a>, fixed and waiting on a build
+        (<a href="#fixes-0914">&sect;0-DZ</a>). <strong>Spruce and acacia never became trees</strong>:
+        28 and 31 growth attempts and no logs, while oak and jungle grew. The suspect is the yard's
+        invisible light blocks, three up and every four blocks, which may leave no room for those two
+        tree shapes (<a href="known-gaps.html#gap-240">gap 240</a>). <strong>The <code>tree grew</code>
+        line means a sapling tried to grow</strong>, not that it did: the event fires on every attempt,
+        failures included, so only the census's log count proves a tree.
+    </p>
+    <p>
+        <strong>None of row U's ratios can be read yet.</strong> Brindle failed (brindle colts and plain
+        fillies, <a href="known-gaps.html#gap-235">gap 235</a>) and no lethal foal died
+        (<a href="known-gaps.html#gap-236">gap 236</a>), both fixed and waiting on a build. On top of
+        that, <strong>the ratio pens leak into each other</strong>
+        (<a href="known-gaps.html#gap-239">gap 239</a>): the RATIO HYPP STUD was listed in RATIO LETHAL
+        WHITE at 09:17, LETHAL WHITE logged nine &ldquo;N/N foal died&rdquo; lines that match HYPP-pen
+        foals being removed by their own pen, and RATIO SIZE's three &ldquo;n/n foal died&rdquo; lines
+        match the brindle pen beside it. At 12:15 the tallies read HYPP 42 foals with 12%
+        <code>H/H</code>, LETHAL WHITE 66 foals at 32% <code>O/O</code> and 36% <code>O/N</code>, and
+        SIZE 51 foals at 22 : 45 : 33. The pass conditions below stand, for a run after the pens are
+        separated.
+    </p>
+</div>
 
 <h3 id="all-day-dryad">Rows S and T: dryads, on a stone floor</h3>
 <p>
@@ -138,21 +179,16 @@
     how many of those lines it has.
 </p>
 <ul>
-    <li><strong>DRYAD SPRUCE, JUNGLE, ACACIA</strong> (row S) and <strong>DRYAD FLOWER</strong> (row
-        T): each plants <strong>only its own species</strong>, and trees grow from them. The watch
-        also counts oak and birch saplings in these pens, and a count above zero is a failure.</li>
-    <li><strong>DRYAD CARRIER</strong> (row S east, <code>Oak/n</code>): <strong>no</strong>
-        <code>dryad planted</code> line for it all day. One line means the variant has stopped being
-        recessive.</li>
+    <li><strong>DRYAD SPRUCE and DRYAD ACACIA</strong> (row S): trees grow from their saplings.
+        On the first run neither did (<a href="known-gaps.html#gap-240">gap 240</a>).
+        <strong>Pass:</strong> <code>spruce_log</code> and <code>acacia_log</code> above zero in
+        the census.</li>
     <li><strong>DRYAD OAK</strong> (row T west) against <strong>DRYAD OAK+BIRCH</strong> (row T
         east): by evening the mixed pen should have about as many plantings as the oak pen, split
-        roughly evenly between oak and birch. This is the half-rate rule, which the first run
-        planted too few saplings to judge.</li>
-    <li><strong>DRYAD DARK SMALL</strong> (row T east): one dark-oak horse in a small pen. Its
-        saplings should end up in a 2&times;2 and grow a tree, with <code>dark_oak_log</code> above
-        zero. Row A's big DRYAD DARK has never grown one. If the small pen does, the clustering
-        works and the big pen is too big; if neither does, the clustering search is the bug
-        (<a href="known-gaps.html#gap-218">gap 218</a>).</li>
+        roughly evenly between oak and birch. This is the half-rate rule. Three hours of the first
+        run gave 2 against 5, still too few to judge.</li>
+    <li><strong>No dryad horse dies in its own pen</strong> once gap 237's fix is built: no
+        <code>inWall</code> damage in rows S and T.</li>
 </ul>
 
 <h3 id="all-day-ratio">Row U: inheritance ratios</h3>
@@ -230,7 +266,25 @@
         time</strong> was a steady 50.0 ms with about 270 horses in the dimension. All deleted below.
     </p>
 </div>
-<ol>
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 (third run, 09:07 to 12:15)</span>
+    <p>
+        <strong>A challenger wins a takeover in a fight</strong>: at 09:52 a bachelor
+        <code>challenged</code> the band stallion and <code>took over band</code>, the bachelors he
+        left re-formed round another, and the old BAND STALLION now reads <em>Bachelor</em>. Over three
+        hours the pen ran a dozen more challenges, each ending in <code>took over band</code> or
+        <code>saw off</code>; the hurt fighters stopped at 11 of 22 health, and no horse in the pen died.
+        <strong>Mares move between bands</strong>: four <code>moved from band</code> lines (09:29,
+        10:01, 10:03, 10:24). <strong>The gelding finds a grooming partner</strong> (GROOM GELDING grooms
+        GROOM MARE A), and the stallion still never does. <strong>The claimed band is later challenged
+        for real</strong>, with takeovers and stand-offs through the morning. Deleted below.
+    </p>
+    <p>
+        <strong>The packing pass fails in row U</strong>: the RATIO HYPP STUD was listed in RATIO LETHAL
+        WHITE's watch line (<a href="known-gaps.html#gap-239">gap 239</a>). Rows Q and R showed no stray;
+        HOST BAND listing LEAVING HOME's horses is by design, since those pens share a group.
+    </p>
+</div>
 <div class="note">
     <span class="label">Confirmed off the log, 2026-09-14 (second run, 07:26 to 07:43)</span>
     <p>
@@ -245,31 +299,17 @@
         <code>saw off</code> nine seconds later. Deleted below.
     </p>
 </div>
-    <li><strong>Row R west, TAKEOVER: a challenger wins.</strong> A fight that was seen off is
-        confirmed. What is left is a <code>took over band</code> won in a fight, after which the old
-        stallion should read <em>Bachelor</em>. A band and three bachelors in one pen.
-        <strong>Pass:</strong>
-        <ul>
-            <li><code>challenged</code> lines, each ending in <code>took over band</code> or
-                <code>saw off</code>;</li>
-            <li><code>[watch] horse hurt</code> lines during a fight that stop with both horses
-                above 40% of their health;</li>
-            <li>no horse ever dies in the pen;</li>
-            <li>no mare ever shows in the <code>target</code> column, because the band does not
-                pile in.</li>
-        </ul>
-        After a takeover, the old stallion's role reads <em>Bachelor</em>.</li>
-    <li><strong>Row Q west, LEAVING HOME: mares move.</strong> Over the night, MOVER MARE 1 or 2 may
-        log <code>moved from band &hellip; to HOST MARE &hellip;'s</code>. That is about one chance
-        in twenty a day each, or roughly two chances in three by morning.</li>
+<ol>
+    <li><strong>Row R west, TAKEOVER: the band stays out of it.</strong> Takeovers, stand-offs and
+        survival are confirmed. What is left: no mare ever shows in the <code>target</code> column
+        during a fight, because the band does not pile in. Not checked across the morning's
+        fights.</li>
     <li><strong>Row R east, DISPLACEMENT</strong> (beside MET NATURAL): four tamed mares ranked 1 to
         4, with hay. Every <code>displaced &hellip; at food or water</code> line should name the
-        higher-ranked mare (the lower number) first. A reversed line is a failure. <strong>None in
-        the first fifteen minutes</strong>, so the next question is whether the mares ever stand
-        beside the hay at all.</li>
-    <li><strong>Row Q east, GROOMING: the gelding</strong> (beside LEADERLESS). The mares paired within fifteen minutes.
-        The open half is GROOM GELDING, who should find a partner the way a mare does. On the first
-        run his label was wiped by the gelding step, so he read as a random name; that is fixed.</li>
+        higher-ranked mare (the lower number) first. A reversed line is a failure. The third run logged
+        four <code>displaced</code> lines, but the herd trace names horses by their own names and the
+        pen by rank labels, so which mare was which cannot be read, and some were wild horses. The log
+        wants to print the label.</li>
     <li><strong>With your hands, only if you are passing:</strong> open a wild horse's
         information screen in these pens and check its Social section matches its watch line.</li>
 </ol>
@@ -288,7 +328,8 @@
     <code>debug.tools</code> on (the dev default), a heat and a pregnancy each last one real minute.
     The logic is unit-tested: <code>ReproRulesTest</code>, <code>NaturalCoverTest</code>,
     <code>ReproTextTest</code>, <code>ConceivableTest</code>, <code>GeldingListingTest</code>,
-    <code>FertilityGeneTest</code>. Nothing in the world has run.
+    <code>FertilityGeneTest</code>. The yard pens ran three times on 2026-09-14; what is left below
+    mostly needs your hands.
 </p>
 <p>
     <strong>What the log gives you:</strong> every fertility pen is watched, so
@@ -309,6 +350,16 @@
         across several heats. <strong>THE CAP</strong> held all nine horses and nobody was covered.
         <strong>COWBOY STOCK</strong> was never covered. <strong>MET NATURAL</strong> foaled and
         had an early loss. All deleted below.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 (09:07 to 12:15, unattended)</span>
+    <p>
+        <strong>THE CAP never grows past the cap</strong>: exactly nine horses at every census for
+        three hours. <strong>MET NATURAL levels off at the cap</strong>: it grew from two to nine and
+        stayed there. Across the yard and the wild bands, 246 natural covers took and 244 foalings
+        followed, with MET and KIT early losses logging their cause. Deleted below.
     </p>
 </div>
 
@@ -335,7 +386,7 @@
         health. The pen stays only until it is next tidied away.</li>
     <li><strong>Row O west, THE CAP, with a lead.</strong> Take one mare out with the chest's lead:
         covers start within seconds. Each birth adds a horse back, so the pen settles again.
-        <strong>Pass: the pen never grows beyond the cap however long it runs</strong>
+        The unattended half, that the pen never grows past the cap, is confirmed
         (<a href="known-gaps.html#gap-206">gap 206</a>).</li>
     <li><strong>Row P east, GOLD ANY HEAT.</strong> The kit says she is <em>not in heat</em>.
         Golden carrots on both give a foal <strong>at once</strong> anyway: vanilla, untouched.
@@ -356,9 +407,7 @@
     <li><strong>Row O east, WEANING</strong> (beside MATERNITY). NURSING MARE's watch line ends
         <em>&bull; nursing</em>. Lead WEAN ME more than 32 blocks away and keep it there a minute:
         the line loses it.</li>
-    <li><strong>Row R east, MET NATURAL &mdash; leave it running.</strong> Births and early losses
-        are confirmed. What is left is that the horse count levels off at the cap, at nine.
-        <br><strong>Row P east, SUBFERTILE GOLD</strong> (beside GOLD ANY HEAT): golden carrots on the <code>sf/sf</code> pair
+    <li><strong>Row P east, SUBFERTILE GOLD</strong> (beside GOLD ANY HEAT): golden carrots on the <code>sf/sf</code> pair
         again and again. About one foal in four, otherwise <em>It didn't take - no foal this
         time</em>.</li>
     <li><strong>Rows L to N, the carrot pens:</strong> follow one sign end to end. The pair must
@@ -541,14 +590,11 @@
     <li><strong>Ocean-born diving</strong> (row E west). Mounted and in water, <b>F</b> goes
         down, <b>F</b> again stops; dismounting clears it. F also swaps hands &mdash;
         rebindable.</li>
-    <li><strong>A lycanthrope dying in animal form</strong> is the horse dying: a
-        <code>[lycan] &hellip; died as a &hellip;</code> line, then <code>[trace] horse
-        died</code> with the real cause, and drops. A fish form on land will do it within
-        seconds (<a href="known-gaps.html#gap-220">gap 220</a>).</li>
-    <li><strong>Dark oak</strong> (row A west, <code>DRYAD DARK</code>). Plant four saplings
-        in a 2&times;2 yourself: grows means the gene's clustering is the bug, refuses means
-        the pen is (<a href="known-gaps.html#gap-218">gap 218</a>). Also read the two
-        <code>DRYAD MUSH</code> census lines &mdash; mushrooms on the podzol half only.</li>
+    <li><strong>A lycanthrope's drops.</strong> Dying in animal form killing the horse is
+        confirmed: on 2026-09-14 two pufferfish forms drowned on land, each logging a
+        <code>[lycan]</code> line and then <code>[trace] horse died</code> from drowning
+        (<a href="known-gaps.html#gap-220">gap 220</a>). Not checked: that the horse's drops land.
+        The drowning itself is <a href="known-gaps.html#gap-238">gap 238</a>.</li>
     <li><strong>A splice-carrot foal's genotype</strong> (rows L, M, N). The breeding is
         confirmed; open a foal and check the substituted locus is actually there.</li>
     <li><strong>The egg-layer cap</strong> (row D east): fills, and <em>stops</em>.</li>
@@ -560,12 +606,15 @@
         line at shutdown gives the slowest single bake, which decides whether
         <code>coats.bakeBudgetMs</code> = 4 is right; <code>[Founding]</code> lines on
         loading into the test yard show the founding budget acting; and the
-        <code>Can't keep up</code> count (one per launch at world load is normal)
+        <code>Can't keep up</code> count (one per launch at world load is normal; the
+        three-hour run on 2026-09-14 had exactly one)
         (<a href="known-gaps.html#gap-221">gap 221</a>). Also
         <a href="known-gaps.html#gap-217">gap 217</a>: why full-health horses are healed at
         all.</li>
-    <li><strong>Built, never confirmed:</strong> the tack room, food preference, the three
-        magic stat pens, and the ward's non-interference half.</li>
+    <li><strong>Built, never confirmed:</strong> the tack room, food preference, and the ward's
+        non-interference half. (The three magic stat pens are confirmed from their watch lines on
+        2026-09-14, and the ward's 70 monster spawns were all far from a warded horse, which says
+        nothing either way.)</li>
 </ol>
 
 <h3>Visual, and therefore last</h3>
@@ -7798,6 +7847,17 @@
     <code>magic_jump=Springy/Springy</code> (and the mirrors
     <code>Sluggish</code> / <code>Frail</code> / <code>Leaden</code>).
 </p>
+
+<div class="note">
+    <span class="label">The numbers are confirmed; the feel is not (2026-09-14)</span>
+    <p>
+        The yard's MAGIC SPEED, MAGIC HEALTH and MAGIC JUMP pens read, all day:
+        movement speed 0.226 and 0.233 against the wild-type 0.1875 (about 22% faster), max health
+        27.0 and 27.4 against 22, and jump strength 0.57 and 0.63 against 0.5. So the multipliers
+        land on the attributes. What is left below is riding them, the <code>mstn</code> ratio, the
+        mirrors, the config and inheritance.
+    </p>
+</div>
 
 <ul>
     <li><strong>Walk into a herd.</strong> Same test as magic body size: the
