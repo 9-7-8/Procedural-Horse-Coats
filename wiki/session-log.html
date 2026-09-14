@@ -27,6 +27,52 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-13g">2026-09-13, evening &mdash; the dhampir taken apart, bands that stay together, an ender whistle, and AI on the wiki</h2>
+
+<p>
+    One long list from the owner, worked through from a phone, with every in-game test
+    saved for the end. None of it has been played; what each piece needs checking is in
+    <a href="verification.html#ai-helpers">verification &sect;0-DU</a>,
+    <a href="verification.html#evening-0913">&sect;0-DT</a> and
+    <a href="verification.html#dhampir">&sect;0-R</a>, and test kit batches 1 and 2 are
+    aimed at them.
+</p>
+
+<ul>
+    <li><strong>The dhampir gene is gone, rebuilt as loci and a breed.</strong> It became
+        <a href="gene-magic-white.html">magic white</a>, <a href="gene-sun-sensitivity.html">sun
+        sensitivity</a>, <a href="gene-diet.html#blood">blood diet</a>, the vampiric allele on
+        the three magic stat loci, and a red iris. The night-only
+        <a href="breed-book.html#dhampir">Dhampir breed</a> puts them back together through a
+        new breed-file feature, <a href="breeds.html#strains">strains</a>: one founder in ten is
+        white and homozygous for everything, the rest are seal brown and carry it. Blood diet
+        bites mobs first, players only when nothing else is near, and tamed pets last, and it
+        never bites horses or the undead.</li>
+    <li><strong>Day twins of the night temper and night watch loci</strong>, rarer in the
+        wild, run through one cached reading per genotype so they cost nothing per tick.</li>
+    <li><strong>Wild bands</strong> from the herd research (<a href="horse-care.html#bands">horse care</a>):
+        relationships with familiarity, rank, grooming and rivalry; a lead mare the band
+        follows, so a stallion's death no longer scatters it; herding, sparring, takeover
+        fights that stop short, displacement, dam and foal, and dispersal. The fertility
+        research went onto <a href="breeding.html">breeding</a>'s science tab, and none of it
+        is built yet. That discussion is the last item on the list.</li>
+    <li><strong>The ender whistle</strong> (<a href="item-whistles.html#ender">whistles</a>):
+        bound for good, calls its horse across dimensions (waiting for an unloaded chunk on a
+        portal ticket), crumbles once the horse is dead.</li>
+    <li><strong>Tools.</strong> The breed designer's Temper step became <em>Day &amp; night
+        habits</em> and <em>Fighting &amp; defence</em>; the gene creator is eight steps
+        beside the horse with <em>show everything</em> for the old view; and there is a
+        generated <a href="behaviour-hierarchy.html">behaviour hierarchy</a> of every goal a
+        horse runs.</li>
+    <li><strong><a href="ai-setup.html">AI helpers</a></strong>, bring-your-own-key: a chat
+        on every page that answers from the search index and writes up bug reports for GitHub,
+        and <em>Draft with AI</em> in both designers, checked by the tools' own parsers, with a
+        failed file sent back to the model to fix. Every provider listed was checked for browser
+        CORS first, which is why Google's Gemini API is not on the list. It is tested headlessly
+        with the AI stubbed out (<code>check-ai.mjs</code>) and has never talked to a real model
+        (<a href="known-gaps.html#gap-224">gap 224</a>).</li>
+</ul>
+
 <h2 id="d2026-09-13f">2026-09-13 &mdash; three fixes that were never reached, and a freeze that needed a reboot</h2>
 
 <p>
