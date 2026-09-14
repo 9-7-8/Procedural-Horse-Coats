@@ -3127,7 +3127,8 @@ public final class HorseBrowserScreen extends Screen {
         HorseListing dam = ClientHorseRoster.byId(damId);
         HorseListing sire = ClientHorseRoster.byId(sireId);
         previewRosterVersion = ClientHorseRoster.version();
-        if (dam == null || sire == null) {
+        // A sire picked before a roster refresh may have been gelded since.
+        if (dam == null || sire == null || dam.gelded() || sire.gelded()) {
             preview = List.of();
             return;
         }

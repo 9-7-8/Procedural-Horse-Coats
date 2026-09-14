@@ -219,9 +219,17 @@ public final class StallionSeedJarHandler {
             return false;
         }
 
+        // THE REAL SIRE'S RECORD, when the world still has it - every horse's record
+        // is filed in the ancestry data - so the foal's generation counts his and
+        // its name draws on his real names, not a barn name split in two. The
+        // genome stays the jar's: it is what was collected. A stallion whose
+        // record is gone falls back to what the jar itself remembers.
         String[] name = splitName(stored.sourceName());
-        HorseRecord sireRecord = HorseRecord
-                .founder(stored.sourceId(), name[0], name[1], sireGenome, stored.breed());
+        final Genome jarGenome = sireGenome;
+        HorseRecord sireRecord = com.example.horsegenetics.neoforge.data.HorseAncestryData.get(level.getServer())
+                .lookup(stored.sourceId())
+                .map(r -> r.withGenome(jarGenome))
+                .orElseGet(() -> HorseRecord.founder(stored.sourceId(), name[0], name[1], jarGenome, stored.breed()));
 
         // A pregnancy, not a foal. The stallion's cover was counted when the
         // jar was filled, so none is counted here. A jar that does not take is

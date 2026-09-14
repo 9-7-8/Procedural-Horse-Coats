@@ -61,13 +61,13 @@ public final class BreedingCooldownHandler {
             return;
         }
         // A PREGNANT MARE REFUSES EVERY BREEDING FOOD, golden carrots included
-        // (owner, 2026-09-13), and keeps it. The pregnancy lives only on the
-        // server, so the client cannot make this call and may briefly predict a
-        // feed before the server says no - unverified in-game.
-        if (!event.getLevel().isClientSide() && HorseRecords.hasRealRecord(horse)
-                && ReproHandler.of(horse).pregnant()) {
-            event.getEntity().sendSystemMessage(Component.literal(ReproHandler.notReceptive(horse))
-                    .withStyle(ChatFormatting.YELLOW));
+        // (owner, 2026-09-13), and keeps it. Both sides answer: the client from the
+        // synced PREGNANT flag, so it never predicts a feed the server takes back.
+        if (ReproHandler.pregnantEitherSide(horse)) {
+            if (!event.getLevel().isClientSide()) {
+                event.getEntity().sendSystemMessage(Component.literal(ReproHandler.notReceptive(horse))
+                        .withStyle(ChatFormatting.YELLOW));
+            }
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
             return;

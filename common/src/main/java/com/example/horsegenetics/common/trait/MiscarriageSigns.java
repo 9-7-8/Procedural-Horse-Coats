@@ -53,16 +53,29 @@ public final class MiscarriageSigns {
     private MiscarriageSigns() {
     }
 
+    /**
+     * One sign for every genotype a gene rules out (see
+     * {@code genetics.Conceivable}): there is no disorder to describe, only a pairing
+     * that could never have made a horse.
+     */
+    public static final String NONVIABLE =
+            "The mare came back into season as if she had never been covered. Whatever the two of "
+                    + "them made could never have become a horse.";
+
     /** The sign for {@code condition}, or {@link #GENERIC} if none is written. */
     public static String of(Condition condition) {
         if (condition == null) {
             return GENERIC;
+        }
+        if (condition.id().startsWith("nonviable-")) {
+            return NONVIABLE;
         }
         return BY_ID.getOrDefault(condition.id(), GENERIC);
     }
 
     /** Is there a sign written for this condition, or is it falling back? */
     public static boolean isWritten(Condition condition) {
-        return condition != null && BY_ID.containsKey(condition.id());
+        return condition != null
+                && (BY_ID.containsKey(condition.id()) || condition.id().startsWith("nonviable-"));
     }
 }

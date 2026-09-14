@@ -521,7 +521,8 @@ public final class HerdGoals {
      */
     public static final class HeatAttraction extends Goal {
         private static final double RANGE = 16.0;
-        private static final double CLOSE = 3.0;
+        /** Inside {@code ReproRules.NATURAL_REACH}, so a pair that walks together can breed. */
+        private static final double CLOSE = 2.5;
         /** Which mare each stallion is walking to. */
         private static final Map<UUID, UUID> ANSWERING = new HashMap<>();
 

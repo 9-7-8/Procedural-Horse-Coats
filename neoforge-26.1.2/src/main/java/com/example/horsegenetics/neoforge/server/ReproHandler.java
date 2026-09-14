@@ -11,6 +11,7 @@ import com.example.horsegenetics.common.repro.Embryo;
 import com.example.horsegenetics.common.repro.Pregnancy;
 import com.example.horsegenetics.common.repro.ReproRules;
 import com.example.horsegenetics.common.repro.ReproState;
+import com.example.horsegenetics.common.repro.ReproText;
 import com.example.horsegenetics.common.repro.ReproTiming;
 import com.example.horsegenetics.common.repro.Reproduction;
 import com.example.horsegenetics.common.trait.Condition;
@@ -96,6 +97,22 @@ public final class ReproHandler {
 
     static void set(Horse horse, Reproduction r) {
         horse.setData(ModAttachments.HORSE_REPRO.get(), r);
+        // Keep the synced flag in step, so the client can refuse with the server (gap 226).
+        boolean shown = horse.hasData(ModAttachments.PREGNANT.get()) && horse.getData(ModAttachments.PREGNANT.get());
+        if (shown != r.pregnant()) {
+            horse.setData(ModAttachments.PREGNANT.get(), r.pregnant());
+        }
+    }
+
+    /**
+     * Pregnant, asked on either side: the server reads the record, the client the
+     * synced {@code PREGNANT} flag.
+     */
+    public static boolean pregnantEitherSide(Horse horse) {
+        if (horse.level().isClientSide()) {
+            return horse.hasData(ModAttachments.PREGNANT.get()) && horse.getData(ModAttachments.PREGNANT.get());
+        }
+        return of(horse).pregnant();
     }
 
     /** Where a mare is now. Meaningless for a stallion - ask only of mares. */
@@ -258,55 +275,20 @@ public final class ReproHandler {
         }
     }
 
-    /** Why a mare cannot be bred right now, and how long until she can. */
+    /** Why a mare cannot be bred right now, and how long until she can. Words: {@link ReproText}. */
     public static String notReceptive(Horse mare) {
-        Reproduction r = of(mare);
-        long now = mare.level().getGameTime();
-        ReproTiming t = ServerConfig.reproTiming();
-        String name = nameOf(mare);
-        long wait = ReproRules.ticksUntilReceptive(r, now, t);
-        return switch (ReproRules.stateAt(r, now, t)) {
-            case PREGNANT -> name + " is pregnant - " + duration(r.pregnancy().get().ticksLeft(now)) + " to go.";
-            case POSTPARTUM -> name + " foaled recently - foal heat in " + duration(wait) + ".";
-            case ESTRUS, FOAL_HEAT -> name + " is in heat.";
-            case DIESTRUS -> name + " is not in heat - " + duration(wait) + " to go.";
-        };
-    }
-
-    /** Ticks as real time a player can plan around: minutes, then hours. */
-    static String duration(long ticks) {
-        long minutes = Math.max(1L, (ticks + 1_199L) / 1_200L);
-        if (minutes < 60L) {
-            return "about " + minutes + " min";
-        }
-        long hours = (minutes + 59L) / 60L;
-        return "about " + hours + (hours == 1L ? " hour" : " hours");
+        return ReproText.notReceptive(nameOf(mare), of(mare), mare.level().getGameTime(), ServerConfig.reproTiming());
     }
 
     /**
      * <b>The info screen's one line</b>, in the Body section (owner, 2026-09-13).
-     * Empty for a stallion or a foal. Twins are not revealed - nobody has scanned
-     * her.
+     * Empty for a stallion or a foal. Twins are not revealed - see {@link ReproText}.
      */
     public static String breedingLine(Horse horse) {
         if (horse.isBaby() || !HorseRecords.hasRealRecord(horse) || HorseRecords.of(horse).sex() != Sex.FEMALE) {
             return "";
         }
-        Reproduction r = of(horse);
-        long now = horse.level().getGameTime();
-        ReproTiming t = ServerConfig.reproTiming();
-        String line = switch (ReproRules.stateAt(r, now, t)) {
-            case PREGNANT -> {
-                Pregnancy p = r.pregnancy().get();
-                yield "Pregnant - " + duration(p.ticksLeft(now)) + " to go"
-                        + (ReproRules.late(p, now) ? ", heavy and slow" : "");
-            }
-            case POSTPARTUM -> "Recently foaled - foal heat in " + duration(ReproRules.ticksUntilReceptive(r, now, t));
-            case FOAL_HEAT -> "In foal heat";
-            case ESTRUS -> ReproRules.inPeak(r, now, t) ? "In heat - best time now" : "In heat";
-            case DIESTRUS -> "Not in heat - " + duration(ReproRules.ticksUntilReceptive(r, now, t)) + " to go";
-        };
-        return r.lactating() ? line + " • nursing" : line;
+        return ReproText.breedingLine(of(horse), horse.level().getGameTime(), ServerConfig.reproTiming());
     }
 
     /**
@@ -316,56 +298,14 @@ public final class ReproHandler {
      * still something a player works out from a pedigree.
      */
     public static List<String> vetReport(Horse horse) {
-        List<String> lines = new ArrayList<>();
         HorseRecord record = HorseRecords.of(horse);
-        String name = nameOf(horse);
         long now = horse.level().getGameTime();
         ReproTiming t = ServerConfig.reproTiming();
         Reproduction r = of(horse);
         if (record.sex() == Sex.MALE) {
-            if (record.gelded()) {
-                lines.add(name + " is a gelding.");
-            } else if (horse.isBaby()) {
-                lines.add(name + " is a colt, too young to breed.");
-            } else {
-                lines.add(name + " is an entire stallion: " + r.coversOn(now, t.dayTicks()) + " of "
-                        + ReproRules.FREE_COVERS_PER_DAY + " covers made today.");
-            }
-            return lines;
+            return ReproText.vetMale(nameOf(horse), !horse.isBaby(), record.gelded(), r.coversOn(now, t.dayTicks()));
         }
-        if (horse.isBaby()) {
-            lines.add(name + " is a filly, too young to breed.");
-            return lines;
-        }
-        switch (ReproRules.stateAt(r, now, t)) {
-            case PREGNANT -> {
-                Pregnancy p = r.pregnancy().get();
-                lines.add(name + " is pregnant with " + (p.twins() ? "twins" : "one foal") + " - "
-                        + duration(p.ticksLeft(now)) + " to go.");
-            }
-            case POSTPARTUM -> lines.add(name + " foaled recently. Foal heat begins in "
-                    + duration(ReproRules.ticksUntilReceptive(r, now, t)) + ".");
-            case FOAL_HEAT -> lines.add(name + " is in foal heat. It ends in "
-                    + duration(ReproRules.heatEndsAt(r, now, t) - now) + ".");
-            case ESTRUS -> {
-                long start = ReproRules.heatStartAt(r, now, t);
-                String half = ReproRules.inPeak(r, now, t)
-                        ? "in the better half"
-                        : "in the first half - the better half starts in "
-                                + duration(start + t.estrusTicks() / 2 - now);
-                lines.add(name + " is in heat, " + half + ". It ends in "
-                        + duration(ReproRules.heatEndsAt(r, now, t) - now) + ".");
-            }
-            case DIESTRUS -> lines.add(name + " is not in heat. Her next heat begins in "
-                    + duration(ReproRules.ticksUntilReceptive(r, now, t)) + ".");
-        }
-        if (ReproRules.stateAt(r, now, t).receptive() && !ReproRules.mayTryNaturally(r, now, t)) {
-            lines.add("A stallion has already covered her this heat.");
-        }
-        if (r.lactating()) {
-            lines.add("She is nursing.");
-        }
-        return lines;
+        return ReproText.vetMare(nameOf(horse), !horse.isBaby(), r, now, t);
     }
 
     // ------------------------------------------------------------------
@@ -412,7 +352,9 @@ public final class ReproHandler {
             if (e.lostEarly()) {
                 Genome g = e.foal();
                 cause = HorseTraits.resolve(g.genotype(), g.epigenome(), ServerConfig.healthGeneticsActive())
-                        .lethalCondition().orElse(null);
+                        .lethalCondition()
+                        .or(() -> com.example.horsegenetics.common.genetics.Conceivable.failure(g.genotype()))
+                        .orElse(null);
                 break;
             }
         }

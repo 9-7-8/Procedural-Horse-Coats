@@ -213,13 +213,31 @@ final class DebugTestYard {
     static final int ROW_N_D = 10;
 
     /**
+     * <b>Rows O-T: breeding and fertility</b>, built by {@link DebugYardFertility}
+     * (2026-09-13). One scenario per pen, only a row's two outer pens, and a wider
+     * aisle - because every horse now breeds on its own and a mare's natural cover
+     * is refused when eight other horses stand within sixteen blocks of her. Pens
+     * packed as tightly as the rest of the yard would cap each other and every
+     * breeding test would read as broken. The cap pen (row Q) gets extra room on
+     * both sides for the same reason.
+     */
+    static final int FERTILITY_AISLE = AISLE + 8;
+    static final int FERTILITY_ROW_D = 10;
+    static final int ROW_O = ROW_N + ROW_N_D + FERTILITY_AISLE;
+    static final int ROW_P = ROW_O + FERTILITY_ROW_D + FERTILITY_AISLE;
+    static final int ROW_Q = ROW_P + FERTILITY_ROW_D + FERTILITY_AISLE + 8;
+    static final int ROW_R = ROW_Q + FERTILITY_ROW_D + FERTILITY_AISLE + 8;
+    static final int ROW_S = ROW_R + FERTILITY_ROW_D + FERTILITY_AISLE;
+    static final int ROW_T = ROW_S + FERTILITY_ROW_D + FERTILITY_AISLE;
+
+    /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
      * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
      * read 110 deep while its rows chained past 150, so the back of it was
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_N + ROW_N_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_T + FERTILITY_ROW_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -295,12 +313,15 @@ final class DebugTestYard {
         // removing the no-damage rule unlocked (rows I-east, J and K).
         DebugYardGameplay.build(level, gy, cx, mouthZ);
         DebugYardCombat.build(level, gy, cx, mouthZ);
+        // Rows O-T: every breeding and fertility scenario, self-running where it
+        // can be, each pen logging its horses' breeding state to the watch.
+        DebugYardFertility.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
         DebugPenManager.placeSign(level, new BlockPos(cx + PATH_HALF_X + 1, gy + 1, ROAD_EDGE_Z),
                 Direction.SOUTH,
-                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "items, villagers,", "arenas, dryads"));
+                List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "items, villagers,", "arenas, breeding"));
 
         verify(level, gy, cx, mouthZ);
     }

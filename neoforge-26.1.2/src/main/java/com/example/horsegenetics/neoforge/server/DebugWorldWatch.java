@@ -153,11 +153,14 @@ public final class DebugWorldWatch {
      *                number and opposite outcomes.
      */
     record Area(String name, AABB box, List<Block> blocks, @Nullable BlockPos focus,
-                @Nullable Holder<Attribute> attribute) {
+                @Nullable Holder<Attribute> attribute, boolean breeding) {
         Area(String name, AABB box, List<Block> blocks, @Nullable BlockPos focus) {
-            this(name, box, blocks, focus, null);
+            this(name, box, blocks, focus, null, false);
         }
     }
+
+    /** Last breeding readout per area, with durations blanked, for "did it change". */
+    private static final Map<String, String> LAST_BREEDING = new LinkedHashMap<>();
 
     private static final List<Area> AREAS = new ArrayList<>();
 
@@ -171,6 +174,7 @@ public final class DebugWorldWatch {
     static void clearAreas() {
         AREAS.clear();
         LAST.clear();
+        LAST_BREEDING.clear();
     }
 
     /** Register a pen for the scan to read. Called by {@link DebugTestYard}. */
@@ -195,7 +199,44 @@ public final class DebugWorldWatch {
      * other gene whose whole effect is a conditional modifier.
      */
     static void watchAttribute(String name, AABB box, Holder<Attribute> attribute) {
-        AREAS.add(new Area(name, box, List.of(), null, attribute));
+        AREAS.add(new Area(name, box, List.of(), null, attribute, false));
+    }
+
+    /**
+     * <b>A pen whose reading is every horse's breeding state</b> (2026-09-13): a
+     * mare's info-screen line (in heat, pregnant, nursing), a stallion's covers
+     * today, a gelding, a foal. Fertility is all timers and rolls nobody watches
+     * happen, so the log has to say which state each horse was in when a foal did
+     * or did not arrive. A scan logs the pen when a horse's state changes; the
+     * census logs it regardless.
+     */
+    static void watchBreeding(String name, AABB box) {
+        AREAS.add(new Area(name, box, List.of(), null, null, true));
+    }
+
+    private static String breedingReadout(ServerLevel level, Area area) {
+        StringBuilder sb = new StringBuilder();
+        long now = level.getGameTime();
+        long day = com.example.horsegenetics.neoforge.ServerConfig.reproTiming().dayTicks();
+        for (Horse h : level.getEntitiesOfClass(Horse.class, area.box().inflate(0.0, 2.0, 0.0), Horse::isAlive)) {
+            if (!HorseRecords.hasRealRecord(h)) {
+                continue;
+            }
+            var record = HorseRecords.of(h);
+            String name = h.getCustomName() != null ? h.getCustomName().getString() : record.displayName();
+            String state;
+            if (h.isBaby()) {
+                state = "foal";
+            } else if (record.sex() == com.example.horsegenetics.common.horse.Sex.FEMALE) {
+                state = ReproHandler.breedingLine(h);
+            } else if (record.gelded()) {
+                state = "gelding";
+            } else {
+                state = "stallion, " + ReproHandler.of(h).coversOn(now, day) + " covers today";
+            }
+            sb.append(sb.length() == 0 ? "" : "; ").append(name).append(": ").append(state);
+        }
+        return sb.length() == 0 ? "" : " | breeding: " + sb;
     }
 
     // ------------------------------------------------------------------
@@ -498,6 +539,13 @@ public final class DebugWorldWatch {
         }
         moved |= was != null && (was.horses() != horses || was.items() != items
                 || was.otherMobs() != mobs);
+        String breeding = area.breeding() ? breedingReadout(level, area) : "";
+        if (area.breeding()) {
+            // "about 3 min" ticking down is not news; a state changing is.
+            String key = breeding.replaceAll("about \\d+ (min|hours?)", "~");
+            String before = LAST_BREEDING.put(area.name(), key);
+            moved |= before != null && !before.equals(key);
+        }
         if (!census && !moved) {
             return;
         }
@@ -514,7 +562,7 @@ public final class DebugWorldWatch {
         String distance = area.focus() == null ? ""
                 : " | nearest non-horse " + (nearest < 0 ? "none in the pen"
                         : String.format("%.1f blocks", nearest));
-        HorseGenetics.LOGGER.info("{} {}{}{}{} | {}", TAG, area.name(), creatures, distance, attr,
+        HorseGenetics.LOGGER.info("{} {}{}{}{}{} | {}", TAG, area.name(), creatures, distance, attr, breeding,
                 sb.length() == 0 ? (area.blocks().isEmpty() ? "no blocks watched here"
                         : "none of its watched blocks are present") : sb);
     }

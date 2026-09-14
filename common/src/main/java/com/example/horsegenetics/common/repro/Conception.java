@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.repro;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.genetics.Conceivable;
 import com.example.horsegenetics.common.genetics.GameteBias;
 import com.example.horsegenetics.common.genetics.GenomeSample;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -117,8 +118,10 @@ public final class Conception {
         }
         // Read, never conditioned on: the draw above is the ordinary one, so two
         // carriers still lose one pregnancy in four.
-        boolean lethal = lethalsActive && HorseTraits.resolve(foal.genotype(), foal.epigenome(), healthActive)
-                .viability() == Viability.LETHAL_AT_CONCEPTION;
+        // An allele pair a gene says cannot exist is lost the same way (gap 225).
+        boolean lethal = lethalsActive && (Conceivable.failure(foal.genotype()).isPresent()
+                || HorseTraits.resolve(foal.genotype(), foal.epigenome(), healthActive)
+                        .viability() == Viability.LETHAL_AT_CONCEPTION);
         return new Embryo(GenomeSample.of(foal), lineage.toToken(), lethal,
                 m.sireId(), m.sireFirstName(), m.sireLastName(), m.sireGeneration(), sireSample, m.bredBy());
     }

@@ -372,6 +372,10 @@ final class DebugYardGameplay {
                 "horsegenetics.extension", carrot.name() + " MARE", 1, 0, "E/e");
         DebugTestYard.stock(level, gy, x0 + 6.0, gateZ - 2.0,
                 "horsegenetics.extension", carrot.name() + " STUD", 0, 1, "E/e");
+        // NATURAL COVERS OFF IN THIS PEN. The pair would walk to the divider in heat
+        // and breed through the fence - a cover has no line of sight check - which
+        // would make a foal nobody fed a carrot for.
+        DebugYardFertility.noNaturalCoversIn(level, DebugTestYard.box(x0, gy, z0, x1, gy + 3, z1));
 
         chest(level, gy, x0 + 5, z0 - 2, carrot.name(), List.of(
                 stack(carrot.item().get(), 16),

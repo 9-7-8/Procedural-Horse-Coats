@@ -156,7 +156,8 @@ public final class HorseRoster {
                 loaded ? where(horse) : "",
                 record.tamedBy().orElse(""),
                 record.bredBy().orElse(""),
-                record.hasKnownParents());
+                record.hasKnownParents(),
+                record.gelded());
     }
 
     /** {@code "overworld 118, 71, -204"} - the dimension path, then the block it is standing on. */

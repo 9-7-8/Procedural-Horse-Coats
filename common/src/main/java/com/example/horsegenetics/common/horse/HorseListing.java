@@ -66,7 +66,8 @@ public record HorseListing(
         String coat,
         List<String> conditions,
         boolean lethal,
-        Genotype genotype) {
+        Genotype genotype,
+        boolean gelded) {
 
     /** Bond is unknown until the entity is loaded; this is that, not "no bond". */
     public static final int BOND_UNKNOWN = -1;
@@ -94,7 +95,7 @@ public record HorseListing(
                                   String breed, int generation, Genotype genotype,
                                   boolean adult, boolean tamed, int bond, boolean inHerd,
                                   boolean loaded, String where,
-                                  String tamedBy, String bredBy, boolean hasParents) {
+                                  String tamedBy, String bredBy, boolean hasParents, boolean gelded) {
         Traits traits;
         try {
             traits = HorseTraits.resolve(genotype, null, true);
@@ -111,7 +112,12 @@ public record HorseListing(
                 genotype.sex(), adult, tamed,
                 traits.speed(), traits.health(), traits.jump(), traits.scale(),
                 bond, inHerd, loaded, where, tamedBy, bredBy, hasParents,
-                describeCoat(genotype), conditions, lethal, genotype);
+                describeCoat(genotype), conditions, lethal, genotype, gelded);
+    }
+
+    /** An ungelded male - what the breeding picker and the "stallion" filter mean. */
+    public boolean entire() {
+        return sex == Sex.MALE && !gelded;
     }
 
     /** {@code "Amber Duskrunner"}, the way the horse is written down. */
@@ -119,8 +125,11 @@ public record HorseListing(
         return (firstName + " " + lastName).trim();
     }
 
-    /** Mare / stallion / filly / colt - the word a table column wants. */
+    /** Mare / stallion / filly / colt / gelding - the word a table column wants. */
     public String sexLabel() {
+        if (gelded && sex == Sex.MALE) {
+            return adult ? "Gelding" : "Gelded colt";
+        }
         return sex.label(adult);
     }
 

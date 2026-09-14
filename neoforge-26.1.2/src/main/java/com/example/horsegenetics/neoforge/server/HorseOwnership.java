@@ -48,4 +48,33 @@ public final class HorseOwnership {
         }
         return null;
     }
+
+    /**
+     * <b>The owner's name, online or not</b> - known gap 228. Loaded players are
+     * read directly. An absent owner goes through the server's name cache
+     * ({@code usercache.json}, a local lookup), then NeoForge's
+     * {@code UsernameCache}, filled at every login. Never a network call.
+     * Empty for an untamed horse, or an owner neither cache has seen.
+     *
+     * <p>API checked against the 26.1.2 sources, not yet exercised in-game.
+     */
+    public static java.util.Optional<String> ownerName(Horse horse) {
+        if (!horse.isTamed()) {
+            return java.util.Optional.empty();
+        }
+        if (horse.getOwner() instanceof Player online) {
+            return java.util.Optional.of(online.getGameProfile().name());
+        }
+        var owner = horse.getOwnerReference();
+        if (owner == null || !(horse.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return java.util.Optional.empty();
+        }
+        UUID id = owner.getUUID();
+        java.util.Optional<String> cached = level.getServer().services().nameToIdCache().get(id)
+                .map(net.minecraft.server.players.NameAndId::name);
+        if (cached.isPresent()) {
+            return cached;
+        }
+        return java.util.Optional.ofNullable(net.neoforged.neoforge.common.UsernameCache.getLastKnownUsername(id));
+    }
 }

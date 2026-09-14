@@ -90,7 +90,7 @@ public final class HorseQuery {
 
     /** Every bare word that is a flag rather than a substring search. */
     public static List<String> flags() {
-        return List.of("mare", "stallion", "filly", "colt", "foal", "adult",
+        return List.of("mare", "stallion", "filly", "colt", "gelding", "foal", "adult",
                 "tamed", "wild", "herd", "loaded", "lost",
                 "lethal", "sick", "healthy", "bred", "founder");
     }
@@ -234,11 +234,13 @@ public final class HorseQuery {
             case "mare":
                 return row.sex() == Sex.FEMALE && row.adult();
             case "stallion":
-                return row.sex() == Sex.MALE && row.adult();
+                return row.entire() && row.adult();
             case "filly":
                 return row.sex() == Sex.FEMALE && !row.adult();
             case "colt":
-                return row.sex() == Sex.MALE && !row.adult();
+                return row.entire() && !row.adult();
+            case "gelding":
+                return row.gelded() && row.sex() == Sex.MALE;
             case "foal":
                 return !row.adult();
             case "adult":

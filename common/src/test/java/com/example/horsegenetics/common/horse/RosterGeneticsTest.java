@@ -30,7 +30,7 @@ class RosterGeneticsTest {
 
     private static HorseListing row(String name, Genotype genotype) {
         return HorseListing.of(ID, name, "Testcase", "", "Arabian", 1, genotype,
-                true, true, 0, false, true, "overworld", "owner", "", false);
+                true, true, 0, false, true, "overworld", "owner", "", false, false);
     }
 
     private static Genotype with(AllelePair... pairs) {

@@ -93,7 +93,7 @@ public final class BandLife {
             return;
         }
 
-        if (sex == Sex.MALE && HerdSocialHandler.isBachelor(care)
+        if (HorseRecords.of(horse).entire() && HerdSocialHandler.isBachelor(care)
                 && horse.getRandom().nextDouble() < HerdRules.perScan(
                         HerdRules.CHALLENGES_PER_BAND_PER_DAY, HerdSocialHandler.SCAN)) {
             challenge(horse, level, care, now);
@@ -136,7 +136,7 @@ public final class BandLife {
             });
             Horse suitor = nearest(level, horse, DISPERSE_REACH, h -> {
                 HorseCareAttachment c = h.getData(ModAttachments.HORSE_CARE.get());
-                return !h.isBaby() && HorseRecords.of(h).sex() == Sex.MALE && c.inWildHerd()
+                return !h.isBaby() && HorseRecords.of(h).entire() && c.inWildHerd()
                         && HerdSocialHandler.isBachelor(c);
             });
             if (suitor != null && (band == null || suitor.distanceToSqr(horse) < band.distanceToSqr(horse))) {

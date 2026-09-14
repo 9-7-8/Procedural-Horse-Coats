@@ -247,8 +247,8 @@ public final class HorseCareHandler {
     /**
      * How much faster a gelding's bond grows from riding and company (owner,
      * 2026-09-13: +25%). It scales the ticks that turn into bond points, so the
-     * daily cap is unchanged. One-off grants ({@link #awardBondFor}) are not
-     * scaled.
+     * daily cap is unchanged. One-off grants ({@link #awardBondFor}) get a quarter
+     * more, rounded down.
      */
     static final double GELDING_BOND_FACTOR = 1.25;
 
@@ -394,7 +394,9 @@ public final class HorseCareHandler {
             return false;
         }
         HorseCareAttachment before = horse.getData(ModAttachments.HORSE_CARE.get());
-        HorseCareAttachment after = awardBond(level, horse, before, amount);
+        // A gelding gets a quarter more here too, rounded down (gap 229).
+        int given = HorseRecords.of(horse).gelded() ? amount + amount / 4 : amount;
+        HorseCareAttachment after = awardBond(level, horse, before, given);
         if (after.equals(before)) {
             return false;
         }

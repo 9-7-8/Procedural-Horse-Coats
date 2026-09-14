@@ -49,7 +49,7 @@ public final class ClientHorseRoster {
                         entry.breed(), entry.generation(), Genotype.parse(entry.geneticCode()),
                         entry.adult(), entry.tamed(), entry.bond(), entry.inHerd(),
                         entry.loaded(), entry.where(),
-                        entry.tamedBy(), entry.bredBy(), entry.hasParents()));
+                        entry.tamedBy(), entry.bredBy(), entry.hasParents(), entry.gelded()));
             } catch (RuntimeException unparseable) {
                 // One bad code must not cost the player the rest of the stable.
             }
@@ -63,11 +63,17 @@ public final class ClientHorseRoster {
         return List.copyOf(BY_ID.values());
     }
 
-    /** The mares, or the stallions - the two sides of the breeding picker. */
+    /**
+     * The mares, or the stallions - the two sides of the breeding picker. A
+     * gelding is left off the stallion side: he sires nothing, so offering him
+     * as a sire would preview foals that can never be born. Filtered here rather
+     * than at the picker because the click lookup and the drawn list must index
+     * the same list.
+     */
     public static List<HorseListing> of(Sex sex) {
         List<HorseListing> out = new ArrayList<>();
         for (HorseListing horse : BY_ID.values()) {
-            if (horse.sex() == sex) {
+            if (horse.sex() == sex && (sex != Sex.MALE || horse.entire())) {
                 out.add(horse);
             }
         }

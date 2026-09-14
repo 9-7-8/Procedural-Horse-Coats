@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.repro.Conception;
+import com.example.horsegenetics.common.repro.NaturalCover;
 import com.example.horsegenetics.common.repro.ReproRules;
 import com.example.horsegenetics.common.repro.ReproTiming;
 import com.example.horsegenetics.common.repro.Reproduction;
@@ -17,6 +18,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,26 +26,13 @@ import java.util.List;
  * the Spontaneous Breeding gene was "now basically just base game behavior",
  * so it is gone and this is what every horse does.
  *
- * <p>Every {@link #SCAN} ticks, an adult mare - tamed or wild - is covered by
- * the nearest entire stallion within {@link ReproRules#NATURAL_REACH} when all of
- * this holds:
- * <ul>
- *   <li>she is in heat and has not been covered yet this heat
- *       ({@link ReproRules#mayTryNaturally}). A cover that does not take waits for
- *       her next heat;</li>
- *   <li>both are at full health, neither is ridden or leashed, and neither is
- *       cowboy stock;</li>
- *   <li>he is not a gelding, and has made fewer than
- *       {@link ReproRules#FREE_COVERS_PER_DAY} covers today - a hard stop here,
- *       where the carrot and jar paths only halve his odds;</li>
- *   <li>fewer than {@link ReproRules#NATURAL_CAP} other horses, foals included,
- *       stand within {@link ReproRules#NATURAL_CAP_RADIUS} of her.</li>
- * </ul>
- *
- * <p>The cover goes through {@link ReproHandler#breed}, so carrot effects armed on
- * either horse act on it, and it is credited to the mare's owner. It runs off
- * the entity tick, so it only ever happens in loaded chunks. The heat-attraction
- * goal ({@code HerdGoals.HeatAttraction}) is what brings the two together.
+ * <p>This class only gathers facts. Every rule - once per heat, full health, not
+ * ridden or leashed, no geldings, three covers a day, the local cap, cowboy stock
+ * exempt - is {@link NaturalCover#decide}, which is unit-tested. The cover goes
+ * through {@link ReproHandler#breed}, so carrot effects armed on either horse act
+ * on it, and it is credited to the mare's owner. It runs off the entity tick, so it
+ * only ever happens in loaded chunks. The heat-attraction goal
+ * ({@code HerdGoals.HeatAttraction}) is what brings the two together.
  *
  * <p><b>Not verified in-game.</b>
  */
@@ -55,6 +44,9 @@ public final class NaturalBreedingHandler {
 
     /** Two seconds; a heat is at least a Minecraft day, so this is plenty. */
     static final int SCAN = 40;
+
+    /** When each capped mare last said so. Transient; a restart just says it again. */
+    private static final java.util.Map<java.util.UUID, Long> CROWDED_LOGGED = new java.util.HashMap<>();
 
     @SubscribeEvent
     static void onTick(EntityTickEvent.Post event) {
@@ -68,29 +60,53 @@ public final class NaturalBreedingHandler {
             return;
         }
         HorseRecord mareRecord = HorseRecords.of(mare);
-        if (mareRecord.sex() != Sex.FEMALE || !ableToBreed(mare)) {
+        if (mareRecord.sex() != Sex.FEMALE) {
             return;
         }
         long now = level.getGameTime();
         ReproTiming t = ServerConfig.reproTiming();
         Reproduction r = ReproHandler.of(mare);
         if (!ReproRules.mayTryNaturally(r, now, t)) {
-            return;
+            return;     // the cheap refusal first: most mares, most of the time
         }
 
-        Horse stallion = nearestStallion(level, mare, now, t);
-        if (stallion == null) {
+        List<Horse> near = level.getEntitiesOfClass(Horse.class,
+                mare.getBoundingBox().inflate(ReproRules.NATURAL_REACH),
+                h -> h != mare && h.isAlive() && HorseRecords.hasRealRecord(h)
+                        && HorseRecords.of(h).sex() == Sex.MALE);
+        if (near.isEmpty()) {
             return;
+        }
+        List<NaturalCover.Stallion> candidates = new ArrayList<>(near.size());
+        for (Horse h : near) {
+            candidates.add(new NaturalCover.Stallion(party(h), h.distanceToSqr(mare),
+                    ReproHandler.of(h).coversOn(now, t.dayTicks())));
         }
         int crowd = level.getEntitiesOfClass(Horse.class,
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS), h -> h != mare && h.isAlive()).size();
-        if (crowd >= ReproRules.NATURAL_CAP) {
-            ActionTrace.log("fertility", ActionTrace.describeShort(mare) + " not covered: " + crowd
-                    + " other horses within " + (int) ReproRules.NATURAL_CAP_RADIUS + " blocks, the cap is "
-                    + ReproRules.NATURAL_CAP);
-            return;
-        }
 
+        NaturalCover.Decision decision = NaturalCover.decide(party(mare), r, now, t, candidates, crowd);
+        switch (decision.verdict()) {
+            case COVER -> cover(level, mare, mareRecord, r, near.get(decision.stallion()), now);
+            case CROWDED -> {
+                // Once a minute per mare: a capped paddock asks every two seconds, and
+                // eight mares saying so each time buries the log the cap is read from.
+                Long last = CROWDED_LOGGED.get(mare.getUUID());
+                if (last == null || now - last >= 1_200L) {
+                    CROWDED_LOGGED.put(mare.getUUID(), now);
+                    ActionTrace.log("fertility", ActionTrace.describeShort(mare) + " not covered: "
+                            + crowd + " other horses within " + (int) ReproRules.NATURAL_CAP_RADIUS
+                            + " blocks, the cap is " + ReproRules.NATURAL_CAP);
+                }
+            }
+            default -> {
+                // not a breeding mare right now, or no able stallion in reach - nothing worth a line
+            }
+        }
+    }
+
+    private static void cover(ServerLevel level, Horse mare, HorseRecord mareRecord, Reproduction r, Horse stallion,
+                              long now) {
         // Her one try this heat is spent whatever the roll says.
         ReproHandler.set(mare, r.withNaturalTry(now));
         HorseRecord stallionRecord = HorseRecords.of(stallion);
@@ -105,45 +121,25 @@ public final class NaturalBreedingHandler {
                 + String.format(" (chance %.2f)", result.chance()));
     }
 
-    private static @Nullable Horse nearestStallion(ServerLevel level, Horse mare, long now, ReproTiming t) {
-        Horse best = null;
-        for (Horse h : level.getEntitiesOfClass(Horse.class, mare.getBoundingBox().inflate(ReproRules.NATURAL_REACH),
-                h -> h != mare && h.isAlive() && !h.isBaby() && HorseRecords.hasRealRecord(h))) {
-            if (!HorseRecords.of(h).entire() || !ableToBreed(h)
-                    || ReproHandler.of(h).coversOn(now, t.dayTicks()) >= ReproRules.FREE_COVERS_PER_DAY) {
-                continue;
-            }
-            if (best == null || h.distanceToSqr(mare) < best.distanceToSqr(mare)) {
-                best = h;
-            }
-        }
-        return best;
-    }
-
-    /** Full health, not ridden, not leashed, and not a cowboy's stock. */
-    private static boolean ableToBreed(Horse horse) {
-        if (horse.getHealth() < horse.getMaxHealth() || horse.isVehicle() || horse.isLeashed()) {
-            return false;
-        }
+    /** The facts {@link NaturalCover} asks about one horse. */
+    static NaturalCover.Party party(Horse horse) {
+        HorseRecord record = HorseRecords.of(horse);
         // hasData first: getData would attach an empty brand to every horse it asked.
-        return !horse.hasData(ModAttachments.COWBOY_BRAND.get())
-                || !horse.getData(ModAttachments.COWBOY_BRAND.get()).isBranded();
+        boolean cowboy = horse.hasData(ModAttachments.COWBOY_BRAND.get())
+                && horse.getData(ModAttachments.COWBOY_BRAND.get()).isBranded();
+        return new NaturalCover.Party(!horse.isBaby(), record.sex() == Sex.FEMALE, record.gelded(),
+                horse.getHealth() >= horse.getMaxHealth(), horse.isVehicle(), horse.isLeashed(), cowboy);
     }
 
     /**
-     * The mare's owner, for {@code bredBy} - blank for a wild mare. <b>An offline
-     * owner falls back to whoever first tamed her</b>, usually the same person:
-     * this module has no lookup from an absent player's id to a name, and the
-     * profile cache on 26.1.2 has not been checked. See known gaps.
+     * The mare's owner, for {@code bredBy} - blank for a wild mare. An offline
+     * owner is resolved through {@link HorseOwnership#ownerName}.
      */
     private static String bredBy(Horse mare, HorseRecord record) {
         if (!mare.isTamed()) {
             return "";
         }
-        if (mare.getOwner() instanceof Player owner) {
-            return owner.getGameProfile().name();
-        }
-        return record.tamedBy().orElse("");
+        return HorseOwnership.ownerName(mare).orElse(record.tamedBy().orElse(""));
     }
 
     private static @Nullable Player ownerPlayer(Horse horse) {

@@ -37,7 +37,7 @@ class HorseQueryTest {
     private static HorseListing row(String first, String breed, Genotype genotype,
                                     boolean adult, int generation, int bond) {
         return HorseListing.of(ID, first, "Testcase", "", breed, generation, genotype,
-                adult, true, bond, false, true, "overworld", "owner", "", generation > 0);
+                adult, true, bond, false, true, "overworld", "owner", "", generation > 0, false);
     }
 
     private static List<HorseListing> stable() {

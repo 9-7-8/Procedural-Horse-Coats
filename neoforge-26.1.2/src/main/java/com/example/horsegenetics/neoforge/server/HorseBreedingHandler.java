@@ -204,8 +204,13 @@ public final class HorseBreedingHandler {
         BreedingDebug.reportDraw(damRecord, sireRecord, damGenome, sireGenome, childGenome,
                 childTraits, breeder);
 
-        if (childTraits.viability() == Viability.LETHAL_AT_CONCEPTION && ServerConfig.lethalsActive()) {
-            Condition cause = childTraits.lethalCondition().orElse(null);
+        // A genotype a gene rules out is an embryonic lethal too (gap 225), with a
+        // synthetic cause so the miscarriage line still has something to say.
+        java.util.Optional<Condition> nonviable = com.example.horsegenetics.common.genetics.Conceivable
+                .failure(childGenome.genotype());
+        if ((childTraits.viability() == Viability.LETHAL_AT_CONCEPTION || nonviable.isPresent())
+                && ServerConfig.lethalsActive()) {
+            Condition cause = childTraits.lethalCondition().or(() -> nonviable).orElse(null);
             if (cause != null) {
                 LethalFoalHandler.announceMiscarriage(damHorse, breeder, cause);
             }

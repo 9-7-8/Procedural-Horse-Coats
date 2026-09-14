@@ -66,6 +66,18 @@ public final class ModAttachments {
                     .serialize(ReproCodecs.MAP_CODEC)
                     .build());
 
+    // Whether this mare is pregnant, and nothing else. SYNCED, so the client can
+    // refuse a breeding food with the server instead of predicting a feed it then
+    // takes back (known gap 226). HORSE_REPRO stays the truth; ReproHandler.set
+    // keeps this in step. Serialized too, so it is right from the first tick
+    // after a load.
+    public static final Supplier<AttachmentType<Boolean>> PREGNANT =
+            ATTACHMENT_TYPES.register("pregnant", () -> AttachmentType
+                    .<Boolean>builder(() -> Boolean.FALSE)
+                    .serialize(com.mojang.serialization.Codec.BOOL.fieldOf("pregnant"))
+                    .sync(net.minecraft.network.codec.ByteBufCodecs.BOOL)
+                    .build());
+
     // Timed-interaction stamps (last shear, last per-gene yield, ...). Gated
     // "once per Minecraft day". Replaces the static cooldown map that used to
     // live in GeneYieldHandler. copyOnDeath so a re-summoned horse keeps them.

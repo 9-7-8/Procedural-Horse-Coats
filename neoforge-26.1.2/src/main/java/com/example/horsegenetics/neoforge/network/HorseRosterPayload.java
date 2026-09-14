@@ -68,14 +68,15 @@ public record HorseRosterPayload(List<Entry> entries) implements CustomPacketPay
                         String where,
                         String tamedBy,
                         String bredBy,
-                        boolean hasParents) {
+                        boolean hasParents,
+                        boolean gelded) {
     }
 
     public static final Type<HorseRosterPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "horse_roster"));
 
     /**
-     * Sixteen fields is past {@code StreamCodec.composite}'s arity, so the entry
+     * Seventeen fields is past {@code StreamCodec.composite}'s arity, so the entry
      * is written by hand. Straight-line reads and writes in the same order -
      * the one rule is that they stay in the same order.
      */
@@ -99,9 +100,10 @@ public record HorseRosterPayload(List<Entry> entries) implements CustomPacketPay
                     String tamedBy = ByteBufCodecs.stringUtf8(64).decode(buf);
                     String bredBy = ByteBufCodecs.stringUtf8(64).decode(buf);
                     boolean hasParents = ByteBufCodecs.BOOL.decode(buf);
+                    boolean gelded = ByteBufCodecs.BOOL.decode(buf);
                     return new Entry(id, firstName, lastName, barnName, breed, generation,
                             geneticCode, tamed, adult, loaded, bond - 1, inHerd, where,
-                            tamedBy, bredBy, hasParents);
+                            tamedBy, bredBy, hasParents, gelded);
                 }
 
                 @Override
@@ -123,6 +125,7 @@ public record HorseRosterPayload(List<Entry> entries) implements CustomPacketPay
                     ByteBufCodecs.stringUtf8(64).encode(buf, entry.tamedBy());
                     ByteBufCodecs.stringUtf8(64).encode(buf, entry.bredBy());
                     ByteBufCodecs.BOOL.encode(buf, entry.hasParents());
+                    ByteBufCodecs.BOOL.encode(buf, entry.gelded());
                 }
             };
 
