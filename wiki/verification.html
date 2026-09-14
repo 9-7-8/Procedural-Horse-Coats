@@ -6697,45 +6697,6 @@
     </p>
 </div>
 
-<h3>Parity with the spawn egg &mdash; the point of the page</h3>
-
-<p>
-    Open both and compare. They should be the same screen:
-</p>
-
-<ul>
-    <li><strong>The gene list.</strong> Every gene alphabetically by display name,
-        the sex locus absent. A gene off the horse is a plain name; clicking it
-        adds it and it grows two allele buttons and an <code>x</code>. An
-        expressing row is green with its outcome underneath; a silent one is grey
-        and says &ldquo;no effect&rdquo;.</li>
-    <li><strong>Adding a gene picks the allele that does something</strong> &mdash;
-        homozygous where the horse can carry it. <code>KIT</code> should not come
-        in at <code>W22/W22</code>: the strong dominant whites are nonviable
-        homozygotes, so it picks the strongest allele that can double.</li>
-    <li><strong>More than three alleles gets a dropdown</strong>, three or fewer
-        cycles. So particle, <code>KIT</code>, <code>ACAN</code> and
-        <code>MITF</code> drop down; everything else cycles.</li>
-    <li><strong>The right column, in order:</strong> Age, Sex, Breed,
-        Randomize + its arrow, Add random + its arrow, Rnd health, Clear genes;
-        then, at the foot, Make egg, Copy horse / Paste, Spawn, Cancel.</li>
-    <li><strong>Sex-linkage.</strong> Add brindle, switch to Stallion: it must
-        snap to <code>Brn/Y</code>. Switch back to Mare and the placeholder must
-        go.</li>
-    <li><strong>The short form and the epigenetic fingerprint</strong> under the
-        list should match what the spawn egg shows for the same horse.
-        <strong>Export here and Paste into the spawn egg in game</strong> &mdash;
-        that is the sharpest test there is, and the two horses should now be
-        identical down to the epigenetics, which a genotype code never
-        carried.</li>
-</ul>
-
-<p class="muted">
-    Two divergences are deliberate: where the spawn egg has <strong>Spawn</strong>
-    and <strong>Cancel</strong> there is nothing to spawn, so those slots are
-    <strong>Wander</strong> and <strong>Reset view</strong>.
-</p>
-
 <h3>The name, the export, and the field</h3>
 
 <ul>
@@ -6769,72 +6730,9 @@
         Magic zebra - actually shows something the moment its page loads, which
         was the point.</li>
 
-    <li><strong>The gene-family menu above the list.</strong> Pick <em>Natural
-        dilution genes</em>: the list should drop to seven rows and the scroll
-        bar should go away. Pick <em>Magic: lines and strokes</em> and it should
-        be the fourteen stroke genes. <em>All genes</em> restores it. The filter
-        is a view only &mdash; a gene filtered out is still on the horse, so the
-        coat must not change when you change the menu.</li>
-
-    <li><strong>The padlocks.</strong> Lock KIT at a white pattern you like, then
-        hold Randomize: the pattern and its epigenetic fingerprint stay while
-        everything else moves. <b>Rnd epigen.</b> must respect the lock too
-        &mdash; that is the half most likely to be wrong, because the epigenome
-        is rebuilt whole and the locked loci are put back into it.</li>
-
-    <li><strong>The Randomize menu.</strong> Eleven modes; the ones to actually
-        look at are <em>True random</em> (should produce absurd horses, and never
-        an impossible one &mdash; no KIT <code>W</code> homozygote, no
-        <code>met/met</code>), <em>Rnd dilution</em> and <em>Rnd white</em>
-        (should visibly change one thing and leave the rest of the horse alone),
-        and <em>Rnd +3 magic</em> (should always land three magical genes that
-        are actually showing, not three that happen to be silent).</li>
-
-    <li><strong>Sex is rolled first.</strong> Add brindle (X-linked), then hold
-        Randomize. The row must never sit in a state a horse of that sex cannot
-        carry &mdash; no <code>Brn/Brn</code> stallion.</li>
-
-    <li><strong>Rnd health, off by default.</strong> With it off, no amount of
-        randomizing should ever put a disorder or a stat gene on the horse. Turn
-        it on and they should start appearing. This one is worth checking
-        <em>in game</em> as well, since it is the switch that decides whether
-        Randomize can hand you a lethal.</li>
-
     <li><strong>Extension, agouti and shade</strong> should be on the horse the
         moment the screen opens, and have no <code>x</code>. <b>Clear genes</b>
         must leave them there.</li>
-    <li><strong>Does it open at all?</strong> A boot overlay, then sky, grass, a
-        horse, and the panel over it.</li>
-    <li><strong>Is the horse in the gap?</strong> The camera is shifted sideways so
-        the horse frames into the space between the two panels rather than behind
-        the gene list.</li>
-    <li><strong>Does it stay near the block?</strong> The wander is pulled toward
-        the reference block &mdash; the further out it strays the narrower the
-        spread of headings it will pick, so it should circle the block rather
-        than leave. It must also <strong>never spin on the spot indefinitely</strong>:
-        a turn now resolves into a walk when it reaches its heading, which the
-        old fixed-duration spin did not.</li>
-    <li><strong>Is the ground still too bright?</strong> The grass texture is
-        multiplied down by <code>GROUND_TINT</code> in <code>scene.js</code> -
-        one constant, easy to re-tune. The horse's own lighting is untouched.</li>
-    <li><strong>The player beside the block</strong> is a scale reference: vanilla
-        proportions at the renderer's 0.9375, so ~1.89 blocks tall against the
-        cube's 1.0 and an adult horse's 2.11 to the ear tip. Untextured on
-        purpose - the default skin is Mojang's asset, not this repo's to ship.
-        <strong>Its hair used to z-fight its scalp</strong> and now wraps it;
-        confirm there is no flicker on the crown as the camera moves.</li>
-    <li><strong>Controls.</strong> Drag the empty middle to spin,
-        <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> and
-        <kbd>Q</kbd><kbd>E</kbd> to move, scroll to zoom. A drag <em>on a panel</em>
-        must not spin the horse, and scrolling over the gene list must scroll the
-        list, not the camera.</li>
-    <li><strong>Size renders correctly.</strong> Add <code>LCORL</code> or the
-        magic body-size locus and the horse should visibly change against the
-        one-block reference cube, with the <code>size 1.14x</code> readout under
-        the preview &mdash; the same readout the spawn egg draws.</li>
-    <li><strong>The gait is an approximation</strong> and is not a port of
-        <code>setupAnim</code>. Worth an opinion on whether it helps or
-        distracts.</li>
 </ul>
 
 <h3>What it still cannot show &mdash; and says so</h3>
@@ -6999,26 +6897,6 @@
     </p>
 </div>
 <ul>
-    <li><strong>Does it read as brindle, and is it white?</strong> Rebuilt onto its own
-        field: irregular <strong>white</strong> streaks, soft-edged and broken, heaviest
-        on barrel and quarters, strong on the neck, a few crosswise strokes on the
-        forearm and gaskin, nothing on the head. The first tuning baked out as wood grain
-        (warp wider than the spacing) and the second came out a tan smear rather than
-        white; this is the third. Spawn one with the custom egg &mdash; add brindle and it
-        defaults to the expressing genotype.</li>
-    <li><strong>Walk round it.</strong> The single most important check on this gene:
-        <strong>the two sides must not match.</strong> A streak on the right need not
-        exist on the left, and that is the mosaicism the whole locus is about. If the
-        horse looks the same from both sides, <code>BlaschkoStripes.side</code> is not
-        doing its job.</li>
-    <li><strong>Is there a seam down the spine?</strong> The per-side rolls are blended
-        over two body units either side of <code>z = 0</code>. Look straight down the
-        topline for a cut.</li>
-    <li><strong>Is the untouched head a visible seam?</strong> The neck is streaked at
-        0.90 weight and the head not at all. Look at the poll.</li>
-    <li><strong>Does <code>X-Brn</code> show correctly?</strong> Info panel and paper dump
-        on a brindle stallion. A <em>plain</em> stallion must show nothing at this locus,
-        not <code>X-n</code>.</li>
     <li><strong>The crosses.</strong> Unit-tested to textbook ratios over 4,000 foals
         each, but worth one real pairing: a brindle stallion &times; plain mare should
         throw <strong>no brindle colts at all</strong> and every filly a carrier.</li>
@@ -7078,47 +6956,6 @@
         eye.</li>
 </ul>
 
-<div class="note warn">
-    <span class="label">Green, hazel and heterochromia &mdash; built 2026-09-06, NOT looked at</span>
-    <p>
-        All of it is asserted through the real pipeline in <code>EyeColorTest</code>, and
-        <strong>none of it has been seen on a horse</strong>. The whole subject is
-        <a href="eye-colour.html">Eye colour &amp; heterochromia</a>; what wants looking
-        at, in the order it is most likely to be wrong:
-    </p>
-    <ul>
-        <li><strong>Does a split iris read as heterochromia at all?</strong> This is the
-            load-bearing unknown. The iris is <strong>four texels</strong>, so a "wedge"
-            is one, two or three of them. Twelve shapes are in
-            <code>EyePatch.WEDGES</code> &mdash; four halves, four single corners, four
-            three-corner shapes &mdash; and the single corners in particular may read as
-            a stray pixel rather than as a sector. If they do, restricting
-            <code>WEDGES</code> to the four halves is a one-line retreat.</li>
-        <li><strong>One blue eye.</strong> 22% of blue-eyed horses. Spawn a few
-            <code>SW1/N</code> splashes and confirm some come out with one blue eye and
-            one dark one, and that the dark one looks deliberate rather than like a
-            half-applied tint.</li>
-        <li><strong>Champagne's iris.</strong> Amber 40%, hazel 35%, light brown 17%,
-            olive 8% &mdash; spawn a handful and confirm the four are actually
-            distinguishable at riding distance. If amber and light brown are the same
-            eye in practice, the palette wants spreading. Also: a champagne horse now has
-            its <em>own</em> baked texture where it used to share one, so watch for any
-            coat-cache churn on a herd of them.</li>
-        <li><strong>Cream and pearl.</strong> <code>Cr/Cr</code> pale blue,
-            <code>Cr/prl</code> blue-green, <code>prl/prl</code> pale. Confirm the
-            blue-green reads as green and not as "the blue one but wrong", since it is
-            the mod's only natural green eye besides champagne's olive.</li>
-        <li><strong>Magic sectoral heterochromia.</strong> Custom egg, two different
-            colour alleles. Confirm both colours show, the two eyes have different
-            shapes, and that <code>green/green</code> and <code>gold/n</code> genuinely
-            change nothing &mdash; including on a horse that already has a champagne or
-            cream eye, which they must not overwrite. Then try <code>chaos</code> on a
-            few horses and see whether the rolled colours are ever muddy.</li>
-        <li><strong>The foal again.</strong> A foal iris is the 2&times;2 pupil with no
-            sclera, so a wedge is a quarter of a very small block. Check a splash foal
-            with a sectoral eye still reads as a horse and not as a smudge.</li>
-    </ul>
-</div>
 
 <h3 id="cutie-glow">A glowing cutie mark</h3>
 <p>
@@ -7717,11 +7554,6 @@
         Check the population effect first and the extremes second.
     </p>
     <ul>
-        <li><strong>Walk into a herd of wild horses.</strong> Is the size spread
-            visible as a spread, without any single horse looking wrong? That is the
-            whole design of the 1.1&times; / 0.9&times; centre. If they all look
-            identical the &sigma; is too small; if individuals look silly it is too
-            big.</li>
         <li><strong>The walking animation.</strong> A previous build had scaled
             horses sliding their feet along the ground &mdash; vanilla advances the
             leg swing from ground distance and never consults
@@ -7764,15 +7596,6 @@
 <div class="note warn">
     <span class="label">Light &mdash; the first user of the overlay phase</span>
     <ul>
-        <li>Each of <code>Lthf</code> / <code>Ltmn</code> / <code>Lteye</code> alone:
-            are the gold hooves / mane / eyes in the <strong>right places</strong>?
-            The hooves in particular were only ever checked on a UV sheet.</li>
-        <li>Do they <strong>glow in the dark</strong>? The emissive layer has never
-            drawn a gene-written texel mask &mdash; only Suntouched&rsquo;s whole-part
-            list.</li>
-        <li>Does the horse <strong>light the ground</strong> around it? Same trailing
-            <code>minecraft:light</code> block Suntouched uses, so expect it to lag a
-            gallop.</li>
         <li>A heterozygote (<code>Lthf/Ltmn</code>): both regions, in full. That is
             the codominance claim.</li>
         <li>Gold eyes should keep a <strong>dark pupil</strong> &mdash; if the eye is
@@ -7786,18 +7609,7 @@
 <div class="note warn">
     <span class="label">Mane / tail colour, and healer</span>
     <ul>
-        <li>A solid mane and a striped one: do the bands read as bands on a 3D horse,
-            or as noise? They were tuned on a UV sheet.</li>
-        <li><code>Mnsld/Mnstrp</code>: <strong>two visibly different colours</strong>
-            on one mane. If they look like one colour, the per-copy epigenetics are
-            not being read.</li>
-        <li>Mane and tail loci together, in different colours.</li>
         <li>Breed a coloured mane and confirm the foal gets the <em>same</em> colour.</li>
-        <li>Healer: is the red stripe recognisably <strong>down the centre</strong> of
-            the mane? Compare a faint one and a vivid one.</li>
-        <li>Healer + mane colour: red on top of the colour, not under it.</li>
-        <li>Stand within 3 blocks of a healer while hurt &mdash; do you mend, and do
-            the heart particles show?</li>
     </ul>
 </div>
 
@@ -7813,12 +7625,6 @@
             <code>Watr/Watr</code> to a <code>Lava/Lava</code>: <strong>every</strong>
             foal is the clash, so the pairing should always refuse, with the chat line
             naming the cause.</li>
-        <li>Verdant: leave a <code>grass/grass</code> horse standing on dirt and come
-            back. One block per beat, so it should be a patch, not a lawn.</li>
-        <li>The <strong>conversion lists</strong> are the risk: confirm a verdant horse
-            does not eat anything you built with. Try standing one on a cobblestone
-            path with <code>moss/moss</code>.</li>
-        <li>Nothing should spread in the horse dimension.</li>
     </ul>
 </div>
 
@@ -8077,29 +7883,16 @@
         tick handler reaches them. <em>Owner-confirmed working 2026-09-05.</em>
         Still watch: the <b>last horse of a very spread pack</b> must join the
         herd, not fall out as a lone Feral Mixed.</li>
-    <li><strong>Traditional vs bachelor bands.</strong> A <b>traditional</b>
-        herd is one stallion + mares (+ the odd foal at vanilla's ~5% rate);
-        a <b>bachelor</b> band is all stallions, no foals. Roughly 70/30.</li>
     <li><strong>Herds move as a unit.</strong> A spawned pack should stay
         clumped and wander together following one horse (the lead stallion, or
         a random bachelor). They should not scatter to the horizon.</li>
     <li><strong>Wild horses aggro like wolves.</strong> Hit one wild horse:
         it and its whole herd should turn and kick you (4 damage). Run out of
         sight for ~3 s and they go back to neutral. Tamed horses never do this.</li>
-    <li><strong>Dev conveniences.</strong> <kbd>F8</kbd> is a <b>toggle</b>
-        now &mdash; press once and nearby horses stay glowing until you press it
-        again (chat says ON / OFF). A <b>stick</b> tames / a <b>clock</b> ages a
-        foal <em>anywhere</em> in a dev build now (not just the horse
-        dimension).</li>
     <li><strong>The info panel shows a breed.</strong> Mount a wild horse, open
         the panel (E): a breed name sits under the &ldquo;mare / stallion &nbsp;
         gen N&rdquo; line. A biome with assigned breeds should mostly show a real
         breed; the odd one reads <em>Feral Mixed</em>.</li>
-    <li><strong>Paper dump.</strong> Right-click a horse with paper: it now
-        prints a <code>breed:</code> line and a <code>herd:</code> line (band
-        type, "this horse is the lead" or "led by &lt;name&gt;", member count);
-        <b>generation and the ancestors list are gone</b>. The dev
-        <code>[coat]</code> chat line still gains a <code>[Breed Name]</code> tag.</li>
     <li><strong>Custom spawn egg &ldquo;Breed:&rdquo; preset.</strong> The egg
         editor has a <code>Breed:</code> cycle button (right column, under
         Sex). Cycling to a breed should load a fresh wild individual of it -
@@ -8112,10 +7905,6 @@
         (~0.96); the gap between them should be obvious. Falabella / Shetland
         still tiny. Thoroughbred / Standardbred herd visibly faster than a draft
         herd.</li>
-    <li><strong>Colour matches the breed.</strong> Friesian = jet black, no
-        white. Suffolk Punch / Haflinger = chestnut. Fjord / Przewalski = dun
-        with a dorsal stripe. Gypsy Vanner / Paint = tobiano pinto. Appaloosa /
-        Knabstrupper currently show only faint roan (leopard complex not built).</li>
     <li><strong>Breeding labels.</strong> Same breed &times; same breed &rarr;
         that breed. Two breeds &rarr; &ldquo;A &times; B cross&rdquo; (alphabetical,
         order-free). Cross &times; a parent breed &rarr; same cross. Cross &times;
@@ -8131,54 +7920,6 @@
         there is no Test card in the wiki or gene picker any more). Pre-session
         saved horses will not parse their old code; start a fresh world.</li>
 </ul>
-
-<h2 id="particle">&sect;0c &mdash; the particle locus (new 2026-09-04, NOT play-tested)</h2>
-
-<p>
-    <strong>Forty alleles on one gene, a new ability interface, and a rebuilt
-    <code>emitter</code> verb &mdash; none of it seen in-game.</strong> Page:
-    <a href="gene-particle.html">particle</a>. Old saves will not parse: the genotype
-    code went from 40 segments to <strong>41</strong> in-game. Start a fresh world.
-</p>
-
-<p>
-    The way in is the custom spawn egg. Adding the gene defaults it to the first allele
-    that does something doubled, which is <code>Dst/Dst</code> &mdash; coloured dust.
-    Summon tokens look like <code>particle=Rflm/n</code>. <strong>You have to make the
-    horse walk</strong>: the trail fires only while it is moving on the ground, so a
-    horse standing in a spawn pen shows nothing and that is correct.
-</p>
-
-<table class="data">
-<thead><tr><th>Check</th><th>Where</th><th>What right looks like</th></tr></thead>
-<tbody>
-<tr><td>A trail appears at all</td><td>Spawn <code>particle=Dst/n</code>, ride it</td><td>Coloured dust behind the horse while moving, nothing while stopped</td></tr>
-<tr><td>The six body sites read as different places</td><td>Spawn the same allele several times over, re-rolling with <strong>Rnd epigen.</strong> between</td><td>head / spine / all four hooves / front pair / back pair / tail are visibly distinct origins. The hoof sites are the ones most likely to be wrong &mdash; they are computed from the bounding box and yaw, so check they track when the horse turns</td></tr>
-<tr><td>Two horses of one allele differ</td><td><strong>Rnd epigen.</strong> on <code>Rflm/n</code> repeatedly</td><td>Different colours, sites and densities every time; the particle itself never changes</td></tr>
-<tr><td>A codominant pair shows both, independently</td><td><code>particle=Rflm/Csmk</code></td><td>Flames <em>and</em> campfire smoke, from two different places, in two colours &mdash; not one merged stream</td></tr>
-<tr><td>A non-codominant pair hides one</td><td><code>particle=Dst/Soul</code></td><td>Dust only. Indistinguishable from <code>Dst/n</code> &mdash; that is the point</td></tr>
-<tr><td>A foal inherits the exact look</td><td>Breed a trailing stallion onto a plain mare</td><td>Roughly half the foals trail, and those that do match the sire <em>exactly</em> &mdash; same colour, same site, same count</td></tr>
-<tr><td>All forty particles render sensibly at horse scale</td><td>Walk the list with the spawn egg</td><td>The suspects are the <strong>emitter-style</strong> ones, which in Bedrock spawned <em>other</em> particles and here are plain: <code>Snc</code> (sonic ring), <code>Shrk</code>, <code>Raid</code>, <code>Skl</code>. Also <code>Sklk2</code> (a vibration aimed at the horse itself) and <code>Dig</code> (a sculk block particle) &mdash; both were substitutions, not the named particle</td></tr>
-<tr><td>The colour-carrying particles are not invisible</td><td><code>particle=Bwswrl/n</code>, <code>Whtswrl/n</code>, <code>Bkswrl/n</code>, <code>Dst2/n</code></td><td>They are visible and coloured. <code>ColorParticleOption</code> reads the alpha byte, so a bug here shows as <em>nothing at all</em> rather than as a wrong colour</td></tr>
-<tr><td><code>Dst2</code> actually fades</td><td><code>particle=Dst2/n</code></td><td>Two colours, one becoming the other &mdash; not a single flat colour</td></tr>
-<tr><td>Density is not overwhelming</td><td>A count-4 horse at a gallop, then a herd of them</td><td>20% of moving ticks &times; up to 4 particles &times; up to 2 emitters. If a single horse is too much, <code>EMIT_CHANCE</code> is the one number to turn down</td></tr>
-<tr><td>The wild rate feels right</td><td>Walk the overworld, or the horse dimension corridor</td><td>Roughly 1 wild horse in 13 trails <em>something</em>. If it reads as noise rather than as a find, <code>WILD_ALLELE_FREQUENCY</code> is the dial</td></tr>
-<tr><td>Sites track a scaled horse</td><td>Pair it with <code>body_size=Big/Big</code></td><td>The trail comes off the big horse&rsquo;s own hooves, not off where an ordinary horse&rsquo;s would be</td></tr>
-<tr><td>A foal emits</td><td>Any trailing foal</td><td>It emits. The sites are computed from the bounding box, so they should scale down &mdash; but nothing has looked</td></tr>
-</tbody>
-</table>
-
-<div class="note">
-    <span class="label">Known, and accepted for now</span>
-    <p>
-        Ten of the forty alleles are named after Bedrock particles with no Java
-        equivalent and carry a substitute &mdash; the table is on
-        <a href="gene-particle.html#java">the gene page</a>. Two more
-        (<code>Bigflm</code>, <code>Cndlflm</code>) were cut rather than substituted,
-        because Java flames carry neither a colour nor a scale and the pair would have
-        been indistinguishable from alleles that already exist.
-    </p>
-</div>
 
 <h2 id="carrots-db">&sect;0f &mdash; shearing, milking rules, carrots, the gene database (new 2026-09-05, NOT play-tested)</h2>
 
@@ -8200,108 +7941,16 @@
         the way it used to (same coat, same stats, same odds).</li>
 </ul>
 
-<h3>Shearing (&sect;12)</h3>
-<ul>
-    <li>Right-click an <strong>adult</strong> horse with shears &rarr; 1&ndash;3
-        <code>horse_hair</code> drop, a shear sound, hair particles. Shears take
-        durability. A <strong>foal</strong> says &ldquo;no coat to shear yet&rdquo;.</li>
-    <li>Shearing the same horse again the same Minecraft day says &ldquo;hasn&rsquo;t
-        grown back&rdquo;; after a full day (24&nbsp;000 ticks) it works again. The
-        gate is a stored game time on <code>HorseCooldownsAttachment</code>, so it
-        survives a relog.</li>
-    <li>A <strong>tamed</strong> horse gains <strong>+5 bond</strong> per shear
-        (honours the daily cap); an untamed horse can still be sheared for hair.</li>
-    <li><strong>No sheared look yet</strong> &mdash; the horse looks unchanged.
-        Deferred (<a href="known-gaps.html#gap-33">gap&nbsp;#33</a>).</li>
-    <li>Craft chain: 4 hair &rarr; bundle; 3 bundle &rarr; braided rope; 4 bundle
-        &rarr; hair cloth; all reverse. <code>braided_rope</code> /
-        <code>hair_cloth</code> borrow the bundle texture &mdash; need art.</li>
-</ul>
-
 <h3>Milking rules (&sect;7)</h3>
 <ul>
-    <li>A <strong>tamed mare at her own full health</strong>, right-clicked with a
-        bucket, gives milk &mdash; <strong>once per Minecraft day</strong> now, not
-        every few seconds. On cooldown she says &ldquo;nothing to give yet&rdquo;
-        rather than silently eating the click.</li>
     <li>An <strong>untamed</strong> mare: milking does nothing and you mount her
         normally (the yield&rsquo;s <code>when</code> fails, nothing is cancelled).</li>
     <li>A <strong>tamed mare below her own max health</strong>: currently gives
         neither milk nor a mount and <em>no message</em> &mdash; a known gap
         (<a href="known-gaps.html#gap-25">gap&nbsp;#25</a>). Heal her and it works.</li>
-    <li>Milking a <strong>stallion</strong> &rarr; a kick (half a heart) + &ldquo;the
-        stallion kicks you&rdquo;. Milking a <strong>foal</strong> &rarr; &ldquo;a
-        foal has no milk to give&rdquo;.</li>
     <li>Water / lava milk (<code>milk=Watr/Watr</code> / <code>Lava/Lava</code>)
         still work off any grown horse, on their own shorter cooldowns.</li>
 </ul>
-
-<h3>Breeding carrots (&sect;14)</h3>
-<ul>
-    <li>Feed a carrot to a breedable adult &rarr; a coloured particle burst
-        (purple epigenetic-splice / orange gene-splice / blue stabilizer / green magnifier /
-        gold known-gene-splice) + the horse enters breeding mode like a golden carrot. A foal
-        says &ldquo;cannot be bred&rdquo;.</li>
-    <li><strong>Unknown Epigenetic Splice</strong>: breed a fed parent &rarr; the foal&rsquo;s
-        alleles are unchanged from an un-fed pairing (same seed), but its
-        <em>epigenetics</em> differ &mdash; check via the paper dump or a
-        re-rolled bay&rsquo;s leg heights.</li>
-    <li><strong>Stabilizer</strong> / <strong>Magnifier</strong>: feed one parent
-        that is heterozygous at a visible locus (say <code>E/e</code>), breed
-        against an <code>e/e</code> partner &mdash; stabilizer &rarr; the foal
-        always gets the dominant copy; magnifier &rarr; always the recessive. On
-        an all-homozygous horse the carrot says &ldquo;does nothing for it&rdquo;.</li>
-    <li><strong>Unknown Gene Splice</strong>: feed one parent, breed several times &mdash; a
-        different single locus should be re-rolled each time (off the foal RNG);
-        never the sex locus.</li>
-    <li><strong>Known Gene Splice carrot</strong>: craft one &mdash; golden carrot +
-        research paper + horse hair (or hair cloth) + the gene&rsquo;s rarity item
-        (iron/gold/diamond/emerald/netherite ingot/nether star) + one flavour
-        item. The output names the gene in its tooltip. Feed it and breed &rarr;
-        that parent is treated as <code>n&lt;Gene&gt;</code> for that gamete
-        (25/50/25 when both parents carry the carrot).</li>
-    <li><strong>Combine</strong>: two or more carrots in the grid &rarr; one carrot
-        carrying all the effects. Stabilizer + magnifier, or two Known Gene Splice carrots for
-        the same gene that disagree, &rarr; the recipe simply does not resolve.</li>
-    <li>The window lapses (~30&nbsp;s, like love) if the pair doesn&rsquo;t breed;
-        it is consumed when they do.</li>
-</ul>
-
-<h3>Gene database &amp; papers (&sect;16)</h3>
-<ul>
-    <li>The Horse Browser&rsquo;s <strong>Gene Database</strong> tab now works
-        outside creative: an undiscovered gene is a dim name + a nudge; a
-        discovered one shows full detail, the variants seen, and &ldquo;Gene
-        carrot recipe: locked/unlocked&rdquo;. Creative shows everything.</li>
-    <li><strong>Tame</strong> a horse carrying a non-baseline allele, or
-        <strong>breed</strong> a foal with one &rarr; those genes appear in the
-        database. Confirm the sync fires (relog should keep them).</li>
-    <li>A <strong>research paper</strong> (from a loot chest, or written) &mdash;
-        right-click &rarr; &ldquo;added X to your gene database&rdquo; + the carrot
-        line unlocks; the paper is consumed.</li>
-    <li><strong>Write research paper</strong> button in the detail pane
-        (discovered genes with a carrot): with a book in your inventory &rarr; one
-        book spent, a paper for that gene handed back.</li>
-    <li><strong>Loot injection</strong>: open dungeon / mineshaft / stronghold /
-        village / mansion / outpost chests &mdash; a research paper turns up
-        ~18&nbsp;% of the time, gene weighted by rarity. If the boot log says
-        <code>Couldn&rsquo;t parse &hellip; loot_modifier</code>, the chest ids
-        drifted &mdash; the modifier file is at
-        <code>data/horsegenetics/loot_modifiers/</code> (plural, no index).</li>
-</ul>
-
-<h2>Wanted (not built yet)</h2>
-
-<div class="note warn" id="eyes-2">
-    <span class="label">Genetic eye colour</span>
-    <p>
-        The eyes render correctly everywhere, but they are copied verbatim from the
-        template (<code>CoatRegions.redrawEyes</code>). Wants a gene &mdash; and the
-        classic hook is <strong>blue eyes on cream double-dilutes</strong>, which would
-        make it the first gene to read <a href="gene-matp.html">MATP</a>&rsquo;s
-        expression for something other than pigment.
-    </p>
-</div>
 
 <h2>Still to verify</h2>
 
