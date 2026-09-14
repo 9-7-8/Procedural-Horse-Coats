@@ -285,10 +285,22 @@ window.HG = window.HG || {};
 
   // ---- panels ----------------------------------------------------------
 
+  /**
+   * A block of a panel that belongs to one or more steps - see the step bar
+   * below. In "show everything" mode the tag does nothing.
+   */
+  function section(host, steps) {
+    var s = document.createElement("div");
+    s.setAttribute("data-step", steps);
+    host.appendChild(s);
+    return s;
+  }
+
   function renderGenePanel() {
     var spec = state.spec;
-    var root = $("gene-panel");
-    root.innerHTML = "";
+    var host = $("gene-panel");
+    host.innerHTML = "";
+    var root = section(host, "1");
 
     root.appendChild(field("Gene key", text(spec.key, function (v) { spec.key = v; changed(); }),
       "modid.gene - unique, lower case"));
@@ -322,6 +334,7 @@ window.HG = window.HG || {};
     // classical words meant. So this asks the question directly.
     var expression = model.visible(spec);
 
+    root = section(host, "2");
     root.appendChild(el("h3", { text: "What it does" }));
     root.appendChild(el("p", {
       class: "hint",
@@ -348,6 +361,7 @@ window.HG = window.HG || {};
       checkbox(!!expression.masks, function (v) { expression.masks = v || undefined; changed(); }),
       "while this shows, no other gene is visible - dominant white does this"));
 
+    root = section(host, "6");
     root.appendChild(el("h3", { text: "Founder population" }));
     root.appendChild(el("p", {
       class: "hint",
@@ -369,8 +383,9 @@ window.HG = window.HG || {};
       text: "Total: " + (Math.round(total * 1000) / 1000) + "%"
     }));
 
-    renderGameplay(root, spec);
+    renderGameplay(host, spec);
 
+    root = section(host, "2");
     root.appendChild(el("h3", { text: "Alleles" }));
     root.appendChild(el("p", {
       class: "hint",
@@ -473,7 +488,8 @@ window.HG = window.HG || {};
    * to be hand-written JSON only, which is why a drop-in gene shipped without
    * a blurb and at whatever rarity the game assumed.
    */
-  function renderGameplay(root, spec) {
+  function renderGameplay(host, spec) {
+    var root = section(host, "7");
     root.appendChild(el("h3", { text: "Gameplay" }));
     root.appendChild(el("p", {
       class: "hint",
@@ -485,7 +501,8 @@ window.HG = window.HG || {};
       textarea(spec.blurb || "", function (v) { spec.blurb = v; changed(); }, 3),
       "a paragraph the Horse Browser's gene database shows once the gene is discovered"));
 
-    root.appendChild(field("Rarity", select(
+    // Rarity sits with the founders: both are "how common is this".
+    section(host, "6").appendChild(field("Rarity", select(
       model.RARITIES.map(function (r) {
         return { value: r, label: r.charAt(0).toUpperCase() + r.slice(1)
           + (r === model.DEFAULT_RARITY ? " (default)" : "") };
@@ -596,15 +613,19 @@ window.HG = window.HG || {};
 
       if (open) {
         var body = el("div", { class: "layer-body" });
-        body.appendChild(field("Layer name", text(layer.name, function (v) { layer.name = v; changed(); })));
+        // One card, two steps: where it paints (the masks) and how it looks
+        // (the op and its glow). "Show everything" shows both halves together.
+        var where = section(body, "3");
+        var what = section(body, "4");
+        where.appendChild(field("Layer name", text(layer.name, function (v) { layer.name = v; changed(); })));
 
-        body.appendChild(el("h4", { text: "Where" }));
+        where.appendChild(el("h4", { text: "Where" }));
         layer.masks.forEach(function (mask, mi) {
-          body.appendChild(maskCard(layer, mask, mi));
+          where.appendChild(maskCard(layer, mask, mi));
         });
         var addMask = [{ value: "", label: "+ add a mask…" }].concat(
           Object.keys(schema.MASKS).map(function (t) { return { value: t, label: t.toLowerCase() }; }));
-        body.appendChild(el("div", { class: "row" }, [
+        where.appendChild(el("div", { class: "row" }, [
           select(addMask, "", function (t) {
             if (!t) return;
             layer.masks.push(model.newMask(t));
@@ -612,22 +633,22 @@ window.HG = window.HG || {};
           })
         ]));
 
-        body.appendChild(el("h4", { text: "What" }));
+        what.appendChild(el("h4", { text: "What" }));
         var opTypes = schema.opsForPhase(spec.phase);
-        body.appendChild(field("Effect", select(opTypes, layer.op.type, function (t) {
+        what.appendChild(field("Effect", select(opTypes, layer.op.type, function (t) {
           layer.op = model.newOp(t);
           changed();
         }), schema.OPS[layer.op.type].blurb));
         schema.OPS[layer.op.type].params.forEach(function (p) {
-          body.appendChild(opParamRow(layer.op, p));
+          what.appendChild(opParamRow(layer.op, p));
         });
 
         // Glow is a property of the LAYER, not of the op: the same TOWARD that
         // paints a teal spot paints a lit one with this number moved. Magical
         // genes only - pigment does not glow, and the loader refuses it.
         if (spec.phase === "magical") {
-          body.appendChild(el("h4", { text: "Glow" }));
-          body.appendChild(glowRow(layer));
+          what.appendChild(el("h4", { text: "Glow" }));
+          what.appendChild(glowRow(layer));
         }
         card.appendChild(body);
       }
@@ -1598,7 +1619,113 @@ window.HG = window.HG || {};
     console.error("gene-creator parity failures:", result.failures);
   }
 
+  // ---- the step bar ----------------------------------------------------
+  //
+  // The creator used to be every field at once, in three columns, which is the
+  // right tool for somebody who already knows the format and an overwhelming one
+  // for everybody else. Owner, 2026-09-13: "split into simple steps, similar to
+  // how the breed designer is." The panels are unchanged - each block is tagged
+  // with the step(s) it belongs to (section(), and data-step in index.html) and
+  // the step bar shows one step's blocks beside the live horse. "Show everything"
+  // takes the filter off and gives back the old three-column view.
+
+  var STEPS = [
+    { title: "Name & kind", lede: "What the gene is called, and whether it moves the horse's own pigment (natural) or paints colour over it (magical)." },
+    { title: "Alleles & outcome", lede: "The alleles, what a horse carrying them looks like, whether one copy is enough, and the numbers each horse draws so no two look identical." },
+    { title: "Where it paints", lede: "Each layer's masks - the part of the horse it covers. Open a layer and tick 'show area' to see it on the horse." },
+    { title: "How it looks", lede: "What each layer does to that area: its colour, its pattern and its glow. Try other base coats and copies with the controls above the horse." },
+    { title: "Behaviour", lede: "What a horse carrying this does, as opposed to how it looks. Optional - most genes have none." },
+    { title: "Founders & rarity", lede: "How common each allele combination is among wild horses, and how rare the gene counts as." },
+    { title: "Gameplay", lede: "What the gene database says about it, its gene carrot, and what the random splice does with it. All optional." },
+    { title: "Check & export", lede: "Anything the game would refuse, the file itself, and where to put it." }
+  ];
+
+  var STEP_STORE = "phc-gene-creator-step";
+
+  function readStepState() {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(STEP_STORE) || "{}");
+      return { step: Math.min(STEPS.length, Math.max(1, Number(saved.step) || 1)), all: !!saved.all };
+    } catch (e) {
+      return { step: 1, all: false };
+    }
+  }
+
+  function writeStepState() {
+    try {
+      window.localStorage.setItem(STEP_STORE, JSON.stringify({ step: state.step, all: state.showAll }));
+    } catch (e) { /* private mode - the step just is not remembered */ }
+  }
+
+  function renderStepper() {
+    var bar = $("stepper");
+    if (!bar) return;
+    bar.innerHTML = "";
+    var chips = el("div", { class: "steps" });
+    STEPS.forEach(function (s, i) {
+      var n = i + 1;
+      chips.appendChild(el("button", {
+        type: "button",
+        class: "step-chip" + (!state.showAll && n === state.step ? " on" : ""),
+        onclick: function () { goToStep(n); }
+      }, [el("span", { class: "n", text: String(n) }), el("span", { text: s.title })]));
+    });
+    bar.appendChild(chips);
+
+    var nav = el("div", { class: "step-nav" });
+    if (!state.showAll) {
+      nav.appendChild(button("Back", function () { goToStep(state.step - 1); }, "btn small"));
+      nav.appendChild(el("span", { class: "mini", text: state.step + " of " + STEPS.length }));
+      nav.appendChild(button(state.step < STEPS.length ? "Next: " + STEPS[state.step].title : "Done",
+        function () { goToStep(state.step + 1); }, "btn small"));
+    }
+    var all = el("label", { class: "cover-toggle" });
+    var cb = el("input", { type: "checkbox" });
+    cb.checked = state.showAll;
+    cb.addEventListener("change", function () {
+      state.showAll = cb.checked;
+      applyStep();
+    });
+    all.appendChild(cb);
+    all.appendChild(el("span", { text: "show everything" }));
+    nav.appendChild(all);
+    bar.appendChild(nav);
+
+    if (!state.showAll) {
+      bar.appendChild(el("p", { class: "step-lede", text: STEPS[state.step - 1].lede }));
+    }
+  }
+
+  function goToStep(n) {
+    state.showAll = false;
+    state.step = Math.min(STEPS.length, Math.max(1, n));
+    applyStep();
+  }
+
+  function applyStep() {
+    var body = document.body;
+    body.classList.toggle("stepped", !state.showAll);
+    body.setAttribute("data-gc-step", String(state.step));
+    // A side column with nothing for this step steps aside entirely, so the step's
+    // column always sits beside the horse.
+    Array.prototype.forEach.call(document.querySelectorAll(".column[data-steps]"), function (col) {
+      col.hidden = !state.showAll && col.getAttribute("data-steps").split(" ").indexOf(String(state.step)) < 0;
+    });
+    // Step 3 and 4 work on a layer, so make sure one is open to work on.
+    if (!state.showAll && (state.step === 3 || state.step === 4) && state.selectedLayer < 0
+        && state.spec && model.layersOf(state.spec).length) {
+      state.selectedLayer = 0;
+      renderLayers();
+    }
+    renderStepper();
+    writeStepState();
+  }
+
   function start() {
+    var saved = readStepState();
+    state.step = saved.step;
+    state.showAll = saved.all;
+    applyStep();
     renderToolbar();
     wireActions();
     runParitySelfCheck();
@@ -1615,5 +1742,5 @@ window.HG = window.HG || {};
     });
   }
 
-  HG.ui = { start: start, state: state };
+  HG.ui = { start: start, state: state, goToStep: goToStep, steps: STEPS };
 })(window.HG);

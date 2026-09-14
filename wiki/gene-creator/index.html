@@ -22,10 +22,14 @@
   </div>
 </header>
 
+<!-- The step bar. Every block below is tagged with the step(s) it belongs to;
+     js/ui.js shows one step at a time beside the horse, or everything at once. -->
+<nav id="stepper" class="stepper" aria-label="Steps"></nav>
+
 <main class="workspace">
 
   <!-- LEFT: the gene itself -->
-  <section class="column left">
+  <section class="column left" data-steps="1 2 6 7">
     <h2>The gene</h2>
     <div id="gene-panel"></div>
   </section>
@@ -55,7 +59,8 @@
   </section>
 
   <!-- RIGHT: layers + export -->
-  <section class="column right">
+  <section class="column right" data-steps="3 4 5 8">
+    <div data-step="3 4">
     <h2>Layers</h2>
     <p class="hint">
       Each layer is <strong>where</strong> (masks) times <strong>what</strong> (an effect).
@@ -63,8 +68,9 @@
       <em>MAX</em> to widen it.
     </p>
     <div id="layers-panel"></div>
+    </div>
 
-    <details class="install">
+    <details class="install" data-step="3">
       <summary>Can a gene change the horse&rsquo;s eyes?</summary>
       <p>
         <strong>No, and please do not try.</strong> A gene file has no mask, op or effect
@@ -91,6 +97,7 @@
       </p>
     </details>
 
+    <div data-step="5">
     <h2>Effects</h2>
     <p class="hint">
       What a horse carrying this outcome <strong>does</strong>, as opposed to what it
@@ -98,7 +105,9 @@
       grant completely different behaviour.
     </p>
     <div id="effects-panel"></div>
+    </div>
 
+    <div data-step="8">
     <h2>Export</h2>
     <div id="problems"></div>
     <textarea id="json-output" readonly spellcheck="false"></textarea>
@@ -107,7 +116,8 @@
       <button type="button" class="btn" id="btn-download">Download</button>
       <code id="export-filename"></code>
     </div>
-    <details class="install">
+    </div>
+    <details class="install" data-step="8">
       <summary>Where does this file go?</summary>
       <p>
         Save it into <code>.minecraft/phc/genes/</code> - the instance folder, for a launcher
