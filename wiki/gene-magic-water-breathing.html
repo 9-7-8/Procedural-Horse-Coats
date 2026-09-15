@@ -86,14 +86,18 @@
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
-<div class="note warn">
-    <span class="label">Newly built, not yet play-tested</span>
-    <p>
-        Nothing on this page has been seen in game. The translator was written
-        against the 26.1.2 sources and is flagged as unverified in its own
-        comments. Checklist on <a href="verification.html">To be verified</a>.
-    </p>
-</div>
+<h3 id="verified">Verified</h3>
+
+<p id="verified-breath">
+    <strong>Gills last longer under water, shallows shorter, and every horse still drowns</strong> (2026-09-15, part of
+    gap 121). The worry was the air accumulator: whether a negative supply really drowns a horse, and whether a
+    <code>Shal</code> horse's extra drain could step past -20, the value vanilla drowns at, and never drown at all. The
+    yard's BREATH pen holds three horses in 2&times;2 water cells under a waterlogged stone-slab lid. A plain stone lid
+    left each head 0.08 above the water, which answered nothing for two runs. In the 09:09 run the first drowning damage
+    came in the expected order: <code>Shal/Shal</code> at tick 40, the plain horse at 340, <code>Gil/Gil</code> at 500.
+    Their lowest air readings were -21, -17 and -19, and all three took drowning damage, so the drain does not skip past
+    drowning.
+</p>
 
 <h2 id="graded">Graded, beside an absolute flag</h2>
 
