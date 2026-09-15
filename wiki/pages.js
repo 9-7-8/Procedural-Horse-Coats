@@ -195,6 +195,8 @@ window.HG.pages = {
                 { href: "gene-hood.html", text: "Hood", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-light.html", text: "Light", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-lut.html", text: "LUT", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-magic-cold.html", text: "Magic cold tolerance", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-heat.html", text: "Magic heat tolerance", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-white.html", text: "Magic white", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical", views: ["gameplay","coding","science"] },

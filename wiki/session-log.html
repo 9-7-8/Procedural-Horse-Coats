@@ -120,7 +120,19 @@
         <code>breed-spawning.toml</code> switches it off or changes the chance, and a breed file opts out with
         <code>"magical_variant": false</code>. Everything is added at runtime; no breed file changed
         (<a href="breeds.html#magical-herds">breeds</a>). <code>MagicalVariantTest</code> and the lineage tests pass. The
-        NeoForge half is type-checked only, and is not in the running build. None of these is in
+        NeoForge half is type-checked only, and is not in the running build.</li>
+    <li><strong>Heat and cold tolerance</strong> (owner's design): two magical loci, <code>magic_heat</code>
+        (<code>Htol</code>/<code>Hsen</code>/<code>n</code>) and <code>magic_cold</code>
+        (<code>Ctol</code>/<code>Csen</code>/<code>n</code>), on <code>AbstractClimateGene</code>. Both copies add, sensitive
+        counting negative. Each copy carries its amount and its own speed-versus-jump split. Two new world flags back them:
+        <code>hot_biome</code> (owner's pick: base temperature 1.0 and up, plus jungles and the mangrove swamp) and
+        <code>cold_biome</code> (snow can fall at the horse). A fork read every breed's lore and proposed pools; 38 breeds
+        carry one or both (<a href="breeds.html#climate">the table</a>). Magical herds had counted a pair as showing only if
+        it paints, which ruled out every behaviour and stat gene. A non-painting gene now shows when homozygous for a
+        variant. Both goldens were regenerated: the bake golden gained six lines, and no pipeline hash moved.
+        <code>CommonPortabilityTest</code> (a <code>Map.of()</code> in <code>Breeds.java</code> since 09-11) and
+        <code>GenotypeTest.randomDrawsOneFloatPerGeneInGeneOrder</code> (fertility's table ends on <code>tw/tw</code> since
+        09-14) were already failing, and still are. None of these is in
         the running build, and the designer's wasm waits for the client to close, because the bake rebuilds
         <code>common.jar</code>.</li>
     <li><strong>The two intake files became science tabs:</strong> fertility's real-horse biology and the timing design

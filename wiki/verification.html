@@ -86,6 +86,7 @@
     <code>CoatPipelineGoldenTest</code>, <code>CoatBakeGoldenTest</code> and <code>GenotypeCatalogTest</code>.
 </p>
 <ul>
+    <li><strong>The designer does not have the heat and cold loci yet</strong>, for the same reason as the line below.</li>
     <li><strong>The designer's wasm was not re-baked.</strong> <code>:web:bakeDesignerAssets</code> rebuilds <code>common.jar</code>, which
         would crash the running client. Until it is run, and <code>check-designer-boots.mjs</code> after it, the
         <a href="horse-designer/">horse designer</a> still founds pearl at the old one in 22.</li>
@@ -93,6 +94,12 @@
     <li><strong>Every breed's MATP pool</strong> (<a href="gene-matp.html#breed-frequencies">the table</a>). <strong>Pass:</strong> a herd of Andalusians or Lusitanos
         turns up the odd classic pearl and a Quarter Horse or Welsh herd plenty of palominos and buckskins. No Belgian, Dartmoor,
         Knabstrupper, Arabian or other breed without a pool is ever cream. An American Cream Draft is gold champagne with amber eyes.</li>
+    <li><strong>Heat and cold tolerance</strong> (<a href="gene-magic-heat.html">heat</a>, <a href="gene-magic-cold.html">cold</a>). Spawn
+        <code>magic_heat=Htol/Htol</code> and <code>magic_heat=Hsen/Hsen</code> horses with the custom egg and ride each across
+        a plains-to-desert border, then a jungle; do the same with <code>magic_cold</code> onto a snowy biome and up a
+        mountain past the snow line. <strong>Pass:</strong> the speed or jump change starts within a few seconds of crossing
+        (the flags are sampled on an interval) and stops on the way back, tolerant up and sensitive down, and a plains horse
+        is unchanged. The wild half: an Arabian herd in a desert should mostly be tolerant, an Icelandic herd in the snow too.</li>
     <li><strong>Magical herds</strong> (<a href="breeds.html#magical-herds">breeds</a>). Set <code>[magical_herds] chance = 1.0</code> in
         <code>phc/breed-spawning.toml</code> and ride into a plains biome. <strong>Pass:</strong> every new wild herd reads
         <em>Magical (Breed)</em>, every member of one herd shows the same magical gene, and the log names it

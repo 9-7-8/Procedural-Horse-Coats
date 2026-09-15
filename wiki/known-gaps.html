@@ -57,6 +57,16 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-252"><strong>Open, found 2026-09-15: <code>GenotypeTest.randomDrawsOneFloatPerGeneInGeneOrder</code> fails on fertility.</strong>
+    The test feeds every gene a maximal roll and expects it to land on its baseline, on the rule that a founder table lists its
+    commonest combination last. <code>FertilityGene</code>&rsquo;s table has ended on <code>tw/tw</code> since the 09-14 crash fix,
+    so the maximal roll lands there. Either the table goes back to ending on <code>n/n</code> (the draws would shift), or the test
+    exempts fertility the way it exempts the two night loci. Not a defect in play.</li>
+<li id="gap-251"><strong>Open, found 2026-09-15: <code>CommonPortabilityTest</code> fails on three <code>Map.of()</code> in <code>common/breed/</code>.</strong>
+    <code>Breeds.java</code> (the <code>BY_ID</code> field and its reset) and <code>BreedSpawnSettings.DEFAULT</code> build an empty
+    map with <code>Map.of()</code>, which TeaVM&rsquo;s immutable empty map turns into a divide-by-zero on the first <code>get</code> in
+    the browser. It has been there since 09-11, so the breed designer and horse designer may be one lookup from failing. The fix is
+    <code>CommonMaps.empty()</code> in all three, then a wasm bake and a boot check.</li>
 <li id="gap-250"><strong>Open, found 2026-09-15: a blood-only horse went a whole game day without biting the cow beside it.</strong>
     In the yard's 08:47 run, BLOOD ONLY (<code>diet=Dbld/Dbld</code>, hurt to half, hunger full) shared a pen with one cow,
     which the watch counted there all day. It logged no <code>[trace] blood</code> line at all. HUNT ORDER, an identical
