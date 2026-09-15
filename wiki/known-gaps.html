@@ -63,8 +63,11 @@
     <code>Dbld/Dbld</code> horse in the next row, bit its own cow at tick 54. The 09:09 run rebuilt the same pen and BLOOD
     ONLY bit its cow at tick 111. <code>BloodHuntGoal.canUse</code>'s conditions (a blood diet, hurt, not ridden or leashed,
     the sun check, a search every second) all held for both horses, so the difference is in <code>findPrey</code> or in
-    reaching the cow. <em>Next:</em> watch the pen across more runs; if it recurs, log <code>findPrey</code>'s result and the
-    path.</li>
+    reaching the cow. <em>The owner's call: log and keep watching.</em> <code>BloodHuntGoal</code> now logs, once a minute per
+    hurt blood-drinker, the prey it is hunting, or how many living things were in range and why each was ruled out (not
+    prey, or bitten today). Once per pursuit it logs a refused path. Since then BLOOD ONLY has bitten promptly in both
+    runs: its cow at tick 111 (09:09 run) and at tick 60 (09:40 run). The next time it goes a day without a bite, the log
+    will say which half failed.</li>
 <li id="gap-249"><strong>Open, found 2026-09-15, the owner's call: magic swim speed does nothing.</strong>
     <code>MagicSwimSpeedGene</code> adds an <code>ADD_MULTIPLIED_TOTAL</code> modifier of (factor &minus; 1) to
     <code>water_movement_efficiency</code>. Nothing in the mod gives that attribute a base, vanilla's is 0 (maximum 1), and
