@@ -97,7 +97,10 @@
     19:08 run's 0 in 35 is still unexplained, and with the instrument on it has not recurred. Left open, with
     the logging running. (Reading it: the log rolled at midnight, so the run's first 75 minutes are in
     <code>run/logs/2026-09-14-1.log.gz</code>, not <code>latest.log</code>.)</li>
-<li id="gap-244"><strong>Fixed 2026-09-14, not yet played: gap 237's fix stopped every tree in the yard's dryad pens from growing.</strong>
+<li id="gap-244"><strong>Closed 2026-09-15, confirmed off the log: gap 237's fix stopped every tree in the yard's dryad pens from growing.</strong>
+    By 03:15 on the overnight run every dryad pen had grown trees with its horses in it, including the one-horse
+    DRYAD DARK SMALL (70 dark oak logs) that the old reach box could never let grow, and no horse took
+    <code>inWall</code> damage in four and a half hours.
     <strong>Passing so far (19:08 build):</strong> DRYAD OAK grew its first tree by 19:59, and no horse took
     <code>inWall</code>. <strong>But no <code>tree grew</code> line fired for it</strong>, so that line under-reports.
     The census's log count is the reliable signal.
@@ -149,10 +152,9 @@
     lines in eight hours. <em>Fix:</em> equines are excluded from "passive", and the flee trace compares UUIDs
     with <code>equals</code>. The same foal also carried <code>plod1=ffs/ffs</code> and lived all day, which
     is gap 236.</li>
-<li id="gap-240"><strong>Fixed 2026-09-14, half confirmed: spruce and acacia dryad saplings never grew into trees in the yard.</strong>
-    <strong>Spruce is confirmed</strong>: the 19:08 run's DRYAD SPRUCE had 7 <code>spruce_log</code> by 22:11
-    (jungle 7 and oak 4 beside it). <strong>Acacia still grew nothing</strong> in three hours, so that half stays
-    open.
+<li id="gap-240"><strong>Closed 2026-09-15, confirmed off the log: spruce and acacia dryad saplings never grew into trees in the yard.</strong>
+    Spruce first: the 19:08 run's DRYAD SPRUCE had 7 <code>spruce_log</code> by 22:11. Acacia last: by 03:15 on
+    the overnight run DRYAD ACACIA had 19 <code>acacia_log</code> and DRYAD SPRUCE 18.
     In eight hours DRYAD SPRUCE and DRYAD ACACIA logged 240 and 174 growth attempts and never a log, while oak,
     jungle, oak+birch and both dark-oak pens grew. <em>Cause, confirmed against the game's data:</em> vanilla's
     tree clearance check accepts only air and <code>#minecraft:replaceable_by_trees</code> (read from the
