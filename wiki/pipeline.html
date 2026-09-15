@@ -1124,6 +1124,55 @@ double snipSize  = epi.get(SNIP_SIZE);</code></pre>
     both exhaust it.
 </p>
 
+<h2 id="verified">Verified</h2>
+
+<p id="verified-bake-freeze">
+    <strong>A herd coming into view froze the machine</strong> (found and fixed 2026-09-13). The render thread took
+    173&nbsp;s of CPU in 427&nbsp;s while the server idled; <code>getTextureLocation</code> and
+    <code>extractRenderState</code> each triggered a full <code>bake</code> for a newly-seen horse, and founding a wild
+    horse cost 10&ndash;24&nbsp;ms of a 50&nbsp;ms tick with no limit on how many ran at once. The fix is
+    <a href="#bake-budget">when a coat is baked</a>. Two diagnoses in the same hour were wrong (the server's spawn
+    burst, then a single stack sample); cumulative CPU per thread plus the call site settled it. The budgets
+    themselves are still guesses: <a href="known-gaps.html#gap-221">gap 221</a>.
+</p>
+
+<p id="verified-texture-cache">
+    <strong>The coat textures are bounded, and a resource reload drops them</strong> (2026-09-09).
+    <code>GeneticCoatTextureFactory</code>'s two maps never removed an entry, so a client kept one registered
+    <code>DynamicTexture</code> per genome ever rendered until logout; and no reload listener existed, so F3+T left old
+    coats and the old templates and <code>LutSet</code> in place. Both caches are <code>TexelBudgetCache</code>s, an LRU
+    whose capacity is texels with an entry floor, and every removal goes through one hook that frees the texture.
+    <code>CoatAssetReload</code> registers through <code>AddClientReloadListenersEvent</code>
+    (<code>RegisterClientReloadListenersEvent</code> does not exist in 26.1.2). <code>TexelBudgetCacheTest</code> caught
+    an off-by-one in eviction. The in-game half is <a href="verification.html#coat-cache">verification &sect;0-AV</a>.
+</p>
+
+<p id="verified-phase3-blend">
+    <strong>Phase 3's blend is a straight signed add</strong> (settled with its first three genes). Magic zebra showed
+    <code>-200%</code> reads black over any coat, dominant white included; pink hair showed a blind add cannot reach pink
+    on a black mane without flooding a pale one to white, so it reads <code>ColorView.visible</code> and returns the
+    delta that walks the texel to its target. The useful magical genes read first, which is why paint order matters;
+    the order is now derived from gene priority rather than hand-written lists.
+</p>
+
+<p id="verified-0-4-1-goldens">
+    <strong>The 0.4.1 drawing-engine change moved no existing coat</strong> (2026-09-09, by hash).
+    It added the <code>SVG</code>, <code>FAN</code> and <code>NORMAL</code> masks, edited
+    <code>SPOTS</code>, <code>RINGS</code>, <code>CRACKLE</code> and the <code>RAMP</code> op, and
+    brought twenty-two genes. All 1056 composed coats in the pipeline golden kept their hashes (every
+    key grew twenty-two segments longer, which is why every line of the file changed); all 620
+    existing bake-golden rows were unchanged and 57 joined them. Every new parameter defaults to the
+    old behaviour. The twenty-two genes all register, parse, take a genotype slot and bake an icon.
+</p>
+
+<p id="verified-black-forms">
+    <strong>Forty-two black alleles changed nothing that existed, except three white forms on
+    purpose</strong> (2026-09-10, by hash). The bake golden gained 42 rows, lost none and moved
+    exactly three &mdash; <a href="gene-pavonem.html">pavonem</a>,
+    <a href="gene-concentric-eyespots.html">concentric eyespots</a> and
+    <a href="gene-scarab-dapple.html">scarab dapple</a>, whose white forms were regraded. The
+    pipeline golden moved six rows, all of them the one new Cleave horse.
+</p>
 
 <div class="page-foot">
     <div class="seealso">

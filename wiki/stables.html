@@ -335,7 +335,7 @@
     <strong>on in a development run and off in a normal install</strong>. It shipped
     hard-coded on once, and players got <code>[Cowboy]</code> and
     <code>[Horseman]</code> lines in their chat
-    (<a href="known-gaps.html#gap-137">gap 137</a>).
+    (<a href="architecture.html#verified-debug-announce">gap 137</a>).
 </p>
 
 <p>
@@ -371,6 +371,20 @@
     <strong>None of these numbers has been played.</strong> Spacing and separation are
     the first thing to turn if stables feel too common or impossible to find, and they
     are a datapack edit rather than a code change.
+</p>
+
+<h2 id="verified">Verified</h2>
+
+<p id="verified-rotated-starts">
+    <strong>A rotated stable is queued like any other</strong> (fixed 2026-09-09, off the owner's report that stables
+    generated with no horses). <code>StablePopulator</code> only queued a stable when
+    <code>new ChunkPos(box.minX() &gt;&gt; 4, box.minZ() &gt;&gt; 4)</code> equalled the loading chunk, but a jigsaw
+    start is rotated about <code>BlockPos.ZERO</code>, so <code>CLOCKWISE_90</code> carries the box into &minus;x,
+    <code>COUNTERCLOCKWISE_90</code> into &minus;z and <code>CLOCKWISE_180</code> into both: three stables in four were
+    never queued. The guard was also unnecessary, since <code>chunk.getAllStarts()</code> already returns only that
+    chunk's starts. It is deduped by (structure, corner), the key <code>claim()</code> uses, and a stable logs when it is
+    queued as well as when it is filled, ungated by <a href="architecture.html#verified-debug-announce">debug.announce</a>.
+    Not yet seen in a world: <a href="known-gaps.html#gap-136">gap 136</a>.
 </p>
 
 </article>

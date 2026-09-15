@@ -154,6 +154,22 @@
     and the shelf used to add them again, which threw the title and the inventory label off
     the window. The last tab is a static on the screen, so it holds for the session.
 </p>
+
+<h3 id="verified">Verified</h3>
+
+<p id="verified-shelf-window">
+    <strong>The shelf window fits and files</strong> (closed 2026-09-09, on the second attempt). The first fix moved the
+    layout constants onto the menu and was written up as closed without anyone opening the window, which was still
+    rough: <em>&ldquo;text all over the place and you still can't put items in it&rdquo;</em>. Four captions were wider
+    than the 176px window and drawn with raw <code>g.text</code>; they go through <code>drawFitted</code> now. The filing
+    slot had been inactive on the server for the life of the block, because <code>isActive()</code> read a
+    <code>storeTab</code> field only the client sets; slot activity is side-aware now.
+</p>
+
+<p id="verified-stores-papers">
+    <strong>It stores papers</strong> (owner, the third play session of 2026-09-10).
+</p>
+
 </section>
 
 </article>

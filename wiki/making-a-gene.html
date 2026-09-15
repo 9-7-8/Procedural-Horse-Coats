@@ -1534,7 +1534,7 @@
     <a href="gene-tribal-ward.html">tribal ward</a>&rsquo;s pale one are both
     &ldquo;a ground, with a cut aimed at one part&rdquo;, and zeroing outside the cut
     deleted the ground. The rule above is the one that serves both. See
-    <a href="known-gaps.html#gap-120">gap 120</a>.
+    <a href="#verified-mask-parts">gap 120</a>.
 </p>
 <p>
     <strong><code>PARTS</code> is exempt from all of this</strong>, because there the list
@@ -4958,6 +4958,92 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     markings filters read). It also moves
     the coat golden file, because a new gene occupies a real position in the genotype
     code.
+</p>
+
+<h2 id="verified">Verified</h2>
+
+<p id="verified-mask-parts">
+    <strong>What a mask's <code>parts</code> means outside them depends on its position</strong> (2026-09-08). The
+    first mask <em>defines</em> the region, so outside its parts coverage is 0; every later mask <em>modifies</em> it,
+    so outside its parts it is skipped; <code>PARTS</code> is exempt. Before, <code>coverage</code> inverted both
+    &ldquo;outside the parts&rdquo; and &ldquo;field reads 0&rdquo;, and four genes (iridescent jewel, opal wing veins,
+    elytra veins, webbed) painted 6&nbsp;176 texels outside their declared parts. Zeroing excluded texels then broke the
+    ground-plus-cut idiom: tribal ward went from a painted white horse to a plain bay. Twelve icons moved in all: galaxy
+    and tribal ward came back byte-identical, the four stayed fixed, and five more (masked, ehretia, peafowl, snow cloud,
+    war mask) regained coverage on parts they listed. A discriminating case in <code>example-genes/prismatic.json</code>
+    fails 264 parity checks under the old rule.
+</p>
+
+<p id="verified-choice">
+    <strong><code>CHOICE</code> is a first-class per-horse decision</strong> (2026-09-09). Quarter had faked one with
+    value noise at a scale of 4000 body units stretched onto [-200, 201], which drifted slightly across the horse and
+    left a 1-in-401 half-strength quadrant. <code>CHOICE</code> draws an integer in <code>[0, options)</code> from a seed
+    knob, is constant across the body and exactly 0 or 1; all 24 of quarter's coin-flip masks migrated. The modulus is
+    taken over the low 32 bits only, because the creator's JavaScript twin has no 64-bit remainder; a power-of-two
+    <code>options</code> would agree either way, so <code>prismatic.json</code> uses <code>options: 3</code>, and
+    reintroducing the mismatch fails 72 parity checks. <code>ChoiceMaskTest</code> pins fairness (within 5% over 60,000
+    seeds for 2, 3, 4, 5 and 8 options), neighbour independence, reachability and determinism.
+</p>
+
+<p id="verified-pigment-spread">
+    <strong><code>PIGMENT</code>'s <code>spread</code> is measured in body units</strong> (2026-09-08). A disc of texels
+    crossed UV seams: Integration dilating three units off a bay's black socks covered the whole horse. The radius is
+    tested on the body point each cached <code>HorseSkinGeometry.sample</code> carries; the texel window only bounds the
+    search. Copy that shape for any neighbourhood of the coat.
+</p>
+
+<p id="verified-perdose">
+    <strong>The parser refuses a <code>perDose</code> that cannot vary</strong> (2026-09-09). <code>perDose</code> is
+    indexed by copies of the first-declared allele, so a coloured expression reached by two copies of the second always
+    reads <code>perDose[0]</code>, which authors write as 0; crescents, lasertae, polymoon, stellar and wormholes shipped
+    a coloured form that painted nothing. <code>GeneSpecParser</code> now refuses a <code>perDose</code> in an expression
+    reachable at only one dose, naming the dose and the constant it reads. A corpus scan first found zero offenders; the
+    catch-all expression is exempt.
+</p>
+
+<p id="verified-band-order">
+    <strong>The parser refuses a band whose <code>to</code> can fall below its <code>from</code></strong> (2026-09-09).
+    <code>BodyStripes.smoothstep</code> treats <code>edge1 &lt;= edge0</code> as a hard step, not a reversed ramp: patina's
+    <code>from: 0.75, to: 0.35</code> gave the opposite of what it asked, and Integration's knob range straddled its own
+    <code>from</code>, reversing about half its horses. The check is on possibility, since knobs are ranges drawn
+    independently; it covers <code>AXIS</code>, <code>PIGMENT</code>, <code>LUMA</code> and <code>WAVES</code>, per dose.
+    <code>RAMP</code> is exempt, because a reversed interpolation is a thing an author might mean. Zero of 513 banded
+    masks tripped it.
+</p>
+
+<p id="verified-creator-metadata">
+    <strong>The creator edits a gene's metadata</strong> (2026-09-06). <code>blurb</code>, <code>rarity</code>,
+    <code>carrot</code> and <code>splice</code> have forms, <code>tidy()</code> drops defaults, and
+    <code>CreatorMetadataRoundTripTest</code> parses the creator's export with the real <code>GeneSpecParser</code>, since
+    parity cannot see fields that do not paint. The creator authors two alleles and one visible outcome, and says so on
+    screen; anything larger is hand-edited.
+</p>
+
+<p id="verified-dead-layers">
+    <strong><code>DeadLayerTest</code> catches a layer that paints nothing</strong> (2026-09-10). Dorsal wing shipped
+    painting a solid black horse and contour a white one, because layer deltas are measured against the gene's starting
+    colour and summed. The test takes each layer out and fails if the horse does not change on any base coat: a
+    measurement, because whether two masks overlap is not decidable by reading them. It runs in 23 seconds and found 29
+    dead layers across the shipped genes (empty folds, deltas clamped away by an overlapping layer, features smaller than
+    a texel), and flags the pre-fix dorsal wing on exactly its two invisible layers.
+    <code>common/src/test/resources/dead-layers.txt</code> is a ratchet: it fails on a new entry and on an entry that has
+    come alive. What it cannot catch is <a href="known-gaps.html#gap-169">gap 169</a>.
+</p>
+
+<ul id="verified-drop-in">
+    <li><strong>A drop-in gene loads in a real client</strong> from <code>.minecraft/phc/genes/</code>
+        (owner, by 2026-09-11).</li>
+    <li><strong>The six SVG barrel drawings sit wherever their <code>posU</code> knob puts them</strong>,
+        shoulder to hip (owner, 2026-09-11).</li>
+</ul>
+
+
+<p id="verified-creator-look">
+    <strong>Verified 2026-09-06: the rebuilt creator, on sight.</strong> The owner: &ldquo;That looks
+    correct.&rdquo; A general look at the live page rather than an item-by-item walk, which settles three
+    things: the page loads (the <code>expresses</code> <code>ReferenceError</code> is gone), the parity
+    line reads green, and the 3D preview reads as a horse instead of a pile of bounding boxes. The
+    interactive parts are open: <a href="verification.html#creator">verification &sect;0-H</a>.
 </p>
 
 <h2 id="tools">What to build it with</h2>

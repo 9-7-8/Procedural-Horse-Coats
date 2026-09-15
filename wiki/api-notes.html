@@ -205,6 +205,19 @@
 </li>
 </ul>
 
+<h2 id="verified">Verified</h2>
+
+<p id="verified-melee-cooldown">
+    <strong><code>MeleeAttackGoal.getAttackInterval()</code> is not on the attack path</strong> (found 2026-09-13,
+    checked in bytecode). <code>checkAndPerformAttack</code> calls <code>resetAttackCooldown()</code>, which writes a
+    hard-coded <code>bipush 20</code> into the private <code>ticksUntilNextAttack</code>, so overriding
+    <code>getAttackInterval()</code> changes nothing: every horse kept a zombie's rate, and a guardian tamed at
+    15:09:17 was dead at 15:09:59, its zombie one second later. <code>canPerformAttack</code> does ask
+    <code>isTimeToAttack()</code> virtually, so <code>HorseMeleeGoal</code> keeps its own cooldown: its
+    <code>resetAttackCooldown</code> sets it, its <code>isTimeToAttack</code> reads it, and <code>tick</code> counts it
+    down before the attack check (10 ticks). An override that compiles and is documented can still never be reached;
+    only measuring the thing it was meant to change shows that.
+</p>
 
 </article>
 </main>

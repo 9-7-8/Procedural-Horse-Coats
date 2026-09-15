@@ -269,6 +269,33 @@
         not take, at 46 to 73 percent each. That is chance, not a fault.</li>
 </ul>
 
+<h3 id="settled">Settled</h3>
+
+<p id="settled-repro-timing">
+    <strong><code>debug.tools</code> shortens the reproductive day</strong> (the owner, 2026-09-13). With the testing
+    tools on, <code>ServerConfig.reproTiming()</code> uses a one-minute day, so a heat and a pregnancy each last a minute.
+    That is deliberate, including on a real server where the owner tests release builds with the switch on, where every
+    mare runs about twenty times fast. It is the only thing behind that switch that changes how the game plays for
+    everyone.
+</p>
+
+<ul id="verified-yard-0914">
+    <li><strong>Maternity runs to the minute</strong> (2026-09-14 morning, the first quarter hour, unattended):
+        the single foal at 1 minute, twins (&ldquo;foaled 2 of 2&rdquo;) at 2, and the early loss at 1, with its
+        genetic-defect damage.</li>
+    <li><strong>Natural covers, and the pens that must not breed</strong> (the same quarter hour). NATURAL PAIR
+        had two foals. SUBFERTILE PAIR got exactly one cover per heat, about two minutes apart, at 20% and then
+        12% odds, none taking. GELDING CONTROL had no foal across several heats. THE CAP held all nine horses
+        and nobody was covered. COWBOY STOCK was never covered. MET NATURAL foaled and had an early loss.</li>
+    <li><strong>The cap holds for hours</strong> (2026-09-14, 09:07 to 12:15, unattended). THE CAP had exactly
+        nine horses at every census for three hours, and MET NATURAL grew from two to nine and stayed there.
+        Across the yard and the wild bands 246 natural covers took and 244 foalings followed, with MET and KIT
+        early losses logging their cause.</li>
+    <li><strong>A hurt mare is not covered</strong> (2026-09-14, second run). HURT MARE was set to 11/22 at
+        07:26:48 and healed a point at a time. Through eight minutes of heats at part health she was never
+        covered, and she was covered at 07:34:32, seconds after reaching full health.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

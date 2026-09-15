@@ -121,6 +121,19 @@
     reason.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-world-flag">
+    <strong>Caveborn and daywalker read the right light</strong> (2026-09-13, census). Lit pen:
+    <code>CAVEBORN=0.165 (base 0.188) light=15, DAYWALKER=0.221 (base 0.188) light=15</code>. Dark pen:
+    <code>CAVEBORN=0.221 (base 0.188) light=7, DAYWALKER=0.165 (base 0.188) light=1</code>. All four cells are
+    correct. Caveborn had been taking the daylight penalty in the dark, and the gene was never at fault:
+    <code>GeneAbilityHandler.worldFlag</code> answered <code>dark</code> from a cache entry that had never computed
+    it, first because four flags shared one timestamp, then (for about an hour, mid-fix) because a
+    <code>Long.MIN_VALUE</code> sentinel overflowed the age test and pinned every flag off. What settled it was
+    printing the raw input (<code>light=N</code>, read with the gene's own call) beside the output.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

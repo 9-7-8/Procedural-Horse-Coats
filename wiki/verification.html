@@ -121,8 +121,8 @@
 
 <h2 id="fixes-0914">&sect;0-DZ &mdash; Fixes from the all-day run (2026-09-14, built at 17:15, NOT played)</h2>
 <p>
-    <strong>Start the next run with</strong> <code>gradlew :neoforge-26.1.2:runClientTestWorld</code>
-    (confirmed: it lands in the yard with no clicks, about thirty seconds from launch), leave it for a few
+    <strong>Start the next run with</strong> <code>gradlew :neoforge-26.1.2:runClientTestWorld</code>,
+    leave it for a few
     hours, and read these off the log.
 </p>
 
@@ -291,30 +291,6 @@
     lines are carrot folds. <code>/testkit census</code> prints every pen at once.
 </p>
 
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 morning (the first quarter hour, unattended)</span>
-    <p>
-        <strong>Maternity ran to the minute</strong>: the single foal at 1 minute, twins (&ldquo;foaled
-        2 of 2&rdquo;) at 2, and the early loss at 1, with its genetic-defect damage.
-        <strong>Natural covers</strong> conceive and foal: NATURAL PAIR had two foals.
-        <strong>SUBFERTILE PAIR</strong> got exactly one cover per heat, about two minutes apart,
-        at 20% and then 12% odds, none taking. <strong>GELDING CONTROL</strong> had no foal
-        across several heats. <strong>THE CAP</strong> held all nine horses and nobody was covered.
-        <strong>COWBOY STOCK</strong> was never covered. <strong>MET NATURAL</strong> foaled and
-        had an early loss. All deleted below.
-    </p>
-</div>
-
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 (09:07 to 12:15, unattended)</span>
-    <p>
-        <strong>THE CAP never grows past the cap</strong>: exactly nine horses at every census for
-        three hours. <strong>MET NATURAL levels off at the cap</strong>: it grew from two to nine and
-        stayed there. Across the yard and the wild bands, 246 natural covers took and 244 foalings
-        followed, with MET and KIT early losses logging their cause. Deleted below.
-    </p>
-</div>
-
 <h3 id="fertility-yard">In the yard, in this order</h3>
 <ol>
     <li><strong>Walk in and check the log first.</strong> Expect <code>fertility pens built
@@ -332,14 +308,8 @@
         The chat lines should be a gold one naming the foal, a grey &ldquo;did not carry&rdquo; for
         the loss, and &ldquo;has foaled twins&rdquo;. After a minute and twenty seconds,
         TWINS' Speed on the info screen is 15% lower.</li>
-    <li><strong>Row O west, HURT MARE: confirmed on the second run, 2026-09-14.</strong> She was set
-        to 11/22 at 07:26:48 and healed a point at a time. Through eight minutes of heats at part
-        health she was never covered, and she was covered at 07:34:32, seconds after reaching full
-        health. The pen stays only until it is next tidied away.</li>
     <li><strong>Row O west, THE CAP, with a lead.</strong> Take one mare out with the chest's lead:
-        covers start within seconds. Each birth adds a horse back, so the pen settles again.
-        The unattended half, that the pen never grows past the cap, is confirmed
-        (<a href="fertility.html#verified">gap 206</a>).</li>
+        covers start within seconds. Each birth adds a horse back, so the pen settles again.</li>
     <li><strong>Row P east, GOLD ANY HEAT.</strong> The kit says she is <em>not in heat</em>.
         Golden carrots on both give a foal <strong>at once</strong> anyway: vanilla, untouched.
         <br><strong>Row P west, JAR STUD and JAR &amp; KIT BENCH</strong>. The stud has his own
@@ -523,7 +493,7 @@
         on one of the yard's tamed-but-ownerless horses: both refuse, sign stays blank. Fill
         a seed jar from a stallion you do not own: refused. Use a jar on <em>your</em> mare
         when the stallion was someone else's: a foal. Also: clicking a wall with a
-        <em>blank</em> stall sign now says so. <a href="known-gaps.html#gap-223">Gap 223</a>
+        <em>blank</em> stall sign now says so. <a href="item-stall-signs.html#verified-sign-floor">Gap 223</a>
         has the stall history.</li>
     <li><strong>The holding pen</strong> (row C west). Parked by the owner on 2026-09-14: the
         bound signs are done for now, and the ticket mare was removed. When it comes back, the
@@ -534,26 +504,23 @@
         horse. Horses now swing every 10 ticks against a zombie's 20
         (<a href="known-gaps.html#gap-222">gap 222</a>); a fighting horse should still close
         on its target rather than stand reared.
-        <br><strong>2026-09-14: the gene works, the horse lost the fight.</strong> The owner was hit
-        first and the guardian went for the zombie, but took nine hits of 3.0 and died with the
-        zombie alive. <strong>Horses now kick monsters twice as hard</strong> (6 for an ordinary
+        <br><strong>2026-09-14: the horse lost the fight</strong> (the gene itself is
+        <a href="gene-guardian.html#verified-guardian">verified</a>). <strong>Horses now kick monsters twice as hard</strong> (6 for an ordinary
         horse, <code>HorseAggroHandler.onHorseKicksMonster</code>). <strong>Pass:</strong> the
         guardian kills a single zombie and lives.</li>
     <li><strong>Ocean-born diving</strong> (row E west). Mounted and in water, <b>F</b> goes
         down, <b>F</b> again stops; dismounting clears it. F also swaps hands &mdash;
         rebindable.</li>
-    <li><strong>A lycanthrope's drops.</strong> Dying in animal form killing the horse is
-        confirmed: on 2026-09-14 two pufferfish forms drowned on land, each logging a
-        <code>[lycan]</code> line and then <code>[trace] horse died</code> from drowning
-        (<a href="known-gaps.html#gap-220">gap 220</a>). Not checked: that the horse's drops land.
+    <li><strong>A lycanthrope's drops.</strong> Dying in animal form kills the horse
+        (<a href="gene-lycan.html#verified-lycan">verified</a>). Not checked: that the horse's drops land.
         The drowning itself is <a href="known-gaps.html#gap-238">gap 238</a>.</li>
     <li><strong>A splice-carrot foal's genotype</strong> (rows L, M, N). The breeding is
-        confirmed; open a foal and check the substituted locus is actually there.</li>
+        <a href="item-splice-carrots.html#verified-splice-breeds">verified</a>; open a foal and check the substituted locus is actually there.</li>
     <li><strong>The egg-layer cap</strong> (row D east): fills, and <em>stops</em>.</li>
     <li><strong>The dairy's three refusals</strong> (row D west): a foal, a hurt mare, and
-        one already milked each refuse. Milking and shears themselves are confirmed.</li>
+        one already milked each refuse.</li>
     <li><strong>Ender echo's ridden half</strong> (row K east): it blinks when its
-        <em>rider</em> is hit. The on-foot blink is confirmed.</li>
+        <em>rider</em> is hit.</li>
     <li><strong>Performance readings</strong>, from the log: the <code>coat baking:</code>
         line at shutdown gives the slowest single bake, which decides whether
         <code>coats.bakeBudgetMs</code> = 4 is right; <code>[Founding]</code> lines on
@@ -562,8 +529,7 @@
         three-hour run on 2026-09-14 had exactly one)
         (<a href="known-gaps.html#gap-221">gap 221</a>).</li>
     <li><strong>Built, never confirmed:</strong> the tack room, food preference, and the ward's
-        non-interference half. (The three magic stat pens are confirmed from their watch lines on
-        2026-09-14, and the ward's 70 monster spawns were all far from a warded horse, which says
+        non-interference half. (The ward's 70 monster spawns on 2026-09-14 were all far from a warded horse, which says
         nothing either way.)</li>
 </ol>
 
@@ -572,132 +538,14 @@
     <li>Distant horses wear the plain stand-in coat and change to their own once, as you come
         within 32 blocks, without flickering back.</li>
     <li>Gilded crackle redrawn, and starburst's emblem inheritance.</li>
+    <li>Rain falls visibly in the horse dimension. The <code>debug_pens</code> biome carried
+        <code>"has_precipitation": false</code> until 2026-09-13, so the level rained and the biome
+        dropped nothing. Needs a restart after the datapack change.</li>
 </ul>
 
 <p hidden>
     <span id="ownership-and-landing"></span><span id="stalls-and-swings"></span><span id="coat-budget"></span><span id="confirmed-1430"></span><span id="play-1400"></span><span id="eyesight-answered"></span><span id="log-read-0913"></span><span id="audit-0913"></span>
 </p>
-
-<h2 id="night-and-weather">&sect;0-DH &mdash; The night loci and the weather loci, all of them (2026-09-13)</h2>
-
-<div class="note good">
-    <span class="label">Thirteen variants and two loci that had never been watched at all &mdash; in one day</span>
-    <p>
-        &sect;0-AT has said since 2026-09-09 that "the night loci - behaviour, so nothing
-        here is confirmed by a render". <strong>All eight night-temper forms and all five
-        night-watch forms are now confirmed</strong>, and every one of those stalls is
-        gone.
-    </p>
-    <p>
-        <strong>They were never broken; they were unwatchable, and for three different
-        reasons.</strong> The dimension had no night, because a
-        <code>dimension_type</code> needs <code>timelines</code> as well as a
-        <code>default_clock</code> and it carried only the clock. The monster-targeted
-        forms had nothing to be about, because the biome was <code>the_void</code> and
-        spawned nothing. And the fleeing forms were in stalls, where the navigator refused
-        their path before it began. Each of those looked exactly like "the gene does
-        nothing".
-    </p>
-</div>
-
-<h3>The shy forms, and why they took three attempts</h3>
-
-<p>
-    Hunt and flee are one locus with the sign flipped, and they went into identical
-    4&nbsp;&times;&nbsp;7 stalls. <strong>The stalls confirmed the hunters immediately and
-    hid the fleers completely</strong> &mdash; because a hunter closes on you and a wall
-    <em>helps</em> it, while a flee-er paths <code>FLEE_DISTANCE</code>, twelve blocks,
-    and needs the one thing a stall cannot give. Moved to 19&nbsp;&times;&nbsp;30
-    paddocks, the log filled with <strong>48 lines, every one <code>path
-    accepted</code></strong>, including <code>from minecraft:cow</code> for the
-    herd-targeted form that had been reported dead.
-</p>
-
-<p>
-    The instrument is the reason that is a fact rather than an impression:
-    <code>Navigation.moveTo</code> returns whether the path was accepted and the return
-    was being discarded, so a flee that never fired and a flee that fired into a fence
-    four blocks away read identically.
-</p>
-
-<h3>The weather loci &mdash; measured, not looked at</h3>
-
-<div class="note good">
-    <span class="label">&sect;0-BT's "the one locus family you cannot check on demand"</span>
-    <table class="data">
-        <thead><tr><th></th><th><code>movement_speed</code></th><th><code>jump_strength</code></th></tr></thead>
-        <tbody>
-            <tr><td><strong>dry</strong></td><td>0.188 &ndash; 0.188</td><td>0.500 &ndash; 0.500</td></tr>
-            <tr><td><strong>rain</strong></td><td>0.194 &ndash; 0.252</td><td>0.584 &ndash; 0.591</td></tr>
-        </tbody>
-    </table>
-    <p>
-        Both move, and <strong>the shape is right as well as the direction</strong>:
-        identical when dry, because there is no modifier at all, and spreading into a
-        range under rain because each horse's magnitude is drawn per allele copy.
-    </p>
-    <p>
-        <strong>The owner reported this as not working</strong>, and looking at the horses
-        would have said exactly that. It is only a fact because the census prints a named
-        attribute's range across the pen &mdash; a conditional modifier is either on the
-        horse or it is not, which is a question about numbers and not about pictures.
-    </p>
-</div>
-
-<div class="note warn">
-    <span class="label">Rain was invisible, and that was mine</span>
-    <p>
-        The new biome carried <code>"has_precipitation": false</code>, copied from
-        <code>the_void</code> when it was written. So the <em>level</em> rained &mdash; grey
-        sky, <code>isRaining()</code> true, the genes firing &mdash; and the
-        <em>biome</em> dropped nothing, which is why it looked like the command had not
-        worked. Now <code>true</code>. Needs a restart, being a datapack file.
-    </p>
-</div>
-
-<h2 id="conclusive">&sect;0-DE &mdash; Five things settled, and the pens are gone (2026-09-13)</h2>
-
-<div class="note good">
-    <span class="label">The holy ward works. First demonstration in the project's history.</span>
-    <table class="data">
-        <thead><tr><th></th><th>spawns attempted</th><th>spawns arrived</th></tr></thead>
-        <tbody>
-            <tr><td><strong>Warded chamber</strong></td><td>39</td><td><strong>0</strong></td></tr>
-            <tr><td><strong>Control chamber</strong></td><td>53</td><td><strong>53</strong></td></tr>
-        </tbody>
-    </table>
-    <p>
-        Ten minutes, unattended, with the player standing on the teal wool thirty blocks
-        off. <strong>Thirty-nine consecutive cancellations and not one leak.</strong>
-    </p>
-    <p>
-        <strong>The evidence is stronger than the test was designed to produce</strong>,
-        by luck. The two hooks straddle the cancellation:
-        <code>FinalizeSpawnEvent</code> fires <em>before</em> the ward can cancel, so it
-        counts <b>attempts</b>; <code>EntityJoinLevelEvent</code> only fires if nothing
-        cancelled, so it counts <b>arrivals</b>. The gap between the columns <em>is</em>
-        the gene. An empty room would have been consistent with a dozen boring
-        explanations; 39-and-0 beside 53-and-53 is not consistent with any of them.
-    </p>
-</div>
-
-<ul>
-    <li><strong>Intimidating holds its radius now.</strong> n=5, <strong>min 7.9, median
-        8.1, max 8.8</strong>, against a pre-fix baseline of median 4.2 and min 0.6. The
-        path-based repel was the right mechanism; the velocity shove never was.</li>
-    <li><strong>The retinue costs nothing measurable.</strong> A flat
-        <strong>50.0&nbsp;ms/tick</strong> with 213 entities including twenty-four
-        continuously re-pathing mobs. That answers &sect;0-BT's <em>"a stable with several
-        pack leaders in it is the case I have no feel for at all"</em> &mdash; there is no
-        feel to have.</li>
-    <li><strong>Lycanthropy works</strong>, found by accident:
-        <code>creature joined | minecraft:allay [LYCAN]</code>. The horse became an allay.
-        Its stall is gone and could never have worked anyway &mdash; allays fly and a pen
-        wall is one block high.</li>
-    <li><strong>The biome spawns.</strong> 42 hostiles in two minutes, every one logged
-        <code>by NATURAL</code>. <code>the_void</code> to
-        <code>horsegenetics:debug_pens</code> did exactly what it had to.</li>
-</ul>
 
 <h2 id="art-pass">&sect;0-DC &mdash; Four coat genes redrawn, and a biome that spawns zombies (2026-09-13, NOT looked at)</h2>
 
@@ -769,14 +617,6 @@
 </div>
 
 <ul>
-    <li><strong>The retinue's cost.</strong> &sect;0-BT ranked this itself: <em>&ldquo;leader
-        of the pack is the performance one&hellip; one horse is certainly fine. A stable
-        with several pack leaders in it is the case I have no feel for at all.&rdquo;</em>
-        The new pen holds <strong>four leaders and sixteen cows</strong> &mdash; twenty-four
-        mobs re-pathing on a forty-tick beat, all night. The census already prints real
-        milliseconds per tick, and the dimension's baseline is a flat 50.0.
-        <strong>Pass: it stays at 50.0</strong>, which would be the first time anyone could
-        say what this gene costs. A climb, with the entity count flat, is the finding.</li>
     <li><strong>How often a <code>spread</code> actually lands.</strong>
         <a href="known-gaps.html#gap-208">Gap 208</a> predicts a hit rate near
         <strong>one in three</strong> for anything that plants, because the verb picks one
@@ -805,9 +645,6 @@
         horse survives lava whether or not it is fireproof (the dimension cancels horse
         damage) and so does the rider (creative). Both are confirmed already; this is
         about speed alone.</li>
-    <li><strong>The hydrophobic pen &mdash; CONFIRMED 2026-09-13</strong>, and it does
-        more than its page claimed: it throws the rider <em>and</em> heads for an edge.
-        The pen stays only because it costs nothing; the gene is done.</li>
 </ul>
 
 <div class="note warn">
@@ -818,7 +655,7 @@
     </p>
 </div>
 
-<h2 id="dryad-rebuilt">&sect;0-CZ &mdash; Dryad is nine alleles now, and intimidating pushes properly (2026-09-13, NOT looked at)</h2>
+<h2 id="dryad-rebuilt">&sect;0-CZ &mdash; Dryad is nine alleles now: bone meal is what is left (2026-09-13, NOT looked at)</h2>
 
 <div class="note danger">
     <span class="label">This changes a locus's allele set, which is the most disruptive thing a change here can do</span>
@@ -832,39 +669,16 @@
     </p>
 </div>
 
-<h3>What to check, in order</h3>
-
-<ol>
-    <li><strong>A matched pair plants its own species and nothing else.</strong> Spawn
-        <code>Oak/Oak</code> and <code>Spru/Spru</code> and leave them in the yard. The
-        watch names the block, so the log answers this without anybody looking.</li>
-    <li><strong>A mixed pair plants both, at half rate.</strong> <code>Oak/Brch</code>
-        should leave roughly as many things per hour as <code>Oak/Oak</code> does, split
-        between the two. This is the new rule and nothing has ever exercised it.</li>
-    <li><strong>A carrier still does nothing.</strong> <code>Oak/n</code> is the control
-        &mdash; if it plants, the recessive-to-wild-type half has broken and the whole
-        locus is now dominant.</li>
-    <li><strong>Dark oak makes a square.</strong> <code>Dark/Dark</code>, left alone.
-        The saplings should cluster rather than scatter, and a tree should eventually
-        appear. <strong>This is the one most likely to be wrong</strong>, because the
-        clustering search is new code with no test behind it &mdash; and it fails
-        <em>invisibly</em>, as a pen of saplings that never become anything, which is
-        exactly the symptom it was written to cure.</li>
-    <li><strong>Mushrooms only appear where they survive.</strong> <code>Mush/Mush</code>
-        in daylight on grass should plant <em>nothing at all</em> &mdash; that is the
-        pass, not a failure. Put one in the yard's dark spawner room, or on mycelium, and
-        it should plant there. If mushrooms appear in the open and vanish a tick later,
-        <code>canSurvive</code> is not being consulted.</li>
+<p>
+    Planting, the half rate, the carrier, dark oak and mushrooms are
+    <a href="gene-dryad.html#verified">verified</a>, and intimidating's push is
+    <a href="gene-intimidating.html#verified-repel">verified</a>. Left:
+</p>
+<ul>
     <li><strong>Bone meal never touches a crop.</strong> <code>Bone/Bone</code> beside a
         wheat field is the test that matters, and the one with a design decision riding
         on it. It should hurry saplings and grass and leave every crop alone.</li>
-    <li><strong>Intimidating: the number should move.</strong> The yard measures it
-        automatically. Tonight's baseline is a <strong>median nearest-cow distance of
-        4.2 blocks with 63 of 64 readings inside 8</strong>. If the path-based repel
-        works, the median should sit at <strong>8 or more</strong> and stay there. This
-        is the first change in the mod measured against a number collected before it
-        was made.</li>
-</ol>
+</ul>
 
 <div class="note">
     <span class="label">What the watch will tell you without being asked</span>
@@ -877,161 +691,6 @@
         pass.
     </p>
 </div>
-
-<h2 id="first-night">&sect;0-CY &mdash; The first night's readings (2026-09-13, read off the log)</h2>
-
-<div class="note good">
-    <span class="label">Three hours unattended, and it worked &mdash; including the part where it caught its own tests being wrong</span>
-    <p>
-        The run started 23:07 and was still going at 02:04: <strong>89 censuses</strong>,
-        a flat entity count (154&ndash;155, so nothing leaked) and a flat 50.0&nbsp;ms per
-        tick throughout. The <a href="#overnight-watch">watch</a> did the job it was built
-        for. What follows is what it found, and two of the six pens turned out to be
-        testing nothing &mdash; which is itself the result, and the reason the census
-        prints every pen whether it moved or not.
-    </p>
-</div>
-
-<h3>Dryad &mdash; confirmed, for the first time ever</h3>
-
-<p>
-    <strong>00:00:03 a sapling appeared; 00:01:09 it grew.</strong> Six oak logs and
-    fifty-two leaves, seventy seconds apart, in a pen that had been bare grass. That is
-    the whole gene working end to end &mdash; plant, then vanilla's own random ticks
-    &mdash; and it has never been seen before, because until yesterday the dimension
-    forbade the spread verb and before that the plot had the wrong floor.
-</p>
-
-<p>
-    <strong>But it planted three times in three hours, not twenty</strong>, and the reason
-    is worth knowing because it applies to every spreading gene.
-    <code>GeneAbilityHandler.spread</code> picks <em>one</em> random block per interval,
-    from a cube of <code>radius</code> around the horse with a vertical offset of
-    &minus;1, 0 or +1, and gives up silently if that block will not convert. For a
-    sapling the only offset that can ever work is <strong>0</strong>: &minus;1 is the
-    grass block itself and is not air, +1 is air with air under it. <strong>So two
-    thirds of the dryad's attempts are thrown away on geometry</strong>, and its
-    effective rate is about a third of the 9&nbsp;000&ndash;32&nbsp;000 ticks its page
-    advertises. Not a bug, and worth saying out loud on the gene's page
-    (<a href="known-gaps.html#gap-208">gap 208</a>).
-</p>
-
-<p>
-    <strong>And one in six of its saplings can never grow at all.</strong>
-    <code>saplingFor</code> picks from six species by position hash, and one of them is
-    <strong>dark oak</strong>, which vanilla will only grow from a 2&nbsp;&times;&nbsp;2
-    block of saplings. A lone dark oak stands for ever: one was planted at 01:28 and was
-    still a sapling at 02:04, while the oak next to it had become a tree in seventy
-    seconds, and a third position logged <strong>ten failed growth attempts</strong>
-    between 01:15 and 02:01. <strong>Fixed the same day</strong> by putting the species on
-    the allele and clustering the dark oaks - &sect;0-CZ, and
-    <a href="gene-dryad.html#what">the gene's page</a>.
-</p>
-
-<p>
-    <strong>It also plants outside its own pen.</strong> A radius does not respect a
-    fence: saplings appeared at z&nbsp;110 with the pen's back wall at z&nbsp;107, so the
-    watch box under-counts. A test-design fault rather than a gene one &mdash; the box
-    wants to be wider than the radius.
-</p>
-
-<h3>Egg layer &mdash; the cap never fired, exactly as predicted</h3>
-
-<p>
-    <strong>Ground count peaked at five against a cap of eight</strong>, sat at two or
-    three most of the night, and of 57 eggs removed <strong>every single one
-    despawned</strong> &mdash; not one was picked up or refused. That is
-    <a href="gene-egg-layer.html#verified">gap 207</a> confirmed by measurement rather than by
-    arithmetic: four layers in one six-block circle still cannot outrun vanilla's
-    6&nbsp;000-tick despawn, so <code>nearby_cap</code> is decorative in any real game.
-    Either it wants an interval that can outpace the despawn or the verb's page should
-    say the despawn is doing the work.
-</p>
-
-<h3>Holy ward &mdash; no data at all, and the control caught it</h3>
-
-<div class="note danger">
-    <span class="label">A vanilla spawner is not an unattended test</span>
-    <p>
-        <strong>Zero <code>monster spawned</code> lines from the yard's spawner in three
-        hours.</strong> <code>BaseSpawner.serverTick</code> begins
-        <code>if (this.isNearPlayer(...))</code>, and
-        <code>requiredPlayerRange</code> is <strong>16 blocks</strong>. The spawner only
-        runs while somebody is standing next to it, which is the one thing an overnight
-        run guarantees nobody is doing.
-    </p>
-    <p>
-        <strong>The fix costs nothing and needs no code:</strong> AFK <em>inside or beside
-        the spawner room</em>. Every other pen is force-loaded and runs regardless of
-        where the player stands, so the spawner room is simply the best place to leave the
-        character. Alternatively the field is settable through the block entity's
-        <code>RequiredPlayerRange</code> NBT, but standing in the right place is free.
-    </p>
-    <p>
-        Worth noting what <em>did</em> work: &sect;0-CW's control line &mdash; &ldquo;if
-        the log has no <code>monster spawned</code> lines anywhere, stop there, because a
-        silent spawner and a perfect ward look identical&rdquo;. Without it, three hours of
-        no hostile spawns beside a warded horse reads as a triumphant pass.
-    </p>
-</div>
-
-<h3>Intimidating &mdash; looks like a failure, and wants a person to confirm it</h3>
-
-<div class="note danger">
-    <span class="label">64 readings, and 63 of them are inside the radius the gene claims</span>
-    <p>
-        The gene says everything that is not a horse is held outside a radius <em>written
-        on the allele copy, at least eight blocks</em>. Measured: <strong>median 4.2
-        blocks, upper quartile 5.4, maximum 8.0, minimum 0.6</strong>, over sixty-four
-        readings across three hours. The cows started at three blocks and never got
-        meaningfully further away.
-    </p>
-    <p>
-        <strong>It is not doing nothing</strong> &mdash; a shove is a velocity nudge of
-        0.35 every twenty ticks, and a cow that walks back in between beats will sit
-        wherever the two balance. But &ldquo;pushed out and held out&rdquo; is not what
-        this reads like. The candidates, in order: the aura is not firing at all (check
-        for a <code>repel</code> in the horse's resolved ability list, not its genotype);
-        the shove is too weak against pathfinding; or the pen is too small for the effect
-        to be legible. <strong>Do not fix it from this alone</strong> &mdash; go and
-        watch one for a minute first, because a velocity nudge that works and one that
-        does not look different in a pen and identical in a column of numbers.
-    </p>
-</div>
-
-<h3>Hot blooded &mdash; it thawed, it did not flood, and it stopped early</h3>
-
-<p>
-    Snow 81&nbsp;&rarr;&nbsp;62, ice 18&nbsp;&rarr;&nbsp;3, water
-    0&nbsp;&rarr;&nbsp;32, all of it inside the first fifty minutes and then
-    <strong>completely static for over two hours</strong>. Two readings out of that:
-</p>
-
-<ul>
-    <li><strong>The water more than doubled the ice's footprint</strong> &mdash; fifteen
-        ice blocks became thirty-two water blocks, because ice melts to a <em>source</em>
-        and a source flows. That is the flood behaviour, and in a flat fenced pen it
-        found its level and stopped. It is still the thing to watch on any terrain with a
-        slope.</li>
-    <li><strong>It stopped because the horses stopped moving</strong>, not because it
-        finished. The melt radius is <strong>2.0</strong> and the pick is one block per
-        four seconds, so once a pair of horses settle they clear their own little cube and
-        nothing else is ever in reach. Sixty-two snow blocks and three ice are still
-        standing five blocks away. Again: the gene doing exactly what it says, and a test
-        that cannot see the whole claim.</li>
-</ul>
-
-<h3>Everything else</h3>
-
-<ul>
-    <li><strong>No leak.</strong> Entity count flat at 154&ndash;155 for three hours,
-        tick time flat at 50.0&nbsp;ms. The thing most likely to damage a save did not
-        happen.</li>
-    <li><strong>The sound rates are exactly as specified</strong> and did not drift:
-        24&nbsp;&times; cat and 4&nbsp;&times; disc per two minutes, every census.</li>
-    <li><strong>Read <code>50.0 ms/tick &mdash; BEHIND</code> as healthy</strong> in this
-        night's log only; see the note on &sect;0-CX.</li>
-</ul>
 
 <h2 id="overnight-watch">&sect;0-CX &mdash; The overnight watch, and a yard that runs itself (2026-09-12, NOT looked at)</h2>
 
@@ -1119,36 +778,8 @@
 <h3>What each pen should say by morning</h3>
 
 <ul>
-    <li><strong>EGG LAYER</strong> &mdash; four of them in one pen, which is the only
-        arrangement that can make the cap fire at all. The guard is eight of the item
-        within six blocks; a copy's interval is 4&nbsp;000&ndash;14&nbsp;000 ticks and a
-        dropped item despawns at 6&nbsp;000, so <strong>one horse can essentially never
-        reach its own cap</strong> &mdash; the floor clears itself about as fast as one
-        horse fills it. <em>Pass:</em> the count climbs, sits at or below eight, and the
-        item-gone lines show pickups rather than a column of despawns. <em>Fail:</em> a
-        floor carpeted in eggs.</li>
-    <li><strong>DRYAD</strong> &mdash; a sapling every 9&nbsp;000 to 32&nbsp;000 ticks, so
-        about a game day between plantings. Its box is six blocks tall, because the far
-        end of this test is a grown <em>tree</em> and vanilla only grows one on random
-        ticks in a loaded chunk &mdash; which is the reason the yard is force-loaded.
-        <em>Pass:</em> several sapling lines overnight, and ideally a <em>tree grew</em>.</li>
-    <li><strong>HOT-BLOODED</strong> &mdash; a snow floor with a strip of <em>ice</em> in
-        it. The ice is the half that matters: it melts to a water <strong>source</strong>,
-        not to air, which is how this gene could flood something. <em>Pass:</em> snow
-        falling steadily. <em>The thing to look for:</em> whether the water count keeps
-        climbing after the ice is gone, which is a flood rather than a thaw.</li>
-    <li><strong>INTIMIDATING</strong> &mdash; six cows ringed round one horse.
-        <strong>Measured as a distance, not a count</strong>: penned cows cannot leave, so
-        four in the far corner and four round its feet are the same number and opposite
-        results. The watch reports the nearest non-horse every ten seconds.
-        <em>Pass:</em> it climbs within a minute and sits at eight or more all night.
-        <em>Fail:</em> a figure wandering between one and six as they graze past.</li>
-    <li><strong>SOUND HERD</strong> &mdash; three meowing and two singers, and
-        <strong>the first census answered it</strong>: 24&nbsp;&times;
-        <code>entity.cat.ambient</code> and 4&nbsp;&times; <code>music_disc.cat</code> per
-        two minutes, which is <em>exactly</em> what a 300-tick and a 1&nbsp;200-tick
-        interval predict. The cooldowns do what they say. So the open question is no
-        longer &ldquo;is it working&rdquo; but &ldquo;is <strong>twelve meows a minute
+    <li><strong>SOUND HERD</strong> &mdash; three meowing and two singers. The rates are
+        <a href="gene-meowing.html#verified-meow-rate">verified</a>, so the open question is &ldquo;is <strong>twelve meows a minute
         from three horses</strong> bearable&rdquo;, which is a judgement, and one you can
         make by standing in that pen for thirty seconds.
         <p><strong>And it turned up a third sound nobody put there.</strong> 40&nbsp;&times;
@@ -1159,9 +790,6 @@
         is a &ldquo;feel&rdquo; question for the corridor rather than a bug, and it is one
         nothing would ever have asked, because the noise is ambient and the mind edits it
         out. The census counts by sound id, which is why it is separable at all.</p></li>
-    <li><strong>WARD + SPAWNER</strong> &mdash; the best of them, because it is the one
-        with the most data. Every hostile spawn is logged with its distance to the nearest
-        <em>live</em> ward, so a night is a column of hundreds of numbers (&sect;0-CW).</li>
     <li><strong>The census's own entity count</strong> is the safety net under all of it.
         An entity storm is the one failure here that damages a save rather than looking
         wrong, and a count that climbs all night is how it announces itself.</li>
@@ -1180,40 +808,6 @@
         the portal on every exit and an empty yard on the way back in. It takes tamed
         <em>and owned</em> horses now &mdash; a horse a player tamed has an owner, and the
         yard's scenery does not.</li>
-</ul>
-
-<h2 id="slow-tests">&sect;0-CV &mdash; The pens that run themselves (2026-09-12, NOT looked at)</h2>
-
-<div class="note">
-    <span class="label">These cannot be answered by standing still</span>
-    <p>
-        What is left in the yard is the tests that need <em>time</em> rather than
-        attention. That is what a private dimension is actually good for. Each one's pass
-        condition, and what the log should say, is on &sect;0-CX above; this is the index.
-    </p>
-    <p>
-        <strong>Gone from the yard, by the owner's call (2026-09-12):</strong> the
-        spontaneous-breeding field and the pack leader's pen &mdash; &ldquo;we're done
-        with those tests&rdquo;. Verdant's three floors went the same way when they were
-        confirmed. The gene itself was removed on 2026-09-13, when every horse started breeding
-        on its own; that <em>natural</em> cap holds a herd in one place
-        (<a href="fertility.html#verified">verified</a>), and a band spread wider than sixteen blocks is untested.
-    </p>
-</div>
-
-<ul>
-    <li><strong>Egg layer</strong>, four in a pen &mdash; does the accumulation guard hold,
-        or does the floor carpet?</li>
-    <li><strong>Dryad</strong>, on grass &mdash; a sapling about once a game day, and a
-        tree eventually.</li>
-    <li><strong>Hot blooded</strong>, on snow with a strip of ice &mdash; does it thaw, and
-        does the water stop?</li>
-    <li><strong>Intimidating</strong>, with six cows &mdash; does the nearest-cow distance
-        climb and stay up?</li>
-    <li><strong>The sound herd</strong> &mdash; how many plays a minute does a herd of five
-        actually make?</li>
-    <li><strong>The ward's spawner</strong> &mdash; &sect;0-CW, and the one with real
-        numbers behind it.</li>
 </ul>
 
 <h2 id="test-yard">&sect;0-CS &mdash; The horse dimension's test yard (2026-09-12, NOT looked at)</h2>
@@ -1332,24 +926,16 @@
         its job and there is a stack trace in the log worth reading.</li>
 </ul>
 
-<h2 id="dialled-genes">&sect;0-CP &mdash; The dial: the look is confirmed, the INHERITANCE is not (2026-09-13)</h2>
+<h2 id="dialled-genes">&sect;0-CP &mdash; The dial: does the INHERITANCE hold? (2026-09-13)</h2>
 
-<div class="note good">
-    <span class="label">Everything visual here is now confirmed</span>
+<div class="note">
+    <span class="label">What is left is not a visual question</span>
     <p>
-        "Starburst looks fine" (2026-09-13), on top of the smooth size range confirmed on
-        2026-09-12 and the lantern and tron glows closed with the rest of the glow room.
-        The pale form's flatness was a real fault and was redrawn &mdash; its whole palette
-        ran <code>#7a7a7a</code> to <code>#ffffff</code>, six layers of structure inside a
-        third of the value range.
-    </p>
-    <p>
-        <strong>What is left is not a visual question, which is why it outranks the ones
-        that were.</strong> The emblem's size rides the gene's <em>dial</em>, drawn per
-        allele copy &mdash; so a foal's emblem should sit near its parents' rather than
-        re-rolling. That is the only claim the dial has ever made and nothing has tested
-        it. Three mares and a stallion are standing in the pen with golden carrots in
-        batch 1.
+        The look is <a href="gene-starburst.html#verified-dial">verified</a>. The emblem's size
+        rides the gene's <em>dial</em>, drawn per allele copy &mdash; so a foal's emblem should
+        sit near its parents' rather than re-rolling. That is the only claim the dial has ever
+        made and nothing has tested it. Three mares and a stallion are standing in the pen with
+        golden carrots in batch 1.
     </p>
 </div>
 
@@ -1371,53 +957,13 @@
     </p>
 </div>
 
-<div class="note good">
-    <span class="label">The scaling reads right &mdash; owner-confirmed 2026-09-12</span>
-    <p>
-        &ldquo;The starburst does indeed look like a smooth variety of sizes.&rdquo; That
-        was the open question and the one nothing in the repo could answer: a
-        <code>pointsMin</code> floor of 45% with a uniform dial over 0.45&ndash;1.0 gives a
-        <strong>continuum</strong> rather than two sizes with a gap, so the floor does not
-        want raising and the morph is doing what it was built to do on a real horse.
-    </p>
-    <p>
-        It is the first evidence that <a href="making-a-gene.html#pointsmin">a drawn
-        marking that erases down</a> is worth having at all, which is the thing the whole
-        feature rested on. What is still unseen below is everything else about these three
-        genes.
-    </p>
-</div>
-
 <ul>
-    <li><strong>Its shards were retuned on the way past</strong> (spacing 3.4 &rarr; 2.8,
-        chance 0.4 &rarr; 0.5) because they were <em>already</em> a coin flip &mdash;
-        measured over twenty horses, the layer painted nothing on five of them. Look at a
-        big emblem and check the shards read as a shattered star rather than as speckle.</li>
-    <li><strong><a href="gene-lantern.html">Lantern</a>'s bloom is lit now</strong>, at
-        22%, with the mane carry at 18% and the core on the dial (0.35&ndash;1.0).
-        <strong>Partly confirmed 2026-09-12</strong>: &ldquo;it does seem like lantern has
-        different light levels&rdquo;, which is the dial reaching the renderer &mdash; a
-        knob-driven glow is a level per horse and it is visibly one. <strong>What that
-        does not yet say is whether the light FALLS OFF.</strong> One horse, at night, up
-        close: the bloom either side of the line should fade out over its own soft mask
-        rather than ending on a line at the core's edge. That is the half of the change
-        that touches every glowing gene in the game, and it is a different observation
-        from horse-to-horse variation.</li>
-    <li><strong><a href="gene-tron.html">Tron</a>'s haloes are lit at 25%</strong> and its
-        tubes are on the dial (0.4&ndash;1.0). <strong>Confirmed 2026-09-12</strong>:
-        &ldquo;Tron does indeed have a glowing diffuse painted along the body for both
-        forms, though more noticeable in the gradient form.&rdquo; A soft-masked layer
-        carrying light is the whole of what the threshold removal bought, so this is the
-        first sighting of it working on a horse.</li>
-    <li><strong>Why the gradient reads stronger &mdash; and it is not the level.</strong>
-        Both haloes are <code>"emissive": 0.25</code> and both paint at
-        <code>strength 34</code>; the only difference is that the gradient's op is a
-        <code>RAMP</code> sweeping hue 300&deg; along the body where the solid's is one
-        flat hue. <strong>A glow has no colour of its own</strong> - the emissive texture
-        is written with whatever colour the coat ended up being at that texel - so two
-        layers lit to exactly the same level read differently depending on what they
-        painted. Worth knowing before somebody &ldquo;fixes&rdquo; a dim-looking glow by
-        raising its level when the answer is its colour.</li>
+    <li><strong><a href="gene-lantern.html">Lantern</a>: does the light FALL OFF?</strong> Its level
+        varies horse to horse (<a href="gene-lantern.html#verified-lantern-dial">verified</a>). One horse,
+        at night, up close: the bloom either side of the line should fade out over its own soft mask
+        rather than ending on a line at the core's edge. That is the half of the change that touches
+        every glowing gene in the game, and it is a different observation from horse-to-horse
+        variation.</li>
     <li><strong>Still unseen: the <code>both</code> egg's overlap.</strong> That horse
         carries solid and gradient tubes as separate layers on the same edges, and where
         they cross <code>CoatOverlay</code> takes the <strong>brighter</strong> rather
@@ -1753,7 +1299,7 @@
         dev run, <code>neoforge-26.1.2/run/phc/</code>) holds <code>genes/</code>,
         <code>breeds/</code>, <code>client.toml</code>, <code>server.toml</code> and
         <code>breed-spawning.toml</code>, and <code>config/</code> gets nothing of this mod's
-        (a drop-in gene in <code>phc/genes/</code> is owner-confirmed). Mods &rarr; Horse
+        (a drop-in gene there is <a href="making-a-gene.html#verified-drop-in">verified</a>). Mods &rarr; Horse
         Genetics &rarr; Config should still open all three.</li>
     <li><strong>Only my breeds.</strong> Set <code>shipped_breeds_enabled = false</code> and
         <code>feral_mixed.enabled = false</code>, drop in one breed that lives in
@@ -1761,8 +1307,8 @@
         should have <em>no</em> horses at all, dark forests should have herds of that breed and
         nothing else. With <code>debug.announce</code> on, a refused lone horse logs
         <code>[Breeds] wild horse at ... not spawned</code>.</li>
-    <li><strong>Switched off, but still a breed.</strong> Owner-confirmed but for one place: the
-        cowboy should never have a switched-off breed (the dev run has the Morgan off) in his
+    <li><strong>Switched off, but still a breed.</strong> Verified but for one place
+        (<a href="breeds.html#verified-switched-off">breeds</a>): the cowboy should never have a switched-off breed (the dev run has the Morgan off) in his
         string.</li>
     <li><strong>Feral Mixed weight.</strong> <code>feral_mixed.herd_weight = 100</code>: most
         new herds in horse biomes should be Feral Mixed.</li>
@@ -1835,7 +1381,8 @@
 <h3>The gene hover picture - three places</h3>
 
 <ul>
-    <li><strong>Custom spawn egg:</strong> the picture is owner-confirmed. Still unseen: a gene
+    <li><strong>Custom spawn egg:</strong> the picture is
+        <a href="item-spawn-eggs.html#verified-hover-picture">verified</a>. Still unseen: a gene
         with no picture (the eye loci, the health genes) should show text only, not a
         purple-and-black square.</li>
     <li><strong>Horse designer:</strong> the same, on the canvas (seen in a headless
@@ -1867,11 +1414,6 @@
     with other markings on top of it.</p>
 
 <ul>
-    <li><strong>The rebuilt-disjoint marks</strong> - corolla, agate eye, barred wing, uraniid,
-        trillium and foxglove are owner-confirmed (2026-09-11), and so are that look's three
-        follow-ups: taper flame widened 2.6&times; reads as a flame; the six SVG barrel
-        drawings now sit wherever their <code>posU</code> knob puts them, shoulder to hip; the
-        black barred wing and nightbell foxglove show on a palomino. Left: ooze drip (below).</li>
     <li><strong>The two drips should hang down from the spine.</strong> Both arrived with
         their wave running sideways and were turned. If a drip points at the tail, the fix
         did not take.</li>
@@ -1897,11 +1439,6 @@
 
 <h2 id="play-fixes-0910c">&sect;0-BY &mdash; The third 2026-09-10 play session's fixes (NOT looked at in game)</h2>
 
-<p><em>Owner-confirmed in that session and removed from this page:</em> the research shelf
-    stores papers; the spawner fires on every meal with no cap; My horses shows hands; the
-    stall ticket lands a horse properly (as a basis - still to be pushed on); the Breeds tab;
-    molten hooves' prints render.</p>
-
 <p><strong>The kit still carries this list</strong> in its bottom two rows - four molten
     hooves eggs, a sheep spawner, holding pen signs and tickets, the potion mare and stallion,
     and the shelf and stall gear. The potion foal and the bucket were dropped for room; build
@@ -1914,11 +1451,6 @@
         because the copy lived on the screen. Also: the title and "Inventory" labels sit in
         the window again (they were drawn offset twice), and the shelf opens on whichever
         tab you used last.</li>
-    <li><strong>Molten hooves has four alleles.</strong> White (<code>MltW</code>) is dominant
-        - one copy glows white. Black (<code>MltB</code>), one colour (<code>MltC</code>) and
-        multicolour (<code>MltM</code>) are recessive and show only as their own
-        homozygotes; <code>MltB/MltC</code> shows nothing. Check black does <em>not</em>
-        glow at night, and that a colour horse and a multicolour one really differ.</li>
     <li><strong>A spawner's mobs are all one colour now</strong> - the allele copy's own
         number picks which of the mob's variants it makes (a sheep's dye, a cow's, a cat's,
         a frog's). Feed the sheep spawner several times: every sheep the same colour. A
@@ -1941,7 +1473,7 @@
         is how it already worked; it is now the rule, owner's call.</li>
 </ul>
 
-<h2 id="play-fixes-0910b">&sect;0-BX &mdash; The second 2026-09-10 play session's fixes (partly confirmed)</h2>
+<h2 id="play-fixes-0910b">&sect;0-BX &mdash; The second 2026-09-10 play session's fixes (NOT looked at in game)</h2>
 
 <ul>
     <li><strong>Stall landing:</strong> try the awkward ones - an L-shape, a stall narrower
@@ -1955,7 +1487,7 @@
     <li><strong>Holy ward, and how to see it.</strong> With <code>debug.announce</code> on, a
         refused spawn says so in chat (purple, at most every ten seconds). <em>Stand at least
         24 blocks from the horse</em> - the game never spawns a monster within 24 blocks of
-        a player. Spawn eggs beside a warding horse are owner-confirmed to still work.</li>
+        a player.</li>
     <li><strong>Breaking a shelf full of papers</strong> must drop every one - and now its
         books and finished copies too.</li>
     <li><strong>The chat is quiet when horses load</strong> - the <code>[coat]</code> line goes
@@ -1978,7 +1510,7 @@
         deciding whether it should switch.</li>
 </ul>
 
-<h2 id="gene-search">&sect;0-BV &mdash; A search box on both gene editors (2026-09-10, spawn egg confirmed)</h2>
+<h2 id="gene-search">&sect;0-BV &mdash; A search box on both gene editors (2026-09-10, two questions left)</h2>
 
 <ul>
     <li><strong>Is half the row enough for the family menu?</strong> Long family names now
@@ -1989,11 +1521,11 @@
         it, and that clicking anywhere else lets go of it.</li>
 </ul>
 
-<h2 id="eye-loci">&sect;0-BU &mdash; Thirteen eye loci (2026-09-10, owner-confirmed on sight)</h2>
+<h2 id="eye-loci">&sect;0-BU &mdash; Thirteen eye loci (2026-09-10, what looking cannot settle)</h2>
 
 <p>
-    The owner looked at the <a href="eye-colour.html">eye loci</a> and confirmed them all:
-    placement, sectors, glows, the third eye. What looking cannot settle is left:
+    What looking at the <a href="eye-colour.html">eye loci</a> cannot settle (the look itself is
+    <a href="eye-colour.html#verified-on-sight">confirmed</a>):
 </p>
 
 <ol>
@@ -2066,12 +1598,9 @@
         they should.</p>
     </li>
     <li>
-        <p><strong><a href="gene-spawner.html">Spawner</a></strong> is owner-confirmed, and
-        now fires on feeding, two per meal with no cap, only when the horse actually ate
-        (<a href="#play-fixes-0910b">&sect;0-BX</a>). It still has to spawn through the
-        normal path so other mods' protections fire. Rider immunity (fireproof, bird boned)
-        is owner-confirmed, dismount included; <a href="gene-ocean-born.html">ocean-born</a>
-        is the one still unplayed.</p>
+        <p><strong><a href="gene-spawner.html">Spawner</a></strong> still has to be seen spawning
+        through the normal path, so other mods' protections fire. Of the rider-immunity loci,
+        <a href="gene-ocean-born.html">ocean-born</a> is the one still unplayed.</p>
     </li>
 </ol>
 
@@ -2088,14 +1617,6 @@
         priority so it sees the interaction before the diet handler and cancels. If another
         mod also wants that event at HIGH, the gene silently does nothing - which is the
         exact failure this project already tracks by name.</li>
-    <li><strong><a href="gene-hydrophobic.html">Hydrophobic</a> is CONFIRMED, and this
-        entry was wrong about it</strong> (owner, 2026-09-13: "hydrophobic works AND it
-        seems like the horse moves for an edge after too?"). It used to say the "and then
-        heads for the nearest shore" half was <em>not implemented</em> and that the horse
-        was "simply dumped where it stood" - written from reading the translator, which
-        only ejects. <strong>The heading-out is vanilla's own behaviour</strong> for a
-        horse in deep water, and the gene inherits it for nothing. A good reminder that
-        reading the code tells you what your code does, not what the player sees.</li>
     <li><strong><a href="gene-pack-leader.html">Leader of the pack</a> is the performance
         one.</strong> Six followers pathfinding continuously, and pathfinding is the most
         expensive thing a mob does. One horse is certainly fine. A stable with several
@@ -2147,8 +1668,7 @@
         <code>GeneWardHandler.isNatural</code> is wrong. Also worth watching: does the
         ward actually follow the horse, and does it stop within a couple of seconds of the
         horse dying? Entries expire after 40 ticks rather than being removed on death.
-        Spawn eggs are owner-confirmed to still work; how to see the ward refuse something
-        is on <a href="#play-fixes-0910b">&sect;0-BX</a>.</li>
+        How to see the ward refuse something is on <a href="#play-fixes-0910b">&sect;0-BX</a>.</li>
     <li><strong><a href="gene-egg-layer.html">Egg layer</a> must stop when the ground is
         full.</strong> Leave one overnight in a closed pen. The nearby-cap should stop it
         at eight of the item, not carpet the floor.</li>
@@ -2213,31 +1733,13 @@
     largest roster and is the worst case.</p>
 
 
-<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves: the four alleles are confirmed; the prints themselves are not (2026-09-13)</h2>
-
-<div class="note good">
-    <span class="label">All four forms, owner-confirmed 2026-09-13 &mdash; and the stalls are gone</span>
-    <p>
-        Black's prints do not glow; one-colour and multicolour both read correctly
-        <em>and are distinguishable from one another</em>, which is the question the yard's
-        row was built four-abreast to answer; and white shows from a <strong>single
-        copy</strong> &mdash; the only genuinely genetic question in the locus, and the one
-        none of the other three could touch, because every one of those stalls was
-        homozygous.
-    </p>
-    <p>
-        <strong>What that does not cover is everything below.</strong> "The four alleles
-        look right and differ" is a statement about <em>colour</em>. The four items left
-        here are about the print as an object &mdash; its spacing, its behaviour on ground
-        that is not flat, and how often the alleles turn up in the wild. None of them was
-        being looked at, and none of them is answered.
-    </p>
-</div>
+<h2 id="molten-hooves">&sect;0-BS &mdash; Molten hooves: the prints themselves (2026-09-13, NOT looked at)</h2>
 
 <p><a href="gene-molten-hooves.html">Molten hooves</a> lays the mod&rsquo;s own flat print
-    particle, one per half-block travelled, and the owner has seen it work ("looks pretty
-    good to start with"; the sprite is theirs to redraw). The allele redesign is on
-    <a href="#play-fixes-0910c">&sect;0-BY</a>. What is left here:</p>
+    particle, one per half-block travelled. The four alleles&rsquo; colours are
+    <a href="gene-molten-hooves.html#verified-four-forms">confirmed</a>, and the sprite is the
+    owner&rsquo;s to redraw; the allele redesign is on <a href="#play-fixes-0910c">&sect;0-BY</a>.
+    What is left is the print as an object:</p>
 
 <ul>
     <li><strong>Spacing and fade.</strong> A walk should leave an even track; a gallop,
@@ -2348,21 +1850,9 @@
 <h2 id="black-alleles">&sect;0-BO &mdash; Forty-two black alleles and a split Cleave (2026-09-10, NOT looked at)</h2>
 
 <p>This is the largest single change to what the coat engine can draw since the
-    import, and almost none of it has been looked at. What <em>is</em> established
-    is narrow and worth separating from what is not.</p>
-
-<div class="note">
-    <span class="label">Confirmed by measurement, not by eye</span>
-    <p>
-        <strong>Nothing that existed changed, except three white forms on purpose.</strong>
-        The bake golden gained 42 rows, lost none, and moved exactly three &mdash;
-        <a href="gene-pavonem.html">pavonem</a>,
-        <a href="gene-concentric-eyespots.html">concentric eyespots</a> and
-        <a href="gene-scarab-dapple.html">scarab dapple</a>, the three whose white
-        form was regraded. The pipeline golden moved six rows, all of them the one
-        genuinely new Cleave horse.
-    </p>
-</div>
+    import, and almost none of it has been looked at. That it moved no existing coat except
+    three regraded white forms is <a href="pipeline.html#verified-black-forms">measured</a>;
+    everything below is about what nobody has seen.</p>
 
 <p><strong>Looked at, on a bay, in a render:</strong> moonwing black (a graphite
     wing with the dust and the gold intact &mdash; the best of them), snow cloud
@@ -2458,27 +1948,10 @@
     </p>
 </div>
 
-<h3>Confirmed, by measurement: not one existing coat moved</h3>
-
-<p>This is not a judgement, it is a hash comparison, and it is the one thing on this page
-    that does not need a play session.</p>
-
-<ul>
-    <li><strong>All 1056 composed coats in the pipeline golden are byte-identical</strong>
-        before and after. The file&rsquo;s every line changed, which looks alarming until
-        you read which half: the <em>key</em> is a genotype code and it got twenty-two
-        segments longer. The hash on the end of each line is the same on all 1056.</li>
-    <li><strong>All 620 rows of the bake golden are unchanged</strong>, and 57 new rows
-        joined them. Not one pre-existing gene&times;allele hash moved.</li>
-    <li>That covers the four masks whose code was edited &mdash; <code>SPOTS</code>,
-        <code>RINGS</code>, <code>CRACKLE</code> and the <code>RAMP</code> op. Every new
-        parameter defaults to the behaviour that was there before, and the goldens are what
-        say so rather than the intention.</li>
-</ul>
-
-<p><strong>So no gene needs re-verifying for appearance.</strong> If a marking you knew
-    looks different in 0.4.1, that is a bug and a serious one, because two golden files say
-    it cannot be.</p>
+<p><strong>No existing coat moved</strong> &mdash; a hash comparison against both goldens,
+    recorded on <a href="pipeline.html#verified-0-4-1-goldens">the pipeline page</a> &mdash; so no
+    gene needs re-verifying for appearance. If a marking you knew looks different in 0.4.1, that
+    is a serious bug.</p>
 
 <h3>Not confirmed, and the reason this section exists: forty-three genes got rarer</h3>
 
@@ -2554,7 +2027,7 @@
         page has seen before.</li>
     <li><strong>The genotype code is 22 segments longer.</strong> It is sent on the coat
         packet, stored on the spawn egg and on a genome jar, and
-        <a href="known-gaps.html#gap-135">gap 135</a> is the release that disconnected
+        <a href="architecture.html#verified-packet-cap">gap 135</a> is the release that disconnected
         everybody by crossing a string cap nobody had written down. The caps all come from
         <code>GenomeCodeCodecs</code> now and <code>EpigenomeSizeTest</code> guards each at
         half budget, so this should be fine &mdash; <strong>but 0.3.0 and 0.3.1 also
@@ -2679,12 +2152,6 @@
         Nightbloom Shroud and Opal Crackle. Look at one at night and one in a lit stable.</li>
 </ul>
 
-<p class="note"><strong>The one thing that is confirmed</strong> is that all 22 register,
-    parse, take a genotype slot, appear on the landing page and bake an icon &mdash; and
-    that no existing gene&rsquo;s coat moved: 57 rows joined the bake golden and not one
-    existing hash changed. Everything above is about whether the markings are any good,
-    which no test can answer.</p>
-
 <h2 id="gene-page-merge">&sect;0-BK &mdash; One page for making a gene, in eight tabs (2026-09-09, NOT looked at)</h2>
 
 <p>Documentation only &mdash; no behaviour changed, and the eight Java edits in it are
@@ -2722,17 +2189,11 @@
 
 <h2 id="stall-rewrite">&sect;0-BJ &mdash; A stall that stopped killing horses, and eight things nobody has touched (2026-09-09, NOT looked at)</h2>
 
-<p class="callout"><strong>Confirmed in play tonight, so deleted from the list above:</strong>
-    binding a stall sign; spending a ticket to bring a horse home; shearing; milking a
-    waterborn mare; research papers off a book; the Getting Started tab; the Alleles tab
-    collecting; the cowboy and horseman reading as they/them; and the gene-preview horses
-    turning in 3D.</p>
-
 <ol>
-    <li><strong>The rewritten stall detector, in a stall with a fence and a gate.</strong>
-        Owner-confirmed 2026-09-10: the sign binds and finds the inside of an ordinary
-        stall. (Where the horse <em>lands</em> is on <a href="#play-fixes-0910b">&sect;0-BX</a>.)
-        Then the cases the
+    <li><strong>The rewritten stall detector, in the cases its rules are guesses about.</strong>
+        (Binding an ordinary stall is <a href="item-stall-signs.html#verified-binding">confirmed</a>;
+        where the horse <em>lands</em> is on <a href="#play-fixes-0910b">&sect;0-BX</a>.) The
+        cases the
         new rules are guesses about: a stall floored with <b>slabs or carpet</b> (should be
         one room), a floor with <b>a one-block step</b> in it (should still be one room), a
         <b>two-block drop</b> (should not), and a stall whose <b>gate is standing open</b>
@@ -2745,7 +2206,7 @@
         Then the awkward ones that are still unproven: a stall in an <b>unloaded chunk</b>,
         and an interdimensional ticket used <b>from the horse dimension</b>.</li>
 
-    <li><strong>Taming by hand</strong> is owner-confirmed. Still unwatched: whether horses
+    <li><strong>Taming by hand, the unwatched half:</strong> whether horses
         peel off a wild herd when you only walk past crouched with food, that a
         <b>carnivorous</b> horse ignores a carrot, and that a <b>dhampir</b> does not come at
         all. <a href="known-gaps.html#gap-155">Gap 155</a>.</li>
@@ -2807,7 +2268,7 @@
         <code>syncCare</code>, so a tier reached while the horse is out of your sight is
         the case to watch.</li>
         <li id="browser-scroll-0-3-7"><strong>The browser's scroll bars drag.</strong>
-        Confirmed by the owner on the gene list. The other eight have not been: the tab
+        The gene list&rsquo;s drags; the other eight are unchecked: the tab
         strip's horizontal bar, both breeding-preview pickers, My horses, Recipes, the
         Alleles page and the two detail panes. Clicking the bare track should jump the
         thumb under the pointer.</li>
@@ -2935,17 +2396,7 @@
         (the unknown epigenetic splice) is the one that would overflow first.</li>
 </ul>
 
-<h2 id="browser-reference">&sect;0-BE &mdash; What is left of the H menu's conversion (2026-09-09, part confirmed)</h2>
-
-<div class="note">
-    <span class="label">Confirmed by the owner, 2026-09-09</span>
-    <p>
-        The browser opens, draws and reads correctly after losing its container
-        &mdash; <i>"the H menu looks great"</i>. That was the load-bearing question on
-        this section and <a href="known-gaps.html#gap-141">gap 141</a> closes with it.
-        The tab strip has since gained scrolling, because six tabs ran off the edge.
-    </p>
-</div>
+<h2 id="browser-reference">&sect;0-BE &mdash; What is left of the H menu's conversion (2026-09-09, NOT looked at)</h2>
 
 <ul>
     <li><strong>The Recipes tab.</strong> Every recipe the mod adds, drawn as its grid
@@ -3011,16 +2462,6 @@
 
 <h2 id="play-session-fixes">&sect;0-BC &mdash; Four things off a real play session, and the one that needs a fresh world (2026-09-09, NOT looked at)</h2>
 
-<div class="note">
-    <span class="label">The first item on this page that is a confirmation rather than a request</span>
-    <p>
-        <strong>0.3.2 launches and makes a world.</strong> The owner confirmed it,
-        which closes <a href="#coat-packet-cap">&sect;0-BB</a>'s first and largest
-        question. What follows are the four things that session then found, three of
-        them fixed by reasoning rather than by being watched working.
-    </p>
-</div>
-
 <ul>
     <li><strong>A stable with horses in it &mdash; and the empty ones you already have
         should fill themselves.</strong> Three stables in four generated empty
@@ -3043,7 +2484,7 @@
         none of them has been ruled out.</li>
     <li><strong>No <code>[Cowboy]</code> or <code>[Horseman]</code> lines in chat.</strong>
         They are now off in a normal install and on in a dev run
-        (<a href="known-gaps.html#gap-137">gap 137</a>). Two things to confirm, and they
+        (<a href="architecture.html#verified-debug-announce">gap 137</a>). Two things to confirm, and they
         are opposite: that a <em>normal</em> install is quiet, and that a <em>dev</em>
         run still talks &mdash; a gate that silences everything everywhere is the failure
         this switch was built to avoid. The log line
@@ -3052,7 +2493,7 @@
         lines back in a normal install.</li>
     <li><strong>The launch log should be quiet now.</strong> It printed 121
         <code>[genes] could not register</code> ERROR lines before the title screen
-        (<a href="known-gaps.html#gap-138">gap 138</a>). There should now be none, and
+        (<a href="architecture.html#verified-double-register">gap 138</a>). There should now be none, and
         two INFO lines instead saying how many genes shipped and how many segments the
         genotype code has. A collision reported after this change is a real one.</li>
     <li><strong>The custom spawn screen's right-hand column.</strong> Widened from 96 to
@@ -3074,7 +2515,7 @@
         and not by the suite: 0.2.0 played, and <strong>both 0.3.0 and 0.3.1 kick the
         client on entering a world</strong> with
         <code>Failed to encode packet 'clientbound/minecraft:custom_payload'</code>.
-        See <a href="known-gaps.html#gap-135">gap 135</a>. It has never been reproduced on
+        See <a href="architecture.html#verified-packet-cap">gap 135</a>. It has never been reproduced on
         this machine, because a dev-run world is entered before any horse is in view often
         enough that it was simply never seen &mdash; the trigger is <em>a horse coming into
         render range</em>, not the world load itself.
@@ -3082,14 +2523,11 @@
 </div>
 
 <p>
-    So the first thing to confirm is the plain one, and it wants a <strong>fresh</strong>
-    world rather than the usual test save:
+    0.3.2 launching and making a world is <a href="releases.html#verified-0-3-2">confirmed</a>.
+    Still unwatched:
 </p>
 
 <ul>
-    <li><strong>Make a new world, find a horse, stay connected.</strong> That is the whole
-        test. Walk until wild horses are in view and keep playing for a minute. Before the
-        fix this disconnected on the first one.</li>
     <li><strong>An existing 0.3.0/0.3.1 save should be fine.</strong> The fault was in what
         the server <em>sends</em>, never in what it saved, so a world made under a broken
         jar should open normally under 0.3.2. Worth confirming with one, because the claim
@@ -3224,7 +2662,7 @@
 </div>
 
 <p>
-    <a href="known-gaps.html#gap-89">Gap 89</a>&rsquo;s 25 missing science tabs are all
+    <a href="coding-notes.html#verified-science-tabs">Gap 89</a>&rsquo;s 25 missing science tabs are all
     written, and the check now runs with an empty exempt list. The 25 are prose against source material the owner supplied, and none of it
     has been read back by anyone. What most wants an eye is not the citations but the
     <strong>disagreements</strong>: each page now states where the mod departs from the
@@ -3307,7 +2745,7 @@
         to 1.00 too, the gate leaked past the one attribute write it is supposed to be.</li>
     <li><strong>Does tack sit right?</strong> The reason the setting exists. Saddle a
         horse that would have been oversized and look at where the saddle and the rider
-        sit, and whether it fits a two-block doorway (<a href="known-gaps.html#gap-55">gap
+        sit, and whether it fits a two-block doorway (<a href="villagers.html#verified-no-shelter">gap
         55</a> should stop applying entirely with the setting off).</li>
     <li><strong>Turn it back on.</strong> Reload again; the big horses should come back
         exactly as they were, because nothing about the genotype was ever touched.</li>
@@ -3322,7 +2760,7 @@
 <h2 id="local-space">&sect;0-AW &mdash; A band can follow a pitched part, and six dead layers woke up (2026-09-09, NOT looked at)</h2>
 
 <p>
-    <a href="known-gaps.html#gap-103">Gap 103</a>. The neck&rsquo;s own geometry used to be
+    <a href="body-space.html#verified-local-space">Gap 103</a>. The neck&rsquo;s own geometry used to be
     written out by hand in eleven gene files as a sawtooth of wavelength 90 at an amplitude
     of 77.94; it is now <code>"space": "local"</code>, which asks the part what shape it is.
     Six of the eleven had that pair in a normalised space where it cannot work, and were
@@ -3375,7 +2813,7 @@
 <h2 id="coat-cache">&sect;0-AV &mdash; The coat texture cache is bounded, and F3+T now means something (2026-09-09, NOT looked at)</h2>
 
 <p>
-    <a href="known-gaps.html#gap-130">Gap 130</a>, both halves. The client used to keep
+    <a href="pipeline.html#verified-texture-cache">Gap 130</a>, both halves. The client used to keep
     every coat it had ever baked until you logged out, and no resource reload touched any
     of it. Both caches are now texel-budgeted LRUs and there is a client reload listener.
     The <em>policy</em> is unit-tested away from the GPU
@@ -3417,7 +2855,7 @@
 <h2 id="reseed">&sect;0-AU &mdash; Every coat in the mod redrew (2026-09-09, NOT looked at)</h2>
 
 <p>
-    <code>SeededRng</code> never mixed its seed &mdash; <a href="known-gaps.html#gap-44">gap 44</a>
+    <code>SeededRng</code> never mixed its seed &mdash; <a href="genetics-model.html#verified-seed-scramble">gap 44</a>
     &mdash; and now does. <strong>That changed every horse the mod has ever generated</strong>:
     883 of 1056 lines of the pipeline golden, 218 of 623 of the bake golden, and 154 gene icons.
     Nothing is <em>expected</em> to look worse, because the same distributions are being drawn
@@ -3428,7 +2866,7 @@
 <ul>
 <li><strong>A paddock of ordinary horses.</strong> The one thing worth eyeballing is whether the
     population still reads right &mdash; the measured share wearing white markings is about two
-    in three (<a href="known-gaps.html#gap-53">gap 53</a>), which should look like a normal mixed
+    in three (<a href="gene-kit.html#verified-founder-white">gap 53</a>), which should look like a normal mixed
     herd and not like a pinto herd.</li>
 <li><strong>Wing cloak is switched off, so there is nothing to look at</strong> &mdash; and
     the thing to confirm is the absence: no horse should carry it, it should not appear in
@@ -3436,7 +2874,7 @@
     it (<a href="known-gaps.html#gap-129">gap 129</a>). Its files are all still there; it is
     unregistered, not deleted.</li>
 <li><strong>Quarter.</strong> Its quadrant choices come from the new <code>CHOICE</code> mask
-    rather than a scale-4000 noise trick (<a href="known-gaps.html#gap-102">gap 102</a>). A
+    rather than a scale-4000 noise trick (<a href="making-a-gene.html#verified-choice">gap 102</a>). A
     quarter horse should show one clean quadrant, and a double-quarter one clean half, with no
     seam where the two halves meet and no half-strength wash &mdash; that last one was a real
     outcome of the old trick, at about one horse in four hundred.</li>
@@ -3510,7 +2948,7 @@
 <h2 id="invert-parts">&sect;0-AS &mdash; Twelve genes whose masks now stay inside the parts they name (2026-09-08, NOT looked at)</h2>
 
 <p>
-    <a href="known-gaps.html#gap-120">Gap 120</a> was fixed in the engine, so an inverted
+    <a href="making-a-gene.html#verified-mask-parts">Gap 120</a> was fixed in the engine, so an inverted
     mask no longer paints everything its <code>parts</code> list excluded. <strong>Ten
     genes changed as a result</strong>, and the icons were re-baked and eyeballed &mdash;
     which is not the same as having seen one in a world.
@@ -3669,20 +3107,10 @@
     on the classpath either way.
 </p>
 
-<div class="note">
-    <span class="label">Half of this is already settled, by inspection</span>
-    <p>
-        The built jar was opened and listed while cutting the tag, and everything is in
-        it: the <code>common/</code> classes, all 85 gene files
-        (<code>suit.json</code> present, <code>collar.json</code> and
-        <code>waves.json</code> correctly gone), the 49 breed files, the name tables, the
-        four structure NBTs, and the assets. <code>ExtremeWhiteDominantGene</code> and
-        <code>WhiteLockContribution</code> are compiled into it and
-        <code>PinkHairGene</code> is not, so it is the current tree rather than a stale
-        build. <strong>The packaging bug that produced 0.1.0 has not come back.</strong>
-        What is left is the part a zip listing cannot answer.
-    </p>
-</div>
+<p>
+    The jar&rsquo;s contents were <a href="releases.html#verified-0-2-0-jar">checked</a> when the
+    tag was cut. What is left is the part a zip listing cannot answer.
+</p>
 
 <ul>
     <li><strong>Install the jar into a plain NeoForge 26.1.2 instance</strong> &mdash;
@@ -3816,7 +3244,7 @@
 <li><strong><a href="gene-invert.html">Invert&rsquo;s preview window loads now</a></strong> - the cause was TeaVM trapping on the first read of an <em>empty</em> immutable map, which is what an <code>ALL</code> mask&rsquo;s parameter map is. Proven by running the wasm itself under node, before and after: it threw <code>remainder by zero</code> and now bakes the sheet. What is unseen is the <strong>picture</strong> - open the page and check the horse in the window is a negative (a bay should come out pale blue), and that the other 82 gene pages still draw.</li>
 <li><strong>Thirty-two genes arrived in one import and none has been bred.</strong> Every one paints and every one was looked at as a baked icon; that is the whole of the evidence. They are the two insect/wing batches - <a href="gene-scarab-dapple.html">scarab dapple</a>, <a href="gene-cracked-porcelain.html">cracked porcelain</a>, <a href="gene-diamond-scutes.html">diamond scutes</a>, <a href="gene-dragon-shroud.html">dragon shroud</a>, <a href="gene-duskwing-bands.html">duskwing bands</a>, <a href="gene-duskfall-speckle.html">duskfall speckle</a>, <a href="gene-ehretia.html">ehretia</a>, <a href="gene-elytra-veins.html">elytra veins</a>, <a href="gene-ink-scroll.html">ink scroll</a>, <a href="gene-koi.html">koi</a>, <a href="gene-lace.html">lace</a>, <a href="gene-nebula-points.html">nebula points</a>, <a href="gene-picasso-marking.html">picasso marking</a>, <a href="gene-snow-cloud.html">snow cloud</a>, <a href="gene-tidemark.html">tidemark</a>, <a href="gene-tribal-ward.html">tribal ward</a>, <a href="gene-wyrmwood-sigils.html">wyrmwood sigils</a>, <a href="gene-banded-socks.html">banded socks</a>, <a href="gene-beetle-pearl.html">beetle pearl</a>, <a href="gene-coccinella.html">coccinella</a>, <a href="gene-dorsal-shield.html">dorsal shield</a>, <a href="gene-harlequin-shield.html">harlequin shield</a>, <a href="gene-iridescent-jewel.html">iridescent jewel</a>, <a href="gene-ladybug-saddle.html">ladybug saddle</a>, <a href="gene-moth-wings.html">moth wings</a>, <a href="gene-opaline-zebra.html">opaline zebra</a>, <a href="gene-painted-lady-wing.html">painted lady wingmark</a>, <a href="gene-shieldback.html">shieldback</a>, <a href="gene-webbed.html">webbed</a>, <a href="gene-wing-cloak.html">wing cloak</a>, <a href="gene-moth-mantle.html">moth mantle</a> and <a href="gene-opal-wing-veins.html">opal wing-veins</a>. Each gene&rsquo;s <em>About this gene</em> section says where its build diverges from the sketch it came from; read that first, because it is the list of things most likely to be wrong. See <a href="known-gaps.html#gap-119">gap 119</a>.</li>
 <li><strong>The 32 imported genes have never been rendered <em>together</em>.</strong> Each was looked at alone, on a bay, with nothing else carrying. Between them they add three new grounds that repaint the whole horse (<a href="gene-koi.html">koi</a>, <a href="gene-beetle-pearl.html">beetle pearl</a>, <a href="gene-coccinella.html">coccinella</a>, <a href="gene-opaline-zebra.html">opaline zebra</a>, <a href="gene-moth-mantle.html">moth mantle</a> and <a href="gene-shieldback.html">shieldback</a> all paint a ground before drawing on it), which is the class of gene most likely to swallow whatever a horse carries below it in the order. Spawn a horse with one of those and a marking gene from the 300s together and check the marking still shows.</li>
-<li><strong>The coat golden file is a run behind.</strong> It was regenerated before the thirty-two genes landed, so the next full <code>:common:test</code> will fail on <code>CoatPipelineGoldenTest</code> and that failure is expected. Delete it, run, copy <code>common/build/coat-golden.txt</code> into place, run again. <a href="known-gaps.html#gap-118">Gap 118</a>.</li>
+<li><strong>The coat golden file is a run behind.</strong> It was regenerated before the thirty-two genes landed, so the next full <code>:common:test</code> will fail on <code>CoatPipelineGoldenTest</code> and that failure is expected. Delete it, run, copy <code>common/build/coat-golden.txt</code> into place, run again. <a href="coding-notes.html#verified-golden-regen">Gap 118</a>.</li>
 <li><strong><a href="gene-lut.html">The green/pink LUT</a> has never been rendered on a horse.</strong> A second palette on the LUT locus (<code>Grnpnk/Grnpnk</code>), wired exactly as the blue/pink one. Spawn one over a black, a bay <em>and</em> a chestnut - a LUT is read as "red survived" against "black survived", so the three corners of the chart are three different questions - and check the log for <code>could not load alternate LUT</code>, the failure that renders an ordinary horse and looks deliberate. See <a href="known-gaps.html#gap-36">gap 36</a>.</li>
 <li><strong>Three genes had their baked picture changed and two were moved in the paint order.</strong> <a href="gene-flametouched.html">Flametouched</a> is now photographed as <code>flames</code> rather than the ember <code>gradient</code>, <a href="gene-patina.html">Patina</a> on a plain bay rather than a tobiano, and <a href="gene-panda.html">Panda</a>&rsquo;s white band is half again as wide (the body keeps its coat only outside 0.22&ndash;0.70 now). <a href="gene-opalized.html">Opalized</a> dropped below <a href="gene-voided.html">voided</a> and <a href="gene-synort.html">synort</a> went from the fields band to 104, among suit and hood at the very bottom - which reorders the registry and therefore shifts every horse&rsquo;s epigenome slots, so <strong>every</strong> coat in the world is redrawn. The icons say the five look right; nothing has bred one.</li>
 </ul>
@@ -3853,7 +3281,7 @@
     <a href="gene-polymoon.html">Polymoon</a>, <a href="gene-stellar.html">Stellar</a> and
     <a href="gene-wormholes.html">Wormholes</a>. Each needs two copies of its
     <em>second</em> allele, so they are not something you will meet by accident: spawn
-    them. <a href="known-gaps.html#gap-105">Gap 105</a> is the check that would have
+    them. <a href="making-a-gene.html#verified-perdose">Gap 105</a> is the check that would have
     caught it.</li>
 <li><strong>The tilted crest band was wrong the first time and is calibrated now</strong>
     (tan 60, not tan 30). It carries <a href="gene-goth.html">Goth</a>'s hood,
@@ -4276,17 +3704,6 @@
         model; those are the ones to rewrite first.</li>
 </ul>
 
-<h3>The natural genes with no science tab &mdash; resolved 2026-09-09</h3>
-
-<p class="muted">
-    This section listed 25 pages that the three-view split could not route to Science,
-    because nothing on them was in a section it could move. <strong>All 25 now have a
-    science tab</strong> and the list is deleted rather than kept as a record of a
-    solved problem. What replaced it &mdash; the tabs that predate that pass and are now
-    the thin ones &mdash; is <a href="roadmap.html#science-tabs">on the roadmap</a>, and
-    <a href="#science-tabs">&sect;0-AY</a> above is the entry that still wants reading.
-</p>
-
 <h3>The two workstations, which cannot both be craftable</h3>
 
 <div class="note">
@@ -4303,7 +3720,7 @@
         <strong>Craft both.</strong> The data is checked by
         <code>neoforge-26.1.2/tools/check-recipes.mjs</code>, which refuses two recipes that
         occupy the same slot, but no check can confirm that a recipe a player types into a
-        grid produces the block they wanted. <a href="known-gaps.html#gap-92">Gap 92</a>.
+        grid produces the block they wanted. <a href="villagers.html#verified-workstation-recipes">Gap 92</a>.
     </p>
 </div>
 
@@ -4325,7 +3742,7 @@
 <p>
     Design: <a href="breed-format.html">the breed file format</a>,
     <a href="breeds.html">breeds</a>, <a href="item-spawn-eggs.html#breed">the two new eggs</a>.
-    Gaps <a href="known-gaps.html#gap-83">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.
+    Gaps <a href="breeds.html#verified-breed-designer">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.
     The Java half of this is well covered by tests; <strong>none of the four things a
     player actually touches has been touched</strong>.
 </p>
@@ -4542,20 +3959,10 @@
 <h2 id="h-menu">&sect;0-AI &mdash; The My horses table, and the information screen made readable (2026-09-07, <em>partly</em> looked at)</h2>
 
 <div class="note">
-    <span class="label">What the owner&rsquo;s own reports already confirm</span>
+    <span class="label">Three defects from the owner&rsquo;s reports, fixed but not re-checked</span>
     <p>
-        Four things below were checked without anybody meaning to: the owner opened
-        both screens mid-session and reported what was wrong with them, which
-        establishes that <strong>the browser opens and its tabs render</strong>, that
-        <strong>My horses draws rows</strong> (they asked what the Barn column was
-        for, which needs rows on screen), that the <strong>Breeding preview</strong>
-        tab renders, and that the information screen&rsquo;s <strong>Genes</strong> and
-        <strong>Other genes</strong> tabs render with gene rows on them. So the
-        &ldquo;does the roster arrive at all&rdquo; gate below is <b>passed</b> and the
-        checks it guarded are worth doing rather than moot.
-    </p>
-    <p>
-        Three defects came out of that and are <strong>fixed but not re-checked</strong>:
+        Three defects came out of the owner&rsquo;s reports
+        (<a href="breeding.html#verified-reports">what those reports confirmed</a>) and are <strong>fixed but not re-checked</strong>:
         buttons sitting on top of text (all of them are label-width now), brindle
         showing on every stallion, and <code>KIT</code> filed under Other genes on
         every horse. Each has its own checklist item below.
@@ -4590,7 +3997,7 @@
 </p>
 
 <div class="note">
-    <span class="label">The roster gate &mdash; passed, and here for the next change</span>
+    <span class="label">The roster gate &mdash; for the next change</span>
     <p>
         If <strong>My horses</strong> ever says <em>&ldquo;asking the
         server&hellip;&rdquo;</em> and never fills, stop: the roster payload is not
@@ -5196,10 +4603,8 @@
 <h2 id="villagers">&sect;0-AC &mdash; The cowboy, the horseman &amp; transfer papers (2026-09-07, partly looked at)</h2>
 
 <p>
-    <strong>Confirmed in game:</strong> the barn generates and sits on the ground with
-    steps up to it, the cowboy founds and has a face, both posts hand out their jobs, the
-    two share a surname, the horseman keeps vanilla's brain, and transfer papers work end
-    to end. <strong>What is new and unseen is the homestead.</strong> The house is no
+    <a href="villagers.html#verified-barn">The barn, the cowboy, both posts and transfer papers
+    are verified in game.</a> <strong>What is new and unseen is the homestead.</strong> The house is no
     longer built at runtime &mdash; it is baked into the same structure piece as the barn,
     and the two work posts moved onto its front step. The piece has since gained a
     <strong>ground course</strong> carrying a walk along the front of both buildings, lost
@@ -5295,7 +4700,7 @@
         Both leaves standing open is the pass.</li>
     <li><strong>Do the horses follow him in?</strong> The point of the whole thing. A
         vanilla-sized horse should manage a two-block opening; anything much over about
-        1.43 scale will not, and that is <a href="known-gaps.html#gap-55">gap 55</a>
+        1.43 scale will not, and that is <a href="villagers.html#verified-no-shelter">gap 55</a>
         rather than a new defect &mdash; check the size on the info panel before blaming
         the doors.</li>
     <li><strong>Does he stop after dark?</strong> Shut the doors on him at night and he
@@ -6116,7 +5521,7 @@
     <a href="gene-magic-health.html#vampiric">vampiric allele</a> on the three magic stat
     loci, and a red iris on the eye loci &mdash; put back together by the rare, night-only
     <a href="breed-book.html#dhampir">Dhampir breed</a> through
-    <a href="breeds.html#strains">strains</a>. Shade-seeking was confirmed on the old gene
+    <a href="breeds.html#strains">strains</a>. Shade-seeking was <a href="gene-sun-sensitivity.html#verified-shade">confirmed on the old gene</a>
     earlier the same day; <strong>everything about the split is unplayed.</strong> The
     genetics are covered by <code>DhampirBreedTest</code>, <code>DietGeneTest</code> and
     <code>MagicBodyStatGenesTest</code>, and the red-eyed bay rendered byte-identical to the
@@ -6407,33 +5812,10 @@
     </p>
 </div>
 
-<div class="note good">
-    <span class="label">What was checked offline</span>
-    <p>
-        The lab's exact call sequence was driven end to end against the baked wasm in
-        node, the way &sect;0-J's was, with the PNGs decoded and handed in as the page
-        hands them. Confirmed: the pipeline accepts its textures; the three bases come
-        back Black / Bay / Chestnut; all six gene keys resolve and yield buttons
-        (<code>Ch/Ch</code>; <code>d1/d1</code>, <code>D/D</code>; <code>prl/prl</code>,
-        <code>Cr/N</code>, <code>Cr/Cr</code>; <code>Mu/Mu</code>; <code>Z/Z</code>;
-        <code>To/To</code>); all six stack onto one genotype; a stale gene key reports
-        missing and a bad allele token refuses. The load-bearing one:
-        <strong>swapping the gradient really does redraw every horse</strong> &mdash; a
-        synthetic 64&times;64 chart moved 4 791 texels on the dilution-stacked horse and
-        11 776 on a plain bay, an odd-sized LUT is accepted (<code>GradientLut</code>
-        normalises), and going back to Natural is <strong>byte-identical</strong>.
-    </p>
-    <p>
-        The footprint overlay was checked the same way, across all three bases and eight
-        combinations. It agrees with the model everywhere it was asked: black lands
-        bottom-left (red 100%, black 100%), chestnut top-left, champagne on a chestnut at
-        chart X 45% and cremello at 92%, mushroom on a black at 88%/100%, dun spreading
-        over 29 histogram cells where a flat dilution occupies one, and a tobiano reading
-        the chart at <strong>4 160 texels against a solid black's 11 904</strong> - white
-        is off the chart rather than a colour on it. Bounds stay inside [0,1] and no cell
-        index exceeds the bin count.
-    </p>
-</div>
+<p class="muted">
+    What was checked offline against the baked wasm is recorded on
+    <a href="gene-lut.html#verified-lut-lab">the gene page</a>.
+</p>
 
 <h3>What has not been looked at at all &mdash; everything visual</h3>
 
@@ -6777,21 +6159,11 @@
 
 <hr>
 
-<h2 id="creator">&sect;0-H &mdash; the gene creator (rebuilt 2026-09-06, partly owner-verified)</h2>
-
-<div class="note">
-    <span class="label">Owner-verified in the browser (2026-09-06)</span>
-    <p>
-        &ldquo;That looks correct.&rdquo; A <strong>general</strong> confirmation off
-        the live page, not an item-by-item walk &mdash; so it closes the three things
-        you cannot miss on opening it: the page <strong>loads</strong> at all (the
-        <code>expresses</code> <code>ReferenceError</code> is gone), the
-        <strong>parity line reads green</strong>, and the 3D preview
-        <strong>reads as a horse</strong> instead of the pile of bounding boxes it was.
-    </p>
-</div>
+<h2 id="creator">&sect;0-H &mdash; the gene creator (rebuilt 2026-09-06)</h2>
 
 <p>
+    The page loads, its parity line reads green and the preview reads as a horse
+    (<a href="making-a-gene.html#verified-creator-look">verified</a>).
     What a look cannot confirm is everything you have to <em>interact</em> with. Still
     open:
 </p>
@@ -7134,57 +6506,27 @@
     </p>
 </div>
 
-<h2 id="white-loci">&sect;0 &mdash; the white-pattern loci (owner-verified 2026-09-04)</h2>
+<h2 id="white-loci">&sect;0 &mdash; the white-pattern loci: what the 2026-09-04 look did not cover</h2>
 
 <p>
-    The white-marking rewrite &mdash; <a href="gene-kit.html">KIT</a>,
-    <a href="gene-mitf.html">MITF</a>, <a href="gene-pax3.html">PAX3</a> and
-    <a href="gene-ednrb.html">EDNRB</a> replacing the old white / splash / sabino /
-    frame genes &mdash; is <strong>confirmed rendering correctly in-game</strong>. The
-    eleven-item checklist that was here has moved to the
-    <a href="session-log.html">session log</a>, which is the permanent record.
+    <a href="gene-kit.html#verified-render-0904">KIT</a>,
+    <a href="gene-mitf.html#verified-render-0904">MITF</a> and
+    <a href="gene-pax3.html#verified-render-0904">PAX3</a> are verified rendering in game, and an
+    <code>O/O</code> foal is verified dying at birth (<a href="gene-ednrb.html#verified">EDNRB</a>).
+    Summon tokens: <code>kit=SB1/N</code>, <code>mitf=SW1/N</code>, <code>pax3=SW2/N</code>,
+    <code>ednrb=O/N</code>.
 </p>
 
-<div class="note warn">
-    <span class="label">That confirmation no longer covers frame, and never covered the eyes</span>
-    <p>
-        <code>EDNRB</code>'s <strong>shape was rebuilt on 2026-09-06</strong> and every
-        constant in it moved &mdash; see <a href="#frame-overo">&sect;0-F2</a>. What was
-        confirmed here on 2026-09-04 was the <em>old</em> frame. The three loci beside it
-        are untouched and the confirmation stands for them; so does everything below
-        about the lethal-white ratio, which is genetics rather than shape.
-    </p>
-    <p>
-        These four loci also grew <strong>eye</strong> behaviour that has never been
-        looked at: complete and sectoral heterochromia, which is new since that
-        confirmation. <a href="eye-colour.html">Eye colour &amp; heterochromia</a>, and
-        the checklist in the eye section above.
-    </p>
-</div>
-
-<p>
-    <strong>Old saves will not parse their white-pattern loci.</strong> Dev only; start a
-    fresh world. Summon tokens: <code>kit=SB1/N</code>, <code>mitf=SW1/N</code>,
-    <code>pax3=SW2/N</code>, <code>ednrb=O/N</code>.
-</p>
-
-<div class="note warn">
-    <span class="label">One thing left, and it is not something you can see</span>
-    <p>
-        <strong>The lethal-white breeding ratio.</strong> Two <code>ednrb=O/N</code>
-        carriers should throw an all-white <code>O/O</code> foal about
-        <strong>one time in four</strong>. That is a statistic over a run of foals rather
-        than something a play session shows you, so it stays here: breed a carrier pair
-        repeatedly and check the rate looks Mendelian. The <em>coat</em> is confirmed
-        &mdash; an <code>O/O</code> horse renders pure white and masks everything.
-    </p>
-    <p>
-        <strong>The foal no longer lives.</strong> As of 2026-09-04 the health system
-        exists, so an <code>O/O</code> foal is born, named, filed in the pedigree, and
-        then dies. Check that too while you are breeding the carrier pair &mdash; and
-        see &sect;0b below, which is where the whole health layer waits.
-    </p>
-</div>
+<ul>
+    <li><strong>Frame&rsquo;s shape.</strong> <code>EDNRB</code> was rebuilt on 2026-09-06 and every
+        constant in it moved, so the 2026-09-04 look covered the <em>old</em> frame. See
+        <a href="#frame-overo">&sect;0-F2</a>.</li>
+    <li><strong>Their eyes.</strong> Complete and sectoral heterochromia arrived on these loci after
+        that look. <a href="eye-colour.html">Eye colour &amp; heterochromia</a>.</li>
+    <li><strong>The lethal-white breeding ratio.</strong> Two <code>ednrb=O/N</code> carriers should
+        throw an all-white <code>O/O</code> foal about one time in four. The yard&rsquo;s ratio pen is
+        drawing far from that: <a href="known-gaps.html#gap-245">gap 245</a>.</li>
+</ul>
 
 <h2 id="leopard">&sect;0-F &mdash; the leopard complex (new 2026-09-06, NOT play-tested)</h2>
 
@@ -7726,24 +7068,11 @@
 </ul>
 
 <h3>The lethals</h3>
-<div class="note good">
-    <span class="label">Lethal at birth &mdash; owner-confirmed 2026-09-13</span>
-    <p>
-        &ldquo;Foals dying right after birth also works.&rdquo; <strong>The first thing in
-        &sect;0b ever confirmed in play</strong> &mdash; the whole trait, size and health
-        system has carried &ldquo;NOT play-tested&rdquo; since 2026-09-04, and the lethal
-        path is the part of it with the least margin for being quietly wrong: a foal that
-        should die and does not is a silent failure, and one that dies when it should not
-        is a ruined line.
-    </p>
-    <p>
-        <strong>What this does not yet cover</strong>, because it was not reported either
-        way: whether the death message <em>resolves</em> rather than printing the raw key
-        <code>death.attack.horsegenetics.genetic_defect</code>. The four bullets below are
-        untouched.
-    </p>
-</div>
-
+<p>
+    <a href="horse-body.html#verified-lethal-at-birth">Lethal at birth is verified.</a> Not yet seen
+    either way: whether the death message <em>resolves</em> rather than printing the raw key
+    <code>death.attack.horsegenetics.genetic_defect</code>.
+</p>
 
 <ul>
 <li><strong>It has to out-damage the healing.</strong> Stand a dying foal next to
@@ -7798,16 +7127,13 @@
     <code>Sluggish</code> / <code>Frail</code> / <code>Leaden</code>).
 </p>
 
-<div class="note">
-    <span class="label">The numbers are confirmed; the feel is not (2026-09-14)</span>
-    <p>
-        The yard's MAGIC SPEED, MAGIC HEALTH and MAGIC JUMP pens read, all day:
-        movement speed 0.226 and 0.233 against the wild-type 0.1875 (about 22% faster), max health
-        27.0 and 27.4 against 22, and jump strength 0.57 and 0.63 against 0.5. So the multipliers
-        land on the attributes. What is left below is riding them, the <code>mstn</code> ratio, the
-        mirrors, the config and inheritance.
-    </p>
-</div>
+<p>
+    The multipliers are verified landing on the attributes
+    (<a href="gene-magic-speed.html#verified-stat-pens">speed</a>,
+    <a href="gene-magic-health.html#verified-stat-pens">health</a>,
+    <a href="gene-magic-jump.html#verified-stat-pens">jump</a>). What is left below is riding them, the
+    <code>mstn</code> ratio, the mirrors, the config and inheritance.
+</p>
 
 <ul>
     <li><strong>Walk into a herd.</strong> Same test as magic body size: the
@@ -7856,7 +7182,7 @@
         badlands, swamp, snowy biome, mushroom fields &mdash; none spawn horses
         in vanilla. You should see <b>packs of 3&ndash;6</b> that read as one
         breed, and only the rare truly-isolated horse.
-        <em>Breed + herd assignment owner-confirmed 2026-09-05.</em></li>
+        (<a href="breeds.html#verified-herds">Breed and herd assignment is verified.</a>)</li>
     <li><strong>No server crash (the load-bearing one) &mdash; NOT yet
         re-confirmed.</strong> A <code>DistanceManager.runAllUpdates</code> NPE
         has crashed the server three times after a few minutes of fast flight
@@ -7874,25 +7200,10 @@
         <code>onHorseJoin</code> <code>server.execute</code> deferral is gone.
         Fly a long way through unexplored terrain, near lots of herds
         (draft-heavy biomes especially), and confirm it holds.</li>
-    <li><strong>A herd is one breed; solo horses are Feral Mixed and never in a
-        clump.</strong> The <b>load-bearing check</b> &mdash; this is the
-        <b>fourth</b> attempt at herd formation (the owner confirmed the third
-        still produced mixed-breed herds). Every member of a pack must show the
-        <em>same</em> breed. A lone wild horse must read <em>Feral Mixed</em>. You
-        must <b>not</b> see a group of horses standing together with two or more
-        different breed labels. The 3rd revision founded on the join event, when
-        a spawned pack's other members are not query-visible yet &mdash; so every
-        horse founded a herd of one and came out <em>Feral Mixed</em> (owner
-        confirmed). The 4th (2026-09-05) founds from
-        <code>HorseFoundingTickHandler</code> 20 ticks after spawn, once the pack
-        is loaded, and <code>HerdManager</code> flood-fills the whole connected
-        clump (a <code>NaturalSpawner</code> pack walks each member a
-        <em>cumulative</em> &plusmn;5 blocks, so four routinely span past 32
-        end-to-end) and elects a deterministic lowest-UUID lead whose UUID seeds
-        the breed draw, so every member lands on the same herd whatever order the
-        tick handler reaches them. <em>Owner-confirmed working 2026-09-05.</em>
-        Still watch: the <b>last horse of a very spread pack</b> must join the
-        herd, not fall out as a lone Feral Mixed.</li>
+    <li><strong>The last horse of a very spread pack</strong> must join the herd, not fall out as a
+        lone Feral Mixed. A <code>NaturalSpawner</code> pack walks each member a
+        <em>cumulative</em> &plusmn;5 blocks, so four routinely span past 32 end-to-end
+        (<a href="breeds.html#verified-herds">herd formation itself is verified</a>).</li>
     <li><strong>Herds move as a unit.</strong> A spawned pack should stay
         clumped and wander together following one horse (the lead stallion, or
         a random bachelor). They should not scatter to the horizon.</li>
@@ -7963,9 +7274,6 @@
 </ul>
 
 <h2>Still to verify</h2>
-
-<p><em>The LUT gene (was &sect;0-A) is owner-confirmed working in game &mdash; moved to
-the <a href="session-log.html">session log</a>.</em></p>
 
 <h3 id="browser-menu">0-B. Horse Browser is now a container menu + a Crafting tab (built 2026-09-05, redesigned + two gene buttons added, NOT play-tested)</h3>
 <p>
@@ -8438,11 +7746,6 @@ the <a href="session-log.html">session log</a>.</em></p>
     <code>:common:test</code> pass, <code>runServer</code> boots clean. (Superseded
     in part by <a href="#expressions">&sect;0.2</a>, which reran all of it.) Machinery:
     <a href="genetics-model.html#gene-priority">Genetics model</a>.
-</p>
-<p>
-    <strong>Confirmed 2026-09-03:</strong> wild spawns render their correct
-    coats (no regression from the new <code>codeOrder()</code> / code format),
-    and the right-click paper genome dump works.
 </p>
 <p><strong>Still to check:</strong></p>
 <ul>
@@ -8929,7 +8232,7 @@ the <a href="session-log.html">session log</a>.</em></p>
 <thead><tr><th>Item</th><th>How to check</th></tr></thead>
 <tbody>
 <tr><td><code>breedNth</code> foal names past foal 1</td><td>Breed one pair 7+ times: foal 1 = parent combo, foal 2 = the other combo, foals 3&ndash;6 = one parent name half + a random word, foal 7+ = fully random, no repeats. <code>HorseNames</code> is unit-tested; the live <code>offspringCount(dam, sire)</code> link is unproven.</td></tr>
-<tr><td><code>FamilyTreeScreen</code> scroll mode</td><td>The default shrink-to-fit chart is confirmed good; the other path is not. Flip <code>familyTree.scrollBar</code> true in <code>phc/client.toml</code> and check the wheel and the right-edge thumb.</td></tr>
+<tr><td><code>FamilyTreeScreen</code> scroll mode</td><td>The scroll-bar path is unchecked (<a href="breeding.html#verified-family-tree">shrink-to-fit is verified</a>). Flip <code>familyTree.scrollBar</code> true in <code>phc/client.toml</code> and check the wheel and the right-edge thumb.</td></tr>
 <tr><td>Stats surfaces</td><td>Foal speed/health landing on the entity&rsquo;s attributes; the inventory-panel green/amber/red tint vs <code>parentStats</code>; the paper dump&rsquo;s <code>vs parents</code> line.</td></tr>
 <tr><td>Compact gene code</td><td><code>GeneCodeDisplay.shortForm</code> on the surfaces not specifically eyeballed: the paper dump&rsquo;s <code>genetic code:</code> line and the mounted info panel&rsquo;s word-wrapped block.</td></tr>
 <tr><td>Water riding feel</td><td><code>HorseWaterRidingHandler</code> &mdash; the speed cap (0.09 b/t) and the submerged lift are a first guess.</td></tr>
@@ -8972,13 +8275,8 @@ the <a href="session-log.html">session log</a>.</em></p>
     <strong>custom horse spawn egg</strong> (item&nbsp;14: add the gene, spawn).
 </p>
 
-<p><strong>Confirmed in-game 2026-09-02:</strong></p>
-<ul>
-    <li>The <strong>neon-blue streaks in the mane and tail</strong> render.</li>
-    <li>The <strong>blue particle trail</strong> works.</li>
-</ul>
-
-<p><strong>Still to check:</strong></p>
+<p><strong>Waterborn, still to check</strong> (its streaks and particle trail are
+<a href="gene-waterborn.html#verified-streaks">verified</a>):</p>
 <ul>
     <li><strong>Streaks on hard cases.</strong> Confirm they still read on a
         <strong>cremello</strong> and on a <strong>dominant-white</strong> horse (the
@@ -9000,11 +8298,8 @@ the <a href="session-log.html">session log</a>.</em></p>
         parent's (the <code>stripeSeed</code> / <code>stripeSpacing</code> knobs).</li>
 </ul>
 
-<p><strong>Suntouched &mdash; the <code>glow</code> verb. Confirmed in-game
-2026-09-02:</strong> the emissive gold mane + tail render and look good, the
-gold-dust <code>emitter</code> shows, and the horse lights the area around it
-(the trailing <code>minecraft:light</code> block).</p>
-<p><strong>Still to check:</strong></p>
+<p><strong>Suntouched &mdash; the <code>glow</code> verb, still to check</strong> (the glowing mane and
+tail, the emitter and the light are <a href="gene-suntouched.html#verified-glow">verified</a>):</p>
 <ul>
     <li><strong>The light cleans up.</strong> Kill the horse, or walk it far enough
         to unload &mdash; the <code>minecraft:light</code> block must disappear, not
@@ -9115,9 +8410,8 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
     the jar now <strong>transforms in the player&rsquo;s hand</strong>, creative
     included. Owner also asked that the horse be <strong>in breeding mode first</strong>
     (fed a carrot / apple &mdash; <code>isInLove()</code>); that gate is now on both
-    ends and the love state is consumed by the op. Partly owner-confirmed
-    2026-09-02 (collection + tooltip work; genome-string display bug is a
-    separate <a href="#open-issues">open issue</a>, the data itself is right).
+    ends and the love state is consumed by the op. Collection and the tooltip are
+    <a href="item-seed-jars.html#verified-collect">verified</a>.
     Still to check:
 </p>
 

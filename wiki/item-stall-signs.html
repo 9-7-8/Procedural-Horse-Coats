@@ -145,7 +145,7 @@
         signs count as solid, so the top of a sign hung outside a stall used to measure as a
         one-tile room with sky above it; it did not exist at binding and was smaller than
         the real stall at ticket time, so the ticket chose it and put the horse half inside
-        the wall (<a href="known-gaps.html#gap-223">gap 223</a>).</li>
+        the wall (<a href="#verified-sign-floor">gap 223</a>).</li>
     <li><strong>It walks columns of floor and never rises.</strong> The version before
         this filled air up to three blocks above the sign, and a fence is one block tall
         &mdash; so it climbed over the front rail of every stall anyone actually builds,
@@ -188,6 +188,44 @@
 <ul>
     <li>Both stall signs borrow <code>minecraft:item/oak_sign</code> for a texture.</li>
 </ul>
+
+<h3 id="verified">Verified</h3>
+
+<p id="verified-detector-rewrite">
+    <strong>Why the detector was rewritten</strong> (0.3.7 to 0.3.8, 2026-09-09; binding confirmed above). It killed
+    a horse: the flood fill walked <em>air</em> three blocks above the
+    sign, climbed the one-block fence of every real stall, spilled into the aisle and reported &ldquo;not a
+    room&rdquo;, and <code>landingSpot</code> then fell through to <code>stall.signPos()</code>, a wall-flush block
+    nobody checked. The search now walks floor columns, never rises, steps at most one block, treats a door, trapdoor
+    or gate as the room's edge in every state, and lives in <code>common/</code> as <code>StallFill</code> with tests.
+    A stall with nowhere to stand refuses the ticket without consuming it. Landing was then moved (2026-09-10) from
+    the centre of the middle floor tile, which put a 1.4-wide horse into the side wall of every two-wide stall, to
+    the floor centroid checked against the horse's own box with <code>noCollision</code>. The three judgement calls
+    still unmet in play are <a href="known-gaps.html#gap-153">gap 153</a>.
+</p>
+
+<p id="verified-sign-floor">
+    <strong>A sign is never a floor</strong> (2026-09-13, confirmed from the log in all three stalls). A ticket put a
+    horse in the tight stall's roof, with <code>inWall</code> damage, because the stall's own sign was measured as a
+    one-tile room: <code>stall sign at 9, 130, 74 facing north: room 9, 131, 74 to 9, 138, 74 (1 tiles), horse box
+    1.40 x 1.60 -&gt; NOTHING FITS - refused</code>. Vanilla signs are force-solid, so <code>blocksMotion()</code> is
+    true and <code>StallDetector.standable</code> counted the top of the sign as floor. At bind time the sign did not
+    exist yet, so the real stall won; at ticket time <code>forSign</code> found both rooms and <code>smaller()</code>
+    chose the one-tile one. After the fix, each sign hung on the outside: tight stall <code>room 7, 129, 76 to 9,
+    131, 79 (12 tiles) -&gt; landing at 8.50, 129.00, 78.00</code>; L-shaped stall <code>(16 tiles) -&gt; landing at
+    17.13, 129.00, 78.25</code>, clear of its notch; the roofed stall as before; no <code>inWall</code> damage
+    anywhere. Kept from the hunt: a stall where nothing fits refuses, every ticket logs its room and landing, and the
+    <code>null</code> from <code>forSign</code> into <code>landingSpot</code> stays guarded. The one trace line
+    printing the measured room was the whole diagnosis.
+</p>
+
+<p id="verified-binding">
+    <strong>The rewritten detector binds an ordinary stall</strong> (owner-confirmed in play,
+    2026-09-10): the sign binds and finds the inside of a stall with a fence and a gate. The cases
+    its rules guess at &mdash; slabs or carpet, a one-block step, a two-block drop, an open gate
+    &mdash; are still on <a href="verification.html#stall-rewrite">verification &sect;0-BJ</a>.
+</p>
+
 </section>
 
 <div class="page-foot">

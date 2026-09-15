@@ -1118,6 +1118,34 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     </p>
 </div>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-drift">
+    <strong>A closed line can leave its founders' looks</strong> (2026-09-07). A foal used to copy a parent's per-allele
+    seed exactly, so no breeding could produce a horse outside the wild population. <code>EpiDrift</code> nudges every
+    stored value with a two-sided exponential at each breeding: half of all drifts move a value under a tenth of a percent
+    of its range, and roughly one foal in thirty has one value that visibly moved. The epigenome moved onto
+    <code>HorseRecord</code> on 2026-09-03, and the invented-ancestor fallback in <code>FamilyTreeScreen</code> is deleted.
+    The curve is unplayed: <a href="known-gaps.html#gap-64">gap 64</a>.
+</p>
+
+<p id="verified-reports">
+    <strong>The <kbd>H</kbd> browser and the information screen render</strong> (2026-09-07, off the
+    owner&rsquo;s own reports of what was wrong with them rather than a checklist walk). The browser
+    opens and its tabs render; My horses draws rows (the owner asked what the Barn column was for); the
+    Breeding preview tab renders; and the information screen&rsquo;s Genes and Other genes tabs render
+    with gene rows. So the roster payload registers and reaches <code>HorseRoster</code>. The three
+    defects those reports found (buttons over text, brindle on every stallion, <code>KIT</code> filed
+    under Other genes) were fixed and are not re-checked:
+    <a href="verification.html#h-menu">verification &sect;0-AI</a>.
+</p>
+
+<p id="verified-family-tree">
+    <strong>The family tree&rsquo;s default shrink-to-fit chart reads correctly</strong> (owner-confirmed
+    in an early play session; the checklist row carried no date). The other path,
+    <code>familyTree.scrollBar = true</code> in <code>phc/client.toml</code>, is unchecked.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

@@ -158,6 +158,22 @@
 
 <p class="muted">Paints nothing.</p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-tron-halo">
+    <strong>A soft-masked layer carries light</strong> (owner, 2026-09-12: &ldquo;Tron does indeed have a
+    glowing diffuse painted along the body for both forms, though more noticeable in the gradient
+    form&rdquo;). The haloes are lit at 25% and the tubes ride the dial (0.4&ndash;1.0); this was the first
+    sighting on a horse of what removing the emissive threshold bought.
+</p>
+<p>
+    <em>Why the gradient reads stronger, and it is not the level:</em> both haloes are
+    <code>"emissive": 0.25</code> and paint at <code>strength 34</code>; the gradient's op is a
+    <code>RAMP</code> sweeping hue 300&deg; along the body where the solid's is one flat hue. A glow has no
+    colour of its own &mdash; the emissive texture takes whatever colour the coat has at that texel &mdash; so a
+    dim-looking glow may want a different colour rather than a higher level.
+</p>
+
 </section>
 
 </article>

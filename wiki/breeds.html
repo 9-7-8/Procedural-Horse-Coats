@@ -568,6 +568,35 @@
     <li><code>neoforge/&hellip;/data/horsegenetics/neoforge/biome_modifier/</code> &mdash; which biomes spawn horses.</li>
 </ul>
 
+<h2 id="verified">Verified</h2>
+
+<p id="verified-breed-designer">
+    <strong>The step-by-step breed designer runs</strong> (2026-09-10, headless Chrome over the DevTools protocol). Every
+    step renders, the viewport sizes itself in both layouts without forcing the page wider than a phone, the herd and the
+    example founder roll, random markings land in the file, export names an unnamed breed, a built-in breed imports, and
+    the console is clean. An untouched step writes nothing. Whether the steps read clearly to a person is
+    <a href="verification.html#breeds-overhaul">verification &sect;0-CA</a>.
+</p>
+
+<ul id="verified-switched-off">
+    <li><strong>A breed switched off in <code>breed-spawning.toml</code> is still a breed</strong> everywhere
+        but the cowboy's string, which is not yet checked (owner, by 2026-09-11).</li>
+    <li><strong>The H menu's Breeds tab works, and My horses shows hands</strong> (owner, the third play
+        session of 2026-09-10).</li>
+</ul>
+
+<p id="verified-herds">
+    <strong>Herd formation and breed assignment work</strong> (owner-confirmed in play 2026-09-05, on the
+    fourth attempt). Every member of a spawned pack shows the same breed and a lone wild horse reads
+    Feral Mixed. The third attempt founded on the join event, before a pack&rsquo;s other members were
+    query-visible, so every horse founded a herd of one and came out Feral Mixed (owner-confirmed). The
+    fourth founds from <code>HorseFoundingTickHandler</code> 20 ticks after spawn, once the pack is
+    loaded; <code>HerdManager</code> flood-fills the connected clump and elects a deterministic
+    lowest-UUID lead whose UUID seeds the breed draw, so every member lands on the same herd whatever
+    order the handler reaches them. Still unwatched: the last horse of a very spread pack
+    (<a href="verification.html#breeds">verification &sect;0e</a>).
+</p>
+
 </article>
 </main>
 </body>

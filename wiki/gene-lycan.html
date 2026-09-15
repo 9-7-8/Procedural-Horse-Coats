@@ -286,6 +286,27 @@
     </tbody>
 </table>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-were-death">
+    <strong>A were-animal dying is a horse dying</strong> (2026-09-13). <code>LycanthropyHandler.shift</code> discards
+    the horse and hangs its saved state on the animal, and nothing handled that animal dying, so two horses left the
+    world as were-salmon on dry land with no body, no drops and no log line. The first fix refused to shift an aquatic
+    form on land and the owner overruled it: <em>&ldquo;It should absolutely still shift and then just die.&rdquo;</em>
+    What ships: the animal's death rebuilds the horse from its tag where the animal fell and kills it with the same
+    damage source, so <code>GeneDeathHandler</code>, <code>ActionTrace</code>, the ancestry database and vanilla's
+    drops all run as for any other horse death. A harsh gene and a gene silently deleting data look identical in a
+    log; ask which it is before guarding it.
+</p>
+
+<p id="verified-lycan">
+    <strong>The shift happens, and a death in animal form is a death.</strong> On 2026-09-13 the yard
+    logged <code>creature joined | minecraft:allay [LYCAN]</code>: a horse became an allay, which its stall
+    could never have held, since allays fly and a pen wall is one block high. On 2026-09-14 two pufferfish
+    forms drowned on land, each logging a <code>[lycan]</code> line and then <code>[trace] horse died</code>
+    from drowning, so the horse dies with its other form rather than disappearing.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

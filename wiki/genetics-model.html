@@ -992,6 +992,66 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     locus&rsquo;s <code>&hellip;-carrier</code>) without pretending to change the coat.
 </p>
 
+<h2 id="verified">Verified</h2>
+
+<p id="verified-seed-scramble">
+    <strong><code>SeededRng</code> scrambles its seed</strong> (2026-09-09). <code>java.util.Random</code>'s seed handling
+    is a single XOR, so the first <code>nextFloat()</code> off seeds 0..3999 spanned only 0.58 to 0.95 (mean 0.77), and
+    <code>EyeSpread.roll</code>'s 62/22/16 split measured 100/0/0. The constructor now runs the seed through splitmix64's
+    finaliser (written out, for TeaVM and Java 8): 0.0002 to 0.9999, mean 0.5043. Every horse moved: 883 of 1056 pipeline
+    golden lines and 218 of 623 bake golden lines, exactly the genes that store epigenetics. The same fault had made
+    positions in neighbouring seeds correlated (magic jump's mean over 3000 seeds came out 1.7% high, fifteen standard
+    errors); neighbour covariance at positions 0, 1, 5 and 20 fell from about 0.013 to 0.001, and
+    <code>MagicBodyStatGenesTest</code>'s private splitmix64 workaround was deleted and the test still passes, which makes
+    it a tripwire.
+</p>
+
+<p id="verified-per-gene-streams">
+    <strong>Registering a gene moves only that gene</strong> (2026-09-09). <code>Epigenome.fromSeed</code> drew every gene
+    from one shared stream, so a locus registered at priority 68 re-drew every gene above it; registering natural zebra
+    broke three <code>WhitePatternGenesTest</code> assertions by margins under 0.05. Each gene now draws from its own
+    generator namespaced by its key (<code>Epigenome.copiesFor</code>). Two <code>EpigenomeTest</code> cases pin it (every
+    gene recomputed from <code>(seed, key)</code> alone; the registry walked backwards), and both fail with the shared
+    stream put back. Changing how many values one gene declares still reshuffles that gene, on purpose. Two tests tuned
+    to a single draw were restated as distributions (the splash dose-response, and the grey spread over 24 seeds, about
+    45 against a threshold of 20).
+</p>
+
+<p id="verified-catalogue">
+    <strong>The catalogue is arithmetic, and <code>long</code></strong> (2026-09-04 and 2026-09-06).
+    <code>GenotypeCatalog</code> is not materialised: <code>size()</code> is arithmetic and <code>get(i)</code> reads an
+    odometer, because an eager list of two million genotypes is hundreds of megabytes, and the pen corridor is a fixed
+    2&nbsp;000 random pens rather than one pen per entry. <code>entries()</code> is a lazy view, so streaming it still
+    builds everything; sample it. When the leopard complex took the reduced catalogue past <code>Integer.MAX_VALUE</code>,
+    <code>size()</code> / <code>get()</code> went to <code>long</code>; no production caller indexes it, so only tests
+    changed, and <code>entries()</code> documents that it truncates. <code>CoatPipelineGoldenTest.override</code> throws on
+    an unknown gene rather than silently pinning nothing.
+</p>
+
+<p id="verified-sex-linked">
+    <strong>Sex-linked inheritance is built, and brindle proves it</strong> (2026-09-06). <code>Gene.inheritance()</code>
+    declares the mode; <code>breedWith</code> routes the sire's copy by the foal's sex; <code>Gene.sexConsistent</code>
+    keeps impossible combinations out of the catalogue and the random splice; a hemizygous copy lives in a reserved
+    placeholder slot and displays as <code>X-Brn</code>; founder tables are sex-aware. Nothing is <code>Y_LINKED</code>
+    yet (the mirror case waits for a gene). The raw-pair display still open is
+    <a href="known-gaps.html#gap-22">gap 22</a>.
+</p>
+
+<p id="verified-expression-readers">
+    <strong>What reads the expression table</strong> (2026-09-04 and 2026-09-05). The info panel and paper dump print a
+    horse's expressed <code>Condition</code>s; the spawn-egg editor lists genes by <code>Gene.name()</code> and prints the
+    outcome name under a row that expresses; the Horse Browser and the View Genes popup show every
+    <code>Expression</code>'s name and sentence, its wild type / masks / varies flags, and <code>Gene.description()</code>
+    from <code>GeneDescriptions</code>. What is still unread is <a href="known-gaps.html#gap-10">gap 10</a>.
+</p>
+
+<p id="verified-code-format">
+    <strong>The gene-keyed code format did not regress wild coats</strong> (owner-confirmed 2026-09-03,
+    after the data-model rewrite that introduced gene priority and
+    <code>&lt;geneKey&gt;=&hellip;</code> genotype and epigenome codes). Wild spawns rendered their
+    correct coats under the new <code>codeOrder()</code>, and the right-click paper genome dump worked.
+</p>
+
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>

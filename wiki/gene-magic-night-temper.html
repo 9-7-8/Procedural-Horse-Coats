@@ -176,6 +176,22 @@ if (temperActing || watch == null) {
     Fleeing needed its own path, because there is no vanilla avoid-goal to borrow.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-night-temper">
+    <strong>All eight night-temper forms confirmed</strong> (2026-09-13). They were never broken, only
+    unwatchable, for three reasons that each looked like &ldquo;the gene does nothing&rdquo;: the horse
+    dimension had no night (a <code>dimension_type</code> needs <code>timelines</code> as well as a
+    <code>default_clock</code>); the biome was <code>the_void</code>, so the monster-targeted forms had
+    nothing to be about; and the fleeing forms were in 4&nbsp;&times;&nbsp;7 stalls. The stalls confirmed the
+    hunt forms at once and hid the flee forms completely: a hunter closes on you and a wall helps it, while a
+    flee paths <code>FLEE_DISTANCE</code>, twelve blocks. Moved to 19&nbsp;&times;&nbsp;30 paddocks, the log
+    filled with 48 lines, every one <code>path accepted</code>, including <code>from minecraft:cow</code> for
+    the herd-targeted form that had been reported dead. That is a fact rather than an impression only because
+    <code>Navigation.moveTo</code>'s return, whether the path was accepted, stopped being discarded: before,
+    a flee that never fired and one that fired into a fence four blocks away read identically.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

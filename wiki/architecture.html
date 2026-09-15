@@ -292,6 +292,43 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 
 <p>Both are <code>ClientLifecycleEvent</code> subclasses, which do <strong>not</strong> implement <code>IModBusEvent</code>, so <code>@EventBusSubscriber(value = Dist.CLIENT)</code> routes them to the game bus. A failed delete only warns - the next launch retries.</p>
 
+<h2 id="verified">Verified</h2>
+
+<p id="verified-debug-announce">
+    <strong><code>debug.announce</code> is a server config</strong> (2026-09-09). <code>DebugAnnounce.ENABLED</code> had
+    been a hard-coded <code>true</code>, so <code>[Cowboy]</code> and <code>[Horseman]</code> lines went to chat in a
+    normal install once jars reached other players. It had been hard-coded because
+    <code>!FMLEnvironment.isProduction()</code> once hid every line for a session. Now: on in a dev run, off in a normal
+    install, switchable in both, and the class logs once which way its gate went and what <code>isProduction()</code>
+    said.
+</p>
+
+<p id="verified-double-register">
+    <strong>A launch no longer prints an ERROR per shipped gene</strong> (2026-09-09). <code>Genes</code> loads the
+    shipped gene files from its own class initialiser; <code>ModGeneSpecs.load()</code> then re-read them through
+    <code>GeneSpecLoader.loadAndRegister(dir)</code>, and every one threw &ldquo;a gene is already registered&rdquo;: 121
+    ERROR lines before the title screen, none meaning anything, teaching the log's reader to scroll past red.
+    <code>loadAndRegister</code> is the drop-in folder only; a drop-in colliding with a shipped gene still throws. The
+    launch logs how many genes shipped, how many were dropped in, and how many segments the genotype code has.
+</p>
+
+<p id="verified-packet-cap">
+    <strong>Every genome string on the wire has a stated cap</strong> (fixed in 0.3.2, 2026-09-09). 0.3.0 and 0.3.1
+    disconnected outside testers on world entry with <code>Failed to encode packet
+    'clientbound/minecraft:custom_payload'</code>: <code>CoatSyncPayload</code> wrote the epigenome with a bare
+    <code>buf.writeUtf(v)</code>, whose implicit cap is 32&nbsp;767 characters, and a full epigenome had reached
+    35&nbsp;304. Minecraft throws rather than truncating, and a throw in an encoder drops the connection. Three more sites
+    had the same fault (<code>StoredGenome</code> on <code>ByteBufCodecs.STRING_UTF8</code>, and the genotype fields of
+    the roster and spawn payloads, at 5612 of 8192). All caps now come from <code>GenomeCodeCodecs</code> and
+    <code>EpigenomeSizeTest</code> guards each at half budget; the genotype guard failed on its first run.
+    <code>EpigenomeSizeTest</code> had existed, but was pointed at the one cap with a number written next to it. The size
+    problem underneath is <a href="known-gaps.html#gap-66">gap 66</a>.
+</p>
+
+<p id="verified-test-world-launch">
+    <strong><code>runClientTestWorld</code> needs no clicks</strong> (2026-09-14, the all-day run): the
+    client lands in the horse dimension's test yard about thirty seconds after launch.
+</p>
 
 </article>
 </main>

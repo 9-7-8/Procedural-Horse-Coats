@@ -327,6 +327,22 @@
     <code>O/O</code> foals (<a href="known-gaps.html#gap-245">gap 245</a>).
 </p>
 
+<p id="verified-topline-quantile">
+    <strong>Frame measures against the topline and cuts at a quantile</strong> (2026-09-06, second attempt). The barrel
+    band is a fraction of <code>WhitePattern.toplineHeight</code> and the neck has a band of its own; spine white went
+    from about 75% to 0.00 at every seed, pinned in <code>WhitePatternGenesTest</code>. The first attempt re-picked
+    constants against <code>PatchNoise.field</code>, which is a bell concentrated near 0.5, and was recorded as closed
+    while still drawing a dipped horse. <code>paintFrame</code> now scores every eligible texel, sorts and cuts at the
+    quantile matching <code>cover</code>, so the knob is an area fraction by construction.
+</p>
+
+<p id="verified-render-0904">
+    <strong>The <em>old</em> frame rendered correctly in game</strong> (owner-verified 2026-09-04, with
+    <code>KIT</code>, <code>MITF</code> and <code>PAX3</code>). The shape was rebuilt on 2026-09-06 and
+    every constant moved, so that look no longer covers it. The <code>O/O</code> coat itself, pure white
+    and masking everything, stands.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

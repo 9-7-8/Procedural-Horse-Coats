@@ -158,6 +158,28 @@ the PNG goes in <code>common/src/main/resources/assets/horsegenetics/textures/co
 set with <code>LutSet.fromRegistry</code>, which walks the registry the way the game
 does.</p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-lut-lab">
+    <strong>The LUT lab&rsquo;s call sequence works against the baked wasm</strong> (checked offline in
+    node when the lab was built, the 2026-09-06 batch, with the PNGs decoded and handed in as the page
+    hands them; nobody has opened the lab in a browser). The pipeline accepts its textures; the three
+    bases come back Black / Bay / Chestnut; all six gene keys resolve, yield buttons and stack onto one
+    genotype; a stale gene key reports missing and a bad allele token refuses. Swapping the gradient
+    redraws every horse: a synthetic 64&times;64 chart moved 4&nbsp;791 texels on the dilution-stacked
+    horse and 11&nbsp;776 on a plain bay, an odd-sized LUT is accepted (<code>GradientLut</code>
+    normalises), and going back to Natural is byte-identical. The footprint overlay agreed with the model
+    across all three bases and eight combinations: black bottom-left, chestnut top-left, champagne on a
+    chestnut at chart X 45% and cremello at 92%, mushroom on a black at 88%/100%, dun over 29 histogram
+    cells where a flat dilution occupies one, and a tobiano reading the chart at 4&nbsp;160 texels against
+    a solid black&rsquo;s 11&nbsp;904 (white is off the chart). Bounds stay inside [0,1].
+</p>
+
+<p id="verified-lut-game">
+    <strong>The LUT locus works in game</strong> (owner-confirmed by 2026-09-05, when it was item
+    &sect;0-A on the checklist). The record is in the <a href="session-log.html">session log</a>.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="lab" data-tab-label="LUT lab"

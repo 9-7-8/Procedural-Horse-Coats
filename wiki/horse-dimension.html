@@ -681,6 +681,57 @@
     <li>Whether the 10-second player dwell <em>feels</em> right is unverified.</li>
 </ul>
 
+<h2 id="verified">Verified</h2>
+
+<p id="verified-readout">
+    <strong>The census names each horse against its own base value</strong> (2026-09-13).
+    <code>DebugWorldWatch.attributeReadout</code> had been written, documented and never called, so the eyesight pens
+    printed <code>movement_speed 0.165-0.221</code> for another session, a min and max over two different animals that
+    cannot tell &ldquo;does nothing&rdquo; from &ldquo;swapped&rdquo;. It is wired in. The same reading found two
+    floods, 725 no-op heal lines and 680 identical <code>[Cowboy]</code> heartbeats, 66% of everything the mod logged
+    in twelve minutes; both are now counted or change-triggered, and the cowboy keeps a two-minute heartbeat so silence
+    still means a cowboy that is not ticking. <code>javac</code> does not fail a build over an uncalled private method.
+</p>
+
+<p id="verified-yard-light">
+    <strong>The open yard is lit, and the dark rooms really are spawn-proof</strong> (2026-09-13). With
+    <code>monster_spawn_light_level: 0</code> the middle of the forty-eight-wide yard spawned zombies, which mattered
+    once horses could take damage there. It is lit with invisible light blocks (no collision, nothing in a sight line).
+    The dark rooms' proofing had been inert since written: level-1 <code>LightBlock</code>s on a four-block grid light
+    only their own block, and the ward room's floor read zero. No spacing works for level 1, so the floor layer is
+    filled instead, still <code>dark</code> to a gene (<code>DARK_LEVEL</code> is 7). A first yard grid (level 15, six
+    blocks apart, at <code>gy+4</code>) was caught before shipping: it bottoms out near six at the floor, which would
+    have made the eyesight pen's lit control read dark.
+</p>
+
+<p id="verified-teardown">
+    <strong>A plot teardown sweeps the whole plot, and dying counts as leaving</strong> (2026-09-13). The census jumped
+    from 205 horses to 290 across one rebuild after the owner died in a plot and came back in. Two bugs: the sweep was
+    one <code>getEntities(plotBox(plot))</code>, which sees only loaded chunks, so every horse past the player's chunk
+    radius survived; and <code>PlayerChangedDimensionEvent</code> does not fire on respawn, so a player who died left
+    the plot claimed and holding forced chunks. The sweep now forces and releases each chunk of the built range in turn,
+    bounded by <code>Plot.highestIndex</code>, and releases the watch's forced chunks after it; <code>PlayerRespawnEvent</code>
+    is hooked, guarded on where the player respawned. The arithmetic predicted 327 against 290 observed, the difference
+    being the loaded stretch nearest the portal that did get swept.
+</p>
+
+<p id="verified-f8-outline">
+    <strong>F8's outline comes off every horse it went on</strong> (2026-09-13, after two reports). <code>glowNear</code>
+    lit horses by proximity at the time and <code>clearNear</code> cleared them by proximity later, so anything ridden
+    away from kept the outline, and effect timers do not tick in unloaded chunks, so the three-second effect held.
+    Three parts: the lit set is recorded per player and cleared from that register; a horse in an unloaded chunk goes to
+    a pending set cleared by <code>EntityJoinLevelEvent</code> when it loads, which survives a restart; and a reaper
+    removes stale <code>GLOWING</code> whenever nobody has the highlight on. The reaper is safe only because this mod
+    applies <code>GLOWING</code> in exactly one place.
+</p>
+
+<ul id="verified-yard">
+    <li><strong>The overnight watch leaks nothing</strong> (2026-09-12 23:07 to 02:04, unattended): 89
+        censuses, the entity count flat at 154&ndash;155 and 50.0&nbsp;ms per tick throughout.</li>
+    <li><strong>The <code>debug_pens</code> biome spawns hostiles</strong> (2026-09-13): 42 in two minutes,
+        every one logged <code>by NATURAL</code>, after it replaced <code>minecraft:the_void</code>.</li>
+</ul>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="items.html">Items &amp; recipes</a>

@@ -112,7 +112,7 @@
     <code>compose()</code> &mdash; the magical cases are seeded with a synthetic flat
     colour rather than resolved through a chart. So the whole composite path had no
     net at all, and the creator drew every dark coat at full opacity for months
-    (<a href="known-gaps.html#gap-50">gap 50</a>). The gate looked comprehensive and
+    (<a href="#verified-composer-parity">gap 50</a>). The gate looked comprehensive and
     had a hole the exact size of the bug.</li>
 <li><strong>The corpus could not discriminate.</strong> The invert/parts fix was
     covered by parity and parity stayed green &mdash; because no example gene had a
@@ -345,7 +345,7 @@
 <tr><td><code>schema.js</code></td><td><code>SpecSchema</code></td><td><strong>Yes</strong> &mdash; defaults compared</td></tr>
 <tr><td><code>noise.js</code></td><td><code>BodyNoise</code></td><td><strong>Yes</strong>, via the engine's cases</td></tr>
 <tr><td><code>fields.js</code></td><td><code>CoatTextureComposer</code></td><td><strong>Arithmetic only</strong> &mdash; new; the composite itself cannot be compared in Node, which has no image decoder for the gradient and template</td></tr>
-<tr><td><code>geometry.js</code> + <code>model3d.js</code></td><td><code>HorseSkinGeometry</code></td><td><strong>No</strong> &mdash; <a href="known-gaps.html#gap-100">gap 100</a>; <code>posed()</code> exists twice, in two languages, in two files that are not obviously a pair</td></tr>
+<tr><td><code>geometry.js</code> + <code>model3d.js</code></td><td><code>HorseSkinGeometry</code></td><td><strong>No</strong> &mdash; <a href="body-space.html#verified-posed-parity">gap 100</a>; <code>posed()</code> exists twice, in two languages, in two files that are not obviously a pair</td></tr>
 </tbody>
 </table>
 
@@ -547,7 +547,7 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
     The documented recipe was &ldquo;run the test, copy the file it writes&rdquo;, but a
     <em>mismatch</em> wrote nothing, so the file sitting there was from some earlier run.
     Copying it back reinstated a stale golden and the test went green having compared
-    nothing (<a href="known-gaps.html#gap-128">gap 128</a>). The tell was a file that
+    nothing (<a href="#verified-golden-copyback">gap 128</a>). The tell was a file that
     &ldquo;moved by zero lines&rdquo; while the test was still red &mdash; two facts that
     cannot both be true, which is the kind of contradiction worth stopping on.</li>
 <li><strong>Gradle reporting <code>processTestResources UP-TO-DATE</code></strong> after
@@ -674,6 +674,85 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
         the whole module's build directory as held until it exits.
     </p>
 </div>
+
+<h2 id="verified">Verified</h2>
+
+<p id="verified-bake-golden">
+    <strong>A per-gene coat regression test exists</strong> (2026-09-08). A change to mask <code>parts</code> moved what
+    twelve genes paint and <code>coat-golden.txt</code> stayed byte-identical, because it exercised 39 registry genes and
+    3 data-driven ones. <code>CoatBakeGoldenTest</code> walks <code>Genes.codeOrder()</code>, so it has no list to fall
+    behind, and runs in seconds. It hashes rather than looks: a diff is a prompt to go and look at icons, and its failure
+    message says so.
+</p>
+
+<p id="verified-golden-regen">
+    <strong>Regenerate the pipeline golden when cutting a release</strong> (2026-09-08). It had been stale across two
+    sessions and forty-six genes, so a real regression was indistinguishable from expected churn. It was regenerated while
+    cutting 0.3.0, when the full suite runs anyway (681 tests, 5m33s).
+</p>
+
+<p id="verified-golden-copyback">
+    <strong>A red golden writes its actual</strong> (2026-09-09). <code>CoatPipelineGoldenTest</code> used to write
+    <code>common/build/coat-golden.txt</code> only when the golden was missing, so copying it back after a mismatch
+    reinstated a stale file and the test went green having compared nothing new. It happened once, caught because the
+    file moved by zero lines. It now writes the actual on a mismatch, as <code>CoatBakeGoldenTest</code> did.
+</p>
+
+<p id="verified-portability-test">
+    <strong>The portability rules are a test</strong> (2026-09-08). <code>CommonPortabilityTest</code> scans
+    <code>common/</code> sources for a Minecraft / NeoForge / Mojang import (hard rule 1), for <code>Map.of()</code> or
+    <code>Map.copyOf(</code> outside <code>CommonMaps</code> (the TeaVM empty-map trap), and for the two removed Java 9+
+    calls. It is a source scan, blind to reflection, and it allows a non-empty <code>Map.of(k, v, &hellip;)</code>, which
+    light ships and the browser exercises on every preview.
+</p>
+
+<p id="verified-creator-parity">
+    <strong>The creator checks parity on boot</strong> (2026-09-06). <code>js/parity.js</code> is the one implementation;
+    <code>check-parity.mjs</code> and the page both run it, and <code>SpecFixtureTool</code> emits
+    <code>fixtures/expected.js</code> because a <code>file://</code> page cannot fetch a sibling. Building it found the
+    terminal check green against a stale fixture while the JS was a day behind on the top/bottom UV swap: re-bake the
+    snapshot before trusting the check.
+</p>
+
+<p id="verified-composer-parity">
+    <strong>The composer's arithmetic is inside the parity gate</strong> (2026-09-09). The creator's mirror in
+    <code>js/fields.js</code> kept the old <code>rgb === 0 ? PURE_BLACK_ALPHA : 0xFF</code> rule; black bakes to about
+    <code>#161515</code>, so the branch never fired and every dark preview was drawn opaque. Nothing caught it because
+    parity ran <code>restrict()</code> and <code>tint()</code> and never <code>compose()</code>. The fixture now carries
+    answer tables for <code>nearBlackAlpha</code> and the shadow lift; restoring the old equality fails three checks.
+</p>
+
+<p id="verified-duplicate-ids">
+    <strong><code>check-links.mjs</code> fails on a repeated HTML id</strong> (2026-09-09). An anchor resolves to the first
+    element with its id, so the second section cannot be linked and every link to it still looks right. Eleven were found
+    (eight on the session log, two on the checklist, one on spawn eggs) and later occurrences took a <code>-2</code>
+    suffix; the check also found two gaps sharing number 46, which is why the zebra-map entry is
+    <a href="known-gaps.html#gap-127">gap 127</a>.
+</p>
+
+<p id="verified-science-tabs">
+    <strong>Every natural gene page carries a science tab</strong> (2026-09-09). 157 of 203 gene pages had none, but 131
+    were magical genes, where none is correct; 25 natural pages were missing one, and all 25 were written from
+    owner-supplied sources rather than stubbed. <code>check-gene-tabs.mjs</code> now holds an empty allowlist, so a new
+    natural page without one fails. The contradictions those tabs found are <a href="known-gaps.html#gap-134">gap 134</a>;
+    the older stub tabs are on <a href="roadmap.html#science-tabs">the roadmap</a>.
+</p>
+
+<p id="verified-page-filename">
+    <strong>A gene page must be named after its gene key</strong> (2026-09-10). <code>GeneWikiTool</code> derives the
+    filename from the key, so four pages written under readable names were missing from the sidebar and landing page with
+    the build green; the bake only printed <code>no page of their own, so not listed</code>, and
+    <code>check-links --orphans</code> missed them because the roadmap linked them. The four were renamed.
+</p>
+
+<p id="verified-cheap-comments">
+    <strong>A comment saying something is cheap is not evidence</strong> (2026-09-10). World-reading condition flags were
+    sampled all four together, so a caveborn horse needing one block-light read paid for a jukebox search and an entity
+    scan every twenty ticks; and <a href="gene-guardian.html">guardian</a>'s handler scanned a sixteen-block box on every
+    hit any player took before checking ownership, while its javadoc said it checked ownership first. Flags are computed
+    individually and the horse tick keeps an owner index. Both hazards had been written down in advance on the gene's own
+    page; only reading the finished code against them found the bugs.
+</p>
 
 </article>
 </main>

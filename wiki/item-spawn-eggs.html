@@ -297,6 +297,27 @@
     an item. In a dev build, the <em>Spawn Test Horse World</em> button&rsquo;s starting
     inventory contains one of every item.
 </p>
+
+<h3 id="verified">Verified</h3>
+
+<p id="verified-spawn-button">
+    <strong>Spawn sits under the preview, and the column overlap moved from 314px to about 258</strong> (2026-09-09).
+    &ldquo;Clear genes&rdquo; and &ldquo;Make egg&rdquo; touched in a real window, as predicted. The owner's fix put Spawn
+    under the horse, which leaves the bottom group three rows rather than four. Measured: the top group ends at 208 and
+    the bottom starts at <code>height&nbsp;&minus;&nbsp;74</code>, so they clear at 290, and at 270 once
+    <code>rightStep()</code> squeezes to its 20px floor (a 1080p screen at GUI scale 4, the case in the report). Below
+    about 258px they still meet: <a href="known-gaps.html#gap-139">gap 139</a>.
+</p>
+
+<p id="verified-hover-picture">
+    <strong>The custom spawn egg shows a gene's hover picture</strong> (owner, by 2026-09-11).
+</p>
+
+<p id="verified-gene-search">
+    <strong>The gene search box works on the custom spawn egg</strong> (owner-confirmed, 2026-09-10).
+    Its twin in the horse designer has not been checked.
+</p>
+
 </section>
 
 <div class="page-foot">

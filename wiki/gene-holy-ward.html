@@ -143,6 +143,30 @@
     it separate keeps that contract honest.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-ward">
+    <strong>The ward works</strong> (2026-09-13, ten minutes unattended, the player thirty blocks off). The
+    warded chamber saw 39 spawns attempted and 0 arrive; the unwarded control saw 53 and 53. The two hooks
+    straddle the cancellation: <code>FinalizeSpawnEvent</code> fires before the ward can cancel, so it counts
+    attempts, and <code>EntityJoinLevelEvent</code> fires only if nothing cancelled, so it counts arrivals.
+    The gap between the columns is the gene.
+</p>
+<p>
+    <em>A measuring trap:</em> the first overnight attempt (2026-09-12 to 13) logged no
+    <code>monster spawned</code> line in three hours, because <code>BaseSpawner.serverTick</code> only runs
+    within <code>requiredPlayerRange</code>, 16 blocks, of a player. The control line (&ldquo;no
+    <code>monster spawned</code> lines anywhere means stop, because a silent spawner and a perfect ward look
+    identical&rdquo;) is what kept it from reading as a pass. The biome that spawns naturally replaced the spawner.
+</p>
+
+<p id="verified-spawn-eggs">
+    <strong>Spawn eggs still work beside a warding horse</strong> (owner-confirmed in the
+    2026-09-10 play sessions). The ward cancels natural spawns only, by the allow-list of spawn
+    reasons in <code>GeneWardHandler.isNatural</code>. <em>Still open:</em> a spawner farm beside a
+    warding horse, and the ward stopping once the horse dies.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

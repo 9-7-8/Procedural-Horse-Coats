@@ -485,8 +485,8 @@
     <li><strong>The eyesight readout.</strong> <code>DebugWorldWatch.attributeReadout</code>,
         which names each horse instead of printing a min&ndash;max, was private and called
         from nowhere. Wired in, then extended to print each horse against its own base and
-        its block light &mdash; which answered eyesight in four censuses (<a href="known-gaps.html#gap-216">gap 216</a>,
-        <a href="known-gaps.html#gap-219">219</a>).</li>
+        its block light &mdash; which answered eyesight in four censuses (<a href="horse-dimension.html#verified-readout">gap 216</a>,
+        <a href="gene-eyesight.html#verified-world-flag">219</a>).</li>
     <li><strong>The horse attack interval.</strong> <code>HorseMeleeGoal</code> overrode
         <code>getAttackInterval()</code> to 12 ticks; vanilla's <code>resetAttackCooldown</code>
         writes a hard-coded 20 and never asks. Found in bytecode after a guardian died one
@@ -524,7 +524,7 @@
     <li><strong>The horse in the roof</strong> was the stall's own sign being measured as a
         one-tile room: signs are force-solid, so a sign hung outside with sky above closed
         as a room, and at ticket time it was smaller than the real stall and won. Diagnosed
-        on the first use of a trace line added for the purpose (<a href="known-gaps.html#gap-223">gap 223</a>).
+        on the first use of a trace line added for the purpose (<a href="item-stall-signs.html#verified-sign-floor">gap 223</a>).
         An L-shaped stall also needed the search to start from the nearest floor along the
         wall, not only the square straight behind the sign.</li>
     <li><strong>Owner rules:</strong> nothing binds to a horse you do not own, creative
@@ -535,7 +535,7 @@
         horse with no death at all. The first fix &mdash; refusing aquatic forms on land
         &mdash; was overruled: <em>&ldquo;It should absolutely still shift and then just
         die.&rdquo;</em> The animal's death now rebuilds the horse and kills it with the same
-        damage source (<a href="known-gaps.html#gap-220">gap 220</a>).</li>
+        damage source (<a href="gene-lycan.html#verified-were-death">gap 220</a>).</li>
 </ul>
 
 <h3>Confirmed and retired from the yard</h3>
@@ -654,7 +654,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
 <h3>Shipped alongside</h3>
 <ul>
     <li><strong>The F8 outline is fixed</strong>
-        (<a href="known-gaps.html#gap-205">gap 205</a>), in three parts: a
+        (<a href="horse-dimension.html#verified-f8-outline">gap 205</a>), in three parts: a
         per-player register of what was lit, a pending set cleared on entity load
         for horses in unloaded chunks whose effect timers are frozen, and a
         reaper for the ones stranded before the fix existed.</li>
@@ -1450,7 +1450,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     after the highlight is switched off, because it lights them by proximity and clears
     them by proximity later &mdash; and effect timers do not tick in unloaded chunks, so a
     group left behind holds the outline frozen until somebody walks back.
-    <a href="known-gaps.html#gap-205">Gap 205</a>, with the fix written down.
+    <a href="horse-dimension.html#verified-f8-outline">Gap 205</a>, with the fix written down.
 </p>
 
 <h2 id="d2026-09-12">2026-09-12 &mdash; three quarters of &sect;10, three genes that use it, and one word that had to be neither of the obvious two</h2>
@@ -2904,7 +2904,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     <li><a href="known-gaps.html#gap-171">Gap 171</a> - a guardian never retaliates against
         a player, because 26.1.2 exposes no server-side PvP flag to gate it on. A decision
         forced by an API gap rather than chosen.</li>
-    <li><a href="known-gaps.html#gap-172">Gap 172</a> - four pages were invisible because
+    <li><a href="coding-notes.html#verified-page-filename">Gap 172</a> - four pages were invisible because
         their filenames did not match their gene keys, with the build entirely green. The
         bake does say so, on a line nobody reads.</li>
 </ul>
@@ -2915,7 +2915,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     Re-reading the finished work before closing turned up a dimension leak in the ward - a
     horse warding in the Nether would have suppressed Overworld spawns at the same x/z -
     and two per-entity costs that had been hidden behind comments asserting they were
-    cheap. All three are fixed, and <a href="known-gaps.html#gap-173">gap 173</a> records
+    cheap. All three are fixed, and <a href="coding-notes.html#verified-cheap-comments">gap 173</a> records
     the part worth keeping: <strong>every one of them was in code whose hazards had been
     correctly identified and written down in advance on the gene's own page.</strong>
     Knowing the hazard did not prevent it. Only reading the finished code back against the
@@ -4455,7 +4455,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     quietly started pausing singleplayer &mdash; and a horse you were watching would
     stop moving whenever you opened its gene list. Overridden back. It is the kind of
     difference that does not show up in a compiler and does show up as "the mod feels
-    wrong", so <a href="known-gaps.html#gap-141">gap 141</a> says plainly that there
+    wrong", so <a href="progression.html#verified-browser">gap 141</a> says plainly that there
     may be others of that shape.
 </p>
 
@@ -4950,7 +4950,7 @@ gene uses <code>FRACTAL</code> yet, so there is nothing to look at until a gene 
 
 <p>The health layer and most of the natural colour genes have been carrying their
 real-world basis in a Java doc comment and nowhere a reader could reach it.
-<a href="known-gaps.html#gap-89">Gap 89</a> had that written down as 25 pages missing from
+<a href="coding-notes.html#verified-science-tabs">Gap 89</a> had that written down as 25 pages missing from
 the science view, with a check
 (<code>wiki/tools/check-gene-tabs.mjs</code>) holding the list so it could not grow. The
 owner supplied source material for all 25. <strong>Twenty-three are now written; the
@@ -5014,7 +5014,7 @@ nobody had looked.</p>
 
 <h4>Everything else that diverges, diverges for one reason</h4>
 
-<p>The <a href="known-gaps.html#gap-1">missing age model</a>, showing through on gene after
+<p>The <a href="roadmap.html#settled">missing age model</a>, showing through on gene after
 gene. <a href="gene-toe1.html">Cerebellar abiotrophy</a> arrives at six weeks and worsens
 for months; <a href="gene-prkdc.html">SCID</a> gives a foal a fortnight of perfect health on
 its dam&rsquo;s borrowed antibodies; <a href="gene-ppib.html">HERDA</a> is a horse that is
@@ -5144,7 +5144,7 @@ silently.</p>
 
 <h4>The coat cache was unbounded, and no reload touched it</h4>
 
-<p><a href="known-gaps.html#gap-130">Gap 130</a>, opened by the previous session&rsquo;s
+<p><a href="pipeline.html#verified-texture-cache">Gap 130</a>, opened by the previous session&rsquo;s
 resolution analysis and closed here. <code>GeneticCoatTextureFactory</code> filled two
 <code>ConcurrentHashMap</code>s with <code>computeIfAbsent</code> and never removed an
 entry, so a client accumulated one permanently registered <code>DynamicTexture</code> per
@@ -5175,7 +5175,7 @@ run &mdash; it double-counted removals and stopped one entry early.</p>
 
 <h4>The neck&rsquo;s geometry was written out by hand in eleven files, and six of them were dead</h4>
 
-<p><a href="known-gaps.html#gap-103">Gap 103</a>. A Y band across the adult neck is a
+<p><a href="body-space.html#verified-local-space">Gap 103</a>. A Y band across the adult neck is a
 collar: it wraps the crest and the throat alike, which is the bug that put
 <a href="gene-goth.html">goth</a>&rsquo;s hood on the underside of the neck and had to be
 reported twice. The workaround was a <code>WAVES</code> mask with a sawtooth longer than
@@ -5375,7 +5375,7 @@ shared infrastructure to be scoped on its own, not whistle work.</p>
 
 <h4>Found on the way</h4>
 
-<p><a href="known-gaps.html#gap-130">Gap 130</a>, in two halves and both present-day
+<p><a href="pipeline.html#verified-texture-cache">Gap 130</a>, in two halves and both present-day
 defects at the current resolution. The generated coat textures are never released until
 logout &mdash; <code>clear()</code> does exactly the right thing and its only caller is the
 logout handler &mdash; so a session accumulates one registered <code>DynamicTexture</code>
@@ -5406,15 +5406,15 @@ single XOR against a constant. <strong>That is not a mix</strong>, and three sep
 entries on the gaps page turned out to be the same fact seen from different angles:</p>
 
 <ul>
-<li><a href="known-gaps.html#gap-44">Gap 44</a>: the first <code>nextFloat()</code> off
+<li><a href="genetics-model.html#verified-seed-scramble">Gap 44</a>: the first <code>nextFloat()</code> off
     sequential seeds spanned <strong>0.58 to 0.95, mean 0.77</strong> - never touching
     either end of [0,1). It had already cost an hour on a 62/22/16 split that measured
     as 100/0/0.</li>
-<li><a href="known-gaps.html#gap-117">Gap 117</a>: because each gene reads its knobs at
+<li><a href="genetics-model.html#verified-seed-scramble">Gap 117</a>: because each gene reads its knobs at
     its own <em>offset</em> in a shared stream, and the offset is its priority, moving two
     unrelated genes pushed magic jump's mean 1.7% out - fifteen standard errors on a
     distribution that had not changed.</li>
-<li><a href="known-gaps.html#gap-47">Gap 47</a>: a related but separate defect -
+<li><a href="genetics-model.html#verified-per-gene-streams">Gap 47</a>: a related but separate defect -
     <code>Epigenome.fromSeed</code> drew every gene from one stream in registry order, so
     adding a locus renumbered every gene after it and the horse at seed 13 became a
     different horse.</li>
@@ -5441,7 +5441,7 @@ but the <em>membership</em>: the genes that moved are exactly the genes that sto
 epigenetics, with <code>acan</code> and <code>b4galt7</code> correctly untouched.</p>
 
 <p><strong>Regenerating the pipeline golden turned out to be impossible as documented</strong>
-(<a href="known-gaps.html#gap-128">gap 128</a>). Its javadoc said "run the test, copy the
+(<a href="coding-notes.html#verified-golden-copyback">gap 128</a>). Its javadoc said "run the test, copy the
 file it writes"; it only wrote that file when the golden was <em>missing</em>, never on a
 mismatch - so <code>build/coat-golden.txt</code> held an older run's output, and copying it
 back reinstated a stale golden while the test went green. The tell was a file that had
@@ -5457,7 +5457,7 @@ threshold of 20. Both now state their claim over a distribution.</p>
 
 <h4>The last ungated mirror</h4>
 
-<p><a href="known-gaps.html#gap-100">Gap 100</a> is closed and the creator's geometry port
+<p><a href="body-space.html#verified-posed-parity">Gap 100</a> is closed and the creator's geometry port
 is inside the parity gate. <code>posed()</code> existed twice - in
 <code>HorseSkinGeometry</code> and again in <code>model3d.js</code>'s
 <code>emitPart</code> - in two languages, in two files that were not obviously a pair. It
@@ -5475,7 +5475,7 @@ normal (44).</p>
 
 <h4>A per-horse choice, and a mirror bug caught before it shipped</h4>
 
-<p><a href="known-gaps.html#gap-102">Gap 102</a>: the mask fold has no branch in it, so
+<p><a href="making-a-gene.html#verified-choice">Gap 102</a>: the mask fold has no branch in it, so
 quarter faked one by sampling noise at a scale of <strong>4000 body units</strong> - a
 hundred times the length of a horse - and amplifying it until the clamp turned it into a
 yes or no. The new <code>CHOICE</code> mask is the real thing: an integer drawn once per
@@ -5514,13 +5514,13 @@ and 6 - so a two-way example would have been green either way. With a three-way 
     <code>wing_cloak=n/n</code> segment left the genotype code prefix, which is why all 1056
     <em>lines</em> looked like they had moved. The bake golden lost exactly its three lines and
     nothing else. That second fact is also a clean demonstration of
-    <a href="known-gaps.html#gap-47">gap 47</a>&rsquo;s fix: before this session, removing a locus
+    <a href="genetics-model.html#verified-per-gene-streams">gap 47</a>&rsquo;s fix: before this session, removing a locus
     would have redrawn every gene registered after it.
 </p>
 
 <h4>Two measurements, and one gap that is a writing job</h4>
 
-<p><a href="known-gaps.html#gap-53">Gap 53</a> is measured and the answer is reassuring:
+<p><a href="gene-kit.html#verified-founder-white">Gap 53</a> is measured and the answer is reassuring:
 <strong>about two founders in three</strong> wear white from the two ordinary-marking loci,
 mean coverage about 10%, only about 8% loudly marked. The estimate on the page was three in
 four, so it was close and slightly high. <strong>The measurement has a trap in it</strong>:
@@ -5529,7 +5529,7 @@ a grey and a palomino are pale <em>coats</em> with no marking on them. The givea
 wearing white while only 78% carried either locus. The test composes each founder twice and
 differences them, so the base coat cancels.</p>
 
-<p><a href="known-gaps.html#gap-89">Gap 89</a> was recounted rather than fixed. The recorded
+<p><a href="coding-notes.html#verified-science-tabs">Gap 89</a> was recounted rather than fixed. The recorded
 24 is 25; a briefly-feared 157 is wrong, because 131 of those are magical genes where having
 no science tab is correct. None of the 25 has an orphaned real-world section that could
 simply be moved, so it is genuinely a writing job and wants the owner - filling those tabs
@@ -5548,13 +5548,13 @@ if one on the list gains a tab and is not removed from it.</p>
 the <em>checks</em> were never written, which is the half that stops it happening again.</p>
 
 <ul>
-<li><strong><a href="known-gaps.html#gap-105">Gap 105</a></strong>: a <code>perDose</code> triple
+<li><strong><a href="making-a-gene.html#verified-perdose">Gap 105</a></strong>: a <code>perDose</code> triple
     on an expression that can only ever be reached at one dose is a constant written in the
     form that looks most like a variable. A <em>coloured</em> expression is reached by two
     copies of the <b>second</b> allele, so its dose is 0 and it reads <code>perDose[0]</code> -
     which authors write as <code>0.0</code>, because a dose of nothing should draw nothing.
     A chance of 0 means the mask never fires, and five genes shipped painting nothing at all.</li>
-<li><strong><a href="known-gaps.html#gap-106">Gap 106</a></strong>: <code>smoothstep</code> with
+<li><strong><a href="making-a-gene.html#verified-band-order">Gap 106</a></strong>: <code>smoothstep</code> with
     its edges reversed is a hard step <em>in the original direction</em> - it does not reverse
     the ramp, it removes it. The test is <strong>possibility, not certainty</strong>, because
     the worse of the two historical cases was a knob whose range straddled its own
@@ -5615,7 +5615,7 @@ Verified by restoring the old equality and watching three checks fail, one of th
 <p>There are four JavaScript ports of <code>common/</code> in the creator -
 <code>spec-engine</code>, <code>schema</code>, <code>geometry</code> and the composer in
 <code>fields.js</code> - and until today the gate covered two of them.
-<a href="known-gaps.html#gap-100">Gap 100</a> is the same shape and still open:
+<a href="body-space.html#verified-posed-parity">Gap 100</a> is the same shape and still open:
 <code>geometry.js</code> never received <code>posed()</code>, and the arithmetic lives one
 directory over in <code>model3d.js</code>. It is now a small job rather than an open question,
 because the technique exists: export the function, bake a table of Java&rsquo;s answers into the
@@ -5720,7 +5720,7 @@ ground here.</p>
 
 <h4>The coat baking test</h4>
 
-<p><code>CoatBakeGoldenTest</code> closes <a href="known-gaps.html#gap-124">gap 124</a>: every
+<p><code>CoatBakeGoldenTest</code> closes <a href="coding-notes.html#verified-bake-golden">gap 124</a>: every
 registered gene, every variant allele, composed through the real gradient and hashed.
 <strong>203 genes in 623 lines, and it runs in seconds</strong> rather than needing the
 ten-minute suite &mdash; which is the property that matters, because the pipeline golden is
@@ -5782,7 +5782,7 @@ parent. Not a bug, and worth having established rather than assumed.</p>
 
 <h4>The invert bug: measured, then fixed</h4>
 
-<p><a href="known-gaps.html#gap-120">Gap 120</a> was opened the same day it was found, on
+<p><a href="making-a-gene.html#verified-mask-parts">Gap 120</a> was opened the same day it was found, on
 <a href="gene-stained-glass.html">stained glass</a>, and left for the owner on the grounds
 that fixing it moves ten shipped coats. <strong>Measuring it settled the question.</strong>
 A throwaway probe rendered every gene that leads with an inverted, parts-restricted mask
@@ -5853,7 +5853,7 @@ Minecraft / NeoForge / Mojang import, for <code>Map.of()</code> or
 that were removed for the TeaVM and Java 8 targets. <strong>Nothing had ever checked hard
 rule 1 or hard rule 2</strong>, and both fail in ways the compiler cannot see &mdash; a
 green build, a shipped mod, and the damage in a browser or in a backport that does not
-exist yet. That closes <a href="known-gaps.html#gap-116">gap 116</a>.</p>
+exist yet. That closes <a href="coding-notes.html#verified-portability-test">gap 116</a>.</p>
 
 <p>Writing it turned up the boundary worth recording: the check was too strict at first and
 flagged <a href="gene-light.html">light</a>&rsquo;s six-entry <code>Map.of(&hellip;)</code>.
@@ -6126,7 +6126,7 @@ why a session had already checked every value it consumes from Java and found no
     is a <code>LinkedHashMap</code> behind an unmodifiable wrapper &mdash; correct empty on
     both targets, and Java 8 clean, which hard rule 2 wanted anyway. Nothing enforces the
     rule, so the next <code>Map.of()</code> in <code>common/</code> reintroduces it:
-    <a href="known-gaps.html#gap-116">gap 116</a>.</li>
+    <a href="coding-notes.html#verified-portability-test">gap 116</a>.</li>
 </ul>
 
 <h3 id="declared-previews-2026-09-08">A gene may now say which picture is its picture.</h3>
@@ -6174,7 +6174,7 @@ out by hand, four copies of a list none of them knew when to update. They call
     across the whole sample. The test now runs its index through a splitmix64 finaliser,
     which is what makes <em>n</em> a sample rather than a stream offset. Whether the
     underlying correlation matters to real horses is
-    <a href="known-gaps.html#gap-117">gap 117</a> and the owner&rsquo;s call, because the
+    <a href="genetics-model.html#verified-seed-scramble">gap 117</a> and the owner&rsquo;s call, because the
     fix would change every horse ever generated.</li>
 </ul>
 
@@ -6182,7 +6182,7 @@ out by hand, four copies of a list none of them knew when to update. They call
 moved every hash in it, and regenerating it means a full suite run, which the owner has
 asked not be done casually. The next deliberate run will fail on
 <code>CoatPipelineGoldenTest</code> and that failure is expected;
-<a href="known-gaps.html#gap-118">gap 118</a> has the recipe.</p>
+<a href="coding-notes.html#verified-golden-regen">gap 118</a> has the recipe.</p>
 
 <h3 id="release-0-2-0-2026-09-08">Released 2026-09-08: 0.2.0, and two gene pages that outlived their genes.</h3>
 
@@ -6332,7 +6332,7 @@ one.</li>
 
 <li><strong>A <code>PALETTE</code> has walls, and Gamma's were cutting across its own fields.</strong> Its blooms had softnesses of two and three body units - several texels of fade - and still read as hard-edged shapes, because the edge was not in the mask at all. <code>PALETTE</code> gives each cell of <em>its own</em> lattice one whole colour and neighbouring cells meet at a wall; that is the documented point of the op and the difference between an opal and a gradient. But its lattice has nothing to do with the spot field's, so the walls ran straight through the blooms. A <code>RAMP</code> has no cells, so the hue sweeps along the body instead and the gene still carries several colours without any of them ending on a line. <strong>The same trap is live wherever a soft mask is painted with a hard op</strong> - the mask's softness is not the whole story about whether a marking has an edge.</li>
 
-<li><strong>The neck's pitch bites in both directions.</strong> <a href="gene-hood.html">Hood</a> is meant to fade back along the neck and was fading from the crest down instead - the colour left the top of the neck before it left the throat. A band on plain <code>X</code> is a plane of constant X, and against a long axis sixty degrees off horizontal that plane cuts the neck <em>diagonally</em>. The fix is the same trick as goth's with the sign flipped: goth wants a plane lying <em>along</em> the neck (slope tan 60), hood wants one square <em>across</em> it (slope -tan 30). Two genes, two opposite tilts, one calibration - and <a href="known-gaps.html#gap-103">gap 103</a> now covers six genes rather than two.</li>
+<li><strong>The neck's pitch bites in both directions.</strong> <a href="gene-hood.html">Hood</a> is meant to fade back along the neck and was fading from the crest down instead - the colour left the top of the neck before it left the throat. A band on plain <code>X</code> is a plane of constant X, and against a long axis sixty degrees off horizontal that plane cuts the neck <em>diagonally</em>. The fix is the same trick as goth's with the sign flipped: goth wants a plane lying <em>along</em> the neck (slope tan 60), hood wants one square <em>across</em> it (slope -tan 30). Two genes, two opposite tilts, one calibration - and <a href="body-space.html#verified-local-space">gap 103</a> now covers six genes rather than two.</li>
 
 <li><strong>A <code>RAMP</code> varies the colour, not the coverage.</strong> <a href="gene-fade.html">Fade</a> is an ombre that should leave the roots alone, and it was painting the whole mane and tail: its only mask was <code>PARTS: HAIR</code>, so coverage was 1 everywhere and the roots got the ramp's <em>first stop</em> rather than the horse's own hair. A ramp positions colour along an axis and has no opinion about where the layer applies; if a gradient is supposed to fade <em>out</em>, the coverage has to fade with it.</li>
 
@@ -6346,7 +6346,7 @@ one.</li>
 
 <li><strong>Two genes got a fade onto the tops of the legs and nothing more.</strong> <a href="gene-nebula-light.html">Nebula Light</a> and <a href="gene-spectrum-light.html">Spectrum Light</a> both ended at the elbow on a line. Each gained a <em>separate layer</em> for the legs rather than an extra mask on the body one - different parts cannot double-paint, and it avoids the fold problem above entirely. Nebula also took a curated pink-violet-blue palette off the owner's own list, with the teal-green entries left out: those were the ones that made a palette wall jump.</li>
 
-<li><strong>Not fixed: Invert's preview.</strong> The owner reports the window does not load on that page. Everything it consumes checks out from here - <code>genePreviewJson</code> and <code>previewGenotypeCode</code> both return well-formed output, the icon is baked, the founder table is sane, the page is registered and carries a family - so it is a browser-side failure and needs a console. <a href="known-gaps.html#gap-116">Gap 107</a>.</li>
+<li><strong>Not fixed: Invert's preview.</strong> The owner reports the window does not load on that page. Everything it consumes checks out from here - <code>genePreviewJson</code> and <code>previewGenotypeCode</code> both return well-formed output, the icon is baked, the founder table is sane, the page is registered and carries a family - so it is a browser-side failure and needs a console. <a href="coding-notes.html#verified-portability-test">Gap 107</a>.</li>
 
 </ul>
 
@@ -6386,13 +6386,13 @@ one.</li>
 
 <ul>
 
-<li><strong>Five genes were drawing nothing at all, and the owner found three of them by opening the pages.</strong> &ldquo;Colored crescents isn't loading on the bay example&rdquo;, then Lasertae, then Stellar. It is one bug: <code>perDose</code> indexes on copies of the gene's <b>first-declared</b> allele, and a <em>coloured</em> expression is reached by two copies of the <b>second</b> - so its dose is always zero, it reads <code>perDose[0]</code>, and every one of these files had written that as <code>0.0</code> on the entirely reasonable ground that a dose of nothing should draw nothing. A <code>chance</code> of zero means the mask never fires. Crescents, Lasertae, Polymoon, Stellar and Wormholes all shipped with an invisible coloured form. Grepping for the shape found the other two before they were reported. <a href="known-gaps.html#gap-105">Gap 105</a> is the real fix: the parser can see this at load.</li>
+<li><strong>Five genes were drawing nothing at all, and the owner found three of them by opening the pages.</strong> &ldquo;Colored crescents isn't loading on the bay example&rdquo;, then Lasertae, then Stellar. It is one bug: <code>perDose</code> indexes on copies of the gene's <b>first-declared</b> allele, and a <em>coloured</em> expression is reached by two copies of the <b>second</b> - so its dose is always zero, it reads <code>perDose[0]</code>, and every one of these files had written that as <code>0.0</code> on the entirely reasonable ground that a dose of nothing should draw nothing. A <code>chance</code> of zero means the mask never fires. Crescents, Lasertae, Polymoon, Stellar and Wormholes all shipped with an invisible coloured form. Grepping for the shape found the other two before they were reported. <a href="making-a-gene.html#verified-perdose">Gap 105</a> is the real fix: the parser can see this at load.</li>
 
 <li><strong>A Y band on the adult neck is a collar, and the first attempt to fix that got the angle wrong.</strong> Goth's hood was on the throat; the tilted-plane trick was built for it, and the owner came back with &ldquo;it's <em>still</em> coloring the underside of the neck&rdquo;. They were right. The slope had been set to tan(30) from the neck's <em>pitch</em>, and what matters is the neck's own <b>long axis</b>: its box is 12 by 7 and its bounding box comes out 12.07 by 13.89, which only works if the long axis is sixty degrees off horizontal. tan(60), not tan(30) - the complement, which tilts the plane the other way and runs the band <em>across</em> the neck rather than along it. Probing with four coloured bands settled it in one bake, and is what should have been done the first time rather than the second.</li>
 
 <li><strong>Integration was reading a channel that saturates.</strong> It is supposed to spread outward from wherever the coat is already dark - &ldquo;like the black socks on a bay&rdquo; - and it was covering the entire horse. <code>darkness</code> is <code>0.55*red + 0.95*black</code>, so a bay's <em>barrel</em> already reads about 0.84 against its points' 0.95: at any threshold high enough to mean &ldquo;the points&rdquo; it had already selected everything. The channel that tells a sock from a barrel is <code>black</code>, where the body sits at 0.2 and the points at 0.85. Found by painting four threshold bands on a horse in primary colours, which took a minute and settled what half an hour of reasoning had got wrong twice.</li>
 
-<li><strong><code>spread</code> changed meaning twice in one session, and ended up simpler than it started.</strong> It began as &ldquo;grow the pale side of the reading&rdquo;, which is what Fielded needed. Integration needed the opposite. Rather than a second parameter, it moved to <b>after <code>invert</code></b> and now dilates the mask's <i>output</i> - grow whatever this mask selected - which serves both, and is provably the same operation for Fielded. Then Integration proved the disc was in the wrong space: dilating three units off a bay's socks covered the horse, because the leg patches sit next to the barrel <em>on the texture sheet</em>. It measures in body space now (<a href="known-gaps.html#gap-104">gap 104</a>, opened and closed the same day), and the fix was cheap because <code>HorseSkinGeometry.sample</code> is a cached grid rather than a computation.</li>
+<li><strong><code>spread</code> changed meaning twice in one session, and ended up simpler than it started.</strong> It began as &ldquo;grow the pale side of the reading&rdquo;, which is what Fielded needed. Integration needed the opposite. Rather than a second parameter, it moved to <b>after <code>invert</code></b> and now dilates the mask's <i>output</i> - grow whatever this mask selected - which serves both, and is provably the same operation for Fielded. Then Integration proved the disc was in the wrong space: dilating three units off a bay's socks covered the horse, because the leg patches sit next to the barrel <em>on the texture sheet</em>. It measures in body space now (<a href="making-a-gene.html#verified-pigment-spread">gap 104</a>, opened and closed the same day), and the fix was cheap because <code>HorseSkinGeometry.sample</code> is a cached grid rather than a computation.</li>
 
 <li><strong>A mask list is a fold, and putting the shape first throws it away.</strong> Lasertae's eclipses were meant to be confined to the shoulder, and the region terms were <code>MAX</code>ed on after the <code>RINGS</code> mask - so a neck texel evaluated <code>max(0, neckBand)</code>, the band on its own with no ring in it, and the shoulder came out as a wash. The rule is: fold the <em>region</em> into one number first, then multiply the <em>shape</em> in. Worth remembering because it reads perfectly naturally the wrong way round.</li>
 
@@ -6426,9 +6426,9 @@ one.</li>
 
 <li><strong>Patina was drawing on the wrong half of the horse and the reason was an argument order.</strong> Its <code>PIGMENT</code> mask read <code>from: 0.75, to: 0.35</code> &mdash; and <code>smoothstep</code> with its second edge below its first is not a reversed ramp, it is a <em>hard step in the original direction</em>. So &ldquo;verdigris where the coat lightens&rdquo; was landing on everything dark. It follows pangare's regions now (the owner asked for that shape) with a heavy speckle through every edge, and reads on a chestnut the way copper reads: grains rather than a wash, and nearly invisible on a black, which is what its own description had always said.</li>
 
-<li><strong>A Y band on the neck is a collar, not a crest.</strong> The adult neck is pitched thirty degrees, so <a href="gene-goth.html">goth</a>'s hood &mdash; a band in the upper part of the neck's box &mdash; wrapped the throat as readily as the top. Probing it with four coloured bands showed that immediately and is the only reason it was cheap to fix. The hood is a <em>tilted</em> plane now, got by giving <code>WAVES</code> a sawtooth whose wavelength is longer than the horse: the displacement then never wraps, so it is a straight ramp, and a band on a ramped coordinate is a plane at an angle. <a href="gene-cosmic.html">Cosmic</a> uses the same trick to hang its blanket off the crest the whole length of the neck. It is a trick and it is <a href="known-gaps.html#gap-103">gap 103</a>: the pitch is written out by hand in two gene files.</li>
+<li><strong>A Y band on the neck is a collar, not a crest.</strong> The adult neck is pitched thirty degrees, so <a href="gene-goth.html">goth</a>'s hood &mdash; a band in the upper part of the neck's box &mdash; wrapped the throat as readily as the top. Probing it with four coloured bands showed that immediately and is the only reason it was cheap to fix. The hood is a <em>tilted</em> plane now, got by giving <code>WAVES</code> a sawtooth whose wavelength is longer than the horse: the displacement then never wraps, so it is a straight ramp, and a band on a ramped coordinate is a plane at an angle. <a href="gene-cosmic.html">Cosmic</a> uses the same trick to hang its blanket off the crest the whole length of the neck. It is a trick and it is <a href="body-space.html#verified-local-space">gap 103</a>: the pitch is written out by hand in two gene files.</li>
 
-<li><strong>Quarter needed a choice, and the format has no way to make one.</strong> It is supposed to cut the trunk into quadrants and pale <em>one</em> of them; it was drawing a soft wash indistinguishable from nimbus. A knob can move a boundary but cannot pick between two of them, and the mask fold has no branch. What it does instead is sample value noise at a scale of 500 body units &mdash; the whole horse inside one lattice cell, so one number per horse &mdash; and amplify it until the clamp turns it into a coin. Two coins give four quadrants, one layer each, exactly one of them live. It works and it is honest about being a workaround (<a href="known-gaps.html#gap-102">gap 102</a>); what it really wants is a per-horse integer knob.</li>
+<li><strong>Quarter needed a choice, and the format has no way to make one.</strong> It is supposed to cut the trunk into quadrants and pale <em>one</em> of them; it was drawing a soft wash indistinguishable from nimbus. A knob can move a boundary but cannot pick between two of them, and the mask fold has no branch. What it does instead is sample value noise at a scale of 500 body units &mdash; the whole horse inside one lattice cell, so one number per horse &mdash; and amplify it until the clamp turns it into a coin. Two coins give four quadrants, one layer each, exactly one of them live. It works and it is honest about being a workaround (<a href="making-a-gene.html#verified-choice">gap 102</a>); what it really wants is a per-horse integer knob.</li>
 
 <li><strong>Every gene preview now opens on six base coats rather than three.</strong> Bay, black and chestnut are the three <em>pigments</em> every marking is read against, and they are no background at all for a gene that modifies somebody else's white: fielded now draws nothing on any of them, and a preview of it on three solid horses is three pictures of a plain bay. So <code>BaseCoats</code> gained a tobiano, a splash and a sabino bay &mdash; heterozygous, and picked to cover the three shapes white comes in.</li>
 
@@ -6602,7 +6602,7 @@ one.</li>
 <ul>
 <li><strong>Every recipe on the new item pages was checked against the JSON, and the pages were right.</strong> All 29 recipe files against all eleven pages: the hair chain and its four reversals, the three whistle tiers, the four tickets, the shaped transfer paper, both jars and all ten carrots including the five themed reagents. What the audit found was <em>absence</em>, not error - the <a href="item-stall-signs.html">stall sign</a>'s own recipe (oak sign + horse hair) had never been written down anywhere, on the old page or the new, so nothing told a player how to get one; and the <strong>Cowboy Hitch</strong> is a registered item that appeared on no roster at all. Both fixed.</li>
 
-<li><strong>And it found a real bug.</strong> <code>cowboy_hitch.json</code> and <code>horsemans_table.json</code> are byte-identical shapeless recipes with different results, so only one of them can ever match and <strong>one of the two blocks is uncraftable in survival</strong> - which matters because those blocks are how both merchant NPCs come to exist. <a href="villagers.html#workstation">Villagers</a> states the shared recipe as though it were fine, so it had been documented rather than noticed. <a href="known-gaps.html#gap-92">Gap 92</a>, deliberately left unfixed: choosing a reagent to tell a hitch from a table is a gameplay decision and not a documentation pass's to make.</li>
+<li><strong>And it found a real bug.</strong> <code>cowboy_hitch.json</code> and <code>horsemans_table.json</code> are byte-identical shapeless recipes with different results, so only one of them can ever match and <strong>one of the two blocks is uncraftable in survival</strong> - which matters because those blocks are how both merchant NPCs come to exist. <a href="villagers.html#workstation">Villagers</a> states the shared recipe as though it were fine, so it had been documented rather than noticed. <a href="villagers.html#verified-workstation-recipes">Gap 92</a>, deliberately left unfixed: choosing a reagent to tell a hitch from a table is a gameplay decision and not a documentation pass's to make.</li>
 
 <li><strong>The predicted routing failure was real, and on the pages that could least afford it.</strong> Measuring prose per gameplay tab found <strong>26 pages whose gameplay tab was seven words</strong> - two headings and the widgets - because they carry neither a look-alike table nor a breed list, which were the only two things the routing rule could move onto Gameplay. Agouti, tobiano, roan, MATP, shade, sooty, leopard and natural zebra were all in that set. Each now opens with a short plain-language "What it does" written from what the page already asserts; thinnest tab is 44 words, median 95. The other direction - whether anything reached Gameplay that should not have, and whether the 307 sections that defaulted to Coding belong there - is still unread. <a href="known-gaps.html#gap-88">Gap 88</a>.</li>
 
@@ -6611,7 +6611,7 @@ one.</li>
 
 <h3 id="breeds-as-data-2026-09-07">Built 2026-09-07, NOT yet looked at: breeds became JSON files, and got spawn eggs, a designer, and a splice mark.</h3>
 
-<p>Owner-driven, one request with four things in it. Design: <a href="breed-format.html">the breed file format</a>, <a href="breeds.html">breeds</a>, <a href="item-spawn-eggs.html#breed">items</a>, <a href="carrots.html#spliced">carrots</a>. Checklist <a href="verification.html#breeds-as-data">&sect;0-AL</a>. Gaps <a href="known-gaps.html#gap-83">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.</p>
+<p>Owner-driven, one request with four things in it. Design: <a href="breed-format.html">the breed file format</a>, <a href="breeds.html">breeds</a>, <a href="item-spawn-eggs.html#breed">items</a>, <a href="carrots.html#spliced">carrots</a>. Checklist <a href="verification.html#breeds-as-data">&sect;0-AL</a>. Gaps <a href="breeds.html#verified-breed-designer">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.</p>
 
 <ul>
 <li><strong>The 49 breeds were not translated by hand, and that was the whole plan.</strong> An 885-line <code>Breeds.java</code> retyped as 49 JSON files is 49 chances to mistype an allele weight and no way to notice. So the writer came first: <code>BreedSpecWriter</code> turns a <code>Breed</code> back into the file that would produce it, <code>BreedFileTool</code> ran it over the Java definitions once, and only then were the definitions deleted. <code>BreedFilesTest</code> now asserts every shipped file is exactly what a fresh bake would write, so the two halves cannot drift apart afterwards either.</li>
@@ -6879,7 +6879,7 @@ one.</li>
 <p>A playtest round rather than a build round &mdash; the owner played the villagers and reported what he saw, repeatedly, and most of what follows is deletion. Design: <a href="villagers.html">Villagers &amp; transfer papers</a>. Checklist <a href="verification.html#villagers">&sect;0-AC</a>.</p>
 
 <ul>
-<li><strong>The mounted cowboy is gone, and that is the headline.</strong> Roughly a thousand lines &mdash; <code>CowboyMountGoal</code>, <code>CowboyRemountGoal</code>, <code>CowboyRoutine</code>, <code>CowboyDoors</code>, <code>HerdCollision</code> &mdash; deleted at the owner's call after eight rounds of fixes, each of which exposed the next. He is an ordinary <code>AbstractVillager</code> on foot now; the horses treat him as their herd lead and trail him. The two lessons worth keeping are written up as <a href="known-gaps.html#gap-55">gap 55</a> (vanilla navigation will not put a large animal through a two-block door) and <a href="known-gaps.html#gap-59">gap 59</a> (a goal that stops for no reason its own predicates explain has had a control flag disabled underneath it).</li>
+<li><strong>The mounted cowboy is gone, and that is the headline.</strong> Roughly a thousand lines &mdash; <code>CowboyMountGoal</code>, <code>CowboyRemountGoal</code>, <code>CowboyRoutine</code>, <code>CowboyDoors</code>, <code>HerdCollision</code> &mdash; deleted at the owner's call after eight rounds of fixes, each of which exposed the next. He is an ordinary <code>AbstractVillager</code> on foot now; the horses treat him as their herd lead and trail him. The two lessons worth keeping are written up as <a href="villagers.html#verified-no-shelter">gap 55</a> (vanilla navigation will not put a large animal through a two-block door) and <a href="villagers.html#verified-move-flag">gap 59</a> (a goal that stops for no reason its own predicates explain has had a control flag disabled underneath it).</li>
 
 <li><strong>He survives by not being a target rather than by going indoors.</strong> Ten times a villager's health, plus <code>CowboySafetyHandler</code>, which cancels <code>LivingChangeTargetEvent</code> whenever anything implementing <code>Enemy</code> tries to take him. That covers retaliation as well as acquisition, since both go through <code>Mob.setTarget</code>. An <code>AbstractVillager</code> has no schedule at all, so shelter was never available to him; this is what replaces it.</li>
 
@@ -6887,7 +6887,7 @@ one.</li>
 
 <li><strong>Both handlers ask the same question about names.</strong> <code>HorsemanHandler.familySurname</code> looks round the village for a cowboy or horseman who already has a surname and takes his, coining a new one only if there is nobody. Order-independent on purpose: which post gets claimed first is down to where the villagers happen to be standing, so neither role can be the one that owns the name.</li>
 
-<li><strong>The horseman's house is baked into the barn's structure piece.</strong> It was built at runtime and never once appeared &mdash; and the reason it could not have worked is <a href="known-gaps.html#gap-61">gap 61</a>: the work posts stand on the house, the work posts are what make a cowboy, and a cowboy cannot build the thing that made him. <code>bake-barn.py</code> now takes two sources and writes one piece: the barn, plus a reshaped <code>plains_small_house_1</code> beside it with a <code>dirt_path</code> lane between them, a four-wide interior, two beds pushed together, a chest either side of them on a new loot table, and both work posts on the front step with a villager on each. The piece went 15&times;7 &rarr; 15&times;15, so its pool weight went 1 &rarr; 3 to keep the same hit rate against the generator's bounding-box check &mdash; which is arithmetic, not measurement, and is <a href="known-gaps.html#gap-62">gap 62</a>.</li>
+<li><strong>The horseman's house is baked into the barn's structure piece.</strong> It was built at runtime and never once appeared &mdash; and the reason it could not have worked is <a href="villagers.html#verified-house-baked">gap 61</a>: the work posts stand on the house, the work posts are what make a cowboy, and a cowboy cannot build the thing that made him. <code>bake-barn.py</code> now takes two sources and writes one piece: the barn, plus a reshaped <code>plains_small_house_1</code> beside it with a <code>dirt_path</code> lane between them, a four-wide interior, two beds pushed together, a chest either side of them on a new loot table, and both work posts on the front step with a villager on each. The piece went 15&times;7 &rarr; 15&times;15, so its pool weight went 1 &rarr; 3 to keep the same hit rate against the generator's bounding-box check &mdash; which is arithmetic, not measurement, and is <a href="known-gaps.html#gap-62">gap 62</a>.</li>
 
 <li><strong>A speed floor, set by vanilla's own slowest horse.</strong> The owner asked for a minimum "just barely fast enough to outrun a zombie", which does not translate: a zombie's <code>MOVEMENT_SPEED</code> of 0.23 is on the walking-mob scale, not the ridden-horse scale, and is above the average horse. <code>HorseSpeedFloor</code> uses <code>AbstractHorse.generateSpeed(() -&gt; 0.0)</code> instead &mdash; the slowest horse vanilla itself will ever produce &mdash; and clamps only in <code>HorseRecords.applyTraitsToEntity</code>, so the genetic numbers on the info panel are untouched.</li>
 
@@ -7117,7 +7117,7 @@ one.</li>
 </li>
 <li><strong>It did not collide with the new chart, and that is luck worth noting.</strong> <code>horselut.png</code>'s black corner is <code>#161515</code> - one above the floor - so the natural side never meets the pass even where the scoping would have allowed it.
 </li>
-<li><strong>Found while mirroring the pass into the creator: <a href="known-gaps.html#gap-50">gap #50</a></strong>. <code>wiki/gene-creator/js/fields.js</code> never got phase 2's alpha ramp and still tests <code>rgb === 0</code>, so it draws dark coats a few percent darker than the game. Recorded rather than fixed, at the end of a session. The general point is that this file has <em>no oracle</em> - the parity check covers the spec engine, not the composer - and this is the second divergence found in it by hand.
+<li><strong>Found while mirroring the pass into the creator: <a href="coding-notes.html#verified-composer-parity">gap #50</a></strong>. <code>wiki/gene-creator/js/fields.js</code> never got phase 2's alpha ramp and still tests <code>rgb === 0</code>, so it draws dark coats a few percent darker than the game. Recorded rather than fixed, at the end of a session. The general point is that this file has <em>no oracle</em> - the parity check covers the spec engine, not the composer - and this is the second divergence found in it by hand.
 </li>
 </ul>
 
@@ -7273,7 +7273,7 @@ one.</li>
 </li>
 <li><strong>The floor on stripe spacing is the sheet, not the animal.</strong> A real zebra&rsquo;s facial stripes are finer than anything here and curve purposefully round the eye and nostril. At two texels to the body unit, below about half a unit per band the pattern stops being stripes and becomes static. The narrow spacing and the dark muzzle carry the read; the rest is below the resolution and is written down as not-modelled rather than attempted.
 </li>
-<li><strong>Registering a gene renumbered every epigenetic seed above it, and three tuned tests were sitting a hair from failing.</strong> <code>Epigenome.random</code> walks <code>Genes.codeOrder()</code> drawing as it goes, so a locus at priority 68 changes what every gene above 68 draws and a horse at seed 13 is a different horse. Three <code>WhitePatternGenesTest</code> assertions went red, all by margins under 0.05 and none of them a real regression. Confirmed by moving the gene to 99 and watching them pass. Fixed by widening the seed samples to twenty and, where the claim was about <em>shape</em> rather than magnitude, restating it as a proportion &mdash; a &ldquo;framed above&rdquo; gap stated in absolute white moves every time the mean white level does. The frame leg check gained a second assertion on the mean, so it now catches a coronet band on every horse as well as a sock on one. <a href="known-gaps.html#gap-47">Gap #47</a>.
+<li><strong>Registering a gene renumbered every epigenetic seed above it, and three tuned tests were sitting a hair from failing.</strong> <code>Epigenome.random</code> walks <code>Genes.codeOrder()</code> drawing as it goes, so a locus at priority 68 changes what every gene above 68 draws and a horse at seed 13 is a different horse. Three <code>WhitePatternGenesTest</code> assertions went red, all by margins under 0.05 and none of them a real regression. Confirmed by moving the gene to 99 and watching them pass. Fixed by widening the seed samples to twenty and, where the claim was about <em>shape</em> rather than magnitude, restating it as a proportion &mdash; a &ldquo;framed above&rdquo; gap stated in absolute white moves every time the mean white level does. The frame leg check gained a second assertion on the mean, so it now catches a coronet band on every horse as well as a sock on one. <a href="genetics-model.html#verified-per-gene-streams">Gap #47</a>.
 </li>
 <li><strong>What is deliberately not modelled, in both genes.</strong> Zebra: species (the knob ranges span plains to Gr&eacute;vy&rsquo;s instead), facial stripes that curve round the eye, and a reaction&ndash;diffusion simulation &mdash; what a Turing model buys at this resolution is spacing and contrast, both of which are knobs, and the consequence that <em>does</em> matter (pattern shape follows body geometry) is the whole point of the map. Brindle: hair texture, seasonal change, and the real-world rule that a hemizygous stallion and a homozygous mare have sparse manes rather than stripes &mdash; that last one is a deliberate inversion, because the true rule makes the visible phenotype an exclusively heterozygous-mare affair with no breeding target, and it is now written down as a trade on <a href="gene-brindle.html#biology">the gene page</a> rather than left as an accident.
 </li>
@@ -7478,7 +7478,7 @@ had to go.</p>
 </li>
 <li><strong><code>EyePatchContribution</code></strong> is the second hook and the reason the magic locus does not fight with the channel: patches are absolute writes over the finished iris, applied in code order, last writer wins &mdash; they compose where colour claims compete. It is also why a matched pair or a carrier leaves a champagne horse's champagne eye alone: a non-expressing combination contributes <em>nothing</em>, rather than contributing a wild-type dark eye.
 </li>
-<li><strong>An hour went into a distribution that measured 100/0/0 and was correct</strong> (<a href="known-gaps.html#gap-44">#44</a>). <code>SeededRng</code> wraps <code>java.util.Random</code>, whose first <code>nextFloat()</code> off <em>sequential</em> seeds spans only about 0.22 to 0.59 &mdash; so a test looping <code>new SeededRng(seed++)</code> and asking for one float never sees either end of the range. Harmless in play (a real epigenetic seed is a full random long) and lethal in a test. The fix in a test is to pull many rolls from one generator; fixing it properly means mixing the seed inside <code>SeededRng</code>, which moves every horse's coat and wants to be a deliberate pass.
+<li><strong>An hour went into a distribution that measured 100/0/0 and was correct</strong> (<a href="genetics-model.html#verified-seed-scramble">#44</a>). <code>SeededRng</code> wraps <code>java.util.Random</code>, whose first <code>nextFloat()</code> off <em>sequential</em> seeds spans only about 0.22 to 0.59 &mdash; so a test looping <code>new SeededRng(seed++)</code> and asking for one float never sees either end of the range. Harmless in play (a real epigenetic seed is a full random long) and lethal in a test. The fix in a test is to pull many rolls from one generator; fixing it properly means mixing the seed inside <code>SeededRng</code>, which moves every horse's coat and wants to be a deliberate pass.
 </li>
 <li><strong>Two things were deliberately not built.</strong> Filmy and blind eyes, because cloudiness is cornea and lens rather than iris pigment and belongs with the conditions, not this channel. And champagne foals' blue-green eyes: the hook is not told which skin it is baking, and with aging out of scope a foal that is <em>permanently</em> blue-green may be worse than one that never was. Both on <a href="roadmap.html#eyes">the roadmap</a>.
 </li>

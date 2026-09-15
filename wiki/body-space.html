@@ -559,7 +559,7 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
         wiki&rsquo;s baked gene icons were drawing the bounding boxes and looked
         like it. Additive again: nothing the pipeline computes reads either method.
         The duplication with <code>model3d.js emitPart</code> is real and is
-        <a href="known-gaps.html#gap-100">gap 100</a>.
+        <a href="#verified-posed-parity">gap 100</a>.
     </p>
 </div>
 
@@ -573,7 +573,7 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
     files used to work around that with a sawtooth longer than the horse, tilted by hand
     to <code>tan(60&deg;)</code>, which is the neck&rsquo;s own long axis written out as two
     constants in files this class had never heard of
-    (<a href="known-gaps.html#gap-103">gap 103</a>).
+    (<a href="#verified-local-space">gap 103</a>).
 </p>
 
 <p>
@@ -650,6 +650,40 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
     rolled <code>Markings.WHITE</code> rendered as a flat white horse on top of a
     correct generated coat. All white markings here come from the
     <a href="gene-mitf.html">splash genes</a>, inside the coat texture.
+</p>
+
+<h2 id="verified">Verified</h2>
+
+<p id="verified-local-space">
+    <strong><code>space: "local"</code> replaced a typed-in neck angle, and six inert genes paint</strong> (2026-09-09).
+    A Y band across the pitched neck is a collar, so eleven gene files faked a crest-to-throat band with a
+    <code>WAVES</code> sawtooth (<code>wavelength</code> 90, <code>amplitude</code> 77.94, a tilted plane at 60&deg;). Six
+    had copied the numbers into <code>space: "part"</code>, where <code>amplitude</code> is normalised and
+    <code>wavelength</code> is not: over all 1280 neck texels beetle pearl, diamond scutes, duskfall speckle, ink scroll,
+    nebula points and wyrmwood sigils selected exactly zero. <code>HorseSkinGeometry.local</code> takes the part's
+    rest-pose pitch out before normalising, for <code>AXIS</code>, <code>WAVES</code> and <code>RAMP</code>; on an
+    unpitched part it equals part space to the bit, and the old trick is an affine function of it (max residual 0.0002),
+    so cosmic, shark, stars and suit came back byte-identical in the bake golden. <code>PartLocalFrameTest</code> pins the
+    frame, and <code>GeneFilesTest</code> refuses a <code>WAVES</code> amplitude far above 1 in a normalised space. Not
+    yet seen on a horse: <a href="verification.html#local-space">verification &sect;0-AW</a>.
+</p>
+
+<p id="verified-posed-parity">
+    <strong><code>posed()</code> exists once in the browser, and parity checks it</strong> (2026-09-09).
+    <code>HorseSkinGeometry.posed</code> / <code>posedNormal</code> had a second, unchecked copy in
+    <code>model3d.js</code>. <code>geometry.js</code> carries the one port and <code>emitPart</code> calls it (528 cuboid
+    corners bit-identical before and after). <code>SpecFixtureTool</code> bakes every part &times; face on both skins,
+    with face centres and an asymmetric point as well as corners, because several wrong axis pairings agree at every
+    corner. 924 new checks; regressing the port fails 460 (Y/Z pairing swapped), 402 (pitch dropped) and 44 (one normal
+    sign).
+</p>
+
+<p id="verified-uv-swap">
+    <strong>The top and bottom faces map to the right patches</strong> (owner-diagnosed, 2026-09-05).
+    <code>HorseSkinGeometry.faceMapsOf</code> had <code>Face.TOP</code> and <code>Face.BOTTOM</code> swapped, so a painter
+    whitening from below hit the spine: bold splash measured about 90% white on the back and, once swapped, about 35%,
+    with the belly at 100%. It was the root cause of &ldquo;white over the whole topline&rdquo;, not a calibration
+    fault, and it hid for a day behind a stale creator fixture.
 </p>
 
 <div class="page-foot">

@@ -388,7 +388,7 @@
     precisely so that no schedule drags them away from their horses. A wandering trader does
     not go indoors either. Giving them somewhere to sleep is what the entire barn-shelter
     subsystem <em>was</em>, and it is written up in
-    <a href="known-gaps.html#gap-55">gap 55</a> as the thing that could not be made to
+    <a href="#verified-no-shelter">gap 55</a> as the thing that could not be made to
     work.
 </p>
 
@@ -878,6 +878,57 @@
         as unverified; the horseman uses vanilla gossip, which costs nothing and
         works.</li>
 </ul>
+
+<h2 id="verified">Verified</h2>
+
+<p id="verified-workstation-recipes">
+    <strong>The two workstations have different recipes</strong> (2026-09-09). <code>cowboy_hitch.json</code> and
+    <code>horsemans_table.json</code> were shapeless over the same seven items, so one block was unobtainable in survival.
+    The hitch is rope-heavy (2 cloth + 3 rope + 2 fence) and the table takes leather (3 cloth + 2 leather + 2 fence).
+    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> refuses two recipes in the same slot, and a vanilla recipe with no
+    result, exempting the mod's custom serialisers.
+</p>
+
+<p id="verified-no-shelter">
+    <strong>The cowboy does not stable his herd at night</strong> (settled 2026-09-07, the owner's call). Walking eleven
+    horses through a two-block barn door at dusk never worked: the ground pathfinder rounds a mob up to
+    <code>floor(width + 1)</code> blocks, so a horse over about 1.43 scale cannot pass at all; a villager inside is a cork;
+    and the herd shoves itself back out. He dismounts at dusk, spends the night as an ordinary villager on ten times a
+    villager's health, and is walked back to his horse at dawn. <code>CowboyDoors</code>, <code>HerdCollision</code> and
+    the <code>SHELTER</code> duty (about five hundred lines) are gone. Vanilla navigation will not put a large animal
+    through a door a player walks through without noticing.
+</p>
+
+<p id="verified-move-flag">
+    <strong>A goal that stops for no reason its predicates explain has had a control flag disabled</strong> (recorded
+    2026-09-07). <code>CowboyMountGoal</code> ran five ticks and never restarted, rider aboard; the only
+    <code>GoalSelector</code> path that stops a goal and blocks its restart without consulting it is
+    <code>disabledFlags</code>. Reasserting <code>enableControlFlag(MOVE)</code> each tick fixed it. Vanilla disables that
+    flag only from <code>Mob.leashTooFarBehaviour</code>, and the culprit was never found before the mounted subsystem was
+    deleted.
+</p>
+
+<p id="verified-house-baked">
+    <strong>The cowboy's house is part of the barn piece</strong> (2026-09-07). A runtime copy of a plains house, placed
+    when the cowboy founded, never appeared once: its flatness test wanted a 7&times;7 footprint of one surface height, and
+    underneath that the work posts had to stand on the house, the work posts are what make a cowboy, and a cowboy cannot
+    build what made him. The house, posts and villagers are baked into the structure now. When a placement test fails
+    every time, check the thing could have been placed at that moment at all.
+</p>
+
+<p id="verified-they-them">
+    <strong>The cowboy and the horseman read as they/them</strong> (owner-confirmed in play,
+    2026-09-10).
+</p>
+
+<p id="verified-barn">
+    <strong>Seen working in game</strong> (the 2026-09-07 batch, owner play session, before the house
+    was baked into the barn&rsquo;s structure piece): the barn generates and sits on the ground with
+    steps up to it, the cowboy founds and has a face, both work posts hand out their jobs, the cowboy
+    and the horseman share a surname, the horseman keeps vanilla&rsquo;s villager brain, and transfer
+    papers work end to end. Not seen since: the baked homestead, its ground course and walk, and the
+    cowboy opening doors (<a href="verification.html#villagers">verification &sect;0-AC</a>).
+</p>
 
 </article>
 </main>
