@@ -59,7 +59,27 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-245"><strong>Open, found 2026-09-14: the lethal ratio pens draw far too few, then far too many, homozygous foals, one run at a time.</strong>
+    RATIO HYPP and RATIO LETHAL WHITE are carrier-by-carrier crosses and should throw one lethal foal in four. The
+    17:36 run threw too many (HYPP 10 <code>H/H</code> in 20). By 20:08 the 19:08 run had thrown <strong>none in
+    35</strong> across both pens, which chance gives about 4 times in 100&nbsp;000. The conception log agrees:
+    every HYPP embryo that run was <code>IMPAIRING</code> (one copy) or had no condition, never "two copies".
+    <em>Ruled out:</em> the parents (every run's stud and mare were the pen's own <code>H/N</code> and
+    <code>O/N</code> founders, and every foal's <code>father</code> is the pen's stud); the tallies (they equal the
+    <code>foaled</code> lines); early losses (none in either pen, either run); carrot bias (none armed, and an
+    empty list folds to <code>GameteBias.NONE</code>); the birth path (<code>bornFromPregnancy</code> carries the
+    stored embryo straight through); a stuck sire coin (foal sex ratios are not consistently skewed); and the draw
+    and generator offline. 40&nbsp;000 draws a case through the real <code>Genome.breedWith</code> on the yard's
+    founders gave 25&nbsp;:&nbsp;50&nbsp;:&nbsp;25 from one stream and after a passing conception roll at chances
+    from 0.46 to 0.85. 400 simulated runs with the generator jumped a fixed distance between conceptions spread
+    exactly as binomial. The game's entity random is <code>LegacyRandomSource</code>, the same generator.
+    <em>So the same code on the same generator is fair offline and not in the pens.</em> <em>Next, needs a build:</em>
+    log each ratio-pen conception's game tick, chance and drawn pair, and draw one pen's embryos from an independent
+    generator seeded off the level random, to see whether the skew follows the mare's entity random.</li>
 <li id="gap-244"><strong>Fixed 2026-09-14, not yet played: gap 237's fix stopped every tree in the yard's dryad pens from growing.</strong>
+    <strong>Passing so far (19:08 build):</strong> DRYAD OAK grew its first tree by 19:59, and no horse took
+    <code>inWall</code>. <strong>But no <code>tree grew</code> line fired for it</strong>, so that line under-reports.
+    The census's log count is the reliable signal.
     <code>GeneAbilityHandler.onTreeGrow</code> cancels a grow if any horse is inside a box <code>TREE_REACH</code>
     (4) blocks out from the sapling on each side and <code>TREE_HEIGHT</code> (16) up. The dryad pens are 5 to 8
     blocks wide, so a horse anywhere in its own pen is almost always inside that box. In the 43 minutes from 17:36, no
@@ -86,7 +106,10 @@
     <code>outOfWorld</code> damage three seconds later, dying at x 163, z &minus;23, y &minus;200. A second
     <code>horse-spawn</code> line with nothing between suggests its chunk was loaded back from disk, and it fell
     from wherever it was saved. Where that was, and whether the corridor has an unfloored stretch there, is not
-    yet known.</li>
+    yet known. <strong>A third at 19:48:</strong> Betty Levi, from the same wild herd (spawned beside Elegiac Star
+    at 19:08:48), died of <code>outOfWorld</code> at x 109, z &minus;51, y &minus;235. z &minus;51 is outside the
+    corridor's &minus;Z bedrock wall at z &minus;26, so that herd is finding a way out of the corridor, not just
+    falling through a floor inside it.</li>
 <li id="gap-242"><strong>Closed 2026-09-14, confirmed off the log: the yard's ratio tallies could never count a lethal foal.</strong>
     After the 17:35 build every <code>O/O</code> and <code>H/H</code> foal reached its tally and was marked died.
     <code>DebugYardLong</code>'s clock looked for <em>living</em> foals every ten seconds, and an <code>H/H</code>
