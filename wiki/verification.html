@@ -92,23 +92,27 @@
     they arrive with the next launch. Everything here is read from <code>latest.log</code>; none of
     it needs your hands.
 </p>
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 (runs from 17:19 and 17:36, unattended)</span>
+    <p>
+        <strong>Lethal foals die in the yard</strong> (<a href="known-gaps.html#gap-236">gap 236</a>): by
+        17:48 three <code>O/O</code> foals in RATIO LETHAL WHITE and two <code>H/H</code> foals in RATIO
+        HYPP had each died from <code>genetic_defect</code> within about four seconds of birth, marked
+        <code>LETHAL_AT_BIRTH</code>, and no other foal died. <strong>The tally counts a foal at
+        birth</strong> (<a href="known-gaps.html#gap-242">gap 242</a>): after the 17:35 build every
+        lethal foal appears as <code>foal N is O/O</code> (or <code>H/H</code>) and then <code>a O/O
+        foal died</code>, where the 17:19 run's tally had missed its <code>H/H</code> entirely.
+        <strong>Wild mares stop flooding the log</strong>: every <code>not covered:</code> line names a
+        CAP MARE, and <code>crowding cap held back 62 wild mares</code> (then 64) arrives every ten
+        minutes. Deleted below. RATIO HYPP started ten minutes behind the other pens because five natural
+        covers in a row did not take, at 46 to 73 percent each; that is chance, not a fault.
+    </p>
+</div>
 <ul>
     <li><strong>Brindle follows sex</strong> (<a href="known-gaps.html#gap-235">gap 235</a>). In the
         <code>RATIO BRINDLE</code> tally every colt should be <code>n/Y</code> and every filly
         <code>Brn/n</code>. <strong>Pass:</strong> no <code>colt Brn/n</code> and no
         <code>filly n/Y</code> in the tally after twenty foals.</li>
-    <li><strong>Lethal foals die in the yard</strong> (<a href="known-gaps.html#gap-236">gap 236</a>).
-        <strong>Seen once, 2026-09-14 17:26:</strong> an <code>H/H</code> foal in RATIO HYPP took 2
-        a second from <code>genetic_defect</code> and died three seconds after birth, marked
-        <code>LETHAL_AT_BIRTH</code>. What is left: an <code>O/O</code> doing the same, and the
-        tallies below agreeing. <strong>Pass:</strong> each <code>foal N is O/O</code> or
-        <code>H/H</code> line is followed by <code>a O/O foal died</code> (or <code>H/H</code>) at the
-        next scan, and no N/N, O/N or H/N foal dies.</li>
-    <li><strong>The tally counts a foal at birth</strong> (<a href="known-gaps.html#gap-242">gap 242</a>,
-        built 17:35). The 17:19 run's tally never saw that <code>H/H</code> foal, since it checked
-        every ten seconds for living foals only. <strong>Pass:</strong> every <code>foaled 1 of 1</code>
-        line from a RATIO mare is followed within a tick by <code>RATIO …: foal N is</code>, and
-        <code>H/H</code> and <code>O/O</code> both appear in the running tallies.</li>
     <li><strong>No tree grows through a horse</strong> (<a href="known-gaps.html#gap-237">gap 237</a>).
         <strong>Pass:</strong> the dryad pens still log <code>[watch] tree grew</code>, some
         <code>[trace] dryad | tree held back at</code> lines appear, and no horse takes
@@ -130,10 +134,6 @@
     <li><strong>Pen labels in the log.</strong> A yard horse's trace name now ends in its label in
         quotes, so <code>displaced ... at food or water</code> in DISPLACEMENT says which RANK mare
         won. <strong>Pass:</strong> every such line names the lower rank number first.</li>
-    <li><strong>Wild mares stop flooding the log.</strong> <strong>Pass:</strong>
-        <code>not covered:</code> lines come only from yard mares (THE CAP, the fertility rows), and a
-        <code>crowding cap held back N wild mares in the last 10 minutes</code> line appears about
-        every ten minutes.</li>
 </ul>
 
 <h2 id="tutorial-0914">&sect;0-DY &mdash; Getting started, brought up to date (2026-09-14, NOT looked at)</h2>

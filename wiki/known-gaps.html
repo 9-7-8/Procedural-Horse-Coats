@@ -65,7 +65,8 @@
     <code>[trace] lycan</code> line records the horse dying with it. Nothing in the dimension stops a flying form
     from going below the floor. Not yet known: whether it flew down or fell through a gap in the yard, and whether
     the overworld has the same problem.</li>
-<li id="gap-242"><strong>Fixed 2026-09-14, not yet played: the yard's ratio tallies could never count a lethal foal.</strong>
+<li id="gap-242"><strong>Closed 2026-09-14, confirmed off the log: the yard's ratio tallies could never count a lethal foal.</strong>
+    After the 17:35 build every <code>O/O</code> and <code>H/H</code> foal reached its tally and was marked died.
     <code>DebugYardLong</code>'s clock looked for <em>living</em> foals every ten seconds, and an <code>H/H</code>
     foal is dead three seconds after birth. The first one (RATIO HYPP, 17:26:20 to 17:26:23) died from
     <code>genetic_defect</code> as it should, and the tally went on reading <code>H/N 3 (100%)</code>, so the
@@ -118,7 +119,8 @@
     within four blocks sideways and sixteen up. The sapling tries again later. <em>Unverified:</em> that the event fires for
     natural and bone-mealed growth alike in this version (the class was checked with javap; its firing sites were not read).
     Checklist: <a href="verification.html#fixes-0914">&sect;0-DZ</a>.</li>
-<li id="gap-236"><strong>Fixed 2026-09-14, not yet played: lethal foals never died in the test yard.</strong>
+<li id="gap-236"><strong>Closed 2026-09-14, confirmed off the log: lethal foals never died in the test yard.</strong>
+    By 17:48 three <code>O/O</code> and two <code>H/H</code> yard foals had died from <code>genetic_defect</code> within seconds of birth.
     <code>LethalFoalHandler</code> skipped the whole <code>debug_pens</code> dimension to spare the gallery, and the yard is in
     that dimension. An overo lethal white foal stood for two minutes, until the ratio pen removed it, and no foal took
     <code>genetic_defect</code> damage all day. <em>Fix:</em> the skip applies only inside the corridor
