@@ -67,12 +67,12 @@ import java.util.List;
  * its own. The honest fix is a markings system; see {@code wiki/roadmap.html}.
  *
  * <p><b>{@code SW6}, {@code SW7} and {@code SW8} are deliberately folded into
- * {@code SW5}.</b> All four are {@code MITF} variants the source describes in
- * word-for-word identical terms - "splash-type variable white pattern; rare;
- * homozygous viability not established" - so four separate alleles would be
- * four indistinguishable rows in a table whose whole point is that each row
- * says something. {@code SW5} stands for the group; adding the others is one
- * line each the day the science separates them.
+ * {@code SW5}.</b> The papers no longer describe them identically - deletions of
+ * different sizes, deafness reported at different rates - but each is still one
+ * family's allele, with the same splash and no established homozygote, so four
+ * alleles would be four rows that play alike. {@code SW9}, the newest {@code MITF}
+ * splash (one Andalusian family), is a named allele because it is the one splash
+ * variant the Andalusian carries, and it paints with {@code SW5}.
  *
  * <h2>What splash looks like</h2>
  * The horse dipped in white from below ({@link WhitePattern#splash}): high,
@@ -120,9 +120,23 @@ public final class MitfGene implements Gene, HealthContribution, EyeRequestContr
     public final Allele SW3 = new Allele(KEY, 0, "SW3", "Splash white 3 (SW3)");
     public final Allele SW1 = new Allele(KEY, 1, "SW1", "Splash white 1 (SW1)");
     public final Allele SW5 = new Allele(KEY, 2, "SW5", "Splash white 5 (SW5)");
-    public final Allele N = new Allele(KEY, 3, "N", "Wild-type (N)");
+    /**
+     * <b>Splash white 9</b> (McFadden et al. 2023): a missense change in {@code MITF}'s DNA-binding domain, in one
+     * Pura Raza Espanola family. One copy is a typical splash with blue eyes; no homozygote has been seen, and whether
+     * it is lethal is not established, so it is allowed, as {@code SW5}'s is. It paints with {@code SW5}'s outcomes.
+     * No wild frequency: it is the Andalusian's.
+     */
+    public final Allele SW9 = new Allele(KEY, 3, "SW9", "Splash white 9 (SW9)");
+    public final Allele N = new Allele(KEY, 4, "N", "Wild-type (N)");
 
-    private final List<Allele> alleles = List.of(SW3, SW1, SW5, N);
+    private final List<Allele> alleles = List.of(SW3, SW1, SW5, SW9, N);
+
+    /** The rare single-family splash alleles, which paint alike. */
+    private final List<Allele> rareSplash = List.of(SW5, SW9);
+
+    private boolean hasRare(AllelePair pair) {
+        return rareSplash.contains(pair.first()) || rareSplash.contains(pair.second());
+    }
 
     private final Expression WILD = Expression.wildType("No splash markings.");
 
@@ -224,13 +238,14 @@ public final class MitfGene implements Gene, HealthContribution, EyeRequestContr
             if (pair.homozygousFor(SW3)) {
                 return EXTENSIVE;    // cannot occur; answered anyway, parsing is tolerant
             }
-            return (pair.has(SW1) || pair.has(SW5)) ? EXTENSIVE : BOLD;
+            return (pair.has(SW1) || hasRare(pair)) ? EXTENSIVE : BOLD;
         }
         if (pair.has(SW1)) {
-            return (pair.homozygousFor(SW1) || pair.has(SW5)) ? BOLD : MINIMAL;
+            return (pair.homozygousFor(SW1) || hasRare(pair)) ? BOLD : MINIMAL;
         }
-        if (pair.has(SW5)) {
-            return pair.homozygousFor(SW5) ? BOLD : SPLASH;
+        if (hasRare(pair)) {
+            // One rare copy is a splash; two - the same one twice, or SW5 with SW9 - is bold.
+            return pair.count(N) == 0 ? BOLD : SPLASH;
         }
         return WILD;
     }

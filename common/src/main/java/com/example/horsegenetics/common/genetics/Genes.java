@@ -98,6 +98,7 @@ import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
 import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
 import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.genes.Pdk4Gene;
+import com.example.horsegenetics.common.genetics.genes.Dmrt3Gene;
 import com.example.horsegenetics.common.genetics.genes.Plod1Gene;
 import com.example.horsegenetics.common.genetics.genes.PpibGene;
 import com.example.horsegenetics.common.genetics.genes.PrkdcGene;
@@ -564,6 +565,7 @@ public final class Genes {
      */
     public static final MstnGene MSTN = new MstnGene();
     public static final Pdk4Gene PDK4 = new Pdk4Gene();
+    public static final Dmrt3Gene DMRT3 = new Dmrt3Gene();
     public static final CkmGene CKM = new CkmGene();
     public static final Ryr2Gene RYR2 = new Ryr2Gene();
     public static final LcorlGene LCORL = new LcorlGene();
@@ -627,7 +629,7 @@ public final class Genes {
             PACK_LEADER, SPAWNER,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             MAGIC_WHITE, SHADOWCREATURE,
-            MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
+            MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,
             PPIB, PRKDC, MYO5A, TOE1, CVM, GBE1, MEGAESOPHAGUS, SCN4A, GYS1);
 

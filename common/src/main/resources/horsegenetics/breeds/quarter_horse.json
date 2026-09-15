@@ -45,7 +45,8 @@
       { "pair": "W32/N", "weight": 8 },
       { "pair": "W34/N", "weight": 4 },
       { "pair": "W10/N", "weight": 1 },
-      { "pair": "N/N", "weight": 55 }
+      { "pair": "W31/N", "weight": 0.12 },
+      { "pair": "N/N", "weight": 54.88 }
     ],
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 4 },
@@ -71,6 +72,11 @@
     "horsegenetics.ppib": [
       { "pair": "herda/N", "weight": 3.4 },
       { "pair": "N/N", "weight": 96.6 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 0.06 },
+      { "pair": "A/C", "weight": 4.88 },
+      { "pair": "C/C", "weight": 95.06 }
     ]
   },
   "notes": [

@@ -51,7 +51,12 @@
       { "pair": "W35/N", "weight": 8 },
       { "pair": "W5/N", "weight": 1 },
       { "pair": "W22/N", "weight": 1 },
-      { "pair": "N/N", "weight": 50 }
+      { "pair": "W2/N", "weight": 0.04 },
+      { "pair": "W14/N", "weight": 0.04 },
+      { "pair": "W25/N", "weight": 0.02 },
+      { "pair": "W26/N", "weight": 0.02 },
+      { "pair": "W27/N", "weight": 0.04 },
+      { "pair": "N/N", "weight": 49.84 }
     ],
     "horsegenetics.matp": [
       { "pair": "Cr/N", "weight": 0.4 },
@@ -60,6 +65,9 @@
     "horsegenetics.magic_cold": [
       { "pair": "Csen/n", "weight": 15 },
       { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "C/C", "weight": 100 }
     ]
   },
   "notes": [

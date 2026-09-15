@@ -55,6 +55,9 @@
       { "pair": "Htol/Htol", "weight": 5 },
       { "pair": "Htol/n", "weight": 30 },
       { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 100 }
     ]
   },
   "notes": [

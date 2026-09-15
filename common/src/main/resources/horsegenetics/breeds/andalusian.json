@@ -52,6 +52,14 @@
       { "pair": "Htol/Htol", "weight": 5 },
       { "pair": "Htol/n", "weight": 30 },
       { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW9/N", "weight": 0.1 },
+      { "pair": "N/N", "weight": 99.9 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW10/N", "weight": 0.05 },
+      { "pair": "N/N", "weight": 99.95 }
     ]
   },
   "notes": [

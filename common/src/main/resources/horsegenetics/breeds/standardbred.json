@@ -50,6 +50,9 @@
       { "pair": "W35/N", "weight": 8 },
       { "pair": "W32/N", "weight": 6 },
       { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 100 }
     ]
   },
   "notes": [

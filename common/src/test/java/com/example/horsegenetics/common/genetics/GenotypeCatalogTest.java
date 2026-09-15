@@ -87,16 +87,17 @@ class GenotypeCatalogTest {
         // homozygote where it has one, and W4's is viable where W22's is not.
         // The representatives are W34 rather than W20 because allPairsOf walks
         // the allele list backwards and W34 is declared last of the four
-        // boosters; any of them would do, which is what "booster" means.
-        assertEquals(List.of("NN", "W34N", "W34W34", "SB1N", "SB1W34", "SB1SB1", "W15W34",
-                        "W4W4", "W22N"),
+        // boosters; any of them would do, which is what "booster" means. W19 and W24 stand for
+        // their groups for the same reason: each is declared last of the alleles sharing its outcome.
+        assertEquals(List.of("NN", "W34N", "W34W34", "SB1N", "SB1W34", "SB1SB1", "W19W34",
+                        "W24N", "W4W4"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.KIT)));
         // the two splash loci: MITF has five outcomes, PAX3 three. SW1N is its
         // own pen now - one SW1 copy is the minimal outcome, not the splash
         // one, which is the whole point of the widespread allele.
-        assertEquals(List.of("NN", "SW5N", "SW5SW5", "SW1N", "SW3SW5"),
+        assertEquals(List.of("NN", "SW9N", "SW9SW9", "SW1N", "SW3SW9"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.MITF)));
-        assertEquals(List.of("NN", "SW4N", "SW2SW2"),
+        assertEquals(List.of("NN", "SW10N", "SW2SW2"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.PAX3)));
     }
 

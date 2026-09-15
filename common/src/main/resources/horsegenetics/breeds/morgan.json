@@ -66,6 +66,11 @@
     "horsegenetics.magic_cold": [
       { "pair": "Ctol/n", "weight": 15 },
       { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 2.07 },
+      { "pair": "A/C", "weight": 24.65 },
+      { "pair": "C/C", "weight": 73.27 }
     ]
   },
   "notes": [

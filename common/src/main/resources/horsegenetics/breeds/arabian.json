@@ -44,7 +44,9 @@
       { "pair": "W34/N", "weight": 3 },
       { "pair": "W15/N", "weight": 1 },
       { "pair": "W23/N", "weight": 1 },
-      { "pair": "N/N", "weight": 71 }
+      { "pair": "W19/N", "weight": 0.3 },
+      { "pair": "W3/N", "weight": 0.04 },
+      { "pair": "N/N", "weight": 70.66 }
     ],
     "horsegenetics.prkdc": [
       { "pair": "scid/N", "weight": 2.8 },
@@ -62,6 +64,10 @@
       { "pair": "Htol/Htol", "weight": 60 },
       { "pair": "Htol/n", "weight": 35 },
       { "pair": "n/n", "weight": 5 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/C", "weight": 1.78 },
+      { "pair": "C/C", "weight": 98.21 }
     ]
   },
   "notes": [

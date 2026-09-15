@@ -432,9 +432,12 @@ public final class GeneticCoatTextureFactory {
             }
         }
         DynamicTexture texture = new DynamicTexture(() -> "horsegenetics_glow_" + key, image);
-        // The composed key can be long at 13 genotype segments; a hash keeps the
-        // Identifier path well inside the 256-char limit. A tripwire guards the
-        // (astronomically unlikely) collision rather than letting it be silent.
+        // Hashed for a short id. There is no path length limit to stay inside -
+        // 26.1.2's Identifier.isValidPath checks characters only, and the coat
+        // ids below run to several hundred characters (checked 2026-09-15) - but a
+        // short id keeps F3's texture dump, which uses the id as a file name, under
+        // the 255-character file name limit. A tripwire guards the (astronomically
+        // unlikely) collision rather than letting it be silent.
         Identifier id = Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
                 "coat_glow/" + Integer.toUnsignedString(key.hashCode(), 16));
         String previous = EMISSIVE_KEY_BY_ID.put(id, key);

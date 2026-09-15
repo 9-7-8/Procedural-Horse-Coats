@@ -73,6 +73,16 @@
       { "pair": "Ctol/Ctol", "weight": 60 },
       { "pair": "Ctol/n", "weight": 35 },
       { "pair": "n/n", "weight": 5 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 79.21 },
+      { "pair": "A/C", "weight": 19.58 },
+      { "pair": "C/C", "weight": 1.21 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W8/N", "weight": 0.04 },
+      { "pair": "W21/N", "weight": 0.04 },
+      { "pair": "N/N", "weight": 99.92 }
     ]
   },
   "notes": [

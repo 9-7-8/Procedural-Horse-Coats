@@ -79,9 +79,16 @@ public final class Pax3Gene implements Gene, HealthContribution, EyeRequestContr
 
     public final Allele SW2 = new Allele(KEY, 0, "SW2", "Splash white 2 (SW2)");
     public final Allele SW4 = new Allele(KEY, 1, "SW4", "Splash white 4 (SW4)");
-    public final Allele N = new Allele(KEY, 2, "N", "Wild-type (N)");
+    /**
+     * <b>Splash white 10</b> (McFadden et al. 2023): a stop-gain in {@code PAX3}, seen in two Pura Raza Espanola
+     * horses from one breeding programme. One copy is a typical splash with blue eyes; the homozygote is predicted
+     * lethal because the protein is cut short, and no birth confirms or refutes it, so it is ruled out here as
+     * {@code SW4}'s is. No wild frequency: it is the Andalusian's.
+     */
+    public final Allele SW10 = new Allele(KEY, 2, "SW10", "Splash white 10 (SW10)");
+    public final Allele N = new Allele(KEY, 3, "N", "Wild-type (N)");
 
-    private final List<Allele> alleles = List.of(SW2, SW4, N);
+    private final List<Allele> alleles = List.of(SW2, SW4, SW10, N);
 
     private final Expression WILD = Expression.wildType("No splash markings.");
 
@@ -153,10 +160,10 @@ public final class Pax3Gene implements Gene, HealthContribution, EyeRequestContr
         return pair.has(N) ? SPLASH : BOLD;
     }
 
-    /** {@code SW4/SW4} has never been detected in a live horse. */
+    /** {@code SW4/SW4} has never been detected in a live horse, and {@code SW10/SW10} is predicted lethal. */
     @Override
     public boolean canOccur(AllelePair pair) {
-        return !pair.homozygousFor(SW4);
+        return !pair.homozygousFor(SW4) && !pair.homozygousFor(SW10);
     }
 
     /** Does this combination draw splash markings at all? */

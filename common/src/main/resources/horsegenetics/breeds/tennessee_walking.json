@@ -65,6 +65,11 @@
     "horsegenetics.magic_heat": [
       { "pair": "Htol/n", "weight": 15 },
       { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 96.04 },
+      { "pair": "A/C", "weight": 3.92 },
+      { "pair": "C/C", "weight": 0.04 }
     ]
   },
   "notes": [
