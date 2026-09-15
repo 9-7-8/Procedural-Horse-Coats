@@ -78,6 +78,22 @@
     </p>
 </div>
 
+<h2 id="after-1057">&sect;0-EC &mdash; Built after the 10:57 launch on 2026-09-15, so NOT in the running game</h2>
+
+<p>
+    The long yard run started at 10:57 holds <code>common.jar</code> and the old classes, so none of this is in it. It all
+    arrives with the next launch. Each change was type-checked against the running client's classpath, and the MATP change passed
+    <code>CoatPipelineGoldenTest</code>, <code>CoatBakeGoldenTest</code> and <code>GenotypeCatalogTest</code>.
+</p>
+<ul>
+    <li><strong>The designer's wasm was not re-baked.</strong> <code>:web:bakeDesignerAssets</code> rebuilds <code>common.jar</code>, which
+        would crash the running client. Until it is run, and <code>check-designer-boots.mjs</code> after it, the
+        <a href="horse-designer/">horse designer</a> still founds pearl at the old one in 22.</li>
+    <li><strong>MATP founder rates</strong> (<a href="gene-matp.html#frequency-ordering">MATP</a>). <strong>Pass:</strong> Feral Mixed herds show cream horses often and classic pearls almost never.</li>
+    <li><strong>The spawner and the ward:</strong> the SPAWNER WARD pen (<a href="#open-older-unattended">&sect;0-EB, unattended</a>).</li>
+    <li><strong>The BONE MEAL pen's sign</strong> now names <code>[watch] gene fertilised</code>.</li>
+</ul>
+
 <h2 id="hunger-0914">&sect;0-EA &mdash; Hunger, and gap 245's conception log (2026-09-14, built 22:12, NOT played)</h2>
 <p>
     Every horse now has an invisible hunger level that drains, pays for healing, and sends a
@@ -651,7 +667,7 @@
     <li><strong>Seed jar collection refusals.</strong> An unfed stallion refuses (&ldquo;must be in breeding mode&rdquo;, <code>isInLove</code>) with no mount, and a fed one stops being in love once collected. An empty jar on a mare, or a filled jar on a stallion or foal, names the horse and does nothing. A filled jar keeps its sire across a reload and a chest. The mare side is <a href="#fertility-yard">JAR STUD</a>; collection is <a href="item-seed-jars.html#verified-collect">verified</a>.</li>
     <li><strong>Basic, golden and echo whistles</strong> (16, 32, 64 blocks). Your tamed horses in range land beside you on the ground, spread out, with a chat count; an untamed horse, someone else's, or one being ridden is left alone, and a leashed one is unleashed. Stand 20 blocks off: basic says none, golden fetches it. <a href="item-whistles.html">Whistles</a>.</li>
     <li><strong>Stall sign upkeep.</strong> <kbd>F7</kbd> re-flashes every stall within about 96 blocks; breaking the placed sign releases the stall (&ldquo;its sign was broken&rdquo;) and F7 stops showing it; binding a new sign to the same horse on another stall replaces the old record and survives a reload; a sign on a top or bottom face is refused. Binding is <a href="item-stall-signs.html#verified-binding">verified</a>.</li>
-    <li><strong>Waterborn with a rider.</strong> Ride a grown waterborn horse into deep water: it stays at the surface without bobbing, sticking at the edge or putting your head under. The unattended half is the WATERBORN pen below.</li>
+    <li><strong>Waterborn with a rider.</strong> Ride a grown waterborn horse into deep water: it stays at the surface without bobbing, sticking at the edge or putting your head under.</li>
     <li><strong>Suntouched's light is cleaned up.</strong> Kill the horse, or ride far enough to unload it: the <code>minecraft:light</code> block goes with it. Gallop and check the light never fills a spot that has a block in it. <a href="gene-suntouched.html">Suntouched</a>.</li>
     <li><strong>Family tree scroll mode.</strong> Set <code>familyTree.scrollBar = true</code> in <code>phc/client.toml</code>: the wheel and the right-edge thumb scroll the tree. Shrink-to-fit is <a href="breeding.html#verified-family-tree">verified</a>.</li>
     <li><strong>Riding in water feels right.</strong> <code>HorseWaterRidingHandler</code>'s speed cap (0.09 blocks a tick) and submerged lift are first guesses.</li>
@@ -666,7 +682,7 @@
     <li><strong>No stray magic on a breed</strong> (unit test to write; <a href="breeds.html#magic">breeds</a>). Roll every breed's founders through <code>BreedFounder.roll</code> and assert no magical coat, particle or ability locus the breed does not list. <code>BreedFounderTest</code> only checks named loci today. The Breeds tab's plates are the same founder rolls, so this covers them too. Only Feral Mixed may carry random magic.</li>
     <li><strong>The jar carries no wiki tooling</strong>. <code>build.gradle</code> excludes <code>**/*Tool.class</code> and <code>horsegenetics/example-genes/**</code>. Check with <code>jar tf</code> on the built jar, and confirm no log names a missing <code>*Tool</code> class.</li>
     <li><strong>Splash blue-eye rates and blue eyes carried through a generation</strong> (unit test, <code>EyeColorTest</code>; <a href="eye-colour.html">eye colour</a>). A splashed white horse has two blue eyes usually, one sometimes and a wedge rarely. A blue-eyed splash bred to a plain horse throws <code>MBl</code> carriers, and blue eyes reappear a generation later on foals with no splash.</li>
-    <li><strong><a href="gene-spawner.html">Spawner</a> and the holy ward together</strong> (yard pen or unit reading). A summon goes through <code>EntityType.spawn</code> with <code>EntitySpawnReason.NATURAL</code>, so it fires <code>FinalizeSpawnEvent</code> (other mods' protections apply), and <code>GeneWardHandler.isNatural</code> accepts <code>NATURAL</code>. So a hostile-allele spawner beside a warding horse should be refused. Put a <code>Zom/Zom</code>-style spawner beside a ward horse and read the <code>Spawner | made N</code> lines; decide whether that refusal is wanted.</li>
+    <li><strong>A spawner fed beside a holy ward makes its mobs</strong> (yard row AI east, SPAWNER WARD; <a href="gene-spawner.html">spawner</a>, <a href="gene-holy-ward.html">holy ward</a>). A summon goes through the <code>NATURAL</code> spawn path, which the ward refused for hostiles; <code>GeneAbilityHandler.summoning()</code> now lets it through. <strong>Pass:</strong> the pen's eighth meal line reads <code>16 made</code> and PASS, with some zombies <code>within 8 of the ward</code>. INCONCLUSIVE means none landed inside the ward that run.</li>
     <li><strong>A breed cannot make a back-half Cleave</strong> (unit test). <code>BreedFounder</code> forces a named modifier wild unless the breed lists it, so every breed horse should be <code>cleave_side=n/n</code>; the same holds for accretion field. Assert it over the breed roster.</li>
     <li><strong>Milk volume</strong> (yard: a <code>Mlk/Mlk</code> mare in the dairy, row D, milked on a clock). <strong>Pass:</strong> a second filling is possible after a fraction of a day (charges divide the cooldown, they do not bank), and the same holds for a water-bearing horse (<a href="gene-magic-milk-volume.html">magic milk volume</a>).</li>
     <li><strong>The night loci's supersede rule</strong> (yard: a horse homozygous for a night watch form and a night temper form, with a cow, logged at night). <strong>Pass:</strong> it deals with the cow rather than doing both, then resumes watching once the cow is gone. Every single form is <a href="gene-magic-night-temper.html">verified</a>; the pair on one horse is not.</li>
@@ -692,7 +708,6 @@
     <li><strong>Magic stats inherit.</strong> Two <code>Swift/n</code> carriers throw about a quarter <code>Swift/Swift</code>, faster than either parent, carrying the parent's percentage. A ratio pen, like row U's RATIO SIZE.</li>
     <li><strong>The health floor.</strong> <code>Frail/Frail</code> stacked with <code>b4galt7</code> keeps at least half a heart and does not die on spawn (<code>MIN_HEALTH</code>).</li>
     <li><strong>The Unknown Gene Splice blacklist.</strong> A few dozen foals from an Unknown Gene Splice carrot: none dies, none is a dwarf, none has fewer hearts than its parents. If rows AJ-AK already arm an Unknown carrot, this is covered by <a href="item-splice-carrots.html#verified-splice-theme">the splice record</a>; if not, add a pen.</li>
-    <li><strong>WATERBORN, the unattended half</strong> (row AA, <code>[trace] test yard | WATERBORN reading n</code>). The 2026-09-15 runs read ADULT steady at y&nbsp;&minus;0.23 against a water top of &minus;0.1, foal and control drifting between &minus;0.26 and &minus;0.52, all &ldquo;in water&rdquo; with full air. So the adult sits higher than the control but not on the surface. Decide whether that is &ldquo;walks on water&rdquo; and record it on <a href="gene-waterborn.html">waterborn</a>, or treat it as a gap.</li>
     <li><strong>No plain pens, and about half magical.</strong> <code>ShowcaseGenotypes.random</code> guarantees one expressing coat gene past extension and agouti and flips a coin per pen for a magical gene. A unit test over a few thousand draws settles both, and each pen's sign should name exactly what its pair carries.</li>
     <li><strong>A newly added gene lands on the allele that does something.</strong> Champagne as <code>Ch/Ch</code>; KIT on its first homozygote that can occur, never a nonviable pair; MET heterozygous. <code>web/HorseEditor</code> mirrors the screen, so a unit test there covers both.</li>
     <li><strong>Dun's genome display.</strong> <code>GeneCodeDisplay</code> writes <code>nD</code> for <code>D/d2</code>, <code>nd1</code> for <code>d1/d2</code>, <code>d1d1</code> for <code>d1/d1</code>, and the seed jar tooltip names data-driven genes (the display bug fixed 2026-09-03, never re-checked). A unit test.</li>

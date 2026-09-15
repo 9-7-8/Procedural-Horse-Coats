@@ -260,25 +260,15 @@
 <h2>Founder frequency</h2>
 
 <p>
-    Allele frequencies <code>1/30</code> for <code>Cr</code> and
-    <code>1/22</code> for <code>prl</code> &mdash; the same numbers the two old
-    genes carried, so the wild population is unchanged apart from the impossible
-    genotypes disappearing. The gene declares the resulting six shares directly
-    rather than computing them, so an author can retune one row without touching
-    the others:
+    One allele copy in <code>WILD_CREAM_ONE_IN</code> is cream, one in <code>WILD_PEARL_ONE_IN</code> pearl,
+    one in <code>WILD_SUNSHINE_ONE_IN</code> sunshine and one in <code>WILD_SNOWDROP_ONE_IN</code> snowdrop.
+    <code>FounderTable.hardyWeinberg</code> turns those into every pair's share. Read the numbers off the
+    constants: they were set against measured breed frequencies on 2026-09-15, which is why pearl is now far
+    rarer than cream (<a href="#frequency-ordering">the science tab</a>). Before that, pearl was one in 22 and
+    commoner than cream, a number carried over from when the two were separate genes. Only Feral Mixed founders use
+    these numbers. <code>BreedFounder</code> rolls a breed's MATP from its own sheet, or forces it wild if the sheet
+    does not list it.
 </p>
-
-<div class="codebox">
-<div class="filename">MatpGene &mdash; the founder table</div>
-<pre><code class="language-java">FounderTable.builder()
-        .weight(Cr,  Cr,  0.111111)
-        .weight(Cr,  prl, 0.303030)
-        .weight(Cr,  N,   6.141414)
-        .weight(prl, prl, 0.206612)
-        .weight(prl, N,   8.374656)
-        .weight(N,   N,  84.863177)
-        .build();</code></pre>
-</div>
 
 </section>
 
@@ -610,25 +600,28 @@
     not a measured percentage.
 </p>
 
-<div class="note warn">
-    <span class="label">The mod makes pearl commoner than cream, which is backwards</span>
-    <p>
-        <code>WILD_CREAM_ONE_IN</code> is <b>30</b> (3.3%) and <code>WILD_PEARL_ONE_IN</code> is
-        <b>22</b> (4.5%), so a founder horse is <em>more</em> likely to carry pearl than cream. In
-        the real population the ordering is emphatically the other way: cream is in 25 of 28
-        breeds and reaches 42% in Lusitanos, while pearl is in 7 breeds and tops out around 12%
-        in Iberians. Sunshine at 1/320 and snowdrop at 1/360 are unquantifiable against the
-        literature, and being the two rarest is the right shape.
-    </p>
-    <p>
-        The likely explanation is stated in the source: these are &ldquo;the same numbers the two
-        old genes carried&rdquo;, from when cream and pearl were separate loci and each was tuned
-        on its own. Merging them into one locus made the two frequencies directly comparable for
-        the first time, and the comparison had not been revisited. Raising cream above pearl
-        would cost nothing structurally and would make a founder paddock look more like a real
-        one.
-    </p>
-</div>
+<h3 id="frequency-ordering">How common each allele is in a wild horse</h3>
+
+<p>
+    The founder numbers follow the one large survey there is: 11,281 horses from 28 breeds
+    (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498372/">&ldquo;Breed Distribution and Allele Frequencies of
+    Base Coat Color, Dilution, and White Patterning Variants across 28 Horse Breeds&rdquo;, 2022</a>).
+    <strong>Cream</strong> turned up in 25 of the 28 breeds, at allele frequencies from 0.013 in Standardbreds up
+    to breeds bred for it, so one copy in 30 (0.033) is a fair middle for a mixed wild population.
+    <strong>Pearl</strong> turned up in only seven: the Iberian breeds carry it at 0.06 to 0.12 (Andalusian 0.12,
+    Pura Raza Espa&ntilde;ola 0.11, Lusitano 0.064), and everywhere else it is scarce (Gypsy Cob 0.017, Gypsy Vanner
+    0.015, Paint 0.007, Quarter Horse 0.0003). A mixed population is mostly not Iberian, so the mod founds pearl at
+    one copy in 300, about a tenth as common as cream. <strong>Sunshine and snowdrop</strong> have no measured
+    frequency (above), so they sit an order of magnitude below pearl again, at one in 3,000 and one in 3,500:
+    rare enough that a homozygote is bred, not met.
+</p>
+<p>
+    Until 2026-09-15 pearl was one copy in 22, which made a founder horse likelier to carry pearl than cream, the
+    reverse of real horses. The number dated from when cream and pearl were two separate genes, each tuned alone,
+    and the comparison was not revisited when they became one locus. These numbers only reach Feral Mixed horses. A
+    breed carries exactly the coat genes its sheet names, and neither the Andalusian nor the Lusitano sheet names
+    MATP, so today no breed horse carries pearl from its breed.
+</p>
 
 <h2 id="settled">What is settled, and what is not</h2>
 
