@@ -59,6 +59,16 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-244"><strong>Open, found 2026-09-14: gap 237's fix stops every tree in the yard's dryad pens from growing.</strong>
+    <code>GeneAbilityHandler.onTreeGrow</code> cancels a grow if any horse is inside a box <code>TREE_REACH</code>
+    (4) blocks out from the sapling on each side and <code>TREE_HEIGHT</code> (16) up. The dryad pens are 5 to 8
+    blocks wide, so a horse anywhere in its own pen is almost always inside that box. In the 43 minutes from 17:36, no
+    tree grew anywhere and 13 grows were held back (logged at most once every ten seconds), 7 of them at one spot
+    in DRYAD DARK SMALL, whose single horse can never be far enough away. The census's "tried to grow and are
+    still saplings" line agrees. <em>Likely fix, not yet made:</em> only a log can suffocate a horse (whether
+    leaves can in 26.1.2 is unchecked), and a trunk rises from the sapling's own columns, so the box could shrink
+    to those columns plus about a block, and to the height of a horse. That shape would still have caught both
+    suffocations, since each horse stood where its tree grew. Acacia's leaning trunk is the case to check.</li>
 <li id="gap-243"><strong>Open, found 2026-09-14: a lycan horse whose other form is a parrot dies falling out of the horse dimension.</strong>
     Waxen Maverick, a wild foal born at 3, 129, -6 in the yard, turned into a <code>minecraft:parrot</code> after
     dark. At 17:33:54 the parrot was at y&nbsp;&minus;65 and took <code>outOfWorld</code> damage, and the
