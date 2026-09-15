@@ -63,8 +63,8 @@ import java.util.Optional;
  *
  * <p>Natural, deterministic. Founder allele frequencies {@code 1/}{@value
  * #WILD_CREAM_ONE_IN} for {@code Cr} and {@code 1/}{@value #WILD_PEARL_ONE_IN}
- * for {@code prl} - the same numbers the two old genes carried, so the wild
- * population is unchanged apart from the impossible genotypes disappearing.
+ * for {@code prl}, set against measured breed frequencies (owner, 2026-09-15):
+ * cream is common, pearl rare outside Iberian breeds.
  *
  * <h2>The eye follows the same six rows</h2>
  * A double dilute's pale blue eye is the famous one, and it is not the blue of a
@@ -81,14 +81,23 @@ public final class MatpGene implements Gene, EyeRequestContribution {
 
     public static final String KEY = "horsegenetics.matp";
 
-    /** Founder frequency of {@code Cr}: one allele copy in this many. */
+    /**
+     * Founder frequency of {@code Cr}: one allele copy in this many. Real cream is widespread, found in 25 of 28 breeds
+     * tested, at allele frequencies from 0.013 (Standardbred) up to breeds selected for it. One in 30 (0.033) sits
+     * inside that range for a mixed wild population.
+     */
     public static final int WILD_CREAM_ONE_IN = 30;
-    /** Founder frequency of {@code prl}: one allele copy in this many. */
-    public static final int WILD_PEARL_ONE_IN = 22;
-    /** Founder frequency of {@code sun}: one allele copy in this many. */
-    public static final int WILD_SUNSHINE_ONE_IN = 320;
-    /** Founder frequency of {@code sno}: one allele copy in this many. */
-    public static final int WILD_SNOWDROP_ONE_IN = 360;
+    /**
+     * Founder frequency of {@code prl}: one allele copy in this many. Real pearl is confined to a handful of breeds:
+     * Iberian horses at 0.06 to 0.12, and almost nowhere else (Paint 0.007, Gypsy 0.015, Quarter Horse 0.0003). A mixed
+     * wild population carries it at a few per thousand, so far rarer than cream. It used to be one in 22, commoner than
+     * cream, a number carried over from the two old genes.
+     */
+    public static final int WILD_PEARL_ONE_IN = 300;
+    /** Founder frequency of {@code sun}: one allele copy in this many. Known from a few horses only, so far below pearl. */
+    public static final int WILD_SUNSHINE_ONE_IN = 3_000;
+    /** Founder frequency of {@code sno}: one allele copy in this many. Known from one family, so the rarest here. */
+    public static final int WILD_SNOWDROP_ONE_IN = 3_500;
 
     // Pigment kept (multiplied), per outcome - so a value of 0.80 is "20% of this
     // pigment restricted away". Set to the owner's measured targets against the
@@ -220,20 +229,14 @@ public final class MatpGene implements Gene, EyeRequestContribution {
     private final List<Expression> expressions = List.of(WILD, PEARL_CARRIER, DILUTION_CARRIER,
             SINGLE_CREAM, CLASSIC_PEARL, SUNSHINE, DOUBLE_DILUTE);
 
-    /**
-     * The six combinations at their Hardy-Weinberg shares given
-     * {@code p(Cr) = 1/30} and {@code p(prl) = 1/22}. Written out rather than
-     * computed so the numbers are readable and an author can retune one row
-     * without touching the others.
-     */
+    /** Every combination at its Hardy-Weinberg share, from {@link #frequencies()}. */
     private final FounderTable founders = FounderTable.hardyWeinberg(frequencies(), pair -> true);
 
     /**
-     * Population frequency per allele. Cream and pearl keep the numbers the two
-     * old genes carried; sunshine and snowdrop are <b>very</b> much rarer - each
-     * was found once, in one horse, in 2019 - so they sit an order of magnitude
-     * below pearl and a homozygote is something a player breeds rather than
-     * meets.
+     * Population frequency per allele: cream commonest, pearl about a tenth as
+     * common, and sunshine and snowdrop an order of magnitude below pearl again.
+     * Each of those two was described in 2019 from a few horses, so a homozygote
+     * is something a player breeds rather than meets.
      */
     private Map<Allele, Double> frequencies() {
         Map<Allele, Double> p = new LinkedHashMap<>();
