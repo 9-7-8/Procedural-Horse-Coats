@@ -97,10 +97,17 @@
     19:08 run's 0 in 35 is still unexplained, and with the instrument on it has not recurred. Left open, with
     the logging running. (Reading it: the log rolled at midnight, so the run's first 75 minutes are in
     <code>run/logs/2026-09-14-1.log.gz</code>, not <code>latest.log</code>.)</li>
-<li id="gap-244"><strong>Closed 2026-09-15, confirmed off the log: gap 237's fix stopped every tree in the yard's dryad pens from growing.</strong>
-    By 03:15 on the overnight run every dryad pen had grown trees with its horses in it, including the one-horse
-    DRYAD DARK SMALL (70 dark oak logs) that the old reach box could never let grow, and no horse took
-    <code>inWall</code> damage in four and a half hours.
+<li id="gap-244"><strong>Reopened 2026-09-15, fix written overnight: the narrowed reach box let a dark oak grow through a horse.</strong>
+    It was closed at 03:15, and at 04:01 DRYAD DARK's tree grew (+39 logs) and Nimble Glow died in it of
+    <code>inWall</code>, 23 hits in ten seconds. Until then every dryad pen, including the one-horse DRYAD DARK
+    SMALL, had grown trees with no damage. <em>Cause, read in 26.1.2's <code>DarkOakTrunkPlacer</code>:</em> the
+    2&times;2 trunk is fine, but branches are placed on the ring one block <em>outside</em> it (&minus;1 to +2 from
+    the tree's corner) and hang down up to four blocks from the top, so on a six-tall tree a branch log sits at
+    one block up, inside a standing horse. Measured from whichever of the four saplings grew, that ring is two
+    blocks out, and the box reached one. <em>Fix:</em> dark oak and pale oak saplings (the same placer) hold back
+    for a horse within two blocks; other saplings keep one. <em>The cost, for the owner:</em> DRYAD DARK SMALL's
+    inside is four by five, so a two-block reach covers nearly all of it and its one horse will almost never let a
+    tree grow. Widening that pen is a test-layout call left for the morning.
     <strong>Passing so far (19:08 build):</strong> DRYAD OAK grew its first tree by 19:59, and no horse took
     <code>inWall</code>. <strong>But no <code>tree grew</code> line fired for it</strong>, so that line under-reports.
     The census's log count is the reliable signal.

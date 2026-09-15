@@ -1405,8 +1405,9 @@ public final class GeneAbilityHandler {
         }
         BlockPos at = event.getPos();
         BlockState grower = level.getBlockState(at);
-        double side = grower.is(net.minecraft.tags.BlockTags.SAPLINGS) && !grower.is(Blocks.MANGROVE_PROPAGULE)
-                ? TRUNK_REACH : TREE_REACH;
+        double side = !grower.is(net.minecraft.tags.BlockTags.SAPLINGS) || grower.is(Blocks.MANGROVE_PROPAGULE)
+                ? TREE_REACH
+                : grower.is(Blocks.DARK_OAK_SAPLING) || grower.is(Blocks.PALE_OAK_SAPLING) ? BRANCH_REACH : TRUNK_REACH;
         AABB reach = new AABB(at).inflate(side, 0.0, side).expandTowards(0.0, HORSE_CLEARANCE, 0.0);
         if (level.getEntitiesOfClass(Horse.class, reach, Horse::isAlive).isEmpty()) {
             return;
@@ -1422,6 +1423,14 @@ public final class GeneAbilityHandler {
 
     /** A sapling's own column and the ring round it: either corner of a 2x2, and one sideways step. */
     private static final double TRUNK_REACH = 1.0;
+
+    /**
+     * Dark and pale oak (26.1.2's {@code DarkOakTrunkPlacer}): branches on the ring one block
+     * outside the 2x2 trunk, hanging as low as one block up on a six-tall tree - two blocks out
+     * from whichever corner sapling grew. One block was not enough: a DRYAD DARK horse died in
+     * such a branch on 2026-09-15 at 04:01 (gap 244).
+     */
+    private static final double BRANCH_REACH = 2.0;
 
     /** Huge mushrooms, fungi and the mangrove propagule: caps and roots that spread low. */
     private static final double TREE_REACH = 4.0;
