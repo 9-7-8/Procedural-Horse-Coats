@@ -59,7 +59,9 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
-<li id="gap-246"><strong>Fixed 2026-09-14, not yet built: the first hunger build slowed the server by a third and stripped the yard's grass.</strong>
+<li id="gap-246"><strong>Closed 2026-09-14, confirmed off the log: the first hunger build slowed the server by a third and stripped the yard's grass.</strong>
+    The 22:45 build's censuses read 54.1 (the yard building), then 50.0 and 50.0 ms a tick, the same as the two
+    builds before hunger. The grazing half is still waiting on its first summary lines.
     From the first census of the 22:12 run the yard ran at 64-71 ms a tick against a steady 50 before, which is
     about 14 ticks a second instead of 20, and before any horse was hungry. <em>Cause:</em>
     <code>HungerFoodGoal.canUse</code> runs for every horse every tick or two, and it asked
