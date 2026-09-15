@@ -116,7 +116,51 @@ public final class BloodHuntGoal extends Goal {
         }
         searchCooldown = SEARCH_INTERVAL;
         prey = findPrey();
+        traceSearch();
         return prey != null;
+    }
+
+    /** Game tick of this horse's last search trace; one a minute is plenty to read a day by. */
+    private long lastSearchTrace = Long.MIN_VALUE;
+    /** Whether this pursuit has already said its path was refused. */
+    private boolean pathRefusalTraced;
+
+    /**
+     * <b>Why a hurt blood-drinker is or is not hunting</b> (gap 250). In the yard's 08:47 run BLOOD ONLY went a whole
+     * day beside a cow without a bite, while an identical horse in the next row bit at once; the next run it bit at
+     * tick 111. Nothing said which half failed - the search or the walk to the prey. At most once a minute per horse:
+     * what the search found, or how many living things were in range and why each was ruled out.
+     */
+    private void traceSearch() {
+        if (!(horse.level() instanceof ServerLevel level)) {
+            return;
+        }
+        long now = level.getGameTime();
+        if (now - lastSearchTrace < 1_200L) {
+            return;
+        }
+        lastSearchTrace = now;
+        if (prey != null) {
+            ActionTrace.log("blood", ActionTrace.describeShort(horse) + " hunting " + ActionTrace.describeShort(prey)
+                    + String.format(" (%.1f blocks, tier %d), health %.1f/%.1f", Math.sqrt(horse.distanceToSqr(prey)),
+                    tier(prey), horse.getHealth(), horse.getMaxHealth()));
+            return;
+        }
+        int inRange = 0;
+        int invalid = 0;
+        int bittenToday = 0;
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, horse.getBoundingBox().inflate(SEARCH_RADIUS),
+                e -> e != horse)) {
+            inRange++;
+            if (!isValidPrey(e)) {
+                invalid++;
+            } else if (!readyToBite(e, now)) {
+                bittenToday++;
+            }
+        }
+        ActionTrace.log("blood", ActionTrace.describeShort(horse) + " found nothing to bite: " + inRange
+                + " living in range, " + invalid + " not prey (horse, undead, creative), " + bittenToday
+                + String.format(" already bitten today; health %.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
     }
 
     @Override
@@ -130,6 +174,7 @@ public final class BloodHuntGoal extends Goal {
     public void start() {
         repathCooldown = 0;
         pursuitTicks = 0;
+        pathRefusalTraced = false;
     }
 
     @Override
@@ -147,7 +192,11 @@ public final class BloodHuntGoal extends Goal {
         horse.getLookControl().setLookAt(prey, 30.0F, 30.0F);
         if (--repathCooldown <= 0) {
             repathCooldown = REPATH_INTERVAL;
-            horse.getNavigation().moveTo(prey, SPEED);
+            if (!horse.getNavigation().moveTo(prey, SPEED) && !pathRefusalTraced) {
+                pathRefusalTraced = true;       // once per pursuit: the other half of gap 250's question
+                ActionTrace.log("blood", ActionTrace.describeShort(horse) + " has NO PATH to "
+                        + ActionTrace.describeShort(prey) + String.format(" (%.1f blocks)", Math.sqrt(horse.distanceToSqr(prey))));
+            }
         }
         if (horse.distanceToSqr(prey) <= BITE_RANGE_SQ) {
             bite();
