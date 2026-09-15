@@ -195,7 +195,7 @@ public final class GeneAbilityHandler {
                 }
                 case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey());
                 case GeneAbility.Breath b -> breathe(b, horse);
-                case GeneAbility.Swim s -> SwimScaling.apply(horse, s.factor());
+                case GeneAbility.Swim ignored -> { /* read inside travelInWater by HorseSwimMixin, via SwimScaling */ }
                 case GeneAbility.MobAura ma -> mobAura(ma, horse, (ServerLevel) level);
                 case GeneAbility.Combat c -> setAttackDamage(c, horse);
                 case GeneAbility.YieldCharges ignored -> { /* read by GeneYieldHandler, on interaction */ }

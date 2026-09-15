@@ -8,16 +8,16 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <b>Magic swim speed for the horse you are riding.</b> A ridden horse is moved by its rider's client, not by the
- * server, so the server's {@code GeneAbilityHandler} can only scale loose horses. This applies the same
- * {@link SwimScaling} on the client, to the one horse this client moves: the local player's mount. The genes come from
- * {@link ClientHorseRecordCache}, and the factor from the same {@link HorseAbilities} the server resolves.
+ * <b>Magic swim speed for the horse you are riding.</b> A ridden horse is moved by its rider's client, so
+ * {@code HorseSwimMixin} runs there for it and asks {@link SwimScaling#factorOf}, which on the client side calls the
+ * lookup this installs. The genes come from {@link ClientHorseRecordCache}, and the factor from the same
+ * {@link HorseAbilities} the server resolves.
  *
  * <p>Magic swim speed's ability is unconditional ({@code Condition.ALWAYS}), so no condition is evaluated here. A gene
  * that ever gates {@code Swim} on a condition will need this to learn it.
@@ -32,27 +32,26 @@ public final class ClientSwimHandler {
     private static final Map<String, Double> FACTOR_BY_CODE = new HashMap<>();
 
     @SubscribeEvent
-    static void onHorseTick(EntityTickEvent.Post event) {
-        if (!(event.getEntity() instanceof Horse horse) || !horse.level().isClientSide() || !horse.canSimulateMovement()) {
-            return;
-        }
+    static void onClientSetup(FMLClientSetupEvent event) {
+        SwimScaling.clientFactor = ClientSwimHandler::factorOf;
+    }
+
+    private static double factorOf(Horse horse) {
         HorseRecord record = ClientHorseRecordCache.get(horse.getId());
         if (record == null || !record.hasGenome()) {
-            return;
+            return 1.0;
         }
         if (FACTOR_BY_CODE.size() > 512) {
             FACTOR_BY_CODE.clear();
         }
-        double factor = FACTOR_BY_CODE.computeIfAbsent(record.geneticCode() + "|" + record.epigenomeCode(),
-                k -> swimFactor(record));
-        SwimScaling.apply(horse, factor);
+        return FACTOR_BY_CODE.computeIfAbsent(record.geneticCode() + "|" + record.epigenomeCode(), k -> swimFactor(record));
     }
 
     private static double swimFactor(HorseRecord record) {
         try {
             for (HorseAbilities.Active active : HorseAbilities.activeFor(record.genotype(), record.epigenome())) {
                 if (active.ability() instanceof GeneAbility.Swim swim) {
-                    return swim.factor();
+                    return Math.max(0.05, swim.factor());
                 }
             }
         } catch (RuntimeException badCode) {

@@ -215,8 +215,8 @@ final class DebugYardEffects {
                     start[i] = h.getZ();
                 }
             }
-            drive(level, horses, xs, targetZ, 40);
-            DebugYardHerd.after(level, 41, () -> {
+            drive(level, horses, xs, targetZ, 100);
+            DebugYardHerd.after(level, 101, () -> {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < horses.length; i++) {
                     Horse h = horses[i];
@@ -235,14 +235,16 @@ final class DebugYardEffects {
                 }
                 String verdict = "";
                 if (n == 8) {
-                    // Clear margins, and a plain horse that really swam: the 10:09 run "passed" on 1.2 against 1.2.
-                    boolean swam = total[1] > 4.0;
+                    // Clear margins, and a plain horse that really moved: the 10:09 run "passed" on 1.2 against 1.2. A
+                    // horse swimming under its own AI is slow - vanilla's push in water is tiny - so "moved" is half a
+                    // block over the eight five-second laps, not a sprint.
+                    boolean swam = total[1] > 0.5;
                     boolean order = total[0] > total[1] * 1.15 && total[1] > total[2] * 1.15;
-                    verdict = String.format(" | totals over 8 laps: OTTER %.1f, PLAIN %.1f, STONE %.1f - expect OTTER"
-                            + " clearly above PLAIN clearly above STONE, with PLAIN over 4 blocks: %s", total[0], total[1],
+                    verdict = String.format(" | totals over 8 laps: OTTER %.2f, PLAIN %.2f, STONE %.2f - expect OTTER"
+                            + " clearly above PLAIN clearly above STONE, with PLAIN over half a block: %s", total[0], total[1],
                             total[2], !swam ? "NO RESULT (the plain horse did not swim)" : order ? "PASS" : "FAIL");
                 }
-                ActionTrace.log("test yard", "SWIM SPEED lap " + n + " (blocks in 2 s): " + sb + verdict);
+                ActionTrace.log("test yard", "SWIM SPEED lap " + n + " (blocks in 5 s): " + sb + verdict);
                 if (n < 8) {
                     lap(level, horses, names, xs, z0, n + 1, total);
                 }
