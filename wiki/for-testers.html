@@ -554,6 +554,21 @@
 <button type="button" class="report-btn" data-report="Stabilizer and magnifier carrots">Report a problem with this test</button>
 </div>
 
+<div class="tester-test" id="t-splice-carrots">
+<h3>Splice carrots: the performance carrot, and each carrot's colour</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, golden carrots, a mare and a stallion, a performance splice carrot, and one each of the dilution, white, marking and magical splice carrots.</p>
+<ol>
+    <li>Feed the performance splice carrot to the mare. Note the colour of the burst.</li>
+    <li>Feed golden carrots to both horses.</li>
+    <li>When the foal is born, open its Health tab and look at speed, max health and jump. Then open its Genes tab.</li>
+    <li>Do this four or five times, each time with a new performance carrot.</li>
+    <li>Feed each of the other splice carrots to a horse, and note each burst's colour.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> every performance foal's speed, health and jump are green (normal or better); no performance foal gains an <em>HMGA2</em> gene, and one that gains <em>LCORL</em> gets the tall, fast version; each kind of carrot always bursts in its own colour (pale gold, white, brown, blue or cyan).</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a performance foal has a red stat, gains HMGA2, or gains the short LCORL; or two different carrots burst in the same colour.</p>
+<button type="button" class="report-btn" data-report="Splice carrots: the performance carrot, and each carrot's colour">Report a problem with this test</button>
+</div>
+
 <div class="tester-test" id="t-cross-names">
 <h3>Crossbred foals get the right breed name</h3>
 <p class="tester-need"><strong>You need:</strong> breed spawn eggs for at least three breeds, and golden carrots.</p>
@@ -1239,10 +1254,28 @@
     <li>Offer it some wheat.</li>
     <li>Hurt the blood diet horse a little.</li>
     <li>Watch it near the cow.</li>
+    <li>Switch to survival. Hurt the blood diet horse again, and stand next to it with the cow nearby. Then kill the cow and stay near the horse.</li>
+    <li>Tame a wolf, stand it beside the horse, switch to creative and step away.</li>
+    <li>Try holding out wheat, hay and a golden carrot to the blood diet horse.</li>
+    <li>If you can, find a wild Dhampir band at night in open grassland (they are rare). Stay nearby until sunrise without leaving the area.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the Sun sensitivity horse smokes and looks for shade in daylight but still eats wheat; the blood diet horse goes for the cow in daylight and never burns. Neither ever bites another horse.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> the wrong horse burns, or a horse bites another horse.</p>
+<p class="tester-pass"><strong>It works if:</strong> the Sun sensitivity horse smokes and looks for shade in daylight but still eats wheat. The blood diet horse goes for the cow in daylight and never burns. With the cow there it bites the cow, not you; with the cow gone it bites you; it only goes for the tamed wolf when neither you nor a cow is in reach. Held-out food is turned away with "Nothing you can hold out will feed it." No horse ever bites another horse. At sunrise the wild band's white horse runs for shade by itself.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the wrong horse burns; a horse bites another horse; it bites you or the wolf while a cow is right there; it eats held-out food; or the wild white horse stands in the sun until you leave and come back.</p>
 <button type="button" class="report-btn" data-report="The Dhampir horses">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-egg-clone">
+<h3>A horse that drops its own spawn egg comes back the same</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and a horse with <em>Magic item drop</em> set to <code>Egg</code> on both buttons.</p>
+<ol>
+    <li>Spawn the horse and open its information screen. Note its name, take a screenshot of its coat, and write down its speed, health and jump.</li>
+    <li>Kill it.</li>
+    <li>Pick up the spawn egg it drops, and use it.</li>
+    <li>Open the new horse's information screen and compare.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the new horse has the same name, a coat that matches your screenshot down to the small details, and the same speed, health and jump.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the coat looks slightly different (spots or markings moved, a shade off), or any number or the name has changed.</p>
+<button type="button" class="report-btn" data-report="A horse that drops its own spawn egg comes back the same">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-dhampir-band">
@@ -1391,6 +1424,20 @@
 <p class="tester-pass"><strong>It works if:</strong> the FPS stays steady, and no horse flashes plain white.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the game stutters more and more over time, or horses flash white.</p>
 <button type="button" class="report-btn" data-report="Lots of horses do not slow the game down">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-herd-arriving">
+<h3>Riding up to a big herd does not freeze the game</h3>
+<p class="tester-need"><strong>You need:</strong> a new world, or a part of your world you have not been to, with a big wild herd in it (plains or savanna are best).</p>
+<ol>
+    <li>Start far away, so the herd is out of sight.</li>
+    <li>Ride towards it at a gallop and watch the moment the horses come into view.</li>
+    <li>Look at the horses nearest you: some may show a plain coat for a moment before their real one.</li>
+    <li>Close the game and send us <code>logs/latest.log</code> from your game folder along with your report. Its <code>coat baking:</code> lines tell us how long the coats took.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the game does not hitch as the herd appears, and the horses close to you get their real coats within a second or two.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the game freezes for a moment as the herd comes into view, or horses right next to you stay plain.</p>
+<button type="button" class="report-btn" data-report="Riding up to a big herd does not freeze the game">Report a problem with this test</button>
 </div>
 
 <!-- ================================================================== -->
