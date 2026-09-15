@@ -192,6 +192,17 @@ if (temperActing || watch == null) {
     a flee that never fired and one that fired into a fence four blocks away read identically.
 </p>
 
+<p id="verified-night-shy">
+    <strong>A night-shy horse leaves its own herd alone</strong> (2026-09-15, formerly gap 241). The bug: a
+    <code>Flc/Flc</code> foal born into a wild band logged 1,578 <code>night flee | ... from minecraft:horse</code>
+    lines in eight hours, because <code>NightBehaviourHandler.matches</code> never left equines out of
+    &ldquo;passive&rdquo; despite a comment saying it must. The fix excludes equines and has the flee trace
+    compare UUIDs with <code>equals</code>. <em>Evidence:</em> the yard's NIGHT SHY pen (row X) put a
+    <code>Flc/Flc</code> mare in with a stallion, two mares and two cows for the 06:49 run's whole first night:
+    96 <code>night flee | ... "NIGHT SHY" from minecraft:cow - path accepted</code> lines and none from anything
+    else.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

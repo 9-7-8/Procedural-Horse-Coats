@@ -155,14 +155,6 @@
     <code>[trace] lycan | ... came back at dawn with nothing under its ... - set down at ...</code>. The death path is
     unchanged. <strong>Pass:</strong> no lycan horse dies of <code>outOfWorld</code>, and every flying form that
     reverts over nothing has a <code>set down at</code> line. The corridor's open far end is still open.</li>
-<li id="gap-241"><strong>Fixed 2026-09-14, not yet played: a night-shy (<code>Flc</code>) horse fled its own herd.</strong>
-    <code>Flc</code> is meant to flee passive animals after dark. <code>NightBehaviourHandler.matches</code>
-    carried a comment saying every other horse must be left out of "passive", and the code never did it, so a
-    <code>Flc/Flc</code> foal born into a wild band logged 1,578 <code>night flee | ... from minecraft:horse</code>
-    lines in eight hours. <em>Fix:</em> equines are excluded from "passive", and the flee trace compares UUIDs
-    with <code>equals</code>. The same foal also carried <code>plod1=ffs/ffs</code> and lived all day, which
-    is gap 236. <em>Where to look:</em> the yard's NIGHT SHY pen (row X) - a <code>Flc/Flc</code> mare, a band and two
-    cows. Pass is <code>night flee | ... "NIGHT SHY" from minecraft:cow</code> after dark and never from a horse.</li>
 <li id="gap-238"><strong>Open 2026-09-14: a lycan horse that shifts into a pufferfish on land drowns, and the horse dies with it.</strong>
     Two did in the first hour of the all-day yard (<code>[trace] lycan | ... died as a minecraft:pufferfish (drown) - the horse dies with it</code>).
     The form list offers water animals to horses standing on grass. Either a water form needs water nearby to be chosen, or a
