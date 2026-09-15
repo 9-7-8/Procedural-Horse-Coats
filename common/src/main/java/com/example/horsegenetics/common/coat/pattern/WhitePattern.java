@@ -216,6 +216,58 @@ public final class WhitePattern {
     }
 
     // ------------------------------------------------------------------
+    // The speckled KIT shape: flecks through the coat
+    // ------------------------------------------------------------------
+
+    /** How fine a fleck is: the frequency of the noise that places them, in body units. */
+    private static final double FLECK_FREQ = 9.0;
+    /** The scale of the cloud that makes flecks gather in some places and thin in others. */
+    private static final double FLECK_CLOUD_SCALE = 0.20;
+    /** How far into the fine noise's range a fully dense spot reaches: higher is more flecks. */
+    private static final double FLECK_REACH = 0.95;
+
+    /**
+     * <b>Speckled or mottled white</b> ({@code KIT} {@code W8}, {@code W18}, {@code W21}; owner, 2026-09-15). Where
+     * {@link #sabino} whitens in torn-edged patches, this scatters single white flecks through the coat - the
+     * Icelandic <i>yruskjottur</i> - thickest low on the barrel and quarters and thinning toward the topline, with a
+     * white face drawn from the shared face marking. The ears, mane and tail keep their colour.
+     *
+     * <p>Two noise fields: a fine one that decides each fleck, and a coarse cloud that lets the flecks gather into
+     * mottled drifts rather than an even salt. Like the other white shapes it is raised by white already on the horse.
+     * Reads {@link #sabinoSchema()}: the seed and the face marking.
+     */
+    public static PigmentField speckled(CoatBuildContext ctx, PigmentView coat, String geneKey, double strength) {
+        double s = clamp01(strength + SABINO_STACKING * alreadyWhite(coat, ctx.skin()));
+        EpiValues epi = ctx.epigeneticsFor(geneKey);
+        long seed = epi.seed(SABINO_SEED);
+        Skin skin = ctx.skin();
+        FaceMarking faceMark = faceMarking(epi, skin, s, SABINO_FACE_JAG);
+        Bounds body = HorseSkinGeometry.bodyBounds(skin);
+        double topline = toplineHeight(skin);
+
+        PigmentField f = coat.mutableCopy();
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+            if (part == Part.LEFT_EAR || part == Part.RIGHT_EAR || part == Part.MANE || part == Part.TAIL) {
+                return;
+            }
+            if ((part == Part.HEAD || part == Part.MUZZLE) && faceMark.covers(part, face, point)) {
+                whiten(f, px, py);
+                return;
+            }
+            double height = clamp01((point.y() - body.yMin()) / topline);
+            double cloud = PatchNoise.field(seed ^ 0x5EC1L, point.x(), point.y(), point.z(), FLECK_CLOUD_SCALE);
+            double density = clamp01(s * (1.2 - 0.8 * height) * (0.35 + 1.1 * cloud));
+            double fleck = PatchNoise.fbm2(seed ^ 0xF1ECL,
+                    point.x() * FLECK_FREQ, point.y() * FLECK_FREQ, point.z() * FLECK_FREQ);
+            // fbm2 sits around 0.5, so a fleck is a texel whose fine noise lands in the top band the density allows.
+            if (fleck > 1.0 - FLECK_REACH * density) {
+                whiten(f, px, py);
+            }
+        });
+        return f;
+    }
+
+    // ------------------------------------------------------------------
     // The MITF / PAX3 shape: dipped in white from below
     // ------------------------------------------------------------------
 

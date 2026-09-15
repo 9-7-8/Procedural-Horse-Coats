@@ -41,12 +41,15 @@ public final class CoatSampleTool {
             {"grey_bay", "agouti=A/a grey=G/g"},
             {"grey_chestnut", "extension=e/e grey=G/g"},
             {"bay_blood", "agouti=A/A shade=ShL/ShL"},      // the light haplotype - blood bay
-            {"kit_dominant_white", "kit=W22/N"},
+            {"kit_dominant_white", "kit=W22/W20"},     // W22 is all white only beside a booster
+            {"kit_w22_alone", "agouti=A/a kit=W22/N"},   // sabino-like on its own
+            {"kit_speckled_bay", "agouti=A/a kit=W21/N"}, // speckled white (W8, W18, W21)
+            {"kit_speckled_black", "kit=W8/N"},
             {"bay_splash", "agouti=A/a mitf=SW1/N"},
             {"zebra_bay", "agouti=A/a magic_zebra=Mzeb/n"},          // stripes over a bay
             {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, rings further down the legs
             {"zebra_palomino", "extension=e/e matp=Cr/N magic_zebra=Mzeb/n"},
-            {"zebra_white", "kit=W22/N magic_zebra=Mzeb/n"},        // magical paints over dominant white
+            {"zebra_white", "kit=W22/W20 magic_zebra=Mzeb/n"},        // magical paints over dominant white
             {"dun_bay", "agouti=A/a dun=D/d2"},          // dorsal stripe + leg bars over tan
             {"dun_black", "dun=D/d2"},                    // grullo
             {"dun_chestnut", "extension=e/e dun=D/d2"},   // red dun
@@ -191,7 +194,7 @@ public final class CoatSampleTool {
      * drifted apart: they had, by two entries, which silently handed every
      * sample after the gap somebody else's seed.
      */
-    private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0,
+    private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 4, 2, 6, 31, 0,
             5, 11, 5, 5, 0, 0, 0, 11,
             0, 0, 0, 7, 0, 0, 0, 0, 4, 9, 2, 6,
             3, 0,
@@ -214,7 +217,7 @@ public final class CoatSampleTool {
             2, 1, 6, 3,
             0, 4, 2,
             0, 3, 0, 0, 0,
-            4, 0, 0};
+            4, 0};
 
     private CoatSampleTool() {}
 

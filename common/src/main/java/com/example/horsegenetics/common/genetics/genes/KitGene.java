@@ -61,7 +61,7 @@ import java.util.Map;
  *   <tr><td>{@code W10}</td><td>sabino-like, broad</td><td><b>nonviable</b></td></tr>
  *   <tr><td>{@code W13}</td><td>extensive white spotting</td><td><b>nonviable</b></td></tr>
  *   <tr><td>{@code W23}</td><td>near-white to all white</td><td><b>nonviable</b></td></tr>
- *   <tr><td>{@code W22}</td><td>dominant white - all white, <b>masks</b></td><td><b>nonviable</b></td></tr>
+ *   <tr><td>{@code W22}</td><td>sabino-like, broad; <b>all white and masking beside a booster</b></td><td><b>nonviable</b></td></tr>
  * </table>
  * Most of the long tail is one founder, one family or one de novo foal, so it has no wild frequency and reaches the
  * game through the breeds it was found in, or a splice. Only {@code W19}, {@code W31} and {@code W3} turned up in the
@@ -95,9 +95,6 @@ import java.util.Map;
  *       reported as possibly stronger on a chestnut background. "Possibly" is
  *       doing a lot of work in that sentence, and buying it costs {@code W34} an
  *       outcome of its own.</li>
- *   <li><b>Speckling.</b> {@code W8}, {@code W18} and {@code W21} are described as white speckled or mottled through
- *       the coat (the Icelandic <i>yruskjottur</i>), which the ragged-margin sabino painter does not draw. They take
- *       the broad-white outcome until a speckled painter exists.</li>
  *   <li><b>Pigment lost with age</b> ({@code W1}, and reportedly {@code W3}). A coat has no age axis, so these
  *       render as the adult.</li>
  * </ul>
@@ -155,6 +152,8 @@ public final class KitGene implements Gene, EyeRequestContribution,
     private static final double S_BROAD = 0.58;
     private static final double S_EXTENSIVE = 0.74;
     private static final double S_NEAR_WHITE = 0.93;
+    /** The speckled outcome's density and face strength - see {@link WhitePattern#speckled}. */
+    private static final double S_SPECKLED = 0.55;
 
     // Declaration order is AllelePair's canonical slot order and nothing else -
     // it is not a dominance ranking. Strongest first reads best in a code string.
@@ -245,15 +244,25 @@ public final class KitGene implements Gene, EyeRequestContribution,
             W10, W5, W6, W8, W12, W18, W21, W26, W28, W31, W33, W37, W38,
             W15, W19, SB1, W20, W35, W32, W34, N);
 
-    /** One copy removes every pigment and masks the coat. */
-    private final List<Allele> allWhite = List.of(W22, W2, W9, W11, W14, W17, W24);
+    /**
+     * One copy removes every pigment and masks the coat. <b>Not {@code W22}</b> (owner, 2026-09-15, following the 2024
+     * McFadden review and haplotype data): one {@code W22} copy is sabino-like, and it is all white only beside a
+     * booster, which is where every {@code W22} chromosome measured was found. See {@link #expressionOf}.
+     */
+    private final List<Allele> allWhite = List.of(W2, W9, W11, W14, W17, W24);
 
     /** One copy is near-white with some colour left: the extensive outcome alone. */
     private final List<Allele> extensiveAlone = List.of(W13, W23, W1, W3, W7, W16, W25, W27, W30, W39);
 
     /** One copy is sabino-like and broad: the broad outcome alone. */
-    private final List<Allele> broadAlone = List.of(W10, W5, W15, W6, W8, W12, W18, W21, W26, W28, W31, W33, W37,
-            W38, W19);
+    private final List<Allele> broadAlone = List.of(W22, W10, W5, W15, W6, W12, W26, W28, W31, W33, W37, W38, W19);
+
+    /**
+     * One copy speckles or mottles white through the coat rather than spotting it (owner, 2026-09-15): {@code W8} and
+     * {@code W21} in Icelandics (<i>yruskjottur</i>) and {@code W18} in a Swiss Warmblood. Nonviable doubled, strong
+     * beside another strong allele, like the rest of their group.
+     */
+    private final List<Allele> speckledAlone = List.of(W8, W18, W21);
 
     /**
      * The alleles whose homozygote is thought nonviable: the four UC Davis lists, and every long-tail allele the 2024
@@ -268,7 +277,7 @@ public final class KitGene implements Gene, EyeRequestContribution,
      * The alleles that already produce broad-to-extensive white on their own;
      * two of them together produce more, whichever two they are.
      */
-    private final List<Allele> strong = List.of(W13, W23, W1, W3, W7, W16, W25, W27, W30, W39,
+    private final List<Allele> strong = List.of(W22, W13, W23, W1, W3, W7, W16, W25, W27, W30, W39,
             W10, W5, W15, W6, W8, W12, W18, W21, W26, W28, W31, W33, W37, W38, W19);
 
     /**
@@ -277,6 +286,15 @@ public final class KitGene implements Gene, EyeRequestContribution,
      * little more; beside any other variant here they add a step.
      */
     private final List<Allele> boosters = List.of(W20, W35, W32, W34);
+
+    /**
+     * Alleles that sit on the same chromosome as a booster in every horse measured - {@code W26} on {@code W20},
+     * {@code W37} on {@code W35}, {@code W19} on {@code W34} and {@code W35} - so each counts as carrying one (owner,
+     * 2026-09-15). The model holds one allele per chromosome, and without this those horses lost the booster they
+     * really carry and painted a step milder than in life. Inheritance is unchanged: the booster travels with the
+     * allele, which is what linkage means.
+     */
+    private final List<Allele> linkedBooster = List.of(W26, W37, W19);
 
     private static boolean hasAny(AllelePair pair, List<Allele> group) {
         return group.contains(pair.first()) || group.contains(pair.second());
@@ -288,10 +306,10 @@ public final class KitGene implements Gene, EyeRequestContribution,
 
     private int boosterCount(AllelePair pair) {
         int n = 0;
-        if (boosters.contains(pair.first())) {
+        if (boosters.contains(pair.first()) || linkedBooster.contains(pair.first())) {
             n++;
         }
-        if (boosters.contains(pair.second())) {
+        if (boosters.contains(pair.second()) || linkedBooster.contains(pair.second())) {
             n++;
         }
         return n;
@@ -380,9 +398,16 @@ public final class KitGene implements Gene, EyeRequestContribution,
                 return f;
             });
 
+    private final Expression SPECKLED = Expression.of("speckled-white", "Speckled white")
+            .describe("White flecks and mottling scattered through the coat, thickest low on the body and thinning toward "
+                    + "the topline, with a white face - not the torn-edged patches of sabino. The Icelandic word for it "
+                    + "is yruskjottur.")
+            .varies()
+            .restrict((ctx, coat) -> WhitePattern.speckled(ctx, coat, KEY, S_SPECKLED));
+
     private final List<Expression> expressions =
             List.of(WILD, MINIMAL, MODEST, SABINO, BROAD, EXTENSIVE, NEAR_WHITE,
-                    DOMINANT_WHITE, CAMARILLO_WHITE);
+                    DOMINANT_WHITE, CAMARILLO_WHITE, SPECKLED);
 
     /**
      * Founder allele frequencies. {@code W20} is genuinely common in some
@@ -450,6 +475,10 @@ public final class KitGene implements Gene, EyeRequestContribution,
         if (hasAny(pair, allWhite)) {
             return DOMINANT_WHITE;
         }
+        // W22 is all white only beside a booster; alone it is a broad sabino-like white (2024 review, AWS 19.5).
+        if (pair.has(W22) && hasBooster(pair)) {
+            return DOMINANT_WHITE;
+        }
         // W4 removes the pigment just as completely. It sits below W22 only so
         // that the one combination carrying both reads as the older name; the
         // horse is the same white either way.
@@ -465,6 +494,9 @@ public final class KitGene implements Gene, EyeRequestContribution,
         // on a single copy, so they start a step above W5 / W10.
         if (hasAny(pair, extensiveAlone)) {
             return pair.has(SB1) || hasBooster(pair) ? NEAR_WHITE : EXTENSIVE;
+        }
+        if (hasAny(pair, speckledAlone)) {
+            return SPECKLED;
         }
         if (hasAny(pair, broadAlone)) {
             if (pair.has(SB1)) {
@@ -514,7 +546,7 @@ public final class KitGene implements Gene, EyeRequestContribution,
      * <i>absence</i>, not about which mutation caused it.
      */
     public boolean isDominantWhite(AllelePair pair) {
-        return hasAny(pair, allWhite) || pair.has(W4);
+        return hasAny(pair, allWhite) || pair.has(W4) || (pair.has(W22) && hasBooster(pair));
     }
 
     /**
@@ -528,7 +560,7 @@ public final class KitGene implements Gene, EyeRequestContribution,
     public EyeRequest requestEyes(AllelePair pair, Genotype genotype,
             com.example.horsegenetics.common.genetics.Epigenome epigenome) {
         Expression e = expressionOf(pair);
-        boolean broad = e == BROAD || e == EXTENSIVE || e == NEAR_WHITE
+        boolean broad = e == BROAD || e == SPECKLED || e == EXTENSIVE || e == NEAR_WHITE
                 || e == DOMINANT_WHITE || e == CAMARILLO_WHITE;
         return WhitePatternEyes.blueIf(broad, this, pair, genotype, epigenome);
     }
@@ -553,6 +585,9 @@ public final class KitGene implements Gene, EyeRequestContribution,
         }
         if (e == BROAD) {
             return S_BROAD;
+        }
+        if (e == SPECKLED) {
+            return S_SPECKLED;
         }
         if (e == EXTENSIVE) {
             return S_EXTENSIVE;

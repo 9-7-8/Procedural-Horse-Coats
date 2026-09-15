@@ -89,8 +89,10 @@ class GenotypeCatalogTest {
         // the allele list backwards and W34 is declared last of the four
         // boosters; any of them would do, which is what "booster" means. W19 and W24 stand for
         // their groups for the same reason: each is declared last of the alleles sharing its outcome.
-        assertEquals(List.of("NN", "W34N", "W34W34", "SB1N", "SB1W34", "SB1SB1", "W19W34",
-                        "W24N", "W4W4"),
+        // W19N is the extensive pen because W19 carries its linked booster, W21N the speckled one, and W24N dominant
+        // white now that W22 alone is only broad.
+        assertEquals(List.of("NN", "W34N", "W34W34", "SB1N", "SB1W34", "SB1SB1", "W19N",
+                        "W21N", "W24N", "W4W4"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.KIT)));
         // the two splash loci: MITF has five outcomes, PAX3 three. SW1N is its
         // own pen now - one SW1 copy is the minimal outcome, not the splash

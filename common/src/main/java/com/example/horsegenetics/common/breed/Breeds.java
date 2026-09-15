@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.breed;
 
 import com.example.horsegenetics.common.CommonLog;
+import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.breed.spec.BreedSpecLoader;
 
 import java.nio.file.Path;
@@ -86,7 +87,7 @@ public final class Breeds {
     private static final java.util.Set<String> SHIPPED = new java.util.HashSet<>();
     /** What callers see: {@code ORIGINAL} with the settings applied. Swapped whole. */
     private static volatile List<Breed> ALL = List.of();
-    private static volatile Map<String, Breed> BY_ID = Map.of();
+    private static volatile Map<String, Breed> BY_ID = CommonMaps.empty();
     private static volatile BreedSpawnSettings settings = BreedSpawnSettings.DEFAULT;
     private static boolean builtinsLoaded;
 
@@ -242,7 +243,7 @@ public final class Breeds {
         SHIPPED.clear();
         settings = BreedSpawnSettings.DEFAULT;
         ALL = List.of();
-        BY_ID = Map.of();
+        BY_ID = CommonMaps.empty();
         builtinsLoaded = false;
     }
 

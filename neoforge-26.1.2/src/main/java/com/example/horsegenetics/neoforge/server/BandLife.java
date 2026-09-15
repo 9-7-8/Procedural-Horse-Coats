@@ -137,7 +137,7 @@ public final class BandLife {
             Horse suitor = nearest(level, horse, DISPERSE_REACH, h -> {
                 HorseCareAttachment c = h.getData(ModAttachments.HORSE_CARE.get());
                 return !h.isBaby() && HorseRecords.of(h).entire() && c.inWildHerd()
-                        && HerdSocialHandler.isBachelor(c);
+                        && HerdSocialHandler.isBachelor(c) && !closeKin(horse, h);
             });
             if (suitor != null && (band == null || suitor.distanceToSqr(horse) < band.distanceToSqr(horse))) {
                 // Recruited by a bachelor: the most common way a stallion gets his first mare.
@@ -154,6 +154,20 @@ public final class BandLife {
         horse.setData(ModAttachments.HORSE_SOCIAL.get(), social.dispersed());
         ActionTrace.log("herd", ActionTrace.describeShort(horse) + " left the band it was born into ("
                 + HerdSocialHandler.short8(natal) + ")");
+    }
+
+    /**
+     * <b>Gap 234</b> (owner, 2026-09-15: "no suitor sharing a parent"). A dispersing filly used to be recruited by
+     * whichever bachelor was nearest, and the nearest was usually her own brother, who had left the same band minutes
+     * earlier - the opposite of what female dispersal is for. A suitor is refused when his record shares her dam or her
+     * sire, or when he is her sire. Unknown parents never match, so founders and wild-caught horses are unaffected.
+     */
+    private static boolean closeKin(Horse filly, Horse suitor) {
+        var her = HorseRecords.of(filly);
+        var his = HorseRecords.of(suitor);
+        return (her.motherId().isPresent() && her.motherId().equals(his.motherId()))
+                || (her.fatherId().isPresent() && her.fatherId().equals(his.fatherId()))
+                || her.fatherId().map(suitor.getUUID()::equals).orElse(false);
     }
 
     // ------------------------------------------------------------------

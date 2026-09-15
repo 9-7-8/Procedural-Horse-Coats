@@ -110,7 +110,7 @@ class GenotypeTest {
         assertEquals(CoatPhenotype.BLACK, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e)).phenotype());
         assertEquals(CoatPhenotype.BAY, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).phenotype());
-        assertEquals(CoatPhenotype.WHITE, g(p(Genes.KIT.W22, Genes.KIT.N)).phenotype());
+        assertEquals(CoatPhenotype.WHITE, g(p(Genes.KIT.W22, Genes.KIT.W20)).phenotype());   // W22 is all white beside a booster
         // the other way to be all white: two frame copies, which is lethal white
         assertEquals(CoatPhenotype.WHITE, g(p(Genes.EDNRB.O, Genes.EDNRB.O)).phenotype());
         // champagne / grey / cream / pearl / test / splash never move the coarse phenotype
@@ -136,7 +136,7 @@ class GenotypeTest {
     void determinism() {
         assertTrue(Genotype.wildType().isDeterministic());                             // black
         assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e)).isDeterministic());       // chestnut
-        assertTrue(g(p(Genes.KIT.W22, Genes.KIT.N)).isDeterministic());                 // dominant white
+        assertTrue(g(p(Genes.KIT.W22, Genes.KIT.W20)).isDeterministic());                 // dominant white
         assertTrue(g(p(Genes.MATP.Cr, Genes.MATP.Cr)).isDeterministic());             // perlino-on-black
 
         assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
@@ -181,6 +181,14 @@ class GenotypeTest {
             if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
                 // the two 50/50 loci: their last bucket is the recessive
                 // homozygote, not the default allele, hence the chestnut above
+                continue;
+            }
+            if (gene == Genes.FERTILITY) {
+                // Fertility's table lists its rarest combination, tw/tw, LAST on purpose (the 09-14 crash fix keeps
+                // its wild copies' numbers), so a maximal roll lands there rather than on n/n. Still "the last bucket
+                // the table declares", the invariant this test is about.
+                assertEquals(0, x.pair(gene).count(gene.defaultAllele()),
+                        gene.key() + " ends its table on the twin homozygote");
                 continue;
             }
             if (gene == Genes.MAGIC_NIGHT_TEMPER || gene == Genes.MAGIC_NIGHT_WATCH) {

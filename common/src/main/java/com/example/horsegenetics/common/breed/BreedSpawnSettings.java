@@ -1,5 +1,7 @@
 package com.example.horsegenetics.common.breed;
 
+import com.example.horsegenetics.common.CommonMaps;
+
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -114,7 +116,7 @@ public final class BreedSpawnSettings {
 
     /** The settings that change nothing: every breed as its file says, Feral Mixed as always. */
     public static final BreedSpawnSettings DEFAULT =
-            new BreedSpawnSettings(true, Map.of(), Feral.DEFAULT);
+            new BreedSpawnSettings(true, CommonMaps.empty(), Feral.DEFAULT);
 
     public boolean builtinsEnabled() {
         return builtinsEnabled;

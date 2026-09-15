@@ -191,7 +191,8 @@ class WhitePatternGenesTest {
                 {"SB1/W20", "broad-white"},
                 {"W13/N", "extensive-white"},
                 {"SB1/SB1", "near-white"},
-                {"W22/N", "dominant-white"},
+                // W22 is all white only beside a booster (owner, 2026-09-15, following the 2024 review)
+                {"W22/W20", "dominant-white"},
         };
         double previous = -1;
         for (String[] rung : rungs) {
