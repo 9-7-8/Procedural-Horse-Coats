@@ -160,7 +160,9 @@ final class DebugYardFertility {
             ActionTrace.log("test yard", "MATERNITY vet: expect DUE 1 MIN one foal, TWINS DUE 2 MIN twins, LOSS AT 1, DUE 3"
                     + " one foal");
         });
-        for (long at : new long[]{200L, 1_600L}) {
+        // 1900, not 1600: "late" is the last third (ReproRules.LATE_FRACTION), and the 09:09 run's watch line first said
+        // "heavy and slow" ten seconds after a 1600-tick reading, then foaled half a minute later.
+        for (long at : new long[]{200L, 1_900L}) {
             DebugYardHerd.after(level, at, () -> {
                 if (twins != null && twins.isAlive()) {
                     ActionTrace.log("test yard", String.format("MATERNITY speed at %d ticks: TWINS %.4f (base %.4f)%s", at,

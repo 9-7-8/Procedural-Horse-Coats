@@ -209,9 +209,18 @@ final class DebugYardHands {
         DebugYardFertility.noNaturalCovers(mare);
         DebugWorldWatch.watchBreeding(name, DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_AI_D));
         if (away) {
-            DebugYardUnattended.pen(level, gy, holdX, z0, 9, ROW_AI_D, "WEANING HOLD", Blocks.GRASS_BLOCK.defaultBlockState(),
-                    List.of("WEANING HOLD", "WEANING AWAY's", "foal, kept 35", "blocks from its dam"));
-            foal.teleportTo(holdX + 4.5, gy + 1, z0 + 5.5);
+            // A PLATFORM 36 UP, NOT A PEN ACROSS THE ROW (09:09 run). The nursing radius is a 3D 32 blocks
+            // (ReproHandler.nurse, distanceToSqr), and a holding pen in the east block left the foal 29 blocks from its
+            // dam when both leaned on the facing walls - inside the radius, so nothing was tested. Straight up, every
+            // position is at least 36 away wherever the two wander.
+            int hy = gy + 36;
+            for (int x = holdX; x <= holdX + 9; x++) {
+                for (int z = z0; z <= z0 + ROW_AI_D; z++) {
+                    level.setBlock(new net.minecraft.core.BlockPos(x, hy, z), Blocks.STONE.defaultBlockState(), 3);
+                }
+            }
+            DebugTestYard.fencedPlot(level, hy, holdX, holdX + 9, z0, z0 + ROW_AI_D);
+            foal.teleportTo(holdX + 4.5, hy + 1, z0 + 5.5);
         }
         long day = ServerConfig.reproTiming().dayTicks();
         report(level, name, mare, foal, "at the start", 200, away, false);
