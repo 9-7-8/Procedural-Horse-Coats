@@ -87,7 +87,7 @@ final class DebugYardHunger {
     private static void starving(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, "HUNGER STARVING",
                 List.of("HUNGER: STARVING", "hurt, starving, by", "water: must NOT", "heal, all day"));
-        water(level, gy, x0 + 2, z0 + 5);
+        water(level, gy, x0 + 3, z0 + 3);    // two clear blocks from every wall (owner, gap 247), off the horse
         Horse h = spawn(level, gy, x0 + 4.5, z0 + 5.5, "horsegenetics.scn4a=N/N", "STARVING HORSE");
         set(level, h, 5.0, 0.5);
         clock(level, h, "HUNGER STARVING", "expect hp never to rise for as long as this runs - a starving"
@@ -97,7 +97,7 @@ final class DebugYardHunger {
     private static void fed(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, "HUNGER FED",
                 List.of("HUNGER: FED", "hurt, fed, by water:", "full health in", "about 15 seconds"));
-        water(level, gy, x0 + 2, z0 + 5);
+        water(level, gy, x0 + 3, z0 + 3);    // two clear blocks from every wall (owner, gap 247), off the horse
         Horse h = spawn(level, gy, x0 + 4.5, z0 + 5.5, "horsegenetics.scn4a=N/N", "FED HORSE");
         set(level, h, 100.0, 0.5);
         clock(level, h, "HUNGER FED", "expect full hp within about 15 s of the first line, and hunger to"
