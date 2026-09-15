@@ -282,6 +282,13 @@ final class DebugTestYard {
     static final int ROW_AC_D = 12;
     static final int ROW_AD = ROW_AC + ROW_AC_D + PACKED_AISLE;
     static final int ROW_AD_D = 10;
+    /** Rows AE-AF west: what a foal is handed at birth ({@link DebugYardBirths}); AF east and AG: the dhampir split. */
+    static final int ROW_AE = ROW_AD + ROW_AD_D + PACKED_AISLE;
+    static final int ROW_AE_D = 10;
+    static final int ROW_AF = ROW_AE + ROW_AE_D + PACKED_AISLE;
+    static final int ROW_AF_D = 10;
+    static final int ROW_AG = ROW_AF + ROW_AF_D + PACKED_AISLE;
+    static final int ROW_AG_D = 10;
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -290,7 +297,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_AD + ROW_AD_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_AG + ROW_AG_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -379,6 +386,9 @@ final class DebugTestYard {
         DebugYardUnattended.build(level, gy, cx, mouthZ);
         // Rows AB-AD: the five effect genes that write no log line of their own.
         DebugYardEffects.build(level, gy, cx, mouthZ);
+        // Rows AE-AG: a foal's bond, breed, starburst dial and name at birth; the dhampir split.
+        DebugYardBirths.build(level, gy, cx, mouthZ);
+        DebugYardDhampir.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.

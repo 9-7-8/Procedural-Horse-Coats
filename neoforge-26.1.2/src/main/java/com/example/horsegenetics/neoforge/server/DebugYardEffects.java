@@ -227,10 +227,10 @@ final class DebugYardEffects {
             DebugTestYard.label(horses[i], names[i]);
         }
         long start = level.getGameTime();
-        drown(level, horses, names, new long[]{-1, -1, -1}, new int[]{300, 300, 300}, start, 1);
+        drown(level, gy, horses, names, new long[]{-1, -1, -1}, new int[]{300, 300, 300}, start, 1);
     }
 
-    private static void drown(ServerLevel level, Horse[] horses, String[] names, long[] firstHurt, int[] minAir,
+    private static void drown(ServerLevel level, int gy, Horse[] horses, String[] names, long[] firstHurt, int[] minAir,
                               long start, int n) {
         DebugYardHerd.after(level, 20, () -> {
             long t = level.getGameTime() - start;
@@ -248,8 +248,12 @@ final class DebugYardEffects {
                         firstHurt[i] = t;
                     }
                 }
+                // Where it is and what its eyes are in (the 08:40 run read HEAD OUT for all three, all minute).
+                BlockPos eye = BlockPos.containing(h.getX(), h.getEyeY(), h.getZ());
                 sb.append(sb.length() == 0 ? "" : "; ").append(names[i]).append(h.isAlive()
-                        ? String.format(" air %d hp %.0f%s", h.getAirSupply(), h.getHealth(), h.isUnderWater() ? "" : " HEAD OUT")
+                        ? String.format(" air %d hp %.0f%s (feet y %+.2f, eye y %+.2f in %s)", h.getAirSupply(),
+                        h.getHealth(), h.isUnderWater() ? "" : " HEAD OUT", h.getY() - gy, h.getEyeY() - gy,
+                        blockId(level.getBlockState(eye)))
                         : " DEAD");
             }
             boolean done = !anyAlive || t >= 1_600;
@@ -269,7 +273,7 @@ final class DebugYardEffects {
                         + (order ? "PASS" : "FAIL") + "; a horse whose air fell below -20 and was never hurt never drowns");
                 return;
             }
-            drown(level, horses, names, firstHurt, minAir, start, n + 1);
+            drown(level, gy, horses, names, firstHurt, minAir, start, n + 1);
         });
     }
 

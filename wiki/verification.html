@@ -3014,25 +3014,15 @@
         <code>GeneAbilityHandler.clearAttributes</code> ever removes a modifier, and that
         method has never run. Check the reverse too: two genes moving the same attribute
         must not strip each other, because the ids are gene-scoped and the sweep only
-        spares ids the horse is currently asking for.</li>
+        spares ids the horse is currently asking for. <em>Blocked:</em> swim speed's modifier
+        changes nothing to begin with (<a href="known-gaps.html#gap-249">gap 249</a>), so
+        this needs another conditional attribute gene or that fix first.</li>
     <li><strong>Does the breath accumulator drown anything?</strong> Hold a
         <code>Shal/Shal</code> horse under water and a <code>Gil/Gil</code> one, and time
         them against an ordinary horse. The code assumes vanilla clamps
         <code>setAirSupply</code> at the top and reads a negative supply as drowning; both
         are guesses from the sources. A horse that never drowns and a horse that drowns
         instantly are the two failure shapes.</li>
-    <li><strong>Does the mob-aura shove actually move anything?</strong> Repel is a velocity
-        nudge plus a cleared target, not a goal &mdash; and a pathfinding mob may simply
-        walk straight back through it. Stand a <code>Wrd/Wrd</code> horse in front of
-        zombies at night. Then the other way: a <code>Bai/Bai</code> horse should pull
-        every hostile in sight off its rider, which is the one on this locus that could get
-        somebody killed.</li>
-    <li><strong>Death: the ground and the drops, separately.</strong> Kill a
-        <code>Xpl/Xpl</code> horse (an explosion the size of a creeper&rsquo;s), a
-        <code>Lav/Lav</code> one <em>standing on a floor somebody built</em> (the fluid
-        must refuse to eat it), and a <code>Dia/Dia</code> one (diamonds instead of
-        leather, not as well as). Then a horse that is both volatile and diamond-bearing:
-        two loci, both firing, is the cross the split exists for.</li>
     <li><strong>The clone egg.</strong> Kill an <code>Egg/Egg</code> horse and use what it
         drops. The horse that comes back must be a <em>clone</em> &mdash; same coat, same
         name-worthy details, same numbers &mdash; and not merely a horse with the same

@@ -87,12 +87,14 @@
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
-<div class="note warn">
-    <span class="label">Newly built, not yet play-tested</span>
+<div class="note danger">
+    <span class="label">It does nothing in game (gap 249)</span>
     <p>
-        Nothing on this page has been seen in game. The translator was written
-        against the 26.1.2 sources and is flagged as unverified in its own
-        comments. Checklist on <a href="verification.html">To be verified</a>.
+        The gene multiplies <code>water_movement_efficiency</code>, whose base is 0 on a horse, and a total multiplier on
+        zero is still zero. The yard's SWIM SPEED pen (2026-09-15) read <code>base 0.000 value 0.000</code> on
+        <code>Otr/Otr</code>, <code>Otr/n</code> and <code>Stne/Stne</code> horses, each carrying its modifier. So no horse
+        swims any faster or slower for it. How to fix it is open: see
+        <a href="known-gaps.html#gap-249">gap 249</a>.
     </p>
 </div>
 
