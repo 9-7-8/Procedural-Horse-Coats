@@ -30,6 +30,15 @@ neoForge {
             client()
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
+        // Launch straight into the test world and on into the horse dimension's yard
+        // (owner, 2026-09-14): ./gradlew :neoforge-26.1.2:runClientTestWorld
+        // The task name is checked (gradlew tasks lists runClientTestWorld). UNVERIFIED: that
+        // ModDevGradle gives it the same run/ game directory as `client`.
+        clientTestWorld {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            systemProperty 'horsegenetics.autoTestWorld', 'true'
+        }
         server {
             server()
             programArgument '--nogui'

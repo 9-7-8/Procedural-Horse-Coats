@@ -76,13 +76,16 @@ final class DebugYardLong {
             stoneBand(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
             stoneBand(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
 
-            dryad(level, gy, west, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD SPRUCE", "Spru/Spru", 2,
+            // SPRUCE AND ACACIA ARE WIDER (2026-09-14): both trees want a two-block clear ring
+            // round the trunk, and a fence is not something a tree may grow through, so in a
+            // five-wide pen only the centre column could ever take one. Seven wide leaves three.
+            dryad(level, gy, west, mouthZ + ROW_S, 8, ROW_S_D, "DRYAD SPRUCE", "Spru/Spru", 2,
                     List.of("DRYAD SPRUCE", "Spru/Spru: spruce", "ONLY, then trees", "(all day)"),
                     Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
             dryad(level, gy, west + 11, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD JUNGLE", "Jung/Jung", 2,
                     List.of("DRYAD JUNGLE", "Jung/Jung: jungle", "ONLY, then trees", "(all day)"),
                     Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
-            dryad(level, gy, east, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD ACACIA", "Aca/Aca", 2,
+            dryad(level, gy, east, mouthZ + ROW_S, 8, ROW_S_D, "DRYAD ACACIA", "Aca/Aca", 2,
                     List.of("DRYAD ACACIA", "Aca/Aca: acacia", "ONLY, then trees", "(all day)"),
                     Blocks.ACACIA_SAPLING, Blocks.ACACIA_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
             dryad(level, gy, east + 11, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD CARRIER", "Oak/n", 2,
@@ -101,6 +104,8 @@ final class DebugYardLong {
             dryad(level, gy, east + 11, mouthZ + ROW_T, 5, 6, "DRYAD DARK SMALL", "Dark/Dark", 1,
                     List.of("DARK OAK, SMALL", "one horse, small", "pen: a 2x2 and a", "tree by evening?"),
                     Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
+            lightFromTheFloor(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
+            lightFromTheFloor(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
 
             ratio(level, gy, west, mouthZ + ROW_U, "RATIO HYPP", "horsegenetics.scn4a", "H/N", "H/N", false,
                     List.of("RATIO: HYPP", "H/N x H/N all day:", "1 in 4 H/H, and", "every H/H dies"),
@@ -134,6 +139,41 @@ final class DebugYardLong {
         }
     }
 
+    /**
+     * <b>Light a dryad row from the floor, not from the air</b> (2026-09-14). The yard's lamp
+     * grid is invisible {@code minecraft:light} blocks three up and four apart, and a tree cannot
+     * grow through one: vanilla's clearance check takes only air and {@code #replaceable_by_trees},
+     * which light is not in (read out of the 26.1.2 client jar). Oak and jungle, which want a
+     * one-block ring, grew anyway; spruce and acacia, which want two, tried hundreds of times in a
+     * day and never did (gap 240). So over these rows the lamps come out and glowstone goes into
+     * the stone floor between the pens: the same "no dark block for a zombie" the lamps were for
+     * (gap 212), with nothing above a sapling.
+     *
+     * <p>UNVERIFIED: that the lamps were the whole cause. The census's failed-grow count says.
+     */
+    private static void lightFromTheFloor(ServerLevel level, int gy, int cx, int z0, int depth) {
+        BlockState air = Blocks.AIR.defaultBlockState();
+        BlockState glow = Blocks.GLOWSTONE.defaultBlockState();
+        for (int x = cx - 24; x <= cx + 24; x++) {
+            for (int z = z0 - 4; z <= z0 + depth + 4; z++) {
+                for (int y = gy + 1; y <= gy + 8; y++) {
+                    BlockPos at = new BlockPos(x, y, z);
+                    if (level.getBlockState(at).is(Blocks.LIGHT)) {
+                        DebugPenManager.fastSet(level, at, air);
+                    }
+                }
+                // Every third stone cell. Grass inside a pen is never more than a few blocks from
+                // one, so it stays well above the light level a monster spawns at.
+                if (Math.floorMod(x, 3) == 0 && Math.floorMod(z, 3) == 0) {
+                    BlockPos floor = new BlockPos(x, gy, z);
+                    if (level.getBlockState(floor).is(Blocks.STONE)) {
+                        DebugPenManager.fastSet(level, floor, glow);
+                    }
+                }
+            }
+        }
+    }
+
     private static void dryad(ServerLevel level, int gy, int x0, int z0, int width, int depth, String name,
                               String tokens, int horses, List<String> sign, Block... watched) {
         int x1 = x0 + width;
@@ -161,6 +201,8 @@ final class DebugYardLong {
         final String key;
         final boolean bySex;
         final String expect;
+        /** The pen's mare, as an entity; only her foals are counted (gap 239). */
+        final @Nullable UUID damEntity;
         final Map<UUID, Long> living = new LinkedHashMap<>();
         final Map<UUID, String> classOf = new LinkedHashMap<>();
         final Set<UUID> done = new HashSet<>();
@@ -168,11 +210,12 @@ final class DebugYardLong {
         int born;
         int died;
 
-        Tally(String name, String key, boolean bySex, String expect) {
+        Tally(String name, String key, boolean bySex, String expect, @Nullable UUID damEntity) {
             this.name = name;
             this.key = key;
             this.bySex = bySex;
             this.expect = expect;
+            this.damEntity = damEntity;
         }
 
         String summary() {
@@ -200,7 +243,7 @@ final class DebugYardLong {
         DebugYardFertility.inHeat(dam);
         YardPens.register(gy, x0, x1, z0, z1, name);
         DebugWorldWatch.watchBreeding(name, DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1));
-        Tally tally = new Tally(name, key, bySex, expect);
+        Tally tally = new Tally(name, key, bySex, expect, dam == null ? null : dam.getUUID());
         scan(level, tally, DebugTestYard.box(x0, gy, z0, x1, gy + 4, z1), 0);
     }
 
@@ -214,6 +257,12 @@ final class DebugYardLong {
     private static void scan(ServerLevel level, Tally t, AABB box, int round) {
         DebugYardHerd.after(level, SCAN, () -> {
             long now = level.getGameTime();
+            // ONLY THIS PEN'S FOALS (gap 239). The pens share a fence line and foals get across it:
+            // a neighbour's foal counted here, then removed by its own pen's clock, read as "a N/N
+            // foal died" nine times in a morning and skewed the shares with it. Matched on the
+            // record's mother rather than on position, since position is what failed.
+            UUID damId = t.damEntity != null && level.getEntity(t.damEntity) instanceof Horse d
+                    && HorseRecords.hasRealRecord(d) ? HorseRecords.of(d).id() : null;
             for (Horse foal : level.getEntitiesOfClass(Horse.class, box, h -> h.isBaby() && h.isAlive()
                     && HorseRecords.hasRealRecord(h))) {
                 UUID id = foal.getUUID();
@@ -221,6 +270,9 @@ final class DebugYardLong {
                     continue;
                 }
                 HorseRecord record = HorseRecords.of(foal);
+                if (damId != null && record.motherId().filter(damId::equals).isEmpty()) {
+                    continue;
+                }
                 AllelePair pair = record.genotype().pair(t.key);
                 String cls = (t.bySex ? (record.sex() == Sex.FEMALE ? "filly " : "colt ") : "")
                         + (pair == null ? "?" : pair.toTokens());

@@ -65,6 +65,18 @@ public final class DebugTitleScreenButton {
      */
     public static final long TEST_WORLD_SEED = 1234L;
 
+    /**
+     * <b>Launch straight into the yard</b> (owner, 2026-09-14: "launch minecraft and it can
+     * automatically go into the debug horse world, and then within that go into the horse
+     * realm"). With this system property set - the {@code runClientTestWorld} Gradle run sets
+     * it - the first title screen of the session presses the button itself, and
+     * {@code DebugTestWorldHandler} carries the player on into the horse dimension once they
+     * have logged in. Once per launch, so quitting back to the title screen stays there.
+     */
+    static final String AUTO_PROPERTY = "horsegenetics.autoTestWorld";
+
+    private static boolean autoLaunched;
+
     private DebugTitleScreenButton() {
     }
 
@@ -79,6 +91,14 @@ public final class DebugTitleScreenButton {
                 .bounds(4, 4, 168, 20)
                 .build();
         event.addListener(button);
+
+        if (!autoLaunched && Boolean.getBoolean(AUTO_PROPERTY)) {
+            autoLaunched = true;
+            DebugTestWorldHandler.pendingHorseRealm = true;
+            // Queued rather than called: opening a world replaces the very screen that is
+            // still being initialised here.
+            Minecraft.getInstance().execute(DebugTitleScreenButton::spawnTestHorseWorld);
+        }
     }
 
     private static void spawnTestHorseWorld() {

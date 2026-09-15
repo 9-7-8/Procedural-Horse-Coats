@@ -433,8 +433,13 @@ public final class ActionTrace {
     private static String shortName(Entity entity) {
         if (entity instanceof Horse horse && HorseRecords.hasRealRecord(horse)) {
             HorseRecord record = HorseRecords.of(horse);
-            return record.firstName() + " " + record.lastName()
-                    + " [" + horse.getUUID().toString().substring(0, 8) + "]";
+            String name = record.firstName() + " " + record.lastName();
+            // A test-yard horse's label is what its pen's watch line calls it. Without it a herd
+            // or fertility line cannot be matched to "RANK 1 MARE", which is what left the
+            // displacement pen unreadable on 2026-09-14.
+            String label = horse.hasCustomName() ? horse.getCustomName().getString() : "";
+            return name + " [" + horse.getUUID().toString().substring(0, 8) + "]"
+                    + (label.isEmpty() || label.equals(name) ? "" : " \"" + label + "\"");
         }
         return entity.getType().builtInRegistryHolder().key().identifier()
                 + " [" + entity.getUUID().toString().substring(0, 8) + "]";

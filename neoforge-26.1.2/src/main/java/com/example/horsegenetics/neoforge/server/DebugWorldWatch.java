@@ -527,6 +527,16 @@ public final class DebugWorldWatch {
                     TAG, sb);
             SPREADS.clear();
         }
+        if (!GROW_FAILED.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, Integer> e : GROW_FAILED.entrySet()) {
+                sb.append(sb.length() == 0 ? "" : ", ").append(e.getValue()).append("x ").append(e.getKey());
+            }
+            // Counted, not logged: a sapling with no room tries every few random ticks.
+            HorseGenetics.LOGGER.info("{} saplings that tried to grow and are still saplings (no room, "
+                    + "or a horse in the way), since the last census: {}", TAG, sb);
+            GROW_FAILED.clear();
+        }
     }
 
     /**
@@ -942,11 +952,27 @@ public final class DebugWorldWatch {
      */
     @SubscribeEvent
     static void onGrow(BlockGrowFeatureEvent event) {
-        if (!(event.getLevel() instanceof Level level) || !watching(level)) {
+        if (!(event.getLevel() instanceof Level level) || !watching(level) || level.getServer() == null) {
             return;
         }
-        note("tree grew", "at " + event.getPos().toShortString() + inArea(event.getPos()));
+        // A GROW EVENT IS AN ATTEMPT (2026-09-14). It fires before the feature is placed, and a
+        // tree with no room leaves its sapling standing: DRYAD SPRUCE and ACACIA "grew" 350 times
+        // in a day and never made a log. So look again once the tick has run - a sapling still
+        // there is a failed attempt, counted per area for the census, and only a sapling that has
+        // gone is a tree.
+        BlockPos pos = event.getPos().immutable();
+        String area = inArea(pos);
+        level.getServer().execute(() -> {
+            if (level.getBlockState(pos).is(net.minecraft.tags.BlockTags.SAPLINGS)) {
+                GROW_FAILED.merge(area.isEmpty() ? "outside any pen" : area.trim(), 1, Integer::sum);
+            } else {
+                note("tree grew", "at " + pos.toShortString() + area);
+            }
+        });
     }
+
+    /** Saplings that tried to grow and are still saplings, since the last census, by area. */
+    private static final Map<String, Integer> GROW_FAILED = new LinkedHashMap<>();
 
     /** A block placed by something that is not a player - a gene, a mob, a falling block. */
     @SubscribeEvent

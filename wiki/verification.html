@@ -104,6 +104,27 @@
         <code>[trace] dryad | tree held back at</code> lines appear, and no horse takes
         <code>inWall</code> damage. The trees still have to grow; if <code>tree grew</code> stops
         entirely, the reach box is too big.</li>
+    <li><strong>The ratio pens count only their own foals</strong>
+        (<a href="known-gaps.html#gap-239">gap 239</a>). <strong>Pass:</strong> no <code>a N/N foal
+        died</code> in RATIO LETHAL WHITE and no <code>a n/n foal died</code> in RATIO SIZE, and the
+        shares come out near 1 : 2 : 1 within a couple of hundred foals.</li>
+    <li><strong>Spruce and acacia grow</strong> (<a href="known-gaps.html#gap-240">gap 240</a>).
+        The dryad rows have no light blocks overhead now, glowstone in the floor instead, and the two
+        pens are wider. <strong>Pass:</strong> <code>spruce_log</code> and <code>acacia_log</code> in
+        the census, <code>tree grew</code> lines that each mean a tree, and a census line counting
+        the attempts that failed. No zombies in rows S and T.</li>
+    <li><strong>The night-shy horse leaves its herd alone</strong>
+        (<a href="known-gaps.html#gap-241">gap 241</a>). <strong>Pass:</strong> no <code>night flee
+        | ... from minecraft:horse</code>, and a <code>Flc</code> horse still moves away from cows and
+        sheep after dark.</li>
+    <li><strong>Pen labels in the log.</strong> A yard horse's trace name now ends in its label in
+        quotes, so <code>displaced ... at food or water</code> in DISPLACEMENT says which RANK mare
+        won. <strong>Pass:</strong> every such line names the lower rank number first.</li>
+    <li><strong>Launching straight into the yard.</strong> Run
+        <code>gradlew :neoforge-26.1.2:runClientTestWorld</code>. <strong>Pass:</strong> the game
+        opens a new test world on its own, hands out the kit, and about three seconds later walks
+        you into the horse dimension. Quitting to the title screen stays there. Plain
+        <code>runClient</code> behaves as before.</li>
     <li><strong>Wild mares stop flooding the log.</strong> <strong>Pass:</strong>
         <code>not covered:</code> lines come only from yard mares (THE CAP, the fertility rows), and a
         <code>crowding cap held back N wild mares in the last 10 minutes</code> line appears about
@@ -137,9 +158,11 @@
         pen plants both (4 oak, 1 birch). <strong>Real trees grow</strong> in DRYAD OAK (17 logs),
         DRYAD JUNGLE (20 logs) and DRYAD OAK+BIRCH (10 oak, 5 birch logs). <strong>Dark oak clustering
         works</strong>: DRYAD DARK SMALL's saplings closed a 2&times;2 at 11:16 and grew a 44-log tree,
-        which answers <a href="known-gaps.html#gap-218">gap 218</a>. Row A's big DRYAD DARK planted
-        ten saplings in the same time and grew nothing, so that pen is too big, not the gene. All
-        deleted below.
+        which answers <a href="known-gaps.html#gap-218">gap 218</a>. Row A's big DRYAD DARK got there
+        too, later: 36 plantings and an 89-log tree by 16:55. The longer run also settled
+        <strong>the half-rate rule</strong> (DRYAD OAK 7 plantings, DRYAD OAK+BIRCH 7, split 4 oak
+        and 3 birch) and <strong>mushrooms on podzol only</strong> (nine, none on the grass half).
+        All deleted below.
     </p>
 </div>
 
@@ -183,10 +206,6 @@
         On the first run neither did (<a href="known-gaps.html#gap-240">gap 240</a>).
         <strong>Pass:</strong> <code>spruce_log</code> and <code>acacia_log</code> above zero in
         the census.</li>
-    <li><strong>DRYAD OAK</strong> (row T west) against <strong>DRYAD OAK+BIRCH</strong> (row T
-        east): by evening the mixed pen should have about as many plantings as the oak pen, split
-        roughly evenly between oak and birch. This is the half-rate rule. Three hours of the first
-        run gave 2 against 5, still too few to judge.</li>
     <li><strong>No dryad horse dies in its own pen</strong> once gap 237's fix is built: no
         <code>inWall</code> damage in rows S and T.</li>
 </ul>

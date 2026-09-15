@@ -81,6 +81,15 @@ public final class DebugTestWorldHandler {
     public static volatile boolean pendingHotbarFill = false;
 
     /**
+     * Set by the auto-launch ({@code DebugTitleScreenButton.AUTO_PROPERTY}): after the kit,
+     * walk the player on into the horse dimension, the way F6 or a hay portal would.
+     */
+    public static volatile boolean pendingHorseRealm = false;
+
+    /** Long enough for the client to finish loading the overworld before it changes dimension. */
+    private static final int HORSE_REALM_DELAY_TICKS = 60;
+
+    /**
      * How far to hunt for a plains village, in chunks. Villages sit on a
      * 34-chunk grid, so this is many cells in every direction and a miss means
      * the spawn landed somewhere with no plains for a thousand blocks rather
@@ -112,6 +121,14 @@ public final class DebugTestWorldHandler {
         reportSpawnBiome(player);
         locatePlainsVillage(player);
         locateDarkForest(player);
+        if (pendingHorseRealm) {
+            pendingHorseRealm = false;
+            afterTicks(player.level().getServer(), HORSE_REALM_DELAY_TICKS, () -> {
+                if (!player.hasDisconnected()) {
+                    DebugPenManager.teleportAndGenerate(player);
+                }
+            });
+        }
     }
 
     /**

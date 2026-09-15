@@ -27,6 +27,38 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-14g">2026-09-14 &mdash; eight hours of yard, four more fixes, and a launch straight into it</h2>
+
+<p>
+    The all-day yard ran from 09:01 to 16:55 without a crash or a warning. The owner asked what it had
+    shown, then for fixes and a way to launch into the yard without clicking. The game kept running
+    throughout, so the NeoForge files were checked with <code>javac</code> against the printed classpath,
+    as in the entry below.
+</p>
+<ul>
+    <li><strong>Three more horses suffocated in dryad trees</strong> (both DRYAD JUNGLE horses at 12:18, a
+        DRYAD DARK horse at 13:09), five in the day. Gap 237's fix, pushed that morning, was still unbuilt.</li>
+    <li><strong>The ratio pens were leaking, and the numbers prove it.</strong> Lethal white logged 29 and
+        size 12 "foal died" lines, always the neighbouring pen's genotype. Taking those foals out gives size
+        25 : 51 : 24 and lethal white 30 : 48 : 22. Tallies now count only the pen mare's own foals
+        (<a href="known-gaps.html#gap-239">gap 239</a>).</li>
+    <li><strong>Spruce and acacia could not grow, and the reason is in the game's data.</strong> Vanilla
+        grows a tree only through air and <code>#replaceable_by_trees</code>, and the yard's invisible light
+        blocks and its fences are neither. The two species that need a two-block ring never found one. The
+        light blocks come out of the dryad rows, glowstone lights them from the floor, and the two pens are
+        wider. The <code>tree grew</code> line now means a tree
+        (<a href="known-gaps.html#gap-240">gap 240</a>).</li>
+    <li><strong>A night-shy foal fled its own herd</strong> 1,578 times, because "passive animals"
+        included horses despite a comment saying it must not (<a href="known-gaps.html#gap-241">gap 241</a>).</li>
+    <li><strong>Log lines name the pen label</strong>, so the displacement pen can finally be read.</li>
+    <li><strong><code>runClientTestWorld</code></strong> sets <code>horsegenetics.autoTestWorld</code>. The
+        first title screen then presses "Spawn Test Horse World" itself, and three seconds after login the
+        player is sent into the horse dimension the way F6 does it. Once per launch.</li>
+    <li><strong>Confirmed by the longer run:</strong> mushrooms on podzol only (nine), the oak/birch half rate
+        (seven plantings each), the big DRYAD DARK pen growing a tree after all (so gap 218's "too big" was
+        only "slow"), five sets of twins all born alive, and THE CAP and MET NATURAL still at nine.</li>
+</ul>
+
 <h2 id="d2026-09-14f">2026-09-14 &mdash; what the all-day pens found in their first hour</h2>
 
 <p>

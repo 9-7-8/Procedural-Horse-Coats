@@ -229,7 +229,9 @@ public final class NightBehaviourHandler {
         // reach the point, which is the difference, and it was being thrown
         // away. Logged on a CHANGE of target rather than per beat, or a penned
         // horse would write a line a second all night.
-        if (FLEEING.put(horse.getUUID(), nearest.getUUID()) != nearest.getUUID()) {
+        // equals, not !=: the map hands back a UUID object, and identity only held while the
+        // entity kept handing out the same instance.
+        if (!nearest.getUUID().equals(FLEEING.put(horse.getUUID(), nearest.getUUID()))) {
             ActionTrace.log("night flee", ActionTrace.describeShort(horse) + " from "
                     + nearest.getType().builtInRegistryHolder().key().identifier()
                     + (pathed ? " - path accepted" : " - NO PATH: nowhere to run to"));
@@ -248,7 +250,11 @@ public final class NightBehaviourHandler {
             // A horse is an Animal, so "passive" would otherwise include every
             // other horse in the herd AND the hostile mobs that extend Animal
             // (there are none, but Enemy is the honest test either way).
-            case "passive" -> candidate instanceof Animal && !(candidate instanceof Enemy);
+            // The horse half of that was only ever in this comment: a Flc/Flc foal
+            // born into a wild band spent 2026-09-14 fleeing its own herd, 1,578
+            // times. Every equine is left out now, which is what the comment said.
+            case "passive" -> candidate instanceof Animal && !(candidate instanceof Enemy)
+                    && !(candidate instanceof net.minecraft.world.entity.animal.equine.AbstractHorse);
             case "hostile" -> candidate instanceof Enemy;
             case "all" -> candidate instanceof Player
                     || (candidate instanceof Mob && !(candidate instanceof Horse));
