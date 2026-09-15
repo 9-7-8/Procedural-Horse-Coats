@@ -228,8 +228,11 @@ final class DebugYardEffects {
                     total[i] += d;
                     // Where it is and what it is doing, because the first two runs had PLAIN and STONE at exactly 0.15
                     // blocks every lap, which is not swimming.
+                    // The factor too, so a speed ratio can be read against what the genes asked for: the 10:17 run's
+                    // Otter swam about six times the plain horse, more than any Otr/Otr factor should give.
                     sb.append(sb.length() == 0 ? "" : "; ").append(names[i]).append(String.format(
-                            " %.2f (y %.2f, %s%s%s, moving %.3f/tick)", d, h.getY(), h.isInWater() ? "in water" : "NOT IN WATER",
+                            " %.2f (factor %.2f, y %.2f, %s%s%s, moving %.3f/tick)", d, SwimScaling.factorOf(h), h.getY(),
+                            h.isInWater() ? "in water" : "NOT IN WATER",
                             h.onGround() ? ", on ground" : "", h.isImmobile() ? ", IMMOBILE" : "",
                             h.getDeltaMovement().horizontalDistance()));
                 }
