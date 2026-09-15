@@ -130,8 +130,11 @@ final class DebugYardUnattended {
             }
         }
         horse(level, gy, x0 + 6.5, z0 + 3.5, Sex.FEMALE, "horsegenetics.dryad=Bone/Bone", true, "BONE MEAL");
-        ActionTrace.log("test yard", "BONE MEAL: expect '[watch] bonemeal | on' sapling or grass lines and never"
-                + " on minecraft:wheat; a 'tree held back' line beside the horse; no inWall (gap 237)");
+        // NOT '[watch] bonemeal': that is vanilla's BonemealEvent, which a direct performBonemeal never fires. The gene
+        // logs through DebugWorldWatch.noteBoneMeal. It tries about once per census, so expect a handful in a long run.
+        ActionTrace.log("test yard", "BONE MEAL: expect '[watch] gene fertilised | minecraft:<sapling or grass>' lines"
+                + " and never minecraft:wheat (rare: read the census's 'bonemeal placed/tried'); a 'tree held back'"
+                + " line beside the horse; no inWall (gap 237)");
     }
 
     /** Gap 229: a gelding in a band never challenges and never covers. */
