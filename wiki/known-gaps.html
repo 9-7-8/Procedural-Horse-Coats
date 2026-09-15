@@ -59,6 +59,20 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-243"><strong>Open, found 2026-09-14: a lycan horse whose other form is a parrot dies falling out of the horse dimension.</strong>
+    Waxen Maverick, a wild foal born at 3, 129, -6 in the yard, turned into a <code>minecraft:parrot</code> after
+    dark. At 17:33:54 the parrot was at y&nbsp;&minus;65 and took <code>outOfWorld</code> damage, and the
+    <code>[trace] lycan</code> line records the horse dying with it. Nothing in the dimension stops a flying form
+    from going below the floor. Not yet known: whether it flew down or fell through a gap in the yard, and whether
+    the overworld has the same problem.</li>
+<li id="gap-242"><strong>Fixed 2026-09-14, not yet played: the yard's ratio tallies could never count a lethal foal.</strong>
+    <code>DebugYardLong</code>'s clock looked for <em>living</em> foals every ten seconds, and an <code>H/H</code>
+    foal is dead three seconds after birth. The first one (RATIO HYPP, 17:26:20 to 17:26:23) died from
+    <code>genetic_defect</code> as it should, and the tally went on reading <code>H/N 3 (100%)</code>, so the
+    ratio and "every H/H dies" could not be read off either pen. <em>Fix:</em> a foal is counted when it joins
+    the world (<code>EntityJoinLevelEvent</code>, whose record the breeding code writes before the foal is
+    added); the ten-second scan stays as a fallback. A ratio pen whose mare is gone now counts nothing rather
+    than falling back to position.</li>
 <li id="gap-241"><strong>Fixed 2026-09-14, not yet played: a night-shy (<code>Flc</code>) horse fled its own herd.</strong>
     <code>Flc</code> is meant to flee passive animals after dark. <code>NightBehaviourHandler.matches</code>
     carried a comment saying every other horse must be left out of "passive", and the code never did it, so a

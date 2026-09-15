@@ -12,8 +12,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,6 +64,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  * should converge on, and a day is a few hundred foals: enough to settle a "one in
  * four" that nobody could count by hand.
  */
+@EventBusSubscriber
 final class DebugYardLong {
 
     private DebugYardLong() {
@@ -68,10 +73,20 @@ final class DebugYardLong {
     private static final int SCAN = 200;
     /** A foal is counted, watched for a lethal-at-birth death, then taken away. */
     private static final long FOAL_KEEP = 2400L;
+    /** The ratio pens of the yard built last; {@link #build} starts it over. */
+    private static final List<Tally> TALLIES = new ArrayList<>();
+
+    @SubscribeEvent
+    static void onEntityJoin(EntityJoinLevelEvent event) {
+        if (event.getLevel() instanceof ServerLevel level && event.getEntity() instanceof Horse foal) {
+            onJoin(level, foal);
+        }
+    }
 
     static void build(ServerLevel level, int gy, int cx, int mouthZ) {
         int west = cx + WEST_MIN;
         int east = cx + EAST_MIN + 1;
+        TALLIES.clear();
         try {
             stoneBand(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
             stoneBand(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
@@ -244,6 +259,7 @@ final class DebugYardLong {
         YardPens.register(gy, x0, x1, z0, z1, name);
         DebugWorldWatch.watchBreeding(name, DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1));
         Tally tally = new Tally(name, key, bySex, expect, dam == null ? null : dam.getUUID());
+        TALLIES.add(tally);
         scan(level, tally, DebugTestYard.box(x0, gy, z0, x1, gy + 4, z1), 0);
     }
 
@@ -254,33 +270,59 @@ final class DebugYardLong {
         return h;
     }
 
+    /**
+     * A foal entering the world, counted by whichever ratio pen's mare bore it.
+     *
+     * <p>COUNTED AT BIRTH, NOT AT THE SCAN (2026-09-14). The scan below only ever saw living
+     * foals, once every ten seconds - and a lethal-at-birth foal is dead in three. The first
+     * H/H in RATIO HYPP was born at 17:26:20 and dead at 17:26:23, and the tally went on
+     * reading "H/N 3 (100%)": the class the pen exists to count could never appear in it.
+     * Both {@code ReproHandler.foal} and vanilla breeding write the foal's record before
+     * {@code addFreshEntity}, so it is readable here.
+     */
+    static void onJoin(ServerLevel level, Horse foal) {
+        if (TALLIES.isEmpty() || !foal.isBaby() || !HorseRecords.hasRealRecord(foal)) {
+            return;
+        }
+        long now = level.getGameTime();
+        for (Tally t : TALLIES) {
+            count(level, t, foal, now);
+        }
+    }
+
+    private static void count(ServerLevel level, Tally t, Horse foal, long now) {
+        UUID id = foal.getUUID();
+        if (t.living.containsKey(id) || t.done.contains(id)) {
+            return;
+        }
+        // ONLY THIS PEN'S FOALS (gap 239). The pens share a fence line and foals get across it:
+        // a neighbour's foal counted here, then removed by its own pen's clock, read as "a N/N
+        // foal died" nine times in a morning and skewed the shares with it. Matched on the
+        // record's mother rather than on position, since position is what failed - and a pen
+        // whose mare is gone counts nothing, since at birth there is no position to fall back on.
+        UUID damId = t.damEntity != null && level.getEntity(t.damEntity) instanceof Horse d
+                && HorseRecords.hasRealRecord(d) ? HorseRecords.of(d).id() : null;
+        HorseRecord record = HorseRecords.of(foal);
+        if (damId == null || record.motherId().filter(damId::equals).isEmpty()) {
+            return;
+        }
+        AllelePair pair = record.genotype().pair(t.key);
+        String cls = (t.bySex ? (record.sex() == Sex.FEMALE ? "filly " : "colt ") : "")
+                + (pair == null ? "?" : pair.toTokens());
+        t.living.put(id, now);
+        t.classOf.put(id, cls);
+        t.counts.computeIfAbsent(cls, k -> new int[2])[0]++;
+        t.born++;
+        ActionTrace.log("test yard", t.name + ": foal " + t.born + " is " + cls + " | " + t.summary());
+    }
+
     private static void scan(ServerLevel level, Tally t, AABB box, int round) {
         DebugYardHerd.after(level, SCAN, () -> {
             long now = level.getGameTime();
-            // ONLY THIS PEN'S FOALS (gap 239). The pens share a fence line and foals get across it:
-            // a neighbour's foal counted here, then removed by its own pen's clock, read as "a N/N
-            // foal died" nine times in a morning and skewed the shares with it. Matched on the
-            // record's mother rather than on position, since position is what failed.
-            UUID damId = t.damEntity != null && level.getEntity(t.damEntity) instanceof Horse d
-                    && HorseRecords.hasRealRecord(d) ? HorseRecords.of(d).id() : null;
+            // A fallback only: a foal whose record landed after it joined. Birth is onJoin's.
             for (Horse foal : level.getEntitiesOfClass(Horse.class, box, h -> h.isBaby() && h.isAlive()
                     && HorseRecords.hasRealRecord(h))) {
-                UUID id = foal.getUUID();
-                if (t.living.containsKey(id) || t.done.contains(id)) {
-                    continue;
-                }
-                HorseRecord record = HorseRecords.of(foal);
-                if (damId != null && record.motherId().filter(damId::equals).isEmpty()) {
-                    continue;
-                }
-                AllelePair pair = record.genotype().pair(t.key);
-                String cls = (t.bySex ? (record.sex() == Sex.FEMALE ? "filly " : "colt ") : "")
-                        + (pair == null ? "?" : pair.toTokens());
-                t.living.put(id, now);
-                t.classOf.put(id, cls);
-                t.counts.computeIfAbsent(cls, k -> new int[2])[0]++;
-                t.born++;
-                ActionTrace.log("test yard", t.name + ": foal " + t.born + " is " + cls + " | " + t.summary());
+                count(level, t, foal, now);
             }
             for (var it = t.living.entrySet().iterator(); it.hasNext(); ) {
                 var e = it.next();
