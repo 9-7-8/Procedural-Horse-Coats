@@ -895,7 +895,19 @@ public final class DebugWorldWatch {
         note("horse hurt", ActionTrace.describeShort(horse) + " took "
                 + String.format("%.1f", event.getHealthDamage()) + " from "
                 + event.getSource().getMsgId() + " - now "
-                + String.format("%.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
+                + String.format("%.1f/%.1f", horse.getHealth(), horse.getMaxHealth())
+                + targetNote(horse));
+    }
+
+    /** ", aiming at X (d blocks, seen)" - what a horse was fighting when it was hit, for the KICK pens (gap 248). */
+    private static String targetNote(Horse horse) {
+        LivingEntity t = horse.getTarget();
+        if (t == null) {
+            return ", no target";
+        }
+        return String.format(", aiming at %s (%.1f blocks, %s%s)", ActionTrace.describeShort(t),
+                Math.sqrt(t.distanceToSqr(horse)), horse.hasLineOfSight(t) ? "seen" : "NOT SEEN",
+                t.isAlive() ? "" : ", DEAD");
     }
 
     /**

@@ -209,7 +209,7 @@
         <code>LivingEntity.aiStep</code> jumps straight past <code>serverAiStep()</code> while a mob is immobile (read in the
         decompiled source and confirmed in <code>javap</code>). So a rear is not just an animation: every goal, every goal's own
         cooldown and every path freezes for twenty ticks. <code>HorseMeleeGoal</code> rears after each blow, which turned a
-        ten-tick swing into one blow every 59 ticks (<a href="known-gaps.html#gap-222">gap 222</a>).
+        ten-tick swing into one blow every 59 ticks (<a href="gene-gladiator.html#verified-swing-rate">formerly gap 222</a>).
         <code>mixin/HorseRearFightMixin</code> returns false from <code>isImmobile</code> for a standing
         <code>Horse</code> with a live target; eating and a saddled rider still hold it still.</li>
 </ul>

@@ -119,6 +119,20 @@
     <a href="gene-guardian.html">guardian</a> data rather than code.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-swing-rate">
+    <strong>A horse swings every ten ticks once a rear no longer freezes it</strong> (2026-09-15, formerly gap 222).
+    <code>HorseMeleeGoal</code> keeps its own ten-tick cooldown, because vanilla's reset hard-codes twenty
+    (<a href="api-notes.html#verified-melee-cooldown">API notes</a>). The yard's KICK GLADIATOR pen puts a
+    <code>Gld/Gld</code> horse in with two husks. Its first run (07:10) swung at ticks 84 and 143. The cause was the
+    rear after each blow: a standing horse is immobile, and an immobile mob runs no goals
+    (<a href="api-notes.html#standing-horse-immobile">API notes</a>). With <code>HorseRearFightMixin</code> (the
+    owner's call: rear, and keep fighting), the 07:33 run swung at ticks 56, 70 and 80, killing the first husk in four
+    blows. KICK PLAIN's horse, which has no temper, never swung at its husks. What that run also showed, the gladiator
+    not turning on the second husk, is <a href="known-gaps.html#gap-248">gap 248</a>.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

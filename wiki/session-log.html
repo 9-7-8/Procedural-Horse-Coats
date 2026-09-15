@@ -490,7 +490,7 @@
     <li><strong>The horse attack interval.</strong> <code>HorseMeleeGoal</code> overrode
         <code>getAttackInterval()</code> to 12 ticks; vanilla's <code>resetAttackCooldown</code>
         writes a hard-coded 20 and never asks. Found in bytecode after a guardian died one
-        second before its zombie. The goal owns its cooldown now, at 10 (<a href="known-gaps.html#gap-222">gap 222</a>).</li>
+        second before its zombie. The goal owns its cooldown now, at 10 (<a href="gene-gladiator.html#verified-swing-rate">gap 222, since verified</a>).</li>
     <li><strong>The stall detector's fallback box.</strong> Built to "never refuse", it
         turned every failed search into a plausible stall &mdash; which hid that the yard's
         stalls had a hole for a doorway instead of a gate. It refuses now.</li>

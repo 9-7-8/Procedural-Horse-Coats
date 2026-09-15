@@ -2187,22 +2187,44 @@ public final class GeneAbilityHandler {
         if (!"aggressive".equals(te.mood())) {
             return; // 'flee' is handled by the same goal set as night temper's
         }
-        AABB box = horse.getBoundingBox().inflate(te.radius());
-        int considered = 0;
-        for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, box)) {
-            if (++considered > te.maxTargets()) {
-                break;
+        LivingEntity current = horse.getTarget();
+        if (current != null && current.isAlive() && horse.hasLineOfSight(current)) {
+            return; // already fighting something it can reach
+        }
+        // THE THING HITTING IT, OR THE NEAREST LIVE ONE IT CAN SEE (gap 248, 2026-09-15). This used to take the
+        // first matching entity in the box, alive or not, seen or not, near or far. The yard's KICK GLADIATOR pen
+        // killed one husk and then took four blows from the second without swinging again, while two husks in the
+        // next pen sat inside the radius behind a wall. Line of sight keeps "hold" meaning "within reach": what
+        // the horse cannot see, it would have to go around something to hit.
+        double r2 = te.radius() * te.radius();
+        LivingEntity best = null;
+        LivingEntity attacker = horse.getLastHurtByMob();
+        if (attacker != null && attacker.isAlive() && attacker != horse.getControllingPassenger()
+                && MobGroups.matches(te.towards(), attacker) && attacker.distanceToSqr(horse) <= r2
+                && horse.hasLineOfSight(attacker)) {
+            best = attacker;
+        }
+        if (best == null) {
+            AABB box = horse.getBoundingBox().inflate(te.radius());
+            double bestD = Double.MAX_VALUE;
+            int considered = 0;
+            for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, box,
+                    c -> c != horse && c.isAlive() && c != horse.getControllingPassenger()
+                            && MobGroups.matches(te.towards(), c))) {
+                if (++considered > te.maxTargets()) {
+                    break;
+                }
+                double d = candidate.distanceToSqr(horse);
+                if (d < bestD && d <= r2 && horse.hasLineOfSight(candidate)) {
+                    bestD = d;
+                    best = candidate;
+                }
             }
-            if (candidate == horse || candidate == horse.getControllingPassenger()) {
-                continue;
-            }
-            if (!MobGroups.matches(te.towards(), candidate)) {
-                continue;
-            }
-            if (horse.getTarget() == null || !horse.getTarget().isAlive()) {
-                horse.setTarget(candidate);
-            }
-            return;
+        }
+        if (best != null) {
+            horse.setTarget(best);
+        } else if (current != null && !current.isAlive()) {
+            horse.setTarget(null);
         }
     }
 
