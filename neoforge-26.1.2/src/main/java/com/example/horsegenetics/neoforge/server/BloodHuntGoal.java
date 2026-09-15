@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.care.Hunger;
 import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.neoforge.data.HorseCooldownsAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
@@ -158,7 +159,13 @@ public final class BloodHuntGoal extends Goal {
             return;
         }
         prey.hurtServer(level, level.damageSources().mobAttack(horse), DAMAGE_DEALT);
-        horse.heal(HEALED);
+        // THE BITE IS ITS MEAL (hunger, owner 2026-09-14: "blood diet just does the small ping
+        // of damage"). It feeds first, then heals out of what it just ate, the way every heal
+        // is paid for - so a starving blood-drinker's first bite still heals it.
+        double hunger = Hunger.eat(horse.getData(ModAttachments.HUNGER.get()), Hunger.Food.BITE);
+        double healed = Hunger.affordable(hunger, Math.min(HEALED, horse.getMaxHealth() - horse.getHealth()));
+        horse.heal((float) healed);
+        horse.setData(ModAttachments.HUNGER.get(), Hunger.afterHealing(hunger, healed));
         stamp(prey, level.getGameTime());
 
         level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),

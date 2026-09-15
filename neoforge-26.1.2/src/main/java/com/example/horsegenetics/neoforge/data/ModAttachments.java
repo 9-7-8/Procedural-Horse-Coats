@@ -44,6 +44,15 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // Hunger (common.care.Hunger): one invisible number, full by default. HorseCareHandler
+    // drains it and spends it on healing; eating refills it. Not synced - nothing on the
+    // client reads it - and NOT copyOnDeath: a re-summoned horse starts fed.
+    public static final Supplier<AttachmentType<Double>> HUNGER =
+            ATTACHMENT_TYPES.register("hunger", () -> AttachmentType
+                    .<Double>builder(() -> com.example.horsegenetics.common.care.Hunger.FULL)
+                    .serialize(com.mojang.serialization.Codec.DOUBLE.fieldOf("hunger"))
+                    .build());
+
     // Social life: age, dam, natal band and the relationship ledger (common.herd).
     // Non-genetic. copyOnDeath like HORSE_CARE, so a re-summoned horse keeps its friends.
     public static final Supplier<AttachmentType<HorseSocialAttachment>> HORSE_SOCIAL =

@@ -2288,6 +2288,15 @@ public final class GeneAbilityHandler {
             if (!ate) {
                 continue;
             }
+            // Food from a hand feeds the horse (hunger, owner 2026-09-14), its favourite most.
+            String favourite = horse.isBaby() ? null : FoodPreferenceHandler.favouriteOf(horse);
+            boolean isFavourite = favourite != null
+                    && favourite.equals(BuiltInRegistries.ITEM.getKey(feed.item()).toString());
+            horse.setData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get(),
+                    com.example.horsegenetics.common.care.Hunger.eat(
+                    horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get()), isFavourite
+                            ? com.example.horsegenetics.common.care.Hunger.Food.FAVOURITE
+                            : com.example.horsegenetics.common.care.Hunger.Food.HAND));
             HorseRecord record = HorseRecords.of(horse);
             if (!record.hasName()) {
                 continue;
@@ -2303,7 +2312,7 @@ public final class GeneAbilityHandler {
     }
 
     /** Would this horse eat {@code stack} from a hand? Favourite, then diet, then vanilla. */
-    private static boolean eats(Horse horse, ItemStack stack) {
+    static boolean eats(Horse horse, ItemStack stack) {
         String favourite = horse.isBaby() ? null : FoodPreferenceHandler.favouriteOf(horse);
         if (favourite != null && favourite.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())) {
             return true;

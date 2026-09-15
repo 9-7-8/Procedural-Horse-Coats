@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.care.Hunger;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.network.HorseCareSyncPayload;
@@ -78,8 +79,6 @@ public final class HorseCareHandler {
     private static final int SCAN_INTERVAL = 30;
     private static final int HEAL_SCAN_RADIUS = 3;
     private static final int HERD_RADIUS = 10;
-    private static final float HEAL_AMOUNT = 1.0F;
-    private static final float HERD_HEAL_AMOUNT = 2.0F;
     private static final int FEED_BOND = 2;
     private static final int GOAL_PRIORITY = 4;
 
@@ -122,6 +121,9 @@ public final class HorseCareHandler {
         // BondFollowGoal on purpose - food is more interesting than an owner
         // standing still.
         horse.goalSelector.addGoal(GOAL_PRIORITY - 1, new FoodTemptGoal(horse));
+        // Hunger: a hungry horse goes and eats (HungerFoodGoal). Added after the two food goals
+        // at the same priority, so a player holding food out still wins the tie.
+        horse.goalSelector.addGoal(GOAL_PRIORITY - 1, new HungerFoodGoal(horse));
     }
 
     // ------------------------------------------------------------------
@@ -186,16 +188,24 @@ public final class HorseCareHandler {
             }
         }
 
-        // --- gated healing: only pay for the block scan if hurt, and only for
-        // a horse that can regenerate at all. A blood-drinker cannot be fed by
-        // any means, and that has to include standing next to a hay bale.
-        if (horse.getHealth() < horse.getMaxHealth() && HorseDietHandler.canRegenerate(horse)
-                && nearWaterAndFood(level, horse)) {
-            horse.heal(after.inHerd() ? HERD_HEAL_AMOUNT : HEAL_AMOUNT);
-            level.sendParticles(ParticleTypes.HEART,
-                    horse.getX(), horse.getY() + horse.getBbHeight() * 0.7, horse.getZ(),
-                    2, 0.35, 0.30, 0.35, 0.0);
+        // --- hunger and healing (common.care.Hunger, owner 2026-09-14). Hunger drains every
+        // scan and pays for healing; a starving horse cannot heal. It replaced the food half
+        // of the old gate - a horse now goes and eats (HungerFoodGoal) - and the water half
+        // stays. A blood-drinker still cannot regenerate at all: its bite is its only heal.
+        double hunger = Hunger.drain(horse.getData(ModAttachments.HUNGER.get()), SCAN_INTERVAL);
+        float missing = horse.getMaxHealth() - horse.getHealth();
+        if (missing > 0.0F && HorseDietHandler.canRegenerate(horse) && nearWater(level, horse)) {
+            double heal = Hunger.affordable(hunger,
+                    Math.min(missing, Hunger.healOver(SCAN_INTERVAL, after.inHerd())));
+            if (heal > 0.0) {
+                horse.heal((float) heal);
+                hunger = Hunger.afterHealing(hunger, heal);
+                level.sendParticles(ParticleTypes.HEART,
+                        horse.getX(), horse.getY() + horse.getBbHeight() * 0.7, horse.getZ(),
+                        2, 0.35, 0.30, 0.35, 0.0);
+            }
         }
+        horse.setData(ModAttachments.HUNGER.get(), hunger);
 
         if (!after.equals(before)) {
             horse.setData(ModAttachments.HORSE_CARE.get(), after);
@@ -346,7 +356,8 @@ public final class HorseCareHandler {
                 care.bondTicks(), together);
     }
 
-    private static boolean nearWaterAndFood(ServerLevel level, Horse horse) {
+    /** Water within {@link #HEAL_SCAN_RADIUS}: the half of the old heal gate that hunger did not replace. */
+    private static boolean nearWater(ServerLevel level, Horse horse) {
         AABB box = horse.getBoundingBox().inflate(HEAL_SCAN_RADIUS);
         int x0 = Mth.floor(box.minX);
         int x1 = Mth.floor(box.maxX);
@@ -354,26 +365,18 @@ public final class HorseCareHandler {
         int y1 = Mth.floor(box.maxY);
         int z0 = Mth.floor(box.minZ);
         int z1 = Mth.floor(box.maxZ);
-        boolean water = false;
-        boolean food = false;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int x = x0; x <= x1; x++) {
             for (int y = y0; y <= y1; y++) {
                 for (int z = z0; z <= z1; z++) {
-                    if (water && food) {
-                        return true;
-                    }
                     BlockState st = level.getBlockState(p.set(x, y, z));
-                    if (!water && (st.is(HORSE_WATER) || st.getFluidState().is(FluidTags.WATER))) {
-                        water = true;
-                    }
-                    if (!food && st.is(HORSE_FOOD)) {
-                        food = true;
+                    if (st.is(HORSE_WATER) || st.getFluidState().is(FluidTags.WATER)) {
+                        return true;
                     }
                 }
             }
         }
-        return water && food;
+        return false;
     }
 
     /**

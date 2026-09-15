@@ -20,8 +20,8 @@
 <p class="lede">
     Three non-genetic systems that apply to <strong>every</strong> horse and
     share <strong>one slow tick</strong>
-    (<code>server/HorseCareHandler</code>): passive healing gated on nearby water
-    <em>and</em> food, a per-horse <strong>bond</strong> number that changes how
+    (<code>server/HorseCareHandler</code>): an invisible <strong>hunger</strong> that pays for
+    healing beside water, a per-horse <strong>bond</strong> number that changes how
     a horse behaves toward its owner, and an emergent <strong>herd</strong>
     grouping. First slice built 2026-09-02, <strong>not play-tested</strong> &mdash;
     checklist in <a href="verification.html">verification</a>. This page is the
@@ -31,51 +31,48 @@
 
 <section class="tab-panel" data-tab="gameplay">
 
-<h2>1. Gated healing</h2>
+<h2 id="hunger">1. Hunger and healing</h2>
 <p>
-    Vanilla horses have <strong>no passive regeneration</strong> &mdash; they
-    heal only from being hand-fed. This <em>adds</em> a gated regen mechanic on
-    top; hand-feeding is untouched and still works with no water requirement, so
-    a stabled horse in a dry biome is never unhealable.
+    Every horse has a <strong>hunger</strong> level you cannot see. It drops slowly on its own
+    &mdash; a full horse is hungry after about one Minecraft day and starving after about two
+    &mdash; and a hurt horse spends it to heal. A horse that has eaten heals faster than horses
+    used to, and a <strong>starving horse cannot heal at all</strong>. Hunger never hurts a horse,
+    and nothing else about the horse depends on it.
 </p>
+<ul>
+    <li><strong>Where it heals.</strong> A hurt horse heals when there is water within 3 blocks
+        (<code>#horsegenetics:horse_water</code> &mdash; <code>water</code>,
+        <code>bubble_column</code>, <code>water_cauldron</code> &mdash; or any block holding water)
+        and it is not starving: 1 health a second, 2 in a herd, and every point costs a little
+        hunger. It no longer needs food beside it, because it goes and eats instead.</li>
+    <li><strong>No free healing.</strong> Vanilla gives every horse one point about every 45
+        seconds whatever state it is in. That is switched off for horses, so a starving horse
+        really stays hurt. Donkeys, mules and llamas keep it.</li>
+    <li><strong>When it eats.</strong> Once hungry, a horse looks up to 10 blocks round for food
+        and eats until it is nearly full. A horse that is not hungry just nibbles the grass it is
+        standing on now and then.</li>
+    <li><strong>What it looks for, best first:</strong> its favourite food lying on the ground;
+        any dropped food it will eat; cake; hay bales; crops, pumpkins, melons and sugar cane;
+        grass; moss; mushrooms; flowers. The nearest of the best kind wins.</li>
+    <li><strong>Eating uses food up.</strong> Cake, hay bales, crops, mushrooms and flowers are
+        eaten whole, and grass and moss turn to dirt, as they do under a sheep. With mob griefing
+        off the horse is still fed and the block stays. A hay bale in a pen does not last.</li>
+    <li><strong>Hand-feeding</strong> heals exactly as before, needs no water, and feeds the horse
+        too &mdash; its favourite food most.</li>
+    <li>A healing horse gives off a couple of heart particles, and heals toward its
+        <em>own</em> max health.</li>
+</ul>
 <div class="note">
-    <span class="label">One locus changes what hand-feeding means</span>
+    <span class="label">Diet changes what counts as food</span>
     <p>
-        <a href="gene-diet.html">Diet</a> decides <em>what</em> a horse will accept
-        from a hand and how much good it does it &mdash; a narrow-diet horse refuses
-        an apple and takes a full heal off one bar of gold. It is a small minority of
-        horses and it touches nothing on this page: the block-scan regen below is
-        unconditional, so even a lava-eater regenerates beside hay and water. Whether
-        that is right is an open question on
-        <a href="verification.html#diet">verification &sect;0-Q</a>.
+        A horse with a narrow <a href="gene-diet.html">diet</a> only goes for what it can eat: a
+        wheat-eater takes hay and wheat, a vegetable-eater carrots, potatoes, beetroot, pumpkins and
+        melons, a cake-eater cake, and none of them graze. A <strong>carnivore</strong> with nothing
+        to eat hunts cows, pigs, sheep, chickens and rabbits and then eats what they drop, and a
+        fish-eater hunts fish. A blood-drinker never regenerates: its bite is its meal and its heal.
+        A horse that cannot be fed never goes looking.
     </p>
 </div>
-<ul>
-    <li>Only a horse whose health is below its own max is considered &mdash;
-        the block scan is skipped entirely otherwise, so a pen full of healthy
-        horses costs nothing beyond the entity lookup.</li>
-    <li>The scan is a <strong>3-block-radius</strong> box around the horse. It
-        heals <strong>+1</strong> health per scan (per 30 ticks) only if it
-        finds <strong>both</strong>:
-        <ul>
-            <li>a block in <code>#horsegenetics:horse_water</code>
-                (<code>water</code>, <code>bubble_column</code>,
-                <code>water_cauldron</code>) <em>or</em> any block whose fluid
-                is in <code>#minecraft:water</code>;</li>
-            <li>a block in <code>#horsegenetics:horse_food</code>
-                (<code>hay_block</code>, <code>grass_block</code>, short/tall
-                grass, ferns, <code>moss_block</code>, pumpkin, melon, sugar
-                cane, pitcher crop, and <code>#minecraft:crops</code>).</li>
-        </ul>
-        Tags, not a hard-coded list, so a datapack can extend both.</li>
-    <li>A healing horse emits a couple of <code>HEART</code> particles, so
-        "it <em>is</em> recovering" is visible.</li>
-    <li>Healing is toward the horse's <em>own</em> max health, so a
-        genetically frail horse (when health genes land) stops at its own
-        ceiling.</li>
-    <li>The dimension's pens satisfy this by accident &mdash; every pen
-        has a full water cauldron and a hay bale.</li>
-</ul>
 <div class="note"><span class="label">Not built yet</span>
     <p>Milking &mdash; the other half of the original design &mdash; is
     <strong>not</strong> in this slice. When it lands, its "mare must be at full

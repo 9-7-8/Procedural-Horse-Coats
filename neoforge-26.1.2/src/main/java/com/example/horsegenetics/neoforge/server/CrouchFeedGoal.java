@@ -147,6 +147,16 @@ public final class CrouchFeedGoal extends Goal {
                 8, 0.2, 0.15, 0.2, 0.05);
         level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                 SoundEvents.HORSE_EAT, SoundSource.NEUTRAL, 0.8F, 1.0F);
+        // Fed from a hand (hunger, owner 2026-09-14), its favourite most. Read before the shrink:
+        // the last item in a stack is air afterwards.
+        String favourite = horse.isBaby() ? null : FoodPreferenceHandler.favouriteOf(horse);
+        boolean isFavourite = favourite != null && favourite.equals(
+                net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(food.getItem()).toString());
+        horse.setData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get(),
+                com.example.horsegenetics.common.care.Hunger.eat(
+                        horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get()),
+                        isFavourite ? com.example.horsegenetics.common.care.Hunger.Food.FAVOURITE
+                                : com.example.horsegenetics.common.care.Hunger.Food.HAND));
         if (!player.getAbilities().instabuild) {
             food.shrink(1);
         }

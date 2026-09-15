@@ -249,13 +249,21 @@ final class DebugTestYard {
     static final int ROW_U_D = 10;
 
     /**
+     * <b>Row V: hunger</b>, built by {@link DebugYardHunger} (owner, 2026-09-14). The food
+     * order, a starving horse that must not heal, a fed one that must, and a carnivore's hunt,
+     * each logging its own answer.
+     */
+    static final int ROW_V = ROW_U + ROW_U_D + PACKED_AISLE;
+    static final int ROW_V_D = 10;
+
+    /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
      * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
      * read 110 deep while its rows chained past 150, so the back of it was
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_U + ROW_U_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_V + ROW_V_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -338,6 +346,8 @@ final class DebugTestYard {
         DebugYardHerd.build(level, gy, cx, mouthZ);
         // Rows S-U: dryad pens and inheritance ratios, for a run of a whole day.
         DebugYardLong.build(level, gy, cx, mouthZ);
+        // Row V: hunger - the food order, starving and fed healing, a carnivore's hunt.
+        DebugYardHunger.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
