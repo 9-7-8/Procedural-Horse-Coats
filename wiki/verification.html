@@ -513,6 +513,9 @@
         rebindable.</li>
     <li><strong>A lycanthrope's drops.</strong> Dying in animal form kills the horse
         (<a href="gene-lycan.html#verified-lycan">verified</a>). Not checked: that the horse's drops land.
+        The yard's LYCAN DOOMED pen (row Z) kills an armoured wolf lycan once it shifts and logs PASS or FAIL
+        on the iron armour reaching the ground. Its neighbours LYCAN ROUND TRIP and WERE-COW log
+        <code>round trip SAME</code> or <code>CHANGED</code> at dawn.
         The drowning itself is <a href="known-gaps.html#gap-238">gap 238</a>.</li>
     <li><strong>A splice-carrot foal's genotype</strong> (rows L, M, N). The breeding is
         <a href="item-splice-carrots.html#verified-splice-breeds">verified</a>; open a foal and check the substituted locus is actually there.</li>
@@ -7174,8 +7177,9 @@
 <p>
     49 breeds, biome-weighted herd spawning, cross / mixed breeding labels, and
     per-breed stat bands feeding the four magical body-stat genes. Full design:
-    <a href="breeds.html">breeds.html</a>. Nothing here has been seen in a play
-    session; the server boots clean with the biome modifiers loaded.
+    <a href="breeds.html">breeds.html</a>. Herd spawning and breed assignment
+    have been seen in play (<a href="breeds.html#verified-herds">recorded there</a>);
+    what is below has not.
 </p>
 <ul>
     <li><strong>Horses spawn, in herds.</strong> Fly to a taiga, jungle,
@@ -8287,7 +8291,10 @@
         at the surface and not sink; a foal should <em>not</em> (the
         <code>when: adult</code> gate). This is an approximation &mdash; buoyancy, not
         a solid plane &mdash; so watch for bobbing, getting stuck at the edge, or the
-        rider's head going under.</li>
+        rider's head going under. <em>Unattended half in the yard:</em> the WATERBORN pen
+        (row AA) logs <code>[trace] test yard | WATERBORN reading n</code> with each horse's
+        height against the water and whether its head is under &mdash; adult, foal and a plain
+        control. The rider's half still needs a person.</li>
     <li><strong>Mares milk for water.</strong> Right-click a <strong>tamed mare</strong>
         with an empty bucket &rarr; it becomes a water bucket, no mount happens, and a
         second try within ~2 minutes does nothing. A <strong>stallion</strong>, or an
@@ -8304,7 +8311,9 @@ tail, the emitter and the light are <a href="gene-suntouched.html#verified-glow"
     <li><strong>The light cleans up.</strong> Kill the horse, or walk it far enough
         to unload &mdash; the <code>minecraft:light</code> block must disappear, not
         linger. In the <strong>horse dimension</strong> there should be
-        <em>no</em> light blocks at all (it is skipped there on purpose).</li>
+        <em>no</em> light blocks at all (it is skipped there on purpose). <em>The
+        horse-dimension half is in the yard:</em> the SUNTOUCHED pen (row AA) counts
+        <code>minecraft:light</code> on its watch line, which must stay 0.</li>
     <li><strong>The light follows and lags.</strong> Gallop and watch the lit patch
         lag or stick a block behind &mdash; it is a trailing block, not a smooth
         source. Confirm it can't light a spot already filled by a block.</li>
