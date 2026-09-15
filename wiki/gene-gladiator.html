@@ -130,7 +130,21 @@
     (<a href="api-notes.html#standing-horse-immobile">API notes</a>). With <code>HorseRearFightMixin</code> (the
     owner's call: rear, and keep fighting), the 07:33 run swung at ticks 56, 70 and 80, killing the first husk in four
     blows. KICK PLAIN's horse, which has no temper, never swung at its husks. What that run also showed, the gladiator
-    not turning on the second husk, is <a href="known-gaps.html#gap-248">gap 248</a>.
+    not turning on the second husk, is <a href="#verified-retarget">the next record</a>.
+</p>
+
+<p id="verified-retarget">
+    <strong>A gladiator that kills one attacker turns on the next</strong> (2026-09-15, formerly gap 248). In the 07:33
+    run it killed the first husk at tick 130 and then never struck again. The second husk hit it four times in 3.6 seconds
+    and killed it. <code>GeneAbilityHandler.temper</code> took the <em>first</em> matching entity in its 12-block box each
+    beat: dead or alive, near or far, seen or not, while the neighbouring pen's husks sat inside that radius behind a
+    wall. The fix keeps a live target it can see. Otherwise it takes whatever last hurt the horse, if that is alive,
+    hostile, in range and in sight, and failing that the nearest live, visible match. A dead target is dropped. Guardian
+    is untouched, because its owner-hurt trigger fires from <code>GeneReactionHandler</code>. <em>Evidence, 07:44
+    run:</em> the first husk died at tick 135. The next <code>horse hurt</code> line read <code>no target</code>, and the
+    gladiator struck the second husk at tick 162, 27 ticks later. It killed that husk at tick 213 and lived, on 1 of 22
+    health. Every <code>horse hurt</code> line named a target it could see. Whether the old code had aimed through the wall
+    was never logged, so that stays a likely cause rather than a proven one.
 </p>
 
 </section>
