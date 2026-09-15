@@ -347,7 +347,34 @@ final class DebugYardUnattended {
         for (int i = 0; i < 3; i++) {
             animal(level, EntityType.COW, gy, x0 + 9.5 + i * 2, z0 + 5.5);
         }
-        breedWhenShifted(level, DebugTestYard.box(x0, gy, z0, x0 + 17, gy + 3, z0 + ROW_Z_D));
+        AABB box = DebugTestYard.box(x0, gy, z0, x0 + 17, gy + 3, z0 + ROW_Z_D);
+        breedWhenShifted(level, box);
+        List<Animal> cows = level.getEntitiesOfClass(Animal.class, box.inflate(0.0, 2.0, 0.0),
+                a -> !(a instanceof Horse));
+        trackCows(level, box, cows, 1);
+    }
+
+    /**
+     * Gap 247: the WERE-COW pen's cows leave its watch box in daylight without dying or leaving the world. Where
+     * each one is, every ten seconds for five minutes, and whether it is still inside the box.
+     */
+    private static void trackCows(ServerLevel level, AABB box, List<Animal> cows, int n) {
+        DebugYardHerd.after(level, 200, () -> {
+            StringBuilder sb = new StringBuilder();
+            for (Animal c : cows) {
+                sb.append(sb.length() == 0 ? "" : "; ").append(ActionTrace.describeShort(c))
+                        .append(String.format(" at %.1f %.1f %.1f", c.getX(), c.getY(), c.getZ()))
+                        .append(c.isAlive() ? "" : " DEAD").append(c.isRemoved() ? " REMOVED " + c.getRemovalReason() : "")
+                        .append(box.inflate(0.0, 2.0, 0.0).contains(c.position()) ? ", in pen" : ", OUT OF PEN")
+                        .append(c.isPassenger() ? ", riding " + ActionTrace.describeShort(c.getVehicle()) : "")
+                        .append(c.isLeashed() ? ", leashed" : "");
+            }
+            ActionTrace.log("test yard", "WERE-COW cows " + n + " (pen x " + (int) box.minX + ".." + (int) box.maxX
+                    + ", z " + (int) box.minZ + ".." + (int) box.maxZ + "): " + sb);
+            if (n < 30) {
+                trackCows(level, box, cows, n + 1);
+            }
+        });
     }
 
     private static void breedWhenShifted(ServerLevel level, AABB box) {
