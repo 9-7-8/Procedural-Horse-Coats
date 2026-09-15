@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
@@ -305,7 +304,10 @@ final class DebugYardUnattended {
                 List.of("LYCAN DOOMED", "an armoured wolf", "lycan, killed at", "night: it drops"));
         Horse h = horse(level, gy, x0 + 4.5, z0 + 5.5, Sex.MALE, WOLF, true, "LYCAN DOOMED");
         if (h != null) {
-            h.setItemSlot(EquipmentSlot.BODY, new ItemStack(Items.IRON_HORSE_ARMOR));
+            // setBodyArmorItem, not setItemSlot: it is what a player's equipBodyArmor calls, and it marks the slot a
+            // guaranteed drop. Plain setItemSlot leaves a mob's default drop chance, and the 07:10 run's
+            // armour never dropped for exactly that reason.
+            h.setBodyArmorItem(new ItemStack(Items.IRON_HORSE_ARMOR));
         }
         killWhenShifted(level, DebugTestYard.box(x0, gy, z0, x0 + 8, gy + 3, z0 + ROW_Z_D));
     }
@@ -465,8 +467,9 @@ final class DebugYardUnattended {
         if (foal != null) {
             foal.setAge(-72_000);
         }
-        ActionTrace.log("test yard", "SUNTOUCHED: expect the SUNTOUCHED watch line to count minecraft:light 0 at"
-                + " every census; any light block is a FAIL");
+        ActionTrace.log("test yard", "SUNTOUCHED: the pen holds the yard's own lamps (11 light blocks in the 07:10"
+                + " run), so expect the SUNTOUCHED watch line's minecraft:light count never to rise above its first"
+                + " reading; any increase is a FAIL");
     }
 
     private static List<Mob> shiftedIn(ServerLevel level, AABB box) {

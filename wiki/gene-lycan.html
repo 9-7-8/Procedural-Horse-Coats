@@ -307,6 +307,19 @@
     from drowning, so the horse dies with its other form rather than disappearing.
 </p>
 
+<p id="verified-round-trip">
+    <strong>A night as an animal gives back the same horse</strong> (2026-09-15). <code>LycanthropyHandler</code> logs a
+    fingerprint at dusk and compares it at dawn or at death: UUID, name, generation, dam and sire, record, genome and
+    epigenome hashes, bond, foal or adult, tamed, and armour. Health is left out, since the night may take it. In the
+    yard's 07:10 run, eight horses changed at 07:20:53 and all eight logged <code>round trip SAME</code> at 07:30:01. They
+    were the LYCAN WOLF STALLION (bond 70), MARE (bond 35) and FOAL (bond 90, still a foal), the WERE-COW, and four
+    foals born in the pen that evening, who shifted and came back as foals with their dam and sire intact. LYCAN DOOMED
+    carried iron armour into its wolf form, died of <code>genericKill</code> with <code>round trip SAME</code> and a
+    <code>horse died</code> line. Its armour did not drop because the pen had put it on with <code>setItemSlot</code>,
+    which leaves a mob's default drop chance, rather than <code>setBodyArmorItem</code>, which a player's equip uses; the
+    pen is fixed and the drop is still to be seen.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
