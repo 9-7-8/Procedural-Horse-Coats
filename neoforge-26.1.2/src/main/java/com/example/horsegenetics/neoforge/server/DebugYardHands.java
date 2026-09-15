@@ -199,7 +199,8 @@ final class DebugYardHands {
      * <b>A spawner fed beside a holy ward</b> (checklist audit, 2026-09-15). A summon goes through the NATURAL spawn
      * path, which the ward refuses for anything hostile, so a zombie spawner fed beside a warding horse made nothing
      * whenever the spot fell inside the ward. {@code GeneAbilityHandler.summoning()} lets a summon through now. Each
-     * meal's zombies are counted five ticks after the feed and discarded at once, before they reach a horse. A summon
+     * meal's zombies are counted <b>in the feed's own tick</b> and discarded at once, before they reach a horse -
+     * anything later reads zero, because vanilla despawns them immediately with no player near (see below). A summon
      * lands anywhere within 32 blocks and the ward reaches 8 to 16, so the pen also counts zombies that landed within 8
      * of the ward horse: only those prove anything, and eight meals make a run with none unlikely (about one in ten).
      */
@@ -230,27 +231,34 @@ final class DebugYardHands {
             hands.snapTo(h.getX(), h.getY(), h.getZ() - 1.5, 0.0F, 0.0F);
             hands.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT));
             CommonHooks.onInteractEntity(hands, h, InteractionHand.MAIN_HAND);
-            DebugYardHerd.after(level, 5, () -> {
-                int meal = 0;
-                int inside = 0;
-                for (Entity z : level.getEntities(EntityType.ZOMBIE, near, e -> e.isAlive() && !before.contains(e.getUUID()))) {
-                    meal++;
-                    if (z.distanceToSqr(ward) <= 8.0 * 8.0) {
-                        inside++;
-                    }
-                    z.discard();
+            // COUNTED IN THIS TICK, not five later (15:36 run). The summons are ordinary hostiles carrying no
+            // persistence - GeneAbilityHandler deliberately does not set it, "it must despawn like anything
+            // else" - and vanilla's Mob.checkDespawn discards a MONSTER on its first tick when no player is
+            // near, which in an unattended yard is always. Every one of the eight meals logged
+            // "[Spawner] made 2 of 2 Zombie" and then two "creature removed ... DISCARDED" lines about 40 ms
+            // later, so the old five-tick count always arrived after the bodies were gone: 0 of 16, a FAIL
+            // that belonged to the pen and not to the ward. The sheep pens never hit this because a vanilla
+            // Animal does not despawn, which is why only this one failed. The summon happens synchronously
+            // inside onInteractEntity above, so counting here - before any mob has ticked - sees them.
+            int meal = 0;
+            int inside = 0;
+            for (Entity z : level.getEntities(EntityType.ZOMBIE, near, e -> e.isAlive() && !before.contains(e.getUUID()))) {
+                meal++;
+                if (z.distanceToSqr(ward) <= 8.0 * 8.0) {
+                    inside++;
                 }
-                tally[0] += meal;
-                tally[1] += inside;
-                String verdict = n < 8 ? "" : " - expect 16 made, some within the ward: "
-                        + (tally[0] < 16 ? "FAIL (the ward or something else refused a summon)"
-                        : tally[1] == 0 ? "INCONCLUSIVE (none landed inside the ward)" : "PASS");
-                ActionTrace.log("test yard", name + " meal " + n + ": " + meal + " zombie(s), " + inside
-                        + " within 8 of the ward | " + tally[0] + " made, " + tally[1] + " inside, so far" + verdict);
-                if (n < 8) {
-                    wardMeal(level, name, h, ward, 240, n + 1, tally);
-                }
-            });
+                z.discard();
+            }
+            tally[0] += meal;
+            tally[1] += inside;
+            String verdict = n < 8 ? "" : " - expect 16 made, some within the ward: "
+                    + (tally[0] < 16 ? "FAIL (the ward or something else refused a summon)"
+                    : tally[1] == 0 ? "INCONCLUSIVE (none landed inside the ward)" : "PASS");
+            ActionTrace.log("test yard", name + " meal " + n + ": " + meal + " zombie(s), " + inside
+                    + " within 8 of the ward | " + tally[0] + " made, " + tally[1] + " inside, so far" + verdict);
+            if (n < 8) {
+                wardMeal(level, name, h, ward, 240, n + 1, tally);
+            }
         });
     }
 
