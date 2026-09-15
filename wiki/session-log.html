@@ -81,6 +81,29 @@
     gap 250 (a blood-only horse's day without a bite, now logged). Also the checks only a person can do, listed in the
     tester guide.
 </p>
+<p>
+    <strong>Late morning (owner at the machine, then away): the spawner's sheep, a long run, and the checklist cut to a
+    tenth.</strong>
+</p>
+<ul>
+    <li><strong>Spawned mobs fell out of the world.</strong> <code>GeneAbilityHandler.findSpawnSpot</code> dropped each column
+        onto the heightmap, whose top over the void is the world's floor, so the yard's spawner pens put sheep at y&nbsp;0
+        (42 that day, sixteen logged dying of <code>outOfWorld</code>) and on roofs. It now searches within eight blocks of
+        the horse's feet. The 10:57 run's sixteen sheep all landed on the floor
+        (<a href="gene-spawner.html#verified-ground">spawner</a>).</li>
+    <li><strong>The yard was launched at 10:57 and left running</strong> for gaps 243, 244, 245 and 250, which only a run of
+        several hours can settle.</li>
+    <li><strong>The BONE MEAL pen named the wrong log line.</strong> Its sign said to grep <code>[watch] bonemeal</code>, which
+        is vanilla's <code>BonemealEvent</code> and never fires for the gene's direct call. The gene logs
+        <code>gene fertilised</code>. The sign is fixed in code, but not in the running build.</li>
+    <li><strong><a href="verification.html">To be verified</a> went from 8,534 lines to about 850.</strong> Six parallel audits
+        took every section below &sect;0-DS item by item. Each item was either verified (recorded on its own page's coding
+        tab, per rule 9), superseded (rebuilt, removed, or covered by a newer check or the tester guide), or still open.
+        Everything still open is now one section, &sect;0-EB, ordered hands, unattended, browser, visual. The anchors other
+        pages link to are kept. Checks that turned out to be answered by today's logs (the genetic-defect death message,
+        Waterborn's effects translating) were recorded and deleted. Owner questions that only lived there went to the
+        roadmap.</li>
+</ul>
 
 <h2 id="d2026-09-14g">2026-09-14 &mdash; eight hours of yard, four more fixes, and a launch straight into it</h2>
 

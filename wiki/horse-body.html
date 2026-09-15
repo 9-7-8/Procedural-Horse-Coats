@@ -703,10 +703,24 @@ public interface GeneEpigenetics {
     <strong>A lethal foal dies right after birth</strong> (owner-confirmed in play 2026-09-13:
     &ldquo;Foals dying right after birth also works.&rdquo;). The first part of the trait, size and
     health layer confirmed in play; it had carried &ldquo;not play-tested&rdquo; since 2026-09-04. The
-    yard repeated it on 2026-09-14 (<a href="gene-ednrb.html#verified">EDNRB</a>). Still unseen: whether
-    the death message resolves rather than printing
-    <code>death.attack.horsegenetics.genetic_defect</code>, lethal at conception, and an adult homozygote
-    living (<a href="verification.html#body">verification &sect;0b</a>).
+    yard repeated it on 2026-09-14 (<a href="gene-ednrb.html#verified">EDNRB</a>). Still unseen: an adult
+    homozygote living (<a href="verification.html#body">the checklist</a>).
+</p>
+
+<p id="verified-death-message">
+    <strong>The genetic-defect death message resolves</strong> (checked 2026-09-15, from the logs). Across
+    <code>latest.log</code> and the saved logs of 2026-09-14 and 15, vanilla's <code>Named entity … died:</code> line
+    reads <code>… did not survive a genetic defect</code> 330 times, and the raw key
+    <code>death.attack.horsegenetics</code> appears 0 times. For example, the yard's <code>LF LETHAL GBE1</code> foal at
+    10:57:25.
+</p>
+
+<p id="verified-lethal-at-conception">
+    <strong>A lethal at conception ends the pregnancy with no foal</strong> (2026-09-14, the test yard, unattended). In
+    the first quarter hour MATERNITY's planned loss came at one minute with its genetic-defect damage, and MET NATURAL,
+    two <a href="gene-met.html">MET</a> carriers, foaled and had an early loss. Over the next three hours the MET and KIT
+    early losses each logged their cause (<a href="fertility.html#verified-yard-0914">fertility</a>). The cause line
+    still reads so on 2026-09-15, e.g. <code>[Breeding] miscarriage: Nonviable KIT (white spotting) (W5/W5)</code>.
 </p>
 
 <div class="page-foot">

@@ -300,7 +300,8 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     normal install once jars reached other players. It had been hard-coded because
     <code>!FMLEnvironment.isProduction()</code> once hid every line for a session. Now: on in a dev run, off in a normal
     install, switchable in both, and the class logs once which way its gate went and what <code>isProduction()</code>
-    said.
+    said. <em>Seen on the dev side, 2026-09-15:</em> the 10:56 launch logged <code>[Debug] chat+log diagnostics
+    enabled=true (config debug.announce), FMLEnvironment.isProduction()=false</code>. The normal-install side is unseen.
 </p>
 
 <p id="verified-double-register">
@@ -326,11 +327,21 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     <code>EpigenomeSizeTest</code> guards each at half budget; the genotype guard failed on its first run.
     <code>EpigenomeSizeTest</code> had existed, but was pointed at the one cap with a number written next to it. The size
     problem underneath is <a href="known-gaps.html#gap-66">gap 66</a>.
+    <em>Seen holding, 2026-09-14 to 15:</em> every test-world launch puts preset spawn eggs, which carry a
+    <code>StoredGenome</code>, into the hotbar (<code>DebugTestWorldHandler.fillInventory</code>), and none of the 33
+    saved client logs of those two days, nor the current one, has a <code>Failed to encode</code> or disconnect line.
 </p>
 
 <p id="verified-test-world-launch">
     <strong><code>runClientTestWorld</code> needs no clicks</strong> (2026-09-14, the all-day run): the
     client lands in the horse dimension's test yard about thirty seconds after launch.
+</p>
+
+<p id="verified-test-world-cleanup">
+    <strong>Test worlds delete themselves</strong> (checked 2026-09-15, from the logs of 2026-09-12 to 15).
+    <code>DebugTestWorldCleanup</code>'s two sweeps both fire: 8 <code>Deleted test horse world … (on shutdown)</code>
+    lines for a client closed normally, and 59 <code>(left over from a previous run)</code> lines for one that was killed.
+    <code>run/saves/</code> holds only the running world.
 </p>
 
 </article>

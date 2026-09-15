@@ -118,10 +118,14 @@
     <code>-0.16</code> (net <code>-0.08</code>) while the lava is above the horse&rsquo;s
     fluid-jump threshold. That settles into a slow rise, and dropping it at the
     surface makes the horse bob there - the float vanilla gives a ridden horse in
-    water and not in lava. The speed is still vanilla lava&rsquo;s fixed crawl: there
-    is no attribute on it, and standing <em>on</em> lava like a strider is
-    <code>canStandOnFluid</code>, an entity method with no event, which would need a
-    mixin.
+    water and not in lava. The speed is no longer vanilla lava&rsquo;s fixed crawl:
+    <code>travelInLava</code> reads no attribute, so <code>mixin/LavaTravelMixin</code>
+    replaces its hardcoded <code>0.02</code> acceleration with the horse&rsquo;s own lava-speed
+    attribute, set from each copy&rsquo;s <code>lavaSpeed</code> between
+    <code>FireproofGene.MIN_LAVA_SPEED</code> (five times vanilla, near a walk) and
+    <code>MAX_LAVA_SPEED</code> (twenty times). Every other entity keeps vanilla&rsquo;s value.
+    Standing <em>on</em> lava like a strider is still not done: that is
+    <code>canStandOnFluid</code>, an entity method with no event.
 </p>
 
 <h2 id="shared">One shared change, three genes</h2>
@@ -139,6 +143,13 @@
 <p id="verified-rider">
     <strong>The rider is immune too, dismount included</strong> (owner-confirmed in the 2026-09-10
     play sessions).
+</p>
+
+<p id="verified-lava-speed">
+    <strong>A ridden horse crosses lava fast</strong> (owner, in the yard's lava channel, 2026-09-13):
+    &ldquo;lava is fast now!&rdquo; (<a href="session-log.html#d2026-09-13b">session log</a>). This was the first
+    thing <code>LavaTravelMixin</code>, the project's first mixin, delivered; gap 179 and the channel pen closed with
+    it. Not yet seen: breeding a faster swimmer from two parents, which is what the epigenetic range is for.
 </p>
 
 </section>
