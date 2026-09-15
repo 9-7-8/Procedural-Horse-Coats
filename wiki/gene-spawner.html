@@ -202,7 +202,22 @@
     <code>Shp/Shp</code> horse, and a NeoForge fake player feeds it wheat four times. Each meal's new sheep are told apart
     by UUID. In the 09:09 run A's four sheep were all gray and B's one was lime. The yard logged 16
     sheep joining over those eight meals, two a meal as promised. The pen's own count saw only five, because a summon
-    lands up to 32 blocks from the horse and some sheep fell outside the 34-block box it searched.
+    lands up to 32 blocks from the horse and some sheep fell outside the 34-block box it searched. The 10:57 run, after
+    the fix below, counted all sixteen: A's eight white, B's eight red, PASS in both.
+</p>
+
+<p id="verified-ground">
+    <strong>What it makes is set down on the ground, near the horse's own height</strong> (2026-09-15).
+    <code>GeneAbilityHandler.findSpawnSpot</code> used to drop each random column onto the
+    <code>MOTION_BLOCKING_NO_LEAVES</code> heightmap. A column with no blocks has its top at the world's floor, and the
+    yard's spawner pens sit near the horse dimension's edge, so sheep appeared at y&nbsp;0 over the void (42 in the day's
+    saved runs before the fix) and sixteen of them were logged dying of <code>outOfWorld</code>. Fifteen more landed on
+    roofs and treetops 4 to 37 blocks up,
+    and in the overworld a horse in a cave would have made its mobs on the surface. Now it searches within
+    <code>SPAWN_RISE</code> (8) blocks of the horse's feet, nearest first, for a sturdy top that is not leaves with two
+    clear, dry blocks over it. <em>Evidence:</em> the 10:57 run's sixteen sheep all joined at y&nbsp;129, the yard floor,
+    and each meal line reads <code>heights off the horse +0, +0</code>. No sheep died of <code>outOfWorld</code>. The yard
+    now discards each meal's sheep once counted, because a sheep 32 blocks off lands in some other pen, such as BLOOD ONLY's.
 </p>
 
 </section>
