@@ -80,7 +80,13 @@
     <em>Whether it should happen is the owner's call, not a code defect.</em> The precedent (2026-09-13) is that a
     were-fish on dry land "should absolutely still shift and then just die". The difference here is that the void
     under the pens is the mod's own dimension, not a place a player chose to leave the horse. Left unfixed pending
-    that decision.</li>
+    that decision.
+    <strong>Not only lycans (2026-09-14, 19:28).</strong> Elegiac Star, an ordinary wild stallion from the
+    corridor (spawned at 45, 129, 9), was logged joining the world again at 19:28:18 and took
+    <code>outOfWorld</code> damage three seconds later, dying at x 163, z &minus;23, y &minus;200. A second
+    <code>horse-spawn</code> line with nothing between suggests its chunk was loaded back from disk, and it fell
+    from wherever it was saved. Where that was, and whether the corridor has an unfloored stretch there, is not
+    yet known.</li>
 <li id="gap-242"><strong>Closed 2026-09-14, confirmed off the log: the yard's ratio tallies could never count a lethal foal.</strong>
     After the 17:35 build every <code>O/O</code> and <code>H/H</code> foal reached its tally and was marked died.
     <code>DebugYardLong</code>'s clock looked for <em>living</em> foals every ten seconds, and an <code>H/H</code>
