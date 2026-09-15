@@ -1646,7 +1646,7 @@ public final class GeneAbilityHandler {
             // The three that read the WORLD - sampled on an interval and cached,
             // because a condition is evaluated once per ability per tick and
             // these are a light lookup, a block search and a biome query.
-            case "dark", "near_jukebox", "snowing", "hostile_near" -> worldFlag(name, horse);
+            case "dark", "near_jukebox", "snowing", "hostile_near", "hot_biome", "cold_biome" -> worldFlag(name, horse);
             default -> false;
         };
     }
@@ -1721,7 +1721,7 @@ public final class GeneAbilityHandler {
      * own freshness stamp. The order is the array index and nothing else.
      */
     private static final List<String> WORLD_FLAG_NAMES =
-            List.of("dark", "near_jukebox", "snowing", "hostile_near");
+            List.of("dark", "near_jukebox", "snowing", "hostile_near", "hot_biome", "cold_biome");
 
     /**
      * <b>One sample per horse, with a timestamp PER FLAG.</b>
@@ -1832,6 +1832,9 @@ public final class GeneAbilityHandler {
      * the jukebox search is a couple of thousand blocks - so computing all four
      * on every refresh was never defensible either.
      */
+    /** A biome at least this warm is hot for {@code hot_biome}: vanilla's desert, badlands, savanna and Nether sit at 1.0 to 2.0. */
+    private static final float HOT_BIOME_TEMPERATURE = 1.0F;
+
     private static boolean sampleWorld(Horse horse, Level level, String wanted) {
         BlockPos at = horse.blockPosition();
         switch (wanted) {
@@ -1842,6 +1845,18 @@ public final class GeneAbilityHandler {
                 // so the flag is a biome query and not a level one.
                 return level.isRaining()
                         && level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
+            case "hot_biome": {
+                // Owner, 2026-09-15: Minecraft's hot biomes (base temperature 1.0 and up - desert, badlands, savanna,
+                // the Nether) plus the jungles and the mangrove swamp, for humid heat.
+                net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = level.getBiome(at);
+                return biome.value().getBaseTemperature() >= HOT_BIOME_TEMPERATURE
+                        || biome.is(net.minecraft.tags.BiomeTags.IS_JUNGLE)
+                        || biome.is(net.minecraft.world.level.biome.Biomes.MANGROVE_SWAMP);
+            }
+            case "cold_biome":
+                // Owner, 2026-09-15: anything with snow is cold. The game's own "snow falls here" test, at the horse's
+                // height, so a snowy peak in a temperate biome counts and it does not have to be snowing.
+                return level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
             case "near_jukebox":
                 for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
                         at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {

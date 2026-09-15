@@ -41,6 +41,11 @@
       { "pair": "Pa2/Pa1", "weight": 34 },
       { "pair": "Pa1/Pa1", "weight": 12 },
       { "pair": "Pa1/pa", "weight": 2 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [

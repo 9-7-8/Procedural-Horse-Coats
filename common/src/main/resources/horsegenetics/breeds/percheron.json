@@ -41,6 +41,10 @@
     "horsegenetics.gys1": [
       { "pair": "P/N", "weight": 2.5 },
       { "pair": "N/N", "weight": 97.5 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

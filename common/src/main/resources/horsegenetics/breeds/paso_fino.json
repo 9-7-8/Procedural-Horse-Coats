@@ -50,6 +50,11 @@
       { "pair": "W22/N", "weight": 4 },
       { "pair": "W35/N", "weight": 8 },
       { "pair": "N/N", "weight": 78 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [

@@ -43,7 +43,12 @@ class MagicalVariantTest {
     void thePickedPairShows() {
         for (long seed = 0; seed < 200; seed++) {
             MagicalVariant v = MagicalVariant.pick(friesian(), new SeededRng(seed)).orElseThrow();
-            assertFalse(v.gene().expressionOf(v.pair()).wildType(), v.gene().key() + "=" + v.pair().toTokens());
+            String what = v.gene().key() + "=" + v.pair().toTokens();
+            if (v.gene().affectsCoat()) {
+                assertFalse(v.gene().expressionOf(v.pair()).wildType(), what);
+            } else {
+                assertTrue(v.pair().homozygous() && !v.pair().first().equals(v.gene().defaultAllele()), what);
+            }
         }
     }
 

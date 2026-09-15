@@ -72,7 +72,7 @@ window.HG.fixtures = {
       "bond": { "amount": { "kind": "NUMBER", "required": false, "fallback": 1.000000 }, "interval": { "kind": "NUMBER", "required": false, "fallback": 200.000000 } },
       "ward": { "radius": { "kind": "NUMBER", "required": false, "fallback": 8.000000 } }
     },
-    "conditionFlags": ["sex_female", "sex_male", "tamed", "untamed", "adult", "baby", "full_health", "has_rider", "in_water", "submerged", "on_ground", "on_fire", "day", "night", "raining", "thundering", "sky_visible", "dark", "near_jukebox", "snowing", "hostile_near"],
+    "conditionFlags": ["sex_female", "sex_male", "tamed", "untamed", "adult", "baby", "full_health", "has_rider", "in_water", "submerged", "on_ground", "on_fire", "day", "night", "raining", "thundering", "sky_visible", "dark", "near_jukebox", "snowing", "hostile_near", "hot_biome", "cold_biome"],
     "pathCurveSamples": 8,
     "composer": {
       "nearBlackAlpha": { "000000": 204, "0c0c0c": 217, "161515": 228, "2f2f2f": 254, "303030": 255, "9b4a28": 255, "ffffff": 255 },

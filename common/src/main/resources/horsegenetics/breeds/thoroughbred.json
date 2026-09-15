@@ -56,6 +56,10 @@
     "horsegenetics.matp": [
       { "pair": "Cr/N", "weight": 0.4 },
       { "pair": "N/N", "weight": 99.6 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Csen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

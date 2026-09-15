@@ -49,6 +49,11 @@
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 16 },
       { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 60 },
+      { "pair": "Htol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [

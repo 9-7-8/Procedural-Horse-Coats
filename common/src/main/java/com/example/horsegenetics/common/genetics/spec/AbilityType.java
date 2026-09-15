@@ -63,7 +63,9 @@ public final class AbilityType {
             "day", "night", "raining", "thundering", "sky_visible",
             // The three that read the WORLD rather than a field on the horse -
             // see WORLD_FLAGS below, and the interval sampling in the translator.
-            "dark", "near_jukebox", "snowing", "hostile_near");
+            "dark", "near_jukebox", "snowing", "hostile_near",
+            // Climate, for the heat and cold loci: a biome query each.
+            "hot_biome", "cold_biome");
 
     /**
      * The flags whose answer comes from a <b>world lookup</b> rather than a
@@ -79,7 +81,7 @@ public final class AbilityType {
      * than a performance bug nobody notices.
      */
     public static final List<String> WORLD_FLAGS =
-            List.of("dark", "near_jukebox", "snowing", "hostile_near");
+            List.of("dark", "near_jukebox", "snowing", "hostile_near", "hot_biome", "cold_biome");
 
     /**
      * <b>Which creatures a radius effect is about.</b> Shared by

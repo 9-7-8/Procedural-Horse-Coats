@@ -36,6 +36,11 @@
       { "pair": "SB1/N", "weight": 8 },
       { "pair": "W35/N", "weight": 6 },
       { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [

@@ -106,8 +106,9 @@ public final class GeneWikiTool {
             if (handWritten.contains(gene.key())) {
                 continue;
             }
-            Files.writeString(wiki.resolve(pageOf(gene)),
-                    genePage(gene, opensOn.get(gene.key())), StandardCharsets.UTF_8);
+            Path page = wiki.resolve(pageOf(gene));
+            String kept = Files.exists(page) ? verifiedBlock(Files.readString(page, StandardCharsets.UTF_8)) : "";
+            Files.writeString(page, genePage(gene, opensOn.get(gene.key()), kept), StandardCharsets.UTF_8);
             written++;
         }
         List<String> notBay = new ArrayList<>();
@@ -742,7 +743,29 @@ public final class GeneWikiTool {
      *                on, or {@code null} to let the window choose - see
      *                {@link #openingBases()}
      */
+    /**
+     * A generated page's <b>Verified</b> block, to carry across a rebake: from {@code <h3 id="verified">} to the end of
+     * the tab it sits in, or empty.
+     *
+     * <p>Hard rule 9 puts what was verified on the coding tab of the thing's own page, and a generated page is
+     * rewritten whole, so until this every bake deleted those records. Found 2026-09-15, when a bake emptied thirteen
+     * pages' Verified sections. The generator writes no {@code id="verified"} of its own, so everything from that
+     * heading on is somebody's.
+     */
+    static String verifiedBlock(String page) {
+        int from = page.indexOf("<h3 id=\"verified\">");
+        if (from < 0) {
+            return "";
+        }
+        int to = page.indexOf("</section>", from);
+        return to < 0 ? "" : page.substring(from, to).trim() + "\n\n";
+    }
+
     private static String genePage(SpecGene gene, String opensOn) {
+        return genePage(gene, opensOn, "");
+    }
+
+    private static String genePage(SpecGene gene, String opensOn, String verified) {
         // The family is the eyebrow's second half and nothing more: it names
         // the sidebar section and the landing-page heading this gene sits
         // under, neither of which is a page one could link to.
@@ -821,6 +844,7 @@ public final class GeneWikiTool {
         sb.append(notes(gene.spec().notes(), "about", "Why it is built this way"));
 
         sb.append(layers(gene));
+        sb.append(verified);   // the hand-written records, kept - see verifiedBlock
         sb.append("</section>\n\n");
         foot(sb);
         return sb.toString();

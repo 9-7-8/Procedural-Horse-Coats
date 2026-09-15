@@ -918,7 +918,9 @@ window.HG = window.HG || {};
     "day", "night", "raining", "thundering", "sky_visible",
     // These three read the WORLD rather than a field on the horse, so the game
     // samples them on an interval rather than every tick. No difference here.
-    "dark", "near_jukebox", "snowing", "hostile_near"];
+    "dark", "near_jukebox", "snowing", "hostile_near",
+    // Climate, for the heat and cold loci.
+    "hot_biome", "cold_biome"];
 
   var TRIGGER_KINDS = ["continuous", "on_move", "interval", "on_interact",
     "on_hurt", "on_owner_hurt"];

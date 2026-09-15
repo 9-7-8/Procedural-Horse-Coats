@@ -40,6 +40,11 @@
       { "pair": "Fl2/Fl1", "weight": 38 },
       { "pair": "Fl1/Fl1", "weight": 14 },
       { "pair": "Fl1/f", "weight": 2 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [

@@ -43,6 +43,11 @@
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 20 },
       { "pair": "rn/rn", "weight": 80 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [

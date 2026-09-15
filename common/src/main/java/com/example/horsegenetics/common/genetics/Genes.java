@@ -71,6 +71,8 @@ import com.example.horsegenetics.common.genetics.genes.GladiatorGene;
 import com.example.horsegenetics.common.genetics.genes.GuardianGene;
 import com.example.horsegenetics.common.genetics.genes.EnderEchoGene;
 import com.example.horsegenetics.common.genetics.genes.EyesightGene;
+import com.example.horsegenetics.common.genetics.genes.MagicColdGene;
+import com.example.horsegenetics.common.genetics.genes.MagicHeatGene;
 import com.example.horsegenetics.common.genetics.genes.WeatherSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.WeatherJumpGene;
 import com.example.horsegenetics.common.genetics.genes.FoodPreferenceGene;
@@ -491,6 +493,8 @@ public final class Genes {
     public static final EyesightGene EYESIGHT = new EyesightGene();
     public static final WeatherSpeedGene WEATHER_SPEED = new WeatherSpeedGene();
     public static final WeatherJumpGene WEATHER_JUMP = new WeatherJumpGene();
+    public static final MagicHeatGene MAGIC_HEAT = new MagicHeatGene();
+    public static final MagicColdGene MAGIC_COLD = new MagicColdGene();
     public static final FoodPreferenceGene FOOD_PREFERENCE = new FoodPreferenceGene();
     public static final PotionMilkGene POTION_MILK = new PotionMilkGene();
     public static final EggLayerGene EGG_LAYER = new EggLayerGene();
@@ -618,7 +622,7 @@ public final class Genes {
             HOT_BLOODED, DRYAD, INTIMIDATING, MEOWING,
             CLEANSING_LIGHT, HOLY_WARD, ECHOLOCATE, BASE_ALARM,
             MUSIC_ENJOYER, GLADIATOR, GUARDIAN, ENDER_ECHO,
-            EYESIGHT, WEATHER_SPEED, WEATHER_JUMP,
+            EYESIGHT, WEATHER_SPEED, WEATHER_JUMP, MAGIC_HEAT, MAGIC_COLD,
             FOOD_PREFERENCE, POTION_MILK, EGG_LAYER, SINGER,
             PACK_LEADER, SPAWNER,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,

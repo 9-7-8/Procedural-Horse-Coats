@@ -45,6 +45,11 @@
     "horsegenetics.dun": [
       { "pair": "d1/d2", "weight": 30 },
       { "pair": "d2/d2", "weight": 70 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 60 },
+      { "pair": "Htol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [

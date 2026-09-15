@@ -44,6 +44,11 @@
       { "pair": "Cr/Cr", "weight": 0.01 },
       { "pair": "Cr/N", "weight": 1.98 },
       { "pair": "N/N", "weight": 98.01 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [

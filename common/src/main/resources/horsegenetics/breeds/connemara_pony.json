@@ -48,6 +48,10 @@
       { "pair": "G3/G2", "weight": 5 },
       { "pair": "G2/G2", "weight": 3 },
       { "pair": "N/N", "weight": 48 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

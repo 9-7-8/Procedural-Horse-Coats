@@ -43,6 +43,11 @@
       { "pair": "prl/prl", "weight": 0.41 },
       { "pair": "prl/N", "weight": 11.21 },
       { "pair": "N/N", "weight": 76.74 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [

@@ -46,6 +46,11 @@
     "horsegenetics.dun": [
       { "pair": "d1/d2", "weight": 30 },
       { "pair": "d2/d2", "weight": 70 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 60 },
+      { "pair": "Htol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -88,6 +93,10 @@
     "horsegenetics.champagne": [
       { "pair": "Ch/Ch", "weight": 25 },
       { "pair": "Ch/c", "weight": 75 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -321,6 +330,11 @@
       { "pair": "prl/prl", "weight": 1.44 },
       { "pair": "prl/N", "weight": 20.4 },
       { "pair": "N/N", "weight": 72.25 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -462,6 +476,11 @@
     "horsegenetics.myo5a": [
       { "pair": "lfs/N", "weight": 2.2 },
       { "pair": "N/N", "weight": 97.8 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 60 },
+      { "pair": "Htol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -517,6 +536,11 @@
       { "pair": "SB1/N", "weight": 20 },
       { "pair": "W35/N", "weight": 8 },
       { "pair": "N/N", "weight": 72 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -564,6 +588,15 @@
       { "pair": "Fl1/Fl1", "weight": 34 },
       { "pair": "Fl1/f", "weight": 36 },
       { "pair": "f/f", "weight": 10 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/Hsen", "weight": 5 },
+      { "pair": "Hsen/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -608,6 +641,10 @@
     ],
     "horsegenetics.grey": [
       { "pair": "G3/G3", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -660,6 +697,11 @@
       { "pair": "Cr/Cr", "weight": 0.01 },
       { "pair": "Cr/N", "weight": 1.98 },
       { "pair": "N/N", "weight": 98.01 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -704,6 +746,11 @@
       { "pair": "SB1/N", "weight": 8 },
       { "pair": "W35/N", "weight": 6 },
       { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -790,6 +837,15 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 55 },
       { "pair": "N/N", "weight": 45 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/Hsen", "weight": 5 },
+      { "pair": "Hsen/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -847,6 +903,10 @@
       { "pair": "G3/G2", "weight": 5 },
       { "pair": "G2/G2", "weight": 3 },
       { "pair": "N/N", "weight": 48 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -898,6 +958,11 @@
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 20 },
       { "pair": "rn/rn", "weight": 80 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -946,6 +1011,11 @@
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 12 },
       { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -1005,6 +1075,10 @@
     ],
     "horsegenetics.eye_glow_sclera_left": [
       { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "strains": [
@@ -1106,6 +1180,11 @@
       { "pair": "Pa2/Pa1", "weight": 34 },
       { "pair": "Pa1/Pa1", "weight": 12 },
       { "pair": "Pa1/pa", "weight": 2 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -1231,6 +1310,11 @@
       { "pair": "Cr/Cr", "weight": 0.04 },
       { "pair": "Cr/N", "weight": 3.92 },
       { "pair": "N/N", "weight": 96.04 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -1271,6 +1355,11 @@
     "horsegenetics.megaesophagus": [
       { "pair": "meg/N", "weight": 1.7 },
       { "pair": "N/N", "weight": 98.3 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/Hsen", "weight": 5 },
+      { "pair": "Hsen/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -1342,6 +1431,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 65 },
       { "pair": "N/N", "weight": 35 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -1439,6 +1532,11 @@
       { "pair": "Fl2/Fl1", "weight": 38 },
       { "pair": "Fl1/Fl1", "weight": 14 },
       { "pair": "Fl1/f", "weight": 2 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -1564,6 +1662,16 @@
       { "pair": "Cr/Cr", "weight": 0.36 },
       { "pair": "Cr/N", "weight": 11.28 },
       { "pair": "N/N", "weight": 88.36 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/Hsen", "weight": 5 },
+      { "pair": "Hsen/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -1621,6 +1729,10 @@
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 12 },
       { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -1669,6 +1781,11 @@
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 24 },
       { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -1741,6 +1858,14 @@
     "horsegenetics.gbe1": [
       { "pair": "gbed/N", "weight": 2 },
       { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -1900,6 +2025,11 @@
       { "pair": "prl/prl", "weight": 0.41 },
       { "pair": "prl/N", "weight": 11.21 },
       { "pair": "N/N", "weight": 76.74 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -1957,6 +2087,11 @@
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 16 },
       { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 60 },
+      { "pair": "Htol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -2028,6 +2163,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 55 },
       { "pair": "N/N", "weight": 45 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -2124,6 +2263,16 @@
     "horsegenetics.gbe1": [
       { "pair": "gbed/N", "weight": 2 },
       { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -2240,6 +2389,11 @@
       { "pair": "W22/N", "weight": 4 },
       { "pair": "W35/N", "weight": 8 },
       { "pair": "N/N", "weight": 78 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -2290,6 +2444,10 @@
     "horsegenetics.gys1": [
       { "pair": "P/N", "weight": 2.5 },
       { "pair": "N/N", "weight": 97.5 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -2322,6 +2480,11 @@
     ],
     "horsegenetics.dun": [
       { "pair": "D/D", "weight": 100 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -2379,6 +2542,11 @@
       { "pair": "TE1/N", "weight": 16 },
       { "pair": "TE2/N", "weight": 6 },
       { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -2541,6 +2709,15 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 60 },
       { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
@@ -2596,6 +2773,15 @@
     "horsegenetics.gys1": [
       { "pair": "P/N", "weight": 2.5 },
       { "pair": "N/N", "weight": 97.5 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/Hsen", "weight": 5 },
+      { "pair": "Hsen/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -2699,6 +2885,10 @@
       { "pair": "Pa1/Pa1", "weight": 20 },
       { "pair": "Pa1/pa", "weight": 40 },
       { "pair": "pa/pa", "weight": 40 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -2769,6 +2959,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 45 },
       { "pair": "N/N", "weight": 55 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -2833,6 +3027,10 @@
     "horsegenetics.matp": [
       { "pair": "Cr/N", "weight": 0.4 },
       { "pair": "N/N", "weight": 99.6 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Csen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -2885,6 +3083,11 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 60 },
       { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -2956,6 +3159,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 60 },
       { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

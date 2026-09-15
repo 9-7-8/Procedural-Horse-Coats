@@ -78,11 +78,18 @@ public record MagicalVariant(Gene gene, AllelePair pair) {
         return out;
     }
 
-    /** The pairs of {@code gene} a horse of either sex can carry that are not a wild type. */
+    /**
+     * The pairs of {@code gene} that show. For a gene that paints, a pair whose expression is not a wild type. A gene
+     * that does not paint marks every outcome a wild type, just to stay out of the texture key, so for those it is a
+     * pair <b>homozygous</b> for a non-wild allele: whatever the dominance, two copies of it do something.
+     */
     public static List<AllelePair> showingPairs(Gene gene) {
         List<AllelePair> out = new ArrayList<>();
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
-            if (!gene.expressionOf(pair).wildType()) {
+            boolean shows = gene.affectsCoat()
+                    ? !gene.expressionOf(pair).wildType()
+                    : pair.homozygous() && !pair.first().equals(gene.defaultAllele());
+            if (shows) {
                 out.add(pair);
             }
         }

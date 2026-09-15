@@ -63,6 +63,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 60 },
       { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

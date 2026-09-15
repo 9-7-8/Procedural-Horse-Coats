@@ -30,6 +30,11 @@
     "horsegenetics.megaesophagus": [
       { "pair": "meg/N", "weight": 1.7 },
       { "pair": "N/N", "weight": 98.3 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/Hsen", "weight": 5 },
+      { "pair": "Hsen/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [

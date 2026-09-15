@@ -64,6 +64,14 @@
     "horsegenetics.gbe1": [
       { "pair": "gbed/N", "weight": 2 },
       { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

@@ -61,6 +61,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 65 },
       { "pair": "N/N", "weight": 35 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

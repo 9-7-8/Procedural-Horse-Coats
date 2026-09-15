@@ -35,6 +35,10 @@
       { "pair": "Pa1/Pa1", "weight": 20 },
       { "pair": "Pa1/pa", "weight": 40 },
       { "pair": "pa/pa", "weight": 40 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [

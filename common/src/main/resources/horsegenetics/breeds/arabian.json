@@ -57,6 +57,11 @@
     "horsegenetics.myo5a": [
       { "pair": "lfs/N", "weight": 2.2 },
       { "pair": "N/N", "weight": 97.8 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 60 },
+      { "pair": "Htol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [

@@ -33,6 +33,10 @@
     "horsegenetics.champagne": [
       { "pair": "Ch/Ch", "weight": 25 },
       { "pair": "Ch/c", "weight": 75 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
