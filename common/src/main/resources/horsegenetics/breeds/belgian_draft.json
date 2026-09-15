@@ -30,11 +30,6 @@
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
     ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "prl/N", "weight": 5 },
-      { "pair": "N/N", "weight": 87 }
-    ],
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 28 },
       { "pair": "rn/rn", "weight": 72 }

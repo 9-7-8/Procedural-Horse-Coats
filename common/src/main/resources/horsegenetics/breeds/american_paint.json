@@ -33,8 +33,11 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 12 },
-      { "pair": "N/N", "weight": 88 }
+      { "pair": "Cr/Cr", "weight": 0.36 },
+      { "pair": "Cr/prl", "weight": 0.08 },
+      { "pair": "Cr/N", "weight": 11.2 },
+      { "pair": "prl/N", "weight": 1.31 },
+      { "pair": "N/N", "weight": 87.05 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 6 },

@@ -39,6 +39,11 @@
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 14 },
       { "pair": "rn/rn", "weight": 86 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.01 },
+      { "pair": "Cr/N", "weight": 1.98 },
+      { "pair": "N/N", "weight": 98.01 }
     ]
   },
   "notes": [

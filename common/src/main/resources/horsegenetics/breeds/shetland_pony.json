@@ -38,8 +38,9 @@
       { "pair": "d2/d2", "weight": 92 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "N/N", "weight": 92 }
+      { "pair": "Cr/Cr", "weight": 0.04 },
+      { "pair": "Cr/N", "weight": 3.92 },
+      { "pair": "N/N", "weight": 96.04 }
     ],
     "horsegenetics.tobiano": [
       { "pair": "To/to", "weight": 30 },

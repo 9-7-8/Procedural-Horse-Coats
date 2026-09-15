@@ -32,10 +32,6 @@
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
     ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 6 },
-      { "pair": "N/N", "weight": 94 }
-    ],
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 14 },
       { "pair": "N/N", "weight": 86 }

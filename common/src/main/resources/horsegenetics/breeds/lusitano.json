@@ -35,6 +35,14 @@
       { "pair": "G3/N", "weight": 44 },
       { "pair": "G3/G3", "weight": 18 },
       { "pair": "N/N", "weight": 38 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.36 },
+      { "pair": "Cr/prl", "weight": 0.77 },
+      { "pair": "Cr/N", "weight": 10.51 },
+      { "pair": "prl/prl", "weight": 0.41 },
+      { "pair": "prl/N", "weight": 11.21 },
+      { "pair": "N/N", "weight": 76.74 }
     ]
   },
   "notes": [

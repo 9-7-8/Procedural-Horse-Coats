@@ -62,6 +62,11 @@
       { "pair": "W34/N", "weight": 5 },
       { "pair": "SB1/N", "weight": 8 },
       { "pair": "N/N", "weight": 73 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.16 },
+      { "pair": "Cr/N", "weight": 7.68 },
+      { "pair": "N/N", "weight": 92.16 }
     ]
   },
   "notes": [

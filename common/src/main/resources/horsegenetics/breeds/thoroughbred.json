@@ -52,6 +52,10 @@
       { "pair": "W5/N", "weight": 1 },
       { "pair": "W22/N", "weight": 1 },
       { "pair": "N/N", "weight": 50 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 0.4 },
+      { "pair": "N/N", "weight": 99.6 }
     ]
   },
   "notes": [

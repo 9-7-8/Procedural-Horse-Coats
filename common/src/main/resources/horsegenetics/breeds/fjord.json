@@ -40,6 +40,11 @@
       { "pair": "Pa2/Pa1", "weight": 36 },
       { "pair": "Pa1/Pa1", "weight": 14 },
       { "pair": "Pa1/pa", "weight": 2 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.04 },
+      { "pair": "Cr/N", "weight": 3.92 },
+      { "pair": "N/N", "weight": 96.04 }
     ]
   },
   "notes": [

@@ -33,10 +33,6 @@
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
     ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 6 },
-      { "pair": "N/N", "weight": 94 }
-    ],
     "horsegenetics.leopard": [
       { "pair": "LP/lp", "weight": 50 },
       { "pair": "LP/LP", "weight": 32 },

@@ -30,12 +30,13 @@
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
     ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/Cr", "weight": 100 }
+    "horsegenetics.champagne": [
+      { "pair": "Ch/Ch", "weight": 25 },
+      { "pair": "Ch/c", "weight": 75 }
     ]
   },
   "notes": [
-    "Pale cream coat, amber eyes, pink skin - the cream double-dilute already renders; dedicated eye colour is a roadmap gene.",
+    "Pale gold coat, amber eyes, pink freckled skin: gold champagne (Ch on a chestnut), not the cream dilution, which the breed does not carry.",
     "EMS / laminitis: age-related, folded into heartiness."
   ]
 }

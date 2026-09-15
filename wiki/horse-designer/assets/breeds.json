@@ -35,9 +35,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 14 },
-      { "pair": "Cr/Cr", "weight": 3 },
-      { "pair": "N/N", "weight": 83 }
+      { "pair": "Cr/Cr", "weight": 2.25 },
+      { "pair": "Cr/N", "weight": 25.5 },
+      { "pair": "N/N", "weight": 72.25 }
     ],
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 5 },
@@ -85,12 +85,13 @@
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
     ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/Cr", "weight": 100 }
+    "horsegenetics.champagne": [
+      { "pair": "Ch/Ch", "weight": 25 },
+      { "pair": "Ch/c", "weight": 75 }
     ]
   },
   "notes": [
-    "Pale cream coat, amber eyes, pink skin - the cream double-dilute already renders; dedicated eye colour is a roadmap gene.",
+    "Pale gold coat, amber eyes, pink freckled skin: gold champagne (Ch on a chestnut), not the cream dilution, which the breed does not carry.",
     "EMS / laminitis: age-related, folded into heartiness."
   ]
 },
@@ -129,9 +130,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 16 },
-      { "pair": "prl/N", "weight": 8 },
-      { "pair": "N/N", "weight": 76 }
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 18 },
+      { "pair": "N/N", "weight": 81 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 10 },
@@ -218,8 +219,11 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 12 },
-      { "pair": "N/N", "weight": 88 }
+      { "pair": "Cr/Cr", "weight": 0.36 },
+      { "pair": "Cr/prl", "weight": 0.08 },
+      { "pair": "Cr/N", "weight": 11.2 },
+      { "pair": "prl/N", "weight": 1.31 },
+      { "pair": "N/N", "weight": 87.05 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 6 },
@@ -309,6 +313,14 @@
       { "pair": "G3/G2", "weight": 6 },
       { "pair": "G2/G2", "weight": 4 },
       { "pair": "N/N", "weight": 26 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.09 },
+      { "pair": "Cr/prl", "weight": 0.72 },
+      { "pair": "Cr/N", "weight": 5.1 },
+      { "pair": "prl/prl", "weight": 1.44 },
+      { "pair": "prl/N", "weight": 20.4 },
+      { "pair": "N/N", "weight": 72.25 }
     ]
   },
   "notes": [
@@ -380,6 +392,11 @@
       { "pair": "W34/N", "weight": 5 },
       { "pair": "SB1/N", "weight": 8 },
       { "pair": "N/N", "weight": 73 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.16 },
+      { "pair": "Cr/N", "weight": 7.68 },
+      { "pair": "N/N", "weight": 92.16 }
     ]
   },
   "notes": [
@@ -487,8 +504,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 12 },
-      { "pair": "N/N", "weight": 88 }
+      { "pair": "Cr/Cr", "weight": 0.04 },
+      { "pair": "Cr/N", "weight": 3.92 },
+      { "pair": "N/N", "weight": 96.04 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 14 },
@@ -536,11 +554,6 @@
       { "pair": "Sh/Sh", "weight": 20 },
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
-    ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "prl/N", "weight": 5 },
-      { "pair": "N/N", "weight": 87 }
     ],
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 28 },
@@ -642,6 +655,11 @@
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 14 },
       { "pair": "rn/rn", "weight": 86 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.01 },
+      { "pair": "Cr/N", "weight": 1.98 },
+      { "pair": "N/N", "weight": 98.01 }
     ]
   },
   "notes": [
@@ -814,8 +832,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 10 },
-      { "pair": "N/N", "weight": 90 }
+      { "pair": "Cr/Cr", "weight": 0.64 },
+      { "pair": "Cr/N", "weight": 14.72 },
+      { "pair": "N/N", "weight": 84.64 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 8 },
@@ -919,10 +938,6 @@
       { "pair": "Sh/Sh", "weight": 20 },
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
-    ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 6 },
-      { "pair": "N/N", "weight": 94 }
     ],
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 14 },
@@ -1133,9 +1148,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 16 },
-      { "pair": "prl/N", "weight": 8 },
-      { "pair": "N/N", "weight": 76 }
+      { "pair": "Cr/Cr", "weight": 0.64 },
+      { "pair": "Cr/N", "weight": 14.72 },
+      { "pair": "N/N", "weight": 84.64 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 8 },
@@ -1211,6 +1226,11 @@
       { "pair": "Pa2/Pa1", "weight": 36 },
       { "pair": "Pa1/Pa1", "weight": 14 },
       { "pair": "Pa1/pa", "weight": 2 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.04 },
+      { "pair": "Cr/N", "weight": 3.92 },
+      { "pair": "N/N", "weight": 96.04 }
     ]
   },
   "notes": [
@@ -1295,8 +1315,14 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "N/N", "weight": 92 }
+      { "pair": "Cr/Cr", "weight": 0.25 },
+      { "pair": "Cr/prl", "weight": 0.15 },
+      { "pair": "Cr/sno", "weight": 0.02 },
+      { "pair": "Cr/N", "weight": 9.33 },
+      { "pair": "prl/prl", "weight": 0.02 },
+      { "pair": "prl/N", "weight": 2.8 },
+      { "pair": "sno/N", "weight": 0.37 },
+      { "pair": "N/N", "weight": 87.05 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 6 },
@@ -1533,6 +1559,11 @@
       { "pair": "Pa1/Pa1", "weight": 26 },
       { "pair": "Pa1/pa", "weight": 34 },
       { "pair": "pa/pa", "weight": 22 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.36 },
+      { "pair": "Cr/N", "weight": 11.28 },
+      { "pair": "N/N", "weight": 88.36 }
     ]
   },
   "notes": [
@@ -1575,8 +1606,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "N/N", "weight": 92 }
+      { "pair": "Cr/Cr", "weight": 0.01 },
+      { "pair": "Cr/N", "weight": 1.98 },
+      { "pair": "N/N", "weight": 98.01 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 5 },
@@ -1630,8 +1662,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 10 },
-      { "pair": "N/N", "weight": 90 }
+      { "pair": "Cr/Cr", "weight": 0.04 },
+      { "pair": "Cr/N", "weight": 3.92 },
+      { "pair": "N/N", "weight": 96.04 }
     ],
     "horsegenetics.grey": [
       { "pair": "G3/N", "weight": 24 },
@@ -1678,8 +1711,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 12 },
-      { "pair": "N/N", "weight": 88 }
+      { "pair": "Cr/Cr", "weight": 0.09 },
+      { "pair": "Cr/N", "weight": 5.82 },
+      { "pair": "N/N", "weight": 94.09 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 55 },
@@ -1748,10 +1782,6 @@
       { "pair": "Sh/Sh", "weight": 20 },
       { "pair": "Sh/ShD", "weight": 22 },
       { "pair": "ShD/ShD", "weight": 7 }
-    ],
-    "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 6 },
-      { "pair": "N/N", "weight": 94 }
     ],
     "horsegenetics.leopard": [
       { "pair": "LP/lp", "weight": 50 },
@@ -1862,6 +1892,14 @@
       { "pair": "G3/N", "weight": 44 },
       { "pair": "G3/G3", "weight": 18 },
       { "pair": "N/N", "weight": 38 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.36 },
+      { "pair": "Cr/prl", "weight": 0.77 },
+      { "pair": "Cr/N", "weight": 10.51 },
+      { "pair": "prl/prl", "weight": 0.41 },
+      { "pair": "prl/N", "weight": 11.21 },
+      { "pair": "N/N", "weight": 76.74 }
     ]
   },
   "notes": [
@@ -1904,8 +1942,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 10 },
-      { "pair": "N/N", "weight": 90 }
+      { "pair": "Cr/Cr", "weight": 0.09 },
+      { "pair": "Cr/N", "weight": 5.82 },
+      { "pair": "N/N", "weight": 94.09 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 8 },
@@ -1961,8 +2000,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "N/N", "weight": 92 }
+      { "pair": "Cr/Cr", "weight": 0.16 },
+      { "pair": "Cr/N", "weight": 7.68 },
+      { "pair": "N/N", "weight": 92.16 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 5 },
@@ -2032,8 +2072,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 14 },
-      { "pair": "N/N", "weight": 86 }
+      { "pair": "Cr/Cr", "weight": 0.49 },
+      { "pair": "Cr/N", "weight": 13.02 },
+      { "pair": "N/N", "weight": 86.49 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 20 },
@@ -2136,6 +2177,11 @@
     "horsegenetics.roan": [
       { "pair": "Rn/rn", "weight": 14 },
       { "pair": "rn/rn", "weight": 86 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.01 },
+      { "pair": "Cr/N", "weight": 1.98 },
+      { "pair": "N/N", "weight": 98.01 }
     ]
   },
   "notes": [
@@ -2177,8 +2223,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 10 },
-      { "pair": "N/N", "weight": 90 }
+      { "pair": "Cr/Cr", "weight": 0.64 },
+      { "pair": "Cr/N", "weight": 14.72 },
+      { "pair": "N/N", "weight": 84.64 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 6 },
@@ -2318,8 +2365,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 10 },
-      { "pair": "N/N", "weight": 90 }
+      { "pair": "Cr/Cr", "weight": 0.64 },
+      { "pair": "Cr/N", "weight": 14.72 },
+      { "pair": "N/N", "weight": 84.64 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 6 },
@@ -2366,9 +2414,10 @@
       { "pair": "a/a", "weight": 25 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 14 },
-      { "pair": "Cr/Cr", "weight": 3 },
-      { "pair": "N/N", "weight": 83 }
+      { "pair": "Cr/Cr", "weight": 0.36 },
+      { "pair": "Cr/N", "weight": 11.28 },
+      { "pair": "prl/N", "weight": 0.06 },
+      { "pair": "N/N", "weight": 88.3 }
     ],
     "horsegenetics.dun": [
       { "pair": "d1/d2", "weight": 22 },
@@ -2457,8 +2506,9 @@
       { "pair": "d2/d2", "weight": 92 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "N/N", "weight": 92 }
+      { "pair": "Cr/Cr", "weight": 0.04 },
+      { "pair": "Cr/N", "weight": 3.92 },
+      { "pair": "N/N", "weight": 96.04 }
     ],
     "horsegenetics.tobiano": [
       { "pair": "To/to", "weight": 30 },
@@ -2588,8 +2638,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 8 },
-      { "pair": "N/N", "weight": 92 }
+      { "pair": "Cr/Cr", "weight": 0.02 },
+      { "pair": "Cr/N", "weight": 2.57 },
+      { "pair": "N/N", "weight": 97.42 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 4 },
@@ -2691,8 +2742,11 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 12 },
-      { "pair": "N/N", "weight": 88 }
+      { "pair": "Cr/Cr", "weight": 0.36 },
+      { "pair": "Cr/sun", "weight": 0.04 },
+      { "pair": "Cr/N", "weight": 11.24 },
+      { "pair": "sun/N", "weight": 0.56 },
+      { "pair": "N/N", "weight": 87.8 }
     ],
     "horsegenetics.champagne": [
       { "pair": "Ch/c", "weight": 8 },
@@ -2775,6 +2829,10 @@
       { "pair": "W5/N", "weight": 1 },
       { "pair": "W22/N", "weight": 1 },
       { "pair": "N/N", "weight": 50 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 0.4 },
+      { "pair": "N/N", "weight": 99.6 }
     ]
   },
   "notes": [
@@ -2869,8 +2927,9 @@
       { "pair": "ShD/ShD", "weight": 7 }
     ],
     "horsegenetics.matp": [
-      { "pair": "Cr/N", "weight": 10 },
-      { "pair": "N/N", "weight": 90 }
+      { "pair": "Cr/Cr", "weight": 0.64 },
+      { "pair": "Cr/N", "weight": 14.72 },
+      { "pair": "N/N", "weight": 84.64 }
     ],
     "horsegenetics.dun": [
       { "pair": "D/d2", "weight": 6 },
