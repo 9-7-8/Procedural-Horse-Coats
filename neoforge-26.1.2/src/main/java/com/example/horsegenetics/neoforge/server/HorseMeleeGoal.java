@@ -52,7 +52,14 @@ import net.minecraft.world.entity.animal.equine.Horse;
  * <p>It rears on a swing <b>only if it is not already rearing</b>. At twelve
  * ticks that never mattered, because the swings were really twenty apart; at
  * ten, re-triggering it on every hit would keep the horse up on its hind legs
- * more or less permanently, and a rearing horse is not closing on anything.
+ * more or less permanently.
+ *
+ * <p><b>A rear used to stop the fight.</b> Vanilla counts a standing horse as
+ * immobile, and an immobile mob runs no goals at all, so every rear froze this
+ * goal and its cooldown for twenty ticks and the ten-tick swing never happened
+ * (gap 222, the yard's KICK GLADIATOR pen: 59 ticks between blows).
+ * {@code mixin.HorseRearFightMixin} lets a rearing horse with a live target keep
+ * running its AI; the animation is unchanged.
  */
 public final class HorseMeleeGoal extends MeleeAttackGoal {
 

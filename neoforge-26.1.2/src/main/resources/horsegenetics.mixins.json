@@ -6,7 +6,8 @@
   "refmap": "horsegenetics.refmap.json",
   "mixins": [
     "LavaTravelMixin",
-    "HorseRegenMixin"
+    "HorseRegenMixin",
+    "HorseRearFightMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -57,6 +57,13 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-247"><strong>Open, found 2026-09-15: the yard's WERE-COW pen loses its cows in daylight, with no death.</strong>
+    Three cows went in at 07:10:27 beside a <code>lycan=Cow/Cow</code> horse. The pen's watch line counted 2 at 07:10:47, 1 at
+    07:11:07 and 0 at 07:12:37, before any night. No <code>creature died</code> line names a cow, and the pen is brick wall
+    with a closed gate. For ten seconds at 07:11:47 the STATS pen, across the aisle to the north, counted one extra creature.
+    The NIGHT SHY pen's two cows, built the same way, stayed. So something removes these cows without killing them, or they
+    get out through a gap a horse cannot use. <em>Next:</em> a <code>[watch] creature removed</code> line (removal reason and
+    pen) is built for the next run and will name the exit.</li>
 <li id="gap-245"><strong>Open, found 2026-09-14: the lethal ratio pens draw far too few, then far too many, homozygous foals, one run at a time.</strong>
     RATIO HYPP and RATIO LETHAL WHITE are carrier-by-carrier crosses and should throw one lethal foal in four. The
     17:36 run threw too many (HYPP 10 <code>H/H</code> in 20). By 20:08 the 19:08 run had thrown <strong>none in
@@ -197,7 +204,14 @@
     (<a href="api-notes.html#verified-melee-cooldown">API notes</a>). A guardian or hunting horse against a zombie
     should now land about two blows to its one. <em>Where to look:</em> the yard's KICK GLADIATOR and KICK PLAIN pens
     (row AA), each with two husks. Pass is <code>[watch] kick</code> lines about 10 ticks apart for the gladiator,
-    <code>horse hurt</code> from the husks about 20 apart, and no kick line from the plain horse.</li>
+    <code>horse hurt</code> from the husks about 20 apart, and no kick line from the plain horse.
+    <em>First run, 2026-09-15 07:10 - failed:</em> the gladiator swung at ticks 84 and 143 while the two husks hit it eight
+    times and killed it inside six seconds. <em>Cause:</em> the rear after each blow (gap 213's strike animation) is
+    <code>setStanding(20)</code>, a standing horse is <code>isImmobile()</code>, and an immobile mob runs no goals, so every
+    blow froze the melee goal and its cooldown for twenty ticks
+    (<a href="api-notes.html#standing-horse-immobile">API notes</a>). <em>Fix, the owner's call (rear, and keep
+    fighting), built and not yet played:</em> <code>HorseRearFightMixin</code> stops the rear alone making a horse with a
+    live target immobile. The plain horse's pen passed: no kick lines.</li>
 <li id="gap-221"><strong>Fixed 2026-09-13, not yet played: the two coat budgets are guesses.</strong>
     A herd coming into view no longer bakes every coat twice inside one frame
     (<a href="pipeline.html#verified-bake-freeze">pipeline</a>). The 4&nbsp;ms per-window bake budget and the

@@ -823,6 +823,27 @@ public final class DebugWorldWatch {
      * are the two readings of an empty intimidating pen and only one of them is
      * the gene working.
      */
+    /**
+     * <b>A creature that leaves without dying</b> - discarded, unloaded, moved to another dimension. Added
+     * 2026-09-15 when the WERE-COW pen lost all three cows in daylight with no death line and no break in
+     * its walls: a death has its own line above, so without this the only trace of any other exit was a
+     * count going down. Deaths are skipped here so each exit is written once.
+     */
+    @SubscribeEvent
+    static void onCreatureLeave(EntityLeaveLevelEvent event) {
+        if (!watching(event.getLevel()) || !(event.getEntity() instanceof LivingEntity living)
+                || living instanceof Horse || living instanceof net.minecraft.world.entity.player.Player) {
+            return;
+        }
+        Entity.RemovalReason reason = living.getRemovalReason();
+        if (reason == Entity.RemovalReason.KILLED) {
+            return;
+        }
+        note("creature removed", living.getType().builtInRegistryHolder().key().identifier()
+                + " at " + living.blockPosition().toShortString() + inArea(living.blockPosition())
+                + " - " + (reason == null ? "no removal reason" : reason.name()));
+    }
+
     @SubscribeEvent
     static void onDeath(LivingDeathEvent event) {
         if (!watching(event.getEntity().level()) || event.getEntity() instanceof Horse) {
