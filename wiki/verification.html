@@ -2966,9 +2966,10 @@
         <code>GeneAbilityHandler.clearAttributes</code> ever removes a modifier, and that
         method has never run. Check the reverse too: two genes moving the same attribute
         must not strip each other, because the ids are gene-scoped and the sweep only
-        spares ids the horse is currently asking for. <em>Blocked:</em> swim speed's modifier
-        changes nothing to begin with (<a href="known-gaps.html#gap-249">gap 249</a>), so
-        this needs another conditional attribute gene or that fix first.</li>
+        spares ids the horse is currently asking for. <em>Needs another gene:</em> magic swim speed no longer
+        uses an attribute at all (<a href="gene-magic-swim-speed.html#verified-swim">it scales
+        the swim push now</a>), so this wants a gene with an attribute gated on a condition such
+        as <code>in_water</code>.</li>
     <li><strong>The clone egg.</strong> Kill an <code>Egg/Egg</code> horse and use what it
         drops. The horse that comes back must be a <em>clone</em> &mdash; same coat, same
         name-worthy details, same numbers &mdash; and not merely a horse with the same

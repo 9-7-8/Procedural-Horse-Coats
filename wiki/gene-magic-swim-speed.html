@@ -87,16 +87,34 @@
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 
-<div class="note danger">
-    <span class="label">It does nothing in game (gap 249)</span>
-    <p>
-        The gene multiplies <code>water_movement_efficiency</code>, whose base is 0 on a horse, and a total multiplier on
-        zero is still zero. The yard's SWIM SPEED pen (2026-09-15) read <code>base 0.000 value 0.000</code> on
-        <code>Otr/Otr</code>, <code>Otr/n</code> and <code>Stne/Stne</code> horses, each carrying its modifier. So no horse
-        swims any faster or slower for it. How to fix it is open: see
-        <a href="known-gaps.html#gap-249">gap 249</a>.
-    </p>
-</div>
+<h3 id="verified">Verified</h3>
+
+<p id="verified-swim">
+    <strong>It scales how hard a horse pushes through water, loose or ridden - after two rewrites</strong> (2026-09-15,
+    formerly gap 249).
+    <ul>
+        <li><em>As built:</em> it multiplied <code>water_movement_efficiency</code>, whose base is 0 on a horse. The yard
+            read <code>base 0.000 value 0.000</code> on every genotype, so no horse swam any differently.</li>
+        <li><em>The owner's call:</em> scale in-water movement, on the server and the rider's client alike.</li>
+        <li><em>First try, a velocity nudge</em> that inferred each tick's push from the velocity: it amplified noise. An
+            Otter horse barely pushing drifted seven times as far as a plain one.</li>
+        <li><em>What ships:</em> the Java-only ability <code>GeneAbility.Swim(factor)</code> and
+            <code>mixin/HorseSwimMixin</code>, which multiplies the push strength vanilla's
+            <code>LivingEntity.travelInWater</code> hands to <code>moveRelative</code>. A horse that is not pushing is not
+            moved. Vanilla runs that method on whichever side moves the horse, so a ridden horse is scaled on its rider's
+            client, where the factor comes from <code>ClientSwimHandler</code> and the client record cache.</li>
+    </ul>
+    <em>Evidence, the 10:19 run:</em> the SWIM SPEED pen's three horses swim eight five-second laps of walled channels,
+    steered by their move control.
+    <ul>
+        <li><code>Stne/Stne</code> (factor 0.62) covered 1.83 blocks and plain covered 2.90, a ratio of 0.63 - proportional.</li>
+        <li><code>Otr/Otr</code> (factor 1.56) covered 21.87 blocks, about 7.5 times plain.</li>
+    </ul>
+    The Otter overshoot is most likely because a horse steered by its AI pushes so weakly that a plain one barely gets
+    going (0.37 blocks in five seconds), while the Otter's extra push gets it swimming. That is an inference, not
+    measured. How it feels under a rider, whose push is far larger, is a tester's check
+    (<a href="for-testers.html">for testers</a>).
+</p>
 
 <h2 id="factor">Not a body stat, and deliberately so</h2>
 
