@@ -117,9 +117,12 @@
         <strong>Pass:</strong> the dryad pens still log <code>[watch] tree grew</code>, some
         <code>[trace] dryad | tree held back at</code> lines appear, and no horse takes
         <code>inWall</code> damage. The trees still have to grow; if <code>tree grew</code> stops
-        entirely, the reach box is too big. <strong>Failing so far:</strong> no tree grew in the first 43
-        minutes of the 17:36 run, and 13 grows were held back. The box covers whole pens
-        (<a href="known-gaps.html#gap-244">gap 244</a>).</li>
+        entirely, the reach box is too big. <strong>Failed on the 17:36 run:</strong> no tree grew in 43
+        minutes, and 13 grows were held back, because the box covered whole pens
+        (<a href="known-gaps.html#gap-244">gap 244</a>). <strong>Fixed in the 19:06 build:</strong> a
+        sapling now checks only its own column and the ring round it, up to a horse's height.
+        <strong>Pass:</strong> <code>tree grew</code> lines come back in every dryad pen, DRYAD DARK SMALL
+        grows a tree despite its horse, and still no horse takes <code>inWall</code> damage.</li>
     <li><strong>The ratio pens count only their own foals</strong>
         (<a href="known-gaps.html#gap-239">gap 239</a>). <strong>Pass:</strong> no <code>a N/N foal
         died</code> in RATIO LETHAL WHITE and no <code>a n/n foal died</code> in RATIO SIZE, and the

@@ -59,7 +59,7 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
-<li id="gap-244"><strong>Open, found 2026-09-14: gap 237's fix stops every tree in the yard's dryad pens from growing.</strong>
+<li id="gap-244"><strong>Fixed 2026-09-14, not yet played: gap 237's fix stopped every tree in the yard's dryad pens from growing.</strong>
     <code>GeneAbilityHandler.onTreeGrow</code> cancels a grow if any horse is inside a box <code>TREE_REACH</code>
     (4) blocks out from the sapling on each side and <code>TREE_HEIGHT</code> (16) up. The dryad pens are 5 to 8
     blocks wide, so a horse anywhere in its own pen is almost always inside that box. In the 43 minutes from 17:36, no
@@ -73,8 +73,14 @@
     Waxen Maverick, a wild foal born at 3, 129, -6 in the yard, turned into a <code>minecraft:parrot</code> after
     dark. At 17:33:54 the parrot was at y&nbsp;&minus;65 and took <code>outOfWorld</code> damage, and the
     <code>[trace] lycan</code> line records the horse dying with it. Nothing in the dimension stops a flying form
-    from going below the floor. Not yet known: whether it flew down or fell through a gap in the yard, and whether
-    the overworld has the same problem.</li>
+    from going below the floor. Not yet known: whether it flew down or fell through a gap in the yard. The overworld
+    is mostly safe, since bedrock sits between an animal and the void.
+    <em>The death itself ran as designed</em>: <code>LycanthropyHandler.onWereAnimalDeath</code> restored the horse
+    and killed it with the same damage, so it logged, dropped and entered the ancestry database like any death.
+    <em>Whether it should happen is the owner's call, not a code defect.</em> The precedent (2026-09-13) is that a
+    were-fish on dry land "should absolutely still shift and then just die". The difference here is that the void
+    under the pens is the mod's own dimension, not a place a player chose to leave the horse. Left unfixed pending
+    that decision.</li>
 <li id="gap-242"><strong>Closed 2026-09-14, confirmed off the log: the yard's ratio tallies could never count a lethal foal.</strong>
     After the 17:35 build every <code>O/O</code> and <code>H/H</code> foal reached its tally and was marked died.
     <code>DebugYardLong</code>'s clock looked for <em>living</em> foals every ten seconds, and an <code>H/H</code>

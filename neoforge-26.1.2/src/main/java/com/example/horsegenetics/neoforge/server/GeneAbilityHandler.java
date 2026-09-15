@@ -1378,6 +1378,21 @@ public final class GeneAbilityHandler {
      * a sapling and tries again on a later random tick or bone meal, by which time the horse
      * has usually moved.
      *
+     * <p>ONLY WHERE A TRUNK CAN REACH A HORSE (gap 244, 2026-09-14). The first box reached four
+     * blocks round the sapling and sixteen up, and the yard's dryad pens are five to eight wide:
+     * in 43 minutes no tree grew, 13 grows were held back, and the one-horse DRYAD DARK SMALL
+     * could not grow at all. A horse suffocates in a log, not in the canopy over its head, and a
+     * trunk steps sideways at most one block per level above the first - straight, 2x2,
+     * forking acacia, bending azalea - so below a standing horse's head a log can only be in
+     * the sapling's column or the ring round it, which covers either corner of a 2x2 as well.
+     * Both suffocations on record had the horse standing where its tree grew. Huge mushrooms,
+     * fungi and the mangrove propagule keep the wide ring: a red mushroom's cap comes down to
+     * one block up and two out, and mangrove roots spread along the ground.
+     *
+     * <p>UNVERIFIED: that leaves do not suffocate in this version, and the one-step-per-level
+     * reading of the trunk placers, which is from vanilla as remembered and was not re-read
+     * against 26.1.2. Cherry's sideways branches are assumed to start above a horse's head.
+     *
      * <p>UNVERIFIED API: that {@code BlockGrowFeatureEvent} fires for every sapling and huge
      * mushroom grow in this version, natural and bone-mealed, and that cancelling it leaves
      * the sapling standing. The class, {@code getPos} and {@code setCanceled} were checked
@@ -1389,7 +1404,10 @@ public final class GeneAbilityHandler {
             return;
         }
         BlockPos at = event.getPos();
-        AABB reach = new AABB(at).inflate(TREE_REACH, 1.0, TREE_REACH).expandTowards(0.0, TREE_HEIGHT, 0.0);
+        BlockState grower = level.getBlockState(at);
+        double side = grower.is(net.minecraft.tags.BlockTags.SAPLINGS) && !grower.is(Blocks.MANGROVE_PROPAGULE)
+                ? TRUNK_REACH : TREE_REACH;
+        AABB reach = new AABB(at).inflate(side, 0.0, side).expandTowards(0.0, HORSE_CLEARANCE, 0.0);
         if (level.getEntitiesOfClass(Horse.class, reach, Horse::isAlive).isEmpty()) {
             return;
         }
@@ -1402,11 +1420,14 @@ public final class GeneAbilityHandler {
         }
     }
 
-    /** From a 2x2 sapling's corner to the edge of the widest vanilla canopy. */
+    /** A sapling's own column and the ring round it: either corner of a 2x2, and one sideways step. */
+    private static final double TRUNK_REACH = 1.0;
+
+    /** Huge mushrooms, fungi and the mangrove propagule: caps and roots that spread low. */
     private static final double TREE_REACH = 4.0;
 
-    /** Taller than any vanilla tree a sapling grows (a mega jungle tops out near 15). */
-    private static final double TREE_HEIGHT = 16.0;
+    /** Above the sapling's own block: a standing horse is under two blocks tall. */
+    private static final double HORSE_CLEARANCE = 2.0;
 
     private static long treeHeldLogged = Long.MIN_VALUE / 2;
 
