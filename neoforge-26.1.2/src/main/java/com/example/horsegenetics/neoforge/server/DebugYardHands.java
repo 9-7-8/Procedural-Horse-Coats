@@ -154,7 +154,8 @@ final class DebugYardHands {
                 ActionTrace.log("test yard", name + ": the horse is gone - no meal " + n);
                 return;
             }
-            AABB near = h.getBoundingBox().inflate(34.0, 6.0, 34.0);
+            // 10 up and down: a summon now lands within GeneAbilityHandler.SPAWN_RISE (8) of the horse's feet.
+            AABB near = h.getBoundingBox().inflate(34.0, 10.0, 34.0);
             Set<UUID> before = new HashSet<>();
             for (Sheep s : level.getEntitiesOfClass(Sheep.class, near)) {
                 before.add(s.getUUID());
@@ -166,17 +167,25 @@ final class DebugYardHands {
             InteractionResult said = CommonHooks.onInteractEntity(hands, h, InteractionHand.MAIN_HAND);
             DebugYardHerd.after(level, 60, () -> {
                 Map<String, Integer> meal = new TreeMap<>();
+                StringBuilder heights = new StringBuilder();
                 for (Sheep s : level.getEntitiesOfClass(Sheep.class, near)) {
                     if (s.isAlive() && !before.contains(s.getUUID())) {
                         String c = s.getColor().getSerializedName();
                         meal.merge(c, 1, Integer::sum);
                         colours.merge(c, 1, Integer::sum);
+                        heights.append(heights.length() == 0 ? "" : ", ")
+                                .append(String.format("%+d", s.getBlockY() - h.getBlockY()));
+                        // Counted, then gone: a sheep 32 blocks off lands in some other pen, where it is a blood
+                        // horse's prey or a night-shy horse's scare, and none of those pens asked for one.
+                        s.discard();
                     }
                 }
                 String verdict = n < 4 ? "" : " - expect every sheep one colour: "
                         + (colours.size() == 1 ? "PASS" : colours.isEmpty() ? "FAIL (no sheep came)" : "FAIL");
                 ActionTrace.log("test yard", name + " meal " + n + " (the interaction said " + said + "): this meal "
-                        + (meal.isEmpty() ? "no sheep" : meal) + ", all so far " + colours + verdict);
+                        + (meal.isEmpty() ? "no sheep" : meal) + ", all so far " + colours + verdict
+                        + (heights.length() == 0 ? "" : " | heights off the horse " + heights
+                        + " (expect within 8; a sheep 'from outOfWorld' is a FAIL)"));
                 if (n < 4) {
                     feed(level, name, h, 240, n + 1, colours);
                 }

@@ -34,6 +34,7 @@ import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Difficulty;
@@ -46,7 +47,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.JukeboxBlock;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
@@ -2430,18 +2430,54 @@ public final class GeneAbilityHandler {
         return Math.floorMod(horse.level().getGameTime() + phase, (long) interval) == 0;
     }
 
+    /** Blocks above or below the horse's feet a summoned mob may be set down. */
+    private static final int SPAWN_RISE = 8;
+
+    /**
+     * A random column within {@code radius}, and the standable spot in it nearest the horse's own height.
+     *
+     * <p><b>Not the heightmap.</b> This used to drop each candidate onto
+     * {@code MOTION_BLOCKING_NO_LEAVES}, and a column with no blocks in it has its top at the world's floor: the yard's
+     * SPAWNER pens sit near the horse dimension's edge, and one sheep a meal or so appeared at y 0 over the void and
+     * died of {@code outOfWorld} (2026-09-15). The same top put sheep on roofs and treetops 10 to 37 blocks above the
+     * horse, and in the overworld would put a cave horse's mobs on the surface. Searching a band round the horse's
+     * feet, for a sturdy block with two clear blocks over it, fixes all three.
+     */
     private static BlockPos findSpawnSpot(Horse horse, ServerLevel level, double radius) {
         int r = (int) Math.max(1, radius);
+        BlockPos feet = horse.blockPosition();
         for (int tries = 0; tries < 12; tries++) {
-            BlockPos p = horse.blockPosition().offset(
+            BlockPos column = feet.offset(
                     horse.getRandom().nextInt(2 * r + 1) - r, 0,
                     horse.getRandom().nextInt(2 * r + 1) - r);
-            BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p);
-            if (level.isEmptyBlock(ground) && level.isEmptyBlock(ground.above())) {
-                return ground;
+            for (int d = 0; d <= 2 * SPAWN_RISE; d++) {
+                int dy = (d & 1) == 0 ? d / 2 : -(d + 1) / 2;   // 0, -1, +1, -2, +2 ... nearest first
+                BlockPos p = column.above(dy);
+                if (standable(level, p)) {
+                    return p;
+                }
             }
         }
         return null;
+    }
+
+    /** A sturdy top that is not leaves under {@code p}, and no collision or fluid in {@code p} or the block over it. */
+    private static boolean standable(ServerLevel level, BlockPos p) {
+        if (p.getY() <= level.getMinY() || p.getY() + 1 > level.getMaxY()) {
+            return false;
+        }
+        BlockPos below = p.below();
+        BlockState floor = level.getBlockState(below);
+        if (floor.is(BlockTags.LEAVES) || !floor.isFaceSturdy(level, below, Direction.UP)) {
+            return false;
+        }
+        for (BlockPos air : new BlockPos[] {p, p.above()}) {
+            BlockState st = level.getBlockState(air);
+            if (!st.getCollisionShape(level, air).isEmpty() || !st.getFluidState().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // ------------------------------------------------------------------
