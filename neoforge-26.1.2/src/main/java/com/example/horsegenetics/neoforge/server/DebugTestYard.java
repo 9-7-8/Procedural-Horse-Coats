@@ -289,6 +289,11 @@ final class DebugTestYard {
     static final int ROW_AF_D = 10;
     static final int ROW_AG = ROW_AF + ROW_AF_D + PACKED_AISLE;
     static final int ROW_AG_D = 10;
+    /** Rows AH-AI: checks that used to need a player's hands ({@link DebugYardHands}). */
+    static final int ROW_AH = ROW_AG + ROW_AG_D + PACKED_AISLE;
+    static final int ROW_AH_D = 10;
+    static final int ROW_AI = ROW_AH + ROW_AH_D + PACKED_AISLE;
+    static final int ROW_AI_D = 10;
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -297,7 +302,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_AG + ROW_AG_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_AI + ROW_AI_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -389,6 +394,8 @@ final class DebugTestYard {
         // Rows AE-AG: a foal's bond, breed, starburst dial and name at birth; the dhampir split.
         DebugYardBirths.build(level, gy, cx, mouthZ);
         DebugYardDhampir.build(level, gy, cx, mouthZ);
+        // Rows AH-AI: gold and subfertile pairings on a clock, weaning by distance, the spawner's sheep colour.
+        DebugYardHands.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.

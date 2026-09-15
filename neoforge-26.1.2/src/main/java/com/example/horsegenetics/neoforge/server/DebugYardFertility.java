@@ -142,12 +142,34 @@ final class DebugYardFertility {
         Genome metSire = Genome.of(Genotype.parse(MET_CARRIER), rng).withSex(Sex.MALE);
         HorseRecord metSireRecord = HorseRecord.founder(new UUID(0x51EL, 2L), "Carrier", "Sire", metSire);
 
-        pregnant(horse(level, gy, x0 + 2.0, z0 + 2.5, Sex.FEMALE, FERT + "n/n", true, "DUE 1 MIN"),
-                plainSire, plainSireRecord, false, false, day);
-        pregnant(horse(level, gy, x0 + 4.5, z0 + 4.5, Sex.FEMALE, FERT + "tw/tw", true, "TWINS DUE 2 MIN"),
-                plainSire, plainSireRecord, true, false, 2 * day);
-        pregnant(horse(level, gy, x0 + 7.0, z0 + 6.5, Sex.FEMALE, MET_CARRIER, true, "LOSS AT 1, DUE 3"),
-                metSire, metSireRecord, false, true, 3 * day);
+        Horse due1 = horse(level, gy, x0 + 2.0, z0 + 2.5, Sex.FEMALE, FERT + "n/n", true, "DUE 1 MIN");
+        Horse twins = horse(level, gy, x0 + 4.5, z0 + 4.5, Sex.FEMALE, FERT + "tw/tw", true, "TWINS DUE 2 MIN");
+        Horse loss = horse(level, gy, x0 + 7.0, z0 + 6.5, Sex.FEMALE, MET_CARRIER, true, "LOSS AT 1, DUE 3");
+        pregnant(due1, plainSire, plainSireRecord, false, false, day);
+        pregnant(twins, plainSire, plainSireRecord, true, false, 2 * day);
+        pregnant(loss, metSire, metSireRecord, false, true, 3 * day);
+        // THE VET'S KIT, READ WITHOUT HANDS (2026-09-15): the kit's examine is chat only, so the pen logs the same
+        // report the kit would print, before the first birth. And TWINS' speed early and late, for "15% lower".
+        DebugYardHerd.after(level, 200, () -> {
+            for (Horse h : new Horse[]{due1, twins, loss}) {
+                if (h != null && h.isAlive()) {
+                    ActionTrace.log("test yard", "MATERNITY vet: " + (h.getCustomName() == null ? "?" : h.getCustomName().getString())
+                            + " - " + String.join(" / ", ReproHandler.vetReport(h)));
+                }
+            }
+            ActionTrace.log("test yard", "MATERNITY vet: expect DUE 1 MIN one foal, TWINS DUE 2 MIN twins, LOSS AT 1, DUE 3"
+                    + " one foal");
+        });
+        for (long at : new long[]{200L, 1_600L}) {
+            DebugYardHerd.after(level, at, () -> {
+                if (twins != null && twins.isAlive()) {
+                    ActionTrace.log("test yard", String.format("MATERNITY speed at %d ticks: TWINS %.4f (base %.4f)%s", at,
+                            twins.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),
+                            twins.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),
+                            at > 1_000 ? " - expect about 15% under base late in a twin pregnancy" : ""));
+                }
+            });
+        }
         DebugYardGameplay.chest(level, gy, x0 + 5, z0 - 2, "MATERNITY", List.of(
                 new ItemStack(ModItems.VET_KIT.get())));
     }
@@ -269,7 +291,7 @@ final class DebugYardFertility {
     }
 
     /** Half way through the quiet part of her cycle. */
-    private static void outOfHeat(@Nullable Horse mare) {
+    static void outOfHeat(@Nullable Horse mare) {
         if (mare == null) {
             return;
         }
