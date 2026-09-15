@@ -30,6 +30,10 @@ public final class SwimScaling {
     }
 
     static final double WATER_DRAG = 0.8;
+    /** Vanilla's in-water drag while sprinting (a ridden horse at a gallop). */
+    static final double SPRINT_DRAG = 0.9;
+    /** A backstop, in blocks per tick: whatever the estimate gets wrong, no swimmer leaves at a sprint's pace and more. */
+    private static final double MAX_SPEED = 1.0;
     private static final double MIN_FACTOR = 0.05;
 
     /**
@@ -49,10 +53,21 @@ public final class SwimScaling {
         Vec3 v = horse.getDeltaMovement();
         Vec3 before = last.get(horse);
         if (before != null) {
+            // The drag vanilla actually used this tick. With the wrong one, part of the drag is left inside the "push",
+            // and scaling that turns drag into thrust: at 0.8 assumed and 0.9 real, an Otter at factor 2 would never
+            // stop speeding up.
+            double drag = horse.isSprinting() ? SPRINT_DRAG : WATER_DRAG;
             double f = Math.max(MIN_FACTOR, factor);
-            double pushX = v.x / WATER_DRAG - before.x;
-            double pushZ = v.z / WATER_DRAG - before.z;
-            v = new Vec3(v.x + (f - 1.0) * WATER_DRAG * pushX, v.y, v.z + (f - 1.0) * WATER_DRAG * pushZ);
+            double pushX = v.x / drag - before.x;
+            double pushZ = v.z / drag - before.z;
+            double nx = v.x + (f - 1.0) * drag * pushX;
+            double nz = v.z + (f - 1.0) * drag * pushZ;
+            double h = Math.sqrt(nx * nx + nz * nz);
+            if (h > MAX_SPEED) {
+                nx *= MAX_SPEED / h;
+                nz *= MAX_SPEED / h;
+            }
+            v = new Vec3(nx, v.y, nz);
             horse.setDeltaMovement(v);
         }
         last.put(horse, v);

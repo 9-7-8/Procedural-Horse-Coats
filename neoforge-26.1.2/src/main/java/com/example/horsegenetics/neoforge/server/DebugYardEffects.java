@@ -226,14 +226,21 @@ final class DebugYardEffects {
                     }
                     double d = Math.abs(h.getZ() - start[i]);
                     total[i] += d;
-                    sb.append(sb.length() == 0 ? "" : "; ").append(names[i]).append(String.format(" %.2f", d))
-                            .append(h.isInWater() ? "" : " (NOT IN WATER)");
+                    // Where it is and what it is doing, because the first two runs had PLAIN and STONE at exactly 0.15
+                    // blocks every lap, which is not swimming.
+                    sb.append(sb.length() == 0 ? "" : "; ").append(names[i]).append(String.format(
+                            " %.2f (y %.2f, %s%s%s, moving %.3f/tick)", d, h.getY(), h.isInWater() ? "in water" : "NOT IN WATER",
+                            h.onGround() ? ", on ground" : "", h.isImmobile() ? ", IMMOBILE" : "",
+                            h.getDeltaMovement().horizontalDistance()));
                 }
                 String verdict = "";
                 if (n == 8) {
-                    boolean order = total[0] > total[1] && total[1] > total[2];
-                    verdict = String.format(" | totals over 8 laps: OTTER %.1f, PLAIN %.1f, STONE %.1f - expect OTTER >"
-                            + " PLAIN > STONE: %s", total[0], total[1], total[2], order ? "PASS" : "FAIL");
+                    // Clear margins, and a plain horse that really swam: the 10:09 run "passed" on 1.2 against 1.2.
+                    boolean swam = total[1] > 4.0;
+                    boolean order = total[0] > total[1] * 1.15 && total[1] > total[2] * 1.15;
+                    verdict = String.format(" | totals over 8 laps: OTTER %.1f, PLAIN %.1f, STONE %.1f - expect OTTER"
+                            + " clearly above PLAIN clearly above STONE, with PLAIN over 4 blocks: %s", total[0], total[1],
+                            total[2], !swam ? "NO RESULT (the plain horse did not swim)" : order ? "PASS" : "FAIL");
                 }
                 ActionTrace.log("test yard", "SWIM SPEED lap " + n + " (blocks in 2 s): " + sb + verdict);
                 if (n < 8) {
