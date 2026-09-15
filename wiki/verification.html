@@ -80,7 +80,12 @@
     </p>
 </div>
 
-<h2 id="fixes-0914">&sect;0-DZ &mdash; Four fixes from the all-day run (2026-09-14, built after the owner's session, NOT played)</h2>
+<h2 id="fixes-0914">&sect;0-DZ &mdash; Fixes from the all-day run (2026-09-14, built at 17:15, NOT played)</h2>
+<p>
+    <strong>Start the next run with</strong> <code>gradlew :neoforge-26.1.2:runClientTestWorld</code>
+    (confirmed: it lands in the yard with no clicks, about thirty seconds from launch), leave it for a few
+    hours, and read these off the log.
+</p>
 
 <p>
     Found in the first 72 minutes of the all-day pens and fixed without restarting the game, so
@@ -120,11 +125,6 @@
     <li><strong>Pen labels in the log.</strong> A yard horse's trace name now ends in its label in
         quotes, so <code>displaced ... at food or water</code> in DISPLACEMENT says which RANK mare
         won. <strong>Pass:</strong> every such line names the lower rank number first.</li>
-    <li><strong>Launching straight into the yard.</strong> Run
-        <code>gradlew :neoforge-26.1.2:runClientTestWorld</code>. <strong>Pass:</strong> the game
-        opens a new test world on its own, hands out the kit, and about three seconds later walks
-        you into the horse dimension. Quitting to the title screen stays there. Plain
-        <code>runClient</code> behaves as before.</li>
     <li><strong>Wild mares stop flooding the log.</strong> <strong>Pass:</strong>
         <code>not covered:</code> lines come only from yard mares (THE CAP, the fertility rows), and a
         <code>crowding cap held back N wild mares in the last 10 minutes</code> line appears about
