@@ -7,8 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -41,7 +39,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
  *   <tr><td>AB</td><td>WARD - Wrd/Wrd and three husks</td><td>WARD CONTROL - a plain horse and three husks</td></tr>
  *   <tr><td>AC</td><td>BAIT, BAIT CONTROL - does a husk come for the horse</td>
- *       <td>SWIM SPEED - the attribute; BREATH - three horses under a lid</td></tr>
+ *       <td>SWIM SPEED - laps of a channel; BREATH - three horses under a lid</td></tr>
  *   <tr><td>AD</td><td>DEATH LAVA, DEATH WATER - on a built floor</td>
  *       <td>DEATH BOOM - Xpl + Dia beside a witness; DEATH ITEMS - Egg and Swd</td></tr>
  * </table>
@@ -61,7 +59,7 @@ final class DebugYardEffects {
             aura(level, gy, east, mouthZ + ROW_AB, "WARD CONTROL", PLAIN);
             baitPen(level, gy, west, mouthZ + ROW_AC, "BAIT", "horsegenetics.magic_mob_aura=Bai/Bai");
             baitPen(level, gy, west + 9, mouthZ + ROW_AC, "BAIT CONTROL", PLAIN);
-            swim(level, gy, east, mouthZ + ROW_AC);
+            swimLaps(level, gy, east, mouthZ + ROW_AC);
             breath(level, gy, east + 9, mouthZ + ROW_AC);
             deathFluid(level, gy, west, mouthZ + ROW_AD, "DEATH LAVA", "Lav/Lav", Blocks.LAVA);
             deathFluid(level, gy, west + 9, mouthZ + ROW_AD, "DEATH WATER", "Wat/Wat", Blocks.WATER);
@@ -159,37 +157,70 @@ final class DebugYardEffects {
     }
 
     /**
-     * Swim speed is a {@code water_movement_efficiency} multiplier. The suspicion (gap 121's research, 2026-09-15): no
-     * code sets that attribute's base, and a total multiplier on a base of 0 is still 0, so the gene may do nothing.
+     * Gap 249: magic swim speed scales the horse's own push through water ({@link SwimScaling}). The first pen read the
+     * {@code water_movement_efficiency} attribute the gene used to multiply and found it 0.000 on every genotype; this
+     * one measures swimming itself. Three horses in their own walled channel, two wide and two deep - Otter, plain and
+     * Stone - are sent to the far end and back by their navigation, and the pen logs how far each swam in two seconds.
      */
-    private static void swim(ServerLevel level, int gy, int x0, int z0) {
-        DebugYardUnattended.pen(level, gy, x0, z0, 9, ROW_AC_D, "SWIM SPEED", Blocks.GRASS_BLOCK.defaultBlockState(),
-                List.of("SWIM SPEED", "Otr, Stne and a", "plain horse: the", "water attribute"));
-        String[][] spec = {
-                {"horsegenetics.magic_swim_speed=Otr/Otr", "SWIM OTTER"},
-                {"horsegenetics.magic_swim_speed=Otr/n", "SWIM OTTER ONE"},
-                {"horsegenetics.magic_swim_speed=Stne/Stne", "SWIM STONE"},
-                {PLAIN, "SWIM PLAIN"}};
-        List<Horse> horses = new ArrayList<>();
-        for (int i = 0; i < spec.length; i++) {
-            Horse h = DebugYardUnattended.horse(level, gy, x0 + 2.5 + (i % 2) * 4, z0 + 3.5 + (i / 2) * 5,
-                    Sex.FEMALE, spec[i][0], true, spec[i][1]);
-            if (h != null) {
-                horses.add(h);
+    private static void swimLaps(ServerLevel level, int gy, int x0, int z0) {
+        DebugYardUnattended.pen(level, gy, x0, z0, 9, ROW_AC_D, "SWIM SPEED", Blocks.STONE.defaultBlockState(),
+                List.of("SWIM SPEED", "Otr, plain, Stne", "swim laps: blocks", "in two seconds"));
+        for (int x = x0 + 1; x <= x0 + 8; x++) {
+            boolean channel = (x - x0 - 1) % 3 != 2;       // channels at x0+1..2, x0+4..5, x0+7..8; stone between
+            for (int z = z0 + 1; z < z0 + ROW_AC_D; z++) {
+                for (int y = gy - 2; y <= gy + 2; y++) {
+                    BlockState st = y == gy - 2 || !channel ? Blocks.STONE.defaultBlockState()
+                            : y <= gy ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+                    level.setBlock(new BlockPos(x, y, z), st, 3);
+                }
             }
         }
-        DebugWorldWatch.watchAttribute("SWIM SPEED ATTR", DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_AC_D),
-                Attributes.WATER_MOVEMENT_EFFICIENCY);
-        DebugYardHerd.after(level, 100, () -> {
-            StringBuilder sb = new StringBuilder();
-            for (Horse h : horses) {
-                AttributeInstance ai = h.getAttribute(Attributes.WATER_MOVEMENT_EFFICIENCY);
-                sb.append(sb.length() == 0 ? "" : "; ").append(h.getCustomName() == null ? "?" : h.getCustomName().getString())
-                        .append(ai == null ? " has no such attribute" : String.format(" base %.3f value %.3f, %d modifier(s)",
-                                ai.getBaseValue(), ai.getValue(), ai.getModifiers().size()));
+        String[] codes = {"horsegenetics.magic_swim_speed=Otr/Otr", PLAIN, "horsegenetics.magic_swim_speed=Stne/Stne"};
+        String[] names = {"SWIM OTTER", "SWIM PLAIN", "SWIM STONE"};
+        double[] xs = {x0 + 2.0, x0 + 5.0, x0 + 8.0};
+        Horse[] horses = new Horse[3];
+        for (int i = 0; i < 3; i++) {
+            horses[i] = DebugPenManager.spawnHorse(level, gy, xs[i], z0 + 1.5, Sex.FEMALE, codes[i], true);
+            DebugTestYard.label(horses[i], names[i]);
+        }
+        lap(level, horses, names, xs, z0, 1, new double[3]);
+    }
+
+    private static void lap(ServerLevel level, Horse[] horses, String[] names, double[] xs, int z0, int n, double[] total) {
+        DebugYardHerd.after(level, n == 1 ? 200 : 60, () -> {
+            double targetZ = n % 2 == 1 ? z0 + ROW_AC_D - 1.5 : z0 + 1.5;
+            double[] start = new double[horses.length];
+            for (int i = 0; i < horses.length; i++) {
+                Horse h = horses[i];
+                if (h != null && h.isAlive()) {
+                    start[i] = h.getZ();
+                    h.getNavigation().moveTo(xs[i], h.getY(), targetZ, 1.0);
+                }
             }
-            ActionTrace.log("test yard", "SWIM SPEED: " + sb + " - expect OTTER above PLAIN and STONE below it;"
-                    + " every value 0.000 with modifiers present means the gene multiplies nothing (FAIL)");
+            DebugYardHerd.after(level, 40, () -> {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < horses.length; i++) {
+                    Horse h = horses[i];
+                    if (h == null || !h.isAlive()) {
+                        sb.append(sb.length() == 0 ? "" : "; ").append(names[i]).append(" gone");
+                        continue;
+                    }
+                    double d = Math.abs(h.getZ() - start[i]);
+                    total[i] += d;
+                    sb.append(sb.length() == 0 ? "" : "; ").append(names[i]).append(String.format(" %.2f", d))
+                            .append(h.isInWater() ? "" : " (NOT IN WATER)");
+                }
+                String verdict = "";
+                if (n == 8) {
+                    boolean order = total[0] > total[1] && total[1] > total[2];
+                    verdict = String.format(" | totals over 8 laps: OTTER %.1f, PLAIN %.1f, STONE %.1f - expect OTTER >"
+                            + " PLAIN > STONE: %s", total[0], total[1], total[2], order ? "PASS" : "FAIL");
+                }
+                ActionTrace.log("test yard", "SWIM SPEED lap " + n + " (blocks in 2 s): " + sb + verdict);
+                if (n < 8) {
+                    lap(level, horses, names, xs, z0, n + 1, total);
+                }
+            });
         });
     }
 

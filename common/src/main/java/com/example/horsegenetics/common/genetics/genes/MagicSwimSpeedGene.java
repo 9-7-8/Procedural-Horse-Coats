@@ -42,13 +42,6 @@ public final class MagicSwimSpeedGene extends AbstractMagicFactorGene {
     public static final String KEY = "horsegenetics.magic_swim_speed";
     public static final int PRIORITY = 144;
 
-    /**
-     * The vanilla attribute this multiplies - the share of its land speed a mob
-     * keeps in water. There is no {@code swim_speed} attribute in vanilla, much
-     * as the name suggests itself; this is the one that means it.
-     */
-    public static final String ATTRIBUTE = "water_movement_efficiency";
-
     public MagicSwimSpeedGene() {
         super(KEY, PRIORITY, "Magic swim speed",
                 "Otr", "Otterlike (Otr)",
@@ -80,9 +73,10 @@ public final class MagicSwimSpeedGene extends AbstractMagicFactorGene {
 
     @Override
     protected List<GeneAbility> abilitiesFor(double factor) {
-        // multiply_total, so it scales whatever the game (or another mod) has
-        // already decided the horse's swim speed is, rather than replacing it.
-        return List.of(new GeneAbility.AttributeMod(ATTRIBUTE, "multiply_total", factor - 1.0,
-                GeneAbility.Condition.ALWAYS, 1));
+        // A swim nudge, not an attribute (owner, 2026-09-15, gap 249). The attribute this multiplied,
+        // water_movement_efficiency, has a base of 0 - the yard's SWIM SPEED pen read 0.000 on every genotype, so
+        // no horse ever swam faster or slower. The translator scales the horse's own push through water instead,
+        // on the server for a loose horse and on the rider's client for a ridden one.
+        return List.of(new GeneAbility.Swim(factor, GeneAbility.Condition.ALWAYS, 1));
     }
 }

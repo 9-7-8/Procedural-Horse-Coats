@@ -166,6 +166,14 @@ public sealed interface GeneAbility {
     record Breath(double factor, Condition when, int minDose) implements GeneAbility {}
 
     /**
+     * <b>Swimming, scaled.</b> {@code factor} multiplies how fast the horse moves through water under its own power:
+     * above 1 faster, below 1 slower, on land nothing. Built for magic swim speed (owner, 2026-09-15, gap 249), which
+     * had multiplied {@code water_movement_efficiency} - an attribute whose base is 0, so it moved nothing. Java genes
+     * only: no {@code effects} verb reads or writes it, so it adds nothing to the spec format or the creator.
+     */
+    record Swim(double factor, Condition when, int minDose) implements GeneAbility {}
+
+    /**
      * <b>What the world does when the horse dies</b> - {@code lava},
      * {@code water} or {@code explode}, the choices on
      * {@link AbilityType#ON_DEATH}.
