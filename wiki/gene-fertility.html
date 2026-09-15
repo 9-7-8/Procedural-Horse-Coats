@@ -99,6 +99,13 @@
     <code>ReproRulesTest</code>.
 </p>
 
+<p id="verified-table-order">
+    <strong>The founder table ends on <code>tw/tw</code>, and the genotype test knows it</strong> (2026-09-15).
+    <code>GenotypeTest.randomDrawsOneFloatPerGeneInGeneOrder</code> expects a maximal roll to land on each gene's last
+    bucket, and read that as the baseline; fertility's last bucket is the twin homozygote. The test now exempts fertility
+    the way it exempts the two night loci, and passes.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

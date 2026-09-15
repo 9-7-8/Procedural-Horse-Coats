@@ -660,6 +660,13 @@
 
 <h2 id="verified">Verified</h2>
 
+<p id="verified-common-maps">
+    <strong>The breed registry builds its empty maps the browser-safe way</strong> (2026-09-15). <code>Breeds</code> and
+    <code>BreedSpawnSettings.DEFAULT</code> used <code>Map.of()</code>, whose TeaVM empty map divides by zero on the first
+    <code>get</code> in the browser tools; they use <code>CommonMaps.empty()</code> now, and <code>CommonPortabilityTest</code>,
+    which had been failing on them since 09-11, passes.
+</p>
+
 <p id="verified-breed-designer">
     <strong>The step-by-step breed designer runs</strong> (2026-09-10, headless Chrome over the DevTools protocol). Every
     step renders, the viewport sizes itself in both layouts without forcing the page wider than a phone, the herd and the

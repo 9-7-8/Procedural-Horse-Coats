@@ -147,7 +147,29 @@
         already run to 773 characters and render, so the roadmap's "hash it first" blocker was wrong and is corrected.
         The goldens gained lines and no hash moved. <code>GenotypeCatalogTest</code>'s gallery representatives now name
         the last-declared allele of each group. Found in passing, and not acted on: the 2024 literature reads one
-        <code>W22</code> copy as sabino-like rather than all white. None of these is in
+        <code>W22</code> copy as sabino-like rather than all white.</li>
+    <li><strong>The owner's answers on what was still open</strong>, all built:
+        <ul>
+            <li><strong>KIT follows the 2024 papers.</strong> One <code>W22</code> copy is a broad sabino-like white, and all
+                white only beside a booster.</li>
+            <li><strong>Linked alleles paint with their booster</strong>: <code>W26</code>, <code>W37</code> and <code>W19</code>
+                land on extensive white.</li>
+            <li><strong><code>W8</code>, <code>W18</code> and <code>W21</code> have a new speckled-white outcome</strong>
+                (<code>WhitePattern.speckled</code>: fine flecks gathered by a coarse cloud, thickest low on the body, with
+                a white face). It was rendered to a sheet grid and tuned once, from too faint to clearly flecked.</li>
+            <li><strong>Gaps 251 and 252 are fixed.</strong> <code>CommonMaps.empty()</code> replaces the <code>Map.of()</code>, and
+                <code>GenotypeTest</code> exempts fertility's table order.</li>
+            <li><strong>Gap 234:</strong> a filly refuses a suitor who shares a parent.</li>
+            <li><strong>Gap 238:</strong> the owner keeps the drowning water form.</li>
+            <li><strong>Magical herds keep my defaults.</strong></li>
+        </ul>
+        Reading the 10:57 run's log turned up a new bug, now gap 253. The yard's LYCAN WOLF foals died of <code>inWall</code> ten
+        seconds after dawn, because a horse was restored where its smaller wolf form stood. <code>clearOfBlocks</code> now
+        moves it to the nearest clear spot.
+        The rest of that run: gap 243 (no void deaths, no set-down lines), the ratio pens near 1:2:1 (HYPP 19% and lethal
+        white 17% homozygotes, at 74 and 63 foals), no errors, and BLOOD ONLY never bit in four hours (gap 250, still
+        open). <code>CoatSampleTool</code> is broken beyond its seed list: it names a grey allele <code>G</code> that no longer
+        exists, so the renders used a one-off script instead. None of these is in
         the running build, and the designer's wasm waits for the client to close, because the bake rebuilds
         <code>common.jar</code>.</li>
     <li><strong>The two intake files became science tabs:</strong> fertility's real-horse biology and the timing design

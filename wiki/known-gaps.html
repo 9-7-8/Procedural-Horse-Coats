@@ -57,16 +57,13 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
-<li id="gap-252"><strong>Open, found 2026-09-15: <code>GenotypeTest.randomDrawsOneFloatPerGeneInGeneOrder</code> fails on fertility.</strong>
-    The test feeds every gene a maximal roll and expects it to land on its baseline, on the rule that a founder table lists its
-    commonest combination last. <code>FertilityGene</code>&rsquo;s table has ended on <code>tw/tw</code> since the 09-14 crash fix,
-    so the maximal roll lands there. Either the table goes back to ending on <code>n/n</code> (the draws would shift), or the test
-    exempts fertility the way it exempts the two night loci. Not a defect in play.</li>
-<li id="gap-251"><strong>Open, found 2026-09-15: <code>CommonPortabilityTest</code> fails on three <code>Map.of()</code> in <code>common/breed/</code>.</strong>
-    <code>Breeds.java</code> (the <code>BY_ID</code> field and its reset) and <code>BreedSpawnSettings.DEFAULT</code> build an empty
-    map with <code>Map.of()</code>, which TeaVM&rsquo;s immutable empty map turns into a divide-by-zero on the first <code>get</code> in
-    the browser. It has been there since 09-11, so the breed designer and horse designer may be one lookup from failing. The fix is
-    <code>CommonMaps.empty()</code> in all three, then a wasm bake and a boot check.</li>
+<li id="gap-253"><strong>Fixed 2026-09-15, not yet played: a lycan horse coming back at dawn could be put inside blocks and suffocate.</strong>
+    The restore put the horse where its animal stood, and a wolf fits against a fence where a horse does not. In the 10:57
+    run the yard's LYCAN WOLF foals, Wondering Blackie and Wondering Milk, died of <code>inWall</code> ten seconds after dawn at
+    14:37, and their sire took 23 wall hits at an earlier dawn. <em>Fix:</em> <code>LycanthropyHandler.clearOfBlocks</code> moves a
+    horse that would collide to the nearest clear spot within three blocks and logs <code>[trace] lycan | ... came back from a ...
+    inside blocks - moved</code>. <strong>Pass:</strong> no <code>inWall</code> in the LYCAN pens all run, and a <code>moved</code> line
+    at some dawn.</li>
 <li id="gap-250"><strong>Open, found 2026-09-15: a blood-only horse went a whole game day without biting the cow beside it.</strong>
     In the yard's 08:47 run, BLOOD ONLY (<code>diet=Dbld/Dbld</code>, hurt to half, hunger full) shared a pen with one cow,
     which the watch counted there all day. It logged no <code>[trace] blood</code> line at all. HUNT ORDER, an identical
@@ -176,10 +173,6 @@
     <code>[trace] lycan | ... came back at dawn with nothing under its ... - set down at ...</code>. The death path is
     unchanged. <strong>Pass:</strong> no lycan horse dies of <code>outOfWorld</code>, and every flying form that
     reverts over nothing has a <code>set down at</code> line. The corridor's open far end is still open.</li>
-<li id="gap-238"><strong>Open 2026-09-14: a lycan horse that shifts into a pufferfish on land drowns, and the horse dies with it.</strong>
-    Two did in the first hour of the all-day yard (<code>[trace] lycan | ... died as a minecraft:pufferfish (drown) - the horse dies with it</code>).
-    The form list offers water animals to horses standing on grass. Either a water form needs water nearby to be chosen, or a
-    shifted water animal should turn back before it suffocates. The owner has not decided which.</li>
 <li id="gap-237"><strong>Fixed 2026-09-14, not yet played: a sapling grew into a tree through a horse and suffocated it.</strong>
     The DRYAD OAK+BIRCH mare died in a trunk 11 seconds after <code>tree grew</code>. Her pen-mate fell to 4 hp, and a wild
     mare lost half her health to another tree. The damage began on the same tick as the growth each time.
@@ -189,7 +182,7 @@
     Checklist: <a href="verification.html#fixes-0914">&sect;0-DZ</a>. The bone-meal half is the yard's BONE MEAL pen
     (row X): a <code>Bone/Bone</code> dryad with saplings and a fenced wheat patch. Pass is
     <code>[watch] bonemeal | on</code> saplings or grass, never wheat, and no <code>inWall</code>.</li>
-<li id="gap-234"><strong>Open, the owner's call: a dispersing filly can be recruited by her own brother.</strong> <code>BandLife.disperse</code> sends a grown filly to the nearest bachelor or the nearest family band within 64 blocks, whichever is closer. Nothing excludes a male from her natal band, so a colt who left the same band a few minutes earlier is usually the nearest bachelor she can find, and the two start a band together. Female dispersal exists to avoid exactly that (the science tab of <a href="horse-care.html">horse care</a>). <em>Options:</em>
+<li id="gap-234"><strong>Fixed 2026-09-15, not yet played: a dispersing filly could be recruited by her own brother.</strong> <em>The owner's call:</em> no suitor sharing a parent. <code>BandLife.closeKin</code> refuses a bachelor whose record shares her dam or sire, or who is her sire; unknown parents never match. <strong>Pass:</strong> the yard's LEAVING HOME pen can drop its three-minute stagger and the filly still joins someone else. <em>Original report:</em> <code>BandLife.disperse</code> sends a grown filly to the nearest bachelor or the nearest family band within 64 blocks, whichever is closer. Nothing excludes a male from her natal band, so a colt who left the same band a few minutes earlier is usually the nearest bachelor she can find, and the two start a band together. Female dispersal exists to avoid exactly that (the science tab of <a href="horse-care.html">horse care</a>). <em>Options:</em>
     <ul>
         <li>exclude a suitor whose record shares a parent with hers;</li>
         <li>exclude one who was ever in her natal band, which needs his natal herd kept after he disperses;</li>

@@ -166,7 +166,7 @@
         <span class="allele wild">N</span>
     </dd></div>
     <div><dt>Combinations</dt><dd>every pair of its alleles, minus <code>KitGene.nonviableHomozygotes()</code>; one outcome each &mdash; <code>WhitePatternGenesTest</code> asserts the relationship rather than the counts</dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>minimal-white</code>, <code>modest-white</code>, <code>sabino</code>, <code>broad-white</code>, <code>extensive-white</code>, <code>near-white</code>, <code>dominant-white</code> (masks), <code>camarillo-white</code> (masks)</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>minimal-white</code>, <code>modest-white</code>, <code>sabino</code>, <code>broad-white</code>, <code>extensive-white</code>, <code>near-white</code>, <code>dominant-white</code> (masks), <code>camarillo-white</code> (masks), <code>speckled-white</code></dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
     <div><dt>Wild frequency</dt><dd>the boosters first &mdash; <code>W35</code> 9%, <code>W20</code> 8.5%, <code>W32</code> 3.5%, <code>W34</code> 1% &mdash; then <code>SB1</code> 2.2%, and every strong <code>W</code> at or below 0.5%. Of the long tail only <code>W19</code>, <code>W31</code> and <code>W3</code> have a wild frequency; the rest come from their breeds. See <code>KitGene.frequencies()</code>; Hardy-Weinberg over the lot, with the nonviable homozygotes dropped and the rest rescaled</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
@@ -201,11 +201,13 @@
 <tr><td><code>W13</code></td><td>near-white to all white</td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W23</code></td><td>near-white to all white</td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W4</code></td><td>Camarillo white &mdash; all white from birth, pink skin, <strong>masks</strong></td><td>viability unknown &mdash; <strong>allowed</strong></td></tr>
-<tr><td><code>W22</code></td><td>dominant white &mdash; all white, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
-<tr><td><code>W2</code>, <code>W9</code>, <code>W11</code>, <code>W14</code>, <code>W17</code>, <code>W24</code></td><td>as <code>W22</code>: all white, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W22</code></td><td>sabino-like, broad &mdash; <strong>all white and masking only beside a booster</strong> (2024 review: every <code>W22</code> chromosome measured also carried <code>W20</code>)</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W2</code>, <code>W9</code>, <code>W11</code>, <code>W14</code>, <code>W17</code>, <code>W24</code></td><td>all white on one copy, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W1</code>, <code>W3</code>, <code>W7</code>, <code>W16</code>, <code>W25</code>, <code>W27</code>, <code>W30</code>, <code>W39</code></td><td>as <code>W13</code>/<code>W23</code>: near-white with some colour left</td><td><strong>cannot occur</strong></td></tr>
-<tr><td><code>W6</code>, <code>W8</code>, <code>W12</code>, <code>W18</code>, <code>W21</code>, <code>W26</code>, <code>W28</code>, <code>W31</code>, <code>W33</code>, <code>W37</code>, <code>W38</code></td><td>as <code>W5</code>/<code>W10</code>: sabino-like, broad (<code>W8</code>, <code>W18</code> and <code>W21</code> really speckle, which is not painted)</td><td><strong>cannot occur</strong></td></tr>
-<tr><td><code>W19</code></td><td>as <code>W15</code>: sabino-like, bald face, white past the knees</td><td><strong>viable</strong> &mdash; a homozygote is on record</td></tr>
+<tr><td><code>W6</code>, <code>W12</code>, <code>W28</code>, <code>W31</code>, <code>W33</code>, <code>W38</code></td><td>as <code>W5</code>/<code>W10</code>: sabino-like, broad</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W26</code>, <code>W37</code></td><td>as <code>W5</code>/<code>W10</code> <em>with a booster</em>: extensive white, because every horse measured carries <code>W20</code> (<code>W26</code>) or <code>W35</code> (<code>W37</code>) on the same chromosome</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W8</code>, <code>W18</code>, <code>W21</code></td><td><strong>speckled white</strong>: white flecks and mottling through the coat and a white face (the Icelandic <em>&yacute;rusk&jacute;&oacute;ttur</em>)</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W19</code></td><td>as <code>W15</code> with a booster, since most <code>W19</code> chromosomes also carry <code>W34</code> and <code>W35</code>: extensive white</td><td><strong>viable</strong> &mdash; a homozygote is on record</td></tr>
 </tbody>
 </table>
 </div>
@@ -213,8 +215,9 @@
 <h2 id="camarillo">Two all-white alleles, and why they are two outcomes</h2>
 
 <p>
-    <code>W22</code> and <code>W4</code> paint the identical horse: pure white, pink
-    skin, every other coat gene hidden and still inherited. &ldquo;No pigment cells
+    <code>W22</code> beside a booster and <code>W4</code> paint the identical horse: pure white, pink
+    skin, every other coat gene hidden and still inherited. (One <code>W22</code> copy alone is a broad sabino-like
+    white, following the 2024 review; the owner's call, 2026-09-15.) &ldquo;No pigment cells
     reached the coat&rdquo; has one appearance, so they could have shared an outcome.
     They do not, and the reason is that they differ in the only thing a breeder can act
     on:
