@@ -117,10 +117,15 @@ public final class LycanthropyHandler {
      *
      * <p>{@link Level#isDarkOutside()} rather than {@code !isBrightOutside()}:
      * both are false in a dimension with a fixed time of day, so asking it this
-     * way means the Nether, the End and the horse dimension are permanent
-     * <i>day</i> for this gene. That is the right answer - a place with no
-     * nightfall should not hold a horse in wolf shape forever - and it is why
-     * the negation is not the same thing.
+     * way means the Nether and the End are permanent <i>day</i> for this gene.
+     * That is the right answer - a place with no nightfall should not hold a
+     * horse in wolf shape forever - and it is why the negation is not the same
+     * thing. The horse dimension was on that list until it was given real nights
+     * ({@code debug_pens.json}'s timelines); its shifters change like anyone's.
+     *
+     * <p>A shifted animal standing on the ground has its spot kept in
+     * {@link #LAST_GROUND}, which is where {@link #revert} sets the horse down
+     * when dawn finds the animal over nothing (gap 243).
      */
     @SubscribeEvent
     static void onTick(EntityTickEvent.Post event) {
@@ -144,6 +149,9 @@ public final class LycanthropyHandler {
         if ((animal.tickCount + animal.getId()) % SUN_CHECK_INTERVAL == 0 && !level.isDarkOutside()) {
             revert(animal, level, shift);
             return;
+        }
+        if (animal.onGround()) {
+            LAST_GROUND.put(animal, animal.position());
         }
         trailCloud(animal, level, shift.cloudColor());
     }
@@ -227,9 +235,23 @@ public final class LycanthropyHandler {
     // Dawn
     // ------------------------------------------------------------------
 
-    /** Put the horse back where the animal is standing, with the night's damage carried over. */
+    /**
+     * Put the horse back where the animal is standing, with the night's damage carried over - or,
+     * when there is nothing under the animal, where it last stood on solid ground.
+     *
+     * <p>LAND ON SOLID GROUND (owner, 2026-09-15). A flying form - bat, parrot, allay, bee, happy
+     * ghast - can be anywhere when the sun comes up, and the horse used to appear wherever it was.
+     * Two bat lycans came back 49 blocks below the horse dimension's floor and outside its wall, a
+     * parrot lycan the same way, and all three fell out of the world (gap 243). Now a revert with
+     * no solid block or water within {@link #SAFE_DROP} blocks below the animal sets the horse down
+     * at the last spot the animal stood on the ground ({@link #LAST_GROUND}), or, when that is not
+     * known because the animal was loaded since, where the horse changed at dusk. The night still
+     * happens; only the drop into nothing does not. Water counts as ground, so a were-fish at sea
+     * is left where it is. The death path is untouched: an animal that dies, dies where it is.
+     */
     private static void revert(Mob animal, ServerLevel level, LycanShift shift) {
-        Horse horse = restore(animal, level, shift);
+        Horse horse = restore(animal, level, shift, true);
+        LAST_GROUND.remove(animal);
         if (horse == null) {
             return;
         }
@@ -249,6 +271,37 @@ public final class LycanthropyHandler {
      */
     @Nullable
     private static Horse restore(Mob animal, ServerLevel level, LycanShift shift) {
+        return restore(animal, level, shift, false);
+    }
+
+    /** How far a horse may drop onto ground without harm: vanilla fall damage starts past three. */
+    private static final int SAFE_DROP = 3;
+
+    /**
+     * Where each shifted animal last stood on solid ground, for {@link #revert}. Held in memory,
+     * weakly, so a discarded animal leaves nothing behind; after a reload the fallback is the
+     * position saved in the horse's own tag, which is where it changed at dusk.
+     */
+    private static final java.util.Map<Mob, net.minecraft.world.phys.Vec3> LAST_GROUND = new java.util.WeakHashMap<>();
+
+    /** Solid ground or water within {@link #SAFE_DROP} blocks under the animal, above the world's floor. */
+    private static boolean groundBelow(ServerLevel level, Mob animal) {
+        net.minecraft.core.BlockPos at = animal.blockPosition();
+        for (int dy = 0; dy <= SAFE_DROP; dy++) {
+            net.minecraft.core.BlockPos p = at.below(dy);
+            if (p.getY() < level.getMinY()) {
+                return false;
+            }
+            net.minecraft.world.level.block.state.BlockState st = level.getBlockState(p);
+            if (!st.getCollisionShape(level, p).isEmpty() || !st.getFluidState().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable
+    private static Horse restore(Mob animal, ServerLevel level, LycanShift shift, boolean landSafely) {
         Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.LOAD);
         if (horse == null) {
             return null;
@@ -261,8 +314,20 @@ public final class LycanthropyHandler {
                     shift.mob(), bad);
             return null;
         }
-        // The tag's position is where it stood at dusk; the animal has walked
-        // since, and where it walked to is where the horse wakes up.
+        // The tag's position is where it stood at dusk; the animal has moved
+        // since, and where it is now is where the horse wakes up - unless that
+        // is over nothing, which is revert's case (gap 243).
+        net.minecraft.world.phys.Vec3 dusk = horse.position();
+        if (landSafely && !groundBelow(level, animal)) {
+            net.minecraft.world.phys.Vec3 ground = LAST_GROUND.get(animal);
+            net.minecraft.world.phys.Vec3 to = ground != null ? ground : dusk;
+            horse.snapTo(to.x, to.y, to.z, animal.getYRot(), animal.getXRot());
+            ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " came back at dawn with nothing under its "
+                    + shift.mob() + " at " + animal.blockPosition().toShortString() + " - set down at "
+                    + net.minecraft.core.BlockPos.containing(to).toShortString()
+                    + (ground != null ? " (where it last stood on the ground)" : " (where it changed at dusk)"));
+            return horse;
+        }
         horse.snapTo(animal.getX(), animal.getY(), animal.getZ(), animal.getYRot(), animal.getXRot());
         return horse;
     }

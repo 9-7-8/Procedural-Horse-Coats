@@ -148,7 +148,28 @@
     corridor's &minus;Z bedrock wall at z &minus;26, so that herd is finding a way out of the corridor, not just
     falling through a floor inside it. <strong>Owner's hunch, to check first:</strong> the placement of a hay
     bale, water cauldron or chest against a wall is giving horses a step up and over. Parked for later
-    (owner, 2026-09-14).</li>
+    (owner, 2026-09-14).
+    <strong>Cause found 2026-09-15: all three are lycans changing back in mid-air.</strong> Elegiac Star and Betty
+    Levi were both <code>lycan=Bat/Bat</code>. At dusk (19:19:10) two bats joined inside their pen at 44 and 46,
+    129, 17. At dawn each came back as a horse wherever its bat was: Elegiac Star at 163, 79, &minus;24, 49 blocks
+    below the floor, dead three seconds later; Betty Levi at 75, 136, &minus;18, seven blocks up, and she survived
+    the fall. The next night she was a bat again at 19:39 and came back at 109, 85, &minus;52, outside the wall and
+    below the floor. <strong>The second <code>horse-spawn</code> line above is that revert, not a chunk loading
+    from disk.</strong> I misread it: <code>ActionTrace</code> logs every horse that joins, and a revert adds a new
+    horse entity. The parrot is the same bug. <code>LycanthropyHandler.restore</code> snaps the horse to the
+    animal's position with no check for ground, and a flying form (bat, parrot, allay, bee, happy ghast) can be
+    anywhere at dawn. <strong>The owner's hunch is ruled out:</strong> the corridor walls stand nine blocks above the
+    floor with no gaps; the cauldron and hay bale are sunk to floor level; there are no corridor chests; and the
+    portal frames top out five blocks short. <em>Also found:</em> <code>LycanthropyHandler</code>'s comment calling
+    this dimension "permanent day" for the gene is stale, since <code>debug_pens</code> now has real nights; and a
+    corridor's unbuilt far end (past the last built segment, x&nbsp;217 or more at first) is open to the void.
+    Nothing has died there yet.
+    <strong>Fixed 2026-09-15, not yet played (owner: "land on solid ground").</strong> At dawn, if there is no
+    solid block or water within three blocks under the animal, the horse is set down where the animal last stood
+    on the ground, or, if that is not known, where it changed at dusk. It logs
+    <code>[trace] lycan | ... came back at dawn with nothing under its ... - set down at ...</code>. The death path is
+    unchanged. <strong>Pass:</strong> no lycan horse dies of <code>outOfWorld</code>, and every flying form that
+    reverts over nothing has a <code>set down at</code> line. The corridor's open far end is still open.</li>
 <li id="gap-242"><strong>Closed 2026-09-14, confirmed off the log: the yard's ratio tallies could never count a lethal foal.</strong>
     After the 17:35 build every <code>O/O</code> and <code>H/H</code> foal reached its tally and was marked died.
     <code>DebugYardLong</code>'s clock looked for <em>living</em> foals every ten seconds, and an <code>H/H</code>

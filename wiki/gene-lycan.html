@@ -196,10 +196,20 @@
 <p>
     The check is <code>Level.isDarkOutside()</code> rather than
     <code>!isBrightOutside()</code>, and those are not the same thing: both are false in
-    a dimension with a fixed time of day. Asking it this way makes the Nether, the End
-    and the <a href="horse-dimension.html">horse dimension</a> permanent <em>day</em>
-    for this gene, which is the right answer &mdash; a place with no nightfall should
-    not hold a horse in wolf shape forever.
+    a dimension with a fixed time of day. Asking it this way makes the Nether and the End
+    permanent <em>day</em> for this gene, which is the right answer &mdash; a place with no
+    nightfall should not hold a horse in wolf shape forever. The
+    <a href="horse-dimension.html">horse dimension</a> used to be on that list, but it has real
+    nights now, so its shifters change like anyone's.
+</p>
+<p>
+    <strong>Dawn sets a horse down on solid ground.</strong> The horse comes back where its
+    animal is, unless there is nothing under the animal: no solid block or water within three
+    blocks below. Then it comes back where the animal last stood on the ground, or, if that is
+    not known, where it changed at dusk. A bat, parrot, allay, bee or happy ghast can fly anywhere
+    in the night. Until 2026-09-15 a horse could wake up in mid-air over the void and fall out of
+    the world (<a href="known-gaps.html#gap-243">gap 243</a>). An animal that <em>dies</em> in the
+    night still takes its horse with it, wherever it is.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>
