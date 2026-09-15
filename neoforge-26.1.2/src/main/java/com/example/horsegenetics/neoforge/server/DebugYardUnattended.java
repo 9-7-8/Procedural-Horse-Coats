@@ -193,7 +193,7 @@ final class DebugYardUnattended {
     private static void stats(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 9, ROW_Y_D, "STATS", Blocks.STONE.defaultBlockState(),
                 List.of("STATS", "speed floor, Swift x", "MSTN, three equal", "C/T, a frail floor"));
-        water(level, gy, x0 + 1, z0 + 1);
+        water(level, gy, x0 + 4, z0 + 4);    // clear of the walls and the horses (gap 247)
         horse(level, gy, x0 + 2.5, z0 + 2.5, Sex.FEMALE, "horsegenetics.magic_speed=Sluggish/Sluggish", true, "STAT SLUGGISH");
         horse(level, gy, x0 + 6.5, z0 + 2.5, Sex.FEMALE, "horsegenetics.magic_speed=Swift/Swift", true, "STAT SWIFT");
         horse(level, gy, x0 + 2.5, z0 + 5.5, Sex.FEMALE, "horsegenetics.mstn=C/C", true, "STAT MSTN CC");
@@ -217,7 +217,7 @@ final class DebugYardUnattended {
     private static void lethalFoals(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 9, ROW_Y_D, "LETHAL FOALS", Blocks.STONE.defaultBlockState(),
                 List.of("LETHAL FOALS", "every 20 min: seven", "lethal foals die by", "water; controls live"));
-        water(level, gy, x0 + 4, z0 + 1);
+        water(level, gy, x0 + 4, z0 + 2);    // a block clear of the walls (gap 247)
         water(level, gy, x0 + 4, z0 + 10);
         Horse adult = horse(level, gy, x0 + 7.5, z0 + 6.5, Sex.FEMALE, "horsegenetics.plod1=ffs/ffs", true,
                 "LF ADULT PLOD1");
@@ -285,7 +285,7 @@ final class DebugYardUnattended {
     private static void lycanRoundTrip(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 9, ROW_Z_D, "LYCAN ROUND TRIP", Blocks.GRASS_BLOCK.defaultBlockState(),
                 List.of("LYCAN ROUND TRIP", "two wolf lycans and", "a foal: the same", "horses at dawn"));
-        water(level, gy, x0 + 1, z0 + 1);
+        water(level, gy, x0 + 2, z0 + 2);    // clear of the walls: a cauldron against one is a step over it (gap 247)
         bond(horse(level, gy, x0 + 2.5, z0 + 4.5, Sex.MALE, WOLF, true, "LYCAN WOLF STALLION"), 70);
         bond(horse(level, gy, x0 + 6.5, z0 + 4.5, Sex.FEMALE, WOLF, true, "LYCAN WOLF MARE"), 35);
         Horse foal = horse(level, gy, x0 + 4.5, z0 + 7.5, Sex.FEMALE, WOLF, true, "LYCAN WOLF FOAL");
@@ -342,7 +342,9 @@ final class DebugYardUnattended {
     private static void wereCow(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 17, ROW_Z_D, "WERE-COW", Blocks.GRASS_BLOCK.defaultBlockState(),
                 List.of("WERE-COW", "a cow lycan among", "three cows, put in", "love at night"));
-        water(level, gy, x0 + 1, z0 + 1);
+        // Two blocks in from both walls. At x0+1, z0+1 the cauldron was a step: the 07:52 run's tracker caught a cow
+        // standing on it at y +1.5 beside the corner, and ten seconds later all three were in the aisle (gap 247).
+        water(level, gy, x0 + 2, z0 + 2);
         horse(level, gy, x0 + 4.5, z0 + 5.5, Sex.FEMALE, "horsegenetics.lycan=Cow/Cow", true, "WERE-COW");
         // Kept as spawned, not searched for afterwards: the 07:44 run searched the pen straight after spawning and
         // found none of them, which is itself a clue for gap 247.
