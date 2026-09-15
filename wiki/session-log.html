@@ -27,6 +27,61 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15a">2026-09-15 &mdash; a night and a day of the yard: hunger, fourteen new rows, and the backlog moved home</h2>
+
+<p>
+    The session began the evening before with "launch into the yard, and then begin your tests" and ran through the night
+    (the owner gave standing permission to restart for small fixes) and the next day, which the owner spent away from the
+    machine with permission to restart whenever needed. The game stayed up between restarts, so NeoForge changes were
+    checked with <code>javac</code> against the running client's classpath and built only while it was closed.
+</p>
+<ul>
+    <li><strong>Hunger</strong> was designed with the owner and built. An invisible bar drains over time and faster to
+        heal. A starving horse cannot heal, and hunger never injures. Food is sought in the owner's order; grass turns to
+        dirt; carnivores hunt. Vanilla's free heal is off (<code>HorseRegenMixin</code>). Row V verified it
+        (<a href="horse-care.html#verified-hunger">horse care</a>).</li>
+    <li><strong>The owner's new rule 9</strong>: a fixed-and-verified gap or check is <em>deleted</em> from
+        <code>known-gaps</code> and <code>verification</code> and recorded on its own page's coding tab. The whole backlog
+        was migrated that way (about 75 records across 45 pages), and every result since followed it.</li>
+    <li><strong>"Put everything which can be tested unattended into the yard"</strong>: rows V to AK
+        (<a href="horse-dimension.html#test-yard">the table</a>). Whatever needs a person went into
+        <a href="for-testers.html">the tester guide</a>, including the new splice-carrot, herd-arrival, egg-clone and
+        extended Dhampir tests.</li>
+    <li><strong>Verified in the yard</strong>, each recorded on its page:
+        <ul>
+            <li>the night-shy horse (gap 241);</li>
+            <li>cover reach (gap 230) and the gelding band;</li>
+            <li>lethal foals dying beside living controls; the lycan round trip, were-breeding and armour drop;</li>
+            <li>suntouched's light;</li>
+            <li>on death, item drop, mob aura and water breathing;</li>
+            <li>foal bond, breed-cross labels, starburst drift and foal names;</li>
+            <li>the Dhampir split;</li>
+            <li>gold in any heat, subfertile pairs, weaning by distance and the vet's readings;</li>
+            <li>spawner colour; splice carrots in theme with no disorders;</li>
+            <li>the registry freeze, a quiet launch log and occasional grazing.</li>
+        </ul></li>
+    <li><strong>Bugs the pens found and fixed:</strong>
+        <ul>
+            <li>flying lycans fell out of the world at dawn (gap 243);</li>
+            <li>a rear froze a fighting horse's AI (gap 222, <code>HorseRearFightMixin</code>);</li>
+            <li>a gladiator would not turn on its next attacker (gap 248);</li>
+            <li>cows climbed out over a cauldron against the wall (gap 247, now a two-clear-blocks rule);</li>
+            <li>the gene attribute sweep removed the late-pregnancy slowdown;</li>
+            <li>magic swim speed multiplied a zero-base attribute (gap 249). The owner chose to scale in-water
+                movement; after a velocity nudge that drifted, it shipped as <code>HorseSwimMixin</code> on
+                <code>travelInWater</code>'s push.</li>
+        </ul></li>
+    <li><strong>Several "fails" were the pens, not the mod</strong>, and are worth remembering: armour set with
+        <code>setItemSlot</code> never drops; a stone lid leaves a horse's eye above the water; a pen 29 blocks away is
+        inside a 32-block radius; an AI-steered horse barely swims; and a grep for PASS also matches the pen's own
+        "expect ... PASS" line.</li>
+</ul>
+<p>
+    <strong>Still open:</strong> gap 245 (the lethal ratio pens' skew, still logging), gap 244 (the dark-oak branch check),
+    gap 250 (a blood-only horse's day without a bite, now logged). Also the checks only a person can do, listed in the
+    tester guide.
+</p>
+
 <h2 id="d2026-09-14g">2026-09-14 &mdash; eight hours of yard, four more fixes, and a launch straight into it</h2>
 
 <p>
