@@ -76,7 +76,8 @@ public record Breed(
         Optional<PriceRange> price,
         String description,
         SpawnTime spawnTime,
-        List<Strain> strains) {
+        List<Strain> strains,
+        boolean magicalVariant) {
 
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
@@ -351,6 +352,7 @@ public record Breed(
         private String description = "";
         private SpawnTime spawnTime = SpawnTime.ANY;
         private final List<Strain> strains = new ArrayList<>();
+        private boolean magicalVariant = true;
 
         private Builder(String id, String name) {
             this.id = id;
@@ -371,6 +373,15 @@ public record Breed(
 
         public Builder spawnWeight(double w) {
             this.spawnWeight = w;
+            return this;
+        }
+
+        /**
+         * Opt the breed out of magical herds ({@link MagicalVariant}). Every breed has them unless it says not, so
+         * this is the only direction there is to set.
+         */
+        public Builder noMagicalVariant() {
+            this.magicalVariant = false;
             return this;
         }
 
@@ -541,7 +552,7 @@ public record Breed(
                     sourcesNamed ? sources : BreedSource.ALL, pools,
                     new StatScores(speed, jump, health, size), bands.build(),
                     notes, price,
-                    description, spawnTime, strains);
+                    description, spawnTime, strains, magicalVariant);
         }
     }
 }

@@ -19,6 +19,10 @@ import java.util.TreeSet;
  *       components always sorted so order never matters);</li>
  *   <li><b>spliced</b> - one pure line a gene splice carrot has been let into
  *       ({@code "spliced:friesian"}, displayed <b>Spliced (Friesian)</b>);</li>
+ *   <li><b>magical</b> - one breed's magical herd ({@code "magical:friesian"}, displayed <b>Magical (Friesian)</b>,
+ *       see {@link MagicalVariant}). It combines as its breed would, except that a foal whose label comes out as that
+ *       one breed keeps the Magical: {@code Magical(A) + A} and {@code Magical(A) + Magical(A)} are
+ *       {@code Magical(A)}, and {@code Magical(A) + B} is the ordinary {@code A × B} cross;</li>
  *   <li><b>mixed</b> - three or more lines tangled together ({@code "mixed"});</li>
  *   <li><b>feral</b> - a horse with no herd identity, i.e. a lone wild spawn,
  *       a {@code /summon}, or a spawn-egg horse ({@code "feral_mixed"},
@@ -76,10 +80,13 @@ import java.util.TreeSet;
  */
 public record BreedLineage(Kind kind, List<String> components) {
 
-    public enum Kind { PURE, CROSS, SPLICED, MIXED, FERAL }
+    public enum Kind { PURE, CROSS, SPLICED, MAGICAL, MIXED, FERAL }
 
     /** What a spliced token starts with. */
     private static final String SPLICED_PREFIX = "spliced:";
+
+    /** What a magical token starts with. */
+    private static final String MAGICAL_PREFIX = "magical:";
 
     /**
      * The reserved component id a splice contributes. It is not a breed and no
@@ -116,7 +123,8 @@ public record BreedLineage(Kind kind, List<String> components) {
      */
     public BreedLineage spliced() {
         return switch (kind) {
-            case PURE -> new BreedLineage(Kind.SPLICED, components);
+            // A splice on a magical horse is still a splice: Spliced says more about how it was bred.
+            case PURE, MAGICAL -> new BreedLineage(Kind.SPLICED, components);
             case CROSS -> MIXED;
             case SPLICED, MIXED, FERAL -> this;
         };
@@ -124,6 +132,16 @@ public record BreedLineage(Kind kind, List<String> components) {
 
     public boolean isSpliced() {
         return kind == Kind.SPLICED;
+    }
+
+    /** A horse of {@code breedId}'s magical herd - {@link #FERAL} for a blank or feral id, as {@link #pure} is. */
+    public static BreedLineage magical(String breedId) {
+        BreedLineage pure = pure(breedId);
+        return pure.kind == Kind.PURE ? new BreedLineage(Kind.MAGICAL, pure.components) : pure;
+    }
+
+    public boolean isMagical() {
+        return kind == Kind.MAGICAL;
     }
 
     public static BreedLineage cross(String a, String b) {
@@ -149,6 +167,10 @@ public record BreedLineage(Kind kind, List<String> components) {
         if (token.startsWith(SPLICED_PREFIX)) {
             return parse(token.substring(SPLICED_PREFIX.length())).spliced();
         }
+        if (token.startsWith(MAGICAL_PREFIX)) {
+            BreedLineage inner = parse(token.substring(MAGICAL_PREFIX.length()));
+            return inner.kind == Kind.PURE ? new BreedLineage(Kind.MAGICAL, inner.components) : inner;
+        }
         if (token.startsWith("cross:")) {
             String[] parts = token.substring("cross:".length()).split("\\+");
             if (parts.length == 2) {
@@ -164,6 +186,7 @@ public record BreedLineage(Kind kind, List<String> components) {
             case PURE -> components.get(0);
             case CROSS -> "cross:" + String.join("+", components); // already sorted
             case SPLICED -> SPLICED_PREFIX + baseToken();
+            case MAGICAL -> MAGICAL_PREFIX + baseToken();
             case MIXED -> "mixed";
             case FERAL -> FERAL_ID;
         };
@@ -177,6 +200,17 @@ public record BreedLineage(Kind kind, List<String> components) {
     // --- combination ---------------------------------------------------
 
     public static BreedLineage combine(BreedLineage a, BreedLineage b) {
+        BreedLineage lines = combineLines(a, b);
+        // Magical rides on the breed, not beside it: it combines as its breed and survives only where the foal comes
+        // out as that one breed. Anything else - a cross, a splice, Mixed - is what it would have been anyway.
+        if (lines.kind == Kind.PURE && (a.kind == Kind.MAGICAL || b.kind == Kind.MAGICAL)) {
+            return new BreedLineage(Kind.MAGICAL, lines.components);
+        }
+        return lines;
+    }
+
+    /** The table in the class comment, with a magical label read as its breed. */
+    private static BreedLineage combineLines(BreedLineage a, BreedLineage b) {
         // Mixed and Feral are both absorbing, and for the same reason: neither
         // names an ancestry a foal could inherit half of.
         if (a.kind == Kind.MIXED || b.kind == Kind.MIXED
@@ -249,6 +283,7 @@ public record BreedLineage(Kind kind, List<String> components) {
             case PURE -> Breeds.displayName(components.get(0));
             case CROSS -> crossName();
             case SPLICED -> "Spliced (" + Breeds.displayName(components.get(0)) + ")";
+            case MAGICAL -> "Magical (" + Breeds.displayName(components.get(0)) + ")";
             case MIXED -> "Mixed";
             case FERAL -> "Feral Mixed";
         };

@@ -1,6 +1,8 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.breed.MagicalVariant;
 import com.example.horsegenetics.common.breed.BandType;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
@@ -143,11 +145,20 @@ public final class HerdManager {
             sex = coin(rng);
         }
 
-        Genome genome = BreedFounder.roll(breed, rng, sex);
-        BreedFounderLog.founder(breed, genome.genotype(), "wild herd");
+        // A magical herd is decided from the lead alone, so a horse founding the herd now and one joining it later
+        // draw the same gene and the same pair.
+        MagicalVariant magic = lead == null ? null : MagicalVariant.roll(breed, Breeds.spawnSettings().magical(),
+                new SeededRng(lead.getMostSignificantBits() ^ lead.getLeastSignificantBits(), "magical-herd")).orElse(null);
+        Genome genome = BreedFounder.roll(breed, rng, sex, magic);
+        BreedFounderLog.founder(breed, genome.genotype(), magic == null ? "wild herd" : "magical wild herd");
         String token = breed == Breeds.FERAL_MIXED
                 ? BreedLineage.FERAL.toToken()
+                : magic != null ? BreedLineage.magical(breed.id()).toToken()
                 : BreedLineage.pure(breed.id()).toToken();
+        if (magic != null && lead.equals(horse.getUUID())) {
+            DebugAnnounce.log("Breeds", "a magical herd of " + breed.name() + " at " + horse.blockPosition().toShortString()
+                    + ": every horse carries " + magic.gene().key() + "=" + magic.pair().toTokens());
+        }
         NameParts name = HorseRecords.newNameParts(rng);
         HorseRecord record = HorseRecord.founder(horse.getUUID(), name.first(), name.last(), genome, token);
 

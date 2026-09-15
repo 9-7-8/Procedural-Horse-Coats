@@ -45,6 +45,9 @@ public final class BreedSpecWriter {
         if (breed.magical()) {
             fields.add(field("kind", quote("magical")));
         }
+        if (!breed.magicalVariant()) {
+            fields.add(field("magical_variant", "false"));   // true is the default, and is never written
+        }
         Commonness tier = Commonness.forWeight(breed.spawnWeight());
         if (tier.weight == breed.spawnWeight()) {
             if (tier != Commonness.MODERATE) {

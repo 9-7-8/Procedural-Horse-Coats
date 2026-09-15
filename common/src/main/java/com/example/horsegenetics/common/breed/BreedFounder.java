@@ -68,7 +68,7 @@ import java.util.Set;
 public final class BreedFounder {
 
     /** The four magical body-stat gene keys, handled from the breed's stat bands. */
-    private static final Set<String> BODY_STAT_KEYS = Set.of(
+    static final Set<String> BODY_STAT_KEYS = Set.of(
             "horsegenetics.body_size",
             "horsegenetics.magic_speed",
             "horsegenetics.magic_health",
@@ -83,7 +83,19 @@ public final class BreedFounder {
         return g.withSex(sex);
     }
 
+    /**
+     * One member of a <b>magical herd</b>: {@link #roll(Breed, Rng, Sex)} with the herd's one magical pair on top (see
+     * {@link MagicalVariant}). {@code variant} may be null, for an ordinary herd.
+     */
+    public static Genome roll(Breed breed, Rng rng, Sex sex, MagicalVariant variant) {
+        return roll(breed, rng, variant).withSex(sex);
+    }
+
     public static Genome roll(Breed breed, Rng rng) {
+        return roll(breed, rng, (MagicalVariant) null);
+    }
+
+    private static Genome roll(Breed breed, Rng rng, MagicalVariant variant) {
         Genotype base = Genotype.random(rng);
         if (breed == Breeds.FERAL_MIXED) {
             return Genome.of(base, rng);
@@ -135,6 +147,10 @@ public final class BreedFounder {
                 g = g.with(wild(gene)); // no disorder the breed sheet does not list
             }
             // otherwise: keep the base roll (the natural performance genes)
+        }
+        if (variant != null) {
+            // Before the epigenome exists, so the magical copies get their numbers like any other allele.
+            g = g.with(variant.pair());
         }
 
         return stampBands(breed, stampStatTargets(breed, strain, Genome.of(g, rng), rng, size), rng);

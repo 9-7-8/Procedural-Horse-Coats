@@ -72,6 +72,8 @@ public final class BreedSpawningConfig {
     private static ModConfigSpec.BooleanValue feralEnabled;
     private static ModConfigSpec.ConfigValue<List<? extends String>> feralBiomes;
     private static ModConfigSpec.DoubleValue feralWeight;
+    private static ModConfigSpec.BooleanValue magicalEnabled;
+    private static ModConfigSpec.DoubleValue magicalChance;
     private static final List<Section> SECTIONS = new ArrayList<>();
 
     private BreedSpawningConfig() {
@@ -117,6 +119,19 @@ public final class BreedSpawningConfig {
                         "on the same scale as spawn_weight below. 0 means Feral Mixed only",
                         "where no breed may spawn - how it has always been. (default: 0)")
                 .defineInRange("herd_weight", 0.0, 0.0, 1000.0);
+        b.pop();
+
+        b.comment("Magical herds: now and then a wild herd of a breed is its magical",
+                        "version. It lives in the same biomes, the whole herd shares one magical",
+                        "gene with the same alleles, and it reads as \"Magical (Breed)\". A foal",
+                        "bred back to that breed stays Magical; crossed to another breed it is an",
+                        "ordinary cross. A breed file can opt out with \"magical_variant\": false.")
+                .push("magical_herds");
+        magicalEnabled = b.comment("Whether any wild herd may be magical. (default: true)")
+                .define("enabled", true);
+        magicalChance = b.comment("The share of each breed's wild herds that are magical, from 0 to 1.",
+                        "(default: 0.05)")
+                .defineInRange("chance", 0.05, 0.0, 1.0);
         b.pop();
 
         b.comment("One section per shipped breed.",
@@ -177,12 +192,14 @@ public final class BreedSpawningConfig {
         }
         BreedSpawnSettings.Feral feral = new BreedSpawnSettings.Feral(
                 feralEnabled.get(), strings(feralBiomes.get()), feralWeight.get());
-        BreedSpawnSettings settings = new BreedSpawnSettings(builtins.get(), overrides, feral);
+        BreedSpawnSettings.Magical magical = new BreedSpawnSettings.Magical(magicalEnabled.get(), magicalChance.get());
+        BreedSpawnSettings settings = new BreedSpawnSettings(builtins.get(), overrides, feral, magical);
         Breeds.applySpawnSettings(settings);
-        HorseGenetics.LOGGER.info("[breeds] spawn settings read from {}: shipped breeds {}, {} switched off, Feral Mixed {}",
+        HorseGenetics.LOGGER.info("[breeds] spawn settings read from {}: shipped breeds {}, {} switched off, Feral Mixed {}, magical herds {}",
                 event.getConfig().getFileName(), settings.builtinsEnabled() ? "on" : "OFF",
                 overrides.values().stream().filter(o -> !o.enabled()).count(),
-                feral.enabled() ? (feral.biomes().isEmpty() ? "everywhere" : "in " + feral.biomes().size() + " biome(s)") : "OFF");
+                feral.enabled() ? (feral.biomes().isEmpty() ? "everywhere" : "in " + feral.biomes().size() + " biome(s)") : "OFF",
+                magical.enabled() ? magical.chance() : "OFF");
     }
 
     private static List<String> strings(List<? extends String> in) {

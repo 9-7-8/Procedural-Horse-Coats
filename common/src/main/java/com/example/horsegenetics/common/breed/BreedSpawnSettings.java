@@ -76,14 +76,40 @@ public final class BreedSpawnSettings {
         }
     }
 
+    /**
+     * Magical herds ({@link MagicalVariant}): whether a wild herd of a breed may be founded as its magical version.
+     *
+     * @param enabled whether any may
+     * @param chance  the share of each breed's wild herds founded magical, 0 to 1
+     */
+    public record Magical(boolean enabled, double chance) {
+
+        public static final Magical DEFAULT = new Magical(true, 0.05);
+
+        public Magical {
+            chance = Math.max(0.0, Math.min(1.0, chance));
+        }
+    }
+
     private final boolean builtinsEnabled;
     private final Map<String, BreedOverride> overrides;
     private final Feral feral;
+    private final Magical magical;
 
     public BreedSpawnSettings(boolean builtinsEnabled, Map<String, BreedOverride> overrides, Feral feral) {
+        this(builtinsEnabled, overrides, feral, Magical.DEFAULT);
+    }
+
+    public BreedSpawnSettings(boolean builtinsEnabled, Map<String, BreedOverride> overrides, Feral feral,
+                              Magical magical) {
         this.builtinsEnabled = builtinsEnabled;
         this.overrides = Collections.unmodifiableMap(new LinkedHashMap<>(overrides));
         this.feral = feral == null ? Feral.DEFAULT : feral;
+        this.magical = magical == null ? Magical.DEFAULT : magical;
+    }
+
+    public Magical magical() {
+        return magical;
     }
 
     /** The settings that change nothing: every breed as its file says, Feral Mixed as always. */
@@ -128,6 +154,6 @@ public final class BreedSpawnSettings {
     private static Breed copy(Breed b, List<String> biomes, double weight, Set<BreedSource> sources,
                               SpawnTime time) {
         return new Breed(b.id(), b.name(), b.magical(), biomes, weight, sources, b.genePools(),
-                b.scores(), b.bands(), b.notes(), b.price(), b.description(), time, b.strains());
+                b.scores(), b.bands(), b.notes(), b.price(), b.description(), time, b.strains(), b.magicalVariant());
     }
 }

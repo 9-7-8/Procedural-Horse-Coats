@@ -56,7 +56,7 @@ public final class BreedSpecParser {
     /** Keys a breed file may carry. Anything else is a hard error. */
     private static final Set<String> KEYS = Set.of(
             "id", "name", "description", "kind", "commonness", "spawn_weight", "biomes",
-            "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes");
+            "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes", "magical_variant");
 
     private BreedSpecParser() {
     }
@@ -130,6 +130,16 @@ public final class BreedSpecParser {
             b.magical();
         } else if (!kind.equals("natural")) {
             throw new IllegalArgumentException("\"kind\" must be \"natural\" or \"magical\", got \"" + kind + "\"");
+        }
+
+        // --- magical herds: every breed has them unless it says not --------
+        if (root.containsKey("magical_variant")) {
+            if (!(root.get("magical_variant") instanceof Boolean on)) {
+                throw new IllegalArgumentException("\"magical_variant\" is true or false");
+            }
+            if (!on) {
+                b.noMagicalVariant();
+            }
         }
 
         // --- how often it heads a herd -----------------------------------

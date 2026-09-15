@@ -130,6 +130,35 @@ class BreedLineageTest {
         assertEquals(FRIESIAN.spliced(), BreedLineage.parse("spliced:friesian"));
     }
 
+    /**
+     * A magical herd's label (owner, 2026-09-15): bred back to its own breed a foal stays Magical, and crossed to
+     * anything else it is what its breed would have made.
+     */
+    @Test
+    void magicalStaysMagicalWithinItsBreedAndCrossesAsUsualOutside() {
+        BreedLineage magical = BreedLineage.magical("friesian");
+        assertEquals(Kind.MAGICAL, magical.kind());
+        assertEquals("Magical (Friesian)", magical.displayName());
+
+        assertEquals(magical, BreedLineage.combine(magical, FRIESIAN));
+        assertEquals(magical, BreedLineage.combine(FRIESIAN, magical));
+        assertEquals(magical, BreedLineage.combine(magical, magical));
+        assertEquals(BreedLineage.combine(FRIESIAN, ARABIAN), BreedLineage.combine(magical, ARABIAN));
+        assertEquals(FR_AR, BreedLineage.combine(magical, FR_AR));
+        assertEquals(BreedLineage.combine(FRIESIAN, BreedLineage.magical("arabian")),
+                BreedLineage.combine(magical, BreedLineage.magical("arabian")));
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(magical, BreedLineage.FERAL));
+        assertEquals(FRIESIAN.spliced(), BreedLineage.combine(magical, FRIESIAN.spliced()));
+        assertEquals(FRIESIAN.spliced(), magical.spliced());
+    }
+
+    @Test
+    void magicalTokensRoundTrip() {
+        assertEquals("magical:friesian", BreedLineage.magical("friesian").toToken());
+        assertEquals(BreedLineage.magical("friesian"), BreedLineage.parse("magical:friesian"));
+        assertSame(BreedLineage.FERAL, BreedLineage.magical(""));
+    }
+
     @Test
     void blankAndNullParseToFeral() {
         assertEquals(Kind.FERAL, BreedLineage.parse(null).kind());

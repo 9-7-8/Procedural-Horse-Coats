@@ -76,6 +76,8 @@ public final class HorsePrices {
                     ? priceOf(Breeds.get(lineage.components().get(0)))
                     : dearer(priceOf(Breeds.get(lineage.components().get(0))),
                             priceOf(Breeds.get(lineage.components().get(1))));
+            // A magical herd's horse is priced as its breed: the magic is a find, not a pedigree.
+            case MAGICAL -> priceOf(Breeds.get(lineage.components().get(0)));
             case MIXED, FERAL -> DEFAULT_PRICE;
         };
     }
