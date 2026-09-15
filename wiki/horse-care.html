@@ -521,6 +521,13 @@
         prints would be missed.</li>
 </ul>
 
+<p id="verified-foal-bond">
+    <strong>A foal born to a tamed dam starts at a quarter of her bond</strong> (2026-09-15, formerly part of gap 155).
+    <code>HorseBreedingHandler.inheritBond</code> writes the dam's bond &divide; 4 straight onto the foal, bypassing
+    <code>awardBond</code> and its daily cap. The yard's BOND pen breeds a bond-80 mare, and in the 08:47 run all four of
+    her foals joined the world at bond 20, each logged against her bond at that moment: PASS.
+</p>
+
 <p id="verified-taming">
     <strong>Taming by hand works</strong> (owner-confirmed in play, 2026-09-10). <em>Still
     unwatched:</em> horses peeling off a wild herd for a player walking past crouched with food, a

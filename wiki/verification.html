@@ -872,11 +872,6 @@
     <li><strong>The horse designer was mirrored</strong> (hard rule 5) - open
         <a href="horse-designer/index.html">the designer</a> and confirm its right column
         matches, since it copies these constants by value.</li>
-    <li><strong>Breed the starburst pair in the yard</strong> with batch 1's golden
-        carrots. The foal's emblem should sit near its parents' rather than re-rolling.
-        This is the one test in the yard that still wants hands, and it is finally
-        possible: the yard's horses are tamed now, and vanilla will not breed an untamed
-        one.</li>
 </ul>
 
 <h2 id="highlight-crash">&sect;0-CQ &mdash; F8's highlight no longer crashes the server (2026-09-12, NOT looked at)</h2>
@@ -2205,10 +2200,6 @@
     <li><strong>Hearts when the bond moves, and where they stop.</strong> Hand-feed a tamed
         horse and watch for hearts. Then keep feeding past the daily cap of 15 and check the
         hearts <b>stop</b> - that is the only signal the cap exists.</li>
-
-    <li><strong>A foal that already likes you.</strong> Breed a well-bonded mare and check
-        the foal's information screen opens at roughly a quarter of hers rather than at
-        zero.</li>
 
     <li><strong>The research shelf</strong> was rebuilt as a chest after it still "did
         nothing" in play - see <a href="#play-fixes-0910b">&sect;0-BX</a>.</li>
@@ -7190,10 +7181,6 @@
         (~0.96); the gap between them should be obvious. Falabella / Shetland
         still tiny. Thoroughbred / Standardbred herd visibly faster than a draft
         herd.</li>
-    <li><strong>Breeding labels.</strong> Same breed &times; same breed &rarr;
-        that breed. Two breeds &rarr; &ldquo;A &times; B cross&rdquo; (alphabetical,
-        order-free). Cross &times; a parent breed &rarr; same cross. Cross &times;
-        an outsider &rarr; &ldquo;Mixed&rdquo;. Check the foal&rsquo;s panel.</li>
     <li><strong>Cross stats.</strong> A Thoroughbred &times; Arabian foal should
         still be fast; a Thoroughbred &times; Friesian foal should regress toward
         ordinary speed (Friesian pins no speed band).</li>
@@ -8195,7 +8182,6 @@
 <table>
 <thead><tr><th>Item</th><th>How to check</th></tr></thead>
 <tbody>
-<tr><td><code>breedNth</code> foal names past foal 1</td><td>Breed one pair 7+ times: foal 1 = parent combo, foal 2 = the other combo, foals 3&ndash;6 = one parent name half + a random word, foal 7+ = fully random, no repeats. <code>HorseNames</code> is unit-tested; the live <code>offspringCount(dam, sire)</code> link is unproven.</td></tr>
 <tr><td><code>FamilyTreeScreen</code> scroll mode</td><td>The scroll-bar path is unchecked (<a href="breeding.html#verified-family-tree">shrink-to-fit is verified</a>). Flip <code>familyTree.scrollBar</code> true in <code>phc/client.toml</code> and check the wheel and the right-edge thumb.</td></tr>
 <tr><td>Stats surfaces</td><td>Foal speed/health landing on the entity&rsquo;s attributes; the inventory-panel green/amber/red tint vs <code>parentStats</code>; the paper dump&rsquo;s <code>vs parents</code> line.</td></tr>
 <tr><td>Compact gene code</td><td><code>GeneCodeDisplay.shortForm</code> on the surfaces not specifically eyeballed: the paper dump&rsquo;s <code>genetic code:</code> line and the mounted info panel&rsquo;s word-wrapped block.</td></tr>

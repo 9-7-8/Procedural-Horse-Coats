@@ -450,7 +450,7 @@
     the cheap one is a node check that both tables name the same mask set with the same
     defaults.</li>
 
-<li id="gap-155"><strong>Hearts on bond, the foal's inherited bond, and crouch-feed's tuning have not been played.</strong>
+<li id="gap-155"><strong>Hearts on bond and crouch-feed's tuning have not been played.</strong>
     Opened 2026-09-09 with 0.3.8. Taming by hand itself is confirmed (<a href="horse-care.html#verified-taming">horse care</a>).
     <code>CrouchFeedGoal</code> re-tests its four conditions every tick, so the failure mode
     nobody will notice is the goal <em>starting</em> too easily
@@ -460,10 +460,9 @@
     vanilla's own and is the one part not in doubt. Separately: hearts now fire from
     <code>awardBond</code> whenever a point is actually granted, which means they also
     <b>stop</b> at the daily cap - that is deliberate and is the only signal a player has
-    that the cap exists, but nobody has watched it happen. And a foal born to a tamed dam
-    starts at a quarter of her bond, written straight onto the attachment rather than
-    through <code>awardBond</code>; if that number reads as too generous it is one
-    division to change.</li>
+    that the cap exists, but nobody has watched it happen. (The foal's inherited bond, a
+    quarter of the dam's, is <a href="horse-care.html#verified-foal-bond">verified</a>; if that
+    number reads as too generous it is one division to change.)</li>
 
 <li id="gap-156"><strong>The phantom saddle is a real saddle, and the only thing stopping it being a duplicator is a sweep.</strong>
     Opened 2026-09-09 with 0.4.0. Bareback steering at bond tier 3 works by equipping an
@@ -736,7 +735,7 @@ three expressions) and <a href="gene-ringwork.html">ringwork</a> (both contour r
 </li>
 <li id="gap-6"><strong>Coat realism</strong> - outside grey's dapples and <a href="gene-sooty.html">sooty</a>'s countershading, every gene still samples the gradient flat per pixel (no seasonal coat, and no seasons to have one in). <code>BodyNoise</code> is the reusable seam for the next one. <code>T</code> on a non-deterministic coat still bakes a unique (identical-looking) texture per horse.
 </li>
-<li id="gap-8"><strong><code>breedNth</code> foal names past foal 1</strong> / <strong><code>FamilyTreeScreen</code> scroll mode</strong> / <strong>stats surfaces</strong> / <strong>water-riding feel</strong> / <strong>the epigenome across a save-reload</strong> - see <code>wiki/verification.html</code>.
+<li id="gap-8"><strong><code>FamilyTreeScreen</code> scroll mode</strong> / <strong>stats surfaces</strong> / <strong>water-riding feel</strong> / <strong>the epigenome across a save-reload</strong> - see <code>wiki/verification.html</code>.
 </li>
 <li id="gap-10"><strong>The carrier wording is read by nothing.</strong>
     Every health locus declares a sentence saying what one copy means, and no screen shows it. The punnett /
