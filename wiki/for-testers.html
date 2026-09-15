@@ -151,9 +151,12 @@
     <li>Type <code>/locate structure horsegenetics:horse_stable</code> in chat.</li>
     <li>Press <kbd>H</kbd>.</li>
     <li>Open the <em>Gene database</em> tab.</li>
+    <li>Stand near a wild herd and watch it for one minute.</li>
+    <li>Open a Custom Horse Spawn Egg, press <strong>Make egg</strong>, and hold the egg it gives you.</li>
+    <li>Fill a seed jar from your own stallion (see <a href="#t-jar">the seed jar test</a>) and hold it.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the world loads, the tamed horse has a generated name, the egg makes a horse of its breed, the command finds a stable, and the gene list is filled.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> the game crashes, the horse has no name, the breed egg makes a "Feral Mixed" horse, or the gene list is empty.</p>
+<p class="tester-pass"><strong>It works if:</strong> the world loads, the tamed horse has a generated name, wild horses have markings, the egg makes a horse of its breed, the command finds a stable, the gene list is filled, and holding the eggs and the jar near horses never disconnects you.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the game crashes, you are disconnected, the horse has no name, the breed egg makes a "Feral Mixed" horse, or the gene list is empty.</p>
 <button type="button" class="report-btn" data-report="The mod works in a plain install">Report a problem with this test</button>
 </div>
 
@@ -354,9 +357,10 @@
     <li>Press <em>Save and Quit to Title</em>.</li>
     <li>Open the world again.</li>
     <li>Open the shelf and look at the list.</li>
+    <li>Start copying one of the papers with some books, and let it make at least one copy.</li>
     <li>Break the shelf.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> all 3 genes are still listed after reloading, and breaking the shelf drops every paper and book.</p>
+<p class="tester-pass"><strong>It works if:</strong> all 3 genes are still listed after reloading, and breaking the shelf drops every paper, every book and every finished copy.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> any paper is lost.</p>
 <button type="button" class="report-btn" data-report="The Equine Research Shelf keeps its papers">Report a problem with this test</button>
 </div>
@@ -377,6 +381,27 @@
 <p class="tester-pass"><strong>It works if:</strong> it turns back into a horse where the wolf was standing, with the same name and family tree.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the horse is lost, comes back with a new name, or there are two of it.</p>
 <button type="button" class="report-btn" data-report="A werewolf horse comes back as the same horse">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-phantom-saddle">
+<h3>You cannot get the invisible saddle out of a horse</h3>
+<p class="tester-need"><strong>You need:</strong> a horse with a bond of 81 or more and <strong>no saddle</strong> (see <a href="#t-bond-tiers">the bond test</a>), a hopper, a dispenser, and a chest. A second player if you can.</p>
+<ol>
+    <li>Ride the horse with no saddle.</li>
+    <li>Steer it around and jump.</li>
+    <li>Look at its back.</li>
+    <li>While riding, open its inventory and try to take the saddle out of the saddle slot.</li>
+    <li>Close the inventory and count the saddles in your own inventory.</li>
+    <li>Get off, and look at its back again.</li>
+    <li>Place a hopper under where the horse stands, with a chest under the hopper, and ride the horse onto it.</li>
+    <li>Place a dispenser facing the horse while you ride it, and power it.</li>
+    <li>If you have a second player, ask them to open the horse's inventory while you ride it.</li>
+    <li>Ride the horse, then type <code>/kill</code> to die while riding. Look at what you drop.</li>
+    <li>Put a normal saddle on a different horse, ride it, get off, and check the saddle is still there.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse steers and jumps like a saddled horse; no saddle shows on its back; you never end up with a saddle from it (not in your inventory, the chest, on the ground, or in the other player's hands); it is bare when you get off; the horse you saddled yourself keeps its saddle.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you get a saddle from the bond-81 horse in any way. Say which way, even if the saddle looks invisible.</p>
+<button type="button" class="report-btn" data-report="You cannot get the invisible saddle out of a horse">Report a problem with this test</button>
 </div>
 
 <!-- ================================================================== -->
@@ -440,7 +465,7 @@
 
 <div class="tester-test" id="t-jar">
 <h3>Seed jars</h3>
-<p class="tester-need"><strong>You need:</strong> two players, empty seed jars, golden carrots, a vet's kit, a chest, and a stallion and mare of your own.</p>
+<p class="tester-need"><strong>You need:</strong> two players, empty seed jars, golden carrots, a vet's kit, a chest, and a stallion and mare of your own. Do it once in single player and once on a server if you can: clicking a horse with a jar should never start the climbing-on animation in either.</p>
 <ol>
     <li>Use an empty jar on your stallion without feeding him first.</li>
     <li>Feed your stallion a golden carrot.</li>
@@ -475,8 +500,9 @@
     <li>Leave him with a mare in heat for one Minecraft day.</li>
     <li>Press <kbd>H</kbd>, open <em>My horses</em>, and type <code>gelding</code> in the filter.</li>
     <li>Type <code>stallion</code> in the filter instead.</li>
+    <li>Open the browser's breeding preview (see <a href="#t-breeding-preview">the breeding preview test</a>) and look through the stallion list.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the wild stallion, the other player's stallion and the mare all refuse; your stallion "is now a gelding"; his symbol turns grey and his screen says Gelding; the jar and the golden carrots both say he is a gelding; he never breeds the mare; the <code>gelding</code> filter finds him and <code>stallion</code> does not.</p>
+<p class="tester-pass"><strong>It works if:</strong> the wild stallion, the other player's stallion and the mare all refuse; your stallion "is now a gelding"; his symbol turns grey and his screen says Gelding; the jar and the golden carrots both say he is a gelding; he never breeds the mare; the <code>gelding</code> filter finds him and <code>stallion</code> does not; he is not in the breeding preview's stallion list.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> any of those does not happen.</p>
 <button type="button" class="report-btn" data-report="Gelding a stallion with the vet's kit">Report a problem with this test</button>
 </div>
@@ -683,8 +709,10 @@
     <li>Watch how fast it comes.</li>
     <li>Put the food away while it is on its way.</li>
     <li>Ride one horse, and put a lead on another, while holding food.</li>
+    <li>Find an untamed wild horse. Crouch and stand still in front of it, holding wheat.</li>
+    <li>Wait up to a minute.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> wheat makes horses drift slowly towards you; the favourite is noticed from further away and the horse gallops; it stops a couple of blocks from you; it stops coming when you put the food away; ridden and led horses ignore the food.</p>
+<p class="tester-pass"><strong>It works if:</strong> wheat makes horses drift slowly towards you; the favourite is noticed from further away and the horse gallops; it stops a couple of blocks from you; it stops coming when you put the food away; ridden and led horses ignore the food; the wild horse comes up and eats from your hand until it tames, rather than only hanging around you.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the favourite and wheat look exactly the same, or the horse refuses its favourite.</p>
 <button type="button" class="report-btn" data-report="Horses come for food, and run for their favourite">Report a problem with this test</button>
 </div>
@@ -745,8 +773,9 @@
     <li>Watch for a minute.</li>
     <li>Hit a wild horse once.</li>
     <li>Run out of sight for 3 seconds.</li>
+    <li>In creative, fly through a taiga, a jungle, a swamp and a badlands, and look at a herd in each.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> every horse in one herd is the same breed; the mare goes back to her herd, or her stallion comes to fetch her; the herd chases you after you hit one, then calms down.</p>
+<p class="tester-pass"><strong>It works if:</strong> every horse in one herd is the same breed, in every biome; the mare goes back to her herd, or her stallion comes to fetch her; the herd kicks and chases you after you hit one, then calms down once you are out of sight; nothing crashes on the way.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the mare stays lost, the herd is a mix of breeds, or the herd never calms down.</p>
 <button type="button" class="report-btn" data-report="Wild herds stick together">Report a problem with this test</button>
 </div>
@@ -768,11 +797,14 @@
     <li>Leave the horse and go through a Nether portal.</li>
     <li>Blow the whistle in the Nether.</li>
     <li>Open the horse's information screen.</li>
+    <li>Blow the whistle in the Nether again, then go back to the Overworld and blow it there.</li>
+    <li>Sell the horse to a second player with transfer papers (see <a href="#t-transfer">the transfer test</a>), then blow the whistle.</li>
+    <li>Give the whistle to the new owner and ask them to blow it.</li>
     <li>Put the whistle in a chest.</li>
     <li>Kill that horse.</li>
     <li>Take the whistle out of the chest.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the wild horse refuses; your horse is "bound for good"; the other horse does not change it; the horse appears in front of you from 30 blocks; from far away it says it "echoes a long way off" and the horse arrives within 5 seconds; it crosses into the Nether with the same name, coat and genes; and the whistle crumbles to dust after the horse dies.</p>
+<p class="tester-pass"><strong>It works if:</strong> the wild horse refuses; your horse is "bound for good"; the other horse does not change it; the horse appears in front of you from 30 blocks; from far away it says it "echoes a long way off" and the horse arrives within 5 seconds; it crosses into the Nether and back with the same name, coat and genes; after you sell it, the whistle will not call it for you, but works for the new owner once you hand it over; and the whistle crumbles to dust after the horse dies.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> it always says nothing answered from far away, or the horse changes when it arrives.</p>
 <button type="button" class="report-btn" data-report="The ender whistle">Report a problem with this test</button>
 </div>
@@ -807,8 +839,11 @@
     <li>Fill the stall with hay bales.</li>
     <li>Use another ticket on the horse.</li>
     <li>Break the sign.</li>
+    <li>Build three more stalls and bind a sign to each: one L-shaped, one only one block wide, and one whose floor has slabs and a one-block step in it.</li>
+    <li>Use a ticket into each of them.</li>
+    <li>Build one more stall with its fence gate left open, and use a ticket into it.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the first two say why and leave the sign blank; the sign binds and places; the ticket puts the horse in the middle of the stall; the full stall refuses and you keep the ticket; breaking the sign says "Stall released".</p>
+<p class="tester-pass"><strong>It works if:</strong> the first two say why and leave the sign blank; the sign binds and places; the ticket puts the horse in the middle of the stall; the full stall refuses and you keep the ticket; breaking the sign says "Stall released"; in the odd-shaped stalls the horse lands standing on the floor inside, or the ticket refuses with a message and is kept.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the horse ends up in a wall, or a ticket is used up when it refused.</p>
 <button type="button" class="report-btn" data-report="Stall signs and tickets">Report a problem with this test</button>
 </div>
@@ -839,26 +874,31 @@
     <li>Give the signed paper to the other player.</li>
     <li>Ask them to use it.</li>
     <li>Ask them to open the horse's family tree.</li>
+    <li>Ask them to open the horse's information screen, and open it yourself at the same time if you can.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the paper says it is bound to you; the other player's horse refuses; the horse becomes theirs; the family tree still shows you as the breeder.</p>
+<p class="tester-pass"><strong>It works if:</strong> the paper says it is bound to you; the other player's horse refuses; the horse becomes theirs; the family tree still shows you as the breeder; two people looking at the horse at once see the same thing and neither screen breaks.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> you can sign someone else's horse, or the breeder changes.</p>
 <button type="button" class="report-btn" data-report="Selling a horse with transfer papers">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-shelf">
 <h3>Copying genes on the Equine Research Shelf</h3>
-<p class="tester-need"><strong>You need:</strong> a research shelf, research papers, books.</p>
+<p class="tester-need"><strong>You need:</strong> a bookshelf, 2 horse hair, research papers, books. A second player with a paper for a different gene, if you can.</p>
 <ol>
+    <li>Craft the shelf from the bookshelf and 2 horse hair, and look at it in your inventory.</li>
     <li>Place the shelf.</li>
     <li>Put a research paper in on the Store tab.</li>
     <li>Put a second paper for the same gene in.</li>
+    <li>On the Store tab, click where the book slot is on the Copy tab, while holding a book.</li>
     <li>Open the Copy tab and pick the gene.</li>
     <li>Add some books.</li>
+    <li>Watch the progress arrow.</li>
     <li>Close the shelf and walk away for 2 minutes.</li>
     <li>Come back and open it.</li>
     <li>Take the book out halfway through a copy.</li>
+    <li>If you have a second player, both file a different gene and both copy at the same shelf.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> it looks like a bookshelf; the second paper for the same gene stays in its slot; copies keep being made while you are away, with a progress bar; taking the book out resets the progress.</p>
+<p class="tester-pass"><strong>It works if:</strong> the item and the placed block look like a bookshelf; the second paper for the same gene stays in its slot; clicking the empty spot on the Store tab puts nothing in; the arrow fills and copies keep being made while you are away; taking the book out resets the progress; each player gets copies of their own gene.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> no copies are made while you are away, or items disappear.</p>
 <button type="button" class="report-btn" data-report="Copying genes on the Equine Research Shelf">Report a problem with this test</button>
 </div>
@@ -890,9 +930,13 @@
     <li>Press Spawn.</li>
     <li>Press Make egg, and use the egg it gives you.</li>
     <li>Press Copy, then Clear, then Paste.</li>
+    <li>Type a gene name into the search box.</li>
+    <li>Hover the mouse over a gene in the list, including one near the bottom of the list.</li>
+    <li>Add the <em>Particle</em> gene and open its variant dropdown. Scroll through it.</li>
     <li>Change your GUI scale to 4 in Video Settings and open the editor again.</li>
+    <li>Make the game window small and short (not full screen) and open the editor again.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> in survival the Spawn button is greyed out; the spawned horse and the egg's horse both match the preview; Paste brings the horse back; nothing overlaps at GUI scale 4.</p>
+<p class="tester-pass"><strong>It works if:</strong> in survival the Spawn button is greyed out and reads "(creative only)"; the spawned horse and the egg's horse both match the preview; Paste brings the horse back; the search finds the gene; hovering shows a short description that stays on screen; the Particle dropdown scrolls to every variant; nothing overlaps at GUI scale 4 or in the small window, and Spawn sits under the horse.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> a horse looks different from its preview, or buttons overlap.</p>
 <button type="button" class="report-btn" data-report="The custom horse spawn egg">Report a problem with this test</button>
 </div>
@@ -909,12 +953,52 @@
     <li>Type <code>mare</code> in the filter box.</li>
     <li>Type <code>foal</code> instead.</li>
     <li>Type <code>bond&gt;50</code> instead.</li>
-    <li>Click a column heading twice.</li>
+    <li>Try these filters one at a time: <code>-lethal</code>, <code>gen 2</code>, <code>gene:SB1</code>, <code>expresses:tobiano</code>.</li>
+    <li>Type something half-finished, like <code>gene:</code> on its own.</li>
+    <li>Click the Bond column heading, then click it again.</li>
     <li>Close the browser, tame a new horse, and open My horses again.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the far-away horses show as "not loaded"; each filter shows sensible results; clicking a heading twice reverses the order; the new horse appears.</p>
+<p class="tester-pass"><strong>It works if:</strong> the far-away horses show as "not loaded"; each filter shows sensible results; a half-finished filter shows no error; clicking a heading twice reverses the order, and horses whose bond is unknown stay together at one end; the new horse appears.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> horses are missing, a filter shows an error, or the list does not update.</p>
 <button type="button" class="report-btn" data-report="My horses lists all your horses">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-my-horses-screen">
+<h3>My horses at every GUI size</h3>
+<p class="tester-need"><strong>You need:</strong> 20 or more tamed horses, some of them foals of your own breeding.</p>
+<ol>
+    <li>Set your GUI scale to 2 in Video Settings. Press <kbd>H</kbd> and open <em>My horses</em>.</li>
+    <li>Do the same at GUI scale 3, then 4.</li>
+    <li>Watch the little horse pictures at the start of each row.</li>
+    <li>Scroll down the list as fast as you can.</li>
+    <li>Open the Gene picker and read what it lists.</li>
+    <li>Pick an allele in the Allele picker, then pick a second one.</li>
+    <li>Pick a horse with foals, open its Offspring, and press Refresh.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the table is readable at every scale with no button over any text; the pictures fill in as you look at them; fast scrolling does not stutter; the pickers list only genes and alleles your own horses carry; the second allele replaces the first; Offspring lists the right foals and grand-foals.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> text is covered, pictures stay blank, the pickers list things none of your horses have, or the offspring are wrong.</p>
+<button type="button" class="report-btn" data-report="My horses at every GUI size">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-getting-started">
+<h3>The Getting started page and its checklist</h3>
+<p class="tester-need"><strong>You need:</strong> a game where the mod has <strong>never</strong> been run before (a fresh install or a new profile), and a new survival world.</p>
+<ol>
+    <li>Open the world and press <kbd>H</kbd>.</li>
+    <li>Close the browser and press <kbd>H</kbd> again.</li>
+    <li>Quit the game, start it again, open the world and press <kbd>H</kbd>.</li>
+    <li>Open <em>Getting started</em> and read the contents list.</li>
+    <li>Scroll to the part about the horseman and look at his picture.</li>
+    <li>Drag the scroll bar from top to bottom.</li>
+    <li>Set your GUI scale to 4 and look through the page again.</li>
+    <li>Tame a mare. Watch chat, then look at the checklist at the end of the page.</li>
+    <li>Save and quit, open the world again, and look at the checklist.</li>
+    <li>Breed one foal, and write down which checklist boxes tick.</li>
+    <li>Raise a horse's bond to 31 and look at the checklist.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the browser opens on Getting started the very first time only; the contents list includes "Heat, pregnancy and foals" and "Horses live in bands"; the horseman wears his work clothes; the scroll bar reaches the end of the page exactly; nothing runs off the edge at scale 4; taming gives one chat line and ticks its box; ticks are still there after reloading; the bond-31 task ticks.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it opens on Getting started every time, text runs off the page, a tick disappears after reloading, or a box never ticks. In the report, list which boxes the foal ticked.</p>
+<button type="button" class="report-btn" data-report="The Getting started page and its checklist">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-info-screen">
@@ -922,16 +1006,69 @@
 <p class="tester-need"><strong>You need:</strong> a tamed horse and a tamed foal.</p>
 <ol>
     <li>Open the horse's inventory and click <strong>i</strong>.</li>
+    <li>Count the tabs along the top.</li>
     <li>Type a barn name and press Set.</li>
     <li>Close the screen and open it again.</li>
     <li>Press Done.</li>
+    <li>Move the saddle from the horse to your inventory and back.</li>
+    <li>Click <strong>i</strong> again, open the Family tree, and press its Done.</li>
     <li>Open the Offspring tab and press Refresh.</li>
+    <li>Open the Health tab on a horse with several health conditions, and read the numbers.</li>
+    <li>Open the Coat tab on a horse with <em>EDNRB (frame overo)</em>, and look at the rows of numbers.</li>
+    <li>Open the information screen of a horse with the <em>Waterborn</em> gene and read the short gene code.</li>
     <li>Crouch and right-click the tamed foal.</li>
     <li>Change your GUI scale to 4 and look for the <strong>i</strong> button.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the barn name stays; Done goes back to a working inventory; Offspring lists each foal once; the foal's inventory has no saddle slot but still has <strong>i</strong>; the <strong>i</strong> button is on screen at scale 4.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> the name is lost, or a button is off the screen.</p>
+<p class="tester-pass"><strong>It works if:</strong> there are six tabs; the barn name stays; Done goes back to a working inventory where the saddle moves normally; the family tree's Done goes back to the information screen; Offspring lists each foal once; the health numbers are sensible and fit on the screen; the coat rows all fit; the short code includes Waterborn; the foal's inventory has no saddle slot but still has <strong>i</strong>; the <strong>i</strong> button is on screen at scale 4.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the name is lost, the saddle cannot be moved, text runs over the edge, Waterborn is missing from the code, or a button is off the screen.</p>
 <button type="button" class="report-btn" data-report="The information screen">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-genes-copy">
+<h3>A horse's genes can be copied into the spawn egg</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a tamed horse with an unusual coat, and a Custom Horse Spawn Egg.</p>
+<ol>
+    <li>Open the horse's information screen and go to the Genes tab.</li>
+    <li>Copy its full gene code.</li>
+    <li>Open the spawn egg editor and paste the code in.</li>
+    <li>Press Spawn next to the first horse.</li>
+    <li>Compare the two horses side by side.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the new horse looks exactly like the first one, with the same markings and eyes.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> anything about the coat or eyes is different, or the paste is refused.</p>
+<button type="button" class="report-btn" data-report="A horse's genes can be copied into the spawn egg">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-breeding-preview">
+<h3>The breeding preview</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, and a tamed mare and stallion that each carry one copy of the same hidden gene. For example, make both with <em>Extension</em> set to <code>E</code> on one button and <code>e</code> on the other.</p>
+<ol>
+    <li>Press <kbd>H</kbd> and open the breeding preview.</li>
+    <li>Pick the mare and the stallion.</li>
+    <li>Read the chance of a foal with two copies (<code>e/e</code>).</li>
+    <li>Switch <em>All loci</em> on, then off.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> both horses show in the pickers with their pictures; the preview says 1 in 4 (25%) for <code>e/e</code>; All loci shows many more genes and hides them again.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the chance is not 1 in 4, or the toggle does nothing.</p>
+<button type="button" class="report-btn" data-report="The breeding preview">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-browser-crafting">
+<h3>The browser's Crafting and Recipes tabs</h3>
+<p class="tester-need"><strong>You need:</strong> a book, a gene you have discovered, the items for a splice carrot for a gene you know, two splice carrots, and a tamed horse.</p>
+<ol>
+    <li>Press <kbd>H</kbd> and open the Crafting tab at GUI scale 2, 3 and 4.</li>
+    <li>Put one book in the grid with your discovered gene chosen.</li>
+    <li>Craft a known-gene splice carrot.</li>
+    <li>Put two splice carrots in the grid to combine them.</li>
+    <li>Craft the same splice carrot at a normal crafting table.</li>
+    <li>Open the Recipes tab and choose each category in the dropdown.</li>
+    <li>Click the search box and type <code>speed</code>.</li>
+    <li>Close the browser, hold a book, and right-click your tamed horse.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the grid, result and inventory never overlap; the book gives a research paper; the carrot crafts in the browser and at the crafting table; the two carrots merge into one; the dropdown changes the list and descriptions stay inside their boxes; typing <code>speed</code> does not open your inventory (the letter "e" is in it); the horse gives you a research paper for a gene it carries.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> anything overlaps, a recipe does not craft, the inventory pops open while typing, or the book does nothing on the horse.</p>
+<button type="button" class="report-btn" data-report="The browser's Crafting and Recipes tabs">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-discovery">
@@ -944,14 +1081,15 @@
     <li>Press <kbd>H</kbd> and open the Gene database.</li>
     <li>Log out and back in.</li>
     <li>Check the Gene database again.</li>
+    <li>Tame a wild horse by riding it, then check the Gene database once more.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> you find papers now and then (about 1 chest in 5); using one adds its gene; the gene is still there after logging back in.</p>
+<p class="tester-pass"><strong>It works if:</strong> you find papers now and then (about 1 chest in 5); using one adds its gene; the gene is still there after logging back in; taming the wild horse adds the genes it carries.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> you never find a paper. Say how many chests you opened.</p>
 <button type="button" class="report-btn" data-report="Finding research papers and discovering genes">Report a problem with this test</button>
 </div>
 
 <!-- ================================================================== -->
-<h2 id="villages">6. Villages, the cowboy and the horseman</h2>
+<h2 id="villages">6. Villages, stables and the hay portal</h2>
 
 <div class="tester-test" id="t-barn">
 <h3>The cowboy's barn appears in villages</h3>
@@ -962,10 +1100,13 @@
     <li>Look for a barn and a small house at the end of a street.</li>
     <li>Walk from the street onto the path in front of the barn.</li>
     <li>Open the chests in the house.</li>
-    <li>Check 3 or 4 villages.</li>
+    <li>Look at the beds in the house.</li>
+    <li>Count the cowboys, and look for cats and iron golems in the village.</li>
+    <li>Check 4 villages. If one has two barns, count its cowboys.</li>
+    <li>Craft a Cowboy Hitch and place it about 40 blocks from the barn, then wait a few minutes.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> most villages have the barn and house; the path is level with the road; the house is not broken; the chests hold horse feed.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> most villages have no barn, there is a step up onto the path, or the house has missing or strange blocks.</p>
+<p class="tester-pass"><strong>It works if:</strong> most villages have the barn and house, at the edge of the village; the path is level with the road; the house is not broken; the beds face the right way; the chests hold loot; each village has one cowboy with 4 to 10 named horses of real breeds, and still only one when it has two barns; the village still has its cats and iron golems; the Cowboy Hitch brings a second cowboy.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> most villages have no barn, there is a step up onto the path, the house has missing or strange blocks, a bed is sideways, there are two cowboys for one village, or the village has no cats or golems.</p>
 <button type="button" class="report-btn" data-report="The cowboy's barn appears in villages">Report a problem with this test</button>
 </div>
 
@@ -976,13 +1117,15 @@
     <li>Find the cowboy in the morning.</li>
     <li>Close all four barn doors.</li>
     <li>Watch him for a few minutes.</li>
+    <li>Type <code>/time set night</code>, close the doors again, and watch him.</li>
+    <li>Type <code>/time set day</code>.</li>
     <li>Open his trades.</li>
     <li>Buy one horse's paper.</li>
     <li>Open his trades again.</li>
     <li>At night, spawn a zombie next to him.</li>
     <li>Leave for a while, come back, and count his horses.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> he stands in a field near the barn; he opens the doors in the day and his horses follow; he sells 4 to 10 named horses; the horse you bought is no longer offered; zombies ignore him; his horses never vanish while you are nearby.</p>
+<p class="tester-pass"><strong>It works if:</strong> he stands in a field near the barn; he opens both halves of each double door in the day and his horses follow; he leaves them shut at night; he sells 4 to 10 named horses; the horse you bought is no longer offered; zombies ignore him; his horses never vanish while you are nearby.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> he is on a roof, his horses disappear, or zombies attack him.</p>
 <button type="button" class="report-btn" data-report="The cowboy and his horses">Report a problem with this test</button>
 </div>
@@ -996,8 +1139,9 @@
     <li>Trade with him again and again.</li>
     <li>Look at the new trades at each level, up to Master.</li>
     <li>Buy a research paper or carrot and use it.</li>
+    <li>In a new world, find a plains village that has a spare bed, and look for a horseman who is already there with his own Horseman's Table.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> he takes the job; every level has about 3 trades; what you buy works.</p>
+<p class="tester-pass"><strong>It works if:</strong> he takes the job; every level has about 3 trades; no trade offers a legendary gene; what you buy works; some plains villages already have a horseman of their own.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> a level has no trades. Say which level.</p>
 <button type="button" class="report-btn" data-report="Every horseman level has trades">Report a problem with this test</button>
 </div>
@@ -1022,10 +1166,28 @@
     <li>Look at how the stable sits on the ground.</li>
     <li>Open the information screen of a few horses there.</li>
     <li>Find the other two stables the same way (their names are on the <a href="stables.html">stables page</a>).</li>
+    <li>In a flat creative world, type <code>/place structure</code> followed by each stable's name, one at a time, and walk through each one.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> no stable is buried or floating, and no stable horse is sick or dying.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> a stable is half underground or in the air, or its horses are ill.</p>
+<p class="tester-pass"><strong>It works if:</strong> no stable is buried or floating, every stable has horses and none of them is inside a wall, no stable horse is sick or dying, and each placed stable builds whole.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a stable is half underground or in the air, a placed stable has missing pieces, or its horses are ill or stuck.</p>
 <button type="button" class="report-btn" data-report="The three stables look right">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-hay-portal">
+<h3>The hay portal and the horse pens</h3>
+<p class="tester-need"><strong>You need:</strong> hay bales, golden carrots, and two tamed horses. About 30 minutes.</p>
+<ol>
+    <li>Build an upright frame of hay bales around an empty space, the same shape as a Nether portal.</li>
+    <li>Right-click the frame with a golden carrot.</li>
+    <li>Stand in the portal for 10 seconds.</li>
+    <li>Walk along the corridor of pens and read the pen numbers as you go.</li>
+    <li>Keep going past pen 25, until you find a break with a hay portal in it.</li>
+    <li>Bring your two tamed horses with you to that break (lead them, or ride one).</li>
+    <li>Stand in that portal for 10 seconds.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the portal lights; you arrive at the start of a corridor of pens; the pen numbers never skip a number; there is a portal break after every 25 pens; that portal takes you back home, and your horses come with you.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the portal does not light, a pen number is missing, the break has no portal, or your horses are left behind.</p>
+<button type="button" class="report-btn" data-report="The hay portal and the horse pens">Report a problem with this test</button>
 </div>
 
 <!-- ================================================================== -->
@@ -1081,6 +1243,36 @@
 <p class="tester-pass"><strong>It works if:</strong> the Sun sensitivity horse smokes and looks for shade in daylight but still eats wheat; the blood diet horse goes for the cow in daylight and never burns. Neither ever bites another horse.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the wrong horse burns, or a horse bites another horse.</p>
 <button type="button" class="report-btn" data-report="The Dhampir horses">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-dhampir-band">
+<h3>Dhampir herds come out at night</h3>
+<p class="tester-need"><strong>You need:</strong> open grassland (plains or savanna) and a few Minecraft nights.</p>
+<ol>
+    <li>Stay out in open grassland after dark.</li>
+    <li>Travel into land you have not explored yet, so new herds can appear.</li>
+    <li>When you find a herd of dark horses with red eyes, count them and count the white ones.</li>
+    <li>Explore new grassland in the daytime too, and note whether any new Dhampir herd appears.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> new Dhampir herds turn up at night but not in the day; they are seal brown (nearly black) with red eyes; about 1 horse in 10 is white.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> new ones appear in the day, or none appear after several nights. Say how many nights you looked.</p>
+<button type="button" class="report-btn" data-report="Dhampir herds come out at night">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-were-animals">
+<h3>Werewolf and were-animal horses</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a saddle, shears, a water bucket, a way to the Nether, and horses with <em>Lycanthropy</em> set to the wolf, pig, sheep and cod forms on both buttons.</p>
+<ol>
+    <li>Saddle the wolf-form horse and ride it.</li>
+    <li>Type <code>/time set 12500</code> (just before dusk) and keep riding until night falls.</li>
+    <li>Take a wolf-form horse into the Nether and wait there for a full Minecraft day.</li>
+    <li>Back in the Overworld at night, try to put a saddle on the pig after it has changed.</li>
+    <li>Shear the sheep after it has changed.</li>
+    <li>Use a water bucket on the cod after it has changed.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the rider is thrown off as the horse changes at dusk; in the Nether it never changes; the were-pig refuses the saddle; shearing the were-sheep and bucketing the were-cod work like the normal animals; nothing is lost when they change back in the morning.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> you stay riding a wolf, it changes in the Nether, the pig takes a saddle, or shearing or bucketing breaks or loses the horse.</p>
+<button type="button" class="report-btn" data-report="Werewolf and were-animal horses">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-diets">
@@ -1202,7 +1394,197 @@
 </div>
 
 <!-- ================================================================== -->
-<h2 id="looks">10. How things look (last)</h2>
+<h2 id="servers">10. Servers, settings and other mods</h2>
+<p>
+    The mod keeps its settings in a folder called <code>phc</code>, next to your
+    <code>mods</code> folder (in single player that is <code>.minecraft/phc/</code>; on a
+    server it is the <code>phc</code> folder in the server's own folder). It holds
+    <code>server.toml</code>, <code>breed-spawning.toml</code>, and <code>genes</code> and
+    <code>breeds</code> folders for files you make on the wiki. The files are plain text:
+    open them with any text editor.
+</p>
+
+<div class="tester-test" id="t-offline-owner">
+<h3>A foal belongs to the owner even when they are offline</h3>
+<p class="tester-need"><strong>You need:</strong> a server and two players. Player A owns a mare and a stallion; player B tamed neither.</p>
+<ol>
+    <li>Player B tames a wild mare, then sells her to player A with transfer papers.</li>
+    <li>Player A puts her in a paddock with their stallion while she is in heat.</li>
+    <li>Player A logs out. Player B stays nearby until the foal is born.</li>
+    <li>Player A logs back in and opens the foal's information screen and family tree.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the foal belongs to player A and names player A as its breeder.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the foal is credited to player B, or to nobody.</p>
+<button type="button" class="report-btn" data-report="A foal belongs to the owner even when they are offline">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-gene-file">
+<h3>Adding your own gene file</h3>
+<p class="tester-need"><strong>You need:</strong> the <a href="gene-creator/index.html">gene creator</a> on the wiki, a text editor, and a throwaway world.</p>
+<ol>
+    <li>In the gene creator, make a gene (or load an example) and export it as a file.</li>
+    <li>Close the game. Put the file in the <code>genes</code> folder inside <code>phc</code>.</li>
+    <li>Start the game and create a new world.</li>
+    <li>Tame some wild horses and look for your gene in their information screens, or in the spawn egg editor.</li>
+    <li>Close the game. Make a copy of the file, open the copy in a text editor, and delete half of it so it is broken. Save it.</li>
+    <li>Start the game again and open the world.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> your gene appears in the editor and on some wild horses; with the broken file, the game still starts and the world still opens.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the gene never shows up, or the broken file stops the game from starting. Attach the newest file from <code>logs</code>.</p>
+<button type="button" class="report-btn" data-report="Adding your own gene file">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-breed-spawning">
+<h3>Choosing which breeds spawn</h3>
+<p class="tester-need"><strong>You need:</strong> the <a href="breed-designer/index.html">breed designer</a> on the wiki, a text editor, creative mode.</p>
+<ol>
+    <li>In the breed designer, make a breed that lives in the dark forest, and export it.</li>
+    <li>Close the game. Put the file in the <code>breeds</code> folder inside <code>phc</code>.</li>
+    <li>Open <code>breed-spawning.toml</code> and change <code>shipped_breeds_enabled</code> to <code>false</code>. Save it.</li>
+    <li>Start the game and create a new world.</li>
+    <li>Fly into new land, including a dark forest, and look at the breed of every herd you find.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the only breed you find in the dark forest is yours, and none of the mod's own breeds appear anywhere.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> one of the mod's own breeds still spawns, or your breed never appears.</p>
+<button type="button" class="report-btn" data-report="Choosing which breeds spawn">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-server-settings">
+<h3>Turning off body size and health effects</h3>
+<p class="tester-need"><strong>You need:</strong> a throwaway world with a very big horse, a very small horse (see <a href="#t-size">the size test</a>), a horse with a health condition, and a horse with <em>Magic health</em> set to Hardy on both buttons.</p>
+<ol>
+    <li>Write down each horse's health, and screenshot their Genes tabs.</li>
+    <li>Quit to title. Open <code>server.toml</code> in <code>phc</code> and change <code>body.size</code> to <code>false</code>. Save it.</li>
+    <li>Open the world and look at the horses side by side.</li>
+    <li>Press <kbd>H</kbd> and look at their sizes in <em>My horses</em>.</li>
+    <li>Quit to title. Change <code>health.mode</code> to <code>NO_DEATHS</code>. Save it, open the world, and check each horse's health and genes.</li>
+    <li>Do the same with <code>health.mode</code> set to <code>OFF</code>.</li>
+    <li>Put both settings back to how they were.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> with size off, every horse is the same height but the browser still shows their real sizes; with either health setting, the genes are unchanged and the Hardy horse keeps its extra hearts; putting the settings back restores everything.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a horse's genes change, the Hardy horse loses hearts, or the horses stay different sizes.</p>
+<button type="button" class="report-btn" data-report="Turning off body size and health effects">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-other-mods">
+<h3>Playing alongside other mods</h3>
+<p class="tester-need"><strong>You need:</strong> a second NeoForge 26.1.2 profile with this mod, one mod that changes saddles or horse gear, and one performance mod.</p>
+<ol>
+    <li>Launch the game with all three mods.</li>
+    <li>Do the <a href="#t-clean-install">plain install test</a> again.</li>
+    <li>Saddle and ride a horse, and use the other mod's horse gear if it has any.</li>
+    <li>Stand near a herd for 5 minutes.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> everything in the plain install test still works, and horses keep their coats.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> anything breaks. Say the names and versions of the other mods, and attach the newest file from <code>crash-reports</code> if it crashed.</p>
+<button type="button" class="report-btn" data-report="Playing alongside other mods">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-old-world">
+<h3>An old world after updating the mod</h3>
+<p class="tester-need"><strong>You need:</strong> a world made with an older version of this mod, with a copy saved somewhere safe.</p>
+<ol>
+    <li>Install the new version and open the old world.</li>
+    <li>Check your tamed horses against your memory or screenshots.</li>
+    <li>Fly into land you have never explored in that world.</li>
+    <li>Look at the wild herds there.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the world opens, your horses are still there, and wild herds in the new land have the new markings.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the world does not open, or horses are missing. Say which version the world came from.</p>
+<button type="button" class="report-btn" data-report="An old world after updating the mod">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="wiki-tools">11. The wiki's tools</h2>
+<p>
+    These run in a web browser, on the wiki itself. You do not need Minecraft for them,
+    except where a step says so.
+</p>
+
+<div class="tester-test" id="t-horse-designer">
+<h3>The horse designer</h3>
+<p class="tester-need"><strong>You need:</strong> a computer browser, and the game with a Custom Horse Spawn Egg for the last steps.</p>
+<ol>
+    <li>Open the <a href="horse-designer/index.html">horse designer</a> on the wiki.</li>
+    <li>Build a horse and export it as a file.</li>
+    <li>Press randomize.</li>
+    <li>Import the file you exported.</li>
+    <li>Click the search box and type <kbd>w</kbd> <kbd>a</kbd> <kbd>s</kbd> <kbd>d</kbd>.</li>
+    <li>Copy the horse's code, paste it into the spawn egg editor in the game, and spawn it.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the imported horse is exactly the one you exported; typing in the search box does not move the horse; the horse in the game looks the same as in the designer.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the imported or spawned horse is different, or the page stays blank.</p>
+<button type="button" class="report-btn" data-report="The horse designer">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-gene-creator">
+<h3>The gene creator</h3>
+<p class="tester-need"><strong>You need:</strong> a computer browser.</p>
+<ol>
+    <li>Open the <a href="gene-creator/index.html">gene creator</a> on the wiki.</li>
+    <li>Click through each step in the step bar at the top.</li>
+    <li>Type into a text box, including in the middle of existing text.</li>
+    <li>Add a PATH shape and look at its drawing area.</li>
+    <li>Move the Minimal dial's slider.</li>
+    <li>Add a FRACTAL shape and try to set its octaves to 2.5.</li>
+    <li>Add a SPOTS shape and look at its mirror option.</li>
+    <li>Load the <em>Waterborn</em> example and look at its effects.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> every step opens; the typing cursor stays where you put it; the PATH area draws; the slider changes the horse as you move it; octaves only take whole numbers; mirror is a tick box; Waterborn keeps its effects.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> the cursor jumps to the end, a drawing area is blank, or the example loses its effects.</p>
+<button type="button" class="report-btn" data-report="The gene creator">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-breed-designer">
+<h3>The breed designer</h3>
+<p class="tester-need"><strong>You need:</strong> a computer browser.</p>
+<ol>
+    <li>Open the <a href="breed-designer/index.html">breed designer</a> on the wiki.</li>
+    <li>Walk through all 16 steps.</li>
+    <li>Look at the strip of eyes.</li>
+    <li>Search for a colour.</li>
+    <li>Refresh the page halfway through.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> every step works, the eye strip shows eyes, the colour search finds colours, and refreshing keeps your place.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a step is blank or stuck, or refreshing loses your breed.</p>
+<button type="button" class="report-btn" data-report="The breed designer">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-gene-pages">
+<h3>Gene pages and the LUT lab</h3>
+<p class="tester-need"><strong>You need:</strong> a computer browser and a small PNG picture.</p>
+<ol>
+    <li>Open the <a href="gene-lut.html?view=lab">LUT lab</a> on the wiki.</li>
+    <li>Upload the PNG.</li>
+    <li>Click somewhere on the chart.</li>
+    <li>Open the <a href="gene-kit.html">KIT gene page</a>.</li>
+    <li>Click each tab at the top of the page, and change the tint.</li>
+    <li>Look at the inheritance grid.</li>
+    <li>Press <kbd>/</kbd>.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse changes after the upload; the mark lands exactly under your mouse; tabs and tint switch; the grid fills in; KIT shows a list of its variants; <kbd>/</kbd> opens the search.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> nothing changes after the upload, the mark lands in the wrong place, or the grid stays empty.</p>
+<button type="button" class="report-btn" data-report="Gene pages and the LUT lab">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-ai-helpers">
+<h3>The AI helpers</h3>
+<p class="tester-need"><strong>You need:</strong> a browser (a phone is fine) and a free OpenRouter account. <a href="ai-setup.html">How to set it up.</a></p>
+<ol>
+    <li>Connect with OpenRouter.</li>
+    <li>Ask a question the wiki answers, like "how do I geld a stallion?"</li>
+    <li>Ask something the wiki does not cover.</li>
+    <li>Use the chat to report a bug.</li>
+    <li>Ask it to draft a breed, then a gene.</li>
+    <li>Press <strong>Forget key</strong>.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> you land back on the wiki with "Connected"; it answers the first question from the wiki and says when it does not know; the bug report opens GitHub already filled in; the drafts appear; Forget key empties the key box.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> connecting fails, it makes things up confidently, or the key stays after Forget key.</p>
+<button type="button" class="report-btn" data-report="The AI helpers">Report a problem with this test</button>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="looks">12. How things look (last)</h2>
 <p>
     These can only be judged by eye, so they come last. If something looks clearly wrong, report
     it with a screenshot.
@@ -1210,14 +1592,15 @@
 
 <div class="tester-test" id="t-look-coats">
 <h3>Coats, nameplates and eyes</h3>
-<p class="tester-need"><strong>You need:</strong> a few different horses, and a foal next to its mother.</p>
+<p class="tester-need"><strong>You need:</strong> a few different horses, and a foal next to its mother. Creative mode for the foals in step 4.</p>
 <ol>
     <li>Walk towards some horses from far away.</li>
     <li>Look at the pink and blue symbols on their nameplates.</li>
-    <li>Look closely at a foal's eyes next to its mother's.</li>
+    <li>Look closely at a foal's eyes, including the whites, next to its mother's.</li>
+    <li>In the spawn egg editor, choose the foal age and spawn a bay foal, a splashed white foal (<em>MITF (splash white)</em> set to <code>SW1</code> on one button), a grey foal and a roan foal.</li>
     <li>Look at a horse with a <em>Cutie mark</em> from both sides.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> a plain coat switches to the real coat once as you get close, without flickering; the symbols are real ♀ and ♂ shapes, not boxes; the foal's eyes look like its mother's; the cutie mark is on both hindquarters and upright.</p>
+<p class="tester-pass"><strong>It works if:</strong> a plain coat switches to the real coat once as you get close, without flickering; the symbols are real ♀ and ♂ shapes, not boxes; the foal's eyes and eye whites look like its mother's; each foal looks like a small version of its colour; the cutie mark is on both hindquarters and upright.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> coats flicker, symbols are boxes, eyes look broken, or the mark is missing or sideways.</p>
 <button type="button" class="report-btn" data-report="Coats, nameplates and eyes">Report a problem with this test</button>
 </div>
@@ -1229,19 +1612,133 @@
     <li>Type <code>/time set midnight</code>.</li>
     <li>Spawn the glowing horses in a dark place.</li>
     <li>Look at them.</li>
+    <li>Type <code>/time set day</code>, then <code>/time set midnight</code> again, and watch the Lantern horse each time.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> they glow in the dark, with soft edges and no flat white blotches.</p>
+<p class="tester-pass"><strong>It works if:</strong> they glow in the dark, with soft edges and no flat white blotches; the Tron horse's lines are coloured rather than blown-out white; the Lantern horse's line is lit the same by day and by night (<a href="gene-lantern.html">it cannot turn it off</a>) - it only stands out more in the dark.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> they do not glow, or the glow is a flat white shape.</p>
 <button type="button" class="report-btn" data-report="Glowing horses at night">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-look-bases">
+<h3>Base colours and their shades</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, daylight, and a flat grassy area. Three base horses to build on: <strong>black</strong> is <em>Extension</em> <code>E</code>/<code>E</code> with <em>Agouti</em> <code>a</code>/<code>a</code>; <strong>bay</strong> is <em>Extension</em> <code>E</code>/<code>E</code> with <em>Agouti</em> <code>A</code>/<code>A</code>; <strong>chestnut</strong> is <em>Extension</em> <code>e</code>/<code>e</code>.</p>
+<ol>
+    <li>Spawn a bay, then use <em>Shade</em> to make a liver bay and a seal brown (see <a href="gene-shade.html">the shade page</a>).</li>
+    <li>Stand the liver bay next to the ordinary bay, and the seal brown next to a black.</li>
+    <li>Spawn a black, a bay and a chestnut all with <em>LUT</em> set to <code>Grnpnk</code> on both buttons.</li>
+    <li>Spawn a black and a seal brown with a few dark ("black form") markings from the magical genes, for example <em>Moonwing</em> <code>Mnk</code>, <em>Snow Cloud</em> <code>Snk</code> or <em>Pavonem</em> <code>Pvk</code> on one button.</li>
+    <li>Look at each from riding distance and from close up.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> liver bay and bay can be told apart in daylight; seal brown looks nearly black from afar but has a tan muzzle and paler patches up close; the green-and-pink colouring looks good on all three bases; dark markings can still be seen on the black and seal brown horses.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> two of them look identical, a colour is a flat blob, or a marking vanishes completely on a dark horse. Say which gene.</p>
+<button type="button" class="report-btn" data-report="Base colours and their shades">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-look-white">
+<h3>White patterns, greys and stripes</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and daylight. Build each horse below on a bay or black base, and compare it with the gene's wiki page. "<code>X</code> and <code>N</code>" means <code>X</code> on one button and <code>N</code> on the other.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Horse</th><th>How to make it</th><th>Look for</th></tr></thead>
+<tbody>
+<tr><td>Bold splash</td><td><a href="gene-mitf.html">MITF</a> <code>SW1</code> and <code>N</code>, plus <a href="gene-pax3.html">PAX3</a> <code>SW2</code> and <code>N</code></td><td>A bold splashed white, with a blaze</td></tr>
+<tr><td>Any splash</td><td>Any variant of MITF or PAX3</td><td>Every one has a blaze</td></tr>
+<tr><td>The white ladder</td><td><a href="gene-kit.html">KIT</a>: several horses, each with a different <code>W</code> variant and <code>N</code></td><td>White climbs a step at a time from one to the next</td></tr>
+<tr><td>Face markings</td><td>KIT variants that give a star, snip or blaze</td><td>Each sits in the right place on the face</td></tr>
+<tr><td>Brindle</td><td><a href="gene-brindle.html">Brindle</a></td><td>No seam across the top of the head</td></tr>
+<tr><td>Hard white edges</td><td><a href="gene-extreme-white-dominant.html">Extreme white dominant</a> <code>EWD</code> and <code>n</code>, <a href="gene-tobiano.html">Tobiano</a> <code>To</code> and <code>to</code>, and <a href="gene-magic-zebra.html">Magic zebra</a></td><td>Clean, hard cuts where white meets colour</td></tr>
+<tr><td>The grey ladder</td><td><a href="gene-grey.html">Grey</a>: <code>G2</code> and <code>N</code>; <code>G3</code> and <code>N</code>; <code>G2</code> and <code>G3</code>; <code>G3</code> on both</td><td>Each one greyer than the last</td></tr>
+<tr><td>Frame overo</td><td><a href="gene-ednrb.html">EDNRB</a> <code>O</code> and <code>N</code></td><td>The back stays dark</td></tr>
+<tr><td>Roan and leopard</td><td><a href="gene-roan.html">Roan</a> <code>Rn</code> and <code>rn</code>; <a href="gene-leopard.html">Leopard</a> <code>LP</code> and <code>lp</code></td><td>The two look clearly different</td></tr>
+<tr><td>Zebra stripes</td><td><a href="gene-natural-zebra.html">Zebra striping</a> <code>Zeb</code> and <code>n</code>; <code>Zeb</code> on both; <code>Zeb</code> on both plus Magic zebra <code>Mzeb</code> and <code>n</code></td><td>Faint shadow stripes, then full stripes; tell us whether the mix looks messy or interesting</td></tr>
+</tbody>
+</table>
+</div>
+<ol>
+    <li>Spawn each horse in the table.</li>
+    <li>Walk around each one, and compare it with the picture on its gene page.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> each horse matches its description, with no flat blobs, stray fringes, or seams where body parts meet.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a horse looks nothing like its page, or has a seam or a blocky edge. Say which row, with a screenshot.</p>
+<button type="button" class="report-btn" data-report="White patterns, greys and stripes">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-look-magic">
+<h3>Magical coats</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode and daylight. Put each gene below on a black, a bay and a chestnut, and compare with its wiki page.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Gene</th><th>Look for</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-opalized.html">Opalized</a>, <a href="gene-yalia.html">Yalia</a>, <a href="gene-cleave.html">Cleave</a>, <a href="gene-panda.html">Panda</a></td><td>Each matches its page</td></tr>
+<tr><td><a href="gene-stained-glass.html">Stained Glass</a></td><td>Coloured panes with clear lines between them</td></tr>
+<tr><td><a href="gene-tron.html">Tron</a>, both variants</td><td>Coloured lines, not blown-out white</td></tr>
+<tr><td><a href="gene-moonwing.html">Moonwing</a> on a horse with <a href="gene-kit.html">KIT</a> dominant white</td><td>The pearly wing still shows on the white coat</td></tr>
+<tr><td><a href="gene-contour.html">Contour</a>, <a href="gene-agatebound.html">Agatebound</a>, <a href="gene-bracketed.html">Bracketed</a></td><td>Soft colour washes, no hard blocks</td></tr>
+</tbody>
+</table>
+</div>
+<ol>
+    <li>Spawn each horse.</li>
+    <li>Walk around it and compare it with its gene page.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> each reads as its page describes, with no flat blobs, fringes or seams.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a pattern is missing, blocky, or pure white where it should be coloured. Say which gene, with a screenshot.</p>
+<button type="button" class="report-btn" data-report="Magical coats">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-look-effects">
+<h3>Hoofprints, particles and eyes</h3>
+<p class="tester-need"><strong>You need:</strong> creative mode, a saddle, stairs and slabs, water, and horses with <a href="gene-molten-hooves.html">Molten hooves</a>, <a href="gene-particle.html">Particle</a>, <a href="gene-rainbow-dust.html">Rainbow dust</a>, <a href="gene-light.html">Light</a> set to <code>Lteye</code> on both buttons, a chaos eye colour (two horses; see <a href="eye-colour.html">eye colour</a>), a gold-eyed champagne horse, and a were-animal (see <a href="#t-were-animals">the were-animal test</a>).</p>
+<ol>
+    <li>Ride the Molten hooves horse at a walk, then at a gallop. Ride it up stairs, over slabs, off a ledge and through water.</li>
+    <li>Ride the Particle horse and watch behind you.</li>
+    <li>Stand two Rainbow dust horses side by side and watch them for a minute.</li>
+    <li>Look closely at the Light horse's eyes.</li>
+    <li>Stand the two chaos-eyed horses side by side, then save, quit and reopen the world.</li>
+    <li>Get off the gold-eyed horse, step back about 5 blocks, and look at its eyes.</li>
+    <li>Watch a were-animal walking around at night.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> hoofprints are evenly spaced at both speeds, sit properly on stairs and slabs, and never float in the air or on water; the particle trail shows while ridden; rainbow dust cycles through colours and differs between the two horses; the gold eye still has a dark pupil; the two chaos eyes differ and each keeps its colour after reloading; the gold eye can be seen from the saddle; the were-animal's little cloud is visible.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> prints float or bunch up, particles are missing, the eyes change colour on reload, or the cloud cannot be seen at all.</p>
+<button type="button" class="report-btn" data-report="Hoofprints, particles and eyes">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-look-items">
+<h3>Items, villagers and horse sizes</h3>
+<p class="tester-need"><strong>You need:</strong> a signed transfer paper, an Equine Research Shelf item, all five themed splice carrots (Dilution, White, Marking, Performance and Magical), a cowboy and a horseman, and a very big and a very small horse, including a big draft breed from a breed spawn egg.</p>
+<ol>
+    <li>Hover over the transfer paper and look at the horse picture in it.</li>
+    <li>Look at the shelf in your hotbar.</li>
+    <li>Put the five themed carrots next to each other in your hotbar.</li>
+    <li>Look at the cowboy and the horseman.</li>
+    <li>Walk the big and small horses on flat ground and watch their feet. Ride each one.</li>
+    <li>Stand next to the draft horse.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse picture fits inside its box; the shelf icon looks like a shelf; the five carrots can be told apart at a glance; the cowboy and horseman outfits look finished; feet plant on the ground instead of sliding; you sit in the saddle on both; the draft horse towers over you.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a picture spills out of its box, an icon is a purple-and-black square, two carrots look the same, feet slide, or you float above a horse.</p>
+<button type="button" class="report-btn" data-report="Items, villagers and horse sizes">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-opinions">
 <h3>Tell us what you think</h3>
 <p>No pass or fail here: your opinion is the result.</p>
 <ol>
-    <li>Do the sounds of <em>Meowing</em>, <em>Singer</em> or <em>Base alarm</em> horses get annoying in a herd?</li>
+    <li>Do the sounds of <em>Meowing</em>, <em>Singer</em> or <em>Base alarm</em> horses get annoying in a herd? Is the horse pen corridor too noisy?</li>
     <li>Does an <em>Intimidating</em> horse clearing mobs off a farm feel fair?</li>
     <li>Do you notice the weather speed genes when it rains?</li>
+    <li>Do <em>Gladiator</em> and <em>Guardian</em> horses feel like guards?</li>
+    <li>A horse with <em>Magic night temper</em> set to <code>Agp</code> on both buttons attacks riders at night. Does it stand still for a moment before it hits you, so you can see it coming?</li>
+    <li>If you walk past a wild herd crouching with wheat, do horses leave the herd to follow you too easily?</li>
+    <li>Does shearing a horse every day raise its bond faster than feeding and riding it? It should not.</li>
+    <li>An <em>Eyesight</em> horse bred for caves gets slower the more torches you place. Does that feel like a fair trade, or like a bug?</li>
+    <li>How long does a <em>Fireproof</em> horse (<code>Frp</code> on both buttons) take to swim across a 20-block lava channel? Does it feel right?</li>
+    <li>Is riding through water with <em>Magic swim speed</em> noticeably faster?</li>
+    <li>How fast does a white Dhampir horse burn in daylight, and can you still ride one in the day?</li>
+    <li>Does <em>Magic speed</em> <code>Swift</code> on both buttons feel clearly faster, and <em>Magic jump</em> <code>Leaden</code> on both clearly worse?</li>
+    <li>Does riding a bond-81 horse with no saddle steer well?</li>
+    <li>After breeding one line of horses for many generations, does it start to feel like it has its own character?</li>
+    <li>Does finding a breed spawn egg in a dungeon chest feel like a real find?</li>
     <li>Is anything in the horse browser confusing?</li>
 </ol>
 <button type="button" class="report-btn" data-report="Tell us what you think (feedback)">Send your thoughts</button>
