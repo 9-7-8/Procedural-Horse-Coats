@@ -262,7 +262,45 @@
     horse is where a stray magical trait turns up &mdash; and breeding it into a line
     is how a player gets magic a breed was not designed with. (Generated stables
     still add their own extra magic on top of the breeds they place &mdash; see
-    <a href="stables.html">stables</a>.)
+    <a href="stables.html">stables</a>.) The other place is a <a href="#magical-herds">magical herd</a>.
+</p>
+
+<h2 id="magical-herds">Magical herds: Magical (Breed)</h2>
+<p>
+    <strong>Now and then a wild herd of a breed is its magical version.</strong> It lives in the same biomes at the
+    same hours. The whole herd shares <strong>one magical gene, every horse with the same pair of alleles</strong>, and
+    it reads as <strong>Magical (Friesian)</strong>. By default five wild herds in a hundred are magical, for every
+    breed. It is the way a magical gene turns up in a named breed without giving any breed a background rate of magic,
+    which a breed sheet never has (<a href="#magic">above</a>).
+</p>
+<p>
+    The gene and the pair are drawn evenly from what is left once these are ruled out: the four body-stat loci (the
+    breed&rsquo;s stat scores own those), anything the breed&rsquo;s sheet or strains already name, feral-only
+    curiosities, sex-linked genes (one pair has to fit mares and stallions alike), and anything that is a health
+    condition. The pair always <em>shows</em>: never a wild type or a silent carrier. Every member of a herd, founding
+    it or joining later, draws the same answer from the lead&rsquo;s id (<code>MagicalVariant</code>, applied in
+    <code>HerdManager.assignFounder</code> through <code>BreedFounder.roll</code>). Only wild herds are ever magical:
+    the cowboy, stables and spawn eggs make ordinary horses of the breed.
+</p>
+<table>
+<thead><tr><th>Dam &times; Sire</th><th>Foal</th></tr></thead>
+<tbody>
+<tr><td>Magical (Friesian) &times; Friesian</td><td>Magical (Friesian)</td></tr>
+<tr><td>Magical (Friesian) &times; Magical (Friesian)</td><td>Magical (Friesian)</td></tr>
+<tr><td>Magical (Friesian) &times; Arabian</td><td>Arabian &times; Friesian cross <span class="muted">(as a Friesian would)</span></td></tr>
+<tr><td>Magical (Friesian) &times; (Arabian &times; Friesian cross)</td><td>Arabian &times; Friesian cross</td></tr>
+<tr><td>Magical (Friesian) &times; Spliced (Friesian)</td><td>Spliced (Friesian) <span class="muted">(a splice outranks it)</span></td></tr>
+<tr><td>Magical (Friesian) &times; Feral Mixed</td><td>Mixed</td></tr>
+</tbody>
+</table>
+<p>
+    The label is only a label: whether a foal actually carries the magic is its genes, as always. A Magical (Friesian)
+    horse sells as a Friesian. <strong>Switching it off:</strong> <code>[magical_herds]</code> in
+    <a href="#world-settings"><code>breed-spawning.toml</code></a> has <code>enabled</code> (default <code>true</code>)
+    and <code>chance</code>, the share of each breed&rsquo;s wild herds that are magical (default <code>0.05</code>). A
+    breed file opts its own breed out with <code>"magical_variant": false</code>
+    (<a href="breed-format.html">the format</a>). The server log names each magical herd as it is founded:
+    <code>[Breeds] a magical herd of &hellip; every horse carries &hellip;</code>.
 </p>
 
 <h2 id="strains">Strains: either this, or that</h2>

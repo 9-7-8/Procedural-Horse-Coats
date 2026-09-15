@@ -113,7 +113,14 @@
         (<a href="gene-matp.html#breed-frequencies">the table</a>). It uses the survey's published numbers where they exist
         and marked estimates elsewhere. Pearl is now on the Iberian breeds, Gypsy Vanner, Paint and Quarter Horse only;
         sunshine is on the Tennessee Walker and snowdrop on the Gypsy Vanner. Breeds with no documented cream lost theirs.
-        The American Cream Draft is gold champagne, not cremello. None of these is in
+        The American Cream Draft is gold champagne, not cremello.</li>
+    <li><strong>Magical herds</strong> (owner's design). A wild herd of any breed is its magical version one time in twenty.
+        The whole herd shares one magical gene and one showing pair, and reads Magical (Breed). Bred back to its breed a
+        foal stays Magical; crossed elsewhere it is the ordinary cross. <code>[magical_herds]</code> in
+        <code>breed-spawning.toml</code> switches it off or changes the chance, and a breed file opts out with
+        <code>"magical_variant": false</code>. Everything is added at runtime; no breed file changed
+        (<a href="breeds.html#magical-herds">breeds</a>). <code>MagicalVariantTest</code> and the lineage tests pass. The
+        NeoForge half is type-checked only, and is not in the running build. None of these is in
         the running build, and the designer's wasm waits for the client to close, because the bake rebuilds
         <code>common.jar</code>.</li>
     <li><strong>The two intake files became science tabs:</strong> fertility's real-horse biology and the timing design
