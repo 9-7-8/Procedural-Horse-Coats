@@ -84,10 +84,9 @@
 <p>
     Every horse now has an invisible hunger level that drains, pays for healing, and sends a
     hungry horse off to eat (<a href="horse-care.html#hunger">horse-care</a>). <code>HungerTest</code>
-    passes 9 of 9. It went in with the 22:12 build, with two things beside it: the DISPLACEMENT pen
-    restocks its own hay, and every ratio-pen conception is logged for
-    <a href="known-gaps.html#gap-245">gap 245</a>. Everything below reads off <code>latest.log</code>;
-    the hunger tests are the yard's new <strong>row V</strong>.
+    passes 9 of 9. It went in with the 22:12 build, beside a log line for every ratio-pen conception
+    (<a href="known-gaps.html#gap-245">gap 245</a>). Everything below reads off <code>latest.log</code>;
+    the hunger tests are the yard's <strong>row V</strong>.
 </p>
 <div class="note warn">
     <span class="label">It changes the pens around it</span>
@@ -95,9 +94,8 @@
         Hungry horses eat whatever food is in their pen, and eating uses it up. <strong>The dryad
         pens' grass will turn to dirt</strong>, and a dryad cannot plant on dirt, so their planting
         rates fall once their horses get hungry (about twenty minutes in). DRYAD FLOWER's flowers
-        get eaten. <strong>The DISPLACEMENT pen puts its hay back</strong> once a minute (owner's
-        request), logging <code>DISPLACEMENT: put back N hay bale(s)</code>, and skips a spot a horse is
-        standing in. Any other pen that needs its food to last needs the same or a stone floor.
+        get eaten. Any pen that needs its food to last needs a restock or a stone floor. (The
+        DISPLACEMENT pen had one until it was deleted as verified on 2026-09-15.)
     </p>
 </div>
 <ul>
@@ -213,11 +211,6 @@
         (<a href="known-gaps.html#gap-241">gap 241</a>). <strong>Pass:</strong> no <code>night flee
         | ... from minecraft:horse</code>, and a <code>Flc</code> horse still moves away from cows and
         sheep after dark.</li>
-    <li><strong>Pen labels in the log, and rank at the hay: confirmed overnight.</strong> From 22:45 to
-        05:50 DISPLACEMENT logged 19 <code>displaced ... at food or water</code> lines and every one names
-        the higher-ranked mare first (1 over 2, 3 and 4; 2 over 3 and 4; 3 over 4), never the reverse. The
-        mares ate the pen's hay 53 times and it was put back 51. Wild horses displaced each other another
-        296 times, steadily all night. Delete this bullet next pass.</li>
 </ul>
 
 <h2 id="tutorial-0914">&sect;0-DY &mdash; Getting started, brought up to date (2026-09-14, NOT looked at)</h2>
@@ -407,17 +400,22 @@
         <code>saw off</code> nine seconds later. Deleted below.
     </p>
 </div>
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 to 15 (overnight, 22:45 to 05:50, unattended)</span>
+    <p>
+        <strong>Rank decides who gets the hay.</strong> DISPLACEMENT logged 19
+        <code>displaced ... at food or water</code> lines, and every one put the higher-ranked mare first:
+        1 over 2, 3 and 4; 2 over 3 and 4; 3 over 4. None was reversed. The mares ate the pen's hay 53 times
+        and it was put back 51. Wild horses displaced each other 296 more times through the night. Those
+        carry no rank labels, so their order was not checked. The pen was deleted as verified (owner,
+        2026-09-15).
+    </p>
+</div>
 <ol>
     <li><strong>Row R west, TAKEOVER: the band stays out of it.</strong> Takeovers, stand-offs and
         survival are confirmed. What is left: no mare ever shows in the <code>target</code> column
         during a fight, because the band does not pile in. Not checked across the morning's
         fights.</li>
-    <li><strong>Row R east, DISPLACEMENT</strong> (beside MET NATURAL): four tamed mares ranked 1 to
-        4, with hay. Every <code>displaced &hellip; at food or water</code> line should name the
-        higher-ranked mare (the lower number) first. A reversed line is a failure. The third run logged
-        four <code>displaced</code> lines, but the herd trace names horses by their own names and the
-        pen by rank labels, so which mare was which cannot be read, and some were wild horses. The log
-        wants to print the label.</li>
     <li><strong>With your hands, only if you are passing:</strong> open a wild horse's
         information screen in these pens and check its Social section matches its watch line.</li>
 </ol>

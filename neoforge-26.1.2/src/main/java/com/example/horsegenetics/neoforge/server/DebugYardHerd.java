@@ -61,7 +61,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *   <tr><td>Q</td><td>LEAVING HOME and HOST BAND (wild, one group)</td>
  *       <td>LEADERLESS (wild), GROOMING (tamed)</td></tr>
  *   <tr><td>R</td><td>TAKEOVER (wild), DAM DEFENCE (tamed)</td>
- *       <td>MET NATURAL (fertility), DISPLACEMENT (tamed)</td></tr>
+ *       <td>MET NATURAL (fertility); DISPLACEMENT deleted 2026-09-15, verified</td></tr>
  * </table>
  *
  * <p><b>Confirmed and deleted, 2026-09-14</b>: SPARRING and HERDING, read off the
@@ -151,7 +151,6 @@ final class DebugYardHerd {
             grooming(level, gy, east + 11, mouthZ + ROW_Q);
             takeover(level, gy, west, mouthZ + ROW_R);
             damDefence(level, gy, west + 12, mouthZ + ROW_R);
-            displacement(level, gy, east + 12, mouthZ + ROW_R);
             ActionTrace.log("test yard", "herd pens built (rows Q-R)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: herd rows failed to build", e);
@@ -326,50 +325,8 @@ final class DebugYardHerd {
         });
     }
 
-    private static void displacement(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 7, 8, "DISPLACEMENT", "DISPLACEMENT",
-                List.of("DISPLACEMENT", "4 ranked mares, hay:", "a higher one moves", "a lower one off"));
-        Horse[] mares = {
-                horse(level, gy, x0 + 1.8, z0 + 2.0, Sex.FEMALE, true, "RANK 1 MARE", 9.0),
-                horse(level, gy, x0 + 5.2, z0 + 2.0, Sex.FEMALE, true, "RANK 2 MARE", 8.0),
-                horse(level, gy, x0 + 1.8, z0 + 6.2, Sex.FEMALE, true, "RANK 3 MARE", 7.0),
-                horse(level, gy, x0 + 5.2, z0 + 6.2, Sex.FEMALE, true, "RANK 4 MARE", 6.0)};
-        for (int i = 0; i < mares.length; i++) {
-            for (int j = i + 1; j < mares.length; j++) {
-                seed(mares[i], mares[j], 0.8, 0.6, 0.0);
-            }
-        }
-        for (int x = x0 + 3; x <= x0 + 4; x++) {
-            level.setBlock(new BlockPos(x, gy + 1, z0 + 4), Blocks.HAY_BLOCK.defaultBlockState(), 3);
-        }
-        restockHay(level, gy, x0, z0);
-    }
-
-    /**
-     * <b>Put the DISPLACEMENT hay back</b> (owner, 2026-09-14: "write a script to automatically
-     * replace the hay in the displacement pens"). Hungry horses eat hay bales whole, and this pen's
-     * whole test is rank at the hay, so once a minute any missing bale is replaced - unless a horse
-     * is standing in its spot, where a new block would suffocate it; that spot waits for the next
-     * minute.
-     */
-    private static void restockHay(ServerLevel level, int gy, int x0, int z0) {
-        after(level, 1_200, () -> {
-            int placed = 0;
-            for (int x = x0 + 3; x <= x0 + 4; x++) {
-                BlockPos at = new BlockPos(x, gy + 1, z0 + 4);
-                if (level.getBlockState(at).is(Blocks.HAY_BLOCK)
-                        || !level.getEntitiesOfClass(Horse.class, new AABB(at), Horse::isAlive).isEmpty()) {
-                    continue;
-                }
-                level.setBlock(at, Blocks.HAY_BLOCK.defaultBlockState(), 3);
-                placed++;
-            }
-            if (placed > 0) {
-                ActionTrace.log("test yard", "DISPLACEMENT: put back " + placed + " hay bale(s) the mares ate");
-            }
-            restockHay(level, gy, x0, z0);
-        });
-    }
+    // DISPLACEMENT (four ranked mares at hay, with its hay restock) was deleted on 2026-09-15 as
+    // verified: overnight all 19 "displaced ... at food or water" lines put the higher rank first.
 
     // ------------------------------------------------------------------
     // Row Q east - grooming
