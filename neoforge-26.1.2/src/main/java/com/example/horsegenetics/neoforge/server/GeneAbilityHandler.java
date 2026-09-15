@@ -374,8 +374,15 @@ public final class GeneAbilityHandler {
                 continue;
             }
             for (AttributeModifier existing : List.copyOf(instance.getModifiers())) {
-                if (existing.id().getNamespace().equals(HorseGenetics.MOD_ID)
-                        && !keep.contains(existing.id())) {
+                // ONLY THE MODIFIERS THIS SWEEP OWNS (2026-09-15). It used to take off every modifier in the mod's
+                // namespace that no gene asked for - including ReproHandler's repro/late_pregnancy, which it put on
+                // every 40 ticks and this took off on the next gene tick. A heavily pregnant mare in the yard's
+                // MATERNITY pen read her base speed all through "heavy and slow". Anything outside gene/ belongs to
+                // another system, which removes its own.
+                Identifier id = existing.id();
+                boolean ours = id.getNamespace().equals(HorseGenetics.MOD_ID)
+                        && (id.getPath().startsWith("gene/") || id.equals(LAVA_FLOAT_ID));
+                if (ours && !keep.contains(id)) {
                     instance.removeModifier(existing.id());
                 }
             }
