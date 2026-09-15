@@ -42,13 +42,13 @@
     <li><strong>The ratio pens were leaking, and the numbers prove it.</strong> Lethal white logged 29 and
         size 12 "foal died" lines, always the neighbouring pen's genotype. Taking those foals out gives size
         25 : 51 : 24 and lethal white 30 : 48 : 22. Tallies now count only the pen mare's own foals
-        (<a href="known-gaps.html#gap-239">gap 239</a>).</li>
+        (<a href="horse-dimension.html#ratio-tally-verified">gap 239</a>).</li>
     <li><strong>Spruce and acacia could not grow, and the reason is in the game's data.</strong> Vanilla
         grows a tree only through air and <code>#replaceable_by_trees</code>, and the yard's invisible light
         blocks and its fences are neither. The two species that need a two-block ring never found one. The
         light blocks come out of the dryad rows, glowstone lights them from the floor, and the two pens are
         wider. The <code>tree grew</code> line now means a tree
-        (<a href="known-gaps.html#gap-240">gap 240</a>).</li>
+        (<a href="gene-dryad.html#verified">gap 240</a>).</li>
     <li><strong>A night-shy foal fled its own herd</strong> 1,578 times, because "passive animals"
         included horses despite a comment saying it must not (<a href="known-gaps.html#gap-241">gap 241</a>).</li>
     <li><strong>Log lines name the pen label</strong>, so the displacement pen can finally be read.</li>
@@ -77,12 +77,12 @@
 </p>
 <ul>
     <li><strong>Brindle did not follow sex in any real breeding</strong>
-        (<a href="known-gaps.html#gap-235">gap 235</a>). <code>Genotype.breedWith</code> applies the
+        (<a href="gene-brindle.html#verified">gap 235</a>). <code>Genotype.breedWith</code> applies the
         X-linked rule. <code>Genome.breedWith</code>, the draw every foal actually comes through, had
         its own allele loop and never did. The ratio pen tallied brindle colts and plain fillies, a
         result the tests could not see because they only bred genotypes.</li>
     <li><strong>Lethal foals never died in the test yard</strong>
-        (<a href="known-gaps.html#gap-236">gap 236</a>). <code>LethalFoalHandler</code> skipped the
+        (<a href="gene-scn4a.html#verified">gap 236</a>). <code>LethalFoalHandler</code> skipped the
         whole debug dimension to protect the gallery, and the yard is in that dimension too. An O/O
         foal was still standing two minutes after birth. The skip is now the corridor only, which is
         the rule two other handlers' comments had already asked for.</li>
@@ -272,8 +272,8 @@
         (displacement, herding, guarding, grooming, a dam's defence, a band holding together without
         its stallion) now write <code>[trace] herd</code> lines.</li>
     <li><strong>Two bugs found while designing the pens, both fixed unplayed:</strong>
-        <a href="known-gaps.html#gap-232">gap 232</a>, where a bachelor who took a band kept his
-        bachelors as band-mates; and <a href="known-gaps.html#gap-233">gap 233</a>, where a tamed
+        <a href="horse-care.html#verified-bands">gap 232</a>, where a bachelor who took a band kept his
+        bachelors as band-mates; and <a href="horse-care.html#verified-bands">gap 233</a>, where a tamed
         dam kept a dead target for good, which vanilla does not clear. One design gap is left for
         the owner: <a href="known-gaps.html#gap-234">gap 234</a>, a filly recruited by her own
         brother.</li>
@@ -371,7 +371,7 @@
         horses within sixteen blocks, and three covers a day as a hard stop. Cowboy stock is
         exempt. The foal is credited to the mare's owner, falling back to her tamer when the
         owner is offline (<a href="known-gaps.html#gap-228">gap 228</a>).
-        <a href="known-gaps.html#gap-206">Gap 206</a>, whether an automatic breeder's cap holds,
+        <a href="fertility.html#verified">Gap 206</a>, whether an automatic breeder's cap holds,
         was reopened for it rather than closed with the gene.</li>
     <li><strong>Gelding</strong> is a flag on <code>HorseRecord</code>, and
         <code>entire()</code> replaced the sex test in every stallion behaviour. A gelding bonds
@@ -636,7 +636,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
         horse</em>, so eight layers spread over a nineteen-wide pen each have
         their own neighbourhood and a pen total above the cap is legal. What
         bounded that pen was the despawn timer, exactly as
-        <a href="known-gaps.html#gap-207">gap 207</a> predicted. Rebuilt as four
+        <a href="gene-egg-layer.html#verified">gap 207</a> predicted. Rebuilt as four
         layers of one allele packed into a corner.</li>
 </ul>
 
@@ -1350,7 +1350,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
     Out: the spontaneous-breeding field and the pack leader's pen, by her call &mdash;
     &ldquo;we're done with those tests&rdquo;. In: <strong>egg layer</strong> (four in one
     pen, which is the only arrangement that can make the cap fire at all &mdash;
-    <a href="known-gaps.html#gap-207">gap 207</a>), a <strong>sound herd</strong> of three
+    <a href="gene-egg-layer.html#verified">gap 207</a>), a <strong>sound herd</strong> of three
     meowing and two singers, and <strong>intimidating</strong> with six cows ringed round
     it. That last one is the design note worth keeping: a repel aura measured by
     <em>counting</em> penned cows proves nothing, because they cannot leave &mdash; four in
@@ -1360,7 +1360,7 @@ stopped at  -8,166 - in shade, health  6/66</code></pre>
 
 <p>
     <strong>One question left with the breeding field and is recorded as dropped rather than
-    answered</strong> (<a href="known-gaps.html#gap-206">gap 206</a>): whether
+    answered</strong> (<a href="fertility.html#verified">gap 206</a>): whether
     <code>LOCAL_CAP</code> actually stops an automatic breeder. The breeding is confirmed;
     the cap never was.
 </p>

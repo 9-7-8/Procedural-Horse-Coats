@@ -420,6 +420,21 @@
     plus his one real allele &mdash; and is waiting for a gene that wants it.
 </p>
 
+<h3 id="verified">Verified in the test yard</h3>
+<p>
+    <strong>Brindle follows sex in real breeding</strong> (2026-09-14, the run from 17:36, unattended).
+    By 18:54 RATIO BRINDLE (a brindle stallion and a plain mare) had 26 foals: all 10 fillies
+    <code>Brn/n</code> and all 16 colts <code>n/Y</code>.
+</p>
+<p>
+    <em>What was wrong before:</em> <code>Genotype.breedWith</code> applied the X-linked rule, but
+    <code>Genome.breedWith</code>, the draw every real foal comes through (golden carrots, breeding
+    carrots, the seed jar and natural covers), had its own allele loop and never did. The first all-day run
+    threw brindle colts and plain fillies. <code>BrindleGeneTest</code> only bred genotypes, so it could not
+    see it. <em>Fix:</em> the genome draw applies the same rule with the same two coins per gene, and a
+    test breeds through <code>Genome</code> in both directions.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

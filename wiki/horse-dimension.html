@@ -429,10 +429,10 @@
 <table>
 <thead><tr><th>Row</th><th>West of the walkway</th><th>East of the walkway</th></tr></thead>
 <tbody>
-<tr><td><strong>A</strong></td><td><strong>The two dryad pens</strong> &mdash; what is left of the growing row, moved here when its other half was confirmed. <code>Dark/Dark</code> for whether the dark oaks <em>cluster</em> into a 2&times;2 (they have never once produced a log &mdash; <a href="known-gaps.html#gap-218">gap 218</a>), and <code>Mush/Mush</code> on a floor that is <strong>half podzol and half grass</strong>: a mushroom survives any light on podzol and needs darkness on grass, so the pass is mushrooms on one half and <em>none</em> on the other, and the two halves are watched separately so that is readable. <strong>The floor is the test</strong> &mdash; <code>convert()</code> is a whitelist per cover, so a spreading gene on the wrong ground fails exactly like a broken one.</td><td><strong>The spawner room</strong> &mdash; holy ward's non-interference half. A roofed unlit box with a zombie spawner charged at build time, the warded horse outside the door. An empty spawner produces nothing, which is indistinguishable from the ward having stopped it.</td></tr>
+<tr><td><strong>A</strong></td><td><strong>The two dryad pens</strong> &mdash; what is left of the growing row, moved here when its other half was confirmed. <code>Dark/Dark</code> for whether the dark oaks <em>cluster</em> into a 2&times;2 (they do, slowly &mdash; <a href="gene-dryad.html#verified">verified</a>), and <code>Mush/Mush</code> on a floor that is <strong>half podzol and half grass</strong>: a mushroom survives any light on podzol and needs darkness on grass, so the pass is mushrooms on one half and <em>none</em> on the other, and the two halves are watched separately so that is readable. <strong>The floor is the test</strong> &mdash; <code>convert()</code> is a whitelist per cover, so a spreading gene on the wrong ground fails exactly like a broken one.</td><td><strong>The spawner room</strong> &mdash; holy ward's non-interference half. A roofed unlit box with a zombie spawner charged at build time, the warded horse outside the door. An empty spawner produces nothing, which is indistinguishable from the ward having stopped it.</td></tr>
 <tr><td><strong>B</strong></td><td><strong>The tack room</strong> &mdash; five labelled chests holding one of every item in the mod, the tools they need, and every one of the twelve foods the food-preference locus knows, in the gene's own order.</td><td><strong>The horseman's study</strong> &mdash; a horseman at a <code>horsemans_table</code> with two research shelves, a cowboy at a <code>cowboy_hitch</code>, two tamed horses and a chest of papers. <strong>No village to find and no barn to hunt.</strong> It does not test acquisition (<a href="known-gaps.html#gap-214">gap 214</a>).</td></tr>
 <tr><td><strong>C</strong></td><td><strong>The ticket stalls</strong> &mdash; a plain holding pen as the control, then four awkward enclosures already built: barely wider than a horse, L-shaped, packed solid with hay, and roofed. Those are the cases the kit used to ask the tester to <em>build</em>, which is why they were never built.</td><td><strong>The carrot bench</strong> &mdash; all nine splice carrots plus the magnifier and the stabiliser, and four horses stocked with <strong>no named locus at all</strong>. Every other pen here avoids that; these are the one thing designed for it.</td></tr>
-<tr><td><strong>D</strong></td><td><strong>The dairy and the clip</strong> &mdash; the three potion-milk refusals with the setup done: the mare is already hurt and the foal is already a foal. Nothing happening is correct three times over here, so the <em>message</em> is the evidence. Two more horses to shear.</td><td><strong>Egg layer &times;8</strong> &mdash; all eight alleles in one pen. Not a confound, because each pair drops a <em>different item</em> and the watch counts the item. It also trips <code>NEARBY_CAP</code>, which one horse essentially never can (<a href="known-gaps.html#gap-207">gap 207</a>).</td></tr>
+<tr><td><strong>D</strong></td><td><strong>The dairy and the clip</strong> &mdash; the three potion-milk refusals with the setup done: the mare is already hurt and the foal is already a foal. Nothing happening is correct three times over here, so the <em>message</em> is the evidence. Two more horses to shear.</td><td><strong>Egg layer &times;8</strong> &mdash; all eight alleles in one pen. Not a confound, because each pair drops a <em>different item</em> and the watch counts the item. It was meant to trip <code>NEARBY_CAP</code>, which one horse essentially never can; the despawn timer got there first (<a href="gene-egg-layer.html#verified">verified</a>).</td></tr>
 <tr><td><strong>E</strong></td><td><strong>Gilded crackle</strong> on a pale base, and <strong>the pool</strong> &mdash; five blocks of water in a sealed stone tank with a saddled ocean-born pair in it. No doorway anywhere below the surface: a gap drains the tank into the walkway and the yard's floor is all there is between here and the void.</td><td>Empty: the food-preference pen was removed on 2026-09-14.</td></tr>
 <tr><td><strong>F</strong></td><td><strong>Starburst</strong> (breed a pair: does the foal's emblem sit near its parents'?) and the <strong>F8 herd</strong>.</td><td><strong>The three magic stat pens</strong> &mdash; speed, health and jump. Their whole effect is a number, which is why looking at one never helped; the census prints the attribute's range across the pen.</td></tr>
 <tr><td><strong>I</strong></td><td><strong>Dhampir</strong> &mdash; walled rather than fenced (it gallops), open to the sky so it burns, a 9&times;9 shelter five blocks from where it spawns, and eight cows because a bitten animal is off the menu for a day. The burn and the feed are both confirmed; what is open is whether it now <strong>holds</strong> that shelter for a whole day instead of being walked back into the sun by the stroll goal. <strong>Pass:</strong> one <code>[trace] dhampir</code> journey in the log and then quiet, with no further <code>onFire</code> lines.</td><td><strong>Eyesight</strong>, as a <strong>lit half and a dark half</strong> with an attribute readout on each. A conditional modifier is invisible in both states &mdash; the same shape that had the weather loci reported as broken &mdash; so each horse is now printed against <em>its own base value</em>, which the two halves holding different animals made necessary.</td></tr>
@@ -475,6 +475,32 @@
     tests&rdquo;). A pen for a settled question is a pen somebody has to walk past to
     reach a live one.
 </p>
+
+<div class="note" id="ratio-tally-verified">
+    <span class="label">Verified 2026-09-14 to 15: row U's tallies count every foal, and only their own</span>
+    <p>
+        <strong>At birth.</strong> <code>DebugYardLong</code>'s clock used to look for <em>living</em> foals
+        every ten seconds, and an <code>H/H</code> foal is dead three seconds after birth, so the 17:19 run's
+        RATIO HYPP tally missed its first one and read <code>H/N 3 (100%)</code>. A foal is now counted when it
+        joins the world (<code>EntityJoinLevelEvent</code>, whose record the breeding code writes before the
+        foal is added); the scan stays as a fallback, and a pen whose mare is gone counts nothing. After the
+        17:35 build every lethal foal appeared as <code>foal N is O/O</code> (or <code>H/H</code>) and then
+        <code>a O/O foal died</code>.
+    </p>
+    <p>
+        <strong>Only their own.</strong> The ratio pens are plots nine apart sharing a fence line, and each tally
+        box ran to its neighbour's fence. On the first run (09:07) the RATIO HYPP STUD was listed in RATIO
+        LETHAL WHITE, which logged nine <code>a N/N foal died</code> lines matching HYPP-pen foals, and RATIO
+        SIZE three <code>a n/n foal died</code> lines from the brindle pen; the shares read HYPP 12%
+        <code>H/H</code> and LETHAL WHITE 32% <code>O/O</code>, 36% <code>O/N</code>. A pen now counts only foals
+        whose record names its mare as mother (<code>DebugYardLong.scan</code>). Over the 17:36, 19:08 and
+        overnight runs every tally equalled its own mare's <code>foaled</code> lines, twins included, and no
+        foal of a surviving class died in the wrong pen. With the leaked foals taken out, the eight-hour run
+        read size 25&nbsp;:&nbsp;51&nbsp;:&nbsp;24 and lethal white 30% <code>O/O</code>, 48% <code>O/N</code>.
+        A stud still wanders into the pen next door, which no longer matters to the count. The lethal pens'
+        shares are still open (<a href="known-gaps.html#gap-245">gap 245</a>).
+    </p>
+</div>
 
 <p>
     <strong>It is flat and plain on purpose.</strong> Every one of these tests is a count

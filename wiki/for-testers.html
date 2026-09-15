@@ -599,19 +599,34 @@
 <h2 id="care">3. Looking after horses</h2>
 
 <div class="tester-test" id="t-healing">
-<h3>Healing needs water and food nearby</h3>
-<p class="tester-need"><strong>You need:</strong> a tamed horse, water, a hay bale, wheat.</p>
+<h3>Healing needs water, and a horse that is not starving</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed horse, water, wheat, and a fenced spot on stone or sand with nothing a horse eats (no grass, hay or flowers).</p>
 <ol>
     <li>Hurt the horse a little with a small fall.</li>
-    <li>Stand it next to water and a hay bale.</li>
+    <li>Stand it next to water on grass.</li>
     <li>Watch its health for 20 seconds.</li>
     <li>Lead it away from the water.</li>
     <li>Watch its health for 20 seconds.</li>
     <li>Feed it wheat by hand.</li>
+    <li>Now put it in the fenced spot beside water, with nothing to eat, and leave it for two Minecraft days (40 real minutes). Stay nearby.</li>
+    <li>Hurt it a little again and watch its health for a minute.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> it heals, with hearts, next to water and hay; stops healing away from them; and wheat still heals it.</p>
-<p class="tester-fail"><strong>Something is wrong if:</strong> it heals anywhere, or never heals.</p>
-<button type="button" class="report-btn" data-report="Healing needs water and food nearby">Report a problem with this test</button>
+<p class="tester-pass"><strong>It works if:</strong> beside water it heals quickly, with hearts; away from water it stops healing; wheat still heals it; after two days with nothing to eat it no longer heals at all, even beside water; and it never loses health from being hungry.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it heals far from water, never heals, keeps healing after two days without food, or takes damage from hunger.</p>
+<button type="button" class="report-btn" data-report="Healing needs water, and a horse that is not starving">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-hunger-eating">
+<h3>Hungry horses go and eat, in order</h3>
+<p class="tester-need"><strong>You need:</strong> a tamed horse that has been away from food for a Minecraft day (20 real minutes), a fenced area, a cake, a hay bale, a poppy and some grass.</p>
+<ol>
+    <li>In the fenced area, put the poppy close to the horse, the hay a little further, and the cake furthest away.</li>
+    <li>Watch the horse for a few minutes.</li>
+    <li>Watch the grass under the horses in your pasture over an hour of play.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> the horse walks past the poppy to the cake and eats it whole, then eats the hay bale whole; grass it eats turns to dirt, the way sheep leave it.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> it eats the poppy first, the food is not used up, or grass never turns to dirt.</p>
+<button type="button" class="report-btn" data-report="Hungry horses go and eat, in order">Report a problem with this test</button>
 </div>
 
 <div class="tester-test" id="t-bond">

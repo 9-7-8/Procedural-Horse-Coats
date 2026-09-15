@@ -110,34 +110,13 @@
         (largest chi-square 1.9 at 43 to 56 conceptions), with no shared random. The skew has not recurred with the
         instrument running. <strong>Read across midnight:</strong> <code>latest.log</code> restarts at 00:00, and the
         earlier part of the run is in <code>run/logs/&lt;date&gt;-1.log.gz</code>.</li>
-    <li><strong>HUNGER STARVING held for four and a half hours</strong> (22:45 to 03:15): <code>hp</code> never
-        rose off 11.0. Delete this bullet next pass.</li>
     <li><strong>Flying lycans land at dawn</strong> (<a href="known-gaps.html#gap-243">gap 243</a>, fixed
         2026-09-15). Wild bat and parrot shifters live in the corridor pens and fly off at dusk.
         <strong>Pass:</strong> no <code>horse died ... from outOfWorld</code> all run, and a
         <code>[trace] lycan | ... set down at</code> line for any that come back over nothing.</li>
-</ul>
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 (the 22:12 build, 30 minutes, unattended)</span>
-    <p>
-        <strong>The mod boots</strong> with the redirect mixin; its only warning is the usual refmap line.
-        <strong>HUNGER ORDER</strong> walked past the poppy, mushroom and moss and ate the cake, then the hay,
-        then stopped at 100. <strong>HUNGER FED</strong> went from 11 to full in about six seconds, hunger
-        97 to 76. <strong>HUNGER STARVING</strong> never rose off 11.0 in thirty minutes, down to hunger 0.
-        <strong>HUNGER CARNIVORE</strong> hunted and ate all three chickens in turn, reaching 75, and was left
-        hungry with no prey, as it should be. <strong>No heals at full health</strong>: none in any census, against
-        364 to 383 a census before (<a href="known-gaps.html#gap-217">gap 217</a>, closed). Deleted below.
-    </p>
-</div>
-<ul>
-    <li><strong>The server keeps up again</strong> (<a href="known-gaps.html#gap-246">gap 246</a>):
-        <strong>confirmed</strong>. The 22:12 build ran at 64-71 ms a tick; the 22:45 build read 54.1, 50.0, 50.0,
-        the same as before hunger. Delete this line next pass.</li>
     <li><strong>Grazing is occasional.</strong> <strong>Pass:</strong> one <code>grazing: N mouthful(s)</code>
         line a minute with N in the tens, not a line a mouthful, and horses really do fall below 50 and go
         looking for food.</li>
-    <li><strong>HUNGER STARVING holds for hours</strong>, not just thirty minutes: its <code>hp</code> never
-        rises all run.</li>
 </ul>
 
 <h2 id="fixes-0914">&sect;0-DZ &mdash; Fixes from the all-day run (2026-09-14, built at 17:15, NOT played)</h2>
@@ -152,27 +131,6 @@
     they arrive with the next launch. Everything here is read from <code>latest.log</code>; none of
     it needs your hands.
 </p>
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 (runs from 17:19 and 17:36, unattended)</span>
-    <p>
-        <strong>Lethal foals die in the yard</strong> (<a href="known-gaps.html#gap-236">gap 236</a>): by
-        17:48 three <code>O/O</code> foals in RATIO LETHAL WHITE and two <code>H/H</code> foals in RATIO
-        HYPP had each died from <code>genetic_defect</code> within about four seconds of birth, marked
-        <code>LETHAL_AT_BIRTH</code>, and no other foal died. <strong>The tally counts a foal at
-        birth</strong> (<a href="known-gaps.html#gap-242">gap 242</a>): after the 17:35 build every
-        lethal foal appears as <code>foal N is O/O</code> (or <code>H/H</code>) and then <code>a O/O
-        foal died</code>, where the 17:19 run's tally had missed its <code>H/H</code> entirely.
-        <strong>Wild mares stop flooding the log</strong>: every <code>not covered:</code> line names a
-        CAP MARE, and <code>crowding cap held back 62 wild mares</code> (then 64) arrives every ten
-        minutes. Deleted below. RATIO HYPP started ten minutes behind the other pens because five natural
-        covers in a row did not take, at 46 to 73 percent each; that is chance, not a fault.
-    </p>
-    <p>
-        <strong>Brindle follows sex</strong> (<a href="known-gaps.html#gap-235">gap 235</a>): by 18:54
-        RATIO BRINDLE had 26 foals, all 10 fillies <code>Brn/n</code> and all 16 colts <code>n/Y</code>.
-        Deleted below.
-    </p>
-</div>
 <ul>
     <li><strong>No tree grows through a horse</strong> (<a href="known-gaps.html#gap-237">gap 237</a>).
         <strong>Pass:</strong> the dryad pens still log <code>[watch] tree grew</code>, some
@@ -193,24 +151,13 @@
         failing again</strong> (<a href="known-gaps.html#gap-244">gap 244</a>, reopened). A fix for dark and pale
         oak went in overnight. <strong>Pass:</strong> no <code>inWall</code> in any dryad pen all run, and the other
         pens keep growing trees.</li>
-    <li><strong>The ratio pens count only their own foals</strong>
-        (<a href="known-gaps.html#gap-239">gap 239</a>). <strong>Pass:</strong> no <code>a N/N foal
-        died</code> in RATIO LETHAL WHITE and no <code>a n/n foal died</code> in RATIO SIZE, and the
-        shares come out near 1 : 2 : 1 within a couple of hundred foals. <strong>So far:</strong> no
-        foal of a surviving class has died in three runs, and the tallies match the <code>foaled</code>
-        lines exactly, twins included. <strong>The two lethal pens are failing, and it is not yet
-        explained</strong> (<a href="known-gaps.html#gap-245">gap 245</a>). The 17:36 run's HYPP pen threw too
-        many lethal foals (10 <code>H/H</code> in 20). By 20:08 the 19:08 run had thrown none in 35 across both
-        pens, which chance gives about 4 times in 100&nbsp;000. <strong>An earlier version of this note called the
-        swings chance. That was wrong</strong>, written before the second run's count was in. What has been ruled
-        out, and the next check, are on the gap. Until it is fixed, read neither pen's shares as a result.</li>
-    <li><strong>Spruce and acacia grow</strong> (<a href="known-gaps.html#gap-240">gap 240</a>).
-        The dryad rows have no light blocks overhead now, glowstone in the floor instead, and the two
-        pens are wider. <strong>Pass:</strong> <code>spruce_log</code> and <code>acacia_log</code> in
-        the census, <code>tree grew</code> lines that each mean a tree, and a census line counting
-        the attempts that failed. No zombies in rows S and T. <strong>Confirmed:</strong> by 03:15 on the
-        overnight run DRYAD SPRUCE had 18 <code>spruce_log</code> and DRYAD ACACIA 19 <code>acacia_log</code>
-        (<a href="known-gaps.html#gap-240">gap 240</a>, closed). Delete this bullet next pass.</li>
+    <li><strong>The lethal ratio pens throw about one foal in four</strong>
+        (<a href="known-gaps.html#gap-245">gap 245</a>). <strong>Pass:</strong> RATIO HYPP and RATIO LETHAL
+        WHITE come out near 1 : 2 : 1 within a couple of hundred foals. <strong>Failing, not yet
+        explained:</strong> the 17:36 run's HYPP pen threw too many lethal foals (10 <code>H/H</code> in 20),
+        and by 20:08 the 19:08 run had thrown none in 35 across both pens, which chance gives about 4 times in
+        100&nbsp;000. What has been ruled out, and the next check, are on the gap. Until it is fixed, read
+        neither pen's shares as a result.</li>
     <li><strong>The night-shy horse leaves its herd alone</strong>
         (<a href="known-gaps.html#gap-241">gap 241</a>). <strong>Pass:</strong> no <code>night flee
         | ... from minecraft:horse</code>, and a <code>Flc</code> horse still moves away from cows and
@@ -235,49 +182,6 @@
     Built to be left running for a whole day. Nothing here needs your hands, and nothing here
     means much in the first hour. Read it in the evening with <code>grep</code>.
 </p>
-
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 (09:07 to 12:15, unattended)</span>
-    <p>
-        <strong>The carrier plants nothing</strong>: no <code>dryad planted</code> line for DRYAD
-        CARRIER in three hours. <strong>Each dryad plants only its own species</strong>, and the mixed
-        pen plants both (4 oak, 1 birch). <strong>Real trees grow</strong> in DRYAD OAK (17 logs),
-        DRYAD JUNGLE (20 logs) and DRYAD OAK+BIRCH (10 oak, 5 birch logs). <strong>Dark oak clustering
-        works</strong>: DRYAD DARK SMALL's saplings closed a 2&times;2 at 11:16 and grew a 44-log tree,
-        which answers <a href="known-gaps.html#gap-218">gap 218</a>. Row A's big DRYAD DARK got there
-        too, later: 36 plantings and an 89-log tree by 16:55. The longer run also settled
-        <strong>the half-rate rule</strong> (DRYAD OAK 7 plantings, DRYAD OAK+BIRCH 7, split 4 oak
-        and 3 birch) and <strong>mushrooms on podzol only</strong> (nine, none on the grass half).
-        All deleted below.
-    </p>
-</div>
-
-<div class="note warn">
-    <span class="label">Failed or unreadable on the first run</span>
-    <p>
-        <strong>Two dryad horses suffocated</strong> in trees that grew where they stood (10:02 and
-        11:16), which is <a href="known-gaps.html#gap-237">gap 237</a>, fixed and waiting on a build
-        (<a href="#fixes-0914">&sect;0-DZ</a>). <strong>Spruce and acacia never became trees</strong>:
-        28 and 31 growth attempts and no logs, while oak and jungle grew. The suspect is the yard's
-        invisible light blocks, three up and every four blocks, which may leave no room for those two
-        tree shapes (<a href="known-gaps.html#gap-240">gap 240</a>). <strong>The <code>tree grew</code>
-        line means a sapling tried to grow</strong>, not that it did: the event fires on every attempt,
-        failures included, so only the census's log count proves a tree.
-    </p>
-    <p>
-        <strong>None of row U's ratios can be read yet.</strong> Brindle failed (brindle colts and plain
-        fillies, <a href="known-gaps.html#gap-235">gap 235</a>) and no lethal foal died
-        (<a href="known-gaps.html#gap-236">gap 236</a>), both fixed and waiting on a build. On top of
-        that, <strong>the ratio pens leak into each other</strong>
-        (<a href="known-gaps.html#gap-239">gap 239</a>): the RATIO HYPP STUD was listed in RATIO LETHAL
-        WHITE at 09:17, LETHAL WHITE logged nine &ldquo;N/N foal died&rdquo; lines that match HYPP-pen
-        foals being removed by their own pen, and RATIO SIZE's three &ldquo;n/n foal died&rdquo; lines
-        match the brindle pen beside it. At 12:15 the tallies read HYPP 42 foals with 12%
-        <code>H/H</code>, LETHAL WHITE 66 foals at 32% <code>O/O</code> and 36% <code>O/N</code>, and
-        SIZE 51 foals at 22 : 45 : 33. The pass conditions below stand, for a run after the pens are
-        separated.
-    </p>
-</div>
 
 <h3 id="all-day-dryad">Rows S and T: dryads, on a stone floor</h3>
 <p>
@@ -310,8 +214,6 @@
         dying is a failure.</li>
     <li><strong>RATIO LETHAL WHITE</strong> (<code>O/N</code> &times; <code>O/N</code>): about 25%
         <code>O/O</code>, every one of them dead.</li>
-    <li><strong>RATIO BRINDLE</strong> (brindle stallion &times; plain mare): every filly is
-        <code>Brn/n</code> and every colt <code>n/Y</code>. A single brindle colt is a failure.</li>
     <li><strong>RATIO SIZE</strong> (<code>Big/n</code> &times; <code>Big/n</code>): roughly 1 : 2
         : 1 across <code>Big/Big</code>, <code>Big/n</code> and <code>n/n</code>.</li>
 </ul>
@@ -336,7 +238,9 @@
         golden-carrot breeding ignores walls. The jar stud now has his own pen, two blocks from the
         mares. Pass for the packing itself: no pen's <code>[watch]</code> line ever lists a horse
         from the pen next door, and no <code>not covered: … other horses</code> line counts more
-        horses than its pen holds.
+        horses than its pen holds. <strong>Known to fail in row U:</strong> a ratio stud still wanders
+        into the pen next door. Rows Q and R showed no stray; HOST BAND listing LEAVING HOME's horses
+        is by design, since those pens share a group.
     </p>
 </div>
 
@@ -357,69 +261,7 @@
     <em>per Minecraft day</em> (twenty minutes), so &ldquo;within the hour&rdquo; means likely,
     not certain.
 </p>
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 morning (first 15 minutes, nobody touching the pens)</span>
-    <p>
-        <strong>A band stays one band when its stallion dies</strong>: &ldquo;stays one band: 3
-        horses, following lead mare&rdquo; two minutes after the kill, and the clock's own check read
-        PASS. That was the old split bug. <strong>Dispersal, both sexes</strong>: the filly left at
-        once and joined the host band, and the colt left at three minutes as his own bachelor lead.
-        <strong>Herding fires</strong>: the stallion fetched the stray from 16 blocks in eight
-        seconds, and in the three later rounds she walked back on her own. <strong>Sparring does no
-        damage</strong>, and the three stallions settled into an order (C, A, B). <strong>Grooming
-        partners form</strong> between mares, and the stallion never gets one. <strong>Tick
-        time</strong> was a steady 50.0 ms with about 270 horses in the dimension. All deleted below.
-    </p>
-</div>
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 (third run, 09:07 to 12:15)</span>
-    <p>
-        <strong>A challenger wins a takeover in a fight</strong>: at 09:52 a bachelor
-        <code>challenged</code> the band stallion and <code>took over band</code>, the bachelors he
-        left re-formed round another, and the old BAND STALLION now reads <em>Bachelor</em>. Over three
-        hours the pen ran a dozen more challenges, each ending in <code>took over band</code> or
-        <code>saw off</code>; the hurt fighters stopped at 11 of 22 health, and no horse in the pen died.
-        <strong>Mares move between bands</strong>: four <code>moved from band</code> lines (09:29,
-        10:01, 10:03, 10:24). <strong>The gelding finds a grooming partner</strong> (GROOM GELDING grooms
-        GROOM MARE A), and the stallion still never does. <strong>The claimed band is later challenged
-        for real</strong>, with takeovers and stand-offs through the morning. Deleted below.
-    </p>
-    <p>
-        <strong>The packing pass fails in row U</strong>: the RATIO HYPP STUD was listed in RATIO LETHAL
-        WHITE's watch line (<a href="known-gaps.html#gap-239">gap 239</a>). Rows Q and R showed no stray;
-        HOST BAND listing LEAVING HOME's horses is by design, since those pens share a group.
-    </p>
-</div>
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 (second run, 07:26 to 07:43)</span>
-    <p>
-        <strong>A vacant band is claimed, not fought for.</strong> Ten minutes after the bachelors
-        arrived, one <code>took over band</code> with no <code>challenged</code> line before it,
-        and <code>the bachelors … left behind re-formed round</code> the other one. That confirms
-        <a href="known-gaps.html#gap-232">gap 232</a>. <strong>Dam defence works</strong>, rounds 2
-        to 5 included: each time the dam went for the zombie within three seconds, killed it within
-        a second, and was targeting nothing twenty seconds later. That confirms
-        <a href="known-gaps.html#gap-233">gap 233</a> and the doubled kick against monsters.
-        <strong>A takeover fight ends without a death</strong>: <code>challenged</code> then
-        <code>saw off</code> nine seconds later. Deleted below.
-    </p>
-</div>
-<div class="note">
-    <span class="label">Confirmed off the log, 2026-09-14 to 15 (overnight, 22:45 to 05:50, unattended)</span>
-    <p>
-        <strong>Rank decides who gets the hay.</strong> DISPLACEMENT logged 19
-        <code>displaced ... at food or water</code> lines, and every one put the higher-ranked mare first:
-        1 over 2, 3 and 4; 2 over 3 and 4; 3 over 4. None was reversed. The mares ate the pen's hay 53 times
-        and it was put back 51. Wild horses displaced each other 296 more times through the night. Those
-        carry no rank labels, so their order was not checked. The pen was deleted as verified (owner,
-        2026-09-15).
-    </p>
-</div>
 <ol>
-    <li><strong>Row R west, TAKEOVER: the band stays out of it.</strong> Takeovers, stand-offs and
-        survival are confirmed. What is left: no mare ever shows in the <code>target</code> column
-        during a fight, because the band does not pile in. Not checked across the morning's
-        fights.</li>
     <li><strong>With your hands, only if you are passing:</strong> open a wild horse's
         information screen in these pens and check its Social section matches its watch line.</li>
 </ol>
@@ -497,7 +339,7 @@
     <li><strong>Row O west, THE CAP, with a lead.</strong> Take one mare out with the chest's lead:
         covers start within seconds. Each birth adds a horse back, so the pen settles again.
         The unattended half, that the pen never grows past the cap, is confirmed
-        (<a href="known-gaps.html#gap-206">gap 206</a>).</li>
+        (<a href="fertility.html#verified">gap 206</a>).</li>
     <li><strong>Row P east, GOLD ANY HEAT.</strong> The kit says she is <em>not in heat</em>.
         Golden carrots on both give a foal <strong>at once</strong> anyway: vanilla, untouched.
         <br><strong>Row P west, JAR STUD and JAR &amp; KIT BENCH</strong>. The stud has his own
@@ -718,9 +560,7 @@
         loading into the test yard show the founding budget acting; and the
         <code>Can't keep up</code> count (one per launch at world load is normal; the
         three-hour run on 2026-09-14 had exactly one)
-        (<a href="known-gaps.html#gap-221">gap 221</a>). Also
-        <a href="known-gaps.html#gap-217">gap 217</a>: why full-health horses are healed at
-        all.</li>
+        (<a href="known-gaps.html#gap-221">gap 221</a>).</li>
     <li><strong>Built, never confirmed:</strong> the tack room, food preference, and the ward's
         non-interference half. (The three magic stat pens are confirmed from their watch lines on
         2026-09-14, and the ward's 70 monster spawns were all far from a warded horse, which says
@@ -1101,7 +941,7 @@
     <strong>Ground count peaked at five against a cap of eight</strong>, sat at two or
     three most of the night, and of 57 eggs removed <strong>every single one
     despawned</strong> &mdash; not one was picked up or refused. That is
-    <a href="known-gaps.html#gap-207">gap 207</a> confirmed by measurement rather than by
+    <a href="gene-egg-layer.html#verified">gap 207</a> confirmed by measurement rather than by
     arithmetic: four layers in one six-block circle still cannot outrun vanilla's
     6&nbsp;000-tick despawn, so <code>nearby_cap</code> is decorative in any real game.
     Either it wants an interval that can outpace the despawn or the verb's page should
@@ -1356,8 +1196,8 @@
         spontaneous-breeding field and the pack leader's pen &mdash; &ldquo;we're done
         with those tests&rdquo;. Verdant's three floors went the same way when they were
         confirmed. The gene itself was removed on 2026-09-13, when every horse started breeding
-        on its own; whether that <em>natural</em> cap holds is
-        <a href="known-gaps.html#gap-206">gap 206</a> and batch 2 of the kit.
+        on its own; that <em>natural</em> cap holds a herd in one place
+        (<a href="fertility.html#verified">verified</a>), and a band spread wider than sixteen blocks is untested.
     </p>
 </div>
 

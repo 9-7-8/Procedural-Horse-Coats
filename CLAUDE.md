@@ -140,8 +140,10 @@ Two rules about the backlog page, both learned the hard way:
    is harvested and put back verbatim.
 8. **Flag genuinely unverified API usage in a comment**, the way the existing
    code does. More useful to the next session than silent confidence.
-9. **When you resolve something recorded as a gap or as unverified, update that
-   page in the same change.**
+9. **When something recorded as a gap or as unverified is fixed and verified, delete it**
+   from `wiki/known-gaps.html` and `wiki/verification.html` in the same change, and put what
+   was verified, when and on what evidence in the **coding tab of that thing's own page**.
+   No "Closed" entries or "Confirmed" notes left behind: those two pages only shrink. (Owner.)
 
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
 or five files each, and the game and the tools drift silently if you miss one.**

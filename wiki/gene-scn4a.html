@@ -146,6 +146,23 @@
     other, not for the arithmetic. Every other new health locus follows the same rule.
 </p>
 
+<h3 id="verified">Verified in the test yard</h3>
+<p>
+    <strong>An <code>H/H</code> foal dies at birth</strong> (2026-09-14, runs from 17:19 and 17:36,
+    unattended). By 17:48 two <code>H/H</code> foals in RATIO HYPP (<code>H/N</code> &times;
+    <code>H/N</code>) had each died of <code>genetic_defect</code> within about four seconds of birth,
+    marked <code>LETHAL_AT_BIRTH</code>. The first lived from 17:26:20 to 17:26:23. No foal of another
+    class died, then or over the 19:08 and overnight runs.
+</p>
+<p>
+    <em>What was wrong before:</em> <code>LethalFoalHandler</code> skipped the whole
+    <code>debug_pens</code> dimension to spare the gallery, and the yard is in that dimension, so no yard
+    foal took <code>genetic_defect</code> damage all day. <em>Fix:</em> the skip applies only inside the
+    corridor (<code>|z| &lt;= DebugPenManager.corridorWallZ()</code>). <em>Not verified:</em> the share of
+    <code>H/H</code> foals, which has swung both ways run to run
+    (<a href="known-gaps.html#gap-245">gap 245</a>).
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

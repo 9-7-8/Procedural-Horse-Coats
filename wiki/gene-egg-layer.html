@@ -120,6 +120,24 @@
     working is the failure mode this mod already tracks.
 </p>
 
+<h3 id="verified">Verified in the test yard</h3>
+<p>
+    <strong>The despawn timer bounds the eggs; <code>nearby_cap</code> never fires</strong> (overnight
+    2026-09-14 to 15, unattended). The EGG LAYER pen packs four layers of one allele into a corner, so
+    their six-block circles overlap and the pen total is the local count. It never had more than 5 eggs
+    on the ground against a cap of 8, and read 1 to 4 most hours. A copy's interval is 4&nbsp;000 to
+    14&nbsp;000 ticks and a dropped item despawns at 6&nbsp;000, so the floor clears faster than the
+    layers fill it. The night of 2026-09-13 agreed: a peak of 5, and all 57 eggs removed had despawned.
+    Nothing further needs bounding. The cap stays as a guard for an interval short enough to outpace
+    the despawn.
+</p>
+<p>
+    <em>A measuring trap:</em> the first attempt used eight layers spread over nineteen blocks, which read
+    3 to 11 items. That says nothing about the cap, because the cap is counted per laying horse and eight
+    horses that far apart each have their own neighbourhood. Clustering the layers is what made the pen
+    readable.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

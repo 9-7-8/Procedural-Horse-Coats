@@ -227,6 +227,38 @@
     <code>DryadGene.PER_VARIANT</code>.
 </p>
 
+<h3 id="verified">Verified in the test yard</h3>
+<ul>
+    <li><strong>Planting</strong> (2026-09-14, 09:07 to 12:15, rows S and T, unattended). The carrier
+        (DRYAD CARRIER, <code>Oak/n</code>) planted nothing in three hours. Each dryad planted only its own
+        species, and the mixed pen planted both (4 oak, 1 birch). Real trees grew in DRYAD OAK (17 logs),
+        DRYAD JUNGLE (20) and DRYAD OAK+BIRCH (10 oak, 5 birch). The longer run settled the half-rate rule
+        (DRYAD OAK 7 plantings, DRYAD OAK+BIRCH 7, split 4 oak and 3 birch) and mushrooms on podzol only
+        (nine, none on the grass half).</li>
+    <li><strong>Dark oak clustering works; a big pen is only slow.</strong> On 2026-09-13
+        <code>dark_oak_log</code> appeared zero times in a full day of logs. On 2026-09-14 DRYAD DARK SMALL,
+        one horse in a small pen, closed a 2&times;2 at 11:16 and grew a 44-log dark oak after about 90
+        minutes. Row A's DRYAD DARK took 36 plantings and most of the afternoon, then an 89-log tree by 16:55.</li>
+    <li><strong>Spruce and acacia grow.</strong> In eight hours on 2026-09-14 DRYAD SPRUCE and DRYAD ACACIA
+        logged 240 and 174 growth attempts and never a log, while oak, jungle, oak+birch and both dark-oak pens
+        grew. Vanilla's tree clearance check accepts only air and <code>#minecraft:replaceable_by_trees</code>
+        (read from the 26.1.2 client jar), which includes neither <code>minecraft:light</code> nor fences. The
+        yard's lamp grid put invisible light blocks three up and four apart in pens five wide inside; oak and
+        jungle need a one-block ring round the trunk, spruce and acacia two. <em>Fix:</em> no light blocks over
+        rows S and T, glowstone set into the floor between pens (<code>DebugYardLong.lightFromTheFloor</code>),
+        and the spruce and acacia pens seven wide inside. After it, DRYAD SPRUCE had 7 <code>spruce_log</code>
+        by 22:11 on the 19:08 run, and by 03:15 on the overnight run DRYAD SPRUCE had 18
+        <code>spruce_log</code> and DRYAD ACACIA 19 <code>acacia_log</code>, which had grown to 25 by the
+        05:50 census. <code>DebugWorldWatch.onGrow</code>
+        now checks a tick later and logs <code>tree grew</code> only when the sapling has gone, though it still
+        under-reports, so read growth off the census's log counts. DRYAD SPRUCE, JUNGLE, ACACIA and OAK were
+        deleted from the yard on 2026-09-15.</li>
+</ul>
+<p>
+    <em>Not verified:</em> that no tree grows through a horse. A dark oak branch killed a horse at 04:01 on
+    2026-09-15 (<a href="known-gaps.html#gap-244">gap 244</a>).
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
