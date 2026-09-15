@@ -342,6 +342,33 @@ final class DebugYardHerd {
         for (int x = x0 + 3; x <= x0 + 4; x++) {
             level.setBlock(new BlockPos(x, gy + 1, z0 + 4), Blocks.HAY_BLOCK.defaultBlockState(), 3);
         }
+        restockHay(level, gy, x0, z0);
+    }
+
+    /**
+     * <b>Put the DISPLACEMENT hay back</b> (owner, 2026-09-14: "write a script to automatically
+     * replace the hay in the displacement pens"). Hungry horses eat hay bales whole, and this pen's
+     * whole test is rank at the hay, so once a minute any missing bale is replaced - unless a horse
+     * is standing in its spot, where a new block would suffocate it; that spot waits for the next
+     * minute.
+     */
+    private static void restockHay(ServerLevel level, int gy, int x0, int z0) {
+        after(level, 1_200, () -> {
+            int placed = 0;
+            for (int x = x0 + 3; x <= x0 + 4; x++) {
+                BlockPos at = new BlockPos(x, gy + 1, z0 + 4);
+                if (level.getBlockState(at).is(Blocks.HAY_BLOCK)
+                        || !level.getEntitiesOfClass(Horse.class, new AABB(at), Horse::isAlive).isEmpty()) {
+                    continue;
+                }
+                level.setBlock(at, Blocks.HAY_BLOCK.defaultBlockState(), 3);
+                placed++;
+            }
+            if (placed > 0) {
+                ActionTrace.log("test yard", "DISPLACEMENT: put back " + placed + " hay bale(s) the mares ate");
+            }
+            restockHay(level, gy, x0, z0);
+        });
     }
 
     // ------------------------------------------------------------------

@@ -316,6 +316,75 @@ final class DebugYardLong {
         ActionTrace.log("test yard", t.name + ": foal " + t.born + " is " + cls + " | " + t.summary());
     }
 
+    /** Gap 245: each ratio pen's running tally of shadow draws, by class. */
+    private static final Map<Tally, Map<String, int[]>> SHADOW = new java.util.IdentityHashMap<>();
+
+    /**
+     * <b>Gap 245's instrument</b> (owner, 2026-09-14: "just build the extra logging for lethal
+     * pens"). The lethal pens threw far too many homozygous foals in one run and none in 35 the
+     * next, while the same draw on the same generator is fair offline. So at every conception in
+     * a ratio pen this logs what the draw actually saw and made: the game tick, the chance, the
+     * dam's and sire's pairs <i>as passed to the draw</i>, the embryo, whether mare and stallion
+     * share one random source, and a <b>shadow draw</b> - the same two genomes through the same
+     * {@code breedWith}, from a generator nothing else touches. The shadow changes nothing in the
+     * game; it only tallies. If the shadow reads 1:2:1 while the real embryos do not, the fault is
+     * in the stream the mare's random hands the draw; if both skew, it is in the genomes.
+     * All four ratio pens log, so brindle and size are controls.
+     */
+    static void onConception(Horse mare, @Nullable Horse sire,
+                             com.example.horsegenetics.common.genetics.Genome mareGenome,
+                             com.example.horsegenetics.common.genetics.Genome sireGenome,
+                             com.example.horsegenetics.common.repro.Conception.Result result) {
+        if (TALLIES.isEmpty() || result.pregnancy().isEmpty() || !(mare.level() instanceof ServerLevel level)) {
+            return;
+        }
+        Tally t = null;
+        for (Tally x : TALLIES) {
+            if (mare.getUUID().equals(x.damEntity)) {
+                t = x;
+                break;
+            }
+        }
+        if (t == null) {
+            return;
+        }
+        StringBuilder embryos = new StringBuilder();
+        for (com.example.horsegenetics.common.repro.Embryo e : result.pregnancy().get().embryos()) {
+            embryos.append(embryos.length() == 0 ? "" : " + ").append(tokens(e.foal().genotype().pair(t.key)));
+        }
+        com.example.horsegenetics.common.genetics.Genome shadow =
+                com.example.horsegenetics.common.genetics.GeneticCodeCombiner.combine(mareGenome, sireGenome,
+                        new com.example.horsegenetics.common.SeededRng(level.getRandom().nextLong()),
+                        com.example.horsegenetics.common.genetics.GameteBias.NONE,
+                        com.example.horsegenetics.common.genetics.GameteBias.NONE);
+        String shadowClass = tokens(shadow.genotype().pair(t.key));
+        Map<String, int[]> tally = SHADOW.computeIfAbsent(t, k -> new LinkedHashMap<>());
+        tally.computeIfAbsent(shadowClass, k -> new int[1])[0]++;
+        int shadows = 0;
+        for (int[] c : tally.values()) {
+            shadows += c[0];
+        }
+        StringBuilder summary = new StringBuilder();
+        for (Map.Entry<String, int[]> e : tally.entrySet()) {
+            summary.append(summary.length() == 0 ? "" : ", ").append(e.getKey()).append(' ').append(e.getValue()[0])
+                    .append(String.format(java.util.Locale.ROOT, " (%.0f%%)", 100.0 * e.getValue()[0] / shadows));
+        }
+        String sireRandom = sire == null ? "no live sire"
+                : String.format(java.util.Locale.ROOT, "sire random #%08x (%s)",
+                        System.identityHashCode(sire.getRandom()),
+                        sire.getRandom() == mare.getRandom() ? "SHARED with the mare" : "separate");
+        ActionTrace.log("test yard", String.format(java.util.Locale.ROOT,
+                "%s conception at tick %d: chance %.2f | dam %s, sire %s as drawn | embryo %s | shadow %s"
+                        + " | mare random #%08x, %s | shadow tally %d: %s | expect the shadow near %s",
+                t.name, level.getGameTime(), result.chance(), tokens(mareGenome.genotype().pair(t.key)),
+                tokens(sireGenome.genotype().pair(t.key)), embryos, shadowClass,
+                System.identityHashCode(mare.getRandom()), sireRandom, shadows, summary, t.expect));
+    }
+
+    private static String tokens(@Nullable AllelePair pair) {
+        return pair == null ? "?" : pair.toTokens();
+    }
+
     private static void scan(ServerLevel level, Tally t, AABB box, int round) {
         DebugYardHerd.after(level, SCAN, () -> {
             long now = level.getGameTime();

@@ -80,13 +80,14 @@
     </p>
 </div>
 
-<h2 id="hunger-0914">&sect;0-EA &mdash; Hunger (2026-09-14, compiled and unit-tested, NOT in the running build)</h2>
+<h2 id="hunger-0914">&sect;0-EA &mdash; Hunger, and gap 245's conception log (2026-09-14, built 22:12, NOT played)</h2>
 <p>
     Every horse now has an invisible hunger level that drains, pays for healing, and sends a
     hungry horse off to eat (<a href="horse-care.html#hunger">horse-care</a>). <code>HungerTest</code>
-    passes 9 of 9 and the whole mod compiles with it, but it was deliberately kept out of the 19:08
-    build so the all-day run carried only the tree fix. It goes in at the next restart. Everything
-    below reads off <code>latest.log</code>, from the yard's new <strong>row V</strong>.
+    passes 9 of 9. It went in with the 22:12 build, with two things beside it: the DISPLACEMENT pen
+    restocks its own hay, and every ratio-pen conception is logged for
+    <a href="known-gaps.html#gap-245">gap 245</a>. Everything below reads off <code>latest.log</code>;
+    the hunger tests are the yard's new <strong>row V</strong>.
 </p>
 <div class="note warn">
     <span class="label">It changes the pens around it</span>
@@ -94,10 +95,20 @@
         Hungry horses eat whatever food is in their pen, and eating uses it up. <strong>The dryad
         pens' grass will turn to dirt</strong>, and a dryad cannot plant on dirt, so their planting
         rates fall once their horses get hungry (about twenty minutes in). DRYAD FLOWER's flowers
-        get eaten. The DISPLACEMENT pen's two hay bales get eaten, which ends that test. A pen that
-        needs its food to last will need restocking or a stone floor.
+        get eaten. <strong>The DISPLACEMENT pen puts its hay back</strong> once a minute (owner's
+        request), logging <code>DISPLACEMENT: put back N hay bale(s)</code>, and skips a spot a horse is
+        standing in. Any other pen that needs its food to last needs the same or a stone floor.
     </p>
 </div>
+<ul>
+    <li><strong>Gap 245, the lethal pens.</strong> Each ratio-pen conception now logs
+        <code>RATIO … conception at tick T: chance C | dam …, sire … as drawn | embryo … | shadow … |
+        mare random #…, sire random #… (separate or SHARED) | shadow tally …</code>. The shadow is the
+        same two genomes through the same draw from a separate generator, and it changes nothing in the game.
+        <strong>Read:</strong> if the shadow tally sits near 1 : 2 : 1 while the real tally does not, the
+        mare's random stream is the cause. If both skew, the genomes are. A <code>SHARED</code> random is a
+        finding on its own. Brindle and size log too, as controls.</li>
+</ul>
 <ul>
     <li><strong>HUNGER ORDER:</strong> a horse at hunger 20, with foods laid out nearest-first and
         worst-first (poppy, mushroom, moss, hay, cake). <strong>Pass:</strong> its first

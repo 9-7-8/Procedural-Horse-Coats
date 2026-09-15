@@ -109,7 +109,9 @@
     yet known. <strong>A third at 19:48:</strong> Betty Levi, from the same wild herd (spawned beside Elegiac Star
     at 19:08:48), died of <code>outOfWorld</code> at x 109, z &minus;51, y &minus;235. z &minus;51 is outside the
     corridor's &minus;Z bedrock wall at z &minus;26, so that herd is finding a way out of the corridor, not just
-    falling through a floor inside it.</li>
+    falling through a floor inside it. <strong>Owner's hunch, to check first:</strong> the placement of a hay
+    bale, water cauldron or chest against a wall is giving horses a step up and over. Parked for later
+    (owner, 2026-09-14).</li>
 <li id="gap-242"><strong>Closed 2026-09-14, confirmed off the log: the yard's ratio tallies could never count a lethal foal.</strong>
     After the 17:35 build every <code>O/O</code> and <code>H/H</code> foal reached its tally and was marked died.
     <code>DebugYardLong</code>'s clock looked for <em>living</em> foals every ten seconds, and an <code>H/H</code>
@@ -126,7 +128,10 @@
     lines in eight hours. <em>Fix:</em> equines are excluded from "passive", and the flee trace compares UUIDs
     with <code>equals</code>. The same foal also carried <code>plod1=ffs/ffs</code> and lived all day, which
     is gap 236.</li>
-<li id="gap-240"><strong>Fixed 2026-09-14, not yet played: spruce and acacia dryad saplings never grew into trees in the yard.</strong>
+<li id="gap-240"><strong>Fixed 2026-09-14, half confirmed: spruce and acacia dryad saplings never grew into trees in the yard.</strong>
+    <strong>Spruce is confirmed</strong>: the 19:08 run's DRYAD SPRUCE had 7 <code>spruce_log</code> by 22:11
+    (jungle 7 and oak 4 beside it). <strong>Acacia still grew nothing</strong> in three hours, so that half stays
+    open.
     In eight hours DRYAD SPRUCE and DRYAD ACACIA logged 240 and 174 growth attempts and never a log, while oak,
     jungle, oak+birch and both dark-oak pens grew. <em>Cause, confirmed against the game's data:</em> vanilla's
     tree clearance check accepts only air and <code>#minecraft:replaceable_by_trees</code> (read from the

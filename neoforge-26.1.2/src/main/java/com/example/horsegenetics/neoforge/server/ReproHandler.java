@@ -244,6 +244,8 @@ public final class ReproHandler {
                         breeder);
             }
         });
+        // Gap 245's instrument: a ratio pen's conception, logged with what the draw saw.
+        DebugYardLong.onConception(mare, liveSire, mareGenome, sireGenome, result);
         ActionTrace.log("fertility", ActionTrace.describeShort(mare) + " bred to " + sireRecord.displayName()
                 + ": " + result.outcome() + String.format(" (chance %.2f)", result.chance())
                 + result.pregnancy().map(p -> " - " + p.embryos().size() + " embryo(s), due at tick "
