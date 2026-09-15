@@ -344,13 +344,19 @@ final class DebugYardUnattended {
                 List.of("WERE-COW", "a cow lycan among", "three cows, put in", "love at night"));
         water(level, gy, x0 + 1, z0 + 1);
         horse(level, gy, x0 + 4.5, z0 + 5.5, Sex.FEMALE, "horsegenetics.lycan=Cow/Cow", true, "WERE-COW");
+        // Kept as spawned, not searched for afterwards: the 07:44 run searched the pen straight after spawning and
+        // found none of them, which is itself a clue for gap 247.
+        List<Entity> cows = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            animal(level, EntityType.COW, gy, x0 + 9.5 + i * 2, z0 + 5.5);
+            Entity cow = animal(level, EntityType.COW, gy, x0 + 9.5 + i * 2, z0 + 5.5);
+            if (cow != null) {
+                cows.add(cow);
+            }
         }
         AABB box = DebugTestYard.box(x0, gy, z0, x0 + 17, gy + 3, z0 + ROW_Z_D);
         breedWhenShifted(level, box);
-        List<Animal> cows = level.getEntitiesOfClass(Animal.class, box.inflate(0.0, 2.0, 0.0),
-                a -> !(a instanceof Horse));
+        ActionTrace.log("test yard", "WERE-COW: spawned " + cows.size() + " cows; a search of the pen straight after"
+                + " finds " + level.getEntitiesOfClass(Animal.class, box.inflate(0.0, 2.0, 0.0), a -> !(a instanceof Horse)).size());
         trackCows(level, box, cows, 1);
     }
 
@@ -358,16 +364,20 @@ final class DebugYardUnattended {
      * Gap 247: the WERE-COW pen's cows leave its watch box in daylight without dying or leaving the world. Where
      * each one is, every ten seconds for five minutes, and whether it is still inside the box.
      */
-    private static void trackCows(ServerLevel level, AABB box, List<Animal> cows, int n) {
+    private static void trackCows(ServerLevel level, AABB box, List<Entity> cows, int n) {
         DebugYardHerd.after(level, 200, () -> {
             StringBuilder sb = new StringBuilder();
-            for (Animal c : cows) {
+            for (Entity c : cows) {
+                net.minecraft.world.level.ChunkPos chunk = c.chunkPosition();
                 sb.append(sb.length() == 0 ? "" : "; ").append(ActionTrace.describeShort(c))
                         .append(String.format(" at %.1f %.1f %.1f", c.getX(), c.getY(), c.getZ()))
+                        .append(" chunk ").append(chunk.x()).append(',').append(chunk.z())
+                        .append(level.isPositionEntityTicking(c.blockPosition()) ? " entity-ticking" : " NOT ENTITY-TICKING")
+                        .append(level.getEntity(c.getUUID()) == c ? "" : ", NOT FINDABLE BY UUID")
                         .append(c.isAlive() ? "" : " DEAD").append(c.isRemoved() ? " REMOVED " + c.getRemovalReason() : "")
                         .append(box.inflate(0.0, 2.0, 0.0).contains(c.position()) ? ", in pen" : ", OUT OF PEN")
                         .append(c.isPassenger() ? ", riding " + ActionTrace.describeShort(c.getVehicle()) : "")
-                        .append(c.isLeashed() ? ", leashed" : "");
+                        .append(c instanceof Mob m && m.isLeashed() ? ", leashed" : "");
             }
             ActionTrace.log("test yard", "WERE-COW cows " + n + " (pen x " + (int) box.minX + ".." + (int) box.maxX
                     + ", z " + (int) box.minZ + ".." + (int) box.maxZ + "): " + sb);
@@ -544,16 +554,17 @@ final class DebugYardUnattended {
         return h;
     }
 
-    private static void animal(ServerLevel level, EntityType<?> type, int gy, double x, double z) {
+    private static @Nullable Entity animal(ServerLevel level, EntityType<?> type, int gy, double x, double z) {
         Entity e = type.create(level, EntitySpawnReason.COMMAND);
         if (e == null) {
-            return;
+            return null;
         }
         e.snapTo(x, gy + 1, z, 0.0F, 0.0F);
         if (e instanceof Mob mob) {
             mob.setPersistenceRequired();
         }
         level.addFreshEntity(e);
+        return e;
     }
 
     private static void water(ServerLevel level, int gy, int x, int z) {
