@@ -1,6 +1,15 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.SpliceCategory;
+import com.example.horsegenetics.common.genetics.SpliceSafety;
 import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.Severity;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
@@ -28,6 +37,10 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AE;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AE_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AF;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AF_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AJ;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AJ_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AK;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AK_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
@@ -74,8 +87,20 @@ final class DebugYardBirths {
                     "thoroughbred", "mixed", List.of("CROSS OUT", "cross x outsider", "(Thoroughbred):", "Mixed"));
             pair(level, gy, west + 9, mouthZ + ROW_AF, ROW_AF_D, "STARBURST DRIFT", "drift", "horsegenetics.starburst=C/C",
                     null, null, "", List.of("STARBURST DRIFT", "C/C x C/C: a foal's", "size and hue sit", "near its parents'"));
+            // Rows AJ-AK: one mare per splice carrot, armed as if she had eaten it and re-armed after every foal.
+            String[][] splices = {
+                    {"SPLICE DILUTION", "gene_splice:dilution"}, {"SPLICE WHITE", "gene_splice:white"},
+                    {"SPLICE MARKING", "gene_splice:marking"}, {"SPLICE PERFORMANCE", "gene_splice:performance"},
+                    {"SPLICE MAGICAL", "gene_splice:magical"}, {"SPLICE UNTHEMED", "gene_splice"}};
+            int[][] at = {{west, ROW_AJ, ROW_AJ_D}, {west + 9, ROW_AJ, ROW_AJ_D}, {east, ROW_AJ, ROW_AJ_D},
+                    {east + 9, ROW_AJ, ROW_AJ_D}, {west, ROW_AK, ROW_AK_D}, {west + 9, ROW_AK, ROW_AK_D}};
+            for (int i = 0; i < splices.length; i++) {
+                pair(level, gy, at[i][0], mouthZ + at[i][1], at[i][2], splices[i][0], "splice", PLAIN, null, null,
+                        splices[i][1], List.of(splices[i][0], "mare armed with", splices[i][1].replace("gene_splice", "splice"),
+                                "new allele: in theme"));
+            }
             ActionTrace.log("test yard", "birth pens built (rows AE-AF: bond, cross same/two/back/out, starburst drift;"
-                    + " every pen also logs foal names for gap 8)");
+                    + " rows AJ-AK: the six splice carrots; every pen also logs foal names for gap 8)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: rows AE-AF (births) failed to build", e);
         }
@@ -95,6 +120,9 @@ final class DebugYardBirths {
             mare.setData(ModAttachments.HORSE_CARE.get(), mare.getData(ModAttachments.HORSE_CARE.get()).withBond(80));
         }
         DebugYardFertility.inHeat(mare);
+        if (kind.equals("splice")) {
+            arm(mare, expect);
+        }
         DebugWorldWatch.watchBreeding(name, DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + depth));
         BY_DAM_RECORD.put(HorseRecords.of(mare).id(), new Pen(name, kind, mare.getUUID(), stud.getUUID(), expect, new int[1]));
     }
@@ -137,11 +165,75 @@ final class DebugYardBirths {
                 yield "foal breed " + got + " (" + rec.lineage().displayName() + "), expect " + pen.expect() + ": "
                         + (got.equals(pen.expect()) ? "PASS" : "FAIL");
             }
+            case "splice" -> {
+                if (dam != null) {
+                    arm(dam, pen.expect());     // a conception used the carrot up; the next cover gets another
+                }
+                yield damRec == null || sireRec == null ? "a parent is gone - nothing to compare"
+                        : splice(pen.expect(), damRec, sireRec, rec);
+            }
             default -> damRec == null || sireRec == null ? "a parent is gone - no drift to read"
                     : drift(damRec.epigenomeCode(), sireRec.epigenomeCode(), rec.epigenomeCode());
         };
         ActionTrace.log("test yard", pen.name() + ": " + who + " - " + detail);
         DebugYardHerd.after(level, 100, foal::discard);     // read; out of the way before the next one
+    }
+
+    // ------------------------------------------------------------------
+    // splice carrots
+    // ------------------------------------------------------------------
+
+    /** What feeding the carrot does to a horse, without the carrot: its token appended to the armed list. */
+    private static void arm(Horse h, String token) {
+        h.setData(ModAttachments.ARMED_CARROTS.get(), h.getData(ModAttachments.ARMED_CARROTS.get()).plus(List.of(token)));
+    }
+
+    /**
+     * Verification &sect;0-AJ: "The spliced locus should be in the carrot's theme every time" and "No themed carrot may
+     * ever produce a foal with a disorder". Nothing records which locus a splice chose, so the pen finds it the way
+     * {@code SpliceOutcome.spliceReached} does: an allele on the foal that neither parent carries. Eye loci are skipped -
+     * {@code Eyes.force} rewrites them after the draw and invents alleles with no carrot involved - and so are sex-linked
+     * placeholders. A splice can also go unseen, when the foal draws a substitute copy a parent already had.
+     */
+    private static String splice(String token, HorseRecord dam, HorseRecord sire, HorseRecord foal) {
+        SpliceCategory want = token.startsWith("gene_splice:")
+                ? SpliceCategory.valueOf(token.substring("gene_splice:".length()).toUpperCase(java.util.Locale.ROOT)) : null;
+        Genotype dg = dam.genotype();
+        Genotype sg = sire.genotype();
+        Genotype fg = foal.genotype();
+        List<String> novel = new ArrayList<>();
+        boolean allInTheme = true;
+        for (Gene gene : Genes.codeOrder()) {
+            if (gene.getClass().getPackageName().endsWith(".eye")) {
+                continue;
+            }
+            AllelePair fp = fg.pair(gene);
+            if (fp == null) {
+                continue;
+            }
+            AllelePair dp = dg.pair(gene);
+            AllelePair sp = sg.pair(gene);
+            for (Allele a : new Allele[]{fp.first(), fp.second()}) {
+                if (gene.isPlaceholder(a) || (dp != null && dp.has(a)) || (sp != null && sp.has(a))) {
+                    continue;
+                }
+                SpliceCategory got = SpliceCategory.of(gene);
+                boolean ok = want == null ? SpliceSafety.isSafe(gene) : got == want;
+                allInTheme &= ok;
+                novel.add(gene.key() + " " + a.token() + " (" + (got == null ? "no theme" : got.name().toLowerCase(java.util.Locale.ROOT))
+                        + (ok ? "" : ", OUT OF THEME") + ")");
+                break;
+            }
+        }
+        List<String> disorders = new ArrayList<>();
+        HorseTraits.resolve(fg, foal.epigenome(), true).conditions().stream()
+                .filter(c -> c.severity() != Severity.INFORMATIONAL)
+                .forEach(c -> disorders.add(c.name() + " [" + c.severity() + "]"));
+        String verdict = novel.isEmpty() ? "no splice seen (a splice can hand down a copy a parent already had)"
+                : allInTheme ? "PASS (in theme)" : "FAIL (out of theme)";
+        return "new alleles: " + (novel.isEmpty() ? "none" : String.join(", ", novel)) + " | conditions above informational: "
+                + (disorders.isEmpty() ? "none" : String.join(", ", disorders)) + " - " + verdict
+                + (disorders.isEmpty() ? "" : "; A DISORDER - check whether it sits on the new locus");
     }
 
     // ------------------------------------------------------------------
