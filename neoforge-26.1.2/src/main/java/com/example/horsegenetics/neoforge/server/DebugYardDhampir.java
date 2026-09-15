@@ -128,10 +128,14 @@ final class DebugYardDhampir {
         DebugYardUnattended.pen(level, gy, x0, z0, 9, depth, name, Blocks.GRASS_BLOCK.defaultBlockState(), sign);
     }
 
-    /** Planks four up over a 4x4 corner: shade a sun-sensitive horse can reach, and not a step over any wall. */
+    /**
+     * Planks four up over a 6x6 corner: shade a sun-sensitive horse can reach, and not a step over any wall. Six, not
+     * four: a 4x4 roof has no square with two rings of cover, so {@code SunShadeGoal} never finds the deep cover it
+     * prefers, and in the 08:47 run SUN ONLY took ten burns on the roof's edge before it settled.
+     */
     private static void roof(ServerLevel level, int gy, int x0, int z0) {
-        for (int x = x0 + 1; x <= x0 + 4; x++) {
-            for (int z = z0 + 1; z <= z0 + 4; z++) {
+        for (int x = x0 + 1; x <= x0 + 6; x++) {
+            for (int z = z0 + 1; z <= z0 + 6; z++) {
                 level.setBlock(new BlockPos(x, gy + 4, z), Blocks.OAK_PLANKS.defaultBlockState(), 3);
             }
         }

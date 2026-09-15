@@ -209,6 +209,13 @@ final class DebugYardEffects {
                 }
             }
         }
+        // THE LID IS A WATERLOGGED TOP SLAB, NOT STONE (08:47 run). Under a solid lid the top water block's surface sits
+        // 0.11 below it, and a horse floating up against the lid has its eye 0.08 below the lid - above the water, so
+        // all three read HEAD OUT at full air for a minute. Fluid above fluid fills the block below to the brim, and the
+        // slab's open lower half is water too, so the horse's head stays under while the slab still stops it rising.
+        BlockState lid = Blocks.STONE_SLAB.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP)
+                .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, true);
         int[] cellX = {x0 + 1, x0 + 4, x0 + 7};
         for (int cx : cellX) {
             for (int dx = 0; dx <= 1; dx++) {
@@ -216,6 +223,7 @@ final class DebugYardEffects {
                     for (int y = gy - 3; y <= gy - 1; y++) {
                         level.setBlock(new BlockPos(cx + dx, y, z0 + 4 + dz), Blocks.WATER.defaultBlockState(), 3);
                     }
+                    level.setBlock(new BlockPos(cx + dx, gy, z0 + 4 + dz), lid, 3);
                 }
             }
         }
