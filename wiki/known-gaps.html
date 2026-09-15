@@ -66,10 +66,15 @@
     0 at 07:37:36. The new <code>[watch] creature removed</code> line (any exit but death, with its reason) logged
     <strong>nothing</strong>, and no other watched pen gained a creature. So the cows are not removed: they are still in
     the world, somewhere outside every watched pen. <em>Third run, 07:44:</em> the same, 3 cows at 07:45:11, 0 at 07:48:30.
-    A position tracker that searched the pen for its cows <em>straight after spawning them</em> found none. <em>Suspect,
-    unproven:</em> an entity that walks into a chunk section the server is not entity-ticking is hidden from searches with
-    no leave event. The cows spawn on z&nbsp;416, a chunk boundary. <em>Next:</em> the tracker now keeps the cows as it
-    spawns them and logs each one's chunk, whether it is entity-ticking and whether it can still be found by UUID.</li>
+    <em>Found, 07:52 run:</em> they climb out. The tracker, keeping each cow as spawned, logged every one in an entity-ticking
+    chunk and findable the whole time, so the hidden-chunk suspicion was wrong. At 07:53:52 one cow stood at y&nbsp;+1.5 at
+    x&nbsp;7.8, z&nbsp;413.4, on the water cauldron the pen put at <code>x0+1, z0+1</code> against the west wall's corner.
+    By 07:54:02 all three were in the aisle outside, wandering x&nbsp;-6 to 18. A cauldron is a full block high, and from
+    its top a 1.5-high brick wall is a step. NIGHT SHY has no cauldron, which is why its cows stayed. <em>Fix, built and not
+    yet played:</em> every cauldron in rows Z-AA's pens is at least one block clear of any wall. <em>Why this matters
+    beyond one pen:</em> any block placed against a pen wall is a step over it for an animal. It was the owner's guess for
+    the herd that escaped on 2026-09-14 (hay, water or a chest). That escape turned out to be lycans (gap 243), but the rule
+    holds for every pen.</li>
 <li id="gap-245"><strong>Open, found 2026-09-14: the lethal ratio pens draw far too few, then far too many, homozygous foals, one run at a time.</strong>
     RATIO HYPP and RATIO LETHAL WHITE are carrier-by-carrier crosses and should throw one lethal foal in four. The
     17:36 run threw too many (HYPP 10 <code>H/H</code> in 20). By 20:08 the 19:08 run had thrown <strong>none in
