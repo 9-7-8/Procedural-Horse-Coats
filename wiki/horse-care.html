@@ -458,7 +458,11 @@
     full in about six seconds, hunger 97 to 76. HUNGER STARVING never rose off 11.0 health while its hunger
     fell to 0, and on the 22:45 build it held at 11.0 for four and a half hours (22:45 to 03:15). HUNGER
     CARNIVORE hunted and ate all three chickens in turn, reached 75, and stayed hungry with no prey left.
-    Grazing is not yet verified.
+    <em>Grazing, 2026-09-15:</em> after the rate fix (below 75, one chance in 1,200 per check), the grazing summary
+    comes about once a minute once horses have drained a little: 11 lines in a 20-minute run, 28 in a 38-minute one. A
+    line's mouthfuls sit in the tens across the whole yard, median 64 and at most 84, rather than a line per mouthful.
+    Horses do fall to 50 and go looking: in the 38-minute run, horses outside the hunger pens ate 534 times - 503 grass,
+    29 hay, a wheat crop, a dropped chicken and a cake - each logged with hunger just above 50 after the mouthful.
 </p>
 <ul>
     <li><strong>No free heal at full health.</strong> <code>AbstractHorse.aiStep</code> (26.1.2's patched

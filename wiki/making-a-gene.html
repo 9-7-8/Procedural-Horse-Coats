@@ -3434,6 +3434,16 @@ public final class YourMod {
         it, and will not load again once it is removed.</li>
 </ul>
 
+<p id="verified-gene-freeze">
+    <strong>Verified, the half that needs no second mod</strong> (2026-09-15). The event's firing point was worked out
+    from the loader's source, not run: every mod constructed, then the deferred queue drained once. Every yard launch
+    that day logged <code>[genes] 0 gene(s) registered by other mods; the registry is frozen at 318 segments</code>,
+    and that count matches <code>the genotype code has 318 segments</code> two lines earlier (08:40 launch: 08:40:52.944,
+    then the freeze at 08:40:53.158). So the queued task runs, and the freeze lands after the shipped genes are in.
+    <em>Still unrun</em>, because it takes a throwaway second mod: a real listener being called, its gene sorting into
+    place, and the refusal of a bad key (<a href="verification.html#gene-api">verification &sect;0-CM</a>).
+</p>
+
 <h2>Walkthrough 1 &mdash; a natural gene</h2>
 
 <div class="note">

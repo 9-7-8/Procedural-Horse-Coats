@@ -114,9 +114,6 @@
         2026-09-15). Wild bat and parrot shifters live in the corridor pens and fly off at dusk.
         <strong>Pass:</strong> no <code>horse died ... from outOfWorld</code> all run, and a
         <code>[trace] lycan | ... set down at</code> line for any that come back over nothing.</li>
-    <li><strong>Grazing is occasional.</strong> <strong>Pass:</strong> one <code>grazing: N mouthful(s)</code>
-        line a minute with N in the tens, not a line a mouthful, and horses really do fall below 50 and go
-        looking for food.</li>
 </ul>
 
 <h2 id="fixes-0914">&sect;0-DZ &mdash; Fixes from the all-day run (2026-09-14, built at 17:15, NOT played)</h2>
@@ -1024,13 +1021,8 @@
 </div>
 
 <p>
-    <strong>The cheap check, with no second mod at all:</strong> boot the game or a
-    server and look for the line
-    <code>[genes] 0 gene(s) registered by other mods; the registry is frozen at N
-    segments</code>. If it appears, the event fired and the freeze happened at the
-    right moment; if it never appears, the enqueued task never ran and the reasoning
-    above is wrong. <code>N</code> must equal the segment count
-    <code>ModGeneSpecs</code> logs two lines earlier.
+    (The cheap check with no second mod, that the freeze line appears with the right segment
+    count, <a href="making-a-gene.html#verified-gene-freeze">has passed</a>. What is below still needs one.)
 </p>
 
 <ul>
@@ -2477,11 +2469,6 @@
         <code>[Debug] chat+log diagnostics enabled=&hellip;</code> says which way it went.
         Setting <code>debug.announce = true</code> in the server config should bring the
         lines back in a normal install.</li>
-    <li><strong>The launch log should be quiet now.</strong> It printed 121
-        <code>[genes] could not register</code> ERROR lines before the title screen
-        (<a href="architecture.html#verified-double-register">gap 138</a>). There should now be none, and
-        two INFO lines instead saying how many genes shipped and how many segments the
-        genotype code has. A collision reported after this change is a real one.</li>
     <li><strong>The custom spawn screen's right-hand column.</strong> Widened from 96 to
         128 with a 4px gutter, and the breed label now fits itself to the button instead
         of being cut at twelve characters. Worth an eye on whether 128 is actually
