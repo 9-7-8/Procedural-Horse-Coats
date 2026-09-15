@@ -88,7 +88,15 @@
     exactly as binomial. The game's entity random is <code>LegacyRandomSource</code>, the same generator.
     <em>So the same code on the same generator is fair offline and not in the pens.</em> <em>Next, needs a build:</em>
     log each ratio-pen conception's game tick, chance and drawn pair, and draw one pen's embryos from an independent
-    generator seeded off the level random, to see whether the skew follows the mare's entity random.</li>
+    generator seeded off the level random, to see whether the skew follows the mare's entity random.
+    <strong>Instrumented, 2026-09-14 22:45 to 09-15 01:14, and the skew did not come back.</strong> Every
+    ratio-pen conception logged the pairs as drawn, the embryo and a shadow draw. Over the whole run the real
+    embryos read HYPP 13&nbsp;:&nbsp;23&nbsp;:&nbsp;7 (n&nbsp;43, chi-square 1.9), lethal white 13&nbsp;:&nbsp;29&nbsp;:&nbsp;14
+    (n&nbsp;56, 0.1) and size 11&nbsp;:&nbsp;19&nbsp;:&nbsp;13 (n&nbsp;43, 0.8); the shadows 0.6, 0.4 and 0.1. Every
+    conception drew from the pen's own carrier parents, and no mare shared a random source with her stud. So the
+    19:08 run's 0 in 35 is still unexplained, and with the instrument on it has not recurred. Left open, with
+    the logging running. (Reading it: the log rolled at midnight, so the run's first 75 minutes are in
+    <code>run/logs/2026-09-14-1.log.gz</code>, not <code>latest.log</code>.)</li>
 <li id="gap-244"><strong>Fixed 2026-09-14, not yet played: gap 237's fix stopped every tree in the yard's dryad pens from growing.</strong>
     <strong>Passing so far (19:08 build):</strong> DRYAD OAK grew its first tree by 19:59, and no horse took
     <code>inWall</code>. <strong>But no <code>tree grew</code> line fired for it</strong>, so that line under-reports.
