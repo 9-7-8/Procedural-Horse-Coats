@@ -204,7 +204,9 @@ final class DebugYardBirths {
         List<String> novel = new ArrayList<>();
         boolean allInTheme = true;
         for (Gene gene : Genes.codeOrder()) {
-            if (gene.getClass().getPackageName().endsWith(".eye")) {
+            // Both tests: the eye classes are not all in the eye package - the 09:26 run counted eye_sclera_left and
+            // eye_sector_colour_left as new alleles, which Eyes.force can make with no carrot at all.
+            if (gene.getClass().getPackageName().endsWith(".eye") || gene.key().startsWith("horsegenetics.eye_")) {
                 continue;
             }
             AllelePair fp = fg.pair(gene);
