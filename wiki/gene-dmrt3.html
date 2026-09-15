@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMRT3 &mdash; gait &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> no coat effect</p>
+
+<h1>DMRT3 &mdash; gait</h1>
+
+<p class="lede">
+    The &ldquo;gait keeper&rdquo;: the gene that lets a horse amble and pace. The locus, its inheritance and every breed&rsquo;s
+    share are in; the gait itself is not animated yet, so for now it is a fact about a horse&rsquo;s breeding rather than
+    something you can ride.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="note warn">
+    <span class="label">It changes nothing about movement yet</span>
+    <p>
+        A gaited horse walks, trots and canters like any other until gait animation is built. What it does now is show
+        on the information screen and pass on properly, so a gaited line bred today is gaited when the gaits arrive.
+    </p>
+</div>
+
+<h2 id="what">What it does</h2>
+
+<table>
+<thead><tr><th>Combination</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td>two gait copies</td><td><strong>Gaited</strong> &mdash; can amble and pace, the smoothest four-beat gaits</td></tr>
+<tr><td>one gait copy</td><td>a better running walk than most, but does not pace, and keeps a good trot and canter</td></tr>
+<tr><td>none</td><td>walk, trot and canter: the ordinary horse</td></tr>
+</tbody>
+</table>
+
+<h2 id="breeds">Who carries it</h2>
+<p>
+    Every Paso Fino (both breeds) and Standardbred is gaited, the Tennessee Walking Horse nearly always, and most
+    Icelandic horses. A few Morgans carry it, a very few Quarter Horses and Arabians, and Thoroughbreds and
+    Przewalski&rsquo;s horses never do. A Feral Mixed horse carries a copy now and then.
+</p>
+
+<h2 id="health">Health</h2>
+<p>None.</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.dmrt3</code></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">A</span> <span class="allele wild">C</span></dd></div>
+    <div><dt>Class</dt><dd><code>Dmrt3Gene</code>, priority 68</dd></div>
+    <div><dt>Contributes</dt><dd>nothing: every outcome is a wild type and there is no trait, by the owner&rsquo;s call</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>WILD_A_FREQUENCY</code>, Hardy-Weinberg</dd></div>
+</dl>
+
+<h2 id="breed-pools">The breed pools</h2>
+<p>
+    Each is its measured allele frequency at Hardy-Weinberg shares, with any pair under 0.01% of founders left out. A
+    breed with no pool rolls the wild frequency, since the locus is a performance locus and <code>BreedFounder</code>
+    keeps those from the base roll.
+</p>
+<table>
+<thead><tr><th>Breed</th><th><code>A</code> frequency</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Paso Fino</td><td>1.00</td><td>45 horses (Promerov&aacute; 2014)</td></tr>
+<tr><td>Puerto Rican Paso Fino</td><td>1.00</td><td>no study found; taken from the Paso Fino</td></tr>
+<tr><td>Standardbred</td><td>1.00</td><td>US trotters and pacers alike</td></tr>
+<tr><td>Tennessee Walking Horse</td><td>0.98</td><td>0.98, and 0.996 in a later sample</td></tr>
+<tr><td>Icelandic Horse</td><td>0.89</td><td>a random sample; the 2012 population estimate is 0.94</td></tr>
+<tr><td>Morgan</td><td>0.144</td><td>abstract only</td></tr>
+<tr><td>Quarter Horse</td><td>0.025</td><td>2 heterozygotes in 40</td></tr>
+<tr><td>Arabian</td><td>0.009</td><td>1 heterozygote in 53</td></tr>
+<tr><td>Thoroughbred, Przewalski&rsquo;s horse</td><td>0</td><td>no carrier found</td></tr>
+</tbody>
+</table>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="variant">A stop codon in the spinal cord</h2>
+<p>
+    <em>DMRT3</em> is expressed in a set of spinal-cord neurons that coordinate the left and right limbs. The gait
+    variant is a nonsense mutation, Ser301STOP, found by
+    <a href="https://www.nature.com/articles/nature11399">Andersson et al. (2012)</a> in Icelandic horses. It is
+    <strong>permissive</strong> rather than simply dominant or recessive: it makes lateral gaits possible, and other
+    genes and training decide which one a horse uses.
+</p>
+<ul>
+    <li><strong>Pace</strong> needs two copies. Almost every five-gaited Icelandic is <code>A/A</code>, but only about
+        70% of <code>A/A</code> Icelandics actually pace.</li>
+    <li><strong>One copy</strong> improves the t&ouml;lt and still scores well at walk, trot, canter and gallop.</li>
+    <li><strong>Two copies</strong> give the best t&ouml;lt and pace and a poorer trot and canter.</li>
+    <li>In <strong>Standardbreds</strong>, trotters and pacers are both <code>A/A</code>, so other loci decide trot versus
+        pace, and <code>A/A</code> horses race better than <code>C/A</code> ones.</li>
+</ul>
+<p>
+    The mutation arose within the last ten thousand years. The earliest ancient DNA carrying it is from England
+    around 850&ndash;900 AD, and it reached Iceland soon after. Breeds selected for smooth riding gaits have fixed it;
+    breeds selected for the gallop have not.
+</p>
+<p>
+    What the mod does not model yet: which lateral gait a gaited horse prefers, which is the modifier loci plus
+    training, and the gait itself. Both wait for movement and animation work.
+</p>
+
+</section>
+
+</article>
+</main>
+</body>
+</html>

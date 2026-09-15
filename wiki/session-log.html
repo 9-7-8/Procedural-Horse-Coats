@@ -132,7 +132,22 @@
         variant. Both goldens were regenerated: the bake golden gained six lines, and no pipeline hash moved.
         <code>CommonPortabilityTest</code> (a <code>Map.of()</code> in <code>Breeds.java</code> since 09-11) and
         <code>GenotypeTest.randomDrawsOneFloatPerGeneInGeneOrder</code> (fertility's table ends on <code>tw/tw</code> since
-        09-14) were already failing, and still are. None of these is in
+        09-14) were already failing, and still are.</li>
+    <li><strong>The rest of the natural genes</strong> (owner's scope: not <code>A+</code>/<code>At</code>, which were dropped from
+        the roadmap as unscientific, and not the polygenic markings system). Two research agents read the literature.
+        <ul>
+            <li><code>KIT</code> now carries every published <code>W</code> allele, <code>W1</code> to <code>W39</code>
+                (there is no <code>W29</code> or <code>W36</code>). Each takes the outcome of the anchor it matches in
+                extent and homozygote viability, so there is no new painter. Only <code>W19</code>, <code>W31</code> and
+                <code>W3</code> have wild frequencies; the others sit on the breeds they were found in.</li>
+            <li><code>SW9</code> (<code>MITF</code>) and <code>SW10</code> (<code>PAX3</code>) are on the Andalusian.</li>
+            <li><a href="gene-dmrt3.html">DMRT3</a> is a gene with measured breed frequencies and no movement yet.</li>
+        </ul>
+        The owner asked what hashing the coat texture id means: <code>Identifier</code> has no length limit, and coat ids
+        already run to 773 characters and render, so the roadmap's "hash it first" blocker was wrong and is corrected.
+        The goldens gained lines and no hash moved. <code>GenotypeCatalogTest</code>'s gallery representatives now name
+        the last-declared allele of each group. Found in passing, and not acted on: the 2024 literature reads one
+        <code>W22</code> copy as sabino-like rather than all white. None of these is in
         the running build, and the designer's wasm waits for the client to close, because the bake rebuilds
         <code>common.jar</code>.</li>
     <li><strong>The two intake files became science tabs:</strong> fertility's real-horse biology and the timing design

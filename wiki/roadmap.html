@@ -720,9 +720,7 @@
 <table>
 <thead><tr><th>Gene</th><th>What it is</th><th>What it needs</th></tr></thead>
 <tbody>
-<tr><td><strong>Wild bay</strong> (and <code>At</code> as a real allele)</td><td>An agouti variant pushing the black points <em>down</em> &mdash; black only to the fetlock rather than the hock, with a <em>gap</em> between the knee/hock point and any fetlock point, and a more yellow body.</td><td>Cleanest as a third agouti allele (<code>A+</code>, dominant to <code>A</code>). <strong>And if <code>A+</code> becomes an allele, <code>At</code> (seal) should too</strong> &mdash; then agouti is the reference&rsquo;s four-allele <code>A+ &gt; A &gt; At &gt; a</code>, and seal stops being an epigenetic edge case (next row).</td></tr>
 <tr><td><strong>Natural (polygenic) face and leg white</strong></td><td>The reference is explicit that a horse with <em>no</em> paint gene can still carry a star, stripe, snip, blaze, coronet, sock or stocking. The mod only draws face and leg white as part of a <code>KIT</code> / <code>MITF</code> / <code>PAX3</code> / <code>EDNRB</code> outcome, so a bay with no white gene is always cleanly solid.</td><td>A small <strong>always-on</strong> marking draw &mdash; a handful of epigenetic values, no allele &mdash; feeding the shared <code>WhitePattern.faceMarking</code> and leg vocabulary at low strength. The vocabulary already exists; this is a caller, not a painter.</td></tr>
-<tr><td><strong>DMRT3</strong> &mdash; gait</td><td>Dominant. Ambling / running-walk / pace.</td><td>The gene is trivial; the value is the <strong>animation</strong>, which is renderer and movement work. That is why it is last in this group. Wanted by both Paso Finos, Tennessee Walking, Standardbred, Icelandic and Hackney.</td></tr>
 </tbody>
 </table>
 </div>
@@ -734,8 +732,6 @@
 <thead><tr><th>Locus</th><th>Missing</th><th>Notes</th></tr></thead>
 <tbody>
 <tr><td><strong>Extension (MC1R)</strong></td><td><code>ea</code></td><td>Purely additive now that multi-allele support exists. <code>ea</code> is phenotypically red like <code>e</code>, so all the interest is in the code string and the carrier display.</td></tr>
-<tr><td><a href="gene-kit.html"><strong>KIT</strong></a> &mdash; the rest of the <code>W</code> series</td><td><code>W1</code>&ndash;<code>W3</code>, <code>W6</code>&ndash;<code>W9</code>, <code>W11</code>, <code>W12</code>, <code>W14</code>, <code>W16</code>&ndash;<code>W19</code>, <code>W21</code>, <code>W24</code>&ndash;<code>W28</code>, <code>W30</code>, <code>W31</code>, <code>W33</code></td><td>Twelve of thirty-plus are modelled &mdash; <code>W15</code>, <code>W32</code>, <code>W34</code> and <code>W35</code> landed with the <a href="gene-kit.html#boosters">booster group</a>, which was the important part of the remainder: <code>W32</code>/<code>W34</code>/<code>W35</code> are <em>common</em>, not rare, and the locus had none of them. What is left is genuinely the long tail &mdash; one founder or one family each, frequencies that round to zero. <strong>The owner wants the full set mapped eventually</strong>, redundant alleles included, as a completeness goal &mdash; so this is a &ldquo;do it&rdquo; item, not a &ldquo;not worth it&rdquo; one. Each is a line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency; ones whose published phenotype is indistinguishable from a modelled allele should <em>collapse onto that allele&rsquo;s outcome</em> (the <code>SW6</code>&ndash;<code>SW8</code> precedent) rather than getting their own row. <strong>Watch the combinatorial cost</strong>: each allele adds <em>n</em> combinations to a locus already at thirty-six, so do the hash-keyed texture id (&sect;<a href="#scale">21</a>) first.</td></tr>
-<tr><td><strong>The splash series</strong></td><td><code>SW9</code>, <code>SW10</code>; possibly splitting <code>SW6</code>&ndash;<code>SW8</code></td><td><code>SW6</code>&ndash;<code>SW8</code> are folded into <a href="gene-mitf.html"><code>SW5</code></a> <em>on purpose</em> &mdash; the source describes all four in word-for-word identical terms, so four alleles would be four indistinguishable rows. Split them when they become distinguishable. <code>SW9</code> / <code>SW10</code> need a locus check first: which of <code>MITF</code> / <code>PAX3</code> they belong to is not settled in the reference used.</td></tr>
 </tbody>
 </table>
 </div>
@@ -799,8 +795,9 @@
     amber champagne&rdquo; or &ldquo;this horse is seal&rdquo; for the info panel, the
     paper dump and the gene dictionary &mdash; and champagne needs to read &ldquo;is this
     horse seal&rdquo; off the agouti epigenetics to paint sable rather than amber. One
-    base-aware phenotype resolver serves all of it. Making <code>At</code> a real allele
-    (&sect;10.1) removes the seal half of the problem outright.
+    base-aware phenotype resolver serves all of it. Seal stays where it is, as the top of agouti&rsquo;s shade
+    band: <code>A+</code> and <code>At</code> as real alleles were dropped (owner, 2026-09-15) because the published
+    evidence for them does not hold up, and the mod already manages seal and liver its own way.
 </p>
 
 <div class="note">
@@ -1589,15 +1586,15 @@
         indexes the catalogue, so both were free. <strong>A derived number written out by
         hand is a liability, and one whose computation can silently wrap is worse
         &mdash; re-deriving it reproduces the lie.</strong></li>
-    <li><strong><code>CoatTextureId</code> and path length.</strong> The encoding
-        <em>expands</em> (<code>A-Z</code> &rarr; 2 chars, anything else &rarr; 5), so a
-        300-character genotype code becomes a &gt;1,000-character path, which
-        <code>Identifier</code> will not accept. The fix is to key the texture on a
-        <strong>hash</strong> plus a short prefix. Keep the <code>KEY_BY_ID</code>
-        tripwire &mdash; it caught the original flat-white-horse bug &mdash; but it
-        becomes load-bearing rather than paranoid, so give it a real collision-resolution
-        path (append a counter) instead of throwing. <strong>Do this before the
-        <code>W</code>-series expansion</strong> (&sect;<a href="#natural-genes">10.2</a>).</li>
+    <li><strong><code>CoatTextureId</code> and path length &mdash; not a limit.</strong> This entry used to say a long
+        encoded key would be refused by <code>Identifier</code> and must be hashed before the <code>W</code>-series
+        expansion. Both halves were wrong (checked 2026-09-15): 26.1.2&rsquo;s <code>Identifier.isValidPath</code> checks
+        characters and nothing else, and random founders already carry coat keys up to 463 characters, encoded to 773,
+        which render. A new allele adds nothing to any horse&rsquo;s key, since a key is one segment per locus. The one
+        thing a long id does cost is F3&rsquo;s texture dump, which names each file after its id and will fail, logged,
+        on a coat whose name passes the 255-character file name limit. Hashing the coat id (as the glow masks already
+        are) would fix only that, and would give up the readable id in exchange. Not worth doing unless someone needs
+        the dump.</li>
     <li><strong>The genotype code string.</strong> Already 50 segments; the backlog above
         with tokens like <code>SW10</code> / <code>W36</code> puts a code in the low
         hundreds of characters. Everything carrying it grows in step &mdash; the record,

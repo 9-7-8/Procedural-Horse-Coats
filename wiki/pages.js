@@ -146,6 +146,7 @@ window.HG.pages = {
         {
             title: "Natural health genes",
             items: [
+                { href: "gene-dmrt3.html", text: "DMRT3", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-mstn.html", text: "MSTN (myostatin)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-pdk4.html", text: "PDK4", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-ckm.html", text: "CKM", kind: "natural", views: ["gameplay","coding","science"] },

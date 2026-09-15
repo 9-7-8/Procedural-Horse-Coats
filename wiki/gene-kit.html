@@ -162,12 +162,13 @@
         <span class="allele dom">W15</span> <span class="allele dom">SB1</span>
         <span class="allele dom">W20</span> <span class="allele dom">W35</span>
         <span class="allele dom">W32</span> <span class="allele dom">W34</span>
+        <span class="allele dom">W2</span> <span class="allele dom">W9</span> <span class="allele dom">W11</span> <span class="allele dom">W14</span> <span class="allele dom">W17</span> <span class="allele dom">W24</span> <span class="allele dom">W1</span> <span class="allele dom">W3</span> <span class="allele dom">W7</span> <span class="allele dom">W16</span> <span class="allele dom">W25</span> <span class="allele dom">W27</span> <span class="allele dom">W30</span> <span class="allele dom">W39</span> <span class="allele dom">W6</span> <span class="allele dom">W8</span> <span class="allele dom">W12</span> <span class="allele dom">W18</span> <span class="allele dom">W21</span> <span class="allele dom">W26</span> <span class="allele dom">W28</span> <span class="allele dom">W31</span> <span class="allele dom">W33</span> <span class="allele dom">W37</span> <span class="allele dom">W38</span> <span class="allele dom">W19</span>
         <span class="allele wild">N</span>
     </dd></div>
     <div><dt>Combinations</dt><dd>every pair of its alleles, minus <code>KitGene.nonviableHomozygotes()</code>; one outcome each &mdash; <code>WhitePatternGenesTest</code> asserts the relationship rather than the counts</dd></div>
     <div><dt>Outcomes</dt><dd>wild, <code>minimal-white</code>, <code>modest-white</code>, <code>sabino</code>, <code>broad-white</code>, <code>extensive-white</code>, <code>near-white</code>, <code>dominant-white</code> (masks), <code>camarillo-white</code> (masks)</dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
-    <div><dt>Wild frequency</dt><dd>the boosters first &mdash; <code>W35</code> 9%, <code>W20</code> 8.5%, <code>W32</code> 3.5%, <code>W34</code> 1% &mdash; then <code>SB1</code> 2.2%, and every strong <code>W</code> at or below 0.5%. See <code>KitGene.frequencies()</code>; Hardy-Weinberg over the lot, with the nonviable homozygotes dropped and the rest rescaled</dd></div>
+    <div><dt>Wild frequency</dt><dd>the boosters first &mdash; <code>W35</code> 9%, <code>W20</code> 8.5%, <code>W32</code> 3.5%, <code>W34</code> 1% &mdash; then <code>SB1</code> 2.2%, and every strong <code>W</code> at or below 0.5%. Of the long tail only <code>W19</code>, <code>W31</code> and <code>W3</code> have a wild frequency; the rest come from their breeds. See <code>KitGene.frequencies()</code>; Hardy-Weinberg over the lot, with the nonviable homozygotes dropped and the rest rescaled</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong>, except the wild type and dominant white</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, 4 &times; nextFloat() leg heights, nextFloat() belly, nextFloat() face</dd></div>
@@ -177,9 +178,9 @@
 <h2>The alleles</h2>
 
 <p>
-    Twelve of the thirty-plus named ones (<code>W1</code>&ndash;<code>W35</code>, with
-    gaps &mdash; there is no <code>W29</code>), chosen to span the real range rather than
-    to reproduce a testing panel. <strong>The <code>W</code> number is a discovery order,
+    <strong>Every published one</strong>, <code>W1</code> to <code>W39</code> &mdash; <code>W29</code> and <code>W36</code>
+    were never assigned. The table lists the alleles that set an outcome; the long tail takes the outcome of the one it
+    matches in both extent and homozygote viability, and is listed under it. <strong>The <code>W</code> number is a discovery order,
     not a severity ranking</strong> &mdash; <code>W20</code> is far milder than
     <code>W5</code>, and nothing about an allele can be inferred from its number.
 </p>
@@ -201,6 +202,10 @@
 <tr><td><code>W23</code></td><td>near-white to all white</td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W4</code></td><td>Camarillo white &mdash; all white from birth, pink skin, <strong>masks</strong></td><td>viability unknown &mdash; <strong>allowed</strong></td></tr>
 <tr><td><code>W22</code></td><td>dominant white &mdash; all white, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W2</code>, <code>W9</code>, <code>W11</code>, <code>W14</code>, <code>W17</code>, <code>W24</code></td><td>as <code>W22</code>: all white, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W1</code>, <code>W3</code>, <code>W7</code>, <code>W16</code>, <code>W25</code>, <code>W27</code>, <code>W30</code>, <code>W39</code></td><td>as <code>W13</code>/<code>W23</code>: near-white with some colour left</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W6</code>, <code>W8</code>, <code>W12</code>, <code>W18</code>, <code>W21</code>, <code>W26</code>, <code>W28</code>, <code>W31</code>, <code>W33</code>, <code>W37</code>, <code>W38</code></td><td>as <code>W5</code>/<code>W10</code>: sabino-like, broad (<code>W8</code>, <code>W18</code> and <code>W21</code> really speckle, which is not painted)</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W19</code></td><td>as <code>W15</code>: sabino-like, bald face, white past the knees</td><td><strong>viable</strong> &mdash; a homozygote is on record</td></tr>
 </tbody>
 </table>
 </div>
@@ -435,7 +440,7 @@ private static final double S_NEAR_WHITE = 0.93;</code></pre>
 <table>
 <thead><tr><th>Pattern</th><th>What it actually is</th><th>Where it lives here</th></tr></thead>
 <tbody>
-<tr><td>Sabino&nbsp;1, <code>W1</code>&ndash;<code>W35</code></td><td><code>KIT</code> variants</td><td><strong>this gene</strong></td></tr>
+<tr><td>Sabino&nbsp;1, <code>W1</code>&ndash;<code>W39</code></td><td><code>KIT</code> variants</td><td><strong>this gene</strong></td></tr>
 <tr><td>Tobiano</td><td>a large inversion <em>near / downstream of</em> <code>KIT</code></td><td><a href="gene-tobiano.html">its own gene</a></td></tr>
 <tr><td>Roan</td><td>maps to the region; causal change unresolved, breed-dependent</td><td><a href="gene-roan.html">its own gene</a></td></tr>
 <tr><td>Splash white</td><td><code>MITF</code> and <code>PAX3</code> &mdash; different chromosomes entirely</td><td><a href="gene-mitf.html">two</a> <a href="gene-pax3.html">genes</a></td></tr>
