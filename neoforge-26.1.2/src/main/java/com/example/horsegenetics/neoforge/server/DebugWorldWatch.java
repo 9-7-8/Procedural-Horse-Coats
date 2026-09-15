@@ -877,6 +877,21 @@ public final class DebugWorldWatch {
                 + String.format("%.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
     }
 
+    /**
+     * <b>Every blow a horse lands</b>, with the game tick, so a fighter gene's cadence is the gap between two
+     * lines (the yard's KICK pens: Gladiator against a plain horse, both among zombies).
+     */
+    @SubscribeEvent
+    static void onHorseHits(LivingDamageEvent.Post event) {
+        if (!watching(event.getEntity().level()) || !(event.getSource().getEntity() instanceof Horse horse)) {
+            return;
+        }
+        LivingEntity victim = event.getEntity();
+        note("kick", ActionTrace.describeShort(horse) + " hit " + ActionTrace.describeShort(victim) + " for "
+                + String.format("%.1f", event.getHealthDamage()) + " at tick " + horse.level().getGameTime()
+                + " - it has " + String.format("%.1f/%.1f", victim.getHealth(), victim.getMaxHealth()) + " left");
+    }
+
     @SubscribeEvent
     static void onHorseHeal(LivingHealEvent event) {
         if (!watching(event.getEntity().level()) || !(event.getEntity() instanceof Horse horse)) {

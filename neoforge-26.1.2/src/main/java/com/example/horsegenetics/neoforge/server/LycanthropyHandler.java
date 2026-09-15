@@ -9,6 +9,7 @@ import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.data.LycanShift;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -229,6 +230,40 @@ public final class LycanthropyHandler {
         horse.discard();
         level.addFreshEntity(animal);
         puff(level, animal);
+        if (ServerConfig.debugTools()) {
+            String print = roundTripPrint(horse);
+            DUSK_PRINTS.put(horse.getUUID(), print);
+            ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " shifted into a " + form.mob() + " at dusk | "
+                    + print + String.format(", hp %.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
+        }
+    }
+
+    /** Debug only: each shifted horse's {@link #roundTripPrint} at dusk, for the dawn and death lines to compare. */
+    private static final java.util.Map<java.util.UUID, String> DUSK_PRINTS = new java.util.HashMap<>();
+
+    /**
+     * What must come through a night as an animal unchanged - identity, record, genome, epigenome, bond,
+     * age class, armour - and deliberately not health, which the night is allowed to take.
+     */
+    private static String roundTripPrint(Horse horse) {
+        HorseRecord r = HorseRecords.of(horse);
+        return "uuid " + horse.getUUID() + ", " + r.displayName() + ", gen " + r.generation()
+                + ", dam " + r.motherId().map(u -> u.toString().substring(0, 8)).orElse("-")
+                + ", sire " + r.fatherId().map(u -> u.toString().substring(0, 8)).orElse("-")
+                + ", record #" + Integer.toHexString(r.hashCode())
+                + ", genome #" + Integer.toHexString(r.geneticCode().hashCode())
+                + ", epigenome #" + Integer.toHexString(r.epigenomeCode().hashCode())
+                + ", bond " + horse.getData(ModAttachments.HORSE_CARE.get()).bond()
+                + ", baby " + horse.isBaby() + ", tamed " + horse.isTamed()
+                + ", armour " + horse.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.BODY).getItem();
+    }
+
+    /** " | round trip SAME", or what it was at dusk when it is not. */
+    private static String roundTrip(Horse horse) {
+        String dusk = DUSK_PRINTS.remove(horse.getUUID());
+        String now = roundTripPrint(horse);
+        return dusk == null ? " | round trip: no dusk print (loaded since)"
+                : dusk.equals(now) ? " | round trip SAME" : " | round trip CHANGED - at dusk it was: " + dusk;
     }
 
     // ------------------------------------------------------------------
@@ -262,6 +297,11 @@ public final class LycanthropyHandler {
         animal.discard();
         level.addFreshEntity(horse);
         puff(level, horse);
+        if (ServerConfig.debugTools()) {
+            ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " back from a " + shift.mob() + " at dawn | "
+                    + roundTripPrint(horse) + String.format(", hp %.1f/%.1f", horse.getHealth(), horse.getMaxHealth())
+                    + roundTrip(horse));
+        }
     }
 
     /**
@@ -382,7 +422,8 @@ public final class LycanthropyHandler {
         animal.setData(ModAttachments.LYCAN_SHIFT.get(), LycanShift.NONE);
         level.addFreshEntity(horse);
         ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " died as a " + shift.mob()
-                + " (" + event.getSource().getMsgId() + ") - the horse dies with it");
+                + " (" + event.getSource().getMsgId() + ") - the horse dies with it"
+                + (ServerConfig.debugTools() ? roundTrip(horse) : ""));
         horse.hurtServer(level, event.getSource(), Float.MAX_VALUE);
         if (horse.isAlive()) {
             horse.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);

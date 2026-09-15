@@ -2,16 +2,23 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +31,10 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Y;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Y_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Z;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Z_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AA;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AA_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
@@ -57,10 +68,18 @@ final class DebugYardUnattended {
             reachFence(level, gy, west + 9, mouthZ + ROW_Y);
             stats(level, gy, east, mouthZ + ROW_Y);
             lethalFoals(level, gy, east + 9, mouthZ + ROW_Y);
-            ActionTrace.log("test yard", "unattended pens built (rows X-Y: night shy, bone meal, gelding band,"
-                    + " reach, stats, lethal foals)");
+            lycanRoundTrip(level, gy, west, mouthZ + ROW_Z);
+            lycanDoomed(level, gy, west + 9, mouthZ + ROW_Z);
+            wereCow(level, gy, east, mouthZ + ROW_Z);
+            kick(level, gy, west, mouthZ + ROW_AA, "KICK GLADIATOR", "horsegenetics.gladiator=Gld/Gld");
+            kick(level, gy, west + 9, mouthZ + ROW_AA, "KICK PLAIN", PLAIN);
+            waterborn(level, gy, east, mouthZ + ROW_AA);
+            suntouched(level, gy, east + 10, mouthZ + ROW_AA);
+            ActionTrace.log("test yard", "unattended pens built (rows X-AA: night shy, bone meal, gelding band,"
+                    + " reach, stats, lethal foals, lycan round trip, lycan doomed, were-cow, kick, waterborn,"
+                    + " suntouched)");
         } catch (RuntimeException e) {
-            HorseGenetics.LOGGER.warn("[Debug] test yard: rows X-Y failed to build", e);
+            HorseGenetics.LOGGER.warn("[Debug] test yard: rows X-AA failed to build", e);
         }
     }
 
@@ -255,6 +274,210 @@ final class DebugYardUnattended {
             });
             wave(level, gy, x0, z0, adult, n + 1);
         });
+    }
+
+    // ------------------------------------------------------------------
+    // Row Z
+    // ------------------------------------------------------------------
+
+    private static final String WOLF = "horsegenetics.lycan=Wlf/Wlf";
+
+    /** A night as a wolf gives back the same horse: record, genome, epigenome, bond, age class. */
+    private static void lycanRoundTrip(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 9, ROW_Z_D, "LYCAN ROUND TRIP", Blocks.GRASS_BLOCK.defaultBlockState(),
+                List.of("LYCAN ROUND TRIP", "two wolf lycans and", "a foal: the same", "horses at dawn"));
+        water(level, gy, x0 + 1, z0 + 1);
+        bond(horse(level, gy, x0 + 2.5, z0 + 4.5, Sex.MALE, WOLF, true, "LYCAN WOLF STALLION"), 70);
+        bond(horse(level, gy, x0 + 6.5, z0 + 4.5, Sex.FEMALE, WOLF, true, "LYCAN WOLF MARE"), 35);
+        Horse foal = horse(level, gy, x0 + 4.5, z0 + 7.5, Sex.FEMALE, WOLF, true, "LYCAN WOLF FOAL");
+        if (foal != null) {
+            foal.setAge(-72_000);    // still a foal through the first night, so the dawn line tests baby=true
+        }
+        bond(foal, 90);
+        ActionTrace.log("test yard", "LYCAN ROUND TRIP: expect, per horse, '[trace] lycan | ... shifted into a"
+                + " minecraft:wolf at dusk' and then '... back from a minecraft:wolf at dawn | ... | round trip SAME';"
+                + " CHANGED on any of them is a FAIL");
+    }
+
+    /** A lycan killed in animal form dies as the horse: a death line, its armour on the ground, nothing left alive. */
+    private static void lycanDoomed(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 8, ROW_Z_D, "LYCAN DOOMED", Blocks.GRASS_BLOCK.defaultBlockState(),
+                List.of("LYCAN DOOMED", "an armoured wolf", "lycan, killed at", "night: it drops"));
+        Horse h = horse(level, gy, x0 + 4.5, z0 + 5.5, Sex.MALE, WOLF, true, "LYCAN DOOMED");
+        if (h != null) {
+            h.setItemSlot(EquipmentSlot.BODY, new ItemStack(Items.IRON_HORSE_ARMOR));
+        }
+        killWhenShifted(level, DebugTestYard.box(x0, gy, z0, x0 + 8, gy + 3, z0 + ROW_Z_D));
+    }
+
+    private static void killWhenShifted(ServerLevel level, AABB box) {
+        DebugYardHerd.after(level, 100, () -> {
+            List<Mob> shifted = shiftedIn(level, box);
+            if (shifted.isEmpty()) {
+                killWhenShifted(level, box);
+                return;
+            }
+            Mob animal = shifted.get(0);
+            ActionTrace.log("test yard", "LYCAN DOOMED: killing the " + animal.getType().getDescriptionId()
+                    + " it became");
+            animal.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+            DebugYardHerd.after(level, 40, () -> {
+                int armour = level.getEntitiesOfClass(ItemEntity.class, box.inflate(1.0, 3.0, 1.0),
+                        i -> i.getItem().is(Items.IRON_HORSE_ARMOR)).size();
+                int horses = level.getEntitiesOfClass(Horse.class, box.inflate(0.0, 2.0, 0.0), Horse::isAlive).size();
+                int animals = level.getEntitiesOfClass(Mob.class, box.inflate(0.0, 2.0, 0.0),
+                        m -> !(m instanceof Horse) && m.isAlive()).size();
+                boolean pass = armour > 0 && horses == 0 && animals == 0;
+                ActionTrace.log("test yard", "LYCAN DOOMED at 2 s: iron armour on the ground " + armour
+                        + ", live horses " + horses + ", live animals " + animals + " - " + (pass ? "PASS" : "FAIL")
+                        + "; also expect '[trace] lycan | ... died as a minecraft:wolf ... round trip SAME' and a"
+                        + " '[trace] horse died' line for LYCAN DOOMED");
+            });
+        });
+    }
+
+    /** What a were-cow does with real cows at night: bred, is the calf a plain cow, and does the horse still come back. */
+    private static void wereCow(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 17, ROW_Z_D, "WERE-COW", Blocks.GRASS_BLOCK.defaultBlockState(),
+                List.of("WERE-COW", "a cow lycan among", "three cows, put in", "love at night"));
+        water(level, gy, x0 + 1, z0 + 1);
+        horse(level, gy, x0 + 4.5, z0 + 5.5, Sex.FEMALE, "horsegenetics.lycan=Cow/Cow", true, "WERE-COW");
+        for (int i = 0; i < 3; i++) {
+            animal(level, EntityType.COW, gy, x0 + 9.5 + i * 2, z0 + 5.5);
+        }
+        breedWhenShifted(level, DebugTestYard.box(x0, gy, z0, x0 + 17, gy + 3, z0 + ROW_Z_D));
+    }
+
+    private static void breedWhenShifted(ServerLevel level, AABB box) {
+        DebugYardHerd.after(level, 100, () -> {
+            List<Mob> shifted = shiftedIn(level, box);
+            if (shifted.isEmpty() || !(shifted.get(0) instanceof Animal were)) {
+                breedWhenShifted(level, box);
+                return;
+            }
+            List<Animal> cows = level.getEntitiesOfClass(Animal.class, box.inflate(0.0, 2.0, 0.0),
+                    a -> a != were && !(a instanceof Horse) && a.isAlive() && !a.isBaby());
+            if (cows.isEmpty()) {
+                ActionTrace.log("test yard", "WERE-COW: no adult cow left to pair with - nothing to test");
+                return;
+            }
+            were.setInLove(null);
+            cows.get(0).setInLove(null);
+            ActionTrace.log("test yard", "WERE-COW: the were-cow and a cow put in love at night");
+            DebugYardHerd.after(level, 1_200, () -> {
+                List<Animal> calves = level.getEntitiesOfClass(Animal.class, box.inflate(0.0, 2.0, 0.0),
+                        a -> !(a instanceof Horse) && a.isAlive() && a.isBaby());
+                long shiftedCalves = calves.stream()
+                        .filter(c -> c.getData(ModAttachments.LYCAN_SHIFT.get()).active()).count();
+                ActionTrace.log("test yard", "WERE-COW at 60 s: calves " + calves.size() + " (" + shiftedCalves
+                        + " carrying a horse - must be 0), were-cow still a cow: " + were.isAlive()
+                        + "; at dawn expect '[trace] lycan | ... back from a minecraft:cow ... round trip SAME'");
+            });
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Row AA
+    // ------------------------------------------------------------------
+
+    /**
+     * Gap 222: horses swing every 10 ticks, so a gladiator lands about two blows to a husk's one. Husks, because
+     * they do not burn in the yard's daylight. The plain horse is the control: husks ignore horses, so it should
+     * have no {@code [watch] kick} lines at all. Husks are topped back up to two every half day.
+     */
+    private static void kick(ServerLevel level, int gy, int x0, int z0, String name, String code) {
+        pen(level, gy, x0, z0, 9, ROW_AA_D, name, Blocks.STONE.defaultBlockState(),
+                List.of(name, code.equals(PLAIN) ? "a plain horse and" : "a gladiator and",
+                        "two husks: blows", "every 10 ticks"));
+        horse(level, gy, x0 + 4.5, z0 + 3.5, Sex.MALE, code, true, name);
+        AABB box = DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_AA_D);
+        husks(level, gy, x0, z0, box, name, 1);
+        ActionTrace.log("test yard", name + ": expect '[watch] kick | ... \"" + name + "\" hit ... husk' lines "
+                + (code.equals(PLAIN) ? "NEVER - any is a FAIL" : "about 10 ticks apart, and 'horse hurt' from the"
+                + " husks about 20 apart (gap 222)"));
+    }
+
+    private static void husks(ServerLevel level, int gy, int x0, int z0, AABB box, String name, int wave) {
+        int alive = level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,
+                box.inflate(0.0, 2.0, 0.0), Mob::isAlive).size();
+        for (int i = alive; i < 2; i++) {
+            animal(level, EntityType.HUSK, gy, x0 + 2.5 + i * 4, z0 + 9.5);
+        }
+        if (alive < 2) {
+            ActionTrace.log("test yard", name + " husk wave " + wave + ": " + (2 - alive) + " husk(s) in");
+        }
+        DebugYardHerd.after(level, 12_000, () -> husks(level, gy, x0, z0, box, name, wave + 1));
+    }
+
+    /** Waterborn rides at the surface of deep water when grown, and a foal does not (the {@code when: adult} gate). */
+    private static void waterborn(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 10, ROW_AA_D, "WATERBORN", Blocks.STONE.defaultBlockState(),
+                List.of("WATERBORN", "adult and foal in a", "4-deep pool: the", "adult rides on top"));
+        // A pool four deep, walled in stone below the floor so it cannot drain into the fill.
+        for (int x = x0 + 1; x <= x0 + 8; x++) {
+            for (int z = z0 + 2; z <= z0 + 10; z++) {
+                boolean rim = x == x0 + 1 || x == x0 + 8 || z == z0 + 2 || z == z0 + 10;
+                for (int y = gy - 4; y <= gy; y++) {
+                    level.setBlock(new BlockPos(x, y, z), rim || y == gy - 4
+                            ? Blocks.STONE.defaultBlockState() : Blocks.WATER.defaultBlockState(), 3);
+                }
+            }
+        }
+        Horse adult = horse(level, gy, x0 + 3.5, z0 + 5.5, Sex.FEMALE, "horsegenetics.waterborn=Wtb/Wtb", true,
+                "WATERBORN ADULT");
+        Horse foal = horse(level, gy, x0 + 6.5, z0 + 5.5, Sex.FEMALE, "horsegenetics.waterborn=Wtb/Wtb", true,
+                "WATERBORN FOAL");
+        if (foal != null) {
+            foal.setAge(-72_000);
+        }
+        Horse control = horse(level, gy, x0 + 4.5, z0 + 8.5, Sex.FEMALE, PLAIN, true, "WATERBORN CONTROL");
+        bob(level, gy, new Horse[]{adult, foal, control}, 1);
+    }
+
+    private static void bob(ServerLevel level, int gy, Horse[] horses, int n) {
+        DebugYardHerd.after(level, n <= 6 ? 200 : 6_000, () -> {
+            StringBuilder sb = new StringBuilder();
+            for (Horse h : horses) {
+                if (h == null || !h.isAlive()) {
+                    continue;
+                }
+                sb.append(sb.length() == 0 ? "" : "; ").append(h.getCustomName() == null ? "?" : h.getCustomName().getString())
+                        .append(String.format(" y %+.2f", h.getY() - (gy + 1)))
+                        .append(h.isInWater() ? ", in water" : ", dry")
+                        .append(h.isUnderWater() ? ", HEAD UNDER" : "")
+                        .append(String.format(", air %d/%d", h.getAirSupply(), h.getMaxAirSupply()));
+            }
+            ActionTrace.log("test yard", "WATERBORN reading " + n + " (y against the pen floor; the water's top is"
+                    + " y -0.1): " + sb + " - expect the adult at or above -0.1 with its head out, the foal and the"
+                    + " control lower");
+            bob(level, gy, horses, n + 1);
+        });
+    }
+
+    /** Suntouched's light verb is skipped in the horse dimension on purpose: no light block should ever appear here. */
+    private static void suntouched(ServerLevel level, int gy, int x0, int z0) {
+        pen(level, gy, x0, z0, 8, ROW_AA_D, "SUNTOUCHED", Blocks.GRASS_BLOCK.defaultBlockState(),
+                List.of("SUNTOUCHED", "adult and foal: no", "light blocks, ever,", "in this dimension"),
+                Blocks.LIGHT);
+        horse(level, gy, x0 + 2.5, z0 + 4.5, Sex.MALE, "horsegenetics.suntouched=Sntch/Sntch", true, "SUNTOUCHED ADULT");
+        Horse foal = horse(level, gy, x0 + 5.5, z0 + 7.5, Sex.FEMALE, "horsegenetics.suntouched=Sntch/Sntch", true,
+                "SUNTOUCHED FOAL");
+        if (foal != null) {
+            foal.setAge(-72_000);
+        }
+        ActionTrace.log("test yard", "SUNTOUCHED: expect the SUNTOUCHED watch line to count minecraft:light 0 at"
+                + " every census; any light block is a FAIL");
+    }
+
+    private static List<Mob> shiftedIn(ServerLevel level, AABB box) {
+        return level.getEntitiesOfClass(Mob.class, box.inflate(0.0, 2.0, 0.0),
+                m -> !(m instanceof Horse) && m.isAlive() && m.getData(ModAttachments.LYCAN_SHIFT.get()).active());
+    }
+
+    private static void bond(@Nullable Horse h, int bond) {
+        if (h != null) {
+            h.setData(ModAttachments.HORSE_CARE.get(), h.getData(ModAttachments.HORSE_CARE.get()).withBond(bond));
+        }
     }
 
     // ------------------------------------------------------------------

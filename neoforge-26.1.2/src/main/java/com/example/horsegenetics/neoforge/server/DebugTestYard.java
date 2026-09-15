@@ -269,6 +269,12 @@ final class DebugTestYard {
     static final int ROW_X_D = 12;
     static final int ROW_Y = ROW_X + ROW_X_D + PACKED_AISLE;
     static final int ROW_Y_D = 12;
+    /** Row Z: lycanthropy - a round trip through the night, a death in animal form, a were-cow. */
+    static final int ROW_Z = ROW_Y + ROW_Y_D + PACKED_AISLE;
+    static final int ROW_Z_D = 10;
+    /** Row AA: a gladiator's swing rate against husks (gap 222), waterborn in a pool, suntouched's light. */
+    static final int ROW_AA = ROW_Z + ROW_Z_D + PACKED_AISLE;
+    static final int ROW_AA_D = 12;
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -277,7 +283,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_Y + ROW_Y_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_AA + ROW_AA_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -362,7 +368,7 @@ final class DebugTestYard {
         DebugYardLong.build(level, gy, cx, mouthZ);
         // Row V: hunger - the food order, starving and fed healing, a carnivore's hunt.
         DebugYardHunger.build(level, gy, cx, mouthZ);
-        // Rows X-Y: open tests that need nobody at the keyboard (row W is in DebugYardLong).
+        // Rows X-Z: open tests that need nobody at the keyboard (row W is in DebugYardLong).
         DebugYardUnattended.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by

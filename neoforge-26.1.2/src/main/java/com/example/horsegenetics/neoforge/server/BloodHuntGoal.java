@@ -167,6 +167,10 @@ public final class BloodHuntGoal extends Goal {
         horse.heal((float) healed);
         horse.setData(ModAttachments.HUNGER.get(), Hunger.afterHealing(hunger, healed));
         stamp(prey, level.getGameTime());
+        ActionTrace.log("blood", ActionTrace.describeShort(horse) + " bit " + ActionTrace.describeShort(prey)
+                + " (tier " + tier(prey) + ") at tick " + level.getGameTime() + String.format(
+                " - healed %.1f, now %.1f/%.1f, hunger %.0f", healed, horse.getHealth(), horse.getMaxHealth(),
+                horse.getData(ModAttachments.HUNGER.get())));
 
         level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                 SoundEvents.GENERIC_DRINK, SoundSource.NEUTRAL, 0.8F, 0.6F);
