@@ -32,6 +32,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_W;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
@@ -127,7 +128,25 @@ final class DebugYardLong {
             ratio(level, gy, east + 9, mouthZ + ROW_U, "RATIO SIZE", "horsegenetics.body_size", "Big/n", "Big/n", false,
                     List.of("RATIO: SIZE", "Big/n x Big/n all", "day: 1 Big/Big to", "2 Big/n to 1 n/n"),
                     "about 1 Big/Big : 2 Big/n : 1 n/n");
-            ActionTrace.log("test yard", "all-day pens built (rows S-U: dryads, inheritance ratios)");
+
+            // ROW W (2026-09-15, owner: every unattended test into the yard). Two genotypes a gene rules
+            // out (gap 225): the doubled allele must be lost at conception, never born. A milk clash
+            // whose every foal would be Watr/Lava, which MilkGene forbids. And a colour gene with knobs,
+            // for inheritance of its epigenetic values. The conception log (gap 245) covers all four.
+            ratio(level, gy, west, mouthZ + ROW_W, "RATIO KIT W5", "horsegenetics.kit", "W5/N", "W5/N", false,
+                    List.of("RATIO: KIT W5", "W5/N x W5/N:", "W5/W5 is impossible", "- lost, never born"),
+                    "no W5/W5 foal ever; about 1 in 4 conceptions lost early as nonviable, 2 W5/N : 1 N/N born");
+            ratio(level, gy, west + 9, mouthZ + ROW_W, "RATIO MITF SW3", "horsegenetics.mitf", "SW3/N", "SW3/N", false,
+                    List.of("RATIO: MITF SW3", "SW3/N x SW3/N:", "SW3/SW3 impossible", "- lost, never born"),
+                    "no SW3/SW3 foal ever; about 1 in 4 conceptions lost early, 2 SW3/N : 1 N/N born");
+            ratio(level, gy, east, mouthZ + ROW_W, "RATIO MILK CLASH", "horsegenetics.milk", "Watr/Watr", "Lava/Lava", false,
+                    List.of("RATIO: MILK CLASH", "Watr x Lava: every", "foal Watr/Lava, and", "that cannot be born"),
+                    "no foal ever: every conception lost early, with a cause that is not MET's");
+            ratio(level, gy, east + 9, mouthZ + ROW_W, "RATIO STARBURST", "horsegenetics.starburst", "W/n", "W/n", false,
+                    List.of("RATIO: STARBURST", "W/n x W/n all day:", "1 W/W : 2 W/n : 1 n/n", "(knob inheritance)"),
+                    "about 1 W/W : 2 W/n : 1 n/n");
+            ActionTrace.log("test yard", "all-day pens built (rows S-U: dryads, inheritance ratios; row W: impossible"
+                    + " genotypes, milk clash, starburst)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }

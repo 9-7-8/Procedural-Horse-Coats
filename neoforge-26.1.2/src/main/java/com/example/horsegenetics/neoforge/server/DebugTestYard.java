@@ -257,13 +257,27 @@ final class DebugTestYard {
     static final int ROW_V_D = 10;
 
     /**
+     * <b>Rows W-Y: every open test that can run unattended</b> (owner, 2026-09-15: "put everything
+     * which can be tested unattended into the yard"). W is four more ratio pens in
+     * {@link DebugYardLong} - two impossible genotypes, a milk clash and a knob-carrying colour gene;
+     * X and Y are {@link DebugYardUnattended}: the night-shy horse, bone meal beside a crop, a gelding
+     * in a band, cover reach through a wall and a fence, stat floors, and lethal foals against healing.
+     */
+    static final int ROW_W = ROW_V + ROW_V_D + PACKED_AISLE;
+    static final int ROW_W_D = 10;
+    static final int ROW_X = ROW_W + ROW_W_D + PACKED_AISLE;
+    static final int ROW_X_D = 12;
+    static final int ROW_Y = ROW_X + ROW_X_D + PACKED_AISLE;
+    static final int ROW_Y_D = 12;
+
+    /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
      * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
      * read 110 deep while its rows chained past 150, so the back of it was
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_V + ROW_V_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_Y + ROW_Y_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -348,6 +362,8 @@ final class DebugTestYard {
         DebugYardLong.build(level, gy, cx, mouthZ);
         // Row V: hunger - the food order, starving and fed healing, a carnivore's hunt.
         DebugYardHunger.build(level, gy, cx, mouthZ);
+        // Rows X-Y: open tests that need nobody at the keyboard (row W is in DebugYardLong).
+        DebugYardUnattended.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.
