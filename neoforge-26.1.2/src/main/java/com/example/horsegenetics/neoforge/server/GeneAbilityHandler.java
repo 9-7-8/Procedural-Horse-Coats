@@ -2396,7 +2396,13 @@ public final class GeneAbilityHandler {
             // posts FinalizeSpawnEvent, so other mods' protections apply. A
             // second finalizeSpawn here used to re-roll equipment and variant.
             // NOT setPersistenceRequired: it must despawn like anything else.
-            Entity spawned = type.spawn(level, at, EntitySpawnReason.NATURAL);
+            Entity spawned;
+            summoning++;   // GeneWardHandler lets these through; see summoning()
+            try {
+                spawned = type.spawn(level, at, EntitySpawnReason.NATURAL);
+            } finally {
+                summoning--;
+            }
             if (spawned != null) {
                 // The allele copy's colour, where the mob has one to set.
                 MobVariants.apply(spawned, su.variant(), level);
@@ -2432,6 +2438,14 @@ public final class GeneAbilityHandler {
 
     /** Blocks above or below the horse's feet a summoned mob may be set down. */
     private static final int SPAWN_RISE = 8;
+
+    /** Depth of {@link #summon}'s spawn call. Server thread only, like every spawn. */
+    private static int summoning;
+
+    /** Whether the spawn being finalized right now is a spawner horse's summon - for {@link GeneWardHandler}. */
+    static boolean summoning() {
+        return summoning > 0;
+    }
 
     /**
      * A random column within {@code radius}, and the standable spot in it nearest the horse's own height.

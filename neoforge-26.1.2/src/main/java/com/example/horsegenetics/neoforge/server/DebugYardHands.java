@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.item.ItemStack;
@@ -64,8 +65,9 @@ final class DebugYardHands {
             spawner(level, gy, east + 9, mouthZ + ROW_AH, "SPAWNER B", 350);
             weaning(level, gy, west, mouthZ + ROW_AI, east + 9, "WEANING AWAY", true);
             weaning(level, gy, west + 9, mouthZ + ROW_AI, 0, "WEANING CONTROL", false);
+            spawnerWard(level, gy, east, mouthZ + ROW_AI, "SPAWNER WARD", 260);
             ActionTrace.log("test yard", "hands pens built (rows AH-AI: gold timer, subfertile timer, spawner A and B,"
-                    + " weaning away and control)");
+                    + " weaning away and control, spawner ward)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: rows AH-AI (hands) failed to build", e);
         }
@@ -188,6 +190,65 @@ final class DebugYardHands {
                         + " (expect within 8; a sheep 'from outOfWorld' is a FAIL)"));
                 if (n < 4) {
                     feed(level, name, h, 240, n + 1, colours);
+                }
+            });
+        });
+    }
+
+    /**
+     * <b>A spawner fed beside a holy ward</b> (checklist audit, 2026-09-15). A summon goes through the NATURAL spawn
+     * path, which the ward refuses for anything hostile, so a zombie spawner fed beside a warding horse made nothing
+     * whenever the spot fell inside the ward. {@code GeneAbilityHandler.summoning()} lets a summon through now. Each
+     * meal's zombies are counted five ticks after the feed and discarded at once, before they reach a horse. A summon
+     * lands anywhere within 32 blocks and the ward reaches 8 to 16, so the pen also counts zombies that landed within 8
+     * of the ward horse: only those prove anything, and eight meals make a run with none unlikely (about one in ten).
+     */
+    private static void spawnerWard(ServerLevel level, int gy, int x0, int z0, String name, int firstMeal) {
+        DebugYardUnattended.pen(level, gy, x0, z0, 9, ROW_AI_D, name, Blocks.GRASS_BLOCK.defaultBlockState(),
+                List.of(name, "Zmb/Zmb fed beside", "a Hly/Hly ward:", "2 zombies a meal"));
+        Horse spawner = DebugYardUnattended.horse(level, gy, x0 + 3.5, z0 + 5.5, Sex.FEMALE,
+                "horsegenetics.spawner=Zmb/Zmb", true, name);
+        Horse ward = DebugYardUnattended.horse(level, gy, x0 + 5.5, z0 + 5.5, Sex.FEMALE,
+                "horsegenetics.holy_ward=Hly/Hly", true, name + " HORSE");
+        wardMeal(level, name, spawner, ward, firstMeal, 1, new int[2]);
+    }
+
+    private static void wardMeal(ServerLevel level, String name, @Nullable Horse h, @Nullable Horse ward, int delay,
+                                 int n, int[] tally) {
+        DebugYardHerd.after(level, delay, () -> {
+            if (h == null || !h.isAlive() || ward == null || !ward.isAlive()) {
+                ActionTrace.log("test yard", name + ": a horse is gone - no meal " + n);
+                return;
+            }
+            AABB near = h.getBoundingBox().inflate(34.0, 10.0, 34.0);
+            Set<UUID> before = new HashSet<>();
+            for (Entity z : level.getEntities(EntityType.ZOMBIE, near, e -> true)) {
+                before.add(z.getUUID());
+            }
+            FakePlayer hands = FakePlayerFactory.getMinecraft(level);
+            hands.getAbilities().instabuild = true;
+            hands.snapTo(h.getX(), h.getY(), h.getZ() - 1.5, 0.0F, 0.0F);
+            hands.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT));
+            CommonHooks.onInteractEntity(hands, h, InteractionHand.MAIN_HAND);
+            DebugYardHerd.after(level, 5, () -> {
+                int meal = 0;
+                int inside = 0;
+                for (Entity z : level.getEntities(EntityType.ZOMBIE, near, e -> e.isAlive() && !before.contains(e.getUUID()))) {
+                    meal++;
+                    if (z.distanceToSqr(ward) <= 8.0 * 8.0) {
+                        inside++;
+                    }
+                    z.discard();
+                }
+                tally[0] += meal;
+                tally[1] += inside;
+                String verdict = n < 8 ? "" : " - expect 16 made, some within the ward: "
+                        + (tally[0] < 16 ? "FAIL (the ward or something else refused a summon)"
+                        : tally[1] == 0 ? "INCONCLUSIVE (none landed inside the ward)" : "PASS");
+                ActionTrace.log("test yard", name + " meal " + n + ": " + meal + " zombie(s), " + inside
+                        + " within 8 of the ward | " + tally[0] + " made, " + tally[1] + " inside, so far" + verdict);
+                if (n < 8) {
+                    wardMeal(level, name, h, ward, 240, n + 1, tally);
                 }
             });
         });

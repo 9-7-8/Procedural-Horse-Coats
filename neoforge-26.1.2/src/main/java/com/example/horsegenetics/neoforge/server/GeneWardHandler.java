@@ -95,6 +95,13 @@ public final class GeneWardHandler {
         if (!isNatural(event.getSpawnType())) {
             return; // a spawner, an egg, breeding, a structure - not this gene's business
         }
+        // A SPAWNER HORSE'S MEAL IS NOT THE WORLD SPAWNING. Its summons go through EntityType.spawn as NATURAL on
+        // purpose, so claim and spawn-blocking mods still see them as ordinary spawns - but a player who feeds a
+        // zombie spawner beside their own warding horse asked for the zombies, the same as a mob farm (found in the
+        // 2026-09-15 checklist audit, and the owner's call: the ward must not refuse them).
+        if (GeneAbilityHandler.summoning()) {
+            return;
+        }
         Entity entity = event.getEntity();
         if (!(entity.level() instanceof ServerLevel level)) {
             return;
