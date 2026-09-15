@@ -275,6 +275,13 @@ final class DebugTestYard {
     /** Row AA: a gladiator's swing rate against husks (gap 222), waterborn in a pool, suntouched's light. */
     static final int ROW_AA = ROW_Z + ROW_Z_D + PACKED_AISLE;
     static final int ROW_AA_D = 12;
+    /** Rows AB-AD: the effect genes - mob aura, swim speed, water breathing, on death, item drop ({@link DebugYardEffects}). */
+    static final int ROW_AB = ROW_AA + ROW_AA_D + PACKED_AISLE;
+    static final int ROW_AB_D = 12;
+    static final int ROW_AC = ROW_AB + ROW_AB_D + PACKED_AISLE;
+    static final int ROW_AC_D = 12;
+    static final int ROW_AD = ROW_AC + ROW_AC_D + PACKED_AISLE;
+    static final int ROW_AD_D = 10;
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -283,7 +290,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_AA + ROW_AA_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_AD + ROW_AD_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -370,6 +377,8 @@ final class DebugTestYard {
         DebugYardHunger.build(level, gy, cx, mouthZ);
         // Rows X-Z: open tests that need nobody at the keyboard (row W is in DebugYardLong).
         DebugYardUnattended.build(level, gy, cx, mouthZ);
+        // Rows AB-AD: the five effect genes that write no log line of their own.
+        DebugYardEffects.build(level, gy, cx, mouthZ);
 
         // A sign at the junction, on the road, so the yard is discoverable by
         // somebody who walked in to look at pens and does not know it is there.

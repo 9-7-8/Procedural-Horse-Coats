@@ -526,7 +526,7 @@ final class DebugYardUnattended {
     // helpers
     // ------------------------------------------------------------------
 
-    private static void pen(ServerLevel level, int gy, int x0, int z0, int width, int depth, String name,
+    static void pen(ServerLevel level, int gy, int x0, int z0, int width, int depth, String name,
                             BlockState floor, List<String> sign, net.minecraft.world.level.block.Block... watched) {
         int x1 = x0 + width;
         int z1 = z0 + depth;
@@ -541,7 +541,7 @@ final class DebugYardUnattended {
         DebugWorldWatch.watch(name, DebugTestYard.box(x0, gy, z0, x1, gy + 3, z1), null, watched);
     }
 
-    private static @Nullable Horse horse(ServerLevel level, int gy, double x, double z, Sex sex, String code,
+    static @Nullable Horse horse(ServerLevel level, int gy, double x, double z, Sex sex, String code,
                                          boolean tamed, String label) {
         Horse h = DebugPenManager.spawnHorse(level, gy + 1, x, z, sex, code, tamed);
         DebugTestYard.label(h, label);
@@ -556,7 +556,7 @@ final class DebugYardUnattended {
         return h;
     }
 
-    private static @Nullable Entity animal(ServerLevel level, EntityType<?> type, int gy, double x, double z) {
+    static @Nullable Entity animal(ServerLevel level, EntityType<?> type, int gy, double x, double z) {
         Entity e = type.create(level, EntitySpawnReason.COMMAND);
         if (e == null) {
             return null;
