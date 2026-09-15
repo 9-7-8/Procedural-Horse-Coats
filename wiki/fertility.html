@@ -328,6 +328,16 @@
     the radius - and both stayed nursing, which is the rule working rather than failing.
 </p>
 
+<p id="verified-late-pregnancy">
+    <strong>A mare in the last third of her pregnancy moves 15% slower - after a fix</strong> (2026-09-15).
+    <code>ReproHandler</code> puts <code>repro/late_pregnancy</code> on her speed every 40 ticks. The yard's MATERNITY pen
+    reads TWINS DUE 2 MIN's speed across that window, and in the 09:35 run it stayed at her base 0.1875 at 2000, 2150
+    and 2300 ticks while her line said <em>heavy and slow</em>. The cause was <code>GeneAbilityHandler.clearAttributes</code>.
+    It took off every modifier in the mod's namespace that no gene had asked for, so it removed this one on the next
+    gene tick. The sweep now removes only what it owns (<code>gene/</code> modifiers and the lava float). In the 09:40 run
+    all three readings were 0.1594, exactly 85% of base, and the STATS pen's gene-driven speeds were unchanged.
+</p>
+
 <ul id="verified-yard-0914">
     <li><strong>Maternity runs to the minute</strong> (2026-09-14 morning, the first quarter hour, unattended):
         the single foal at 1 minute, twins (&ldquo;foaled 2 of 2&rdquo;) at 2, and the early loss at 1, with its
