@@ -186,6 +186,25 @@ final class DebugYardEffects {
         lap(level, horses, names, xs, z0, 1, new double[3]);
     }
 
+    /**
+     * Steer every horse at the far end through its move control, re-aimed every tick for {@code ticks} ticks. The first
+     * version gave each horse a navigation path, and the plain and Stone horses bobbed in place (0.15 blocks in two
+     * seconds, every lap): a floating horse does not follow a ground path. The move control is what turns a wanted
+     * position into the horse's own forward push, which is exactly the push {@link SwimScaling} scales.
+     */
+    private static void drive(ServerLevel level, Horse[] horses, double[] xs, double targetZ, int ticks) {
+        if (ticks <= 0) {
+            return;
+        }
+        for (int i = 0; i < horses.length; i++) {
+            Horse h = horses[i];
+            if (h != null && h.isAlive()) {
+                h.getMoveControl().setWantedPosition(xs[i], h.getY(), targetZ, 1.0);
+            }
+        }
+        DebugYardHerd.after(level, 1, () -> drive(level, horses, xs, targetZ, ticks - 1));
+    }
+
     private static void lap(ServerLevel level, Horse[] horses, String[] names, double[] xs, int z0, int n, double[] total) {
         DebugYardHerd.after(level, n == 1 ? 200 : 60, () -> {
             double targetZ = n % 2 == 1 ? z0 + ROW_AC_D - 1.5 : z0 + 1.5;
@@ -194,10 +213,10 @@ final class DebugYardEffects {
                 Horse h = horses[i];
                 if (h != null && h.isAlive()) {
                     start[i] = h.getZ();
-                    h.getNavigation().moveTo(xs[i], h.getY(), targetZ, 1.0);
                 }
             }
-            DebugYardHerd.after(level, 40, () -> {
+            drive(level, horses, xs, targetZ, 40);
+            DebugYardHerd.after(level, 41, () -> {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < horses.length; i++) {
                     Horse h = horses[i];
