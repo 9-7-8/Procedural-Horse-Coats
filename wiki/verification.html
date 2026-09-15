@@ -109,26 +109,27 @@
         mare's random stream is the cause. If both skew, the genomes are. A <code>SHARED</code> random is a
         finding on its own. Brindle and size log too, as controls.</li>
 </ul>
+<div class="note">
+    <span class="label">Confirmed off the log, 2026-09-14 (the 22:12 build, 30 minutes, unattended)</span>
+    <p>
+        <strong>The mod boots</strong> with the redirect mixin; its only warning is the usual refmap line.
+        <strong>HUNGER ORDER</strong> walked past the poppy, mushroom and moss and ate the cake, then the hay,
+        then stopped at 100. <strong>HUNGER FED</strong> went from 11 to full in about six seconds, hunger
+        97 to 76. <strong>HUNGER STARVING</strong> never rose off 11.0 in thirty minutes, down to hunger 0.
+        <strong>HUNGER CARNIVORE</strong> hunted and ate all three chickens in turn, reaching 75, and was left
+        hungry with no prey, as it should be. <strong>No heals at full health</strong>: none in any census, against
+        364 to 383 a census before (<a href="known-gaps.html#gap-217">gap 217</a>, closed). Deleted below.
+    </p>
+</div>
 <ul>
-    <li><strong>HUNGER ORDER:</strong> a horse at hunger 20, with foods laid out nearest-first and
-        worst-first (poppy, mushroom, moss, hay, cake). <strong>Pass:</strong> its first
-        <code>[trace] hunger | ... ate</code> line is <code>minecraft:cake</code> and its second is
-        <code>minecraft:hay_block</code>. The ORDER pen's watch line loses its cake and hay.</li>
-    <li><strong>HUNGER STARVING:</strong> a half-health horse at hunger 5, beside a water cauldron.
-        <strong>Pass:</strong> its <code>hp</code> never rises in any of its lines. This is also the
-        test that vanilla's free heal is off.</li>
-    <li><strong>HUNGER FED:</strong> a half-health horse at hunger 100, beside water.
-        <strong>Pass:</strong> full <code>hp</code> within about 15 seconds of its first line, and
-        hunger down by about 2 for every point healed.</li>
-    <li><strong>HUNGER CARNIVORE:</strong> a <code>Dmeat/Dmeat</code> horse at hunger 20 with three
-        chickens. <strong>Pass:</strong> <code>hunted minecraft:chicken</code> followed by
-        <code>ate minecraft:chicken (dropped)</code>, repeated until it reaches 90.</li>
-    <li><strong>No heals at full health</strong> (<a href="known-gaps.html#gap-217">gap 217</a>).
-        <strong>Pass:</strong> the census's "heals on horses already at full health" line stops
-        listing the yard's horses.</li>
-    <li><strong>The mod boots.</strong> This is the first <code>@Redirect</code> mixin in the
-        project, and a miss fails at mod load. <strong>Pass:</strong> the client reaches the title
-        screen and the yard builds.</li>
+    <li><strong>The server keeps up again</strong> (<a href="known-gaps.html#gap-246">gap 246</a>). The 22:12
+        build ran at 64-71 ms a tick from its first census. <strong>Pass:</strong> the next build's censuses read
+        near 50 ms, with the same yard.</li>
+    <li><strong>Grazing is occasional.</strong> <strong>Pass:</strong> one <code>grazing: N mouthful(s)</code>
+        line a minute with N in the tens, not a line a mouthful, and horses really do fall below 50 and go
+        looking for food.</li>
+    <li><strong>HUNGER STARVING holds for hours</strong>, not just thirty minutes: its <code>hp</code> never
+        rises all run.</li>
 </ul>
 
 <h2 id="fixes-0914">&sect;0-DZ &mdash; Fixes from the all-day run (2026-09-14, built at 17:15, NOT played)</h2>

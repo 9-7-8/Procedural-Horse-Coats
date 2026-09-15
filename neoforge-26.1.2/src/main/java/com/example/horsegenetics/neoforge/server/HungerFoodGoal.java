@@ -39,9 +39,9 @@ import java.util.Set;
  * <b>A hungry horse goes and eats</b> ({@link Hunger}, owner 2026-09-14).
  *
  * <p>Below {@link Hunger#HUNGRY} it looks round for the best food its diet allows, walks to
- * it and eats, one mouthful at a time, until it reaches {@link Hunger#SATED}. Above that it
- * only grazes what it is standing on, now and then, the way vanilla's animation already
- * pretends to. What it looks for, best first, is {@link Hunger.Food}'s order:
+ * it and eats, one mouthful at a time, until it reaches {@link Hunger#SATED}. Between that and
+ * {@link Hunger#GRAZE_BELOW} it only grazes what it is standing on, now and then. What it looks
+ * for, best first, is {@link Hunger.Food}'s order:
  * <ol>
  *   <li>its favourite food, lying on the ground;</li>
  *   <li>any dropped food it can eat - the same test a hand-feeding uses
@@ -64,6 +64,18 @@ import java.util.Set;
  * dropped food. A fish-eater hunts fish. A blood-drinker's meal is its bite
  * ({@link BloodHuntGoal}), and a horse that eats nothing never looks.
  *
+ * <h2>Cost</h2>
+ * THE FIRST BUILD SLOWED THE SERVER BY A THIRD (2026-09-14, 22:12): 50 ms a tick became 64-71
+ * from the first census, before any horse was hungry. {@code canUse} runs for every horse every
+ * tick or two, and it asked {@code HorseDietHandler.dietOf} first - which parses the horse's whole
+ * genotype and epigenome - so a yard of 280 horses parsed a genome tens of thousands of times a
+ * second to decide to do nothing. Now hunger is read first, and a fed horse leaves {@code canUse}
+ * on one attachment read; the diet is resolved once per horse, as {@link BloodHuntGoal} does.
+ * The same build also grazed every horse below 90, which kept every horse topped up at 96, never
+ * hungry, and turned 1,547 grass blocks to dirt in 26 minutes with a log line each. Grazing now
+ * starts below {@link Hunger#GRAZE_BELOW}, about once every two minutes a horse, and is counted
+ * into one line a minute.
+ *
  * <p>UNVERIFIED: that {@code BlockTags.CROPS} and {@code BlockTags.SMALL_FLOWERS} hold what
  * their names say in 26.1.2 (both compile; contents not read), and that a partial path to an
  * unreachable target times out cleanly - an unreachable target is ignored for a minute after
@@ -80,8 +92,8 @@ public final class HungerFoodGoal extends Goal {
     private static final int REPATH_INTERVAL = 20;
     private static final int MAX_PURSUIT = 400;
     private static final int IGNORE_TICKS = 1_200;
-    /** A fed horse grazes where it stands about once in this many checks. */
-    private static final int GRAZE_CHANCE = 200;
+    /** A grazing horse takes a mouthful about once in this many checks - roughly every two minutes. */
+    private static final int GRAZE_CHANCE = 1_200;
     private static final float HUNT_DAMAGE = 4.0F;
     private static final int HUNT_SWING = 20;
 
@@ -93,9 +105,15 @@ public final class HungerFoodGoal extends Goal {
     private static final Set<EntityType<?>> FISH_PREY = Set.of(
             EntityType.COD, EntityType.SALMON, EntityType.TROPICAL_FISH, EntityType.PUFFERFISH);
 
+    /** Grazing mouthfuls since the last summary line, and when that line was written. */
+    private static int grazed;
+    private static long grazeLogged = Long.MIN_VALUE / 2;
+
     private final Horse horse;
     private final Map<Long, Long> ignoredUntil = new HashMap<>();
 
+    /** Resolved once, the first time the horse has a real record - see {@link #diet}. */
+    private @Nullable HorseDiet diet;
     private @Nullable ItemEntity item;
     private @Nullable BlockPos block;
     private @Nullable LivingEntity prey;
@@ -117,17 +135,15 @@ public final class HungerFoodGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (!(horse.level() instanceof ServerLevel level) || !free() || !HorseRecords.hasRealRecord(horse)) {
-            return false;
-        }
-        HorseDiet diet = HorseDietHandler.dietOf(horse);
-        if (diet.diet() == Diet.NOTHING || diet.diet() == Diet.BLOOD) {
-            return false;
-        }
+        // Cheapest first: one attachment read decides it for a fed horse.
         double hunger = hunger();
         if (!Hunger.seeksFood(hunger)) {
-            if (Hunger.wantsMore(hunger) && horse.getRandom().nextInt(GRAZE_CHANCE) == 0) {
-                grazeInPlace(level, diet);
+            if (Hunger.grazes(hunger) && horse.getRandom().nextInt(GRAZE_CHANCE) == 0
+                    && horse.level() instanceof ServerLevel level && free()) {
+                HorseDiet d = diet();
+                if (d != null && eatsAtAll(d)) {
+                    grazeInPlace(level, d);
+                }
             }
             return false;
         }
@@ -135,7 +151,11 @@ public final class HungerFoodGoal extends Goal {
             return false;
         }
         searchCooldown = SEARCH_INTERVAL;
-        return search(level, diet);
+        if (!(horse.level() instanceof ServerLevel level) || !free()) {
+            return false;
+        }
+        HorseDiet d = diet();
+        return d != null && eatsAtAll(d) && search(level, d);
     }
 
     @Override
@@ -149,8 +169,9 @@ public final class HungerFoodGoal extends Goal {
         if (prey != null) {
             return prey.isAlive();
         }
-        return block != null && horse.level() instanceof ServerLevel level
-                && rungOf(level, block, HorseDietHandler.dietOf(horse)) == rung;
+        HorseDiet d = diet();
+        return block != null && d != null && horse.level() instanceof ServerLevel level
+                && rungOf(level, block, d) == rung;
     }
 
     @Override
@@ -203,7 +224,7 @@ public final class HungerFoodGoal extends Goal {
             eatItem(level, item);
             item = null;
         } else if (block != null) {
-            eatBlock(level, block, rung);
+            eatBlock(level, block, rung, false);
             block = null;
         } else if (prey != null && --swingCooldown <= 0) {
             swingCooldown = HUNT_SWING;
@@ -214,6 +235,18 @@ public final class HungerFoodGoal extends Goal {
     // ------------------------------------------------------------------
     // Finding food
     // ------------------------------------------------------------------
+
+    /** The diet, resolved once; null until the horse has a real record. */
+    private @Nullable HorseDiet diet() {
+        if (diet == null && HorseRecords.hasRealRecord(horse)) {
+            diet = HorseDietHandler.dietOf(horse);
+        }
+        return diet;
+    }
+
+    private static boolean eatsAtAll(HorseDiet d) {
+        return d.diet() != Diet.NOTHING && d.diet() != Diet.BLOOD;
+    }
 
     /** The best thing to eat in reach, in {@link Hunger.Food} order and nearest within a rung. */
     private boolean search(ServerLevel level, HorseDiet diet) {
@@ -360,13 +393,13 @@ public final class HungerFoodGoal extends Goal {
     // Eating
     // ------------------------------------------------------------------
 
-    /** A fed horse, now and then: the tuft it stands in, or the grass under its feet. */
+    /** A horse that is not hungry but could eat: the tuft it stands in, or the grass under its feet. */
     private void grazeInPlace(ServerLevel level, HorseDiet diet) {
         BlockPos at = horse.blockPosition();
         if (rungOf(level, at, diet) == Hunger.Food.GRASS) {
-            eatBlock(level, at, Hunger.Food.GRASS);
+            eatBlock(level, at, Hunger.Food.GRASS, true);
         } else if (rungOf(level, at.below(), diet) == Hunger.Food.GRASS) {
-            eatBlock(level, at.below(), Hunger.Food.GRASS);
+            eatBlock(level, at.below(), Hunger.Food.GRASS, true);
         }
     }
 
@@ -382,10 +415,10 @@ public final class HungerFoodGoal extends Goal {
         level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, what),
                 horse.getX(), horse.getY() + horse.getBbHeight() * 0.75, horse.getZ(),
                 8, 0.2, 0.15, 0.2, 0.05);
-        fed(level, rung, BuiltInRegistries.ITEM.getKey(what).toString(), e.blockPosition());
+        fed(level, rung, BuiltInRegistries.ITEM.getKey(what).toString(), e.blockPosition(), false);
     }
 
-    private void eatBlock(ServerLevel level, BlockPos pos, Hunger.Food food) {
+    private void eatBlock(ServerLevel level, BlockPos pos, Hunger.Food food, boolean grazing) {
         BlockState st = level.getBlockState(pos);
         String what = BuiltInRegistries.BLOCK.getKey(st.getBlock()).toString();
         if (net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, horse)) {
@@ -397,17 +430,28 @@ public final class HungerFoodGoal extends Goal {
                 level.destroyBlock(pos, false);
             }
         }
-        fed(level, food, what, pos);
+        fed(level, food, what, pos, grazing);
     }
 
-    private void fed(ServerLevel level, Hunger.Food food, String what, BlockPos pos) {
+    private void fed(ServerLevel level, Hunger.Food food, String what, BlockPos pos, boolean grazing) {
         double after = Hunger.eat(hunger(), food);
         horse.setData(ModAttachments.HUNGER.get(), after);
         level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                 SoundEvents.HORSE_EAT, SoundSource.NEUTRAL, 0.8F, 1.0F);
-        ActionTrace.log("hunger", ActionTrace.describeShort(horse) + " ate " + what + " ("
-                + food.name().toLowerCase(java.util.Locale.ROOT) + ") at " + pos.toShortString()
-                + " - hunger now " + Math.round(after));
+        if (!grazing) {
+            ActionTrace.log("hunger", ActionTrace.describeShort(horse) + " ate " + what + " ("
+                    + food.name().toLowerCase(java.util.Locale.ROOT) + ") at " + pos.toShortString()
+                    + " - hunger now " + Math.round(after));
+            return;
+        }
+        grazed++;
+        long now = level.getGameTime();
+        if (now - grazeLogged >= 1_200L) {
+            ActionTrace.log("hunger", "grazing: " + grazed + " mouthful(s) of grass by horses that were not"
+                    + " hungry, in the last minute");
+            grazed = 0;
+            grazeLogged = now;
+        }
     }
 
     private void hunt(ServerLevel level, LivingEntity target) {

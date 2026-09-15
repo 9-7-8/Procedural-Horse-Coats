@@ -45,6 +45,13 @@ public final class Hunger {
     /** A horse that went looking eats until it reaches this. */
     public static final double SATED = 90.0;
 
+    /**
+     * Below this a horse that is not hungry yet grazes what it stands on, now and then. It was
+     * {@link #SATED} in the first build, which kept every horse topped up and never hungry, and
+     * stripped a yard's grass to dirt in half an hour (2026-09-14).
+     */
+    public static final double GRAZE_BELOW = 75.0;
+
     /** At or below this a horse cannot heal, and healing never spends below it. */
     public static final double STARVING = 10.0;
 
@@ -122,6 +129,11 @@ public final class Hunger {
     /** Should a horse go looking for food? */
     public static boolean seeksFood(double hunger) {
         return hunger < HUNGRY;
+    }
+
+    /** Does a horse that is not hungry yet graze what it stands on, now and then? */
+    public static boolean grazes(double hunger) {
+        return hunger < GRAZE_BELOW;
     }
 
     /** Does a horse that is already eating want another mouthful? */

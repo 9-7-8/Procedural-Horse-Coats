@@ -82,6 +82,13 @@ class HungerTest {
     }
 
     @Test
+    void aFedHorseGrazesOnlyWellBelowFull() {
+        assertTrue(Hunger.grazes(Hunger.GRAZE_BELOW - 1.0));
+        assertFalse(Hunger.grazes(Hunger.GRAZE_BELOW));
+        assertTrue(Hunger.GRAZE_BELOW > Hunger.HUNGRY && Hunger.GRAZE_BELOW < Hunger.SATED);
+    }
+
+    @Test
     void aHungryHorseEatsUntilSated() {
         assertTrue(Hunger.seeksFood(Hunger.HUNGRY - 1.0));
         assertFalse(Hunger.seeksFood(Hunger.HUNGRY));
