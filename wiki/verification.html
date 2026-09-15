@@ -96,8 +96,6 @@
         <code>kit=W22/N</code>, <code>kit=W22/W20</code>, <code>kit=W26/N</code> and <code>kit=W21/N</code>. <strong>Pass:</strong> a broad
         sabino, a pure white, an extensive white, and a horse flecked white through the coat with a white face and a coloured
         mane. Whether the speckle reads as <em>&yacute;rusk&jacute;&oacute;ttur</em> rather than roan is a look for you.</li>
-    <li><strong>A lycan comes back clear of walls</strong> (<a href="known-gaps.html#gap-253">gap 253</a>): no <code>inWall</code> in the
-        LYCAN pens for a whole run, and a <code>came back from a ... inside blocks - moved</code> line at some dawn.</li>
     <li><strong>A filly is not recruited by her brother</strong> (<a href="known-gaps.html#gap-234">gap 234</a>): in the LEAVING HOME
         pen, no <code>left the band it was born into</code> line pairs a filly with a colt from the same dam or sire.</li>
     <li><strong>The rest of the natural genes</strong>: every published <code>KIT</code> <code>W</code> allele
@@ -118,7 +116,6 @@
         <em>Magical (Breed)</em>, every member of one herd shows the same magical gene, and the log names it
         (<code>[Breeds] a magical herd of</code>). Breed a Magical horse to its own breed: the foal is Magical. Breed it to another breed: an ordinary cross. Then set
         <code>enabled = false</code>: no more magical herds. Put <code>chance</code> back to 0.05 afterwards.</li>
-    <li><strong>The spawner and the ward:</strong> the SPAWNER WARD pen (<a href="#open-older-unattended">&sect;0-EB, unattended</a>).</li>
     <li><strong>The BONE MEAL pen's sign</strong> now names <code>[watch] gene fertilised</code>.</li>
 </ul>
 
@@ -710,7 +707,6 @@
     <li><strong>No stray magic on a breed</strong> (unit test to write; <a href="breeds.html#magic">breeds</a>). Roll every breed's founders through <code>BreedFounder.roll</code> and assert no magical coat, particle or ability locus the breed does not list. <code>BreedFounderTest</code> only checks named loci today. The Breeds tab's plates are the same founder rolls, so this covers them too. Only Feral Mixed may carry random magic.</li>
     <li><strong>The jar carries no wiki tooling</strong>. <code>build.gradle</code> excludes <code>**/*Tool.class</code> and <code>horsegenetics/example-genes/**</code>. Check with <code>jar tf</code> on the built jar, and confirm no log names a missing <code>*Tool</code> class.</li>
     <li><strong>Splash blue-eye rates and blue eyes carried through a generation</strong> (unit test, <code>EyeColorTest</code>; <a href="eye-colour.html">eye colour</a>). A splashed white horse has two blue eyes usually, one sometimes and a wedge rarely. A blue-eyed splash bred to a plain horse throws <code>MBl</code> carriers, and blue eyes reappear a generation later on foals with no splash.</li>
-    <li><strong>A spawner fed beside a holy ward makes its mobs</strong> (yard row AI east, SPAWNER WARD; <a href="gene-spawner.html">spawner</a>, <a href="gene-holy-ward.html">holy ward</a>). A summon goes through the <code>NATURAL</code> spawn path, which the ward refused for hostiles; <code>GeneAbilityHandler.summoning()</code> now lets it through. <strong>Pass:</strong> the pen's eighth meal line reads <code>16 made</code> and PASS, with some zombies <code>within 8 of the ward</code>. INCONCLUSIVE means none landed inside the ward that run.</li>
     <li><strong>A breed cannot make a back-half Cleave</strong> (unit test). <code>BreedFounder</code> forces a named modifier wild unless the breed lists it, so every breed horse should be <code>cleave_side=n/n</code>; the same holds for accretion field. Assert it over the breed roster.</li>
     <li><strong>Milk volume</strong> (yard: a <code>Mlk/Mlk</code> mare in the dairy, row D, milked on a clock). <strong>Pass:</strong> a second filling is possible after a fraction of a day (charges divide the cooldown, they do not bank), and the same holds for a water-bearing horse (<a href="gene-magic-milk-volume.html">magic milk volume</a>).</li>
     <li><strong>The night loci's supersede rule</strong> (yard: a horse homozygous for a night watch form and a night temper form, with a cow, logged at night). <strong>Pass:</strong> it deals with the cow rather than doing both, then resumes watching once the cow is gone. Every single form is <a href="gene-magic-night-temper.html">verified</a>; the pair on one horse is not.</li>

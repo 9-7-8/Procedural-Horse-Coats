@@ -220,6 +220,29 @@
     now discards each meal's sheep once counted, because a sheep 32 blocks off lands in some other pen, such as BLOOD ONLY's.
 </p>
 
+<p id="verified-ward-farm">
+    <strong>A spawner fed beside a holy ward still makes its mobs</strong> (2026-09-15, the 16:11 run). The yard's
+    SPAWNER WARD pen feeds a <code>Zmb/Zmb</code> horse wheat eight times beside a <code>Hly/Hly</code> ward. Every meal
+    read <code>2 zombie(s)</code>, the run finished <code>16 made, 2 inside</code> the ward's eight blocks, and the pen
+    printed PASS. <code>[Spawner] made 2 of 2 Zombie</code> appears at every meal and no <code>[Ward]</code> refusal line
+    appears anywhere, so <code>GeneAbilityHandler.summoning()</code> holds: a mob farm beside a warding horse keeps
+    producing (<a href="gene-holy-ward.html">holy ward</a>).
+</p>
+
+<p id="counting-a-summon">
+    <strong>Two earlier runs read <code>0 made</code>, and it was the pen both times.</strong> Worth knowing before
+    trusting any count of a summon. A fed summon is <em>not</em> made during the interaction:
+    <code>GeneAbilityHandler.onFeed</code> queues a <code>PendingFeed</code> and <code>drainPendingFeeds</code> runs the
+    summon on <code>ServerTickEvent.Post</code>, at the end of that tick. The mobs then carry no persistence - the summon
+    deliberately does not set it - so vanilla's <code>Mob.checkDespawn</code> takes them on their first mob tick whenever
+    no player is near, which in an unattended yard is always. They exist for about one tick: a five-tick count read
+    <code>0 of 16</code> because it arrived after they were gone (15:36 run), and a same-tick count read
+    <code>0 of 16</code> because it ran before the summon (16:05 run, the count logged at 16:06:01.675 and the zombies
+    arrived at .683 and .689). The pen now pins each arrival with <code>setPersistenceRequired</code> and counts at
+    leisure. Nothing is cancelled, so <code>made 2 of 2</code> still measures the gene rather than the harness. The sheep
+    pens never needed any of this, because a vanilla <code>Animal</code> does not despawn.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

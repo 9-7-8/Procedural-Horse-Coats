@@ -338,6 +338,25 @@
     none CHANGED, and LYCAN DOOMED's armour dropped again.
 </p>
 
+<p id="verified-clear-of-walls">
+    <strong>A horse restored at dawn is moved clear of blocks instead of suffocating</strong> (2026-09-15, the 16:11 run).
+    A wolf fits against a fence where a horse does not, so the restore used to put a horse inside the wall it was standing
+    against: in the 10:57 run the LYCAN WOLF foals Wondering Blackie and Wondering Milk died of <code>inWall</code> ten
+    seconds after dawn, and their sire took 23 wall hits at an earlier one. <code>LycanthropyHandler.clearOfBlocks</code>
+    now moves a colliding horse to the nearest clear spot within three blocks. At the 16:31 dawn it fired twice in the same
+    tick - <code>Grand Aura "LYCAN WOLF MARE" came back from a minecraft:wolf inside blocks - moved -1, 1, 1 to
+    -17, 130, 413</code> and <code>Boulder Alaafin "LYCAN WOLF STALLION" ... moved -1, 0, 0 to -12, 129, 412</code> - and
+    across the run's twelve dawn restores nothing took <code>inWall</code> damage anywhere.
+</p>
+
+<p>
+    <em>Why that check needs both halves.</em> A quiet run does not prove this one. The 15:36 run took nine lycans through
+    a dawn, including the foal that died last time, with no <code>inWall</code> anywhere - and logged no
+    <code>moved</code> line at all, because no horse happened to be restored into a wall. That run is equally consistent
+    with a working fix and with a fix that never ran, which is why the pass was written as <em>no
+    <code>inWall</code> all run <b>and</b> a <code>moved</code> line at some dawn</em>. Only the second run produced both.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">

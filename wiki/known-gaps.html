@@ -57,13 +57,6 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
-<li id="gap-253"><strong>Fixed 2026-09-15, not yet played: a lycan horse coming back at dawn could be put inside blocks and suffocate.</strong>
-    The restore put the horse where its animal stood, and a wolf fits against a fence where a horse does not. In the 10:57
-    run the yard's LYCAN WOLF foals, Wondering Blackie and Wondering Milk, died of <code>inWall</code> ten seconds after dawn at
-    14:37, and their sire took 23 wall hits at an earlier dawn. <em>Fix:</em> <code>LycanthropyHandler.clearOfBlocks</code> moves a
-    horse that would collide to the nearest clear spot within three blocks and logs <code>[trace] lycan | ... came back from a ...
-    inside blocks - moved</code>. <strong>Pass:</strong> no <code>inWall</code> in the LYCAN pens all run, and a <code>moved</code> line
-    at some dawn.</li>
 <li id="gap-250"><strong>Open, found 2026-09-15: a blood-only horse went a whole game day without biting the cow beside it.</strong>
     In the yard's 08:47 run, BLOOD ONLY (<code>diet=Dbld/Dbld</code>, hurt to half, hunger full) shared a pen with one cow,
     which the watch counted there all day. It logged no <code>[trace] blood</code> line at all. HUNT ORDER, an identical

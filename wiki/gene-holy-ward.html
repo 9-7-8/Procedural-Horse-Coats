@@ -163,8 +163,18 @@
 <p id="verified-spawn-eggs">
     <strong>Spawn eggs still work beside a warding horse</strong> (owner-confirmed in the
     2026-09-10 play sessions). The ward cancels natural spawns only, by the allow-list of spawn
-    reasons in <code>GeneWardHandler.isNatural</code>. <em>Still open:</em> a spawner farm beside a
-    warding horse, and the ward stopping once the horse dies.
+    reasons in <code>GeneWardHandler.isNatural</code>. <em>Still open:</em> the ward stopping once the horse dies.
+</p>
+
+<p id="verified-spawner-farm">
+    <strong>A spawner farm beside a warding horse keeps producing</strong> (2026-09-15, the 16:11 run). This was the
+    open half of the note above. A spawner horse's summons go through <code>EntityType.spawn</code> as
+    <code>NATURAL</code> on purpose, so claim and spawn-blocking mods still see them as ordinary spawns - which meant
+    the ward refused them whenever one landed inside its radius. <code>GeneAbilityHandler.summoning()</code> now lets a
+    summon through, and the yard's SPAWNER WARD pen tests it: eight meals beside a <code>Hly/Hly</code> horse made
+    <code>16 made, 2 inside</code> the ward's eight blocks, PASS, with no refusal line logged
+    (<a href="gene-spawner.html#verified-ward-farm">spawner</a>). The owner's call, and the reason it is not a hole in
+    the gene: a player who feeds a zombie spawner beside their own warding horse asked for the zombies.
 </p>
 
 </section>
