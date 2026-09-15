@@ -213,9 +213,11 @@
         (<a href="known-gaps.html#gap-241">gap 241</a>). <strong>Pass:</strong> no <code>night flee
         | ... from minecraft:horse</code>, and a <code>Flc</code> horse still moves away from cows and
         sheep after dark.</li>
-    <li><strong>Pen labels in the log.</strong> A yard horse's trace name now ends in its label in
-        quotes, so <code>displaced ... at food or water</code> in DISPLACEMENT says which RANK mare
-        won. <strong>Pass:</strong> every such line names the lower rank number first.</li>
+    <li><strong>Pen labels in the log, and rank at the hay: confirmed overnight.</strong> From 22:45 to
+        05:50 DISPLACEMENT logged 19 <code>displaced ... at food or water</code> lines and every one names
+        the higher-ranked mare first (1 over 2, 3 and 4; 2 over 3 and 4; 3 over 4), never the reverse. The
+        mares ate the pen's hay 53 times and it was put back 51. Wild horses displaced each other another
+        296 times, steadily all night. Delete this bullet next pass.</li>
 </ul>
 
 <h2 id="tutorial-0914">&sect;0-DY &mdash; Getting started, brought up to date (2026-09-14, NOT looked at)</h2>
@@ -289,12 +291,12 @@
     how many of those lines it has.
 </p>
 <ul>
-    <li><strong>DRYAD SPRUCE and DRYAD ACACIA</strong> (row S): trees grow from their saplings.
-        On the first run neither did (<a href="known-gaps.html#gap-240">gap 240</a>).
-        <strong>Pass:</strong> <code>spruce_log</code> and <code>acacia_log</code> above zero in
-        the census.</li>
-    <li><strong>No dryad horse dies in its own pen</strong> once gap 237's fix is built: no
-        <code>inWall</code> damage in rows S and T.</li>
+    <li><strong>No dryad horse dies in its own pen</strong>: no <code>inWall</code> damage in any dryad
+        pen. <strong>Failed once overnight</strong>, when DRYAD DARK's dark oak grew a branch through a horse
+        at 04:01 (<a href="known-gaps.html#gap-244">gap 244</a>). Dark and pale oak now hold back two blocks
+        out, and DRYAD DARK SMALL is widened to ten by nine. <strong>Pass:</strong> a whole run with no
+        <code>inWall</code> in DRYAD DARK, DRYAD DARK SMALL, DRYAD OAK+BIRCH, DRYAD FLOWER or DRYAD CARRIER,
+        and DRYAD DARK SMALL still grows a tree.</li>
 </ul>
 
 <h3 id="all-day-ratio">Row U: inheritance ratios</h3>

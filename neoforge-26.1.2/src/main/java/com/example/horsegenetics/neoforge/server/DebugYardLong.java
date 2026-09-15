@@ -41,8 +41,8 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *
  * <table>
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>S</td><td>DRYAD SPRUCE, DRYAD JUNGLE</td><td>DRYAD ACACIA, DRYAD CARRIER (Oak/n, plants nothing)</td></tr>
- *   <tr><td>T</td><td>DRYAD OAK, DRYAD FLOWER</td><td>DRYAD OAK+BIRCH (half rate each), DRYAD DARK SMALL</td></tr>
+ *   <tr><td>S</td><td>(spruce and jungle deleted 2026-09-15)</td><td>(acacia deleted), DRYAD CARRIER (Oak/n, plants nothing)</td></tr>
+ *   <tr><td>T</td><td>(oak deleted), DRYAD FLOWER</td><td>DRYAD OAK+BIRCH (half rate each), DRYAD DARK SMALL (widened 10x9)</td></tr>
  *   <tr><td>U</td><td>RATIO HYPP, RATIO LETHAL WHITE</td><td>RATIO BRINDLE, RATIO SIZE</td></tr>
  * </table>
  *
@@ -91,33 +91,26 @@ final class DebugYardLong {
             stoneBand(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
             stoneBand(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
 
-            // SPRUCE AND ACACIA ARE WIDER (2026-09-14): both trees want a two-block clear ring
-            // round the trunk, and a fence is not something a tree may grow through, so in a
-            // five-wide pen only the centre column could ever take one. Seven wide leaves three.
-            dryad(level, gy, west, mouthZ + ROW_S, 8, ROW_S_D, "DRYAD SPRUCE", "Spru/Spru", 2,
-                    List.of("DRYAD SPRUCE", "Spru/Spru: spruce", "ONLY, then trees", "(all day)"),
-                    Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
-            dryad(level, gy, west + 11, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD JUNGLE", "Jung/Jung", 2,
-                    List.of("DRYAD JUNGLE", "Jung/Jung: jungle", "ONLY, then trees", "(all day)"),
-                    Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
-            dryad(level, gy, east, mouthZ + ROW_S, 8, ROW_S_D, "DRYAD ACACIA", "Aca/Aca", 2,
-                    List.of("DRYAD ACACIA", "Aca/Aca: acacia", "ONLY, then trees", "(all day)"),
-                    Blocks.ACACIA_SAPLING, Blocks.ACACIA_LOG, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING);
+            // DELETED 2026-09-15 (owner: "delete the dryad pens which have grown and haven't killed
+            // anyone"): DRYAD SPRUCE, DRYAD JUNGLE, DRYAD ACACIA and DRYAD OAK. Overnight each grew
+            // trees with its horses in it (spruce 18 logs, jungle 4, acacia 25, oak 18) and none took
+            // inWall damage. Kept: the carrier control, flowers, oak+birch (no tree overnight), and
+            // both dark oak pens - DRYAD DARK is where the branch killed a horse (gap 244).
             dryad(level, gy, east + 11, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD CARRIER", "Oak/n", 2,
                     List.of("DRYAD CARRIER", "Oak/n: must plant", "NOTHING all day", "(the control)"),
                     Blocks.OAK_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_SAPLING);
 
-            dryad(level, gy, west, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD OAK", "Oak/Oak", 2,
-                    List.of("DRYAD OAK", "Oak/Oak: count its", "plantings - vs", "OAK+BIRCH east"),
-                    Blocks.OAK_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_SAPLING);
             dryad(level, gy, west + 11, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD FLOWER", "Flwr/Flwr", 2,
                     List.of("DRYAD FLOWER", "Flwr/Flwr: flowers", "on grass only", "(all day)"),
                     Blocks.DANDELION, Blocks.POPPY, Blocks.OAK_SAPLING);
             dryad(level, gy, east, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
-                    List.of("DRYAD OAK+BIRCH", "both, each at half", "rate: total about", "DRYAD OAK's"),
+                    List.of("DRYAD OAK+BIRCH", "both, each at half", "rate - and still", "no tree?"),
                     Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
-            dryad(level, gy, east + 11, mouthZ + ROW_T, 5, 6, "DRYAD DARK SMALL", "Dark/Dark", 1,
-                    List.of("DARK OAK, SMALL", "one horse, small", "pen: a 2x2 and a", "tree by evening?"),
+            // WIDENED 2026-09-15 (owner). Dark and pale oak now hold back for a horse two blocks out
+            // (gap 244), and at five by six the old pen's one horse was always inside that. Ten by
+            // nine leaves room for it to stand clear while a 2x2 grows.
+            dryad(level, gy, east + 8, mouthZ + ROW_T, 10, ROW_T_D, "DRYAD DARK SMALL", "Dark/Dark", 1,
+                    List.of("DARK, ONE HORSE", "widened 10x9", "for the 2-block", "branch check"),
                     Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
             lightFromTheFloor(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
             lightFromTheFloor(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
