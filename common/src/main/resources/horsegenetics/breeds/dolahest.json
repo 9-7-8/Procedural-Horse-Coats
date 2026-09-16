@@ -1,0 +1,78 @@
+{
+  "id": "dolahest",
+  "name": "Dolahest",
+  "country": "norway",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:grove",
+    "minecraft:forest",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 9,
+    "size": [0.925, 0.975]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 52 },
+      { "pair": "A/a", "weight": 40 },
+      { "pair": "a/a", "weight": 8 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 12 },
+      { "pair": "G2/N", "weight": 7 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 18 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Dolahest or Dole Gudbrandsdal - Norway's largest native horse, from Gudbrandsdalen and the eastern valleys. A cold-blood that did everything a Norwegian farm needed: timber, fields, carts, sleighs, roads and riding.",
+    "The spelling here drops the slash from Dolahest because a breed id is a lower-case ASCII token.",
+    "More colourful than the silhouette suggests, and the point of difference from the Fjord: the current Norwegian breeding plan accepts black, brown, chestnut, buckskin, palomino and every grey, where the Fjord is effectively colour-fixed. Cream is real here.",
+    "Dun is forced wild on conflicting evidence. Some secondary summaries list it, other sources say the dun allele does not occur in the breed, and no Dole survey was found either way - so the conservative reading shipped.",
+    "Silver, pearl, champagne, mushroom and flaxen are forced wild, and so is every white pattern: moderate facial markings and low socks are allowed by the plan but extensive white is restricted at inspection, and the mod's white-pattern loci all paint far more than that. Sabino 1 sits near absent for ordinary markings only.",
+    "The lighter Dole Trotter (Doletrav) is a real sub-tradition and is not a strain here: no separate height was cited for it, and a strain may override gene pools and nothing else, so it could not have its own size band anyway.",
+    "Cold tolerant near-fixed - bred to pull through snow - and lightly heat sensitive as the heavy cold-bloods are.",
+    "Two height figures were cited and the current breed plan's 148-156 cm was followed over NordGen's 145-155 cm.",
+    "All disorders clear. The breed's endangered status is not evidence of disease prevalence and was not turned into any.",
+    "The national Dole organisation formed in 1947 and the breed is managed today through the Norwegian Horse Centre as one of Norway's endangered natives.",
+    "Timber traction, harness trotting and the limited feathering are none of them modelled."
+  ]
+}

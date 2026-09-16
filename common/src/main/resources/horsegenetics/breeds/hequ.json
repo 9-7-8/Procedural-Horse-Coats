@@ -1,0 +1,100 @@
+{
+  "id": "hequ",
+  "name": "Hequ",
+  "country": "china",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:snowy_slopes",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:plains",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 10,
+    "size": [0.813, 0.937]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 55 },
+      { "pair": "E/e", "weight": 38 },
+      { "pair": "e/e", "weight": 7 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 22 },
+      { "pair": "G2/N", "weight": 12 },
+      { "pair": "N/N", "weight": 66 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Jiaode",
+      "weight": 4,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "G3/N", "weight": 40 },
+          { "pair": "G2/N", "weight": 20 },
+          { "pair": "N/N", "weight": 40 }
+        ]
+      }
+    },
+    {
+      "name": "Suoke",
+      "weight": 3,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "G3/N", "weight": 16 },
+          { "pair": "G2/N", "weight": 8 },
+          { "pair": "N/N", "weight": 76 }
+        ]
+      }
+    },
+    {
+      "name": "Kesheng",
+      "weight": 3,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "G3/N", "weight": 17 },
+          { "pair": "G2/N", "weight": 9 },
+          { "pair": "N/N", "weight": 74 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The horse of the great bend of the Yellow River, on the Qinghai-Tibetan plateau where Qinghai, southern Gansu and western Sichuan meet. Formerly called the Nanfan.",
+    "Its home ground is around eleven thousand feet. Health 10 is the mod's only available proxy for that: thin air, cold winters, seasonal forage, carrying a rider all day and recovering afterwards where a lowland horse would not. Oxygen physiology, acclimatisation and haemoglobin response are not modelled and cannot be.",
+    "Three regional varieties ship as strains, and grey is the whole of the difference. Jiaode of southern Gansu is the largest and heaviest and much the greyest; Suoke of western Sichuan is compact with a high tail carriage; Kesheng of Qinghai is the balanced all-rounder and carries historical Mongolian influence.",
+    "The varieties really do differ in size as well as colour, and cannot here: a strain may override gene pools and nothing else, so the one size band spans all three.",
+    "Black, bay and brown, and grey - true progressive grey, born dark and lightening with age, not silver dapple and not mouse dun. Every dilution, every white pattern and the leopard complex are forced wild.",
+    "No representative genotype study exists for extension, agouti or grey by variety. These are calibrated gameplay approximations and not Chinese studbook percentages.",
+    "Cold tolerant near-fixed, for plateau winters; no heat locus.",
+    "All disorders clear, with the reasoning spelled out because it is the tempting kind of breed to guess on: PSSM1 is dominant and not a carrier allele at all, the Arabian panel of SCID, CA and LFS is not licensed by any oriental influence, the Quarter Horse panel of HYPP, GBED and HERDA has nothing to do with a plateau landrace, and warmblood WFFS is not a default mountain-horse mutation.",
+    "Some sources trace the regional identity to Tang-era horse culture, and Suoke's high tail carriage does resemble Tang art. It is a long-developed highland landrace all the same, not a relic of one dynasty.",
+    "The broad hooves, the large mobile eyes and long open ears, and the light draught and local racing roles are none of them modelled."
+  ]
+}

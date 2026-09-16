@@ -1,0 +1,62 @@
+{
+  "id": "henson_horse",
+  "name": "Henson Horse",
+  "country": "france",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:beach",
+    "minecraft:stony_shore",
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 9,
+    "size": [0.937, 1]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 60 },
+      { "pair": "D/d1", "weight": 15 },
+      { "pair": "D/d2", "weight": 25 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Cheval Henson of the Bay of Somme and the Marquenterre in Picardy - the horse of the bay, and one of the youngest breeds in this book. Made in the 1970s from Norwegian Fjord stallions over local French saddle mares, and officially recognised as a French breed in July 2003.",
+    "The design brief was explicit: keep the Fjord's calm, its primitive dun colour, its strength and its ability to live outdoors, and make it taller, longer-legged and more comfortable for trekking. It reads as a refined, less heavy Fjord.",
+    "Bay dun - baie sauvage - every time, and this is the most tightly fixed colour pool here after the Friesian and the Camargue. Extension is fixed E so no founder is ever a red dun, agouti is fixed A so none is ever a grullo, and every founder carries D.",
+    "The dorsal stripe is compulsory in the standard and leg bars are common, which is what the dun does here. d1 and d2 ride along behind D without ever showing, since one D is enough.",
+    "Grey, cream, pearl, champagne, silver, mushroom and flaxen are forced wild, and so is every white pattern - extensive white is discouraged in the breed and prohibited outright in breeding stallions.",
+    "Pangare is not named, which is the one place this file may be wrong. The Fjord's near-fixed pangare is part of the look it was bred from, but the intake draft never raised it and inventing a rate for a fifty-year-old breed on the strength of its foundation sire is a guess too far. Worth revisiting if the Henson looks too flat beside a Fjord.",
+    "The real breeding rule of roughly 25 to 50 percent Fjord ancestry is not modelled; nor is the two-toned black-and-gold mane, which is the other half of the Fjord inheritance.",
+    "Cold tolerant partially, for a coastal Picardy climate lived outdoors year-round on sand, wet grassland and estuary marsh.",
+    "All disorders clear. No Henson-specific carrier data was located, which for a breed this young and this closely managed is unsurprising.",
+    "Rare, and genuinely small: a historical count put about 1,200 in France with some 200 around the Marquenterre, and few active stallions means inbreeding avoidance is a live concern. That figure is historical and not a current census.",
+    "It is named for the bay, not for a person or a stud, and it turned a regional tourism idea into a recognised breed.",
+    "The preferred dark hooves, the beach and estuary footing, and its suitability for novice riders are none of them modelled."
+  ]
+}

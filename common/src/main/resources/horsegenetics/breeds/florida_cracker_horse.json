@@ -1,0 +1,96 @@
+{
+  "id": "florida_cracker_horse",
+  "name": "Florida Cracker Horse",
+  "country": "united_states",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:plains",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    "minecraft:sparse_jungle",
+    "minecraft:meadow",
+    "minecraft:beach"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 10,
+    "size": [0.857, 0.984]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 45 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 4 },
+      { "pair": "ShL/Sh", "weight": 16 },
+      { "pair": "ShL/ShD", "weight": 14 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 30 },
+      { "pair": "ShD/ShD", "weight": 16 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 4 },
+      { "pair": "D/d2", "weight": 33 },
+      { "pair": "d1/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 55 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 13 },
+      { "pair": "G2/N", "weight": 6 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 17 },
+      { "pair": "rn/rn", "weight": 83 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 1 },
+      { "pair": "Fl1/f", "weight": 21 },
+      { "pair": "f/f", "weight": 78 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 5 },
+      { "pair": "to/to", "weight": 95 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 9 },
+      { "pair": "N/N", "weight": 91 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 9 },
+      { "pair": "rb/rb", "weight": 91 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "Florida's state horse since 2008, and a colonial-Spanish descendant of horses landed by Spanish expeditions in the early 1500s. The name comes from the Florida cowhunters nicknamed for the crack of their rawhide whips; the horses inherited it.",
+    "A cattle horse for palmetto scrub, pine flatwoods, wet prairie and swamp margin - all day, on little feed, picking its own footing. Health 10 is that, not bulk: it is a small light riding horse of 700 to 1,000 pounds, not a Quarter Horse.",
+    "A broad palette for a heritage stock breed - bay, dark bay, black, brown, grey, chestnut, dun and grullo, with roan and pinto strains persisting - but it still skews dark and practical, so the shade pool is skewed dark and dun is a visible recurring quarter of the herd rather than a signature.",
+    "Grullo is dun over black, and dun carries the dorsal stripe, leg bars and shoulder cross the breed is known for. A little d1 rides along: primitive marking without body dilution.",
+    "Cream, pearl, champagne, silver and mushroom are forced wild - not documented as central colours, though they can enter by outcrossing. Frame overo is forced wild too, which deliberately keeps lethal white out of a small conservation breed with no evidence for it.",
+    "Leopard is forced wild: Appaloosa-type spotting is not part of the documented core palette.",
+    "DMRT3 gait is not named. The breed is famous for a smooth ground-covering way of going, but no source put that in the gait-keeper sense, and the Boerperd and the Paso breeds are where this file would have had to borrow from.",
+    "Heat tolerant partially, as the Banker Horse is. Tolerating heat and insects on open range was a working requirement, not a comfort.",
+    "All disorders clear, and deliberately so: the breed was displaced from Florida cattle work by the Quarter Horse in the 1930s, which is a shared history and not a licence to import the Quarter Horse disorder panel.",
+    "The registry formed in 1989 after the 1930s collapse. Older accounts insist you cannot judge one by looking - the best way to recognise one is to ride it.",
+    "Cow sense, quick acceleration, the white sclera, hard feet and insect tolerance are none of them modelled."
+  ]
+}

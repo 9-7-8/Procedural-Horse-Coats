@@ -1,0 +1,85 @@
+{
+  "id": "highland_pony",
+  "name": "Highland Pony",
+  "country": "united_kingdom",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_forest",
+    "minecraft:grove",
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:birch_forest"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 10,
+    "size": [0.825, 0.919]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 74 },
+      { "pair": "E/e", "weight": 24 },
+      { "pair": "e/e", "weight": 2 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 58 },
+      { "pair": "A/a", "weight": 36 },
+      { "pair": "a/a", "weight": 6 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 31 },
+      { "pair": "D/d1", "weight": 16 },
+      { "pair": "D/d2", "weight": 34 },
+      { "pair": "d1/d1", "weight": 2 },
+      { "pair": "d1/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 9 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 18 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 73 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 18 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 3 },
+      { "pair": "Fl1/f", "weight": 27 },
+      { "pair": "f/f", "weight": 70 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "One of the largest British native ponies, and one of Scotland's three native breeds with the Shetland and the Eriskay. Carried deer off the hills, hauled timber, ploughed crofts and packed over roadless ground, and some still carry deer down from Scottish hills today.",
+    "Dun is the signature and the breed has a whole vocabulary for it - mouse, yellow, grey, cream, red or fox, oatmeal, biscuit - with dorsal stripes, leg barring and the occasional shoulder stripe. Roughly four founders in five carry D.",
+    "Two different greys are in play and they are independent here: 'grey dun' is a dun shade, and the grey gene is the separate thing that whitens a horse with age. Both are in the pool and they combine.",
+    "Cream carries the cream dun and biscuit dun end of that vocabulary. It is an approximation - the sources describe phenotype categories, not MATP allele counts.",
+    "Flaxen carries the occasional liver chestnut with a light silvery mane and tail that the registry also accepts.",
+    "Every white-pattern locus is forced wild, and unusually this is the registry's own rule rather than an absence of evidence: broken colours are not permitted, a small star is acceptable, and white legs, extensive facial white, white hooves and - on stallions - anything beyond that small star are unacceptable. So no sabino pool at all, not even a token one.",
+    "Champagne, silver, mushroom and pearl are forced wild with no defensible breed-specific basis.",
+    "Cold tolerant near-fixed: heather, bog, loose stone, thin grazing and a wet climate, with a dense double winter coat that sheds to a clean summer one.",
+    "Health 10 is the easy-keeper constitution - real strength in sparse country. The modern flip side is obesity, laminitis and metabolic trouble on rich pasture, which is a management phenotype and not a single-locus disease, so nothing is coded for it.",
+    "All disorders clear; no trustworthy Highland-specific carrier study was found, and importing rates from breeds where those diseases are established would be inventing them.",
+    "The registry began in the 1830s and the Highland Pony Society was formally established in 1923. Queen Victoria favoured the breed and Queen Elizabeth II kept a substantial working Highland stud at Balmoral. The Society manages co-ancestry with the SPARKS kinship system, which warns against pairings expected to yield 10% or more co-ancestry.",
+    "The silky feathering, the tough round feet, the double coat and the food-motivated stubbornness are none of them modelled."
+  ]
+}

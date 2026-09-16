@@ -1,0 +1,75 @@
+{
+  "id": "hucul_pony",
+  "name": "Hucul Pony",
+  "country": "romania",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:grove",
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 10,
+    "size": [0.825, 0.925]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 78 },
+      { "pair": "E/e", "weight": 20 },
+      { "pair": "e/e", "weight": 2 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 23 },
+      { "pair": "A/a", "weight": 50 },
+      { "pair": "a/a", "weight": 27 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 2 },
+      { "pair": "D/d1", "weight": 2 },
+      { "pair": "D/d2", "weight": 21 },
+      { "pair": "d1/d1", "weight": 1 },
+      { "pair": "d1/d2", "weight": 12 },
+      { "pair": "d2/d2", "weight": 62 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 7 },
+      { "pair": "to/to", "weight": 93 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The Carpathian pony of the Hutsul region - Hutsul, Huzul, Hucul, all the same horse. A low, deep, short-legged mountain worker with hooves sound enough that many are never shod.",
+    "Filed under Romania on the owner's breed-by-country table. The homeland genuinely spans the Eastern Carpathians across Romania, Ukraine, Poland and Slovakia, with breeding populations in Hungary, the Czech Republic and Austria, and Poland holds the international Studbook of Origin - but a breed is pinned to one nation here, not a region.",
+    "The colour pool follows the published Polish allele-frequency study rather than the second draft's gameplay estimates, which is why agouti is split near the middle and black is a real quarter of the herd rather than a rarity.",
+    "That same choice makes dun a visible minority of about a quarter rather than the signature it reads as in prose. The measured d frequency was 0.878. This is the Domestic Mountain Pony situation again - a measured allele frequency disagreeing with the visual reputation - and the measurement won. A 2019 study found recorded Hucul colours disagreeing with genotype often enough to justify the choice.",
+    "d1 is carried on purpose: primitive marking without body dilution, which is much of what the dorsal stripe and zebra leg barring look like in a population whose dun classification is unreliable by eye.",
+    "Grey is forced wild. The measured study found it essentially absent at 0.003 and the international standard excludes it outright, so the two lines of evidence agree for once.",
+    "Tobiano is the one place the two drafts could not be reconciled and the value here splits them. The study measured To at 0.071, which would make one founder in eight a pinto; the studbook admits skewbald only as a rare historical colour, attributed to old oriental blood. Seven percent of founders carrying it is the compromise and it is a judgement call, not a measurement.",
+    "Cream, pearl, champagne, silver, mushroom, flaxen, roan, rabicano, leopard and every other white-pattern locus are forced wild - no defensible Hucul-specific evidence for any.",
+    "Cold tolerant near-fixed: Carpathian slopes, high pasture and stony ground, lived on grass and hay rather than in a stable for much of the year.",
+    "All disorders clear. The conservation literature on this breed is about inbreeding and bottleneck management, not single-locus disease frequency.",
+    "First mentioned in professional accounts as early as 1613, with systematic recording from the imperial stud at Luczyn in Bukovina in 1856. The studbook is closed and requires five documented generations on both sides, with DNA verification since 2002. The FAO listed it in its protected gene fund for primitive breeds in 1979 and the Hucul International Federation has coordinated the national populations since 1994; peer-reviewed work has called it a vanishing breed, which is why it ships rare and not uncommon.",
+    "The Hucul Path trail-and-obstacle competition, the hard unshod hooves and the thick mane and tail are none of them modelled."
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "id": "baise_horse",
+  "name": "Baise Horse",
+  "country": "china",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:bamboo_jungle",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 10,
+    "size": [0.7, 0.731]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 44 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 16 },
+      { "pair": "G2/N", "weight": 8 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 60 },
+      { "pair": "Htol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The Baise horse of the Baise region of Guangxi, in southwestern China. Filed here under its proper breed name rather than as a generic 'Guangxi horse' - Guangxi is the autonomous region, and the Debao Pony and the Guoxia come from the same ground.",
+    "Not one of China's big northern steppe horses: a compact southern mountain and village type, pony-sized but not refined - broad-jawed, dense-boned, short-legged, and built to carry people and supplies on narrow paths and pull a light cart.",
+    "Bronze horses from the third to first centuries BCE found in the region resemble the modern type closely. That is suggestive rather than proof of genetic continuity.",
+    "Four documented colours and no more: bay leads, with chestnut, black and grey as minorities. No population genotype survey exists for this breed, so the rates are transparent gameplay approximations.",
+    "The grey here is true progressive grey - born pigmented and lightening with age - and not silver dapple, not mouse dun and not a horse white from birth.",
+    "Every dilution, every white pattern and the whole leopard complex are forced wild. Ordinary face and lower-leg markings do occur on individuals, but the mod's named white loci all paint far more than that, and there is no evidence to hang them on.",
+    "Heat tolerant near-fixed: exceptional heat and humidity tolerance is the breed's documented adaptation, along with thrift on poor-to-medium forage and hard small hooves. Health 10 is that thrift; no cold locus.",
+    "All disorders clear. Real-world resilience to climate and forage is not evidence about any particular Mendelian allele, and no Baise-specific carrier frequency was located for any of them.",
+    "Genomic work identifies it as a distinctive Chinese indigenous population, protected regionally as an animal genetic resource. Traditional wedding use is noted in the sources.",
+    "The hard hooves, the forage efficiency and the narrow mountain-track sure-footedness are none of them modelled."
+  ]
+}

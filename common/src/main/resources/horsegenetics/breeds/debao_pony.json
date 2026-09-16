@@ -1,0 +1,80 @@
+{
+  "id": "debao_pony",
+  "name": "Debao Pony",
+  "country": "china",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:bamboo_jungle",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:windswept_hills",
+    "minecraft:stony_peaks"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 9,
+    "size": [0.587, 0.644]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 38 },
+      { "pair": "E/e", "weight": 47 },
+      { "pair": "e/e", "weight": 15 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 10 },
+      { "pair": "G2/N", "weight": 6 },
+      { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 2.5 },
+      { "pair": "N/N", "weight": 97.5 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa1/pa", "weight": 6 },
+      { "pair": "pa/pa", "weight": 94 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 2 },
+      { "pair": "to/to", "weight": 98 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Debao ai ma, or Baiseshishan pony - a registered landrace of Debao county in western Guangxi, descended from the older Guoxia tradition but a distinct breed from it, not another name for it. One of the smallest horses in the world.",
+    "Rediscovered by a 1981 field survey that turned up a seven-year-old mare only 92.5 cm at the withers; research from 1986 to 1990 established that the small stature is stable and heritable and separated the breed from the taller Baise horse.",
+    "The coat pool is built to a real survey - 856 ponies, reported as 54.9% bay, 15.8% grey, 15.0% chestnut, 6.8% black, 3.3% rabbit-brown, 2.5% yellow and 1.9% piebald - which makes it one of the few breeds here whose colour rates are measured rather than designed.",
+    "The survey's 'yellow' and 'piebald' are read as cream and tobiano. The source does not identify either molecularly, so those two are visual proxies and the weakest part of the pool.",
+    "The survey's 'rabbit-brown' is read as pangare, which the intake draft left unmapped. A mealy light-brown is the best available reading of the category, and it is a guess.",
+    "Genomic work puts the miniature size down to selection near TBX3 and HMGA2, arrived at independently of the small stature of other pony breeds. Neither is named as a pool here: the mod's HMGA2 is the p.G28E pony test and this is not that result, so the size band carries it instead - the same call the Domestic Mountain Pony made.",
+    "Its smallness is a normal breed phenotype, not dwarfism. ACAN is clear on purpose and borrowing a dwarfism allele would be a different, sicker animal.",
+    "Dun, pearl, champagne, silver, mushroom, flaxen, roan, rabicano and leopard are all forced wild. Sabino 1 sits low, for the limited face and lower-leg white the survey mentions.",
+    "Heat tolerant for subtropical Guangxi; no cold locus.",
+    "All disorders clear. No Debao-specific carrier rate was found for any of them.",
+    "Steep limestone country, hard hoof horn, dense mane and fetlock hair, pack carriage far beyond what the size suggests, and the modern pony-polo and youth-riding roles are none of them modelled."
+  ]
+}

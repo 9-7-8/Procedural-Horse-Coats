@@ -1,0 +1,66 @@
+{
+  "id": "fell_pony",
+  "name": "Fell Pony",
+  "country": "united_kingdom",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_forest",
+    "minecraft:grove",
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 9,
+    "size": [0.825, 0.889]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 88 },
+      { "pair": "E/e", "weight": 11.5 },
+      { "pair": "e/e", "weight": 0.5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 9 },
+      { "pair": "A/a", "weight": 42 },
+      { "pair": "a/a", "weight": 49 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 4 },
+      { "pair": "ShL/Sh", "weight": 16 },
+      { "pair": "ShL/ShD", "weight": 14 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 30 },
+      { "pair": "ShD/ShD", "weight": 16 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The pony of the northern fells - Cumbria and the Lake District. Packed lead down from the northern mines and moved farm goods over ground too wet, rocky, steep and narrow for a horse.",
+    "Black first, dark brown second, then bay and a little grey: the registered palette is black, brown, bay and grey, and black only became predominant in the second half of the twentieth century - bay and brown were especially common before that. The agouti pool is weighted to that phenotype rather than being a published allele frequency.",
+    "Chestnut, piebald and skewbald go in Section X rather than the main colour standard, so chestnut sits at about one founder in two hundred and no pinto locus is named at all.",
+    "Dark brown is carried by the shade locus, so the shade pool is skewed dark rather than using the house-standard spread.",
+    "Cream, pearl, silver, dun, champagne, mushroom, flaxen, roan, rabicano and leopard are all forced wild - none is a standard mainstream Fell colour. Sabino 1 sits at 1% for the permitted star and the odd white hind hoof; extensive facial white and white forelegs are discouraged by the standard.",
+    "Foal Immunodeficiency Syndrome is the breed's defining modern health story and this file cannot carry it: FIS is a fatal autosomal-recessive that the mod has no locus for. A foundational screen found 82 carriers in 214 Fell Ponies - about 38%, and UC Davis has reported near 40% - and the same mutation is present in the Dales Pony. Testing has been available since 2010. The gene is on the roadmap; its absence here is a missing feature, not a claim that the breed is clear.",
+    "Every other disorder is clear - no credible Fell-specific evidence was found for any of them.",
+    "Cold tolerant partially, as the neighbouring Dales is: a weatherproof hill pony with a dense winter coat.",
+    "The Fell Pony Society registry formed in 1922; the RBST puts the type in the Lake District for more than two thousand years.",
+    "Blue horn, the silky feather to the knee, the dense winter coat and the economical all-day walk are none of them modelled."
+  ]
+}

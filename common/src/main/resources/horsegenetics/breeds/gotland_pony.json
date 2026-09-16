@@ -1,0 +1,77 @@
+{
+  "id": "gotland_pony",
+  "name": "Gotland Pony",
+  "country": "sweden",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:taiga",
+    "minecraft:grove",
+    "minecraft:plains"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 6,
+    "health": 10,
+    "size": [0.719, 0.813]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 64 },
+      { "pair": "E/e", "weight": 32 },
+      { "pair": "e/e", "weight": 4 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 67 },
+      { "pair": "A/a", "weight": 30 },
+      { "pair": "a/a", "weight": 3 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 34 },
+      { "pair": "D/d1", "weight": 14 },
+      { "pair": "D/d2", "weight": 35 },
+      { "pair": "d1/d1", "weight": 1 },
+      { "pair": "d1/d2", "weight": 7 },
+      { "pair": "d2/d2", "weight": 9 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 3 },
+      { "pair": "Fl1/f", "weight": 30 },
+      { "pair": "f/f", "weight": 67 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Gotlandsruss, or just the Russ - the island landrace of Gotland in the Baltic. Older names are better: Skogruss, the little horse of the woods, and Skogsbaggar, forest rams.",
+    "Dun is the signature family and sits near three-quarters of founders, over a bay-led base, so bay dun leads with grullo and red dun behind it. d1 is carried on purpose - primitive marking without body dilution, which is what a landrace should look like.",
+    "Single cream is deliberately present and double cream deliberately impossible: the Swedish conservation description excludes homozygous cream, not cream itself, so Cr/N ships and Cr/Cr does not. A founder will never be cremello, though breeding two carriers still can be.",
+    "Grey and tobiano are excluded by the same conservation profile and are forced wild outright, not merely kept rare.",
+    "No gait locus, and for once that is measured rather than assumed: a published sample of 28 Gotland ponies found the DMRT3 gait-keeper allele at zero frequency. The breed's sporting reputation is pony trotting, which is a trot.",
+    "Champagne, silver, mushroom, pearl, roan, rabicano, leopard and every white-pattern locus are forced wild - no breed-specific evidence for any. Flaxen is the one cautious aesthetic addition and is not a documented population estimate.",
+    "Cold tolerant partially: wind-exposed Baltic country - mixed forest, heath, thin soils and cold wet winters rather than lush pasture - and a managed semi-feral herd still lives out at Lojsta Hed.",
+    "It came within a hair of ending. By 1922 the core remnant was seven mares, one young stallion and six young horses; Welsh and Welsh Mountain stallions were brought in in 1951 and 1957 against the inbreeding and their lines run through the modern population, with no outside introductions since.",
+    "Uncommon rather than rare on the numbers: NordGen recorded about 2,500 mares in Sweden in 2020 and conservation sources put the world population at roughly 6,000 to 8,000.",
+    "All disorders clear. Importing Arabian, Quarter Horse, Friesian or warmblood rates into a small Swedish pony population would be inventing them.",
+    "The famously hard sound hooves, the pony-trotting talent and the long back are none of them modelled."
+  ]
+}

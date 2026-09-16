@@ -1,0 +1,80 @@
+{
+  "id": "gelderland",
+  "name": "Gelderlander",
+  "country": "netherlands",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:birch_forest",
+    "minecraft:flower_forest",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 8,
+    "size": [0.984, 1.238]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 17 },
+      { "pair": "E/e", "weight": 48 },
+      { "pair": "e/e", "weight": 35 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 53 },
+      { "pair": "A/a", "weight": 39 },
+      { "pair": "a/a", "weight": 8 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 9 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 3 },
+      { "pair": "Fl1/f", "weight": 30 },
+      { "pair": "f/f", "weight": 67 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 32 },
+      { "pair": "W20/N", "weight": 8 },
+      { "pair": "N/N", "weight": 60 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 11 },
+      { "pair": "rb/rb", "weight": 89 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 5 },
+      { "pair": "to/to", "weight": 95 }
+    ]
+  },
+  "notes": [
+    "The Gelders Paard of eastern Gelderland, once the Basispaard - the big chestnut carriage warmblood with white socks and an elevated trot. Solid and old-fashioned next to a modern sport horse, and never draught-heavy.",
+    "Chestnut is the traditional and most frequent colour, which is why extension is tilted red - about a third of founders. Bay and black are real variety behind it and grey is uncommon.",
+    "The white is the point: broad blazes and substantial socks are part of the look, so sabino 1 is heavy at about a third of founders with the W20 booster and a light splash behind it. This is the markings mechanism, not a pinto pool.",
+    "Tobiano sits at a twentieth - skewbald is rare but historically present, a memorable find rather than the default.",
+    "Cream, pearl, champagne, silver, mushroom, dun, roan and leopard are forced wild - none is central to the reviewed standard. Frame overo is forced wild too, with no evidence for it and lethal white as the cost of guessing.",
+    "Warmblood Fragile Foal Syndrome is the real modern genetic concern in the Dutch warmblood population - the KWPN requires licensed stallions to be tested so carriers are not paired - and the mod has no WFFS locus, so no rate is written. It is on the roadmap. PLOD1 is NOT a substitute: the mod's PLOD1 is Friesian dwarfism and they are different disorders that happen to share a gene name in loose writing.",
+    "Every other disorder is clear; no Gelderlander-specific carrier study was found.",
+    "No heat or cold locus - a Dutch lowland carriage horse has no climate history to carry, so it is neutral everywhere.",
+    "The Geldersch Paarden Stamboek was founded in 1890 around two goals, an agricultural carriage horse and a luxury one. In 1965 it was one of the two foundation breeds of the Dutch Warmblood with the heavier Groninger, and was later folded under the KWPN; a Classic Gelder studbook won Dutch recognition in 2019 specifically to stop the historical type being absorbed.",
+    "Scarce: a 2017 estimate put it at about 600 breeding mares and 35 stallions.",
+    "The high-stepping carriage trot, the upright neck set and the broad durable hoof are none of them modelled."
+  ]
+}

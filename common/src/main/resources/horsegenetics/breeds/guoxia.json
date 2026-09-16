@@ -1,0 +1,68 @@
+{
+  "id": "guoxia",
+  "name": "Guoxia",
+  "country": "china",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:bamboo_jungle",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:windswept_hills",
+    "minecraft:stony_peaks"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 9,
+    "size": [0.537, 0.625]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 67 },
+      { "pair": "E/e", "weight": 30 },
+      { "pair": "e/e", "weight": 3 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 64 },
+      { "pair": "A/a", "weight": 32 },
+      { "pair": "a/a", "weight": 4 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 18 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 73 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 15 },
+      { "pair": "rn/rn", "weight": 85 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The 'under-fruit-tree horse' of Debao, Jingxi and Tianyang in the Baise region of western Guangxi, and the name is literal: a pony small enough to walk beneath orchard branches. One of the smallest horses in the world, at roughly 86 to 100 cm with an average near 97.",
+    "A functional mountain pony and not a purpose-bred miniature pet - narrow paths, small farms, pack work, light draught and local riding in rugged subtropical hill country. Unusually generous hair for a southern pony: abundant mane and tail, and thick leg hair.",
+    "Three traditional colours - bay, grey and roan - so bay leads with grey a recognisable but not dominant minority and roan below it. No breed-specific coat study was located; these are conservative gameplay estimates.",
+    "Dun is forced wild ON PURPOSE, and this is the interesting call in the file. Sources describe primitive markings, but nobody has shown those markings are the tested TBX3 dun allele, and claiming otherwise would assert a molecular result that does not exist. The markings belong in flavour and model art until someone genotypes one.",
+    "ACAN is clear and no dwarfism allele is borrowed. The smallness is a normal breed phenotype selected for over a long time, not a pathology, and the size band carries it - the same call the Debao Pony and the Domestic Mountain Pony made.",
+    "Every dilution and every white pattern beyond roan is forced wild, with no breed-specific evidence for any of them.",
+    "Heat tolerant partially, for southern China's subtropical hill country.",
+    "Often called ancient and often said to carry Mongolian-horse ancestry, though no continuous studbook supports either. Its modern identity really dates from rediscovery: a remote herd of roughly a thousand very small ponies was reported in 1981, after which a registry was founded and 390 animals registered.",
+    "All disorders clear. Do not import disease rates from superficially similar small breeds.",
+    "Shares its home region with the Baise Horse and the Debao Pony, which are separate breeds from it and from each other.",
+    "The notably strong feet, the abundant hair and the orchard-height niche are none of them modelled."
+  ]
+}

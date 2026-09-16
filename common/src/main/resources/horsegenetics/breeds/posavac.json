@@ -1,0 +1,78 @@
+{
+  "id": "posavac",
+  "name": "Posavac",
+  "country": "croatia",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    "minecraft:forest",
+    "minecraft:birch_forest"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 10,
+    "size": [0.875, 0.937]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 45 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 11 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 61 },
+      { "pair": "A/a", "weight": 34 },
+      { "pair": "a/a", "weight": 5 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 4 },
+      { "pair": "ShL/Sh", "weight": 16 },
+      { "pair": "ShL/ShD", "weight": 14 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 30 },
+      { "pair": "ShD/ShD", "weight": 16 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 5 },
+      { "pair": "G2/N", "weight": 3 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 2 },
+      { "pair": "Fl1/f", "weight": 22 },
+      { "pair": "f/f", "weight": 76 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Hrvatski posavac - the cold-blooded farm horse of the Posavina, the seasonally flooded lowland of the Sava basin in central Croatia. Also the Posavski konj.",
+    "The smaller, lighter counterpart to the Croatian Coldblood. The two are related but genetically distinct populations (Galov et al. found no recent bottleneck in the Posavina sample), and here the difference is the size band and a higher speed, jump and health, not the coat.",
+    "Broad feet and a deep short-legged frame for soft ground. Bred on wet pasture at low input, which is what health 10 is: it recovers on coarse forage that would not keep a riding horse.",
+    "Two intake drafts described this breed with opposite coat identities - one bay and seal-brown led with flaxen absent, one chestnut-led with flaxen a defining trait - and neither cited a coat survey. The better-sourced draft (Ivankovic et al., which is also the source of the heights) leads with bay and seal brown, so that is what shipped, with chestnut kept a real minority at about one founder in nine and a mild flaxen allowed on it. No Croatian coat survey exists; this is a gameplay approximation and nothing more.",
+    "Seal brown is carried by the shade locus rather than a separate agouti allele, so the shade pool is skewed dark instead of using the house-standard spread.",
+    "Grey is a minority. Cream, pearl, champagne, silver, dun, roan, mushroom and rabicano are forced wild: nothing found supports them in a conservative founder pool.",
+    "Solid-bodied. No tobiano, frame, splash, dominant white or leopard. Sabino 1 sits near absent, for ordinary face and leg white only.",
+    "Free-ranging herds are real here - the breed is used as a conservation grazer on protected Sava floodplain landscapes - so unlike the Croatian Coldblood it keeps its wild spawn.",
+    "Cold tolerant for wet continental winters and lightly heat tolerant for the summers.",
+    "All disorders clear. A WFFS study finding zero carriers in the Polish Heavy Draft is a different breed and licenses nothing, and 'draught type' is not evidence of a Posavac PSSM1 rate.",
+    "One draft gave 'Turopolje horse' as a local synonym. That is conventionally a separate Croatian breed and was not followed.",
+    "Traction, harness work, forestry, meat and milk production, fetlock feathering and floodplain footing are none of them modelled."
+  ]
+}

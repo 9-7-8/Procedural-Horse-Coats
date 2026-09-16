@@ -1,0 +1,100 @@
+{
+  "id": "finnhorse",
+  "name": "Finnhorse",
+  "country": "finland",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:grove",
+    "minecraft:forest",
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 10,
+    "size": [0.925, 0.987]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 0.5 },
+      { "pair": "E/e", "weight": 11 },
+      { "pair": "e/e", "weight": 88.5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 38 },
+      { "pair": "A/a", "weight": 47 },
+      { "pair": "a/a", "weight": 15 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl2", "weight": 34 },
+      { "pair": "Fl2/Fl1", "weight": 28 },
+      { "pair": "Fl1/Fl1", "weight": 6 },
+      { "pair": "Fl2/f", "weight": 20 },
+      { "pair": "Fl1/f", "weight": 9 },
+      { "pair": "f/f", "weight": 3 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 2 },
+      { "pair": "z/z", "weight": 98 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 1 },
+      { "pair": "d2/d2", "weight": 99 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 2 },
+      { "pair": "rn/rn", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 4 },
+      { "pair": "rb/rb", "weight": 96 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 0.4 },
+      { "pair": "to/to", "weight": 99.6 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The Suomenhevonen - Finland's only native horse, and its national one. A northern farm-and-harness horse rather than a continental warmblood: forestry, fields, sleighs, cavalry, and now harness trotting.",
+    "Chestnut with a flaxen mane and tail is the breed, and it is a policy outcome rather than an ancient trait. The studbook closed in 1907 and twentieth-century policy refused colours it called foreign - grey, palomino, piebald, white - driving chestnut past 90% of the modern population. Flaxen is near-fixed on top of it.",
+    "The old diversity was not wholly erased, and this is the rare pool where the heritage minorities are the interesting part: bay at about 6% and black at about 1.2% (2007 figures), plus surviving traces of grey, cream, silver, dun, roan, rabicano and splash white 1, each at a percent or two.",
+    "Tobiano sits at four founders in a thousand. A single historical pinto is on record and piebalds were actively selected against; this preserves the outlier without creating a pinto population.",
+    "Sabino 1 is deliberately absent even though the breed has a moderately common minimally-expressed sabino-like pattern. That pattern is documented as non-SB1, so naming the mod's SB1 would assert a molecular result nobody has shown.",
+    "The four official sections since 1971 - trotter, riding, pony-sized, working - are NOT strains here. They are performance and inspection categories over one shared gene pool, earned individually and not inherited, so encoding them would invent four closed sub-breeds that do not exist. The size band spans them; only the pony section has a hard limit (148 cm) and only the general average (155-156 cm) is otherwise pinned.",
+    "Cold tolerant near-fixed, for Finnish winters, bogs and forest.",
+    "Flaxen's architecture is still incompletely resolved in the literature, so the near-fixed rate here is a gameplay reading of a visual hallmark, not a molecular frequency.",
+    "All disorders clear. The breed has real population-genetic concerns - one analysis put nuclear effective population near 50 per section against high mitochondrial variation - but a bottleneck is not a disease rate.",
+    "Uncommon rather than rare: the draft asked for rare, but this is a living national breed in regular harness use, not a remnant.",
+    "The trotting gait, the modest feathering and the thick mane and tail are none of them modelled."
+  ]
+}
