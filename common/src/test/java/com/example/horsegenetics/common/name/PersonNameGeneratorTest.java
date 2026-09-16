@@ -72,6 +72,23 @@ class PersonNameGeneratorTest {
         assertEquals(3, PersonNameGenerator.extrasFor("scandinavia", true));
     }
 
+    /**
+     * The folder ships with a README explaining the format, and it is a
+     * {@code .txt} sitting in a folder of {@code .txt} files. Before this was
+     * handled, every server boot logged
+     * {@code [names] README.txt is ignored - a name file must end "-alpha.txt"...},
+     * which is noise that never goes away and never means anything.
+     */
+    @Test
+    void theReadmeInTheFolderIsNotMistakenForANameTable(@TempDir Path dir) throws IOException {
+        write(dir, "README.txt", "Horse Genetics - drop-in trader names\nName a file scandinavia-alpha.txt");
+        write(dir, "scandinavia-alpha.txt", "Torfinn");
+
+        assertEquals(List.of(), PersonNameGenerator.loadFrom(dir, KNOWN),
+                "the README must not be reported as a malformed name table");
+        assertEquals(1, PersonNameGenerator.extrasFor("scandinavia", true));
+    }
+
     @Test
     void aTypoInAFileNameIsReportedRatherThanIgnored(@TempDir Path dir) throws IOException {
         write(dir, "scandinavai-alpha.txt", "Torfinn");   // region misspelled

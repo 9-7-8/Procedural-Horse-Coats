@@ -131,6 +131,15 @@ public final class PersonNameGenerator {
         try (DirectoryStream<Path> files = Files.newDirectoryStream(directory, "*.txt")) {
             for (Path file : files) {
                 String name = file.getFileName().toString();
+                // The folder's own README, which the NeoForge side writes into it on first
+                // launch. It is a .txt in a folder of .txt files, so it lands in this scan
+                // and was reported as a malformed name table on every single boot. A
+                // warning that is always there and never actionable teaches people to stop
+                // reading the log. (The breeds drop-in dodges this by luck: its README is
+                // .txt and it scans for .json.)
+                if (name.equalsIgnoreCase("README.txt")) {
+                    continue;
+                }
                 String stem = name.substring(0, name.length() - ".txt".length());
                 int dash = stem.lastIndexOf('-');
                 String half = dash < 0 ? "" : stem.substring(dash + 1);

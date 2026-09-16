@@ -96,6 +96,15 @@
 </div>
 
 <p>
+    <strong>What has been checked already:</strong> a dedicated server boots clean on this
+    work &mdash; <code>Done (0.289s)</code>, no errors or exceptions, 194 genes and 122
+    breeds registered. That matters because the names drop-in runs from the mod constructor,
+    which is the one place a change fails only at load. It also caught a real bug, a warning
+    about our own README that would have appeared on every boot. What a server boot cannot
+    tell you is anything below, because none of it is rendering.
+</p>
+
+<p>
     <strong>The saddle is dyeable now, and an undyed one should be indistinguishable from
     before.</strong> That is the part worth checking hardest, because it is what keeps every
     other mob looking untouched: the textures are derived from vanilla by dividing out the
