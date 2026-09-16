@@ -153,6 +153,41 @@
     other people.
 </p>
 
+<h3>The names became drop-in, on the owner&rsquo;s point</h3>
+
+<p>
+    The owner asked where the regional names were stored so she could expand them, and said
+    they should not be in a Java file. They already were not &mdash; twenty plain UTF-8
+    tables under <code>names/people/</code> &mdash; but the question exposed a real gap:
+    unlike breeds and genes, names had <strong>no drop-in folder</strong>, so widening one
+    meant editing the repo and rebuilding. <code>phc/names/</code> now exists beside
+    <code>phc/breeds/</code> and <code>phc/genes/</code>, made with a README on first launch.
+</p>
+
+<p>
+    <strong>It adds rather than replaces, and that is the deliberate half.</strong> A
+    drop-in holding ten names would otherwise make every trader in that region draw from
+    ten; appending cannot make a region worse, and widening is what the request actually
+    was. Removing a shipped name still means editing the shipped file, which is the right
+    trade. Region ids are validated by the NeoForge side, which knows <code>Region</code>,
+    so <code>common/name</code> stays decoupled from <code>common/breed</code> and a typo in
+    a file name is reported in the log rather than silently doing nothing.
+</p>
+
+<p>
+    The tables carry diacritics, so a test now fails on a replacement character anywhere in
+    them. That guard exists precisely because the files are about to be hand-edited on
+    Windows: an editor saving one as Windows-1252 produces
+    <code>Bj&#65533;rnstad</code> with nothing logged and nothing to notice. The test itself
+    uses the code point <code>0xFFFD</code> rather than a literal character, because a test that
+    catches encoding damage should not itself contain a byte that can be damaged.
+</p>
+
+<p class="muted">
+    The offer to move the <em>region definitions</em> out of Java as well was declined &mdash;
+    the pools change rarely, and the enum keeps them type-safe and test-enforced.
+</p>
+
 <h3>Two disciplines held on purpose</h3>
 
 <p>

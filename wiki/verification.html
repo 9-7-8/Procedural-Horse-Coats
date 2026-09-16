@@ -121,6 +121,20 @@
     <a href="villagers.html#random-trades">the reasoning is on the villagers page</a>.
 </p>
 
+<p>
+    <strong>The <code>phc/names/</code> drop-in folder has never been exercised in game.</strong>
+    Three things to check, in order of how quietly they fail. First, that the folder is
+    <em>made</em> on a first launch with a README in it, the way
+    <code>phc/breeds/</code> is &mdash; it is created from the mod constructor, so a
+    permissions problem there is logged and otherwise invisible. Second, that a file
+    dropped in actually widens a region: put one name in
+    <code>scandinavia-beta.txt</code>, restart, and found enough cowboys in a Scandinavian
+    biome to see it. Third, the failure path &mdash; misspell a region in a file name and
+    confirm the log says so rather than swallowing it. Unit tests cover the parsing and the
+    typo reporting; what they cannot cover is whether the folder is in the place the player
+    is told to look.
+</p>
+
 <h2 id="new-breeds-0915g">&sect;0-EK &mdash; The deferred fourteen, now baked and tested (2026-09-15, NOT played)</h2>
 
 <p>
