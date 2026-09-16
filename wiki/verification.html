@@ -126,12 +126,22 @@
         at 0.09 makes about 17% of founders dun where the study classified only 8% that way by eye.
         The allele frequency was followed. If duns look too frequent in play, that is the call to
         revisit, not a bug.</li>
-    <li><strong>Sizes were re-derived, not taken from the drafts.</strong> Every one of the five came
-        from the cited metric or hand heights through the real scale
-        (decimal hands = 15.75 &times; scale); the drafts' own scale numbers contradicted their own
-        stated heights in all five cases. <strong>Pass:</strong> a Domestic Mountain Pony reads
-        12.3&ndash;14.1 hh and a Croatian Coldblood 14.3&ndash;16.1 hh against
-        <a href="breeds.html#commonness">the table</a>.</li>
+    <li><strong>Sizes were re-derived, not taken from the drafts</strong> &mdash; and then
+        corrected once. The drafts' own scale numbers contradicted their own stated heights in
+        all five cases, so each band came from the cited metric or hand heights instead.
+        <strong>The curve is not linear:</strong> below the 15.75&nbsp;hh baseline a scale is
+        just <code>hands / 15.75</code>, but above it the part over 1.0 is <em>tripled</em>
+        (<code>BreedStatCurve.BIG_GAMMA</code>), so a draught horse visibly towers. Three of
+        these five were first written with the linear rule and were a third of a hand short at
+        the top. That prompted an audit of <em>every</em> breed, which found the same mistake in
+        four breeds shipped earlier &mdash; the Anglo-Arabian, Australian Stock Horse, Azteca and
+        Budyonny were all shorter than their own table row claimed &mdash; so seven files were
+        corrected and every height string on both breed pages was regenerated from the files
+        (<a href="known-gaps.html#gap-257">gap 257</a>). <strong>Pass:</strong> a Domestic
+        Mountain Pony reads
+        12.3&ndash;14.1 hh, a Croatian Coldblood 14.3&ndash;16.1 hh and a Colorado Ranger
+        14.2&ndash;16.0 hh against <a href="breeds.html#commonness">the table</a>. Nothing
+        asserts this in a test, which is why it is here.</li>
 </ul>
 
 <div class="note">

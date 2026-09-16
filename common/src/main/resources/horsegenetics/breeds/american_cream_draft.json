@@ -42,6 +42,9 @@
   },
   "notes": [
     "Pale gold coat, amber eyes, pink freckled skin: gold champagne (Ch on a chestnut), not the cream dilution, which the breed does not carry.",
-    "EMS / laminitis: age-related, folded into heartiness."
+    "EMS / laminitis: age-related, folded into heartiness.",
+    "The only draught breed developed in the United States, and traced to one cream foundation mare - Old Granny, foaled about 1911 - with the association formed in 1944. The Livestock Conservancy rates it Critical and the registered population is in the hundreds; it ships as rare here, which is a gameplay call rather than a reading of that status.",
+    "The real association test panel is exactly two loci, and both are clear here. PSSM1 (GYS1) ships as a gene but is not named: presence in the breed is documented and no population frequency is, and a dominant would show on every copy. JEB1 - junctional epidermolysis bullosa, a recessive lethal - has no locus in this mod at all; it is on the roadmap, and is deliberately not stood in for by an unrelated recessive lethal.",
+    "Champagne here is the real SLC36A1 dominant, and every founder carries a copy: the coat, the amber eye and the pink freckled skin all come off that one locus."
   ]
 }

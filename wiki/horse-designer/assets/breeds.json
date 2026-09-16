@@ -103,7 +103,10 @@
   },
   "notes": [
     "Pale gold coat, amber eyes, pink freckled skin: gold champagne (Ch on a chestnut), not the cream dilution, which the breed does not carry.",
-    "EMS / laminitis: age-related, folded into heartiness."
+    "EMS / laminitis: age-related, folded into heartiness.",
+    "The only draught breed developed in the United States, and traced to one cream foundation mare - Old Granny, foaled about 1911 - with the association formed in 1944. The Livestock Conservancy rates it Critical and the registered population is in the hundreds; it ships as rare here, which is a gameplay call rather than a reading of that status.",
+    "The real association test panel is exactly two loci, and both are clear here. PSSM1 (GYS1) ships as a gene but is not named: presence in the breed is documented and no population frequency is, and a dominant would show on every copy. JEB1 - junctional epidermolysis bullosa, a recessive lethal - has no locus in this mod at all; it is on the roadmap, and is deliberately not stood in for by an unrelated recessive lethal.",
+    "Champagne here is the real SLC36A1 dominant, and every founder carries a copy: the coat, the amber eye and the pink freckled skin all come off that one locus."
   ]
 },
 {
@@ -453,7 +456,7 @@
     "speed": 8,
     "jump": 8,
     "health": 8,
-    "size": [0.98, 1.07]
+    "size": [0.98, 1.19]
   },
   "genes": {
     "horsegenetics.extension": [
@@ -677,7 +680,7 @@
     "speed": 7,
     "jump": 7,
     "health": 9,
-    "size": [0.89, 1.05]
+    "size": [0.89, 1.143]
   },
   "genes": {
     "horsegenetics.extension": [
@@ -790,7 +793,7 @@
     "speed": 7,
     "jump": 8,
     "health": 8,
-    "size": [0.905, 1.016]
+    "size": [0.905, 1.048]
   },
   "genes": {
     "horsegenetics.extension": [
@@ -1269,7 +1272,10 @@
     "Solid-bodied by breed standard, which requires pigmented skin and rejects pinto-like marking - so tobiano, frame, splash, sabino and the W series are all absent.",
     "Most are naturally five-gaited, with a rack or amble on top of the ordinary gaits. DMRT3 carries the gait allele, but gait itself is not modelled - see the roadmap.",
     "All disorders clear: the breed has a performance-trait study but no carrier rates for this panel.",
-    "The distinction between SA Boerperd and Cape Boerperd is not modelled."
+    "The distinction between SA Boerperd and Cape Boerperd is not modelled.",
+    "A double-cream foal is barred from registration, and breeders are warned off mating two cream dilutes. Cream is kept where it is - high enough for buckskin, palomino and smoky black, low enough that a double dilute is an uncommon founder - and the pair stays reachable by breeding, because it is a registry rule rather than a disorder. The same shape as the Chilean Corralero.",
+    "Traced to the Cape settlement after 1652, from Barb and Arabian-type horses imported by way of Java, and rebuilt from remote survivors after heavy losses in the Anglo-Boer wars. Mares must stand at least 13.3 hh and stallions at least 14.2 hh; the band here starts at 14.2 hh, so it is the stallion minimum that sets the floor and the smallest registrable mares fall below anything this breed rolls.",
+    "Black pigmented skin is required by the standard, which is the other half of why no white pattern is named here."
   ]
 },
 {
@@ -1292,7 +1298,7 @@
     "speed": 8,
     "jump": 7,
     "health": 8,
-    "size": [1.016, 1.063]
+    "size": [1.048, 1.19]
   },
   "genes": {
     "horsegenetics.extension": [
@@ -1806,7 +1812,7 @@
     "speed": 7,
     "jump": 7,
     "health": 8,
-    "size": [0.921, 1.016]
+    "size": [0.921, 1.048]
   },
   "genes": {
     "horsegenetics.extension": [
@@ -2131,7 +2137,7 @@
     "speed": 3,
     "jump": 3,
     "health": 9,
-    "size": [0.937, 1.031]
+    "size": [0.937, 1.093]
   },
   "genes": {
     "horsegenetics.extension": [
@@ -2278,7 +2284,7 @@
     "speed": 5,
     "jump": 4,
     "health": 8,
-    "size": [0.969, 1.031]
+    "size": [0.969, 1.093]
   },
   "genes": {
     "horsegenetics.extension": [
@@ -2557,7 +2563,9 @@
   },
   "notes": [
     "The Domaci brdski konj, or Bosnian Mountain Horse - the only indigenous domestic horse of Bosnia and Herzegovina, a Dinaric pack, riding and farm pony. Selective breeding began at Gorazde in 1908 and concentrated at the Borike and Han Pijesak studs, with Arab stallions used at Borike to improve it.",
-    "This is the rare breed here with real coat data: a study of 313 horses found dark bay 44%, black 36%, ordinary bay 11% and dun 8%, with the true-dun D allele at 0.09. The pool is built to that rather than to a generic mountain-pony guess.",
+    "Also the Bosanski brdski konj, which is the form its own breeders' association uses.",
+    "This is the rare breed here with real coat data: Cotman et al. genotyped 313 horses from the association's records and found dark bay 44%, black 36%, ordinary bay 11% and dun 8%, with the true-dun D allele at 0.09. The pool is built to that rather than to a generic mountain-pony guess, and it is the only breed in the mod whose dun rate is a published allele frequency instead of a design call.",
+    "Its small size is selected, not carried: a genome-wide homozygosity scan (Schrimpf et al.) found long-term selection toward roughly 135 cm at the withers and a high prevalence of small-allele homozygosity at the body-size loci examined. That is not the p.G28E pony test, so no HMGA2 pool is named here - the size band carries it instead.",
     "Dark bay is carried by the shade locus, not by a separate agouti allele. At as a real allele was dropped (owner's call), and seal sits at the top of agouti's shade band, so the shade pool is skewed dark instead of using the house-standard spread - a/a gives the 36% black, and the A_ horses come out mostly dark rather than ordinary bay.",
     "Chestnut is functionally absent: the breeding programme excludes it, and e sits at 0.01 only as an admission of modelling uncertainty rather than as a colour anyone will see.",
     "One honest discrepancy: D at 0.09 makes about 17% of founders dun, where the same study classified only 8% as dun by eye. The study itself reports phenotype-genotype mismatches at this locus, so the measured allele frequency was followed rather than the visual tally.",
@@ -3187,7 +3195,11 @@
     ]
   },
   "notes": [
-    "Scopey powerful frame, strong clean limbs - the classic sport-horse foundation. Joint stress is age-related (folded into heartiness)."
+    "Scopey powerful frame, strong clean limbs - the classic sport-horse foundation. Joint stress is age-related (folded into heartiness).",
+    "The Horse Sport Ireland standard asks for any strong whole colour and names six - bay, brown, grey, chestnut, black and dun - and calls excessive white undesirable. That named list is why dun is in the pool at all, and why no white pattern is.",
+    "Two pools sit outside that list and are kept as shipped rather than re-tuned: roan, and a trace of cream. Neither is among the six named colours, so they are the open question on this breed's palette.",
+    "PSSM1 (GYS1) has been detected in the breed, but no Irish Draught population frequency is published and the mutation is dominant, so it ships clear rather than at a guessed rate that would show on every copy.",
+    "158-170 cm, and a horse built to work and still move freely - not a draught horse in the continental sense. Inspection scores, Irish Draught percentage and Irish Sport Horse eligibility are not modelled."
   ]
 },
 {
