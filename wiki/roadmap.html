@@ -2195,7 +2195,90 @@
     Asked 2026-09-15.
 </p>
 
-<h2 id="settled">25. Settled decisions &mdash; do not reopen</h2>
+<h2 id="equestrian-bench">25. The Equestrian Bench</h2>
+
+<p>
+    A block with a screen of its own that does three things to tack: dyes a saddle in
+    <strong>three independent zones</strong>, recolours its metal hardware for an ingot or a
+    gem, and turns a <strong>chosen rectangle of a banner</strong> into a saddle pad. Designed
+    with the owner on 2026-09-16; <strong>none of it is built</strong>. This is written as
+    decisions and risks rather than as a plan, because two feasibility questions are still
+    open and either could change its shape.
+</p>
+
+<h3 id="bench-decided">25.1 Decided, and why</h3>
+
+<ul>
+    <li><strong>The pad rides its own attachment, not an equipment slot.</strong> There are
+        only two animal slots and horse armour holds one, so a slot-based pad would mean
+        riding unarmoured. An attachment plus a render layer costs roughly 150 lines and
+        buys armour <em>and</em> pad together. It needs no modeling: the layer can bake
+        vanilla&rsquo;s <code>HORSE_ARMOR</code> mesh, which already covers the body.</li>
+    <li><strong>Colours live on the vanilla saddle, in our own component.</strong>
+        <code>dyed_color</code> holds one value and we need three, so a
+        <code>tack_tint</code> component carries seat, bridle and metal. The item stays
+        <code>minecraft:saddle</code>, so a saddle a player already owns can be taken to the
+        bench and upgraded, and nothing that expects a vanilla saddle stops working. We
+        already own how the saddle <em>looks</em> (&sect;<a href="#dyeable-saddle">23.3</a>),
+        so this adds no new imposition.</li>
+    <li><strong>The banner is cropped by dragging a rectangle over a preview.</strong>
+        Presets were considered and rejected: the point is to frame the part of a device you
+        want, and a fixed &ldquo;top half&rdquo; cannot take an off-centre charge.</li>
+    <li><strong>The banner is consumed, and a pad is washable.</strong> Making a pad spends
+        the banner; washing strips the design back to a blank pad and loses it. Mistakes stay
+        cheap without making the banner free.</li>
+    <li><strong>Metal takes an ingot or a gem &mdash; seven of them.</strong> Iron is the
+        steel grey it already is, gold brass, copper warm copper, netherite dark gunmetal,
+        diamond pale blue-white, emerald green, amethyst purple. This is the ingot sink the
+        feature was asked for.</li>
+    <li><strong>The pad is fitted from a third slot in the horse&rsquo;s own inventory</strong>,
+        beside saddle and armour &mdash; the place a player already looks for tack. This is
+        the most discoverable option and the most dangerous one; see below.</li>
+    <li><strong>The bench is craftable, and one generates in the cowboy&rsquo;s barn</strong>,
+        so a player meets the feature before knowing to want it. The barn already houses the
+        horseman&rsquo;s table, so the bench reads as part of the same shop.</li>
+    <li><strong>No pads on foals.</strong> A foal&rsquo;s UV layout is completely different
+        from an adult&rsquo;s, so a foal pad is a second set of art drawn from scratch for
+        something worn briefly. Vanilla renders no equipment on a foal either.</li>
+</ul>
+
+<h3 id="bench-open">25.2 The two things that could still sink it</h3>
+
+<ul>
+    <li><strong>Can a banner be rasterised into an image we can crop?</strong> Banners render
+        by stacking pattern sprites out of an atlas with a colour each; they are not a
+        picture sitting anywhere. Dragging a rectangle over a preview assumes we can produce
+        that picture. If we cannot, the crop degrades to choosing pattern layers &mdash;
+        robust, but no longer &ldquo;a portion&rdquo;. <strong>Being researched.</strong></li>
+    <li><strong>The horse inventory screen is vanilla&rsquo;s.</strong> A third slot means
+        reaching into <code>HorseInventoryMenu</code> and its screen, and this repo has
+        exactly one mixin today. A menu is server-driven state, so a mis-synced slot is an
+        <em>item-duplication</em> bug, not a cosmetic one &mdash; and
+        <a href="known-gaps.html">gap 156</a> already warns about this mod writing horse
+        equipment slots. If the honest answer is &ldquo;only by a fragile mixin&rdquo;, the
+        fallback is our own small screen and the discoverability is paid for elsewhere.
+        <strong>Being researched.</strong></li>
+</ul>
+
+<h3 id="bench-derisked">25.3 What is already proven, and it is most of the hard part</h3>
+
+<ul>
+    <li><strong>Three tint zones genuinely separate.</strong> Measured 2026-09-16: the seat
+        claims 513 texels, the five bridle cubes 374, and they share none. See
+        &sect;<a href="#native-tack">23.2</a>.</li>
+    <li><strong>The metal zone already exists.</strong> The 36 hardware texels are shipped as
+        their own untinted overlay (<a href="items.html#tack">the item roster</a>), so
+        recolouring them is a third tinted layer rather than new art.</li>
+    <li><strong>Per-layer tinting is supported.</strong> Vanilla reads one dye per stack, but
+        NeoForge&rsquo;s <code>getArmorLayerTintColor</code> hands over the layer index, so
+        three layers can take three colours from our component.</li>
+    <li><strong>Generated textures have somewhere to live.</strong> The coat engine&rsquo;s
+        <code>NativeImage</code>&nbsp;&rarr;&nbsp;<code>DynamicTexture</code> path, with its
+        texel budget and id-collision tripwire, is generic rather than coat-specific. A
+        cropped banner is just another generated texture.</li>
+</ul>
+
+<h2 id="settled">26. Settled decisions &mdash; do not reopen</h2>
 
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
