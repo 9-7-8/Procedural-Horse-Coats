@@ -1902,14 +1902,18 @@
         The worry was that the seat and the bridle share one 64&times;64 sheet whose cube
         unwraps overlap as rectangles &mdash; if they shared painted <em>texels</em>, a
         two-layer split would paint part of the bridle when you dyed the seat. Computed
-        cube-by-cube from the face layout on 2026-09-16: the seat claims 513 texels, the five
-        bridle cubes 374, and <strong>the two groups share none at all</strong>, painted or
+        cube-by-cube from the face layout on 2026-09-16: the seat claims 522 texels, the five
+        bridle cubes 380, and <strong>the two groups share none at all</strong>, painted or
         otherwise. The rectangles overlap; the texels do not, because a cube's unwrap is a
-        cross with empty corners. So seat and bridle can carry two independent colours.
-        <span class="muted">One loose end: 240 of vanilla's 244 painted texels are accounted
-        for by these seven cubes, and four are not &mdash; most likely the blank body cube
-        <code>EquineSaddleModel</code> inherits. It does not affect the overlap answer, but
-        it is unexplained.</span></li>
+        cross with empty corners. Every one of vanilla's 244 painted texels is accounted for
+        &mdash; 134 seat, 74 bridle, 36 metal &mdash; so seat and bridle can carry two
+        independent colours.
+        <span class="muted">A first pass reported 513 and 374 with four texels unexplained.
+        That was a bug in the analysis, not a fact about the sheet: a cube's side row is
+        <code>west(d) | north(w) | east(d) | south(w)</code>, and the south face had been
+        placed at <code>u+d+w+w</code> instead of <code>u+d+w+d</code>, which is wrong for
+        every cube whose depth and width differ. The verdict survived the correction; the
+        numbers did not.</span></li>
     <li><strong>Two traps worth writing down.</strong> A saddle <em>pad</em> must use the
         <code>HORSE_BODY</code> mesh (inflated 0.1, so it clears the skin) and not the
         <code>HORSE_SADDLE</code> body cube, which is exactly coincident with the horse and
@@ -2221,9 +2225,25 @@
         bench and upgraded, and nothing that expects a vanilla saddle stops working. We
         already own how the saddle <em>looks</em> (&sect;<a href="#dyeable-saddle">23.3</a>),
         so this adds no new imposition.</li>
-    <li><strong>The banner is cropped by dragging a rectangle over a preview.</strong>
-        Presets were considered and rejected: the point is to frame the part of a device you
-        want, and a fixed &ldquo;top half&rdquo; cannot take an off-centre charge.</li>
+    <li><strong>The pad is authored at maximum coverage and cut down by the player.</strong>
+        The texture is drawn as the largest sheet the body can carry, and the bench lets the
+        player scale it freely in every direction &mdash; so &ldquo;saddle pad&rdquo; and
+        &ldquo;full caparison&rdquo; are the same item at two settings rather than two items.
+        The extent is part of the design, stored with it.</li>
+    <li><strong>The banner is placed, not merely cropped.</strong> Under the pad the player
+        moves, scales, squashes, stretches and tiles the banner image freely; the crop
+        rectangle is the start of it, not the whole of it. Mechanically that is a 2D
+        transform &mdash; offset, scale per axis, tile on or off &mdash; carried on the
+        component beside the pattern list, which is cheap to store and cheap to apply.</li>
+    <li><strong>The layout is the player&rsquo;s choice too.</strong> Once per flank,
+        continuous across the whole sheet, tiled, or flanks-with-a-plain-ground: all four are
+        settings at the bench rather than a decision taken here.</li>
+    <li><strong>The bench shows a live 3D horse.</strong> The design is judged on the animal,
+        not on a flat swatch &mdash; which is the only honest way to judge something that
+        wraps around a body.</li>
+    <li><strong>Order of work: the bench and its dyeing first, the pad and the banner
+        after.</strong> Three-zone dyeing is nearly certain and stands alone, so it ships and
+        gets played before the uncertain half is started.</li>
     <li><strong>The banner is consumed, and a pad is washable.</strong> Making a pad spends
         the banner; washing strips the design back to a blank pad and loses it. Mistakes stay
         cheap without making the banner free.</li>
@@ -2245,26 +2265,67 @@
 <h3 id="bench-open">25.2 The two things that could still sink it</h3>
 
 <ul>
-    <li><strong>Can a banner be rasterised into an image we can crop?</strong> Banners render
-        by stacking pattern sprites out of an atlas with a colour each; they are not a
-        picture sitting anywhere. Dragging a rectangle over a preview assumes we can produce
-        that picture. If we cannot, the crop degrades to choosing pattern layers &mdash;
-        robust, but no longer &ldquo;a portion&rdquo;. <strong>Being researched.</strong></li>
-    <li><strong>The horse inventory screen is vanilla&rsquo;s.</strong> A third slot means
-        reaching into <code>HorseInventoryMenu</code> and its screen, and this repo has
-        exactly one mixin today. A menu is server-driven state, so a mis-synced slot is an
-        <em>item-duplication</em> bug, not a cosmetic one &mdash; and
-        <a href="known-gaps.html">gap 156</a> already warns about this mod writing horse
-        equipment slots. If the honest answer is &ldquo;only by a fragile mixin&rdquo;, the
-        fallback is our own small screen and the discoverability is paid for elsewhere.
-        <strong>Being researched.</strong></li>
+    <li><strong>Rasterising a banner: answered, and it is not a risk.</strong> A pattern
+        layer resolves to an ordinary resource PNG under
+        <code>textures/entity/banner/</code>, all 64&times;64, and the composite is
+        <code>base &times; baseColour</code> then alpha-over each
+        <code>pattern &times; layerColour</code>. The coat engine&rsquo;s loader,
+        <code>NativeImage</code> compositor and <code>DynamicTexture</code> upload all apply
+        unchanged. The banner&rsquo;s own front face is a clean 20&times;40 texel rectangle at
+        origin (1,1), so a crop has real coordinates to work in. The in-GUI preview is free:
+        vanilla renders a live <code>BannerPatternLayers</code> into a GUI rect already, which
+        is how the loom does it.</li>
+    <li><strong>The live preview is the new risk, and it is a known one.</strong> A 3D horse
+        that re-bakes while the player drags is precisely the shape of the
+        2026-09-13 incident recorded in <code>GeneticCoatTextureFactory</code>, where
+        unbudgeted per-frame baking froze the owner&rsquo;s machine. It must be designed
+        around rather than discovered: bake on release rather than per frame, or preview the
+        transform as a UV change on an already-baked sheet and only re-composite when the
+        pattern set itself changes. The existing texel budget, cache and reload
+        invalidation are the right machinery; they just have to be wired in from the
+        start.</li>
+    <li><strong>The third slot: answered, and the danger is not where it looked.</strong>
+        NeoForge offers <em>no</em> hook &mdash; a grep of its whole source finds three
+        mentions of the horse menu, all irrelevant &mdash; so a slot beside the saddle means
+        a mixin on <code>HorseInventoryMenu</code>, or our own separate screen. Two things
+        make that cheaper than feared: the repo already runs <strong>four</strong> mixins,
+        two of them on <code>AbstractHorse</code> (the &ldquo;THE ONE MIXIN&rdquo; comment in
+        <code>neoforge.mods.toml</code> is stale and should be fixed), and <strong>no screen
+        mixin is needed</strong> &mdash; a supported render event can draw the empty-slot
+        hole, which avoids putting a client-only mixin in a config that has no
+        <code>"client"</code> section and would crash a dedicated server.</li>
+    <li><strong>The real risk is <code>quickMoveStack</code>, not the slot.</strong>
+        <code>AbstractMountInventoryMenu.quickMoveStack</code> is shared with donkeys, mules,
+        llamas and nautiluses, and computes every shift-click range from hardcoded
+        <code>0</code>, <code>1</code>, <code>2</code> and
+        <code>2 + mountContainer.getContainerSize()</code>. A third slot invalidates that
+        arithmetic wherever it is inserted, and a mis-ranged <code>moveItemStackTo</code> is
+        how items duplicate or vanish. It is also the failure that looks fine until somebody
+        shift-clicks with a chest on the horse. Secondary: the client builds its own menu
+        from the open packet, so the mod must stay network-required on both sides or every
+        slot index is off by one.</li>
+    <li><strong>Storing the pad in an attachment is blessed, not a hack.</strong> The saddle
+        and armour slots are not backed by the horse&rsquo;s container either &mdash;
+        <code>Mob.createEquipmentSlotContainer</code> fronts the equipment array with a
+        <code>ContainerSingleItem</code> view that owns no storage. A pad slot reading an
+        attachment is the same shape. Keep one authority (never mirror it into a container),
+        store <code>stack.copy()</code> and write back through <code>setData</code>, and it
+        stays out of hopper reach, which a widened container would not.</li>
+    <li><strong>Two hazards from <a href="known-gaps.html">gap 156</a>.</strong> Do not build
+        the pad on <code>EquipmentSlot.SADDLE</code>, and never let a pad item carry
+        <code>PHANTOM_SADDLE</code>: <code>BarebackSteeringHandler</code> writes that slot
+        every tick and its <code>reclaim</code> sweep destroys anything carrying that
+        component in a rider&rsquo;s inventory.</li>
 </ul>
 
 <h3 id="bench-derisked">25.3 What is already proven, and it is most of the hard part</h3>
 
 <ul>
-    <li><strong>Three tint zones genuinely separate.</strong> Measured 2026-09-16: the seat
-        claims 513 texels, the five bridle cubes 374, and they share none. See
+    <li><strong>Three tint zones genuinely separate, and they are built.</strong> Measured
+        2026-09-16: the seat claims 522 texels, the five bridle cubes 380, and they share
+        none. The bake now emits three disjoint layers &mdash; 134 seat, 74 bridle, 36 metal,
+        summing to vanilla's 244 &mdash; each of which recomposes to vanilla with zero
+        differing pixels, so an undyed saddle is unchanged. See
         &sect;<a href="#native-tack">23.2</a>.</li>
     <li><strong>The metal zone already exists.</strong> The 36 hardware texels are shipped as
         their own untinted overlay (<a href="items.html#tack">the item roster</a>), so

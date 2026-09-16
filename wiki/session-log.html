@@ -115,6 +115,69 @@
     <code>part.visible</code> between submits mutates one shared model.
 </p>
 
+<h3>The saddle learns three zones</h3>
+
+<p>
+    The two-way split became a <strong>three-way</strong> one: seat, bridle and metal, each
+    its own dyeable layer, which is what lets the seat and the bridle be dyed independently
+    and the hardware recoloured for an ingot. The interesting part is that the two splits are
+    found <em>differently</em>. Metal is a <strong>colour</strong> question &mdash; vanilla's
+    sheet holds six saturated browns and three pure greys, so hardware is exactly
+    <code>R&nbsp;=&nbsp;G&nbsp;=&nbsp;B</code>. Seat versus bridle is a
+    <strong>geometric</strong> one, because both are the same brown; they are separated by
+    which of <code>EquineSaddleModel</code>'s cubes owns the texel.
+</p>
+
+<p>
+    Verified on the written files rather than in the bake: 134 seat, 74 bridle, 36 metal,
+    summing to vanilla's 244, with no texel in two layers, none uncovered, none painted
+    outside vanilla's silhouette, and <strong>zero</strong> recompose error. An undyed saddle
+    is still pixel-identical to the one players know, which is what keeps donkeys, mules,
+    skeleton and zombie horses untouched.
+</p>
+
+<h3>A formula error that invalidated its own verdict, and then survived it</h3>
+
+<p>
+    The first three-way bake refused to ship: two painted texels belonged to no cube. They
+    turned out to be <strong>a bug in the analysis, not a gap in the sheet</strong>. A cube's
+    side row unwraps as <code>west(d) | north(w) | east(d) | south(w)</code>, and the south
+    face had been placed at <code>u+d+w+w</code> rather than <code>u+d+w+d</code> &mdash;
+    wrong for every cube whose depth and width differ, which is most of them.
+</p>
+
+<p>
+    <strong>That formula had already produced a published answer.</strong> The
+    &ldquo;seat 513, bridle 374, no overlap&rdquo; figures given the day before came from it,
+    as did a &ldquo;four unexplained texels&rdquo; loose end that was never a mystery at all.
+    Recomputed: 522 and 380, still no overlap, nothing unexplained. <strong>The verdict
+    survived; the numbers did not</strong> &mdash; and it was only caught because the bake
+    asserts that every painted texel finds a home and refuses to write otherwise. An
+    assertion written before the asset is what turned a wrong published number into a
+    ten-minute correction.
+</p>
+
+<h3>The Equestrian Bench, designed</h3>
+
+<p>
+    A block with its own screen that dyes the three zones, recolours the metal for an ingot
+    or a gem, and turns a chosen part of a banner into a saddle pad. Eight decisions settled
+    with the owner and written up at <a href="roadmap.html#equestrian-bench">&sect;25</a>;
+    nothing built beyond the zones above. The order is deliberate &mdash; bench and dyeing
+    first, the pad and the banner after &mdash; because the dyeing is nearly certain and the
+    banner half holds all the uncertainty.
+</p>
+
+<p>
+    Two research results reshaped it. <strong>Rasterising a banner is not a risk</strong>:
+    pattern layers are ordinary 64&times;64 resource PNGs and the composite is a multiply and
+    an alpha-over, so the coat engine's existing texture pipeline takes it unchanged. And
+    <strong>the danger in the horse-inventory slot is not the slot</strong> &mdash; it is
+    <code>quickMoveStack</code>, which derives every shift-click range from hardcoded indices
+    and is shared with donkeys, mules, llamas and nautiluses. A mis-ranged move there
+    duplicates items and looks fine until somebody shift-clicks with a chest on the horse.
+</p>
+
 <h2 id="d2026-09-15m">2026-09-15, later &mdash; a cowboy comes from somewhere, and two &ldquo;patches&rdquo; turn out to need no patch</h2>
 
 <p>
