@@ -57,6 +57,20 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-261"><strong>Open, found 2026-09-15: the designer&rsquo;s wasm is not reproducible, so &ldquo;the wasm moved&rdquo; is not evidence of anything.</strong>
+    Found running the deferred breed bake. <code>:web:bakeDesignerAssets --rerun-tasks</code> was run twice over a tree
+    that differed only in three breed JSON files, and the two runs produced <em>different binaries at identical
+    size</em> &mdash; <code>sha1 e1bba2e5&hellip;</code> and <code>3a614a1d&hellip;</code>, against the committed
+    <code>5754548e&hellip;</code>. No <code>common/src/main/java</code> commit exists since the wasm was last baked, so
+    this is the toolchain varying, not a source change. <strong>The rule in <code>CLAUDE.md</code> still holds in the
+    direction it is written</strong> &mdash; <code>common/</code> changed with the wasm unchanged does mean the designer
+    is running yesterday&rsquo;s mod &mdash; but <strong>the converse does not</strong>: a moved wasm is not evidence
+    that anything changed, and committing one spends a 2&nbsp;MB binary diff on nothing while camouflaging a real one.
+    The rebuild was reverted here, since a data-only bake should leave it alone. <strong>Nobody has diffed the two
+    binaries</strong>, so which part varies &mdash; TeaVM&rsquo;s ordering, an embedded timestamp, the JDK &mdash; is
+    unknown, and that is the first thing to find out if this is ever worth fixing. Until then the working rule is: when
+    a bake chain changed only data, revert the wasm; when <code>common/</code> genuinely moved, commit it and accept
+    that the diff is mostly noise.</li>
 <li id="gap-258"><strong>Open, found 2026-09-15: a ratio pen whose pregnancy is lost early is never covered again.</strong>
     Three of row W's pens conceived once or twice in the first few thousand ticks of the 16:11 run and then sat idle
     for the remaining six hours, while the row U pens beside them ran about a hundred conceptions each.
