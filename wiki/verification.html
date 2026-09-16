@@ -78,6 +78,63 @@
     </p>
 </div>
 
+<h2 id="new-breeds-0915e">&sect;0-EI &mdash; Fifteen more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
+
+<p>
+    <strong>Jutland, Kaimanawa, Karabair, Karakachan Horse, Kentucky Mountain Saddle Horse, Kiso Horse,
+    Kladruber, Konik, Mangalarga Marchador, Medimurje Horse, Misaki Horse, Missouri Fox Trotter,
+    Mongolian Horse, Montenegrin Domestic Hilly Horse, Murgese</strong> &mdash; the batch that took the
+    shipped count to 94. Green on the bench: <code>:neoforge-26.1.2:build</code>,
+    <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>, <code>check-parity</code>,
+    <code>check-links</code>, <code>build-search-index</code> and the designer boot check.
+    <strong>None of these fifteen has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The Kentucky Mountain Saddle Horse has the widest height band in the mod</strong>
+        (11.0&ndash;16.0&nbsp;hh), because the registry's two classes are one gene pool. That is the
+        size-curve check this time: the small end must still be <em>rideable and mountable</em>, which
+        nothing in the test suite covers, and the tall end must not tower. Stand one of each beside a
+        Welsh Pony and an Irish Draught.</li>
+    <li><strong>The Kiso's dorsal stripes are the batch's most deliberate call and the one most likely
+        to look wrong.</strong> Roughly two thirds of a herd should wear a stripe while only about one
+        in twenty-five is actually dun-diluted &mdash; stripes without body dilution, carried by
+        <code>d1</code>. If the striped horses are also visibly paler, <code>d1</code> is diluting when
+        it should not; if almost nothing is striped, the pool is not reaching the founder.</li>
+    <li><strong>Two breeds must be one colour and will fail visibly if they are not.</strong> Every
+        Konik should be blue dun with a dorsal stripe &mdash; a single bay, chestnut or grey one means a
+        fixed pool is not holding. Every Murgese should be raven black, with about one in fifty a blue
+        roan; <strong>a grey Murgese or a greying Konik is the specific failure to watch for</strong>,
+        since both breeds' traditional colour names ("iron grey", "mouse grey") are the exact trap the
+        files avoid.</li>
+    <li><strong>The Kladruber is a strain check with a visible answer.</strong> Spawn a good number:
+        about half should be black for life and about half grey, and <em>the greys should be born dark
+        and whiten</em>. Both halves are black underneath, so a bay or chestnut Kladruber means the
+        fixed base is not holding, and an even split that never whitens means strains are reaching the
+        founder but grey is not.</li>
+    <li><strong>The Kaimanawa's strains are geographic and should be obvious in bulk.</strong> Grey
+        should be near absent in one strain and near universal in the other, not averaged across the
+        herd. This is the second test of strain weighting after Hequ, and the first where the
+        difference is unmistakable at a glance.</li>
+    <li><strong>The Missouri Fox Trotter is a lethal-white breed and the Mangalarga Marchador is
+        deliberately not.</strong> Breeding two frame carriers together should be able to go wrong in
+        the Fox Trotter, exactly as it does in an American Paint herd, and should be <em>impossible</em>
+        in the Marchador. Both halves are worth confirming; the second is the deliberate one.</li>
+    <li><strong>Five of the fifteen must never head a wild herd</strong> &mdash; Jutland, Kiso,
+        Kladruber, Medimurje and Murgese. The Misaki is the odd one out in the other direction: it has
+        wild herds but <strong>no cowboy</strong>, so it should never appear in a trader's offers while
+        still turning up on a coast.</li>
+    <li><strong>The Jutland should read as flaxen chestnut, never palomino.</strong> Cream is forced
+        wild, so a pale-maned Jutland is always a red horse with a light mane; anything that looks
+        golden-bodied is cream leaking in from somewhere.</li>
+    <li><strong>The Karakachan is the most visually unified natural breed in the mod</strong> &mdash;
+        almost every founder bay or brown. A chestnut or black one is roughly a one-in-two-hundred
+        event, so several in a herd means the near-fixed pools are not holding.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the Mongolian's dun-heavy
+        steppe pool reads as varied rather than muddy; whether the Montenegrin and the Domestic Mountain
+        Pony are actually distinguishable side by side (grey is the only difference, and that may not be
+        enough); and whether the Mangalarga Marchador's heavy grey plus pinto pool is too loud in a herd.</li>
+</ul>
+
 <h2 id="new-breeds-0915d">&sect;0-EH &mdash; Fourteen more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
 
 <p>

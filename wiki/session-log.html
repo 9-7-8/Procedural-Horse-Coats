@@ -27,6 +27,98 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15h">2026-09-15, later again &mdash; fifteen breeds, and three drafts that disowned their own numbers</h2>
+
+<p>
+    The fifth intake batch, and the first one to ship the full count asked for: the queue from the
+    Jutland to the Murgese, alphabetically. <strong>94 breeds ship now.</strong> Fifteen files went in
+    and fifteen breeds came out &mdash; no duplicates, no stubs, and nothing in the batch needed a gene
+    the mod has not got, which is the first time that has been true.
+</p>
+
+<h3>The batch</h3>
+
+<p>
+    Jutland, Kaimanawa, Karabair, Karakachan Horse, Kentucky Mountain Saddle Horse, Kiso Horse,
+    Kladruber, Konik, Mangalarga Marchador, Medimurje Horse, Misaki Horse, Missouri Fox Trotter,
+    Mongolian Horse, Montenegrin Domestic Hilly Horse, Murgese.
+</p>
+
+<ul>
+    <li><strong>Three drafts contradicted their own cited sources, and the sources won every time.</strong>
+        The Misaki is the clearest: its own prose says its JSON block is not consistent with the
+        99-horse study it cites and should not be used, and gives corrected figures that reconstruct
+        79.2% bay, 12.9% black and 8.0% chestnut. Those shipped. The Kiso's allele figures would have
+        produced chestnut at a tenth of the rate its own 125-horse census recorded, and the
+        Kaimanawa's at a twentieth of the field tally. <strong>The lesson is now four batches old and
+        worth stating plainly: read the draft's evidence, not its JSON.</strong></li>
+    <li><strong>The Kiso's dun pool is the most deliberate thing in the batch.</strong> The census
+        recorded a dorsal stripe on 66.4% of the breed and a dun dilution on only 4%. Those two
+        numbers cannot both come from <code>D</code>. So <code>d1</code> &mdash; non-dun with primitive
+        marking &mdash; was solved for directly (it lands near 0.40) and <code>D</code> sits near
+        absent at 0.02. Raising <code>D</code> to hit the stripe count would have painted two thirds of
+        the breed with a body dilution nobody has ever observed in it. The same reasoning the
+        <a href="#d2026-09-15f">Domestic Mountain Pony</a> used, arrived at from the opposite end.</li>
+    <li><strong>Every draft's size scale was wrong. All fifteen.</strong> Five batches running now.
+        All were re-derived from the cited heights through <code>BreedStatCurve</code>. Two land exactly
+        on shipped neighbours as the check: the Kladruber's <code>1.238</code> on the Irish Draught's
+        17.0&nbsp;hh, and its <code>1.048</code> on the Suffolk Punch's 16.0.</li>
+    <li><strong>The Montenegrin Domestic Hilly Horse was the owner's call, and it ships.</strong> Its
+        draft never mentions the Bosnian horse, but claims the same native name
+        (<em>Doma&#263;i brdski konj</em>) and the same English alias as the
+        <a href="breed-book.html#hills">Domestic Mountain Pony</a> already shipped under Bosnia and
+        Herzegovina. They are sister national populations of one transboundary Balkan type, and FAO
+        DAD-IS does hold a separate Montenegrin record. Owner's decision was to ship it as Montenegro's
+        own record rather than treat it as a re-supply &mdash; <strong>with the relationship written
+        into the breed file</strong>, including the fact that nobody has shown the two populations to
+        be genetically distinct. Grey is the only real difference in the pools: heavy here, excluded by
+        the programme there.</li>
+    <li><strong>The Medimurje's draft argued against itself, and the culprit was a three-letter
+        abbreviation.</strong> Its lede demands a black-only breed with agouti fixed recessive; its own
+        body then explains that the &ldquo;only black and grey&rdquo; rule comes from a genomic study of
+        the Italian <em>Murgese</em>, coded MUR, and is an unrelated breed. The bay-dominant pool
+        shipped. The actual Murgese is in this same batch and is black-only for its own, real reasons
+        &mdash; the only natural breed here with <em>both</em> base loci fixed.</li>
+    <li><strong>Three gaited breeds, and two of their drafts assumed the mod had no gait locus.</strong>
+        It does. The Kentucky Mountain Saddle Horse, the Missouri Fox Trotter and the Mangalarga
+        Marchador all ship <code>DMRT3</code> near-fixed, alongside the existing gaited breeds. The gait
+        itself remains a roadmap item; the genotype is real regardless.</li>
+    <li><strong>One of the three is a lethal-white breed and one deliberately is not.</strong> The
+        Missouri Fox Trotter's registry documents frame, so it carries <code>O</code> at a real rate and
+        two founders can throw a lethal white. The Mangalarga Marchador's does not, so frame is forced
+        wild &mdash; seeding it would have manufactured a breeding hazard the real population has not
+        got.</li>
+    <li><strong>Two breeds lock three loci at once</strong> &mdash; the Konik (<code>E</code>,
+        <code>a</code>, <code>D</code>, so every founder is blue dun) and the Kladruber (<code>E</code>,
+        <code>a</code>, plus strains that own grey). The Konik's grey is forced wild on purpose:
+        &ldquo;mouse grey&rdquo; is a description of a dun, and seeding <code>STX17</code> would whiten
+        the one thing the breed looks like. The Murgese carries the same trap under the name
+        &ldquo;iron grey&rdquo;, which is blue roan.</li>
+    <li><strong>The Kladruber and the Kaimanawa are the second and third breeds to use strains</strong>,
+        after Hequ. The Kladruber's are the historically separate grey and black court herds, differing
+        in grey alone over a fixed black base. The Kaimanawa's are the measured north&ndash;south split:
+        every grey horse ever sampled was southern and of one maternal haplogroup, so the Northern
+        strain forces grey wild and the Southern is near-fixed for it.</li>
+    <li><strong>Eight files' tolerance pools were snapped onto the three tiers
+        <code>breeds.html</code> documents</strong> (near-fixed 60/35/5, partial 5/30/65, light 15/85).
+        They had been written with bespoke shares that the page's own vocabulary could not describe, and
+        the page is the thing that has to stay true. The Kladruber and the Missouri Fox Trotter carry no
+        tolerance locus at all and are named in that page's neutral list.</li>
+</ul>
+
+<h3>Green on the bench</h3>
+
+<p>
+    <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
+    <code>check-parity</code> (7&nbsp;169 checks), <code>check-links</code>,
+    <code>build-search-index</code> and the designer boot check.
+    <code>everyShippedFileIsExactlyWhatABakeWouldWrite</code> passed on the first bake, so the
+    hand-written field order matched <code>BreedSpecWriter</code> and the bake churned nothing; and
+    <code>everyShippedFileLoadsWithNoErrorsAndNoWarnings</code> is the one that proves no allele token
+    was warned and silently dropped. <strong>None of the fifteen has been seen in a world</strong> &mdash;
+    see <a href="verification.html#new-breeds-0915e">the checklist</a>.
+</p>
+
 <h2 id="d2026-09-15g">2026-09-15, later still &mdash; fourteen breeds, four drafts that were two horses, and a stub declined</h2>
 
 <p>
