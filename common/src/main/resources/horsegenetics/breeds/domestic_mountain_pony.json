@@ -1,0 +1,73 @@
+{
+  "id": "domestic_mountain_pony",
+  "name": "Domestic Mountain Pony",
+  "country": "bosnia_and_herzegovina",
+  "commonness": "uncommon",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:dark_forest",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 10,
+    "size": [0.813, 0.906]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 98 },
+      { "pair": "E/e", "weight": 2 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 16 },
+      { "pair": "A/a", "weight": 48 },
+      { "pair": "a/a", "weight": 36 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 1 },
+      { "pair": "ShL/Sh", "weight": 7 },
+      { "pair": "ShL/ShD", "weight": 12 },
+      { "pair": "Sh/Sh", "weight": 16 },
+      { "pair": "Sh/ShD", "weight": 34 },
+      { "pair": "ShD/ShD", "weight": 30 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 1 },
+      { "pair": "D/d1", "weight": 3 },
+      { "pair": "D/d2", "weight": 14 },
+      { "pair": "d1/d1", "weight": 2 },
+      { "pair": "d1/d2", "weight": 23 },
+      { "pair": "d2/d2", "weight": 57 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Domaci brdski konj, or Bosnian Mountain Horse - the only indigenous domestic horse of Bosnia and Herzegovina, a Dinaric pack, riding and farm pony. Selective breeding began at Gorazde in 1908 and concentrated at the Borike and Han Pijesak studs, with Arab stallions used at Borike to improve it.",
+    "This is the rare breed here with real coat data: a study of 313 horses found dark bay 44%, black 36%, ordinary bay 11% and dun 8%, with the true-dun D allele at 0.09. The pool is built to that rather than to a generic mountain-pony guess.",
+    "Dark bay is carried by the shade locus, not by a separate agouti allele. At as a real allele was dropped (owner's call), and seal sits at the top of agouti's shade band, so the shade pool is skewed dark instead of using the house-standard spread - a/a gives the 36% black, and the A_ horses come out mostly dark rather than ordinary bay.",
+    "Chestnut is functionally absent: the breeding programme excludes it, and e sits at 0.01 only as an admission of modelling uncertainty rather than as a colour anyone will see.",
+    "One honest discrepancy: D at 0.09 makes about 17% of founders dun, where the same study classified only 8% as dun by eye. The study itself reports phenotype-genotype mismatches at this locus, so the measured allele frequency was followed rather than the visual tally.",
+    "d1 is carried on purpose - primitive marking without body dilution, which is how a population whose visual dun classification proved unreliable should look.",
+    "Grey, cream, pearl, champagne, silver, mushroom and flaxen are all forced wild, and so is every white pattern: the programme allows all colours except grey, pinto, chestnut and spotted, and requires no white markings. No roan, no rabicano, no leopard, no sabino.",
+    "Cold tolerant for Dinaric winters and lightly heat tolerant for the dry summers. Health 10 is the hardiness, fertility and low-input survival the breed is known for.",
+    "All disorders clear. Arab improvement crosses do not license Arabian SCID, CA or LFS rates, and a sturdy mountain build does not license a draught PSSM1 rate.",
+    "Hoof hardness, mountain traction, carrying capacity, the Agan, Barut and Misko stallion lines, and the split between the lighter riding and heavier pack types are not modelled. A strain may override gene pools and nothing else, so the two types cannot differ in size here; the band spans both."
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "id": "croatian_coldblood",
+  "name": "Croatian Coldblood",
+  "country": "croatia",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:birch_forest",
+    "minecraft:grove",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 9,
+    "size": [0.937, 1.031]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 20 },
+      { "pair": "E/e", "weight": 50 },
+      { "pair": "e/e", "weight": 30 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 44 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 9 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 14 },
+      { "pair": "d1/d2", "weight": 10 },
+      { "pair": "d2/d2", "weight": 76 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 18 },
+      { "pair": "rn/rn", "weight": 82 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 3 },
+      { "pair": "Fl1/f", "weight": 26 },
+      { "pair": "f/f", "weight": 71 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 4 },
+      { "pair": "rb/rb", "weight": 96 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Hrvatski hladnokrvnjak, Croatia's principal heavy farm and forestry horse - lowland Slavonia, Podravina, Posavina, Medimurje and the Sava and Drava basins, local mares over Brabant, Noriker, Ardennes and Percheron.",
+    "The taller, heavier counterpart to the Posavac. The two are distinct but genetically related populations, and here the difference is the size band and a lower speed and jump, not the coat.",
+    "Chestnut-led on purpose: chestnut is the visual core, with bay and brown behind it and black a minority. The draft's own E/e split put chestnut at under a fifth, which contradicted its prose, so extension was tilted until chestnut actually leads. No Croatian studbook coat survey exists - these are gameplay approximations and nothing more.",
+    "Grey, dun, roan and flaxen chestnut are real minorities. Cream, pearl, champagne, silver and mushroom are forced wild: nothing found supports them in a conservative founder pool.",
+    "Solid-bodied. No tobiano, frame, splash, dominant white or leopard - this is a traditional farm horse, not a colour-bred pinto. Sabino 1 and rabicano sit near absent, for ordinary markings only.",
+    "No wild herds: a managed agricultural breed, so the cowboy, the stables and the egg are the only ways to one.",
+    "Heat sensitive, lightly - a broad heavy draught sheds heat poorly, as with the Belgian and the Clydesdale - and cold tolerant for continental winters in wet lowland and forest.",
+    "All disorders clear. PSSM1 is the tempting mistake: it is dominant, it varies sharply by bloodline, and 'draught breed' is not evidence of a Croatian Coldblood rate.",
+    "Traction, harness work, ploughing, logging, fertility, moderate fetlock feathering, broad hooves and floodplain footing are none of them modelled."
+  ]
+}

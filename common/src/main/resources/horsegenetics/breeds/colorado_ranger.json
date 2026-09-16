@@ -1,0 +1,132 @@
+{
+  "id": "colorado_ranger",
+  "name": "Colorado Ranger",
+  "country": "united_states",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:badlands"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 7,
+    "health": 8,
+    "size": [0.921, 1.016]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 46 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 10 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.81 },
+      { "pair": "Cr/N", "weight": 16.38 },
+      { "pair": "N/N", "weight": 82.81 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 20 },
+      { "pair": "d1/d2", "weight": 12 },
+      { "pair": "d2/d2", "weight": 68 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 10 },
+      { "pair": "G2/N", "weight": 6 },
+      { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 18 },
+      { "pair": "rn/rn", "weight": 82 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 6 },
+      { "pair": "z/z", "weight": 94 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 2 },
+      { "pair": "c/c", "weight": 98 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 30 },
+      { "pair": "f/f", "weight": 70 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 15 },
+      { "pair": "rb/rb", "weight": 85 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Solid Rangerbred",
+      "weight": 11,
+      "genes": {
+        "horsegenetics.leopard": [
+          { "pair": "lp/lp", "weight": 100 }
+        ],
+        "horsegenetics.patn1": [
+          { "pair": "n/n", "weight": 100 }
+        ],
+        "horsegenetics.patn2": [
+          { "pair": "n/n", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Leopard Rangerbred",
+      "weight": 9,
+      "genes": {
+        "horsegenetics.leopard": [
+          { "pair": "LP/LP", "weight": 15 },
+          { "pair": "LP/lp", "weight": 50 },
+          { "pair": "lp/lp", "weight": 35 }
+        ],
+        "horsegenetics.patn1": [
+          { "pair": "PATN1/PATN1", "weight": 7 },
+          { "pair": "PATN1/n", "weight": 45 },
+          { "pair": "n/n", "weight": 48 }
+        ],
+        "horsegenetics.patn2": [
+          { "pair": "PATN2/n", "weight": 22 },
+          { "pair": "n/n", "weight": 78 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "A pedigree registry, not a colour registry: qualification is documented descent from the foundation sires Max and Patches, so a Rangerbred need not be spotted. That is what the two strains say - eleven founders in twenty are solid, nine carry the leopard complex.",
+    "The solid strain forces the leopard complex and both PATN modifiers wild outright rather than leaving them unnamed, because that is the breed's actual claim about itself and is worth reading in the file.",
+    "Leopard is deliberately lighter here than in the Appaloosa and the Knabstrupper: the Rangerbred is a leopard breed, not the defining one.",
+    "Pinto is barred by the registry within five generations, so there is no tobiano, frame, splash or W-series dominant white in either strain. Sabino 1 is kept light, for ordinary face and leg white only.",
+    "All disorders clear. The draft offered PSSM1 at 1.5% as an admitted guess for the Quarter Horse outcrosses; no Rangerbred-specific rate exists, and GYS1 is dominant, so every copy would show. Approved-outcross ancestry is not a licence to import Quarter Horse rates.",
+    "Congenital stationary night blindness on LP/LP is already modelled by the leopard locus. Equine recurrent uveitis is a multifactorial risk, not a single locus, and is folded into heartiness.",
+    "Documented descent, registry inspection, the dished Arabian profile, cattle sense and endurance conditioning are all outside what the mod models."
+  ]
+}

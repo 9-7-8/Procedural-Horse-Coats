@@ -78,6 +78,74 @@
     </p>
 </div>
 
+<h2 id="new-breeds-0915c">&sect;0-EG &mdash; Five more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
+
+<p>
+    <strong>Colorado Ranger, Criollo, Croatian Coldblood, Danubian, Domestic Mountain Pony.</strong>
+    Green on the bench: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>,
+    <code>BreedSpecParserTest</code>, <code>check-parity</code>, <code>check-links</code> and the
+    designer boot check. Every gene pool of all five was confirmed to survive the bake round-trip
+    pair by pair (20, 17, 11, 7 and 6 pools), because a bad allele token is <em>warned and
+    dropped</em> &mdash; a breed can load quietly missing a locus with every test still passing.
+    <strong>None of these five has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The Colorado Ranger's solid strain must be completely free of leopard &mdash; and
+        that path is new.</strong> It is the first shipped breed whose strain <em>forces loci wild</em>
+        (<code>lp/lp</code>, <code>n/n</code>, <code>n/n</code>) rather than naming a pool to draw from.
+        <strong>Pass:</strong> across a large sample, about 11 founders in 20 show no leopard character
+        at all &mdash; no spots, no blanket, no varnish &mdash; and the other 9 do.
+        <strong>Fail, and it is the interesting kind:</strong> any spotting on a solid-strain founder
+        means a forced-wild pool inside a strain is not being honoured, which would be quietly wrong
+        for every future breed that tries it.</li>
+    <li><strong>A manchado foal is now reachable from a breed.</strong> The Criollo is the
+        <em>first breed ever to name <a href="gene-manchado.html">manchado</a></em>, at carriers only
+        (6%, a design call &mdash; there is no test to measure). No founder should ever show it.
+        <strong>Pass:</strong> no manchado on any wild Criollo, and a <code>ma/Ma</code> &times;
+        <code>ma/Ma</code> pair eventually throws a foal with the dorsal white sheet, the rounded
+        base-colour islands and a dark head and legs. This is the only route to that pattern besides
+        the wild founder table.</li>
+    <li><strong>Two more breeds that never run wild.</strong> The Croatian Coldblood and the Danubian
+        are the second and third to use the <code>spawn</code> checklist after the Budyonny
+        (<code>["cowboy", "spawn_egg", "stable"]</code>). <strong>Pass:</strong> ride plains, meadow,
+        river, swamp and forest at length and never see a herd of either, while the cowboy still sells
+        one and the eggs still exist.</li>
+    <li><strong>Does a dark-skewed shade pool actually read as dark bay?</strong> The Domestic Mountain
+        Pony is the test case for standing <a href="gene-agouti.html">shade</a> in for the dropped
+        <code>At</code> allele: its study reports dark bay 44% and black 36%, so <code>a/a</code>
+        carries the black and the shade pool is deliberately skewed to <code>ShD</code> instead of the
+        house-standard spread. <strong>Pass:</strong> a band that reads as black and very dark brown,
+        with ordinary bright bay a clear minority. If the <code>A_</code> horses look like ordinary
+        bays, shade is not doing the job the agouti call assumed it would, and that conclusion matters
+        well beyond this breed.</li>
+    <li><strong>The Criollo should be visibly a dun breed.</strong> Seven founders in ten are the
+        traditional strain, where dun dominates and a double copy is ordinary.
+        <strong>Pass:</strong> most of a band is bay dun, red dun or grullo with a dorsal stripe and
+        leg barring; the rest is plainer. <strong>Also worth a look:</strong> the Domestic Mountain
+        Pony's dun rate is an <em>honest disagreement with its own source</em> &mdash; <code>D</code>
+        at 0.09 makes about 17% of founders dun where the study classified only 8% that way by eye.
+        The allele frequency was followed. If duns look too frequent in play, that is the call to
+        revisit, not a bug.</li>
+    <li><strong>Sizes were re-derived, not taken from the drafts.</strong> Every one of the five came
+        from the cited metric or hand heights through the real scale
+        (decimal hands = 15.75 &times; scale); the drafts' own scale numbers contradicted their own
+        stated heights in all five cases. <strong>Pass:</strong> a Domestic Mountain Pony reads
+        12.3&ndash;14.1 hh and a Croatian Coldblood 14.3&ndash;16.1 hh against
+        <a href="breeds.html#commonness">the table</a>.</li>
+</ul>
+
+<div class="note">
+    <span class="label">One intake file did not hold the breed its name promised</span>
+    <p>
+        <code>intake/Croatian warmblood.md</code> contained a complete, well-sourced draft of the
+        <strong>Croatian Coldblood</strong> (<i>Hrvatski hladnokrvnjak</i>), not the Croatian
+        Warmblood &mdash; it names the coldblood throughout and contrasts it with the Posavac. The
+        coldblood is what shipped, and the file was consumed. <strong>If a Croatian Warmblood was
+        wanted, no draft for it has ever arrived</strong> and one would need re-supplying. Recorded
+        here because deleting the file removed the only trace of that queue entry.
+    </p>
+</div>
+
 <h2 id="new-breeds-0915b">&sect;0-EF &mdash; Five more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
 
 <p>

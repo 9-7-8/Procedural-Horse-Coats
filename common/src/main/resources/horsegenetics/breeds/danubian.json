@@ -1,0 +1,68 @@
+{
+  "id": "danubian",
+  "name": "Danubian",
+  "country": "bulgaria",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:grove",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 8,
+    "size": [0.969, 1.031]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 55 },
+      { "pair": "E/e", "weight": 38 },
+      { "pair": "e/e", "weight": 7 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 6 },
+      { "pair": "f/f", "weight": 94 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 2 },
+      { "pair": "rb/rb", "weight": 98 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Dunavski kon, one of Bulgaria's modern national breeds - built at the Klementina stud near Pleven out of local mares and imported Nonius stock, for the army and to improve the local working horse, and recognised in 1951.",
+    "A light draught and carriage horse: the middle ground between the Hungarian Nonius and a sport horse. Strong and harness-minded without being a heavy draught or a trotter.",
+    "Dark and solid, and only just varied. Extension, agouti and a trace of flaxen are the whole colour pool; grey, cream, pearl, champagne, silver, mushroom, dun and roan are all forced wild, because no Danubian source supports seeding them. The base-colour weights are gameplay approximations - the breed's own genetic survey is microsatellite diversity and sire lines, not coat loci.",
+    "No pinto and no leopard. Sabino 1 and rabicano sit at 2%, for ordinary markings only.",
+    "The six paternal lines - Zdravko, Nonius XVII-30, Torpedo, Lider, Kalifa and Hrabar - are genealogical, not coat strains, so they are deliberately not modelled as strains. The survey behind them found high diversity and low inbreeding, which is why the pool is varied rather than fixed on one dark colour.",
+    "No wild herds: a managed Bulgarian working breed, so the cowboy, the stables and the egg only.",
+    "All disorders clear. A Nonius foundation is not a licence to copy Nonius assumptions, and a working breed is not a licence to copy draught PSSM1 estimates.",
+    "Harness action, pulling force, remount suitability, hoof durability and leg bone are not modelled."
+  ]
+}

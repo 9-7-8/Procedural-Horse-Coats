@@ -1,0 +1,126 @@
+{
+  "id": "criollo",
+  "name": "Criollo",
+  "country": "argentina",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 10,
+    "size": [0.873, 0.968]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 45 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 11 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 45 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 10 },
+      { "pair": "G2/N", "weight": 6 },
+      { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 21 },
+      { "pair": "rn/rn", "weight": 79 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 5 },
+      { "pair": "Fl1/f", "weight": 35 },
+      { "pair": "f/f", "weight": 60 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 4 },
+      { "pair": "z/z", "weight": 96 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 17 },
+      { "pair": "N/N", "weight": 83 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 19 },
+      { "pair": "rb/rb", "weight": 81 }
+    ],
+    "horsegenetics.manchado": [
+      { "pair": "ma/Ma", "weight": 6 },
+      { "pair": "Ma/Ma", "weight": 94 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Traditional Dun Criollo",
+      "weight": 7,
+      "genes": {
+        "horsegenetics.dun": [
+          { "pair": "D/D", "weight": 20 },
+          { "pair": "D/d2", "weight": 45 },
+          { "pair": "d1/d2", "weight": 12 },
+          { "pair": "d2/d2", "weight": 23 }
+        ],
+        "horsegenetics.matp": [
+          { "pair": "Cr/Cr", "weight": 0.81 },
+          { "pair": "Cr/N", "weight": 16.38 },
+          { "pair": "N/N", "weight": 82.81 }
+        ]
+      }
+    },
+    {
+      "name": "Broad-Colour Criollo",
+      "weight": 3,
+      "genes": {
+        "horsegenetics.dun": [
+          { "pair": "D/d2", "weight": 25 },
+          { "pair": "d1/d2", "weight": 15 },
+          { "pair": "d2/d2", "weight": 60 }
+        ],
+        "horsegenetics.matp": [
+          { "pair": "Cr/Cr", "weight": 4 },
+          { "pair": "Cr/N", "weight": 32 },
+          { "pair": "N/N", "weight": 64 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The Argentine or Rio de la Plata Criollo, not every horse called Criollo across the Americas - the regional populations differ in size, gait and use, and one shared pool would erase that. The gaucho's cattle and distance horse, into the Argentine Rural Society studbook in 1918 and restored to type by Solanet afterwards.",
+    "Dun is the breed: seven founders in ten are the traditional strain, where dun dominates and a double copy is ordinary, giving bay dun, red dun and grullo with a dorsal stripe and leg barring. The other three in ten are the broader palette, with dun a minority and more cream.",
+    "The two strains differ only in dun and cream. A strain may override gene pools and nothing else, so they cannot differ in size, and the size band spans both.",
+    "Tobiano is forced wild: the shared southern-Criollo standard excludes paint and tobiano, and the broad summaries that say 'pinto' use the word loosely. Frame overo and a little splash are allowed instead, which is the overo the sources actually describe - and O/O is the lethal white cross, the one breeding hazard here.",
+    "Manchado is named, at carriers only. This mod has the locus and the Criollo is the population it is most reported in; the pattern is a suspected rare recessive with no test and no measured frequency, so the 6% carrier rate is a design call, not data. It makes the Criollo the one breed where two carriers can throw a manchado foal.",
+    "No leopard complex: nothing found establishes appaloosa spotting as a Criollo founder trait.",
+    "All disorders clear, PSSM1 included. It is dominant, so a guessed rate would show on every copy, and no Criollo-specific survey exists.",
+    "Health 10 is the point of the breed - endurance, thrift, sound feet and coping with sparse forage. Real endurance trials, grazing efficiency, cow sense, hoof density and the full mane and tail are not modelled."
+  ]
+}
