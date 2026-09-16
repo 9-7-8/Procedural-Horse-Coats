@@ -1,0 +1,66 @@
+{
+  "id": "ukrainian_riding_horse",
+  "name": "Ukrainian Riding Horse",
+  "country": "ukraine",
+  "commonness": "uncommon",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 7,
+    "health": 7,
+    "size": [1.0, 1.093]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 44 },
+      { "pair": "E/e", "weight": 45 },
+      { "pair": "e/e", "weight": 11 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 4 },
+      { "pair": "f/f", "weight": 96 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 2 },
+      { "pair": "rb/rb", "weight": 98 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Ukrainskyi Verkhovyi Kin, also called the Ukrainian Saddle Horse: a postwar sport warmblood begun at Dnipropetrovsk Stud and extended through Aleksandriisk, Yagonitsk and Derkul. Studbook from 1971, formal recognition in 1990, a year before independence.",
+    "Built out of Hungarian mare lines - Nonius, Furioso-North Star and Gidran - under Trakehner, Hanoverian, Thoroughbred and Russian Saddle Horse stallions. Substantial rather than refined, and an all-rounder rather than a specialist, which is why speed and jump sit level at 7.",
+    "Chestnut, bay and brown are the breed, black is the minority, and that is the whole palette. Grey and cream are forced wild rather than low: the sources that mention them are broad summaries with no studbook behind them, and until there is colour data the conservative pool is the honest one.",
+    "Sabino and rabicano sit at a trace to allow ordinary face and leg markings. Every pinto pattern, the leopard complex, roan and every dilution are forced wild - this is not a colour-bred warmblood.",
+    "All disorders clear, WFFS included. Warmblood, Thoroughbred and Hungarian ancestry makes WFFS possible in individual lines but establishes no rate, and the mod has no WFFS locus to put one in.",
+    "Cold tolerant lightly, for continental Ukrainian winters.",
+    "Managed only: cowboy, spawn egg and stable. Passports, licensing, inspections and every discipline the breed is actually selected on are not modelled."
+  ]
+}

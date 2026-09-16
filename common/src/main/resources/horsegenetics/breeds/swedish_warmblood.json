@@ -1,0 +1,90 @@
+{
+  "id": "swedish_warmblood",
+  "name": "Swedish Warmblood",
+  "country": "sweden",
+  "commonness": "uncommon",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:taiga",
+    "minecraft:grove",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 8,
+    "health": 7,
+    "size": [1.074, 1.187]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 44 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 7.7 },
+      { "pair": "N/N", "weight": 92.3 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 17 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 2 },
+      { "pair": "z/z", "weight": 98 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 8 },
+      { "pair": "f/f", "weight": 92 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 2 },
+      { "pair": "to/to", "weight": 98 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 4 },
+      { "pair": "rb/rb", "weight": 96 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "Sweden's principal sport horse, out of the royal and state studs - Stromsholm from 1621, Flyinge and Ottenby - with a studbook from 1874 and the breeders' association from 1928. Thoroughbred, Trakehner, Hanoverian, Anglo-Norman and Arabian lines turned a cavalry and carriage horse into a dressage and jumping one.",
+    "Solid colours by studbook policy: bay, chestnut, grey and black are the whole population, and grey is the one that carries. Cream sits low enough for an occasional palomino or buckskin, silver and splash lower still.",
+    "Roan is forced wild on purpose. The breed references say roan does not occur in the Swedish Warmblood and has to be brought in by crossing, which is exactly what forcing the locus wild means here.",
+    "Tobiano is present at a trace rather than absent - supplementary records call it rare, not impossible - and it is the one loud pattern a pure founder can throw.",
+    "WFFS is the breed's real disorder and this file ships clear of it, because the mod has no WFFS locus. PLOD1 here is Friesian dwarfism, not warmblood fragile foal syndrome, and writing the draft's PLOD1 number into it would have seeded dwarfism into a sport horse. The measured figure is on the roadmap: 38 of 511 randomly selected Swedish Warmbloods born in 2017 were carriers, 7.4%, an allele frequency near 0.0385 - better evidence than most of what is already in that section.",
+    "Every other disorder clear; no Swedish-specific carrier survey exists for the rest of the panel.",
+    "Cold tolerant lightly - Scandinavian, but a stabled and rugged sport horse rather than a horse that winters out.",
+    "Managed only: cowboy, spawn egg and stable, no wild herds. Stallion licensing, mare inspections, young-horse tests and everything else the studbook actually selects on are not modelled."
+  ]
+}

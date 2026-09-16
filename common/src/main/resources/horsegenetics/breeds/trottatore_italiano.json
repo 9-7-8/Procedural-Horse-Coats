@@ -1,0 +1,106 @@
+{
+  "id": "trottatore_italiano",
+  "name": "Trottatore Italiano",
+  "country": "italy",
+  "commonness": "uncommon",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 9,
+    "jump": 4,
+    "health": 7,
+    "size": [0.906, 1.0]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 46 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 10 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 49 },
+      { "pair": "A/a", "weight": 42 },
+      { "pair": "a/a", "weight": 9 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 7.7 },
+      { "pair": "N/N", "weight": 92.3 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 2 },
+      { "pair": "c/c", "weight": 98 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 3 },
+      { "pair": "z/z", "weight": 97 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 9 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 9 },
+      { "pair": "f/f", "weight": 91 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 4 },
+      { "pair": "rn/rn", "weight": 96 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 6 },
+      { "pair": "to/to", "weight": 94 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 6 },
+      { "pair": "W20/N", "weight": 2 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 85 },
+      { "pair": "A/C", "weight": 14 },
+      { "pair": "C/C", "weight": 1 }
+    ]
+  },
+  "notes": [
+    "Italy's harness racer, out of nineteenth-century trotting stock on American Standardbred, French and Norman Trotter and Orlov Trotter lines, with a herdbook from 1896. Speed 9 - among the fastest here, and the only thing the breed is selected on.",
+    "There is deliberately no morphology standard and no colour rule: a horse is judged on whether it can trot fast in front of a sulky. So the colour pool is the most permissive of any solid breed here, with bay leading, chestnut and black common, grey occasional, and low background rates on cream, champagne, dun, silver, flaxen, roan, rabicano and the pinto patterns.",
+    "DMRT3 sits high. The gait-keeper allele is what lets a horse hold a fast symmetrical trot instead of breaking into a gallop, and a trotting breed is where it belongs - though the trot itself, the sulky and the break-to-gallop penalty are not modelled.",
+    "Frame is a trace rather than absent and carries the usual O/O hazard with it. It is one locus here, not a coat gene plus a separate lethal roll.",
+    "The leopard complex, brindle, pearl and mushroom stay wild. An open colour rule is not the same as every locus being present.",
+    "All disorders clear. Standardbred ancestry is not a PSSM1 rate, and no Italian Trotter carrier survey exists.",
+    "Carries neither tolerance locus, like the Standardbred it descends from.",
+    "Managed only: cowboy, spawn egg and stable."
+  ]
+}

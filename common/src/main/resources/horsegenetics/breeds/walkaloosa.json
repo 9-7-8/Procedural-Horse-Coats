@@ -1,0 +1,127 @@
+{
+  "id": "walkaloosa",
+  "name": "Walkaloosa",
+  "country": "united_states",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_hills",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 4,
+    "health": 8,
+    "size": [0.889, 0.984]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 18 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 13 },
+      { "pair": "d2/d2", "weight": 87 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 15 },
+      { "pair": "rn/rn", "weight": 85 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 13 },
+      { "pair": "f/f", "weight": 87 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/LP", "weight": 25 },
+      { "pair": "LP/lp", "weight": 62 },
+      { "pair": "lp/lp", "weight": 13 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/PATN1", "weight": 18 },
+      { "pair": "PATN1/n", "weight": 48 },
+      { "pair": "n/n", "weight": 34 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 28 },
+      { "pair": "n/n", "weight": 72 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.5 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Regular Walkaloosa",
+      "weight": 90,
+      "genes": {
+        "horsegenetics.leopard": [
+          { "pair": "LP/LP", "weight": 28 },
+          { "pair": "LP/lp", "weight": 72 }
+        ],
+        "horsegenetics.patn1": [
+          { "pair": "PATN1/PATN1", "weight": 20 },
+          { "pair": "PATN1/n", "weight": 52 },
+          { "pair": "n/n", "weight": 28 }
+        ],
+        "horsegenetics.patn2": [
+          { "pair": "PATN2/n", "weight": 30 },
+          { "pair": "n/n", "weight": 70 }
+        ]
+      }
+    },
+    {
+      "name": "Identification only",
+      "weight": 10,
+      "genes": {
+        "horsegenetics.leopard": [
+          { "pair": "LP/lp", "weight": 12 },
+          { "pair": "lp/lp", "weight": 88 }
+        ],
+        "horsegenetics.patn1": [
+          { "pair": "PATN1/n", "weight": 10 },
+          { "pair": "n/n", "weight": 90 }
+        ],
+        "horsegenetics.patn2": [
+          { "pair": "n/n", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "A gaited Appaloosa: the Walkaloosa Horse Registry, founded 1983, registers horses that have both verified Appaloosa ancestry and a certified intermediate gait that is not a trot. The early crosses were largely Appaloosa on Paso Fino. Two inherited things at once is the whole breed.",
+    "LP is fixed in the regular strain - every fully registered founder carries at least one copy, because visible Appaloosa colour from ten feet away is a registration requirement rather than a preference. PATN1 and PATN2 sit high behind it so blankets, snowcaps, leopards and few-spots are the common outcomes rather than varnish alone.",
+    "Two strains, 9 regular to 1 identification-only. The registry issues ID papers to horses that lack the colour or the gait, and that is what the second strain is; it carries LP at a trace instead of not at all.",
+    "It is leopard and not pinto, and the file is built to keep that true: tobiano, frame, sabino, splash and the W-series are all forced wild. A nearly white few-spot Walkaloosa is still an Appaloosa-patterned horse.",
+    "Grey is forced wild on the registry's own logic - it would progressively obscure the pattern the horse is registered for. Mushroom, silver, champagne and pearl are out too; cream, dun, roan and flaxen stay in at low rates as legitimate bases under the pattern.",
+    "DMRT3 sits high for the gait requirement. The running walk, fox trot, rack, single-foot and stepping pace are not modelled, nor is the gait certification.",
+    "All disorders clear. The one real health consequence is LP/LP congenital stationary night blindness, and it belongs to the leopard locus rather than to the disorder panel - the mod already reports it there, informationally, and it costs the horse nothing.",
+    "Carries neither tolerance locus."
+  ]
+}

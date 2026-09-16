@@ -1,0 +1,67 @@
+{
+  "id": "wielkopolski",
+  "name": "Wielkopolski",
+  "country": "poland",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:river",
+    "minecraft:grove",
+    "minecraft:windswept_forest"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 7,
+    "health": 8,
+    "size": [0.981, 1.15]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 52 },
+      { "pair": "A/a", "weight": 40 },
+      { "pair": "a/a", "weight": 8 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 8 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 87 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Great Poland Horse, also the Wielkopolska or Mazursko-Poznanski: made in 1964 by merging the Poznan horse of western Poland with the Mazury horse of the north-east, and kept by the PZHK studbook. The double name is the two founding populations.",
+    "Trakehner, Thoroughbred, Arabian, Anglo-Arab and Hanoverian behind farm and cavalry stock. Substance without being a coldblood, and associated above all with cross-country, which is why speed and jump both sit at 7.",
+    "Bay-led with a strong chestnut minority, a real black group and occasional grey. Cream is a trace, allowing a rare buckskin or palomino without moving the centre of the breed.",
+    "Roan is forced wild, and that is the breed's own rule rather than an omission: roan horses are excluded from breeding in the detailed breed reference.",
+    "The basic-colour pool has a large study behind it in principle - 7,664 registered bay, black and chestnut Wielkopolskis across five studbook volumes were analysed at the two base loci - but the accessible citation does not expose the frequencies, so the numbers here are the usual estimate and the study is cited for the shape of the population, not the values.",
+    "Every pinto pattern, the leopard complex and every remaining dilution are forced wild. Solid colours are the standard.",
+    "All disorders clear; no Wielkopolski carrier survey exists.",
+    "Cold tolerant lightly, for Polish winters.",
+    "Managed only: cowboy, spawn egg and stable."
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "id": "yakutian_horse",
+  "name": "Yakutian Horse",
+  "country": "russia",
+  "commonness": "uncommon",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes",
+    "minecraft:snowy_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:taiga",
+    "minecraft:grove",
+    "minecraft:frozen_river",
+    "minecraft:river",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 10,
+    "size": [0.825, 0.889]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 50.6 },
+      { "pair": "E/e", "weight": 41 },
+      { "pair": "e/e", "weight": 8.4 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 16 },
+      { "pair": "A/a", "weight": 48 },
+      { "pair": "a/a", "weight": 36 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 36 },
+      { "pair": "D/d1", "weight": 8 },
+      { "pair": "D/d2", "weight": 40 },
+      { "pair": "d1/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 10 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 18 },
+      { "pair": "G3/G2", "weight": 12 },
+      { "pair": "G2/G2", "weight": 5 },
+      { "pair": "G3/N", "weight": 27 },
+      { "pair": "G2/N", "weight": 18 },
+      { "pair": "N/N", "weight": 20 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 11 },
+      { "pair": "rn/rn", "weight": 89 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 5 },
+      { "pair": "to/to", "weight": 95 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 2 },
+      { "pair": "lp/lp", "weight": 98 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Middle Kolyma",
+      "weight": 55,
+      "genes": {
+        "horsegenetics.dun": [
+          { "pair": "D/D", "weight": 42 },
+          { "pair": "D/d1", "weight": 9 },
+          { "pair": "D/d2", "weight": 38 },
+          { "pair": "d1/d2", "weight": 5 },
+          { "pair": "d2/d2", "weight": 6 }
+        ],
+        "horsegenetics.tobiano": [
+          { "pair": "to/to", "weight": 100 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "N/N", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Southern Yakut",
+      "weight": 25,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 44 },
+          { "pair": "E/e", "weight": 45 },
+          { "pair": "e/e", "weight": 11 }
+        ],
+        "horsegenetics.dun": [
+          { "pair": "D/D", "weight": 34 },
+          { "pair": "D/d1", "weight": 8 },
+          { "pair": "D/d2", "weight": 40 },
+          { "pair": "d1/d2", "weight": 7 },
+          { "pair": "d2/d2", "weight": 11 }
+        ],
+        "horsegenetics.tobiano": [
+          { "pair": "to/to", "weight": 100 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "N/N", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Megezh / Olekminsk",
+      "weight": 20,
+      "genes": {
+        "horsegenetics.dun": [
+          { "pair": "D/D", "weight": 14 },
+          { "pair": "D/d1", "weight": 7 },
+          { "pair": "D/d2", "weight": 37 },
+          { "pair": "d1/d2", "weight": 9 },
+          { "pair": "d2/d2", "weight": 33 }
+        ],
+        "horsegenetics.roan": [
+          { "pair": "Rn/rn", "weight": 21 },
+          { "pair": "rn/rn", "weight": 79 }
+        ],
+        "horsegenetics.tobiano": [
+          { "pair": "To/to", "weight": 12 },
+          { "pair": "to/to", "weight": 88 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 12 },
+          { "pair": "N/N", "weight": 88 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The Sakha ata, native to the Sakha Republic in north-eastern Siberia and recognised as its own Russian breed in 1987. Genome work puts its ancestors' arrival in the thirteenth to fifteenth centuries - these are not surviving ice-age horses, they are domestic horses that adapted to eight-month winters astonishingly fast.",
+    "Two intake drafts arrived for this breed, Yakut.md and Yakutian.md, describing the same Sakha horse under its two English names. They were merged into one file rather than shipped twice, the way the APHA Paint re-supply was. The base-colour pool comes from the first, which cites a real study; the regional strains come from the second.",
+    "Extension and agouti are measured, not estimated: a study of 45 purebred Yakutian horses puts MC1R E at 0.711 and ASIP A at 0.400. The high a is the notable half - it is what gives the breed its black bases under grey and dun.",
+    "Grey and dun together are the breed's camouflage and both sit high, so a herd against snow reads pale. They are gameplay-calibrated from the phenotype descriptions rather than measured; only extension and agouti have numbers behind them.",
+    "Three strains, 55 Middle Kolyma to 25 Southern Yakut to 20 Megezh/Olekminsk. The real types differ mostly in SIZE - Southern the smallest, Megezh the largest at about 14 hands - and a strain may override gene pools and nothing else, so the size band spans all three and the strains carry the colour difference. Tobiano and sabino are shut off entirely in the two traditional strains and occur only in the draught-and-trotter-influenced Megezh pool.",
+    "Roan and a trace of leopard are reported in the wider population and kept low. Cream, pearl, champagne, silver, mushroom, frame, splash, the W-series and brindle are all forced wild.",
+    "DMRT3 is left wild on purpose: the same study found the gait-keeper and the MSTN sprint variant both at very low frequency, which is what a walking transport horse should look like.",
+    "All disorders clear. Surviving at fifty below is not evidence of anything about PSSM1 or WFFS.",
+    "Cold tolerant near-fixed. Nothing else in the file comes close to being this obviously right.",
+    "Winter coat of 8 to 15 cm, seasonal fat, snow-cratering for forage, mare's milk and meat use, and the hoof horn are none of them modelled."
+  ]
+}

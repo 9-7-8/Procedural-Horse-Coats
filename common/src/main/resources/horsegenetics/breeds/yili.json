@@ -1,0 +1,124 @@
+{
+  "id": "yili",
+  "name": "Yili",
+  "country": "china",
+  "commonness": "uncommon",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:grove",
+    "minecraft:taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:river",
+    "minecraft:frozen_river",
+    "minecraft:stony_peaks"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.9, 0.956]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 52 },
+      { "pair": "A/a", "weight": 40 },
+      { "pair": "a/a", "weight": 8 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 17 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 6 },
+      { "pair": "f/f", "weight": 94 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 2 },
+      { "pair": "rb/rb", "weight": 98 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Improved Yili",
+      "weight": 60,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 52 },
+          { "pair": "E/e", "weight": 40 },
+          { "pair": "e/e", "weight": 8 }
+        ],
+        "horsegenetics.agouti": [
+          { "pair": "A/A", "weight": 55 },
+          { "pair": "A/a", "weight": 38 },
+          { "pair": "a/a", "weight": 7 }
+        ]
+      }
+    },
+    {
+      "name": "Kazakh-rooted Yili",
+      "weight": 25,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 46 },
+          { "pair": "E/e", "weight": 44 },
+          { "pair": "e/e", "weight": 10 }
+        ],
+        "horsegenetics.grey": [
+          { "pair": "G3/N", "weight": 14 },
+          { "pair": "G2/N", "weight": 7 },
+          { "pair": "N/N", "weight": 79 }
+        ]
+      }
+    },
+    {
+      "name": "Race Yili",
+      "weight": 15,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "G3/N", "weight": 19 },
+          { "pair": "G2/N", "weight": 10 },
+          { "pair": "N/N", "weight": 71 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The Ili Horse of the Ili Kazakh Autonomous Prefecture in Xinjiang: local Kazakh mares improved through the twentieth century with Don, Budyonny and Orlov Trotter stallions, and redirected in 1963 towards a larger riding and draught type. A riding, harness, light-draught, milk, meat and racing horse all at once.",
+    "Bay-led with a real chestnut group, a smaller black one and grey as an established minority. No dilution and no white pattern: cream, dun, pearl, champagne, silver, mushroom, roan, every pinto locus and the leopard complex are forced wild.",
+    "The metallic sheen the breed is described with is not a pigment gene and is not modelled. It is emphatically not silver, champagne or cream, and putting it in one of those would have changed the colour of the horse to fake a highlight.",
+    "Three strains, 60 improved to 25 Kazakh-rooted to 15 race. The real groups differ in size and performance as much as in colour, and a strain may override gene pools and nothing else - so the stat band spans all three and the strains carry only a small difference in base colour and grey.",
+    "All disorders clear. Don, Budyonny, Orlov and Thoroughbred ancestry is not a carrier rate, and the Yili genomic literature is about population structure, immunity and racing markers rather than disease alleles.",
+    "Tolerant both ways and lightly, for the continental extremes of a Xinjiang mountain basin.",
+    "Mare's milk and meat production, the local gallop, trot and pace racing types, harness action and traction are none of them modelled."
+  ]
+}

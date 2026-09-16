@@ -1,0 +1,140 @@
+{
+  "id": "tarpan",
+  "name": "Tarpan",
+  "country": "russia",
+  "commonness": "very_rare",
+  "spawn": ["spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:grove",
+    "minecraft:stony_peaks"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 4,
+    "health": 10,
+    "size": [0.873, 0.905]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 83 },
+      { "pair": "E/e", "weight": 16 },
+      { "pair": "e/e", "weight": 1 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 34 },
+      { "pair": "A/a", "weight": 48 },
+      { "pair": "a/a", "weight": 18 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 60 },
+      { "pair": "D/d1", "weight": 8 },
+      { "pair": "D/d2", "weight": 26 },
+      { "pair": "d1/d2", "weight": 4 },
+      { "pair": "d2/d2", "weight": 2 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 8 },
+      { "pair": "lp/lp", "weight": 92 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 3 },
+      { "pair": "n/n", "weight": 97 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Steppe dun",
+      "weight": 85,
+      "genes": {
+        "horsegenetics.dun": [
+          { "pair": "D/D", "weight": 72 },
+          { "pair": "D/d1", "weight": 7 },
+          { "pair": "D/d2", "weight": 19 },
+          { "pair": "d1/d2", "weight": 1 },
+          { "pair": "d2/d2", "weight": 1 }
+        ],
+        "horsegenetics.leopard": [
+          { "pair": "lp/lp", "weight": 100 }
+        ],
+        "horsegenetics.patn1": [
+          { "pair": "n/n", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Ancient leopard",
+      "weight": 5,
+      "genes": {
+        "horsegenetics.dun": [
+          { "pair": "D/D", "weight": 12 },
+          { "pair": "D/d2", "weight": 46 },
+          { "pair": "d1/d2", "weight": 12 },
+          { "pair": "d2/d2", "weight": 30 }
+        ],
+        "horsegenetics.leopard": [
+          { "pair": "LP/LP", "weight": 50 },
+          { "pair": "LP/lp", "weight": 50 }
+        ],
+        "horsegenetics.patn1": [
+          { "pair": "PATN1/PATN1", "weight": 10 },
+          { "pair": "PATN1/n", "weight": 60 },
+          { "pair": "n/n", "weight": 30 }
+        ],
+        "horsegenetics.patn2": [
+          { "pair": "PATN2/n", "weight": 45 },
+          { "pair": "n/n", "weight": 55 }
+        ]
+      }
+    },
+    {
+      "name": "Undiluted",
+      "weight": 10,
+      "genes": {
+        "horsegenetics.dun": [
+          { "pair": "D/d2", "weight": 14 },
+          { "pair": "d1/d1", "weight": 4 },
+          { "pair": "d1/d2", "weight": 22 },
+          { "pair": "d2/d2", "weight": 60 }
+        ],
+        "horsegenetics.leopard": [
+          { "pair": "lp/lp", "weight": 100 }
+        ],
+        "horsegenetics.patn1": [
+          { "pair": "n/n", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The Eurasian wild horse, Equus ferus ferus: the free-ranging horse of the western Eurasian steppe and forest, documented through the eighteenth and nineteenth centuries and gone by the start of the twentieth. The last widely accepted captive animal died in the Russian Empire in 1909, which is why the country token is Russia; the range was the Pontic-Caspian steppe and reached well into Ukraine, Poland and central Europe, and no single modern nation owns it.",
+    "The only extinct breed in the mod, and the reason it has no wild spawn: spawn egg and stable only, where the stable stands in for a reconstruction programme. It is not magical - it is a real horse that is not here any more.",
+    "Dun is nearly fixed and is the whole look: grullo and bay dun with the dorsal stripe, dark points, leg bars and shoulder stripe the nineteenth-century accounts describe. Extension is skewed hard so chestnut is almost absent, agouti split so the black-based mouse dun is common.",
+    "Three strains, 85 steppe dun to 10 undiluted to 5 ancient leopard. The leopard strain is the interesting one and it is not folklore: ancient-DNA work finds leopard-spotted horses in prehistoric western Eurasian populations. It is evidence about prehistory, not a claim that nineteenth-century tarpans were commonly spotted, which is why it is one founder in twenty.",
+    "Grey is forced wild, and that matters more here than usual. The old name for the colour is mouse grey, and seeding STX17 would whiten the horse with age and destroy the one thing it is described as looking like. The same trap the Konik, the Murgese and the Sorraia file around.",
+    "Every modern dilution and every pinto pattern is forced wild. There is no basis for building a domestic colour pool into a reconstruction.",
+    "All disorders clear - there is no living population to measure, and inventing a rate for an extinct animal would be the least defensible number in the mod.",
+    "Cold tolerant partially, for steppe winters.",
+    "Distinct from the Konik, the Sorraia, the Heck horse and Przewalski's horse, all of which are living lineages. The breeding-back projects produced horses that resemble the descriptions; they did not bring this one back."
+  ]
+}

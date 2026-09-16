@@ -1,0 +1,73 @@
+{
+  "id": "yugoslavian_trotter",
+  "name": "Yugoslavian Trotter",
+  "country": "serbia",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:grove",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 8,
+    "jump": 4,
+    "health": 7,
+    "size": [0.906, 0.968]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 61 },
+      { "pair": "A/a", "weight": 34 },
+      { "pair": "a/a", "weight": 5 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 4 },
+      { "pair": "G2/N", "weight": 2 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 6 },
+      { "pair": "f/f", "weight": 94 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 2 },
+      { "pair": "rb/rb", "weight": 98 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 80 },
+      { "pair": "A/C", "weight": 18 },
+      { "pair": "C/C", "weight": 2 }
+    ]
+  },
+  "notes": [
+    "The Jugoslovenski kasac, a Balkan harness racer made in the former Yugoslavia and kept principally in Serbia, out of Orlov Trotter and Anglo-Arabian stock with later American Standardbred blood. More of a general-purpose horse than a Standardbred, and smaller - about 145 to 152 cm.",
+    "Bay, bay-brown, brown, black and light chestnut, with grey explicitly rare and everything else absent. Agouti is skewed hard towards A; the bay-brown and brown the FAO record distinguishes come out of the shade locus here rather than out of a seal-brown allele, because agouti in this mod is A and a only.",
+    "DMRT3 sits high, as it should in a trotting breed - the gait-keeper allele is what holds a fast trot together under harness. The trot, the sulky and the racing itself are not modelled.",
+    "Every dilution, every pinto pattern, roan and the leopard complex are forced wild; sabino and rabicano sit at a trace for ordinary markings. It is not a colour breed in any sense.",
+    "All disorders clear. Being a trotter is not a reason to seed PSSM1 - that is a dominant mutation and needs a direct survey before a breed carries it.",
+    "Carries neither tolerance locus, like the other racing studbooks here.",
+    "Managed only: cowboy, spawn egg and stable."
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "id": "zangersheide",
+  "name": "Zangersheide",
+  "country": "belgium",
+  "commonness": "uncommon",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 8,
+    "jump": 10,
+    "health": 7,
+    "size": [1.048, 1.333]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 7.7 },
+      { "pair": "N/N", "weight": 92.3 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 17 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 2 },
+      { "pair": "d2/d2", "weight": 98 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 2 },
+      { "pair": "z/z", "weight": 98 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 6 },
+      { "pair": "f/f", "weight": 94 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 8 },
+      { "pair": "to/to", "weight": 92 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 8 },
+      { "pair": "W20/N", "weight": 2 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 2 },
+      { "pair": "rn/rn", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 4 },
+      { "pair": "rb/rb", "weight": 96 }
+    ]
+  },
+  "notes": [
+    "The Belgian jumping studbook at Lanaken, out of Leon Melchior's Zangersheide Stud of the 1970s and independent as Studbook Zangersheide from 1992. A registered horse carries Z after its name. It is a performance registry rather than a closed breed: Holsteiner, Hanoverian, Selle Francais, Dutch and Belgian Warmblood and Thoroughbred lines all qualify on jumping ability.",
+    "Jump 10, which is the one thing the whole studbook exists to select for. Speed 8 behind it, because a jumper needs an adjustable gallop rather than a flat-racing one.",
+    "A tall band, running to 17.2 hands at the top. The studbook enforces no height standard at all, which is why it is wide rather than tight.",
+    "Colour is not selected on at all, and the pool reflects that rather than forcing solid bay: grey and cream are ordinary, and tobiano, sabino, splash, W20, a trace of frame, roan, rabicano, dun and silver are all reachable. A pinto Z is a real horse, just an unusual one.",
+    "Champagne, pearl, mushroom, the leopard complex and brindle stay wild. An open registry is not a reason to give every locus a frequency.",
+    "WFFS is the warmblood disorder this breed would carry and the file ships clear of it, because the mod has no WFFS locus - PLOD1 here is Friesian dwarfism. The draft's own figure was a self-labelled warmblood proxy rather than a Zangersheide measurement, so the rate that went on the roadmap is the Swedish Warmblood's measured one, not this.",
+    "Every other disorder clear. An open pedigree is not a licence to import the Quarter Horse or Friesian panel.",
+    "Carries neither tolerance locus - a modern international sport horse that lives in a stable, like the other warmbloods here.",
+    "Managed only: cowboy, spawn egg and stable, no wild herds."
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "vyatka",
+  "name": "Vyatka",
+  "country": "russia",
+  "commonness": "rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:grove",
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:river",
+    "minecraft:frozen_river",
+    "minecraft:swamp"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 9,
+    "size": [0.875, 0.937]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 61 },
+      { "pair": "E/e", "weight": 34 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 36 },
+      { "pair": "A/a", "weight": 48 },
+      { "pair": "a/a", "weight": 16 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.64 },
+      { "pair": "Cr/N", "weight": 14.7 },
+      { "pair": "N/N", "weight": 84.66 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 9 },
+      { "pair": "D/d1", "weight": 15 },
+      { "pair": "D/d2", "weight": 27 },
+      { "pair": "d1/d1", "weight": 6 },
+      { "pair": "d1/d2", "weight": 23 },
+      { "pair": "d2/d2", "weight": 20 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 8 },
+      { "pair": "f/f", "weight": 92 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 2 },
+      { "pair": "rb/rb", "weight": 98 }
+    ],
+    "horsegenetics.gys1": [
+      { "pair": "P/P", "weight": 3.6 },
+      { "pair": "P/N", "weight": 30.7 },
+      { "pair": "N/N", "weight": 65.7 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The Vyatskaya loshad, out of the Vyatka river basin around Kirov and into Udmurtia and Perm Krai: one of Russia's oldest native horses, shaped by forest, marshy meadow, snow, poor forage and long winter journeys by sledge. A village horse, not a stud creation.",
+    "Dun is the signature and it is real TBX3 dun, not a stripe painted on: D sits at the measured 0.30, so bay dun, savrasaya and mouse dun or grullo are the common outcomes, with d1 carried widely for primitive marking without body dilution.",
+    "Cream is deliberately present at a modest rate. The Vyatka colour-marker work notes that dun-plus-cream horses are commercially sought, which is how a dunskin or a smoky grullo gets to be a Vyatka rather than a mistake.",
+    "PSSM1 is the one seeded disorder and it is seeded high: a Vyatka population-genomic study reports the GYS1 allele at 0.189, which is about 31% heterozygous and 3.6% homozygous. The homozygous share is written into the founder pool deliberately - PSSM1 is dominant, so a heterozygote is affected rather than a silent carrier, and a third of the breed being genetically positive is what the measurement says rather than something to soften.",
+    "Everything else clear. Grey, pearl, champagne, silver, mushroom, every pinto pattern and the leopard complex are forced wild; sabino and rabicano sit at a trace for ordinary markings.",
+    "Cold tolerant near-fixed, which is the strongest tier here and the least arguable - this is a horse that works through a Kirov winter.",
+    "Winter coat, thick mane and tail, hoof hardness, forage thrift, the fast working trot and the line structure of the conservation programme are none of them modelled."
+  ]
+}

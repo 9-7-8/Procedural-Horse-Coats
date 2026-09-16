@@ -1,0 +1,67 @@
+{
+  "id": "tersk",
+  "name": "Tersk",
+  "country": "russia",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:river",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 8,
+    "size": [0.981, 1.0]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 49 },
+      { "pair": "A/a", "weight": 42 },
+      { "pair": "a/a", "weight": 9 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 20 },
+      { "pair": "G3/G2", "weight": 15 },
+      { "pair": "G2/G2", "weight": 7 },
+      { "pair": "G3/N", "weight": 26 },
+      { "pair": "G2/N", "weight": 20 },
+      { "pair": "N/N", "weight": 12 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Tersk Stud in Stavropol Krai, founded 1921, rebuilding a Russian riding horse out of the last Strelets horses with Arabian, Don and Kabardin blood. Recognised as its own breed in 1948. Bigger and longer-lined than the Arabian it looks like.",
+    "Silvery grey is the whole visual identity and the pool is built for it: about seven founders in eight go grey, over a bay-leaning base, and the rest stay bay, chestnut or black.",
+    "It is grey and not silver, and the difference matters. Grey is progressive depigmentation over a pigmented foal coat; silver dilutes black pigment and comes with eye trouble. Silver is forced wild here, along with cream, pearl, champagne, mushroom, dun and flaxen - the same distinction the breed's own name for the colour keeps blurring.",
+    "Nothing white: every pinto locus, roan, rabicano and the leopard complex are forced wild. No source describes a patterned pure Tersk.",
+    "All disorders clear. Arabian foundation is not an Arabian carrier rate - the SCID, CA and LFS numbers that exist are Arabian samples, and a Tersk has Strelets, Don and Kabardin behind it as well.",
+    "Tolerant both ways and lightly: the taboon system leaves them out on North Caucasus range through hot summers and real winters, sorted by both rather than specialised for either.",
+    "The dry Arabian head, the high tail set, the fine skin and hair, and the taboon management itself are none of them modelled."
+  ]
+}

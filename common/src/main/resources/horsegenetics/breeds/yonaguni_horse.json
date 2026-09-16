@@ -1,0 +1,63 @@
+{
+  "id": "yonaguni_horse",
+  "name": "Yonaguni Horse",
+  "country": "japan",
+  "commonness": "very_rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:beach",
+    "minecraft:stony_shore",
+    "minecraft:river",
+    "minecraft:sparse_jungle",
+    "minecraft:jungle",
+    "minecraft:forest",
+    "minecraft:meadow",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 9,
+    "size": [0.688, 0.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 81 },
+      { "pair": "E/e", "weight": 18 },
+      { "pair": "e/e", "weight": 1 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 81 },
+      { "pair": "A/a", "weight": 18 },
+      { "pair": "a/a", "weight": 1 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "d1/d1", "weight": 12 },
+      { "pair": "d1/d2", "weight": 46 },
+      { "pair": "d2/d2", "weight": 42 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Yonaguni-uma, locally Chimanma: an endangered island horse from Yonaguni in the Yaeyama Islands, Japan's westernmost land, nearer Taiwan than Okinawa. One of Japan's eight native breeds and the most isolated of them. A 2016 study counted about 130 horses and found diversity comparable to other endangered breeds despite that.",
+    "Tiny at 110 to 120 cm, and a true small horse rather than a miniature or a dwarf: island work stock that carried crops, panniers and riders over steep wet rock.",
+    "Almost entirely bay, and the pool is built tight: extension and agouti are both skewed hard, so dark points over a red body is the overwhelming outcome with a small dark-bay, black and chestnut minority.",
+    "The dorsal stripe is d1, not D, and that distinction is the whole point of the file. The horses are described as reddish bay with a dark line from mane to tail; true dun would pale the body into a yellow dun and wreck that. d1 gives the primitive marking with no body dilution, which is exactly what the locus is for.",
+    "No white at all - the breed is described as solid with no markings, so every pinto locus, roan, rabicano, the leopard complex and every dilution are forced wild.",
+    "All disorders clear. A small isolated conservation population is a reason to be careful about inbreeding, not a source of carrier frequencies.",
+    "Heat tolerant partially, for subtropical Okinawan islands.",
+    "The hard unshod hooves, the bushy upright mane, the narrow body, the swimming, and the town natural-monument protection that keeps the breed alive are none of them modelled."
+  ]
+}

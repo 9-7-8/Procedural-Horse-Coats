@@ -1,0 +1,165 @@
+{
+  "id": "spotted_saddle_horse",
+  "name": "Spotted Saddle Horse",
+  "country": "united_states",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_hills",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 4,
+    "health": 8,
+    "size": [0.937, 1.048]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 44 },
+      { "pair": "E/e", "weight": 45 },
+      { "pair": "e/e", "weight": 11 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 37 },
+      { "pair": "A/a", "weight": 48 },
+      { "pair": "a/a", "weight": 15 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1.4 },
+      { "pair": "Cr/N", "weight": 21.1 },
+      { "pair": "N/N", "weight": 77.5 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 6 },
+      { "pair": "c/c", "weight": 94 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 13 },
+      { "pair": "d2/d2", "weight": 87 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 6 },
+      { "pair": "z/z", "weight": 94 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 4 },
+      { "pair": "G2/N", "weight": 2 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 15 },
+      { "pair": "f/f", "weight": 85 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 13 },
+      { "pair": "rn/rn", "weight": 87 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 12 },
+      { "pair": "rb/rb", "weight": 88 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/To", "weight": 16 },
+      { "pair": "To/to", "weight": 48 },
+      { "pair": "to/to", "weight": 36 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 26 },
+      { "pair": "W20/N", "weight": 10 },
+      { "pair": "N/N", "weight": 64 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 13 },
+      { "pair": "N/N", "weight": 87 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 22 },
+      { "pair": "N/N", "weight": 78 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW2/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 96 },
+      { "pair": "A/C", "weight": 3.9 },
+      { "pair": "C/C", "weight": 0.1 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Spotted Registry",
+      "weight": 90,
+      "genes": {
+        "horsegenetics.tobiano": [
+          { "pair": "To/To", "weight": 18 },
+          { "pair": "To/to", "weight": 50 },
+          { "pair": "to/to", "weight": 32 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 30 },
+          { "pair": "W20/N", "weight": 11 },
+          { "pair": "N/N", "weight": 59 }
+        ],
+        "horsegenetics.ednrb": [
+          { "pair": "O/N", "weight": 14 },
+          { "pair": "N/N", "weight": 86 }
+        ],
+        "horsegenetics.mitf": [
+          { "pair": "SW1/N", "weight": 25 },
+          { "pair": "N/N", "weight": 75 }
+        ]
+      }
+    },
+    {
+      "name": "Solid Registry",
+      "weight": 10,
+      "genes": {
+        "horsegenetics.tobiano": [
+          { "pair": "to/to", "weight": 100 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "N/N", "weight": 100 }
+        ],
+        "horsegenetics.ednrb": [
+          { "pair": "N/N", "weight": 100 }
+        ],
+        "horsegenetics.mitf": [
+          { "pair": "N/N", "weight": 100 }
+        ],
+        "horsegenetics.pax3": [
+          { "pair": "N/N", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "A southeastern American trail horse out of the same gaited culture as the Tennessee Walking Horse, with the pinto colour breeders wanted added on top. The NSSHA registry dates from 1979, the SSHBEA is the other one, and registration turns on what the horse does and looks like rather than on pedigree: it must be gaited and it must be visibly spotted.",
+    "Two strains, 9 spotted to 1 solid. The NSSHA runs a separate solid-colour breeding-stock register for gaited, correctly-bred horses that are not patterned, and that is exactly what the Solid Registry strain is - every white-pattern locus forced wild. It is not a defect and carries no penalty.",
+    "Four routes to a patch and all of them are open: tobiano is the main one and sits high enough that two thirds of spotted-strain founders carry it, with sabino, W20, frame and splash behind it. Tovero comes out of tobiano landing on top of one of the others rather than out of a locus of its own.",
+    "Frame is deliberately lower than tobiano because O/O is lethal white, and that is this breed's real breeding hazard, the same as for the American Paint and the Nokota.",
+    "DMRT3 is near-fixed on the gait allele - a fully registered horse cannot trot as its qualifying gait, so the gait requirement is as absolute here as the colour one. The running walk, rack, single-foot and stepping pace themselves are not modelled.",
+    "Any base colour is allowed under the pattern, so cream, champagne, dun, silver, grey, flaxen, roan and rabicano all sit at low rates. Grey is kept deliberately low: it would eat the pattern the breed is registered for.",
+    "The leopard complex is forced wild. The registry identity is pinto, not Appaloosa, and the CSNB discussion around LP in related gaited populations is not a reason to seed it.",
+    "All disorders clear. Southern gaited and stock-horse ancestry is not a carrier rate for the Quarter Horse panel.",
+    "Heat tolerant lightly, for southeastern summers."
+  ]
+}
