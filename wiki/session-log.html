@@ -27,6 +27,50 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15b">2026-09-15, late afternoon &mdash; the pen that was lying about the ward, and a fix that took two tries</h2>
+
+<p>
+    A short session, picking up where the 15:36 run stopped. Its one standing FAIL &mdash; the SPAWNER WARD pen reading
+    <code>0 of 16</code> and blaming the holy ward &mdash; was the pen, not the gene. That is now the fourth time this
+    yard has accused a working feature, and the reason the reading is written down rather than the verdict.
+</p>
+<ul>
+    <li><strong>The ward was never involved.</strong> Every meal logged <code>[Spawner] made 2 of 2 Zombie</code>, no
+        <code>[Ward]</code> refusal line appeared all run, and both zombies joined the level &mdash; then vanished about
+        40&nbsp;ms later. A summoned mob carries no persistence by design, and vanilla's <code>Mob.checkDespawn</code>
+        takes a monster on its first mob tick when no player is near, which in an unattended yard is always. The pen
+        counted five ticks after the feed, long after the bodies were gone. The sheep pens never hit this because a
+        vanilla <code>Animal</code> does not despawn, which is why this was the only pen that failed.</li>
+    <li><strong>The first fix was wrong, and was pushed before it was run</strong> (<code>b9915ce5</code>). It moved the
+        count into the feed's own tick, on the assumption that the summon happens inside
+        <code>CommonHooks.onInteractEntity</code>. It does not: <code>GeneAbilityHandler.onFeed</code> queues a
+        <code>PendingFeed</code> and <code>drainPendingFeeds</code> summons on <code>ServerTickEvent.Post</code>, at the
+        <em>end</em> of the tick. The 16:05 run showed it exactly &mdash; the count logged at 16:06:01.675, the zombies
+        arrived at .683 and .689 &mdash; so it read <code>0 of 16</code> again, now by counting before they existed.</li>
+    <li><strong>The fix that worked stops timing them altogether</strong> (<code>751de924</code>). The live window is
+        about one tick wide, so every tick number is a race. While a meal is armed, an
+        <code>EntityJoinLevelEvent</code> handler gives each arriving zombie <code>setPersistenceRequired</code> &mdash;
+        what <code>DebugYardHerd</code> already does for the DAM DEFENCE zombie &mdash; and the original five-tick sweep
+        counts and discards them unchanged. Nothing is cancelled, so <code>made 2 of 2</code>, which is the measurement
+        itself, is untouched. <strong>Verified in the 16:11 run:</strong> eight meals at <code>2 zombie(s)</code>,
+        <code>16 made, 2 inside</code> the ward, PASS
+        (<a href="gene-spawner.html#verified-ward-farm">spawner</a>, <a href="gene-holy-ward.html#verified-spawner-farm">holy ward</a>).</li>
+    <li><strong>Gap 253 closed, on both halves of its own test.</strong> Its pass needed no <code>inWall</code> all run
+        <em>and</em> a <code>moved</code> line at some dawn. The 15:36 run gave the first half only &mdash; nine clean
+        restores, no <code>moved</code> line anywhere in any of the day's logs &mdash; which is indistinguishable from a
+        fix that never ran, so it was nearly recorded as unexercised. At the 16:31 dawn
+        <code>clearOfBlocks</code> fired twice, moving Grand Aura and Boulder Alaafin out of the blocks they were restored
+        into, with no <code>inWall</code> across twelve restores
+        (<a href="gene-lycan.html#verified-clear-of-walls">lycan</a>).</li>
+    <li><strong>Gap 250 deliberately left open.</strong> It was never fixed &mdash; the owner's call was to log and keep
+        watching &mdash; so a third run of prompt bites is a data point, not a verification.</li>
+    <li><strong>Not built, by instruction:</strong> the intake folder's breed write-ups. An hour went into reading and
+        schema-mapping them before the owner stopped it: <em>&ldquo;don't ever worry about or do anything with content in
+        the intake folder until I directly tell you to.&rdquo;</em> Nothing from it reached the repo.</li>
+    <li>The designer's boot check, left un-run by the previous session, passes: 4 checks, wasm bridge present, overlay
+        drawn from a real genome, clean console.</li>
+</ul>
+
 <h2 id="d2026-09-15a">2026-09-15 &mdash; a night and a day of the yard: hunger, fourteen new rows, and the backlog moved home</h2>
 
 <p>

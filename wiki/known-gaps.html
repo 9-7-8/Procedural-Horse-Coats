@@ -67,7 +67,20 @@
     hurt blood-drinker, the prey it is hunting, or how many living things were in range and why each was ruled out (not
     prey, or bitten today). Once per pursuit it logs a refused path. Since then BLOOD ONLY has bitten promptly in both
     runs: its cow at tick 111 (09:09 run) and at tick 60 (09:40 run). The next time it goes a day without a bite, the log
-    will say which half failed.</li>
+    will say which half failed.
+    <strong>It went about five game days without one in the 16:11 run, and the log says <em>neither</em> half.</strong>
+    In 98 minutes the pen's horse logged nothing at all: no bite, no refused path, no ruled-out tally, no
+    <code>horse hurt</code> and no <code>horse healed</code> line. Its label appears exactly once in the whole run, on the
+    pen's own sign. The pen is not empty - its census reads <code>horses 1 ... other creatures 1</code> throughout, so the
+    horse is alive with its cow beside it - and the goal itself is plainly working, because DHAMPIR FULL and HUNT ORDER
+    logged 119 blood traces between them over the same run, bites included. Since the once-a-minute diagnostic only fires
+    for a <em>hurt</em> blood-drinker, the failure is upstream of both <code>findPrey</code> and pathing: the horse was
+    never hurt, so <code>BloodHuntGoal.canUse</code> never ran at all. That inverts what this gap has assumed since it was
+    opened. <em>Next:</em> check whether <code>DebugYardDhampir.state()</code> ran for that pen at all - the 15:36 run's
+    BLOOD ONLY was hurt, healed and bit twice, so it is not a permanent fault - and have the census print the horse's
+    health, so an inert pen cannot look like a patient one again.
+    <em>(A grep trap worth keeping: <code>"BLOOD ONLY" bit</code> matches the pen's sign, which quotes the line it is
+    waiting for. Counting bites that way reports one when there are none.)</em></li>
 <li id="gap-245"><strong>Open, found 2026-09-14: the lethal ratio pens draw far too few, then far too many, homozygous foals, one run at a time.</strong>
     RATIO HYPP and RATIO LETHAL WHITE are carrier-by-carrier crosses and should throw one lethal foal in four. The
     17:36 run threw too many (HYPP 10 <code>H/H</code> in 20). By 20:08 the 19:08 run had thrown <strong>none in
