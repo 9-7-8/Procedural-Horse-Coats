@@ -31,8 +31,20 @@
 
 <p>
     A play session on the overnight saddle work, and then the bench grew. Everything below
-    was confirmed in a world except where it says otherwise, and the session ended on a
-    dedicated-server boot at <code>Done (0.274s)</code> for the release.
+    was confirmed in a world except where it says otherwise, and it
+    <strong>shipped as <code>v0.5.002</code></strong> on a dedicated-server boot at
+    <code>Done (0.274s)</code>.
+</p>
+
+<p class="muted">
+    One process note worth carrying, because the session nearly ended a step short. The
+    wrap-up routine in <code>CLAUDE.md</code> finishes at &ldquo;commit, push, verify
+    clean&rdquo; and says nothing about publishing a <em>release</em> &mdash; so the tag went
+    up, the summary announced a shipped version, and there was no jar anyone could download.
+    The owner caught it: &ldquo;I don&rsquo;t see it here <code>/releases</code>&rdquo;.
+    Every version in this repo has a GitHub Release with the jar attached, and
+    <code>gh release list</code> is the thing that proves it &mdash; a tag on
+    <code>origin</code> does not appear there.
 </p>
 
 <h3>The tack-fit bug closed, and the recorded diagnosis was wrong</h3>
