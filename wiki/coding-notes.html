@@ -566,6 +566,66 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
 </p>
 
 
+<h3 id="git-status-overreports">A post-bake <code>git status</code> is not evidence of staleness</h3>
+
+<p>
+    The inverse of <a href="#regen">the section above</a>, and the more expensive mistake of the two.
+    <strong><code>git status</code> on this repo flags a rewritten file on <em>mtime alone</em>, without comparing
+    its content.</strong> Every bake rewrites all of its outputs whether or not they changed, so a bake that
+    changed one file reports dozens. <code>git diff</code> does the comparison; <code>git status</code> does not.
+</p>
+
+<p>
+    Measured on 2026-09-15, after a <code>bakeBreedFiles</code> that genuinely changed one breed:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Asked</th><th>Answer</th></tr></thead>
+<tbody>
+<tr><td><code>git status --porcelain | wc -l</code></td><td><strong>60</strong></td></tr>
+<tr><td><code>git diff --name-only</code></td><td><strong>5</strong> &mdash; the truth</td></tr>
+<tr><td><code>git diff-files</code> on one of the 55</td><td>worktree SHA printed as <strong>all zeros</strong> &mdash; the &ldquo;stat-dirty, not re-hashed&rdquo; marker</td></tr>
+<tr><td>worktree / worktree-filtered / index / HEAD SHAs</td><td><strong>all four identical</strong></td></tr>
+<tr><td><code>git show HEAD:path | cmp - path</code></td><td>identical, <strong>zero CR</strong> on either side</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Neither <code>git update-index --refresh</code> nor <code>--really-refresh</code> cleared it; the latter prints
+    <code>needs update</code> for files it has just been shown are identical. <strong>Do not chase it, and above all
+    do not re-commit the files to &ldquo;fix&rdquo; it.</strong> The authoritative sweep over a folder, which is
+    cheap and answers the only question that matters:
+</p>
+
+<pre><code>for f in *.json; do
+  [ "$(git hash-object "$f")" = "$(git rev-parse HEAD:"$f")" ] || echo "$f"
+done</code></pre>
+
+<p>
+    That found <strong>1 of 61</strong> breed files genuinely changed. <code>git diff --ignore-cr-at-eol --numstat</code>
+    emitting no line for a path is the other quick tell.
+</p>
+
+<div class="note rule">
+    <span class="label">Renormalise to the glob, never to <code>.</code></span>
+    <p>
+        The <em>other</em> half of this noise was real: <code>core.autocrlf=true</code> wanted CRLF in the worktree
+        while the bake tools write LF. That is now settled by a <code>.gitattributes</code> pinning
+        <code>*.json text eol=lf</code> (and <code>*.wasm binary</code>). The index already stored LF, so adding it
+        changed no committed byte.
+    </p>
+    <p>
+        But <code>git add --renormalize .</code> &mdash; the documented follow-up to changing
+        <code>.gitattributes</code> &mdash; is <strong>repo-wide</strong>. Run as written it staged <strong>51
+        <code>intake/*.md</code> files</strong>, rewriting every line of each to strip CR from blobs that genuinely
+        hold CRLF. <code>intake/</code> is the owner's queue and is never ours to rewrite, so that was backed out
+        with <code>git restore --staged intake/</code>. Scope it:
+        <code>git add --renormalize -- '*.json'</code>.
+    </p>
+</div>
+
 <h2 id="rebuild-under-client">A <code>ClassNotFoundException</code> for our own class is almost never real</h2>
 
 <p>

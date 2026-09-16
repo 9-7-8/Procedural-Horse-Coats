@@ -102,9 +102,16 @@
     <td>none, and a blank one is a real answer &mdash; it means the breed comes from
         nowhere on earth. Where in the real world the breed is from, spelled like an
         <code>id</code> (<code>united_states</code>, <code>mexico</code>,
-        <code>arabian_peninsula</code>) rather than as a display name, because it is
+        <code>saudi_arabia</code>) rather than as a display name, because it is
         meant to be <em>keyed on</em> and not only printed. A capital letter is an
-        error rather than a warning, for the same reason.</td>
+        error rather than a warning, for the same reason.
+        <strong>It must be a nation, never a region</strong> (owner, 2026-09-15):
+        not <code>maghreb</code>, not <code>arabian_peninsula</code>, not
+        <code>scandinavia</code>. A breed that genuinely spans several countries is
+        pinned to the one it is most associated with &mdash; the Barb to
+        <code>morocco</code>, the Arabian to <code>saudi_arabia</code> &mdash; because
+        the mechanic this feeds keys on a country and a region token would simply
+        never match.</td>
 </tr>
 <tr>
     <td><code>description</code></td>

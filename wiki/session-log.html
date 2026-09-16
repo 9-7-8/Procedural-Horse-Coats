@@ -62,10 +62,36 @@
         tokens are the lower-case <code>f</code> and <code>pa</code> while the variants are <code>Fl1</code>/
         <code>Fl2</code> and <code>Pa1</code>/<code>Pa2</code> &mdash; the natural loci are Java classes, and
         neither gene index lists them.</li>
-    <li><strong>The line-ending noise has a working answer.</strong> Restoring the 54 falsely-modified breed files
-        one at a time works and a <code>for</code> loop or <code>xargs</code> over them silently does not; restoring
-        <em>the whole directory in one call</em> clears the lot. Still no <code>.gitattributes</code>, which would
-        end it permanently and was offered.</li>
+    <li><strong>The &ldquo;bake dirties every breed file&rdquo; noise turned out to be two problems, and only one
+        of them was line endings.</strong> The repo now has a <code>.gitattributes</code> pinning
+        <code>*.json</code> to <code>eol=lf</code> (and marking <code>*.wasm</code> binary), which is what the bake
+        tools already write. The index already stored LF, so <strong>not one committed byte changed</strong>.
+        <strong>But the file count did not drop</strong> &mdash; because the rest of it was never CRLF at all:
+        <code>git status</code> on this repo flags a rewritten file on <em>mtime alone</em>, without comparing
+        content. After a bake it claimed 60 modified files while <code>git diff --name-only</code> named the 5 that
+        had actually changed. Proven on a sample: worktree, worktree-filtered, index and HEAD SHAs all identical,
+        <code>git diff</code> empty, <code>git show HEAD:path | cmp - path</code> identical with zero CR either
+        side; and across all 61 breed files exactly one differed &mdash; the one that had been edited. So a
+        post-bake <code>git status</code> is not evidence of staleness, and
+        <a href="coding-notes.html#git-status-overreports">coding notes</a> now says so with the check to use
+        instead. An earlier draft of this entry claimed a <code>for</code> loop and <code>xargs</code> "silently
+        fail" to restore those files; that was this same misreading, and they work fine.</li>
+    <li><strong>Renormalising is scoped to the glob, never to <code>.</code></strong>
+        <code>git add --renormalize .</code> is the documented follow-up to changing <code>.gitattributes</code>
+        and it did settle the breed files &mdash; but being repo-wide it also staged <strong>51
+        <code>intake/*.md</code> files</strong>, rewriting every line of each to strip CR from blobs that
+        genuinely hold CRLF. That is the owner's queue and not ours to rewrite, so it was backed out with
+        <code>git restore --staged intake/</code> and nothing in <code>intake/</code> was committed. Use
+        <code>git add --renormalize -- '*.json'</code>.</li>
+    <li><strong>A breed's <code>country</code> must be a nation, never a region</strong> (owner, stated outright).
+        The Barb shipped as <code>maghreb</code> &mdash; the draft leans hard on &ldquo;not any single modern
+        nation&rdquo;, which is true of the breed and useless to the format &mdash; and was corrected to
+        <code>morocco</code>. An audit of all 60 files found it was the <em>only</em> region token; everything else
+        was already a nation. The reason is mechanical rather than stylistic: <code>country</code> exists to be
+        keyed on by a mechanic not yet built, and a region token would simply never match, so it is a value that
+        silently does nothing. <a href="breed-format.html">The format page</a> now says so, and its own example
+        list no longer offers <code>arabian_peninsula</code> as a valid token. The Dhampir keeps no country at
+        all, which is the separate and correct answer for a breed from nowhere on earth.</li>
 </ul>
 <p>
     Green: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,

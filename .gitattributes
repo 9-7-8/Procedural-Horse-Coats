@@ -1,0 +1,9 @@
+# Every generated JSON in this repo is written with LF by the Java bake tools
+# (BreedFileTool and friends). Without this line, core.autocrlf=true makes git
+# want CRLF in the worktree, so a bake reports every breed file as modified when
+# the committed bytes are byte-identical - noise that hid real staleness twice.
+# Pin the worktree to LF and the false diffs stop.
+*.json text eol=lf
+
+# Belt and braces: never let the wasm blob be line-ending converted.
+*.wasm binary
