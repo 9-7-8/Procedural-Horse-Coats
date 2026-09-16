@@ -1,0 +1,58 @@
+{
+  "id": "konik",
+  "name": "Konik",
+  "country": "poland",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:swamp",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 9,
+    "size": [0.812, 0.875]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 100 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The Konik polski - Poland's small native horse, out of the Panje horses of the Bilgoraj country, named in the 1920s and bred since 1955 in the continuous reserve herds at Popielno. It is the conservation grazer of European wetland and woodland rewilding, well beyond Poland.",
+    "One coat, fixed three ways: E_ aa D_ is blue dun, and every founder is a mouse grey horse with a dark dorsal stripe, dark lower legs, and a dark or dark-mixed mane and tail. Leg barring and shoulder shadowing come with the dun locus.",
+    "The shade pool is the only variation in the colour, and it is the right one - the standard runs from light mouse through dark mouse to a greyer dun, which is a depth difference rather than a different colour.",
+    "True grey is forced wild and that matters more here than usual: 'mouse grey' is a description of a dun, not a reason to seed STX17, which would whiten these horses with age and destroy the one thing the breed looks like.",
+    "Every white pattern is forced wild too. The pure-bred standard permits no white markings at all, with a narrow allowance for tiny temporary facial marks in mares.",
+    "This is the modern registered Konik polski, not the looser historical primitive Polish horse it came from, which is why the palette is closed rather than merely narrow.",
+    "Not a surviving Tarpan. The breed's own literature rejects that framing: it is a conserved domestic population with real bottlenecks behind it, and the resemblance is the result of selection, not descent.",
+    "Cold tolerant near-fixed. It winters out in reserve herds, which is the whole point of it, and health 9 is that thriftiness on poor wet grazing.",
+    "All disorders clear. No breed-specific carrier survey was found, which is a data decision and not a claim that real Koniks are disease-free.",
+    "The upright primitive mane, the head profile, the hoof quality, the seasonal coat and the wetland grazing behaviour are none of them modelled."
+  ]
+}

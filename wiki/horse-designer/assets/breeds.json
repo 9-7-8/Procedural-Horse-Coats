@@ -4236,6 +4236,249 @@
   ]
 },
 {
+  "id": "jutland",
+  "name": "Jutland",
+  "country": "denmark",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:grove",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 9,
+    "size": [0.981, 1.075]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 1 },
+      { "pair": "E/e", "weight": 18 },
+      { "pair": "e/e", "weight": 81 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl2", "weight": 30 },
+      { "pair": "Fl2/Fl1", "weight": 26 },
+      { "pair": "Fl2/f", "weight": 12 },
+      { "pair": "Fl1/Fl1", "weight": 12 },
+      { "pair": "Fl1/f", "weight": 14 },
+      { "pair": "f/f", "weight": 6 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 3 },
+      { "pair": "G2/N", "weight": 2 },
+      { "pair": "N/N", "weight": 95 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 4 },
+      { "pair": "rn/rn", "weight": 96 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 2 },
+      { "pair": "z/z", "weight": 98 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Jydsk hest - Denmark's national draught horse, out of the local workhorses of the Jutland peninsula and organised into a studbook late in the nineteenth century. Suffolk Punch blood is in it, which is visible here in the pool as well as in the silhouette.",
+    "Flaxen chestnut is the whole player-facing identity: a red body with a cream-to-blond mane, tail and feather. Chestnut is near-led rather than fixed, because the deliberate twentieth-century selection that produced the modern 'national colour' did not erase the older bay and black horses.",
+    "The pale mane is flaxen and not cream. Cream is forced wild on purpose - a palomino Jutland would be the wrong horse, and the draft's own rationale says so.",
+    "Grey, roan and silver are historically recorded and are kept at a couple of percent each. Silver is the weakest of the three: it rests on secondary breed descriptions with no Jutland PMEL17 count behind it, and on a chestnut-led breed it is invisible most of the time it is carried.",
+    "A medium draught, not a giant. The size band is the cited 157-164 cm and lands below the Shire and the Percheron on purpose; the breed's mass is in its width, which is not modelled.",
+    "Managed sources only. The population fell under 300 horses in 1998 and Danish conservation work brought it back near 2,000 by 2016, which is a recovering national breed rather than anything a player should find running loose.",
+    "All disorders clear. No Jutland-specific carrier rate was located for any locus, and a heavy draught build is not on its own a licence to seed PSSM1.",
+    "Moderately cold tolerant for Danish winters - a northern farm horse, but a lowland maritime one, so not the near-fixed pool the Nordic mountain breeds carry.",
+    "The heavy mane and tail, the feathering, real pulling force, harness work and the conservation registry itself are none of them modelled."
+  ]
+},
+{
+  "id": "kaimanawa",
+  "name": "Kaimanawa",
+  "country": "new_zealand",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:stony_peaks",
+    "minecraft:taiga",
+    "minecraft:savanna_plateau"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 10,
+    "size": [0.831, 0.944]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 24 },
+      { "pair": "E/e", "weight": 50 },
+      { "pair": "e/e", "weight": 26 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Northern",
+      "weight": 3,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 20 },
+          { "pair": "E/e", "weight": 48 },
+          { "pair": "e/e", "weight": 32 }
+        ],
+        "horsegenetics.grey": [
+          { "pair": "N/N", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Southern",
+      "weight": 1,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 42 },
+          { "pair": "E/e", "weight": 46 },
+          { "pair": "e/e", "weight": 12 }
+        ],
+        "horsegenetics.grey": [
+          { "pair": "G3/G3", "weight": 40 },
+          { "pair": "G3/N", "weight": 52 },
+          { "pair": "N/N", "weight": 8 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The feral horses of the Kaimanawa Ranges in the central North Island of Aotearoa New Zealand. Not a closed breed: the Department of Conservation describes them as mixed-breed ferals with a strong Thoroughbred and station-hack likeness, mustered periodically to hold the herd near 300 head.",
+    "The base pool follows the field tally - roughly 56% bay, 26% chestnut and 7.7% black - rather than the draft's own allele figures, which would have produced chestnut at a twentieth of the observed rate.",
+    "The two strains are the real geographic split and the only one the mod can carry. Every sampled grey horse belonged to one maternal haplogroup and every one of them was in the south; the chestnuts concentrate in the north. So the Northern strain forces grey wild entirely and the Southern strain is near-fixed for it over a darker base, which is what makes its foals come out bay or black and whiten later.",
+    "Grey in the base pool is the population-wide rate, and only reaches a founder that the strain roll leaves it to.",
+    "Every white-pattern locus is forced wild. Face and lower-leg white is common in field descriptions of these horses, and ordinary markings are not evidence of a pinto allele.",
+    "All disorders clear. No Kaimanawa-specific carrier frequency exists, and a feral population's ancestry is not a reason to import the disease panel of the breeds behind it.",
+    "Health 10 is unmanaged survival on volcanic tussock country: no feed, no shelter, no farrier, and a population that persists anyway.",
+    "Lightly cold tolerant for the Central Plateau's winters rather than near-fixed - high country, but not a Nordic one.",
+    "Only six maternal and six paternal lineages were found in 96 sampled horses, and mitochondrial diversity is lower than in several other feral populations. A bottleneck is not a disease rate and was not turned into one.",
+    "The muster, the herd structure and the adoption programme are not modelled."
+  ]
+},
+{
+  "id": "karabair",
+  "name": "Karabair",
+  "country": "uzbekistan",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:windswept_savanna",
+    "minecraft:badlands",
+    "minecraft:desert",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.937, 0.987]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 55 },
+      { "pair": "E/e", "weight": 38 },
+      { "pair": "e/e", "weight": 7 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 3 },
+      { "pair": "G3/N", "weight": 20 },
+      { "pair": "G2/N", "weight": 10 },
+      { "pair": "N/N", "weight": 67 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Qorabayir - an old Central Asian riding and light-harness horse of the oasis country, kept above all in Uzbekistan and across the border into northern Tajikistan. Uzbek writing calls it a golden fund of the national horse breeding, and it is used for riding, packing, light draught and the mounted games.",
+    "The name is usually glossed 'black horse' and the breed is not colour-defined. Bay, chestnut, grey and black are all documented, with no registry colour rule; recent Uzbek literature leans on black and dark bay, which the extension and agouti pools carry rather than an artificial dark shade band.",
+    "Grey is a real and visible part of the population at something near a fifth of founders. The rate is a gameplay estimate, not a measured STX17 frequency - no such count exists for the breed.",
+    "Every dilution and every white pattern is forced wild. That is an absence of breed-specific evidence rather than a registry prohibition, and it is the conservative reading.",
+    "The real main, riding and denser intra-breed types are not strains here. No separate size or colour data was cited for them, and a strain may override gene pools and nothing else.",
+    "Tolerant both ways for a continental climate - hot dry summers, cold winters - and neither near-fixed, since this is oasis and foothill stock rather than a high-desert or high-plateau landrace.",
+    "All disorders clear. The one breed-health source found states outright that no inherited disease is well documented in the Karabair, while cautioning that absence of evidence is not proof of absence.",
+    "The traditional gaits, the mounted games and the regional type differences are none of them modelled."
+  ]
+},
+{
   "id": "karabakh",
   "name": "Karabakh",
   "country": "azerbaijan",
@@ -4287,6 +4530,164 @@
   },
   "notes": [
     "Small head, muscular arched neck, golden sheen - the sheen is not modelled (a shader)."
+  ]
+},
+{
+  "id": "karakachan",
+  "name": "Karakachan Horse",
+  "country": "bulgaria",
+  "commonness": "very_rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:grove",
+    "minecraft:meadow",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 10,
+    "size": [0.787, 0.862]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 90 },
+      { "pair": "E/e", "weight": 10 },
+      { "pair": "e/e", "weight": 0.25 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 86 },
+      { "pair": "A/a", "weight": 13 },
+      { "pair": "a/a", "weight": 0.5 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The horse of the Karakachans, the transhumant pastoralists of the Balkans, and an indigenous Bulgarian mountain breed of the Rhodopes, Rila, Pirin, Stara Planina and Kraishte. It lives semi-free in herds year round and is one of the smallest horses in the mod.",
+    "Almost always bay or brown. This is the most visually unified natural pool that ships: chestnut and black are each held at a fraction of a percent, present only as an admission that no one has shown either locus to be fixed.",
+    "Every dilution, every white pattern, grey and the leopard complex are forced wild. A primitive mountain landrace is not a licence to seed primitive-looking alleles that nobody has tested for.",
+    "Size follows the measured exterior study - a mean of 130.22 cm, inside a modern range of roughly 126-138 cm - rather than the older descriptions nearer 128 cm. The population is reported as taller and heavier than it was a century ago.",
+    "Cold tolerant near-fixed: it winters out in the mountains, which is the whole of its reputation, and health 10 is that plus foaling and thriving on thin grazing with no shelter.",
+    "Listed as critically endangered on Bulgaria's Red Data List of autochthonous domestic forms. By 2018 the four Rhodope rewilding herds together held more than eighty horses.",
+    "All disorders clear. No Karakachan carrier data was located, and hardiness is not evidence of immunity any more than rarity is evidence of disease.",
+    "The hoof quality, the herd behaviour, the pack and transhumance work, and the rewilding programme itself are none of them modelled."
+  ]
+},
+{
+  "id": "kentucky_mountain_saddle_horse",
+  "name": "Kentucky Mountain Saddle Horse",
+  "country": "united_states",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:dark_forest",
+    "minecraft:meadow",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_hills",
+    "minecraft:grove",
+    "minecraft:plains"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 8,
+    "size": [0.698, 1.048]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 36 },
+      { "pair": "A/a", "weight": 48 },
+      { "pair": "a/a", "weight": 16 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 3 },
+      { "pair": "Cr/N", "weight": 30 },
+      { "pair": "N/N", "weight": 67 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/Z", "weight": 2 },
+      { "pair": "Z/z", "weight": 26 },
+      { "pair": "z/z", "weight": 72 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 4 },
+      { "pair": "c/c", "weight": 96 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 2 },
+      { "pair": "D/d1", "weight": 3 },
+      { "pair": "D/d2", "weight": 20 },
+      { "pair": "d1/d1", "weight": 1 },
+      { "pair": "d1/d2", "weight": 18 },
+      { "pair": "d2/d2", "weight": 56 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 2 },
+      { "pair": "G3/N", "weight": 17 },
+      { "pair": "G2/N", "weight": 8 },
+      { "pair": "N/N", "weight": 73 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 24 },
+      { "pair": "rn/rn", "weight": 76 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl1", "weight": 6 },
+      { "pair": "Fl2/f", "weight": 10 },
+      { "pair": "Fl1/Fl1", "weight": 6 },
+      { "pair": "Fl1/f", "weight": 30 },
+      { "pair": "f/f", "weight": 48 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90.25 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.25 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "An Appalachian gaited saddle horse out of eastern Kentucky, registered by the KMSHA since 1989. Its four-beat lateral single-foot replaces the trot entirely, and it is the everyday mountain riding horse the Rocky Mountain Horse is the famous cousin of.",
+    "Gaited near-fixed on DMRT3. The gait-keeper stop-gain is documented in the breed, and the locus ships even though the gait itself is still a roadmap item - the genotype is real whether or not the animation is.",
+    "The palette is wide and every bit of it must be solid. Bay, black, chestnut, brown, palomino, buckskin, dun, grey, roan and the silver chocolates all belong; the registry excludes bald faces, white above the knee or hock and any pinto expression, which go to the affiliated Spotted Mountain association instead. So every white-pattern locus is forced wild - a registry rule, not missing evidence.",
+    "Double cream is left reachable. The restriction is on white patterning, not on dilution, so a cremello founder is a legitimate outcome here.",
+    "Champagne sits at a token rate and is the weakest call in the file: it is real in the American gaited breeds generally and has no KMSH-specific count behind it. The draft itself offered to zero it.",
+    "Silver is deliberately below the chocolate-and-flaxen reputation of the Rocky Mountain Horse, which is a related but separate breed and should not lend it its public image.",
+    "The size band is the registry's own, and it is the widest in the mod: Class B begins just above 11 hands and Class A runs past 14.2 to something near 16. The two classes are registration categories over one gene pool, not strains, so the band spans both rather than splitting them.",
+    "All disorders clear. No KMSH carrier survey exists, and PSSM1 occurring across many horse populations is not a reason to assign this breed a founder rate for it.",
+    "Head nod, the single-foot itself, rider comfort and the KMSHA inspection are none of them modelled."
   ]
 },
 {
@@ -4372,6 +4773,146 @@
   ]
 },
 {
+  "id": "kiso",
+  "name": "Kiso Horse",
+  "country": "japan",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:grove",
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:meadow",
+    "minecraft:birch_forest",
+    "minecraft:forest",
+    "minecraft:windswept_forest",
+    "minecraft:stony_peaks"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 8,
+    "size": [0.769, 0.881]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 67 },
+      { "pair": "E/e", "weight": 30 },
+      { "pair": "e/e", "weight": 3.2 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 85 },
+      { "pair": "A/a", "weight": 14.5 },
+      { "pair": "a/a", "weight": 0.5 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 0.04 },
+      { "pair": "D/d1", "weight": 1.6 },
+      { "pair": "D/d2", "weight": 2.3 },
+      { "pair": "d1/d1", "weight": 16 },
+      { "pair": "d1/d2", "weight": 46.4 },
+      { "pair": "d2/d2", "weight": 33.6 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The only indigenous horse breed of Honshu, from the Kiso district where southern Nagano meets eastern Gifu. A small, deep-bodied mountain packhorse, and one of Japan's eight native breeds.",
+    "This breed has a real coat survey behind it. A 2008-09 census of 125 horses - 86.2% of everything registered - found 105 bay, 11 dark bay, 5 buckskin dun and 4 chestnut, and no black at all. The pools are built to those counts rather than to the draft's own allele figures, which would have put chestnut at a tenth of the rate its own source recorded.",
+    "Black is not forced wild but is close to it: no black horse appeared in the census, so a/a sits at half a percent as an admission that a carrier pool is not the same as a fixed locus.",
+    "The dun pool is built backwards from two numbers, and it is the most deliberate thing in the file. A dorsal stripe was recorded on 66.4% of the census, while only 4% were classified as dun-diluted - so D is near absent and d1, non-dun with primitive marking, carries the stripes. Raising D to produce the stripe count would have painted two thirds of the breed with a body dilution nobody observed.",
+    "The 'buckskin dun' of the survey is read as dun, not as evidence that cream survives. Cream is forced wild, as are grey, silver, champagne, pearl, mushroom, flaxen, roan, the leopard complex and every white pattern.",
+    "Grey was in the breed in 1953 at 0.2% along with black, dark chestnut and palomino. The bottleneck took all four, and the modern population is what ships.",
+    "Managed sources only. There is no feral Kiso population - the surviving horses are a conservation herd, and a player who wants one should be buying it, which is also the way to run a breeding programme of their own.",
+    "Health 8, deliberately not higher. A breed rebuilt from a single surviving shrine stallion and his son, down to 32 horses in 1976 and near 149 registered in 2012, with a mean inbreeding coefficient of 0.11 and an effective population near 45.8, is a conservation concern - not a demonstration of exceptional robustness.",
+    "All disorders clear. The inbreeding is real and is not a carrier rate; inventing one from it would be inventing a disease.",
+    "Cold tolerant for Kiso winters. The thick winter coat, the hoof quality and the pack work are not modelled."
+  ]
+},
+{
+  "id": "kladruber",
+  "name": "Kladruber",
+  "country": "czech_republic",
+  "commonness": "very_rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 8,
+    "size": [1.048, 1.238]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Grey",
+      "weight": 1,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "G3/G3", "weight": 60 },
+          { "pair": "G3/G2", "weight": 20 },
+          { "pair": "G3/N", "weight": 20 }
+        ]
+      }
+    },
+    {
+      "name": "Black",
+      "weight": 1,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "N/N", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The Starokladrubsky kun, the Old Kladruber - the oldest indigenous Czech breed and the baroque carriage horse of the Habsburg court, bred at the National Stud at Kladruby nad Labem since the sixteenth century. The stud landscape has been a UNESCO World Heritage site since 2019.",
+    "Two colours and nothing else, and they are two historically separate closed herds rather than one pool with two outcomes: the grey was the imperial and court horse, the black the ecclesiastical one, associated with Slatinany. That is exactly what a strain is for, and it is the only thing the strains differ in.",
+    "Grey is the only locus either strain names. The base is black at both - fixed E and fixed a - so a grey Kladruber is a black horse whitening with age, born dark and greying out, which is what the real ones do.",
+    "The 50/50 strain split is a gameplay reading, not the stud's roughly 250-grey-in-500 ratio, and the grey strain is near-fixed rather than truly fixed so that a grey pairing can still throw the occasional black.",
+    "Every other locus is forced wild. No bay, no chestnut, no dilution, no roan, no pinto, no leopard belongs in a pure founder, and the modern breeding programme is the reason rather than an absence of evidence.",
+    "One of the tallest breeds that ships. The band is the usual 16.0-17.0 hands, which puts its top on the Irish Draught's; wider figures from 15.3 to 17.3 are on record and are not what a founder rolls.",
+    "Managed sources only. Kladruby is a designed agricultural and training landscape, not wild range, and there has never been a feral Kladruber.",
+    "The black herd was dissolved in the 1930s and rebuilt; the reconstruction programme closed in 1973. Six grey and four black sire lines survive, and sire-line identity is not modelled.",
+    "All disorders clear. Research on the breed discusses melanoma and insect-bite hypersensitivity markers - melanoma being the standing risk of any grey population - but establishes no rate for any locus in the panel, so nothing was seeded.",
+    "The Roman nose, the baroque outline, the arched neck, the high knee action, collection, team driving and the whitening timeline itself are none of them modelled."
+  ]
+},
+{
   "id": "knabstrupper",
   "name": "Knabstrupper",
   "country": "denmark",
@@ -4428,6 +4969,64 @@
   },
   "notes": [
     "ERU is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational)."
+  ]
+},
+{
+  "id": "konik",
+  "name": "Konik",
+  "country": "poland",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:swamp",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 9,
+    "size": [0.812, 0.875]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 100 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The Konik polski - Poland's small native horse, out of the Panje horses of the Bilgoraj country, named in the 1920s and bred since 1955 in the continuous reserve herds at Popielno. It is the conservation grazer of European wetland and woodland rewilding, well beyond Poland.",
+    "One coat, fixed three ways: E_ aa D_ is blue dun, and every founder is a mouse grey horse with a dark dorsal stripe, dark lower legs, and a dark or dark-mixed mane and tail. Leg barring and shoulder shadowing come with the dun locus.",
+    "The shade pool is the only variation in the colour, and it is the right one - the standard runs from light mouse through dark mouse to a greyer dun, which is a depth difference rather than a different colour.",
+    "True grey is forced wild and that matters more here than usual: 'mouse grey' is a description of a dun, not a reason to seed STX17, which would whiten these horses with age and destroy the one thing the breed looks like.",
+    "Every white pattern is forced wild too. The pure-bred standard permits no white markings at all, with a narrow allowance for tiny temporary facial marks in mares.",
+    "This is the modern registered Konik polski, not the looser historical primitive Polish horse it came from, which is why the palette is closed rather than merely narrow.",
+    "Not a surviving Tarpan. The breed's own literature rejects that framing: it is a conserved domestic population with real bottlenecks behind it, and the resemblance is the result of selection, not descent.",
+    "Cold tolerant near-fixed. It winters out in reserve herds, which is the whole point of it, and health 9 is that thriftiness on poor wet grazing.",
+    "All disorders clear. No breed-specific carrier survey was found, which is a data decision and not a claim that real Koniks are disease-free.",
+    "The upright primitive mane, the head profile, the hoof quality, the seasonal coat and the wetland grazing behaviour are none of them modelled."
   ]
 },
 {
@@ -4538,6 +5137,106 @@
   ]
 },
 {
+  "id": "mangalarga_marchador",
+  "name": "Mangalarga Marchador",
+  "country": "brazil",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:sparse_jungle",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 8,
+    "size": [0.921, 1.048]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 45 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 10 },
+      { "pair": "G3/G2", "weight": 5 },
+      { "pair": "G2/G2", "weight": 2 },
+      { "pair": "G3/N", "weight": 30 },
+      { "pair": "G2/N", "weight": 15 },
+      { "pair": "N/N", "weight": 38 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 2 },
+      { "pair": "Cr/N", "weight": 24 },
+      { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 13 },
+      { "pair": "d2/d2", "weight": 87 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 11 },
+      { "pair": "rn/rn", "weight": 89 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 15 },
+      { "pair": "f/f", "weight": 85 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/To", "weight": 1 },
+      { "pair": "To/to", "weight": 18 },
+      { "pair": "to/to", "weight": 81 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 21 },
+      { "pair": "N/N", "weight": 79 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90.25 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.25 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Mangalarga Mineiro of Minas Gerais, registered by the ABCCMM out of Belo Horizonte since 1949 and one of the most numerous saddle breeds in Brazil. Iberian stock worked into a national riding horse over two centuries.",
+    "The marcha is the breed: a smooth four-beat amble with moments of triple support, ridden in place of the trot, batida diagonally coordinated and picada more lateral and usually called the smoother of the two. Gaited near-fixed on DMRT3 - the draft assumed the mod had no locus for it and it does.",
+    "Deliberately not a unified colour. Grey is conspicuous and common, bay, brown, black and chestnut are all well represented, and buckskin, palomino, dun, roan, sabino and tobiano turn up underneath. It should read as the most colourful founder pool in Latin America without every horse being a loud one.",
+    "None of these rates is a registry statistic. No population allele survey for the breed was found, and grey at something near a third of founders is the largest of the approximations.",
+    "Frame overo is forced wild on purpose. It is not documented in the breed, and seeding it would manufacture a lethal white cross where the real population has none - so a Marchador pair is safe to breed in a way an American Paint pair is not.",
+    "The leopard complex, champagne, silver, pearl and mushroom are forced wild for want of any evidence at all.",
+    "Heat tolerant heavily, for Minas Gerais.",
+    "All disorders clear, with the panel reasoned through: HYPP is a Quarter Horse Impressive-line disease, SCID, CA and LFS are Arabian, PLOD1 is Friesian, HERDA is Quarter Horse cutting lines. None of that ancestry is this breed's.",
+    "The marcha itself, gait timing, rider comfort, the three-year-old inspection, the mane-roaching tradition and regional bloodlines are none of them modelled."
+  ]
+},
+{
   "id": "marwari",
   "name": "Marwari",
   "country": "india",
@@ -4599,6 +5298,416 @@
   "notes": [
     "Inward-curving (lyre-shaped) ear tips - NOT modelled (a mesh change, out of scope for now).",
     "Sweet itch: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "medimurje",
+  "name": "Medimurje Horse",
+  "country": "croatia",
+  "commonness": "very_rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:swamp"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 8,
+    "size": [0.969, 1.093]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 61 },
+      { "pair": "E/e", "weight": 34 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 49 },
+      { "pair": "A/a", "weight": 42 },
+      { "pair": "a/a", "weight": 9 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 4 },
+      { "pair": "ShL/Sh", "weight": 16 },
+      { "pair": "ShL/ShD", "weight": 14 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 28 },
+      { "pair": "ShD/ShD", "weight": 18 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 6 },
+      { "pair": "G2/N", "weight": 3 },
+      { "pair": "N/N", "weight": 91 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Medimurje horse, properly Medimurski konj and also the Murinsulaner or Murakozi - a tall medium-heavy draught horse of the Mura and Drava lowland in northern Croatia. The name is written Medimurje with a crossed D that a breed id cannot carry.",
+    "Its landscape is genuinely transboundary - Croatia, Hungary, Slovenia and Austria all belong to it - and it is filed under Croatia because a breed is pinned to one nation here. The Croatian population is the smallest part of it: larger related herds survive north of the Mura in Hungary and in eastern Slovenia.",
+    "Bay and seal brown are the core, black is next, chestnut is less common, and the surviving Croatian animals include dark chestnuts and browns. The shade pool is skewed dark to carry the seal browns rather than giving agouti a second allele.",
+    "Its draft opened by arguing every founder should be black with agouti fixed recessive - and then corrected itself in the body, because that 'only black and grey' rule comes from a genomic study of the Italian Murgese, an unrelated breed that happens to abbreviate to MUR. The bay-dominant pool is the corrected reading. The actual Murgese ships in this same batch and is black-only for its own reasons.",
+    "Grey is real and rare. Every dilution and every white pattern is forced wild.",
+    "Managed sources only, and this is the rarest thing in the file: a 2018 systematization paper put the effective population near 14, with the Croatian source population around 40 animals. Microsatellite work found moderate diversity, low and non-significant inbreeding, and clear separation from both the Posavac and the Croatian Coldblood.",
+    "Health 8 rather than the draught-horse 9 or 10: a population this small is a conservation emergency, not a demonstration of vigour.",
+    "Lightly cold tolerant for Pannonian winters and lightly heat sensitive as the heavy breeds are.",
+    "All disorders clear. With a population this small, invented disease frequencies would be worse than usual - there is nothing to average against.",
+    "Traction, ploughing and logging skill, carriage training, mane density, feathering and the conservation registry are none of them modelled."
+  ]
+},
+{
+  "id": "misaki",
+  "name": "Misaki Horse",
+  "country": "japan",
+  "commonness": "rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:stony_shore",
+    "minecraft:beach"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 8,
+    "size": [0.812, 0.857]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 51 },
+      { "pair": "E/e", "weight": 41 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 39 },
+      { "pair": "A/a", "weight": 47 },
+      { "pair": "a/a", "weight": 14 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Misaki-uma of Cape Toi, in Kushima at the southern tip of Miyazaki on Kyushu - one of Japan's eight native breeds and the only one still living as a self-sustaining feral population. Local history dates it to 1697, when the Akizuki family gathered the district's horses, and the horses and their cape were designated a Natural Monument together in 1953.",
+    "The base pool reconstructs a Misaki-specific study of 99 horses: 79.2% bay, 12.9% black, 8.0% chestnut. The draft's own JSON figures do not produce those percentages and it says so outright - its corrected numbers are what ship.",
+    "Solid and dark. Face and leg white is very rare in the Japanese native breeds, and nothing supports grey, cream, dun, champagne, silver, roan, tobiano or the leopard complex in a pure founder, so all of them are forced wild.",
+    "No cowboy. This is an isolated conservation population on one headland, not sale-yard stock, so it is found in the wild or bought from a stable and never offered by a trader.",
+    "Wild is the point of it. A player should meet these on the coast, and the difference between a feral horse and an untamed domestic one is not something the mod models - so what makes them Misaki is the breed, not the behaviour.",
+    "The population bottomed out at 53 animals in 1973 and has recovered to something above a hundred. Health 8 carries that: a small, closed, unmanaged population is fragile, however hardy the individual horse.",
+    "All disorders clear. No Misaki carrier frequency was found for any locus in the panel.",
+    "Lightly heat tolerant for a subtropical coast.",
+    "The herd structure, the coastal grazing, the seasonal forage and the legal protection itself are none of them modelled."
+  ]
+},
+{
+  "id": "missouri_fox_trotter",
+  "name": "Missouri Fox Trotter",
+  "country": "united_states",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_hills",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 8,
+    "size": [0.889, 1.048]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 46 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 10 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 4 },
+      { "pair": "Cr/N", "weight": 32 },
+      { "pair": "N/N", "weight": 64 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 11 },
+      { "pair": "c/c", "weight": 89 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 11 },
+      { "pair": "z/z", "weight": 89 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 11 },
+      { "pair": "d2/d2", "weight": 89 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 11 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 21 },
+      { "pair": "rn/rn", "weight": 79 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 18 },
+      { "pair": "f/f", "weight": 82 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/To", "weight": 3 },
+      { "pair": "To/to", "weight": 27 },
+      { "pair": "to/to", "weight": 70 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 24 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 8 },
+      { "pair": "rb/rb", "weight": 92 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90.25 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.25 }
+    ]
+  },
+  "notes": [
+    "The saddle horse of the Ozark country of southern Missouri and northern Arkansas, organised at Ava in 1948 and the Missouri state horse since 2002. The fox trot is a broken four-beat diagonal - the front foot of a pair lands just before the opposite hind, one foot is always down, and the horse covers about ten miles an hour doing it all day.",
+    "Gaited near-fixed on DMRT3, alongside the flat-footed walk and canter the registry also requires.",
+    "The registry is colour-open and the pool is the widest natural palette that ships outside the Mustang: bay, brown, black, chestnut, palomino, buckskin, cremello, dun, grey, roan, champagne, tobiano, sabino and frame all belong. The rulebook has its own champagne classes - classic, amber, gold and ivory - which is the rare case of a registry naming the locus for us.",
+    "Frame is here at a real rate, so this is one of the breeds where two founders can produce a lethal white foal. That is the breed being what it is, not an oversight.",
+    "The leopard complex is forced wild: it is explicitly outside the documented range. Pearl, mushroom, dominant white and brindle have no support either.",
+    "Silver is at a modest rate and carries a caveat the draft raised and then got right: MCOA in this breed is a consequence of the silver PMEL variant, not a separate disorder locus, and PPIB is HERDA and belongs to Quarter Horse cutting lines. Neither was seeded as a disease.",
+    "All disorders clear. UC Davis offers a PSSM1 test in a Fox Trotter context, but the existence of a test is not a founder rate, so nothing was assigned.",
+    "Curly-coated Fox Trotters occur and there is no curly locus in the mod to give them. Curl is not required for breed identity here anyway.",
+    "The separate 11-to-14-hand pony registry is not modelled; the band is the documented 14-16-hand saddle horse.",
+    "The fox trot itself, the head nod, the sliding hind action and rider comfort are none of them modelled."
+  ]
+},
+{
+  "id": "mongolian",
+  "name": "Mongolian Horse",
+  "country": "mongolia",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:meadow",
+    "minecraft:stony_peaks",
+    "minecraft:grove",
+    "minecraft:badlands"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 4,
+    "health": 10,
+    "size": [0.762, 0.889]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 10 },
+      { "pair": "D/d1", "weight": 10 },
+      { "pair": "D/d2", "weight": 34 },
+      { "pair": "d1/d1", "weight": 2 },
+      { "pair": "d1/d2", "weight": 16 },
+      { "pair": "d2/d2", "weight": 28 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 2 },
+      { "pair": "G3/N", "weight": 15 },
+      { "pair": "G2/N", "weight": 8 },
+      { "pair": "N/N", "weight": 75 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 16 },
+      { "pair": "N/N", "weight": 83 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 18 },
+      { "pair": "rn/rn", "weight": 82 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 15 },
+      { "pair": "f/f", "weight": 85 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 8 },
+      { "pair": "to/to", "weight": 92 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The steppe horse itself - a landrace rather than a studbook breed, a family of related local types with no single registry governing them, and by headcount one of the most numerous horse populations on earth.",
+    "There is no correct Mongolian coat. Bay, black, dun, chestnut, grey, roan and palomino all occur, dun and the dark bases are favoured across most of the country, and white horses carry a particular importance for the Darkhad. The pool is built to stay earth-toned and steppe-plausible: colourful, but not an Appaloosa herd and not an American gaited breed's champagne palette.",
+    "Dun is the largest single thing in it, at about a third of alleles, and d1 is carried on purpose - primitive marking without body dilution is exactly what a landrace this old should be throwing.",
+    "Silver is forced wild. The draft flagged its own 2% silver for removal for want of any documented Mongolian frequency, and that was the right call.",
+    "Champagne, pearl, mushroom, frame, the leopard complex and brindle are forced wild too.",
+    "Tolerant both ways and cold near-fixed - this is the only sensible reading of a horse that lives out through the dzud and through a steppe summer. Health 10 is unmanaged survival on grass alone.",
+    "The desert, mountain and steppe regional types are real and are not strains here: they differ mainly in size and build, and a strain may override gene pools and nothing else. The size band spans all three.",
+    "All disorders clear. No Mongolian carrier prevalence exists for any locus, and PSSM1 in particular is a dominant disease rather than a harmless carrier state - it must not be seeded speculatively.",
+    "None of these rates comes from a genomic survey; they are gameplay approximations calibrated to the described phenotype spread.",
+    "Winter coat depth, hoof hardness, the Roman nose, dzud survival, digging for forage under snow and airag are none of them modelled."
+  ]
+},
+{
+  "id": "montenegrin_hilly_horse",
+  "name": "Montenegrin Domestic Hilly Horse",
+  "country": "montenegro",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:stony_peaks",
+    "minecraft:plains",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 9,
+    "size": [0.825, 0.895]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 61 },
+      { "pair": "E/e", "weight": 34 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 6 },
+      { "pair": "G3/G2", "weight": 2 },
+      { "pair": "G3/N", "weight": 27 },
+      { "pair": "G2/N", "weight": 13 },
+      { "pair": "N/N", "weight": 52 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "Montenegro's native mountain horse, the Domaci brdski konj, recorded by FAO DAD-IS as Montenegro's own mountain-pony population and also called the Montenegro Mountain Horse in English.",
+    "It shares that native name with the Domestic Mountain Pony already in the mod, which is the Bosnian half of the same thing. They are sister national populations of one transboundary Balkan hill horse, whose family also takes in local populations in North Macedonia, Bulgaria and Romania. Both ship, each pinned to its own nation, because that is what the country field is for; nobody has shown the two populations to be phenotypically or genetically separate, and this file should not be read as claiming they are.",
+    "Grey is the one real difference in the pools, and it is the traditional colour list doing it: dorata first - the bays and browns - then grey and white, then black, then alata, the chestnuts. Grey runs far heavier here than in its Bosnian sister, where the breeding programme excludes it outright.",
+    "Every dilution and every white pattern is forced wild, which makes this a solid-coloured mountain population on extension, agouti and grey alone rather than a general-purpose pony.",
+    "The colour evidence is thin - one non-academic breed page and a DAD-IS list - and no Montenegrin STX17 or MC1R survey was located. The grey rate is an approximation and is the least certain number in the file.",
+    "The sources give an average, about 13.1 to 13.2 hands, rather than a range. The band is set around that average at the width its Bosnian sister carries.",
+    "Health 9 for a pack horse that carries a hundred kilos over limestone on local forage, and cold tolerant lightly for Montenegrin winters, matching the sister breed.",
+    "All disorders clear. Borrowing rates from another Balkan breed would be as much an invention as borrowing them from a commercial one.",
+    "Trail sense, load capacity, hoof wear on karst, forage thrift and the Balkan colour vocabulary itself are none of them modelled."
   ]
 },
 {
@@ -4681,6 +5790,64 @@
     "Slightly crested neck, expressive eyes, compact and refined - a versatile foundation American breed.",
     "Cushing's, EMS: age-related, folded into heartiness.",
     "Carries W4, the Camarillo white: the line was founded on Morgan mares bred to one white stallion in the 1920s, and it is the only breed here that throws an all-white foal rather than a grey."
+  ]
+},
+{
+  "id": "murgese",
+  "name": "Murgese",
+  "country": "italy",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:windswept_hills",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 9,
+    "size": [0.937, 1.149]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 2 },
+      { "pair": "rn/rn", "weight": 98 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The horse of the Murge plateau in Apulia, out of Spanish rule in the fifteenth and sixteenth centuries with Barb and Iberian blood in it, rebuilt and registered at the Foggia stallion depot in 1926 and kept today by the ANAMF.",
+    "The colour rule is the strictest in the mod. The palette is raven black and blue roan and nothing else: black is E_ aa, and the blue roan is that plus Rn. Both base loci are fixed, which no other natural breed here does.",
+    "Blue roan is about 2% of the population, so the roan allele sits near 0.01 - a Hardy-Weinberg back-calculation from the phenotype, and a restrained one, since studbook mating is not random.",
+    "The old language for the blue roans is 'iron grey' and it is a trap. It is roan, not STX17 grey: a blue roan keeps its dark head and dark lower legs and does not whiten with age, where a grey would end up white and wreck the breed's whole look. Grey is forced wild.",
+    "Chestnut, bay, dun, cream, champagne, silver, pearl, mushroom, every pinto and the leopard complex are all forced wild as well. The abundant mane and tail are structural and are not flaxen or silver.",
+    "Managed sources only. This is an Italian registry breed kept semi-extensively on the plateau, not a feral population, and it should not turn up as a wild pack.",
+    "All disorders clear, and the temptation to seed some was real: the pedigree study reports a mean inbreeding coefficient near 5.22% and an effective population near 47, with a small set of ancestors explaining much of the present diversity. That is a monitoring concern, not evidence for any particular mutation.",
+    "Granduca di Martina, Araldo delle Murge and Nerone are the foundation stallions. Founder-line identity is not modelled.",
+    "Heat tolerant for Apulia. The endurance work, the hoof quality and the Murgese's characteristic uphill carriage are none of them modelled."
   ]
 },
 {

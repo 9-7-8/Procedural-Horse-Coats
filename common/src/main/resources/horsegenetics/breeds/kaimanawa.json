@@ -1,0 +1,95 @@
+{
+  "id": "kaimanawa",
+  "name": "Kaimanawa",
+  "country": "new_zealand",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:stony_peaks",
+    "minecraft:taiga",
+    "minecraft:savanna_plateau"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 10,
+    "size": [0.831, 0.944]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 24 },
+      { "pair": "E/e", "weight": 50 },
+      { "pair": "e/e", "weight": 26 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Northern",
+      "weight": 3,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 20 },
+          { "pair": "E/e", "weight": 48 },
+          { "pair": "e/e", "weight": 32 }
+        ],
+        "horsegenetics.grey": [
+          { "pair": "N/N", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Southern",
+      "weight": 1,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 42 },
+          { "pair": "E/e", "weight": 46 },
+          { "pair": "e/e", "weight": 12 }
+        ],
+        "horsegenetics.grey": [
+          { "pair": "G3/G3", "weight": 40 },
+          { "pair": "G3/N", "weight": 52 },
+          { "pair": "N/N", "weight": 8 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The feral horses of the Kaimanawa Ranges in the central North Island of Aotearoa New Zealand. Not a closed breed: the Department of Conservation describes them as mixed-breed ferals with a strong Thoroughbred and station-hack likeness, mustered periodically to hold the herd near 300 head.",
+    "The base pool follows the field tally - roughly 56% bay, 26% chestnut and 7.7% black - rather than the draft's own allele figures, which would have produced chestnut at a twentieth of the observed rate.",
+    "The two strains are the real geographic split and the only one the mod can carry. Every sampled grey horse belonged to one maternal haplogroup and every one of them was in the south; the chestnuts concentrate in the north. So the Northern strain forces grey wild entirely and the Southern strain is near-fixed for it over a darker base, which is what makes its foals come out bay or black and whiten later.",
+    "Grey in the base pool is the population-wide rate, and only reaches a founder that the strain roll leaves it to.",
+    "Every white-pattern locus is forced wild. Face and lower-leg white is common in field descriptions of these horses, and ordinary markings are not evidence of a pinto allele.",
+    "All disorders clear. No Kaimanawa-specific carrier frequency exists, and a feral population's ancestry is not a reason to import the disease panel of the breeds behind it.",
+    "Health 10 is unmanaged survival on volcanic tussock country: no feed, no shelter, no farrier, and a population that persists anyway.",
+    "Lightly cold tolerant for the Central Plateau's winters rather than near-fixed - high country, but not a Nordic one.",
+    "Only six maternal and six paternal lineages were found in 96 sampled horses, and mitochondrial diversity is lower than in several other feral populations. A bottleneck is not a disease rate and was not turned into one.",
+    "The muster, the herd structure and the adoption programme are not modelled."
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "karakachan",
+  "name": "Karakachan Horse",
+  "country": "bulgaria",
+  "commonness": "very_rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:grove",
+    "minecraft:meadow",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 10,
+    "size": [0.787, 0.862]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 90 },
+      { "pair": "E/e", "weight": 10 },
+      { "pair": "e/e", "weight": 0.25 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 86 },
+      { "pair": "A/a", "weight": 13 },
+      { "pair": "a/a", "weight": 0.5 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The horse of the Karakachans, the transhumant pastoralists of the Balkans, and an indigenous Bulgarian mountain breed of the Rhodopes, Rila, Pirin, Stara Planina and Kraishte. It lives semi-free in herds year round and is one of the smallest horses in the mod.",
+    "Almost always bay or brown. This is the most visually unified natural pool that ships: chestnut and black are each held at a fraction of a percent, present only as an admission that no one has shown either locus to be fixed.",
+    "Every dilution, every white pattern, grey and the leopard complex are forced wild. A primitive mountain landrace is not a licence to seed primitive-looking alleles that nobody has tested for.",
+    "Size follows the measured exterior study - a mean of 130.22 cm, inside a modern range of roughly 126-138 cm - rather than the older descriptions nearer 128 cm. The population is reported as taller and heavier than it was a century ago.",
+    "Cold tolerant near-fixed: it winters out in the mountains, which is the whole of its reputation, and health 10 is that plus foaling and thriving on thin grazing with no shelter.",
+    "Listed as critically endangered on Bulgaria's Red Data List of autochthonous domestic forms. By 2018 the four Rhodope rewilding herds together held more than eighty horses.",
+    "All disorders clear. No Karakachan carrier data was located, and hardiness is not evidence of immunity any more than rarity is evidence of disease.",
+    "The hoof quality, the herd behaviour, the pack and transhumance work, and the rewilding programme itself are none of them modelled."
+  ]
+}

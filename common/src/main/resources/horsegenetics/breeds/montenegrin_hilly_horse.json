@@ -1,0 +1,68 @@
+{
+  "id": "montenegrin_hilly_horse",
+  "name": "Montenegrin Domestic Hilly Horse",
+  "country": "montenegro",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:stony_peaks",
+    "minecraft:plains",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 9,
+    "size": [0.825, 0.895]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 61 },
+      { "pair": "E/e", "weight": 34 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 6 },
+      { "pair": "G3/G2", "weight": 2 },
+      { "pair": "G3/N", "weight": 27 },
+      { "pair": "G2/N", "weight": 13 },
+      { "pair": "N/N", "weight": 52 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "Montenegro's native mountain horse, the Domaci brdski konj, recorded by FAO DAD-IS as Montenegro's own mountain-pony population and also called the Montenegro Mountain Horse in English.",
+    "It shares that native name with the Domestic Mountain Pony already in the mod, which is the Bosnian half of the same thing. They are sister national populations of one transboundary Balkan hill horse, whose family also takes in local populations in North Macedonia, Bulgaria and Romania. Both ship, each pinned to its own nation, because that is what the country field is for; nobody has shown the two populations to be phenotypically or genetically separate, and this file should not be read as claiming they are.",
+    "Grey is the one real difference in the pools, and it is the traditional colour list doing it: dorata first - the bays and browns - then grey and white, then black, then alata, the chestnuts. Grey runs far heavier here than in its Bosnian sister, where the breeding programme excludes it outright.",
+    "Every dilution and every white pattern is forced wild, which makes this a solid-coloured mountain population on extension, agouti and grey alone rather than a general-purpose pony.",
+    "The colour evidence is thin - one non-academic breed page and a DAD-IS list - and no Montenegrin STX17 or MC1R survey was located. The grey rate is an approximation and is the least certain number in the file.",
+    "The sources give an average, about 13.1 to 13.2 hands, rather than a range. The band is set around that average at the width its Bosnian sister carries.",
+    "Health 9 for a pack horse that carries a hundred kilos over limestone on local forage, and cold tolerant lightly for Montenegrin winters, matching the sister breed.",
+    "All disorders clear. Borrowing rates from another Balkan breed would be as much an invention as borrowing them from a commercial one.",
+    "Trail sense, load capacity, hoof wear on karst, forage thrift and the Balkan colour vocabulary itself are none of them modelled."
+  ]
+}

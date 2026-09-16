@@ -1,0 +1,68 @@
+{
+  "id": "medimurje",
+  "name": "Medimurje Horse",
+  "country": "croatia",
+  "commonness": "very_rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:swamp"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 8,
+    "size": [0.969, 1.093]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 61 },
+      { "pair": "E/e", "weight": 34 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 49 },
+      { "pair": "A/a", "weight": 42 },
+      { "pair": "a/a", "weight": 9 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 4 },
+      { "pair": "ShL/Sh", "weight": 16 },
+      { "pair": "ShL/ShD", "weight": 14 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 28 },
+      { "pair": "ShD/ShD", "weight": 18 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 6 },
+      { "pair": "G2/N", "weight": 3 },
+      { "pair": "N/N", "weight": 91 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Medimurje horse, properly Medimurski konj and also the Murinsulaner or Murakozi - a tall medium-heavy draught horse of the Mura and Drava lowland in northern Croatia. The name is written Medimurje with a crossed D that a breed id cannot carry.",
+    "Its landscape is genuinely transboundary - Croatia, Hungary, Slovenia and Austria all belong to it - and it is filed under Croatia because a breed is pinned to one nation here. The Croatian population is the smallest part of it: larger related herds survive north of the Mura in Hungary and in eastern Slovenia.",
+    "Bay and seal brown are the core, black is next, chestnut is less common, and the surviving Croatian animals include dark chestnuts and browns. The shade pool is skewed dark to carry the seal browns rather than giving agouti a second allele.",
+    "Its draft opened by arguing every founder should be black with agouti fixed recessive - and then corrected itself in the body, because that 'only black and grey' rule comes from a genomic study of the Italian Murgese, an unrelated breed that happens to abbreviate to MUR. The bay-dominant pool is the corrected reading. The actual Murgese ships in this same batch and is black-only for its own reasons.",
+    "Grey is real and rare. Every dilution and every white pattern is forced wild.",
+    "Managed sources only, and this is the rarest thing in the file: a 2018 systematization paper put the effective population near 14, with the Croatian source population around 40 animals. Microsatellite work found moderate diversity, low and non-significant inbreeding, and clear separation from both the Posavac and the Croatian Coldblood.",
+    "Health 8 rather than the draught-horse 9 or 10: a population this small is a conservation emergency, not a demonstration of vigour.",
+    "Lightly cold tolerant for Pannonian winters and lightly heat sensitive as the heavy breeds are.",
+    "All disorders clear. With a population this small, invented disease frequencies would be worse than usual - there is nothing to average against.",
+    "Traction, ploughing and logging skill, carriage training, mane density, feathering and the conservation registry are none of them modelled."
+  ]
+}

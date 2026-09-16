@@ -1,0 +1,71 @@
+{
+  "id": "kladruber",
+  "name": "Kladruber",
+  "country": "czech_republic",
+  "commonness": "very_rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 8,
+    "size": [1.048, 1.238]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Grey",
+      "weight": 1,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "G3/G3", "weight": 60 },
+          { "pair": "G3/G2", "weight": 20 },
+          { "pair": "G3/N", "weight": 20 }
+        ]
+      }
+    },
+    {
+      "name": "Black",
+      "weight": 1,
+      "genes": {
+        "horsegenetics.grey": [
+          { "pair": "N/N", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The Starokladrubsky kun, the Old Kladruber - the oldest indigenous Czech breed and the baroque carriage horse of the Habsburg court, bred at the National Stud at Kladruby nad Labem since the sixteenth century. The stud landscape has been a UNESCO World Heritage site since 2019.",
+    "Two colours and nothing else, and they are two historically separate closed herds rather than one pool with two outcomes: the grey was the imperial and court horse, the black the ecclesiastical one, associated with Slatinany. That is exactly what a strain is for, and it is the only thing the strains differ in.",
+    "Grey is the only locus either strain names. The base is black at both - fixed E and fixed a - so a grey Kladruber is a black horse whitening with age, born dark and greying out, which is what the real ones do.",
+    "The 50/50 strain split is a gameplay reading, not the stud's roughly 250-grey-in-500 ratio, and the grey strain is near-fixed rather than truly fixed so that a grey pairing can still throw the occasional black.",
+    "Every other locus is forced wild. No bay, no chestnut, no dilution, no roan, no pinto, no leopard belongs in a pure founder, and the modern breeding programme is the reason rather than an absence of evidence.",
+    "One of the tallest breeds that ships. The band is the usual 16.0-17.0 hands, which puts its top on the Irish Draught's; wider figures from 15.3 to 17.3 are on record and are not what a founder rolls.",
+    "Managed sources only. Kladruby is a designed agricultural and training landscape, not wild range, and there has never been a feral Kladruber.",
+    "The black herd was dissolved in the 1930s and rebuilt; the reconstruction programme closed in 1973. Six grey and four black sire lines survive, and sire-line identity is not modelled.",
+    "All disorders clear. Research on the breed discusses melanoma and insect-bite hypersensitivity markers - melanoma being the standing risk of any grey population - but establishes no rate for any locus in the panel, so nothing was seeded.",
+    "The Roman nose, the baroque outline, the arched neck, the high knee action, collection, team driving and the whitening timeline itself are none of them modelled."
+  ]
+}

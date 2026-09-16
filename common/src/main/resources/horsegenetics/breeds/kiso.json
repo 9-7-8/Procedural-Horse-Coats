@@ -1,0 +1,69 @@
+{
+  "id": "kiso",
+  "name": "Kiso Horse",
+  "country": "japan",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:grove",
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:meadow",
+    "minecraft:birch_forest",
+    "minecraft:forest",
+    "minecraft:windswept_forest",
+    "minecraft:stony_peaks"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 8,
+    "size": [0.769, 0.881]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 67 },
+      { "pair": "E/e", "weight": 30 },
+      { "pair": "e/e", "weight": 3.2 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 85 },
+      { "pair": "A/a", "weight": 14.5 },
+      { "pair": "a/a", "weight": 0.5 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 0.04 },
+      { "pair": "D/d1", "weight": 1.6 },
+      { "pair": "D/d2", "weight": 2.3 },
+      { "pair": "d1/d1", "weight": 16 },
+      { "pair": "d1/d2", "weight": 46.4 },
+      { "pair": "d2/d2", "weight": 33.6 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The only indigenous horse breed of Honshu, from the Kiso district where southern Nagano meets eastern Gifu. A small, deep-bodied mountain packhorse, and one of Japan's eight native breeds.",
+    "This breed has a real coat survey behind it. A 2008-09 census of 125 horses - 86.2% of everything registered - found 105 bay, 11 dark bay, 5 buckskin dun and 4 chestnut, and no black at all. The pools are built to those counts rather than to the draft's own allele figures, which would have put chestnut at a tenth of the rate its own source recorded.",
+    "Black is not forced wild but is close to it: no black horse appeared in the census, so a/a sits at half a percent as an admission that a carrier pool is not the same as a fixed locus.",
+    "The dun pool is built backwards from two numbers, and it is the most deliberate thing in the file. A dorsal stripe was recorded on 66.4% of the census, while only 4% were classified as dun-diluted - so D is near absent and d1, non-dun with primitive marking, carries the stripes. Raising D to produce the stripe count would have painted two thirds of the breed with a body dilution nobody observed.",
+    "The 'buckskin dun' of the survey is read as dun, not as evidence that cream survives. Cream is forced wild, as are grey, silver, champagne, pearl, mushroom, flaxen, roan, the leopard complex and every white pattern.",
+    "Grey was in the breed in 1953 at 0.2% along with black, dark chestnut and palomino. The bottleneck took all four, and the modern population is what ships.",
+    "Managed sources only. There is no feral Kiso population - the surviving horses are a conservation herd, and a player who wants one should be buying it, which is also the way to run a breeding programme of their own.",
+    "Health 8, deliberately not higher. A breed rebuilt from a single surviving shrine stallion and his son, down to 32 horses in 1976 and near 149 registered in 2012, with a mean inbreeding coefficient of 0.11 and an effective population near 45.8, is a conservation concern - not a demonstration of exceptional robustness.",
+    "All disorders clear. The inbreeding is real and is not a carrier rate; inventing one from it would be inventing a disease.",
+    "Cold tolerant for Kiso winters. The thick winter coat, the hoof quality and the pack work are not modelled."
+  ]
+}

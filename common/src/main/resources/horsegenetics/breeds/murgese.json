@@ -1,0 +1,58 @@
+{
+  "id": "murgese",
+  "name": "Murgese",
+  "country": "italy",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:windswept_hills",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 9,
+    "size": [0.937, 1.149]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 2 },
+      { "pair": "rn/rn", "weight": 98 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The horse of the Murge plateau in Apulia, out of Spanish rule in the fifteenth and sixteenth centuries with Barb and Iberian blood in it, rebuilt and registered at the Foggia stallion depot in 1926 and kept today by the ANAMF.",
+    "The colour rule is the strictest in the mod. The palette is raven black and blue roan and nothing else: black is E_ aa, and the blue roan is that plus Rn. Both base loci are fixed, which no other natural breed here does.",
+    "Blue roan is about 2% of the population, so the roan allele sits near 0.01 - a Hardy-Weinberg back-calculation from the phenotype, and a restrained one, since studbook mating is not random.",
+    "The old language for the blue roans is 'iron grey' and it is a trap. It is roan, not STX17 grey: a blue roan keeps its dark head and dark lower legs and does not whiten with age, where a grey would end up white and wreck the breed's whole look. Grey is forced wild.",
+    "Chestnut, bay, dun, cream, champagne, silver, pearl, mushroom, every pinto and the leopard complex are all forced wild as well. The abundant mane and tail are structural and are not flaxen or silver.",
+    "Managed sources only. This is an Italian registry breed kept semi-extensively on the plateau, not a feral population, and it should not turn up as a wild pack.",
+    "All disorders clear, and the temptation to seed some was real: the pedigree study reports a mean inbreeding coefficient near 5.22% and an effective population near 47, with a small set of ancestors explaining much of the present diversity. That is a monitoring concern, not evidence for any particular mutation.",
+    "Granduca di Martina, Araldo delle Murge and Nerone are the foundation stallions. Founder-line identity is not modelled.",
+    "Heat tolerant for Apulia. The endurance work, the hoof quality and the Murgese's characteristic uphill carriage are none of them modelled."
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "misaki",
+  "name": "Misaki Horse",
+  "country": "japan",
+  "commonness": "rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:stony_shore",
+    "minecraft:beach"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 8,
+    "size": [0.812, 0.857]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 51 },
+      { "pair": "E/e", "weight": 41 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 39 },
+      { "pair": "A/a", "weight": 47 },
+      { "pair": "a/a", "weight": 14 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "The Misaki-uma of Cape Toi, in Kushima at the southern tip of Miyazaki on Kyushu - one of Japan's eight native breeds and the only one still living as a self-sustaining feral population. Local history dates it to 1697, when the Akizuki family gathered the district's horses, and the horses and their cape were designated a Natural Monument together in 1953.",
+    "The base pool reconstructs a Misaki-specific study of 99 horses: 79.2% bay, 12.9% black, 8.0% chestnut. The draft's own JSON figures do not produce those percentages and it says so outright - its corrected numbers are what ship.",
+    "Solid and dark. Face and leg white is very rare in the Japanese native breeds, and nothing supports grey, cream, dun, champagne, silver, roan, tobiano or the leopard complex in a pure founder, so all of them are forced wild.",
+    "No cowboy. This is an isolated conservation population on one headland, not sale-yard stock, so it is found in the wild or bought from a stable and never offered by a trader.",
+    "Wild is the point of it. A player should meet these on the coast, and the difference between a feral horse and an untamed domestic one is not something the mod models - so what makes them Misaki is the breed, not the behaviour.",
+    "The population bottomed out at 53 animals in 1973 and has recovered to something above a hundred. Health 8 carries that: a small, closed, unmanaged population is fragile, however hardy the individual horse.",
+    "All disorders clear. No Misaki carrier frequency was found for any locus in the panel.",
+    "Lightly heat tolerant for a subtropical coast.",
+    "The herd structure, the coastal grazing, the seasonal forage and the legal protection itself are none of them modelled."
+  ]
+}

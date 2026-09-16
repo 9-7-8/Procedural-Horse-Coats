@@ -1,0 +1,108 @@
+{
+  "id": "mongolian",
+  "name": "Mongolian Horse",
+  "country": "mongolia",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:meadow",
+    "minecraft:stony_peaks",
+    "minecraft:grove",
+    "minecraft:badlands"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 4,
+    "health": 10,
+    "size": [0.762, 0.889]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 10 },
+      { "pair": "D/d1", "weight": 10 },
+      { "pair": "D/d2", "weight": 34 },
+      { "pair": "d1/d1", "weight": 2 },
+      { "pair": "d1/d2", "weight": 16 },
+      { "pair": "d2/d2", "weight": 28 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 2 },
+      { "pair": "G3/N", "weight": 15 },
+      { "pair": "G2/N", "weight": 8 },
+      { "pair": "N/N", "weight": 75 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 16 },
+      { "pair": "N/N", "weight": 83 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 18 },
+      { "pair": "rn/rn", "weight": 82 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 15 },
+      { "pair": "f/f", "weight": 85 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 8 },
+      { "pair": "to/to", "weight": 92 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The steppe horse itself - a landrace rather than a studbook breed, a family of related local types with no single registry governing them, and by headcount one of the most numerous horse populations on earth.",
+    "There is no correct Mongolian coat. Bay, black, dun, chestnut, grey, roan and palomino all occur, dun and the dark bases are favoured across most of the country, and white horses carry a particular importance for the Darkhad. The pool is built to stay earth-toned and steppe-plausible: colourful, but not an Appaloosa herd and not an American gaited breed's champagne palette.",
+    "Dun is the largest single thing in it, at about a third of alleles, and d1 is carried on purpose - primitive marking without body dilution is exactly what a landrace this old should be throwing.",
+    "Silver is forced wild. The draft flagged its own 2% silver for removal for want of any documented Mongolian frequency, and that was the right call.",
+    "Champagne, pearl, mushroom, frame, the leopard complex and brindle are forced wild too.",
+    "Tolerant both ways and cold near-fixed - this is the only sensible reading of a horse that lives out through the dzud and through a steppe summer. Health 10 is unmanaged survival on grass alone.",
+    "The desert, mountain and steppe regional types are real and are not strains here: they differ mainly in size and build, and a strain may override gene pools and nothing else. The size band spans all three.",
+    "All disorders clear. No Mongolian carrier prevalence exists for any locus, and PSSM1 in particular is a dominant disease rather than a harmless carrier state - it must not be seeded speculatively.",
+    "None of these rates comes from a genomic survey; they are gameplay approximations calibrated to the described phenotype spread.",
+    "Winter coat depth, hoof hardness, the Roman nose, dzud survival, digging for forage under snow and airag are none of them modelled."
+  ]
+}

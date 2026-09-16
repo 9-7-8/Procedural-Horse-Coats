@@ -1,0 +1,101 @@
+{
+  "id": "kentucky_mountain_saddle_horse",
+  "name": "Kentucky Mountain Saddle Horse",
+  "country": "united_states",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:dark_forest",
+    "minecraft:meadow",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_hills",
+    "minecraft:grove",
+    "minecraft:plains"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 8,
+    "size": [0.698, 1.048]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 36 },
+      { "pair": "A/a", "weight": 48 },
+      { "pair": "a/a", "weight": 16 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 3 },
+      { "pair": "Cr/N", "weight": 30 },
+      { "pair": "N/N", "weight": 67 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/Z", "weight": 2 },
+      { "pair": "Z/z", "weight": 26 },
+      { "pair": "z/z", "weight": 72 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 4 },
+      { "pair": "c/c", "weight": 96 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 2 },
+      { "pair": "D/d1", "weight": 3 },
+      { "pair": "D/d2", "weight": 20 },
+      { "pair": "d1/d1", "weight": 1 },
+      { "pair": "d1/d2", "weight": 18 },
+      { "pair": "d2/d2", "weight": 56 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 2 },
+      { "pair": "G3/N", "weight": 17 },
+      { "pair": "G2/N", "weight": 8 },
+      { "pair": "N/N", "weight": 73 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 24 },
+      { "pair": "rn/rn", "weight": 76 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl1", "weight": 6 },
+      { "pair": "Fl2/f", "weight": 10 },
+      { "pair": "Fl1/Fl1", "weight": 6 },
+      { "pair": "Fl1/f", "weight": 30 },
+      { "pair": "f/f", "weight": 48 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90.25 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.25 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "An Appalachian gaited saddle horse out of eastern Kentucky, registered by the KMSHA since 1989. Its four-beat lateral single-foot replaces the trot entirely, and it is the everyday mountain riding horse the Rocky Mountain Horse is the famous cousin of.",
+    "Gaited near-fixed on DMRT3. The gait-keeper stop-gain is documented in the breed, and the locus ships even though the gait itself is still a roadmap item - the genotype is real whether or not the animation is.",
+    "The palette is wide and every bit of it must be solid. Bay, black, chestnut, brown, palomino, buckskin, dun, grey, roan and the silver chocolates all belong; the registry excludes bald faces, white above the knee or hock and any pinto expression, which go to the affiliated Spotted Mountain association instead. So every white-pattern locus is forced wild - a registry rule, not missing evidence.",
+    "Double cream is left reachable. The restriction is on white patterning, not on dilution, so a cremello founder is a legitimate outcome here.",
+    "Champagne sits at a token rate and is the weakest call in the file: it is real in the American gaited breeds generally and has no KMSH-specific count behind it. The draft itself offered to zero it.",
+    "Silver is deliberately below the chocolate-and-flaxen reputation of the Rocky Mountain Horse, which is a related but separate breed and should not lend it its public image.",
+    "The size band is the registry's own, and it is the widest in the mod: Class B begins just above 11 hands and Class A runs past 14.2 to something near 16. The two classes are registration categories over one gene pool, not strains, so the band spans both rather than splitting them.",
+    "All disorders clear. No KMSH carrier survey exists, and PSSM1 occurring across many horse populations is not a reason to assign this breed a founder rate for it.",
+    "Head nod, the single-foot itself, rider comfort and the KMSHA inspection are none of them modelled."
+  ]
+}

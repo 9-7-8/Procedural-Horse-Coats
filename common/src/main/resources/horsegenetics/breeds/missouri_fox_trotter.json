@@ -1,0 +1,109 @@
+{
+  "id": "missouri_fox_trotter",
+  "name": "Missouri Fox Trotter",
+  "country": "united_states",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_hills",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 8,
+    "size": [0.889, 1.048]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 46 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 10 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 4 },
+      { "pair": "Cr/N", "weight": 32 },
+      { "pair": "N/N", "weight": 64 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 11 },
+      { "pair": "c/c", "weight": 89 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 11 },
+      { "pair": "z/z", "weight": 89 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 11 },
+      { "pair": "d2/d2", "weight": 89 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 11 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 21 },
+      { "pair": "rn/rn", "weight": 79 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 18 },
+      { "pair": "f/f", "weight": 82 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/To", "weight": 3 },
+      { "pair": "To/to", "weight": 27 },
+      { "pair": "to/to", "weight": 70 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 24 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 8 },
+      { "pair": "rb/rb", "weight": 92 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90.25 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.25 }
+    ]
+  },
+  "notes": [
+    "The saddle horse of the Ozark country of southern Missouri and northern Arkansas, organised at Ava in 1948 and the Missouri state horse since 2002. The fox trot is a broken four-beat diagonal - the front foot of a pair lands just before the opposite hind, one foot is always down, and the horse covers about ten miles an hour doing it all day.",
+    "Gaited near-fixed on DMRT3, alongside the flat-footed walk and canter the registry also requires.",
+    "The registry is colour-open and the pool is the widest natural palette that ships outside the Mustang: bay, brown, black, chestnut, palomino, buckskin, cremello, dun, grey, roan, champagne, tobiano, sabino and frame all belong. The rulebook has its own champagne classes - classic, amber, gold and ivory - which is the rare case of a registry naming the locus for us.",
+    "Frame is here at a real rate, so this is one of the breeds where two founders can produce a lethal white foal. That is the breed being what it is, not an oversight.",
+    "The leopard complex is forced wild: it is explicitly outside the documented range. Pearl, mushroom, dominant white and brindle have no support either.",
+    "Silver is at a modest rate and carries a caveat the draft raised and then got right: MCOA in this breed is a consequence of the silver PMEL variant, not a separate disorder locus, and PPIB is HERDA and belongs to Quarter Horse cutting lines. Neither was seeded as a disease.",
+    "All disorders clear. UC Davis offers a PSSM1 test in a Fox Trotter context, but the existence of a test is not a founder rate, so nothing was assigned.",
+    "Curly-coated Fox Trotters occur and there is no curly locus in the mod to give them. Curl is not required for breed identity here anyway.",
+    "The separate 11-to-14-hand pony registry is not modelled; the band is the documented 14-16-hand saddle horse.",
+    "The fox trot itself, the head nod, the sliding hind action and rider comfort are none of them modelled."
+  ]
+}

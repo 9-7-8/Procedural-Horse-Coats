@@ -1,0 +1,81 @@
+{
+  "id": "jutland",
+  "name": "Jutland",
+  "country": "denmark",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:grove",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 9,
+    "size": [0.981, 1.075]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 1 },
+      { "pair": "E/e", "weight": 18 },
+      { "pair": "e/e", "weight": 81 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl2", "weight": 30 },
+      { "pair": "Fl2/Fl1", "weight": 26 },
+      { "pair": "Fl2/f", "weight": 12 },
+      { "pair": "Fl1/Fl1", "weight": 12 },
+      { "pair": "Fl1/f", "weight": 14 },
+      { "pair": "f/f", "weight": 6 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 3 },
+      { "pair": "G2/N", "weight": 2 },
+      { "pair": "N/N", "weight": 95 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 4 },
+      { "pair": "rn/rn", "weight": 96 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 2 },
+      { "pair": "z/z", "weight": 98 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Jydsk hest - Denmark's national draught horse, out of the local workhorses of the Jutland peninsula and organised into a studbook late in the nineteenth century. Suffolk Punch blood is in it, which is visible here in the pool as well as in the silhouette.",
+    "Flaxen chestnut is the whole player-facing identity: a red body with a cream-to-blond mane, tail and feather. Chestnut is near-led rather than fixed, because the deliberate twentieth-century selection that produced the modern 'national colour' did not erase the older bay and black horses.",
+    "The pale mane is flaxen and not cream. Cream is forced wild on purpose - a palomino Jutland would be the wrong horse, and the draft's own rationale says so.",
+    "Grey, roan and silver are historically recorded and are kept at a couple of percent each. Silver is the weakest of the three: it rests on secondary breed descriptions with no Jutland PMEL17 count behind it, and on a chestnut-led breed it is invisible most of the time it is carried.",
+    "A medium draught, not a giant. The size band is the cited 157-164 cm and lands below the Shire and the Percheron on purpose; the breed's mass is in its width, which is not modelled.",
+    "Managed sources only. The population fell under 300 horses in 1998 and Danish conservation work brought it back near 2,000 by 2016, which is a recovering national breed rather than anything a player should find running loose.",
+    "All disorders clear. No Jutland-specific carrier rate was located for any locus, and a heavy draught build is not on its own a licence to seed PSSM1.",
+    "Moderately cold tolerant for Danish winters - a northern farm horse, but a lowland maritime one, so not the near-fixed pool the Nordic mountain breeds carry.",
+    "The heavy mane and tail, the feathering, real pulling force, harness work and the conservation registry itself are none of them modelled."
+  ]
+}

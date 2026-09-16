@@ -1,0 +1,100 @@
+{
+  "id": "mangalarga_marchador",
+  "name": "Mangalarga Marchador",
+  "country": "brazil",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:sparse_jungle",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 8,
+    "size": [0.921, 1.048]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 45 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 10 },
+      { "pair": "G3/G2", "weight": 5 },
+      { "pair": "G2/G2", "weight": 2 },
+      { "pair": "G3/N", "weight": 30 },
+      { "pair": "G2/N", "weight": 15 },
+      { "pair": "N/N", "weight": 38 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 2 },
+      { "pair": "Cr/N", "weight": 24 },
+      { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 13 },
+      { "pair": "d2/d2", "weight": 87 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 11 },
+      { "pair": "rn/rn", "weight": 89 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 15 },
+      { "pair": "f/f", "weight": 85 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/To", "weight": 1 },
+      { "pair": "To/to", "weight": 18 },
+      { "pair": "to/to", "weight": 81 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 21 },
+      { "pair": "N/N", "weight": 79 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90.25 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.25 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Mangalarga Mineiro of Minas Gerais, registered by the ABCCMM out of Belo Horizonte since 1949 and one of the most numerous saddle breeds in Brazil. Iberian stock worked into a national riding horse over two centuries.",
+    "The marcha is the breed: a smooth four-beat amble with moments of triple support, ridden in place of the trot, batida diagonally coordinated and picada more lateral and usually called the smoother of the two. Gaited near-fixed on DMRT3 - the draft assumed the mod had no locus for it and it does.",
+    "Deliberately not a unified colour. Grey is conspicuous and common, bay, brown, black and chestnut are all well represented, and buckskin, palomino, dun, roan, sabino and tobiano turn up underneath. It should read as the most colourful founder pool in Latin America without every horse being a loud one.",
+    "None of these rates is a registry statistic. No population allele survey for the breed was found, and grey at something near a third of founders is the largest of the approximations.",
+    "Frame overo is forced wild on purpose. It is not documented in the breed, and seeding it would manufacture a lethal white cross where the real population has none - so a Marchador pair is safe to breed in a way an American Paint pair is not.",
+    "The leopard complex, champagne, silver, pearl and mushroom are forced wild for want of any evidence at all.",
+    "Heat tolerant heavily, for Minas Gerais.",
+    "All disorders clear, with the panel reasoned through: HYPP is a Quarter Horse Impressive-line disease, SCID, CA and LFS are Arabian, PLOD1 is Friesian, HERDA is Quarter Horse cutting lines. None of that ancestry is this breed's.",
+    "The marcha itself, gait timing, rider comfort, the three-year-old inspection, the mane-roaching tradition and regional bloodlines are none of them modelled."
+  ]
+}

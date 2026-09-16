@@ -1,0 +1,67 @@
+{
+  "id": "karabair",
+  "name": "Karabair",
+  "country": "uzbekistan",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:windswept_savanna",
+    "minecraft:badlands",
+    "minecraft:desert",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.937, 0.987]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 55 },
+      { "pair": "E/e", "weight": 38 },
+      { "pair": "e/e", "weight": 7 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 3 },
+      { "pair": "G3/N", "weight": 20 },
+      { "pair": "G2/N", "weight": 10 },
+      { "pair": "N/N", "weight": 67 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Qorabayir - an old Central Asian riding and light-harness horse of the oasis country, kept above all in Uzbekistan and across the border into northern Tajikistan. Uzbek writing calls it a golden fund of the national horse breeding, and it is used for riding, packing, light draught and the mounted games.",
+    "The name is usually glossed 'black horse' and the breed is not colour-defined. Bay, chestnut, grey and black are all documented, with no registry colour rule; recent Uzbek literature leans on black and dark bay, which the extension and agouti pools carry rather than an artificial dark shade band.",
+    "Grey is a real and visible part of the population at something near a fifth of founders. The rate is a gameplay estimate, not a measured STX17 frequency - no such count exists for the breed.",
+    "Every dilution and every white pattern is forced wild. That is an absence of breed-specific evidence rather than a registry prohibition, and it is the conservative reading.",
+    "The real main, riding and denser intra-breed types are not strains here. No separate size or colour data was cited for them, and a strain may override gene pools and nothing else.",
+    "Tolerant both ways for a continental climate - hot dry summers, cold winters - and neither near-fixed, since this is oasis and foothill stock rather than a high-desert or high-plateau landrace.",
+    "All disorders clear. The one breed-health source found states outright that no inherited disease is well documented in the Karabair, while cautioning that absence of evidence is not proof of absence.",
+    "The traditional gaits, the mounted games and the regional type differences are none of them modelled."
+  ]
+}
