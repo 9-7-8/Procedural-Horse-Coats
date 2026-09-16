@@ -18,7 +18,16 @@
         "texture": "minecraft:saddle"
       },
       {
-        "texture": "minecraft:saddle_overlay"
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle_bridle"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -9342607
+        },
+        "texture": "minecraft:saddle_metal"
       }
     ],
     "horse_saddle": [
@@ -29,7 +38,16 @@
         "texture": "minecraft:saddle"
       },
       {
-        "texture": "minecraft:saddle_overlay"
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle_bridle"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -9342607
+        },
+        "texture": "minecraft:saddle_metal"
       }
     ],
     "mule_saddle": [
@@ -40,7 +58,16 @@
         "texture": "minecraft:saddle"
       },
       {
-        "texture": "minecraft:saddle_overlay"
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle_bridle"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -9342607
+        },
+        "texture": "minecraft:saddle_metal"
       }
     ],
     "nautilus_saddle": [
@@ -61,7 +88,16 @@
         "texture": "minecraft:saddle"
       },
       {
-        "texture": "minecraft:saddle_overlay"
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle_bridle"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -9342607
+        },
+        "texture": "minecraft:saddle_metal"
       }
     ],
     "strider_saddle": [
@@ -77,7 +113,16 @@
         "texture": "minecraft:saddle"
       },
       {
-        "texture": "minecraft:saddle_overlay"
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle_bridle"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -9342607
+        },
+        "texture": "minecraft:saddle_metal"
       }
     ]
   }

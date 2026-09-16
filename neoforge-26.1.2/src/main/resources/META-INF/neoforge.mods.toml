@@ -23,10 +23,27 @@ description = "Genetics-based coat generation for horses, starting with extensio
     ordering = "NONE"
     side = "BOTH"
 
-# THE ONE MIXIN. LivingEntity.travelInLava hardcodes lava's speed and reads no
-# attribute, so a fireproof horse crawled and nothing in the gene format could
-# change it (known-gaps gap 179). It is a single ModifyConstant that returns
-# vanilla's own value unless the entity carries this mod's lava_movement
-# attribute - horses only, and only horses with the gene ever get a modifier.
+# FOUR MIXINS. This comment said "THE ONE MIXIN" long after there were four, and
+# that stale line was read as fact and repeated on 2026-09-16 - so it is now a
+# list, which is harder to leave wrong:
+#
+#   LavaTravelMixin    LivingEntity.travelInLava hardcodes lava's speed and reads
+#                      no attribute, so a fireproof horse crawled and nothing in
+#                      the gene format could change it (known-gaps gap 179). A
+#                      ModifyConstant returning vanilla's own value unless the
+#                      entity carries this mod's lava_movement attribute.
+#   HorseSwimMixin     LivingEntity.travelInWater, same shape, for swimming.
+#   HorseRegenMixin    AbstractHorse.aiStep - redirects the vanilla heal call.
+#   HorseRearFightMixin  AbstractHorse.isImmobile.
+#
+# All four use the narrowest injector that works and argue in their own javadoc
+# why nothing cheaper does. Keep that bar.
+#
+# NOTE FOR ANYONE ADDING ONE: there is deliberately no "client" section in
+# horsegenetics.mixins.json. A mixin on a client-only class - any Screen, for
+# instance - put in the common "mixins" list crashes a dedicated server at mod
+# load. Add a "client" block for those, or use a NeoForge client event instead;
+# ScreenEvent.Init.Post and ContainerScreenEvent already cover most of it, and
+# HorseScreenHooks is the working example.
 [[mixins]]
 config = "horsegenetics.mixins.json"
