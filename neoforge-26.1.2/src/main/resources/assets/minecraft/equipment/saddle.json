@@ -1,0 +1,84 @@
+{
+  "layers": {
+    "camel_husk_saddle": [
+      {
+        "texture": "minecraft:saddle"
+      }
+    ],
+    "camel_saddle": [
+      {
+        "texture": "minecraft:saddle"
+      }
+    ],
+    "donkey_saddle": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle"
+      },
+      {
+        "texture": "minecraft:saddle_overlay"
+      }
+    ],
+    "horse_saddle": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle"
+      },
+      {
+        "texture": "minecraft:saddle_overlay"
+      }
+    ],
+    "mule_saddle": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle"
+      },
+      {
+        "texture": "minecraft:saddle_overlay"
+      }
+    ],
+    "nautilus_saddle": [
+      {
+        "texture": "minecraft:saddle"
+      }
+    ],
+    "pig_saddle": [
+      {
+        "texture": "minecraft:saddle"
+      }
+    ],
+    "skeleton_horse_saddle": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle"
+      },
+      {
+        "texture": "minecraft:saddle_overlay"
+      }
+    ],
+    "strider_saddle": [
+      {
+        "texture": "minecraft:saddle"
+      }
+    ],
+    "zombie_horse_saddle": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:saddle"
+      },
+      {
+        "texture": "minecraft:saddle_overlay"
+      }
+    ]
+  }
+}

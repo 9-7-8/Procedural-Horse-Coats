@@ -8,6 +8,7 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
 /**
@@ -66,8 +67,29 @@ public final class HdHorseModel extends HorseModel {
         super(root);
     }
 
+    /**
+     * <b>The 1.1 transform is not optional, and leaving it off was the saddle bug.</b>
+     *
+     * <p>Vanilla does not apply it inside {@code createBodyMesh} - it applies it
+     * one level up, in {@code LayerDefinitions}, to <i>three</i> layers at once:
+     * {@code HORSE}, {@code HORSE_ARMOR} and {@code HORSE_SADDLE}. This file is a
+     * copy of the mesh <i>function</i>, so the transform was never in the part
+     * that was copied, and the omission is invisible on inspection.
+     *
+     * <p>The cost was that this body rendered at 1.0 while the saddle and armour
+     * layers - which are still vanilla's bakes, and still carry the transform -
+     * rendered at 1.1. And {@code MeshTransformer.scaling} is not only a scale:
+     * it is {@code scaled(f).translated(0, 24.016 * (1 - f), 0)}, so at 1.1 the
+     * tack also sat 2.4016 units off vertically. That is the "the bridle looks
+     * wrong" report, and it was true on every horse, not only resized ones - the
+     * genetic scale multiplies the gap rather than causing it.
+     *
+     * <p>Coats are unaffected: UVs are normalised at bake time, so
+     * {@code HorseSkinGeometry}'s texel-to-body-point projection does not move.
+     */
     public static LayerDefinition createHdLayer() {
-        return LayerDefinition.create(createHdBodyMesh(CubeDeformation.NONE), TEX_SIZE, TEX_SIZE);
+        return LayerDefinition.create(createHdBodyMesh(CubeDeformation.NONE), TEX_SIZE, TEX_SIZE)
+                .apply(MeshTransformer.scaling(1.1F));
     }
 
     /**
