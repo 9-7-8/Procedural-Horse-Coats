@@ -32,6 +32,10 @@ public final class HorseGenetics {
         // Unlike a gene, a breed does not lengthen the genotype code, so this
         // one is not order-critical against anything else.
         ModBreedSpecs.load();
+        // A player's own trader names. Order-free - a name changes no registry
+        // and lengthens no genotype code - but it reads Region, so it sits with
+        // the breeds rather than above them. phc/names/.
+        ModPersonNames.load();
         // The world's say over the shipped breeds - built from the registry, so
         // it has to come after the load above. phc/breed-spawning.toml.
         BreedSpawningConfig.register(modContainer, modEventBus);

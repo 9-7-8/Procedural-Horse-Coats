@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.breed.Region;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
@@ -153,8 +154,6 @@ public final class CowboyHandler {
     /** Ticks between the cowboy's own state line, and between attempts to get them back on. */
     private static final int COWBOY_REPORT_INTERVAL = 20;
 
-    private static final PersonNameGenerator NAMES = PersonNameGenerator.cowboys();
-
     private CowboyHandler() {
     }
 
@@ -246,11 +245,27 @@ public final class CowboyHandler {
 
     private static void found(Cowboy cowboy, ServerLevel level) {
         Rng rng = new NeoRng(cowboy.getRandom());
+
+        // The breed they are known for, settled FIRST - before the name, because
+        // the name comes from the same place the breed does. The premise is that
+        // villagers were pulled out of the real world along with their herds, so
+        // the man selling Fjords is a Halvorsen and the man selling Andalusians
+        // is an Olivares. Naming him before knowing his trade threw that away.
+        //
+        // (Picked at the barn rather than at the paddock he is about to walk to;
+        // they are a few blocks apart and share a biome.)
+        Breed favourite = pickBreed(cowboy, level);
+        cowboy.setPreferredBreed(favourite.id());
+        String regionId = regionOf(cowboy)
+                .orElseGet(() -> Region.values()[rng.nextInt(Region.values().length)])
+                .id();
+
         // The village's horse family, if it has one already - the hitch and the
         // table hand out their jobs in whatever order, so whoever is hired first
         // coins the surname and the other joins it. See server/HorsemanHandler.
-        String surname = HorsemanHandler.familySurname(level, cowboy.blockPosition(), cowboy, rng);
-        cowboy.setCustomName(Component.literal(NAMES.generateParts(rng).first() + " " + surname));
+        String surname = HorsemanHandler.familySurname(level, cowboy.blockPosition(), cowboy, rng, regionId);
+        cowboy.setCustomName(Component.literal(
+                PersonNameGenerator.forRegion(regionId).generateParts(rng).first() + " " + surname));
         cowboy.setCustomNameVisible(true);
 
         // Home is where the structure put them - the middle of the barn - and it
@@ -271,11 +286,6 @@ public final class CowboyHandler {
         if (paddock != null) {
             cowboy.snapTo(paddock, cowboy.getYRot(), 0.0F);
         }
-
-        // The breed they are known for, settled before the first horse is made so
-        // that horse can be one.
-        Breed favourite = pickBreed(cowboy, level);
-        cowboy.setPreferredBreed(favourite.id());
 
         int herdSize = Cowboy.MIN_HERD + cowboy.getRandom().nextInt(Cowboy.MAX_HERD - Cowboy.MIN_HERD + 1);
         cowboy.setStockTarget(herdSize);
@@ -366,16 +376,27 @@ public final class CowboyHandler {
      * falls in is {@link #nextBreedFor}'s call.
      */
     private static Breed pickBreed(Cowboy cowboy, ServerLevel level) {
+        Optional<Region> region = regionOf(cowboy);
+
         Breed breed = HerdManager.pickHerdBreed(
                 level.getBiome(cowboy.blockPosition()), level.getRandom(), BreedSource.COWBOY);
-        if (breed != Breeds.FERAL_MIXED) {
+        if (breed != Breeds.FERAL_MIXED
+                && (region.isEmpty() || region.get().countries().contains(breed.country()))) {
             return breed;
         }
-        // Nothing local they are allowed to deal in - fall back to the whole set they
-        // is, still weighted by commonness. A breed that has switched the cowboy
-        // source off is not in this list either, so "no dealer has ever had one"
-        // is a thing a breed can actually say.
-        List<Breed> sellable = Breeds.from(BreedSource.COWBOY);
+        // Either nothing local they are allowed to deal in, or something local
+        // that is not from home. Fall back to the set they can actually get, still
+        // weighted by commonness. A breed that has switched the cowboy source off
+        // is not in this list either, so "no dealer has ever had one" is a thing a
+        // breed can actually say.
+        //
+        // Once founded that set is their REGION's breeds, not every breed in the
+        // world: a man who came here from the Rhine with his horses did not also
+        // bring a Marwari. Before founding there is no region yet, and the first
+        // pick - the one that decides where he is from - draws from everything.
+        List<Breed> sellable = region.isPresent()
+                ? region.get().breeds(BreedSource.COWBOY)
+                : Breeds.from(BreedSource.COWBOY);
         if (sellable.isEmpty()) {
             return Breeds.FERAL_MIXED;
         }
@@ -672,6 +693,19 @@ public final class CowboyHandler {
             }
         }
         return have < wanted ? favourite : pickBreed(cowboy, level);
+    }
+
+    /**
+     * <b>Where this cowboy is from</b>, read off the breed he is known for.
+     *
+     * <p>Derived rather than stored, deliberately: {@code PreferredBreed} is
+     * already persisted on the entity, so a second field would be one more thing
+     * that can disagree with it. Empty before he is founded, and empty if his
+     * breed claims no country - a magical one belongs to no region and must never
+     * make him a dealer in it.
+     */
+    static Optional<Region> regionOf(Cowboy cowboy) {
+        return Region.forBreed(Breeds.getOrFeral(cowboy.preferredBreed()));
     }
 
     /** The breed id of a horse of one pure breed, or {@code null} for anything else. */

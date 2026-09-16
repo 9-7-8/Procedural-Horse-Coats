@@ -4,6 +4,7 @@
     "horsegenetics:horseman/level_1/buy_horse_hair",
     "horsegenetics:horseman/level_1/sell_horse_hair_bundle",
     "horsegenetics:horseman/level_1/sell_lead",
+    "horsegenetics:horseman/level_1/sell_leather_horse_armor",
     "horsegenetics:horseman/level_1/sell_saddle"
   ],
   "random_sequence": "horsegenetics:trade_set/horseman/level_1"

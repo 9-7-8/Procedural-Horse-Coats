@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.breed.Region;
 import com.example.horsegenetics.common.name.PersonNameGenerator;
 import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
@@ -49,8 +50,6 @@ public final class HorsemanHandler {
     /** How far counts as "this town", for the surname. */
     private static final int TOWN = 128;
 
-    private static final PersonNameGenerator NAMES = PersonNameGenerator.cowboys();
-
     private HorsemanHandler() {
     }
 
@@ -66,8 +65,10 @@ public final class HorsemanHandler {
             return;
         }
         Rng rng = new NeoRng(villager.getRandom());
-        String surname = familySurname(level, villager.blockPosition(), villager, rng);
-        villager.setCustomName(Component.literal(NAMES.generateParts(rng).first() + " " + surname));
+        String regionId = regionIdNear(level, villager.blockPosition(), villager, rng);
+        String surname = familySurname(level, villager.blockPosition(), villager, rng, regionId);
+        villager.setCustomName(Component.literal(
+                PersonNameGenerator.forRegion(regionId).generateParts(rng).first() + " " + surname));
         villager.setCustomNameVisible(true);
         DebugAnnounce.sayAt(level, "Horseman",
                 villager.getName().getString() + " took the table, of the " + surname + " family",
@@ -92,7 +93,8 @@ public final class HorsemanHandler {
      * <p>It counts the two roles this mod names and nothing else. A player who
      * renames their own farmer "Bob" has not founded a horse family.
      */
-    public static String familySurname(ServerLevel level, BlockPos at, @Nullable Entity except, Rng rng) {
+    public static String familySurname(ServerLevel level, BlockPos at, @Nullable Entity except, Rng rng,
+                                       String regionId) {
         AABB town = new AABB(at).inflate(TOWN);
         String nearest = null;
         double best = Double.MAX_VALUE;
@@ -122,7 +124,43 @@ public final class HorsemanHandler {
                 nearest = surname;
             }
         }
-        return nearest != null ? nearest : NAMES.generateParts(rng).last();
+        return nearest != null ? nearest : PersonNameGenerator.forRegion(regionId).generateParts(rng).last();
+    }
+
+    /**
+     * <b>Which part of the world this village's horse trade came from.</b>
+     *
+     * <p>A horseman has no breed of his own to read it off, so he takes it from
+     * the nearest cowboy who has one - the same nearest-wins scan the surname
+     * uses, and for the same reason: two outfits in one town are two families
+     * from two places, and a table beside the second one joins the second one.
+     *
+     * <p>With no cowboy in town at all he is the founder, and where he is from is
+     * simply rolled. That is not a fallback so much as the other half of the
+     * premise: somebody arrived here first, and they came from somewhere.
+     */
+    private static String regionIdNear(ServerLevel level, BlockPos at, @Nullable Entity except, Rng rng) {
+        AABB town = new AABB(at).inflate(TOWN);
+        Region nearest = null;
+        double best = Double.MAX_VALUE;
+
+        for (Cowboy cowboy : level.getEntitiesOfClass(Cowboy.class, town)) {
+            if (cowboy == except) {
+                continue;
+            }
+            Region region = CowboyHandler.regionOf(cowboy).orElse(null);
+            if (region == null) {
+                continue;
+            }
+            double distance = cowboy.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
+            if (distance < best) {
+                best = distance;
+                nearest = region;
+            }
+        }
+        return nearest != null
+                ? nearest.id()
+                : Region.values()[rng.nextInt(Region.values().length)].id();
     }
 
     /** The family half of "Wade Hargreave". */
