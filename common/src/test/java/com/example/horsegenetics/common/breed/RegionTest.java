@@ -107,9 +107,11 @@ class RegionTest {
                 String resource = "/horsegenetics/names/people/" + region.id() + "-" + half + ".txt";
                 String text = readResource(resource);
                 assertFalse(text.isEmpty(), resource + " is empty");
-                // '�', not the literal character: this test exists because source
-                // files get re-saved in the wrong encoding, and that includes this one.
-                int bad = text.indexOf('�');
+                // The code point, never a literal character: this test exists because source
+                // files get re-saved in the wrong encoding, and that includes this one. A
+                // literal here could be damaged by the very thing it is meant to catch, and
+                // would still compile.
+                int bad = text.indexOf(0xFFFD);
                 assertEquals(-1, bad,
                         resource + " is not valid UTF-8 - a replacement character at offset "
                                 + bad + ", near: \"" + snippetAround(text, bad) + "\". Re-save it as UTF-8.");
