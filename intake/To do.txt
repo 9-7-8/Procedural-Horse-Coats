@@ -1,0 +1,4 @@
+GEt the release process actually working-- right now, it's still not consistently pushing a new github release
+1/1000 chance of any new horse mutating a new magic gene at heterozygous, 1/1000000 at homozygous. Rolls the first check, if it succeeds, then rolls another 1/1000 check to see if it gets a second magical allele. Doesn't necessarily have to be an allele pair which does things, just guarantees non wild for each success.
+
+Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
