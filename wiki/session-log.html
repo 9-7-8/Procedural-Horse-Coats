@@ -27,6 +27,99 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15g">2026-09-15, later still &mdash; fourteen breeds, four drafts that were two horses, and a stub declined</h2>
+
+<p>
+    The fourth intake batch, and the first run at more than five at a time: the queue from the Posavac
+    to the Hucul Pony, alphabetically. <strong>79 breeds ship now.</strong> Sixteen intake files went in
+    and fourteen breeds came out, because two pairs of files were each one horse twice.
+</p>
+
+<h3>The batch</h3>
+
+<p>
+    Posavac, Debao Pony, D&oslash;lahest, Fell Pony, Finnhorse, Florida Cracker Horse, Gelderlander,
+    Gotland Pony, Baise Horse, Guoxia, Henson Horse, Hequ, Highland Pony, Hucul Pony.
+</p>
+
+<ul>
+    <li><strong>Two pairs of drafts were the same breed.</strong> <code>Croatian Posavina Horse.md</code>
+        and <code>Posavac.md</code> are one horse; <code>Hucul Horse.md</code> and
+        <code>Hucul Pony.md</code> are another. Both pairs were merged rather than shipped twice, and
+        both pairs disagreed with themselves in ways worth recording.</li>
+    <li><strong>The two Posavac drafts gave opposite coat identities.</strong> One led bay and seal
+        brown with flaxen explicitly unsupported; the other led chestnut with flaxen as a defining
+        trait. Neither cited a coat survey. The better-sourced draft won &mdash; it is also the one
+        carrying the peer-reviewed heights (Ivankovi&cacute; <em>et&nbsp;al.</em>) &mdash; so bay leads
+        with chestnut a real ninth and a mild flaxen on it. <strong>The disagreement is written into
+        the breed file</strong> rather than averaged silently, because the loser is not obviously wrong.</li>
+    <li><strong>The Hucul's reputation and its genotype disagree, and the genotype won.</strong> One
+        draft was evidence-driven (a published Polish allele-frequency study), the other
+        studbook-driven (what the registry admits). The study makes dun about a quarter of the herd
+        where the prose everywhere calls it the signature. This is the
+        <a href="#d2026-09-15f">Domestic Mountain Pony</a> situation again and was resolved the same
+        way; a 2019 study finding recorded Hucul colours disagreeing with genotype is the
+        justification. Tobiano is the one value that splits the two drafts and is a judgement call.</li>
+    <li><strong>Every draft's size scale was wrong. All fourteen.</strong> This is now four batches
+        running and should be assumed rather than checked for. The D&oslash;lahest draft wanted
+        &times;1.00&ndash;1.11 for a 148&ndash;156&nbsp;cm horse and the Guoxia &times;0.42 for an
+        86&nbsp;cm one. All were re-derived from cited heights through
+        <code>BreedStatCurve</code>. Two landed exactly on shipped neighbours as a check: the Florida
+        Cracker on the Mustang's <code>[0.857, 0.984]</code>, and the Gelderlander's
+        <code>1.238</code> on the Irish Draught's 17.0&nbsp;hh.</li>
+    <li><strong>The Guangxi is properly the Baise Horse</strong> and ships under that name (owner's
+        call). Its own draft opened by arguing the point, and it is right: Guangxi is the autonomous
+        region, and the Debao Pony and the Guoxia in this same batch come from the same ground.</li>
+    <li><strong>The Hucul is Romanian here</strong>, on <code>intake/breedbycountry.md</code>, over
+        both drafts leaning toward Poland as holder of the Studbook of Origin. The owner's table wins;
+        the homeland genuinely spans four countries and a breed is pinned to a nation regardless.</li>
+    <li><strong>The Gotland ships single cream and cannot ship double.</strong> Its conservation
+        profile excludes the homozygote, not the allele, so <code>Cr/N</code> is in the pool and
+        <code>Cr/Cr</code> is simply absent from it &mdash; a founder is never cremello, though
+        breeding two carriers still gets there. Grey and tobiano are excluded outright by the same
+        profile. It also has the rare <em>measured</em> negative: a published sample of 28 found
+        <code>DMRT3</code> at zero frequency, so the no-gait call is evidence rather than omission.</li>
+    <li><strong>The Guoxia forces dun wild on purpose</strong>, which is the most interesting
+        restraint in the batch. Its primitive markings are described in every source and tied to the
+        tested <code>D</code> allele in none, so naming a dun pool would assert a molecular result
+        nobody has. Neither it nor the Debao borrows a dwarfism allele for being tiny; the size band
+        carries both, as it does for the Domestic Mountain Pony.</li>
+    <li><strong>Hequ is the first breed to use <a href="breeds.html#strains">strains</a> for a
+        regional colour cline.</strong> Three named plateau varieties &mdash; Jiaode, Suoke, Kesheng
+        &mdash; differing in grey alone, Jiaode much the greyest. They differ in <em>size</em> in life
+        and cannot here, since a strain may override gene pools and nothing else; the file says so.</li>
+    <li><strong>The Finnhorse's interesting half is its minorities.</strong> Chestnut is past 90% by
+        studbook policy rather than ancient type &mdash; the 1907 closure refused grey, palomino,
+        piebald and white as foreign &mdash; so the pool's real content is bay at ~6%, black at ~1.2%
+        and percent-level traces of grey, cream, silver, dun, roan, rabicano and <code>SW1</code>.
+        Sabino is <em>deliberately absent</em> despite the breed having a common sabino-like pattern,
+        because that pattern is documented as non-SB1. Its four official sections are performance
+        categories over one gene pool and are pointedly <strong>not</strong> strains.</li>
+</ul>
+
+<h3>Two disorder genes went to the roadmap, not into a guess</h3>
+
+<p>
+    <strong>FIS</strong> (foal immunodeficiency syndrome) is the sharpest health gap the mod has: a
+    recessive lethal that about <strong>38%</strong> of real Fell Ponies carry &mdash; 82 of 214 in the
+    foundational screen &mdash; shared with the Dales Pony, and tested for by the societies since 2010.
+    A Fell that carries nothing is the one thing the real breed is not, and both breeds ship clear and
+    say so in their files. <strong>WFFS</strong> is the real modern concern across the Dutch warmblood
+    population and the Gelderlander names no rate for it; <code>PLOD1</code> is Friesian dwarfism and is
+    <em>not</em> a substitute, which is the trap worth flagging. Both on
+    <a href="roadmap.html#health-genes">roadmap &sect;12</a>.
+</p>
+
+<h3>One draft was declined</h3>
+
+<p>
+    <strong>The Dutch Warmblood is not in this batch and its file stays in <code>intake/</code>.</strong>
+    The draft is a 28-line stub &mdash; no breed JSON, no loci, no frequencies, no disorders, no
+    population, no size &mdash; and ends by offering to write a real one later. Shipping it would have
+    meant inventing a warmblood off the Hanoverian and calling it a translation. Owner's call was to
+    skip it and ship fourteen rather than backfill, so the batch is 14 and not 15.
+</p>
+
 <h2 id="d2026-09-15f">2026-09-15, later &mdash; five more breeds, the duplicate drafts, and a height bug that shipped</h2>
 
 <p>

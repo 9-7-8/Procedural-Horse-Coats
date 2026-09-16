@@ -78,6 +78,60 @@
     </p>
 </div>
 
+<h2 id="new-breeds-0915d">&sect;0-EH &mdash; Fourteen more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
+
+<p>
+    <strong>Posavac, Debao Pony, D&oslash;lahest, Fell Pony, Finnhorse, Florida Cracker Horse,
+    Gelderlander, Gotland Pony, Baise Horse, Guoxia, Henson Horse, Hequ, Highland Pony, Hucul
+    Pony</strong> &mdash; the batch that took the shipped count to 79. Green on the bench:
+    <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>,
+    <code>BreedSpecParserTest</code>, <code>check-links</code>, <code>build-search-index</code> and
+    the designer boot check. <code>everyShippedFileLoadsWithNoErrorsAndNoWarnings</code> is the one
+    that matters and it passed, so no allele token was <em>warned and dropped</em> &mdash; a breed
+    can otherwise load quietly missing a locus with every test still green.
+    <strong>None of these fourteen has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The three tiny breeds are the first thing to look at, because the size curve is the
+        thing that has shipped wrong before.</strong> The Guoxia (8.2&ndash;9.3&nbsp;hh) and Debao
+        Pony (9.1&ndash;10.1&nbsp;hh) sit between the Falabella and the American Miniature, and the
+        Baise Horse (11.0&ndash;11.2&nbsp;hh) just above. Stand one next to a Shetland and a
+        Falabella and confirm the ordering reads correctly &mdash; and that a horse that small is
+        still <em>rideable and mountable</em>, which nothing in the test suite checks.</li>
+    <li><strong>The Gelderlander is the tall end of the same check</strong>, at
+        15.2&ndash;17.0&nbsp;hh with a top scale of <code>1.238</code>. It should stand exactly as
+        tall as an Irish Draught and no taller; if it towers, the above-1.0 gamma was applied twice
+        somewhere.</li>
+    <li><strong>Hequ is the first breed whose strains are a colour cline, and strains are
+        lightly exercised.</strong> Spawn a good number and confirm you get visibly different grey
+        rates &mdash; Jiaode should grey out far more often than Suoke or Kesheng &mdash; rather than
+        one pooled average. If all three look alike, strain weighting is not reaching the founder.</li>
+    <li><strong>The Gotland's cream is a deliberate near-miss and worth confirming.</strong> No
+        founder should ever be cremello or perlino, because <code>Cr/Cr</code> is absent from the
+        pool while <code>Cr/N</code> is in it. Breeding two cream carriers together <em>should</em>
+        still produce one. Both halves need checking; the first is the unusual one.</li>
+    <li><strong>The Henson should be bay dun every single time</strong>, with a dorsal stripe on
+        every animal &mdash; fixed <code>E</code>, fixed <code>A</code>, and <code>D</code> on every
+        founder. A single red dun or grullo means the fixed pools are not holding. It is also the
+        breed most likely to look <em>wrong</em> rather than broken: pangare was deliberately not
+        named despite its Fjord foundation, so compare one side-by-side with a Fjord and say whether
+        it reads too flat.</li>
+    <li><strong>The Fell should be overwhelmingly black</strong> and the Finnhorse overwhelmingly
+        chestnut-with-flaxen (past 90%). Both are strong phenotype targets, so both fail visibly and
+        cheaply &mdash; but the Finnhorse's <em>minorities</em> are the interesting find: a black
+        Finnhorse is about one in eighty.</li>
+    <li><strong>The Posavac keeps its wild herds where the Croatian Coldblood does not.</strong>
+        Both are Croatian lowland breeds in overlapping biomes, and only one should ever head a wild
+        herd. Finding a loose Coldblood, or never finding a loose Posavac, is the failure.</li>
+    <li><strong>The Hucul's dun is deliberately a minority</strong> (about a quarter), against a
+        reputation that calls it the signature. If it looks too plain in a herd, that is the call to
+        revisit &mdash; it is a recorded decision, not a bug.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> the Highland Pony's dun
+        vocabulary and independent grey stacking, the Florida Cracker's dark skew, and whether the
+        Guoxia's absent dun leaves it looking too plain for a breed whose sources all mention
+        primitive markings.</li>
+</ul>
+
 <h2 id="new-breeds-0915c">&sect;0-EG &mdash; Five more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
 
 <p>
