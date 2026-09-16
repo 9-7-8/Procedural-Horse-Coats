@@ -211,6 +211,47 @@
     block actually entered the structure.
 </p>
 
+<h3>Played, and four things came back from it</h3>
+
+<p>
+    The bench went into a world and the dyeing worked &mdash; zones independent, fittings
+    recolouring, an undyed saddle indistinguishable, inputs returned on Escape. Four notes
+    came back, and the most interesting one was measurable.
+</p>
+
+<p>
+    <strong>&ldquo;Not as brilliantly coloured as vanilla&rsquo;s dyed leather.&rdquo;</strong>
+    That is a headroom problem, not an art problem. Tinting multiplies, so vividness is
+    decided entirely by how bright the base is, and the base was vanilla&rsquo;s saddle
+    divided by vanilla&rsquo;s leather brown. <strong>That constant is free</strong>: base
+    &times; undyed reproduces vanilla whatever it is, so long as no channel clamps. Setting
+    it to the per-channel <em>maximum</em> of the leather pixels lifted mean luminance from
+    151.2 to 180.9 against vanilla leather&rsquo;s 167.5 &mdash; and lifted blue, which the
+    brown&rsquo;s <code>B=0x40</code> had capped at 183, to a full 255. The fittings zone
+    needed nothing because <code>0x717171</code> already was its maximum, which is precisely
+    why the owner reported the metal looking right while the leather did not. The diagnosis
+    was in the report if you read it as a measurement rather than a complaint.
+</p>
+
+<p>
+    <strong>&ldquo;Store the dyed information as NBT on each saddle.&rdquo;</strong> It
+    always was &mdash; a component, which is the modern form of exactly that. But the
+    <em>icon</em> still read vanilla&rsquo;s <code>dyed_color</code>, which our saddles do
+    not carry, so a saddle rendering in three colours on the horse sat in the hotbar looking
+    plain. From the outside that is indistinguishable from not being stored at all, and the
+    report was right even though the stated cause was not. A custom
+    <code>ItemTintSource</code> fixes the icon; a tooltip names all three zones, because an
+    icon can only ever show one.
+</p>
+
+<p>
+    <strong>The zone selector is gone</strong>, replaced by three labelled rows so all three
+    can be dyed in one pass, and the window grew to carry a name field &mdash; a saddle can
+    be &ldquo;Daisy&rsquo;s Saddle&rdquo; now. Naming needed its own payload, because
+    vanilla&rsquo;s rename packet is hard-wired to <code>AnvilMenu</code>; the keyboard guard
+    is the anvil&rsquo;s too, without which typing an <kbd>e</kbd> closes the window.
+</p>
+
 <h2 id="d2026-09-15m">2026-09-15, later &mdash; a cowboy comes from somewhere, and two &ldquo;patches&rdquo; turn out to need no patch</h2>
 
 <p>

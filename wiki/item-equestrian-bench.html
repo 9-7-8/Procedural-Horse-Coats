@@ -41,10 +41,17 @@
 </p>
 
 <p>
-    Right-click it and you get three slots and three buttons. Put a saddle in the top slot,
-    pick which part of it you are colouring, and put a dye or an ingot in the slot below.
-    The recoloured saddle appears on the right; take it, and the saddle and the material are
-    both spent.
+    Right-click it and you get a saddle slot, a name field, and <strong>three labelled
+    rows</strong> &mdash; one per part. Put a saddle in, drop a dye or an ingot into
+    whichever rows you want to change, and the recoloured saddle appears on the right. Take
+    it and the saddle is spent, along with <em>only</em> the materials that actually changed
+    something.
+</p>
+
+<p>
+    <strong>An empty row means &ldquo;leave this one alone&rdquo;</strong>, not &ldquo;no
+    colour&rdquo;. Recolouring just the bridle costs one dye and leaves the seat and the
+    fittings exactly as they were.
 </p>
 
 <ul>
@@ -60,13 +67,32 @@
         <strong>amethyst</strong> (purple).</li>
 </ul>
 
-<h2 id="cost">One part at a time, and that is the price</h2>
+<h2 id="name">Naming a saddle</h2>
 
 <p>
-    <strong>Each use spends one dye or one ingot and colours one part.</strong> A saddle
-    done in three colours therefore costs three materials and three passes, and changing
-    your mind costs another. That is deliberate: the bench is meant to be somewhere you go,
-    not a settings screen you open.
+    The field across the top names the saddle &mdash; <em>Daisy&rsquo;s Saddle</em> &mdash;
+    and the name travels with it, so a tack room full of saddles is a tack room you can read.
+    Naming costs nothing and can be done in the same pass as dyeing, or on its own.
+</p>
+
+<h2 id="cost">What it costs</h2>
+
+<p>
+    <strong>One material per part you actually change.</strong> Dye all three rows at once
+    and it costs three materials and one pass; change one and it costs one. The bench will
+    not charge you for a part that is already the colour you asked for, and a dye will not
+    colour metal nor an ingot leather &mdash; in either case no result appears at all rather
+    than a material quietly vanishing.
+</p>
+
+<h2 id="reading">Reading a saddle you already own</h2>
+
+<p>
+    <strong>Hover it.</strong> The tooltip names all three parts &mdash; &ldquo;Seat: red,
+    Bridle: black, Fittings: gold&rdquo; &mdash; by dye and metal name rather than as hex
+    codes. That matters because <strong>the icon can only show one colour</strong>, and it
+    shows the seat: the largest area, and the one people mean when they say what colour a
+    saddle is.
 </p>
 
 <p>
@@ -154,11 +180,28 @@
 <h2 id="verified">Verified</h2>
 
 <p>
-    Built 2026-09-16 and <strong>not yet played</strong>. The three-layer split is verified
-    numerically &mdash; the shipped textures were read back and recomposed against
-    vanilla&rsquo;s with zero differing pixels &mdash; and the mod builds and boots a
-    dedicated server clean. What no bench test can tell you is whether the window reads
-    well, which is what <a href="verification.html">verification</a> is for.
+    <strong>Played 2026-09-16, and the dyeing works.</strong> Confirmed in a world by the
+    owner: a saddle dyes, the three zones take colours <em>independently</em>, recolouring
+    the fittings works, and an undyed saddle is indistinguishable from before &mdash;
+    &ldquo;if there&rsquo;s a difference, I can&rsquo;t tell&rdquo;, which is the visual
+    confirmation of the zero-pixel measurement. Inputs come back when the screen is closed.
+</p>
+
+<p>
+    <strong>One thing that play caught and measurement had not:</strong> the dyes came out
+    duller than vanilla&rsquo;s dyed leather. Tinting multiplies, so vividness is decided by
+    how bright the base is, and the base was being divided by vanilla&rsquo;s leather brown.
+    That constant is free &mdash; any value reproduces an undyed saddle, provided no channel
+    clamps &mdash; so it is now the per-channel <em>maximum</em> of the leather pixels. Mean
+    luminance went 151.2 to 180.9 on the seat against vanilla leather&rsquo;s 167.5, and blue,
+    which the old brown had capped at 183, reaches a full 255. The fittings needed no such
+    change because their constant already was their maximum, which is exactly why they
+    looked right when the leather did not.
+</p>
+
+<p class="muted">
+    Still unseen: the three-row window, the name field, the tooltip, and the icon tint &mdash;
+    all built after that session. See <a href="verification.html">verification</a>.
 </p>
 
 </section>
