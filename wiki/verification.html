@@ -78,6 +78,51 @@
     </p>
 </div>
 
+<h2 id="herd-shape-0915">&sect;0-ED &mdash; A breed's herd shape, and fertility in the breed designer (2026-09-15, built after the 16:11 run, NOT played)</h2>
+
+<p>
+    A breed may now say how its wild herds are founded &mdash; the share founded as bachelor bands, and how many
+    stallions and mares each kind of band wants (<a href="breed-format.html#herd-shape"><code>herd</code></a>,
+    <code>BreedHerd</code>). <strong>This changes how every wild herd in the world is put together</strong>, so it is
+    first below. Green on the bench: <code>:neoforge-26.1.2:build</code>, creator parity (7169 checks),
+    <code>check-links</code>, the designer boot check, <code>check-ai.mjs</code> (35 checks, including that the breed
+    designer boots with a clean console), and the breed test classes &mdash; <code>BreedHerdTest</code> 12 of 12,
+    <code>BreedSpecParserTest</code>, <code>BreedFilesTest</code>, <code>BreedSpawnSettingsTest</code>. None of that is
+    a game.
+</p>
+<ul>
+    <li><strong>Wild herds still form at all.</strong> The first thing to lose if this is wrong, and it fails
+        invisibly: sex assignment moved from one-horse-at-a-time to an assignment made over the whole clump from the
+        lead's seed, so a disagreement between members would show as <em>two herds where there should be one</em>, or
+        horses with no herd. Ride into plains and read <code>latest.log</code>: every member of a pack should share one
+        <code>[Breeds]</code> founder line's breed, and the inspect panel should show the same herd for all of them.
+        <strong>Pass:</strong> packs of 2&ndash;6, one herd each, one stallion in a family band.</li>
+    <li><strong>A bachelor band is still all male, at any size.</strong> The clamp that guarantees it is unit-tested,
+        but not in a world. <strong>Pass:</strong> no mare ever appears in a band the log founded as
+        <code>BACHELOR</code>.</li>
+    <li><strong>A breed's own composition is honoured.</strong> Nothing shipped sets <code>herd</code> &mdash; all 50
+        files are deliberately unchanged &mdash; so this needs a drop-in. Put a breed in
+        <code>phc/breeds/</code> with <code>"herd": {"bachelor_chance": 1.0}</code> and another with
+        <code>{"traditional": {"stallions": 1, "mares": [3, 4]}}</code>, in a biome you can find.
+        <strong>Pass:</strong> the first is only ever found as stallion bands; the second's family bands run to three or
+        four mares whenever the pack is big enough. Remember the limit: a pack of three cannot hold four mares, because
+        the game spawns the pack before the breed is chosen.</li>
+    <li><strong>The breed designer's additions need none of your time</strong>
+        (<a href="breed-designer/index.html">breed designer</a>) &mdash; recorded here only so it is clear they were
+        not skipped. A <strong>Breeding</strong> step now carries fertility, which was reachable on no step at all
+        before; <strong>Where it lives</strong> has the herd controls; <strong>Price and kind</strong> has a
+        magical-herds checkbox, which is a fixed bug as much as a control (a breed file saying it has no magical herds
+        used to lose that silently on load-and-save). A headless run of the page covered the mechanics &mdash; 17
+        checks: it boots clean, the Breeding step is in the list and offers fertility, all three changed steps render,
+        the <code>herd</code> block it writes is <strong>accepted by the game's own parser compiled to wasm</strong> and
+        survives a round trip exactly, a breed left at its defaults writes no <code>herd</code> or
+        <code>magical_variant</code> key at all, and a share above 1 or a negative count is refused. What is left is
+        whether the boxes <em>read</em> well, which is a look whenever you are next in there.</li>
+    <li><strong>The custom spawn egg's Clear now rerolls the epigenome in the browser too</strong>, which it has always
+        done in game. <strong>Pass:</strong> in the designer, Clear changes the epigenetic fingerprint under the genome
+        line, and the two editors do the same thing on the same button.</li>
+</ul>
+
 <h2 id="after-1057">&sect;0-EC &mdash; Built on 2026-09-15 after the 10:57 launch; in the running build, NOT yet looked at</h2>
 
 <p>
