@@ -1810,53 +1810,15 @@
     Six third-party projects were investigated on 2026-09-15 and written up on
     <a href="compatibility.html">Mod compatibility</a>; this is the work that came out of
     it. <strong>Two of the three requested patches turned out to need no patch at all</strong>
-    &mdash; the detail is on that page and is not repeated here. What is left is one
-    prerequisite defect, one small piece of art, and one large question about scope.
+    &mdash; the detail is on that page and is not repeated here. What is left is one small
+    piece of art and one large question about scope. <strong>The prerequisite defect that
+    used to head this section is gone</strong> &mdash; the saddle did not fit a resized
+    horse, it does now, and it was confirmed in a world on 2026-09-16. The diagnosis
+    recorded here was wrong as well as the code, so both the fix and the wrong turn are
+    written up on <a href="items.html#tack-fit">the item roster</a>.
 </p>
 
-<h3 id="tack-scale">23.1 The saddle does not fit, and that blocks all of it</h3>
-
-<p>
-    <strong>This section had the diagnosis wrong.</strong> It said the equipment layers
-    render at vanilla scale over a resized body and needed to inherit
-    <code>state.scale</code>. <strong>They already inherit it</strong> &mdash;
-    <code>LivingEntityRenderer.submit</code> scales the pose stack and <em>then</em> iterates
-    the layers, inside the same push/pop, so the genetic scale has always reached tack.
-    Rewritten 2026-09-16.
-</p>
-
-<p>
-    <strong>The real defect was a missing mesh transform, and it was never about resizing.</strong>
-    Vanilla builds three horse layers with <code>MeshTransformer.scaling(1.1F)</code> applied
-    &mdash; <code>HORSE</code>, <code>HORSE_ARMOR</code> and <code>HORSE_SADDLE</code> &mdash;
-    and applies it in <code>LayerDefinitions</code>, one level <em>above</em> the mesh
-    function. <code>HdHorseModel</code> is a copy of that mesh function, so the transform was
-    never in the part that was copied, and its absence is invisible on inspection: the class
-    doc discusses the 128&times;128 UV layout at length and scale not at all. The mod drew its
-    body at 1.0 while still baking tack from vanilla's layers at 1.1.
-</p>
-
-<p>
-    And the transform is not only a scale. It is
-    <code>scaled(f).translated(0, 24.016 &times; (1 &minus; f), 0)</code>, so at 1.1 the tack
-    also sat <strong>2.4016 units off vertically</strong>. The bug was therefore present on
-    <em>every</em> horse, including scale 1.0; the size locus multiplied the visible gap
-    rather than causing it, which is exactly why it read as &ldquo;worse on big horses&rdquo;.
-    <strong>Fixed 2026-09-16</strong> by adding
-    <code>.apply(MeshTransformer.scaling(1.1F))</code> in
-    <code>HdHorseModel.createHdLayer()</code> &mdash; one line.
-</p>
-
-<p>
-    <strong>Not yet seen in game, and it changes every horse.</strong> Every horse becomes
-    about 10&nbsp;% larger, because the HD body has been the small one all along; and the
-    cutie-mark and emissive-coat layers anchor off
-    <code>body.translateAndRotate</code>, so their placement moves with it. Coats themselves
-    are safe: UVs are normalised at bake time, so <code>HorseSkinGeometry</code>'s
-    texel-to-body-point projection does not move. One line to revert if it looks wrong.
-</p>
-
-<h3 id="native-tack">23.2 Native tack &mdash; cheap in code, expensive in art</h3>
+<h3 id="native-tack">23.1 Native tack &mdash; cheap in code, expensive in art</h3>
 
 <p>
     Assessed against this codebase rather than in the abstract. Every seam already exists:
@@ -1950,69 +1912,7 @@
         change. Found 2026-09-15.</li>
 </ul>
 
-<h3 id="dyeable-saddle">23.3 A dyeable saddle asset of our own</h3>
-
-<p>
-    <strong>Built 2026-09-16 and moved off this page</strong>, per the rule that shipped work
-    leaves the roadmap rather than being marked done on it. The saddle is dyeable, the
-    textures are derived from vanilla by a script rather than drawn, and an undyed saddle is
-    pixel-identical to the one players already know &mdash; which is what keeps donkeys,
-    mules, skeleton and zombie horses looking untouched. Written up at
-    <a href="items.html#tack">the item roster</a>.
-</p>
-
-<p>
-    What is <em>not</em> done and stays here: <strong>nothing in the game dyes a
-    saddle</strong>. There is no recipe and no trade, so a colour can only be set with
-    <code>/give</code> today. The withdrawn horseman trade stays withdrawn until the render
-    is confirmed in game. A crafting route is the obvious next step and belongs with
-    &sect;<a href="#native-tack">23.2</a>'s dye story rather than on its own.
-</p>
-
-<p>
-    <strong>Their pack was downloaded and measured, so the shape of the work is known.</strong>
-    The asset half is trivial &mdash; the vanilla leather pattern, a
-    <code>dyeable</code> base layer plus an untinted overlay, with
-    <code>color_when_undyed</code> set to the vanilla leather brown. The real content is a
-    <em>texture split</em>: vanilla's saddle partitioned into a greyscale base that takes the
-    tint (208 opaque pixels over six grey tones) and an overlay carrying the buckles (36
-    pixels, byte-identical to vanilla). The two add up to vanilla's opaque count exactly,
-    with no overlap.
-</p>
-
-<p>
-    <strong>The split is not optional, because tinting multiplies.</strong> Applied to
-    vanilla's brown saddle, red dye lands on <code>#360803</code> and blue on
-    <code>#20161E</code> &mdash; multiply can only darken, so a brown base has no headroom
-    and most of the sixteen dyes become indistinguishable mud. That is the whole reason
-    vanilla's own leather armour ships a desaturated base beside a coloured overlay.
-</p>
-
-<p>
-    <strong>Write our own rather than bundle theirs</strong>, on three grounds and not on
-    licence &mdash; CC-BY-4.0 permits the bundle. First, the artwork is a couple of hundred
-    grey pixels and can be <em>generated from vanilla at bake time</em> by dividing out the
-    leather brown, which reproduces vanilla's undyed look more faithfully than their
-    hand-picked greys do. Second, CC-BY cannot sit under this project's
-    CC BY-NC terms: its no-downstream-restrictions clause means
-    their files stay CC-BY inside the repo and need marking as separately licensed, the way
-    <a href="stables.html">third-party schematics</a> already are &mdash; and anyone could
-    then lawfully lift them back out for commercial use. Third, their pack overrides the
-    <code>minecraft:</code> namespace, so shipping it changes every saddle in the game for
-    every user and collides with any other pack touching saddles.
-</p>
-
-<p>
-    <strong>The open design question is which item gets dyed.</strong> Making the
-    <em>vanilla</em> saddle dyeable unavoidably means overriding
-    <code>assets/minecraft/equipment/saddle.json</code> &mdash; it is the asset the vanilla
-    item points at, and that override is global and hits camels, pigs, striders and donkeys
-    too. The alternative is a saddle of our own with its own namespaced asset, which is
-    clean and conflicts with nothing, at the cost of being a new item rather than an
-    improvement to the one players already have. Decide that before writing any pixels.
-</p>
-
-<h3 id="rhg-detection">23.4 Detect Realistic Horse Genetics and say so</h3>
+<h3 id="rhg-detection">23.2 Detect Realistic Horse Genetics and say so</h3>
 
 <p>
     Not a patch &mdash; the two mods both replace the horse and both own coat generation, so
@@ -2025,7 +1925,7 @@
     establishes the seam for any later soft dependency. Found 2026-09-15.
 </p>
 
-<h3 id="bhar-recipes">23.5 A recipe-collision check against BHAR</h3>
+<h3 id="bhar-recipes">23.3 A recipe-collision check against BHAR</h3>
 
 <p>
     <a href="compatibility.html#bhar">BHAR</a> adds crafting recipes for the vanilla saddle
@@ -2223,8 +2123,8 @@
         <code>tack_tint</code> component carries seat, bridle and metal. The item stays
         <code>minecraft:saddle</code>, so a saddle a player already owns can be taken to the
         bench and upgraded, and nothing that expects a vanilla saddle stops working. We
-        already own how the saddle <em>looks</em> (&sect;<a href="#dyeable-saddle">23.3</a>),
-        so this adds no new imposition.</li>
+        already own how the saddle <em>looks</em>
+        (<a href="items.html#tack">the item roster</a>), so this adds no new imposition.</li>
     <li><strong>The pad is authored at maximum coverage and cut down by the player.</strong>
         The texture is drawn as the largest sheet the body can carry, and the bench lets the
         player scale it freely in every direction &mdash; so &ldquo;saddle pad&rdquo; and

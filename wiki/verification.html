@@ -78,22 +78,7 @@
     </p>
 </div>
 
-<h2 id="dyeable-saddle-0916">&sect;0-EM &mdash; A dyeable saddle, and the tack-fit bug (2026-09-16, NOT played)</h2>
-
-<div class="note warn">
-    <span class="label">This one changes every horse in the world &mdash; look at it first</span>
-    <p>
-        <code>HdHorseModel</code> was missing vanilla's <code>scaling(1.1F)</code> mesh
-        transform, so the body rendered 10&nbsp;% small and 2.4 units offset against tack
-        that carried it. Fixed, which means <strong>every horse is now about 10&nbsp;%
-        larger than you have ever seen it</strong> &mdash; the HD body was the small one all
-        along. Check that a saddle and horse armour now sit <em>on</em> the horse rather than
-        floating or sinking, on a normal horse and on a deliberately large and small one.
-        Then check the <a href="gene-cutie-mark.html">cutie mark</a> and any glowing coat:
-        both anchor off the body part, so their placement moves with this. If it looks wrong
-        it is one line in <code>createHdLayer()</code> to revert.
-    </p>
-</div>
+<h2 id="dyeable-saddle-0916">&sect;0-EM &mdash; A dyeable saddle: what is still unseen (2026-09-16)</h2>
 
 <p>
     <strong>What has been checked already:</strong> a dedicated server boots clean on this
@@ -132,39 +117,31 @@
 </p>
 
 <p>
-    <strong>The dyeing itself is confirmed</strong> and has moved to
-    <a href="item-equestrian-bench.html#verified">the bench&rsquo;s own page</a>: colours
-    apply, the zones are independent, the fittings recolour, an undyed saddle is
-    indistinguishable, and inputs come back on Escape. What follows is only what has changed
-    or been added <em>since</em> that session.
+    <strong>The bench itself is confirmed and has moved to
+    <a href="item-equestrian-bench.html#verified">its own page</a></strong> &mdash; colours
+    apply, the three zones are independent, the window, the name field, the tooltip and the
+    icon tint all work, and the brightened dyes were checked against vanilla&rsquo;s dyed
+    leather. What is left here is only what has never been looked at.
 </p>
 
 <p>
-    <strong>The window was rebuilt and has never been opened.</strong> It is three labelled
-    rows now rather than a zone selector, so: fill all three at once and confirm one pass
-    dyes all three; fill one and confirm the other two keep their colours rather than
-    resetting; and confirm only the materials that actually changed something are spent. A
-    part already wearing the colour you ask for, a dye in the fittings row, or an ingot in a
-    leather row should each produce <em>no result at all</em> rather than eating the
-    material.
+    <strong>Five fittings have never been rendered:</strong> redstone, ender pearl, basalt,
+    bone and prismarine. The three worth actually comparing side by side are the pairs that
+    were deliberately pulled apart rather than set to their material&rsquo;s own colour
+    &mdash; <strong>basalt against netherite</strong>, <strong>bone against quartz</strong>,
+    and <strong>prismarine against ender pearl</strong>. If either half of a pair is not
+    obviously its own colour on the horse, the separation was not enough and the constant
+    should move further, not the material be dropped. Note also that the fittings tooltip
+    now consults the materials before the dyes, so redstone must read
+    &ldquo;Fittings: redstone&rdquo; and never &ldquo;Fittings: red&rdquo;.
 </p>
 
 <p>
-    <strong>Three things are entirely new.</strong> The name field &mdash; type
-    &ldquo;Daisy&rsquo;s Saddle&rdquo; and check the name sticks to the item, and that
-    typing an <kbd>e</kbd> does not close the window. The hover tooltip, which should name
-    all three parts by dye and metal name rather than hex. And the icon, which should now
-    take the seat&rsquo;s colour in your hand &mdash; that one is the fix for
-    &ldquo;it isn&rsquo;t storing the dye&rdquo;, which it always was; only the icon never
-    showed it.
-</p>
-
-<p>
-    <strong>And the dyes should now be brighter than vanilla&rsquo;s dyed leather</strong>,
-    where before they were duller &mdash; blues and purples most of all, since those had the
-    least headroom. An undyed saddle must still be unchanged; if it has gone pale, the
-    brightening overshot and the constant needs lowering. The horseman&rsquo;s withdrawn
-    dyed-saddle trade stays withdrawn until the render is confirmed.
+    <strong>And the horseman&rsquo;s withdrawn dyed-saddle trade is now unblocked.</strong>
+    It was pulled because vanilla did not tint saddles, so it sold a fourteen-emerald item
+    identical to the eight-emerald one. That is no longer true. Reinstating it is a decision
+    rather than a check, so it is not listed as something to look at &mdash; but the reason
+    it was withdrawn has expired.
 </p>
 
 <h2 id="regional-cowboys-0915">&sect;0-EL &mdash; Cowboys with a country, and four tack trades (2026-09-15, NOT played)</h2>

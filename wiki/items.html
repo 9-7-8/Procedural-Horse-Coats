@@ -147,14 +147,48 @@
         saddle layer types because it replaces vanilla&rsquo;s whole file, but those five
         carry vanilla&rsquo;s entry verbatim. A horse mod has no business repainting
         camels.</li>
-    <li><strong>Nothing dyes a saddle yet.</strong> There is no recipe and no trade, so a
-        colour has to be set by hand with <code>/give</code> for now. A crafting route is on
-        <a href="roadmap.html#dyeable-saddle">the roadmap</a>.</li>
+    <li><strong>The <a href="item-equestrian-bench.html">Equestrian Bench</a> is what dyes
+        one.</strong> Craft it, or use the one standing at a cowboy&rsquo;s homestead. It
+        colours the seat, the bridle and the fittings independently, and a saddle you
+        already own can be brought to it &mdash; this rides on <code>minecraft:saddle</code>
+        rather than on an item of our own.</li>
     <li><strong>It conflicts with <a href="compatibility.html#saturated-saddles">Saturated
         Saddles</a>.</strong> Both replace the same vanilla file, so whichever loads later
         wins. They do the same job, so the result is not broken either way &mdash; but
         running both is pointless, and ours needs no resource pack.</li>
 </ul>
+
+<h3 id="tack-fit">Tack fits a resized horse now &mdash; verified</h3>
+
+<p>
+    <strong>Confirmed in a world on 2026-09-16:</strong> &ldquo;the saddle now fits resized
+    breeds correctly&rdquo;. This had been open long enough to be written up as a
+    prerequisite for any further tack work, and the recorded diagnosis was
+    <em>wrong</em>: it said the equipment layers did not inherit the horse&rsquo;s genetic
+    scale. They always did &mdash; <code>LivingEntityRenderer</code> scales the pose stack
+    and <em>then</em> iterates the layers, inside the same push and pop.
+</p>
+
+<p>
+    The real cause was a missing mesh transform. Vanilla builds three horse layers with
+    <code>MeshTransformer.scaling(1.1F)</code> applied &mdash; the body, the armour and the
+    saddle &mdash; and applies it in <code>LayerDefinitions</code>, one level <em>above</em>
+    the mesh function. <code>HdHorseModel</code> is a copy of that mesh function, so the
+    transform was never in the part that was copied and its absence is invisible on
+    inspection. The body therefore drew at 1.0 while tack baked from vanilla&rsquo;s layers
+    drew at 1.1 &mdash; and since the transform is
+    <code>scaled(f).translated(0, 24.016 &times; (1 &minus; f), 0)</code>, the tack sat
+    2.4&nbsp;units high as well as 10&nbsp;% large.
+</p>
+
+<p>
+    <strong>So it was never really about resizing.</strong> The bug was on every horse
+    including scale 1.0; the size locus multiplied the visible gap rather than causing it,
+    which is exactly why it read as &ldquo;worse on big horses&rdquo; and sent the original
+    diagnosis looking in the renderer. One line in <code>createHdLayer()</code> fixed it, and
+    the side effect is that every horse is now about 10&nbsp;% larger than it used to
+    render, because the HD body had been the small one all along.
+</p>
 
 </section>
 

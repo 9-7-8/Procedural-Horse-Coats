@@ -60,12 +60,66 @@
     <li><strong>Bridle</strong> &mdash; the headstall, noseband, bit and reins. Also a
         dye, and <strong>independent of the seat</strong>: a black saddle with a red bridle
         is two visits, not a compromise.</li>
-    <li><strong>Metal</strong> &mdash; the buckles and rings. Takes a metal or a gem rather
-        than a dye: <strong>iron</strong> (plain steel), <strong>gold</strong> (brass),
-        <strong>copper</strong>, <strong>netherite</strong> (dark gunmetal),
-        <strong>diamond</strong> (pale blue-white), <strong>emerald</strong> (green) or
-        <strong>amethyst</strong> (purple).</li>
+    <li><strong>Fittings</strong> &mdash; the buckles and rings. Takes a <em>material</em>
+        rather than a dye, which is the whole character of the row: you are not painting the
+        hardware, you are saying what it is made of. Thirteen of them.</li>
 </ul>
+
+<h3 id="fittings">The thirteen fittings</h3>
+
+<table>
+    <thead>
+        <tr><th>Material</th><th>Reads as</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Iron ingot</td><td>Plain steel &mdash; and the way back to undyed</td></tr>
+        <tr><td>Gold ingot</td><td>Brass</td></tr>
+        <tr><td>Copper ingot</td><td>Warm orange</td></tr>
+        <tr><td>Redstone</td><td>Red</td></tr>
+        <tr><td>Emerald</td><td>Green</td></tr>
+        <tr><td>Prismarine shard</td><td>Pale sea-green</td></tr>
+        <tr><td>Ender pearl</td><td>Deep teal</td></tr>
+        <tr><td>Diamond</td><td>A deliberately loud cyan</td></tr>
+        <tr><td>Amethyst shard</td><td>Purple</td></tr>
+        <tr><td>Nether quartz</td><td>Clean white</td></tr>
+        <tr><td>Bone</td><td>Aged cream</td></tr>
+        <tr><td>Basalt</td><td>Cool blue-grey stone</td></tr>
+        <tr><td>Netherite ingot</td><td>Dark warm gunmetal</td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>Three of those pairs sit close together, and were pulled apart on purpose.</strong>
+    Basalt and netherite are both near-black, bone and quartz are both near-white, and
+    prismarine and ender pearl are both blue-greens. Each was moved <em>away</em> from its
+    material&rsquo;s own average colour rather than set to it &mdash; basalt cooler and
+    lighter, bone creamier and darker, ender pearl deeper than prismarine. Two fittings a
+    player cannot tell apart on a horse are worth one option, not two.
+</p>
+
+<p>
+    <strong>Diamond is the loud one deliberately.</strong> It was a pale blue-white at first
+    and read as washed-out pewter; spending diamonds on tack that does nothing whatever
+    except look expensive ought to <em>look</em> expensive.
+</p>
+
+<div class="note">
+    <span class="label">Bone, not bone meal</span>
+    <p>
+        Bone meal carries a <code>dye</code> component, so it would satisfy the seat and
+        bridle rows as well &mdash; a single item meaning two different things in a bench
+        whose entire premise is leather-or-material. The bone itself has no such ambiguity.
+    </p>
+</div>
+
+<p class="muted">
+    <strong>What the wheel still lacks:</strong> a true blue, a true black, and pink or
+    magenta. Blue is the glaring one &mdash; the run goes straight from cyan to purple with
+    nothing between, and <em>lapis lazuli</em> is sitting right there. Netherite is the
+    closest thing to black but is really a warm plum; coal or obsidian would be an actual
+    one. Pink and magenta have no vanilla material at all, and reaching them would mean
+    letting dyes into the fittings row, which would cost the row its character.
+</p>
 
 <h2 id="name">Naming a saddle</h2>
 
@@ -199,9 +253,35 @@
     looked right when the leather did not.
 </p>
 
+<p>
+    <strong>The window, the name field, the tooltip and the icon all confirmed the same
+    day</strong>, after the brightening: &ldquo;the dye is now very bright and looks great
+    &hellip; the item caption works perfectly, the item icon recolors, the name box looks
+    great, you can fill all three rows at once&rdquo;. Shift-clicking routes a saddle, a dye
+    and an ingot each to their own slot. Two defects were found by playing and fixed in the
+    same session &mdash; both worth keeping, because neither was visible from the code:
+</p>
+
+<ul>
+    <li><strong>The name box trapped Escape.</strong> The guard was copied from the anvil
+        without understanding what it tested: <code>EditBox.canConsumeInput()</code> is
+        <code>isActive() &amp;&amp; isFocused() &amp;&amp; isEditable()</code> &mdash; it
+        says nothing about <em>which</em> key, so once focused it swallowed every key
+        including Escape and the window could not be closed. Escape is now handled before
+        the box sees it, and unfocuses the box if it is focused rather than closing
+        straight away.</li>
+    <li><strong>The tooltip never appeared,</strong> despite the component implementing
+        <code>TooltipProvider</code> correctly. Implementing it is necessary and not
+        sufficient: <code>ItemStack.addDetailsToTooltipComponents</code> walks a
+        <strong>hardcoded list of vanilla components</strong>, so a modded one is never
+        asked. It goes through NeoForge&rsquo;s <code>ItemTooltipEvent</code> instead.</li>
+</ul>
+
 <p class="muted">
-    Still unseen: the three-row window, the name field, the tooltip, and the icon tint &mdash;
-    all built after that session. See <a href="verification.html">verification</a>.
+    Still unseen: the bench that <a href="stables.html">generates at a cowboy&rsquo;s
+    homestead</a> &mdash; the crafted one is confirmed, the placed one has never been
+    laid eyes on &mdash; plus the brighter diamond and the quartz fittings, built after
+    that session. See <a href="verification.html">verification</a>.
 </p>
 
 </section>
