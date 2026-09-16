@@ -254,9 +254,39 @@
         under-reports, so read growth off the census's log counts. DRYAD SPRUCE, JUNGLE, ACACIA and OAK were
         deleted from the yard on 2026-09-15.</li>
 </ul>
-<p>
-    <em>Not verified:</em> that no tree grows through a horse. A dark oak branch killed a horse at 04:01 on
-    2026-09-15 (<a href="known-gaps.html#gap-244">gap 244</a>).
+<p id="verified-no-tree-through-horse">
+    <strong>No tree grows through a horse, and the pens still grow trees</strong> (2026-09-15, the 16:11 run,
+    six hours unattended, formerly gaps 237 and 244). The two halves of this pull against each other &mdash; a reach
+    box big enough to protect a horse stops every tree &mdash; so both were read off one run. <em>Nothing
+    suffocated:</em> not one <code>inWall</code> damage line in six hours and 181 censuses. (The single
+    <code>inWall</code> the log does contain is the BONE MEAL pen's own sign, quoting the line it is waiting for
+    &mdash; the grep trap this page's neighbours keep rediscovering.) <em>And the trees grew anyway:</em> at
+    census 1 every dryad pen read <code>none of its watched blocks are present</code>, so all of the following
+    grew from bare ground during the run &mdash; DRYAD DARK 26 <code>dark_oak_log</code>, DRYAD DARK SMALL 99
+    <code>dark_oak_log</code> and 159 leaves, DRYAD OAK+BIRCH 30 <code>birch_log</code>, DRYAD FLOWER 2 poppies.
+    DRYAD DARK SMALL is the case that matters: one horse in a small pen, the pen the two-block dark-oak hold-back
+    was expected to strangle, and it still closed a square and grew a full tree with its horse standing in it.
+    DRYAD CARRIER planted nothing, as it should. <em>Read growth off the census's log counts, not
+    <code>tree grew</code></em>, which fired zero times across the whole run and still under-reports.
+</p>
+
+<p id="verified-bonemeal-never-crops">
+    <strong>The bone meal allele never touches a crop</strong> (2026-09-15, the 16:11 run, row X). Three
+    <code>[watch] gene fertilised</code> lines in six hours: <code>minecraft:grass_block</code> twice and
+    <code>minecraft:short_grass</code> once. Never <code>minecraft:wheat</code>, and the pen's fenced wheat patch
+    was still standing at the last census. It did drop from 8 plants to 6 &mdash; because the pen's own horse
+    <em>ate</em> two of them, logged as <code>[trace] hunger | ... ate minecraft:wheat (crop)</code>, which is the
+    hunger goal and not this gene. The refusal in <code>SpreadCover.bonemeal</code> holds, so the objection the old
+    javadoc raised (a horse that auto-farms every crop you own) is answered in play as well as in code. The rate
+    stays as low as <a href="known-gaps.html#gap-208">gap 208</a> predicts: three landings in six hours.
+</p>
+
+<p id="verified-mushroom-ground">
+    <strong>Mushrooms fill podzol and never touch the grass beside it</strong> (2026-09-15, the 16:11 run,
+    a second and much longer confirmation). The split pen ended the run with 7 brown and 5 red mushrooms over its
+    50 podzol, and its grass half &mdash; signed <em>must stay empty</em> &mdash; held 49 grass blocks and not one
+    mushroom, over 583 watch readings. That is <code>BlockState.canSurvive</code> doing the whole job for the
+    species, with no light table of this gene's own.
 </p>
 
 <p id="verified-first-tree">

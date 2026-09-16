@@ -522,8 +522,12 @@
         <code>kit=W22/N</code>, <code>kit=W22/W20</code>, <code>kit=W26/N</code> and <code>kit=W21/N</code>. <strong>Pass:</strong> a broad
         sabino, a pure white, an extensive white, and a horse flecked white through the coat with a white face and a coloured
         mane. Whether the speckle reads as <em>&yacute;rusk&jacute;&oacute;ttur</em> rather than roan is a look for you.</li>
-    <li><strong>A filly is not recruited by her brother</strong> (<a href="known-gaps.html#gap-234">gap 234</a>): in the LEAVING HOME
-        pen, no <code>left the band it was born into</code> line pairs a filly with a colt from the same dam or sire.</li>
+    <li><strong>A filly is not recruited by her brother</strong> (<a href="known-gaps.html#gap-234">gap 234</a>).
+        <strong>The 16:11 run did not test this</strong>, and the pen is why: LEAVING HOME staggers its colt three
+        minutes behind its filly, so he had not left when she chose and was never the nearest bachelor. Both
+        dispersed cleanly and no kin pair formed, but <code>closeKin</code> was never asked the question.
+        <strong>Drop the stagger</strong> so the two disperse together, then check that no
+        <code>left the band it was born into</code> line pairs a filly with a colt from the same dam or sire.</li>
     <li><strong>The rest of the natural genes</strong>: every published <code>KIT</code> <code>W</code> allele
         (<a href="gene-kit.html">KIT</a>), <code>SW9</code> and <code>SW10</code> (<a href="gene-mitf.html">MITF</a>,
         <a href="gene-pax3.html">PAX3</a>) and <a href="gene-dmrt3.html">DMRT3</a>. Spawn <code>kit=W2/N</code>,
@@ -545,13 +549,11 @@
     <li><strong>The BONE MEAL pen's sign</strong> now names <code>[watch] gene fertilised</code>.</li>
 </ul>
 
-<h2 id="hunger-0914">&sect;0-EA &mdash; Hunger, and gap 245's conception log (2026-09-14, built 22:12, NOT played)</h2>
+<h2 id="hunger-0914">&sect;0-EA &mdash; What the ratio and lycan logging still owes (2026-09-14, built 22:12)</h2>
 <p>
-    Every horse now has an invisible hunger level that drains, pays for healing, and sends a
-    hungry horse off to eat (<a href="horse-care.html#hunger">horse-care</a>). <code>HungerTest</code>
-    passes 9 of 9. It went in with the 22:12 build, beside a log line for every ratio-pen conception
-    (<a href="known-gaps.html#gap-245">gap 245</a>). Everything below reads off <code>latest.log</code>;
-    the hunger tests are the yard's <strong>row V</strong>.
+    Hunger itself is <a href="horse-care.html#verified-hunger">verified</a> &mdash; row V's four pens
+    came out right twice, most recently over the six hours of the 16:11 run. What is left here reads off
+    <code>latest.log</code> and is not settled yet.
 </p>
 <div class="note warn">
     <span class="label">It changes the pens around it</span>
@@ -564,62 +566,24 @@
     </p>
 </div>
 <ul>
-    <li><strong>Gap 245, the lethal pens.</strong> Each ratio-pen conception now logs
-        <code>RATIO … conception at tick T: chance C | dam …, sire … as drawn | embryo … | shadow … |
-        mare random #…, sire random #… (separate or SHARED) | shadow tally …</code>. The shadow is the
-        same two genomes through the same draw from a separate generator, and it changes nothing in the game.
-        <strong>Read:</strong> if the shadow tally sits near 1 : 2 : 1 while the real tally does not, the
-        mare's random stream is the cause. If both skew, the genomes are. A <code>SHARED</code> random is a
-        finding on its own. Brindle and size log too, as controls.
-        <strong>First night, 22:45 to 01:14:</strong> real and shadow both 1&nbsp;:&nbsp;2&nbsp;:&nbsp;1 in every pen
-        (largest chi-square 1.9 at 43 to 56 conceptions), with no shared random. The skew has not recurred with the
-        instrument running. <strong>Read across midnight:</strong> <code>latest.log</code> restarts at 00:00, and the
-        earlier part of the run is in <code>run/logs/&lt;date&gt;-1.log.gz</code>.</li>
+    <li><strong>Gap 245's shadow logging stays on, and only the old anomaly is left.</strong> The ratios
+        themselves are <a href="breeding.html#verified-ratio-1-2-1">verified</a> over two long instrumented
+        runs, most recently 95 to 102 foals a pen across six hours. What the logging is still there for is the
+        19:08 run's 0 <code>H/H</code> in 35, which has never come back
+        (<a href="known-gaps.html#gap-245">gap 245</a>). <strong>Read:</strong> if a pen's real tally leaves
+        1&nbsp;:&nbsp;2&nbsp;:&nbsp;1 while its shadow does not, the mare's random stream is the cause; if both
+        skew, the genomes are; a <code>SHARED</code> random is a finding on its own. One more clean all-day run
+        and the entry can close. <strong>Read across midnight:</strong> <code>latest.log</code> restarts at
+        00:00, and the earlier part of a run is in <code>run/logs/&lt;date&gt;-1.log.gz</code>.</li>
     <li><strong>Flying lycans land at dawn</strong> (<a href="known-gaps.html#gap-243">gap 243</a>, fixed
         2026-09-15). Wild bat and parrot shifters live in the corridor pens and fly off at dusk.
         <strong>Pass:</strong> no <code>horse died ... from outOfWorld</code> all run, and a
-        <code>[trace] lycan | ... set down at</code> line for any that come back over nothing.</li>
-</ul>
-
-<h2 id="fixes-0914">&sect;0-DZ &mdash; Fixes from the all-day run (2026-09-14, built at 17:15, NOT played)</h2>
-<p>
-    <strong>Start the next run with</strong> <code>gradlew :neoforge-26.1.2:runClientTestWorld</code>,
-    leave it for a few
-    hours, and read these off the log.
-</p>
-
-<p>
-    Found in the first 72 minutes of the all-day pens and fixed without restarting the game, so
-    they arrive with the next launch. Everything here is read from <code>latest.log</code>; none of
-    it needs your hands.
-</p>
-<ul>
-    <li><strong>No tree grows through a horse</strong> (<a href="known-gaps.html#gap-237">gap 237</a>).
-        <strong>Pass:</strong> the dryad pens still log <code>[watch] tree grew</code>, some
-        <code>[trace] dryad | tree held back at</code> lines appear, and no horse takes
-        <code>inWall</code> damage. The trees still have to grow; if <code>tree grew</code> stops
-        entirely, the reach box is too big. <strong>Failed on the 17:36 run:</strong> no tree grew in 43
-        minutes, and 13 grows were held back, because the box covered whole pens
-        (<a href="known-gaps.html#gap-244">gap 244</a>). <strong>Fixed in the 19:06 build:</strong> a
-        sapling now checks only its own column and the ring round it, up to a horse's height.
-        <strong>Pass:</strong> <code>tree grew</code> lines come back in every dryad pen, DRYAD DARK SMALL
-        grows a tree despite its horse, and still no horse takes <code>inWall</code> damage.
-        <strong>So far, passing:</strong> by 19:59 DRYAD OAK had grown its first tree (4 logs, sapling gone),
-        grows held back fell from 84 in ninety minutes to 8 in an hour, and nothing took <code>inWall</code>.
-        No <code>tree grew</code> line fired for that tree, though, so read growth off the census's log counts,
-        not that line. <strong>Overnight (22:45 to 04:01):</strong> every dryad pen grew trees with its horses in
-        it (spruce 18 logs, acacia 19, oak 12, jungle 4, DRYAD DARK SMALL a 70-log dark oak), and then at 04:01
-        DRYAD DARK's dark oak grew a branch through Nimble Glow, who died of <code>inWall</code>. <strong>So this is
-        failing again</strong> (<a href="known-gaps.html#gap-244">gap 244</a>, reopened). A fix for dark and pale
-        oak went in overnight. <strong>Pass:</strong> no <code>inWall</code> in any dryad pen all run, and the other
-        pens keep growing trees.</li>
-    <li><strong>The lethal ratio pens throw about one foal in four</strong>
-        (<a href="known-gaps.html#gap-245">gap 245</a>). <strong>Pass:</strong> RATIO HYPP and RATIO LETHAL
-        WHITE come out near 1 : 2 : 1 within a couple of hundred foals. <strong>Failing, not yet
-        explained:</strong> the 17:36 run's HYPP pen threw too many lethal foals (10 <code>H/H</code> in 20),
-        and by 20:08 the 19:08 run had thrown none in 35 across both pens, which chance gives about 4 times in
-        100&nbsp;000. What has been ruled out, and the next check, are on the gap. Until it is fixed, read
-        neither pen's shares as a result.</li>
+        <code>[trace] lycan | ... set down at</code> line for any that come back over nothing.
+        <strong>The 16:11 run of 2026-09-15 half-answers this and no more.</strong> Nothing died of
+        <code>outOfWorld</code> in six hours, which is the first half. But every shifter in the yard that run
+        was a wolf or a cow &mdash; 19 round trips each, all reading <code>round trip SAME</code> &mdash; so
+        nothing reverted over open air and <em>not one</em> <code>set down at</code> line was logged. The
+        set-down path itself is still unexercised; it needs a bat or parrot shifter over the corridor.</li>
 </ul>
 
 <h2 id="tutorial-0914">&sect;0-DY &mdash; Getting started, brought up to date (2026-09-14, NOT looked at)</h2>
@@ -632,53 +596,6 @@
     says shears are worth two, and that <em>Put a gene into a foal</em> says a carrot waits on
     the horse and makes a pregnancy. <strong>Pass:</strong> both new steps are in the contents
     list, and nothing runs off the panel at GUI scale 4.
-</p>
-
-<h2 id="all-day">&sect;0-DX &mdash; The all-day pens: dryads and inheritance ratios, rows S to U (built 2026-09-14, first run read 09:07&ndash;12:15)</h2>
-
-<p>
-    Built to be left running for a whole day. Nothing here needs your hands, and nothing here
-    means much in the first hour. Read it in the evening with <code>grep</code>.
-</p>
-
-<h3 id="all-day-dryad">Rows S and T: dryads, on a stone floor</h3>
-<p>
-    A dryad plants within four blocks of itself, fence or not, so these two rows are floored
-    with stone and only the inside of each pen is grass. A sapling that lands outside a pen
-    cannot survive there, which means every sapling a pen counts is its own. Every planting is a
-    <code>[watch] dryad planted | sapling_… by DRYAD …</code> line naming the pen, so a pen's rate is
-    how many of those lines it has.
-</p>
-<ul>
-    <li><strong>No dryad horse dies in its own pen</strong>: no <code>inWall</code> damage in any dryad
-        pen. <strong>Failed once overnight</strong>, when DRYAD DARK's dark oak grew a branch through a horse
-        at 04:01 (<a href="known-gaps.html#gap-244">gap 244</a>). Dark and pale oak now hold back two blocks
-        out, and DRYAD DARK SMALL is widened to ten by nine. <strong>Pass:</strong> a whole run with no
-        <code>inWall</code> in DRYAD DARK, DRYAD DARK SMALL, DRYAD OAK+BIRCH, DRYAD FLOWER or DRYAD CARRIER,
-        and DRYAD DARK SMALL still grows a tree.</li>
-</ul>
-
-<h3 id="all-day-ratio">Row U: inheritance ratios</h3>
-<p>
-    Each pen is one pair, breeding on its own all day. A clock counts each foal's pair for the
-    locus, notes whether it dies, and removes it two minutes after birth, so the pen never
-    reaches the cap and never stops. Each foal logs <code>[trace] test yard | RATIO …: foal N is
-    … | N foals: …</code> with the running tally and the expected answer, and there is a summary
-    every ten minutes. By evening each pen should have a few hundred foals.
-</p>
-<ul>
-    <li><strong>RATIO HYPP</strong> (<code>H/N</code> &times; <code>H/N</code>): about 25%
-        <code>H/H</code>, and <strong>every</strong> <code>H/H</code> foal dies. Any other class
-        dying is a failure.</li>
-    <li><strong>RATIO LETHAL WHITE</strong> (<code>O/N</code> &times; <code>O/N</code>): about 25%
-        <code>O/O</code>, every one of them dead.</li>
-    <li><strong>RATIO SIZE</strong> (<code>Big/n</code> &times; <code>Big/n</code>): roughly 1 : 2
-        : 1 across <code>Big/Big</code>, <code>Big/n</code> and <code>n/n</code>.</li>
-</ul>
-<p>
-    Grep <code>RATIO</code> and <code>dryad planted</code>. With a few hundred foals, a share
-    within a few points of the expected number is a pass, and a class that never appears is a
-    failure.
 </p>
 
 <h2 id="herd-yard">&sect;0-DW &mdash; Band life in the yard: rows Q and R (built 2026-09-14, NOT played)</h2>
@@ -696,9 +613,14 @@
         golden-carrot breeding ignores walls. The jar stud now has his own pen, two blocks from the
         mares. Pass for the packing itself: no pen's <code>[watch]</code> line ever lists a horse
         from the pen next door, and no <code>not covered: … other horses</code> line counts more
-        horses than its pen holds. <strong>Known to fail in row U:</strong> a ratio stud still wanders
-        into the pen next door. Rows Q and R showed no stray; HOST BAND listing LEAVING HOME's horses
-        is by design, since those pens share a group.
+        horses than its pen holds. <strong>Known to fail, and wider than row U</strong>
+        (<a href="known-gaps.html#gap-259">gap 259</a>): a ratio stud wanders into the pen next door, and in
+        the birth and splice rows a pen's watch line carries its neighbour's mare for a whole run &mdash;
+        SPLICE WHITE listed SPLICE DILUTION's mare in 278 censuses and CROSS SAME listed BOND's in 643, each
+        counted in both pens at once, which is the watch box overlapping rather than a horse straying. The
+        <code>not covered: … other horses</code> half held: no line counted more horses than its pen holds.
+        Rows Q and R showed no stray; HOST BAND listing LEAVING HOME's horses is by design, since those pens
+        share a group.
     </p>
 </div>
 
@@ -961,13 +883,15 @@
         one already milked each refuse.</li>
     <li><strong>Ender echo's ridden half</strong> (row K east): it blinks when its
         <em>rider</em> is hit, and lands somewhere legal with the rider still seated and no rubber-banding.</li>
-    <li><strong>Performance readings</strong>, from the log: the <code>coat baking:</code>
-        line at shutdown gives the slowest single bake, which decides whether
-        <code>coats.bakeBudgetMs</code> = 4 is right; <code>[Founding]</code> lines on
-        loading into the test yard show the founding budget acting; and the
-        <code>Can't keep up</code> count (one per launch at world load is normal; the
-        three-hour run on 2026-09-14 had exactly one)
-        (<a href="known-gaps.html#gap-221">gap 221</a>).</li>
+    <li><strong>Performance readings</strong>, from the log (<a href="known-gaps.html#gap-221">gap 221</a>).
+        <em>The tick half is answered:</em> the six-hour 16:11 run of 2026-09-15 logged
+        <code>Can't keep up</code> exactly once, at world load, and its last census read 50.0 ms a tick - a clean
+        20 TPS - with 437 entities, 411 of them horses. <em>The coat half a yard run cannot answer at all:</em>
+        that run finished <code>coat baking: 0 bakes</code>, because nobody is at the keyboard and nothing renders,
+        so <code>coats.bakeBudgetMs</code> = 4 has still never been measured against real drawing. It needs a
+        person riding into a herd, which is the tester guide's <em>Riding up to a big herd does not freeze the
+        game</em>, with <code>latest.log</code> attached. <code>[Founding]</code> lines on loading into the yard
+        still want reading.</li>
     <li><strong>Built, never confirmed:</strong> the tack room, food preference (a favourite its diet forbids must still be accepted; a refusal means
         <code>HorseDietHandler</code> won the ordering), and the ward's
         non-interference half. (The ward's 70 monster spawns on 2026-09-14 were all far from a warded horse, which says
@@ -986,7 +910,7 @@
 </ul>
 
 <p hidden>
-    <span id="ownership-and-landing"></span><span id="stalls-and-swings"></span><span id="coat-budget"></span><span id="confirmed-1430"></span><span id="play-1400"></span><span id="eyesight-answered"></span><span id="log-read-0913"></span><span id="audit-0913"></span>
+    <span id="ownership-and-landing"></span><span id="stalls-and-swings"></span><span id="coat-budget"></span><span id="confirmed-1430"></span><span id="play-1400"></span><span id="eyesight-answered"></span><span id="log-read-0913"></span><span id="audit-0913"></span><span id="fixes-0914"></span><span id="all-day"></span><span id="all-day-dryad"></span><span id="all-day-ratio"></span>
 </p>
 
 <h2 id="open-older">&sect;0-EB &mdash; Still open from before 2026-09-13</h2>
@@ -1128,7 +1052,6 @@
 
 <h3 id="open-older-unattended">Unattended: the yard, the log, a unit test or a tool</h3>
 <ul>
-    <li><strong>Bone meal never touches a crop</strong> (yard, row X, BONE MEAL: a <code>Bone/Bone</code> dryad beside saplings and a fenced wheat patch; <a href="gene-dryad.html">dryad</a>, <a href="known-gaps.html#gap-237">gap 237</a>). <strong>Pass:</strong> <code>[watch] gene fertilised | minecraft:&hellip;</code> lines name saplings or grass, never <code>minecraft:wheat</code>, and nothing takes <code>inWall</code>. The pen's sign used to say to grep <code>[watch] bonemeal | on</code>, which is vanilla's <code>BonemealEvent</code> and never fires for the gene's direct call, so no saved run shows either line. The gene tries about once a census and lands rarely (the census's <code>bonemeal placed/tried</code>; <a href="known-gaps.html#gap-208">gap 208</a>), so a single run may show none: add the counts across runs.</li>
     <li><strong>A third-party gene, end to end</strong> (<code>runServer</code> with a throwaway second mod: a <code>@Mod</code>, one <code>RegisterHorseGenesEvent</code> listener, one <code>AbstractNaturalGene</code>; <a href="making-a-gene.html">making a gene</a>). <strong>Pass:</strong> the listener runs, the gene sorts into the order rather than after the built-ins, and a wild horse carries it. Removing the mod refuses the saved horses without a crash. A bad key (no dot, capitals) is refused with the mod and the key named. The <code>common/</code> half is <code>GeneApiTest</code>.</li>
     <li><strong>No stray magic on a breed</strong> (unit test to write; <a href="breeds.html#magic">breeds</a>). Roll every breed's founders through <code>BreedFounder.roll</code> and assert no magical coat, particle or ability locus the breed does not list. <code>BreedFounderTest</code> only checks named loci today. The Breeds tab's plates are the same founder rolls, so this covers them too. Only Feral Mixed may carry random magic.</li>
     <li><strong>The jar carries no wiki tooling</strong>. <code>build.gradle</code> excludes <code>**/*Tool.class</code> and <code>horsegenetics/example-genes/**</code>. Check with <code>jar tf</code> on the built jar, and confirm no log names a missing <code>*Tool</code> class.</li>
@@ -1150,14 +1073,12 @@
     <li><strong>Sooty never darkens a black</strong> (bake golden). <code>S2/S2</code> and <code>s/s</code> blacks bake byte-identical.</li>
     <li><strong>Flaxen never touches a bay or black</strong> (bake golden). Bays that differ only in flaxen bake one texture, and a flaxen chestnut's body, legs and face match a plain chestnut's.</li>
     <li><strong>Two seal-brown Dhampirs throw a white foal about one time in four</strong>, and the whole white animal rarely (yard RATIO pen). A seal brown's health is about twice an ordinary horse's, its speed about a quarter higher and its jump half again. A white one's are triple, half again and double.</li>
-    <li><strong>An adult lethal homozygote lives.</strong> An adult <code>plod1=ffs/ffs</code>, or a grown pen horse carrying a lethal pair, never starts dying. A yard pen with a census line would settle it.</li>
     <li><strong>A carrier is invisible.</strong> <code>plod1=ffs/N</code> has full stats, no conditions, and its short genome string shows <code>nffs</code>. A <code>GeneCodeDisplayTest</code> / trait unit test.</li>
     <li><strong>The short genome string shows data genes.</strong> A horse carrying <a href="gene-suntouched.html">Suntouched</a> or <a href="gene-waterborn.html">Waterborn</a> lists it (<code>GeneCodeDisplay.shortForm</code>). No test covers a loaded gene yet; add one to <code>GeneCodeDisplayTest</code>.</li>
     <li><strong>No wild homozygote.</strong> No wild horse is ever <code>Big/Big</code>, <code>Small/Small</code>, <code>Big/Small</code>, or doubled at magic speed, health or jump. Unit-tested over founders; a yard census of wild horses would confirm it in the world.</li>
     <li><strong>Magic speed multiplies.</strong> A <code>Swift/Swift</code> + <code>mstn=C/C</code> horse is faster than <code>Swift/Swift</code> alone by the ratio, not a flat amount. Readable from a stat pen's attribute line.</li>
     <li><strong>Magic stats inherit.</strong> Two <code>Swift/n</code> carriers throw about a quarter <code>Swift/Swift</code>, faster than either parent, carrying the parent's percentage. A ratio pen, like row U's RATIO SIZE.</li>
     <li><strong>The health floor.</strong> <code>Frail/Frail</code> stacked with <code>b4galt7</code> keeps at least half a heart and does not die on spawn (<code>MIN_HEALTH</code>).</li>
-    <li><strong>The Unknown Gene Splice blacklist.</strong> A few dozen foals from an Unknown Gene Splice carrot: none dies, none is a dwarf, none has fewer hearts than its parents. If rows AJ-AK already arm an Unknown carrot, this is covered by <a href="item-splice-carrots.html#verified-splice-theme">the splice record</a>; if not, add a pen.</li>
     <li><strong>No plain pens, and about half magical.</strong> <code>ShowcaseGenotypes.random</code> guarantees one expressing coat gene past extension and agouti and flips a coin per pen for a magical gene. A unit test over a few thousand draws settles both, and each pen's sign should name exactly what its pair carries.</li>
     <li><strong>A newly added gene lands on the allele that does something.</strong> Champagne as <code>Ch/Ch</code>; KIT on its first homozygote that can occur, never a nonviable pair; MET heterozygous. <code>web/HorseEditor</code> mirrors the screen, so a unit test there covers both.</li>
     <li><strong>Dun's genome display.</strong> <code>GeneCodeDisplay</code> writes <code>nD</code> for <code>D/d2</code>, <code>nd1</code> for <code>d1/d2</code>, <code>d1d1</code> for <code>d1/d1</code>, and the seed jar tooltip names data-driven genes (the display bug fixed 2026-09-03, never re-checked). A unit test.</li>

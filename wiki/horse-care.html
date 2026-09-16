@@ -463,6 +463,15 @@
     line's mouthfuls sit in the tens across the whole yard, median 64 and at most 84, rather than a line per mouthful.
     Horses do fall to 50 and go looking: in the 38-minute run, horses outside the hunger pens ate 534 times - 503 grass,
     29 hay, a wheat crop, a dropped chicken and a cake - each logged with hunger just above 50 after the mouthful.
+    <em>Confirmed again over six hours (2026-09-15, the 16:11 run), which is the length that matters for the
+    starving case:</em> HUNGER ORDER's horse walked past the poppy, the mushroom and the moss and ate the
+    <strong>cake first</strong> (hunger 20 to 80), then the <strong>hay</strong> (80 to 100), then nothing more -
+    the documented order, with nothing eaten ahead of it. HUNGER FED went 12.5 to 22.0 health while its hunger fell
+    97 to 77, which is the two-hunger-per-point rule holding to the number. HUNGER STARVING never rose off
+    <strong>11.0/22.0 for the whole six hours</strong> while its hunger drained to 0, so a starving horse cannot
+    heal and vanilla's free heal stays off. HUNGER CARNIVORE hunted and ate all three chickens in turn. (A grep
+    trap worth knowing: these horses are named <code>ORDER HORSE</code>, not <code>HUNGER ORDER</code> - searching
+    the pen's name finds the sign and none of the eating.)
 </p>
 <ul>
     <li><strong>No free heal at full health.</strong> <code>AbstractHorse.aiStep</code> (26.1.2's patched
