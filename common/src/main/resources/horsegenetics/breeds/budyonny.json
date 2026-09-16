@@ -1,0 +1,55 @@
+{
+  "id": "budyonny",
+  "name": "Budyonny",
+  "country": "russia",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:forest",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 8,
+    "jump": 7,
+    "health": 8,
+    "size": [1.016, 1.063]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 1 },
+      { "pair": "E/e", "weight": 18 },
+      { "pair": "e/e", "weight": 81 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 52 },
+      { "pair": "A/a", "weight": 40 },
+      { "pair": "a/a", "weight": 8 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 20 },
+      { "pair": "Ctol/n", "weight": 45 },
+      { "pair": "n/n", "weight": 35 }
+    ]
+  },
+  "notes": [
+    "Don mares on Thoroughbred stallions, rebuilt as Soviet cavalry remounts in the Rostov region and recognised in 1949. Four founders in five are chestnut; the rest are bay or brown, and black is scarce.",
+    "No wild herds - it is a state-stud and sport-horse breed, so the cowboy, the stables and the egg are the only ways to one.",
+    "The prized golden metallic sheen is coat quality, not a dilution, and is not modelled - the same loss as the Akhal-Teke and the Karabakh.",
+    "The three historical types - Massive, Eastern and Middle - are not strains here: a strain may override gene pools and nothing else, and the three differ only in conformation and size. The size band spans all three.",
+    "All disorders clear. Don, Thoroughbred and Arabian ancestry does not license importing their carrier rates."
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "id": "boerperd",
+  "name": "Boerperd",
+  "country": "south_africa",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:plains",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 9,
+    "size": [0.921, 1.016]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 46 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 10 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1.44 },
+      { "pair": "Cr/N", "weight": 21.12 },
+      { "pair": "N/N", "weight": 77.44 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 8 },
+      { "pair": "G2/N", "weight": 4 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 11 },
+      { "pair": "d1/d2", "weight": 15 },
+      { "pair": "d2/d2", "weight": 74 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 17 },
+      { "pair": "rn/rn", "weight": 83 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 2 },
+      { "pair": "Fl1/f", "weight": 21 },
+      { "pair": "f/f", "weight": 77 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 8 },
+      { "pair": "rb/rb", "weight": 92 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/C", "weight": 35 },
+      { "pair": "C/C", "weight": 10 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 25 },
+      { "pair": "Htol/n", "weight": 45 },
+      { "pair": "n/n", "weight": 30 }
+    ]
+  },
+  "notes": [
+    "The SA Boerperd - a Cape-derived farmer's horse. Broad in solid colour: bay, brown, black, chestnut, buckskin, palomino, smoky black, grey, roan and rare dun, with flaxen and rabicano as modifiers.",
+    "Solid-bodied by breed standard, which requires pigmented skin and rejects pinto-like marking - so tobiano, frame, splash, sabino and the W series are all absent.",
+    "Most are naturally five-gaited, with a rack or amble on top of the ordinary gaits. DMRT3 carries the gait allele, but gait itself is not modelled - see the roadmap.",
+    "All disorders clear: the breed has a performance-trait study but no carrier rates for this panel.",
+    "The distinction between SA Boerperd and Cape Boerperd is not modelled."
+  ]
+}

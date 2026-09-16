@@ -1,0 +1,62 @@
+{
+  "id": "barb",
+  "name": "Barb",
+  "country": "maghreb",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:plains",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.906, 0.969]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 7 },
+      { "pair": "G3/G2", "weight": 5 },
+      { "pair": "G3/N", "weight": 34 },
+      { "pair": "G2/G2", "weight": 3 },
+      { "pair": "G2/N", "weight": 20 },
+      { "pair": "N/N", "weight": 31 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 45 },
+      { "pair": "Htol/n", "weight": 40 },
+      { "pair": "n/n", "weight": 15 }
+    ]
+  },
+  "notes": [
+    "Grey-dominant by design: about seven founders in ten grey out, over a bay, black or chestnut base. Nothing else varies.",
+    "No dilution, no pinto, no roan, no leopard - the traditional palette is bay, black, chestnut and grey, and small face and leg white is not a named locus here.",
+    "All disorders clear. The one MENA study that found SCID found it in Arabians and a single Arab-Barb, which is not a pure-Barb rate.",
+    "Hard feet, heat tolerance and recovery after work - not modelled beyond heartiness and the heat-tolerance locus."
+  ]
+}

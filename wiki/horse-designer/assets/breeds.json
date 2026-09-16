@@ -288,6 +288,85 @@
   ]
 },
 {
+  "id": "anadolu",
+  "name": "Anadolu",
+  "country": "turkey",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:grove",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 9,
+    "size": [0.775, 0.888]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 10 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 85 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 20 },
+      { "pair": "d1/d2", "weight": 25 },
+      { "pair": "d2/d2", "weight": 55 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 10 },
+      { "pair": "f/f", "weight": 90 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 4 },
+      { "pair": "rb/rb", "weight": 96 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 70 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 70 }
+    ]
+  },
+  "notes": [
+    "A Turkish village landrace, not a closed show breed - bay, brown, black and chestnut are the core, with grey and true dun as real minorities.",
+    "No dilution, no pinto and no leopard: ancient Anatolian coat diversity is archaeology, not a modern founder pool.",
+    "All disorders clear - the Turkish screening data that exists is for Arabians, which is not evidence about this landrace."
+  ]
+},
+{
   "id": "andalusian",
   "name": "Andalusian",
   "country": "spain",
@@ -863,6 +942,68 @@
   ]
 },
 {
+  "id": "barb",
+  "name": "Barb",
+  "country": "maghreb",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:plains",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.906, 0.969]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 42 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 12 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 7 },
+      { "pair": "G3/G2", "weight": 5 },
+      { "pair": "G3/N", "weight": 34 },
+      { "pair": "G2/G2", "weight": 3 },
+      { "pair": "G2/N", "weight": 20 },
+      { "pair": "N/N", "weight": 31 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 45 },
+      { "pair": "Htol/n", "weight": 40 },
+      { "pair": "n/n", "weight": 15 }
+    ]
+  },
+  "notes": [
+    "Grey-dominant by design: about seven founders in ten grey out, over a bay, black or chestnut base. Nothing else varies.",
+    "No dilution, no pinto, no roan, no leopard - the traditional palette is bay, black, chestnut and grey, and small face and leg white is not a named locus here.",
+    "All disorders clear. The one MENA study that found SCID found it in Arabians and a single Arab-Barb, which is not a pure-Barb rate.",
+    "Hard feet, heat tolerance and recovery after work - not modelled beyond heartiness and the heat-tolerance locus."
+  ]
+},
+{
   "id": "bashkir_curly",
   "name": "American Bashkir Curly",
   "country": "united_states",
@@ -1044,6 +1185,149 @@
   ]
 },
 {
+  "id": "boerperd",
+  "name": "Boerperd",
+  "country": "south_africa",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:plains",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 9,
+    "size": [0.921, 1.016]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 46 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 10 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 41 },
+      { "pair": "A/a", "weight": 46 },
+      { "pair": "a/a", "weight": 13 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1.44 },
+      { "pair": "Cr/N", "weight": 21.12 },
+      { "pair": "N/N", "weight": 77.44 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 8 },
+      { "pair": "G2/N", "weight": 4 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 11 },
+      { "pair": "d1/d2", "weight": 15 },
+      { "pair": "d2/d2", "weight": 74 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 17 },
+      { "pair": "rn/rn", "weight": 83 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 2 },
+      { "pair": "Fl1/f", "weight": 21 },
+      { "pair": "f/f", "weight": 77 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 8 },
+      { "pair": "rb/rb", "weight": 92 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/C", "weight": 35 },
+      { "pair": "C/C", "weight": 10 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 25 },
+      { "pair": "Htol/n", "weight": 45 },
+      { "pair": "n/n", "weight": 30 }
+    ]
+  },
+  "notes": [
+    "The SA Boerperd - a Cape-derived farmer's horse. Broad in solid colour: bay, brown, black, chestnut, buckskin, palomino, smoky black, grey, roan and rare dun, with flaxen and rabicano as modifiers.",
+    "Solid-bodied by breed standard, which requires pigmented skin and rejects pinto-like marking - so tobiano, frame, splash, sabino and the W series are all absent.",
+    "Most are naturally five-gaited, with a rack or amble on top of the ordinary gaits. DMRT3 carries the gait allele, but gait itself is not modelled - see the roadmap.",
+    "All disorders clear: the breed has a performance-trait study but no carrier rates for this panel.",
+    "The distinction between SA Boerperd and Cape Boerperd is not modelled."
+  ]
+},
+{
+  "id": "budyonny",
+  "name": "Budyonny",
+  "country": "russia",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:forest",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 8,
+    "jump": 7,
+    "health": 8,
+    "size": [1.016, 1.063]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 1 },
+      { "pair": "E/e", "weight": 18 },
+      { "pair": "e/e", "weight": 81 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 52 },
+      { "pair": "A/a", "weight": 40 },
+      { "pair": "a/a", "weight": 8 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 20 },
+      { "pair": "Ctol/n", "weight": 45 },
+      { "pair": "n/n", "weight": 35 }
+    ]
+  },
+  "notes": [
+    "Don mares on Thoroughbred stallions, rebuilt as Soviet cavalry remounts in the Rostov region and recognised in 1949. Four founders in five are chestnut; the rest are bay or brown, and black is scarce.",
+    "No wild herds - it is a state-stud and sport-horse breed, so the cowboy, the stables and the egg are the only ways to one.",
+    "The prized golden metallic sheen is coat quality, not a dilution, and is not modelled - the same loss as the Akhal-Teke and the Karabakh.",
+    "The three historical types - Massive, Eastern and Middle - are not strains here: a strain may override gene pools and nothing else, and the three differ only in conformation and size. The size band spans all three.",
+    "All disorders clear. Don, Thoroughbred and Arabian ancestry does not license importing their carrier rates."
+  ]
+},
+{
   "id": "camargue",
   "name": "Camargue",
   "country": "france",
@@ -1197,6 +1481,93 @@
   },
   "notes": [
     "Small, fine-boned, short legs, prominent eyes. 'Fragile bones' left as low heartiness rather than a lethal gene."
+  ]
+},
+{
+  "id": "chilean_corralero",
+  "name": "Chilean Corralero",
+  "country": "chile",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:grove",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.85, 0.925]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 58 },
+      { "pair": "E/e", "weight": 36 },
+      { "pair": "e/e", "weight": 6 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 44 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.49 },
+      { "pair": "Cr/N", "weight": 13.02 },
+      { "pair": "N/N", "weight": 86.49 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 18 },
+      { "pair": "d1/d2", "weight": 20 },
+      { "pair": "d2/d2", "weight": 62 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 5 },
+      { "pair": "G2/N", "weight": 3 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 13 },
+      { "pair": "f/f", "weight": 87 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 70 }
+    ]
+  },
+  "notes": [
+    "The Caballo de Pura Raza Chilena - the huaso's cattle horse, and the oldest registered native breed in South America (studbook 1893, closed 1934).",
+    "Dark and solid by preference: bay, dark bay and black lead, chestnut is a minority, and buckskin, palomino, dun, grey and roan all occur at low rates.",
+    "The real standard bars total or partial white and washed-out cream coats. Cream is kept low enough that a double-cream founder is very uncommon, but the pair is reachable by breeding - that is a registry rule, not a disorder.",
+    "Solid-bodied: no tobiano, frame, splash or leopard. Sabino is light, for ordinary face and leg white only.",
+    "All disorders clear - no Chilean-specific carrier data, and Quarter Horse, Arabian or warmblood rates are not a substitute.",
+    "Cow sense, the medialuna, thick skin, wavy mane and black concave hooves - none modelled."
   ]
 },
 {

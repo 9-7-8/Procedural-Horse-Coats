@@ -1,0 +1,87 @@
+{
+  "id": "chilean_corralero",
+  "name": "Chilean Corralero",
+  "country": "chile",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:grove",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.85, 0.925]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 58 },
+      { "pair": "E/e", "weight": 36 },
+      { "pair": "e/e", "weight": 6 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 44 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.49 },
+      { "pair": "Cr/N", "weight": 13.02 },
+      { "pair": "N/N", "weight": 86.49 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 18 },
+      { "pair": "d1/d2", "weight": 20 },
+      { "pair": "d2/d2", "weight": 62 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 5 },
+      { "pair": "G2/N", "weight": 3 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 13 },
+      { "pair": "f/f", "weight": 87 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 70 }
+    ]
+  },
+  "notes": [
+    "The Caballo de Pura Raza Chilena - the huaso's cattle horse, and the oldest registered native breed in South America (studbook 1893, closed 1934).",
+    "Dark and solid by preference: bay, dark bay and black lead, chestnut is a minority, and buckskin, palomino, dun, grey and roan all occur at low rates.",
+    "The real standard bars total or partial white and washed-out cream coats. Cream is kept low enough that a double-cream founder is very uncommon, but the pair is reachable by breeding - that is a registry rule, not a disorder.",
+    "Solid-bodied: no tobiano, frame, splash or leopard. Sabino is light, for ordinary face and leg white only.",
+    "All disorders clear - no Chilean-specific carrier data, and Quarter Horse, Arabian or warmblood rates are not a substitute.",
+    "Cow sense, the medialuna, thick skin, wavy mane and black concave hooves - none modelled."
+  ]
+}
