@@ -308,6 +308,16 @@ put(house, (0, 0, 3),
 put(house, (0, 0, 2), 'horsegenetics:cowboy_hitch')
 put(house, (0, 0, 4), 'horsegenetics:horsemans_table')
 
+# ---- and the bench, at the end of the same frontage -----------------------
+# One here so a player meets tack dyeing before they know to want it; it is
+# craftable too. The coordinate is not free choice: z=3 is the DOORWAY - the oak
+# step above is the threshold and the door itself is at (1, 1, 3) - so the posts
+# flank it and the bench continues past the table rather than standing in it.
+# z=5 fronts a solid oak_log corner of the house with air above, and z=6 is
+# already outside the walls. `put` overwrites without checking, so moving this
+# means re-checking what is there first.
+put(house, (0, 0, 5), 'horsegenetics:equestrian_bench')
+
 # ============================================== compose the two buildings
 # The house goes behind the barn along z, and both front faces stay on the same
 # x - which is the side the village street attaches to, so the street reaches
