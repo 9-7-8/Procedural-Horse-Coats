@@ -115,7 +115,9 @@ import java.util.List;
  *
  * <h2>The epigenome is part of what you are looking at</h2>
  * The screen holds a real {@link Epigenome} and previews with it.
- * <b>Reroll epi.</b> draws a new one and the preview redraws - the first place
+ * <b>Rnd epigen.</b> - the randomize dropdown's {@link RandomizeMode#EPIGENETICS}
+ * mode, which replaced a button of its own - draws a new one and the preview
+ * redraws - the first place
  * per-allele epigenetics are directly visible, and how you flip through the bay
  * leg heights or grey dapplings one genotype can produce. It is then sent
  * <i>with</i> the genotype and written into the founder record, so the horse
@@ -141,15 +143,28 @@ import java.util.List;
  * ({@code wiki/horse-designer/js/gui.js}), and it copies the layout constants
  * and colours below by value, so a moved widget is a two-line change.
  *
- * <p>The deliberate divergences: the browser has nothing to spawn, so
- * <b>Spawn</b> and <b>Cancel</b> are replaced by <b>Wander</b> and <b>Reset
- * view</b>; it cannot draw the cutie-mark item icons or the particle emitters,
- * which come from the game's own registries; and where this screen has
- * <b>Copy horse</b> / <b>Paste</b> the browser has <b>Export</b> /
- * <b>Import</b>. That last pair is the same slot on the same column carrying
- * the identical payload - {@code HorseFile}, the whole animal - to a file
- * rather than to a clipboard, because a Minecraft screen has no file picker and
- * a browser tab has no chat to paste into.
+ * <p>The deliberate divergences. The browser has nothing to spawn and no
+ * inventory to put an egg in, so this screen's two output buttons have no twin
+ * there, and the slots they leave are taken by view controls. Slot for slot,
+ * down the right-hand column:
+ *
+ * <ul>
+ *   <li>under the preview: <b>Spawn (creative only)</b> here, <b>Reroll
+ *       name</b> there;</li>
+ *   <li>{@code bottomStackTop()}: <b>Make egg</b> here, <b>Export</b> /
+ *       <b>Import</b> there;</li>
+ *   <li>one {@code RIGHT_STEP} down: <b>Copy horse</b> / <b>Paste</b> here,
+ *       <b>Wander</b> there;</li>
+ *   <li>two down: <b>Cancel</b> here, <b>Reset view</b> there.</li>
+ * </ul>
+ *
+ * <p>So Export / Import carry the identical payload to Copy horse / Paste -
+ * {@code HorseFile}, the whole animal - to a file rather than to a clipboard,
+ * because a Minecraft screen has no file picker and a browser tab has no chat to
+ * paste into, but they are <i>not</i> in the same slot: they sit one row higher,
+ * in the one Make egg occupies here. The browser also cannot draw the
+ * cutie-mark item icons or the particle emitters, which come from the game's own
+ * registries.
  *
  * <p><b>The creative gate belongs to that first divergence.</b> This screen's
  * Spawn button reads <i>Spawn (creative only)</i> and is inactive outside

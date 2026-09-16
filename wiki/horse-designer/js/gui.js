@@ -15,10 +15,19 @@
 // and no inventory, so the screen's two output buttons have no twin here.
 // "Spawn" has nothing to spawn into; "Make egg" (which writes the horse on
 // screen into a preset_horse_spawn_egg item) has no inventory to put an item
-// in. Export / Import sit in the slot the screen gives Copy horse / Paste
-// horse, and carry the identical payload - HorseFile, the whole animal - to a
-// file rather than to a clipboard, because a browser tab has no chat to paste
-// into and a Minecraft screen has no file picker. Nothing else may differ.
+// in. The slots they leave are taken by view controls, so slot for slot down
+// the right-hand column:
+//
+//   under the preview  Spawn (creative only)   -> Reroll name
+//   bottomStackTop()   Make egg                -> Export / Import
+//   + RIGHT_STEP       Copy horse / Paste      -> Wander
+//   + 2 * RIGHT_STEP   Cancel                  -> Reset view
+//
+// Export / Import carry the identical payload to Copy horse / Paste - HorseFile,
+// the whole animal - to a file rather than to a clipboard, because a browser tab
+// has no chat to paste into and a Minecraft screen has no file picker; they are
+// NOT in the same slot, though, but one row higher, where the screen has Make
+// egg. Nothing else may differ.
 //
 // What this file does NOT contain is any genetics. Every question it asks -
 // what a row expresses, which allele a gene is added at, how a sex-linked row
@@ -72,7 +81,7 @@ window.HG = window.HG || {};
   var C_EPI = "#8890A8";
   var C_BIG = "#E0C070";
   var C_SMALL = "#80B8D0";
-  var DD_BG = "#0E0E16";
+  var DD_BG = "rgba(14,14,22,0.94)";   // the screen's 0xF00E0E16 - alpha 0xF0, not opaque
   var DD_BORDER = "#5A6478";
   var DD_SEL = "rgba(112,136,255,0.33)";
   var DD_TEXT = "#C0C4D0";
@@ -294,12 +303,26 @@ window.HG = window.HG || {};
       // Header band. The screen puts its title here; a horse has a better one,
       // so this is the name - and each half is its own button, which is where
       // "reroll either half" lives without costing a widget in the column.
+      //
+      // 32 deep, where the screen stops at 24 (see its fill): the name block is
+      // two lines here, and the family filter cannot be painted over because it
+      // is drawn after the band rather than before it. The one layout constant
+      // deliberately not copied by value.
       fill(0, 6, vw, 32, PANEL);
       drawName();
 
       // the name column only - stop short of an added row's allele buttons
       fill(LIST_X - 4, LIST_TOP - 2, LIST_X + nameWidth(true) + LOCK_W + 2,
         LIST_TOP + shown * ROW_H, NAME_BG);
+
+      // Nothing matched: say so, the screen's two strings verbatim. Without it
+      // the page drew an empty list, which reads as a broken page rather than as
+      // "no hits" - and the filter and the search box are mirrored otherwise.
+      if (!view.length) {
+        fill(LIST_X - 4, LIST_TOP - 2, LIST_X + listWidth(), LIST_TOP + ROW_H, NAME_BG);
+        fitted(search.trim() ? 'No gene matches "' + search.trim() + '"' : "No genes in this family",
+          nameX(), LIST_TOP + 6, listWidth() - LOCK_W - 4, C_NAME_OFF);
+      }
 
       drawFilter();
       drawRows(hovered);

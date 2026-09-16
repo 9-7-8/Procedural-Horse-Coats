@@ -99,8 +99,10 @@
 
 <h2 id="bands">Traditional bands and bachelor bands</h2>
 <p>
-    A wild pack is one of two shapes (<code>BandType</code>), chosen ~70/30 by
-    the first member spawned:
+    A wild pack is one of two shapes (<code>BandType</code>), chosen by the
+    lead's seed &mdash; 3 in 10 bachelor, unless the breed's own
+    <a href="breed-format.html#herd-shape"><code>herd</code> block</a> says
+    otherwise:
 </p>
 <ul>
     <li><strong>Traditional</strong> &mdash; one stallion (the herd lead), his
@@ -108,9 +110,18 @@
         pack member for now &mdash; the pack <code>AgeableMobGroupData</code>
         can no longer be overridden, so the intended "up to 3 foals" is a
         follow-up.</li>
-    <li><strong>Bachelor</strong> &mdash; a band of 3&ndash;5 stallions, no
-        mares, no foals. The lowest-UUID member of the spawned clump is the lead.</li>
+    <li><strong>Bachelor</strong> &mdash; a band of stallions, no mares, no
+        foals. The lowest-UUID member of the spawned clump is the lead.</li>
 </ul>
+<p>
+    A breed may also say how many stallions and mares each kind of its bands
+    wants (<code>BreedHerd</code>). The sexes are the mod's to assign, so it is
+    honoured exactly whenever the pack is big enough &mdash; but <strong>the game
+    spawns the pack before the breed is chosen</strong>, so a count is a
+    preference clamped by however many horses turned up, never a request for
+    more. Precedence when it cannot have everything: the stallion range, then the
+    mare maximum, then the mare minimum.
+</p>
 <p>
     Every member of the herd shares the lead's breed and band. What a band does
     after it spawns &mdash; following its lead mare, herding, sparring, dispersal,

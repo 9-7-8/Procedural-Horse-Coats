@@ -34,6 +34,18 @@ window.HG = window.HG || {};
     "horsegenetics.magic_health", "horsegenetics.magic_jump"];
   bd.BASE_KEYS = ["horsegenetics.extension", "horsegenetics.agouti", "horsegenetics.shade"];
   bd.DIET_KEYS = ["horsegenetics.diet", "horsegenetics.food_preference"];
+  // How readily it breeds. Fertility is natural and NATURAL_OTHER, and no step's
+  // family filter reaches that family - so until it was named here it was
+  // offered on no step at all, which is exactly what these lists are for.
+  bd.REPRO_KEYS = ["horsegenetics.fertility"];
+  // Copied by value from BreedHerd.DEFAULT - the shape the game founds a herd in
+  // when a breed says nothing. Only the placeholders and the "is this still the
+  // default" checks read it; the file itself never carries a default.
+  bd.HERD_DEFAULT = {
+    bachelor_chance: 0.3,
+    traditional: { stallions: [1, 1], mares: [0, 64] },
+    bachelor: { stallions: [1, 64], mares: [0, 0] }
+  };
   // What the breed does by time of day - hunting, fleeing, stalking, shifting,
   // burning - and what it does in a fight. Two steps, owner's call (2026-09-13):
   // the dispositions were buried among the combat genes.
@@ -73,7 +85,8 @@ window.HG = window.HG || {};
     });
     return {
       id: "", name: "", description: "",
-      kind: undefined, commonness: undefined, spawn: undefined, spawn_time: undefined,
+      kind: undefined, magical_variant: undefined, commonness: undefined, spawn: undefined,
+      spawn_time: undefined, herd: undefined,
       biomes: [], price: undefined,
       // Health, speed and jump are always asked, so they always have a score;
       // size starts as "an ordinary horse" rather than unset, because an unset
@@ -95,9 +108,17 @@ window.HG = window.HG || {};
     if (s.description) out.description = s.description;
     var kind = s.kind === "auto" || !s.kind ? (bd.anyMagical(s) ? "magical" : undefined) : s.kind;
     if (kind && kind !== "natural") out.kind = kind;
+    // Magical herds: every breed has them unless it says not. Only false is ever
+    // written - BreedSpecWriter's rule - so a file from here still diffs cleanly
+    // against a baked one.
+    if (s.magical_variant === false) out.magical_variant = false;
     if (s.commonness) out.commonness = s.commonness;
     if (s.spawn) out.spawn = s.spawn;
     if (s.spawn_time && s.spawn_time !== "any") out.spawn_time = s.spawn_time;
+    // The state is the file, so the block goes out as it stands - and only when
+    // it holds something, so a breed that founds herds the ordinary way writes
+    // no key at all (BreedSpecWriter's rule again).
+    if (s.herd && Object.keys(s.herd).length) out.herd = s.herd;
     if (s.biomes.length) out.biomes = s.biomes;
     if (s.price) out.price = s.price;
     if (Object.keys(s.stats).length) out.stats = s.stats;
@@ -128,7 +149,7 @@ window.HG = window.HG || {};
   bd.fromJson = function (text) {
     var parsed = JSON.parse(text);
     var s = bd.blank();
-    ["id", "name", "description", "kind", "commonness", "spawn", "spawn_time", "price"]
+    ["id", "name", "description", "kind", "magical_variant", "commonness", "spawn", "spawn_time", "herd", "price"]
       .forEach(function (k) { if (parsed[k] !== undefined) s[k] = parsed[k]; });
     s.biomes = parsed.biomes || [];
     s.stats = parsed.stats || {};

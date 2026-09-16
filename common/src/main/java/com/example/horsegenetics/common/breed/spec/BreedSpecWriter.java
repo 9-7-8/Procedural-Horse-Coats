@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.breed.spec;
 
 import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.BreedHerd;
 import com.example.horsegenetics.common.breed.BreedBands;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Commonness;
@@ -68,6 +69,10 @@ public final class BreedSpecWriter {
         if (breed.spawnTime() != SpawnTime.ANY) {
             fields.add(field("spawn_time", quote(breed.spawnTime().id())));
         }
+        String herd = herd(breed.herd());
+        if (herd != null) {
+            fields.add(field("herd", herd));
+        }
         if (!breed.biomes().isEmpty()) {
             fields.add(field("biomes", blockArray(quoteAll(breed.biomes()), 2)));
         }
@@ -110,6 +115,31 @@ public final class BreedSpecWriter {
         scores.health().ifPresent(r -> parts.add(field("health", range(r), 4)));
         scores.size().ifPresent(r -> parts.add(field("size", range(r), 4)));
         return "{\n" + String.join(",\n", parts) + "\n  }";
+    }
+
+    /** The {@code herd} block, or {@code null} when the breed founds herds the ordinary way. */
+    private static String herd(BreedHerd h) {
+        List<String> parts = new ArrayList<>();
+        if (h.bachelorChance() != BreedHerd.DEFAULT_BACHELOR_CHANCE) {
+            parts.add(field("bachelor_chance", number(h.bachelorChance()), 4));
+        }
+        if (!h.traditional().isDefault(false)) {
+            parts.add(field("traditional", band(h.traditional()), 4));
+        }
+        if (!h.bachelor().isDefault(true)) {
+            parts.add(field("bachelor", band(h.bachelor()), 4));
+        }
+        return parts.isEmpty() ? null : "{\n" + String.join(",\n", parts) + "\n  }";
+    }
+
+    /** One band's two ranges; a zero-width range reads as the single number it is. */
+    private static String band(BreedHerd.Band b) {
+        return "{ \"stallions\": " + counts(b.minStallions(), b.maxStallions())
+                + ", \"mares\": " + counts(b.minMares(), b.maxMares()) + " }";
+    }
+
+    private static String counts(int lo, int hi) {
+        return lo == hi ? String.valueOf(lo) : "[" + lo + ", " + hi + "]";
     }
 
     private static String range(Breed.Range r) {

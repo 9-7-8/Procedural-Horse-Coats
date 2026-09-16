@@ -41,6 +41,9 @@ class BreedSpecParserTest {
         assertEquals("X", b.name());
         assertFalse(b.magical(), "kind defaults to natural");
         assertEquals(Commonness.MODERATE.weight, b.spawnWeight());
+        assertTrue(b.magicalVariant(), "every breed has magical herds unless its file says not");
+        assertEquals(BreedHerd.DEFAULT, b.herd(),
+                "no herd block leaves the game's own founding shape");
         assertEquals(BreedSource.ALL, b.sources(), "a breed that names no source gets every source");
         assertTrue(b.biomes().isEmpty());
         assertTrue(b.price().isEmpty(), "an unpriced breed is priced by HorsePrices, not here");

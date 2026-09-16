@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.breed.MagicalVariant;
 import com.example.horsegenetics.common.breed.BandType;
+import com.example.horsegenetics.common.breed.BreedHerd;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.BreedLineage;
@@ -124,8 +125,19 @@ public final class HerdManager {
                     discard(horse, "no breed or Feral Mixed may spawn here");
                     return;
                 }
-                band = seeded.nextInt(10) < 7 ? BandType.TRADITIONAL : BandType.BACHELOR;
-                sex = lead.equals(horse.getUUID()) ? leadSex(horse, rng) : joinerSex(horse, band, rng);
+                // The breed's own share of bachelor bands (BreedHerd - 3 in 10
+                // unless its file says otherwise). Drawn from the lead's seeded
+                // RNG, after the breed, so every clump member agrees.
+                band = seeded.nextDouble() < breed.herd().bachelorChance()
+                        ? BandType.BACHELOR
+                        : BandType.TRADITIONAL;
+                // ...and the breed's own composition, decided over the whole
+                // clump at once rather than one horse at a time, so "one
+                // stallion and three mares" can mean what it says. Same seeded
+                // RNG, same clump, same sorted order: every member works out the
+                // same assignment and reads its own place in it.
+                sex = foundedSex(horse, clump, breed.herd().bandOf(band == BandType.BACHELOR),
+                        new NeoRng(seeded), rng);
             } else {
                 // genuinely alone -> a lone Feral Mixed, if the world has any
                 if (!Breeds.spawnSettings().feral().allowedIn(biomeId(level.getBiome(horse.blockPosition())))) {
@@ -255,6 +267,34 @@ public final class HerdManager {
     /** A stable per-lead randomness: every clump member derives the same herd from this. */
     private static RandomSource seededFor(UUID id) {
         return RandomSource.create(id.getMostSignificantBits() ^ id.getLeastSignificantBits());
+    }
+
+    /**
+     * One founding horse's sex, from the composition its breed asked for.
+     *
+     * <p>The adults of the clump are sorted by UUID - the same order every
+     * member computes, and the order whose first entry is the elected lead - and
+     * the first {@code stallionCount} of them are stallions. So the lead is a
+     * stallion whenever the band wants one at all, and a breed that asks for no
+     * stallions gets a mare-led group, which {@code BandLife} already handles.
+     *
+     * <p>A foal keeps the old coin-flip: it spawned as a baby, and which sex a
+     * foal is was never the band's business.
+     */
+    private static Sex foundedSex(Horse horse, List<Horse> clump, BreedHerd.Band want,
+                                  Rng seeded, Rng rng) {
+        if (horse.isBaby()) {
+            return coin(rng);
+        }
+        List<Horse> adults = new ArrayList<>();
+        for (Horse h : clump) {
+            if (!h.isBaby()) {
+                adults.add(h);
+            }
+        }
+        adults.sort(Comparator.comparing(Horse::getUUID));
+        int stallions = want.stallionCount(adults.size(), seeded);
+        return adults.indexOf(horse) < stallions ? Sex.MALE : Sex.FEMALE;
     }
 
     private static Sex leadSex(Horse horse, Rng rng) {

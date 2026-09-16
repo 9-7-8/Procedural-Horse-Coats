@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.breed.spec;
 
 import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.BreedHerd;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Commonness;
@@ -56,7 +57,8 @@ public final class BreedSpecParser {
     /** Keys a breed file may carry. Anything else is a hard error. */
     private static final Set<String> KEYS = Set.of(
             "id", "name", "description", "kind", "commonness", "spawn_weight", "biomes",
-            "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes", "magical_variant");
+            "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes", "magical_variant",
+            "herd");
 
     private BreedSpecParser() {
     }
@@ -198,6 +200,7 @@ public final class BreedSpecParser {
         readGenes(root, b, source, warn);
         readStrains(root, b, source, warn);
         readBands(root, b, source, warn);
+        readHerd(root, b);
         Breed breed = b.build();
         warnStatsPinnedByPools(breed, source, warn);
         return breed;
@@ -408,6 +411,69 @@ public final class BreedSpecParser {
                 b.band(key, v.getKey(), r[0], r[1]);
             }
         }
+    }
+
+    /**
+     * <pre>
+     *   "herd": {
+     *     "bachelor_chance": 0.3,
+     *     "traditional": { "stallions": 1, "mares": [2, 4] },
+     *     "bachelor":    { "stallions": [3, 5], "mares": 0 }
+     *   }
+     * </pre>
+     *
+     * <p>Thrown rather than forgiven, unlike a gene reference: a share outside
+     * {@code 0..1} or a negative count is not a pack this install has not got,
+     * it is the author meaning something the format cannot express.
+     *
+     * <p>The counts are a preference clamped by however many horses the game
+     * spawned - see {@link BreedHerd}, which is the page-level explanation too.
+     */
+    private static void readHerd(Map<String, Object> root, Breed.Builder b) {
+        if (!root.containsKey("herd")) {
+            return;
+        }
+        Map<String, Object> herd = asObject(root.get("herd"), "herd");
+        expectKeys(herd, Set.of("bachelor_chance", "traditional", "bachelor"));
+        double share = BreedHerd.DEFAULT_BACHELOR_CHANCE;
+        if (herd.containsKey("bachelor_chance")) {
+            share = asNumber(herd.get("bachelor_chance"), "herd.bachelor_chance");
+            if (share < 0.0 || share > 1.0) {
+                throw new IllegalArgumentException("\"herd.bachelor_chance\" is a share, 0 to 1, got " + share);
+            }
+        }
+        b.herd(new BreedHerd(share,
+                band(herd, "traditional", BreedHerd.DEFAULT.traditional()),
+                band(herd, "bachelor", BreedHerd.DEFAULT.bachelor())));
+    }
+
+    /** One {@code traditional} / {@code bachelor} block, or the game's own default for it. */
+    private static BreedHerd.Band band(Map<String, Object> herd, String key, BreedHerd.Band fallback) {
+        if (!herd.containsKey(key)) {
+            return fallback;
+        }
+        Map<String, Object> o = asObject(herd.get(key), "herd." + key);
+        expectKeys(o, Set.of("stallions", "mares"));
+        int[] stallions = counts(o, "stallions", "herd." + key,
+                fallback.minStallions(), fallback.maxStallions());
+        int[] mares = counts(o, "mares", "herd." + key, fallback.minMares(), fallback.maxMares());
+        return new BreedHerd.Band(stallions[0], stallions[1], mares[0], mares[1]);
+    }
+
+    /** {@code 3} or {@code [3, 5]} as a whole-number {@code {lo, hi}}; absent is the fallback. */
+    private static int[] counts(Map<String, Object> o, String key, String where, int lo, int hi) {
+        if (!o.containsKey(key)) {
+            return new int[]{lo, hi};
+        }
+        String at = where + "." + key;
+        double[] r = range(o.get(key), at);
+        if (r[0] < 0.0 || r[1] < 0.0) {
+            throw new IllegalArgumentException("\"" + at + "\" is a count of horses and cannot be negative");
+        }
+        if (r[0] != Math.rint(r[0]) || r[1] != Math.rint(r[1])) {
+            throw new IllegalArgumentException("\"" + at + "\" is a whole number of horses, got " + r[0] + ".." + r[1]);
+        }
+        return new int[]{(int) r[0], (int) r[1]};
     }
 
     /** Repeated from {@code BreedFounder}; the two agree by test, not by import. */

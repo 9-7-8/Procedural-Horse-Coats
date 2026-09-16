@@ -1080,6 +1080,80 @@ window.HG = window.HG || {};
     sel.addEventListener("change", function () { st.commonness = sel.value === "moderate" ? undefined : sel.value; bd.changed(); });
     host.appendChild(sel);
     host.appendChild(el("p", { "class": "hint", text: "How often it heads a herd, against the other breeds of the same biome." }));
+
+    // ---- how its herds are founded --------------------------------------
+    //
+    // The state is the file, so nothing here writes a value that matches the
+    // game's own: an empty box means "no key", not "the default, spelled out".
+    function herd() {
+      st.herd = st.herd || {};
+      return st.herd;
+    }
+    function tidyHerd() {
+      var h = st.herd;
+      if (!h) return;
+      ["traditional", "bachelor"].forEach(function (k) {
+        if (h[k] && !Object.keys(h[k]).length) delete h[k];
+      });
+      if (!Object.keys(h).length) st.herd = undefined;
+    }
+    /** One inclusive range - two boxes, empty meaning "as the game does it". */
+    function countRow(kind, key, label) {
+      var def = bd.HERD_DEFAULT[kind][key];
+      var cur = st.herd && st.herd[kind] ? st.herd[kind][key] : undefined;
+      var lo = el("input", { type: "number", min: "0", max: "64", placeholder: String(def[0]),
+        value: cur ? cur[0] : "" });
+      var hi = el("input", { type: "number", min: "0", max: "64", placeholder: String(def[1]),
+        value: cur ? cur[1] : "" });
+      function commit() {
+        var h = herd();
+        if (lo.value === "" && hi.value === "") {
+          if (h[kind]) delete h[kind][key];
+        } else {
+          h[kind] = h[kind] || {};
+          var a = lo.value === "" ? def[0] : Math.max(0, Math.min(64, Math.round(Number(lo.value))));
+          var b = hi.value === "" ? def[1] : Math.max(0, Math.min(64, Math.round(Number(hi.value))));
+          h[kind][key] = [Math.min(a, b), Math.max(a, b)];
+        }
+        tidyHerd();
+        bd.changed();
+      }
+      lo.addEventListener("input", commit);
+      hi.addEventListener("input", commit);
+      return el("div", { "class": "pair-inputs" }, [el("span", { text: label }), lo,
+        el("span", { text: "to" }), hi]);
+    }
+
+    host.appendChild(el("h3", { text: "How its herds are founded" }));
+    var bc = el("input", { type: "number", min: "0", max: "100", placeholder: "30",
+      value: st.herd && st.herd.bachelor_chance !== undefined
+        ? Math.round(st.herd.bachelor_chance * 100) : "" });
+    bc.addEventListener("input", function () {
+      var h = herd();
+      if (bc.value === "") delete h.bachelor_chance;
+      else h.bachelor_chance = Math.max(0, Math.min(100, Math.round(Number(bc.value)))) / 100;
+      tidyHerd();
+      bd.changed();
+    });
+    host.appendChild(el("div", { "class": "pair-inputs" }, [bc,
+      el("span", { text: "% of its new herds are bachelor bands" })]));
+    host.appendChild(el("p", { "class": "hint", text:
+      "Empty for the ordinary 3 in 10. 100 means this breed is only ever found in single-sex bands of " +
+      "stallions; 0 means never." }));
+
+    host.appendChild(el("h4", { text: "A family band" }));
+    host.appendChild(countRow("traditional", "stallions", "stallions"));
+    host.appendChild(countRow("traditional", "mares", "mares"));
+    host.appendChild(el("h4", { text: "A bachelor band" }));
+    host.appendChild(countRow("bachelor", "stallions", "stallions"));
+    host.appendChild(countRow("bachelor", "mares", "mares"));
+    host.appendChild(el("p", { "class": "hint", text:
+      "What the band wants - and the limit worth knowing: the game spawns the pack first, two to six horses " +
+      "and the same for every breed, then the breed is chosen from the horses standing there. So these are a " +
+      "preference applied to the pack that turned up, never an order for more of it - ask for four mares and " +
+      "a pack of three gives you two. Where it cannot have everything the stallion range is honoured first, " +
+      "then the mare maximum, then the mare minimum. Foals are vanilla's and take a coin-flip sex. After " +
+      "founding the band lives its own life: colts leave, challengers take over, mares drift." }));
   }
 
   function homeSummary() {
@@ -1089,6 +1163,12 @@ window.HG = window.HG || {};
     if (st.spawn_time) bits.push(st.spawn_time + " only");
     if (st.commonness) bits.push(st.commonness.replace(/_/g, " "));
     if (st.spawn) bits.push("from " + (st.spawn.length ? st.spawn.join(", ") : "nowhere"));
+    if (st.herd) {
+      if (st.herd.bachelor_chance !== undefined) {
+        bits.push(Math.round(st.herd.bachelor_chance * 100) + "% bachelor bands");
+      }
+      if (st.herd.traditional || st.herd.bachelor) bits.push("its own band sizes");
+    }
     return bits.join("; ");
   }
 
@@ -1122,6 +1202,20 @@ window.HG = window.HG || {};
     host.appendChild(el("p", { "class": "hint", text:
       "Which half of the breed book it is listed in. A breed carries exactly the magic you gave it on the " +
       "earlier steps - founders never pick up a magical gene you did not choose." }));
+
+    host.appendChild(el("h3", { text: "Magical herds" }));
+    var mv = el("input", { type: "checkbox" });
+    mv.checked = st.magical_variant !== false;
+    mv.addEventListener("change", function () {
+      st.magical_variant = mv.checked ? undefined : false;
+      bd.changed();
+    });
+    host.appendChild(el("label", { "class": "check" }, [mv,
+      el("span", { text: " now and then, a wild herd of this breed is founded magical" })]));
+    host.appendChild(el("p", { "class": "hint", text:
+      "Five herds in a hundred by default. The whole herd shares one magical gene, every horse with the " +
+      "same pair of alleles - it is how magic appears in a named breed without giving the breed a " +
+      "background rate of it. Untick to hold this breed to its own sheet, always." }));
   }
 
   function tradeSummary() {
@@ -1129,6 +1223,7 @@ window.HG = window.HG || {};
     var bits = [];
     if (st.price) bits.push(st.price[0] + "-" + st.price[1] + " emeralds");
     if (st.kind) bits.push(st.kind);
+    if (st.magical_variant === false) bits.push("no magical herds");
     return bits.join("; ");
   }
 
@@ -1227,6 +1322,11 @@ window.HG = window.HG || {};
       lede: "Natural disorders the breed carries - if any.",
       render: renderDisorders,
       summary: function () { return namesOf(family("NATURAL_HEALTH", true)) || "none"; } },
+    geneStep("breeding", "Breeding",
+      "How readily the breed conceives, and how often a mare carries two. Untouched, it breeds like an " +
+      "ordinary horse - subfertility takes two copies in one parent, and plain golden-carrot breeding " +
+      "never gives twins whatever you pick here.",
+      function () { return bd.present(bd.REPRO_KEYS); }),
     geneStep("diet", "Diet",
       "What the breed eats. Untouched, it eats what an ordinary horse eats.",
       function () { return bd.present(bd.DIET_KEYS); }),

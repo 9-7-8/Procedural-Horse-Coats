@@ -114,6 +114,16 @@
         <a href="breeds.html#magical-herds">magical herds</a>.</td>
 </tr>
 <tr>
+    <td><code>herd</code></td>
+    <td><code>{"bachelor_chance": 0.3, "traditional": {"stallions": 1, "mares": [2, 4]},
+        "bachelor": {"stallions": [3, 5], "mares": 0}}</code></td>
+    <td>How its <em>new</em> wild herds are founded &mdash; see
+        <a href="#herd-shape">the shape of a founded herd</a> below. Every part is optional and none is
+        written when it matches the game's own. <code>bachelor_chance</code> outside
+        <code>0</code>&hellip;<code>1</code>, or a negative or fractional count, is an error rather than a
+        warning.</td>
+</tr>
+<tr>
     <td><code>commonness</code></td>
     <td>one of the seven tiers, <code>extremely_common</code>&hellip;<code>very_rare</code></td>
     <td><code>moderate</code>. Each step is a doubling; see <code>Commonness</code>.</td>
@@ -340,6 +350,68 @@
     breed is not a candidate and the biome's other breeds share the draw. It only speaks for
     <code>wild</code>. Vanilla will not spawn an animal in the dark on a chunk near a player,
     so a night breed's herds mostly come from chunks generated at night.
+</p>
+
+<h2 id="herd-shape">The shape of a founded herd</h2>
+
+<p>
+    The <code>herd</code> block says how a breed's <em>new</em> wild herds are put together
+    (<code>BreedHerd</code>). Every part is optional, and a part that matches the game's own
+    answer is never written:
+</p>
+
+<pre><code>"herd": {
+  "bachelor_chance": 0.3,
+  "traditional": { "stallions": 1, "mares": [2, 4] },
+  "bachelor":    { "stallions": [3, 5], "mares": 0 }
+}</code></pre>
+
+<ul>
+    <li><code>bachelor_chance</code> &mdash; the share of its new herds founded as a band of
+        stallions rather than a stallion with mares. <code>0.3</code> by default; <code>1</code>
+        means the breed is only ever found in single-sex bands, <code>0</code> that it never is.</li>
+    <li><code>traditional</code> / <code>bachelor</code> &mdash; how many stallions and mares
+        that kind of band wants. Each is a number or an inclusive <code>[lo, hi]</code>.</li>
+</ul>
+
+<div class="note rule">
+    <span class="label">A count is a preference, not a request for more horses</span>
+    <p>
+        <strong>The game spawns the pack before the breed is chosen.</strong> How many horses
+        appear is a biome modifier's business (<code>add_horse_herds.json</code> &mdash; two to
+        six, the same for every breed); only then does <code>HerdManager</code> elect a lead,
+        derive the breed from the lead's seed, and found a herd over the clump standing there.
+    </p>
+    <p>
+        So the <em>sexes</em> are honoured exactly &mdash; nothing has read them yet, and the
+        assignment is made over the whole clump at once from the lead's seed, which is why every
+        member agrees on who is a stallion without talking to each other. The <em>counts</em> are
+        clamped by however many horses turned up: ask for four mares and a pack of three gives you
+        two. Nothing is ever padded out by spawning extra horses &mdash; that was considered and
+        left out (owner, 2026-09-15).
+    </p>
+    <p>
+        Where the clump cannot satisfy everything, the precedence is <strong>the stallion range
+        first, then the mare maximum</strong> (so a bachelor band never grows a mare at any size),
+        <strong>then the mare minimum</strong> &mdash; last, because the only way to insist on a
+        mare that did not spawn would be to spawn one.
+    </p>
+</div>
+
+<p>
+    Two things the block deliberately does not touch. <strong>Foals are vanilla's</strong>: a horse
+    that spawned as a baby stays one and takes a coin-flip sex. And a founded band has <strong>no
+    family relations</strong> &mdash; every member is a parentless founder with an independently
+    rolled genome, so a foal in a band is nobody's foal
+    (<a href="roadmap.html#bond">roadmap &sect;15</a>).
+</p>
+
+<p>
+    It is asked once, at founding. What a band becomes afterwards belongs to
+    <code>BandLife</code> &mdash; colts leave for bachelor bands, challengers take harems over,
+    mares drift between bands &mdash; so none of this is a claim about what a herd looks like an
+    hour later. See <a href="breeds.html#bands">bands on the breeds page</a> and
+    <a href="horse-care.html#bands">band life</a>.
 </p>
 
 <h2>Loading, and the order it happens in</h2>

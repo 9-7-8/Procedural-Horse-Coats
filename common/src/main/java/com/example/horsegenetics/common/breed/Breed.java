@@ -77,7 +77,8 @@ public record Breed(
         String description,
         SpawnTime spawnTime,
         List<Strain> strains,
-        boolean magicalVariant) {
+        boolean magicalVariant,
+        BreedHerd herd) {
 
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
@@ -189,6 +190,7 @@ public record Breed(
         description = description == null ? "" : description;
         spawnTime = spawnTime == null ? SpawnTime.ANY : spawnTime;
         strains = strains == null ? List.of() : List.copyOf(strains);
+        herd = herd == null ? BreedHerd.DEFAULT : herd;
     }
 
     private static Map<String, List<Combo>> ordered(Map<String, List<Combo>> pools) {
@@ -353,6 +355,7 @@ public record Breed(
         private SpawnTime spawnTime = SpawnTime.ANY;
         private final List<Strain> strains = new ArrayList<>();
         private boolean magicalVariant = true;
+        private BreedHerd herd = BreedHerd.DEFAULT;
 
         private Builder(String id, String name) {
             this.id = id;
@@ -547,12 +550,18 @@ public record Breed(
             return this;
         }
 
+        /** The shape its new wild herds are founded in - see {@link BreedHerd}. */
+        public Builder herd(BreedHerd shape) {
+            this.herd = shape;
+            return this;
+        }
+
         public Breed build() {
             return new Breed(id, name, magical, biomes, spawnWeight,
                     sourcesNamed ? sources : BreedSource.ALL, pools,
                     new StatScores(speed, jump, health, size), bands.build(),
                     notes, price,
-                    description, spawnTime, strains, magicalVariant);
+                    description, spawnTime, strains, magicalVariant, herd);
         }
     }
 }

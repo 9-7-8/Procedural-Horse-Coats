@@ -514,7 +514,7 @@ public final class HorseEditor {
         return !row.locked && (randomizeInvisible || Genes.influencesCoat(row.gene));
     }
 
-    public void clearGenes() {
+    public void clearGenes(Rng rng) {
         for (Row row : rows) {
             if (row.locked) {
                 continue;
@@ -525,6 +525,10 @@ public final class HorseEditor {
             row.added = EditorRules.alwaysCarried(row.gene);
         }
         breedIndex = 0;
+        // The twin's Clear rerolls the epigenome too (CustomHorseSpawnScreen.reset):
+        // a plain horse is a whole horse, and leaving the old numbers on it made
+        // Clear mean something different in the two editors.
+        rerollEpigenome(rng);
     }
 
     /**
@@ -543,6 +547,7 @@ public final class HorseEditor {
         female = gt.sex() == Sex.FEMALE;
         for (Row row : rows) {
             stamp(row, gt);
+            enforceSexLinkage(row); // a hand-edited or stale file may not be sex-consistent
         }
         breedIndex = 0;
         return true;

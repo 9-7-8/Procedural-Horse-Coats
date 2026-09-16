@@ -1151,6 +1151,17 @@
         stack from the owner is +2, whatever it is.</li>
     <li>Gated healing has no <strong>info-panel line naming what is missing</strong>
         &mdash; a hurt horse near food but no water shows particles and nothing else.</li>
+    <li><strong>A founding band has no family relations.</strong> A breed can now say how many
+        stallions and mares its bands are founded with
+        (<a href="breed-format.html#herd-shape"><code>herd</code></a>), but every member is a
+        parentless founder: <code>HorseRecord.founder</code> leaves mother and father empty, and
+        each genome is rolled independently from the breed sheet. So a foal standing in a band is
+        nobody's foal, and could carry alleles neither adult beside it has. Doing it honestly means
+        founding rolls the foal <em>from</em> the lead and a chosen mare
+        (<code>HorseRecord.bred</code>, a real generation) rather than from the sheet &mdash; which
+        is a change to what founding <em>is</em>, so it was deliberately left out of the herd-shape
+        work (owner, 2026-09-15). Stamping the ids without the descent was considered and rejected:
+        the pedigree screen would present a relationship the genetics contradict.</li>
 </ul>
 
 <hr>

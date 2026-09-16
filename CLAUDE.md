@@ -117,10 +117,10 @@ Two rules about the backlog page, both learned the hard way:
    horses quietly asserts otherwise. (Owner's call.)
 5. **`wiki/horse-designer/` and `CustomHorseSpawnScreen` are one screen in two
    places - change both.** The designer's model is `web/HorseEditor.java`,
-   mirroring the screen's `variantPair` / `enforceSexLinkage` / `applyGenome` /
-   `randomizeGenes` under the same names; `js/gui.js` copies the screen's layout
-   constants **by value**. A deliberate divergence goes in the comment on both
-   files, not left to be discovered.
+   mirroring `applyGenome` / `stamp` / `randomizable` / `topUpMagical` /
+   `addRandom` / `enforceSexLinkage` by name; identical rules live once in
+   `common/EditorRules`. `js/gui.js` copies the layout constants **by value**. A
+   deliberate divergence goes in the comment on both files.
 6. **No legacy or back-compat code.** Dev only, single tester, no saves worth
    keeping - when a format changes, change it and move on. No genotype-code
    padding, no attachment field fallbacks.

@@ -525,7 +525,7 @@ public final class DesignerApi {
 
     @JSExport
     public static void clearGenes() {
-        editor().clearGenes();
+        editor().clearGenes(RNG);
     }
 
     @JSExport
