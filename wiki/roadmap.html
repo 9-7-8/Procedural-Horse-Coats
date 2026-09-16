@@ -1817,15 +1817,43 @@
 <h3 id="tack-scale">23.1 The saddle does not fit, and that blocks all of it</h3>
 
 <p>
-    <strong>This is a prerequisite, not a follow-up.</strong> The saddle and armour layers
-    render at vanilla scale over a body the size locus has resized, so they float or clip on
-    every horse that is not exactly 1.0 &mdash; already true today, already recorded at
-    &sect;<a href="#resizing">2</a>, and true of third-party tack as well. Adding tack
-    categories on top multiplies a visible bug and buries its fix under new art. Fix
-    <code>state.scale</code> inheritance on the two existing equipment layers first. It is
-    also the change that makes <em>other</em> mods' tack sit correctly, which is the
-    compatibility story <a href="compatibility.html#patches">this project says it is
-    telling</a>.
+    <strong>This section had the diagnosis wrong.</strong> It said the equipment layers
+    render at vanilla scale over a resized body and needed to inherit
+    <code>state.scale</code>. <strong>They already inherit it</strong> &mdash;
+    <code>LivingEntityRenderer.submit</code> scales the pose stack and <em>then</em> iterates
+    the layers, inside the same push/pop, so the genetic scale has always reached tack.
+    Rewritten 2026-09-16.
+</p>
+
+<p>
+    <strong>The real defect was a missing mesh transform, and it was never about resizing.</strong>
+    Vanilla builds three horse layers with <code>MeshTransformer.scaling(1.1F)</code> applied
+    &mdash; <code>HORSE</code>, <code>HORSE_ARMOR</code> and <code>HORSE_SADDLE</code> &mdash;
+    and applies it in <code>LayerDefinitions</code>, one level <em>above</em> the mesh
+    function. <code>HdHorseModel</code> is a copy of that mesh function, so the transform was
+    never in the part that was copied, and its absence is invisible on inspection: the class
+    doc discusses the 128&times;128 UV layout at length and scale not at all. The mod drew its
+    body at 1.0 while still baking tack from vanilla's layers at 1.1.
+</p>
+
+<p>
+    And the transform is not only a scale. It is
+    <code>scaled(f).translated(0, 24.016 &times; (1 &minus; f), 0)</code>, so at 1.1 the tack
+    also sat <strong>2.4016 units off vertically</strong>. The bug was therefore present on
+    <em>every</em> horse, including scale 1.0; the size locus multiplied the visible gap
+    rather than causing it, which is exactly why it read as &ldquo;worse on big horses&rdquo;.
+    <strong>Fixed 2026-09-16</strong> by adding
+    <code>.apply(MeshTransformer.scaling(1.1F))</code> in
+    <code>HdHorseModel.createHdLayer()</code> &mdash; one line.
+</p>
+
+<p>
+    <strong>Not yet seen in game, and it changes every horse.</strong> Every horse becomes
+    about 10&nbsp;% larger, because the HD body has been the small one all along; and the
+    cutie-mark and emissive-coat layers anchor off
+    <code>body.translateAndRotate</code>, so their placement moves with it. Coats themselves
+    are safe: UVs are normalised at bake time, so <code>HorseSkinGeometry</code>'s
+    texel-to-body-point projection does not move. One line to revert if it looks wrong.
 </p>
 
 <h3 id="native-tack">23.2 Native tack &mdash; cheap in code, expensive in art</h3>
@@ -1839,16 +1867,43 @@
 </p>
 
 <ul>
-    <li><strong>It cannot use equipment slots.</strong> <code>EquipmentSlot</code> has
-        exactly two animal slots, <code>BODY</code> and <code>SADDLE</code>, and both are
-        taken; <code>EquipmentClientInfo.LayerType</code> reports itself non-extended, so we
-        cannot add layer types either. Anything past two simultaneous pieces rides on a
-        synced <code>tack</code> attachment, equipped through
-        <code>HorseInteractionHandler</code>'s lowest-priority seam.</li>
-    <li><strong>Colour is free, and that is the whole opportunity.</strong> Vanilla's leather
-        horse armour is a tinted base plus an untinted overlay, declared per-layer on the
-        equipment asset. Two greyscale PNGs and one JSON per piece buys sixteen colours
-        &mdash; or any RGB. A saddle pad, a blanket and a halter are days of work.</li>
+    <li><strong>Geometry is hidden with alpha, not with JSON &mdash; and that is the finding
+        that changes this section.</strong> Equipment draws through an alpha-cutout pass, so
+        any cube whose texels are left transparent simply does not appear. One existing mesh
+        therefore becomes many pieces purely by which part of the sheet is painted. A
+        <strong>halter</strong> is <code>head_saddle</code> + <code>mouth_saddle_wrap</code>
+        with everything else erased; a <strong>bridle</strong> adds the bits and reins; a
+        <strong>blanket</strong> is the horse-armour body cube. <em>No modeling, and for
+        those three, no Java at all.</em></li>
+    <li><strong>A blanket needs no <code>minecraft:</code> override.</strong> Equipment assets
+        are keyed by the file's own namespace, so
+        <code>assets/horsegenetics/equipment/blanket.json</code> registers
+        <code>horsegenetics:blanket</code> and its texture resolves under our namespace too.
+        Equipping is not tag-gated: <code>Horse.canUseSlot</code> returns true
+        unconditionally, so any item with <code>Equippable(slot=BODY)</code> equips and
+        renders. Cost per piece: one JSON, one or two PNGs, three lines of registration.</li>
+    <li><strong>The two-slot ceiling is real but less binding than it looked.</strong>
+        <code>EquipmentSlot</code> has exactly two animal slots and
+        <code>EquipmentClientInfo.LayerType</code> is non-extended, so <em>three</em>
+        simultaneous pieces still needs a synced attachment and a bespoke layer. But two
+        pieces &mdash; one on <code>BODY</code>, one on <code>SADDLE</code> &mdash; are free
+        today and carry independent dye colours, because they are two stacks.</li>
+    <li><strong>Two colours on ONE item: use NeoForge's hook, not a custom layer.</strong>
+        Vanilla reads the dye once, outside the layer loop, so a single stack gives one
+        colour however many layers it declares. NeoForge's
+        <code>IClientItemExtensions.getArmorLayerTintColor</code> exists for exactly this and
+        hands you the layer index; returning 0 skips a layer entirely, which is free
+        per-piece toggling. About twenty lines of client Java and a two-int component
+        &mdash; no new geometry, no custom render layer. This supersedes the
+        draw-the-parts-twice idea, which additionally does not work as written: rendering is
+        deferred, so toggling <code>part.visible</code> between two submits mutates one
+        shared model and both draw the final state.</li>
+    <li><strong>Two traps worth writing down.</strong> A saddle <em>pad</em> must use the
+        <code>HORSE_BODY</code> mesh (inflated 0.1, so it clears the skin) and not the
+        <code>HORSE_SADDLE</code> body cube, which is exactly coincident with the horse and
+        z-fights. And the reins' visibility is hardwired to <code>isRidden</code> in
+        <code>EquineSaddleModel.setupAnim</code>, so a bridle inherits that and cannot change
+        it without Java.</li>
     <li><strong>The four riding <em>sets</em> are not four features, they are four art
         styles.</strong> English, western, racing and jumping share identical code and differ
         only in textures &mdash; and Horse Tack's 381 are All Rights Reserved even though
@@ -1882,15 +1937,20 @@
 <h3 id="dyeable-saddle">23.3 A dyeable saddle asset of our own</h3>
 
 <p>
-    A dyed-saddle trade was built and withdrawn the same day: <strong>vanilla does not tint
-    the saddle</strong>, so the component was set and invisible, and the trade sold a
-    fourteen-emerald saddle indistinguishable from the eight-emerald one. The tinted model
-    comes from <a href="compatibility.html#saturated-saddles">Saturated Saddles</a>'
-    resource pack. Shipping our own dyeable saddle equipment asset would make a coloured
-    saddle work standalone, at the cost of overriding a vanilla asset &mdash; which is the
-    same override that pack performs, so the two would collide rather than stack. Worth
-    doing only alongside &sect;<a href="#native-tack">23.2</a>, where the same asset
-    machinery is already being written. Found 2026-09-15.
+    <strong>Built 2026-09-16 and moved off this page</strong>, per the rule that shipped work
+    leaves the roadmap rather than being marked done on it. The saddle is dyeable, the
+    textures are derived from vanilla by a script rather than drawn, and an undyed saddle is
+    pixel-identical to the one players already know &mdash; which is what keeps donkeys,
+    mules, skeleton and zombie horses looking untouched. Written up at
+    <a href="items.html#tack">the item roster</a>.
+</p>
+
+<p>
+    What is <em>not</em> done and stays here: <strong>nothing in the game dyes a
+    saddle</strong>. There is no recipe and no trade, so a colour can only be set with
+    <code>/give</code> today. The withdrawn horseman trade stays withdrawn until the render
+    is confirmed in game. A crafting route is the obvious next step and belongs with
+    &sect;<a href="#native-tack">23.2</a>'s dye story rather than on its own.
 </p>
 
 <p>
@@ -1961,7 +2021,169 @@
     their files. Found 2026-09-15.
 </p>
 
-<h2 id="settled">24. Settled decisions &mdash; do not reopen</h2>
+<h2 id="asked-0915">24. Asked for on 2026-09-15, and not built</h2>
+
+<p>
+    A batch of thirteen was asked for in one go. The
+    <a href="breeds.html#regions">cowboy&rsquo;s regions</a> and the
+    <a href="villagers.html#trade-table">horseman&rsquo;s tack trades</a> shipped, the six
+    third-party projects are written up on
+    <a href="compatibility.html">Mod compatibility</a> and in
+    &sect;<a href="#mod-patches">23</a>, and these five are the remainder. Each was
+    researched before being deferred, so what follows is the research rather than a
+    restatement of the request &mdash; the point is that the next session does not pay for
+    it twice.
+</p>
+
+<h3 id="weather-spawning">24.1 Breeds that only spawn in certain weather</h3>
+
+<p>
+    An <strong>opt-in</strong> line in the breed file, left out entirely unless it is
+    something other than &ldquo;any weather&rdquo;, and <strong>never back-applied</strong>
+    to the breeds that ship. The owner was explicit on both points.
+</p>
+
+<ul>
+    <li><strong>The format contract is five or six files, not one.</strong>
+        <code>BreedSpecParser.KEYS</code> (anything not listed is a hard error),
+        <code>BreedSpecWriter</code> (which omits a field at its default, deliberately, so an
+        absent line keeps meaning &ldquo;not chosen&rdquo;), the <code>Breed</code> record
+        header and its builder, and <strong><code>BreedSpawnSettings.copy()</code>, which
+        enumerates every record component positionally &mdash; a new field missed there is
+        silently dropped for every shipped breed</strong>. Then
+        <code>breed-format.html</code>, and <code>:common:bakeBreedFiles</code>.</li>
+    <li><strong>The enforcement point is one method.</strong>
+        <code>Breeds.wildCandidates(biomeId, dark)</code> is the single chokepoint the wild
+        path goes through; <code>BreedSpawnHandler.onFinalizeSpawn</code> currently passes
+        exactly one runtime condition (<code>isDarkOutside</code>) and would pass weather
+        too, with <code>HerdManager.pickWildBreed</code> and
+        <code>BreedSpawningConfig</code> following.</li>
+    <li><strong>Snow is not weather.</strong> The precedent already exists in
+        <code>GeneAbilityHandler</code>: <code>snowing</code> is
+        <code>level.isRaining() &amp;&amp; biome.coldEnoughToSnow(pos)</code>, because
+        Minecraft has no snow state &mdash; it is rain in a cold biome. Any weather field
+        must resolve the same way or it will simply never fire.</li>
+    <li><strong>The validation the owner asked for is the interesting part.</strong> A breed
+        that names a weather <em>and</em> biomes must have at least one biome where that
+        weather can occur &mdash; it never rains in a desert, so a rainy desert breed spawns
+        never and says nothing. That check belongs in the parser (so it warns for a drop-in
+        file too) and is surfaced in the breed designer, which already validates through the
+        real parser compiled to WebAssembly. Note the parser has <em>no</em> cross-field
+        spawn validation today, so this would be the first.</li>
+</ul>
+
+<h3 id="visited-chunks">24.2 Horses spawning in chunks already visited</h3>
+
+<p>
+    <strong>The premise needs checking before the work does.</strong> Wild spawning is
+    entirely vanilla&rsquo;s <code>NaturalSpawner</code>, fed by two biome modifiers
+    (<code>add_horse_herds</code>, a 3&ndash;6 herd in listed biomes, and
+    <code>add_horse_loners</code>, a single horse anywhere overworld). Vanilla consumes those
+    from <em>both</em> chunk generation and the ongoing per-tick pass around players, and
+    <code>BreedSpawnHandler</code> accepts <code>NATURAL</code>,
+    <code>CHUNK_GENERATION</code> and <code>SPAWNER</code> identically. <strong>Nothing in
+    this mod keys off a chunk being new</strong> &mdash; no <code>isNewChunk</code>, no
+    <code>ChunkStatus</code> check, no per-chunk attachment.
+</p>
+<p>
+    So horses should already spawn in explored land, and the real cause is likelier to be
+    vanilla&rsquo;s animal rules: <code>CREATURE</code> spawns are weighted heavily toward
+    worldgen, and a night-only breed cannot pass the light check on an existing chunk at all
+    (<code>SpawnTime</code> documents this). <strong>Diagnose before building:</strong> if
+    the answer is vanilla&rsquo;s pass rather than ours, the fix is a mod-owned periodic
+    spawner around players, which is a much larger thing than it sounds and wants a config
+    gate. Asked 2026-09-15.
+</p>
+
+<h3 id="chase-gene">24.3 A gene for how long an aggravated horse gives chase</h3>
+
+<p>
+    Alleles <code>n</code>, <code>timed</code>, <code>distance</code>, <code>sight</code>,
+    <code>never</code>, <code>infinite</code>. <code>n</code> is whatever the behaviour is
+    now, and every natural breed is <code>n</code> unless stated &mdash; which costs nothing,
+    because <code>BreedFounder</code> already forces <strong>every magical gene</strong> to
+    wild for any breed that does not name it. A breed is exactly its breed sheet.
+</p>
+<ul>
+    <li><strong>The substrate exists.</strong> <code>HorseAggroHandler</code> already gives
+        every horse an attack-damage attribute and a melee goal, and
+        <code>WildHorseForgetTargetGoal</code> already clears a wild horse&rsquo;s target
+        after a fixed interval without line of sight. That goal is very nearly
+        <code>sight</code> and <code>timed</code> already; this gene generalises it.</li>
+    <li><strong>It needs Java, not just JSON.</strong> A duration in ticks or a distance in
+        blocks that runs in families means per-allele epigenetics, and a JSON gene&rsquo;s
+        knobs are for painting, not effects. Subclass <code>AbstractAbilityGene</code>,
+        override <code>epiSchema()</code>, read it in
+        <code>abilitiesWhenExpressed(EpiValues)</code> &mdash; <code>IntimidatingGene</code>
+        is the template, and it is a behaviour gene whose radius is inherited and drifts.</li>
+    <li><strong>Watch the goal-priority trap.</strong> The comment in
+        <code>HorseAggroHandler</code> records that vanilla&rsquo;s panic goal sits at
+        priority one and the melee goal at three, both holding <code>Flag.MOVE</code>, so the
+        first hit a fighting horse took handed movement to panic and the fight starved. A
+        chase that must outlast being hurt lands in exactly that fight. Asked 2026-09-15.</li>
+</ul>
+
+<h3 id="magic-grab">24.4 Magic Grab &mdash; a horse that drags what it bites</h3>
+
+<p>
+    Alleles <code>n</code>, <code>smaller</code>, <code>same size</code>,
+    <code>larger</code>, naming the largest thing the horse can pick up. Epigenetics carry
+    drag speed and the damage the horse will absorb before dropping its prey short of
+    wherever it was taking it. Simulates a horse grabbing someone by the teeth and hauling
+    them off &mdash; uncommon in life, common enough in fiction to deserve a locus.
+</p>
+<ul>
+    <li><strong>The dosage pattern already exists</strong> and should be copied rather than
+        reinvented: <code>AbstractMagicFactorGene</code> sums a signed per-copy epigenetic
+        value so that <code>n</code>/weak is weakest and doubled-strong is strongest, with
+        six outcomes falling out of one comparison. <code>MagicFighterGene</code> is the
+        two-value variant of the same shape.</li>
+    <li><strong>There is no existing verb for carrying a mob.</strong> The
+        <code>effects</code> vocabulary has <code>temper</code>, <code>mob_aura</code>,
+        <code>summon</code> and <code>teleport</code>, none of which pick anything up, so
+        this is a new <code>AbilityType</code> &mdash; and that contract is <strong>five
+        files, not the four the wiki claims</strong>: the record on
+        <code>GeneAbility</code>, the registration in <code>AbilityType</code>, the
+        translator case, the creator&rsquo;s <code>schema.js</code> mirror (which
+        <code>check-parity.mjs</code> compares against the real Java), and the Effects tab.
+        The wiki&rsquo;s own verb contract omits <code>schema.js</code> and wrongly says
+        effects miss the parity check; fix that while in there.</li>
+    <li><strong>Mob groups must resolve through entity type tags</strong>, never a hardcoded
+        vanilla list &mdash; a hardcoded list makes every modded creature invisible to the
+        gene and fails silently. Asked 2026-09-15.</li>
+</ul>
+
+<h3 id="getting-started-rewrite">24.5 Getting Started, reorganised into chapters</h3>
+
+<p>
+    The in-game page is <code>TutorialPage</code> and its wiki write-up is
+    <a href="progression.html">the progression page</a>; there is no
+    <code>getting-started.html</code>. The owner asked for headers and sub-headers, every
+    sub-header ending in at least one checklist item, and in-game assets linked or used
+    throughout. The chapters, in order: <strong>husbandry</strong> (stable, wheat farm from
+    seeds and hoe and water, pasture with constant food and water, stalls and sign-linking
+    and tickets, whistles, grooming, bonding, healing &mdash; nothing about breeding);
+    <strong>basic breeding</strong> (heats, covering, stallion seed jars, and
+    <em>explicitly no golden carrots, natural coverings and jars only</em>);
+    <strong>genetics</strong> (what a genotype is, homozygous and heterozygous, dominant and
+    recessive, every gene carrot, line breeding, inbreeding and the risks of both, the vet
+    kit, gelding); <strong>breeding projects</strong> (breeding deliberately for combinations,
+    especially recessives); <strong>horses in the wild</strong> (breeds, bands, social life,
+    wild breeding); and <strong>the villagers</strong> (the horseman and the cowboy, and how
+    they came here from one part of the other world and so deal only in its breeds).
+</p>
+<p>
+    <strong>Two things to know before starting.</strong> The wiki has <em>no</em> checklist
+    idiom &mdash; no checkbox markup and no CSS for one anywhere &mdash; so this either
+    invents one in <code>styles.css</code> or reuses the tester-procedure block from
+    <code>for-testers.html</code>, whose styles are page-local. And the wiki has no item
+    icons: the only images it has are baked gene icons, and the in-game page draws items live
+    on purpose so nothing goes stale when a texture changes. Linking &ldquo;in-game
+    assets&rdquo; on the wiki therefore means deciding to export item art for the first time.
+    Asked 2026-09-15.
+</p>
+
+<h2 id="settled">25. Settled decisions &mdash; do not reopen</h2>
 
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.

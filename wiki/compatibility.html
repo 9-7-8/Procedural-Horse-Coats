@@ -691,6 +691,18 @@
     Leather horse armour is tinted by vanilla and is not in doubt.
 </p>
 <p>
+    <strong>This mod now ships its own dyeable saddle, so the two collide.</strong> As of
+    2026-09-16 we replace <code>assets/minecraft/equipment/saddle.json</code> and the
+    horse-family saddle textures ourselves &mdash; see
+    <a href="items.html#tack">the item roster</a> &mdash; which is the same vanilla file
+    their resource pack replaces. Whichever loads last wins. <strong>Nothing breaks either
+    way</strong>, because both do the same job in the same pattern: a dyeable base plus an
+    untinted overlay for the hardware. Running both is simply redundant, and ours needs no
+    resource pack to render, where theirs does. The choice was forced rather than taken: the
+    requirement was that <em>other</em> mobs go on looking untouched, and only replacing the
+    vanilla asset can reach the saddle a donkey or a skeleton horse is already wearing.
+</p>
+<p>
     <strong>What is actually in the pack</strong>, from downloading and measuring it on
     2026-09-15: 18 equipment assets, 18 item models and 61 textures. Its
     <code>equipment/saddle.json</code> is vanilla's leather pattern &mdash; a
@@ -915,9 +927,9 @@
     <td>Replaces the horse mesh and textures from a resource pack</td>
     <td class="ok">Pack-side</td>
     <td class="bad">Ignored today; both halves have a plan and neither is built</td></tr>
-<tr><td><a href="#saturated-saddles">Saturated Saddles</a></td><td>Dyes the vanilla saddle via a vanilla component</td>
+<tr><td><a href="#saturated-saddles">Saturated Saddles</a></td><td>Replaces the same vanilla saddle asset this mod now replaces</td>
     <td class="ok">26.1.2 (datapack)</td>
-    <td class="ok">No conflict; we already sell a dyed saddle and need no dependency</td></tr>
+    <td class="warn">Redundant rather than broken &mdash; last to load wins; ours needs no resource pack</td></tr>
 <tr><td><a href="#bhar">BHAR</a></td><td>Crafting recipes for vanilla saddle and horse armour</td>
     <td class="ok">26.1.2 (datapack)</td>
     <td class="ok">Recommended; only watch for a recipe collision</td></tr>

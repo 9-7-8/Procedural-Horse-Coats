@@ -27,6 +27,94 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-16">2026-09-16, overnight &mdash; a saddle worth dyeing, and the tack bug was never the one we recorded</h2>
+
+<p>
+    Asked to build our own dyeable saddle, to leave other mobs looking default, and to look
+    into what tack is reachable without learning 3D modeling. The last of those turned up two
+    findings that overturned things this project had already written down, which is the more
+    useful result.
+</p>
+
+<h3>The saddle, derived rather than drawn</h3>
+
+<p>
+    <strong>The leather/hardware split needed no artistic judgement, and that is why it could
+    be a script.</strong> Vanilla's 64&times;64 saddle sheet holds exactly nine colours: six
+    browns at 66&ndash;76&nbsp;% saturation and three pure greys. Leather is
+    &ldquo;saturated&rdquo;, hardware is &ldquo;R equals G equals B&rdquo; &mdash; 208 pixels
+    and 36, summing to vanilla's 244 with no overlap. That rule is stated once, in
+    <code>tools/tack/bake-saddle-textures.ps1</code>, and asserted, so a future vanilla
+    retexture that breaks the assumption fails the bake instead of shipping a muddy saddle.
+</p>
+
+<p>
+    The base is vanilla's colour <em>divided by</em> the undyed tint, so base &times; undyed
+    reproduces vanilla exactly. Measured worst error: <strong>zero</strong>, on both the
+    entity sheet and the inventory icon, verified twice &mdash; once inside the bake and
+    again by reading the written files back and recomposing them against vanilla. That
+    exactness is not vanity: it is what lets the asset cover donkeys, mules, skeleton and
+    zombie horses without anyone noticing, which was the requirement.
+</p>
+
+<p>
+    <strong>The icon needed its own constant, and finding out why was the useful part.</strong>
+    The first attempt reused the entity divisor and the bake refused it &mdash; worst error
+    81. The icon's palette is genuinely brighter (channel maxima 241/153/136 against
+    138/85/46), so dividing by the entity's constant overflowed and clamped. The same run
+    also reported zero hardware pixels, which was itself wrong: the icon's three hardware
+    pixels are <em>warm</em> greys at ~22&nbsp;% saturation, so the neutral test never matched
+    them. Three pixels out of ninety-two on a 16&times;16 icon are not worth a second layer,
+    so the icon is treated as all leather and tints very slightly. <strong>The guard earned
+    its keep twice in ten minutes</strong>, which is the argument for writing the assertion
+    before the asset.
+</p>
+
+<p class="muted">
+    Scoped to the horse family only. Camel, pig, strider and nautilus keep vanilla's entry
+    verbatim in our override &mdash; a horse mod has no business repainting camels.
+</p>
+
+<h3>The tack-fit bug was misdiagnosed on this project's own roadmap</h3>
+
+<p>
+    &sect;23.1 said the equipment layers render at vanilla scale over a resized body and need
+    to inherit <code>state.scale</code>. <strong>They already inherit it.</strong>
+    <code>LivingEntityRenderer.submit</code> scales the pose stack and then iterates the
+    layers inside the same push/pop. The real cause is that vanilla applies
+    <code>MeshTransformer.scaling(1.1F)</code> to three layers &mdash; <code>HORSE</code>,
+    <code>HORSE_ARMOR</code>, <code>HORSE_SADDLE</code> &mdash; in
+    <code>LayerDefinitions</code>, one level <em>above</em> the mesh function that
+    <code>HdHorseModel</code> copied. So the transform was never in the copied part, and its
+    absence is invisible on inspection: that class's doc discusses UV layout at length and
+    scale not at all.
+</p>
+
+<p>
+    It is also not only a scale &mdash;
+    <code>scaled(f).translated(0, 24.016 &times; (1 &minus; f), 0)</code> &mdash; so tack sat
+    2.4 units off vertically as well as 10&nbsp;% large. <strong>The bug was on every horse,
+    including scale 1.0</strong>; the size locus multiplied the gap rather than causing it,
+    which is exactly why it read as &ldquo;worse on big horses&rdquo;. One line to fix. Both
+    ends were re-verified by hand before touching anything, because the same report also
+    contained the claim that turned out to be wrong.
+</p>
+
+<h3>What the research changed about the tack plan</h3>
+
+<p>
+    <strong>Geometry is hidden with alpha, not with JSON.</strong> Equipment draws through an
+    alpha-cutout pass, so a cube whose texels are transparent does not appear &mdash; which
+    means a halter, a bridle and a blanket are all re-textures of meshes that already exist,
+    with no modeling and no Java. A blanket does not even need a <code>minecraft:</code>
+    override, because equipment assets are keyed by their own file's namespace. And for two
+    colours on one item, NeoForge already provides
+    <code>getArmorLayerTintColor</code> with a layer index, which is twenty lines against the
+    hundred-and-fifty of the custom render layer this roadmap had proposed &mdash; a layer
+    that would not have worked as written anyway, since rendering is deferred and toggling
+    <code>part.visible</code> between submits mutates one shared model.
+</p>
+
 <h2 id="d2026-09-15m">2026-09-15, later &mdash; a cowboy comes from somewhere, and two &ldquo;patches&rdquo; turn out to need no patch</h2>
 
 <p>

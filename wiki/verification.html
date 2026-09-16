@@ -78,6 +78,49 @@
     </p>
 </div>
 
+<h2 id="dyeable-saddle-0916">&sect;0-EM &mdash; A dyeable saddle, and the tack-fit bug (2026-09-16, NOT played)</h2>
+
+<div class="note warn">
+    <span class="label">This one changes every horse in the world &mdash; look at it first</span>
+    <p>
+        <code>HdHorseModel</code> was missing vanilla's <code>scaling(1.1F)</code> mesh
+        transform, so the body rendered 10&nbsp;% small and 2.4 units offset against tack
+        that carried it. Fixed, which means <strong>every horse is now about 10&nbsp;%
+        larger than you have ever seen it</strong> &mdash; the HD body was the small one all
+        along. Check that a saddle and horse armour now sit <em>on</em> the horse rather than
+        floating or sinking, on a normal horse and on a deliberately large and small one.
+        Then check the <a href="gene-cutie-mark.html">cutie mark</a> and any glowing coat:
+        both anchor off the body part, so their placement moves with this. If it looks wrong
+        it is one line in <code>createHdLayer()</code> to revert.
+    </p>
+</div>
+
+<p>
+    <strong>The saddle is dyeable now, and an undyed one should be indistinguishable from
+    before.</strong> That is the part worth checking hardest, because it is what keeps every
+    other mob looking untouched: the textures are derived from vanilla by dividing out the
+    leather tint, and both the worn saddle and the inventory icon were verified to recompose
+    to vanilla with <em>zero</em> differing pixels. So a plain saddle on a donkey, a mule, a
+    skeleton horse or a zombie horse should look exactly as it always has. If any of them
+    looks pale, washed out or grey, the tint is not being applied and the base texture is
+    showing raw &mdash; that is the failure mode to watch for.
+</p>
+
+<p>
+    <strong>Camels, pigs, striders and nautiluses were deliberately left alone.</strong> Our
+    equipment asset carries vanilla's entry verbatim for those five layer types, so they
+    should be untouched. Worth a glance at a strider or a saddled pig to confirm the override
+    did not reach further than intended.
+</p>
+
+<p>
+    <strong>A dyed saddle has no crafting route yet.</strong> Nothing in the game dyes one,
+    so to see a colour you need to set the component by hand &mdash; a
+    <code>minecraft:saddle</code> with <code>dyed_color</code> via <code>/give</code>. The
+    horseman does not sell one; the withdrawn trade stays withdrawn until this is seen
+    working.
+</p>
+
 <h2 id="regional-cowboys-0915">&sect;0-EL &mdash; Cowboys with a country, and four tack trades (2026-09-15, NOT played)</h2>
 
 <p>

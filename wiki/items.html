@@ -99,6 +99,61 @@
         horses you have already done today.</li>
 </ul>
 
+<h2 id="tack">Tack: the saddle is dyeable</h2>
+
+<p>
+    <strong>A saddle can be any of the sixteen dye colours</strong>, and an undyed one looks
+    exactly as it always has. That second half is the point: the change reaches donkeys,
+    mules, skeleton horses and zombie horses too, and none of them should look any different
+    from the day before it landed.
+</p>
+
+<p>
+    Vanilla does not tint saddles &mdash; it builds the saddle&rsquo;s equipment asset with
+    the plain, non-dyeable layer, which is why the
+    <a href="villagers.html#random-trades">horseman&rsquo;s dyed saddle was withdrawn</a>
+    before this existed. This mod ships its own asset in the vanilla pattern instead: a base
+    layer that takes the colour, and an untinted overlay for the buckles, so the hardware
+    stays metal whatever the leather does.
+</p>
+
+<h3 id="tack-derived">The textures are derived, not drawn</h3>
+
+<p>
+    Tinting <em>multiplies</em>, so a brown base has no headroom and most dyes collapse into
+    mud. The base therefore has to be desaturated &mdash; and rather than redraw vanilla&rsquo;s
+    saddle by hand, <code>neoforge-26.1.2/tools/tack/bake-saddle-textures.ps1</code> derives
+    it. The split needs no artistic judgement, which is why it can be a script: vanilla&rsquo;s
+    sheet holds exactly nine colours, six saturated browns and three pure greys, so
+    <em>leather is saturated and hardware is R&nbsp;=&nbsp;G&nbsp;=&nbsp;B</em>. That rule is
+    asserted in the bake, so a future vanilla retexture that breaks it fails loudly instead of
+    shipping a muddy saddle.
+</p>
+
+<p>
+    Each leather pixel is vanilla&rsquo;s colour divided by the tint applied when undyed, so
+    base &times; undyed reproduces vanilla exactly. Measured worst error is <strong>zero</strong>
+    &mdash; the shipped files were read back and recomposed against vanilla pixel by pixel.
+    The inventory icon carries its own constant, because its palette is genuinely brighter
+    than the sheet&rsquo;s and the entity&rsquo;s divisor would clamp it.
+</p>
+
+<h3 id="tack-scope">What it deliberately does not touch</h3>
+
+<ul>
+    <li><strong>Camels, pigs, striders and nautiluses.</strong> The asset covers all ten
+        saddle layer types because it replaces vanilla&rsquo;s whole file, but those five
+        carry vanilla&rsquo;s entry verbatim. A horse mod has no business repainting
+        camels.</li>
+    <li><strong>Nothing dyes a saddle yet.</strong> There is no recipe and no trade, so a
+        colour has to be set by hand with <code>/give</code> for now. A crafting route is on
+        <a href="roadmap.html#dyeable-saddle">the roadmap</a>.</li>
+    <li><strong>It conflicts with <a href="compatibility.html#saturated-saddles">Saturated
+        Saddles</a>.</strong> Both replace the same vanilla file, so whichever loads later
+        wins. They do the same job, so the result is not broken either way &mdash; but
+        running both is pointless, and ours needs no resource pack.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
