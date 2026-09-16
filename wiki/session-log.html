@@ -27,6 +27,73 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-16-release">2026-09-16, afternoon &mdash; the release note described a tenth of its own release</h2>
+
+<p>
+    <strong>&ldquo;The 0.5.002 release has a VERY incomplete changelist.&rdquo;</strong> It
+    did. The note was written the morning the dyeable-tack work landed, by the session that
+    did the tagging, out of what that session remembered building &mdash; so it described
+    dyeable tack. The range behind the tag was <strong>297 commits over five days</strong>.
+    No code changed this session; both records of what 0.5.002 is were rewritten.
+</p>
+
+<h3>What the note had left out</h3>
+
+<p>
+    Everything except the tack, essentially. <strong>Seventy-three new breeds</strong>
+    (49 &rarr; 122), magical herds, natural breeding with heat, pregnancy and twins, gelding
+    and the vet&rsquo;s kit, hunger, wild bands, KIT&rsquo;s full W1&ndash;W39 series with
+    SW9, SW10 and DMRT3, heat and cold tolerance, the dhampir split into loci and a breed, the
+    ender whistle, cowboy regions and drop-in name tables, the family tree, F8 and the dive
+    key, and the coat-bake freeze fix. <a href="releases.html#v0-5-002">Releases</a> is the
+    account now.
+</p>
+
+<h3>How the range was audited, so the next one need not be</h3>
+
+<p>
+    Git answers the <em>what</em> cheaply &mdash; the commit log with
+    <code>--stat</code>, per-tag breed counts, the <code>en_us.json</code> diff (the best
+    single proxy for new items, blocks and keybinds), recipe and source adds and deletes,
+    config <code>define</code>s, and <code>gradle.properties</code> for a version bump. It
+    does not answer the <em>why</em>, which lives only in this page, so the entries for the
+    range were read in a subagent and each item marked player-facing or dev-only.
+</p>
+
+<p>
+    <strong>The trap is that most of a heavy range is unreachable in a real jar.</strong>
+    <code>debug.tools</code> defaults to <code>!production()</code>, so the test yard, the
+    test kit, the debug pens and the stall overlay &mdash; the bulk of this range&rsquo;s
+    commit count &mdash; are off in anything a player installs. A commit subject alone will
+    mislead you: <em>&ldquo;A way out every 25 pens in the horse dimension&rdquo;</em> reads
+    exactly like a player feature and lives in <code>DebugPenManager</code>. Check the gate,
+    not the subject.
+</p>
+
+<h3>The wiki had no 0.5.002 section at all</h3>
+
+<p>
+    Its player-facing record stopped at 0.5.001, which is the easier of the two records to
+    forget precisely because it is not where the work was happening. Both now carry the same
+    account, including what the release does to an existing world &mdash; removed genes drop
+    to their default rather than breaking a save, the cream/pearl rebuild moved several
+    breeds, four breeds were shorter than their own table row claimed, and new breeds are
+    written back into an existing <code>breed-spawning.toml</code> &mdash; and an honest
+    rough-edges section naming the mare who loses a pregnancy early and is never covered
+    again. The release was retitled off <em>dyeable tack</em>, which had come to argue with
+    its own body.
+</p>
+
+<p class="muted">
+    The standing rule this produced: write the note from an audit of the whole tag range, at
+    tag time, never from what the tagging session remembers. It pairs with the note in the
+    entry below &mdash; that the wrap-up routine ends at &ldquo;verify clean&rdquo; and never
+    mentions publishing a release. <strong>Both gaps are in the same seam, and
+    <code>CLAUDE.md</code> is at exactly 300 lines</strong>, so adding a release step to the
+    wrap-up means choosing a line to delete &mdash; an owner&rsquo;s call, not a silent
+    restructuring of the standing rules.
+</p>
+
 <h2 id="d2026-09-16-tack">2026-09-16, morning &mdash; fifteen fittings, armour that dyes in three zones, and two guesses that died on a false-colour map</h2>
 
 <p>
