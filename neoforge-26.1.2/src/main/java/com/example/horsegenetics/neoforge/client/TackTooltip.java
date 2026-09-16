@@ -31,11 +31,12 @@ public final class TackTooltip {
         if (tint == null) {
             return;
         }
-        tint.addToTooltip(
-                event.getContext(),
+        // Named for the piece, not for the component: a saddle has a seat and a
+        // bridle, leather horse armour has a blanket and trim. Same three ints,
+        // same layer order, different words.
+        tint.describeInto(
                 event.getToolTip()::add,
-                event.getFlags(),
-                event.getItemStack().getComponents());
+                SaddleTint.zoneNames(event.getItemStack()));
     }
 
     private TackTooltip() {

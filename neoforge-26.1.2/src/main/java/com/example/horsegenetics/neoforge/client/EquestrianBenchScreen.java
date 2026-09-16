@@ -30,7 +30,6 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
  */
 public final class EquestrianBenchScreen extends AbstractContainerScreen<EquestrianBenchMenu> {
 
-    private static final String[] ZONE_LABELS = { "Seat", "Bridle", "Fittings" };
     private static final int[] ZONE_YS = {
             EquestrianBenchMenu.SEAT_Y, EquestrianBenchMenu.BRIDLE_Y, EquestrianBenchMenu.METAL_Y };
 
@@ -111,17 +110,18 @@ public final class EquestrianBenchScreen extends AbstractContainerScreen<Equestr
         VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.SADDLE_X, topPos + EquestrianBenchMenu.SADDLE_Y);
         VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.RESULT_X, topPos + EquestrianBenchMenu.RESULT_Y);
 
+        // The labels follow whatever is in the slot: a saddle has a seat and a
+        // bridle, a caparison has neither, so naming the armour's rows "Seat"
+        // and "Bridle" would simply be wrong (owner, 2026-09-16). An empty slot
+        // shows the saddle's words, since that is the commoner errand.
+        String[] labels = com.example.horsegenetics.neoforge.data.SaddleTint.zoneNames(
+                this.menu.slots.get(EquestrianBenchMenu.SLOT_SADDLE).getItem());
         for (int i = 0; i < ZONE_YS.length; i++) {
             int y = topPos + ZONE_YS[i];
             VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.ZONE_X, y);
-            g.text(this.font, Component.literal(ZONE_LABELS[i]),
+            g.text(this.font, Component.literal(labels[i]),
                     leftPos + EquestrianBenchMenu.ZONE_LABEL_X, y + 5, VanillaPanel.TEXT, false);
         }
-
-        // What the empty rows mean, said once rather than left to be guessed.
-        g.text(this.font, Component.literal("Empty rows keep their colour"),
-                leftPos + EquestrianBenchMenu.MARGIN,
-                topPos + EquestrianBenchMenu.METAL_Y + 20, VanillaPanel.TEXT_DIM, false);
 
         for (int i = 0; i < 27; i++) {
             VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.MARGIN + (i % 9) * 18,

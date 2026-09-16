@@ -35,6 +35,18 @@ public final class TackClientExtensions implements IClientItemExtensions {
                                       int layerIdx, int fallbackColor) {
         SaddleTint tint = stack.get(ModDataComponents.TACK_TINT.get());
         if (tint == null) {
+            // Vanilla dyeing must keep working, and on leather horse armour it
+            // would otherwise get WORSE than vanilla. A crafting-grid dye sets
+            // dyed_color, which vanilla reads once and hands to every dyeable
+            // layer - so our extra trim and fitting layers would take the dye
+            // too and the whole piece would go one flat colour, where vanilla
+            // only ever coloured the blanket. Pinning those two to their own
+            // undyed constants keeps the grid recipe behaving exactly as it
+            // always has; the bench is the only way to colour them.
+            if (stack.is(net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR)
+                    && (layerIdx == SaddleTint.LAYER_BRIDLE || layerIdx == SaddleTint.LAYER_METAL)) {
+                return ARGB.opaque(SaddleTint.ARMOUR_UNDYED.forLayer(layerIdx));
+            }
             return IClientItemExtensions.super.getArmorLayerTintColor(stack, layer, layerIdx, fallbackColor);
         }
         int colour = tint.forLayer(layerIdx);

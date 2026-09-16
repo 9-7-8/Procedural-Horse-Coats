@@ -78,6 +78,69 @@
     </p>
 </div>
 
+<h2 id="dyeable-armour-0916">&sect;0-EN &mdash; Dyeable leather horse armour (2026-09-16, NOT played)</h2>
+
+<div class="note warn">
+    <span class="label">Check the player&rsquo;s leather armour first, before anything horse-shaped</span>
+    <p>
+        <strong>There is no <code>leather_horse_armor.json</code>.</strong> The asset is
+        <code>equipment/leather.json</code>, and that one file carries
+        <code>horse_body</code>, <code>humanoid</code>, <code>humanoid_baby</code> and
+        <code>humanoid_leggings</code> together &mdash; leather horse armour and every
+        leather chestplate, helmet, legging and boot in the game read it. Our override
+        rewrites <code>horse_body</code> only and copies the other three verbatim, the way
+        <code>saddle.json</code> leaves camels and striders alone. <strong>So put on a
+        leather chestplate, dye one in a crafting grid, and confirm both look exactly as
+        they always have.</strong> If the player&rsquo;s armour changed, the override reached
+        further than intended and that is far more serious than anything below.
+    </p>
+</div>
+
+<p>
+    <strong>The bench now takes leather horse armour as well as a saddle</strong>, and the
+    three row labels change with it &mdash; <em>Seat / Bridle / Fittings</em> for a saddle,
+    <em>Blanket / Trim / Fittings</em> for armour, and the saddle&rsquo;s words when the slot
+    is empty. Shift-clicking either from the inventory should land it in the top-left slot.
+    Check the labels actually swap when you drop armour in, since an empty bench shows the
+    saddle&rsquo;s wording and the swap is the easy thing to get wrong.
+</p>
+
+<p>
+    <strong>Vanilla&rsquo;s crafting-grid dye must still work, and must still colour only the
+    blanket.</strong> This is the one that could quietly get <em>worse</em> than vanilla
+    rather than merely broken: vanilla reads a stack&rsquo;s dye once and hands it to every
+    dyeable layer, so our two extra layers would take it too and a grid-dyed armour would go
+    one flat colour over trim and buckles alike. Those two layers are pinned to their own
+    undyed constants when no bench tint is present. <strong>Dye an armour in a grid and
+    confirm the straps stay brown and the hardware stays grey.</strong> Check the icon too
+    &mdash; a grid-dyed piece should still show its colour in the hotbar.
+</p>
+
+<p>
+    <strong>An undyed leather horse armour must be indistinguishable from before.</strong>
+    Same guarantee as the saddle and the same arithmetic behind it: vanilla&rsquo;s
+    <code>leather_overlay.png</code> was split three ways &mdash; 417 texels of brown trim,
+    79 of metal, 92 of near-black shadow that is deliberately <em>not</em> dyeable &mdash;
+    and the bake asserts zero orphans, no clamping and a worst round-trip error of 1. The
+    shadow stays untinted on purpose: it reads as depth rather than as material, and tinting
+    it is how dyed tack starts looking like a flat sticker.
+</p>
+
+<p class="muted">
+    The split was measured, not reasoned, and two guesses died on the way: that the dark
+    greys were outlines (they are not &mdash; the bag outlines are dark <em>brown</em>), and
+    that hardware was grey above <code>0x3E</code> (that threshold cuts each metal bar in
+    half). The boundary is <code>0x20</code>, where thresholds plateau and every bar comes
+    out solid.
+</p>
+
+<p>
+    <strong>Two more fittings have never been rendered either:</strong> lapis lazuli, which
+    fills the blue the wheel completely lacked, and coal for a true black &mdash; netherite
+    is the darkest of the old set but is really a warm plum, so check the two read as
+    different materials rather than as one.
+</p>
+
 <h2 id="dyeable-saddle-0916">&sect;0-EM &mdash; A dyeable saddle: what is still unseen (2026-09-16)</h2>
 
 <p>

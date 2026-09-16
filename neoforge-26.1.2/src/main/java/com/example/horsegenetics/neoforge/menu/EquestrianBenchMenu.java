@@ -87,23 +87,34 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
      * constant, so an iron-fitted saddle is indistinguishable from one that was
      * never dyed.
      */
-    public static final Map<Item, Integer> METALS = Map.of(
-            Items.IRON_INGOT, 0x717171,
-            Items.GOLD_INGOT, 0xE0B94A,
-            Items.COPPER_INGOT, 0xC06A44,
-            Items.NETHERITE_INGOT, 0x4A4248,
-            Items.DIAMOND, 0xB8E8E4,
-            Items.EMERALD, 0x3FBF6F,
-            Items.AMETHYST_SHARD, 0xA079D8);
+    public static final Map<Item, Integer> METALS = Map.ofEntries(
+            Map.entry(Items.IRON_INGOT, SaddleTint.IRON),
+            Map.entry(Items.GOLD_INGOT, SaddleTint.GOLD),
+            Map.entry(Items.COPPER_INGOT, SaddleTint.COPPER),
+            Map.entry(Items.NETHERITE_INGOT, SaddleTint.NETHERITE),
+            Map.entry(Items.DIAMOND, SaddleTint.DIAMOND),
+            Map.entry(Items.EMERALD, SaddleTint.EMERALD),
+            Map.entry(Items.AMETHYST_SHARD, SaddleTint.AMETHYST),
+            Map.entry(Items.QUARTZ, SaddleTint.QUARTZ),
+            Map.entry(Items.REDSTONE, SaddleTint.REDSTONE),
+            Map.entry(Items.ENDER_PEARL, SaddleTint.ENDER_PEARL),
+            Map.entry(Items.BASALT, SaddleTint.BASALT),
+            // BONE, deliberately not BONE_MEAL: bone meal carries a DYE component,
+            // so it would also satisfy the seat and bridle slots and read as an
+            // ambiguous input in a bench whose whole premise is leather-or-metal.
+            Map.entry(Items.BONE, SaddleTint.BONE),
+            Map.entry(Items.PRISMARINE_SHARD, SaddleTint.PRISMARINE),
+            Map.entry(Items.LAPIS_LAZULI, SaddleTint.LAPIS),
+            Map.entry(Items.COAL, SaddleTint.COAL));
 
     /**
-     * The three undyed constants from {@code assets/minecraft/equipment/saddle.json}.
-     * A saddle with no component has never been dyed, and this is what it looks
-     * like - so recolouring one zone keeps the others exactly as they were rather
-     * than resetting them. <b>Must match that file</b>; the leather value changed
-     * on 2026-09-16 to brighten the dyes.
+     * What this bench works on. A saddle and leather horse armour, and nothing
+     * else - iron, gold and diamond horse armour are not dyeable at all, so
+     * accepting them would only offer a result that never comes.
      */
-    private static final SaddleTint UNTINTED = new SaddleTint(0x8A552E, 0x8A552E, 0x717171);
+    public static boolean isTack(ItemStack stack) {
+        return stack.is(Items.SADDLE) || stack.is(Items.LEATHER_HORSE_ARMOR);
+    }
 
     private final ContainerLevelAccess access;
     private long lastSoundTime;
@@ -130,7 +141,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
         addSlot(new Slot(input, SLOT_SADDLE, SADDLE_X, SADDLE_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(Items.SADDLE);
+                return isTack(stack);
             }
         });
         addSlot(dyeSlot(SLOT_SEAT, SEAT_Y));
@@ -191,7 +202,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
         if (saddle.isEmpty()) {
             return null;
         }
-        SaddleTint now = saddle.getOrDefault(ModDataComponents.TACK_TINT.get(), UNTINTED);
+        SaddleTint now = saddle.getOrDefault(ModDataComponents.TACK_TINT.get(), SaddleTint.undyedFor(saddle));
 
         Integer seat = dyeColour(input.getItem(SLOT_SEAT));
         Integer bridle = dyeColour(input.getItem(SLOT_BRIDLE));
@@ -274,7 +285,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
             slot.onQuickCraft(stack, original);
-        } else if (stack.is(Items.SADDLE)) {
+        } else if (isTack(stack)) {
             if (!moveItemStackTo(stack, SLOT_SADDLE, SLOT_SADDLE + 1, false)) {
                 return ItemStack.EMPTY;
             }

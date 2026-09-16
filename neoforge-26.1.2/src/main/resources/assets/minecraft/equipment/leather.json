@@ -1,0 +1,61 @@
+{
+  "__comment": "Overrides vanilla's leather equipment asset to give leather HORSE armour three dyeable zones. WARNING: this one file serves the player's leather armour as well - humanoid, humanoid_baby and humanoid_leggings below are vanilla's entries VERBATIM and must stay that way, exactly as our saddle.json leaves camels, pigs, striders and nautiluses alone. Only horse_body is ours. The three extra textures are derived from vanilla's leather_overlay.png by tools/tack/bake-leather-armor-textures.ps1: trim is the brown strapwork, fittings the metal bars, shadow the near-black depth that is deliberately NOT dyeable. color_when_undyed values are that script's output, and layer ORDER here is SaddleTint's LAYER_SEAT/BRIDLE/METAL - the two must not drift.",
+  "layers": {
+    "horse_body": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:leather"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -6986453
+        },
+        "texture": "minecraft:leather_trim"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -6513508
+        },
+        "texture": "minecraft:leather_fittings"
+      },
+      {
+        "texture": "minecraft:leather_shadow"
+      }
+    ],
+    "humanoid": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:leather"
+      },
+      {
+        "texture": "minecraft:leather_overlay"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:leather"
+      },
+      {
+        "texture": "minecraft:leather_overlay"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "dyeable": {
+          "color_when_undyed": -6265536
+        },
+        "texture": "minecraft:leather"
+      },
+      {
+        "texture": "minecraft:leather_overlay"
+      }
+    ]
+  }
+}

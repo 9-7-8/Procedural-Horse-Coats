@@ -81,7 +81,9 @@ public final class ClientSetup {
     @SubscribeEvent
     static void registerClientExtensions(
             net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
-        event.registerItem(new TackClientExtensions(), net.minecraft.world.item.Items.SADDLE);
+        event.registerItem(new TackClientExtensions(),
+                net.minecraft.world.item.Items.SADDLE,
+                net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR);
     }
 
     /**

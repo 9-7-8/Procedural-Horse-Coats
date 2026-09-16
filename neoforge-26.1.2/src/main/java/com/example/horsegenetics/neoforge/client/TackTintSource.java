@@ -32,13 +32,32 @@ public final class TackTintSource implements ItemTintSource {
     /** Matches {@code items/saddle.json}'s old default and the icon bake's divisor. */
     public static final int UNDYED_ICON = 0xF19988;
 
+    /**
+     * Leather horse armour's icon divisor - vanilla's own {@code -6265536}. Its
+     * icon base is greyscale already, so this is simply the colour vanilla
+     * multiplies it by to get the armour everyone recognises.
+     */
+    public static final int UNDYED_ARMOUR_ICON = 0xA06540;
+
     public static final MapCodec<TackTintSource> MAP_CODEC =
             MapCodec.unit(new TackTintSource());
 
     @Override
     public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity owner) {
         SaddleTint tint = stack.get(ModDataComponents.TACK_TINT.get());
-        return ARGB.opaque(tint == null ? UNDYED_ICON : tint.seat());
+        if (tint != null) {
+            return ARGB.opaque(tint.seat());
+        }
+        if (stack.is(net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR)) {
+            // Replacing vanilla's tint source must not cost vanilla its own
+            // behaviour. Leather horse armour can still be dyed in a crafting
+            // grid, which sets dyed_color and nothing else - so with no
+            // tack_tint we answer exactly what vanilla's dye source would have,
+            // and a grid-dyed armour keeps a correctly coloured icon.
+            return ARGB.opaque(net.minecraft.world.item.component.DyedItemColor
+                    .getOrDefault(stack, UNDYED_ARMOUR_ICON));
+        }
+        return ARGB.opaque(UNDYED_ICON);
     }
 
     @Override

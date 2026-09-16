@@ -1,0 +1,12 @@
+{
+  "__comment": "Replaces vanilla's minecraft:dye tint so a bench-dyed armour's ICON matches the one on the horse. Vanilla's source reads dyed_color, which a bench-dyed piece does not carry, so without this an armour that renders in three colours would sit in the hotbar looking plain - the same bug the saddle had on 2026-09-16, reported as 'it isn't storing the dye' when it always was. TackTintSource falls back to dyed_color for this item, so the vanilla crafting-grid recipe still colours the icon correctly. The icon shows the BLANKET, being the largest area; trim and fittings are in the tooltip.",
+  "model": {
+    "type": "minecraft:model",
+    "model": "minecraft:item/leather_horse_armor",
+    "tints": [
+      {
+        "type": "horsegenetics:tack_tint"
+      }
+    ]
+  }
+}

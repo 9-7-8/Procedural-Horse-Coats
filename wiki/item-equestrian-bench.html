@@ -19,8 +19,9 @@
 <h1>Equestrian Bench</h1>
 <p class="lede">
     A saddler&rsquo;s bench. It dyes a saddle&rsquo;s <strong>seat</strong>, its
-    <strong>bridle</strong> and its <strong>metal fittings</strong> separately, so two
-    saddles need not look alike &mdash; and one day it will cut a banner into a saddle pad.
+    <strong>bridle</strong> and its <strong>metal fittings</strong> separately, does the same
+    three-way job on <strong>leather horse armour</strong>, and one day will cut a banner
+    into a saddle pad. Two horses need not look alike.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -62,10 +63,10 @@
         is two visits, not a compromise.</li>
     <li><strong>Fittings</strong> &mdash; the buckles and rings. Takes a <em>material</em>
         rather than a dye, which is the whole character of the row: you are not painting the
-        hardware, you are saying what it is made of. Thirteen of them.</li>
+        hardware, you are saying what it is made of. Fifteen of them.</li>
 </ul>
 
-<h3 id="fittings">The thirteen fittings</h3>
+<h3 id="fittings">The fifteen fittings</h3>
 
 <table>
     <thead>
@@ -80,11 +81,13 @@
         <tr><td>Prismarine shard</td><td>Pale sea-green</td></tr>
         <tr><td>Ender pearl</td><td>Deep teal</td></tr>
         <tr><td>Diamond</td><td>A deliberately loud cyan</td></tr>
+        <tr><td>Lapis lazuli</td><td>True blue</td></tr>
         <tr><td>Amethyst shard</td><td>Purple</td></tr>
         <tr><td>Nether quartz</td><td>Clean white</td></tr>
         <tr><td>Bone</td><td>Aged cream</td></tr>
         <tr><td>Basalt</td><td>Cool blue-grey stone</td></tr>
         <tr><td>Netherite ingot</td><td>Dark warm gunmetal</td></tr>
+        <tr><td>Coal</td><td>Black</td></tr>
     </tbody>
 </table>
 
@@ -112,13 +115,24 @@
     </p>
 </div>
 
+<div class="note">
+    <span class="label">Coal is not <code>#000000</code>, and that is a trap rather than a taste call</span>
+    <p>
+        The colours here feed <code>getArmorLayerTintColor</code>, and returning
+        <strong>zero</strong> from that hook tells the renderer to skip the layer
+        altogether. Pure black would therefore not give you black hardware; it would give
+        you <em>no</em> hardware. Coal is a near-black with a slight cool cast, which reads
+        identically and cannot trip it.
+    </p>
+</div>
+
 <p class="muted">
-    <strong>What the wheel still lacks:</strong> a true blue, a true black, and pink or
-    magenta. Blue is the glaring one &mdash; the run goes straight from cyan to purple with
-    nothing between, and <em>lapis lazuli</em> is sitting right there. Netherite is the
-    closest thing to black but is really a warm plum; coal or obsidian would be an actual
-    one. Pink and magenta have no vanilla material at all, and reaching them would mean
-    letting dyes into the fittings row, which would cost the row its character.
+    <strong>What the wheel still lacks: pink and magenta, and probably for good.</strong>
+    Blue and black were the real holes and lapis and coal fill them. But no vanilla
+    <em>material</em> is pink, and the only way to reach it would be admitting dyes into the
+    fittings row &mdash; which would cost that row the thing that makes it interesting. You
+    are not painting the hardware, you are saying what it is made of, and nothing the world
+    is made of is pink.
 </p>
 
 <h2 id="name">Naming a saddle</h2>
@@ -173,6 +187,46 @@
     renders <strong>pixel for pixel</strong> as it always has. That matters beyond the
     horse: donkeys, mules, skeleton horses and zombie horses wear the same saddle, and none
     of them changed. Camels, pigs, striders and nautiluses were left alone entirely.
+</p>
+
+<h2 id="armour">It does leather horse armour too</h2>
+
+<p>
+    Put leather horse armour in the top-left slot instead of a saddle and the bench works
+    exactly the same way &mdash; except that <strong>the three row labels change</strong>,
+    because a caparison has no seat and no bridle:
+</p>
+
+<ul>
+    <li><strong>Blanket</strong> &mdash; the broad sheet over the body. This is the part
+        vanilla has always let you dye.</li>
+    <li><strong>Trim</strong> &mdash; the brown strapwork and the saddlebags.</li>
+    <li><strong>Fittings</strong> &mdash; the buckles and bars, from the same fifteen
+        materials as a saddle&rsquo;s.</li>
+</ul>
+
+<p>
+    Iron, gold, diamond and netherite horse armour are <em>not</em> accepted, and that is
+    deliberate rather than an oversight: none of them is dyeable, so taking them would only
+    promise a result that never appears.
+</p>
+
+<h3 id="armour-vanilla">The crafting-grid recipe still works, and still does only the blanket</h3>
+
+<p>
+    You can keep dyeing leather horse armour the way you always have, in a crafting grid
+    with dyes. That path colours <strong>the blanket alone</strong>, exactly as it did before
+    this bench existed &mdash; the trim stays brown and the fittings stay steel.
+</p>
+
+<p>
+    That took deliberate work, because the obvious implementation makes vanilla
+    <em>worse</em> rather than merely different. Vanilla reads a stack&rsquo;s dye once and
+    hands the same value to every dyeable layer, so simply adding trim and fitting layers
+    would have made a grid-dyed armour turn one flat colour over straps and buckles alike.
+    Those two layers are pinned to their own undyed constants whenever no bench colour is
+    present. <strong>The bench is the only thing that can colour them</strong>, which is the
+    distinction worth having: the grid is the crude tool and the bench the fine one.
 </p>
 
 <p class="muted">
