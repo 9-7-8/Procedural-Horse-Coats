@@ -27,6 +27,115 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-16-tack">2026-09-16, morning &mdash; fifteen fittings, armour that dyes in three zones, and two guesses that died on a false-colour map</h2>
+
+<p>
+    A play session on the overnight saddle work, and then the bench grew. Everything below
+    was confirmed in a world except where it says otherwise, and the session ended on a
+    dedicated-server boot at <code>Done (0.274s)</code> for the release.
+</p>
+
+<h3>The tack-fit bug closed, and the recorded diagnosis was wrong</h3>
+
+<p>
+    <strong>&ldquo;The saddle now fits resized breeds correctly.&rdquo;</strong> That closed
+    the last unverified thing hanging over the tack work, and it is worth keeping <em>why</em>
+    the roadmap had it wrong for so long. The entry said equipment layers did not inherit the
+    horse&rsquo;s genetic scale. They always did &mdash; <code>LivingEntityRenderer</code>
+    scales the pose stack and <em>then</em> iterates the layers, inside one push and pop. The
+    real cause was that vanilla applies <code>MeshTransformer.scaling(1.1F)</code> in
+    <code>LayerDefinitions</code>, one level <em>above</em> the mesh function, and
+    <code>HdHorseModel</code> is a copy of the mesh function &mdash; so the transform was
+    never in the part that was copied and its absence is invisible on inspection.
+</p>
+
+<p>
+    <strong>Which means it was never about resizing at all.</strong> The transform is
+    <code>scaled(f).translated(0, 24.016 &times; (1 &minus; f), 0)</code>, so tack sat
+    10&nbsp;% large <em>and</em> 2.4 units high on <em>every</em> horse including scale 1.0.
+    The size locus multiplied a gap that was always there, which is exactly why it read as
+    &ldquo;worse on big horses&rdquo; and sent the original diagnosis hunting in the renderer.
+    Two roadmap sections were deleted rather than marked done: the scale defect, and one that
+    still claimed &ldquo;nothing in the game dyes a saddle&rdquo;.
+</p>
+
+<h3>Eight fittings became fifteen</h3>
+
+<p>
+    Redstone, ender pearl, basalt, bone and prismarine, then lapis lazuli and coal. Three of
+    those sit close to an existing one, and each was pulled <em>away</em> from its
+    material&rsquo;s own average colour rather than set to it &mdash; basalt cooler and
+    lighter than netherite, bone creamier and darker than quartz, ender pearl deeper than
+    prismarine. Two fittings a player cannot tell apart are worth one option, not two.
+</p>
+
+<p>
+    <strong>Coal is deliberately not <code>0x000000</code>, and that is a trap rather than a
+    taste call.</strong> These colours feed <code>getArmorLayerTintColor</code>, where
+    returning <em>zero</em> means <em>skip this layer entirely</em> &mdash; so pure black
+    would have rendered no hardware at all rather than black hardware. The tooltip also
+    learned to consult materials before dyes, or a redstone fitting would have reported
+    itself as &ldquo;red&rdquo;, naming a material the bench will not accept in that slot.
+</p>
+
+<h3>Leather horse armour, and two guesses that had to die first</h3>
+
+<p>
+    <strong>It needed no new artwork.</strong> Vanilla&rsquo;s <code>leather.png</code> is
+    already a pure greyscale tint mask &mdash; 624 texels, four flat tones, zero coloured
+    &mdash; which is why vanilla&rsquo;s dyed armour looks as good as it does. All the work
+    was splitting <code>leather_overlay.png</code>, the part vanilla never tints: 417 texels
+    of brown trim, 79 of metal, 92 of near-black shadow left deliberately undyeable because
+    shadow reads as depth rather than as material.
+</p>
+
+<p>
+    <strong>That split was measured, not argued, and the arguing lost twice.</strong> The
+    saddle&rsquo;s rule &mdash; hardware is &ldquo;R equals G equals B&rdquo; &mdash; does
+    not transfer, because the overlay holds twenty-odd greys rather than three. First guess:
+    the dark greys are outlines. Wrong; a false-colour map came back with the bag outlines
+    <em>green</em>, meaning they are dark brown and never were grey. Second guess: hardware
+    is grey above <code>0x3E</code>. Wrong; at that threshold every metal bar renders as a
+    dark body speckled with bright dots, because a bar is shadow <em>plus</em> highlight and
+    the cut ran through the middle of it. The boundary is <code>0x20</code>, where thresholds
+    plateau and each bar comes out solid. <strong>Three attempts at a reasoned answer, one
+    picture to settle it.</strong>
+</p>
+
+<p>
+    <strong>Two hazards worth carrying forward.</strong> There is no
+    <code>leather_horse_armor.json</code>: the asset is <code>equipment/leather.json</code>,
+    and that one file also serves every leather chestplate, helmet, legging and boot in the
+    game, so the override rewrites <code>horse_body</code> only and copies the three humanoid
+    entries verbatim. And vanilla&rsquo;s crafting-grid dye had to keep working without
+    getting <em>worse</em> than vanilla &mdash; it reads a stack&rsquo;s dye once and hands it
+    to every dyeable layer, so the new layers would have turned a grid-dyed armour one flat
+    colour over straps and buckles alike. They are pinned to their undyed constants whenever
+    no bench tint is present.
+</p>
+
+<h3>A bug found by reading the commit, not by playing it</h3>
+
+<p>
+    <strong>The bench would have destroyed a grid-dyed armour&rsquo;s colour, silently.</strong>
+    Reviewing what had just been pushed: <code>undyedFor</code> treated any armour without a
+    bench tint as plain brown, but a player can arrive with an armour dyed blue in a crafting
+    grid years earlier. Recolouring only its trim would have written the blanket back to
+    leather and thrown the dye away without a word. It now seeds the blanket from
+    <code>dyed_color</code>. The failure mode is the nasty kind &mdash; you get a result, it
+    simply is not the one you asked for &mdash; so it is a named check on
+    <a href="verification.html#dyeable-armour-0916">the verification list</a> rather than
+    something to stumble into.
+</p>
+
+<p class="muted">
+    Three PowerShell attempts were also spent on one line that converts RGB to signed ARGB,
+    which exists precisely so nobody hand-computes it. <code>0xFF000000</code> is neither a
+    long nor a uint in PowerShell &mdash; it is <code>Int32 -16777216</code> &mdash; so the
+    arithmetic overflowed one way, then underflowed the other. It builds the value from four
+    bytes now and has no literal in it at all.
+</p>
+
 <h2 id="d2026-09-16">2026-09-16, overnight &mdash; a saddle worth dyeing, and the tack bug was never the one we recorded</h2>
 
 <p>

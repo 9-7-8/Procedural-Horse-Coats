@@ -1937,6 +1937,34 @@
     their files. Found 2026-09-15.
 </p>
 
+<h3 id="tack-trades">23.4 Tack trades the horseman could sell again</h3>
+
+<p>
+    <strong>A dyed-saddle trade was written and withdrawn on 2026-09-15</strong>, because
+    vanilla did not tint saddles and it therefore sold a fourteen-emerald item visually
+    identical to the eight-emerald one. <strong>That reason has expired.</strong> Saddles
+    take three colours now and leather horse armour takes three more, so the trade would
+    sell something real.
+</p>
+
+<p>
+    What is <em>not</em> settled is whether it should exist at all, and that is the question
+    to answer before writing it. The <a href="item-equestrian-bench.html">bench</a> lets a
+    player dye any saddle they own, so a pre-dyed one at a premium is only worth buying if
+    it carries something they cannot easily make &mdash; a fitting material they have not
+    mined, say, which would make the trade a <em>source</em> rather than a convenience.
+    Selling a random colour at a markup is the version worth avoiding: it was withdrawn once
+    for being an invisible upgrade and would deserve withdrawing again for being a pointless
+    one.
+</p>
+
+<p class="muted">
+    Cheap either way &mdash; the trade table already carries four tack entries and the
+    colours are one component on the stack. See
+    <a href="villagers.html#random-trades">the villagers page</a> for how a tier draws its
+    pool.
+</p>
+
 <h2 id="asked-0915">24. Asked for on 2026-09-15, and not built</h2>
 
 <p>
@@ -2244,6 +2272,27 @@
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
+
+<h3 id="settled-tack">Settled 2026-09-16 &mdash; three calls about dyeable tack</h3>
+
+<ul>
+    <li><strong>Pink and magenta fittings are unreachable, and that is the design rather
+        than a shortfall.</strong> The fittings row takes a <em>material</em>, not a dye:
+        you are not painting the hardware, you are saying what it is made of. No vanilla
+        material is pink, and the only way to reach it would be admitting dyes into that
+        row &mdash; which would cost it the whole thing that makes it interesting. Blue and
+        black were real holes and lapis and coal filled them; this one stays open on
+        purpose.</li>
+    <li><strong>The bench refuses iron, gold, diamond and netherite horse armour.</strong>
+        None of them is dyeable, so accepting them would only offer a result that never
+        appears. Refusing at <code>mayPlace</code> is a clearer answer than an empty output
+        slot.</li>
+    <li><strong>The 92 shadow texels of leather horse armour stay undyeable.</strong> They
+        are the near-black depth inside the bags and across the central box, and they read
+        as <em>shadow</em> rather than as material. Tinting them is exactly how dyed tack
+        starts looking like a flat sticker, so the third zone is the metal and not
+        everything that is left.</li>
+</ul>
 
 <h3>Settled 2026-09-14 &mdash; the two breeding gaps left open overnight</h3>
 

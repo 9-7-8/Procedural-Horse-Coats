@@ -117,6 +117,17 @@
 </p>
 
 <p>
+    <strong>Then the two together, in that order, which is the check most likely to catch
+    something.</strong> Dye an armour in a crafting grid, take <em>that</em> piece to the
+    bench, and recolour <em>only the trim</em>. The blanket must keep its grid colour. This
+    was a real defect found by reading the committed code rather than by playing: the bench
+    assumed any armour without its own tint was plain brown, so editing one row wrote the
+    blanket back to leather and destroyed the player&rsquo;s dye silently. It now seeds the
+    blanket from <code>dyed_color</code>. Worth confirming precisely because the failure is
+    invisible &mdash; you get a result, it just is not the one you asked for.
+</p>
+
+<p>
     <strong>An undyed leather horse armour must be indistinguishable from before.</strong>
     Same guarantee as the saddle and the same arithmetic behind it: vanilla&rsquo;s
     <code>leather_overlay.png</code> was split three ways &mdash; 417 texels of brown trim,

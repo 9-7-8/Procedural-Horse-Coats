@@ -57,6 +57,17 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-262"><strong>Open, noticed 2026-09-16: the test yard fails its own soundness check on every boot, and nobody has looked.</strong>
+    Every launch logs <code>test yard is NOT sound: 0 spot(s) with no floor, 1 blocked at head height, around x=3</code>.
+    It appeared in four separate client sessions in one morning and was set aside each time as
+    noise, which is precisely how a real obstruction survives. <strong>Two possibilities and
+    they want different fixes</strong>: either a block genuinely sits at head height around
+    <code>x=3</code>, in which case some horse in that row is standing in a wall and any test
+    depending on it is quietly compromised; or the check&rsquo;s own head-height probe is
+    off by one and it has been crying wolf since it was written, in which case the warning
+    should be silenced rather than chased. <em>The check is the thing that tells us the yard
+    is trustworthy, so a check that always complains is worse than no check.</em> Cheap to
+    settle: teleport to the coordinate and look.</li>
 <li id="gap-261"><strong>Open, found 2026-09-15: the designer&rsquo;s wasm is not reproducible, so &ldquo;the wasm moved&rdquo; is not evidence of anything.</strong>
     Found running the deferred breed bake. <code>:web:bakeDesignerAssets --rerun-tasks</code> was run twice over a tree
     that differed only in three breed JSON files, and the two runs produced <em>different binaries at identical
