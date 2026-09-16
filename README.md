@@ -177,7 +177,7 @@ the [GitHub repo](https://github.com/9-7-8/Procedural-Horse-Coats)** - a
   (behavior beyond the coat) currently need a hand-written JSON block - see
   the [gene effects](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/gene-effects.html)
   page - but the vocabulary is designed to grow.
-- **New magic breeds.** The 49 real-world breeds are just the start; a breed
+- **New magic breeds.** The real-world breeds are just the start; a breed
   built around a magical theme (rather than a real-world one) is completely
   uncharted territory and I'd love to see what people come up with.
 - **3D modeling, especially.** This is the area I most want help with. The

@@ -78,6 +78,51 @@
     </p>
 </div>
 
+<h2 id="new-breeds-0915b">&sect;0-EF &mdash; Five more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
+
+<p>
+    <strong>Anadolu, Barb, Boerperd, Budyonny, Chilean Corralero.</strong> Green on the bench:
+    <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
+    <code>check-parity</code>, <code>check-links</code> and the designer boot check. Every gene pool was
+    confirmed to survive the bake round-trip, which matters more than it sounds: a bad allele token is
+    <em>warned and dropped</em>, so a breed can load quietly missing a locus and every test still passes.
+    <strong>None of these five has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>The Budyonny does not turn up wild &mdash; and that path has never run before.</strong> It is the
+        <em>first shipped breed to use the <code>spawn</code> checklist</em>
+        (<a href="breed-format.html#where">the format page</a>): <code>["cowboy", "spawn_egg", "stable"]</code>, no
+        <code>wild</code>. Every other breed has always taken the default of all four, so
+        <code>Breed.allows</code> being honoured at herd founding is asserted by nothing in a real world.
+        <strong>Pass:</strong> ride plains, meadow and forest at length and never see a Budyonny herd, while the
+        cowboy still offers one and the spawn egg still exists. <strong>Fail, and it is the interesting kind:</strong>
+        a wild Budyonny band means the checklist is being ignored, which would be quietly wrong for every future
+        breed that uses it.</li>
+    <li><strong>The other four head herds at all, in the right country.</strong> The cheapest check and the one that
+        fails silently &mdash; a breed file that loads but never leads a herd looks exactly like one that does not
+        exist. Read <code>latest.log</code> for a <code>[Breeds]</code> founder line naming each.
+        <strong>Pass:</strong> Anadolu in plains, meadow or savanna (it is <em>common</em>, so it should be the
+        easiest of the five by a distance); Barb in desert or savanna; Boerperd in savanna or plateau; Chilean
+        Corralero in plains or dry hills.</li>
+    <li><strong>A Barb band reads as a pale smudge.</strong> Grey is the whole point of the breed here &mdash; about
+        seven founders in ten grey out, and <em>nothing else varies</em>. <strong>Pass:</strong> a mostly-grey band
+        with a real minority of plain bay, black and chestnut, and no dilution, roan, pinto or leopard anywhere in
+        it. If the band looks colour-assorted, the pool is not being read.</li>
+    <li><strong>The Budyonny is chestnut about four times in five</strong> (<code>e</code> at 0.9), the rest bay or
+        brown with black scarce. <strong>Pass:</strong> a stable's worth of them is overwhelmingly red, with no
+        grey, cream, dun, pinto or leopard at all. The golden metallic sheen is <em>not</em> modelled, so do not
+        read a plain chestnut as a failure.</li>
+    <li><strong>The Boerperd is broad in colour but never patterned.</strong> Cream, grey, rare dun, roan, flaxen and
+        rabicano over any base &mdash; and solid-bodied by breed standard. <strong>Pass:</strong> buckskins,
+        palominos, roans and the odd dun, with <em>no</em> tobiano, sabino, frame or splash on any of them. It also
+        carries <code>DMRT3</code> gait deliberately, which cannot be seen yet
+        (<a href="roadmap.html">gait is unbuilt</a>) &mdash; nothing to check there.</li>
+    <li><strong>Sizes land where the table says.</strong> These were re-derived from the cited metric heights through
+        the real scale rather than taken from the drafts, so this is the number most worth a spot check against
+        <a href="breeds.html#commonness">the table</a>. <strong>Pass:</strong> an Anadolu reads 12.1&ndash;14.0 hh on
+        the info screen, a Budyonny 16.0&ndash;16.3, and a Chilean Corralero 13.2&ndash;14.2.</li>
+</ul>
+
 <h2 id="new-breeds-0915">&sect;0-EE &mdash; Five new breeds, and a country on every breed (2026-09-15, NOT played)</h2>
 
 <p>

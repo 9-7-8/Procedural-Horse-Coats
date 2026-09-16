@@ -27,6 +27,56 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15e">2026-09-15, late &mdash; five more out of <code>intake/</code>, and the format saying no twice</h2>
+
+<p>
+    The second batch, same cadence: five alphabetically, translated rather than pasted. <strong>Anadolu, Barb,
+    Boerperd, Budyonny, Chilean Corralero.</strong> The interesting part was not the translation &mdash; that is a
+    known routine now &mdash; but the two places the drafts asked for something the file format will not do, and
+    one verification check that has never run.
+</p>
+<ul>
+    <li><strong>The Budyonny is the first shipped breed to use <code>spawn</code>.</strong> It is a state-stud and
+        sport-horse breed with no feral population, so the draft was right that it should not head wild herds, and
+        the format has had the checklist for exactly that case since it was written
+        (<a href="breed-format.html#where">&ldquo;a breed the cowboy has heard of but that no longer runs
+        wild&rdquo;</a>). Nothing had ever used it: all 55 previous breeds take the default of all four sources. So
+        the field is documented, parsed, and <em>unexercised in a real world</em> &mdash;
+        <a href="verification.html#new-breeds-0915b">&sect;0-EF</a> makes "no wild Budyonny" the first thing to look
+        at, because a failure there would be silently wrong for every breed that uses it later.</li>
+    <li><strong>Gap 256 got its second breed, which was the condition it named for being fixed.</strong> The draft
+        wanted the three historical Budyonny types &mdash; Massive, Eastern, Middle &mdash; as strains differing in
+        size and strength. A strain may override gene pools and <em>nothing else</em>
+        (<code>BreedSpecParser</code> allows a strain only <code>name</code>, <code>weight</code> and
+        <code>genes</code>), so they are a note and one size band spanning all three. That is the same wall the
+        Chincoteague's sport type hit, and <a href="known-gaps.html#gap-256">the gap</a> had said to wait for a
+        second breed to want it.</li>
+    <li><strong>Nothing needed a new gene</strong>, so nothing went to the roadmap &mdash; a first for an intake
+        batch. The two cosmetic losses are already recorded elsewhere: the Budyonny's golden sheen is the same
+        shader problem as the Akhal-Teke's, and the Boerperd's rack is gait, which is a roadmap item. The Boerperd
+        does carry <code>DMRT3</code> deliberately, at Tennessee Walking levels, so it is ready when gait is.</li>
+    <li><strong>Every pool was checked for silent loss, not just for a green build.</strong> A wrong allele token is
+        warned and dropped rather than thrown, so a breed can load missing a locus with every test still passing.
+        Dumping the loci back out of the <em>baked</em> files confirmed all 42 pools and every pair round-tripped.
+        Worth doing every batch: <code>flaxen</code> and <code>pangare</code> are the traps, because their wild-type
+        tokens are the lower-case <code>f</code> and <code>pa</code> while the variants are <code>Fl1</code>/
+        <code>Fl2</code> and <code>Pa1</code>/<code>Pa2</code> &mdash; the natural loci are Java classes, and
+        neither gene index lists them.</li>
+    <li><strong>The line-ending noise has a working answer.</strong> Restoring the 54 falsely-modified breed files
+        one at a time works and a <code>for</code> loop or <code>xargs</code> over them silently does not; restoring
+        <em>the whole directory in one call</em> clears the lot. Still no <code>.gitattributes</code>, which would
+        end it permanently and was offered.</li>
+</ul>
+<p>
+    Green: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
+    <code>check-parity</code>, <code>check-links</code>, the designer boot check. <strong>None of the five has been
+    seen in a world</strong> &mdash; <a href="verification.html#new-breeds-0915b">&sect;0-EF</a> says what to look
+    at. The five <code>.md</code> files were deleted from <code>intake/</code>, leaving 52 breed drafts queued; the
+    next five alphabetically are <strong>Colorado ranger, criollo, Croatian warmblood, Danubian</strong> and the
+    <strong>Domestic Mountain Pony</strong>, but re-sort the folder first &mdash; the owner pushes new files
+    mid-run and they interleave.
+</p>
+
 <h2 id="d2026-09-15d">2026-09-15, night &mdash; a country on every breed, and the first five out of <code>intake/</code></h2>
 
 <p>
