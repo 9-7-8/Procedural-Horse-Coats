@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equestrian Bench &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Block <span class="sep">/</span> tack</p>
+<h1>Equestrian Bench</h1>
+<p class="lede">
+    A saddler&rsquo;s bench. It dyes a saddle&rsquo;s <strong>seat</strong>, its
+    <strong>bridle</strong> and its <strong>metal fittings</strong> separately, so two
+    saddles need not look alike &mdash; and one day it will cut a banner into a saddle pad.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="use">What it does</h2>
+
+<div class="plain">
+    <p>
+        <strong>Recipe (shapeless):</strong> 1 crafting table + 1 leather + 2 horse hair.
+    </p>
+</div>
+
+<p>
+    Right-click it and you get three slots and three buttons. Put a saddle in the top slot,
+    pick which part of it you are colouring, and put a dye or an ingot in the slot below.
+    The recoloured saddle appears on the right; take it, and the saddle and the material are
+    both spent.
+</p>
+
+<ul>
+    <li><strong>Seat</strong> &mdash; the leather you sit on. Takes any of the sixteen
+        dyes.</li>
+    <li><strong>Bridle</strong> &mdash; the headstall, noseband, bit and reins. Also a
+        dye, and <strong>independent of the seat</strong>: a black saddle with a red bridle
+        is two visits, not a compromise.</li>
+    <li><strong>Metal</strong> &mdash; the buckles and rings. Takes a metal or a gem rather
+        than a dye: <strong>iron</strong> (plain steel), <strong>gold</strong> (brass),
+        <strong>copper</strong>, <strong>netherite</strong> (dark gunmetal),
+        <strong>diamond</strong> (pale blue-white), <strong>emerald</strong> (green) or
+        <strong>amethyst</strong> (purple).</li>
+</ul>
+
+<h2 id="cost">One part at a time, and that is the price</h2>
+
+<p>
+    <strong>Each use spends one dye or one ingot and colours one part.</strong> A saddle
+    done in three colours therefore costs three materials and three passes, and changing
+    your mind costs another. That is deliberate: the bench is meant to be somewhere you go,
+    not a settings screen you open.
+</p>
+
+<p>
+    Two things it politely refuses. A dye will not colour metal and an ingot will not colour
+    leather, so the result stays empty until the material suits the part you picked. And if
+    the part is <em>already</em> that colour nothing appears either &mdash; the bench will
+    not take a dye for doing nothing. <strong>Putting iron in is how you put the fittings
+    back to plain steel</strong>, because plain steel is what iron means here.
+</p>
+
+<div class="note">
+    <span class="label">Nothing is eaten if you change your mind</span>
+    <p>
+        Close the screen and whatever is still in the slots comes back to you. Only
+        <em>taking the result</em> spends anything.
+    </p>
+</div>
+
+<h2 id="undyed">An undyed saddle is exactly the saddle you know</h2>
+
+<p>
+    The bench works by colouring three layers that were cut out of vanilla&rsquo;s own
+    saddle texture, and a saddle nobody has dyed carries no colour at all &mdash; so it
+    renders <strong>pixel for pixel</strong> as it always has. That matters beyond the
+    horse: donkeys, mules, skeleton horses and zombie horses wear the same saddle, and none
+    of them changed. Camels, pigs, striders and nautiluses were left alone entirely.
+</p>
+
+<p class="muted">
+    Not yet: the saddle pad, and cutting a banner into one. Those are
+    <a href="roadmap.html#equestrian-bench">&sect;25 on the roadmap</a>, along with the
+    reasoning behind every decision here.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="shape">Loom-shaped, not furnace-shaped</h2>
+
+<p>
+    It computes its result the moment a slot changes and keeps nothing between uses, so
+    <strong>there is no block entity</strong> &mdash; no ticker, no save and load, no
+    <code>ContainerData</code> to sync. <code>ContainerLevelAccess</code> is the whole
+    connection to the world, exactly as vanilla&rsquo;s loom does it. The
+    <a href="item-research-shelf.html">research shelf</a> needs one only because it
+    <em>ticks</em>; this does not.
+</p>
+
+<p>
+    The part being dyed travels through <code>clickMenuButton</code>, vanilla&rsquo;s own
+    plumbing, so unlike the shelf this needs <strong>no custom packet</strong> &mdash; a
+    zone is a small int and vanilla already carries small ints.
+</p>
+
+<h2 id="three-colours">Three colours on one item</h2>
+
+<p>
+    Vanilla holds one dye per stack and reads it <em>once</em>, outside its layer loop, so
+    every layer of an equipment asset takes the same value however many there are. That is
+    why this cannot be <code>dyed_color</code>. The three colours live in a
+    <code>tack_tint</code> component and reach the renderer through NeoForge&rsquo;s
+    <code>getArmorLayerTintColor</code>, which is handed the layer index for exactly this
+    limitation.
+</p>
+
+<p>
+    <strong>The component&rsquo;s indices are the layer order in
+    <code>assets/minecraft/equipment/saddle.json</code></strong>, and the two must not
+    drift. The three textures are disjoint, so a wrong order would not overlap anything
+    &mdash; it would quietly paint the bridle in the seat&rsquo;s colour, which is the kind
+    of bug that looks like a decision. How the three were cut out of vanilla&rsquo;s sheet,
+    and why an undyed saddle recomposes to it exactly, is on
+    <a href="items.html#tack">the item roster</a>.
+</p>
+
+<p>
+    Absent means undyed, and that path is load-bearing rather than incidental: with no
+    component each layer resolves its own <code>color_when_undyed</code>, and those
+    constants were chosen so the three recompose to vanilla. It is what lets all of this
+    ride on <code>minecraft:saddle</code> rather than needing an item of our own, so a
+    saddle you already owned can be brought to the bench and dyed.
+</p>
+
+<h2 id="verified">Verified</h2>
+
+<p>
+    Built 2026-09-16 and <strong>not yet played</strong>. The three-layer split is verified
+    numerically &mdash; the shipped textures were read back and recomposed against
+    vanilla&rsquo;s with zero differing pixels &mdash; and the mod builds and boots a
+    dedicated server clean. What no bench test can tell you is whether the window reads
+    well, which is what <a href="verification.html">verification</a> is for.
+</p>
+
+</section>
+
+</article>
+</main>
+</body>
+</html>
