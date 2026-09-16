@@ -27,6 +27,113 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15l">2026-09-15, last thing &mdash; the deferred bake runs, and the last two intake files turn out not to be breeds</h2>
+
+<p>
+    The session was asked to intake the remaining breeds from <code>intake/</code>, and
+    <strong>there were none</strong> &mdash; the folder held two reference documents and
+    <code>tools/</code>. The &ldquo;remaining breeds&rdquo; were the fourteen already committed as
+    JSON and left unbaked on purpose, waiting on the next batch rather than on a free moment. The
+    instruction to run the bake chain is what released that deferral.
+</p>
+
+<h3>The bake, and what it says about hand-written breed files</h3>
+
+<p>
+    Run in the prescribed order: <code>bakeBreedFiles</code> on its own, then the tests, then the
+    designer assets, then the build. <strong>It rewrote three files &mdash; the Tersk, the Trottatore
+    Italiano and the Ukrainian Riding Horse &mdash; and every change was <code>1.0</code> becoming
+    <code>1</code> in a <code>size</code> band.</strong> That is <code>BreedSpecWriter</code>'s number
+    formatting disagreeing with hand-written JSON, and nothing else. The useful result is the negative
+    one: <strong>nothing was warned-and-dropped at load</strong>, so the allele tokens that were checked
+    by eye against the <code>new Allele(&hellip;)</code> lines held up, and the hand-written field order
+    was right everywhere it mattered. <code>index.json</code> needed no change. The browser bundle had
+    been sitting at 108 entries against 122 on disk, which was the visible symptom of the wait, and is
+    current again.
+</p>
+
+<p>
+    Green: every <code>*Breed*Test</code> class &mdash; twelve of them, including
+    <code>DhampirBreedTest</code> and <code>BreedingPreviewTest</code>, which a grep turned up beyond the
+    obvious ten &mdash; plus <code>ConceivableTest</code>, <code>DietGeneTest</code> and
+    <code>ReproRulesTest</code>, the three outside the breed package that touch breeds at all. Then
+    <code>:web:bakeDesignerAssets</code>, the designer boot check,
+    <code>:neoforge-26.1.2:build</code>, <code>check-links</code> and <code>check-parity</code>. The full
+    <code>:common:test</code> was deliberately not run; what it would still cover is the coat goldens and
+    the gene suite, which adding a breed cannot move.
+</p>
+
+<h3>The two documents, and why the country table was not imported</h3>
+
+<p>
+    Neither file was a breed draft. One was a breed-count-by-country table, marked INCOMPLETE by its
+    author; the other a long list of registries sorted by <em>how a horse gets into them</em>. Both were
+    read, mined into <a href="roadmap.html#breed-coverage">a roadmap entry</a> and deleted.
+</p>
+
+<p>
+    <strong>The country table is not a coverage oracle, and saying so is the point of the entry.</strong>
+    Every row but one already ships &mdash; the exception is the Dutch Warmblood, awkward because the
+    Gelderland's own <code>notes</code> name KWPN as the book it was folded into &mdash; and it
+    under-represents the mod badly in the other direction, carrying no row at all for China or the
+    Balkans, where a good part of the catalogue now comes from. Importing it as data would have taught
+    the mod nothing and implied a gap that is not there.
+</p>
+
+<p>
+    The registry document gave a candidate list (the continental draft cluster, the natives, the gaited
+    and show breeds, the spotted-pony registries, the sport-horse books) and <strong>one genuinely new
+    design question: open versus closed studbooks are not modelled anywhere, and the breed format cannot
+    express them</strong> &mdash; <code>BreedSpecParser</code>'s key whitelist has no such field, and the
+    idea survives only as prose in <code>notes</code>. It is written up as an owner's call rather than a
+    plan, because <a href="known-gaps.html#gap-134">gap 134</a> already reasoned against studbooks in
+    another context and the nearest hook, <a href="breeds.html#strains">strains</a>, is itself limited by
+    <a href="known-gaps.html#gap-256">gap 256</a>. The same entry records that <code>country</code> sits
+    on nearly every breed with <em>nothing reading it</em>, which is worth settling before the catalogue
+    grows by another country's worth of drafts.
+</p>
+
+<h3>The wasm is not reproducible, and that is not what the TeaVM spike proved</h3>
+
+<p>
+    <code>web.wasm</code> came back dirty from the bake with no <code>common/</code> Java change behind
+    it. It was not staleness: no <code>common/src/main/java</code> commit exists since the binary was
+    last baked, and <strong>two forced rebuilds of an identical tree produced two different binaries at
+    identical size</strong>. The rebuild was reverted &mdash; a data-only bake should leave the binary
+    alone &mdash; and it is written up as <a href="known-gaps.html#gap-261">gap 261</a>.
+</p>
+
+<p>
+    <strong>This does not contradict the 2026-09-06 TeaVM spike, and a later session should not
+    &ldquo;correct&rdquo; one against the other.</strong> That spike proved the compiled code produces
+    byte-identical <em>coats</em> to the JVM; this is about the <em>binary</em> not being reproducible
+    between builds. The practical consequence is one-directional: the <code>CLAUDE.md</code> rule holds
+    as written &mdash; <code>common/</code> changed with the wasm unchanged still means the designer is
+    running yesterday's mod &mdash; but the converse is false, and committing a moved wasm spends a
+    2&nbsp;MB binary diff on nothing while camouflaging a real one.
+</p>
+
+<h3>Docs that had gone false</h3>
+
+<ul>
+    <li><code>verification.html</code> lost the block calling the fourteen &ldquo;pushed unbaked and
+        untested&rdquo; and &ldquo;deliberately still waiting&rdquo;; its own instruction was to delete it
+        when green. It is replaced by
+        <a href="verification.html#new-breeds-0915g">&sect;0-EK</a>, which records what the bake found and
+        that the fourteen are still unplayed.</li>
+    <li>Two stale derived numbers on the roadmap said &ldquo;the 49&rdquo; against a catalogue that
+        <code>Breeds.all().size()</code> owns &mdash; the repeat offender the standing rules name.</li>
+    <li>The carried-over owner question asking whether to add the Mangalarga Marchador is closed: it
+        ships.</li>
+</ul>
+
+<p>
+    <strong>Left for the next session:</strong> &sect;0-EK has no per-breed checklist of the kind
+    &sect;0-EJ and &sect;0-EI carry. Nobody has sat down with those fourteen files to work out what each
+    should look like in a herd, and that write-up &mdash; not the build &mdash; is the outstanding work
+    on them.
+</p>
+
 <h2 id="d2026-09-15k">2026-09-15, after the client was closed &mdash; six hours of yard log, read</h2>
 
 <p>
