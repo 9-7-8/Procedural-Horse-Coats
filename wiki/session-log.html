@@ -27,6 +27,89 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15j">2026-09-15, last of the day &mdash; the intake queue empties: fourteen more breeds, one of them extinct</h2>
+
+<p>
+    The seventh and <strong>final</strong> intake batch. Fifteen drafts remained in
+    <code>intake/</code> &mdash; Spotted Saddle Horse through Zangersheide &mdash; and they
+    became fourteen breeds. Nothing is left in that folder but
+    <code>breedbycountry.md</code>, which is the country authority and stays, and
+    <code>breeds that might be missing.md</code>, which is a candidate list rather than a
+    write-up. <code>Breeds.all().size()</code> owns the count.
+</p>
+
+<h3>The batch</h3>
+
+<p>
+    Spotted Saddle Horse, Swedish Warmblood, Tarpan, Tersk, Trottatore Italiano, Ukrainian
+    Riding Horse, Vyatka, Walkaloosa, Wielkopolski, Yakutian Horse, Yili, Yonaguni Horse,
+    Yugoslavian Trotter, Zangersheide.
+</p>
+
+<ul>
+    <li><strong>One breed arrived twice under two English names.</strong>
+        <code>Yakut.md</code> and <code>Yakutian.md</code> are both the Sakha horse of
+        Yakutia. Neither had shipped, so unlike the APHA re-supply there was no
+        replace-or-not call to put to the owner &mdash; they were merged on that precedent.
+        The merge is the better file than either draft: the base colours come from the one
+        that cites a real study (45 purebreds, <code>MC1R</code> <code>E</code> 0.711 and
+        <code>ASIP</code> <code>A</code> 0.400, one of the few <em>measured</em> base pools
+        here), and the three regional strains come from the other. The same study's low
+        gait-keeper frequency is why <code>DMRT3</code> is left wild rather than written.</li>
+    <li><strong>The mod now has an extinct breed, and extinction turned out to need no new
+        machinery.</strong> The <a href="breed-book.html#desert">Tarpan</a> is
+        <code>kind: natural</code> like everything else &mdash; <code>magical</code> is for
+        the Dhampir, not for &ldquo;unusual&rdquo; &mdash; and the whole of how it says it is
+        gone is that its <code>spawn</code> omits <code>wild</code>. It is very rare, nearly
+        fixed for dun, and carries a 5% <em>ancient leopard</em> strain, which is not folklore:
+        ancient DNA finds leopard-spotted horses in prehistoric western Eurasia. Grey is
+        forced wild for the reason the Konik and the Sorraia force it &mdash; &ldquo;mouse
+        grey&rdquo; is dun, and <code>STX17</code> would whiten the one thing it looks like.
+        Pinned to <strong>Russia</strong> on the last captive animal (1909) under the
+        nation-not-region rule, with the steppe range said in its notes.</li>
+    <li><strong>A founder pool carries a disorder allele homozygously for the first time in
+        this batch's reading of the files.</strong> A Vyatka population-genomic study puts
+        <code>GYS1</code> <a href="gene-gys1.html">PSSM1</a> at an allele frequency of
+        <strong>0.189</strong> &mdash; about 31% heterozygous and <strong>3.6% homozygous</strong>.
+        PSSM1 is dominant, so those heterozygotes are affected rather than silent carriers and
+        roughly a third of the breed is genetically positive. The number was written straight
+        in rather than softened, because it is measured and the softening would have been the
+        invention.</li>
+    <li><strong>Two more warmbloods ship without WFFS, and one of them brings the best
+        evidence in that roadmap section.</strong> A random cohort of 511 Swedish Warmbloods
+        born in 2017 had <strong>38 carriers, 7.4%</strong> &mdash; a random sample rather than
+        a tested-because-suspected one, which is what makes it better than the warmblood-wide
+        proxies. The <a href="breed-book.html#plains">Zangersheide</a> ships clear too but adds
+        nothing: its draft's rate was self-labelled as a proxy and was declined.
+        <a href="roadmap.html#health-genes">The roadmap entry</a> now names five shipped breeds
+        missing their headline disorder. <code>PLOD1</code> here is Friesian dwarfism, and both
+        drafts wrote the WFFS one into it &mdash; the trap held.</li>
+    <li><strong><code>patn1</code> and <code>patn2</code> are two loci, not one pool.</strong>
+        Found while writing the Walkaloosa and the Tarpan, and worth recording because a file
+        written the other way does not fail: the parser warns and drops the pair, and the breed
+        loads quietly missing its pattern modifiers. The Walkaloosa is the second breed here to
+        fix <code>LP</code> in a strain, after the Pony of the Americas, and for the same kind
+        of registry reason &mdash; it must be both spotted and gaited, inspected for each.</li>
+    <li><strong>Three breeds wanted per-strain body sizes and cannot have them.</strong> The
+        Yakutian's regional types, the Yili's production groups and the Spotted Saddle Horse's
+        two registers all differ in size in life; a strain may override gene pools and nothing
+        else, so each got one spanning band and a sentence in <code>notes</code> saying so.</li>
+    <li><strong>Four sentences had to be un-written for ranking the new breeds against the
+        catalogue</strong> &mdash; &ldquo;the tallest band here&rdquo;, &ldquo;the highest jump
+        in the mod&rdquo;, &ldquo;the smallest horse&rdquo;, &ldquo;the first breed to carry X
+        homozygous&rdquo;. <code>CLAUDE.md</code>'s derived-number rule covers prose as much as
+        figures, and one of the four was already false when written: the Yonaguni is nowhere
+        near the smallest horse here, the Falabella is six hands.</li>
+    <li><strong>This batch was committed unbaked and untested, deliberately.</strong> The owner
+        was processing logs in a running client all session and a gradle run recompiles
+        underneath one. Everything a JVM is not needed for was checked instead: all fourteen
+        parse, use only legal top-level and strain keys, and every allele token was read off the
+        <code>new Allele(&hellip;)</code> lines of the gene classes; <code>index.json</code> is
+        sorted and matches the folder. The chain still owed is at the top of
+        <a href="verification.html">to be verified</a>, and that block is the thing to delete
+        when it goes green.</li>
+</ul>
+
 <h2 id="d2026-09-15i">2026-09-15, later still &mdash; fourteen breeds, a re-supply merged, and three headline disorders with no locus</h2>
 
 <p>

@@ -25,6 +25,37 @@
 </p>
 
 <div class="note danger">
+    <span class="label">Pushed unbaked and untested &mdash; the fourteen-breed batch of 2026-09-15</span>
+    <p>
+        <strong>Read this before touching breeds.</strong> The last intake batch &mdash;
+        Spotted Saddle Horse, Swedish Warmblood, Tarpan, Tersk, Trottatore Italiano, Ukrainian
+        Riding Horse, Vyatka, Walkaloosa, Wielkopolski, Yakutian Horse, Yili, Yonaguni Horse,
+        Yugoslavian Trotter, Zangersheide &mdash; was committed and pushed <strong>without
+        <code>bakeBreedFiles</code>, without <code>BreedFilesTest</code> and without a
+        build</strong>. The owner was processing logs in a running client and a gradle run
+        recompiles underneath one, so the choice was an unbuilt commit or a lost session.
+    </p>
+    <p>
+        What <em>was</em> checked without a JVM: all fourteen parse, carry only keys
+        <code>BreedSpecParser.KEYS</code> allows, use only <code>name</code>/<code>weight</code>/<code>genes</code>
+        inside strains, and every allele token was read off the <code>new Allele(&hellip;)</code>
+        lines of the gene classes. <code>index.json</code> is sorted and matches the folder.
+    </p>
+    <p>
+        What is still unproven is exactly what only the JVM proves: that no pair is
+        <em>warned and dropped</em> at load, and that the hand-written field order matches
+        <code>BreedSpecWriter</code>. <strong>Run, in this order:</strong>
+        <code>:common:bakeBreedFiles</code> on its own; then
+        <code>:common:test --tests '*BreedFilesTest'</code> and
+        <code>'*BreedSpecParserTest'</code>; then <code>git diff --name-only</code> and commit
+        whatever the bake rewrote; then <code>:web:bakeDesignerAssets</code> +
+        <code>check-designer-boots.mjs</code> and commit
+        <code>wiki/horse-designer/assets/breeds.json</code>; then
+        <code>:neoforge-26.1.2:build</code>. <strong>Delete this block when it is green.</strong>
+    </p>
+</div>
+
+<div class="note danger">
     <span class="label">How this page is ordered: "does it look right" goes LAST</span>
     <p>
         Owner's rule, 2026-09-13. <strong>Rank every open test by whether it can be wrong
