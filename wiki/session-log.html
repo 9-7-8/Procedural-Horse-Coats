@@ -27,6 +27,56 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15d">2026-09-15, night &mdash; a country on every breed, and the first five out of <code>intake/</code></h2>
+
+<p>
+    The ask was to start taking breeds out of <code>intake/</code>, five at a time and alphabetically, and to add a
+    country to the breed files because it is going to drive a mechanic. Both done; the shipped count is 55.
+</p>
+<ul>
+    <li><strong><code>intake/*.md</code> is not drop-in material, and that shaped the whole session.</strong> Each
+        file is a research write-up from another model carrying a &ldquo;Breed JSON&rdquo; block <em>in a schema this
+        mod has never had</em> &mdash; <code>coat_genes</code>, <code>sources</code>, <code>stat_scores</code>,
+        per-allele frequencies instead of weighted pairs, prices in the hundreds where this mod trades in tens, and
+        invented gene keys (<code>sabino_1</code>, <code>frame_overo</code>). Every one says so in its own schema
+        caveat. So all five were <em>translated</em> against <code>BreedSpecParser</code> rather than pasted.</li>
+    <li><strong>The drafts' size bands contradicted their own research.</strong> Each states a hand range and then
+        gives a scale band that does not match it. Calibrating against the Fjord's known
+        <code>[0.857, 0.921]</code> &rarr; <code>13.2&ndash;14.2</code> proved the convention &mdash; decimal hands
+        = scale &times; 15.75, displayed in stable notation &mdash; and all five were re-derived to land on the
+        heights their own sources give.</li>
+    <li><strong><code>country</code> is a lower-case token, not a display name</strong>
+        (<a href="breed-format.html">the format page</a>), because it is meant to be keyed on rather than only
+        printed; a capital letter is an error the way a bad <code>id</code> is. Blank is a real answer meaning
+        nowhere on earth, and the Dhampir is the only breed with none. Plumbed through the record, parser, writer,
+        breed designer and format page, and backfilled across all 49 earthly breeds.</li>
+    <li><strong>The owner's own <code>breedbycountry.md</code> overrode two of my 49.</strong> It arrived mid-session
+        in a push and is the authority: the Lipizzan is filed under <strong>Austria</strong> (I had Slovenia) and the
+        Arabian under <strong>Saudi Arabia</strong> (I had a region token). The other 47 already agreed.</li>
+    <li><strong>Three genes these breeds need do not exist, and went to
+        <a href="roadmap.html#natural-genes">the roadmap</a></strong> rather than known-gaps (owner's call): the
+        <strong>curly coat</strong> (<code>KRT25</code>/<code>SP6</code>) &mdash; which is the <em>whole</em> of the
+        American Bashkir Curly, so it ships with the colour pool and no curl &mdash; plus ACAN <code>D5</code> and
+        RYR1. What stayed a gap is a format limit: a strain can override gene pools but not <code>stats</code>, so the
+        Chincoteague's sport type cannot be the taller of the two (<a href="known-gaps.html#gap-256">gap 256</a>).</li>
+    <li><strong><code>main</code> was already red before any of this.</strong>
+        <code>HerdManager</code> used <code>NeoRng</code> without importing it &mdash; it sits in
+        <code>&hellip;neoforge.server</code>, the class in <code>&hellip;neoforge</code> &mdash; from the previous
+        session's commit. Fixed in its own commit so it is not buried in the breed work.</li>
+    <li><strong>Two Windows traps worth knowing.</strong> A pushed intake filename containing double quotes cannot be
+        created on NTFS, so <code>git</code> failed the <em>checkout</em> and it read like a merge conflict; the owner
+        renamed it. And a bake dirties all 55 breed files under <code>core.autocrlf</code> with no
+        <code>.gitattributes</code> &mdash; <code>git diff --ignore-cr-at-eol</code> showed no real change, and the
+        committed bytes were identical, so it is noise rather than staleness.</li>
+</ul>
+<p>
+    Green: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
+    <code>BreedFounderTest</code>, <code>check-links</code>, the designer boot check. <strong>None of the five has
+    been seen in a world</strong> &mdash; <a href="verification.html#new-breeds-0915">&sect;0-EE</a> says what to look
+    at. The five <code>.md</code> files were deleted from <code>intake/</code>, leaving 58; note that the folder's
+    alphabetical order was disturbed mid-session by a 36-file push, so the next batch is not simply the next five.
+</p>
+
 <h2 id="d2026-09-15c">2026-09-15, evening &mdash; what the three tools could not reach, and a breed that shapes its own herds</h2>
 
 <p>

@@ -75,29 +75,16 @@
     The fix for the first is to ask Java which categories are viewable rather than naming two that are not; the other two
     are a line each. Nothing is <em>wrong</em> on screen today - which is why it is written down rather than fixed in the
     same pass.</li>
-<li id="gap-256"><strong>Open, found 2026-09-15: four breeds now ship missing the trait that defines them, because the locus does not exist.</strong>
-    Found while taking the first five breeds out of <code>intake/</code>. None of these is a bug in what was written &mdash; each
-    is a gene the mod has not got, recorded here so the next person does not go looking for it in the breed file.
-    <ul>
-        <li><strong>The curly coat, and it is the whole breed.</strong> <a href="breed-book.html">American Bashkir Curly</a> is
-            defined by hair texture, not colour. Two dominant variants are known in the real animal &mdash; <strong>KRT25</strong>
-            (curls, with hypotrichosis) and <strong>SP6</strong> (curls, without it), KRT25 epistatic to SP6 for the hair loss
-            &mdash; and this mod has neither, nor any hair-texture axis to hang them on. <code>horsegenetics.rex</code> is a
-            magical ring marking and is <em>not</em> this. So the breed ships as a hardy, eclectically coloured saddle horse
-            with nothing curly about it, and its two real strains (which are strains <em>of curl</em>) are not written at all,
-            because with no locus they would be two identical empty strains.</li>
-        <li><strong>ACAN <code>D5</code>.</strong> The Chincoteague tests for it; <code>AcanGene</code> declares
-            <code>D1</code>&ndash;<code>D4</code>, and <code>D1</code> is labelled the severe one. Borrowing a different
-            variant's allele would misstate what it does, so the locus is simply absent from that breed.</li>
-        <li><strong>RYR1 / malignant hyperthermia.</strong> The American Azteca registry screens for it alongside the four
-            disorders the breed does carry here. There is no gene for it.</li>
-        <li><strong>A strain cannot set stats.</strong> <code>Breed.Strain</code> carries a name, a weight and gene pools only,
-            so the Chincoteague's sport type &mdash; which is genuinely the taller of the two &mdash; is the same size as the
-            island type. This one is a format limit rather than a missing gene, and it would be a small change to
-            <code>BreedSpecParser</code>, <code>BreedSpecWriter</code> and <code>BreedFounder</code> if a second breed ever wants it.</li>
-    </ul>
-    Each is also written in the relevant breed's own <code>notes</code>, which is what a player reading
-    <a href="breeds.html#commonness">the breeds table</a> will actually see.</li>
+<li id="gap-256"><strong>Open, found 2026-09-15: a strain can override gene pools but not stats, and a shipped breed already wants it to.</strong>
+    <code>Breed.Strain</code> carries a name, a weight and gene pools, and nothing else. The
+    <a href="breed-book.html">Chincoteague Pony</a>'s two strains are the stocky island type and the taller
+    privately-bred sport type &mdash; and the height is half of what makes them different, so the file can only
+    say the <em>white</em> differs and both come out the same size. The breed's notes say so rather than leaving
+    it to be noticed. It would be a small change to <code>BreedSpecParser</code>, <code>BreedSpecWriter</code>
+    and <code>BreedFounder</code>, and it should wait until a second breed wants it.
+    <strong>The three <em>genes</em> that batch turned out to need &mdash; the curly coat, ACAN <code>D5</code> and
+    RYR1 &mdash; are on <a href="roadmap.html#natural-genes">the roadmap</a> instead</strong>, which is where
+    unbuilt work belongs (owner, 2026-09-15).</li>
 <li id="gap-255"><strong>Open, found 2026-09-15: two constants that exist on one side of the twin only.</strong> Also from
     the rule 5 audit. <code>CustomHorseSpawnScreen</code> appends <code>" (preview capped)"</code> to its size readout past
     <code>PREVIEW_SCALE_CAP</code>; the browser has neither the suffix nor the constant, so a very large horse reads there

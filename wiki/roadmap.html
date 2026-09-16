@@ -721,6 +721,7 @@
 <thead><tr><th>Gene</th><th>What it is</th><th>What it needs</th></tr></thead>
 <tbody>
 <tr><td><strong>Natural (polygenic) face and leg white</strong></td><td>The reference is explicit that a horse with <em>no</em> paint gene can still carry a star, stripe, snip, blaze, coronet, sock or stocking. The mod only draws face and leg white as part of a <code>KIT</code> / <code>MITF</code> / <code>PAX3</code> / <code>EDNRB</code> outcome, so a bay with no white gene is always cleanly solid.</td><td>A small <strong>always-on</strong> marking draw &mdash; a handful of epigenetic values, no allele &mdash; feeding the shared <code>WhitePattern.faceMarking</code> and leg vocabulary at low strength. The vocabulary already exists; this is a caller, not a painter.</td></tr>
+<tr><td><strong>Curly coat (<code>KRT25</code>, <code>SP6</code>)</strong></td><td>Two dominant variants curl the coat, mane and tail. <code>KRT25</code> curls <em>and</em> thins the hair (hypotrichosis); <code>SP6</code> curls it without thinning; <code>KRT25</code> is epistatic to <code>SP6</code> for the hair loss, so the plush full-coated curly is the <code>SP6</code>-only horse.</td><td><strong>A coat-structure axis before a gene</strong> &mdash; nothing in the pipeline varies hair at all, so there is no value for a painter to write to. Wanted by the <a href="breed-book.html">American Bashkir Curly</a>, whose entire identity it is; that breed ships with the colour pool and no curl, and says so in its notes. <code>horsegenetics.rex</code> is a magical ring marking and is <strong>not</strong> this. Found taking the breed out of <code>intake/</code>, 2026-09-15.</td></tr>
 </tbody>
 </table>
 </div>
@@ -843,6 +844,17 @@
 <h3>What else is left on the health layer</h3>
 
 <ul>
+    <li><strong>ACAN <code>D5</code> is missing from a locus that already ships.</strong>
+        <a href="gene-acan.html">ACAN</a> declares <code>D1</code>&ndash;<code>D4</code>, and the
+        real dwarfism panel has a fifth. <code>D5</code> is the one the
+        <a href="breed-book.html">Chincoteague Pony</a> is actually tested for, so that breed
+        names no ACAN pool at all rather than borrowing <code>D1</code> &mdash; which is labelled
+        the severe variant and would overstate what the horse has. Additive: the locus and its
+        inheritance already work. Found 2026-09-15.</li>
+    <li><strong>RYR1 / malignant hyperthermia has no locus.</strong> The American Azteca registry
+        screens breeding stock for it alongside HYPP, PSSM1, GBED and HERDA &mdash; the four the
+        <a href="breed-book.html">Azteca</a> does carry here. It is the one of those five with
+        nothing to hang on. Found 2026-09-15.</li>
     <li><strong>Carrier display is half done.</strong> The info panel and the paper dump
         show a horse&rsquo;s <em>expressed</em> conditions, which was the easy half.
         What is still unread is every disorder&rsquo;s <em>carrier</em> sentence &mdash;

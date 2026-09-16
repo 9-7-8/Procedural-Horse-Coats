@@ -78,6 +78,42 @@
     </p>
 </div>
 
+<h2 id="new-breeds-0915">&sect;0-EE &mdash; Five new breeds, and a country on every breed (2026-09-15, NOT played)</h2>
+
+<p>
+    The first five out of <code>intake/</code> &mdash; <strong>Anglo-Arabian, Australian Stock Horse, Azteca,
+    American Bashkir Curly, Chincoteague Pony</strong> &mdash; bringing the shipped count to 55. Every breed also
+    gained a <a href="breed-format.html"><code>country</code></a> token, backfilled across the 49 earthly ones.
+    Green on the bench: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>,
+    <code>BreedSpecParserTest</code>, <code>BreedFounderTest</code>, <code>check-links</code> and the designer boot
+    check. <strong>None of these five has been seen in a world.</strong>
+</p>
+<ul>
+    <li><strong>They spawn at all, and in the right country.</strong> The cheapest check and the one that fails
+        silently: a breed file that loads but never heads a herd looks identical to one that does not exist. Ride
+        plains and savanna and read <code>latest.log</code> for a <code>[Breeds]</code> founder line naming each.
+        <strong>Pass:</strong> Australian Stock Horse and Azteca in savanna, Anglo-Arabian in plains or flower
+        forest, Bashkir Curly in taiga or grove. The Chincoteague is the awkward one &mdash; beach, stony shore
+        and mangrove swamp rarely have the grass and light a horse needs, so it may take a deliberate look.</li>
+    <li><strong>The Chincoteague reads as pinto from a distance.</strong> Tobiano is its signature and
+        <code>SW1</code> splash is heavy, so a band should be loudly white-marked with blue or part-blue eyes far
+        more often than a feral population. <strong>Pass:</strong> a visibly patterned pony herd, not a solid one.
+        This is the breed most likely to look wrong if the strain weights are off.</li>
+    <li><strong>The Bashkir Curly is <em>not</em> curly, on purpose.</strong> There is no hair-texture locus
+        (<a href="roadmap.html#natural-genes">roadmap &sect;11</a>), so it is a hardy saddle horse with the widest
+        colour pool of any breed here. <strong>Pass:</strong> a herd that looks assorted &mdash; chestnut, bay,
+        grey, dilutes, roan, pinto and the occasional leopard. If it looks uniform, the pool is not being read.</li>
+    <li><strong>The Azteca's two strains split about 9 to 1.</strong> Nine founders in ten solid Mexican-standard,
+        one in ten carrying Paint-derived tobiano, frame, sabino or splash. <strong>Pass:</strong> a patterned
+        Azteca is a rare and slightly surprising sight, not the normal one.</li>
+    <li><strong>Sizes land where the book says.</strong> The intake drafts' own size bands contradicted their
+        stated hand ranges and were re-derived, so this is the number most worth a spot check against
+        <a href="breeds.html#commonness">the table</a>. <strong>Pass:</strong> a Chincoteague reads 12.0&ndash;13.2 hh
+        on the info screen and an Anglo-Arabian 15.2&ndash;16.3.</li>
+    <li><strong>Nothing needs looking at for <code>country</code></strong> &mdash; it is data only, displayed
+        nowhere in game yet, and the mechanic it is for is not built.</li>
+</ul>
+
 <h2 id="herd-shape-0915">&sect;0-ED &mdash; A breed's herd shape, and fertility in the breed designer (2026-09-15, built after the 16:11 run, NOT played)</h2>
 
 <p>
