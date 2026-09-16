@@ -1574,7 +1574,7 @@
 <h3>Breed-system follow-ups</h3>
 
 <ul>
-    <li><strong>More fictional breeds wanted.</strong> The 49 are real-world; the mod
+    <li><strong>More fictional breeds wanted.</strong> The shipped catalogue is real-world; the mod
         also wants a batch of invented ones &mdash; a werewolf breed built on
         <a href="gene-lycan.html">LYCAN</a> is now possible &mdash; as gene suites. That is partly
         what would make a polygenic cutie mark worth doing. <strong>This is now cheap</strong>:
@@ -1584,7 +1584,7 @@
         is left here.</li>
     <li><strong>Per-gene pool rates are estimates</strong>, never play-balanced. A herd
         should read as that breed without being a monoculture, and that is eyeballed
-        across all 49.</li>
+        across every one of them (<code>Breeds.all().size()</code> owns the count).</li>
     <li><strong>Total horse density is unmeasured.</strong> Biome assignments overlap
         heavily in the vanilla horse biomes, and <code>add_horse_loners</code> targets
         <code>#minecraft:is_overworld</code> wholesale.</li>
@@ -1601,6 +1601,85 @@
         <code>ATTACK_DAMAGE</code> scaling by breed or size, and a fixed 3-second
         forget-on-line-of-sight timer. Horses are neutral until hit, deliberately, like a
         wolf.</li>
+</ul>
+
+<h3 id="breed-coverage">Breed coverage, and the studbook question &mdash; out of the last two intake files</h3>
+
+<p>
+    The last two files in <code>intake/</code> were not breed drafts. One was a
+    breed-count-by-country table, marked INCOMPLETE by its author; the other a long list of
+    registries sorted by <em>how a horse gets into them</em>. Both were read and deleted on
+    2026-09-15; what was worth keeping is here.
+</p>
+
+<p>
+    <strong>The country table is not a coverage oracle and was deliberately not imported as
+    data.</strong> Every row but one already ships, and the exception is the Dutch Warmblood
+    (KWPN). It also under-represents the mod badly in the other direction &mdash; it carries no
+    row at all for China or the Balkans, where a good part of the catalogue now comes from. Its
+    one real finding is that missing KWPN, which is awkward because
+    <a href="breed-book.html">the Gelderland</a> already names it in its <code>notes</code> as
+    the book it was folded into.
+</p>
+
+<p>
+    <strong>Candidates the second document named that do not ship.</strong> None of these is
+    committed to; they are a shopping list, and a breed is
+    <a href="breed-format.html">a JSON file</a> so each is cheap:
+</p>
+
+<ul>
+    <li><strong>The continental draft cluster</strong> &mdash; Ardennais, Boulonnais, Breton,
+        Comtois, Auxois, Poitevin Mulassier, Cob Normand, Noriker, South German Coldblood,
+        Rhenish German Coldblood, Black Forest Horse, Schleswig Coldblood. The largest coherent
+        gap in the catalogue, and the one where the existing heavy breeds give the most to copy
+        from.</li>
+    <li><strong>Natives</strong> &mdash; M&eacute;rens, Pottok, Landais Pony, Eriskay Pony.</li>
+    <li><strong>Gaited and show breeds</strong> &mdash; Peruvian Paso, Racking Horse, Mountain
+        Pleasure Horse, National Show Horse, Drum Horse.</li>
+    <li><strong>Spotted-pony registries with a breed behind them</strong> &mdash; British Spotted
+        Pony, Australian Spotted Pony, Tiger Horse.</li>
+    <li><strong>Singles</strong> &mdash; Shagya Arabian, Maremmano; and the Russian Don, Russian
+        Trotter and French Trotter beside the Orlov that already ships.</li>
+    <li><strong>The sport-horse books</strong> &mdash; Holsteiner, Westphalian, Rhinelander,
+        Bavarian, W&uuml;rttemberger, Mecklenburg, Brandenburg-Anhalt, the national warmbloods
+        (Danish, Norwegian, Finnish, Swiss, Czech, Slovak, Polish, Hungarian), Belgian BWP and
+        SBS, and the Irish Sport Horse. <strong>Read the studbook bullet below before adding
+        any of these</strong>: they are open, performance-selected books rather than breeding
+        populations, and a pile of them would be a pile of near-identical gene pools.</li>
+    <li class="muted"><strong>Named but not breed-shaped.</strong> The pure colour registries
+        (Palomino, Buckskin, IBHA, Roan, Champagne, Silver Dapple, Pinto) have no breed behind
+        them &mdash; this mod expresses all of them as genes already, which is the better answer.
+        The crossbreed registries (Quarab, Morab, Warlander) are ancestry compositions, which is
+        what <a href="breeds.html">the cross label</a> arguably says already. The AQHA Appendix
+        is a pathway, not a breed.</li>
+</ul>
+
+<ul>
+    <li><strong>Open versus closed studbooks are not modelled anywhere, and this is now an
+        open question rather than an oversight.</strong> The document's actual content is a
+        taxonomy &mdash; closed purebred books, graded books that admit approved outside blood,
+        appendix/upgrade pathways, crossbreed registries &mdash; and the breed format cannot say
+        which a breed is: <code>BreedSpecParser</code>'s key whitelist has no such field, and the
+        idea survives only as prose (the Zangersheide's <code>notes</code> describe an open
+        performance book exactly, with no mechanic behind it).
+        <strong>There is a counter-argument already on the record</strong>:
+        <a href="known-gaps.html#gap-134">gap 134</a> ruled that &ldquo;a studbook has no
+        analogue in a game&rdquo; in a different context. The nearest existing hook is
+        <a href="breeds.html#strains">strains</a>, which is itself limited by
+        <a href="known-gaps.html#gap-256">gap 256</a>. <strong>Owner's call before any of it is
+        built.</strong></li>
+    <li><strong><code>country</code> is carried by nearly every breed and nothing reads it.</strong>
+        <a href="breed-format.html">The format page</a> says the token must be a nation rather
+        than a region &ldquo;because the mechanic this feeds keys on a country&rdquo;, and that
+        mechanic does not exist &mdash; the only readers are the writer and a pass-through in
+        <code>BreedSpawnSettings</code>. Worth deciding what it is <em>for</em> before the
+        catalogue grows by another country's worth of drafts.</li>
+    <li><strong>Two shipped files each stand for several registry divisions.</strong> The Welsh
+        sections A&ndash;D are one <code>welsh_pony.json</code>, and the Hackney Horse and
+        Hackney Pony are one <code>hackney.json</code>. A strain per section is the cheap
+        version and it is blocked on the same <a href="known-gaps.html#gap-256">gap 256</a>,
+        since the sections differ mostly by height and a strain cannot override stats.</li>
 </ul>
 
 <hr>
@@ -1790,8 +1869,6 @@
     <li><strong>Pangar&eacute;: is the pale too pale?</strong> A strong mealy belly ends around <code>MEALY_RED</code>,
         already raised once because the chart has no gold band (<a href="known-gaps.html#gap-49">gap 49</a>). It may still
         be too far.</li>
-    <li><strong>The Mangalarga Marchador is not in the breed catalogue.</strong> The reference names it for both
-        <code>SW1</code> and the grey duplication. Add it as a breed, or leave it out?</li>
 </ul>
 
 <h3>Settled 2026-09-13 &mdash; fertility &amp; gestation</h3>

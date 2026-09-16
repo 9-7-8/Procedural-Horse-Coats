@@ -25,44 +25,6 @@
 </p>
 
 <div class="note danger">
-    <span class="label">Pushed unbaked and untested &mdash; the fourteen-breed batch of 2026-09-15</span>
-    <p>
-        <strong>Read this before touching breeds.</strong> The last intake batch &mdash;
-        Spotted Saddle Horse, Swedish Warmblood, Tarpan, Tersk, Trottatore Italiano, Ukrainian
-        Riding Horse, Vyatka, Walkaloosa, Wielkopolski, Yakutian Horse, Yili, Yonaguni Horse,
-        Yugoslavian Trotter, Zangersheide &mdash; was committed and pushed <strong>without
-        <code>bakeBreedFiles</code>, without <code>BreedFilesTest</code> and without a
-        build</strong>. The owner was processing logs in a running client and a gradle run
-        recompiles underneath one, so the choice was an unbuilt commit or a lost session.
-    </p>
-    <p>
-        What <em>was</em> checked without a JVM: all fourteen parse, carry only keys
-        <code>BreedSpecParser.KEYS</code> allows, use only <code>name</code>/<code>weight</code>/<code>genes</code>
-        inside strains, and every allele token was read off the <code>new Allele(&hellip;)</code>
-        lines of the gene classes. <code>index.json</code> is sorted and matches the folder.
-    </p>
-    <p>
-        What is still unproven is exactly what only the JVM proves: that no pair is
-        <em>warned and dropped</em> at load, and that the hand-written field order matches
-        <code>BreedSpecWriter</code>. <strong>Run, in this order:</strong>
-        <code>:common:bakeBreedFiles</code> on its own; then
-        <code>:common:test --tests '*BreedFilesTest'</code> and
-        <code>'*BreedSpecParserTest'</code>; then <code>git diff --name-only</code> and commit
-        whatever the bake rewrote; then <code>:web:bakeDesignerAssets</code> +
-        <code>check-designer-boots.mjs</code> and commit
-        <code>wiki/horse-designer/assets/breeds.json</code>; then
-        <code>:neoforge-26.1.2:build</code>. <strong>Delete this block when it is green.</strong>
-    </p>
-    <p>
-        <strong>Deliberately still waiting, 2026-09-15 (owner):</strong> &ldquo;I have more breeds to add
-        before I bake again.&rdquo; So this is <em>not</em> an oversight to be tidied up by the next session
-        that notices it &mdash; run the chain above once the next batch of breeds is in, and not before.
-        Baking now would only have to be redone. The original blocker (a running client, which a gradle run
-        recompiles underneath) is gone; the reason is now simply that more breeds are coming.
-    </p>
-</div>
-
-<div class="note danger">
     <span class="label">How this page is ordered: "does it look right" goes LAST</span>
     <p>
         Owner's rule, 2026-09-13. <strong>Rank every open test by whether it can be wrong
@@ -115,6 +77,34 @@
         reproduce any of the four checks.
     </p>
 </div>
+
+<h2 id="new-breeds-0915g">&sect;0-EK &mdash; The deferred fourteen, now baked and tested (2026-09-15, NOT played)</h2>
+
+<p>
+    <strong>Spotted Saddle Horse, Swedish Warmblood, Tarpan, Tersk, Trottatore Italiano, Ukrainian
+    Riding Horse, Vyatka, Walkaloosa, Wielkopolski, Yakutian Horse, Yili, Yonaguni Horse,
+    Yugoslavian Trotter, Zangersheide.</strong> These were committed unbaked on purpose &mdash; the
+    owner had more breeds coming and wanted one bake after them &mdash; and the bake was run when she
+    called for it. <strong>Green on the bench now</strong>: <code>:common:bakeBreedFiles</code>,
+    every <code>*Breed*Test</code> class plus <code>ConceivableTest</code>,
+    <code>DietGeneTest</code> and <code>ReproRulesTest</code>, <code>:web:bakeDesignerAssets</code>,
+    the designer boot check, <code>:neoforge-26.1.2:build</code> and <code>check-links</code>.
+</p>
+<p>
+    <strong>What the bake actually found was trivial, and that is itself the useful result</strong>:
+    it rewrote three files &mdash; the Tersk, the Trottatore Italiano and the Ukrainian Riding Horse
+    &mdash; and every change was <code>1.0</code> becoming <code>1</code> in a <code>size</code>
+    band, which is <code>BreedSpecWriter</code>'s number formatting disagreeing with hand-written
+    JSON. Nothing was warned-and-dropped at load, so the hand-checked allele tokens held up.
+    <code>index.json</code> needed no change and still matches the folder exactly.
+    The designer bundle was the visible casualty of the wait and is now current again.
+</p>
+<p>
+    <strong>None of the fourteen has been seen in a world</strong>, and this section has no
+    per-breed checklist of the kind &sect;0-EJ and &sect;0-EI carry &mdash; nobody has sat down with
+    these files to work out what each one should look like in a herd. That write-up is the
+    outstanding work here, not the build.
+</p>
 
 <h2 id="new-breeds-0915f">&sect;0-EJ &mdash; Fourteen more breeds out of <code>intake/</code>, and a changed American Paint (2026-09-15, NOT played)</h2>
 
