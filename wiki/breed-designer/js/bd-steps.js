@@ -1253,6 +1253,14 @@ window.HG = window.HG || {};
     host.appendChild(el("label", { "class": "field" }, ["File id", id]));
     host.appendChild(el("p", { "class": "hint", text: "The id is how the game tells breeds apart - lower case, unique. It is filled in from the name." }));
 
+    var country = el("input", { type: "text", value: st.country || "", placeholder: "united_states" });
+    country.addEventListener("input", function () {
+      st.country = country.value.trim().toLowerCase().replace(/\s+/g, "_");
+      bd.changed();
+    });
+    host.appendChild(el("label", { "class": "field" }, ["Country of origin", country]));
+    host.appendChild(el("p", { "class": "hint", text: "Where the breed is from, as a lower-case token - united_states, mexico, norway. Leave it blank for a breed nowhere on earth made." }));
+
     var desc = el("textarea", { rows: "4", placeholder: "A rotting horse from the swamps: slow, bad-tempered, and not quite dead." });
     desc.value = st.description || "";
     var left = el("span", { "class": "hint" });

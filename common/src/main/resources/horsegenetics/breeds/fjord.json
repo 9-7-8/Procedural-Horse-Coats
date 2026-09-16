@@ -1,6 +1,7 @@
 {
   "id": "fjord",
   "name": "Norwegian Fjord",
+  "country": "norway",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:snowy_taiga",

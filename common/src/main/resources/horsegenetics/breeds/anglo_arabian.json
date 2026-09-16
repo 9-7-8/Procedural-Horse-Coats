@@ -1,0 +1,71 @@
+{
+  "id": "anglo_arabian",
+  "name": "Anglo-Arabian",
+  "country": "france",
+  "description": "Arabian endurance crossed onto Thoroughbred scope, fixed as a breed of its own in France. Tall, rangy and grey more often than not.",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 8,
+    "jump": 8,
+    "health": 8,
+    "size": [0.98, 1.07]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 41 },
+      { "pair": "E/e", "weight": 46 },
+      { "pair": "e/e", "weight": 13 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 49 },
+      { "pair": "A/a", "weight": 42 },
+      { "pair": "a/a", "weight": 9 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 10 },
+      { "pair": "G3/N", "weight": 44 },
+      { "pair": "N/N", "weight": 46 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 5 },
+      { "pair": "N/N", "weight": 95 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 3 },
+      { "pair": "rb/rb", "weight": 97 }
+    ],
+    "horsegenetics.prkdc": [
+      { "pair": "scid/N", "weight": 7 },
+      { "pair": "N/N", "weight": 93 }
+    ],
+    "horsegenetics.toe1": [
+      { "pair": "ca/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.myo5a": [
+      { "pair": "lfs/N", "weight": 21 },
+      { "pair": "N/N", "weight": 79 }
+    ]
+  },
+  "notes": [
+    "No dilution, no tobiano, no leopard complex - both parent breeds are base-colour-and-grey populations, so a patterned Anglo comes from outcrossing.",
+    "SCID, CA and LFS carry at Arabian-line rates; the studies behind them are of Arabians, not of Anglos.",
+    "Pedigree fractions are the real registry's definition of the breed and are not modelled - an Arabian bred to a Thoroughbred here makes a cross, not an Anglo-Arabian.",
+    "Dished face, stride length and endurance metabolism not modelled."
+  ]
+}

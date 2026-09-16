@@ -1,6 +1,7 @@
 {
   "id": "irish_draught",
   "name": "Irish Draught",
+  "country": "ireland",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:windswept_hills",

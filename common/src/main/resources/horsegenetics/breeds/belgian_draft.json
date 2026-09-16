@@ -1,6 +1,7 @@
 {
   "id": "belgian_draft",
   "name": "Belgian Draft",
+  "country": "belgium",
   "commonness": "common",
   "biomes": [
     "minecraft:plains",

@@ -1,6 +1,7 @@
 {
   "id": "akhal_teke",
   "name": "Akhal-Teke",
+  "country": "turkmenistan",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:desert",

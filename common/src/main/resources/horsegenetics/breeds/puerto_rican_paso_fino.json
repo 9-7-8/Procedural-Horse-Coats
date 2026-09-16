@@ -1,6 +1,7 @@
 {
   "id": "puerto_rican_paso_fino",
   "name": "Puerto Rican Paso Fino",
+  "country": "puerto_rico",
   "commonness": "rare",
   "biomes": [
     "minecraft:jungle",

@@ -1,6 +1,7 @@
 {
   "id": "suffolk_punch",
   "name": "Suffolk Punch",
+  "country": "united_kingdom",
   "commonness": "rare",
   "biomes": [
     "minecraft:plains",

@@ -1,6 +1,7 @@
 {
   "id": "knabstrupper",
   "name": "Knabstrupper",
+  "country": "denmark",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:plains",

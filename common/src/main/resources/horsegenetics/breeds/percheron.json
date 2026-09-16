@@ -1,6 +1,7 @@
 {
   "id": "percheron",
   "name": "Percheron",
+  "country": "france",
   "commonness": "common",
   "biomes": [
     "minecraft:plains",

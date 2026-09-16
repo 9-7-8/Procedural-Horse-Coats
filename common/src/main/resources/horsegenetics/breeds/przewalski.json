@@ -1,6 +1,7 @@
 {
   "id": "przewalski",
   "name": "Przewalski's Horse",
+  "country": "mongolia",
   "commonness": "rare",
   "biomes": [
     "minecraft:desert",

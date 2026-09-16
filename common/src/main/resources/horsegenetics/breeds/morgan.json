@@ -1,6 +1,7 @@
 {
   "id": "morgan",
   "name": "Morgan",
+  "country": "united_states",
   "commonness": "very_common",
   "biomes": [
     "minecraft:plains",

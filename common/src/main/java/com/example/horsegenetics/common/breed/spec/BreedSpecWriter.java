@@ -40,6 +40,9 @@ public final class BreedSpecWriter {
 
         fields.add(field("id", quote(breed.id())));
         fields.add(field("name", quote(breed.name())));
+        if (!breed.country().isEmpty()) {
+            fields.add(field("country", quote(breed.country())));
+        }
         if (!breed.description().isEmpty()) {
             fields.add(field("description", quote(breed.description())));
         }

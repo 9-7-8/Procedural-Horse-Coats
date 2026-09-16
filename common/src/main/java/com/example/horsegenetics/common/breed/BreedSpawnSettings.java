@@ -155,7 +155,7 @@ public final class BreedSpawnSettings {
 
     private static Breed copy(Breed b, List<String> biomes, double weight, Set<BreedSource> sources,
                               SpawnTime time) {
-        return new Breed(b.id(), b.name(), b.magical(), biomes, weight, sources, b.genePools(),
+        return new Breed(b.id(), b.name(), b.country(), b.magical(), biomes, weight, sources, b.genePools(),
                 b.scores(), b.bands(), b.notes(), b.price(), b.description(), time, b.strains(), b.magicalVariant(),
                 b.herd());
     }

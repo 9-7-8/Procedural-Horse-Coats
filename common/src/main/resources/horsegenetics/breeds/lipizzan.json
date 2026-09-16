@@ -1,6 +1,7 @@
 {
   "id": "lipizzan",
   "name": "Lipizzan",
+  "country": "slovenia",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:plains",

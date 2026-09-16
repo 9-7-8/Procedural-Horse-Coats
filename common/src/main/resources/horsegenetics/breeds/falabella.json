@@ -1,6 +1,7 @@
 {
   "id": "falabella",
   "name": "Falabella",
+  "country": "argentina",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:plains",

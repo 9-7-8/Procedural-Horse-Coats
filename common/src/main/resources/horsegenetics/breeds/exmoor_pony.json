@@ -1,6 +1,7 @@
 {
   "id": "exmoor_pony",
   "name": "Exmoor Pony",
+  "country": "united_kingdom",
   "commonness": "rare",
   "biomes": [
     "minecraft:windswept_hills",

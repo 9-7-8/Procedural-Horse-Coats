@@ -1,6 +1,7 @@
 {
   "id": "haflinger",
   "name": "Haflinger",
+  "country": "austria",
   "commonness": "common",
   "biomes": [
     "minecraft:cherry_grove",

@@ -1,6 +1,7 @@
 {
   "id": "camargue",
   "name": "Camargue",
+  "country": "france",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:swamp",

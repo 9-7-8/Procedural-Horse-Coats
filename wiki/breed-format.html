@@ -48,6 +48,7 @@
 <pre><code class="language-json">{
   "id": "friesian",
   "name": "Friesian",
+  "country": "netherlands",
   "description": "Jet black, heavily feathered, and built to carry a knight.",
   "kind": "natural",
   "commonness": "uncommon",
@@ -94,6 +95,16 @@
     <td><code>name</code></td>
     <td>display string</td>
     <td><strong>required.</strong></td>
+</tr>
+<tr>
+    <td><code>country</code></td>
+    <td>lower-case token</td>
+    <td>none, and a blank one is a real answer &mdash; it means the breed comes from
+        nowhere on earth. Where in the real world the breed is from, spelled like an
+        <code>id</code> (<code>united_states</code>, <code>mexico</code>,
+        <code>arabian_peninsula</code>) rather than as a display name, because it is
+        meant to be <em>keyed on</em> and not only printed. A capital letter is an
+        error rather than a warning, for the same reason.</td>
 </tr>
 <tr>
     <td><code>description</code></td>

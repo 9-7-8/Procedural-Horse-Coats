@@ -1,6 +1,7 @@
 {
   "id": "andalusian",
   "name": "Andalusian",
+  "country": "spain",
   "biomes": [
     "minecraft:plains",
     "minecraft:forest",

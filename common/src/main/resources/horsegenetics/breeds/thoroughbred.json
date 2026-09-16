@@ -1,6 +1,7 @@
 {
   "id": "thoroughbred",
   "name": "Thoroughbred",
+  "country": "united_kingdom",
   "commonness": "very_common",
   "biomes": [
     "minecraft:plains",

@@ -1,6 +1,7 @@
 {
   "id": "hanoverian",
   "name": "Hanoverian",
+  "country": "germany",
   "commonness": "very_common",
   "biomes": [
     "minecraft:plains",

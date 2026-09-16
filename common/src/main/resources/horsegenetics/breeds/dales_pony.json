@@ -1,6 +1,7 @@
 {
   "id": "dales_pony",
   "name": "Dales Pony",
+  "country": "united_kingdom",
   "commonness": "rare",
   "biomes": [
     "minecraft:windswept_hills",

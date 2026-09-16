@@ -1,6 +1,7 @@
 {
   "id": "icelandic_horse",
   "name": "Icelandic Horse",
+  "country": "iceland",
   "biomes": [
     "minecraft:snowy_plains",
     "minecraft:ice_spikes",

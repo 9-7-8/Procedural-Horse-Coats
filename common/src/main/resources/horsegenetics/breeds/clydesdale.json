@@ -1,6 +1,7 @@
 {
   "id": "clydesdale",
   "name": "Clydesdale",
+  "country": "united_kingdom",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:taiga",

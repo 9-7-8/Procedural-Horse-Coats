@@ -1,6 +1,7 @@
 {
   "id": "quarter_horse",
   "name": "Quarter Horse",
+  "country": "united_states",
   "commonness": "extremely_common",
   "biomes": [
     "minecraft:plains",

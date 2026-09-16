@@ -1,6 +1,7 @@
 {
   "id": "appaloosa",
   "name": "Appaloosa",
+  "country": "united_states",
   "biomes": [
     "minecraft:taiga",
     "minecraft:forest",

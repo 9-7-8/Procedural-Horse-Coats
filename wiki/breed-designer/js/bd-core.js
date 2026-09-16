@@ -84,7 +84,7 @@ window.HG = window.HG || {};
       genes[k] = [{ pair: t + "/" + t, weight: 1 }];
     });
     return {
-      id: "", name: "", description: "",
+      id: "", name: "", country: "", description: "",
       kind: undefined, magical_variant: undefined, commonness: undefined, spawn: undefined,
       spawn_time: undefined, herd: undefined,
       biomes: [], price: undefined,
@@ -105,6 +105,7 @@ window.HG = window.HG || {};
     var out = {};
     out.id = s.id || "";
     out.name = s.name || "";
+    if (s.country) out.country = s.country;
     if (s.description) out.description = s.description;
     var kind = s.kind === "auto" || !s.kind ? (bd.anyMagical(s) ? "magical" : undefined) : s.kind;
     if (kind && kind !== "natural") out.kind = kind;
@@ -149,7 +150,7 @@ window.HG = window.HG || {};
   bd.fromJson = function (text) {
     var parsed = JSON.parse(text);
     var s = bd.blank();
-    ["id", "name", "description", "kind", "magical_variant", "commonness", "spawn", "spawn_time", "herd", "price"]
+    ["id", "name", "country", "description", "kind", "magical_variant", "commonness", "spawn", "spawn_time", "herd", "price"]
       .forEach(function (k) { if (parsed[k] !== undefined) s[k] = parsed[k]; });
     s.biomes = parsed.biomes || [];
     s.stats = parsed.stats || {};

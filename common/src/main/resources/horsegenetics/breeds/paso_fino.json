@@ -1,6 +1,7 @@
 {
   "id": "paso_fino",
   "name": "Paso Fino",
+  "country": "colombia",
   "biomes": [
     "minecraft:savanna",
     "minecraft:jungle",

@@ -1,0 +1,112 @@
+{
+  "id": "australian_stock_horse",
+  "name": "Australian Stock Horse",
+  "country": "australia",
+  "description": "Australia's working stock horse: compact, sure-footed and level-headed around cattle. Every colour is allowed, and it shows.",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:windswept_hills",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 7,
+    "health": 9,
+    "size": [0.89, 1.05]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 20 },
+      { "pair": "N/N", "weight": 80 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 20 },
+      { "pair": "d1/d2", "weight": 10 },
+      { "pair": "d2/d2", "weight": 70 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 15 },
+      { "pair": "N/N", "weight": 85 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 13 },
+      { "pair": "rn/rn", "weight": 87 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 70 },
+      { "pair": "Fl1/f", "weight": 27 },
+      { "pair": "f/f", "weight": 3 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 5 },
+      { "pair": "z/z", "weight": 95 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 3 },
+      { "pair": "c/c", "weight": 97 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 8 },
+      { "pair": "to/to", "weight": 92 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 13 },
+      { "pair": "W20/N", "weight": 3 },
+      { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 5 },
+      { "pair": "N/N", "weight": 95 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 11 },
+      { "pair": "rb/rb", "weight": 89 }
+    ],
+    "horsegenetics.gbe1": [
+      { "pair": "gbed/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.gys1": [
+      { "pair": "P/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.ppib": [
+      { "pair": "herda/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.scn4a": [
+      { "pair": "H/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ]
+  },
+  "notes": [
+    "\"All colours\" is the breed standard, so the pool is unusually wide - but solids stay the majority and a loud pinto is meant to be an outlier, not the look of the herd.",
+    "No leopard complex: Appaloosa blood is not part of the breed's description.",
+    "The four disorder rates are deliberately below the Quarter Horse figures they are borrowed from - there is no published Stock Horse panel survey, and the breed only has stock-horse ancestry in some modern lines.",
+    "Cow sense, campdrafting and the sure-footed walk are the breed's actual selling points and none of them are modelled."
+  ]
+}

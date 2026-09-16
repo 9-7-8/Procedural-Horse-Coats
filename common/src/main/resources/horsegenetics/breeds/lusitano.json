@@ -1,6 +1,7 @@
 {
   "id": "lusitano",
   "name": "Lusitano",
+  "country": "portugal",
   "biomes": [
     "minecraft:savanna",
     "minecraft:plains",

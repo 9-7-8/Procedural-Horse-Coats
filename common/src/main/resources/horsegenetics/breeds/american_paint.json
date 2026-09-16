@@ -1,6 +1,7 @@
 {
   "id": "american_paint",
   "name": "American Paint",
+  "country": "united_states",
   "commonness": "very_common",
   "biomes": [
     "minecraft:plains",

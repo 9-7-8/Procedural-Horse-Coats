@@ -1,6 +1,7 @@
 {
   "id": "welsh_pony",
   "name": "Welsh Pony",
+  "country": "united_kingdom",
   "commonness": "very_common",
   "biomes": [
     "minecraft:windswept_hills",

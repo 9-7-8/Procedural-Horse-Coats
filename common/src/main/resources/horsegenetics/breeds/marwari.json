@@ -1,6 +1,7 @@
 {
   "id": "marwari",
   "name": "Marwari",
+  "country": "india",
   "commonness": "rare",
   "biomes": [
     "minecraft:jungle",

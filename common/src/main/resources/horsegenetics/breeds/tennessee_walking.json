@@ -1,6 +1,7 @@
 {
   "id": "tennessee_walking",
   "name": "Tennessee Walking Horse",
+  "country": "united_states",
   "commonness": "very_common",
   "biomes": [
     "minecraft:plains",

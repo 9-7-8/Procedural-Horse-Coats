@@ -1,6 +1,7 @@
 {
   "id": "cleveland_bay",
   "name": "Cleveland Bay",
+  "country": "united_kingdom",
   "commonness": "rare",
   "biomes": [
     "minecraft:plains",

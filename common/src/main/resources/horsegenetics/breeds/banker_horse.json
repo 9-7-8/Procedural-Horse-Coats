@@ -1,6 +1,7 @@
 {
   "id": "banker_horse",
   "name": "Banker Horse",
+  "country": "united_states",
   "commonness": "rare",
   "biomes": [
     "minecraft:beach",

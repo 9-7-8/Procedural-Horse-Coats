@@ -1,6 +1,7 @@
 {
   "id": "gypsy_vanner",
   "name": "Gypsy Vanner",
+  "country": "united_kingdom",
   "commonness": "common",
   "biomes": [
     "minecraft:plains",

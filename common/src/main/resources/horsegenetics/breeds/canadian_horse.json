@@ -1,6 +1,7 @@
 {
   "id": "canadian_horse",
   "name": "Canadian Horse",
+  "country": "canada",
   "commonness": "rare",
   "biomes": [
     "minecraft:snowy_taiga",

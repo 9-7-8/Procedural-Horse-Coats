@@ -1,6 +1,7 @@
 {
   "id": "caspian_pony",
   "name": "Caspian Pony",
+  "country": "iran",
   "commonness": "rare",
   "biomes": [
     "minecraft:desert",

@@ -1,0 +1,122 @@
+{
+  "id": "chincoteague_pony",
+  "name": "Chincoteague Pony",
+  "country": "united_states",
+  "description": "A small, weatherproof salt-marsh pony off a barrier island, and the most reliably pinto thing running wild. Blue eyes are common.",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:beach",
+    "minecraft:stony_shore",
+    "minecraft:mangrove_swamp",
+    "minecraft:swamp",
+    "minecraft:plains"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 9,
+    "size": [0.762, 0.86]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 41 },
+      { "pair": "E/e", "weight": 46 },
+      { "pair": "e/e", "weight": 13 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 45 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 4 },
+      { "pair": "Cr/N", "weight": 32 },
+      { "pair": "N/N", "weight": 64 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 13 },
+      { "pair": "N/N", "weight": 87 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d1/d2", "weight": 10 },
+      { "pair": "d2/d2", "weight": 84 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 49 },
+      { "pair": "Fl1/f", "weight": 42 },
+      { "pair": "f/f", "weight": 9 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 3 },
+      { "pair": "z/z", "weight": 97 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 6 },
+      { "pair": "rn/rn", "weight": 94 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 16 },
+      { "pair": "rb/rb", "weight": 84 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Traditional Assateague",
+      "weight": 8,
+      "genes": {
+        "horsegenetics.tobiano": [
+          { "pair": "To/To", "weight": 28 },
+          { "pair": "To/to", "weight": 50 },
+          { "pair": "to/to", "weight": 22 }
+        ],
+        "horsegenetics.mitf": [
+          { "pair": "SW1/N", "weight": 45 },
+          { "pair": "N/N", "weight": 55 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 28 },
+          { "pair": "W20/N", "weight": 11 },
+          { "pair": "N/N", "weight": 61 }
+        ]
+      }
+    },
+    {
+      "name": "Sport Type",
+      "weight": 2,
+      "genes": {
+        "horsegenetics.tobiano": [
+          { "pair": "To/to", "weight": 45 },
+          { "pair": "to/to", "weight": 55 }
+        ],
+        "horsegenetics.mitf": [
+          { "pair": "SW1/N", "weight": 35 },
+          { "pair": "N/N", "weight": 65 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 22 },
+          { "pair": "N/N", "weight": 78 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "Tobiano is the signature and splash is the reason for the eyes - a herd should read as pinto ponies from a distance, with blue and part-blue eyes turning up far more often than in a feral population.",
+    "Two strains: eight founders in ten are the stocky island type, two in ten the taller privately-bred sport type. The sport type should also be the larger of the two and is not, because a strain can override gene pools but not the stats block.",
+    "ACAN D5 dwarfism is tested for in the real breed and is not here: this mod's ACAN gene declares D1 to D4, and D1 is the severe one, so borrowing a different variant's allele would overstate what it does.",
+    "The association's other listed risks - uveitis, lordosis, EMS, laminitis, DSLD, CIAR - are mostly not single-gene conditions and have no locus here. They are deliberately not stood in for by unrelated disorders.",
+    "Salt tolerance, marsh grazing, the dense winter coat, swimming and the pony penning are all outside what the mod models."
+  ]
+}

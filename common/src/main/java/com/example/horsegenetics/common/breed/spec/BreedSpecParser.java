@@ -56,7 +56,7 @@ public final class BreedSpecParser {
 
     /** Keys a breed file may carry. Anything else is a hard error. */
     private static final Set<String> KEYS = Set.of(
-            "id", "name", "description", "kind", "commonness", "spawn_weight", "biomes",
+            "id", "name", "country", "description", "kind", "commonness", "spawn_weight", "biomes",
             "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes", "magical_variant",
             "herd");
 
@@ -124,6 +124,16 @@ public final class BreedSpecParser {
             throw new IllegalArgumentException("\"" + id + "\" is reserved by the breed label system");
         }
         Breed.Builder b = Breed.of(id, requireString(root, "name"));
+
+        // --- where in the real world it is from ---------------------------
+        // Thrown rather than forgiven, like "id" and unlike a gene reference: a
+        // country is meant to be keyed on, so "United States" is not a pack this
+        // install has not got, it is a display name in a token's slot.
+        String country = string(root, "country", "");
+        if (!country.isEmpty() && !country.equals(country.toLowerCase(Locale.ROOT))) {
+            throw new IllegalArgumentException("\"country\" must be a lower-case token, got \"" + country + "\"");
+        }
+        b.country(country);
         b.description(string(root, "description", ""));
 
         // --- kind: natural (default) or magical --------------------------

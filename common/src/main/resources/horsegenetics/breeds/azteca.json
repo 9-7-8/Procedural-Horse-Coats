@@ -1,0 +1,108 @@
+{
+  "id": "azteca",
+  "name": "Azteca",
+  "country": "mexico",
+  "description": "Mexico's own horse, made in 1972 from Iberian stock and Quarter Horses. Compact, powerfully built, and usually a solid dark colour or grey.",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:plains",
+    "minecraft:windswept_hills",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 8,
+    "health": 8,
+    "size": [0.905, 1.016]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 53 },
+      { "pair": "E/e", "weight": 39 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 3 },
+      { "pair": "G3/N", "weight": 30 },
+      { "pair": "N/N", "weight": 67 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 5 },
+      { "pair": "rb/rb", "weight": 95 }
+    ],
+    "horsegenetics.gbe1": [
+      { "pair": "gbed/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.gys1": [
+      { "pair": "P/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.ppib": [
+      { "pair": "herda/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.scn4a": [
+      { "pair": "H/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Mexican Solid",
+      "weight": 9,
+      "genes": {
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 8 },
+          { "pair": "N/N", "weight": 92 }
+        ]
+      }
+    },
+    {
+      "name": "American Patterned",
+      "weight": 1,
+      "genes": {
+        "horsegenetics.tobiano": [
+          { "pair": "To/To", "weight": 12 },
+          { "pair": "To/to", "weight": 46 },
+          { "pair": "to/to", "weight": 42 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 34 },
+          { "pair": "W20/N", "weight": 9 },
+          { "pair": "N/N", "weight": 57 }
+        ],
+        "horsegenetics.ednrb": [
+          { "pair": "O/N", "weight": 21 },
+          { "pair": "N/N", "weight": 79 }
+        ],
+        "horsegenetics.mitf": [
+          { "pair": "SW1/N", "weight": 13 },
+          { "pair": "N/N", "weight": 87 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "Two strains, because the two registries disagree about what an Azteca may look like: nine founders in ten are the Mexican solid-coloured standard, one in ten carries the American registry's permitted Paint-derived patterns.",
+    "No leopard complex in either strain - the Mexican standard explicitly refuses Appaloosa patterning.",
+    "The disorder rates are Quarter Horse-derived risks kept deliberately low. The American registry requires breeding stock to test clear for all of them, which is evidence the loci matter to the breed, not evidence of a carrier rate.",
+    "Malignant hyperthermia (RYR1) is the fifth locus that registry screens, and this mod has no gene for it.",
+    "Foundation-blood percentages, registry inspection and charro training are what actually define the breed, and none of them are modelled: a Quarter Horse bred to an Andalusian here makes a cross, not an Azteca."
+  ]
+}

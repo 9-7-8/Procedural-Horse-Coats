@@ -174,6 +174,7 @@ class BreedSpecParserTest {
                  "spawn": ["cowboy", "spawn_egg"],
                  "biomes": ["minecraft:plains"],
                  "price": [8, 14],
+                 "country": "norway",
                  "description": "A test breed.", "spawn_time": "night",
                  "stats": {"speed": 9, "size": [1.1, 1.4]},
                  "genes": {"horsegenetics.extension": [ {"pair": "E/e", "weight": 3} ]},
@@ -186,6 +187,7 @@ class BreedSpecParserTest {
 
         assertEquals(written, BreedSpecWriter.write(twice), "write -> parse -> write must be stable");
         assertEquals(once.sources(), twice.sources());
+        assertEquals("norway", twice.country());
         assertEquals(once.magical(), twice.magical());
         assertEquals(once.spawnWeight(), twice.spawnWeight());
         assertEquals(once.price(), twice.price());

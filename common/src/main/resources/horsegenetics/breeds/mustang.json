@@ -1,6 +1,7 @@
 {
   "id": "mustang",
   "name": "Mustang",
+  "country": "united_states",
   "biomes": [
     "minecraft:badlands",
     "minecraft:eroded_badlands",

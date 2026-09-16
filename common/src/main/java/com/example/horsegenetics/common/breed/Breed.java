@@ -65,6 +65,7 @@ import java.util.Set;
 public record Breed(
         String id,
         String name,
+        String country,
         boolean magical,
         List<String> biomes,
         double spawnWeight,
@@ -187,6 +188,7 @@ public record Breed(
         bands = bands == null ? BreedBands.NONE : bands;
         notes = List.copyOf(notes);
         price = price == null ? Optional.empty() : price;
+        country = country == null ? "" : country;
         description = description == null ? "" : description;
         spawnTime = spawnTime == null ? SpawnTime.ANY : spawnTime;
         strains = strains == null ? List.of() : List.copyOf(strains);
@@ -351,6 +353,7 @@ public record Breed(
         private final BreedBands.Builder bands = BreedBands.builder();
         private final List<String> notes = new ArrayList<>();
         private Optional<PriceRange> price = Optional.empty();
+        private String country = "";
         private String description = "";
         private SpawnTime spawnTime = SpawnTime.ANY;
         private final List<Strain> strains = new ArrayList<>();
@@ -517,6 +520,21 @@ public record Breed(
             return this;
         }
 
+        /**
+         * Where in the real world the breed comes from, as a lower-case token
+         * ({@code "mexico"}, {@code "united_states"}). Spelled like an
+         * {@code id} rather than as a display name because it is meant to be
+         * keyed on, not only printed.
+         *
+         * <p>Left blank by a breed that has no country to claim - a magical one
+         * the mod invented, or {@link Breeds#FERAL_MIXED}, which is the absence
+         * of a breed rather than one.
+         */
+        public Builder country(String token) {
+            this.country = token == null ? "" : token;
+            return this;
+        }
+
         /** A sentence or two for the Breeds tab - what a player reads about the breed in game. */
         public Builder description(String text) {
             this.description = text == null ? "" : text;
@@ -557,7 +575,7 @@ public record Breed(
         }
 
         public Breed build() {
-            return new Breed(id, name, magical, biomes, spawnWeight,
+            return new Breed(id, name, country, magical, biomes, spawnWeight,
                     sourcesNamed ? sources : BreedSource.ALL, pools,
                     new StatScores(speed, jump, health, size), bands.build(),
                     notes, price,

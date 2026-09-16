@@ -1,6 +1,7 @@
 {
   "id": "karabakh",
   "name": "Karabakh",
+  "country": "azerbaijan",
   "commonness": "rare",
   "biomes": [
     "minecraft:desert",

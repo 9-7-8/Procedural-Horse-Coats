@@ -1,0 +1,123 @@
+{
+  "id": "bashkir_curly",
+  "name": "American Bashkir Curly",
+  "country": "united_states",
+  "description": "A rare, hardy North American saddle horse whose whole identity is the curl of its coat rather than its colour - so it comes in every colour there is.",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:grove",
+    "minecraft:plains"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 9,
+    "size": [0.905, 0.968]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 38 },
+      { "pair": "E/e", "weight": 47 },
+      { "pair": "e/e", "weight": 15 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 38 },
+      { "pair": "A/a", "weight": 47 },
+      { "pair": "a/a", "weight": 15 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 23 },
+      { "pair": "N/N", "weight": 77 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 18 },
+      { "pair": "d1/d2", "weight": 10 },
+      { "pair": "d2/d2", "weight": 72 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 18 },
+      { "pair": "N/N", "weight": 82 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 18 },
+      { "pair": "rn/rn", "weight": 82 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 10 },
+      { "pair": "z/z", "weight": 90 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 4 },
+      { "pair": "c/c", "weight": 96 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/Fl1", "weight": 61 },
+      { "pair": "Fl1/f", "weight": 34 },
+      { "pair": "f/f", "weight": 5 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 21 },
+      { "pair": "to/to", "weight": 79 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 21 },
+      { "pair": "W20/N", "weight": 11 },
+      { "pair": "N/N", "weight": 68 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 11 },
+      { "pair": "N/N", "weight": 89 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 16 },
+      { "pair": "rb/rb", "weight": 84 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 18 },
+      { "pair": "lp/lp", "weight": 82 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 21 },
+      { "pair": "n/n", "weight": 79 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 11 },
+      { "pair": "n/n", "weight": 89 }
+    ],
+    "horsegenetics.toe1": [
+      { "pair": "ca/N", "weight": 5 },
+      { "pair": "N/N", "weight": 95 }
+    ],
+    "horsegenetics.gys1": [
+      { "pair": "P/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.scn4a": [
+      { "pair": "H/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ]
+  },
+  "notes": [
+    "The curly coat is not modelled, and it is the entire breed. There is no hair-texture locus: KRT25 (curls with hair loss) and SP6 (curls without it) both exist in real Curlies, KRT25 is epistatic to SP6 for the hair loss, and this mod has neither gene - so a Bashkir Curly here is a hardy, eclectically coloured saddle horse and nothing on it is curly.",
+    "The two strains the breed really has are strains of curl, so they are not written here: with no curly locus they would be two identical empty strains.",
+    "The wide colour pool is the point - chestnut is the commonest, but bay, black, grey, every dilution, roan, pinto and leopard all occur, so a herd should look assorted.",
+    "CA carries at the 2.8% figure reported for the breed. HYPP and PSSM1 are kept very low and are borrowed from stock-horse lines rather than measured here.",
+    "Curl tightness, seasonal shedding, mane and ear curl, and the breed's reputation for suiting some allergic riders are all outside what the mod models."
+  ]
+}

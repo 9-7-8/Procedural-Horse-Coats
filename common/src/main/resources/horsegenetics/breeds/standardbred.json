@@ -1,6 +1,7 @@
 {
   "id": "standardbred",
   "name": "Standardbred",
+  "country": "united_states",
   "commonness": "very_common",
   "biomes": [
     "minecraft:plains",

@@ -1,6 +1,7 @@
 {
   "id": "shetland_pony",
   "name": "Shetland Pony",
+  "country": "united_kingdom",
   "commonness": "very_common",
   "biomes": [
     "minecraft:mushroom_fields",

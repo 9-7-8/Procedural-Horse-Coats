@@ -1,6 +1,7 @@
 {
   "id": "trakehner",
   "name": "Trakehner",
+  "country": "germany",
   "commonness": "common",
   "biomes": [
     "minecraft:taiga",

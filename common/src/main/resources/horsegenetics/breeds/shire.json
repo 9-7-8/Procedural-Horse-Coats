@@ -1,6 +1,7 @@
 {
   "id": "shire",
   "name": "Shire",
+  "country": "united_kingdom",
   "commonness": "uncommon",
   "biomes": [
     "minecraft:plains",

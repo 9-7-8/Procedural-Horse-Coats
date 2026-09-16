@@ -1,6 +1,7 @@
 {
   "id": "new_forest_pony",
   "name": "New Forest Pony",
+  "country": "united_kingdom",
   "commonness": "common",
   "biomes": [
     "minecraft:forest",
