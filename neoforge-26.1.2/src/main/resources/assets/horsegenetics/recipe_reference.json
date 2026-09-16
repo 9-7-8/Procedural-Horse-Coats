@@ -141,6 +141,18 @@
       "count": 1
     },
     {
+      "id": "equestrian_bench",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:crafting_table",
+        "minecraft:leather",
+        "horsegenetics:horse_hair",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:equestrian_bench",
+      "count": 1
+    },
+    {
       "id": "equine_research_shelf",
       "kind": "shapeless",
       "in": [

@@ -24,6 +24,15 @@ public final class ModMenus {
             MENUS.register("research_shelf",
                     () -> new MenuType<>(ResearchShelfMenu::new, FeatureFlags.VANILLA_SET));
 
+    /**
+     * The <b>Equestrian Bench's</b>. Loom-shaped - three slots and a result
+     * computed on change - so unlike the shelf's it is backed by a
+     * {@code ContainerLevelAccess} rather than a block entity.
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<EquestrianBenchMenu>> EQUESTRIAN_BENCH =
+            MENUS.register("equestrian_bench",
+                    () -> new MenuType<>(EquestrianBenchMenu::new, FeatureFlags.VANILLA_SET));
+
     public static void register(IEventBus modEventBus) {
         MENUS.register(modEventBus);
     }

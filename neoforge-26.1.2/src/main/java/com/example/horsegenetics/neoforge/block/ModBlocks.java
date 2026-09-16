@@ -84,6 +84,17 @@ public final class ModBlocks {
             EquineResearchShelfBlock::new,
             EquineResearchShelfBlock::shelfProperties);
 
+    /**
+     * The <b>Equestrian Bench</b> - dyes a saddle's seat, bridle and metal
+     * hardware independently. No block entity: it computes from its slots, so it
+     * is loom-shaped rather than furnace-shaped. See
+     * {@link EquestrianBenchBlock}.
+     */
+    public static final DeferredBlock<EquestrianBenchBlock> EQUESTRIAN_BENCH = BLOCKS.registerBlock(
+            "equestrian_bench",
+            EquestrianBenchBlock::new,
+            EquestrianBenchBlock::benchProperties);
+
     /** Shared properties: both posts are plain, breakable, flammable wood. */
     private static BlockBehaviour.Properties workPost() {
         return BlockBehaviour.Properties.of()

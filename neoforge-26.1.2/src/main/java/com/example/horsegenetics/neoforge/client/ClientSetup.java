@@ -55,11 +55,13 @@ public final class ClientSetup {
      * The generated coats are composed from pack resources, so a resource
      * reload has to be able to throw them away - see {@link CoatAssetReload}.
      */
-    /** The one menu this mod has: the Equine Research Shelf's. */
+    /** This mod's menus: the Equine Research Shelf's, and the Equestrian Bench's. */
     @SubscribeEvent
     static void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
         event.register(com.example.horsegenetics.neoforge.menu.ModMenus.RESEARCH_SHELF.get(),
                 ResearchShelfScreen::new);
+        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.EQUESTRIAN_BENCH.get(),
+                EquestrianBenchScreen::new);
     }
 
     /** Molten hooves' glowing prints - see {@link HoofprintParticle}. */
