@@ -1898,6 +1898,18 @@
         draw-the-parts-twice idea, which additionally does not work as written: rendering is
         deferred, so toggling <code>part.visible</code> between two submits mutates one
         shared model and both draw the final state.</li>
+    <li><strong>And the texel question that gated it is settled: there is no bleed.</strong>
+        The worry was that the seat and the bridle share one 64&times;64 sheet whose cube
+        unwraps overlap as rectangles &mdash; if they shared painted <em>texels</em>, a
+        two-layer split would paint part of the bridle when you dyed the seat. Computed
+        cube-by-cube from the face layout on 2026-09-16: the seat claims 513 texels, the five
+        bridle cubes 374, and <strong>the two groups share none at all</strong>, painted or
+        otherwise. The rectangles overlap; the texels do not, because a cube's unwrap is a
+        cross with empty corners. So seat and bridle can carry two independent colours.
+        <span class="muted">One loose end: 240 of vanilla's 244 painted texels are accounted
+        for by these seven cubes, and four are not &mdash; most likely the blank body cube
+        <code>EquineSaddleModel</code> inherits. It does not affect the overlap answer, but
+        it is unexplained.</span></li>
     <li><strong>Two traps worth writing down.</strong> A saddle <em>pad</em> must use the
         <code>HORSE_BODY</code> mesh (inflated 0.1, so it clears the skin) and not the
         <code>HORSE_SADDLE</code> body cube, which is exactly coincident with the horse and
