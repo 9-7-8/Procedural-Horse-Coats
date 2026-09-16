@@ -178,6 +178,39 @@
     duplicates items and looks fine until somebody shift-clicks with a chest on the horse.
 </p>
 
+<h3>And then phase one of it was built</h3>
+
+<p>
+    Block, menu, screen and three-zone dyeing &mdash; the half with no uncertainty in it.
+    The bench turned out <strong>small</strong>, and for a reason worth recording: it
+    computes its result the moment a slot changes and keeps nothing between uses, so it is
+    shaped like vanilla's loom rather than like the research shelf. No block entity, no
+    ticker, no save and load, no <code>ContainerData</code> sync &mdash; none of which would
+    have had anything to carry. The zone picker rides <code>clickMenuButton</code>, so
+    unlike the shelf it needs no custom packet either: a zone is a small int and vanilla
+    already carries small ints.
+</p>
+
+<p>
+    <strong>The screen had to land in the same change as the block, not after it.</strong>
+    <code>registerBlockItem</code> auto-joins the creative tab, so the bench was obtainable
+    the instant it was registered &mdash; and a menu with no registered screen crashes the
+    client on the first right-click. That is a nasty shape of half-finished: it compiles, it
+    builds, and it is broken only for whoever opens it.
+</p>
+
+<p>
+    <strong>The barn coordinate was probed, not chosen.</strong> The obvious next cell along
+    the homestead frontage turned out to be the <em>doorway</em> &mdash; the oak step is its
+    threshold and the door sits behind it &mdash; which is why the hitch and the table flank
+    it rather than sitting in a row. The bench went one further along, fronting a solid log
+    corner with headroom. <code>put()</code> overwrites without checking bounds or
+    occupancy, so guessing would have silently replaced a block and looked fine until
+    somebody walked into a barn and found a door bricked up. The reasoning is recorded
+    beside the call, and the bake's own palette count going 41 to 42 is what proved the
+    block actually entered the structure.
+</p>
+
 <h2 id="d2026-09-15m">2026-09-15, later &mdash; a cowboy comes from somewhere, and two &ldquo;patches&rdquo; turn out to need no patch</h2>
 
 <p>
