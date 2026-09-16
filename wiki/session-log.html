@@ -27,6 +27,97 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15i">2026-09-15, later still &mdash; fourteen breeds, a re-supply merged, and three headline disorders with no locus</h2>
+
+<p>
+    The sixth intake batch: the queue from the Newfoundland Pony to the Sorraia, alphabetically.
+    <strong>Fifteen drafts went in and fourteen breeds came out</strong>, because one of the fifteen
+    was a breed the mod already had. <code>Breeds.all().size()</code> owns the count.
+</p>
+
+<h3>The batch</h3>
+
+<p>
+    American Saddlebred, Newfoundland Pony, Nokota, Nonius, Novooleksandrivsky Heavy Draught,
+    Oldenburg, Orlov Trotter, Pindos, Pony of the Americas, Riwoche Horse, Rocky Mountain Horse,
+    Sanhe, Selle Fran&ccedil;ais, Sorraia.
+</p>
+
+<ul>
+    <li><strong>The fifteenth draft was a re-supply, and the owner's call was to merge it rather than
+        ship it twice.</strong> <em>Paint Horse (APHA)</em> arrived with a filename asserting it was
+        &ldquo;distinct from the mod's American Paint&rdquo; and a request for a second
+        <code>apha_paint_horse</code> id. It is not distinct: same registry, same 1965 merger, same
+        horse. The instruction was to take its numbers <em>only where they are cited to a real
+        study</em>, which turned out to be exactly two. HYPP moved to the <code>0.025</code> allele
+        frequency reported for the control American Paint group of an inherited-disease survey &mdash;
+        several times the generic 1.2% carrier rate it had been carrying, and the single biggest
+        change in the batch to a breed that already existed. <strong>Frame did not move, and that is
+        worth recording precisely because nothing had to be edited</strong>: the same study's
+        <code>0.107</code> gives about 19% carriers under Hardy-Weinberg and the pool already sat at
+        20, so the measurement corroborated what shipped. The draft's GBED, PSSM1 and HERDA figures
+        were declined &mdash; it calls all three Quarter Horse proxies itself.</li>
+    <li><strong>Three breeds ship without the disorder they are actually known for.</strong> This is
+        the first batch where that happened more than once. WFFS has no locus, so the
+        <a href="breed-book.html#plains">Oldenburg</a> and the
+        <a href="breed-book.html#plains">Selle Fran&ccedil;ais</a> both ship clear of the thing their
+        drafts were built around; JEB has no locus, so the
+        <a href="breed-book.html#plains">American Saddlebred</a> does too.
+        <strong>The evidence arrived with the gaps, and in two cases it is better than anything else
+        in that roadmap section</strong> &mdash; a 2022 study measured 6% WFFS carriers in Selle
+        Fran&ccedil;ais specifically rather than across warmbloods generally, and the Saddlebred's JEB
+        has 9 carriers in 175 foals from a random 2007 foal crop, a 0.026 allele frequency. Both went
+        onto <a href="roadmap.html#health-genes">the roadmap</a> with their numbers. The Saddlebred
+        also settles half of an open question there: its form is a <em>LAMA3</em> deletion, separate
+        from the <em>LAMC2</em> variant, so JEB wants two alleles or two loci.</li>
+    <li><strong>PLOD1 is Friesian dwarfism and it nearly ate this batch.</strong> Both warmblood drafts
+        name their WFFS locus <code>PLOD1</code>, which is the correct real-world gene symbol and is
+        also the key of a gene this mod already ships for something else entirely. A file that had
+        pasted the draft's block would have loaded, parsed, and quietly seeded Friesian dwarfism into
+        two sport horses at 3&ndash;5%. The roadmap had already flagged exactly this trap for the
+        Gelderlander; it is the first time it was actually walked into and stepped over.</li>
+    <li><strong>The Nokota could not have the strains it wants</strong>, and it is the third breed in
+        two days to lose the same thing. The Conservancy's two types are named along a size axis
+        &mdash; Traditional about 14 to 15 hands, Ranch to 17 &mdash; and a strain may override gene
+        pools and nothing else, so the strains carry colour alone and one band spans both. Chincoteague
+        and Budyonny each lost a shade of meaning to this; this one loses three hands.
+        <a href="known-gaps.html#gap-256">Gap 256</a> now names all three.</li>
+    <li><strong>Silver turns out to owe a disease.</strong> Found taking in the
+        <a href="breed-book.html#wet">Rocky Mountain Horse</a>, whose chocolate coat is its entire
+        identity and carries the highest silver rate of any breed here. The same <em>PMEL</em> variant
+        causes multiple congenital ocular anomalies, badly in the homozygote. This is a different shape
+        from every other row in the health section: not a missing gene, but a <em>shipped</em> gene
+        missing its consequence, so it needs no allele and no locus, only a contribution that scales
+        with copy count. On the roadmap.</li>
+    <li><strong>Every draft's size scale was wrong. All fifteen, six batches running.</strong> All were
+        re-derived from the cited heights through <code>BreedStatCurve</code>. The Pony of the Americas
+        is the tidiest check in the batch, because its registry states the band in inches rather than
+        hands: 46 to 56 inches, which lands on <code>0.730</code>&ndash;<code>0.889</code>, and a pony
+        outside it cannot hold permanent registration in life or be generated here.</li>
+    <li><strong>Two breeds are visually fixed and one is nearly so.</strong> The
+        <a href="breed-book.html#desert">Sorraia</a> and the
+        <a href="breed-book.html#hills">Riwoche Horse</a> both fix dun in every founder, joining the
+        Henson and the Konik. Both also force grey wild for the same reason the Konik does: their
+        colour is called &ldquo;mouse grey&rdquo; in the old language, and seeding <code>STX17</code>
+        would whiten the one thing either breed looks like. The <a href="breed-book.html#plains">Pony
+        of the Americas</a> is the inverse &mdash; the first breed in the mod where <code>LP</code> is
+        fixed and no founder is ever <code>lp/lp</code>.</li>
+    <li><strong>An empty file, and a file named for the wrong horse.</strong> <code>Nonius .md</code>
+        with a trailing space was zero bytes beside a real <code>Nonius.md</code>; it was removed with
+        the batch and nothing was lost. <code>Novoalexandrovsk Trotter.md</code> contains no trotter at
+        all &mdash; it is the Novooleksandrivsky heavy draught, a breed with no trotting history &mdash;
+        which is the third time a draft's filename has disagreed with its contents.</li>
+</ul>
+
+<p>
+    Green on the way out: <code>BreedFilesTest</code> and <code>BreedSpecParserTest</code> (the two that
+    matter are <code>everyShippedFileLoadsWithNoErrorsAndNoWarnings</code>, which proves no allele token
+    was warned and dropped, and <code>everyShippedFileIsExactlyWhatABakeWouldWrite</code>),
+    <code>:neoforge-26.1.2:build</code>, the designer boot check, and every internal link across the
+    wiki. Nothing in the batch has been seen in game &mdash; see
+    <a href="verification.html">the checklist</a>.
+</p>
+
 <h2 id="d2026-09-15h">2026-09-15, later again &mdash; fifteen breeds, and three drafts that disowned their own numbers</h2>
 
 <p>

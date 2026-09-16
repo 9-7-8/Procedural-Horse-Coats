@@ -78,6 +78,81 @@
     </p>
 </div>
 
+<h2 id="new-breeds-0915f">&sect;0-EJ &mdash; Fourteen more breeds out of <code>intake/</code>, and a changed American Paint (2026-09-15, NOT played)</h2>
+
+<p>
+    <strong>American Saddlebred, Newfoundland Pony, Nokota, Nonius, Novooleksandrivsky Heavy Draught,
+    Oldenburg, Orlov Trotter, Pindos, Pony of the Americas, Riwoche Horse, Rocky Mountain Horse, Sanhe,
+    Selle Fran&ccedil;ais, Sorraia.</strong> Green on the bench: <code>:neoforge-26.1.2:build</code>,
+    <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>, <code>check-links</code>,
+    <code>build-search-index</code> and the designer boot check.
+    <strong>None of these fourteen has been seen in a world, and neither has the changed Paint.</strong>
+</p>
+<ul>
+    <li><strong>Confirm no Oldenburg or Selle Fran&ccedil;ais carries Friesian dwarfism.</strong> This is
+        the first check in the batch because it is the one that would be invisible and catastrophic.
+        Both drafts named their WFFS locus <code>PLOD1</code>, which is a real gene symbol and is also
+        the key this mod uses for <em>Friesian dwarfism</em>. A file that had pasted it would parse, load,
+        warn about nothing, and seed the wrong lethal into two sport horses. The files name no
+        <code>PLOD1</code> pool at all &mdash; check a spread of founder genomes and confirm the locus
+        reads clear, then breed a pair repeatedly and confirm no dwarf foal ever appears.</li>
+    <li><strong>The American Paint's HYPP rate moved and it is the one change to a breed that already
+        existed.</strong> It went from the generic 1.2% carrier figure to the study's 0.025 allele
+        frequency &mdash; roughly 4.9% of founders, about four times as many. <a href="gene-scn4a.html">HYPP</a>
+        is dominant, so every carrier is affected and visible: a Paint herd should now contain
+        noticeably more unwell horses than before. <strong>If it does not, the pool is not reaching the
+        founder</strong>; if it contains far more than one in twenty, something is reading the weight as
+        a percentage of the wrong total. This is the single most likely thing in the batch to be wrong
+        in a way nobody would think to look at.</li>
+    <li><strong>Five must never head a wild herd</strong> &mdash; Nonius, Novooleksandrivsky Heavy
+        Draught, Oldenburg, Orlov Trotter and Selle Fran&ccedil;ais, all managed studbook breeds with a
+        <code>spawn</code> checklist. <strong>Three more have wild herds but no cowboy</strong> &mdash;
+        Newfoundland Pony, Pindos and Sanhe, plus the Sorraia: they should turn up in the world but never
+        in a trader's offers. That is eight source checklists, the most in any batch so far.</li>
+    <li><strong>Every Pony of the Americas must be spotted, with no exceptions at all.</strong> It is the
+        first breed in the mod where <code>LP</code> is fixed &mdash; no founder is ever
+        <code>lp/lp</code>. Spawn a large number: a single solid, unspotted POA means a fixed pool is not
+        holding, which is the same failure class as a bay Kladruber. Both strains should be visible in
+        bulk, bold blankets and leopards against subtler varnish and snowflake.</li>
+    <li><strong>A pure POA must also never be pinto, and that is a separate failure.</strong> The registry
+        bars it, so tobiano, sabino, frame, splash and dominant white are all forced wild. A nearly white
+        few-spot POA is correct and is <em>not</em> a pinto; a POA with smooth rounded patches crossing
+        the topline is a bug. The two are easy to confuse by eye, which is why it is written down.</li>
+    <li><strong>The Nokota is a lethal-white breed and must never throw tobiano.</strong> Breeding two
+        frame carriers should be able to go wrong, exactly as in an American Paint herd. Tobiano is the
+        opposite check: the Conservancy's own line is that it only enters by crossbreeding, so a tobiano
+        Nokota out of two pure parents means a forced-wild locus is leaking.</li>
+    <li><strong>The Saddlebred's gait locus is intermediate, not near-fixed, and that is deliberate.</strong>
+        Every other gaited breed here sits near 90% <code>A/A</code>; this one should be about a quarter
+        <code>A/A</code>, half <code>A/C</code> and a quarter <code>C/C</code>, because only some
+        Saddlebreds are five-gaited. Check the genotype spread rather than the animation, which does not
+        exist.</li>
+    <li><strong>The Sorraia and the Riwoche Horse must be dun every time, and must never grey.</strong>
+        Both fix <code>D</code> in every founder, joining the Henson and the Konik. Both also force grey
+        wild for the Konik's reason &mdash; their colour is called "mouse grey" in the old language and
+        <code>STX17</code> would whiten the one thing either looks like. A greying Sorraia is the
+        specific failure. The Sorraia should be mostly mouse dun and grullo with a bay-dun minority; the
+        Riwoche almost entirely bay dun.</li>
+    <li><strong>The size curve, checked at both ends this time.</strong> The Pony of the Americas is the
+        tidiest case in the mod because its registry states the band in inches &mdash; 46 to 56, so no
+        founder should fall outside roughly 11.2 to 14 hands. At the other end the Oldenburg and the
+        Selle Fran&ccedil;ais are among the tallest riding horses in the book: stand one of each beside a
+        Hanoverian and a Shire and confirm they land between them and not past the Shire.</li>
+    <li><strong>The Rocky Mountain Horse's chocolate must be silver on black, not flaxen on chestnut.</strong>
+        A black-based horse carrying <code>Z</code> should read as dark chocolate with a pale mane and
+        tail; a flaxen chestnut is a different horse and must not be mistaken for it, and a chestnut
+        carrying <code>Z</code> should show almost nothing. Silver is at its highest rate of any breed
+        here, so the batch will produce plenty of both to compare. <strong>MCOA is not modelled</strong>,
+        so no <code>Z/Z</code> horse should show any eye effect &mdash; that is correct today and is on
+        the roadmap.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the Nokota's blue roan
+        actually reads as smoke with a dark head rather than as a washed-out black; whether the Nonius's
+        dark-skewed shade pool makes a visibly darker herd than an ordinary bay breed, since that pool is
+        standing in for a band the format does not have; whether the Riwoche and the Sorraia are
+        distinguishable from the Konik at a glance, all three being fixed-dun primitives; and whether the
+        Saddlebred's "any colour" pool reads as varied rather than incoherent.</li>
+</ul>
+
 <h2 id="new-breeds-0915e">&sect;0-EI &mdash; Fifteen more breeds out of <code>intake/</code> (2026-09-15, NOT played)</h2>
 
 <p>
