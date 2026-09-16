@@ -62,7 +62,7 @@ the same change as the code, and never copy it back into here.
 | Eye colour - the thirteen loci, and the genes that request one | `wiki/eye-colour.html` |
 | Body space, `HorseSkinGeometry`, the vanilla model tables | `wiki/body-space.html` |
 | Breeding, pedigree, horse records, stat inheritance | `wiki/breeding.html` |
-| Breeds: spawning, stat curve, cross labels; then the lore and the 49 entries | `wiki/breeds.html`, `wiki/breed-book.html` |
+| Breeds: spawning, regions, stat curve, cross labels; then the lore and the entries | `wiki/breeds.html`, `wiki/breed-book.html` |
 | Speed / health / jump / size, disorders, the two lethal paths | `wiki/horse-body.html` |
 | Gated healing, bond tiers, herds, the shared slow tick | `wiki/horse-care.html` |
 | The item roster; then one page per item | `wiki/items.html`, `wiki/item-*.html` |

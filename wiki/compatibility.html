@@ -655,6 +655,214 @@
     feature.
 </p>
 
+<h2 id="companions">Datapacks worth running beside this mod</h2>
+
+<p>
+    Everything else on this page is about conflict. This section is the opposite: three
+    datapacks that add what this mod deliberately does not, touch nothing we own, and are
+    current on 26.1.2. All three are <em>data</em> &mdash; no code, so no seam to fight
+    over. Investigated 2026-09-15; none has been run beside this mod in a real game.
+</p>
+
+<h2 id="saturated-saddles">Saturated Saddles</h2>
+
+<p>
+    Lets you dye saddles and happy-ghast harnesses the way leather armour is dyed. Ships a
+    datapack of recipes plus a resource pack of tinted textures.
+</p>
+<p>
+    <strong>No conflict, and nothing to depend on.</strong> It adds <em>no items at all</em>
+    &mdash; the saddle recipe is <code>minecraft:crafting_dye</code> onto
+    <code>minecraft:saddle</code>, so the output is the vanilla saddle carrying the vanilla
+    <code>minecraft:dyed_color</code> component. There is no <code>saturated_saddles</code>
+    namespace. That is why <a href="villagers.html#trade-table">the horseman&rsquo;s dyed
+    saddle</a> needs no mod detection and no optional dependency: a dyed saddle is a vanilla
+    item in a vanilla state, and <code>SetRandomDyeFunction</code> produces one whether or
+    not the player has this installed.
+</p>
+<p>
+    <strong>Their resource pack is the load-bearing half, and that is easy to miss.</strong>
+    Vanilla does <em>not</em> tint the saddle: <code>EquipmentAssetProvider</code> builds the
+    leather asset with <code>Layer.leatherDyeable(&hellip;)</code> and the saddle asset with
+    the plain single-argument <code>Layer</code>, dyeable empty. So the datapack alone gives
+    you a saddle whose <code>dyed_color</code> is set and invisible; the colour you actually
+    see comes from their resource pack supplying a dyeable saddle asset. This mod
+    <a href="villagers.html#random-trades">withdrew a dyed-saddle trade</a> over it.
+    Leather horse armour is tinted by vanilla and is not in doubt.
+</p>
+<p>
+    <strong>What is actually in the pack</strong>, from downloading and measuring it on
+    2026-09-15: 18 equipment assets, 18 item models and 61 textures. Its
+    <code>equipment/saddle.json</code> is vanilla's leather pattern &mdash; a
+    <code>dyeable</code> base plus an untinted overlay &mdash; applied to all ten saddle
+    types, and its textures split vanilla's saddle into a greyscale base that takes the tint
+    and an overlay holding the buckles. It also overrides vanilla's
+    <code>equipment/leather.json</code> to add a <code>horse_body</code> overlay layer that
+    vanilla does not have. Note it overrides <code>minecraft:</code>-namespace files
+    throughout, so it conflicts with any other pack touching saddles, and it loads on 26.1 by
+    declaring <code>"max_format": 999</code> rather than by having been rebuilt for it.
+</p>
+<p>
+    <strong>Licence: CC-BY-4.0</strong>, confirmed from the Modrinth API; the only credit
+    marker shipped is <code>"by SageAxolotl"</code> in <code>pack.mcmeta</code>, and there is
+    no LICENSE file in either zip, no source repository and no issue tracker. A bundle is
+    permitted with attribution &mdash; but CC-BY carries a no-downstream-restrictions clause,
+    so their files would stay CC-BY inside this CC BY-NC project and would have to be marked
+    as separately licensed. <a href="roadmap.html#dyeable-saddle">The roadmap</a> argues for
+    writing our own instead, and it is not a licence objection.
+</p>
+
+<h2 id="bhar">BHAR &mdash; Balanced Horse Armor Recipes</h2>
+
+<p>
+    Adds crafting recipes for leather, iron, golden and diamond horse armour and for the
+    saddle, so they are craftable rather than loot-only. Recommended: it fixes the thing
+    this mod&rsquo;s breeding loop makes most obvious, which is that you end up with far
+    more horses than tack.
+</p>
+<p>
+    <strong>No conflict.</strong> It adds recipes for <em>vanilla</em> items only &mdash; no
+    entity, rendering or attribute surface at all. The single failure mode is a recipe
+    collision if this mod ever adds its own saddle or horse-armour recipe, which is exactly
+    what <code>neoforge-26.1.2/tools/check-recipes.mjs</code> exists to catch.
+</p>
+<p>
+    <strong>Licence is the only friction.</strong> Fyoncle&rsquo;s custom licence forbids
+    redistribution of any part, modified or not, and reusing &ldquo;parts or the whole
+    project&rdquo; needs explicit prior permission. So we may ship a collision
+    <em>check</em>; we may not ship a copied recipe file.
+</p>
+
+<h2 id="universal-dyeing">Universal Dyeing</h2>
+
+<p>
+    Shapeless recipes to re-colour already-dyed vanilla blocks and items. Listed here
+    because its store page reads as though it is relevant to horses, and it is not.
+</p>
+<p>
+    <strong>Nothing to patch &mdash; verified, not assumed.</strong> The page advertises
+    &ldquo;Leather Horse Armor&rdquo;, wolf armour, shulker boxes, bundles and bleaching.
+    Both published artefacts (the datapack zip and the loader-wrapped jar) were downloaded
+    and enumerated in full on 2026-09-15: both contain exactly 176 recipes &mdash; 16
+    colours across banner, bed, candle, carpet, concrete, concrete powder, glazed
+    terracotta, stained glass, stained glass pane, terracotta and wool &mdash; plus 11 item
+    tags. Searching the extracted contents for <code>horse</code>, <code>saddle</code>,
+    <code>leather</code> and <code>dyed_color</code> returns nothing, in either artefact.
+    There are no bleaching recipes either.
+</p>
+<p>
+    Recorded at this length so the next person does not re-investigate on the strength of
+    the description. Note also that a <em>different</em> project shares the display name
+    &mdash; cite the slug <code>universal-dyeing-datapack</code>, not the name. All Rights
+    Reserved, which is moot given there is nothing to patch.
+</p>
+
+<h2 id="bridle">Bridle</h2>
+
+<p>
+    Splits mounting from steering across every rideable mob: a saddle only lets you sit, and
+    a second species-specific item is needed to steer. Horses, donkeys and mules take a
+    bridle; equipped gear renders on the mount and drops on death.
+</p>
+<p>
+    <strong>Cannot be installed beside this mod today, so the conflict is theoretical.</strong>
+    It is <strong>Fabric-only on Minecraft 26.2</strong> &mdash; no NeoForge build and no
+    1.21.x build exists. If one ever appears, two seams collide: it draws its gear on the
+    horse model (seam 3, <a href="#renderer">the renderer</a>), and it gates riding control,
+    which sits upstream of our AI and attribute work (seam 4).
+</p>
+<p>
+    It is also All Rights Reserved <strong>with no public source</strong>, so its mixins,
+    attribute writes and goal edits cannot be inspected &mdash; the conflict above is read
+    off its feature description, not its code, and should not be quoted as more than that.
+    At three files all from July 2026 and a very small download count, it may not persist.
+</p>
+
+<h2 id="realistic-horse-genetics">Realistic Horse Genetics</h2>
+
+<p>
+    Biologically accurate coat-colour genetics for horses, donkeys and mules, with heritable
+    speed, health, jump and size, and gene testing by using a book on a horse. By sekelsta;
+    over two million downloads.
+</p>
+<p>
+    <strong>Incompatible by construction &mdash; this is a competitor, not a patch
+    target.</strong> It models extension, agouti, dun, cream and pearl, gray, silver dapple,
+    KIT, frame overo, splashed white, leopard complex and PATN1, champagne, mushroom and
+    tiger eye, plus hidden flaxen, sooty and rabicano; and it puts the body stats under
+    genetic control to push breeding over hunting. That is our gene registry, our hidden
+    modifier layer and our resolved-not-rolled stats, arrived at independently. It also
+    replaces the vanilla horse entity, as we do. Two mods that each own coat generation and
+    each replace the horse cannot both be in charge; whoever registers last wins.
+</p>
+<p>
+    There is also nothing to test against: it stops at <strong>1.20.4</strong>, published
+    October 2024, so no build runs on 26.1.2. And its code is LGPL-3.0-or-later, which sits
+    badly against this mod&rsquo;s CC BY-NC &mdash; reading it for ideas is unrestricted,
+    copying from it is not. <strong>The only thing worth building is a friendly
+    detection</strong>: if it is present at load, log &ldquo;these two mods both replace the
+    horse; run one&rdquo; rather than letting a player find out as a half-broken world.
+</p>
+<p>
+    <strong>One pattern here is worth borrowing, and it is about us, not them.</strong> This
+    mod is in RHG&rsquo;s position rather than a tack mod&rsquo;s: we re-render the horse, so
+    a third-party armour or tack texture authored against the <em>vanilla</em> mesh lands on
+    our geometry with the wrong UVs. RHG&rsquo;s answer is a namespace-scoped override &mdash;
+    its <code>HorseArmorer</code> checks the texture&rsquo;s namespace and silently
+    substitutes its own re-unwrapped copy for the handful it knows about
+    (<code>minecraft</code> and one other), passing every other namespace through untouched.
+    That is the right shape for us too if we ever re-unwrap the horse: fix the textures we
+    can, never silently mangle a third party&rsquo;s. Read from their source 2026-09-15.
+</p>
+
+<h2 id="horse-tack">Horse Tack</h2>
+
+<p>
+    Vanilla-styled craftable tack &mdash; racing, western, English, jumping, halters, saddle
+    pads, blankets and a draft harness, advertised as 381 textures at 16 colours per
+    category. Code by sekelsta, art by misteriawolfe.
+</p>
+<p>
+    <strong>Not installable beside this mod, and on modern versions it is an RHG
+    addon.</strong> It stops at <strong>1.20.1</strong> (August 2023), and from 1.16 onward
+    CurseForge lists <a href="#realistic-horse-genetics">Realistic Horse Genetics</a> as a
+    <em>required</em> dependency &mdash; so &ldquo;compatibility with Horse Tack&rdquo;
+    transitively means compatibility with RHG, which the entry above rules out.
+</p>
+<p>
+    <strong>The licence is split, and the split is the whole story.</strong> The GitHub
+    <code>LICENSE.txt</code> puts sekelsta&rsquo;s code under MIT and explicitly blesses
+    reuse as reference code provided the mod id changes; the CurseForge distribution as a
+    whole, including the 381 textures, is All Rights Reserved. So the code may be
+    reimplemented freely and <strong>not one texture may be copied</strong> &mdash; and the
+    art is the reason the mod is popular. Whether to build tack natively instead is a
+    roadmap question, not a compatibility one: see
+    <a href="roadmap.html#mod-patches">the roadmap</a>.
+</p>
+<p>
+    <strong>Their source was read in full on 2026-09-15, and there is no code in it.</strong>
+    The mod is two Java files &mdash; a twenty-line <code>@Mod</code> class and one file
+    containing 381 literal <code>register("name")</code> calls. No render layer, no model, no
+    equip handler, no attachment, no mixins, no events. A tack piece is
+    <code>new HorseArmorItem(0, texture, props)</code> hung on vanilla&rsquo;s existing horse
+    armour slot, and the <em>rendering</em> is RHG&rsquo;s, not theirs. The protection
+    <code>0</code> is load-bearing: RHG&rsquo;s <code>isArmor</code> accepts an armour item
+    only when <code>getProtection() == 0</code>, which is how a decorative blanket passes for
+    armour. There is no compile dependency on RHG anywhere &mdash; the coupling is that
+    RHG substitutes its own entity and renderer, and the textures are authored for
+    <em>its</em> mesh, so without it they land on the vanilla model with misaligned UVs.
+</p>
+<p>
+    Recorded because it settles a question rather than leaving it open: <strong>reimplementing
+    their code would save no work, because every API it touches is gone.</strong>
+    <code>HorseArmorItem</code> no longer exists, and the texture-on-item hook the whole mod
+    hangs on was replaced by the <code>equipment/&lt;name&gt;.json</code> asset system.
+    Their ~90 &ldquo;blanket + halter&rdquo; combination items exist only because vanilla gave
+    a horse one armour slot; 26.1.2 has <code>SADDLE</code> <em>and</em> <code>BODY</code>, so
+    that combinatorial tax is gone by construction. What transfers is a taxonomy and two
+    cautionary lessons, both on <a href="roadmap.html#native-tack">the roadmap</a>.
+</p>
+
 <h2 id="known">Known-good and known-bad</h2>
 <table class="data">
     <thead><tr><th>Kind of mod</th><th>Verdict</th></tr></thead>
@@ -707,6 +915,24 @@
     <td>Replaces the horse mesh and textures from a resource pack</td>
     <td class="ok">Pack-side</td>
     <td class="bad">Ignored today; both halves have a plan and neither is built</td></tr>
+<tr><td><a href="#saturated-saddles">Saturated Saddles</a></td><td>Dyes the vanilla saddle via a vanilla component</td>
+    <td class="ok">26.1.2 (datapack)</td>
+    <td class="ok">No conflict; we already sell a dyed saddle and need no dependency</td></tr>
+<tr><td><a href="#bhar">BHAR</a></td><td>Crafting recipes for vanilla saddle and horse armour</td>
+    <td class="ok">26.1.2 (datapack)</td>
+    <td class="ok">Recommended; only watch for a recipe collision</td></tr>
+<tr><td><a href="#universal-dyeing">Universal Dyeing</a></td><td>None &mdash; verified to contain no horse, saddle or leather recipe</td>
+    <td class="ok">26.1.2 (datapack)</td>
+    <td class="ok">No patch needed; the store page overstates its contents</td></tr>
+<tr><td><a href="#bridle">Bridle</a></td><td>Gear drawn on the mount; gates riding control</td>
+    <td class="bad">Fabric, 26.2 only</td>
+    <td class="warn">Cannot co-install; ARR with no source, so unassessable</td></tr>
+<tr><td><a href="#realistic-horse-genetics">Realistic Horse Genetics</a></td><td>The same loci, the same hidden genes, the same stats &mdash; and replaces the horse</td>
+    <td class="bad">&le;&nbsp;1.20.4</td>
+    <td class="bad">Competitor, not a patch target; detect and warn</td></tr>
+<tr><td><a href="#horse-tack">Horse Tack</a></td><td>Tack items; requires RHG from 1.16 on</td>
+    <td class="bad">&le;&nbsp;1.20.1</td>
+    <td class="bad">Blocked transitively by RHG; MIT code but ARR art</td></tr>
 </tbody>
 </table>
 </div>

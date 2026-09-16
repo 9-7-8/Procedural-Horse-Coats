@@ -693,9 +693,35 @@
     <strong>Whoever is hired first names the family, and everyone after joins it.</strong>
     Both handlers ask the same question &mdash;
     <code>HorsemanHandler.familySurname</code> &mdash; which looks round the village for
-    a cowboy or a horseman who already has a surname and takes their; finding nobody, it
+    a cowboy or a horseman who already has a surname and takes theirs; finding nobody, it
     coins a new one. So a village reads as one outfit in the horse trade: Wade Hargreave
     at the hitch, Frank Hargreave behind the table.
+</p>
+
+<p>
+    <strong>And the name it coins comes from the same place the horses do.</strong> Both
+    halves are drawn from the <a href="breeds.html#regions">region</a> the outfit is from,
+    so the man selling Fjords is a Halvorsen and the man selling Andalusians is an Olivares.
+    The cowboy reads his region off the breed he is known for, which is why
+    <code>CowboyHandler.found</code> now settles that breed <em>before</em> it names him
+    &mdash; naming him first threw the connection away. The horseman has no breed of his
+    own, so he takes the region from the nearest cowboy who has one; in a village with no
+    cowboy at all he is the founder and his region is simply rolled.
+</p>
+
+<p>
+    <strong>The name tables are drop-in, like breeds and genes.</strong> Every
+    <code>.txt</code> in <code>.minecraft/phc/names/</code> <em>adds</em> names to one
+    region &mdash; <code>scandinavia-alpha.txt</code> for given names,
+    <code>-beta.txt</code> for family names &mdash; and the folder is made with a README in
+    it on first launch. The format is the shipped one: comma-separated, with newlines
+    counting as ordinary whitespace, so one name per line reads exactly the same as one long
+    line. It adds rather than replaces, deliberately: a drop-in holding ten names would
+    otherwise make every trader in that region draw from ten, and widening a region is the
+    thing worth doing without a rebuild. A file naming a region that does not exist, or
+    ending in neither half, is reported in the log rather than silently ignored &mdash; and
+    <strong>it must be saved as UTF-8</strong>, or accented names arrive as question marks
+    with nothing to warn you.
 </p>
 
 <p>
@@ -796,10 +822,10 @@
 <table>
 <thead><tr><th>Tier</th><th>Buys</th><th>Sells</th></tr></thead>
 <tbody>
-<tr><td><strong>1 Novice</strong></td><td>16 horse hair</td><td>Hair bundle, saddle, leads</td></tr>
-<tr><td><strong>2 Apprentice</strong></td><td>8 hair bundles</td><td>Basic whistle, blank tickets, iron horse armour</td></tr>
+<tr><td><strong>1 Novice</strong></td><td>16 horse hair</td><td>Hair bundle, saddle, leads, leather horse armour</td></tr>
+<tr><td><strong>2 Apprentice</strong></td><td>8 hair bundles</td><td>Basic whistle, blank tickets, vet kit, iron horse armour, a <strong>dyed</strong> leather horse armour</td></tr>
 <tr><td><strong>3 Journeyman</strong></td><td>4 braided rope</td><td>The four general breeding carrots, a common <a href="item-spawn-eggs.html#breed">breed spawn egg</a> (22&nbsp;em)</td></tr>
-<tr><td><strong>4 Expert</strong></td><td>2 hair cloth</td><td>A random common gene carrot, a random uncommon one, a random common/uncommon research paper, an uncommon breed egg (38&nbsp;em)</td></tr>
+<tr><td><strong>4 Expert</strong></td><td>2 hair cloth</td><td>A random common gene carrot, a random uncommon one, a random common/uncommon research paper, an uncommon breed egg (38&nbsp;em), golden horse armour</td></tr>
 <tr><td><strong>5 Master</strong></td><td>1 stallion seed jar</td><td>A random rare gene carrot, a random epic one, a random rare/epic paper, diamond horse armour, a rare breed egg (58&nbsp;em, one use)</td></tr>
 </tbody>
 </table>
@@ -810,6 +836,17 @@
     villages are not the same shop. <strong>Hair buying is the early-game emerald
     tap</strong> and therefore the number most likely to want retuning; it is one JSON
     file per trade.
+</p>
+
+<p>
+    <strong>He now stocks the whole vanilla tack ladder</strong> &mdash; saddle and all four
+    horse armours, leather through diamond, spread one per tier so the good stuff is
+    earned. Adding a trade to a pool dilutes the rest of it, because the draw is three
+    whatever the pool size: tier&nbsp;1 went from four trades to five, so any one of them
+    now shows up three times in five rather than three in four. That is a deliberate
+    trade &mdash; a fuller shop that is less predictable &mdash; and the lever if it goes
+    too far is the <code>amount</code> field in the tier's
+    <code>trade_set</code> file, not the trades themselves.
 </p>
 
 <h3 id="random-trades">A random carrot, without a custom listing</h3>
@@ -845,6 +882,40 @@
     reads as &ldquo;no offer&rdquo; and drops &mdash; so a rarity tier with no genes
     in it costs a trade slot rather than putting a blank item on sale.
 </p>
+
+<p>
+    A <strong>dyed</strong> leather horse armour is the same trick again, with the simplest
+    function of the three &mdash; <code>horsegenetics:set_random_dye</code> takes no
+    parameters at all and stamps one of the sixteen dye colours onto whatever it is given:
+</p>
+
+<pre><code class="language-json">{ "function": "horsegenetics:set_random_dye" }</code></pre>
+
+<p>
+    The sixteen dyes rather than a free RGB roll, because the point is an item that looks
+    like one somebody dyed, and a random 24-bit colour mostly lands on muddy shades no dye
+    can make. <strong>This depends on no other mod.</strong> That is worth stating because
+    it was scoped as a <a href="compatibility.html#saturated-saddles">Saturated Saddles</a>
+    patch: that datapack adds no items, only <code>crafting_dye</code> recipes whose result
+    is the vanilla saddle carrying the vanilla <code>dyed_color</code> component. There is
+    no third-party id to depend on, so there is nothing to detect.
+</p>
+
+<div class="note warn">
+    <span class="label">It is applied to armour, and deliberately not to saddles</span>
+    <p>
+        <strong>Vanilla does not tint the saddle.</strong>
+        <code>EquipmentAssetProvider</code> builds the leather asset with
+        <code>Layer.leatherDyeable(&hellip;)</code> and the saddle asset with the
+        single-argument <code>Layer</code> constructor, whose dyeable field is
+        <code>Optional.empty()</code> &mdash; so <code>dyed_color</code> on a saddle is set,
+        correct and <em>invisible</em>. The tinted saddle model comes from Saturated
+        Saddles&rsquo; <em>resource pack</em>, not from its datapack and not from vanilla.
+        A dyed-saddle trade was written and withdrawn on 2026-09-15 for exactly that reason:
+        it sold a fourteen-emerald saddle indistinguishable from the eight-emerald one.
+        Shipping a coloured saddle means shipping the dyeable equipment asset ourselves.
+    </p>
+</div>
 
 <p>
     <a href="item-spawn-eggs.html#breed">Breed spawn eggs</a> are the same trick with a second

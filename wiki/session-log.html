@@ -27,6 +27,154 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15m">2026-09-15, later &mdash; a cowboy comes from somewhere, and two &ldquo;patches&rdquo; turn out to need no patch</h2>
+
+<p>
+    A large batch was asked for &mdash; two new genes, weather-gated spawning, spawning in
+    visited chunks, regional cowboys, a Getting Started rewrite, horseman stock, and six mod
+    investigations. Far more than one session, so it was cut to two: <strong>the
+    compatibility work and the cowboy&rsquo;s regions</strong>. The rest is untouched and
+    still wanted; the two genes in particular were researched in full and not built.
+</p>
+
+<h3>The research changed the brief twice</h3>
+
+<p>
+    Two of the requested patches do not exist as patches. <strong>Saturated Saddles adds no
+    items at all</strong> &mdash; it is <code>minecraft:crafting_dye</code> recipes onto the
+    vanilla saddle, producing the vanilla <code>dyed_color</code> component, with no
+    namespace of its own. So &ldquo;sell a coloured saddle if that datapack is
+    installed&rdquo; became <em>sell one always</em>, with no detection, no optional
+    dependency and no third-party id to break. That is strictly better than what was asked
+    for, and it is the reason there is still no <code>ModList.isLoaded</code> call anywhere
+    in this repo.
+</p>
+
+<p>
+    <strong>Universal Dyeing does not touch horses.</strong> Its store page advertises
+    leather horse armour, wolf armour, bundles and bleaching; both published artefacts were
+    downloaded and enumerated in full, and they contain exactly 176 recipes over eleven
+    block categories and nothing else &mdash; no match for <code>horse</code>,
+    <code>saddle</code>, <code>leather</code> or <code>dyed_color</code> in either. It was
+    called a very high priority patch; there is nothing to patch. The negative is written up
+    at length on <a href="compatibility.html#universal-dyeing">the compatibility page</a>
+    precisely so the next person does not re-investigate on the strength of the description.
+    The player&rsquo;s actual wish still lands, because vanilla leather horse armour has
+    always been dyeable.
+</p>
+
+<p>
+    Of the other four: <strong>Bridle</strong> is Fabric-only on 26.2 and cannot be
+    co-installed at all; <strong>Realistic Horse Genetics</strong> is not a patch target but
+    a competitor occupying the same design space and replacing the horse entity as we do,
+    stopped at 1.20.4; <strong>Horse Tack</strong> is blocked transitively by requiring RHG,
+    and its code is MIT while its 381 textures are All Rights Reserved; <strong>BHAR</strong>
+    is a clean recommendation whose only friction is a licence forbidding reuse of any part.
+</p>
+
+<h3>The cowboy&rsquo;s region &mdash; and the field that was waiting for it</h3>
+
+<p>
+    <strong><code>country</code> has been on every breed from the start and nothing read
+    it.</strong> The parser has always thrown on a capital letter rather than forgiving one,
+    on the stated grounds that a country is meant to be keyed on. <code>Region</code> is the
+    first thing that keys on it: ten pools of neighbouring countries, from which a cowboy
+    draws his whole string <em>and</em> his name.
+</p>
+
+<p>
+    <strong>The rule was that a cowboy must be able to stock five breeds from his own
+    region, and a census said four sensible regions cannot.</strong> Counting only
+    cowboy-sellable breeds, the Middle East had three, Central America two, North Africa one
+    and Sub-Saharan Africa one. Rather than let those spawn a trader at an empty rail, each
+    was folded into its nearest neighbour &mdash; Africa with the Near East, Central with
+    South America. Two regions run the other way and are far larger than the rest, and there
+    is no honest fix for that short of inventing countries. Australia and New Zealand, which
+    the brief did not mention, went in with East Asia because nothing else is near them.
+</p>
+
+<p>
+    <strong>The structural change was an ordering one.</strong>
+    <code>CowboyHandler.found</code> named the man at line 253 and did not pick his breed
+    until line 277, so his name could not possibly have reflected his trade. The pick now
+    comes first and the region is <em>derived</em> from it rather than stored &mdash;
+    <code>PreferredBreed</code> is already persisted, so a second field would be one more
+    thing that can disagree with it. The horseman, who has no breed, takes the region from
+    the nearest cowboy who has one, and founds his own when there is no cowboy at all.
+</p>
+
+<p>
+    The old <code>cowboy-names-*.txt</code> were already American frontier names, so they
+    were moved into the new layout as <code>people/north_america-*.txt</code> rather than
+    duplicated, and nine more pairs written. They deliberately do <em>not</em> join the
+    designer asset bundle: the copy task globs <code>names/*.txt</code>, which does not
+    descend into <code>people/</code>, and the designer names horses and never people &mdash;
+    the old flat tables had been copied into it and never read.
+</p>
+
+<h3>A trade shipped in the morning and withdrawn in the afternoon</h3>
+
+<p>
+    <strong>Vanilla does not tint the saddle</strong>, and this session sold one anyway for
+    about an hour. A follow-up look at tack feasibility read
+    <code>EquipmentAssetProvider</code> out of the patched sources jar and found the leather
+    asset built with <code>Layer.leatherDyeable(&hellip;)</code> and the saddle asset built
+    with the plain single-argument <code>Layer</code>, dyeable <code>Optional.empty()</code>.
+    So <code>dyed_color</code> on a saddle is set, correct and invisible &mdash; the tinted
+    model lives in Saturated Saddles' <em>resource pack</em>, which is the half of that
+    project everyone forgets, this session included. The trade sold a fourteen-emerald
+    saddle indistinguishable from the eight-emerald one, so it was deleted rather than
+    documented as a quirk. The dyed leather horse armour, which vanilla genuinely tints,
+    stayed.
+</p>
+
+<p>
+    Worth recording as a process note: the original javadoc said &ldquo;checked in game: not
+    yet&rdquo;, and that hedge was doing real work &mdash; but the answer was available from
+    the sources jar the whole time, for the cost of reading one provider class. <strong>An
+    unverified-API comment is a placeholder for a lookup, not a substitute for one.</strong>
+</p>
+
+<h3>Tack, assessed and not built</h3>
+
+<p>
+    The owner asked mid-session how feasible native tack would be. Verdict:
+    <strong>feasible in code, unaffordable in art, and blocked on an existing
+    defect</strong>. Every seam already exists &mdash; <code>CutieMarkLayer</code> is a
+    proven precedent for geometry anchored to an animated bone, a new item is one line, and
+    the synced-attachment pattern has ten instances. Two hard constraints turned up:
+    <code>EquipmentSlot</code> has exactly two animal slots and both are taken, and
+    <code>EquipmentClientInfo.LayerType</code> is not extensible, so tack past two pieces
+    must ride on an attachment. The blocker is that the saddle already renders at vanilla
+    scale over a genetically resized body, so tack would be visibly broken on arrival;
+    fixing <code>state.scale</code> inheritance is a prerequisite. Written up at
+    <a href="roadmap.html#mod-patches">&sect;23</a>, with the honest note that shipping tack
+    contradicts the compatibility page's current claim that tack is what this mod leaves to
+    other people.
+</p>
+
+<h3>Two disciplines held on purpose</h3>
+
+<p>
+    <strong>No per-region breed counts were written down anywhere.</strong> They are
+    <code>Region.breeds(BreedSource.COWBOY).size()</code>, they move whenever a breed is
+    added or drops its cowboy source, and the floor of five is held by
+    <code>RegionTest.everyRegionCanSeatACowboy</code> failing the build instead. A second
+    test catches a breed whose country no region claims, so a drop-in from a new country is
+    a build failure rather than a cowboy who never appears. While in the area, the stale
+    &ldquo;forty-nine breeds&rdquo; claims on the landing page and the releases page were
+    fixed by <em>removing the number</em> rather than updating it to 122.
+</p>
+
+<p>
+    <strong>The designer&rsquo;s <code>web.wasm</code> was reverted rather than
+    committed.</strong> The bake rewrote it to a byte-identical size with no functional
+    change &mdash; neither <code>Region</code> nor <code>PersonNameGenerator</code> is
+    reachable from <code>DesignerApi</code>, and TeaVM compiles only the reachable graph &mdash;
+    so committing it would have been 2&nbsp;MB of build noise. The boot check was run against
+    the rebuilt file before reverting.
+</p>
+
 <h2 id="d2026-09-15l">2026-09-15, last thing &mdash; the deferred bake runs, and the last two intake files turn out not to be breeds</h2>
 
 <p>

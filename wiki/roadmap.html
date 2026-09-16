@@ -1804,7 +1804,164 @@
 
 <hr>
 
-<h2 id="settled">23. Settled decisions &mdash; do not reopen</h2>
+<h2 id="mod-patches">23. Mod patches, and tack of our own</h2>
+
+<p>
+    Six third-party projects were investigated on 2026-09-15 and written up on
+    <a href="compatibility.html">Mod compatibility</a>; this is the work that came out of
+    it. <strong>Two of the three requested patches turned out to need no patch at all</strong>
+    &mdash; the detail is on that page and is not repeated here. What is left is one
+    prerequisite defect, one small piece of art, and one large question about scope.
+</p>
+
+<h3 id="tack-scale">23.1 The saddle does not fit, and that blocks all of it</h3>
+
+<p>
+    <strong>This is a prerequisite, not a follow-up.</strong> The saddle and armour layers
+    render at vanilla scale over a body the size locus has resized, so they float or clip on
+    every horse that is not exactly 1.0 &mdash; already true today, already recorded at
+    &sect;<a href="#resizing">2</a>, and true of third-party tack as well. Adding tack
+    categories on top multiplies a visible bug and buries its fix under new art. Fix
+    <code>state.scale</code> inheritance on the two existing equipment layers first. It is
+    also the change that makes <em>other</em> mods' tack sit correctly, which is the
+    compatibility story <a href="compatibility.html#patches">this project says it is
+    telling</a>.
+</p>
+
+<h3 id="native-tack">23.2 Native tack &mdash; cheap in code, expensive in art</h3>
+
+<p>
+    Assessed against this codebase rather than in the abstract. Every seam already exists:
+    <code>CutieMarkLayer</code> is a worked precedent for geometry anchored to an animated
+    bone (<code>body.translateAndRotate(poseStack)</code>), <code>EquineSaddleModel</code>
+    shows the cube layout for head strapwork, a new item is one line in
+    <code>ModItems</code>, and the synced-attachment pattern has ten instances already.
+</p>
+
+<ul>
+    <li><strong>It cannot use equipment slots.</strong> <code>EquipmentSlot</code> has
+        exactly two animal slots, <code>BODY</code> and <code>SADDLE</code>, and both are
+        taken; <code>EquipmentClientInfo.LayerType</code> reports itself non-extended, so we
+        cannot add layer types either. Anything past two simultaneous pieces rides on a
+        synced <code>tack</code> attachment, equipped through
+        <code>HorseInteractionHandler</code>'s lowest-priority seam.</li>
+    <li><strong>Colour is free, and that is the whole opportunity.</strong> Vanilla's leather
+        horse armour is a tinted base plus an untinted overlay, declared per-layer on the
+        equipment asset. Two greyscale PNGs and one JSON per piece buys sixteen colours
+        &mdash; or any RGB. A saddle pad, a blanket and a halter are days of work.</li>
+    <li><strong>The four riding <em>sets</em> are not four features, they are four art
+        styles.</strong> English, western, racing and jumping share identical code and differ
+        only in textures &mdash; and Horse Tack's 381 are All Rights Reserved even though
+        sekelsta's code is MIT, so not one may be copied. This project currently ships four
+        tickets sharing one texture and four whistles sharing another; it cannot afford
+        7&nbsp;&times;&nbsp;16 PNGs. <strong>A draft harness</strong> is the only category
+        needing genuinely new geometry, and it implies a cart that does not exist.</li>
+    <li><strong>There is no third-party code to start from &mdash; checked, not assumed.</strong>
+        Horse Tack&rsquo;s source was read in full: two Java files, 381 literal registrations,
+        no rendering and no equip logic, on APIs 26.1.2 has removed. The taxonomy is the only
+        transferable part &mdash; saddle pad, halter, english / jumping / western / racing
+        tack, cart harness, and blankets (solid, trimmed, novelty) &mdash; and its two lessons
+        are both cautionary: <em>do not</em> pre-register colour variants (dyeable layers
+        collapse each &times;16 run to one item), and <em>do not</em> pre-register
+        combinations (that was a one-slot workaround; we have two slots).</li>
+    <li><strong>Minimum viable version:</strong> one saddle pad and one halter, dyeable
+        through vanilla <code>dyed_color</code>, on a new synced attachment, drawn by one
+        render layer. No stats, no sets, no foal support &mdash; vanilla already draws no
+        equipment on babies.</li>
+    <li><strong>Do not give tack stats.</strong>
+        <a href="philosophy.html">Philosophy</a> is explicit that no outcome is
+        &ldquo;better&rdquo; and that the mod should add texture, not chores. Cosmetic tack
+        is in keeping; a tiered tack ladder is not.</li>
+    <li><strong>It contradicts the current positioning.</strong>
+        <code>compatibility.html</code> says in as many words that tack is what this mod
+        deliberately leaves to others and that the two are &ldquo;almost perfectly
+        complementary&rdquo;. Shipping native tack means rewriting that claim in the same
+        change. Found 2026-09-15.</li>
+</ul>
+
+<h3 id="dyeable-saddle">23.3 A dyeable saddle asset of our own</h3>
+
+<p>
+    A dyed-saddle trade was built and withdrawn the same day: <strong>vanilla does not tint
+    the saddle</strong>, so the component was set and invisible, and the trade sold a
+    fourteen-emerald saddle indistinguishable from the eight-emerald one. The tinted model
+    comes from <a href="compatibility.html#saturated-saddles">Saturated Saddles</a>'
+    resource pack. Shipping our own dyeable saddle equipment asset would make a coloured
+    saddle work standalone, at the cost of overriding a vanilla asset &mdash; which is the
+    same override that pack performs, so the two would collide rather than stack. Worth
+    doing only alongside &sect;<a href="#native-tack">23.2</a>, where the same asset
+    machinery is already being written. Found 2026-09-15.
+</p>
+
+<p>
+    <strong>Their pack was downloaded and measured, so the shape of the work is known.</strong>
+    The asset half is trivial &mdash; the vanilla leather pattern, a
+    <code>dyeable</code> base layer plus an untinted overlay, with
+    <code>color_when_undyed</code> set to the vanilla leather brown. The real content is a
+    <em>texture split</em>: vanilla's saddle partitioned into a greyscale base that takes the
+    tint (208 opaque pixels over six grey tones) and an overlay carrying the buckles (36
+    pixels, byte-identical to vanilla). The two add up to vanilla's opaque count exactly,
+    with no overlap.
+</p>
+
+<p>
+    <strong>The split is not optional, because tinting multiplies.</strong> Applied to
+    vanilla's brown saddle, red dye lands on <code>#360803</code> and blue on
+    <code>#20161E</code> &mdash; multiply can only darken, so a brown base has no headroom
+    and most of the sixteen dyes become indistinguishable mud. That is the whole reason
+    vanilla's own leather armour ships a desaturated base beside a coloured overlay.
+</p>
+
+<p>
+    <strong>Write our own rather than bundle theirs</strong>, on three grounds and not on
+    licence &mdash; CC-BY-4.0 permits the bundle. First, the artwork is a couple of hundred
+    grey pixels and can be <em>generated from vanilla at bake time</em> by dividing out the
+    leather brown, which reproduces vanilla's undyed look more faithfully than their
+    hand-picked greys do. Second, CC-BY cannot sit under this project's
+    CC BY-NC terms: its no-downstream-restrictions clause means
+    their files stay CC-BY inside the repo and need marking as separately licensed, the way
+    <a href="stables.html">third-party schematics</a> already are &mdash; and anyone could
+    then lawfully lift them back out for commercial use. Third, their pack overrides the
+    <code>minecraft:</code> namespace, so shipping it changes every saddle in the game for
+    every user and collides with any other pack touching saddles.
+</p>
+
+<p>
+    <strong>The open design question is which item gets dyed.</strong> Making the
+    <em>vanilla</em> saddle dyeable unavoidably means overriding
+    <code>assets/minecraft/equipment/saddle.json</code> &mdash; it is the asset the vanilla
+    item points at, and that override is global and hits camels, pigs, striders and donkeys
+    too. The alternative is a saddle of our own with its own namespaced asset, which is
+    clean and conflicts with nothing, at the cost of being a new item rather than an
+    improvement to the one players already have. Decide that before writing any pixels.
+</p>
+
+<h3 id="rhg-detection">23.4 Detect Realistic Horse Genetics and say so</h3>
+
+<p>
+    Not a patch &mdash; the two mods both replace the horse and both own coat generation, so
+    whoever registers last wins. The useful version is a load-time check that logs
+    &ldquo;these two mods both replace the horse; run one&rdquo; rather than letting a player
+    discover it as a half-broken world. <strong>This would be the first
+    <code>ModList.isLoaded</code> call in the repo</strong>, which is worth noting because
+    there is currently no compat package, no optional dependency in
+    <code>neoforge.mods.toml</code>, and therefore no pattern to follow. Cheap, and it also
+    establishes the seam for any later soft dependency. Found 2026-09-15.
+</p>
+
+<h3 id="bhar-recipes">23.5 A recipe-collision check against BHAR</h3>
+
+<p>
+    <a href="compatibility.html#bhar">BHAR</a> adds crafting recipes for the vanilla saddle
+    and all four horse armours. This mod adds none today, so there is no collision today
+    &mdash; but if it ever does, two recipes claim the same inputs.
+    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> already answers that question
+    mechanically and would need only to be pointed at their recipe ids. Note the licence:
+    their custom terms forbid redistributing any part, so the check may not embed a copy of
+    their files. Found 2026-09-15.
+</p>
+
+<h2 id="settled">24. Settled decisions &mdash; do not reopen</h2>
 
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.

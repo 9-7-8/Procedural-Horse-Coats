@@ -78,6 +78,49 @@
     </p>
 </div>
 
+<h2 id="regional-cowboys-0915">&sect;0-EL &mdash; Cowboys with a country, and four tack trades (2026-09-15, NOT played)</h2>
+
+<p>
+    <strong>Nothing in this section has been seen in a world.</strong> It is green on the
+    bench &mdash; <code>:neoforge-26.1.2:build</code>, <code>RegionTest</code>, the designer
+    boot check &mdash; and every claim below is read off the source.
+</p>
+
+<p>
+    <strong>The cowboy now comes from somewhere.</strong> Find a plains village barn and
+    read his name against his string: a man selling Fjords should be a Halvorsen, one
+    selling Andalusians an Olivares. The whole paddock should be from one
+    <a href="breeds.html#regions">region</a> once he is founded &mdash; the first horse sets
+    where he is from, and every horse after it is drawn from that region. What to watch for
+    is a mismatch: a Scandinavian name over a yard of Quarter Horses means
+    <code>CowboyHandler.found</code> is naming before it picks, which is the exact bug the
+    reordering fixed.
+</p>
+
+<p>
+    <strong>The horseman should share the cowboy's region, not just his surname.</strong>
+    Put a Horseman's Table near an existing barn and check his first name suits the
+    cowboy&rsquo;s region as well as matching his family. Then the harder path: a table in a
+    village with <em>no</em> cowboy at all, where he is the founder and his region is rolled.
+    Both go through <code>HorsemanHandler.regionIdNear</code>.
+</p>
+
+<p>
+    <strong>Three new trades</strong> &mdash; leather horse armour at tier 1, a
+    <strong>dyed</strong> leather horse armour at 2, golden horse armour at 4. Each tier
+    still draws three of its pool, so they will not all show at once; level a horseman and
+    watch the pools rather than expecting a fixed shop. <strong>The dyed armour is the one
+    worth looking at</strong>: sixteen possible colours, rolled once per restock, so it
+    should hold its colour in the window rather than shimmering under the cursor.
+</p>
+
+<p class="muted">
+    A fourth trade, a dyed saddle, was written and withdrawn the same day &mdash; vanilla
+    does not tint saddles, so it sold an invisible upgrade. That is settled from the
+    equipment-asset source rather than pending a look;
+    <a href="villagers.html#random-trades">the reasoning is on the villagers page</a>.
+</p>
+
 <h2 id="new-breeds-0915g">&sect;0-EK &mdash; The deferred fourteen, now baked and tested (2026-09-15, NOT played)</h2>
 
 <p>

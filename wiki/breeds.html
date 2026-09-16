@@ -458,6 +458,67 @@
     it is the absence of a breed, so it never spawns as itself and never has an egg.
 </p>
 
+<h2 id="regions">Where in the world it is from</h2>
+<p>
+    Every breed carries a <code>country</code> &mdash; a lower-case token, on every breed
+    that has one to claim. It has been in the file format from the start, and the parser has
+    always <em>thrown</em> on a capital letter rather than forgiving it, on the grounds that
+    &ldquo;a country is meant to be keyed on, so <code>United States</code> is not a pack
+    this install has not got, it is a display name in a token&rsquo;s slot&rdquo;. For a long
+    time nothing keyed on it. <code>Region</code> is the first thing that does.
+</p>
+<p>
+    A region groups neighbouring countries into one pool, and the
+    <a href="villagers.html#cowboy">cowboy</a> is drawn entirely from one of them: his
+    string, and his <a href="villagers.html#family-names">name</a>. The premise is that the
+    villagers were pulled out of the real world along with their herds and landed here
+    together, so a man who came from the Rhine with his horses did not also bring a Marwari.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Region</th><th>Countries</th></tr></thead>
+<tbody>
+<tr><td>North America</td><td><code>united_states</code>, <code>canada</code></td></tr>
+<tr><td>Britain and Ireland</td><td><code>united_kingdom</code>, <code>ireland</code></td></tr>
+<tr><td>Western Europe</td><td><code>france</code>, <code>germany</code>, <code>netherlands</code>, <code>belgium</code></td></tr>
+<tr><td>Scandinavia and the North</td><td><code>norway</code>, <code>sweden</code>, <code>denmark</code>, <code>finland</code>, <code>iceland</code></td></tr>
+<tr><td>Mediterranean Europe</td><td><code>portugal</code>, <code>spain</code>, <code>italy</code>, <code>croatia</code>, <code>montenegro</code>, <code>serbia</code>, <code>bosnia_and_herzegovina</code>, <code>greece</code></td></tr>
+<tr><td>Eastern Europe</td><td><code>austria</code>, <code>poland</code>, <code>czech_republic</code>, <code>hungary</code>, <code>romania</code>, <code>bulgaria</code>, <code>ukraine</code></td></tr>
+<tr><td>Russia, Central Asia and India</td><td><code>russia</code>, <code>mongolia</code>, <code>azerbaijan</code>, <code>turkmenistan</code>, <code>uzbekistan</code>, <code>india</code></td></tr>
+<tr><td>East Asia and the Pacific</td><td><code>china</code>, <code>japan</code>, <code>australia</code>, <code>new_zealand</code></td></tr>
+<tr><td>Africa and the Near East</td><td><code>morocco</code>, <code>south_africa</code>, <code>saudi_arabia</code>, <code>iran</code>, <code>turkey</code></td></tr>
+<tr><td>Latin America</td><td><code>mexico</code>, <code>puerto_rico</code>, <code>argentina</code>, <code>brazil</code>, <code>chile</code>, <code>colombia</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    <strong>The rule the groupings answer to is that a cowboy must be able to stock at least
+    five different breeds from his own region</strong>, and that the countries in one must be
+    near each other. Those two pull against each other, because the breed roster is not
+    spread evenly over the globe &mdash; it is overwhelmingly European and North American.
+    Four regions that look obvious on a map (North Africa, Sub-Saharan Africa, the Middle
+    East, Central America) have one or two breeds each and cannot seat a trader alone, so
+    each is folded into its nearest neighbour rather than left to spawn an empty stall. Two
+    regions run the other way and are far larger than the rest; there is no honest fix for
+    that short of inventing countries.
+</p>
+<p>
+    <strong>Do not write the per-region counts down.</strong> They are
+    <code>Region.breeds(BreedSource.COWBOY).size()</code>, they move whenever a breed is
+    added or switches its <a href="#sources">cowboy source</a> off, and
+    <code>RegionTest.everyRegionCanSeatACowboy</code> is what actually holds the floor of
+    five &mdash; it fails the build rather than letting a region quietly empty out.
+    <code>RegionTest.everyShippedBreedWithACountryIsPlaced</code> is the other half: a breed
+    from a country no region claims is caught at build time, not discovered as a cowboy who
+    never appears.
+</p>
+<p class="muted">
+    A breed with no country belongs to no region &mdash; a magical one the mod invented, or
+    <code>Feral Mixed</code>, which is the absence of a breed rather than one. Those are
+    never regional stock, so a cowboy will not deal in
+    <a href="breed-book.html#dhampir">Dhampirs</a> on the strength of where he is from.
+</p>
+
 <h2 id="world-settings">A world's own ecology: <code>breed-spawning.toml</code></h2>
 <p>
     A player's breeds are their own files; the breeds the mod ships are inside the jar.
