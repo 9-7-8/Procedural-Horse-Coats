@@ -1,0 +1,86 @@
+{
+  "id": "oldenburg",
+  "name": "Oldenburg",
+  "country": "germany",
+  "commonness": "uncommon",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 9,
+    "health": 7,
+    "size": [1.143, 1.333]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 44 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 11 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 0.4 },
+      { "pair": "Cr/N", "weight": 11 },
+      { "pair": "N/N", "weight": 88.6 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 9 },
+      { "pair": "f/f", "weight": 91 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 16 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 75 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 6 },
+      { "pair": "rn/rn", "weight": 94 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 4 },
+      { "pair": "rb/rb", "weight": 96 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 10 },
+      { "pair": "to/to", "weight": 90 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "The Oldenburger, from the former Grand Duchy of Oldenburg in Lower Saxony, administered by the Oldenburger Pferdezuchtverband. It began as a heavy carriage and artillery horse and was rebuilt through the twentieth century into a large elastic sport horse on Thoroughbred, Anglo-Norman, Hanoverian, Trakehner, Holsteiner and Dutch Warmblood blood.",
+    "An open studbook, and the colour pool says so. Bay, brown, black, chestnut and grey are the classic palette and dominate here, but the Verband does not restrict colour - quality is the only standard that counts - so cream, tobiano and roan all ship as real minorities rather than being forced wild the way a closed colour registry's would be.",
+    "Tobiano at one founder in ten is the most distinctive call in the file and it is a judgement, not a measurement. No Oldenburg genotype survey exists for any locus here; these are readings of a documented open-colour policy.",
+    "WFFS does not ship, and it is the breed's real modern concern. Warmblood fragile foal syndrome has no locus in this mod - PLOD1 here is Friesian dwarfism and is emphatically not a substitute - so the file names no rate for it. UC Davis reports an average carrier frequency near 11% across tested warmbloods, which would have been the number. See the roadmap.",
+    "Champagne, silver, pearl, mushroom, dun, frame and the leopard complex are forced wild. An open registry is not evidence that every known allele is present in an average founder, and frame in particular would introduce a lethal-white hazard with no breed evidence behind it.",
+    "Managed sources only. An international performance studbook with licensed stallions and inspected mares, not a feral population.",
+    "Every other disorder clear. The breed's open international pedigree is not a licence to import HYPP, HERDA, GBED or the Arabian panel.",
+    "No climate locus. A modern sport horse kept in stables and rugs, with no climate history to follow - the same call the Hanoverian gets.",
+    "Studbook approval, stallion licensing, mare inspection, performance testing, dressage collection, jumping technique and rideability are none of them modelled. The size band is the 16 to 17.2 hand target frame and puts it among the tallest riding horses here."
+  ]
+}

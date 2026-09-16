@@ -1,0 +1,169 @@
+{
+  "id": "nokota",
+  "name": "Nokota",
+  "country": "united_states",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 8,
+    "size": [0.889, 1.238]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 67 },
+      { "pair": "E/e", "weight": 30 },
+      { "pair": "e/e", "weight": 3 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 18 },
+      { "pair": "A/a", "weight": 49 },
+      { "pair": "a/a", "weight": 33 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 17 },
+      { "pair": "d1/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 77 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 18 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 73 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/Rn", "weight": 20 },
+      { "pair": "Rn/rn", "weight": 50 },
+      { "pair": "rn/rn", "weight": 30 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 10 },
+      { "pair": "rb/rb", "weight": 90 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 21 },
+      { "pair": "N/N", "weight": 79 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 11 },
+      { "pair": "N/N", "weight": 89 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "National Park Traditional",
+      "weight": 70,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 74 },
+          { "pair": "E/e", "weight": 24 },
+          { "pair": "e/e", "weight": 2 }
+        ],
+        "horsegenetics.agouti": [
+          { "pair": "A/A", "weight": 13 },
+          { "pair": "A/a", "weight": 46 },
+          { "pair": "a/a", "weight": 41 }
+        ],
+        "horsegenetics.dun": [
+          { "pair": "D/d2", "weight": 24 },
+          { "pair": "d1/d2", "weight": 8 },
+          { "pair": "d2/d2", "weight": 68 }
+        ],
+        "horsegenetics.roan": [
+          { "pair": "Rn/Rn", "weight": 27 },
+          { "pair": "Rn/rn", "weight": 50 },
+          { "pair": "rn/rn", "weight": 23 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 18 },
+          { "pair": "N/N", "weight": 82 }
+        ],
+        "horsegenetics.ednrb": [
+          { "pair": "O/N", "weight": 9 },
+          { "pair": "N/N", "weight": 91 }
+        ]
+      }
+    },
+    {
+      "name": "National Park Ranch",
+      "weight": 30,
+      "genes": {
+        "horsegenetics.extension": [
+          { "pair": "E/E", "weight": 56 },
+          { "pair": "E/e", "weight": 38 },
+          { "pair": "e/e", "weight": 6 }
+        ],
+        "horsegenetics.agouti": [
+          { "pair": "A/A", "weight": 31 },
+          { "pair": "A/a", "weight": 49 },
+          { "pair": "a/a", "weight": 20 }
+        ],
+        "horsegenetics.dun": [
+          { "pair": "D/d2", "weight": 11 },
+          { "pair": "d1/d2", "weight": 5 },
+          { "pair": "d2/d2", "weight": 84 }
+        ],
+        "horsegenetics.roan": [
+          { "pair": "Rn/Rn", "weight": 12 },
+          { "pair": "Rn/rn", "weight": 45 },
+          { "pair": "rn/rn", "weight": 43 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "SB1/N", "weight": 28 },
+          { "pair": "N/N", "weight": 72 }
+        ],
+        "horsegenetics.ednrb": [
+          { "pair": "O/N", "weight": 14 },
+          { "pair": "N/N", "weight": 86 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The horse of the Little Missouri Badlands in western North Dakota - feral stock preserved in and around Theodore Roosevelt National Park, bought out of the 1980s park removals by the Kuntz family and registered by the Nokota Horse Conservancy from 1999. The name is North Dakota.",
+    "Blue roan is the hallmark and the file is built around it: roan sits high enough that a fifth of founders are homozygous, over an extension and agouti pool skewed hard towards black. Black plus roan is the blue roan, and it should be the first thing a player notices about a Nokota herd.",
+    "Frame overo and sabino are both named by the Conservancy as characteristic, which makes this one of the few breeds here carrying frame on purpose. O/O lethal white is the real breeding hazard, exactly as it is for the American Paint.",
+    "Tobiano is forced wild, and that is the Conservancy's own line: tobiano in a Nokota comes from crossbreeding and is not the breed. It is the one pattern a pure founder can never throw.",
+    "Two strains, 7 traditional to 3 ranch, and they differ in gene pools alone. The Conservancy's two types differ mostly in SIZE - the Traditional is about 14 to 15 hands and the Ranch runs to 17 - and a strain may override gene pools and nothing else, so the size band spans both and the strains carry the colour difference only. The smaller refined type is rounder on black, roan and dun; the ranch-influenced one is bayer, chestnutter and whiter.",
+    "Grey is common in the breed and sits near a quarter of founders. Dun carries d1 for the primitive leg and wither striping the breed is described with, and grullo comes out of dun over the black base rather than out of a separate pool.",
+    "Silver, champagne, pearl, mushroom, the leopard complex and every W-series white are forced wild - the Conservancy-supported phenotype range does not reach them.",
+    "All disorders clear. No Nokota carrier survey exists, and the Ranch type's foundation-ranch ancestry is not a licence to import the Quarter Horse panel.",
+    "Tolerant both ways and lightly: badlands summers are hot and North Dakota winters are hard, but this is a feral population sorted by both rather than a specialist in either.",
+    "The Indian shuffle some of them carry, the angular Colonial-Spanish outline, the low tail set, the blue eyes frame can bring, hoof toughness and the park-removal pedigree are none of them modelled."
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "newfoundland_pony",
+  "name": "Newfoundland Pony",
+  "country": "canada",
+  "commonness": "rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:grove",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:stony_shore",
+    "minecraft:beach",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 9,
+    "size": [0.698, 0.921]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 45 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 11 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 38 },
+      { "pair": "A/a", "weight": 47 },
+      { "pair": "a/a", "weight": 15 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/f", "weight": 2 },
+      { "pair": "Fl1/f", "weight": 10 },
+      { "pair": "f/f", "weight": 88 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 2 },
+      { "pair": "D/d1", "weight": 3 },
+      { "pair": "D/d2", "weight": 22 },
+      { "pair": "d1/d1", "weight": 1 },
+      { "pair": "d1/d2", "weight": 15 },
+      { "pair": "d2/d2", "weight": 57 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 12 },
+      { "pair": "G2/N", "weight": 7 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The native heritage pony of Newfoundland and Labrador, off British and Irish working pony stock brought to the island from the seventeenth century and left to become its own type. Protected under the province's Heritage Animals Act, with the Newfoundland Pony Society as the designated guardian.",
+    "The colour pool is the registry's own accepted list and nothing else: bay, black, brown, chestnut, dun, grey and roan. It is a deliberately broad heritage pool rather than a one-colour breed, because the Society accepts all of those and the ponies vary from fine-boned to nearly draught in build.",
+    "Piebald and skewbald are barred from registration outright, and so are the leopard, blanket and snowflake patterns, so tobiano, sabino, frame, splash and the whole leopard complex are forced wild. That is a registry rule, not missing evidence.",
+    "The registry also recognises a true white pony - white from birth with pink skin, which is a dominant white and not grey. It does not ship. The mod carries the whole W series, but no source names which variant a Newfoundland carries, and picking one would assert a molecular result nobody has. The accepted colour is real; the allele behind it is not known here.",
+    "Dun carries d1 alongside D, for the primitive marking the Society describes without the body dilution - the same reasoning the Kiso and the Hucul use.",
+    "Grey and roan are both accepted colours and both sit as real minorities rather than signatures. No Newfoundland allele-frequency study exists for any locus; these are restrained readings of the accepted-colour list.",
+    "Cold tolerant near-fixed. Sub-arctic island winters lived largely outdoors, with the dense double winter coat that goes with them - one of the clearest climate cases in the book.",
+    "No cowboy. This is a critically threatened conservation population under a provincial protection act, found or bought from a stable, never traded out of a sale yard.",
+    "All disorders clear. No Newfoundland-specific carrier rate was located for any locus on the panel.",
+    "The heavy seasonal coat, the seasonal colour shift it causes, the fetlock feathering, the famously flint-hard hooves, the low-set tail and the breed's docility are none of them modelled."
+  ]
+}

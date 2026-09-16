@@ -1,0 +1,74 @@
+{
+  "id": "novooleksandrivsky_heavy_draught",
+  "name": "Novooleksandrivsky Heavy Draught",
+  "country": "ukraine",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:taiga",
+    "minecraft:grove",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 9,
+    "size": [0.937, 1]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 30 },
+      { "pair": "E/e", "weight": 50 },
+      { "pair": "e/e", "weight": 20 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 49 },
+      { "pair": "A/a", "weight": 42 },
+      { "pair": "a/a", "weight": 9 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/f", "weight": 6 },
+      { "pair": "Fl1/Fl1", "weight": 3 },
+      { "pair": "Fl1/f", "weight": 26 },
+      { "pair": "f/f", "weight": 65 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 8 },
+      { "pair": "rn/rn", "weight": 92 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Hsen/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "The Novooleksandrivska vahovozna - Ukraine's compact heavy draught, named for the Novo-Oleksandrivka state stud in what is now Luhansk oblast. Local mares on Ardennes stallions from 1868 with lesser Brabant and Percheron influence, recognised by Soviet agriculture in 1970 and by Ukraine's Ministry of Agrarian Policy in November 1999. English sources also call it the Novoalexandrovsk Heavy Draft or the Novoolexandrian Draught.",
+    "Chestnut leads, with bay and brown behind it and black uncommon - the palette repeatedly described for this breed and for the Russian Ardennes population it shares its early history with. Flaxen rides on the chestnut and gives the pale mane and tail the working photographs show.",
+    "Roan is kept to a few percent. It is reported in the related Russian Heavy Draft rather than measured here, so it ships as a rare historical possibility rather than a breed marker.",
+    "Grey, cream, pearl, champagne, silver, mushroom, dun, every white pattern and the leopard complex are forced wild. The documented palette is chestnut, bay, brown and the occasional roan, and a crossbred origin is not evidence for every allele its founders might have carried.",
+    "A compact draught, not a giant. The size band is the cited 150 to 160 cm and lands well below the Shire and the Percheron on purpose - the breed's mass is in its width and its short heavy limbs, which are not modelled. Individuals nearer 16 hands are reported and sit outside this band.",
+    "Managed sources only. A state-stud working breed kept by the Ukrainian studbook, not a feral population.",
+    "All disorders clear. The Ardennes, Brabant and Percheron ancestry is not a licence to import a draught disease panel, and PSSM1 in particular is dominant and must never be seeded as a casual carrier without breed data.",
+    "Cold tolerant partially for continental Ukrainian winters, and lightly heat sensitive as the heavy drafts here are.",
+    "Traction force, harness action, fertility, longevity, the small hard hooves, the light feathering and the heavy crested neck are none of them modelled.",
+    "The intake file arrived named for a trotter. It is not one - the draft inside it is the heavy draught, and the breed has no trotting history at all."
+  ]
+}

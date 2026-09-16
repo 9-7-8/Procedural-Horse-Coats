@@ -1,0 +1,76 @@
+{
+  "id": "pindos",
+  "name": "Pindos",
+  "country": "greece",
+  "commonness": "rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 9,
+    "size": [0.75, 0.875]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 49 },
+      { "pair": "E/e", "weight": 42 },
+      { "pair": "e/e", "weight": 9 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 10 },
+      { "pair": "f/f", "weight": 90 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 16 },
+      { "pair": "G2/N", "weight": 9 },
+      { "pair": "N/N", "weight": 75 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "Greece's mountain horse, from the Pindus range across Epirus, Thessaly and Macedonia - the Pindos Horse or Pindos Pony, the same animal either way. A pack, farm and trail horse from country where a cart could not go, and it carried ammunition through the mountains in the Greco-Italian war.",
+    "Bay leads, with chestnut a real minority and grey a visible quarter of the herd; black and brown come out of the same extension and agouti pool. Those are the colours the Greek breed sources name, in that order of emphasis.",
+    "Roan and a mild flaxen are both kept low. Roan is reported in supplementary breed material rather than measured, and flaxen is there so the occasional chestnut has a pale mane without it becoming a signature.",
+    "Cream, pearl, champagne, silver, mushroom, dun, every white pattern and the leopard complex are forced wild. This is a solid-coloured mountain landrace and nothing in the sources reaches to a pinto or a dilute.",
+    "No Pindos genotype survey exists. An academic source puts a historic census near 500 animals and the Greek breed organisation cites a larger 2019 registered figure; the difference is time and method, and rare is the defensible tier either way.",
+    "Tolerant both ways and modestly: the Pindus has hot dry summers and cold snowy winters, and a mountain landrace is sorted by both without specialising in either.",
+    "All disorders clear. The genetic-diversity work on Greek native breeds establishes the Pindos as a distinct population with high heterozygosity but reports no carrier frequency for anything on the panel, and borrowing from other Mediterranean or Balkan breeds would be a guess.",
+    "The narrow dark exceptionally hard hooves are the breed's clearest practical signature and are not modelled; nor are the cow hocks that help it find purchase, the thick mane, the long tail, its thrift on sparse forage, or its pack capacity."
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "id": "nonius",
+  "name": "Nonius",
+  "country": "hungary",
+  "commonness": "rare",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_hills",
+    "minecraft:savanna"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 8,
+    "size": [1, 1.19]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 88 },
+      { "pair": "E/e", "weight": 11 },
+      { "pair": "e/e", "weight": 1 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 31 },
+      { "pair": "A/a", "weight": 49 },
+      { "pair": "a/a", "weight": 20 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 2 },
+      { "pair": "ShL/Sh", "weight": 8 },
+      { "pair": "ShL/ShD", "weight": 10 },
+      { "pair": "Sh/Sh", "weight": 15 },
+      { "pair": "Sh/ShD", "weight": 35 },
+      { "pair": "ShD/ShD", "weight": 30 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "Hungary's carriage, cavalry, farm and light-draught horse, built at the imperial state stud of Mezohegyes from 1816 around Nonius Senior, a dark Anglo-Norman stallion taken in France during the Napoleonic wars. The type settled through the nineteenth century and the breed was recognised internationally in the twentieth.",
+    "Black, dark bay and brown, and almost nothing else. A 2021 study of the Hungarian and Serbian populations reports that most Nonius horses are one of those three, with bay relatively more common in the Hortobagy stud, which is why extension is near-fixed and agouti is split rather than forced.",
+    "The dark look comes from a deliberately dark-skewed shade pool, not from an agouti allele. The draft asked for a bespoke 'black intensity' band, which is not a thing the format has; the same effect is what the shade locus is for, and the Domestic Mountain Pony and the Medimurje do it the same way.",
+    "Chestnut survives at about one founder in a hundred. It is a real Mendelian outcome from two carriers rather than a breed colour, and the draft's own note offered to zero it; keeping a trace is the less absolute claim.",
+    "Grey, every dilution, dun, roan, rabicano, every white pattern and the leopard complex are all forced wild. This is one of the narrowest pools in the book, behind only the fixed-colour breeds and the Danubian - which is unsurprising, since the Danubian was built on Nonius foundation stock.",
+    "The two historical types, the lighter saddle-and-carriage horse and the heavier agricultural one, are not strains: they differ in size and build, and a strain may override gene pools and nothing else. The size band spans both.",
+    "Managed sources only. A state-stud breed kept by studbook at Mezohegyes and Hortobagy, not a feral population.",
+    "All disorders clear. Anglo-Norman, Norfolk Roadster, Arabian and Lipizzan ancestry does not license importing any of their carrier rates.",
+    "Cold tolerant lightly, for continental winters on the Hungarian plain.",
+    "Pulling force, harness work, the heavy straight-to-convex head, the substantial bone and the calm working temperament are none of them modelled."
+  ]
+}

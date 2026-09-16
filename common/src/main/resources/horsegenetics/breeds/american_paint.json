@@ -72,8 +72,8 @@
       { "pair": "N/N", "weight": 70 }
     ],
     "horsegenetics.scn4a": [
-      { "pair": "H/N", "weight": 1.2 },
-      { "pair": "N/N", "weight": 98.8 }
+      { "pair": "H/N", "weight": 4.9 },
+      { "pair": "N/N", "weight": 95.1 }
     ],
     "horsegenetics.ppib": [
       { "pair": "herda/N", "weight": 3.4 },
@@ -86,6 +86,10 @@
   },
   "notes": [
     "Pinto spotting: tobiano + sabino + frame overo + splash, all present. O/O (lethal white) is the real breeding hazard.",
-    "HYPP, HERDA and PSSM1 all have loci now - see SCN4A, PPIB and GYS1. HYPP is the breeding hazard here alongside O/O."
+    "HYPP, HERDA and PSSM1 all have loci now - see SCN4A, PPIB and GYS1. HYPP is the breeding hazard here alongside O/O.",
+    "This is the APHA breed. A second intake draft arrived under the name 'Paint Horse (APHA)' asking for a separate apha_paint_horse alongside this file; it describes the same registry, the same 1965 merger and the same horse, so it was merged in here instead of shipped twice. Owner's call, 2026-09-15.",
+    "Two pools are now anchored to a measured study rather than to estimate. A study of inherited-disease allele frequencies in American Quarter Horse subgroups reports, for its control American Paint Horse group, an EDNRB/lethal-white allele frequency of 0.107 and an SCN4A/HYPP allele frequency of 0.025. HYPP moved to match it and is now several times its old rate - it had been carrying the mod's generic 1.2% carrier figure.",
+    "Frame did not move. An allele frequency of 0.107 gives about 19% carriers under Hardy-Weinberg, and the pool already sat at 20 - so the measurement corroborates what shipped rather than changing it, which is worth recording precisely because nothing had to be edited.",
+    "The same draft offered GBED, PSSM1 and HERDA rates. Those were declined: the draft labels all three as conservative Quarter Horse proxies rather than APHA figures, and the existing PPIB and GYS1 pools stay as they are. Only the numbers with a study behind them were taken."
   ]
 }

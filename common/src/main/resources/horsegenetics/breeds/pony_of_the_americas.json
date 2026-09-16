@@ -1,0 +1,122 @@
+{
+  "id": "pony_of_the_americas",
+  "name": "Pony of the Americas",
+  "country": "united_states",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:windswept_hills",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 8,
+    "size": [0.73, 0.889]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 44 },
+      { "pair": "E/e", "weight": 45 },
+      { "pair": "e/e", "weight": 11 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 38 },
+      { "pair": "A/a", "weight": 47 },
+      { "pair": "a/a", "weight": 15 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 18 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 10 },
+      { "pair": "f/f", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 11 },
+      { "pair": "d1/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 83 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 6 },
+      { "pair": "G2/N", "weight": 4 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 15 },
+      { "pair": "rn/rn", "weight": 85 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/LP", "weight": 28 },
+      { "pair": "LP/lp", "weight": 72 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/PATN1", "weight": 12 },
+      { "pair": "PATN1/n", "weight": 45 },
+      { "pair": "n/n", "weight": 43 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 35 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Blanket and Leopard",
+      "weight": 55,
+      "genes": {
+        "horsegenetics.patn1": [
+          { "pair": "PATN1/PATN1", "weight": 25 },
+          { "pair": "PATN1/n", "weight": 50 },
+          { "pair": "n/n", "weight": 25 }
+        ],
+        "horsegenetics.patn2": [
+          { "pair": "PATN2/PATN2", "weight": 10 },
+          { "pair": "PATN2/n", "weight": 45 },
+          { "pair": "n/n", "weight": 45 }
+        ]
+      }
+    },
+    {
+      "name": "Varnish and Snowflake",
+      "weight": 45,
+      "genes": {
+        "horsegenetics.patn1": [
+          { "pair": "PATN1/n", "weight": 30 },
+          { "pair": "n/n", "weight": 70 }
+        ],
+        "horsegenetics.patn2": [
+          { "pair": "PATN2/n", "weight": 22 },
+          { "pair": "n/n", "weight": 78 }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "The POA - an American youth riding pony begun in Iowa in 1954, when Leslie Boomhower bought an Appaloosa-cross foal called Black Hand and built a breed around him. The Pony of the Americas Club has registered it ever since, and it is an Appaloosa in pony size with real Quarter Horse influence in the build.",
+    "LP is fixed. Every pure founder carries at least one copy, because the POAC requires an Appaloosa-patterned coat and the Appaloosa characteristics that come with the locus - mottled skin, white sclera and striped hooves. No founder is ever lp/lp, which no other breed here does.",
+    "Two strains, 11 to 9, differing in the pattern modifiers alone. The bold strain is PATN-heavy and throws blankets, spotted blankets, snowcaps, leopards and few-spots; the subtler one favours varnish roan, frost, snowflake and small blankets. This is a founder-generation device rather than a POAC population division, and it exists so that not every POA renders as a full leopard.",
+    "Pinto is barred outright and that is the breed's second defining rule: the POAC excludes pinto colouring, refuses Paint and Pinto parentage, and bars excessive white from non-Appaloosa mechanisms. So tobiano, sabino, frame, splash and every W-series white are forced wild. A nearly white few-spot POA is still genetically Appaloosa and not a pinto, which is the distinction the file is built to preserve.",
+    "That rule costs the breed its ordinary face and leg white too, since SW1 stands in for ordinary markings here. A pure POA is cleanly marked apart from what LP and the PATN modifiers give it - the same trade the Kentucky Mountain Saddle Horse makes.",
+    "Grey is kept low on purpose. It is accepted where the pony still shows mottled skin, white sclera or striped hooves, but progressive greying hides an Appaloosa pattern as the animal ages and this is a breed whose whole point is the pattern.",
+    "HYPP is forced clear on a registry rule rather than on absence of evidence, which is worth separating: the POAC does not permit HYPP-positive ponies for registration and requires descendants of known lines to test negative. Every other disorder is clear for the ordinary reason.",
+    "The size band is the registry's own and it is strict: 46 to 56 inches at maturity, which is about 11.2 to 14 hands. A pony outside it cannot hold normal permanent registration, so no pure founder is generated outside it either.",
+    "No climate locus. A modern American show and youth pony with no climate history to follow.",
+    "The 40-foot visible-colour rule, POAC registration classes, the mottled skin and striped hooves themselves, white sclera, youth suitability and western event training are none of them modelled. Congenital stationary night blindness on LP/LP is modelled informationally, as it is for the Appaloosa."
+  ]
+}

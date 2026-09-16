@@ -1,0 +1,66 @@
+{
+  "id": "sorraia",
+  "name": "Sorraia",
+  "country": "portugal",
+  "commonness": "very_rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:swamp",
+    "minecraft:river",
+    "minecraft:forest",
+    "minecraft:sparse_jungle",
+    "minecraft:stony_shore"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 9,
+    "size": [0.873, 0.937]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 85 },
+      { "pair": "E/e", "weight": 14 },
+      { "pair": "e/e", "weight": 1 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 3 },
+      { "pair": "A/a", "weight": 30 },
+      { "pair": "a/a", "weight": 67 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 25 },
+      { "pair": "D/d1", "weight": 15 },
+      { "pair": "D/d2", "weight": 60 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 5 },
+      { "pair": "Htol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
+    ]
+  },
+  "notes": [
+    "A rare Iberian conservation breed from the low valleys of the Sor and the Raia in southern Portugal, in the Tagus basin. Ruy d'Andrade found a small wild-living population in 1920 and began a preservation programme from a very small foundation, and the bottleneck that created is most of the breed's modern story.",
+    "Dun is fixed. Every founder carries D, and agouti is skewed hard to a, so most are black-based mouse dun or grullo with a minority of bay or yellow dun - the pale body, dark points, emphatic dorsal stripe, zebra leg bars, shoulder stripe and forehead cobwebbing the breed is recognised by.",
+    "It is dun and not grey, and the distinction is load-bearing. The old name for the colour is mouse grey, rato, and seeding STX17 would whiten the horse with age and wreck the one thing it looks like. Grey is forced wild - the same trap the Konik and the Murgese file around.",
+    "Red dun survives at about one founder in a hundred through two extension carriers. It is not a headline Sorraia colour and the draft offered to zero it; a trace is the less absolute claim.",
+    "Pure Sorraias are described as carrying no white markings at all, so every white-pattern locus is forced wild, along with cream, pearl, champagne, silver, mushroom, flaxen, roan, rabicano and the leopard complex. This is the most tightly constrained natural pool here after the Henson and the fixed-colour breeds.",
+    "The characteristic mane and tail - dark hair fringed with paler, sometimes nearly white hairs - is a structural two-tone rather than flaxen, which is why flaxen is absent rather than low.",
+    "Very rare, and genuinely so: a numerically tiny conservation population rather than a breed that is merely uncommon.",
+    "All disorders clear. The literature on this breed is about low diversity, inbreeding and its value as a model for studying those - which makes health monitoring a real concern and establishes no carrier frequency for anything on the panel.",
+    "Heat tolerant partially, for hot dry southern Portuguese summers on open lowland.",
+    "The convex Roman head profile, the long ears, the low-set tail, the bi-coloured mane, the conspicuously striped foal coat and the debated relationship between Sorraias and ancient Iberian horses are none of them modelled."
+  ]
+}

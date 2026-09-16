@@ -1,0 +1,73 @@
+{
+  "id": "sanhe",
+  "name": "Sanhe",
+  "country": "china",
+  "commonness": "rare",
+  "spawn": ["wild", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:snowy_plains",
+    "minecraft:grove",
+    "minecraft:taiga",
+    "minecraft:river",
+    "minecraft:frozen_river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "size": [0.937, 0.984]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 38 },
+      { "pair": "E/e", "weight": 47 },
+      { "pair": "e/e", "weight": 15 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 8 },
+      { "pair": "f/f", "weight": 92 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 2 },
+      { "pair": "rb/rb", "weight": 98 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "The Sanhe horse of the Hulunbuir grassland in north-eastern Inner Mongolia - also Sanho, Sanpeitze, Hailar or Hai-La-Erh. The name means three rivers, for the basin it was made in. A twentieth-century improved breed: local Mongolian mares crossed with imported Russian Zabaikal-type horses and later Thoroughbred and other selected stock.",
+    "Chestnut and bay, and other colours rare. That is the whole of what the strongest accessible breed reference says, and the pool is built to reconstruct it: chestnut at about one founder in seven, bay the largest single group, brown and dark bay behind it and black genuinely uncommon.",
+    "Grey is forced wild, which is the file's most consequential omission and is deliberate. The breed is characterised as chestnut and bay dominant with other colours rare, and there is no Sanhe-specific evidence for progressive grey. Its Russian trotter ancestry is not a reason to seed it - that would be borrowing the Orlov's identity.",
+    "Every dilution, dun, roan, tobiano, frame, splash, dominant white and the leopard complex are forced wild for the same reason. A crossbred origin is not evidence for every allele the founders might have carried.",
+    "A near-absent sabino and rabicano are kept for ordinary small white and hair variation only, at one or two percent each.",
+    "Taller and stronger than the Mongolian Horse it was built from, with better practical speed and light-draught power - which is the whole point of the breed - while keeping the grassland resilience. The size band is the cited 150 to 155 cm.",
+    "No cowboy. A regional Chinese working and riding breed found on the grassland or bought from a stable, not a sale-yard horse.",
+    "Cold tolerant near-fixed. Hulunbuir winters reach around minus forty and the breed is celebrated for working through them.",
+    "All disorders clear. Thoroughbred, Zabaikal and Mongolian ancestry does not license importing a warmblood, trotter, draught or steppe carrier rate, and cold adaptation is evidence about neither.",
+    "Pulling power, harness action, winter forage digging, hard hooves, local racing and the pastoral landscape of Hulunbuir are none of them modelled."
+  ]
+}

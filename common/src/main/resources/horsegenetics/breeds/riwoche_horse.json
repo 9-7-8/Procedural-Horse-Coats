@@ -1,0 +1,62 @@
+{
+  "id": "riwoche_horse",
+  "name": "Riwoche Horse",
+  "country": "china",
+  "commonness": "very_rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:frozen_peaks",
+    "minecraft:snowy_slopes",
+    "minecraft:grove",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 10,
+    "size": [0.73, 0.794]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 98 },
+      { "pair": "E/e", "weight": 2 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 90 },
+      { "pair": "A/a", "weight": 9 },
+      { "pair": "a/a", "weight": 1 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 30 },
+      { "pair": "D/d1", "weight": 20 },
+      { "pair": "D/d2", "weight": 50 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
+    ]
+  },
+  "notes": [
+    "A small Tibetan highland horse from the valleys around Riwoche county in Kham, eastern Tibet, used by local Bon-po people as a riding and pack animal for generations. It reached outside attention in 1995, when Michel Peissel's expedition crossed a pass near 5,000 metres and found a herd in an isolated valley.",
+    "It is not a surviving wild horse, and the correction matters more than the story. Blood samples taken from the herd were tested and showed none of the divergence a relic wild population would carry: these are domestic horses. What they demonstrate is that isolation and a tightly held local type can make an ordinary domestic population look astonishingly ancient.",
+    "Dun is fixed. Every founder carries D, over a near-fixed bay base, so the breed is bay dun almost without exception - beige body, dark points, black dorsal stripe and barred legs, which is the whole of how it is described. d1 and d2 ride along behind D without showing.",
+    "Agouti keeps a trace of a, so a rare mouse dun or grullo founder is possible. Extension is near-fixed, so red dun is effectively absent - the descriptions are consistently of a dark-maned beige horse.",
+    "Grey, every dilution, flaxen, roan, rabicano, every white pattern and the leopard complex are forced wild. Nothing in the record of this population reaches any of them, and its visual uniformity is the point of it.",
+    "Very rare, and genuinely so - one isolated valley population, which is why it sits on the bottom rung of the ladder alongside the Karakachan and the Sorraia.",
+    "All disorders clear. A small isolated population is a reason to watch for inbreeding, not evidence for any particular mutation.",
+    "Health 10 stands in for high-altitude hardiness, the same proxy the Hequ gets, and means nothing about disease resistance.",
+    "The short upright bristly mane is the breed's most distinctive feature and is not modelled; nor is the wedge-shaped head, the small ears, the narrow nostrils, the rough seasonal coat or any altitude adaptation."
+  ]
+}

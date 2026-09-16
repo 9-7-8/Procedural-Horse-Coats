@@ -1,0 +1,97 @@
+{
+  "id": "rocky_mountain_horse",
+  "name": "Rocky Mountain Horse",
+  "country": "united_states",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:birch_forest",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 4,
+    "health": 8,
+    "size": [0.889, 1.143]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 29 },
+      { "pair": "A/a", "weight": 50 },
+      { "pair": "a/a", "weight": 21 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 18 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 10 },
+      { "pair": "c/c", "weight": 90 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/Z", "weight": 12 },
+      { "pair": "Z/z", "weight": 46 },
+      { "pair": "z/z", "weight": 42 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/f", "weight": 8 },
+      { "pair": "Fl1/f", "weight": 26 },
+      { "pair": "f/f", "weight": 66 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 11 },
+      { "pair": "d1/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 83 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 8 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 87 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 11 },
+      { "pair": "rn/rn", "weight": 89 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 90.25 },
+      { "pair": "A/C", "weight": 9.5 },
+      { "pair": "C/C", "weight": 0.25 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
+    ]
+  },
+  "notes": [
+    "An American gaited saddle breed from the Appalachian foothills of eastern Kentucky, despite the name - the Rocky Mountain community, not the western range. It traces to a chocolate-coloured gaited colt brought east around 1900 and reinforced with local Kentucky mountain stock, and the RMHA has registered it since 1986.",
+    "Chocolate is the signature and it is silver on black: a dark brown body with a pale flaxen-to-silver mane and tail. Silver is deliberately the highest rate of any breed here, and agouti keeps a/a at about a fifth so the allele has black pigment to act on often enough to be recognisable.",
+    "Silver is not cosmetic. The same PMEL variant that makes the chocolate coat causes multiple congenital ocular anomalies - heterozygotes commonly show the cyst phenotype and Z/Z horses are at real risk of severe malformation and impaired vision. The mod does not model that, so a Rocky Mountain Horse here gets the colour without the cost. That is an engine limitation, not a claim about the breed, and it is on the roadmap.",
+    "Every white pattern is forced wild. The RMHA registers solid body colours only and excludes Paint, pinto, Appaloosa, spotted and all-white horses outright, allowing white only as modest face marks and below the knee and hock. A registry rule, not missing evidence - and the same trade the Kentucky Mountain Saddle Horse makes, which is this breed's near neighbour and shares its gene pool.",
+    "The rest of the solid palette is the registry's own list: black, bay, brown, chestnut, palomino, buckskin, champagne, dun, grullo, red dun, roan and grey all belong, and several of them need DNA proof for registration in life.",
+    "Flaxen ships alongside silver and must not be mistaken for it. Flaxen lightens a chestnut's mane; silver lightens a black-based one. A flaxen chestnut is not a chocolate, and a chestnut carrying Z shows almost nothing.",
+    "Gaited near-fixed on DMRT3, at the same rate as the Kentucky Mountain Saddle Horse. The four-beat single-foot replaces the trot; the locus is real whether or not the gait is animated.",
+    "Grey is kept low because progressive greying hides the chocolate the breed exists for.",
+    "Every other disorder clear. UC Davis offers PSSM1 testing for the breed, but a test being sold is not a population rate.",
+    "Cold tolerant lightly, for Appalachian Kentucky winters.",
+    "The single-foot itself, the head nod, rider comfort, hoof quality, RMHA certification and the ocular anatomy of MCOA are none of them modelled. The size band is the registry's strict 14 to 16 hands."
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "id": "selle_francais",
+  "name": "Selle Français",
+  "country": "france",
+  "commonness": "uncommon",
+  "spawn": ["cowboy", "spawn_egg", "stable"],
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 9,
+    "health": 7,
+    "size": [0.968, 1.286]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 44 },
+      { "pair": "E/e", "weight": 45 },
+      { "pair": "e/e", "weight": 11 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl1/f", "weight": 6 },
+      { "pair": "f/f", "weight": 94 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 4 },
+      { "pair": "d2/d2", "weight": 96 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 11 },
+      { "pair": "G2/N", "weight": 7 },
+      { "pair": "N/N", "weight": 82 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 3 },
+      { "pair": "rn/rn", "weight": 97 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 6 },
+      { "pair": "rb/rb", "weight": 94 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 4 },
+      { "pair": "to/to", "weight": 96 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 11 },
+      { "pair": "N/N", "weight": 89 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 20 },
+      { "pair": "N/N", "weight": 80 }
+    ]
+  },
+  "notes": [
+    "The French Saddle Horse - France's national sport horse, created in 1958 when the Anglo-Norman, Charolais, Vendeen and other regional half-bred populations were merged into one national studbook. The ANSF runs it, approves the stallions and admits selected outside blood to improve international performance.",
+    "Bay and chestnut dominate, with black and grey established behind them. It is an open performance studbook rather than a colour breed, so cream, dun, tobiano, frame, roan and rabicano all survive at low rates through qualifying ancestry rather than being forced wild - but none of them should be common, and a Selle Francais herd should never read as flashy.",
+    "White face and leg markings are common in the breed and come down in part from the Norman foundation, so SW1 sits higher here than the pattern loci around it. It is standing in for ordinary markings, as it does across the mod.",
+    "Frame is at one founder in a hundred. That is low enough to be a curiosity rather than a breeding hazard, but O/O is still lethal white and two carriers can still meet.",
+    "WFFS does not ship, and for this breed the evidence was better than for any other warmblood here: a 2022 genetic-marker study reported 6% of tested Selle Francais horses as heterozygous PLOD1 carriers, which is a direct breed figure rather than a warmblood-wide proxy. There is no WFFS locus in the mod. PLOD1 here is Friesian dwarfism and is not a substitute, and the shared gene name is exactly the trap. See the roadmap.",
+    "The leopard complex is forced wild, against the draft, which wanted LP, PATN1 and PATN2 at half a percent each on the strength of a fan-site breed page. That is not enough to put appaloosa spotting into a French warmblood.",
+    "Champagne, silver, pearl, mushroom and brindle are forced wild too. An open studbook is a policy about pedigree, not evidence about alleles.",
+    "Every other disorder clear. The breed's international sport ancestry does not license importing the Quarter Horse, Arabian or Friesian panels.",
+    "Managed sources only. A performance studbook with licensed stallions and inspected mares, not a feral population.",
+    "No climate locus. A modern sport horse with no climate history to follow, the same call the Hanoverian and the Oldenburg get.",
+    "The size band spans the broad accepted 15.1 to 17.1 hands rather than only the 16.1 to 16.3 centre, which is where most of them actually stand. Studbook approval, stallion testing, jumping technique, carefulness, rideability and competition record are none of them modelled."
+  ]
+}

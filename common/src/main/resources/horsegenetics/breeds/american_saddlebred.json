@@ -1,0 +1,107 @@
+{
+  "id": "american_saddlebred",
+  "name": "American Saddlebred",
+  "country": "united_states",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:flower_forest"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 6,
+    "health": 7,
+    "size": [0.968, 1.19]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 52 },
+      { "pair": "E/e", "weight": 40 },
+      { "pair": "e/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 46 },
+      { "pair": "A/a", "weight": 44 },
+      { "pair": "a/a", "weight": 10 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 1 },
+      { "pair": "Cr/N", "weight": 18 },
+      { "pair": "N/N", "weight": 81 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 7 },
+      { "pair": "c/c", "weight": 93 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 5 },
+      { "pair": "z/z", "weight": 95 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/f", "weight": 6 },
+      { "pair": "Fl1/f", "weight": 26 },
+      { "pair": "f/f", "weight": 68 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 5 },
+      { "pair": "d2/d2", "weight": 95 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 6 },
+      { "pair": "G2/N", "weight": 4 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 10 },
+      { "pair": "rb/rb", "weight": 90 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 12 },
+      { "pair": "to/to", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W20/N", "weight": 6 },
+      { "pair": "N/N", "weight": 78 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 25 },
+      { "pair": "N/N", "weight": 75 }
+    ],
+    "horsegenetics.dmrt3": [
+      { "pair": "A/A", "weight": 25 },
+      { "pair": "A/C", "weight": 50 },
+      { "pair": "C/C", "weight": 25 }
+    ]
+  },
+  "notes": [
+    "The Kentucky Saddler, the American Saddle Horse, and now 'the horse America made' - out of colonial riding stock in Kentucky and the eastern states through the eighteenth and nineteenth centuries, off gaited pacers, Thoroughbreds and Morgans, with its own registry from 1891.",
+    "The registry accepts any colour, and the pool is built to say so rather than to pick one. Chestnut, bay, brown and black are the familiar core; grey, roan, palomino, buckskin, dun, champagne, silver, cremello and pinto all occur in the registered population and all ship here as minorities.",
+    "DMRT3 sits at an intermediate rate rather than near-fixed, and that is the point of it. Only some Saddlebreds are five-gaited - the slow gait and the rack are a division, not a breed trait - so about three founders in four carry a gait allele and only a quarter are homozygous. Every other gaited breed here is near-fixed; this one should not be.",
+    "Frame ships at a low rate, so this is a lethal-white breed: O/O is the hazard, as it is for the Paint and the Missouri Fox Trotter.",
+    "JEB does not ship, and it is the breed's own documented disorder. American Saddlebred junctional epidermolysis bullosa is a recessive lethal caused by a partial LAMA3 deletion, and a random 2007 foal-crop sample found 9 carriers in 175 foals - a mutant allele frequency of 0.026, which is an unusually solid number by the standards of this book. There is no JEB locus in the mod, so the file names no rate for it. The Belgian-context LAMC2 variant is a different mutation and is not a substitute. See the roadmap.",
+    "Every other disorder clear. No Saddlebred-specific rate was located for anything else on the panel.",
+    "Pearl, mushroom, brindle and the leopard complex are forced wild - 'any colour' is the registry's policy about what it will accept, not evidence that every allele is present in an average founder.",
+    "Moderate commonness, which is the default and so is not written in the file.",
+    "No climate locus. A Kentucky show and pleasure horse with no climate history to follow.",
+    "The rack, the slow gait, the three-gaited and five-gaited divisions, the high head and neck carriage, the famously high-set tail, show shoeing and tail setting are none of them modelled - and the carriage is most of what the breed is recognised by."
+  ]
+}
