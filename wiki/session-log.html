@@ -27,6 +27,135 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-15f">2026-09-15, later &mdash; five more breeds, the duplicate drafts, and a height bug that shipped</h2>
+
+<p>
+    Three pieces, in the order they happened: the third intake batch, then a pass over the drafts that turned out
+    to be re-supplies of breeds that already ship, then an audit that started as a one-line check and found a
+    mistake in seven breed files &mdash; three of them written the same day, four of them shipped earlier.
+</p>
+
+<h3>The batch: Colorado Ranger, Criollo, Croatian Coldblood, Danubian, Domestic Mountain Pony</h3>
+
+<ul>
+    <li><strong>The Criollo is the first breed ever to name <a href="gene-manchado.html">manchado</a></strong>, and
+        it is carriers only. The locus has always existed and no breed had ever used it, so the pattern was
+        reachable solely from the wild founder table; the Criollo is the population it is most reported in, which
+        makes it the obvious first. The 6% carrier rate is a <em>design call and says so</em> &mdash; there is no
+        test for manchado, so there is no frequency to copy. The gene page had no Breeds section at all to
+        contradict, which is why this needed adding rather than correcting.</li>
+    <li><strong>The Domestic Mountain Pony is the best test the mod has of the no-<code>At</code> decision.</strong>
+        It is the rare breed with real coat data: Cotman <em>et&nbsp;al.</em> genotyped 313 horses and found dark
+        bay 44%, black 36%, ordinary bay 11%, and the true-dun <code>D</code> allele at 0.09. Dark bay is carried
+        by a deliberately <code>ShD</code>-skewed <a href="gene-agouti.html#dark-bay-population">shade pool</a>
+        rather than by an agouti allele, because <code>At</code> was dropped as unvalidated &mdash; so here is a
+        population whose target proportions are <em>measured</em> instead of guessed, and whether it reads as dark
+        bay in the world is the thing to look at. It is also the only breed whose dun rate is a published allele
+        frequency, and it inherits that study's argument with itself: <code>D</code> at 0.09 makes about 17% of
+        founders dun where the same study counted 8% by eye. <strong>The genotype was followed over the
+        eyeball</strong>, deliberately, and that is the call to revisit if duns look too common.</li>
+    <li><strong>The Colorado Ranger is the first breed whose strain <em>forces loci wild</em></strong> rather than
+        naming a pool to draw from. Its registry certifies a pedigree and not a colour, so eleven founders in
+        twenty are solid with <code>lp/lp</code> and both PATN modifiers pinned off, and nine carry the leopard
+        complex &mdash; deliberately lighter than the Appaloosa's, which stays the defining leopard breed. Pinto is
+        barred by that registry within five generations, so no tobiano, frame, splash or dominant white in either
+        <a href="breeds.html#strains">strain</a>.</li>
+    <li><strong>Two more breeds that never run wild.</strong> The Croatian Coldblood and the Danubian are the
+        second and third to use the <code>spawn</code> checklist after the Budyonny &mdash; both managed working
+        breeds with no feral population. The path is still unexercised in a real world.</li>
+    <li><strong>One intake file did not hold the breed its name promised.</strong>
+        <code>intake/Croatian warmblood.md</code> was a complete, well-sourced draft of the Croatian
+        <em>Coldblood</em>, naming it throughout and contrasting it with the Posavac. The coldblood shipped and the
+        file was consumed, so <strong>if a Croatian Warmblood was wanted, no draft for it has ever arrived.</strong>
+        Recorded on <a href="verification.html#new-breeds-0915c">the checklist</a> because deleting the file removed
+        the only trace of that queue entry.</li>
+</ul>
+
+<h3>The duplicates: four drafts for breeds that already ship</h3>
+
+<p>
+    The owner's next drop included drafts for the American Cream Draft, Irish Draught, SA Boerperd and the Bosnian
+    Mountain Horse &mdash; the last being the breed shipped hours earlier as the Domestic Mountain Pony. Each one's
+    new science went into the breed it duplicates and into the gene page that owns the locus, then the draft was
+    deleted. <strong>A breed has nowhere of its own to put science:</strong> neither
+    <a href="breeds.html">breeds.html</a> nor <a href="breed-book.html">the book</a> carries tab panels at all, so
+    locus-level findings went to the science tabs of the gene pages and breed-level facts to the breed's own
+    <code>notes</code>.
+</p>
+<ul>
+    <li><strong>JEB1 has no locus, and it is half of a shipped breed's real test panel.</strong> The American Cream
+        Draft's association tests exactly two things &mdash; PSSM1, which ships, and junctional epidermolysis
+        bullosa, which does not exist here at all. That is the most conspicuous gap on any shipped breed's own
+        panel, so it went to <a href="roadmap.html#health-genes">&sect;12</a> rather than being stood in with an
+        unrelated recessive lethal. Both loci are left clear on the breed: presence is documented and no frequency
+        is, and for a <em>dominant</em> that distinction decides everything, because a guessed rate would show on
+        every copy instead of hiding in carriers. <a href="gene-gys1.html#breeds">GYS1</a> now names both breeds
+        whose panels include it and says why neither carries a pool.</li>
+    <li><strong>The studbook colour list is why dun is in the Irish Draught's pool.</strong> Horse Sport Ireland
+        names six whole colours and calls excessive white undesirable. Two shipped pools sit outside that list
+        &mdash; roan, and a trace of cream &mdash; and were <em>kept as shipped and written down as the open
+        question</em> rather than quietly deleted, because re-tuning a breed that already ships is a different
+        decision from writing a new one.</li>
+    <li><strong>The Boerperd bars a double-cream foal from registration</strong>, which is the same
+        registry-rule-not-disorder shape as the Chilean Corralero: cream stays high enough for buckskin, palomino
+        and smoky black, low enough that a double dilute is an uncommon founder, and reachable by breeding.</li>
+    <li><strong>The Bosnian draft's real gift was a size finding.</strong> Schrimpf <em>et&nbsp;al.</em>'s
+        homozygosity scan shows long-term selection toward roughly 135&nbsp;cm at the withers and small-allele
+        homozygosity at the body-size loci &mdash; so the breed is small because it was <em>selected</em> small,
+        not because it carries the pony allele. It is not the p.G28E test, so
+        <a href="gene-hmga2.html#breeds">HMGA2</a> records it with that caveat and the breed names no pool.
+        <a href="gene-dun.html#breeds">Dun</a> also gained the only real breed-wide <code>D</code> figure on its
+        page.</li>
+</ul>
+
+<h3>The height bug, and why it had been &ldquo;verified&rdquo;</h3>
+
+<ul>
+    <li><strong><code>BreedStatCurve</code> triples the part of a size ratio above 1.0</strong>
+        (<code>BIG_GAMMA</code>), so above the 15.75&nbsp;hh baseline
+        <code>hands = 15.75 &times; (1 + (s&minus;1)/3)</code> and a file written with the obvious
+        <code>hands / 15.75</code> comes out short &mdash; <em>only at the top of its band</em>, which is why it
+        looks right. Three breeds in this batch had it. Auditing all 65 found four more already shipped: the
+        <strong>Anglo-Arabian, Australian Stock Horse, Azteca and Budyonny were each shorter than their own table
+        row claimed</strong>, the Budyonny by most of a hand. Seven files corrected, and all 129 height strings
+        across the two breed pages regenerated from the files.</li>
+    <li><strong>The reason it survived a check is the useful part.</strong> The rule had been confirmed against the
+        Mustang and recorded as sound &mdash; but the Mustang's band lies entirely <em>below</em> 1.0, where both
+        the linear and the real curve give the same answer. <strong>Verifying the arithmetic on a pony proves
+        nothing whatever about a draught horse.</strong> The Percheron (<code>1.38</code> &rarr; 17.7&nbsp;hh) and
+        the Irish Draught (<code>1.238</code> &rarr; 17.0&nbsp;hh) are the discriminating cases.</li>
+    <li><strong>A third error mode turned up on the way:</strong> the Dhampir's row read <code>17.3</code> because
+        a <em>decimal</em> number had been typed into the stable-notation column. The two pages use different
+        notations &mdash; <a href="breeds.html#commonness">the table</a> is stable, where <code>16.3</code> is
+        sixteen hands and three inches, and the book is decimal &mdash; so the same three digits are two different
+        horses and copying a height between them is silently wrong.</li>
+    <li><strong>Nothing asserts any of it, which is <a href="known-gaps.html#gap-257">gap 257</a>:</strong> no test
+        reads a breed file's size against the height printed for it. A <code>BreedFilesTest</code> case parsing the
+        two pages would close it for good.</li>
+    <li><strong>A test-runner trap worth knowing:</strong> <code>:common:test</code> does <em>not</em>
+        <code>dependsOn</code> <code>:common:bakeBreedFiles</code>, so asking for both in one Gradle command races
+        &mdash; the test reads the browser bundle while the bake is still writing it and fails with &ldquo;the
+        browser bundle is stale&nbsp;&mdash; run bakeBreedFiles&rdquo;, which is a lie. Run the bake as its own
+        invocation, then the tests. The same message for real means a breed file was edited <em>after</em> the
+        bake.</li>
+</ul>
+
+<p>
+    Green: <code>:neoforge-26.1.2:build</code>, <code>BreedFilesTest</code>, <code>BreedSpecParserTest</code>,
+    <code>check-parity</code>, <code>check-links</code>, <code>check-gene-tabs</code> and the designer boot check;
+    every pool of the five new breeds was dumped back out of the <em>baked</em> files pair by pair, because a wrong
+    allele token is warned and dropped rather than thrown. <strong>None of the five has been seen in a world, and
+    four already-shipped breeds are now visibly taller</strong> &mdash;
+    <a href="verification.html#new-breeds-0915c">&sect;0-EG</a> says what to look at, and the dark-bay check on the
+    Domestic Mountain Pony is the one that matters beyond its own breed. <strong>Three calls are the owner's:</strong>
+    whether the American Cream Draft's Critical status should make it <code>very_rare</code> and wild-less, whether
+    the Irish Draught keeps roan and cream against its studbook's six colours, and which ordering the next batch
+    follows &mdash; strict alphabetical now resumes at <strong>Debao Pony</strong>, while continuing from where this
+    batch stopped gives <strong>Dutch Warmblood</strong>. Four pairs of drafts describe the same unshipped breed
+    twice (Hucul Horse/Hucul Pony, Croatian Posavina/Posavac, Yakut/Yakutian, and two Nonius files) and want merging
+    rather than shipping twice.
+</p>
+
 <h2 id="d2026-09-15e">2026-09-15, late &mdash; five more out of <code>intake/</code>, and the format saying no twice</h2>
 
 <p>
