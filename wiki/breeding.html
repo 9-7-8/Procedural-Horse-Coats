@@ -1087,12 +1087,16 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         thirty generations of anything to see whether a line actually develops
         character at the rate it should. The two numbers to turn are
         <code>EpiDrift.SCALE</code> and <code>EpiDrift.REPLACE_CHANCE</code>.</li>
-    <li>No inbreeding prevention, no generational effects, and <strong>no sex-linked
-        loci yet</strong> &mdash; genes combine independently. The
-        <a href="gene-sex.html">sex locus itself is built</a>, which was the
-        prerequisite; X-linked and Y-linked inheritance
-        (<a href="roadmap.html#sex-linked">the roadmap</a>) is the remaining half and the
-        one planned exception to independent assortment.</li>
+    <li><strong>No inbreeding prevention and no generational effects.</strong> Nothing
+        computes how closely two horses are related, nothing warns, and no foal is born
+        weaker for it. The only kinship rule anywhere in the mod is a wild dispersing filly
+        refusing a suitor who shares a parent with her, which never touches player
+        breeding &mdash; so line breeding is a practice, not a mechanic.
+        <strong>Sex-linked inheritance, by contrast, is built</strong>:
+        <a href="gene-sex.html">the sex locus</a> and X- and Y-linked transmission both, the
+        one exception to independent assortment. What is left there
+        (<a href="roadmap.html#sex-linked">the roadmap</a>) is that a punnett square draws a
+        sex-linked locus wrongly rather than refusing to.</li>
     <li>Name-generation output is rough and slated for a rework. The rule &mdash;
         <code>&lt;alpha&gt; &lt;space&gt; &lt;beta&gt;</code> &mdash; is fixed.</li>
     <li><code>HorseRecord.geneticCode</code> and the coat attachment&rsquo;s genotype
@@ -1276,12 +1280,18 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </ul>
 
 <div class="note">
-    <span class="label">None of this is built</span>
+    <span class="label">Most of this is built now</span>
     <p>
-        The mod still uses vanilla&rsquo;s instant foal with a genetic draw on top, and
-        whether to change that at all is an open design question &mdash; it would replace a
-        vanilla behaviour, not add to it. The options and open questions are on
-        <a href="fertility.html">fertility &amp; gestation</a>, a page still in progress.
+        Heat, natural covering, conception odds that vary by phase, pregnancy, twins, foal
+        heat and nursing are all implemented &mdash; <code>common/repro</code> and
+        <code>server/ReproHandler</code> &mdash; and are described on
+        <a href="fertility.html">fertility &amp; gestation</a>. Golden-carrot breeding still
+        exists alongside them and is still an instant foal, <em>unless</em> a parent is
+        carrying a breeding carrot, which turns it into a pregnancy instead.
+    </p>
+    <p>
+        What is <strong>not</strong> built is the list immediately above this note: a body
+        condition model, a real lactation lock, and the clock-choice question.
     </p>
 </div>
 

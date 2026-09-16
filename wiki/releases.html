@@ -58,6 +58,66 @@
     </p>
 </div>
 
+<h2 id="v0-5-003">0.5.003</h2>
+
+<p class="lede">
+    <strong>A breeding bug that quietly sterilised mares, and the Getting started tab
+    rebuilt as a book.</strong> A small release next to 0.5.002, and the first half of it
+    matters considerably more than the second.
+</p>
+
+<h3>A mare who lost a pregnancy was never covered again</h3>
+
+<ul>
+    <li><strong>The bug.</strong> A natural cover required <em>exactly</em> full health, a
+        miscarriage costs the dam half a heart, and a horse only heals beside water. Any
+        mare who lost a pregnancy somewhere without water was permanently barren: she went
+        on cycling, still read <em>In heat</em>, and stallions simply ignored her.</li>
+    <li><strong>It was silent</strong>, which is why it survived three sessions looking for
+        it. That particular refusal was the one verdict the handler passed over without a
+        log line.</li>
+    <li><strong>The fix.</strong> Covering now asks for nine-tenths health rather than all
+        of it, so a scratch no longer stops breeding, and the refusal logs itself once a
+        minute. The same equality check meant a wolf bite or a lost stallion fight
+        sterilised <em>any</em> horse until it next found water &mdash; so this was always
+        wider than the mare it was noticed on.</li>
+</ul>
+
+<h3>Getting started is a book now</h3>
+
+<ul>
+    <li><strong>Six chapters</strong> &mdash; husbandry, basic breeding, genetics, breeding
+        projects, horses in the wild, the villagers &mdash; each split into sub-chapters,
+        in place of one long run of eighteen sections.</li>
+    <li><strong>The checklist moved into the prose.</strong> Every task now sits under the
+        sub-chapter that teaches it, so the box for hanging a stall sign is beneath the
+        paragraphs about hanging one. A sub-chapter you have finished is lit in gold in the
+        contents list, and a Checklist section at the end keeps the running total and lists
+        only what is still outstanding.</li>
+    <li><strong>Dyeing tack</strong> is a new sub-chapter, covering the Equestrian Bench's
+        three independent zones on both a saddle and leather horse armour.</li>
+    <li><strong>The checklist went from 36 tasks to 62</strong>, so that every item in the
+        mod is named by at least one of them. Nothing already ticked is lost.</li>
+</ul>
+
+<h3>Four corrections to the wiki</h3>
+
+<p>
+    Writing the tab from the source rather than the documentation turned up four stale
+    claims, all now fixed: grooming is worth two bond and not five; riding earns a point
+    every forty seconds rather than every minute, because proximity always stacks with it;
+    a stall sign <em>refuses</em> an unenclosed room instead of falling back to the ground
+    in front of it; and the breeding page no longer says heat and pregnancy are unbuilt, or
+    that there are no sex-linked genes.
+</p>
+
+<h3>What it does to an existing world</h3>
+
+<p>
+    Nothing. No checklist task changed its id, so progress carries over untouched, and
+    there is no save migration.
+</p>
+
 <h2 id="v0-5-002">0.5.002</h2>
 
 <p class="lede">
