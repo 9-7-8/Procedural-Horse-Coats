@@ -1,7 +1,7 @@
 {
   "id": "arabian",
   "name": "Arabian",
-  "country": "arabian_peninsula",
+  "country": "saudi_arabia",
   "commonness": "common",
   "biomes": [
     "minecraft:desert",
