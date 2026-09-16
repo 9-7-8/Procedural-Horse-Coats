@@ -14,6 +14,7 @@ import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
+import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.network.CoatSyncPayload;
