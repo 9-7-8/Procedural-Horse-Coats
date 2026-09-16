@@ -1,37 +1,42 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.neoforge.menu.EquestrianBenchMenu;
+import com.example.horsegenetics.neoforge.network.BenchNamePayload;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
- * <b>The Equestrian Bench's screen.</b> Put a saddle in, pick a zone, add a dye
- * or an ingot, take the result.
+ * <b>The Equestrian Bench's screen.</b> A saddle, three labelled material slots,
+ * a name field, and one result.
  *
- * <h2>The zone picker is vanilla plumbing</h2>
- * Clicking a zone calls {@code handleInventoryButtonClick}, the same route the
- * loom's pattern picker uses, so there is <b>no custom packet</b> - unlike the
- * {@link ResearchShelfScreen research shelf}, whose selection is a gene key and
- * needed one. A zone is a small int, and vanilla already carries small ints.
+ * <h2>Three boxes, not a selector</h2>
+ * This had a zone picker and it is gone (owner, 2026-09-16): one row per zone,
+ * each labelled, so all three can be dyed in a single pass. A zone whose slot is
+ * empty keeps the colour it already had, so the empty rows are not "no colour",
+ * they are "leave this one alone".
  *
- * <h2>Drawn as a Minecraft window</h2>
- * Face, bevel, sunken slots - see {@link VanillaPanel} - and every position
- * comes from {@link EquestrianBenchMenu}'s constants, the same numbers its slots
- * are placed with. There is one source of truth for the layout and it is the
- * menu.
+ * <h2>The name field is the anvil's</h2>
+ * Same widget and, importantly, the same <b>keyboard guard</b>: a container
+ * screen would otherwise close on the inventory key, so typing an "e" into a
+ * name would shut the window. {@code canConsumeInput} is what vanilla's anvil
+ * uses to decide whether the box wants the keystroke, and this copies it rather
+ * than inventing a rule.
  */
 public final class EquestrianBenchScreen extends AbstractContainerScreen<EquestrianBenchMenu> {
 
-    private static final int TITLE_Y = 6;
-    private static final int INV_LABEL_Y = EquestrianBenchMenu.INV_Y - 12;
-    private static final int ZONE_W = 40;
-    private static final int ZONE_H = 16;
-    private static final int ZONE_GAP = 2;
+    private static final String[] ZONE_LABELS = { "Seat", "Bridle", "Fittings" };
+    private static final int[] ZONE_YS = {
+            EquestrianBenchMenu.SEAT_Y, EquestrianBenchMenu.BRIDLE_Y, EquestrianBenchMenu.METAL_Y };
 
-    private static final String[] ZONE_LABELS = { "Seat", "Bridle", "Metal" };
+    private EditBox nameBox;
+
+    /** Survives a resize, which rebuilds every widget from scratch. */
+    private String typed = "";
 
     public EquestrianBenchScreen(EquestrianBenchMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, EquestrianBenchMenu.WIDTH, EquestrianBenchMenu.HEIGHT);
@@ -41,45 +46,40 @@ public final class EquestrianBenchScreen extends AbstractContainerScreen<Equestr
     protected void init() {
         super.init();
         this.titleLabelX = EquestrianBenchMenu.MARGIN;
-        this.titleLabelY = TITLE_Y;
+        this.titleLabelY = EquestrianBenchMenu.TITLE_Y;
         this.inventoryLabelX = EquestrianBenchMenu.MARGIN;
-        this.inventoryLabelY = INV_LABEL_Y;
-    }
+        this.inventoryLabelY = EquestrianBenchMenu.INV_LABEL_Y;
 
-    // ------------------------------------------------------------------
-    // Input
-    // ------------------------------------------------------------------
+        this.nameBox = new EditBox(this.font,
+                leftPos + EquestrianBenchMenu.NAME_X + 1, topPos + EquestrianBenchMenu.NAME_Y + 3,
+                EquestrianBenchMenu.NAME_W - 2, EquestrianBenchMenu.NAME_H - 5,
+                Component.literal("Saddle name"));
+        this.nameBox.setMaxLength(BenchNamePayload.MAX_LENGTH);
+        this.nameBox.setValue(this.typed);
+        this.nameBox.setResponder(text -> {
+            this.typed = text;
+            ClientPacketDistributor.sendToServer(new BenchNamePayload(text));
+        });
+        this.addRenderableWidget(this.nameBox);
+    }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        int zone = zoneAt(event.x(), event.y());
-        if (zone >= 0) {
-            if (zone != this.menu.zone() && this.minecraft != null && this.minecraft.gameMode != null) {
-                this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, zone);
-            }
+    protected void setInitialFocus() {
+        this.setInitialFocus(this.nameBox);
+    }
+
+    /**
+     * The anvil's guard, verbatim in spirit: let the box have the keystroke if it
+     * wants one, and only then fall through to the container screen - which
+     * closes on the inventory key.
+     */
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (this.nameBox != null && (this.nameBox.keyPressed(event) || this.nameBox.canConsumeInput())) {
             return true;
         }
-        return super.mouseClicked(event, doubleClick);
+        return super.keyPressed(event);
     }
-
-    /** Which zone button is under the cursor, or {@code -1}. */
-    private int zoneAt(double mx, double my) {
-        int y = topPos + EquestrianBenchMenu.ZONE_BUTTON_Y;
-        if (my < y || my >= y + ZONE_H) {
-            return -1;
-        }
-        for (int i = 0; i < ZONE_LABELS.length; i++) {
-            int x = leftPos + EquestrianBenchMenu.ZONE_BUTTON_X + i * (ZONE_W + ZONE_GAP);
-            if (mx >= x && mx < x + ZONE_W) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    // ------------------------------------------------------------------
-    // Drawing
-    // ------------------------------------------------------------------
 
     @Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
@@ -87,11 +87,24 @@ public final class EquestrianBenchScreen extends AbstractContainerScreen<Equestr
 
         VanillaPanel.window(g, leftPos, topPos, EquestrianBenchMenu.WIDTH, EquestrianBenchMenu.HEIGHT);
 
+        // The name field sits in a sunken well, so it reads as something to type in.
+        VanillaPanel.well(g, leftPos + EquestrianBenchMenu.NAME_X, topPos + EquestrianBenchMenu.NAME_Y,
+                EquestrianBenchMenu.NAME_W, EquestrianBenchMenu.NAME_H);
+
         VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.SADDLE_X, topPos + EquestrianBenchMenu.SADDLE_Y);
-        VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.MATERIAL_X, topPos + EquestrianBenchMenu.MATERIAL_Y);
         VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.RESULT_X, topPos + EquestrianBenchMenu.RESULT_Y);
 
-        drawZones(g, mouseX, mouseY);
+        for (int i = 0; i < ZONE_YS.length; i++) {
+            int y = topPos + ZONE_YS[i];
+            VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.ZONE_X, y);
+            g.text(this.font, Component.literal(ZONE_LABELS[i]),
+                    leftPos + EquestrianBenchMenu.ZONE_LABEL_X, y + 5, VanillaPanel.TEXT, false);
+        }
+
+        // What the empty rows mean, said once rather than left to be guessed.
+        g.text(this.font, Component.literal("Empty rows keep their colour"),
+                leftPos + EquestrianBenchMenu.MARGIN,
+                topPos + EquestrianBenchMenu.METAL_Y + 20, VanillaPanel.TEXT_DIM, false);
 
         for (int i = 0; i < 27; i++) {
             VanillaPanel.slot(g, leftPos + EquestrianBenchMenu.MARGIN + (i % 9) * 18,
@@ -103,32 +116,16 @@ public final class EquestrianBenchScreen extends AbstractContainerScreen<Equestr
         }
     }
 
-    private void drawZones(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        int selected = this.menu.zone();
-        int hovered = zoneAt(mouseX, mouseY);
-        int y = topPos + EquestrianBenchMenu.ZONE_BUTTON_Y;
-        for (int i = 0; i < ZONE_LABELS.length; i++) {
-            int x = leftPos + EquestrianBenchMenu.ZONE_BUTTON_X + i * (ZONE_W + ZONE_GAP);
-            VanillaPanel.tab(g, x, y, ZONE_W, ZONE_H, i == selected);
-            if (i != selected && i == hovered) {
-                g.fill(x + 1, y + 1, x + ZONE_W - 1, y + ZONE_H - 1, VanillaPanel.HOVER);
-            }
-            int textW = this.font.width(ZONE_LABELS[i]);
-            g.text(this.font, Component.literal(ZONE_LABELS[i]),
-                    x + (ZONE_W - textW) / 2, y + 4,
-                    i == selected ? VanillaPanel.TEXT : VanillaPanel.TEXT_DIM, false);
-        }
-    }
-
     /**
      * Window-relative coordinates: the caller has already translated to
      * {@code (leftPos, topPos)}, and adding them again is what threw the
-     * shelf's labels off its window.
+     * research shelf's labels off its window.
      */
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        g.text(this.font, this.title, EquestrianBenchMenu.MARGIN, TITLE_Y, VanillaPanel.TEXT, false);
+        g.text(this.font, this.title, EquestrianBenchMenu.MARGIN,
+                EquestrianBenchMenu.TITLE_Y, VanillaPanel.TEXT, false);
         g.text(this.font, this.playerInventoryTitle, EquestrianBenchMenu.MARGIN,
-                INV_LABEL_Y, VanillaPanel.TEXT, false);
+                EquestrianBenchMenu.INV_LABEL_Y, VanillaPanel.TEXT, false);
     }
 }

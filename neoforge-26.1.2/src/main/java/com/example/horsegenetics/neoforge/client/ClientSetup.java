@@ -84,6 +84,20 @@ public final class ClientSetup {
         event.registerItem(new TackClientExtensions(), net.minecraft.world.item.Items.SADDLE);
     }
 
+    /**
+     * The saddle icon reads our three-colour component rather than vanilla's
+     * single {@code dyed_color} - see {@link TackTintSource}. Registered under
+     * the id {@code horsegenetics:tack_tint}, which is what
+     * {@code assets/minecraft/items/saddle.json} names.
+     */
+    @SubscribeEvent
+    static void registerItemTintSources(
+            net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.ItemTintSources event) {
+        event.register(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "tack_tint"),
+                TackTintSource.MAP_CODEC);
+    }
+
     @SubscribeEvent
     static void registerReloadListeners(AddClientReloadListenersEvent event) {
         event.addListener(CoatAssetReload.ID, new CoatAssetReload());

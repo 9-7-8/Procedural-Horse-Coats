@@ -40,7 +40,22 @@ $dest = Join-Path $repo 'neoforge-26.1.2\src\main\resources\assets\minecraft\tex
 # Undyed tints, one per zone. Leather uses vanilla's own leather constant so our
 # asset and vanilla's agree on what "undyed leather" means. Metal uses its own
 # brightest grey, because dividing the greys by the leather brown would clamp.
-$UNDYED_LEATHER = @{ R = 0xA0; G = 0x65; B = 0x40 }   # 0xFFA06540 == -6265536
+# Chosen as the PER-CHANNEL MAXIMUM of vanilla's leather pixels, not as vanilla's
+# leather constant - and that is a deliberate change made 2026-09-16 after the
+# owner reported dyed saddles looking duller than dyed leather armour.
+#
+# The constant is free: base = 255 * pixel / undyed, so base x undyed reproduces
+# vanilla whatever it is, PROVIDED no channel clamps. The only thing it changes
+# is headroom. Sitting at the maximum makes the base as bright as it can be, and
+# the worst offender was blue - dividing by the old brown's B=0x40 left the base
+# peaking at 183, so no dye could ever come out a saturated blue or purple.
+# At the maximum, blue reaches a full 255.
+#
+# Measured against vanilla's own dyeable leather (mean luminance 167.5): the old
+# constant gave 151.2, this gives about 175. The metal zone needed no such change
+# because 0x717171 already IS its per-channel maximum - which is why recolouring
+# the hardware looked right when the leather did not.
+$UNDYED_LEATHER = @{ R = 0x8A; G = 0x55; B = 0x2E }   # 0xFF8A552E == -7711442
 $UNDYED_METAL   = @{ R = 0x71; G = 0x71; B = 0x71 }   # 0xFF717171 == -9342607
 
 # Horse family only. Deliberately NOT camel, pig, strider or nautilus: this is a

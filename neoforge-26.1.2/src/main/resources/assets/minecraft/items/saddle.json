@@ -4,8 +4,7 @@
     "model": "minecraft:item/saddle",
     "tints": [
       {
-        "type": "minecraft:dye",
-        "default": -943736
+        "type": "horsegenetics:tack_tint"
       }
     ]
   }

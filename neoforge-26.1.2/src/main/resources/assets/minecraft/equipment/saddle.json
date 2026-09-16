@@ -13,13 +13,13 @@
     "donkey_saddle": [
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle"
       },
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle_bridle"
       },
@@ -33,13 +33,13 @@
     "horse_saddle": [
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle"
       },
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle_bridle"
       },
@@ -53,13 +53,13 @@
     "mule_saddle": [
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle"
       },
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle_bridle"
       },
@@ -83,13 +83,13 @@
     "skeleton_horse_saddle": [
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle"
       },
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle_bridle"
       },
@@ -108,13 +108,13 @@
     "zombie_horse_saddle": [
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle"
       },
       {
         "dyeable": {
-          "color_when_undyed": -6265536
+          "color_when_undyed": -7711442
         },
         "texture": "minecraft:saddle_bridle"
       },

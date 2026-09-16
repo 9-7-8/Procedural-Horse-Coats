@@ -4,6 +4,7 @@ import com.example.horsegenetics.neoforge.block.ModBlocks;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.SaddleTint;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -12,86 +13,103 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Map;
 
 /**
- * <b>The Equestrian Bench's menu</b> - where a saddle's three zones are dyed.
+ * <b>The Equestrian Bench's menu</b> - dyes a saddle's three zones, and names it.
+ *
+ * <h2>All three at once</h2>
+ * There was a zone selector here and it is gone (owner, 2026-09-16). Three
+ * material slots, one per zone, each labelled on the screen: fill whichever you
+ * care about and take one result. A zone whose slot is empty keeps the colour it
+ * already had, so recolouring just the bridle is one material, not a reset.
  *
  * <h2>Loom-shaped, not furnace-shaped</h2>
- * It computes its result from its input slots the instant they change and holds
- * no state worth saving, so unlike the
- * {@link ResearchShelfMenu research shelf} there is <b>no block entity</b>:
- * {@link ContainerLevelAccess} is the whole connection to the world, exactly as
- * vanilla's loom does it. Close the screen and nothing is lost because nothing
- * was in progress.
+ * It computes its result the moment a slot changes and keeps nothing between
+ * uses, so there is <b>no block entity</b> - {@link ContainerLevelAccess} is the
+ * whole connection to the world, exactly as vanilla's loom does it.
  *
- * <h2>One zone per use, and that is the price</h2>
- * Three slots: the saddle, one material, and the result. The material is a dye
- * for the leather zones or an ingot or gem for the metal, and taking the result
- * spends one of each - so recolouring all three zones costs three dyes and three
- * visits, and changing your mind costs another. That is the owner's decision
- * recorded on <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/roadmap.html#equestrian-bench">roadmap
- * &sect;25</a>, and it is what keeps the bench an economy building rather than a
- * settings screen.
- *
- * <h2>The zone is a button, not a packet</h2>
- * Which zone is being dyed travels through {@link #clickMenuButton}, which is
- * vanilla's own plumbing - the same route the loom's pattern picker uses. No
- * custom payload is needed because the choice encodes as a small int.
+ * <h2>One plan, used twice</h2>
+ * {@link #plan()} decides both what the result <i>is</i> and which materials
+ * paid for it, and {@link #onTakeResult} spends exactly what that plan named.
+ * Computing "what does it make" and "what does it cost" separately is how a
+ * bench ends up charging for a dye it did not use.
  */
 public final class EquestrianBenchMenu extends AbstractContainerMenu {
 
     public static final int SLOT_SADDLE = 0;
-    public static final int SLOT_MATERIAL = 1;
-    public static final int SLOT_RESULT = 2;
-    private static final int SLOT_COUNT = 3;
-
-    /** Zone ids, and they are {@link SaddleTint}'s layer indices on purpose. */
-    public static final int ZONE_SEAT = SaddleTint.LAYER_SEAT;
-    public static final int ZONE_BRIDLE = SaddleTint.LAYER_BRIDLE;
-    public static final int ZONE_METAL = SaddleTint.LAYER_METAL;
+    public static final int SLOT_SEAT = 1;
+    public static final int SLOT_BRIDLE = 2;
+    public static final int SLOT_METAL = 3;
+    public static final int SLOT_RESULT = 4;
+    private static final int SLOT_COUNT = 5;
 
     // ------------------------------------------------------------------
-    // Layout, owned here so the screen has one place to read it from.
+    // Layout, owned here so the screen has one place to read it from. The
+    // window is wider and taller than vanilla's 176x166 because it carries a
+    // name field and three labelled rows; VanillaPanel draws the frame
+    // procedurally rather than from a fixed texture, so the size is free.
     // ------------------------------------------------------------------
-    public static final int WIDTH = 176;
-    public static final int HEIGHT = 166;
+    public static final int WIDTH = 194;
+    public static final int HEIGHT = 232;
     public static final int MARGIN = 8;
-    public static final int SADDLE_X = 16;
-    public static final int MATERIAL_X = 16;
-    public static final int SADDLE_Y = 22;
-    public static final int MATERIAL_Y = 48;
-    public static final int RESULT_X = 143;
-    public static final int RESULT_Y = 35;
-    public static final int ZONE_BUTTON_X = 46;
-    public static final int ZONE_BUTTON_Y = 20;
-    public static final int INV_Y = 84;
+    public static final int TITLE_Y = 6;
+
+    public static final int NAME_X = 8;
+    public static final int NAME_Y = 18;
+    public static final int NAME_W = 178;
+    public static final int NAME_H = 16;
+
+    public static final int SADDLE_X = 8;
+    public static final int SADDLE_Y = 42;
+    public static final int RESULT_X = 160;
+    public static final int RESULT_Y = 42;
+
+    public static final int ZONE_X = 8;
+    public static final int SEAT_Y = 70;
+    public static final int BRIDLE_Y = 92;
+    public static final int METAL_Y = 114;
+    public static final int ZONE_LABEL_X = 30;
+
+    public static final int INV_LABEL_Y = 136;
+    public static final int INV_Y = 148;
 
     /**
-     * What the metal zone costs, and what colour each material gives. Iron is
-     * the steel the saddle already wears, so choosing it is how you put the
-     * hardware back to plain - its value is the metal layer's own undyed
-     * constant, which reproduces vanilla exactly.
+     * What the metal zone takes, and what colour each gives. Iron is how you put
+     * the fittings back to plain steel: its value is the metal layer's own undyed
+     * constant, so an iron-fitted saddle is indistinguishable from one that was
+     * never dyed.
      */
-    public static final java.util.Map<net.minecraft.world.item.Item, Integer> METALS =
-            java.util.Map.of(
-                    Items.IRON_INGOT, 0x717171,
-                    Items.GOLD_INGOT, 0xE0B94A,
-                    Items.COPPER_INGOT, 0xC06A44,
-                    Items.NETHERITE_INGOT, 0x4A4248,
-                    Items.DIAMOND, 0xB8E8E4,
-                    Items.EMERALD, 0x3FBF6F,
-                    Items.AMETHYST_SHARD, 0xA079D8);
+    public static final Map<Item, Integer> METALS = Map.of(
+            Items.IRON_INGOT, 0x717171,
+            Items.GOLD_INGOT, 0xE0B94A,
+            Items.COPPER_INGOT, 0xC06A44,
+            Items.NETHERITE_INGOT, 0x4A4248,
+            Items.DIAMOND, 0xB8E8E4,
+            Items.EMERALD, 0x3FBF6F,
+            Items.AMETHYST_SHARD, 0xA079D8);
+
+    /**
+     * The three undyed constants from {@code assets/minecraft/equipment/saddle.json}.
+     * A saddle with no component has never been dyed, and this is what it looks
+     * like - so recolouring one zone keeps the others exactly as they were rather
+     * than resetting them. <b>Must match that file</b>; the leather value changed
+     * on 2026-09-16 to brighten the dyes.
+     */
+    private static final SaddleTint UNTINTED = new SaddleTint(0x8A552E, 0x8A552E, 0x717171);
 
     private final ContainerLevelAccess access;
-    private final DataSlot zone = DataSlot.standalone();
     private long lastSoundTime;
+    private String saddleName = "";
 
-    private final Container input = new SimpleContainer(2) {
+    private final Container input = new SimpleContainer(4) {
         @Override
         public void setChanged() {
             super.setChanged();
@@ -109,16 +127,18 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
         super(ModMenus.EQUESTRIAN_BENCH.get(), containerId);
         this.access = access;
 
-        addSlot(new Slot(input, 0, SADDLE_X, SADDLE_Y) {
+        addSlot(new Slot(input, SLOT_SADDLE, SADDLE_X, SADDLE_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return stack.is(Items.SADDLE);
             }
         });
-        addSlot(new Slot(input, 1, MATERIAL_X, MATERIAL_Y) {
+        addSlot(dyeSlot(SLOT_SEAT, SEAT_Y));
+        addSlot(dyeSlot(SLOT_BRIDLE, BRIDLE_Y));
+        addSlot(new Slot(input, SLOT_METAL, ZONE_X, METAL_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return isDye(stack) || METALS.containsKey(stack.getItem());
+                return METALS.containsKey(stack.getItem());
             }
         });
         addSlot(new Slot(output, 0, RESULT_X, RESULT_Y) {
@@ -129,103 +149,117 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
 
             @Override
             public void onTake(Player taker, ItemStack taken) {
-                // Loom semantics: one saddle and one material per result taken.
-                getSlot(SLOT_SADDLE).remove(1);
-                getSlot(SLOT_MATERIAL).remove(1);
-                access.execute((level, pos) -> {
-                    long now = level.getGameTime();
-                    if (lastSoundTime != now) {
-                        level.playSound(null, pos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                        lastSoundTime = now;
-                    }
-                });
+                onTakeResult();
                 super.onTake(taker, taken);
             }
         });
 
         addStandardInventorySlots(inventory, MARGIN, INV_Y);
-        addDataSlot(zone);
     }
 
-    /** A dye, by the component rather than the item class, as the loom tests it. */
-    private static boolean isDye(ItemStack stack) {
-        return stack.has(DataComponents.DYE);
+    private Slot dyeSlot(int index, int y) {
+        return new Slot(input, index, ZONE_X, y) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return stack.has(DataComponents.DYE);
+            }
+        };
     }
 
-    /** Which zone the next dye lands on. */
-    public int zone() {
-        return zone.get();
-    }
-
-    @Override
-    public boolean clickMenuButton(Player player, int buttonId) {
-        if (buttonId < ZONE_SEAT || buttonId > ZONE_METAL) {
-            return false;
-        }
-        zone.set(buttonId);
+    /** From {@code BenchNamePayload}; the client sends it as the box is typed in. */
+    public void setSaddleName(String name) {
+        this.saddleName = name == null ? "" : name;
         slotsChanged(input);
-        return true;
+    }
+
+    public String saddleName() {
+        return saddleName;
     }
 
     @Override
     public void slotsChanged(Container container) {
-        output.setItem(0, result());
+        Plan plan = plan();
+        output.setItem(0, plan == null ? ItemStack.EMPTY : plan.out());
         broadcastChanges();
     }
 
-    /**
-     * The saddle as it would be with this zone recoloured, or empty when the
-     * bench has nothing to do - no saddle, no material, or a material that does
-     * not suit the chosen zone (a dye cannot colour steel, an ingot cannot
-     * colour leather).
-     */
-    private ItemStack result() {
-        ItemStack saddle = input.getItem(0);
-        ItemStack material = input.getItem(1);
-        if (saddle.isEmpty() || material.isEmpty()) {
-            return ItemStack.EMPTY;
+    /** What the bench would make, and which materials would pay for it. */
+    private record Plan(ItemStack out, boolean usedSeat, boolean usedBridle, boolean usedMetal) {}
+
+    private @Nullable Plan plan() {
+        ItemStack saddle = input.getItem(SLOT_SADDLE);
+        if (saddle.isEmpty()) {
+            return null;
         }
-        Integer colour = colourFor(material, zone.get());
-        if (colour == null) {
-            return ItemStack.EMPTY;
+        SaddleTint now = saddle.getOrDefault(ModDataComponents.TACK_TINT.get(), UNTINTED);
+
+        Integer seat = dyeColour(input.getItem(SLOT_SEAT));
+        Integer bridle = dyeColour(input.getItem(SLOT_BRIDLE));
+        Integer metal = METALS.get(input.getItem(SLOT_METAL).getItem());
+
+        // A material only counts if it would actually CHANGE that zone, so the
+        // bench never charges a dye for a colour the saddle already wears.
+        boolean usedSeat = seat != null && seat != now.seat();
+        boolean usedBridle = bridle != null && bridle != now.bridle();
+        boolean usedMetal = metal != null && metal != now.metal();
+
+        String wanted = saddleName.strip();
+        boolean renaming = !wanted.isEmpty() && !wanted.equals(nameOf(saddle));
+
+        if (!usedSeat && !usedBridle && !usedMetal && !renaming) {
+            return null;
         }
-        SaddleTint current = saddle.getOrDefault(ModDataComponents.TACK_TINT.get(), untinted());
-        SaddleTint next = switch (zone.get()) {
-            case ZONE_SEAT -> new SaddleTint(colour, current.bridle(), current.metal());
-            case ZONE_BRIDLE -> new SaddleTint(current.seat(), colour, current.metal());
-            default -> new SaddleTint(current.seat(), current.bridle(), colour);
-        };
-        if (next.equals(current)) {
-            return ItemStack.EMPTY;   // already that colour; do not charge for nothing
-        }
+
         ItemStack out = saddle.copyWithCount(1);
-        out.set(ModDataComponents.TACK_TINT.get(), next);
-        return out;
-    }
-
-    /**
-     * The three undyed constants from {@code assets/minecraft/equipment/saddle.json}.
-     * A saddle with no component has never been dyed, and this is what it looks
-     * like - so recolouring one zone keeps the other two exactly as they were
-     * rather than resetting them to white.
-     */
-    private static SaddleTint untinted() {
-        return new SaddleTint(0xA06540, 0xA06540, 0x717171);
-    }
-
-    private static Integer colourFor(ItemStack material, int zone) {
-        if (zone == ZONE_METAL) {
-            return METALS.get(material.getItem());
+        out.set(ModDataComponents.TACK_TINT.get(), new SaddleTint(
+                usedSeat ? seat : now.seat(),
+                usedBridle ? bridle : now.bridle(),
+                usedMetal ? metal : now.metal()));
+        if (!wanted.isEmpty()) {
+            out.set(DataComponents.CUSTOM_NAME, Component.literal(wanted));
         }
-        DyeColor dye = material.get(DataComponents.DYE);
+        return new Plan(out, usedSeat, usedBridle, usedMetal);
+    }
+
+    /** Spend exactly what the plan named - the saddle, and only the materials used. */
+    private void onTakeResult() {
+        Plan plan = plan();
+        getSlot(SLOT_SADDLE).remove(1);
+        if (plan != null) {
+            if (plan.usedSeat()) {
+                getSlot(SLOT_SEAT).remove(1);
+            }
+            if (plan.usedBridle()) {
+                getSlot(SLOT_BRIDLE).remove(1);
+            }
+            if (plan.usedMetal()) {
+                getSlot(SLOT_METAL).remove(1);
+            }
+        }
+        access.execute((level, pos) -> {
+            long now = level.getGameTime();
+            if (lastSoundTime != now) {
+                level.playSound(null, pos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                lastSoundTime = now;
+            }
+        });
+    }
+
+    private static @Nullable Integer dyeColour(ItemStack stack) {
+        DyeColor dye = stack.get(DataComponents.DYE);
         return dye == null ? null : dye.getTextureDiffuseColor() & 0xFFFFFF;
+    }
+
+    private static String nameOf(ItemStack stack) {
+        Component name = stack.get(DataComponents.CUSTOM_NAME);
+        return name == null ? "" : name.getString();
     }
 
     /**
      * Shift-click. Out of the bench into the player; from the player, a saddle
-     * finds the saddle slot and anything else tries the material slot -
-     * {@code moveItemStackTo} asks each slot's {@code mayPlace}, so a stick goes
-     * nowhere rather than into the wrong one.
+     * finds the saddle slot, a dye the first free leather slot, and a metal its
+     * own - {@code moveItemStackTo} asks each slot's {@code mayPlace}, so a stick
+     * goes nowhere rather than into the wrong one.
      */
     @Override
     public ItemStack quickMoveStack(Player who, int index) {
@@ -244,7 +278,11 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
             if (!moveItemStackTo(stack, SLOT_SADDLE, SLOT_SADDLE + 1, false)) {
                 return ItemStack.EMPTY;
             }
-        } else if (!moveItemStackTo(stack, SLOT_MATERIAL, SLOT_MATERIAL + 1, false)) {
+        } else if (METALS.containsKey(stack.getItem())) {
+            if (!moveItemStackTo(stack, SLOT_METAL, SLOT_METAL + 1, false)) {
+                return ItemStack.EMPTY;
+            }
+        } else if (!moveItemStackTo(stack, SLOT_SEAT, SLOT_METAL, false)) {
             return ItemStack.EMPTY;
         }
         if (stack.isEmpty()) {

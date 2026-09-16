@@ -109,6 +109,21 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                BenchNamePayload.TYPE,
+                BenchNamePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    // The menu is the authority: a forged packet can only rename
+                    // a saddle in a bench the sender actually has open, and the
+                    // menu re-derives its result from its own slots afterwards.
+                    if (context.player() instanceof ServerPlayer serverPlayer
+                            && serverPlayer.containerMenu
+                                    instanceof com.example.horsegenetics.neoforge.menu.EquestrianBenchMenu bench) {
+                        bench.setSaddleName(payload.name());
+                    }
+                })
+        );
+
+        registrar.playToServer(
                 RequestDebugPensPayload.TYPE,
                 RequestDebugPensPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
