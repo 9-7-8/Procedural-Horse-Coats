@@ -82,7 +82,25 @@
     unknown, and that is the first thing to find out if this is ever worth fixing. Until then the working rule is: when
     a bake chain changed only data, revert the wasm; when <code>common/</code> genuinely moved, commit it and accept
     that the diff is mostly noise.</li>
-<li id="gap-258"><strong>Open, found 2026-09-15: a ratio pen whose pregnancy is lost early is never covered again.</strong>
+<li id="gap-258"><strong>Fixed 2026-09-16, not yet played: a pen whose pregnancy is lost early was never covered again.</strong>
+    <em>The cause was not the one this entry told the next session to look for.</em> Nothing wrong survived in her
+    repro state; the pregnancy was cleared correctly. A miscarriage costs the dam half a heart
+    (<code>LethalFoalHandler.MISCARRIAGE_DAMAGE</code>), a natural cover demanded full health <em>exactly</em>
+    (<code>getHealth() &gt;= getMaxHealth()</code>), and healing is gated on standing near water &mdash; and the
+    fertility pens placed none. So she sat one point short for the rest of the run, which
+    <code>NaturalCover.decide</code> refused as <code>NOT_A_BREEDING_MARE</code>, a verdict
+    <code>NaturalBreedingHandler</code> passed over without a line. That is why she read <em>In heat</em> with idle
+    studs and nothing in the log. <em>Confirmed from the 2026-09-15 logs before changing anything:</em> six mares
+    miscarried and <strong>none</strong> was ever covered again, against 30 of 48 whose cover merely did not take
+    and 25 of 62 who foaled normally; two of the six had run <code>COVER FOALED COVER FOALED</code> for hours and
+    stopped dead at their loss, and <code>21.0/22.0</code> is the last health reading for every one of them.
+    <em>Fix:</em> <code>ReproRules.COVER_HEALTH</code> makes it a fraction rather than equality
+    (<a href="fertility.html#settled-cover-health">fertility</a>), the health refusal now logs once a minute per
+    mare, and every pen gets a water cauldron sunk into its floor via <code>DebugTestYard.fencedPlot</code>, so the
+    yard stops manufacturing the condition. The same equality check had made any wolf bite or lost fight sterilise
+    a horse until it found water. <em>Left open:</em> gap 225's nonviable-homozygote ratios are still unmeasured in
+    play &mdash; row W should now produce a usable sample, which is the thing to check.
+    <strong>Original report, 2026-09-15:</strong>
     Three of row W's pens conceived once or twice in the first few thousand ticks of the 16:11 run and then sat idle
     for the remaining six hours, while the row U pens beside them ran about a hundred conceptions each.
     <strong>RATIO KIT W5</strong>: conceived at tick 102 (foaled) and at tick 2662 (<code>early loss at tick

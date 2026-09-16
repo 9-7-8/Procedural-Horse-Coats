@@ -871,6 +871,26 @@
         (rows O-P, and MET NATURAL in R)</code>, and <em>no</em> <code>could not make ... pregnant as promised</code>. That
         warning means the maternity pen came up empty, usually because <code>health.mode</code>
         is not FULL.</li>
+    <li><strong>A mare who loses a pregnancy is covered again (2026-09-16, gap 258, NOT played).</strong>
+        This is the one to do first, because until now she never was. Stand at <strong>row W</strong>'s
+        ratio pens (RATIO KIT W5, RATIO MITF SW3, RATIO MILK CLASH) and leave them. Each loses
+        pregnancies by design. <em>Pass:</em> <code>early loss</code> lines keep being followed by fresh
+        <code>natural cover</code> lines for the same mare all run &mdash; MILK CLASH should conceive and
+        lose over and over, never stall. <em>Fail, the old behaviour:</em> one loss and that pen goes
+        quiet for the rest of the run while her readout still says <em>In heat</em>. Worth a census an
+        hour in: row W should now be building a real sample for
+        <a href="known-gaps.html#gap-225">gap 225</a>'s ratios.</li>
+    <li><strong>A badly hurt mare is refused, and says so (2026-09-16, NOT played).</strong> Hurt a mare
+        in heat below 90% health with a stallion beside her. Expect a
+        <code>not covered: hurt, N/N health</code> line, once a minute, not silence &mdash; that silence
+        is what hid gap 258. Then let her heal and she should be covered normally. A scratch (a point or
+        two) must <em>not</em> stop her at all.</li>
+    <li><strong>Every pen has water now (2026-09-16, NOT played).</strong> A water cauldron is sunk flush
+        into the floor of each pen's corner, from <code>DebugTestYard.fencedPlot</code>, so a hurt horse
+        can heal anywhere in the yard. <em>Check:</em> no animal uses one as a step to leave its pen
+        (the failure gap 247 found with <em>raised</em> cauldrons), and the splice pens in the carrot
+        rows have one in <strong>both</strong> halves. The WATERBORN and death-fluid pens overwrite their
+        interiors after the pen is built, so they will not have one &mdash; that is expected.</li>
     <li><strong>Row O east, MATERNITY, what needs your hands.</strong> The kit's readings are
         <a href="fertility.html#verified-vet-readings">verified from the log</a>. Still for a person: TWINS'
         info screen's Breeding line should only say <em>Pregnant</em>. The chat lines should be a gold one naming the foal, a grey &ldquo;did not carry&rdquo; for

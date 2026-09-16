@@ -128,7 +128,8 @@
 </p>
 <p>It does not happen if:</p>
 <ul>
-    <li>either horse is hurt, ridden or on a lead;</li>
+    <li>either horse is <strong>badly hurt</strong> &mdash; below 90% of its health; a scratch does
+        not stop it (<a href="#settled-cover-health">why</a>) &mdash; ridden, or on a lead;</li>
     <li>he is a <a href="#gelding">gelding</a>, or has already covered three mares today;</li>
     <li><strong>eight or more other horses</strong>, foals included, are within 16 blocks of
         her;</li>
@@ -277,6 +278,22 @@
     That is deliberate, including on a real server where the owner tests release builds with the switch on, where every
     mare runs about twenty times fast. It is the only thing behind that switch that changes how the game plays for
     everyone.
+</p>
+
+<p id="settled-cover-health">
+    <strong>A natural cover needs a healthy horse, not an untouched one</strong> (2026-09-16, closing
+    gap 258). The rule was full health <em>exactly</em> &mdash;
+    <code>getHealth() &gt;= getMaxHealth()</code> &mdash; and that turned a single point of damage into
+    permanent infertility, because healing is gated on standing near water
+    (<code>HorseCareHandler.nearWater</code>): a horse in a dry pen never got the point back. A
+    miscarriage costs the dam half a heart, so <strong>a mare who lost a pregnancy to a lethal pairing
+    was never covered again</strong>. She went on cycling and reading <em>In heat</em>, stallions
+    ignored her, and nothing was logged, because that verdict
+    (<code>NOT_A_BREEDING_MARE</code>) was the one the handler passed over in silence. A wolf bite or a
+    lost fight did the same to any horse. It is now a fraction,
+    <code>ReproRules.COVER_HEALTH</code>, tested by <code>ReproRulesTest</code> at exactly the health a
+    miscarriage leaves her; and the refusal now logs once a minute per mare, naming her health.
+    <em>Not played yet</em> &mdash; <a href="verification.html#fertility">&sect;0-DV</a>.
 </p>
 
 <p id="verified-cover-reach">
