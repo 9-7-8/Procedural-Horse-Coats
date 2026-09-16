@@ -230,8 +230,26 @@ public record SaddleTint(int seat, int bridle, int metal)
      */
     public static final SaddleTint ARMOUR_UNDYED = new SaddleTint(0xA06540, 0x95652B, 0x9C9C9C);
 
+    /**
+     * What the bench should believe a piece already looks like.
+     *
+     * <p><b>An armour can arrive already dyed, and not by us.</b> Leather horse
+     * armour still has vanilla's crafting-grid recipe, which sets
+     * {@code dyed_color} and no component of ours - so a player can walk up with
+     * a blue armour that carries no {@code tack_tint} at all. Answering "plain
+     * brown" for that piece would be quietly destructive: recolouring only its
+     * trim would write the blanket back to brown and throw their dye away
+     * without ever saying so. So the blanket is seeded from {@code dyed_color}
+     * where there is one, and only the trim and the fittings - which the grid
+     * cannot touch - fall back to their own constants.
+     */
     public static SaddleTint undyedFor(net.minecraft.world.item.ItemStack stack) {
-        return stack.is(net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR) ? ARMOUR_UNDYED : SADDLE_UNDYED;
+        if (!stack.is(net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR)) {
+            return SADDLE_UNDYED;
+        }
+        int blanket = net.minecraft.world.item.component.DyedItemColor
+                .getOrDefault(stack, ARMOUR_UNDYED.seat());
+        return new SaddleTint(blanket, ARMOUR_UNDYED.bridle(), ARMOUR_UNDYED.metal());
     }
 
     /** Layer order in the equipment asset. Changing these means changing that file too. */
