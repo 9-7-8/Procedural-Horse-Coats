@@ -170,6 +170,14 @@ public final class HorseBrowserScreen extends Screen {
     private static final float REST = 26.0F;
     private static final int ROW_HOVER = 0x22FFFFFF;
     private static final int ROW_SEL = 0x3355A0E0;
+    /**
+     * A sub-chapter with every one of its checklist items ticked. Amber rather
+     * than the green the ticks use: it sits behind the label as a background, and
+     * it has to read as "finished" at a glance down a column of twenty-odd rows
+     * without fighting the blue that means "you are here".
+     */
+    private static final int ROW_DONE = 0x44E0C070;
+    private static final int ROW_DONE_TEXT = 0xFFE8D9A8;
     private static final int NAME = 0xFFE4E8F0;
     private static final int NAME_DIM = 0xFF9AA0B0;
     private static final int HEADING = 0xFFF2F2F6;
@@ -1958,9 +1966,9 @@ public final class HorseBrowserScreen extends Screen {
         }
     }
 
-    /** Every section the contents list offers: the prose steps, then the checklist by group. */
+    /** Every section the contents list offers: one per sub-chapter, then the checklist summary. */
     private static int sectionCount() {
-        return TutorialPage.headings().size() + ProgressTask.Group.values().length;
+        return TutorialPage.steps().size() + 1;
     }
 
     /**
@@ -1971,13 +1979,13 @@ public final class HorseBrowserScreen extends Screen {
         List<TutorialPage.Step> steps = TutorialPage.steps();
         int section = Math.max(0, Math.min(tutorialSection, sectionCount() - 1));
         if (section < steps.size()) {
-            int h = TutorialPage.drawStep(g, this.font, steps.get(section), x, y, w,
-                    mouseX, mouseY, HEADING, DESC);
+            TutorialPage.Step step = steps.get(section);
+            int h = TutorialPage.drawStep(g, this.font, step, x, y, w, mouseX, mouseY, HEADING, DESC);
+            h += drawStepTasks(g, x, y + h, w, step);
             h += drawSectionFooter(g, x, y + h + 8, w, mouseX, mouseY, section) + 8;
             return h;
         }
-        ProgressTask.Group group = ProgressTask.Group.values()[section - steps.size()];
-        int h = drawChecklist(g, x, y, w, group);
+        int h = drawChecklistSummary(g, x, y, w);
         h += drawSectionFooter(g, x, y + h + 8, w, mouseX, mouseY, section) + 8;
         return h;
     }
@@ -2008,12 +2016,7 @@ public final class HorseBrowserScreen extends Screen {
     /** What the contents list calls a section. */
     private static String sectionLabel(int section) {
         List<String> headings = TutorialPage.headings();
-        if (section < headings.size()) {
-            return headings.get(section);
-        }
-        int g = section - headings.size();
-        ProgressTask.Group[] groups = ProgressTask.Group.values();
-        return g >= 0 && g < groups.length ? groups[g].title() : "";
+        return section < headings.size() ? headings.get(section) : "Checklist";
     }
 
     /**
@@ -2032,9 +2035,9 @@ public final class HorseBrowserScreen extends Screen {
      */
     private int drawContents(GuiGraphicsExtractor g, int x, int y, int w, int bottom,
                              int mouseX, int mouseY, boolean pinned) {
-        int steps = TutorialPage.headings().size();
         int lineH = this.font.lineHeight + 3;
         int active = Math.max(0, Math.min(tutorialSection, sectionCount() - 1));
+        int total = TutorialPage.steps().size();
 
         if (pinned) {
             g.enableScissor(x - 3, y, x + w + 6, bottom);
@@ -2044,33 +2047,25 @@ public final class HorseBrowserScreen extends Screen {
         g.text(this.font, Component.literal("Contents"), x, cy, HEADING, false);
         cy += this.font.lineHeight + 4;
 
-        for (int i = 0; i < sectionCount(); i++) {
-            // The checklist's groups are sections in their own right - thirty
-            // tasks under one heading is the same wall the prose was.
-            boolean checklist = i >= steps;
-            if (i == steps) {
-                cy += 4;
-                if (!pinned || (cy + lineH > y && cy < bottom)) {
-                    g.text(this.font, Component.literal("Checklist"), x, cy, HEADING, false);
-                }
-                cy += this.font.lineHeight + 4;
-            }
-            int lx = checklist ? x + 8 : x;
+        // Chapter titles are headings, not rows: there is nothing to open at a
+        // chapter, and a clickable line that only ever takes you to its first
+        // sub-chapter is a second control doing the first one's job.
+        int i = 0;
+        for (TutorialPage.Chapter chapter : TutorialPage.chapters()) {
+            cy += 4;
             if (!pinned || (cy + lineH > y && cy < bottom)) {
-                boolean hover = mouseX >= x - 3 && mouseX < x + w + 2
-                        && mouseY >= cy - 1 && mouseY < cy + lineH - 2
-                        && (!pinned || (mouseY >= y && mouseY < bottom));
-                if (i == active) {
-                    g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_SEL);
-                } else if (hover) {
-                    g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_HOVER);
-                }
-                drawFitted(g, sectionLabel(i), lx, cy, w - (lx - x),
-                        i == active ? NAME : (hover ? HEADING : NAME_DIM));
-                tocEntries.add(new TocEntry(x - 3, cy - 1, x + w + 2, cy + lineH - 2, i));
+                g.text(this.font, Component.literal(chapter.title()), x, cy, HEADING, false);
             }
-            cy += lineH;
+            cy += this.font.lineHeight + 4;
+            for (TutorialPage.Step step : chapter.steps()) {
+                cy = drawContentsRow(g, x, cy, w, y, bottom, mouseX, mouseY, pinned, lineH,
+                        i, active, ClientProgress.allDone(step.tasks()));
+                i++;
+            }
         }
+        cy += 4;
+        cy = drawContentsRow(g, x, cy, w, y, bottom, mouseX, mouseY, pinned, lineH,
+                total, active, ClientProgress.count() >= ProgressTask.values().length);
         cy += 6;
 
         if (pinned) {
@@ -2087,6 +2082,39 @@ public final class HorseBrowserScreen extends Screen {
             g.fill(x, cy - 5, x + w, cy - 4, DIVIDER);
         }
         return cy - start;
+    }
+
+    /**
+     * <b>One line of the contents list.</b> A sub-chapter whose every checklist
+     * item is ticked is painted gold - which is the one place the page says "you
+     * are finished here" without the player having to open it and count the
+     * boxes. It is a background rather than a tick so that it survives being
+     * read down a column at a glance, and the selection colour still wins on top
+     * of it, because where you <i>are</i> matters more than where you have been.
+     *
+     * @return the y the next row starts at
+     */
+    private int drawContentsRow(GuiGraphicsExtractor g, int x, int cy, int w, int top, int bottom,
+                                int mouseX, int mouseY, boolean pinned, int lineH,
+                                int index, int active, boolean done) {
+        if (!pinned || (cy + lineH > top && cy < bottom)) {
+            boolean hover = mouseX >= x - 3 && mouseX < x + w + 2
+                    && mouseY >= cy - 1 && mouseY < cy + lineH - 2
+                    && (!pinned || (mouseY >= top && mouseY < bottom));
+            if (done) {
+                g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_DONE);
+            }
+            if (index == active) {
+                g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_SEL);
+            } else if (hover) {
+                g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_HOVER);
+            }
+            int colour = index == active ? NAME
+                    : (hover ? HEADING : (done ? ROW_DONE_TEXT : NAME_DIM));
+            drawFitted(g, sectionLabel(index), x + 8, cy, w - 8, colour);
+            tocEntries.add(new TocEntry(x - 3, cy - 1, x + w + 2, cy + lineH - 2, index));
+        }
+        return cy + lineH;
     }
 
     /** A click on a contents line, or on the next-section link: open that section. */
@@ -2120,27 +2148,15 @@ public final class HorseBrowserScreen extends Screen {
      * first day ticks two boxes at once and is not stopped - the moment a
      * checklist gates content it stops being advice and starts being homework.
      */
-    private int drawChecklist(GuiGraphicsExtractor g, int x, int y, int w, ProgressTask.Group group) {
-        int start = y;
-        int total = ProgressTask.values().length;
-        int done = ClientProgress.count();
-
-        // The running total stays on every group's page: it is the one number
-        // somebody opening the checklist wants, and it is not this group's.
-        g.text(this.font, Component.literal("Checklist  " + done + " / " + total),
-                x, y, LABEL, false);
-        y += this.font.lineHeight + 2;
-        // A bar, because "17 of 30" is a number and a bar is a feeling.
-        int barW = Math.min(w, 260);
-        g.fill(x, y, x + barW, y + 3, 0xFF2B2B36);
-        if (total > 0 && done > 0) {
-            g.fill(x, y, x + Math.max(1, barW * done / total), y + 3, GOOD);
+    private int drawStepTasks(GuiGraphicsExtractor g, int x, int y, int w, TutorialPage.Step step) {
+        if (step.tasks().isEmpty()) {
+            return 0;
         }
-        y += 14;
-
-        g.text(this.font, Component.literal(group.title()), x, y, HEADING, false);
-        y += this.font.lineHeight + 6;
-        for (ProgressTask task : ProgressTask.inGroup(group)) {
+        int start = y;
+        y += 2;
+        g.fill(x, y, x + Math.min(w, 260), y + 1, DIVIDER);
+        y += 8;
+        for (ProgressTask task : step.tasks()) {
             boolean ticked = ClientProgress.isDone(task);
             g.text(this.font, Component.literal(ticked ? "\u2714" : "\u2610"),
                     x + 2, y, ticked ? GOOD : TAG, false);
@@ -2155,6 +2171,59 @@ public final class HorseBrowserScreen extends Screen {
                 }
             }
             y += 4;
+        }
+        return y - start;
+    }
+
+    /**
+     * <b>The checklist, as one number and whatever is still outstanding.</b>
+     *
+     * <p>The items themselves live under the sub-chapters that teach them, which
+     * is where somebody who has just read about stall signs wants the box for
+     * one. What that arrangement loses is the overview - "how much is left, and
+     * of what?" - so this is the section that answers it, and it lists only what
+     * is <i>not</i> done. A chapter with every box ticked disappears from here
+     * entirely, which is the point: this page shrinks as you play.
+     */
+    private int drawChecklistSummary(GuiGraphicsExtractor g, int x, int y, int w) {
+        int start = y;
+        int total = ProgressTask.values().length;
+        int done = ClientProgress.count();
+
+        g.text(this.font, Component.literal("Checklist"), x, y, HEADING, false);
+        y += this.font.lineHeight + 6;
+        g.text(this.font, Component.literal(done + " of " + total + " done"), x, y, LABEL, false);
+        y += this.font.lineHeight + 2;
+        // A bar, because "17 of 50" is a number and a bar is a feeling.
+        int barW = Math.min(w, 260);
+        g.fill(x, y, x + barW, y + 3, 0xFF2B2B36);
+        if (total > 0 && done > 0) {
+            g.fill(x, y, x + Math.max(1, barW * done / total), y + 3, GOOD);
+        }
+        y += 16;
+
+        for (ProgressTask.Group group : ProgressTask.Group.values()) {
+            List<ProgressTask> left = new ArrayList<>();
+            for (ProgressTask task : ProgressTask.inGroup(group)) {
+                if (!ClientProgress.isDone(task)) {
+                    left.add(task);
+                }
+            }
+            if (left.isEmpty()) {
+                continue;
+            }
+            g.text(this.font, Component.literal(group.title()), x, y, HEADING, false);
+            y += this.font.lineHeight + 4;
+            for (ProgressTask task : left) {
+                g.text(this.font, Component.literal("\u2610"), x + 2, y, TAG, false);
+                drawFitted(g, task.title(), x + 14, y, w - 16, NAME_DIM);
+                y += this.font.lineHeight + 3;
+            }
+            y += 5;
+        }
+        if (done >= total) {
+            g.text(this.font, Component.literal("Everything on the list is done."), x, y, GOOD, false);
+            y += this.font.lineHeight;
         }
         return y - start;
     }

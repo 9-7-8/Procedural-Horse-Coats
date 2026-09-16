@@ -9,6 +9,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -160,7 +162,11 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
 
             @Override
             public void onTake(Player taker, ItemStack taken) {
-                onTakeResult();
+                // Only a colour change counts - a take that did nothing but put a
+                // name on the saddle is not "dye a piece of tack".
+                if (onTakeResult()) {
+                    HorseProgress.complete(taker, ProgressTask.DYE_TACK);
+                }
                 super.onTake(taker, taken);
             }
         });
@@ -232,11 +238,19 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
         return new Plan(out, usedSeat, usedBridle, usedMetal);
     }
 
-    /** Spend exactly what the plan named - the saddle, and only the materials used. */
-    private void onTakeResult() {
+    /**
+     * Spend exactly what the plan named - the saddle, and only the materials used.
+     *
+     * @return whether a <i>colour</i> actually changed, which is what the
+     *         checklist's "dye a piece of tack" asks for. A rename-only take
+     *         spends nothing and returns false.
+     */
+    private boolean onTakeResult() {
         Plan plan = plan();
         getSlot(SLOT_SADDLE).remove(1);
+        boolean dyed = false;
         if (plan != null) {
+            dyed = plan.usedSeat() || plan.usedBridle() || plan.usedMetal();
             if (plan.usedSeat()) {
                 getSlot(SLOT_SEAT).remove(1);
             }
@@ -254,6 +268,7 @@ public final class EquestrianBenchMenu extends AbstractContainerMenu {
                 lastSoundTime = now;
             }
         });
+        return dyed;
     }
 
     private static @Nullable Integer dyeColour(ItemStack stack) {

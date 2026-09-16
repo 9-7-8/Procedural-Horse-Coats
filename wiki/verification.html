@@ -78,6 +78,76 @@
     </p>
 </div>
 
+<h2 id="tutorial-chapters-0916">&sect;0-EO &mdash; Getting started, rebuilt as six chapters (2026-09-16, NOT played)</h2>
+
+<div class="note warn">
+    <span class="label">Two of the new tasks tick with no player action at all</span>
+    <p>
+        <strong>Heal a horse at water</strong> and <strong>Let your horses form a herd</strong>
+        are credited from the shared slow tick, to <code>horse.getOwner()</code> when that owner
+        happens to be a loaded player. Every other task in the mod is credited from something
+        the player did, so these two are the ones that can fail <em>invisibly, in both
+        directions</em> &mdash; never firing because the owner was out of range or offline, or
+        firing the moment any horse anywhere is scratched. <strong>Hurt a horse of yours beside
+        water, stand next to it, and watch for the one chat line. Then walk a long way off, hurt
+        another, and confirm nothing arrives.</strong>
+    </p>
+</div>
+
+<p>
+    <strong>The tab is six chapters of sub-chapters now</strong> &mdash; Husbandry, Basic
+    breeding, Genetics, Breeding projects, Horses in the wild, The villagers &mdash; and the
+    checklist is no longer a section of its own. Every task sits under the sub-chapter that
+    teaches it, and a <em>Checklist</em> section at the end carries the running total and
+    <em>only what is still outstanding</em>. <strong>Pass:</strong> the contents list shows six
+    chapter headings with their sub-chapters indented beneath, every sub-chapter opens, and
+    nothing runs off the panel at GUI scale 4.
+</p>
+
+<p>
+    <strong>A sub-chapter whose every box is ticked is painted amber in the contents list.</strong>
+    That is the one genuinely new piece of feedback, and the easy thing to get subtly wrong is
+    the overlap: the selected row is drawn <em>over</em> the amber, so check that a finished
+    sub-chapter still reads as selected when you click it, and that the hover still shows.
+    <em>Milk a mare</em> is the cheapest one to finish &mdash; it carries a single task.
+</p>
+
+<p>
+    <strong>Twenty-six tasks are new</strong>, and
+    <code>tools/check-progress-tasks.mjs</code> proves only that something can reach each one,
+    never that it fires at the right moment
+    (<a href="known-gaps.html#gap-148">gap 148</a>). In rough order of how quietly each could
+    be wrong:
+</p>
+
+<ul>
+    <li><strong>Dyeing tack ticks only when a colour actually changed.</strong> Put a saddle in
+        the bench, type a name and change no row, and take it: the box must <em>not</em> tick.
+        Change one row and take it: it must.</li>
+    <li><strong>A natural cover is credited to the mare's owner</strong>, so a cover in a wild
+        band must tick nothing at all.</li>
+    <li><strong>The five themed splice carrots tick twice</strong> &mdash; their own box and
+        <em>Use an unknown gene splice carrot</em>, because a themed splice is a narrowed one
+        and shares its effect token. Feed a dilution carrot and confirm both.</li>
+    <li><strong>The three written tickets tick per tier.</strong> A basic ticket ticks only
+        <em>Send a horse to its stall</em>; a bound and an interdimensional one each also tick
+        their own.</li>
+    <li><strong>The four crafted tasks</strong> &mdash; blank ticket, hair bundle, braided rope,
+        hair cloth &mdash; tick at a crafting table, including when the result is shift-clicked
+        out as a stack.</li>
+    <li><strong>Feeding by hand now ticks two boxes at once</strong> (<em>Bond with a horse</em>
+        and <em>Feed a horse by hand</em>), and a favourite food ticks a third.</li>
+    <li><strong>The vet's kit, gelding, and a seed jar used on a mare</strong> each tick.</li>
+    <li><strong>Founding a breed from a spawn egg</strong> ticks, as does taming a horse of any
+        named breed (<em>Meet a breed</em>).</li>
+</ul>
+
+<p>
+    <strong>Every item in the mod is now named by at least one task</strong>, bar the custom and
+    preset horse spawn eggs, which have no recipe and no trade. Worth re-checking whenever an
+    item is added.
+</p>
+
 <h2 id="dyeable-armour-0916">&sect;0-EN &mdash; Dyeable leather horse armour (2026-09-16, NOT played)</h2>
 
 <div class="note warn">
@@ -779,18 +849,6 @@
         nothing reverted over open air and <em>not one</em> <code>set down at</code> line was logged. The
         set-down path itself is still unexercised; it needs a bat or parrot shifter over the corridor.</li>
 </ul>
-
-<h2 id="tutorial-0914">&sect;0-DY &mdash; Getting started, brought up to date (2026-09-14, NOT looked at)</h2>
-
-<p>
-    Press <kbd>H</kbd> and open <strong>Getting started</strong>. Look for two new steps,
-    <em>Heat, pregnancy and foals</em> (after <em>Feed a golden carrot</em>) and <em>Horses
-    live in bands</em> (after <em>Bonding</em>), with the vet's kit, seed jar, hay and lead
-    icons. Also check that <em>You need one of each</em> mentions geldings, that <em>Bonding</em>
-    says shears are worth two, and that <em>Put a gene into a foal</em> says a carrot waits on
-    the horse and makes a pregnancy. <strong>Pass:</strong> both new steps are in the contents
-    list, and nothing runs off the panel at GUI scale 4.
-</p>
 
 <h2 id="herd-yard">&sect;0-DW &mdash; Band life in the yard: rows Q and R (built 2026-09-14, NOT played)</h2>
 

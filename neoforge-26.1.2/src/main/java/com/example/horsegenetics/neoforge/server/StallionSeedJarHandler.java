@@ -252,6 +252,7 @@ public final class StallionSeedJarHandler {
         jar.shrink(1);
         level.broadcastEntityEvent(mare, (byte) 18); // heart particles, like vanilla breeding
         ReproHandler.announce(mare, player, result);
+        HorseProgress.complete(player, ProgressTask.USE_SEED_JAR);
         return true;
     }
 

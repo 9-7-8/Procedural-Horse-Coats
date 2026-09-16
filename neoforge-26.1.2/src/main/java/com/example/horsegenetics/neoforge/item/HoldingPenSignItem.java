@@ -11,6 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -108,6 +110,7 @@ public class HoldingPenSignItem extends Item {
             sp.sendSystemMessage(Component.literal(
                     "Holding pen set - " + r.blockCount() + " blocks, "
                             + r.sizeX() + "x" + r.sizeY() + "x" + r.sizeZ() + "."));
+            HorseProgress.complete(sp, ProgressTask.HANG_PEN_SIGN);
         }
         return InteractionResult.SUCCESS;
     }

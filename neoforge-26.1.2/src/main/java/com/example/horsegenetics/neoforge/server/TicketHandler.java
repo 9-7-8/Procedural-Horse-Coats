@@ -20,6 +20,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -125,6 +126,18 @@ public final class TicketHandler {
             stack.shrink(1);
         }
         say(player, (stall.horseName().isBlank() ? "The horse" : stall.horseName()) + " is back in its stall.");
+        HorseProgress.complete(player, ProgressTask.USE_TICKET);
+        // The tier as well as the act: the three written tickets are three
+        // separate crafts and three separate reaches, and a player who has only
+        // ever used the basic one has not met the other two.
+        switch (tier) {
+            case BOUND -> HorseProgress.complete(player, ProgressTask.USE_BOUND_TICKET);
+            case INTERDIMENSIONAL ->
+                    HorseProgress.complete(player, ProgressTask.USE_INTERDIMENSIONAL_TICKET);
+            default -> {
+                // BASIC, already credited
+            }
+        }
     }
 
     /**
@@ -168,6 +181,7 @@ public final class TicketHandler {
         }
         String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
         say(player, name + " is in your holding pen.");
+        HorseProgress.complete(player, ProgressTask.USE_PEN_TICKET);
     }
 
     /** Move the horse, with a puff and a sound at both ends so the player sees it go. */

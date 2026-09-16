@@ -28,10 +28,31 @@
 <h2 id="checklist">The checklist</h2>
 
 <p>
-    At the bottom of the <strong>Getting started</strong> tab, under the prose it
-    explains. Thirty-one tasks in seven groups, from taming your first mare to signing a
-    transfer paper, and each unticked one carries a line saying what to actually do.
+    Not a page of its own any more. Every task sits <strong>under the sub-chapter of
+    Getting started that teaches it</strong> &mdash; the box for hanging a stall sign is
+    directly beneath the paragraphs about hanging one &mdash; and each unticked one carries
+    a line saying what to actually do. The count is
+    <code>ProgressTask.values().length</code>, across the six chapters, from taming your
+    first mare to signing a transfer paper.
 </p>
+
+<p>
+    A <strong>Checklist</strong> section at the end of the contents is the overview: the
+    running total, a bar, and <em>only what is still outstanding</em>, grouped by chapter. A
+    chapter with every box ticked drops out of it entirely, so that section shrinks as you
+    play.
+</p>
+
+<div class="note">
+    <span class="label">A finished sub-chapter goes gold</span>
+    <p>
+        A sub-chapter whose every checklist item is ticked is painted amber in the contents
+        list down the left. It is the one place the page says &ldquo;you are finished
+        here&rdquo; without your having to open it and count boxes, and it is the reason
+        <strong>every sub-chapter carries at least one task</strong>: one with nothing to do
+        could never be finished, so an empty task list is deliberately never coloured.
+    </p>
+</div>
 
 <p>
     <strong>It gates nothing.</strong> Nothing in the mod asks whether a task is done.
@@ -41,27 +62,40 @@
 </p>
 
 <p>
-    Ticking one says so in chat, once, with a running count. The groups are:
+    Ticking one says so in chat, once, with a running count. The chapters are:
 </p>
 
 <ul>
-    <li><strong>First steps</strong> &mdash; tame a mare, tame a stallion, shear one for
-        hair, name one, breed a foal.</li>
-    <li><strong>Reading a horse</strong> &mdash; take a gene off one with a book, build
-        a shelf, file a paper, copy one.</li>
-    <li><strong>Putting a gene into a horse</strong> &mdash; craft a gene carrot, feed
-        one, and use each of the four general breeding carrots.</li>
-    <li><strong>What breeding can produce</strong> &mdash; a foal carrying something it
-        does not show, one homozygous for a non-baseline allele, one homozygous for the
-        baseline. These arrive on their own; they are there so the words mean something
-        the first time you read them.</li>
-    <li><strong>The horse dimension</strong> &mdash; light a hay portal, go through it,
-        bring a horse back.</li>
-    <li><strong>Living with horses</strong> &mdash; bond with one, milk a mare, give one
-        a stall, use each of the three whistles, fill a seed jar.</li>
-    <li><strong>Other people</strong> &mdash; trade with a horseman, meet a cowboy, sign
+    <li><strong>Husbandry</strong> &mdash; taming and naming, feeding and watering and
+        healing, grooming and what horse hair becomes, bonding to each of its three tiers,
+        stalls and holding pens and the four tickets, the four whistles,
+        <a href="item-equestrian-bench.html">dyeing your tack</a>, and milking a mare.
+        Nothing about breeding at all: keeping a horse is a whole game before genetics
+        is.</li>
+    <li><strong>Basic breeding</strong> &mdash; heat and natural covering, reading a mare
+        with a vet's kit, pregnancy and foaling and twins, filling and using a seed jar,
+        and gelding. <em>No golden carrots</em>: the first breeding a player does is the
+        one the horses arrange themselves.</li>
+    <li><strong>Genetics</strong> &mdash; taking a gene off a horse with a book, earning
+        one into your database, the research shelf, the gene carrot, the nine splice
+        carrots, and the hay portal as a showroom for genes you have not bred yet.</li>
+    <li><strong>Breeding projects</strong> &mdash; a foal carrying something it does not
+        show, one that breeds true, and line breeding for a recessive.</li>
+    <li><strong>Horses in the wild</strong> &mdash; meeting a breed and founding one from
+        a spawn egg, and letting your own horses form a herd.</li>
+    <li><strong>The villagers</strong> &mdash; trade with a horseman, meet a cowboy, sign
         a transfer paper.</li>
 </ul>
+
+<div class="note">
+    <span class="label">Every item in the mod has a task</span>
+    <p>
+        Deliberately, and it is worth keeping true as items are added: every registered item
+        a player can obtain in survival is named by at least one checklist task. The only
+        items without one are the <strong>custom and preset horse spawn eggs</strong>, which
+        have no recipe and no trade and exist for creative and debugging.
+    </p>
+</div>
 
 <h2 id="alleles">The collection</h2>
 
@@ -106,7 +140,19 @@
     and a group, with no Minecraft in it, so it is testable without a game and it survives
     the version port. The hooks that complete a task are necessarily Minecraft-side and
     live next to whatever event already existed &mdash; taming in the tame handler, foals
-    in the breeding handler, whistles in the whistle item.
+    in the breeding handler, whistles in the whistle item, crafting in
+    <code>ProgressHooks</code>.
+</p>
+
+<p>
+    <code>ProgressTask.Group</code> is <strong>the six chapters of the book</strong>, not a
+    filing system of its own, and it is only used for grouping the summary section. Which
+    <em>sub-chapter</em> a task belongs to is held the other way round, in
+    <code>TutorialPage.Step.tasks()</code> &mdash; the page owns the mapping because the page
+    is what draws it, and that is what <code>ClientProgress.allDone</code> reads to decide
+    whether a contents row is painted gold. A task in the enum but in no
+    <code>Step</code> would show only in the summary and could never finish a sub-chapter, so
+    the two lists are kept in step by hand.
 </p>
 
 <div class="note">

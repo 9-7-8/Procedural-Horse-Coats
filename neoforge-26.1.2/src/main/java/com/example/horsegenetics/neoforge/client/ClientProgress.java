@@ -28,6 +28,24 @@ public final class ClientProgress {
         return done.size();
     }
 
+    /**
+     * Every task in {@code tasks} ticked - what a contents-list row is painted
+     * gold for. An empty list is <i>not</i> done: a sub-chapter with nothing to
+     * do has nothing to finish, and colouring it as complete would be a lie the
+     * player cannot act on.
+     */
+    public static boolean allDone(java.util.List<ProgressTask> tasks) {
+        if (tasks.isEmpty()) {
+            return false;
+        }
+        for (ProgressTask task : tasks) {
+            if (!done.contains(task.id())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** Dropped on disconnect - progress belongs to a save. */
     public static void clear() {
         done = Set.of();

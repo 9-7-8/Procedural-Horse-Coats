@@ -203,6 +203,12 @@ public final class HorseCareHandler {
                 level.sendParticles(ParticleTypes.HEART,
                         horse.getX(), horse.getY() + horse.getBbHeight() * 0.7, horse.getZ(),
                         2, 0.35, 0.30, 0.35, 0.0);
+                // Credited to the owner, who is the only person who can have
+                // arranged the water and the food this cost. An offline owner
+                // simply misses it - the tick has nobody to tell.
+                if (horse.getOwner() instanceof Player healed) {
+                    HorseProgress.complete(healed, ProgressTask.HEAL_AT_WATER);
+                }
             }
         }
         horse.setData(ModAttachments.HUNGER.get(), hunger);
@@ -246,6 +252,7 @@ public final class HorseCareHandler {
             // Feeding by hand is the deliberate half of bonding - the rest
             // accrues from riding and care, with no player to credit.
             HorseProgress.complete(event.getEntity(), ProgressTask.BOND_HORSE);
+            HorseProgress.complete(event.getEntity(), ProgressTask.FEED_BY_HAND);
         }
         // deliberately not cancelled - vanilla feeding (heal / temper / love) proceeds
     }
@@ -347,6 +354,9 @@ public final class HorseCareHandler {
                         }
                     }
                 }
+            }
+            if (horse.getOwner() instanceof Player rancher) {
+                HorseProgress.complete(rancher, ProgressTask.FORM_HERD);
             }
         } else if (together == 0 && herd.isPresent()) {
             herd = Optional.empty();

@@ -42,11 +42,23 @@ public final class ProgressHooks {
         }
     }
 
-    /** Crafting a gene carrot - the one task that is about the bench, not the horse. */
+    /**
+     * The tasks that are about the crafting table rather than the horse - a gene
+     * carrot, and the three things horse hair turns into on the way to
+     * everything else.
+     */
     @SubscribeEvent
     static void onCrafted(PlayerEvent.ItemCraftedEvent event) {
         if (event.getCrafting().is(ModItems.KNOWN_GENE_SPLICE_CARROT.get())) {
             HorseProgress.complete(event.getEntity(), ProgressTask.GENE_CARROT);
+        } else if (event.getCrafting().is(ModItems.HORSE_HAIR_BUNDLE.get())) {
+            HorseProgress.complete(event.getEntity(), ProgressTask.BUNDLE_HAIR);
+        } else if (event.getCrafting().is(ModItems.BRAIDED_ROPE.get())) {
+            HorseProgress.complete(event.getEntity(), ProgressTask.CRAFT_ROPE);
+        } else if (event.getCrafting().is(ModItems.HAIR_CLOTH.get())) {
+            HorseProgress.complete(event.getEntity(), ProgressTask.CRAFT_HAIR_CLOTH);
+        } else if (event.getCrafting().is(ModItems.BLANK_TICKET.get())) {
+            HorseProgress.complete(event.getEntity(), ProgressTask.CRAFT_BLANK_TICKET);
         }
     }
 

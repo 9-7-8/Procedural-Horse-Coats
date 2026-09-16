@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -85,6 +86,7 @@ public final class FoodPreferenceHandler {
             horse.addEffect(new MobEffectInstance(MobEffects.SPEED, BUFF_TICKS, 0,
                     true, false, false));
             boolean bonded = HorseCareHandler.awardBondFor(horse, FAVOURITE_BOND);
+            HorseProgress.complete(event.getEntity(), ProgressTask.FAVOURITE_FOOD);
             level.sendParticles(ParticleTypes.HEART,
                     horse.getX(), horse.getY() + horse.getBbHeight(), horse.getZ(),
                     5, 0.4, 0.3, 0.4, 0.0);

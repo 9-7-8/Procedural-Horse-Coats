@@ -11,6 +11,7 @@ import com.example.horsegenetics.common.repro.Reproduction;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.server.level.ServerLevel;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -179,6 +180,9 @@ public final class NaturalBreedingHandler {
                 HorseBreedingHandler.genomeOf(stallion, stallionRecord, rng),
                 stallionRecord, stallion, List.of(), bredBy(mare, mareRecord), ownerPlayer(mare));
         level.broadcastEntityEvent(mare, (byte) 18);
+        // Null for a wild mare, which HorseProgress swallows - a cover in a wild
+        // band is nobody's achievement.
+        HorseProgress.complete(ownerPlayer(mare), ProgressTask.NATURAL_COVER);
         ActionTrace.log("fertility", "natural cover: " + ActionTrace.describeShort(mare) + " by "
                 + ActionTrace.describeShort(stallion) + " - " + result.outcome()
                 + String.format(" (chance %.2f)", result.chance()));

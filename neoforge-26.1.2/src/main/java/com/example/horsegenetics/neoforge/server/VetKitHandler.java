@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -80,6 +81,7 @@ public final class VetKitHandler {
         tell(player, name + " is now a gelding. He will not breed, and he will settle to you a little "
                 + "faster.", ChatFormatting.GREEN);
         ActionTrace.log("vet", player.getName().getString() + " gelded " + ActionTrace.describeShort(horse));
+        HorseProgress.complete(player, ProgressTask.GELD_HORSE);
         return true;
     }
 
@@ -87,6 +89,7 @@ public final class VetKitHandler {
         for (String line : ReproHandler.vetReport(horse)) {
             tell(player, "[vet] " + line, ChatFormatting.GOLD);
         }
+        HorseProgress.complete(player, ProgressTask.VET_KIT_USE);
         return true;
     }
 

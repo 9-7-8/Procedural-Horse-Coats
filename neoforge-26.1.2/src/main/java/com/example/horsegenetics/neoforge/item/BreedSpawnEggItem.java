@@ -12,6 +12,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.item.Item;
@@ -96,6 +98,8 @@ public class BreedSpawnEggItem extends Item {
         if (horse == null) {
             return InteractionResult.FAIL;
         }
+        // Null in the dispenser case, which HorseProgress swallows.
+        HorseProgress.complete(ctx.getPlayer(), ProgressTask.BREED_EGG);
         if (ctx.getPlayer() == null || !ctx.getPlayer().getAbilities().instabuild) {
             ctx.getItemInHand().shrink(1);
         }

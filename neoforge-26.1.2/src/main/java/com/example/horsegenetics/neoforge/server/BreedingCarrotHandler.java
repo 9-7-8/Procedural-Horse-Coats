@@ -205,6 +205,27 @@ public final class BreedingCarrotHandler {
                 HorseProgress.complete(player, ProgressTask.CARROT_UNKNOWN_EPIGENETIC);
             } else if (token.startsWith("gene_splice")) {
                 HorseProgress.complete(player, ProgressTask.CARROT_UNKNOWN_GENE);
+                // A themed splice IS an unknown gene splice with the pool
+                // narrowed - same effect, same token with a category on the end -
+                // so it ticks the general box as well as its own. Ticking only
+                // the themed one would leave a player who owns every themed
+                // carrot unable to finish the sub-chapter.
+                if (token.startsWith("gene_splice:")) {
+                    SpliceCategory themed =
+                            SpliceCategory.byId(token.substring("gene_splice:".length()));
+                    if (themed != null) {
+                        switch (themed) {
+                            case DILUTION -> HorseProgress.complete(player, ProgressTask.CARROT_DILUTION);
+                            case WHITE -> HorseProgress.complete(player, ProgressTask.CARROT_WHITE);
+                            case MARKING -> HorseProgress.complete(player, ProgressTask.CARROT_MARKING);
+                            case PERFORMANCE -> HorseProgress.complete(player, ProgressTask.CARROT_PERFORMANCE);
+                            case MAGICAL -> HorseProgress.complete(player, ProgressTask.CARROT_MAGICAL);
+                            case ANY -> {
+                                // the plain splice, already credited above
+                            }
+                        }
+                    }
+                }
             }
         }
     }
