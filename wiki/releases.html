@@ -58,6 +58,197 @@
     </p>
 </div>
 
+<h2 id="v0-5-002">0.5.002</h2>
+
+<p class="lede">
+    <strong>Five days of work, not one feature.</strong> Horses breed, eat and band together
+    on their own; the breed list nearly trebled; and tack takes dye.
+</p>
+
+<h3>Seventy-three new breeds</h3>
+
+<ul>
+    <li><strong>Forty-nine breeds became a hundred and twenty-two</strong> &mdash; each built
+        from its own breed sheet rather than a template. <a href="breed-book.html">The breed
+        book</a> has the entries.</li>
+    <li><strong>The mod has an extinct breed.</strong> The <strong>Tarpan</strong> never
+        spawns wild &mdash; it is only ever reached by breeding for it.</li>
+    <li><strong>Some breeds never run wild at all</strong> &mdash; Budyonny, Croatian
+        Coldblood and Danubian are stud and sport breeds with no feral population, so they
+        arrive through cowboys and stables only.</li>
+    <li><strong>Visually fixed breeds</strong>: every Sorraia, Riwoche and Konik founder is
+        dun, every Murgese is black, and no Pony of the Americas is ever without the
+        leopard-complex allele.</li>
+    <li><strong>The Criollo is the first breed to carry manchado</strong>, which had been
+        reachable only from the wild founder table.</li>
+    <li><strong>Vyatka carries PSSM1 heavily</strong> &mdash; about a third of the breed is
+        genetically affected rather than a silent carrier.</li>
+</ul>
+
+<h3>A wild herd might be magical</h3>
+
+<p>
+    <strong>One wild herd in twenty is the magical version of its breed.</strong> The whole
+    herd shares one magical gene and reads as <em>Magical (Breed)</em>; bred back into its own
+    breed a foal stays Magical, crossed elsewhere it is the ordinary cross. Switched off, or
+    re-weighted, under <code>[magical_herds]</code> in <code>breed-spawning.toml</code>, and a
+    breed file may opt out. <a href="breeds.html">Breeds</a>.
+</p>
+
+<h3>Horses breed on their own</h3>
+
+<ul>
+    <li><strong>Mares come into heat, carry a pregnancy and foal</strong> with no carrot
+        involved &mdash; a cover needs both horses within three blocks, at full health,
+        neither ridden nor leashed, after a real courtship. A stallion manages three covers a
+        day at most. <strong>Twins</strong> happen, and not every twin survives.</li>
+    <li><strong>A pregnancy runs one Minecraft day by default</strong>
+        (<code>fertility.gestation_days</code>), with every other stage scaled from it.
+        <strong>Plain golden carrots still give a foal at once.</strong></li>
+    <li><strong>Gelding</strong>, and <strong>the vet's kit</strong> that does it &mdash; and
+        which is the only way to learn a mare is carrying twins before birth.
+        <a href="item-vet-kit.html">The vet's kit</a>.</li>
+    <li><strong>Breeding carrots wait on the horse</strong> until a conception uses them,
+        rather than opening a thirty-second window.</li>
+    <li><a href="fertility.html">Fertility and gestation</a>, <a href="breeding.html">breeding</a>.</li>
+</ul>
+
+<h3>Hunger, and bands</h3>
+
+<ul>
+    <li><strong>Horses carry a hunger you cannot see</strong>, which drains faster when they
+        heal. A starving horse cannot heal; hunger never injures one directly.
+        <strong>Vanilla's free passive healing is switched off</strong> &mdash; hunger is what
+        pays for healing now. Grazing wears grass to dirt; carnivorous horses hunt.</li>
+    <li><strong>Wild horses live in bands</strong> &mdash; relationships, rank, grooming
+        partners and rivalry, a <strong>lead mare</strong> the band follows so a stallion's
+        death no longer scatters it, bachelor bands, dispersal, sparring, takeovers that stop
+        short of a kill, and a dam defending her foal. <a href="horse-care.html">Horse
+        care</a>.</li>
+</ul>
+
+<h3>Genes and coats</h3>
+
+<ul>
+    <li><strong>KIT carries every published W allele, W1 through W39</strong>, and W8, W18 and
+        W21 gained a new <strong>speckled white</strong>. <strong>SW9</strong> and
+        <strong>SW10</strong> joined splashed white, and <strong>DMRT3</strong> the gait
+        keeper ships at measured breed frequencies &mdash; the genotype is real, the gait
+        itself is not implemented yet.</li>
+    <li><strong>Heat and cold tolerance</strong>, two magical loci carried by thirty-eight
+        breeds. <a href="gene-magic-heat.html">Heat</a>,
+        <a href="gene-magic-cold.html">cold</a>.</li>
+    <li><strong>The dhampir is a breed now, not a gene</strong> &mdash; one gene doing five
+        jobs became magic white, sun sensitivity, blood diet, a vampiric allele and a red
+        iris, reassembled as the night-only Dhampir breed.</li>
+    <li><strong>The dryad became nine alleles</strong>, carrying mushrooms, flowers and bone
+        meal, with the tree species on the allele &mdash; which retires the dark-oak horse
+        whose saplings could never grow.</li>
+    <li><strong>Glow is a level, not a switch</strong>: around fifty glowing layers fade at
+        their edges instead of stopping at a hard line. <strong>Magic zebra is
+        codominant.</strong> <strong>Markings can come out smaller rather than fainter.</strong></li>
+    <li><strong>Rainbow Drip is now Ribbon Drip</strong> &mdash; no horse changed, the name
+        simply argued with the horse in front of you.</li>
+    <li>Fixed: every white painter and every magical gene had been <strong>painting over the
+        whites of a foal's eyes</strong>. Fixed: a particle horse could be a homozygote or a
+        carrier, identical to look at &mdash; non-partner pairs now show nothing.</li>
+</ul>
+
+<h3>Dyeable tack</h3>
+
+<ul>
+    <li><strong>A saddle dyes in three parts</strong> &mdash; seat, bridle and metal fittings,
+        independently. <strong>Leather horse armour dyes the same way</strong>: blanket, trim
+        and fittings.</li>
+    <li><strong>The Equestrian Bench</strong> does the dyeing and names the saddle. Craft it,
+        or find the one at any cowboy's homestead. You are charged only for the parts that
+        changed. <a href="item-equestrian-bench.html">The bench</a>.</li>
+    <li><strong>Fifteen fittings</strong> &mdash; the hardware row takes a <em>material</em>
+        rather than a dye, and iron is the way back to plain steel.</li>
+    <li><strong>Nothing already owned changed.</strong> An undyed saddle is
+        <strong>pixel-identical</strong> to the one players know, so donkeys, mules, skeleton
+        horses and zombie horses look exactly as they did, and crafting-grid dyeing still
+        works.</li>
+</ul>
+
+<h3>Items, cowboys and screens</h3>
+
+<ul>
+    <li><strong>The ender whistle</strong> binds to one horse for good and calls it from
+        anywhere, across dimensions; it crumbles when that horse dies.</li>
+    <li><strong>A cowboy comes from somewhere</strong> &mdash; his whole string of horses and
+        his own name are drawn from one of ten regional pools, keyed off the country on each
+        breed. The horseman takes his region from the nearest cowboy and stocks the whole tack
+        ladder. <a href="villagers.html">Villagers</a>.</li>
+    <li><strong>Your own name tables</strong> drop into <code>phc/names/</code>, adding to the
+        shipped ones rather than replacing them.</li>
+    <li><strong>The family tree runs both ways</strong>, and <em>My horses</em> gained gene and
+        allele pickers listing only what your roster holds.</li>
+    <li><strong>F8 highlights nearby horses</strong> and marks the herd lead in red.
+        <strong>F asks a ridden horse to dive</strong>, which is the only way to use
+        Ocean-born's underwater breathing &mdash; it shares a key with vanilla's swap-hands by
+        deliberate choice, and both are rebindable.</li>
+    <li>Fixed: <em>Make egg</em> did nothing (a widget sat on the button, eating the click),
+        and a name tag put you on the horse while opening the rename window.</li>
+</ul>
+
+<h3>Performance</h3>
+
+<p>
+    Walking toward a herd could freeze the whole machine: <strong>every newly-seen horse was
+    baked twice inside the frame that first drew it</strong>. It is one bake per horse now,
+    against a time budget, with a shared stand-in coat while a bake is pending and a 32-block
+    detail distance &mdash; both knobs under <code>coats.</code> in <code>client.toml</code>.
+</p>
+
+<h3>What this does to a world you already have</h3>
+
+<ul>
+    <li><strong>It should load, and no world has been carried across yet.</strong> A gene that
+        no longer exists is dropped and that locus returns to its default rather than breaking
+        the save.</li>
+    <li><strong>Spontaneous Breeding is gone as a gene</strong> &mdash; every horse breeds now
+        &mdash; and <strong>the old dhampir gene with it</strong>; the Dhampir breed is how you
+        get one.</li>
+    <li><strong>Some breeds changed.</strong> Cream, pearl and champagne were rebuilt from
+        per-breed frequencies, so pearl is on the Iberian breeds, Gypsy Vanner, Paint and
+        Quarter Horse only, and the American Cream Draft is gold champagne rather than
+        cremello. The Paint's HYPP rate rose. Anglo-Arabian, Australian Stock Horse, Azteca and
+        Budyonny were each shorter than their own table row claimed. Horses already owned keep
+        what they carry.</li>
+    <li><strong>The new breeds are added to an existing <code>breed-spawning.toml</code></strong>
+        &mdash; a missing section is written back with its defaults, so the file need not be
+        deleted.</li>
+    <li><strong>Every horse renders about 10% bigger</strong>, because the body had been the
+        undersized one all along &mdash; that is the tack-fit fix.</li>
+    <li><strong>Horses no longer heal for free.</strong></li>
+</ul>
+
+<div class="note">
+    <span class="label">The testing tools ship, switched off</span>
+    <p>
+        <code>/testkit</code>, <code>/bond</code>, the debug pens and the stall overlay are in
+        the jar rather than compiled out, behind <strong><code>debug.tools</code></strong> in
+        <code>server.toml</code> and <code>client.toml</code>. Off in a normal install.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Known rough edges</span>
+    <p>
+        <strong>A mare that loses a pregnancy early may never be covered again</strong> &mdash;
+        she reads as in heat and the stallion as having covers left, and nothing happens.
+        <strong>Hand-feeding a foal for bond also ages it</strong>, since vanilla's feed on a
+        baby ages it and the mod does not cancel that.
+    </p>
+    <p>
+        <strong>None of this has had a proper play session</strong>, and the last fourteen
+        breeds have never been seen in a world.
+        <a href="verification.html">To be verified</a> is the honest account of what has
+        actually been watched working.
+    </p>
+</div>
+
 <h2 id="v0-5-001">0.5.001</h2>
 
 <p class="lede">
