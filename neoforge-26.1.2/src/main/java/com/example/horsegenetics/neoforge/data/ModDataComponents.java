@@ -126,6 +126,23 @@ public final class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.BOOL)
                     .build());
 
+    /**
+     * The three colours of a dyed saddle ({@link SaddleTint}) - seat leather,
+     * bridle leather and metal hardware, dyed independently at the
+     * <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/roadmap.html#equestrian-bench">Equestrian
+     * Bench</a>. Not {@code dyed_color}, because vanilla holds one value per
+     * stack and reads it once for every layer; see that record for the rest.
+     *
+     * <p>Absent means undyed, and an undyed saddle renders exactly as vanilla's
+     * does - which is what lets this ride on {@code minecraft:saddle} rather
+     * than needing an item of our own.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SaddleTint>> TACK_TINT =
+            TYPES.register("tack_tint", () -> DataComponentType.<SaddleTint>builder()
+                    .persistent(SaddleTint.CODEC)
+                    .networkSynchronized(SaddleTint.STREAM_CODEC)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }

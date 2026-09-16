@@ -69,6 +69,19 @@ public final class ClientSetup {
                 HoofprintParticle.Provider::new);
     }
 
+    /**
+     * The saddle's three dyeable zones. Vanilla gives one dye colour per stack
+     * however many layers an equipment asset declares, so the seat, the bridle
+     * and the metal reach their own colours through this hook - see
+     * {@link TackClientExtensions}. The first client item extension this mod has
+     * registered.
+     */
+    @SubscribeEvent
+    static void registerClientExtensions(
+            net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
+        event.registerItem(new TackClientExtensions(), net.minecraft.world.item.Items.SADDLE);
+    }
+
     @SubscribeEvent
     static void registerReloadListeners(AddClientReloadListenersEvent event) {
         event.addListener(CoatAssetReload.ID, new CoatAssetReload());
