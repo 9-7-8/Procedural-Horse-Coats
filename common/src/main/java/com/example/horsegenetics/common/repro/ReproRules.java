@@ -46,6 +46,24 @@ public final class ReproRules {
     public static final int NATURAL_CAP = 8;
     public static final double NATURAL_CAP_RADIUS = 16.0;
 
+    /**
+     * <b>How healthy a horse must be to take part in a natural cover</b>, as a
+     * fraction of its maximum health.
+     *
+     * <p>This was once full health <i>exactly</i>, and that made any chip damage
+     * permanent infertility rather than a scratch: healing is gated on standing near
+     * water, so a horse in a dry paddock never got the point back. A miscarriage
+     * costs the dam half a heart, so losing one pregnancy quietly ended her breeding
+     * life - she stayed in heat, stallions ignored her, and nothing was logged. Gap
+     * 258. A wolf bite or a lost fight did the same to any horse.
+     */
+    public static final double COVER_HEALTH = 0.9;
+
+    /** Whether a horse is well enough for a natural cover. See {@link #COVER_HEALTH}. */
+    public static boolean healthyEnoughToBreed(double health, double maxHealth) {
+        return health >= maxHealth * COVER_HEALTH;
+    }
+
     // ------------------------------------------------------------------
     // Pregnancy
     // ------------------------------------------------------------------

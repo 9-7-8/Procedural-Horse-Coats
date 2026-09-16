@@ -358,6 +358,13 @@ final class DebugYardGameplay {
             }
         }
 
+        // WATER IN BOTH HALVES. This pen lays its own walls instead of calling
+        // fencedPlot, so it does not inherit the pen cauldron - and the divider means
+        // a single one would water whichever horse happened to share its side. Sunk
+        // at the south end, clear of the two north gates and of the pair at gateZ - 2.
+        DebugTestYard.penWater(level, gy, x0 + 2, z1 - 1);
+        DebugTestYard.penWater(level, gy, x0 + 6, z1 - 1);
+
         // Since 2026-09-13 a carrot only ARMS the horse, the mare has to be in
         // heat, and breeding makes a pregnancy - so the sign is three steps, and
         // the chest has the clock that puts her in heat.

@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
@@ -1327,6 +1328,31 @@ final class DebugTestYard {
     static void fencedPlot(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
         DebugPenManager.penWalls(level, gy + 1, x0, x1, z0, z1,
                 (x0 + x1) / 2, z0, Direction.NORTH);
+        penWater(level, gy, x0 + 1, z0 + 1);
+    }
+
+    /**
+     * <b>Every pen has water, sunk into its floor.</b> Owner, 2026-09-16: water is
+     * standard in a pen from here on, in the ones that exist and the ones nobody has
+     * written yet - which is why it lives in {@link #fencedPlot} rather than in each
+     * pen that remembered to ask for it.
+     *
+     * <p>A dry pen was not a cosmetic gap. Healing is gated on standing near water
+     * ({@code HorseCareHandler.nearWater}), so a hurt horse in a dry pen never got the
+     * point back; and a natural cover needs a healthy horse, so a mare who lost a
+     * pregnancy to a lethal pairing - half a heart, from the miscarriage - was never
+     * covered again, in silence, for the rest of the run. Gap 258.
+     *
+     * <p><b>Sunk to {@code gy}, not raised to {@code gy + 1}</b>, for the reason the
+     * corridor pens already sink theirs: a block standing proud of the floor is a step,
+     * and an animal beside a wall uses it to hop out. That is also why it is exempt
+     * from the two-clear-blocks rule (2026-09-15, formerly gap 247), which governs
+     * <i>raised</i> blocks - flush with the grass this is not a step, so it may sit in
+     * the corner of even a four-wide pen, where two clear blocks would not fit.
+     */
+    static void penWater(ServerLevel level, int gy, int x, int z) {
+        level.setBlockAndUpdate(new BlockPos(x, gy, z),
+                Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
     }
 
 }

@@ -177,6 +177,21 @@ class ReproRulesTest {
         assertEquals(0.05, counts[0] / 20_000.0, 0.01);
     }
 
+    /**
+     * Gap 258. A natural cover once demanded full health exactly, a miscarriage costs
+     * the dam half a heart, and healing is gated on water - so one lost pregnancy made
+     * a mare permanently unbreedable in a dry paddock, in silence.
+     */
+    @Test
+    void aSlightlyHurtHorseMayStillBeCovered() {
+        assertTrue(ReproRules.healthyEnoughToBreed(22.0, 22.0), "untouched");
+        assertTrue(ReproRules.healthyEnoughToBreed(21.0, 22.0),
+                "half a heart off, exactly as a miscarriage leaves her");
+        assertTrue(ReproRules.healthyEnoughToBreed(20.0, 22.0), "a scratch is not infertility");
+        assertFalse(ReproRules.healthyEnoughToBreed(19.0, 22.0), "properly hurt, and she waits");
+        assertFalse(ReproRules.healthyEnoughToBreed(2.0, 22.0), "nearly dead");
+    }
+
     @Test
     void anEarlyLossFallsInTheFirstThird() {
         for (long seed = 0; seed < 500; seed++) {

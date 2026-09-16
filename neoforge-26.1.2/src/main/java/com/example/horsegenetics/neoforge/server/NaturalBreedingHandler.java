@@ -26,9 +26,10 @@ import java.util.List;
  * the Spontaneous Breeding gene was "now basically just base game behavior",
  * so it is gone and this is what every horse does.
  *
- * <p>This class only gathers facts. Every rule - once per heat, full health, not
- * ridden or leashed, no geldings, three covers a day, the local cap, cowboy stock
- * exempt - is {@link NaturalCover#decide}, which is unit-tested. The cover goes
+ * <p>This class only gathers facts. Every rule - once per heat, healthy enough
+ * ({@link ReproRules#COVER_HEALTH}), not ridden or leashed, no geldings, three
+ * covers a day, the local cap, cowboy stock exempt - is
+ * {@link NaturalCover#decide}, which is unit-tested. The cover goes
  * through {@link ReproHandler#breed}, so carrot effects armed on either horse act
  * on it, and it is credited to the mare's owner. It runs off the entity tick, so it
  * only ever happens in loaded chunks. The heat-attraction goal
@@ -53,6 +54,9 @@ public final class NaturalBreedingHandler {
 
     /** When each capped mare last said so. Transient; a restart just says it again. */
     private static final java.util.Map<java.util.UUID, Long> CROWDED_LOGGED = new java.util.HashMap<>();
+
+    /** When each too-hurt mare last said so. Transient, like {@link #CROWDED_LOGGED}. */
+    private static final java.util.Map<java.util.UUID, Long> UNFIT_LOGGED = new java.util.HashMap<>();
 
     /** Wild mares the cap held back since {@link #wildCappedSince}, summarised every ten minutes. */
     private static final java.util.Set<java.util.UUID> WILD_CAPPED = new java.util.HashSet<>();
@@ -96,7 +100,8 @@ public final class NaturalBreedingHandler {
         int crowd = level.getEntitiesOfClass(Horse.class,
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS), h -> h != mare && h.isAlive() && YardPens.together(mare, h)).size();
 
-        NaturalCover.Decision decision = NaturalCover.decide(party(mare), r, now, t, candidates, crowd);
+        NaturalCover.Party mareParty = party(mare);
+        NaturalCover.Decision decision = NaturalCover.decide(mareParty, r, now, t, candidates, crowd);
         switch (decision.verdict()) {
             case COVER -> {
                 // VANILLA'S COURTSHIP FIRST (gap 230): the same stallion in reach for three
@@ -141,8 +146,24 @@ public final class NaturalBreedingHandler {
                             + " blocks, the cap is " + ReproRules.NATURAL_CAP);
                 }
             }
+            case NOT_A_BREEDING_MARE -> {
+                // ONLY HER HEALTH IS WORTH A LINE (gap 258). To get here she is already an
+                // adult mare in heat, with a try left and a stallion in reach, so the rest
+                // of the reasons - ridden, leashed, cowboy stock - are the player's own
+                // doing and obvious. Being a point short of full health was neither: it
+                // refused her silently, and a miscarriage costs half a heart.
+                if (!mareParty.healthyEnough()) {
+                    Long saidAt = UNFIT_LOGGED.get(mare.getUUID());
+                    if (saidAt == null || now - saidAt >= 1_200L) {
+                        UNFIT_LOGGED.put(mare.getUUID(), now);
+                        ActionTrace.log("fertility", ActionTrace.describeShort(mare) + String.format(
+                                " not covered: hurt, %.1f/%.1f health - a natural cover needs %.0f%%",
+                                mare.getHealth(), mare.getMaxHealth(), ReproRules.COVER_HEALTH * 100.0));
+                    }
+                }
+            }
             default -> {
-                // not a breeding mare right now, or no able stallion in reach - nothing worth a line
+                // no able stallion in reach, or not her heat - nothing worth a line
             }
         }
     }
@@ -170,7 +191,8 @@ public final class NaturalBreedingHandler {
         boolean cowboy = horse.hasData(ModAttachments.COWBOY_BRAND.get())
                 && horse.getData(ModAttachments.COWBOY_BRAND.get()).isBranded();
         return new NaturalCover.Party(!horse.isBaby(), record.sex() == Sex.FEMALE, record.gelded(),
-                horse.getHealth() >= horse.getMaxHealth(), horse.isVehicle(), horse.isLeashed(), cowboy);
+                ReproRules.healthyEnoughToBreed(horse.getHealth(), horse.getMaxHealth()),
+                horse.isVehicle(), horse.isLeashed(), cowboy);
     }
 
     /**

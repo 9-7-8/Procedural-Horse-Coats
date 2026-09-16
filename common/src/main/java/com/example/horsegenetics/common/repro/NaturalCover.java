@@ -11,6 +11,12 @@ import java.util.List;
  * heat when they meet. Both at full health, neither ridden nor leashed, cowboy
  * stock exempt, a gelding never covers, three covers a day is a hard stop, and
  * {@link ReproRules#NATURAL_CAP} other horses near her stops it.
+ *
+ * <p><b>"Full health" is a threshold, not exact equality</b> - see
+ * {@link ReproRules#COVER_HEALTH}. Demanding the maximum exactly meant a single
+ * point of damage stopped a horse breeding until it found water to heal at, and a
+ * miscarriage costs the dam half a heart: one lost pregnancy ended her breeding
+ * life, silently. Gap 258.
  */
 public final class NaturalCover {
 
@@ -61,12 +67,12 @@ public final class NaturalCover {
     }
 
     /** One horse, as far as a natural cover cares. */
-    public record Party(boolean adult, boolean female, boolean gelded, boolean fullHealth,
+    public record Party(boolean adult, boolean female, boolean gelded, boolean healthyEnough,
                         boolean ridden, boolean leashed, boolean cowboyStock) {
 
         /** Adult, whole, free, and not a dealer's stock. */
         public boolean ableToBreed() {
-            return adult && fullHealth && !ridden && !leashed && !cowboyStock;
+            return adult && healthyEnough && !ridden && !leashed && !cowboyStock;
         }
 
         public boolean entireStallion() {
