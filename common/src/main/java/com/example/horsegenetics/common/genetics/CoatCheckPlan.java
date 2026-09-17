@@ -135,8 +135,17 @@ public final class CoatCheckPlan {
          * a horse whose genotype does not exist.
          */
         public Sex sex() {
-            Allele placeholder = gene.hemizygousPlaceholder();
-            return placeholder != null && pair.has(placeholder) ? Sex.MALE : Sex.FEMALE;
+            // ASK WHETHER THE GENE IS SEX-LINKED FIRST. hemizygousPlaceholder()
+            // THROWS on an autosomal gene - it does not return null - so the
+            // null check below it never ran, and every pen in the plan is
+            // autosomal. That made the corridor's first pen throw while the
+            // player was still being teleported in: a crash on entering the
+            // horse dimension, reported by testers against 0.5.004 and
+            // reproduced by CoatCheckPlanSanityTest on all 438 pens.
+            if (!gene.inheritance().sexLinked()) {
+                return Sex.FEMALE;
+            }
+            return pair.has(gene.hemizygousPlaceholder()) ? Sex.MALE : Sex.FEMALE;
         }
 
         /** What this combination is called - the expression's own name. */

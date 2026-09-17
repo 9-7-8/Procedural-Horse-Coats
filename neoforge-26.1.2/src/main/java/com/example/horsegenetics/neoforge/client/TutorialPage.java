@@ -234,7 +234,8 @@ public final class TutorialPage {
                 List.of(new ItemStack(Items.WHEAT), new ItemStack(Items.SUGAR),
                         new ItemStack(Items.SHEARS)), Art.NONE,
                 List.of(ProgressTask.BOND_HORSE, ProgressTask.BOND_ATTENTIVE,
-                        ProgressTask.BOND_APPROACHES, ProgressTask.BOND_FOLLOWS)));
+                        ProgressTask.BOND_APPROACHES, ProgressTask.BOND_FOLLOWS,
+                        ProgressTask.RIDE_BAREBACK, ProgressTask.STEER_BAREBACK)));
 
         husbandry.add(new Step("Stalls, pens and tickets",
                 List.of("A stall sign starts blank. Right-click a horse of yours with it and it binds "
@@ -421,7 +422,8 @@ public final class TutorialPage {
                                 + "many of them, cheaper than an entire horse.",
                         "It is the ordinary answer to a paddock with too many colts in it."),
                 List.of(new ItemStack(ModItems.VET_KIT.get())), Art.NONE,
-                List.of(ProgressTask.GELD_HORSE)));
+                List.of(ProgressTask.GELD_HORSE, ProgressTask.OWN_GELDING,
+                        ProgressTask.BOND_GELDING)));
 
         out.add(new Chapter("Basic breeding", List.copyOf(breeding)));
 

@@ -107,7 +107,9 @@ public final class HerdManager {
             breed = Breeds.get(mate.herdBreed().orElse(""));
             band = parseBand(mate.herdBand().orElse(BandType.TRADITIONAL.name()));
             lead = mate.herd().orElse(herdedMate.getUUID());
-            sex = lead.equals(horse.getUUID()) ? leadSex(horse, rng) : joinerSex(horse, band, rng);
+            sex = lead.equals(horse.getUUID())
+                    ? leadSex(horse, rng)
+                    : joinerSex(horse, level, breed, band, lead, rng);
         } else if (wildSpawn) {
             List<Horse> clump = freshClump(horse, level);
             if (clump.size() > 1) {
@@ -302,11 +304,54 @@ public final class HerdManager {
         return horse.isBaby() ? coin(rng) : Sex.MALE; // the stallion / bachelor head
     }
 
-    private static Sex joinerSex(Horse horse, BandType band, Rng rng) {
+    /**
+     * <b>A horse joining a band that already exists</b> - and the single line
+     * that made the wild look the way testers reported it.
+     *
+     * <p>This used to be an unconditional {@code Sex.FEMALE} for every
+     * traditional band. It asked no question about how full the band was, so
+     * once a band existed anywhere near a spawn every later adult joined it as a
+     * mare, for ever: the band never grew a second stallion and the mares had no
+     * ceiling. Founding a clump was always near even - a bachelor band is all
+     * male and a harem is one stallion in four or five - but joining was not, and
+     * joining is most of what happens in a world that has been running a while.
+     *
+     * <p>Now the band's own {@code maxMares} is honoured. Up to it, a joiner is
+     * a mare and the harem fills as it should; past it the band is full and the
+     * horse is a straight coin flip, which is what the lone and non-natural
+     * paths have always done.
+     */
+    private static Sex joinerSex(Horse horse, ServerLevel level, Breed breed, BandType band,
+                                 UUID lead, Rng rng) {
         if (horse.isBaby()) {
             return coin(rng);
         }
-        return band == BandType.BACHELOR ? Sex.MALE : Sex.FEMALE;
+        if (band == BandType.BACHELOR) {
+            return Sex.MALE;
+        }
+        return bandMares(horse, level, lead) < breed.herd().bandOf(false).maxMares()
+                ? Sex.FEMALE
+                : coin(rng);
+    }
+
+    /**
+     * Adult mares already carrying the wild-herd tag {@code lead}, near enough to
+     * {@code horse} to be the band it is joining. Twice {@link #HERD_RADIUS},
+     * because a band is not a point and the horse joining it is at the edge.
+     */
+    private static int bandMares(Horse horse, ServerLevel level, UUID lead) {
+        int mares = 0;
+        for (Horse h : level.getEntitiesOfClass(Horse.class,
+                horse.getBoundingBox().inflate(HERD_RADIUS * 2.0),
+                o -> o != horse && o.isAlive() && !o.isBaby() && HorseRecords.hasRealRecord(o))) {
+            HorseCareAttachment care = h.getData(ModAttachments.HORSE_CARE.get());
+            if (care.inWildHerd()
+                    && care.herd().map(lead::equals).orElse(false)
+                    && HorseRecords.of(h).sex() == Sex.FEMALE) {
+                mares++;
+            }
+        }
+        return mares;
     }
 
     private static Sex coin(Rng rng) {

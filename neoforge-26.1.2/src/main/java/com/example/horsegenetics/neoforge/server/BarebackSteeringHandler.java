@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
@@ -78,6 +79,9 @@ public final class BarebackSteeringHandler {
             ItemStack saddle = new ItemStack(Items.SADDLE);
             saddle.set(ModDataComponents.PHANTOM_SADDLE.get(), true);
             horse.setItemSlot(EquipmentSlot.SADDLE, saddle);
+            // The tick this fires on is the moment a horse first takes direction
+            // bare, which is the whole of what the task is asking for.
+            HorseProgress.complete(rider, ProgressTask.STEER_BAREBACK);
             return;
         }
         if (phantom && rider == null) {
@@ -129,6 +133,20 @@ public final class BarebackSteeringHandler {
         if (isPhantom(rider.containerMenu.getCarried())) {
             rider.containerMenu.setCarried(ItemStack.EMPTY);
         }
+    }
+
+    /**
+     * <b>Is this horse being ridden bare?</b> Either it has no saddle at all, or
+     * the only saddle on it is one this class put there.
+     *
+     * <p>The second half is the part worth having: at the top bond tier a
+     * bareback rider is given a real saddle so vanilla's mounted path works, so
+     * {@code isSaddled()} says <i>true</i> about a horse with nothing on it.
+     * Anything asking "is this bareback" and trusting {@code isSaddled()} alone
+     * gets the wrong answer for exactly the horses this mod is about.
+     */
+    static boolean bareback(AbstractHorse horse) {
+        return !horse.isSaddled() || isPhantom(horse.getItemBySlot(EquipmentSlot.SADDLE));
     }
 
     private static boolean isPhantom(ItemStack stack) {

@@ -169,6 +169,9 @@ public final class HorseCareHandler {
             // with a horse - if anything is bonding, it is that.
             if (horse.hasPassenger(owner)) {
                 add += SCAN_INTERVAL;                     // riding ~ +1/min, saddle or not
+                if (BarebackSteeringHandler.bareback(horse)) {
+                    HorseProgress.complete(owner, ProgressTask.RIDE_BAREBACK);
+                }
             }
             if (add > 0 && HorseRecords.of(horse).gelded()) {
                 add = Math.round(add * GELDING_BOND_FACTOR);   // a gelding settles to you faster
@@ -452,6 +455,17 @@ public final class HorseCareHandler {
         }
         if (tier >= 3) {
             HorseProgress.complete(owner, ProgressTask.BOND_FOLLOWS);
+        }
+
+        // The two gelding tasks ride along here for the same reason the tiers do:
+        // being a gelding is a fact about the horse, not an event, so crediting
+        // the state catches the one you bought already done as surely as the one
+        // you had done yourself - and neither has an interaction to hang on.
+        if (HorseRecords.hasRealRecord(horse) && HorseRecords.of(horse).gelded()) {
+            HorseProgress.complete(owner, ProgressTask.OWN_GELDING);
+            if (tier >= 2) {
+                HorseProgress.complete(owner, ProgressTask.BOND_GELDING);
+            }
         }
     }
 }

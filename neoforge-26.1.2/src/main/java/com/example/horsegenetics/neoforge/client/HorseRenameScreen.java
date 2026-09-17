@@ -85,9 +85,21 @@ public final class HorseRenameScreen extends Screen {
         onClose();
     }
 
+    /**
+     * <b>The panel goes down first and {@code super} runs last.</b> {@code Screen}'s
+     * default order paints the widgets and then hands over, which is right for a
+     * screen that draws a background and wrong for this one: {@link #PANEL} is
+     * 94% opaque and covers the whole window, so drawn afterwards it buried both
+     * name boxes and both buttons. They were still there and still taking input -
+     * the caret blinked under the fill and the typing landed - but nothing about
+     * it was visible, so the window read as a dead rectangle you could neither
+     * type into nor leave. (Testers, 0.5.004. Escape did still close it.)
+     *
+     * <p>{@code HorseInfoScreen} and {@code HorseBrowserScreen} both hit this and
+     * both fixed it this way; this screen was the one that kept the old order.
+     */
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(g, mouseX, mouseY, partialTick);
         int l = left();
         int t = top();
         g.fill(l - 1, t - 1, l + W + 1, t + H + 1, BORDER);
@@ -95,6 +107,7 @@ public final class HorseRenameScreen extends Screen {
         g.text(this.font, this.title, l + 12, t + 10, 0xFFF2F2F6, false);
         g.text(this.font, Component.literal("First name"), l + 12, t + 21, LABEL, false);
         g.text(this.font, Component.literal("Last name"), l + 12, t + 53, LABEL, false);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     @Override

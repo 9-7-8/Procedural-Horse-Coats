@@ -49,14 +49,28 @@ public record BreedHerd(double bachelorChance, Band traditional, Band bachelor) 
      */
     public static final int MANY = 64;
 
+    /**
+     * <b>How many mares one stallion's band will hold before the surplus is
+     * something else.</b>
+     *
+     * <p>It was {@link #MANY}, which is to say no limit at all, and that is
+     * half of why testers saw far more mares than stallions in the wild: a
+     * traditional band took exactly one stallion however many horses turned up,
+     * so every adult past the first was a mare and the ratio fell away with the
+     * size of the pack. Four is a real harem, and past it
+     * {@code Band.stallionCount} turns the surplus stallion - the precedence
+     * that rule already documents.
+     */
+    public static final int MAX_HAREM_MARES = 4;
+
     /** What the game did before any breed could say otherwise. */
     public static final BreedHerd DEFAULT = new BreedHerd(DEFAULT_BACHELOR_CHANCE,
-            new Band(1, 1, 0, MANY),
+            new Band(1, 1, 0, MAX_HAREM_MARES),
             new Band(1, MANY, 0, 0));
 
     public BreedHerd {
         bachelorChance = Math.max(0.0, Math.min(1.0, bachelorChance));
-        traditional = traditional == null ? new Band(1, 1, 0, MANY) : traditional;
+        traditional = traditional == null ? new Band(1, 1, 0, MAX_HAREM_MARES) : traditional;
         bachelor = bachelor == null ? new Band(1, MANY, 0, 0) : bachelor;
     }
 

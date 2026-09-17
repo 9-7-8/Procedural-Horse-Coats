@@ -60,6 +60,11 @@ import net.minecraft.world.level.block.state.BlockState;
  *       are now the edge of the room <b>in every state</b> - see
  *       {@link #isDoorway}. That is a statement about what a player means by
  *       "this stall", not about collision.</li>
+ *   <li><b>It asked for two blocks of clear air over every tile.</b> So a
+ *       roofed stall, a low doorway or a beam across the back failed to
+ *       validate at all, and the stalls that did pass shoved a dismounting
+ *       rider into the ceiling. A stall is its floor and the boundary round it;
+ *       see {@link #HEADROOM}.</li>
  * </ol>
  *
  * <p>Everything else a stall really contains is still passable: a torch, a
@@ -71,8 +76,25 @@ public final class StallDetector {
     /** Above this many floor tiles the fill is treated as "did not close" and the other side is tried. */
     public static final int MAX_COLUMNS = 512;
 
-    /** Cells of headroom a horse needs: the floor cell it stands in, and the one above it. */
-    private static final int HEADROOM = 2;
+    /**
+     * <b>Cells that must be clear for a column to be inside the stall: one.</b>
+     * The floor cell itself, and nothing above it.
+     *
+     * <p>It was two, and two is what testers hit: a stall whose entrance - or
+     * whose ceiling, or a beam across it - left only one clear cell failed to
+     * validate, and the ones that did validate pushed a dismounting rider up
+     * into the block overhead and hurt them. Owner's call, 2026-09-17: a stall
+     * is <b>its floor and the fence, gate, wall or door around it</b>, and
+     * height is not part of the question. A roofed stall, a low entrance and an
+     * open-topped paddock now all measure the same way.
+     *
+     * <p>This loosens what counts as a <i>room</i>; it does not loosen where a
+     * horse may be <i>put</i>. {@link #landingSpot} still tests the horse's real
+     * bounding box with {@code noCollision}, so a room too low to hold one is
+     * still refused at the moment something tries to stand in it - which is the
+     * check that belongs on the horse rather than on the architecture.
+     */
+    private static final int HEADROOM = 1;
 
     /** How far below and above the sign the stall floor is allowed to sit. */
     private static final int FLOOR_BELOW = 3;
@@ -265,7 +287,7 @@ public final class StallDetector {
         return StallFill.NONE;
     }
 
-    /** Room to stand in this column at {@code y}: something underfoot, and clear cells above. */
+    /** Room to stand in this column at {@code y}: something underfoot, and the cell itself clear. */
     private static boolean standable(LevelReader level, int x, int y, int z) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y - 1, z);
         if (level.isOutsideBuildHeight(p)) {

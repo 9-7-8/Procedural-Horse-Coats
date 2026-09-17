@@ -80,6 +80,14 @@ public enum ProgressTask {
             "Bond 61. It walks over to you of its own accord, when it can find a way round."),
     BOND_FOLLOWS(Group.HUSBANDRY, "Bond a horse to following",
             "Bond 81. It follows you at a walk and stops a few paces off. The top of the scale."),
+    RIDE_BAREBACK(Group.HUSBANDRY, "Ride a horse bareback",
+            "Get on one of your own horses with no saddle on it. It is how you tamed it in the "
+                    + "first place, and it earns bond at exactly the rate a saddled ride does - the "
+                    + "horse does not care what you are sitting on."),
+    STEER_BAREBACK(Group.HUSBANDRY, "Steer a horse with no saddle",
+            "Ride a horse of yours that has reached bond 81 without tacking it up. Below that it "
+                    + "carries you where it likes; at the top of the scale it takes direction bare, "
+                    + "and no other horse in the world will do that for you."),
     BUILD_STALL(Group.HUSBANDRY, "Give a horse a stall",
             "Bind a stall sign to that horse, then hang it on the wall of a room that closes in. "
                     + "A sign that cannot find an enclosed room refuses to go up rather than guess."),
@@ -136,6 +144,14 @@ public enum ProgressTask {
     GELD_HORSE(Group.BASIC_BREEDING, "Geld a stallion",
             "Crouch and use a vet's kit on a stallion of your own. He sires nothing afterwards, keeps "
                     + "company the way a mare does, and earns bond a quarter faster. It cannot be undone."),
+    OWN_GELDING(Group.BASIC_BREEDING, "Own a gelding",
+            "Have one in your care, however he got that way - gelded by your own hand or bought "
+                    + "already done. Cowboys sell a good many, cheaper than an entire horse, and a "
+                    + "gelding is the ordinary answer to a paddock with too many colts in it."),
+    BOND_GELDING(Group.BASIC_BREEDING, "Bond a gelding to approaching",
+            "Get a gelding of yours to bond 61. He settles about a quarter faster than a stallion "
+                    + "would, which is the whole practical argument for gelding one you mean to ride "
+                    + "rather than breed."),
 
     // ---- 3. Genetics ---------------------------------------------------
     GENE_BOOK(Group.GENETICS, "Research a gene with a book",
