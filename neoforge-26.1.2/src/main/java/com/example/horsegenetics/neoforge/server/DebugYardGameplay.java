@@ -89,7 +89,12 @@ final class DebugYardGameplay {
         buildTicketStalls(level, gy, cx, mouthZ);
         buildCarrotPens(level, gy, cx, mouthZ);
         buildDairyAndClip(level, gy, cx, mouthZ);
-        buildEggLayerPen(level, gy, cx, mouthZ);
+        // THE EGG LAYER PEN IS GONE. Its last open question was the cap, and the
+        // overnight run of 2026-09-14/15 answered it on this very pen: the
+        // despawn timer bounds the eggs and nearby_cap never fires, written up
+        // at gene-egg-layer.html#verified. All eight alleles were confirmed
+        // before that. A pen for an answered question is the most expensive
+        // thing in this yard (see the class note on DebugTestYard).
         // ROW E EAST IS EMPTY: owner, 2026-09-14, "you can remove the 'loves X' food pen".
         buildDeepWaterPen(level, gy, cx, mouthZ);
     }
@@ -478,62 +483,6 @@ final class DebugYardGameplay {
                 horse.setBaby(true);
             }
         }
-    }
-
-    // ==================================================================
-    // ROW D EAST - the egg layer
-    // ==================================================================
-
-    /**
-     * <b>All eight laying alleles at once, because the watch counts the item
-     * and not the horse.</b>
-     *
-     * <p>Egg layer is a matched-pair locus - two of the same allele or nothing
-     * at all - and each pair drops a <i>different item</i>. That is what makes
-     * eight horses in one pen legitimate rather than a confound: a feather on
-     * the ground can only have come from the feather horse, so the pen
-     * separates itself and the {@code item join} lines in the log are the
-     * whole result.
-     *
-     * <p>It also answers the cap for free. {@code NEARBY_CAP} says a layer
-     * stops bothering when enough is already lying about, and eight layers in
-     * one pen with nobody picking anything up is precisely the condition that
-     * should trip it. A pen that fills and then <b>stops</b> is the pass; a pen
-     * that fills for ever is the cap not working.
-     */
-    private static void buildEggLayerPen(ServerLevel level, int gy, int cx, int mouthZ) {
-        // ALL EIGHT ALLELES ARE CONFIRMED. The log caught every one of them
-        // dropping its own item - leather, wool, bone, slime, ink, feather,
-        // string and egg - so the "does each allele produce its own thing"
-        // half is finished and its eight horses are gone.
-        //
-        // WHAT IS LEFT IS THE CAP, AND THE OLD PEN COULD NOT TEST IT. I said
-        // it was close to answerable and that was wrong: NEARBY_CAP counts
-        // items within six blocks OF EACH LAYING HORSE, and eight horses spread
-        // over a nineteen-wide pen each have their own neighbourhood, so a pen
-        // total of eleven is perfectly legal and proves nothing. What bounded
-        // that pen was the 6000-tick despawn timer, exactly as gap 207
-        // predicted.
-        //
-        // Four layers of the SAME allele, packed into one corner so their
-        // six-block circles overlap almost completely. Now the pen total IS the
-        // local count, the cap is reachable, and a floor that fills and then
-        // STOPS is the pass.
-        String[][] lays = {
-                {"Egg", "EGGS 1"}, {"Egg", "EGGS 2"}, {"Egg", "EGGS 3"}, {"Egg", "EGGS 4"}};
-        int x0 = cx + EAST_MIN;
-        int x1 = cx + EAST_MIN + DebugTestYard.BLOCK_W;
-        int z0 = mouthZ + ROW_D;
-        int z1 = z0 + ROW_D_D;
-        DebugTestYard.fencedPlot(level, gy, x0, x1, z0, z1);
-        DebugPenManager.placeSign(level, new BlockPos(x0 + 3, gy + 1, z0 - 1), Direction.NORTH,
-                List.of("EGG LAYER: THE CAP", "4 layers, ONE spot.", "All 8 alleles are", "confirmed already"));
-        for (int i = 0; i < lays.length; i++) {
-            DebugTestYard.stock(level, gy, x0 + 3.0 + (i % 2) * 2.0, z0 + 3.0 + (i / 2) * 2.0,
-                    "horsegenetics.egg_layer", "LAYS " + lays[i][1], 1, 0,
-                    lays[i][0] + "/" + lays[i][0]);
-        }
-        DebugWorldWatch.watch("EGG LAYER", DebugTestYard.box(x0, gy, z0, x1, gy + 1, z1), null);
     }
 
     // ==================================================================

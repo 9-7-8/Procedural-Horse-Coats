@@ -141,7 +141,22 @@ final class DebugTestYard {
     static final int ROW_C_D = 14;
     static final int ROW_D = ROW_C + ROW_C_D + AISLE;    // dairy and clip | egg layer
     static final int ROW_D_D = 12;
-    static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // crackle | food preference
+    // ROW E'S WEST HALF IS GONE - it was the display row, a pen of horses whose
+    // only question was "does this marking look right?". That question now has a
+    // better home: the horse dimension's corridor shows every unconfirmed
+    // marking on four base coats at once (CoatCheckPlan), which is the whole
+    // catalogue rather than the one or two genes somebody remembered to put in a
+    // yard row. Owner, 2026-09-17: move the visual checks out of the yard and put
+    // them first in the visual section of for-testers.html instead.
+    //
+    // THE ROW ITSELF STAYS, because the SAME west block also holds the deep-water
+    // pen (DebugYardGameplay.buildDeepWaterPen): the crackle stall stood at
+    // WEST_MIN and the pool starts six blocks along from it. The pool is a
+    // drowning check, not a looking one, so it is not going anywhere. Deleting
+    // the row outright broke that pen's z - the one kind of mistake this
+    // chained-row layout cannot absorb for you. (The east block has been empty
+    // since the food-preference pen went on 2026-09-14.)
+    static final int ROW_E = ROW_D + ROW_D_D + AISLE;   // the pool | (empty)
     static final int ROW_E_D = 7;
     private static final int ROW_F = ROW_E + ROW_E_D + AISLE;   // starburst, F8 | the three stat pens
     private static final int ROW_F_D = 12;
@@ -377,7 +392,12 @@ final class DebugTestYard {
         // and had to be put back within the hour; this time the whole cycle is
         // sun to shelter to bite to heal, and the log shows it holding shade at
         // 66/66 rather than bleeding out a journey at a time.
-        buildDisplayRow(level, gy, cx, mouthZ);
+        //
+        // ROW E'S DISPLAY STALL IS GONE - it asked only "does this look right?".
+        // The horse dimension's corridor answers that for every unconfirmed
+        // marking now, four base coats at a time, so a yard stall that did it for
+        // one gene is a worse copy of a better thing. The rest of that block is
+        // the pool, which is a drowning check and stays where it is.
 
         // The two halves of the mod this yard never had: the item, block and
         // villager layer (rows B, C, D and E-east), and the six genes that
@@ -591,7 +611,7 @@ final class DebugTestYard {
             int x1 = x0 + 5;
             fencedPlot(level, gy, x0, x1, z0, z1);
             DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of(pens[i][1], "the census prints", "the number. Is it", "off baseline?"));
+                    List.of(pens[i][1], "RIDE both horses.", "One should differ", "from the other"));
             stock(level, gy, x0 + 2.0, (z0 + z1) / 2.0, pens[i][0], pens[i][1], 2, 0, null);
             DebugWorldWatch.watchAttribute(pens[i][1], box(x0, gy, z0, x1, gy + 1, z1),
                     "speed".equals(pens[i][2]) ? Attributes.MOVEMENT_SPEED
@@ -1115,21 +1135,6 @@ final class DebugTestYard {
     static final String PALE = "horsegenetics.extension=e/e-horsegenetics.matp=Cr/N";
 
     /**
-     * One display stall: the gene, the thing to look for, and optionally a
-     * <b>second form</b> to stand beside it.
-     *
-     * <p>{@code alt} exists for rainbow drip, which ships in a plain and a
-     * coloured form and was two separate eggs in the old kit. Two eggs is the
-     * wrong shape for "do these differ": a stall holding one of each answers it
-     * by looking, and costs nothing.
-     */
-    private record Look(String key, String name, String check1, String check2, String alt) {
-        Look(String key, String name, String check1, String check2) {
-            this(key, name, check1, check2, null);
-        }
-    }
-
-    /**
      * <b>The display row: eight coat genes nobody has ever seen on a horse.</b>
      *
      * <p>These are the simplest tests in the project and they have been the
@@ -1144,52 +1149,6 @@ final class DebugTestYard {
      * land somewhere new - and one horse cannot answer a question about
      * variation. Every horse from one preset rolls its own epigenome, so two
      * side by side is the comparison.
-     *
-     * <p>The row splits around the yard's centre line, because a stall sitting
-     * in the walkway is a wall between the gate and everything behind it.
-     */
-    private static void buildDisplayRow(ServerLevel level, int gy, int cx, int mouthZ) {
-        // FOUR, not eight. Rime, candelabra, tribal claw and holo flake all
-        // came back "look fine" on 2026-09-13 and their stalls are gone - the
-        // row is audited like every other pen, and a stall for an answered
-        // question is the thing this yard exists to keep deleting.
-        // TWO. Contour cells and rainbow drip both have their verdict already -
-        // "one patch ate the whole barrel", "the shape is wrong" - and looking
-        // at them again before the drawing is changed adds nothing. They come
-        // back when there is something new to look AT.
-        //
-        // These two stay because each has forms nobody has seen. Ooze was
-        // confirmed in its PLAIN form ("looks GREAT") and has a coloured one;
-        // gilded crackle was seen in one of its three.
-        // Ooze is CONFIRMED in both its forms now - plain "looks GREAT" and
-        // coloured "looks perfect" - so its stall is gone and the row is one.
-        List<Look> row = List.of(
-                new Look("horsegenetics.gilded_crackle", "CRACKLE - BLACK",
-                        "redrawn: 3 seams", "now. Shiny enough?", "Gck"));
-
-        int z0 = mouthZ + ROW_E;
-        int z1 = z0 + ROW_E_D;
-        int[] starts = {cx + WEST_MIN};
-        for (int i = 0; i < row.size() && i < starts.length; i++) {
-            Look look = row.get(i);
-            int x0 = starts[i];
-            int x1 = x0 + 4;
-            fencedPlot(level, gy, x0, x1, z0, z1);
-            DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of(look.name(), look.check1(), look.check2(), "(pale base)"));
-            if (look.alt() == null) {
-                stock(level, gy, x0 + 1.5, (z0 + z1) / 2.0, look.key(),
-                        look.name(), 2, 0, null, PALE);
-            } else {
-                stock(level, gy, x0 + 1.0, (z0 + z1) / 2.0, look.key(),
-                        look.name() + " (plain)", 1, 0, null, PALE);
-                stock(level, gy, x0 + 3.0, (z0 + z1) / 2.0, look.key(),
-                        look.name() + " (" + look.alt() + ")", 1, 0,
-                        look.alt() + "/" + look.alt(), PALE);
-            }
-        }
-    }
-
     /**
      * <b>Saddle everything in a pen.</b> A ridden test whose first step is
      * "find a saddle" is a ridden test that gets put off, and these two are the

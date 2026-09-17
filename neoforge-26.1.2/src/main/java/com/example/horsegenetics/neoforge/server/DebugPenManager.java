@@ -1,8 +1,10 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.genetics.CoatCheckPlan;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genotype;
-import com.example.horsegenetics.common.genetics.ShowcaseGenotypes;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.NeoRng;
@@ -52,17 +54,24 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Builds and populates the horse dimension: a corridor of pens, each holding a
- * <b>random pair</b> of horses to look at. All calls happen on the server
- * thread.
+ * Builds and populates the horse dimension: a corridor with a <b>different
+ * question down each side</b>. All calls happen on the server thread.
  *
- * <h2>The pens</h2>
- * Each pen gets one {@link ShowcaseGenotypes#random showcase genotype} - an
- * ordinary founder draw with a floor under it, so a pen is never a plain bay -
- * and stocks one mare and one stallion with it. The two share the genotype and
- * <i>not</i> the epigenome, so they are two examples rather than two copies. A
- * sign on the road, to the right of the gate, names the genotype in the same
- * compact form the horse's own info panel uses.
+ * <h2>The two columns</h2>
+ * Walking in from the portal:
+ * <ul>
+ *   <li><b>On your right</b> ({@code +Z}, {@link #NORTH_PEN}) is the <b>coat
+ *       check</b> - {@link CoatCheckPlan}, one pen per allele combination of
+ *       every gene whose wiki page says nobody has confirmed it by eye yet,
+ *       worst-first. Each pen holds <b>four</b> horses carrying that one
+ *       combination on a black, a bay, a chestnut and a white base, so a
+ *       marking that only works on one of them is obvious rather than
+ *       discoverable. The signs on the road say what it is meant to look
+ *       like.</li>
+ *   <li><b>On your left</b> ({@code -Z}, {@link #SOUTH_PEN}) is the <b>breed
+ *       book</b> - every breed in the game in alphabetical order, a mare and a
+ *       stallion each, looping for as long as the right-hand column runs.</li>
+ * </ul>
  *
  * <p>This used to be a <b>gallery of the genotype catalogue</b>: one pen per
  * visually distinct genotype, in odometer order, with the corridor length
@@ -70,15 +79,16 @@ import java.util.UUID;
  * long before it stopped being computable - every gene multiplies the
  * catalogue, the white-pattern loci alone put it past two million, and at seven
  * blocks a segment that is a corridor a quarter of the way to the world border.
- * Random pens do not care how large the genotype space is, which is exactly why
- * the corridor stops being the thing that blocks adding genes
- * ({@code wiki/roadmap.html} §8). The catalogue itself stays - it is still what
- * a punnett display and the tests want, it just no longer drives the dimension.
+ * Then it was two thousand random pens, which had the opposite problem: it never
+ * ran out, and so it never told you anything was <i>left</i>. The catalogue
+ * itself stays - it is still what a punnett display and the tests want, it just
+ * no longer drives the dimension.
  *
- * <p>The corridor is {@value #PEN_COUNT} pens long: an arbitrary number, not a
- * derived one, chosen as far more than anyone walks. Pens are built lazily as
- * the player goes ({@link #ensureGeneratedAheadOfPlayer}) and the corridor
- * closes in an end wall.
+ * <p>The corridor is as long as {@link #COAT_CHECK_PENS}, which is derived from
+ * the plan and therefore <b>shrinks as the mod is tested</b>: confirm a gene,
+ * write its {@code Verified} block, re-bake, and its pens leave. Pens are built
+ * lazily as the player goes ({@link #ensureGeneratedAheadOfPlayer}) and the
+ * corridor closes in an end wall.
  *
  * <h2>Instancing</h2>
  * The dimension is a flat <b>void</b> (see {@code dimension/debug_pens.json}):
@@ -92,15 +102,16 @@ import java.util.UUID;
  * and forgets those horses' ancestry records - but <b>leaves the blocks
  * standing</b>. Leaving is therefore O(entities), not O(blocks walked).
  *
- * <p>That is still safe now the pens are random, but for a different reason
- * than it used to be. The <b>geometry</b> is fixed ({@value #PEN_COUNT} pens,
- * fixed {@link #PLOT_BASE_Y}), so a plot rebuilt on a recycled X lands exactly
- * on the old one; the <b>contents</b> are not, but every pen a player can reach
- * is rebuilt from index 0 upward as they walk, signs and horses included, so
- * nothing stale is ever visible. The only leftovers are pens past the new
- * player's frontier, which they would have to walk to - and walking there
- * rebuilds them. {@link #buildPen} clears any untamed horse it finds before
- * stocking, so a previous occupant's animals cannot outlive their sign.
+ * <p>That is safe because the <b>geometry</b> is fixed for a given build
+ * ({@link #COAT_CHECK_PENS} segments, fixed {@link #PLOT_BASE_Y}), so a plot
+ * rebuilt on a recycled X lands exactly on the old one; and the <b>contents</b>
+ * are now deterministic too - pen <i>n</i> is the same coat check and the same
+ * breed every time, which the random corridor could not promise. Every pen a
+ * player can reach is rebuilt from index 0 upward as they walk, signs and horses
+ * included, so nothing stale is ever visible. The only leftovers are pens past
+ * the new player's frontier, which they would have to walk to - and walking
+ * there rebuilds them. {@link #penShell} clears any untamed horse it finds
+ * before stocking, so a previous occupant's animals cannot outlive their sign.
  *
  * <h2>Layout of one plot</h2>
  * A straight corridor running +X from {@code originX}. The wall <b>behind the
@@ -135,27 +146,37 @@ public final class DebugPenManager {
     private static final int LOOKAHEAD_PENS = 30;
 
     /**
-     * <b>How long the corridor is.</b> An arbitrary number now, and
-     * deliberately so: the length used to be derived from the genotype
-     * catalogue, which meant every gene added made the dimension bigger, and by
-     * the white-pattern loci it wanted a corridor about seven <i>million</i>
-     * blocks long - a quarter of the way to the world border. Random pens do
-     * not have to enumerate anything, so the corridor is simply as long as is
-     * worth walking: {@value} pens, one genotype each, about seven thousand
-     * blocks end to end.
+     * <b>How long the corridor is: exactly the coat-check column.</b>
+     *
+     * <p>Derived again, but from something that stays small. It used to come
+     * from the genotype catalogue, which meant every gene made the dimension
+     * bigger and the white-pattern loci alone wanted seven <i>million</i>
+     * blocks; then it was a flat two thousand, arbitrary on purpose. Now it is
+     * {@link CoatCheckPlan#size()} - one pen per unverified combination - which
+     * is a number that <b>shrinks as the mod is tested</b>: confirm a gene by
+     * eye, write its {@code Verified} block, re-bake, and its pens leave the
+     * corridor. That is the right direction for a list of things to look at.
      */
-    static final int PEN_COUNT = 2_000;
+    static final int COAT_CHECK_PENS = CoatCheckPlan.size();
+
+    /**
+     * Pens either side, for anything that counts them. The left column loops
+     * breeds for as long as the right column runs, so the two are the same
+     * length and the corridor holds twice the coat checks - less the one right
+     * pen segment 0 gives up to the test yard's doorway.
+     */
+    static final int PEN_COUNT = COAT_CHECK_PENS * PENS_PER_SEGMENT;
 
     /**
      * <b>A rest stop every this many pen segments</b>, in place of that
      * segment's two pens: no fences, no horses, and a hay-bale portal home.
      *
-     * <p>The corridor is {@value #PEN_COUNT} pens long and a pen segment is
-     * {@value #PERIOD} blocks, so walking it end to end is some seven thousand
-     * blocks with, until now, exactly one way out - the return portal at the
-     * start. Anyone who walked in a few hundred pens to look at something had
-     * to walk all the way back. A break every twenty-five segments puts a way
-     * home within about ninety blocks from anywhere.
+     * <p>A pen segment is {@value #PERIOD} blocks and the corridor runs one
+     * segment per coat check, so walking it end to end is thousands of blocks
+     * with, until now, exactly one way out - the return portal at the start.
+     * Anyone who walked in a few hundred pens to look at something had to walk
+     * all the way back. A break every twenty-five segments puts a way home
+     * within about ninety blocks from anywhere.
      *
      * <p>Counted in <b>segments</b>, so it is twenty-five pens down each side
      * between breaks - which is what "every twenty-five" means to somebody
@@ -163,8 +184,15 @@ public final class DebugPenManager {
      */
     private static final int REST_STOP_EVERY = 25;
 
-    /** Pen segments needed to hold {@link #PEN_COUNT} pens, before any breaks. */
-    private static final int PEN_SEGMENTS = (PEN_COUNT + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT;
+    /**
+     * Pen segments needed to hold the coat-check column, before any breaks.
+     *
+     * <p><b>One per segment, not two.</b> The right-hand pen is the coat check
+     * and the left-hand one is a breed, so a segment carries exactly one entry
+     * from {@link CoatCheckPlan} - and one more segment than there are entries,
+     * because segment 0 gives its right-hand pen to the test yard's doorway.
+     */
+    private static final int PEN_SEGMENTS = COAT_CHECK_PENS + 1;
 
     /**
      * The corridor holds {@link #PEN_COUNT} pens, two per segment, <b>plus</b>
@@ -355,17 +383,20 @@ public final class DebugPenManager {
             // ground between solid walls - just an open stretch with a way home.
             buildRestStop(level, plot, x0, index);
         } else {
-            int base = penBaseFor(index);
+            // Each side of the road is its own column with its own index, and
+            // both count segments rather than pens: the nth segment you walk
+            // past holds the nth coat check and the nth breed.
+            int ordinal = penBaseFor(index) / PENS_PER_SEGMENT;
             // Segment 0's +Z pen is the test yard's doorway - DebugTestYard
             // writes a path straight through where its fence and back wall
             // would stand, so building it first and cutting it open afterwards
-            // would leave brick stumps either side of the gap. The pen NUMBERS
-            // are left alone: the yard takes a pen's place, it does not shift
-            // the ones after it.
+            // would leave brick stumps either side of the gap. So the coat-check
+            // column starts one segment in, and its index is one behind the
+            // segment's: the yard takes a pen's place, it does not skip an entry.
             if (index != 0) {
-                buildPen(level, plot, x0, NORTH_PEN, base);
+                buildCoatCheckPen(level, plot, x0, NORTH_PEN, ordinal - 1);
             }
-            buildPen(level, plot, x0, SOUTH_PEN, base + 1);
+            buildBreedPen(level, plot, x0, SOUTH_PEN, ordinal);
         }
         if (index == 0) {
             buildReturnPortal(level, plot);
@@ -570,18 +601,15 @@ public final class DebugPenManager {
     // --- one pen ---
 
     /**
-     * One pen and the pair of horses in it. The genotype is a fresh
-     * {@link ShowcaseGenotypes#random showcase draw} - a wild founder roll that
-     * is guaranteed to express at least one natural gene beyond extension and
-     * agouti, and half the time a magical one as well - and the sign by the
-     * gate names it. {@code penIndex} is only the number on that sign.
+     * <b>An empty pen, ready to stock</b> - walls, a two-wide gate, corner
+     * torches, sunk water and hay, and nothing alive in it.
+     *
+     * <p>Shared by both columns, because a coat check and a breed pen differ
+     * only in what stands inside them and what the signs say. The two used to be
+     * one method that also rolled a genotype, and splitting the shell out is
+     * what let the columns stop being the same thing twice.
      */
-    private static void buildPen(ServerLevel level, Plot plot, int x0, PenSpec pen, int penIndex) {
-        if (penIndex >= PEN_COUNT) {
-            return;
-        }
-        Genotype genotype = ShowcaseGenotypes.random(new NeoRng(level.getRandom()));
-        String geneticCode = genotype.toCode();
+    private static void penShell(ServerLevel level, Plot plot, int x0, PenSpec pen) {
         int gy = plot.baseY;
         int floorY = gy + 1;
         int xMax = x0 + PEN_LEN_X - 1;
@@ -603,8 +631,6 @@ public final class DebugPenManager {
         level.setBlockAndUpdate(new BlockPos(xMax - 1, floorY - 1, zGateInner),
                 Blocks.HAY_BLOCK.defaultBlockState());
 
-        buildPenSign(level, plot, x0, pen, penIndex, genotype);
-
         // A pen is built exactly once per plot, so anything already standing in
         // it belongs to a previous occupant of this recycled X slot - and its
         // genotype has nothing to do with the sign that was just written. Clear
@@ -615,10 +641,94 @@ public final class DebugPenManager {
             forget(level, stale);
             stale.discard();
         }
+    }
+
+    /**
+     * <b>One coat check: a combination nobody has confirmed by eye, on four base
+     * coats at once.</b>
+     *
+     * <p>The four stand in a line across the pen, in {@link CoatCheckPlan.Base}
+     * order - black, bay, chestnut, white - so they read left to right from the
+     * road like a row of swatches. Spaced along Z rather than X because the pen
+     * is twenty deep and six wide: four horses across six blocks would overlap,
+     * and {@link #placeClear} would then scatter them.
+     *
+     * <p>The white one is the <b>masking check</b> and is the reason it is worth
+     * a quarter of every pen: {@code KIT}'s dominant white removes every
+     * pigment, so anything still drawn on that horse is a gene painting over a
+     * mask it should have respected.
+     */
+    private static void buildCoatCheckPen(ServerLevel level, Plot plot, int x0, PenSpec pen, int planIndex) {
+        CoatCheckPlan.Pen check = CoatCheckPlan.at(planIndex);
+        if (check == null) {
+            return;     // past the end of the plan - the corridor outruns it by a segment or two
+        }
+        penShell(level, plot, x0, pen);
+        buildCoatCheckSigns(level, plot, x0, pen, planIndex, check);
+
+        int floorY = plot.baseY + 1;
+        int zLo = Math.min(pen.zRoad(), pen.zBack());
+        int zHi = Math.max(pen.zRoad(), pen.zBack());
+        double midX = x0 + PEN_LEN_X / 2.0;
+        // Across the pen's depth, well inside both walls.
+        double near = Math.min(zLo, zHi) + 4.5;
+        double step = (Math.abs(zHi - zLo) - 9.0) / 3.0;
+        CoatCheckPlan.Base[] bases = CoatCheckPlan.Base.values();
+        for (int i = 0; i < bases.length; i++) {
+            CoatCheckPlan.Base base = bases[i];
+            Horse horse = spawnHorse(level, floorY, midX, near + step * i,
+                    check.sex(), check.genotype(base).toCode());
+            // The sign names the combination once; the horse names which base it
+            // is, because four unlabelled horses is a puzzle rather than a test.
+            if (horse != null) {
+                horse.setCustomName(Component.literal(base.label()));
+                horse.setCustomNameVisible(true);
+            }
+        }
+    }
+
+    /**
+     * <b>One breed, as a mare and a stallion.</b> The left-hand column is every
+     * breed in the game in alphabetical order, looping for as long as the
+     * coat-check column runs - so a walk down the corridor is a walk past the
+     * whole breed book, however far the right-hand side happens to go.
+     */
+    private static void buildBreedPen(ServerLevel level, Plot plot, int x0, PenSpec pen, int breedIndex) {
+        List<Breed> all = breedColumn();
+        if (all.isEmpty()) {
+            return;
+        }
+        Breed breed = all.get(Math.floorMod(breedIndex, all.size()));
+        penShell(level, plot, x0, pen);
+        buildBreedSigns(level, plot, x0, pen, breedIndex, breed, all.size());
+
+        int floorY = plot.baseY + 1;
+        int zLo = Math.min(pen.zRoad(), pen.zBack());
+        int zHi = Math.max(pen.zRoad(), pen.zBack());
         double midX = x0 + PEN_LEN_X / 2.0;
         double midZ = (zLo + zHi) / 2.0;
-        spawnHorse(level, floorY, midX, midZ - 4, Sex.MALE, geneticCode);
-        spawnHorse(level, floorY, midX, midZ + 4, Sex.FEMALE, geneticCode);
+        spawnBreedHorse(level, floorY, midX, midZ - 4, Sex.MALE, breed);
+        spawnBreedHorse(level, floorY, midX, midZ + 4, Sex.FEMALE, breed);
+    }
+
+    /**
+     * Every breed that can stand in a pen, alphabetically.
+     *
+     * <p>{@link Breeds#all()} is in registration order and includes
+     * {@link Breeds#FERAL_MIXED}, which is not a breed but the absence of one -
+     * a pen labelled "Feral Mixed" would be an unconstrained founder draw with a
+     * breed's name over it, which is exactly what the right-hand column already
+     * does better. Sorted by display name so the column is walkable as an index.
+     */
+    private static List<Breed> breedColumn() {
+        List<Breed> out = new ArrayList<>();
+        for (Breed breed : Breeds.all()) {
+            if (breed != Breeds.FERAL_MIXED) {
+                out.add(breed);
+            }
+        }
+        out.sort(java.util.Comparator.comparing(Breed::name));
+        return out;
     }
 
     /** Drop {@code horse} from the ancestry database, if it has a record there. */
@@ -673,54 +783,149 @@ public final class DebugPenManager {
     // --- signs -----------------------------------------------------------
 
     private static final int SIGN_LINES = 4;              // vanilla sign: 4 lines per face
-    private static final int SIGN_GENE_LINES = SIGN_LINES - 1;  // line 0 is the pen number
     private static final int SIGN_LINE_CHARS = 15;        // about what a vanilla sign line fits
 
     /**
-     * The genotype label for one pen: a standing sign on the road, immediately
-     * to the <b>right of the gate</b> as you face the pen from the road. Both
-     * faces carry the same text so it reads from anywhere on the road.
+     * <b>The four sign slots on one pen's road frontage</b>, in reading order
+     * left to right as you face the pen. The gate takes the middle two blocks of
+     * a six-wide pen, so what is left is the pair either side of it.
+     *
+     * <p>One sign was enough when a pen was a genotype code. It is not enough
+     * for "what should this look like?", which is a sentence - so a pen gets as
+     * many of these as it has something to say, and they are filled in order
+     * rather than spread out, so a pen with three signs has a gap at the end
+     * rather than a hole in the middle.
      */
-    private static void buildPenSign(ServerLevel level, Plot plot, int x0, PenSpec pen,
-                                     int penIndex, Genotype genotype) {
-        int gateX = x0 + PEN_LEN_X / 2 - 1;               // gate occupies gateX and gateX + 1
-        Direction towardPen = pen.roadFacing().getOpposite();
-        Direction right = towardPen.getClockWise();       // always +/-X here
-        int signX = right.getStepX() > 0 ? gateX + 2 : gateX - 1;
+    private static int[] signSlots(int x0) {
+        return new int[] {x0, x0 + 1, x0 + PEN_LEN_X - 2, x0 + PEN_LEN_X - 1};
+    }
+
+    /** Write {@code boards} into the pen's sign slots, one board per sign, in order. */
+    private static void placeFrontage(ServerLevel level, Plot plot, int x0, PenSpec pen,
+                                      List<List<String>> boards) {
+        int[] slots = signSlots(x0);
         int signZ = pen.zRoad() + pen.roadFacing().getStepZ();  // one block out onto the road
-        placeSign(level, new BlockPos(signX, plot.baseY + 1, signZ), pen.roadFacing(),
-                genotypeSignLines(penIndex, genotype));
+        for (int i = 0; i < boards.size() && i < slots.length; i++) {
+            placeSign(level, new BlockPos(slots[i], plot.baseY + 1, signZ), pen.roadFacing(),
+                    boards.get(i));
+        }
     }
 
     /**
-     * The sign three blocks in front of the entrance portal. It used to be a
-     * tally of the genotype catalogue - how many genotypes exist, how many are
-     * distinct, how many of those the corridor was showing. None of that is
-     * true of a random corridor, so it says what <i>is</i>: how many pens there
-     * are and what is in one.
+     * <b>What this combination is, and what it should look like.</b>
+     *
+     * <p>The first board identifies it - the pen's number, the gene, and the two
+     * allele tokens - and the rest carry the outcome's own description, wrapped.
+     * That description is the gene file's, the same sentence the wiki page and
+     * the designer show, so a tester comparing the horse to the sign is
+     * comparing it to what the gene <i>claims</i> rather than to a guess.
+     */
+    private static void buildCoatCheckSigns(ServerLevel level, Plot plot, int x0, PenSpec pen,
+                                            int planIndex, CoatCheckPlan.Pen check) {
+        List<List<String>> boards = new ArrayList<>();
+        List<String> head = new ArrayList<>();
+        head.add("#" + (planIndex + 1));
+        head.addAll(wrapText(geneLabel(check.gene()), SIGN_LINE_CHARS, 2));
+        head.add(check.pair().toTokens());
+        boards.add(head);
+
+        List<String> what = new ArrayList<>();
+        what.add("SHOULD BE:");
+        what.addAll(wrapText(check.expression().name(), SIGN_LINE_CHARS, SIGN_LINES - 1));
+        boards.add(what);
+
+        // The description is a sentence or three; it gets whatever boards are left.
+        List<String> words = wrapText(check.expression().description(),
+                SIGN_LINE_CHARS, SIGN_LINES * 2);
+        for (int from = 0; from < words.size() && boards.size() < signSlots(x0).length; from += SIGN_LINES) {
+            boards.add(words.subList(from, Math.min(from + SIGN_LINES, words.size())));
+        }
+        placeFrontage(level, plot, x0, pen, boards);
+    }
+
+    /** A gene's display name, falling back to its key's last segment. */
+    private static String geneLabel(com.example.horsegenetics.common.genetics.Gene gene) {
+        String name = gene.name();
+        return name == null || name.isEmpty() ? gene.key() : name;
+    }
+
+    /**
+     * <b>Which breed this is, and where in the book.</b> Breed names run long
+     * ("Mecklenburger Warmblood"), so the name gets a whole board to wrap into
+     * and the country and position share the next.
+     */
+    private static void buildBreedSigns(ServerLevel level, Plot plot, int x0, PenSpec pen,
+                                        int breedIndex, Breed breed, int total) {
+        List<List<String>> boards = new ArrayList<>();
+        boards.add(wrapText(breed.name(), SIGN_LINE_CHARS, SIGN_LINES));
+
+        List<String> where = new ArrayList<>();
+        where.add(String.format("%d of %,d", Math.floorMod(breedIndex, total) + 1, total));
+        if (breed.country() != null && !breed.country().isEmpty()) {
+            where.addAll(wrapText(breed.country(), SIGN_LINE_CHARS, 2));
+        }
+        where.add("mare + stud");
+        boards.add(where);
+        placeFrontage(level, plot, x0, pen, boards);
+    }
+
+    /**
+     * {@code text} broken onto at most {@code maxLines} lines of at most
+     * {@code maxChars}, between whole words.
+     *
+     * <p>{@link GeneCodeDisplay#wrap} does this for a genotype and only for a
+     * genotype - it breaks between gene tokens, which is the right rule there
+     * and the wrong one for a sentence. A word longer than a line is left to
+     * overflow rather than hyphenated: an allele name running one character wide
+     * is better than one that cannot be read back.
+     */
+    private static List<String> wrapText(String text, int maxChars, int maxLines) {
+        List<String> out = new ArrayList<>();
+        if (text == null || text.isBlank()) {
+            return out;
+        }
+        StringBuilder line = new StringBuilder();
+        for (String word : text.trim().split("\\s+")) {
+            if (line.length() > 0 && line.length() + 1 + word.length() > maxChars) {
+                out.add(line.toString());
+                line.setLength(0);
+                if (out.size() == maxLines) {
+                    return out;
+                }
+            }
+            if (line.length() > 0) {
+                line.append(' ');
+            }
+            line.append(word);
+        }
+        if (line.length() > 0 && out.size() < maxLines) {
+            out.add(line.toString());
+        }
+        return out;
+    }
+
+    /**
+     * <b>The two signs three blocks in front of the entrance portal</b>, which
+     * have to do the one job no pen sign can: say that the corridor has two
+     * sides and that they are different from each other. Somebody who walks in
+     * and reads only pen labels will take the place for one long list.
+     *
+     * <p>It was a tally of the genotype catalogue once, and then a count of
+     * random pens. Now it is the shape of the place.
      */
     private static void buildEntranceSign(ServerLevel level, Plot plot) {
         placeSign(level, new BlockPos(plot.originX + 4, plot.baseY + 1, 0), Direction.WEST,
                 List.of("Horse Pens",
-                        String.format("%,d pens", PEN_COUNT),
-                        "random genome",
-                        "mare + stallion"));
-    }
-
-    /**
-     * Line 0 is the pen's 1-based number down the corridor; the rest is the
-     * genotype in the <b>same compact form the horse's info panel and paper
-     * dump use</b> ({@link GeneCodeDisplay#shortForm}) - extension + agouti,
-     * then only the genes actually carrying a variant. Wrapped over the
-     * remaining {@value #SIGN_GENE_LINES} lines between whole gene tokens;
-     * {@code wrap} deliberately overflows its last line rather than dropping a
-     * gene, which {@code ShowcaseGenotypesTest} pins over random draws.
-     */
-    private static List<String> genotypeSignLines(int penIndex, Genotype genotype) {
-        List<String> lines = new ArrayList<>();
-        lines.add("#" + (penIndex + 1));
-        lines.addAll(GeneCodeDisplay.wrap(genotype, SIGN_GENE_LINES, SIGN_LINE_CHARS));
-        return lines;
+                        "LEFT: breeds",
+                        "RIGHT: coats",
+                        "not yet checked"));
+        // A second sign beside it, because the right-hand column is the one that
+        // needs explaining and four lines cannot do both.
+        placeSign(level, new BlockPos(plot.originX + 4, plot.baseY + 1, -1), Direction.WEST,
+                List.of(String.format("%,d coats", COAT_CHECK_PENS),
+                        "4 horses each:",
+                        "black bay",
+                        "chestnut white"));
     }
 
     /**
@@ -797,6 +1002,31 @@ public final class DebugPenManager {
     static Horse spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
                                    String geneticCode) {
         return spawnHorse(level, floorY, x, z, sex, geneticCode, false);
+    }
+
+    /**
+     * <b>One horse of a named breed</b>, for the corridor's left-hand column.
+     *
+     * <p>Not {@link #spawnHorse} with a genotype string: a breed is not only a
+     * set of alleles, it is a <i>record</i> - the founder is rolled from the
+     * breed's own constrained pools and stamped with its lineage token, so the
+     * horse reads as that breed everywhere downstream (its info panel, its
+     * price, what its foals are called). Building the genotype by hand and
+     * spawning it would produce a horse that looks right and is feral on paper.
+     */
+    static Horse spawnBreedHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
+                                 Breed breed) {
+        Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.COMMAND);
+        if (horse == null) {
+            return null;
+        }
+        placeClear(level, horse, x, floorY, z);
+        // Record applied before the entity joins, so HorseGeneticsEventHandler
+        // sees a real record and doesn't roll a random genotype over the top.
+        HorseRecords.apply(horse,
+                HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), breed, sex));
+        level.addFreshEntity(horse);
+        return horse;
     }
 
     /**

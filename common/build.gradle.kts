@@ -109,6 +109,20 @@ tasks.register<JavaExec>("bakeMarkingFacts") {
     args(rootProject.layout.projectDirectory.file("wiki/breed-designer/assets/marking-facts.json").asFile.absolutePath)
 }
 
+// Which genes nobody has confirmed by eye, worst-first - read off the wiki's own
+// Verified blocks (hard rule 9) so the horse dimension's coat-check column does
+// not need a second, drifting list. See UnverifiedGeneTool.
+tasks.register<JavaExec>("bakeUnverifiedGenes") {
+    group = "horsegenetics"
+    description = "Write common/.../horsegenetics/unverified-genes.txt from the wiki's Verified blocks"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.genetics.spec.UnverifiedGeneTool")
+    args(rootProject.layout.projectDirectory.dir("wiki").asFile.absolutePath,
+            layout.projectDirectory.file(
+                    "src/main/resources/horsegenetics/unverified-genes.txt").asFile.absolutePath)
+}
+
 // Concatenate the shipped gene files into the single array the browser fetches.
 // The wiki tools cannot walk a classpath index; see GeneFileTool.
 tasks.register<JavaExec>("bakeGeneBundle") {

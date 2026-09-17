@@ -89,6 +89,29 @@ public final class HorseRecords {
     }
 
     /**
+     * A wild horse of a given <b>breed, as a mare or a stallion</b> - the horse
+     * dimension's breed column, which shows one breed per pen and needs both
+     * sexes of it standing there.
+     *
+     * <p>Neither of the two obvious paths does this on its own, which is why it
+     * exists: {@link #newFounder(Horse, Rng, Breed)} stamps the breed's lineage
+     * token but lets the sex locus fall where the roll puts it, and
+     * {@link #newFounder(Horse, Rng, Genome)} takes a genome whose sex you chose
+     * but stamps <b>no breed at all</b>, so the horse reads as feral. A pen
+     * labelled with a breed name has to be that breed on the record, or the
+     * label is the only place the breed exists.
+     */
+    public static HorseRecord newFounder(Horse horse, Rng rng, Breed breed, Sex sex) {
+        Genome genome = BreedFounder.roll(breed, rng, sex);
+        BreedFounderLog.founder(breed, genome.genotype(), "pen");
+        NameParts name = NAMES.generateParts(rng);
+        String token = breed == Breeds.FERAL_MIXED
+                ? BreedLineage.FERAL.toToken()
+                : BreedLineage.pure(breed.id()).toToken();
+        return HorseRecord.founder(horse.getUUID(), name.first(), name.last(), genome, token);
+    }
+
+    /**
      * Founder record with a forced sex <b>and</b> a forced genotype - the horse
      * dimension stocks each pen with a rolled showcase genotype, and the custom
      * spawn egg with the one the player built, so neither may be re-rolled. The sex is written <i>into</i> the genotype
