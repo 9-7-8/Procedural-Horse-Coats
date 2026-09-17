@@ -78,6 +78,49 @@
     </p>
 </div>
 
+<h2 id="over-payoff-0917">&sect;0-EY &mdash; Eleven genes stop faking it with subtraction (2026-09-17, NOT played)</h2>
+
+<p>
+    The eleven genes that were hand-written <em>disjoint</em> because the format could not say
+    &ldquo;paint over&rdquo; now say it: dorsal wing, contour, starburst, corolla, agate eye,
+    taper flame, barred wing, uraniid, trillium, foxglove and ooze drip
+    (<a href="known-gaps.html#gap-169">gap 169</a>). Each dropped the inverted copies of the
+    shapes its later layers paint, which is why a 9&nbsp;KB SVG or a second <code>SPOTS</code>
+    field comes off several layers apiece.
+</p>
+
+<div class="note good">
+    <span class="label">Most of this is already settled by measurement &mdash; do not spend eyes on it</span>
+    <p>
+        Rendered per pixel against the pre-change icons, <strong>corolla, taper flame, barred
+        wing, uraniid, trillium and ooze drip move by at most one channel bit</strong> &mdash;
+        the same picture, drawn with fewer masks. Foxglove's coloured form holds its mean
+        saturation to three decimals. Starburst and agate eye move under 1.5% of their pixels
+        at the soft edges. <strong>None of those seven is worth looking for a difference in</strong>;
+        look at them only as ordinary horses, if at all.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Contour is the one that genuinely changed, and it is the thing to look at.</strong>
+        Its seven bands paint at <code>strength</code> 93, so stacking them <em>compounds</em>
+        &mdash; each band now keeps a little of the one beneath instead of measuring from the
+        coat the gene started on &mdash; and about <strong>38% of the horse moves</strong>. It
+        reads greener. That was taken deliberately over reverting it, on the argument that
+        stacking is what the layers always meant; <strong>the open question is whether the
+        hypsometric ramp still reads as a contour map on a real horse</strong>, or whether the
+        six band colours want re-picking now that they compound. <code>Ct/Ct</code> and
+        <code>Cx/Cx</code> both.</li>
+    <li><strong>Dorsal wing's margin band.</strong> The margin is the one layer in the batch that
+        <em>kept</em> its subtraction, because the ground it must not cover is painted before it
+        rather than after. If the butterfly comes out flooded teal with no dark ground, that is
+        exactly what a wrong call there looks like &mdash; it measured clean, but it is the
+        failure worth recognising.</li>
+    <li><strong>Contour's drawn line, for the same reason.</strong> It keeps its
+        <code>0.56</code> cut so it cannot paint over the summit bands above it. The line should
+        still be a line at one level, not a wash across the high ground.</li>
+</ul>
+
 <h2 id="over-flag-0917">&sect;0-EX &mdash; A layer can paint over the ones above it (2026-09-17, NOT played)</h2>
 
 <p>
@@ -117,11 +160,11 @@
         on 124 checks. It is deliberately crude: dropped into <code>phc/genes/</code> it
         will read as a flat orange band over everything else on the barrel. That is
         correct, not a bug.</li>
-    <li><strong>No real gene uses it yet.</strong> Dorsal wing, contour, starburst and the
-        eight nested genes of the 2026-09-10 intake are the candidates
-        (<a href="known-gaps.html#gap-169">gap 169</a>). Each is a look-at-the-horse change
-        rather than a mechanical one, so they were deliberately left out of the commit that
-        built the flag.</li>
+    <li><strong>All eleven candidates now use it.</strong> Dorsal wing, contour, starburst and
+        the eight nested genes of the 2026-09-10 intake were converted the same day
+        (<a href="known-gaps.html#gap-169">gap 169</a>), so the flag is exercised by real genes
+        rather than by <code>prismatic</code> alone. What is worth looking at, and what is
+        already settled by measurement, is <a href="#over-payoff-0917">&sect;0-EY</a>.</li>
 </ul>
 
 <h2 id="tuning-moved-0917">&sect;0-EW &mdash; Tuning and balance questions, moved off the roadmap (2026-09-17, NOT played)</h2>

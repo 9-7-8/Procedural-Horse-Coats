@@ -1685,18 +1685,22 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
     <span class="label">It is opt-in, and that is the point</span>
     <p>
         A layer with no <code>over</code> behaves exactly as every layer did before the
-        flag existed, so <strong>no shipped gene moves</strong> and neither golden file
-        changes. That is what made it worth adding rather than changing the default: the
+        flag existed, so <strong>adding it moved no shipped gene</strong> and neither golden
+        file changed. That is what made it worth adding rather than changing the default: the
         summing behaviour is load-bearing in the genes whose colours were tuned around
-        it.
+        it. Eleven genes have since been converted to the flag deliberately, which did move the
+        bake golden &mdash; <a href="known-gaps.html#gap-169">gap 169</a>.
     </p>
     <p>
-        The older way still works, and is what every shipped gene does &mdash; write the
+        The older way still works &mdash; write the
         marking <strong>disjoint</strong>, each layer multiplying in the inverted shape of
         every layer painted after it (a disc minus the ring minus the core; a ring minus
         the core). For hard-edged masks that draws the same picture.
         <code>over</code> is the cheaper way to say it, and the one that does not quietly
-        go wrong when somebody edits the shapes later.
+        go wrong when somebody edits the shapes later, so <strong>prefer it in a new
+        gene</strong>. Keep a subtraction only where a layer must not cover something painted
+        <em>before</em> it, which <code>over</code> cannot express &mdash; contour's drawn line
+        and dorsal wing's margin band are the two in the corpus.
     </p>
 </div>
 
@@ -4628,10 +4632,13 @@ RULES THAT ARE NOT OPTIONAL
    picture a nested marking is trying to draw. Use it for eyes, bands, a
    flame's tones, bars on a wing. Magical phase only, and refused on a FLAT
    layer, which replaces the texel anyway.
-   The other way still works and is what every shipped gene does: write the
-   marking DISJOINT, each layer multiplying in the INVERTED shape of every
-   layer painted after it (a disc minus the ring minus the core; a ring minus
-   the core). For hard-edged masks that draws exactly the same picture.
+   The other way still works: write the marking DISJOINT, each layer
+   multiplying in the INVERTED shape of every layer painted after it (a disc
+   minus the ring minus the core; a ring minus the core). For hard-edged masks
+   that draws exactly the same picture. PREFER "over" in a new gene - it is
+   cheaper and it does not quietly go wrong when somebody edits the shapes
+   later. Keep a subtraction only where a layer must not cover something
+   painted BEFORE it, which "over" cannot say.
 9. The NECK, HEAD, MUZZLE, MANE, EARS and TAIL are PITCHED, so their bounding
    box is not their box and a "part"-space band across one is a horizontal
    slice - a COLLAR wrapping crest and throat alike. Use space "local", which
