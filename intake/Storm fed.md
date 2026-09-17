@@ -9,3 +9,5 @@ Rain, Snow
 Lightning: gets a huge burst of energy after being struck by lightining (also, does not take damage from lightning)
 Snow: slowly gains energy while standing on snow
 Water, Lava: see snow
+
+To note again: this gene does not DO anything with the energy. It only controls storing up the magical energy, and other genes will need to be made to consume it. 
