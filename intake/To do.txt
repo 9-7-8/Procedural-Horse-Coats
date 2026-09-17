@@ -7,4 +7,6 @@ We need another gene that is the opposite of verdant/dryad: we need a gene which
 
 may need to overhaul the aggression genes. 
 
+Add a roll to determine if twins are identical or fraternal.
+
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
