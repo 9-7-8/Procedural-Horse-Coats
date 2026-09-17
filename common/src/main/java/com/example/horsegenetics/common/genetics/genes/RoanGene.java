@@ -53,12 +53,17 @@ import java.util.List;
  *   <li><b>Dark lower legs ending in a point</b> - the <b>inverted V</b>, roan's
  *       most characteristic edge. See {@link #chevronWeight}.</li>
  *   <li><b>A solid mane and tail.</b></li>
+ *   <li><b>Corn spots</b> - small islands of solid base colour left <i>inside</i> the
+ *       roan field, as though the white hairs never reached them. A minority trait:
+ *       most roans have none, and the ones that do inherit the tendency. See
+ *       {@link #CORN_CHANCE}.</li>
  * </ul>
  *
- * <p>Three knobs off the expressing {@code Rn} copy, in this order:
+ * <p>Five knobs off the expressing {@code Rn} copy, in this order:
  * {@code nextLong()} (the field's seed), {@code nextFloat()} for how dense the
- * white is, and {@code nextFloat()} for the forehead. A foal that inherits the
- * copy inherits the exact roaning.
+ * white is, {@code nextFloat()} for the forehead, then {@code nextLong()} for
+ * the corn-spot lattice and {@code nextFloat()} for how spotty this copy is. A
+ * foal that inherits the copy inherits the exact roaning, corn spots included.
  */
 public final class RoanGene implements Gene {
 
@@ -113,6 +118,38 @@ public final class RoanGene implements Gene {
     private static final double FOREHEAD_CHANCE = 0.35;
     private static final double FOREHEAD_MAX = 0.30;
 
+    // --- corn spots ----------------------------------------------------
+
+    /**
+     * How many roans carry corn spots at all. <b>A minority trait</b>: the roll
+     * is a propensity on the copy, tested the way {@link #FOREHEAD_CHANCE} is,
+     * so most roans have none and a spotty horse passes the tendency on. A locus
+     * where every roan was spotted would be a different and much rarer horse.
+     */
+    public static final double CORN_CHANCE = 0.32;
+
+    /** How much of the gate field becomes spots on the spottiest horse. */
+    private static final double CORN_MAX = 0.34;
+
+    /**
+     * Body-space frequency of the spot lattice. Far lower than {@link #FREQ}:
+     * the roan mix is about one cell per texel, and a corn spot is an island
+     * several texels across, so the two fields must not be near each other or
+     * the spots would read as more of the same dither.
+     */
+    private static final double CORN_FREQ = 0.35;
+
+    /** A second, lower field deciding <i>which</i> cells become spots. */
+    private static final double CORN_GATE_FREQ = 0.22;
+
+    /**
+     * How far from a cell centre a spot reaches, in {@code cellDistance} units,
+     * and the softness of its edge. A corn spot has a definite edge - it is base
+     * coat, not a thinning of the roaning - so the edge is narrow.
+     */
+    private static final double CORN_RADIUS = 0.34;
+    private static final double CORN_SOFT = 0.08;
+
     public final Allele Rn = new Allele(KEY, 0, "Rn", "Roan (Rn)");
     public final Allele rn = new Allele(KEY, 1, "rn", "Wild-type (rn)");
     private final List<Allele> alleles = List.of(Rn, rn);
@@ -159,8 +196,18 @@ public final class RoanGene implements Gene {
         return EpiSchema.of(
                 EpiValue.seed("seed"),
                 EpiValue.uniform("density", 0, DENSITY_RANGE),
-                EpiValue.uniform("forehead", 0, 1));
+                EpiValue.uniform("forehead", 0, 1),
+                EpiValue.seed(CORN_SEED),
+                EpiValue.uniform(CORN, 0, 1));
     }
+
+    /**
+     * Corn-spot lattice and propensity. Named constants rather than string
+     * literals so a test can reach them - a test that hardcodes an epigenetic
+     * name goes quietly green when the name changes.
+     */
+    public static final String CORN_SEED = "cornSeed";
+    public static final String CORN = "corn";
 
     private static PigmentField paintRoan(CoatBuildContext ctx, PigmentView coat) {
         EpiValues epi = ctx.epigeneticsFor(KEY);
@@ -169,6 +216,13 @@ public final class RoanGene implements Gene {
         double foreheadRoll = epi.get("forehead");
         double forehead = foreheadRoll < FOREHEAD_CHANCE
                 ? FOREHEAD_MAX * (1.0 - foreheadRoll / FOREHEAD_CHANCE) : 0.0;
+
+        // Corn spots, on the same propensity idiom as the forehead: zero on most
+        // roans, and inherited with the copy on the ones that have them.
+        long cornSeed = epi.seed(CORN_SEED);
+        double cornRoll = epi.get(CORN);
+        double corn = cornRoll < CORN_CHANCE
+                ? CORN_MAX * (1.0 - cornRoll / CORN_CHANCE) : 0.0;
 
         Skin skin = ctx.skin();
         Bounds neck = HorseSkinGeometry.bounds(skin, Part.NECK);
@@ -192,6 +246,27 @@ public final class RoanGene implements Gene {
             double w = PatchNoise.smoothstep(threshold - EDGE, threshold + EDGE, n);
             if (w <= 0) {
                 return;
+            }
+            // A corn spot is base coat the white hairs never reached, so it
+            // *suppresses* the whitening rather than painting anything of its
+            // own. Two fields: a low-frequency lattice for where the islands sit,
+            // and a lower one still deciding which of those cells is a spot at
+            // all - without the gate every cell centre becomes one and the horse
+            // reads as polka-dotted rather than corn-spotted.
+            if (corn > 0) {
+                double gate = BodyNoise.value(cornSeed ^ 0x9E37L,
+                        point.x() * CORN_GATE_FREQ, point.y() * CORN_GATE_FREQ,
+                        point.z() * CORN_GATE_FREQ);
+                if (gate > 1.0 - corn) {
+                    double cd = BodyNoise.cellDistance(cornSeed,
+                            point.x() * CORN_FREQ, point.y() * CORN_FREQ, point.z() * CORN_FREQ);
+                    double spot = 1.0 - PatchNoise.smoothstep(
+                            CORN_RADIUS - CORN_SOFT, CORN_RADIUS + CORN_SOFT, cd);
+                    w *= 1.0 - spot;
+                    if (w <= 0) {
+                        return;
+                    }
+                }
             }
             f.whiten(px, py, (float) w);
         });

@@ -27,6 +27,54 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-corn-spots">2026-09-17, after that &mdash; Roan grows corn spots</h2>
+
+<p>
+    Back to the natural queue. <a href="gene-roan.html">Roan</a>&rsquo;s per-texel dither had
+    no notion of <strong>corn spots</strong> &mdash; the islands of solid base colour that sit
+    inside a roan field &mdash; and the roadmap wanted a second low-frequency mask for them.
+</p>
+
+<p>
+    The insight that made it small: roan already computes a whitening weight
+    <code>w</code> per texel and calls <code>PigmentField.whiten</code>. A corn spot is
+    therefore a <strong>suppression of <code>w</code></strong>, not a new thing painted over
+    the top &mdash; one insertion at one point rather than surgery on the existing dither
+    maths, and it falls out correctly that a spot is base coat at full strength with a hard
+    edge. Two fields decide them: a low-frequency <code>cellDistance</code> lattice for where
+    the islands sit, and a lower one still gating <em>which</em> cells become spots at all.
+    Without that gate every cell centre becomes one and the horse reads as polka-dotted.
+</p>
+
+<p>
+    Seed and propensity live on the <code>Rn</code> copy, following the precedent the owner
+    set for <a href="gene-silver.html">silver&rsquo;s dapples</a> earlier in the day, and
+    reusing roan&rsquo;s own existing idiom &mdash; the forehead-white roll, a propensity
+    tested against a chance so that most horses get none. Roan went from three knobs off the
+    expressing copy to five, and the class javadoc says so.
+</p>
+
+<h3>The test is statistical, and says so</h3>
+
+<p>
+    <code>RoanCornSpotTest</code> could not do what
+    <code>SilverDappleTest</code> does, and the reason is worth recording. A corn spot cannot
+    be isolated on one horse: the painter reads its epigenetics from the build context, so
+    there is no way to paint the <em>same</em> roan with spots off and on, and
+    <code>density</code> varies enough between horses to move total whiteness far more than
+    the spots do. So the whiteness assertion compares <strong>means over 240 horses</strong>,
+    where the density spread averages out and a systematic suppression does not. The crisp
+    assertion is the other one &mdash; that corn spots are a <em>minority</em> trait &mdash;
+    because that is the claim the javadoc makes and the one that would be silently wrong if
+    the propensity roll were ignored.
+</p>
+
+<p>
+    Both passed first run, and the goldens moved by <strong>8 of 1092 rows, all of them roan
+    horses</strong> &mdash; the same tightly-scoped result as the dapples, and the same method:
+    decompose the diff by column before copying anything back.
+</p>
+
 <h2 id="d2026-09-17-gap-263">2026-09-17, last &mdash; The one red test in the project, closed</h2>
 
 <p>
