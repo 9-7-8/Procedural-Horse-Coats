@@ -78,6 +78,73 @@
     </p>
 </div>
 
+<h2 id="tester-fixes-0917">&sect;0-FB &mdash; Five fixes from the testers' first day on 0.5.004 (2026-09-17, NOT played)</h2>
+
+<p>
+    All five were reported from outside, and all five are fixed against a report rather
+    than against a play session here &mdash; so every one of them wants confirming by the
+    person who found it. The first item is the one that matters most, because until it is
+    true <a href="#corridor-two-columns-0917">&sect;0-EV</a> cannot be started at all:
+    every check in that entry begins &ldquo;walk in&rdquo;, and in 0.5.004 walking in
+    crashed the game.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+
+<ul>
+    <li><strong>The horse dimension can be entered.</strong> Light a hay portal, stand in
+        it, and go through. <strong>Pass:</strong> you arrive standing on the road with the
+        corridor in front of you, and no crash report is written. This is the whole of the
+        0.5.004 blocker: <code>CoatCheckPlan.Pen.sex()</code> threw on the first pen built,
+        which happened during the teleport. A unit test now walks all 438 pens, so a
+        failure here would mean something other than the fault that was fixed.</li>
+    <li><strong>The four new checklist entries can be ticked.</strong> Press <kbd>H</kbd>
+        and find them: <em>Ride a horse bareback</em> and <em>Steer a horse with no
+        saddle</em> under Husbandry &rarr; Bonding, <em>Own a gelding</em> and <em>Bond a
+        gelding to approaching</em> under Basic breeding &rarr; Gelding.
+        <strong>Pass:</strong> riding one of your own horses with no saddle ticks the
+        first; a gelding you own ticks the third within a scan or two of standing near it;
+        the other two want bond 81 and bond 61 respectively. See
+        <a href="progression.html">progression</a>.</li>
+</ul>
+
+<h3>In the game, with your hands</h3>
+
+<ul>
+    <li><strong>The rename window can be used.</strong> Right-click a tamed horse with a
+        name tag (tester guide, <em><a href="for-testers.html#t-name-tag">Renaming a horse
+        with a name tag</a></em>). <strong>Pass:</strong> both name boxes, the Rename
+        button and the Cancel button are all <em>visible</em>; typing shows letters; Cancel
+        and <kbd>Esc</kbd> both close it and spend no tag. It was drawing its panel over
+        its own widgets, so the whole window read as dead.</li>
+    <li><strong>A stall has no height any more.</strong> (tester guide,
+        <em><a href="for-testers.html#t-stall">Stall signs and tickets</a></em>;
+        <a href="item-stall-signs.html">stall signs</a>.) Bind a sign to a
+        <strong>roofed</strong> stall, one whose doorway is a single block tall, and one
+        walled with nothing but a ring of fences and a gate. <strong>Pass:</strong> all
+        three bind, and <strong>riding into the roofed one and getting off does not hurt
+        you</strong> &mdash; that damage is the half of the report that the height rule was
+        causing rather than merely refusing.</li>
+    <li><strong>Wild horses come in both sexes</strong> (tester guide,
+        <em><a href="for-testers.html#t-wild-sexes">Wild horses come in both sexes</a></em>;
+        <a href="breeds.html#bands">bands</a>). Counted across groups, not within one band
+        &mdash; a single band is <em>meant</em> to be one stallion and a few mares, or else
+        all male. <strong>Pass:</strong> comparable totals overall, no traditional band
+        above four mares, and an area played in for a long time no worse than fresh land.
+        The old rule only went wrong for horses <em>joining</em> a band, so a freshly
+        founded pack always looked fine &mdash; which is why this wants a long-played
+        world.</li>
+</ul>
+
+<h3>Visual, and therefore last</h3>
+
+<ul>
+    <li><strong>Everything in <a href="#corridor-two-columns-0917">&sect;0-EV</a>.</strong>
+        It is not a new entry and nothing in it changed; it simply became performable. The
+        corridor, the four base coats to a pen, the white masking horse and the breed
+        column have still never been seen by anybody.</li>
+</ul>
+
 <h2 id="glow-preview-0917">&sect;0-FA &mdash; A glow can be seen without the game: lights-out in the browser (2026-09-17, NOT played)</h2>
 
 <p>
@@ -1318,6 +1385,12 @@
         horses with no herd. Ride into plains and read <code>latest.log</code>: every member of a pack should share one
         <code>[Breeds]</code> founder line's breed, and the inspect panel should show the same herd for all of them.
         <strong>Pass:</strong> packs of 2&ndash;6, one herd each, one stallion in a family band.</li>
+    <li><strong>A harem fills to four mares and then stops, and the wild is not all mares.</strong> Joining an
+        existing traditional band made a horse a mare unconditionally until 2026-09-17, so this needs a count in a
+        world rather than a look at one band. Count grown horses across several separate groups in fresh land, then
+        do it again where you have been playing a long time. <strong>Pass:</strong> both sexes in roughly comparable
+        numbers once the groups are added together, no traditional band holding more than four mares, and the
+        long-played area no worse than the fresh one.</li>
     <li><strong>A bachelor band is still all male, at any size.</strong> The clamp that guarantees it is unit-tested,
         but not in a world. <strong>Pass:</strong> no mare ever appears in a band the log founded as
         <code>BACHELOR</code>.</li>
@@ -1791,7 +1864,7 @@
     <li><strong>H &rarr; Breeds &rarr; Open breeds folder</strong> opens the OS file browser on <code>phc/breeds/</code>. <code>Util.getPlatform().openPath</code> is unverified on Windows.</li>
     <li><strong>The research shelf copies with its screen closed</strong> (tester guide, <em>Copying genes on the Equine Research Shelf</em>; <a href="item-research-shelf.html">research shelf</a>). Pick a gene, add books, close it and walk away: copies keep arriving, one per book. It opens on the last tab used, and the title and <em>Inventory</em> labels sit inside the window.</li>
     <li><strong>Breaking a shelf drops everything</strong> (tester guide, <em>The Equine Research Shelf keeps its papers</em>): every paper, book and finished copy.</li>
-    <li><strong>Awkward stalls</strong> (tester guide, <em>Stall signs and tickets</em>; <a href="item-stall-signs.html">stall signs</a>). An L-shape and a stall narrower than the horse still land it in the middle. A stall full of hay refuses the ticket without using it up, and the size message reports the real height.</li>
+    <li><strong>Awkward stalls</strong> (tester guide, <em>Stall signs and tickets</em>; <a href="item-stall-signs.html">stall signs</a>). An L-shape and a stall narrower than the horse still land it in the middle. A stall full of hay refuses the ticket without using it up, and the size message reports the room it measured.</li>
     <li><strong>A stallion milked with a bottle rears, kicks you and says so; a foal says it has nothing to give</strong> (tester guide, <em>Milking rules</em>; <a href="gene-milk.html">milk</a>).</li>
     <li><strong>Taming a breed horse by hand, out of creative</strong>, fills its Breeds row and ticks <em>tame a mare / stallion</em> (<a href="progression.html">progression</a>).</li>
     <li><strong>Chat stays quiet</strong> (tester guide, <em>A normal game is quiet in chat</em>). <code>[coat]</code> lines go to the log only, except for a coat that came out bare white.</li>
@@ -1805,7 +1878,7 @@
     <li><strong>Feel: <a href="gene-intimidating.html">intimidating</a>'s cost.</strong> It empties a farm on purpose. Is that a memorable trade-off or just annoying?</li>
     <li><strong>Feel: the sound genes in a herd.</strong> <a href="gene-singer.html">Singer</a>'s and <a href="gene-meowing.html">meowing</a>'s rates are verified; the question is whether several in one paddock are bearable, especially dominant <a href="gene-base-alarm.html">base alarm</a> with a whole paddock noticing one skeleton.</li>
     <li><strong>Feel: <a href="gene-eyesight.html">eyesight</a>'s torch trade-off.</strong> A caveborn horse gets slower the more you light a tunnel. Does that read as a trade-off or as a bug?</li>
-    <li><strong>The stall detector's guesses</strong> (<a href="known-gaps.html#gap-153">gap 153</a>): bind a stall floored with slabs or carpet (one room), one with a one-block step (one room), one with a two-block drop (not one room), and one whose gate stands open (still stops at the gate).</li>
+    <li><strong>The stall detector's guesses</strong> (<a href="known-gaps.html#gap-153">gap 153</a>): bind a stall floored with slabs or carpet (one room), one with a one-block step (one room), one with a two-block drop (not one room), and one whose gate stands open (still stops at the gate). Since 2026-09-17 also: a <strong>roofed</strong> stall, one whose doorway is only one block tall, and one walled with nothing but a ring of fences and a gate &mdash; all three must bind, and getting off a horse inside the roofed one must not hurt you.</li>
     <li><strong>Tickets in the awkward places.</strong> Spend a ticket on a horse whose bound stall is in an unloaded chunk, and an interdimensional ticket used from the horse dimension. Pass: the horse lands in the stall, or the ticket refuses, says why and is not used up.</li>
     <li><strong>Crouch-feed taming in a wild herd</strong> (<a href="known-gaps.html#gap-155">gap 155</a>; hand taming itself is <a href="horse-care.html#verified-taming">verified</a>). Walk past a wild herd crouched with food: horses should not peel off from a distance too easily. A carnivore should ignore a carrot, and a dhampir should not come at all.</li>
     <li><strong>Hearts stop at the daily cap</strong> (<a href="known-gaps.html#gap-155">gap 155</a>). Hand-feed a tamed horse past <code>HorseCareAttachment.DAILY_CAP</code> bond in a day: the hearts must stop, which is the only sign the cap exists.</li>
@@ -1887,7 +1960,7 @@
     <li><strong>Cross stats.</strong> A Thoroughbred &times; Arabian foal is still fast; a Thoroughbred &times; Friesian foal regresses toward ordinary speed. The labels themselves are <a href="breeds.html#verified-cross-labels">verified</a>.</li>
     <li><strong>Seed-jar breed labels.</strong> A jar foal from a pure mare and a pure sire of another breed reads as their cross, and one from a feral donor reads plain Mixed.</li>
     <li><strong>Designer to egg.</strong> Export a horse from <a href="horse-designer/">the horse designer</a> and <b>Paste</b> it into the custom egg: the same horse, name and coat.</li>
-    <li><strong>Name-tag rename window.</strong> Right-click a tamed horse with any name tag: the window opens prefilled and you are not put on the horse. Confirm spends exactly one tag and the information screen shows the new name; Cancel or <kbd>Esc</kbd> spends nothing; walking out of range before confirming is refused; vanilla's floating name is never set.</li>
+    <li><strong>Name-tag rename window.</strong> Right-click a tamed horse with any name tag: the window opens prefilled and you are not put on the horse. Confirm spends exactly one tag and the information screen shows the new name; Cancel or <kbd>Esc</kbd> spends nothing; walking out of range before confirming is refused; vanilla's floating name is never set. The window was unusable in 0.5.004 &mdash; it painted its panel over its own boxes and buttons &mdash; so check first that you can <em>see</em> both name boxes, both buttons and the letters you type.</li>
     <li><strong>Cutie-mark performance.</strong> A paddock of <code>cutie_mark=Cutmrk/Cutmrk</code> horses should not stutter (<code>CutieMarkLayer</code> resolves up to six item models per horse per frame). See <a href="gene-cutie-mark.html">cutie mark</a>.</li>
     <li><strong>Bond tiers change behaviour.</strong> At 31-60 a dismounted horse turns to face you within 10 blocks, at 61-80 it walks to you, at 81-100 it follows round fences and stops about three blocks off; none of it while leashed or ridden. And two horses kept within 10 blocks for ten minutes show <code>&bull; in a herd</code> on the information screen, which clears ten minutes after they are parted. <a href="horse-care.html">Horse care</a>.</li>
     <li><strong>Save and reload keeps the horse.</strong> Before quitting to title, note a strongly marked horse's markings and one epigenetic value, a stallion, a big horse's size, speed and jump, an injured horse's health, and a bonded pair's bond and herd. After reloading, all of it matches. Any repaint means the quantised epigenome did not round-trip, and an injured horse must not come back healed.</li>

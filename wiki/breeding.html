@@ -851,7 +851,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <code>ancestors (3 gen)</code>.
 </p>
 
-<h3>D. Name-tag rename</h3>
+<h3 id="rename">D. Name-tag rename</h3>
 
 <p>
     Right-clicking a horse with a real record with <strong>any</strong> name tag
@@ -864,6 +864,18 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     name and consumes <strong>one</strong> tag (unless creative). Cancelling
     consumes nothing. The interaction is cancelled on both sides so vanilla does
     not also set the entity&rsquo;s custom name.
+</p>
+
+<p>
+    <strong>It paints its panel first and calls <code>super</code> last</strong>, which is
+    not decoration. <code>Screen</code>&rsquo;s default order draws the widgets and then
+    hands over, and this window fills a 94%-opaque panel across its whole area &mdash; so
+    in the default order both name boxes and both buttons were drawn and then painted
+    over. They were still focused and still taking keystrokes; you simply could not see
+    them, the caret, or the letters you typed, which is why testers reported a window
+    they could neither type into nor leave (0.5.004; <kbd>Esc</kbd> did still close it).
+    <code>HorseInfoScreen</code> and <code>HorseBrowserScreen</code> had already hit this
+    and already inverted the order &mdash; this screen was the one left on the old one.
 </p>
 
 <h3>E. Barn name</h3>

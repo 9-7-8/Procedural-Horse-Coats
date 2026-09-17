@@ -140,9 +140,12 @@ public static Sex sexOf(String code) { ... }</code></pre>
 <p>
     The one place sex is still <em>chosen</em> rather than inherited is a founder:
     <code>Genotype.withSex(Sex)</code> rewrites the locus and nothing else. The horse
-    dimension uses it to stock each pen with one mare and one stallion of the same
-    colour, and the custom spawn egg uses it for the Mare / Stallion button. A foal never
-    goes through it.
+    dimension uses it to stock each breed pen with a mare and a stallion, and to give a
+    coat-check pen the one sex its combination can occur in; the custom spawn egg uses it
+    for the Mare / Stallion button; and <code>HerdManager</code> uses it for every wild
+    founder, where the sex is decided by the <a href="breeds.html#bands">band</a> the
+    horse is founding or joining rather than by the founder table. A foal never goes
+    through it.
 </p>
 
 <h3 id="verified">Verified</h3>

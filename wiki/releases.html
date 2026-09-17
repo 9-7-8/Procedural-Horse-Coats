@@ -58,6 +58,66 @@
     </p>
 </div>
 
+<h2 id="v0-5-005">0.5.005</h2>
+
+<p class="lede">
+    <strong>Five things the testers hit in 0.5.004, and the colour work that was already
+    sitting on main behind them.</strong> The horse dimension crashed on the way in, the
+    rename window could not be typed into or left, and a stall had a height requirement
+    nobody had asked for.
+</p>
+
+<h3>The five reports</h3>
+
+<ul>
+    <li><strong>The horse dimension crashed the moment you stepped through.</strong> The
+        new coat-check corridor asks every pen whether its combination belongs to a mare
+        or a stallion, and that question went to a method which <em>throws</em> on an
+        ordinary autosomal gene rather than answering &ldquo;no&rdquo;. Every pen in the
+        plan is autosomal, so the first one threw while you were still being teleported
+        in. All 438 pens now build, and a test walks every one of them so this cannot
+        come back quietly.</li>
+    <li><strong>The rename window works.</strong> It was drawing its background panel
+        <em>over</em> its own two name boxes and both buttons &mdash; they were still
+        there and still taking your keystrokes, just painted over at 94% opacity, which
+        is why it looked like a dead rectangle you could neither type into nor leave.</li>
+    <li><strong>A stall is its floor and the fence, gate, wall or door around it</strong>
+        &mdash; it no longer has a height at all. It used to demand two clear blocks above
+        every tile, which refused roofed stalls and low doorways outright and shoved a
+        dismounting rider up into the ceiling of the ones it did accept. Where a horse may
+        actually be <em>put</em> is unchanged: that is still checked against the horse&rsquo;s
+        real size when something tries to stand there.</li>
+    <li><strong>Wild horses stop being mostly mares.</strong> Every adult joining a band
+        that already existed was made female, with no limit and no re-check, so a band
+        near a spawn collected mares for ever and never gained a second stallion. A harem
+        now fills to four and the surplus goes elsewhere.</li>
+    <li><strong>Four new checklist entries</strong> &mdash; <em>ride a horse bareback</em>
+        and <em>steer a horse with no saddle</em> under Bonding, <em>own a gelding</em> and
+        <em>bond a gelding to approaching</em> under Gelding.</li>
+</ul>
+
+<h3>Coat work that ships alongside it</h3>
+
+<ul>
+    <li><strong>A colour op can paint a different colour per region</strong>, and a ramp or
+        a palette takes its colour source per region too.</li>
+    <li><strong>A glow can be seen without starting the game</strong> &mdash; it is
+        something you can look at now, not only read about.</li>
+    <li><strong>A layer can say it paints over the ones above it</strong>, and
+        <strong>eleven genes stop faking that with subtraction</strong>.</li>
+    <li><strong>A colour op is one control</strong>, and Random stops lying about its
+        ranges.</li>
+</ul>
+
+<h3>If you are testing</h3>
+
+<p>
+    The three tests that changed are <a href="for-testers.html#t-stall">Stall signs and
+    tickets</a> (now including a roofed stall), <a href="for-testers.html#t-name-tag">Renaming
+    a horse with a name tag</a>, and <a href="for-testers.html#t-hay-portal">The hay portal and
+    the horse pens</a> &mdash; which nobody could get past in 0.5.004.
+</p>
+
 <h2 id="v0-5-004">0.5.004</h2>
 
 <p class="lede">

@@ -19,10 +19,12 @@
 <h1>Hay portals &amp; the horse dimension</h1>
 <p class="lede">
     Build a hay-bale frame, light it with a golden carrot, and stand in it for ten
-    seconds. You arrive in a private, disposable corridor of <strong>2,000
-    pens</strong>, each holding a mare and a stallion of one randomly rolled genotype,
-    each signed with the genome they carry. It is the mod&rsquo;s showroom &mdash; a
-    place to see what the genes actually do without breeding for a week.
+    seconds. You arrive in a private, disposable corridor with <strong>a different
+    question down each side</strong>: on your right, every marking nobody has confirmed
+    by eye yet, four horses to a pen on four different base coats; on your left, every
+    breed in the game, a mare and a stallion each. It is the mod&rsquo;s showroom
+    &mdash; a place to see what the genes actually do without breeding for a week
+    &mdash; and it <strong>gets shorter as the mod is tested</strong>.
 </p>
 
 <div class="note">
@@ -180,6 +182,27 @@
     <code>Verified</code> block, re-bake, and its pens leave the corridor.
 </p>
 
+<div class="note warn">
+    <span class="label">This column crashed the dimension on arrival, 2026-09-17</span>
+    <p>
+        Every pen asks whether its combination belongs to a mare or a stallion, because a
+        sex-linked gene&rsquo;s hemizygous form is a horse only a stallion can be. That
+        question went to <code>Gene.hemizygousPlaceholder()</code> and the answer was
+        checked for <code>null</code> &mdash; but that method <strong>throws</strong> on an
+        ordinary autosomal gene rather than returning <code>null</code>, so the null check
+        never ran. Every gene in the plan is autosomal, so the corridor&rsquo;s
+        <em>first</em> pen threw while the player was still being teleported in: the whole
+        dimension was unenterable in 0.5.004, and nothing downstream of it could be tested.
+    </p>
+    <p>
+        <code>CoatCheckPlan.Pen.sex()</code> asks whether the gene is sex-linked first.
+        <code>CoatCheckPlanSanityTest</code> walks every pen in the plan and asks it for
+        exactly what the corridor asks &mdash; the four genotype codes, the expression name
+        and the description the signs wrap &mdash; so this class of fault costs a test in
+        seconds rather than a world on entry. It failed on all 438 pens before the fix.
+    </p>
+</div>
+
 <ul>
     <li><strong>Four horses to a pen</strong>, carrying the same combination on a
         <strong>black</strong>, a <strong>bay</strong>, a <strong>chestnut</strong> and a
@@ -304,8 +327,10 @@
         string the info panel and paper dump use &mdash; greedily wrapped over three lines.
         The wrap deliberately <strong>overflows its last line rather than dropping a
         gene</strong>, so a busy horse reads very wide.</li>
-    <li><strong>At the entrance</strong>, three blocks in front of the return portal:
-        <em>Horse Pens / 2,000 pens / random genome / mare + stallion</em>.</li>
+    <li><strong>At the entrance</strong>, three blocks in front of the return portal, two
+        signs side by side: <em>Horse Pens / LEFT: breeds / RIGHT: coats / not yet
+        checked</em>, and beside it <em>N coats / 4 horses each: / black bay / chestnut
+        white</em>.</li>
     <li><strong>At each <a href="#rest-stops">rest stop</a></strong>, on the road side of
         the break: <em>Way out / step through / N pens / that way -&gt;</em>, where N is how
         many pens you have walked past to get there.</li>

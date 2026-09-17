@@ -623,6 +623,19 @@
 <button type="button" class="report-btn" data-report="Wild herds have foals but stay small">Report a problem with this test</button>
 </div>
 
+<div class="tester-test" id="t-wild-sexes">
+<h3>Wild horses come in both sexes</h3>
+<p class="tester-need"><strong>You need:</strong> wild horses in an area you have not visited before, and ideally one you have been playing in for a while.</p>
+<ol>
+    <li>Find wild horses and count the mares and the stallions &mdash; the symbol after the name is pink for a mare and blue for a stallion. Ignore foals.</li>
+    <li>Do that for several separate groups, at least twenty grown horses in total.</li>
+    <li>Now count again somewhere you have been playing for a long time, where horses have had plenty of chances to spawn around you.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> both sexes turn up in roughly comparable numbers once you add the groups together. One band on its own is <em>meant</em> to be a single stallion with a few mares, or else all male &mdash; it is the total across many groups that should even out, and the long-played area should be no worse than the fresh one.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> mares heavily outnumber stallions across the whole count, or the area you have played in longest is almost entirely mares.</p>
+<button type="button" class="report-btn" data-report="Wild horses come in both sexes">Report a problem with this test</button>
+</div>
+
 <div class="tester-test" id="t-cowboy-geldings">
 <h3>The cowboy sells geldings a little cheaper</h3>
 <p class="tester-need"><strong>You need:</strong> a cowboy (see <a href="#t-cowboy">the cowboy test</a>).</p>
@@ -857,8 +870,11 @@
     <li>Build three more stalls and bind a sign to each: one L-shaped, one only one block wide, and one whose floor has slabs and a one-block step in it.</li>
     <li>Use a ticket into each of them.</li>
     <li>Build one more stall with its fence gate left open, and use a ticket into it.</li>
+    <li>Build a stall with a <strong>roof on it</strong>, and another whose doorway is only one block tall. Bind a sign to each and use a ticket into each.</li>
+    <li>Build a stall whose walls are only a ring of fences with a gate in them &mdash; no solid blocks at all &mdash; and do the same.</li>
+    <li>Ride a horse into a roofed stall and get off inside it.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> the first two say why and leave the sign blank; the sign binds and places; the ticket puts the horse in the middle of the stall; the full stall refuses and you keep the ticket; breaking the sign says "Stall released"; in the odd-shaped stalls the horse lands standing on the floor inside, or the ticket refuses with a message and is kept.</p>
+<p class="tester-pass"><strong>It works if:</strong> the first two say why and leave the sign blank; the sign binds and places; the ticket puts the horse in the middle of the stall; the full stall refuses and you keep the ticket; breaking the sign says "Stall released"; in the odd-shaped stalls the horse lands standing on the floor inside, or the ticket refuses with a message and is kept; <strong>the roofed stall, the low doorway and the fence-ring stall are all accepted</strong>; and getting off inside a roofed stall does not hurt you.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> the horse ends up in a wall, or a ticket is used up when it refused.</p>
 <button type="button" class="report-btn" data-report="Stall signs and tickets">Report a problem with this test</button>
 </div>
@@ -923,12 +939,14 @@
 <p class="tester-need"><strong>You need:</strong> a tamed horse and two name tags.</p>
 <ol>
     <li>Right-click the horse with a name tag.</li>
+    <li>Look at the window before you touch anything: both name boxes, the Rename button and the Cancel button should all be <strong>visible</strong>.</li>
+    <li>Click the first name box and type; then click the last name box and type.</li>
     <li>Change the name and confirm.</li>
     <li>Right-click it with the second name tag.</li>
-    <li>Press Cancel.</li>
+    <li>Press Cancel, then open it once more and press Escape.</li>
     <li>Count your name tags.</li>
 </ol>
-<p class="tester-pass"><strong>It works if:</strong> a rename window opens with the current name, confirming renames the horse and uses one tag, and Cancel changes nothing and uses no tag.</p>
+<p class="tester-pass"><strong>It works if:</strong> a rename window opens with the current name and you can <strong>see the boxes, the buttons and the letters you type</strong>; confirming renames the horse and uses one tag; Cancel and Escape both close it, change nothing and use no tag.</p>
 <p class="tester-fail"><strong>Something is wrong if:</strong> a tag is used up when you cancelled, or the horse gets a floating name tag instead.</p>
 <button type="button" class="report-btn" data-report="Renaming a horse with a name tag">Report a problem with this test</button>
 </div>

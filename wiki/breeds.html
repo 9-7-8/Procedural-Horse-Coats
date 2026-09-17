@@ -58,8 +58,10 @@
 </p>
 <ul>
     <li>if one is <b>already in a wild herd</b> &rarr; <b>join</b> it: its
-        breed, its band, its lead, and a sex that fits the band (traditional
-        joiner = mare, bachelor joiner = stallion);</li>
+        breed, its band, its lead, and a sex that fits the band &mdash; a bachelor
+        joiner is a stallion, and a traditional joiner is a mare <b>until the harem
+        is full</b> (<code>maxMares</code>, four by default), after which it is a
+        straight coin;</li>
     <li>else if one is <b>also a fresh natural spawn</b> (a pack-mate still
         waiting its turn) &rarr; <b>found</b> a herd: this horse is the lead
         stallion, the breed is <code>pickHerdBreed</code> (weighted by
@@ -106,7 +108,8 @@
 </p>
 <ul>
     <li><strong>Traditional</strong> &mdash; one stallion (the herd lead), his
-        harem of mares, and the occasional foal. Foal rate is vanilla's ~5% per
+        harem of <strong>up to four</strong> mares
+        (<code>BreedHerd.MAX_HAREM_MARES</code>), and the occasional foal. Foal rate is vanilla's ~5% per
         pack member for now &mdash; the pack <code>AgeableMobGroupData</code>
         can no longer be overridden, so the intended "up to 3 foals" is a
         follow-up.</li>
@@ -121,6 +124,16 @@
     preference clamped by however many horses turned up, never a request for
     more. Precedence when it cannot have everything: the stallion range, then the
     mare maximum, then the mare minimum.
+</p>
+<p>
+    <strong>The mare maximum is why the wild is not all mares.</strong> It was
+    effectively unlimited until 2026-09-17, and a horse <em>joining</em> a band that
+    already existed was made a mare unconditionally &mdash; no cap, no re-check &mdash;
+    so a band near a spawn collected mares for ever and never gained a second stallion.
+    Founding a clump was always near even (a bachelor band is all male; a harem is one
+    stallion in four or five), but joining is most of what happens in a world that has
+    been running a while, which is why testers saw the skew and the founder tables did
+    not. A full harem now sends the surplus elsewhere.
 </p>
 <p>
     Every member of the herd shares the lead's breed and band. What a band does

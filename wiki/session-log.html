@@ -27,6 +27,109 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-tester-fixes">2026-09-17, last of the day &mdash; Five fixes from the testers' first day on 0.5.004</h2>
+
+<p>
+    The first release with outside testers on it came back with five reports the same day.
+    Four were defects and one was a request; none of them had been found here, and three of
+    them had been sitting in shipped code for longer than 0.5.004.
+</p>
+
+<h3>The dimension crash, and why a test was the actual deliverable</h3>
+
+<p>
+    <strong>Every pen in the new coat-check corridor threw.</strong>
+    <code>CoatCheckPlan.Pen.sex()</code> wants to know whether a combination is one only a
+    stallion can carry, so it asked <code>Gene.hemizygousPlaceholder()</code> for the
+    reserved allele and checked the answer for <code>null</code>. That method does not
+    return <code>null</code> for an autosomal gene &mdash; it <em>throws</em>. Every gene in
+    the plan is autosomal, so the null check was dead code and the corridor&rsquo;s first
+    pen threw during the teleport. The dimension was unenterable, which also meant the
+    entire &sect;0-EV verification entry written that morning was unperformable.
+</p>
+
+<p>
+    The one-line guard is not the interesting part. The interesting part is that this shipped
+    at all: the dimension had been reworked, the build was green, the server booted clean, and
+    <em>nothing in the project ever asked a pen a question</em>. So the fix came with
+    <code>CoatCheckPlanSanityTest</code>, which walks every pen in the plan and asks it for
+    exactly what the corridor asks &mdash; four genotype codes, the expression name, the
+    description the signs wrap. It failed 438 of 438 before the change. A crash that costs a
+    world on entry now costs two seconds in <code>:common:test</code>, and it will keep
+    catching this as genes come and go, because it has no list to fall behind.
+</p>
+
+<h3>A window you could neither type into nor leave</h3>
+
+<p>
+    The rename window took keystrokes perfectly well. It drew its widgets, then filled a
+    94%-opaque panel across the whole window on top of them, so the boxes, the caret, the
+    letters and both buttons were all underneath it. <strong>This project had already found
+    and fixed this exact bug twice</strong> &mdash; <code>HorseInfoScreen</code> has a long
+    comment about the barn-name box coming out &ldquo;still there, still clickable, and
+    looking like nothing at all&rdquo;, and <code>HorseBrowserScreen</code> carries the same
+    note. <code>HorseRenameScreen</code> was simply never brought along. Worth remembering
+    that a fix written up on one page does not propagate itself to its siblings.
+</p>
+
+<h3>A stall stops having a height</h3>
+
+<p>
+    The detector demanded two clear cells above every floor tile. That refused roofed stalls
+    and low doorways outright, and &mdash; the part that made it a report rather than an
+    annoyance &mdash; pushed a rider dismounting inside an accepted stall up into the ceiling
+    and hurt them. Owner&rsquo;s call was the whole rule rather than an exemption for the
+    doorway: <strong>a stall is its floor and the fence, gate, wall or door around it</strong>,
+    and height is not part of the question.
+</p>
+
+<p>
+    The thing that makes that safe is a separation that was already there. Loosening what
+    counts as a <em>room</em> does not loosen where a horse may be <em>put</em>:
+    <code>landingSpot</code> still tests the horse&rsquo;s real bounding box with
+    <code>noCollision</code>, so a room too low to hold a horse is refused at the moment
+    something tries to stand in it. Validation is about the architecture; fitting is about
+    the animal. Had those been one check, this change would have needed to be much more
+    careful.
+</p>
+
+<h3>The wild was mostly mares, and the founder table was innocent</h3>
+
+<p>
+    The sex locus is a clean 50/50 and the foal path is properly Mendelian, which is exactly
+    why this took reading rather than guessing. Wild horses never keep that roll:
+    <code>HerdManager</code> assigns sex from the <a href="breeds.html#bands">band</a>. Founding
+    a clump was near even &mdash; three in ten bands are all-male bachelors, and a harem is one
+    stallion in four or five. <strong>Joining was not.</strong>
+    <code>joinerSex</code> returned <code>FEMALE</code> unconditionally for every adult joining
+    a traditional band, with no cap and no re-check, so a band near a spawn point collected
+    mares for ever and never gained a second stallion.
+</p>
+
+<p>
+    Joining is most of what happens in a world that has been running a while, which is why the
+    testers saw it and the unit tests did not: every test starts from a founding. The band&rsquo;s
+    own <code>maxMares</code> is honoured now, and the default harem is capped at four
+    (<code>BreedHerd.MAX_HAREM_MARES</code>) instead of sixty-four, so
+    <code>Band.stallionCount</code>&rsquo;s documented precedence &mdash; surplus mares turn
+    stallion &mdash; finally has something to bite on. Kept the harem shape rather than flattening
+    everything to a coin flip: one-stallion bands are the point of the system, and the ratio is a
+    population-level property, not a per-band one.
+</p>
+
+<h3>Four checklist entries, and one trap</h3>
+
+<p>
+    <em>Ride a horse bareback</em> and <em>Steer a horse with no saddle</em> under Bonding;
+    <em>own a gelding</em> and <em>bond a gelding to approaching</em> under Gelding. The trap is
+    that <code>isSaddled()</code> is the wrong question: at bond tier 3 a bareback rider is handed
+    a real saddle so vanilla&rsquo;s mounted path works, so the horse with nothing on it reports
+    <em>true</em>. Hence <code>BarebackSteeringHandler.bareback()</code>, which also accepts a
+    saddle carrying the phantom component. The two gelding tasks hang off the bond-tier credit,
+    which credits <em>state</em> rather than an event &mdash; so a gelding bought from a cowboy
+    already done counts the same as one you had done yourself, with no interaction to hook.
+</p>
+
 <h2 id="d2026-09-17-glow-preview">2026-09-17, after the regions work &mdash; A glow can be seen without starting the game</h2>
 
 <p>

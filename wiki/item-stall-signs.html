@@ -153,9 +153,16 @@
         this filled air up to three blocks above the sign, and a fence is one block tall
         &mdash; so it climbed over the front rail of every stall anyone actually builds,
         spilled into the aisle and reported &ldquo;not a room&rdquo;. A column counts if a
-        horse could stand in it: something underfoot, two cells clear above. Neighbouring
+        horse could stand in it: something underfoot, and that cell clear. Neighbouring
         columns may differ by one block, so a slab, a carpet or an uneven floor is one
-        room and a two-block drop is not.</li>
+        room and a two-block drop is not. <strong>A stall has no height requirement at
+        all</strong> (2026-09-17): it asked for two clear cells over every tile until
+        testers found that this refused roofed stalls and low doorways outright, and
+        shoved a dismounting rider up into the ceiling of the ones it did accept. A stall
+        is its floor and the boundary round it. That loosens what counts as a
+        <em>room</em>, not where a horse may be <em>put</em> &mdash; landing still tests
+        the horse&rsquo;s real bounding box, so a room too low to hold one is refused at
+        the moment something tries to stand there.</li>
     <li><strong>A door, trapdoor or gate is the edge, in every state.</strong> By block
         identity, deliberately, not by whether a horse could squeeze past &mdash; a rule
         based on collision measures a different stall depending on which way the gate
