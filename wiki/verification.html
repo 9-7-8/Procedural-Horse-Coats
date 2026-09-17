@@ -78,6 +78,40 @@
     </p>
 </div>
 
+<h2 id="silver-dapples-0917">&sect;0-ER &mdash; Silver finally draws its dapples (2026-09-17, NOT played)</h2>
+
+<p>
+    <a href="gene-silver.html">Silver</a> shipped as the dilution only; the dapples the
+    gene is named for are now drawn, and the flaxen mane has been pulled paler in the same
+    change. Checked against an offline render rather than by asking for game time, but a
+    render is a still image of one horse &mdash; <strong>what it cannot show is the
+    population</strong>, which is where the remaining risk is.
+</p>
+<ul>
+    <li><strong>The dapple strength varies between horses, and reaches zero.</strong>
+        Strength is an epigenetic value on the allele running the full range, so some
+        silvers should barely dapple and some should show it clearly. <strong>If every
+        silver horse dapples identically the epigenetics are not being read per allele</strong>
+        &mdash; which is the specific failure this design invites, and the one a single
+        render cannot detect.</li>
+    <li><strong>It inherits, and drifts.</strong> Breed two heavily dappled silvers and
+        confirm the foals trend dappled; the seed and spacing sit on the allele, so a line
+        should be selectable toward it. A foal whose dappling is unrelated to either parent
+        means the value is being re-rolled rather than inherited.</li>
+    <li><strong>The same horse dapples identically every time.</strong> Note one, leave and
+        rejoin the world. A lattice that moves between reloads means something is sampling
+        fresh randomness at paint time instead of reading stored epigenetics.</li>
+    <li><strong>A chestnut silver still shows almost nothing.</strong> The dapple modulates
+        how much <em>black</em> a texel keeps, so on a red horse there is nothing for it to
+        act on. A visibly dappled chestnut would mean the modulation is touching red.</li>
+    <li><strong>Grey and silver together do not fight.</strong> A horse carrying both has
+        two dapple lattices at different depths and spacings. They should read as one
+        coherently dappled horse, not as interference or moir&eacute;.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether the dappling
+        reads as dappling at riding distance rather than as spots or as noise, and whether
+        the paler mane still reads as flaxen rather than as white.</li>
+</ul>
+
 <h2 id="markings-0917">&sect;0-EQ &mdash; Ordinary markings get a locus, and SW1 drops to a sixth of what it was (2026-09-17, NOT played)</h2>
 
 <p>

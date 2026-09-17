@@ -35,11 +35,11 @@ public final class CoatSampleTool {
             {"perlino", "agouti=A/a matp=Cr/Cr"},
             {"pearl_bay", "agouti=A/a matp=prl/prl"},
             {"cream_pearl_bay", "agouti=A/a matp=Cr/prl"},
-            {"grey_steel", "grey=G/g"},         // barely greyed
-            {"grey_dapple", "grey=G/g"},        // mid - strongest dapples
-            {"grey_old", "grey=G/g"},           // nearly white
-            {"grey_bay", "agouti=A/a grey=G/g"},
-            {"grey_chestnut", "extension=e/e grey=G/g"},
+            {"grey_steel", "grey=G2/N"},        // dosage 1 - barely greyed
+            {"grey_dapple", "grey=G2/G2"},      // dosage 2 - strongest dapples
+            {"grey_old", "grey=G3/G3"},         // dosage 4 - nearly white
+            {"grey_bay", "agouti=A/a grey=G2/G2"},
+            {"grey_chestnut", "extension=e/e grey=G2/G2"},
             {"bay_blood", "agouti=A/A shade=ShL/ShL"},      // the light haplotype - blood bay
             {"kit_dominant_white", "kit=W22/W20"},     // W22 is all white only beside a booster
             {"kit_w22_alone", "agouti=A/a kit=W22/N"},   // sabino-like on its own
@@ -180,9 +180,17 @@ public final class CoatSampleTool {
 
     /**
      * One epigenetic seed per sample, chosen to show the spread rather than a
-     * single draw: the three greys are the same {@code G/g} at three stages of
-     * greying, and the two zebras the same {@code Mzeb/n} at two different
+     * single draw: the two zebras are the same {@code Mzeb/n} at two different
      * stripe reaches.
+     *
+     * <p>The three greys <b>used to be</b> one genotype at three seeds, back when
+     * greying stage was a bare epigenetic roll. Grey is a dosage locus now, so
+     * they are three genotypes instead - and the rows said {@code grey=G/g} for
+     * some time after that rework, which is an allele the locus no longer has.
+     * <b>That threw, and it threw on row twelve</b>, so this tool silently
+     * produced only its first eleven samples until 2026-09-17. Same lesson as
+     * the bays below, and now with a cost attached: a sample list is a poor
+     * place to keep a claim about how a gene works.
      *
      * <p>The bays <b>used to be</b> one genotype at three seeds, back when the
      * point extent was a bare epigenetic roll. It is a shade score now, so they

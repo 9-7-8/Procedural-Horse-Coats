@@ -150,12 +150,23 @@ f.dilute(px, py,
 <div class="note">
     <span class="label">Follow-ups</span>
     <ul>
-        <li>The <em>dappling</em> that gives the gene its name is not built &mdash; v1
-            is the dilution only. A deterministic dapple field (a fixed-seed
-            <a href="body-space.html"><code>BodyNoise</code></a> modulation, like
-            <a href="gene-grey.html">grey</a>&rsquo;s but lighter and per-genotype rather
-            than per-horse) is the obvious next step.</li>
-        <li>The flaxen mane still reads a little <em>gold</em> rather than pale.</li>
+        <li><strong>The dappling now ships</strong> (2026-09-17). A
+            <a href="body-space.html"><code>BodyNoise.cellDistance</code></a> lattice in
+            body space, warped exactly as <a href="gene-grey.html">grey</a>&rsquo;s is so
+            the two kinds of dapple on one horse are the same shape of thing &mdash; but at
+            a much shallower depth (<code>0.16</code> against grey&rsquo;s <code>0.42</code>),
+            because a silver dapple is a shading <em>within</em> one chocolate rather than
+            pigment lost. Body only; the mane and tail keep the flaxen path untouched.
+            <strong>Its seed, spacing and strength live in the allele&rsquo;s own
+            epigenetics</strong>, so they inherit with the copy and drift each breeding
+            &mdash; two horses of the same genotype can dapple differently, and a line can
+            be bred toward heavy dappling. Strength runs down to zero, because a silver
+            that barely dapples is a real and common horse.</li>
+        <li><strong>The flaxen mane was reading a little <em>gold</em> rather than pale</strong>
+            and has been pulled down (<code>HAIR_KEEP_RED</code> 0.40 &rarr; 0.30) in the
+            same change.</li>
+        <li><strong>Neither has been seen in game.</strong> See
+            <a href="verification.html">to be verified</a>.</li>
         <li>Health: MCOA is <strong>built and dosed</strong> &mdash; <code>Z/Z</code> is
             an impairing <code>Condition</code> costing two hearts, and <code>Z/z</code>
             is an informational one costing nothing. See

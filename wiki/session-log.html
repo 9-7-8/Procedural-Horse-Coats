@@ -27,6 +27,80 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-dapples">2026-09-17, later still &mdash; Silver draws its dapples, and a render that could not settle it</h2>
+
+<p>
+    Next on the natural list, one at a time. <a href="gene-silver.html">Silver</a> had
+    shipped as the dilution only &mdash; <strong>the dapples the gene is named for were not
+    drawn</strong> &mdash; and the roadmap also recorded that its flaxen mane read a little
+    gold rather than pale. Both fixed in one pass.
+</p>
+
+<p>
+    The lattice is <code>BodyNoise.cellDistance</code> in body space, warped exactly as
+    <a href="gene-grey.html">grey</a>&rsquo;s is, so that two kinds of dapple on one horse
+    are the same shape of thing. The depth is <strong>0.16 against grey&rsquo;s 0.42</strong>:
+    a grey dapple is the difference between pigment kept and pigment lost, while a silver
+    dapple is a shading <em>within</em> one chocolate, and at grey&rsquo;s depth it reads as
+    spots. Body only; the mane and tail keep the flat flaxen path. The mane was pulled from
+    <code>HAIR_KEEP_RED</code> 0.40 to 0.30 in the same change.
+</p>
+
+<h3>The seed lives on the allele, which was the owner&rsquo;s correction</h3>
+
+<p>
+    The roadmap had specified a fixed-seed modulation &ldquo;per-genotype rather than
+    per-horse&rdquo;, and the owner overrode it mid-session: <strong>the seed, spacing and
+    strength are stored in the silver allele&rsquo;s own epigenetics.</strong> That is the
+    better call and it is worth writing down why. A genotype-derived hash would make every
+    horse of a given genotype dapple identically and permanently; on the allele, the values
+    inherit with the copy they sit on and drift each breeding, so two siblings can differ and
+    <em>a line can be bred toward heavy dappling</em>. Strength runs down to zero, because a
+    silver that barely dapples is a real and common horse.
+</p>
+
+<h3>The render confirmed two things and could not settle the third</h3>
+
+<p>
+    Checked with an offline render rather than by spending game time. It confirmed the
+    dilution and the paler mane. <strong>It could not confirm the dappling either way</strong>
+    &mdash; a 0.16-depth modulation is a few percent of brightness on a 128-texel sheet, which
+    is below what can honestly be judged by eye, and the sample&rsquo;s strength comes from its
+    own seed, so the picture might not even have been a fair test of the feature.
+</p>
+
+<p>
+    <strong>&ldquo;I could not see it&rdquo; is not evidence of absence, and would not have
+    been evidence of presence either.</strong> So the eyeball was replaced with a measurement:
+    <code>SilverDappleTest</code> paints silver horses across 64 seeds and measures the spread
+    of surviving black over body texels. It asserts that a strongly dappled horse really is
+    modulated, that a barely dappled one is not, that the long hair stays uniform, and &mdash;
+    the one a picture can never show &mdash; that <strong>strength varies from horse to
+    horse</strong>, which is the specific way this design breaks if the epigenetics are read
+    from the wrong place. A render of one horse would look perfectly correct while every
+    silver in the world wore the same coat.
+</p>
+
+<h3>The coat sample tool had been broken for months, silently</h3>
+
+<p>
+    Found while trying to render that probe. <code>bakeCoatSamples</code> was dying on its
+    twelfth sample with <em>&ldquo;gene horsegenetics.grey has no allele 'G'&rdquo;</em>, so it
+    had been producing <strong>11 of its 122 renders</strong> and exiting non-zero. The cause is
+    dated: the commit that reworked grey into a dosage locus left the sample rows asking for
+    <code>grey=G/g</code>, an allele the locus no longer has. Silver&rsquo;s samples sit below
+    the break, which is why the probe produced nothing at all.
+</p>
+
+<p>
+    Repaired to real dosage genotypes (<code>G2/N</code> steel, <code>G2/G2</code> mid,
+    <code>G3/G3</code> nearly white) and all 122 samples render again. The file&rsquo;s own
+    comment already warned that <em>&ldquo;a sample list is a poor place to keep a claim about
+    how a gene works&rdquo;</em> &mdash; it now carries the cost of having been right. The
+    wider lesson is the one in <a href="known-gaps.html">gap 263</a>: a tool or test that
+    nobody&rsquo;s change happens to run can stay broken indefinitely with no session at fault.
+</p>
+
 <h2 id="d2026-09-17-markings">2026-09-17, later &mdash; Ordinary markings get a locus, and SW1 gives back a job</h2>
 
 <p>
