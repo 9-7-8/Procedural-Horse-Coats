@@ -1637,6 +1637,51 @@
     it with a screenshot.
 </p>
 
+<div class="tester-test" id="t-look-pens">
+<h3>Walk the horse pens and say if anything looks wrong</h3>
+<p class="tester-need"><strong>You need:</strong> a hay bale portal into the horse dimension (place a hay bale, light it with a golden carrot). Nothing else &mdash; the horses are already there.</p>
+<p>
+    This is the big one, and it is deliberately not a list. The corridor's <strong>right-hand
+    side</strong> is one pen per marking nobody has looked at yet, <strong>worst first</strong> &mdash;
+    the newest genes are at the near end, so the first few hundred pens are the ones most likely
+    to be broken. Every pen holds <strong>four horses carrying the same marking</strong> on a black,
+    a bay, a chestnut and a white base, and the signs in front say what it is supposed to look like.
+</p>
+<ol>
+    <li>Walk down the corridor, keeping to the right-hand pens.</li>
+    <li>At each pen, read the signs, then look at the four horses.</li>
+    <li>Compare what you see with what the sign says it should be.</li>
+    <li>Look at the <strong>white</strong> horse in particular: a white horse has no pigment at all,
+        so it should be plain white with <em>no marking on it whatsoever</em>.</li>
+    <li>Go as far as you like and stop whenever. There is a way out every twenty-five pens.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> each marking looks like its sign describes; it can be
+    seen on all three coloured horses (it may look very different on each, which is fine and interesting);
+    and the white horse is blank.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a marking is invisible on a horse it should
+    show on, is a solid blob, spills off the edge of the horse, is drawn on the white horse at all, or
+    simply does not match its sign. <strong>Report the pen number</strong> &mdash; it is on the first sign
+    &mdash; and a screenshot.</p>
+<button type="button" class="report-btn" data-report="Horse pen coat check">Report a problem with this test</button>
+</div>
+
+<div class="tester-test" id="t-look-breeds">
+<h3>The breed side of the corridor</h3>
+<p class="tester-need"><strong>You need:</strong> the same trip into the horse dimension.</p>
+<p>The corridor's <strong>left-hand side</strong> is every breed in the game in alphabetical order, a mare
+    and a stallion in each, looping around when it runs out.</p>
+<ol>
+    <li>Walk down the corridor keeping to the left-hand pens.</li>
+    <li>Read the breed name on the sign, then look at the two horses.</li>
+    <li>Watch for breeds whose horses look nothing like each other, or like the breed either side.</li>
+</ol>
+<p class="tester-pass"><strong>It works if:</strong> each breed's pair looks plausible for that breed, and
+    breeds look different from one another.</p>
+<p class="tester-fail"><strong>Something is wrong if:</strong> a breed's two horses are wildly different
+    colours from each other, every breed looks the same, or a draft breed is pony-sized. Name the breed.</p>
+<button type="button" class="report-btn" data-report="Horse pen breed column">Report a problem with this test</button>
+</div>
+
 <div class="tester-test" id="t-look-coats">
 <h3>Coats, nameplates and eyes</h3>
 <p class="tester-need"><strong>You need:</strong> a few different horses, and a foal next to its mother. Creative mode for the foals in step 4.</p>

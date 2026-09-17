@@ -78,6 +78,81 @@
     </p>
 </div>
 
+<h2 id="corridor-two-columns-0917">&sect;0-EV &mdash; The horse dimension becomes two lists: coats to check, and every breed (2026-09-17, NOT played)</h2>
+
+<p>
+    The corridor was two thousand random genotypes on both sides. It is now a
+    <strong>different question down each side</strong>, and the right-hand one <em>ends</em>:
+    one pen per allele combination of every gene whose wiki page carries no
+    <code>Verified</code> block, worst-first. Ask <code>CoatCheckPlan.size()</code> how long
+    that is; it falls every time a gene is confirmed. Full write-up:
+    <a href="horse-dimension.html#pens">what is in the pens</a>.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+
+<ul>
+    <li><strong>The corridor still builds as you walk, and still ends in a wall.</strong>
+        It is far shorter than it was, so the end cap is now reachable on foot. <em>Pass:</em>
+        walking to the end finds a wall rather than a drop into the void, and the log has no
+        <code>test yard is NOT sound</code> line. This is the half most likely to be wrong:
+        <code>LAST_SEGMENT_INDEX</code> is derived from the plan now, and if it is short the
+        last pens simply do not exist.</li>
+    <li><strong>Pen <em>n</em> is the same horse every visit.</strong> Both columns are
+        deterministic, which the random corridor could not promise. <em>Pass:</em> leave and
+        re-enter, walk to the same pen number, and the sign and the four horses match.</li>
+    <li><strong>The left column is every breed, alphabetically, and loops.</strong>
+        <em>Pass:</em> the first pens are A-named breeds, no pen says <code>Feral Mixed</code>,
+        and the names restart from A after the last breed rather than stopping.</li>
+    <li><strong>A breed pen's horses really are that breed.</strong> They are rolled through
+        <code>BreedFounder</code> and stamped with the breed's lineage token, not just given a
+        matching genotype. <em>Pass:</em> open one in the horse browser and the breed on the
+        record is the breed on the sign.</li>
+    <li><strong>The four base coats are the four base coats.</strong> Each coat-check pen
+        holds a black, a bay, a chestnut and a white horse, named on the nameplate.
+        <em>Pass:</em> four horses, four nameplates, and the chestnut is chestnut rather than
+        a second bay.</li>
+</ul>
+
+<h3>In the game, with your hands</h3>
+
+<ul>
+    <li><strong>The signs say what the marking should look like.</strong> A pen carries up to
+        four boards: the pen number and gene, the outcome's name, then its description
+        wrapped across the rest. <em>Pass:</em> the boards read in order left to right and no
+        sentence is cut off mid-word where a board was available.</li>
+    <li><strong>The entrance says the corridor has two sides.</strong> Two signs by the
+        return portal. <em>Pass:</em> somebody who has never been here can tell which side is
+        which from them alone.</li>
+</ul>
+
+<h3>Visual, and therefore last</h3>
+
+<ul>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> the markings
+        themselves. That is the whole point of the column, but it is also the cheapest thing
+        to judge and the thing that announces itself &mdash; so it goes last, per this page's
+        own rule. It is written up for testers as
+        <a href="for-testers.html#t-look-pens">walk the horse pens</a>, and the one thing
+        worth reporting precisely is the <strong>white</strong> horse: anything drawn on it
+        is a gene ignoring a mask.</li>
+</ul>
+
+<h3>The yard lost its looking pens</h3>
+
+<ul>
+    <li><strong>Row E's gilded-crackle stall and row D's egg-layer pen are gone.</strong> The
+        crackle stall asked only &ldquo;does this look right?&rdquo;, which the corridor now
+        answers for every unconfirmed marking; the egg layer's last open question (the cap)
+        was closed by the overnight run of 2026-09-14/15 and is written up at
+        <a href="gene-egg-layer.html#verified">its own page</a>. <em>Pass:</em> the yard still
+        builds and logs <code>test yard built and walkable</code>, row E still holds the pool,
+        and nothing fell through a hole where a pen used to be.</li>
+    <li><strong>The magic stat pens now tell you to ride.</strong> Their sign said what the
+        census prints, which is not something a tester does. <em>Pass:</em> riding the two
+        horses in a pen, one feels different from the other.</li>
+</ul>
+
 <h2 id="dun-d1-marks-0917">&sect;0-EU &mdash; <code>d1</code> gets its bars and shoulder shadow (2026-09-17, NOT played)</h2>
 
 <p>

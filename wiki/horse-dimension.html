@@ -162,22 +162,64 @@
 <h2 id="pens">What is in the pens</h2>
 
 <p>
-    <strong>Each pen is one random genotype, shown by two horses.</strong> The corridor is
-    a fixed <code>PEN_COUNT</code> of <strong>2,000</strong> &mdash; an arbitrary number,
-    deliberately <em>not</em> derived from the genotype space, so adding a gene does not
-    lengthen the corridor. Both horses in a pen share the genotype but not the epigenome,
-    so they are two examples rather than two copies.
+    <strong>The two sides of the road ask different questions.</strong> Walking in from the
+    portal, your <strong>right</strong> (<code>+Z</code>) is the <em>coat check</em> and your
+    <strong>left</strong> (<code>-Z</code>) is the <em>breed book</em>. The corridor used to be
+    one long row of random genotypes on both sides; it is now two lists, and one of them ends.
+</p>
+
+<h3 id="coat-check">Right: every marking nobody has confirmed</h3>
+
+<p>
+    One pen per allele combination of every gene whose wiki page carries <strong>no
+    <code>Verified</code> block</strong> &mdash; the record hard rule&nbsp;9 already requires,
+    read straight off the pages by <code>:common:bakeUnverifiedGenes</code> and planned by
+    <code>common/genetics/CoatCheckPlan</code>. Ask it for its length with
+    <code>CoatCheckPlan.size()</code>; it is not a number worth writing down here, because
+    <strong>it falls every time a gene is confirmed</strong>. Confirm a gene, write its
+    <code>Verified</code> block, re-bake, and its pens leave the corridor.
+</p>
+
+<ul>
+    <li><strong>Four horses to a pen</strong>, carrying the same combination on a
+        <strong>black</strong>, a <strong>bay</strong>, a <strong>chestnut</strong> and a
+        <strong>white</strong> base, named on their nameplates. A marking that only works on
+        one base is then obvious rather than something you have to go looking for.</li>
+    <li><strong>The white horse is the masking check.</strong> Its base is
+        <code>KIT</code> <code>W2</code>/<code>N</code> &mdash; one copy of an
+        <code>allWhite</code> allele, which removes every pigment and masks the coat. So
+        anything still drawn on that horse is a gene painting over a mask it should have
+        respected. (<em>Not</em> <code>W22</code>, which is sabino-like on its own and
+        all-white only beside a booster.)</li>
+    <li><strong>Worst first.</strong> The order is the gene timeline's, newest first, so the
+        near end of the corridor is the genes written most recently &mdash; which is where a
+        drawing bug actually is. Genes the timeline cannot date go last.</li>
+    <li><strong>Extension and agouti are excluded</strong>, being the base coat rather than a
+        marking on one: every pen shows four of those already.</li>
+</ul>
+
+<h3 id="breed-book">Left: every breed, alphabetically</h3>
+
+<p>
+    A mare and a stallion of one breed per pen, in alphabetical order by display name,
+    <strong>looping</strong> for as long as the right-hand column runs. Both are rolled
+    through <code>BreedFounder</code> and stamped with the breed's <code>BreedLineage</code>
+    token, so they read as that breed everywhere downstream rather than being a genotype with
+    a breed's name on the sign. <code>Feral Mixed</code> is skipped &mdash; it is the absence
+    of a breed, not one of them.
 </p>
 
 <h3 id="rest-stops">A way out every twenty-five pens</h3>
 
 <p>
     <strong>Every 25th segment carries no pens. It is a break with a hay-bale portal
-    home.</strong> The corridor is some seven thousand blocks end to end and until now
+    home.</strong> The corridor is thousands of blocks end to end and until now
     had exactly <em>one</em> way out, the return portal at the entrance &mdash; so
     anybody who walked in a few hundred pens to look at something had to walk all the way
-    back. There are <strong>41</strong> of these, one every <strong>175 blocks</strong>,
-    so a way home is never more than about ninety blocks away.
+    back. There is one every <strong>175 blocks</strong>
+    (<code>REST_STOP_EVERY &times; PERIOD</code>), so a way home is never more than about
+    ninety blocks away. How many that is depends on how long the corridor is, which is
+    <code>CoatCheckPlan.size()</code>.
 </p>
 
 <ul>
@@ -198,13 +240,26 @@
         then 53. The breaks before a segment are subtracted, so a pen's number still means
         &ldquo;the nth pen you have walked past&rdquo;. It is still a pure function of the
         segment index, so a recycled plot rebuilds identically.</li>
-    <li><strong>The corridor got longer, not shorter.</strong> The breaks are extra
-        segments rather than pens taken away, so all 2,000 pens still exist &mdash; 1,042
-        segments, 41 of them breaks. Skipping that would have quietly eaten the last forty
-        pens.</li>
+    <li><strong>The breaks lengthen the corridor rather than eating pens.</strong> A break
+        is an extra segment, not a segment's pens taken away, so every coat check in the
+        plan still exists. <code>LAST_SEGMENT_INDEX</code> adds them back on top of
+        <code>PEN_SEGMENTS</code>; skipping that would quietly swallow the last few dozen
+        pens, which is the end of the list nobody would notice was missing.</li>
 </ul>
 
 <h3><code>ShowcaseGenotypes</code> &mdash; a founder draw with a floor under it</h3>
+
+<div class="note">
+    <span class="label">No longer what the corridor uses</span>
+    <p>
+        The pens were stocked from this until 2026-09-17 and are not any more &mdash; both
+        columns are deterministic lists now, so pen <em>n</em> is the same horse every visit.
+        It is kept because it is still the right answer to &ldquo;give me a founder worth
+        looking at&rdquo;, it is still what <code>ShowcaseGenotypesTest</code> pins, and its
+        <code>showcasePairs</code> rule &mdash; a combination that can occur, is not wild type,
+        and does not mask &mdash; is the same rule <code>CoatCheckPlan</code> applies.
+    </p>
+</div>
 
 <p>
     An honest wild draw is mostly plain horses: every founder table is weighted hard toward
@@ -291,9 +346,10 @@
 <table>
 <thead><tr><th>Constant</th><th>Value</th><th>What it is</th></tr></thead>
 <tbody>
-<tr><td><code>PEN_COUNT</code></td><td>2&nbsp;000</td><td>Pens per corridor &mdash; an arbitrary number, deliberately <strong>not</strong> derived from the genotype space. Adding a gene must not lengthen the corridor.</td></tr>
-<tr><td><code>PERIOD</code></td><td>7</td><td><code>PEN_LEN_X</code> (6) + 1. <code>LAST_SEGMENT_INDEX</code> is 999, so the corridor is about 7&nbsp;000 blocks.</td></tr>
-<tr><td><code>PLOT_SPACING_X</code></td><td>8&nbsp;007</td><td>The corridor + 1&nbsp;000. Plots never share chunks, so &ldquo;two players never land in the same place&rdquo; holds with no per-player-dimension work.</td></tr>
+<tr><td><code>COAT_CHECK_PENS</code></td><td><code>CoatCheckPlan.size()</code></td><td>Segments per corridor, one coat check each. <strong>Derived, and it shrinks as the mod is tested</strong> &mdash; ask the accessor rather than quoting it here, because writing a gene's <code>Verified</code> block removes its pens.</td></tr>
+<tr><td><code>PEN_COUNT</code></td><td><code>COAT_CHECK_PENS &times; 2</code></td><td>Both columns together, for anything that counts pens. The left column loops breeds for as long as the right column runs.</td></tr>
+<tr><td><code>PERIOD</code></td><td>7</td><td><code>PEN_LEN_X</code> (6) + 1. One segment is one coat check and one breed, so the corridor is about <code>PERIOD &times; LAST_SEGMENT_INDEX</code> blocks.</td></tr>
+<tr><td><code>PLOT_SPACING_X</code></td><td>corridor + 1&nbsp;000</td><td>Derived from <code>LAST_SEGMENT_INDEX</code>, so it tracks the corridor's length. Plots never share chunks, so &ldquo;two players never land in the same place&rdquo; holds with no per-player-dimension work.</td></tr>
 <tr><td><code>PLOT_BASE_Y</code></td><td>128</td><td>The grass surface. Fixed, which is half of why a recycled slot rebuilds identically.</td></tr>
 <tr><td><code>PEN_DEPTH_Z</code> / <code>PEN_FAR_Z</code></td><td>20 / &plusmn;23</td><td>Pen depth, and the back edge the E/W walls sit flush against &mdash; no grass gap.</td></tr>
 <tr><td><code>GRAVEL_STRIP_Z</code></td><td>&plusmn;24</td><td>Gravel, with a glowstone line floating directly above at <code>baseY + 10</code>.</td></tr>
@@ -327,7 +383,7 @@
     <li>In a dev build: a <strong>stick</strong> tames an untamed horse and a
         <strong>clock</strong> ages a foal to adult.</li>
     <li>A pen is built once per plot, so anything already standing in it belongs to a
-        previous occupant of that recycled X slot. <code>buildPen</code> discards untamed
+        previous occupant of that recycled X slot. <code>penShell</code> discards untamed
         leftovers before stocking, and leaves tamed ones alone &mdash; a player may have
         ridden one ahead of the build frontier.</li>
 </ul>
@@ -432,8 +488,8 @@
 <tr><td><strong>A</strong></td><td><strong>The two dryad pens</strong> &mdash; what is left of the growing row, moved here when its other half was confirmed. <code>Dark/Dark</code> for whether the dark oaks <em>cluster</em> into a 2&times;2 (they do, slowly &mdash; <a href="gene-dryad.html#verified">verified</a>), and <code>Mush/Mush</code> on a floor that is <strong>half podzol and half grass</strong>: a mushroom survives any light on podzol and needs darkness on grass, so the pass is mushrooms on one half and <em>none</em> on the other, and the two halves are watched separately so that is readable. <strong>The floor is the test</strong> &mdash; <code>convert()</code> is a whitelist per cover, so a spreading gene on the wrong ground fails exactly like a broken one.</td><td><strong>The spawner room</strong> &mdash; holy ward's non-interference half. A roofed unlit box with a zombie spawner charged at build time, the warded horse outside the door. An empty spawner produces nothing, which is indistinguishable from the ward having stopped it.</td></tr>
 <tr><td><strong>B</strong></td><td><strong>The tack room</strong> &mdash; five labelled chests holding one of every item in the mod, the tools they need, and every one of the twelve foods the food-preference locus knows, in the gene's own order.</td><td><strong>The horseman's study</strong> &mdash; a horseman at a <code>horsemans_table</code> with two research shelves, a cowboy at a <code>cowboy_hitch</code>, two tamed horses and a chest of papers. <strong>No village to find and no barn to hunt.</strong> It does not test acquisition (<a href="known-gaps.html#gap-214">gap 214</a>).</td></tr>
 <tr><td><strong>C</strong></td><td><strong>The ticket stalls</strong> &mdash; a plain holding pen as the control, then four awkward enclosures already built: barely wider than a horse, L-shaped, packed solid with hay, and roofed. Those are the cases the kit used to ask the tester to <em>build</em>, which is why they were never built.</td><td><strong>The carrot bench</strong> &mdash; all nine splice carrots plus the magnifier and the stabiliser, and four horses stocked with <strong>no named locus at all</strong>. Every other pen here avoids that; these are the one thing designed for it.</td></tr>
-<tr><td><strong>D</strong></td><td><strong>The dairy and the clip</strong> &mdash; the three potion-milk refusals with the setup done: the mare is already hurt and the foal is already a foal. Nothing happening is correct three times over here, so the <em>message</em> is the evidence. Two more horses to shear.</td><td><strong>Egg layer &times;8</strong> &mdash; all eight alleles in one pen. Not a confound, because each pair drops a <em>different item</em> and the watch counts the item. It was meant to trip <code>NEARBY_CAP</code>, which one horse essentially never can; the despawn timer got there first (<a href="gene-egg-layer.html#verified">verified</a>).</td></tr>
-<tr><td><strong>E</strong></td><td><strong>Gilded crackle</strong> on a pale base, and <strong>the pool</strong> &mdash; five blocks of water in a sealed stone tank with a saddled ocean-born pair in it. No doorway anywhere below the surface: a gap drains the tank into the walkway and the yard's floor is all there is between here and the void.</td><td>Empty: the food-preference pen was removed on 2026-09-14.</td></tr>
+<tr><td><strong>D</strong></td><td><strong>The dairy and the clip</strong> &mdash; the three potion-milk refusals with the setup done: the mare is already hurt and the foal is already a foal. Nothing happening is correct three times over here, so the <em>message</em> is the evidence. Two more horses to shear.</td><td>Empty since 2026-09-17: the egg-layer pen was removed once its last question closed. All eight alleles drop their own item, and the cap never fires because the despawn timer bounds the floor first &mdash; both <a href="gene-egg-layer.html#verified">verified</a>.</td></tr>
+<tr><td><strong>E</strong></td><td><strong>The pool</strong> &mdash; five blocks of water in a sealed stone tank with a saddled ocean-born pair in it. No doorway anywhere below the surface: a gap drains the tank into the walkway and the yard's floor is all there is between here and the void. (The gilded-crackle display stall stood at the near end of this block until 2026-09-17; every &ldquo;does this look right?&rdquo; check is <a href="#coat-check">the corridor's coat column</a> now.)</td><td>Empty: the food-preference pen was removed on 2026-09-14.</td></tr>
 <tr><td><strong>F</strong></td><td><strong>Starburst</strong> (breed a pair: does the foal's emblem sit near its parents'?) and the <strong>F8 herd</strong>.</td><td><strong>The three magic stat pens</strong> &mdash; speed, health and jump. Their whole effect is a number, which is why looking at one never helped; the census prints the attribute's range across the pen.</td></tr>
 <tr><td><strong>I</strong></td><td><strong>Dhampir</strong> &mdash; walled rather than fenced (it gallops), open to the sky so it burns, a 9&times;9 shelter five blocks from where it spawns, and eight cows because a bitten animal is off the menu for a day. The burn and the feed are both confirmed; what is open is whether it now <strong>holds</strong> that shelter for a whole day instead of being walked back into the sun by the stroll goal. <strong>Pass:</strong> one <code>[trace] dhampir</code> journey in the log and then quiet, with no further <code>onFire</code> lines.</td><td><strong>Eyesight</strong>, as a <strong>lit half and a dark half</strong> with an attribute readout on each. A conditional modifier is invisible in both states &mdash; the same shape that had the weather loci reported as broken &mdash; so each horse is now printed against <em>its own base value</em>, which the two halves holding different animals made necessary.</td></tr>
 <tr><td><strong>J</strong></td><td><strong>The arena</strong> &mdash; the guardian, alone now that gladiator is confirmed and its half deleted. It arrives <strong>untamed</strong>, which nothing else in the yard does: the gene fires on <code>OnOwnerHurt</code> and the yard's tame-but-ownerless stock matched nobody. Tame it, then let something hit <em>you</em>. Opponents come out of the chest by hand &mdash; a spawner refills as fast as a horse can kill, which counts the horse down instead of testing it.</td><td><strong>The infirmary</strong> &mdash; a healer with three companions already at half health when the yard is built, and cleansing light in its own arena with undead to cleanse. Both are read off the watch's <code>horse hurt</code> and <code>horse healed</code> lines.</td></tr>

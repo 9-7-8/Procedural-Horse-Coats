@@ -27,6 +27,111 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-corridor">2026-09-17, last &mdash; The horse dimension stops being a random gallery</h2>
+
+<p>
+    The owner&rsquo;s brief: the aisles should be <strong>every breed down one side</strong> and
+    <strong>every unchecked marking down the other</strong>, generated as you walk, with more
+    signs saying what each thing should look like &mdash; and the visual checks taken out of
+    the test yard and put first in the tester page&rsquo;s visual section.
+</p>
+
+<h3>The corridor is two lists now, and one of them ends</h3>
+
+<p>
+    It was <code>PEN_COUNT</code> = 2,000 random showcase genotypes on both sides: a corridor
+    that never ran out and so never told you anything was <em>left</em>. Now the right-hand
+    (<code>+Z</code>) column is <strong><code>CoatCheckPlan</code></strong> &mdash; one pen per
+    allele combination of every gene whose wiki page carries no <code>Verified</code> block,
+    newest-gene-first by the timeline, because a painter written last week is where a drawing
+    bug actually is. The left (<code>-Z</code>) column is every breed alphabetically, a mare and
+    a stallion each, looping for as long as the right column runs.
+</p>
+
+<p>
+    <strong>The length is derived and it shrinks as the mod is tested.</strong>
+    <code>COAT_CHECK_PENS</code> is <code>CoatCheckPlan.size()</code>: confirm a gene, write its
+    <code>Verified</code> block, re-bake, and its pens leave the corridor. That is the opposite
+    direction from the old catalogue corridor, which grew with every gene added until it wanted
+    seven million blocks.
+</p>
+
+<ul>
+    <li><strong>Four horses to a pen</strong>, one combination on a black, a bay, a chestnut and
+        a white base, named on their nameplates &mdash; chosen over four consecutive pens because
+        &ldquo;does this work on every base?&rdquo; is answered by looking at them together, and
+        four pens would have made it a memory test and quadrupled the walk.</li>
+    <li><strong>The white horse is the masking check</strong>, on <code>KIT</code>
+        <code>W2</code>/<code>N</code> &mdash; one copy of an <code>allWhite</code> allele, which
+        removes every pigment. Anything still drawn on it is a gene ignoring a mask. Not
+        <code>W22</code>, which is sabino-like alone and all-white only beside a booster.</li>
+    <li><strong>Up to four sign boards per pen</strong>, replacing the single genotype-code sign:
+        the pen number and gene, the outcome&rsquo;s name, then the gene file&rsquo;s own
+        description wrapped across the rest &mdash; so a tester compares the horse to what the
+        gene <em>claims</em>, not to a guess.</li>
+    <li><strong>A breed pen&rsquo;s horses really are that breed</strong>: a new
+        <code>HorseRecords.newFounder(horse, rng, breed, sex)</code>, because the existing pair of
+        overloads could give you the lineage token <em>or</em> a forced sex and never both. A pen
+        labelled with a breed whose horse reads as feral is a label, not a breed.</li>
+</ul>
+
+<h3>Where the list comes from</h3>
+
+<p>
+    <strong><code>:common:bakeUnverifiedGenes</code></strong> reads the wiki&rsquo;s own
+    <code>Verified</code> blocks &mdash; the record hard rule 9 already requires &mdash; and writes
+    <code>horsegenetics/unverified-genes.txt</code>, because the wiki is not in the jar and the
+    game cannot ask a web page. The alternative was a second hand-kept list of what is untested,
+    and a drifted list of that kind is worse than none: it says &ldquo;done&rdquo; about something
+    nobody looked at.
+</p>
+
+<p>
+    Two filters stay at <em>runtime</em> rather than bake time, so the resource is a faithful copy
+    of the wiki and the build decides what it means: a gene absent from <code>genes/index.json</code>
+    is skipped (an absence there is a killswitch, not an oversight), and a gene that paints nothing
+    is skipped &mdash; several of the newest genes are health and behaviour loci whose pen would have
+    been four identical horses. Extension and agouti are excluded as the base coat rather than a
+    marking on one, the same exclusion <code>ShowcaseGenotypes</code> makes.
+</p>
+
+<p>
+    <strong>The first scan was wrong in the mod&rsquo;s favour and had to be fixed:</strong> agouti and
+    champagne carry the <em>older</em> marker (<code>Owner-verified in-game</code>, a
+    <code>note good</code> div with no <code>id="verified"</code> anchor), so they were being counted
+    as unconfirmed and would have filled the corridor with pens for work done on 2026-09-01.
+</p>
+
+<h3>The yard gave up its looking pens</h3>
+
+<ul>
+    <li><strong>Row E&rsquo;s gilded-crackle display stall is gone</strong> &mdash; it asked only
+        &ldquo;does this look right?&rdquo; for one gene, which the corridor now does for every
+        unconfirmed marking. The row itself stays: the <em>same</em> west block holds the pool, six
+        blocks along. Deleting the row outright broke the pool&rsquo;s <code>z</code> and failed the
+        build, which is the one mistake the chained-row layout cannot absorb for you.</li>
+    <li><strong>Row D&rsquo;s egg-layer pen is gone</strong> &mdash; its last open question was the
+        cap, and the overnight run of 2026-09-14/15 answered it on that very pen: the despawn timer
+        bounds the floor and <code>nearby_cap</code> never fires.</li>
+    <li><strong>The magic stat pens now say what to do</strong> (&ldquo;RIDE both horses&rdquo;)
+        rather than what the census prints, which is not something a tester does.</li>
+    <li><strong>Everything else stayed.</strong> Ender echo&rsquo;s ridden half, holy ward&rsquo;s
+        spawner farm, starburst&rsquo;s pale structure, lantern&rsquo;s bloom and the stat loci are all
+        still open on <code>verification.html</code>, so their pens are still earning their place. The
+        rule used was the pen&rsquo;s own question being answered in writing &mdash; not the gene
+        being flagged verified, which would have deleted the egg-layer pen while its cap question was
+        still live.</li>
+</ul>
+
+<h3>For the testers</h3>
+
+<p>
+    Two new entries at the <em>top</em> of <a href="for-testers.html#looks">&sect;12 How things look</a>
+    &mdash; walk the coat column, and walk the breed column &mdash; deliberately <strong>not</strong> one
+    entry per allele, which would have been bloat nobody reads. They say to report the pen number, which
+    is on the first board.
+</p>
+
 <h2 id="d2026-09-17-dun-d1">2026-09-17, to finish &mdash; Dun&rsquo;s <code>d1</code> gets its bars and shoulder bar</h2>
 
 <p>

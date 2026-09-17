@@ -58,6 +58,92 @@
     </p>
 </div>
 
+<h2 id="v0-5-004">0.5.004</h2>
+
+<p class="lede">
+    <strong>Five markings that were flat now draw their structure, four more health loci,
+    and the horse dimension turned into a checklist you can walk.</strong> The coat half is
+    the visible one; the dimension half is what makes the next release&rsquo;s coat half
+    checkable at all.
+</p>
+
+<h3>Markings that were a wash now have a shape</h3>
+
+<ul>
+    <li><strong>Silver draws its dapples.</strong> It had the colour and none of the
+        structure, so a silver dapple read as a flat lightening of the body.</li>
+    <li><strong>Roan grows corn spots</strong> &mdash; and does it by <em>suppressing</em>
+        white rather than painting coloured spots over the top, which is why they now appear
+        in the places a real roan keeps its colour.</li>
+    <li><strong>Flaxen fades from root to tip</strong> down the mane and tail instead of
+        recolouring the whole hair evenly. It reuses grey&rsquo;s existing hair axis rather
+        than inventing a second one.</li>
+    <li><strong>Dun&rsquo;s <code>d1</code> draws the leg bars and the shoulder bar</strong>,
+        not the dorsal stripe alone &mdash; the marks that tell a dun from a horse with a
+        stripe down its back.</li>
+    <li><strong>Ordinary white markings get their own locus</strong> &mdash; stars, snips,
+        socks and stockings &mdash; and <strong>SW1 gives back a job it should never have
+        had</strong>. Splash white had been standing in for plain markings, so it turned up
+        about six times more often than it should; it is now down to roughly a sixth of
+        what it was.</li>
+</ul>
+
+<h3>Health</h3>
+
+<ul>
+    <li><strong>Four new health loci</strong>, plus <strong>ACAN D5</strong>, and
+        <strong>silver&rsquo;s MCOA is dosed</strong> &mdash; one copy and two copies are no
+        longer the same eye.</li>
+    <li><strong>WFFS had shipped all along</strong> and was missing only from the
+        documentation, which is now corrected.</li>
+    <li><strong>Three genes had no description at all.</strong> They do now, and the check
+        that catches a missing one is no longer the project&rsquo;s one failing test.</li>
+</ul>
+
+<h3>The horse pens are a checklist now</h3>
+
+<p>
+    Step through a hay-bale portal and the corridor has a <strong>different question down
+    each side</strong> instead of two thousand random horses.
+</p>
+
+<ul>
+    <li><strong>On your right: every marking nobody has confirmed by eye.</strong> One pen
+        per combination, <strong>worst first</strong> &mdash; the most recently written genes
+        are at the near end, because that is where a drawing bug actually is. Each pen holds
+        <strong>four horses carrying the same marking</strong> on a black, a bay, a chestnut
+        and a white base, so a marking that only works on one of them is obvious rather than
+        something you have to go hunting for. The white horse is the interesting one: it has
+        no pigment at all, so <em>anything</em> drawn on it is a bug.</li>
+    <li><strong>On your left: every breed in the game, alphabetically</strong>, a mare and a
+        stallion each, looping round when it runs out.</li>
+    <li><strong>Signs in front of each pen say what it should look like</strong> &mdash; the
+        gene, the outcome&rsquo;s name and its own description, rather than the bare genotype
+        code the old signs carried.</li>
+    <li><strong>It gets shorter as the mod gets tested.</strong> The corridor&rsquo;s length
+        is the number of unconfirmed markings, so confirming one removes its pens. It is
+        several times shorter than 0.5.003&rsquo;s corridor already.</li>
+    <li>The pens still build as you walk, and there is still a way home every twenty-five
+        pens.</li>
+</ul>
+
+<p>
+    If you are testing, <a href="for-testers.html#t-look-pens">walk the horse pens</a> in
+    For Testers is the short version, and it asks you to report the pen number from the
+    first sign.
+</p>
+
+<h3>What it does to an existing world</h3>
+
+<ul>
+    <li><strong>Horses you already have will look different</strong> where they carry silver,
+        roan, flaxen or dun &mdash; those markings draw differently now. Their genetics have
+        not changed; the drawing has.</li>
+    <li><strong>Splash white becomes rarer in newly generated horses.</strong> Horses that
+        already exist keep the alleles they have.</li>
+    <li>The horse dimension is rebuilt on each visit, as always, so nothing there is lost.</li>
+</ul>
+
 <h2 id="v0-5-003">0.5.003</h2>
 
 <p class="lede">
