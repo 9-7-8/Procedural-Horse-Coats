@@ -230,8 +230,7 @@ mod.
 
 ## Status
 
-Deliberately a set of pointers - the numbers live in the code and the detail
-lives on a page.
+Pointers only - the numbers live in the code, the detail on a page.
 
 - **`common/`** compiles, the suite is green, **`neoforge-26.1.2/`** assembles,
   **`runServer`** boots clean, **creator parity** green. Confirm, don't trust.
@@ -250,9 +249,8 @@ where the session actually landed rather than narrating it mid-change.
 1. **Regenerate what the session invalidated** (the table under Build & test),
    then **fix the twin** if `CustomHorseSpawnScreen` or the designer changed
    (hard rule 5).
-2. **Build green**: `:neoforge-26.1.2:build`,
-   `check-parity.mjs`. Don't push red - and if you must, say so in the commit
-   message and put it at the top of `wiki/verification.html`.
+2. **Build green**: `:neoforge-26.1.2:build`, `check-parity.mjs`. Don't push red -
+   if you must, say so in the commit message and at the top of `wiki/verification.html`.
 3. **Commit and push the code.** Read `git status --short` first; the repo has a
    `.gitignore`, so if build or run output appears then a pattern is wrong - fix
    the pattern, don't `git add` around it. Work directly on **`main`**; don't
@@ -273,20 +271,22 @@ where the session actually landed rather than narrating it mid-change.
    grep -nE '20[0-9]{2}-[0-9]{2}-[0-9]{2}|[0-9]{3,}' CLAUDE.md   # dates + derived numbers
    ```
 
-   Then take **every line the session added here**, run it through the test and
-   the routing table at the top of this file, and move what fails. The two
-   greps above catch the usual offenders: a date means it is session-log
-   material, and a long number is almost always a derived value that should be
-   an accessor name instead.
-
+   Then run **every line the session added here** through the test and the
+   routing table at the top, and move what fails: a date means session-log
+   material, a long number a derived value that should be an accessor name.
    Over 300 lines is the signal to **move a whole section out**, not to trim
-   words to squeeze under the line: the budget exists so the hard rules stay
-   findable, and a file that is 299 lines of history has already failed.
+   words to squeeze under it - 299 lines of history has already failed.
 6. **Commit and push the doc update as its own commit.** Step 4 always leaves
    the tree dirty; a session must not end with unpushed doc changes.
 7. **Verify clean**: `git status --short` empty and `git log origin/main..HEAD`
    empty.
-8. **Stop** with a short summary - what shipped, what is newly waiting in
+8. **Kill every process this session started** - Gradle daemons and workers, any
+   `runClient` / `runServer`, and every shell left running in the background.
+   They outlive the session and sit on the owner's RAM for days. Kill the game
+   and server processes *first*, then `./gradlew --stop`: a daemon still running
+   a build ignores the stop. Leave the owner's own terminals alone, and if a
+   client is up that you did not launch, ask before closing it.
+9. **Stop** with a short summary - what shipped, what is newly waiting in
    `wiki/verification.html`, and the one thing the next session should pick up
    first. Then stop: no new work, no "while I'm here" refactors.
 
