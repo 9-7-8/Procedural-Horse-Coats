@@ -78,6 +78,59 @@
     </p>
 </div>
 
+<h2 id="tuning-moved-0917">&sect;0-EW &mdash; Tuning and balance questions, moved off the roadmap (2026-09-17, NOT played)</h2>
+
+<p>
+    None of this is unbuilt, which is why none of it belongs on
+    <a href="roadmap.html">the roadmap</a> any more &mdash; each is a number or a shape
+    already in the game that only a person looking at it can judge. By this page's own
+    rule they therefore rank <strong>below</strong> every behavioural check above: each
+    announces itself the moment anybody looks. Several roadmap entries were
+    <em>deleted</em> rather than moved, because the check already existed elsewhere: the
+    browser's untested tabs (<a href="known-gaps.html#gap-37">gap 37</a> and
+    <a href="#open-older">&sect;0-EB</a>), breed pool rates and world horse density
+    (<a href="known-gaps.html#gap-31">gap 31</a>), the unplayed health layer
+    (<a href="#health-loci-0917">&sect;0-EP</a>), and founder and wild-spawn frequency,
+    which the owner parked outright (<a href="known-gaps.html#gap-214">gap 214</a>).
+</p>
+
+<ul>
+    <li><strong>A themed splice reads as its theme, not as one gene.</strong> Feed each of
+        the <a href="carrots.html#themed">five themed splices</a> several times over. Each
+        rolls a uniform locus out of its slice, so a pool of five (marking) hits each
+        locus four times as often as a pool of twenty would. <strong>Pass:</strong> it
+        reads as &ldquo;this carrot is about markings&rdquo; rather than &ldquo;this
+        carrot always gives me sooty&rdquo;. A per-theme weighting, or letting a gene
+        declare its own weight, is the lever if it does not. The sibling question &mdash;
+        whether the plain Unknown Gene Splice table is too wide &mdash; is in
+        <a href="#open-older">&sect;0-EB</a>.</li>
+    <li><strong>A scaled foal has never been seen</strong>, and <code>Skin.BABY</code>&rsquo;s
+        projection is already approximate, so check a <code>p/p</code> foal before
+        anything else that scales is added. <strong>Pass:</strong> a marking lands on the
+        foal's body the way it lands on an adult's, neither stretched nor truncated.</li>
+    <li><strong>The animations at scale.</strong> The walk cycle was partly addressed
+        (<code>GeneticHorseRenderer.stretchGaitToSize</code> divides
+        <code>walkAnimationPos</code> by the scale, so a bigger horse takes proportionally
+        longer strides); rear, eat, buck, the tail swish and the seat position have not
+        been looked at at all. Walk through each on a <code>p/p</code> pony and a
+        Percheron. That the saddle, armour and rider offset do not follow
+        <code>Attributes.SCALE</code> is known and is <em>work</em> &mdash;
+        <a href="roadmap.html#resizing">&sect;2</a> &mdash; not a check.</li>
+    <li><strong>The eye wedges may be too fine.</strong> Twelve masks over four texels
+        include single corners and three-corner shapes. <strong>Pass:</strong> a wedge
+        reads as sectoral heterochromia at riding distance rather than as a stray pixel.
+        If it does not, restricting <code>EyePatch.WEDGES</code> to the four halves is a
+        one-line retreat. <a href="eye-colour.html">Eye colour</a>.</li>
+    <li><strong>Leopard's first-guess constants.</strong> The spot, blanket and
+        hoof-stripe numbers have never been judged in a world. What the patterns should
+        <em>look</em> like is checked in <a href="#open-older">&sect;0-EB</a>; this is the
+        narrower question of whether those numbers want turning once they have been seen.
+        Whether appaloosa patterns should read the coat handed to them, the way the other
+        white painters do, is a design call and stays on
+        <a href="roadmap.html#defects">&sect;1.2</a>.
+        <a href="gene-leopard.html">Leopard complex</a>.</li>
+</ul>
+
 <h2 id="corridor-two-columns-0917">&sect;0-EV &mdash; The horse dimension becomes two lists: coats to check, and every breed (2026-09-17, NOT played)</h2>
 
 <p>

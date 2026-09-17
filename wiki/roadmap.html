@@ -114,15 +114,10 @@
 </p>
 
 <ol>
-    <li><strong>Look at the three dialled genes</strong>
-        (<a href="verification.html#dialled-genes">&sect;0-CP</a>) &mdash; Starburst's
-        emblem now scales per horse, and Lantern and Tron burn at a level their dial
-        sets. They are the first genes whose <em>variation</em> is the point rather than
-        their pattern, and nothing but a person can say whether the range is right.</li>
-    <li><strong>Play-test the backlog</strong> &mdash; the two items that stood at the
-        top of this list both shipped, and neither has been seen by a person. A great
-        deal else is built and unplayed: see <a href="verification.html">To be
-        verified</a>, which is longer than this page's top section.</li>
+    <li><strong>Play-test the backlog.</strong> Far more is built and unplayed than is
+        unbuilt: <a href="verification.html">To be verified</a> is longer than this whole
+        page's top section, and it is the authority on what has actually been seen.
+        Nothing on this page competes with it for a session.</li>
     <li><strong>What is left of the visual marking designer</strong>
         (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial, the minimal shape
         and glow intensity have all shipped, so what remains is <strong>per-region
@@ -194,7 +189,7 @@
 <table>
 <thead><tr><th>Gene</th><th>Problem</th><th>Fix</th></tr></thead>
 <tbody>
-<tr><td><a href="gene-leopard.html"><strong>Leopard complex</strong></a></td><td><strong>&ldquo;White finds white&rdquo; is not applied.</strong> Leopard composes at priority 73, before the four white loci, so leopard + sabino simply stacks rather than compounding.</td><td>Decide whether the appaloosa patterns should read the coat they are handed like the other white painters do. Multi-pattern appaloosas are unverified either way. The spot / blanket / hoof-stripe constants are also first-guess and want a play session.</td></tr>
+<tr><td><a href="gene-leopard.html"><strong>Leopard complex</strong></a></td><td><strong>&ldquo;White finds white&rdquo; is not applied.</strong> Leopard composes at priority 73, before the four white loci, so leopard + sabino simply stacks rather than compounding.</td><td>Decide whether the appaloosa patterns should read the coat they are handed like the other white painters do. Multi-pattern appaloosas are unverified either way. The spot / blanket / hoof-stripe constants are first-guess, and looking at them is a check rather than work &mdash; <a href="verification.html#tuning-moved-0917">&sect;0-EW</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -261,16 +256,14 @@
     <li><strong>The rider sits wrong</strong> on a very large or very small horse
         &mdash; the mount offset is a vanilla constant. Related to bareback steering
         (&sect;<a href="#bond">14</a>).</li>
-    <li><strong>Most animations are unchecked at scale.</strong> The walk cycle was
-        partly addressed (<code>GeneticHorseRenderer.stretchGaitToSize</code> divides
-        <code>walkAnimationPos</code> by the scale, so a bigger horse takes
-        proportionally longer strides), but rear, eat, buck, the tail swish and the
-        seat position have not been looked at. Walk through each on a <code>p/p</code>
-        pony and a Percheron.</li>
-    <li><strong>A scaled foal has never been seen</strong>, and <code>Skin.BABY</code>&rsquo;s
-        projection is already approximate. Check a <code>p/p</code> foal before adding
-        anything else that scales.</li>
 </ul>
+
+<p class="muted">
+    Two entries that stood here were checks rather than work &mdash; the animations at
+    scale, and a scaled foal against <code>Skin.BABY</code>&rsquo;s approximate
+    projection. Both moved to
+    <a href="verification.html#tuning-moved-0917">&sect;0-EW</a> on 2026-09-17.
+</p>
 
 <hr>
 
@@ -375,11 +368,6 @@
         cornea, lens or inflammation rather than iris pigment, and is not an inherited
         eye-colour category at all. It would want to be a
         <a href="horse-body.html">condition</a>, not a claim on this channel.</li>
-    <li><strong>The wedge shapes may be too fine.</strong> Twelve masks over four texels
-        includes single corners and three-corner shapes; whether those read as
-        heterochromia at riding distance or as a stray pixel is the first thing to look at
-        in game. Restricting <code>EyePatch.WEDGES</code> to the four halves is a one-line
-        retreat if they do not. <a href="verification.html">To be verified</a>.</li>
     <li><strong>The foal sclera bug</strong> is a defect, not this work &mdash;
         <a href="#defects">&sect;1.2</a>.</li>
 </ul>
@@ -813,21 +801,20 @@
         de-pigmented mane reads as a <em>white</em> mane &mdash; a different horse and a
         worse lie than drawing nothing. Wants a bare-skin template or a real phase-3
         pass.</li>
-    <li><strong>Founder frequencies are guesses.</strong> Carrier rates run 1.2% to 4%,
-        chosen so a wild horse is healthy and an inbred line is not. Whether a player
-        ever actually meets a lethal at those numbers is a play-test question, and the
-        answer may be that they are all too rare to matter. The two dominants are the
-        exception and the one to watch: every copy shows, so PSSM1 at 2.5% is the only
-        disorder a player is likely to meet by accident, and it is the number most
-        likely to want turning.</li>
-    <li><strong>Nothing here has been play-tested</strong> &mdash; not a scaled horse,
-        not a dying foal, not a refused pairing, not the config, and not a wild horse
-        born sick. The
-        <a href="verification.html">checklist</a> is where that lives, and the custom
-        spawn egg is the quickest way in: adding a health gene defaults it to the
-        affected genotype, so &ldquo;add PLOD1, pick Foal, spawn&rdquo; is a one-click
-        lethal foal.</li>
 </ul>
+
+<p class="muted">
+    <strong>None of the health layer has been played</strong>, and that is not this
+    page&rsquo;s business: the checks live on
+    <a href="verification.html#health-loci-0917">&sect;0-EP</a> and in
+    <a href="verification.html#open-older">&sect;0-EB</a>, which already cover a dying
+    foal, a refused pairing, <code>health.mode</code> and a wild horse born sick.
+    <strong>Founder carrier rates are guesses</strong> &mdash; 1.2% to 4%, with PSSM1 at
+    2.5% the one a player actually meets, since every copy of a dominant shows &mdash;
+    but frequency tuning is <em>parked by the owner</em>
+    (<a href="known-gaps.html#gap-214">gap 214</a>), so it is not work waiting here
+    either.
+</p>
 
 <hr>
 
@@ -1086,7 +1073,7 @@
         economy (&sect;<a href="#items">13</a>).</li>
 </ul>
 
-<h3>Herds, and testing any of it</h3>
+<h3>Herds</h3>
 
 <ul>
     <li><strong>Nothing consumes the herd alpha.</strong> Computed on demand, no
@@ -1211,13 +1198,14 @@
         <code>CarrotEffect</code> case and a <code>fold</code> rule. Those five did not
         even need a case &mdash; they are one field on the existing
         <code>GeneSplice</code>. The list is meant to grow.</li>
-    <li><strong>The themed splices need play-balancing, not building.</strong> Each rolls
-        a uniform locus out of its slice, so a pool of five (marking) hits each locus
-        four times as often as a pool of twenty would. Whether that reads as
-        &ldquo;this carrot is about markings&rdquo; or as &ldquo;this carrot always gives
-        me sooty&rdquo; is a play question. A per-theme weighting, or letting a gene
-        declare its own weight, is the lever if it needs one.</li>
 </ul>
+
+<p class="muted">
+    The <a href="carrots.html#themed">five themed splices</a> need play-balancing rather
+    than building, so that question moved to
+    <a href="verification.html#tuning-moved-0917">&sect;0-EW</a> on 2026-09-17. The lever,
+    if it turns out to need one, is a per-theme weighting or a per-gene weight.
+</p>
 
 <hr>
 
@@ -1339,15 +1327,15 @@
     <li><strong>Teleport, recall and whistle</strong> need the stall and pen definitions
         &sect;<a href="#items">13</a> says are missing, plus answers for a destination
         that no longer exists and for whether any of it crosses dimensions.</li>
-    <li><strong>Every tab is an untested GUI.</strong> Built against the
-        26.1.2 retained-mode API with no play session. Risks: the fixed-panel slot and
-        label geometry at GUI scale 2/3/4, a ghost slot-highlight bleeding through on the
-        Gene database tab (the slots are <code>isActive() == false</code> there, but the
-        highlight path is only partly reachable), <code>quickMoveStack</code> edge cases,
-        the book &rarr; research paper result path, and &mdash; new &mdash; whether
-        thirteen columns of My horses are legible at GUI scale 3 and 4, where
-        <code>drawFitted</code> squeezes each one rather than dropping it.</li>
 </ul>
+
+<p class="muted">
+    <strong>Every tab is an untested GUI</strong>, built against the 26.1.2 retained-mode
+    API with no play session &mdash; but that is a check, not work, and it was already
+    recorded twice: <a href="known-gaps.html#gap-37">gap 37</a> holds the risk list, and
+    <a href="verification.html#open-older">&sect;0-EB</a> has the checks at GUI scale 2, 3
+    and 4.
+</p>
 
 <div class="note warn">
     <span class="label">Cut the &ldquo;limited custom egg&rdquo;</span>
@@ -1450,12 +1438,6 @@
         <a href="breed-designer/index.html">the designer</a> writes it, so an invented
         breed costs no Java at all. Nobody has written one yet, which is the whole of what
         is left here.</li>
-    <li><strong>Per-gene pool rates are estimates</strong>, never play-balanced. A herd
-        should read as that breed without being a monoculture, and that is eyeballed
-        across every one of them (<code>Breeds.all().size()</code> owns the count).</li>
-    <li><strong>Total horse density is unmeasured.</strong> Biome assignments overlap
-        heavily in the vanilla horse biomes, and <code>add_horse_loners</code> targets
-        <code>#minecraft:is_overworld</code> wholesale.</li>
     <li><strong>Traditional-band foals spawn at vanilla&rsquo;s ~5%</strong> instead of
         the intended &ldquo;up to 3&rdquo;. The <code>SpawnGroupData</code> route is
         unusable &mdash; <code>Horse.finalizeSpawn</code> replaces it per member &mdash;
@@ -1470,6 +1452,14 @@
         forget-on-line-of-sight timer. Horses are neutral until hit, deliberately, like a
         wolf.</li>
 </ul>
+
+<p class="muted">
+    Two entries here were measurements rather than work and are already recorded on
+    <a href="known-gaps.html#gap-31">gap 31</a>: <strong>per-gene pool rates</strong> are
+    eyeballed to &ldquo;reads as that breed, not a monoculture&rdquo; and have had no
+    balance pass, and <strong>total horse density is unmeasured</strong> because
+    <code>add_horse_loners</code> targets <code>#minecraft:is_overworld</code> wholesale.
+</p>
 
 <h3 id="breed-coverage">Breed coverage, and the studbook question &mdash; out of the last two intake files</h3>
 
@@ -1556,36 +1546,20 @@
 
 <p>
     Both are built &mdash; <a href="horse-dimension.html">the dimension</a> and the
-    <a href="item-spawn-eggs.html#custom">spawn egg</a>. Two pieces of rework remain.
+    <a href="item-spawn-eggs.html#custom">spawn egg</a>. One piece of rework remains.
 </p>
-
-<h3>20.1 Split the corridor</h3>
-
-<p>
-    The owner wants the dimension to read as a <em>gallery</em> again, without going back
-    to a catalogue-length corridor:
-</p>
-
-<ul>
-    <li><strong>Left side: random <em>breeds</em>.</strong> Each pen a
-        <code>BreedFounder.roll</code> of a real breed, signed with the breed name &mdash;
-        a walk past the breeds rather than past raw genotypes.</li>
-    <li><strong>Right side: totally random horses.</strong> The current
-        <code>ShowcaseGenotypes</code> draw, unchanged &mdash; the &ldquo;what can the
-        genes do&rdquo; half.</li>
-    <li>Both sides keep the mare + stallion pair and the per-pen sign. This is a
-        <code>buildPen</code> change (pick the draw by which side of the road the pen is
-        on) plus a second sign line for the breed. No new machinery.</li>
-</ul>
 
 <p class="muted">
-    If a <em>systematic</em> gallery is ever wanted again, the shape that scales is a
-    <strong>wing per locus</strong> &mdash; each gene&rsquo;s pairs on a fixed wild-type
-    background, bounded by alleles rather than by their product, extending naturally to a
-    modded gene adding its own wing.
+    <strong>Splitting the corridor shipped on 2026-09-17</strong> and was deleted from
+    here, as a shipped thing should be: the right column is
+    <code>CoatCheckPlan</code> &mdash; one pen per allele combination of every gene with
+    no <code>Verified</code> block, so the list <em>ends</em> &mdash; and the left is
+    every breed alphabetically. It is written up on
+    <a href="horse-dimension.html#pens">the horse dimension</a>, and unplayed at
+    <a href="verification.html#corridor-two-columns-0917">&sect;0-EV</a>.
 </p>
 
-<h3>20.2 The per-copy epigenetics editor</h3>
+<h3>The per-copy epigenetics editor</h3>
 
 <p>
     The spawner&rsquo;s whole-genome <em>Rnd epigen.</em> covers the creative use; the
@@ -1642,10 +1616,6 @@
     <li><strong>Display.</strong> The pen sign caps out; the info panel needs grouping
         (colour / pattern / performance / health) and probably scrolling. It has already
         gained two rows and a condition list.</li>
-    <li><strong>Wild-spawn frequency needs a pass.</strong> With a dozen recessive lethals
-        in the pool and more coming (&sect;<a href="#health-genes">11</a>): rare enough
-        that wild horses are healthy, common enough that a breeder eventually meets
-        one.</li>
     <li><strong>Composer cost.</strong> Phase 1 is O(painting genes &times; texels) at
         16,384 texels per sheet, and the non-painting genes cost nothing. The pattern
         genes&rsquo; <code>BodyNoise</code> sampling is the real cost, and coats are
