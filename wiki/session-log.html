@@ -27,6 +27,100 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-over">2026-09-17, last of all &mdash; A layer can say it paints over the ones above it</h2>
+
+<p>
+    Two pieces of work, and the first one is why the second was findable. The owner asked
+    what was next on the roadmap, and the honest answer was that the top of the page was
+    not answerable: its first item pointed at a verification entry that had been
+    <em>deleted</em> because the thing was confirmed, and several others were checks
+    rather than work. So the page was audited first, and then the real top item was built.
+</p>
+
+<h3>The roadmap was carrying nine things that were not work</h3>
+
+<p>
+    <strong>The roadmap is unbuilt work; <a href="verification.html">to be verified</a> is
+    built-but-unseen.</strong> Nine entries had drifted across that line &mdash; balance
+    questions and &ldquo;go and look at it&rdquo; checks about things already in the game.
+    They were a trap rather than clutter: a session reading the top of the page for
+    <em>what do I build next</em> found items it could not build, only look at.
+</p>
+
+<ul>
+    <li><strong>Five moved</strong> to a new <a href="verification.html#tuning-moved-0917">&sect;0-EW</a>,
+        ranked below the behavioural checks by that page&rsquo;s own rule, since each
+        announces itself the moment anybody looks: the themed splices&rsquo; per-theme
+        weighting, a scaled foal against <code>Skin.BABY</code>&rsquo;s approximate
+        projection, the animations at scale, whether the twelve eye wedges read as
+        heterochromia or as a stray pixel, and leopard&rsquo;s first-guess spot and blanket
+        constants.</li>
+    <li><strong>Four were deleted rather than moved</strong>, because the check already
+        existed and a third copy is how three sources of truth drift apart: the
+        browser&rsquo;s untested tabs (<a href="known-gaps.html#gap-37">gap 37</a>), breed
+        pool rates and world horse density (<a href="known-gaps.html#gap-31">gap 31</a>,
+        verbatim), the unplayed health layer, and founder and wild-spawn frequency &mdash;
+        which the owner <em>parked</em> on <a href="known-gaps.html#gap-214">gap 214</a>, so
+        moving it would have quietly reopened a closed call.</li>
+    <li><strong>Two stale things fell out of the audit.</strong> &sect;21&rsquo;s
+        &ldquo;split the corridor&rdquo; had shipped that morning and should have gone with
+        it, and the page&rsquo;s own top item still pointed at the dialled genes, whose
+        verification entry is gone because they were confirmed.</li>
+</ul>
+
+<h3>Then the thing at the top, which was a format change</h3>
+
+<p>
+    A magical gene&rsquo;s layers each measured their delta against the colour the
+    <em>gene</em> started from, and the deltas summed. Authors &mdash; human and model
+    alike &mdash; write files as though each layer painted over the one above it, because
+    that is what layers mean everywhere else, and the format had no way to say it. So they
+    wrote the thing that looks like stacking and got summing: a solid black dorsal wing, a
+    white contour, a starburst with no core, and eight of the twenty-four genes in the
+    2026-09-10 intake, every one rewritten disjoint by hand. That is
+    <a href="known-gaps.html#gap-169">gap 169</a>, and
+    <a href="making-a-gene.html#over"><code>"over": true</code></a> is its root cause fix.
+</p>
+
+<ul>
+    <li><strong>The arithmetic falls out rather than being imposed.</strong>
+        <code>toward()</code> returns a step from whatever view it is handed, so a step
+        measured from the accumulated colour lands the layer on the colour it asked for,
+        while a layer without the flag still measures from the gene&rsquo;s start and sums
+        exactly as before. The engine copies the idiom
+        <code>SpecPainter.restrict</code> already used ten lines above &mdash; snapshot,
+        apply the delta so far, hand that to the layer &mdash; and going through
+        <code>apply()</code> rather than adding channels by hand means a <code>FLAT</code>
+        layer underneath reads as the flat colour it set.</li>
+    <li><strong>Opt-in is the whole design, and it was provable.</strong> No shipped gene
+        sets the flag, so <code>CoatBakeGoldenTest</code> and <code>DeadLayerTest</code>
+        pass with <em>both golden files untouched</em>. That answers the question the
+        roadmap entry had parked &mdash; whether <code>expected.json</code> and the goldens
+        move &mdash; without a migration: only the fixtures gained rows.</li>
+    <li><strong>The five-file contract was the wrong template.</strong>
+        <code>SpecSchema</code> holds mask and op parameters only &mdash; a layer&rsquo;s
+        allowed keys live in <code>GeneSpecParser.expectKeys</code> &mdash; and the designer
+        inherits <code>common/</code> through TeaVM. What it <em>did</em> need and the
+        contract does not mention: the creator&rsquo;s exporter whitelist, where an unknown
+        key is silently dropped, and a <code>ColorField.mutableCopy</code> that only
+        <code>PigmentField</code> had.</li>
+    <li><strong>Parity coverage was demonstrated, not assumed.</strong> Prismatic gained an
+        <code>over</code> wash across the barrel, all four <code>BODY</code> probes moved,
+        and breaking the creator&rsquo;s branch on purpose turned the check <strong>red on
+        124 comparisons</strong> before it was restored &mdash; the step
+        <a href="making-a-gene.html#pointsmin"><code>pointsMin</code></a> nearly shipped
+        without.</li>
+    <li><strong>Two refusals, both load errors that name the reason:</strong>
+        <code>over</code> on a natural gene, where <code>restrict</code> already re-reads
+        between layers so the flag would change nothing, and on a <code>FLAT</code> layer,
+        which replaces the texel anyway. A flag that quietly means nothing is how an author
+        talks himself into believing a layer does something it does not.</li>
+    <li><strong>The payoff is deliberately not taken.</strong> No real gene uses it yet.
+        Dorsal wing, contour, starburst and the eight nested intake genes each want judging
+        on a horse, so they belong after this is proven rather than inside the commit that
+        built it.</li>
+</ul>
+
 <h2 id="d2026-09-17-corridor">2026-09-17, last &mdash; The horse dimension stops being a random gallery</h2>
 
 <p>
