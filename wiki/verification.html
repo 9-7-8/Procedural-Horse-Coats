@@ -81,10 +81,13 @@
 <h2 id="regions-0917">&sect;0-EZ &mdash; A colour op can paint a different colour per region (2026-09-17, NOT played)</h2>
 
 <p>
-    <code>TOWARD</code> and <code>FLAT</code> take a <code>regions</code> list &mdash;
+    <strong>All four colour ops</strong> take a <code>regions</code> list &mdash;
     <a href="making-a-gene.html#regions">the format page</a> has the shape. Each entry names
     <code>parts</code> and the colour they take, so one layer paints the legs paler than the
-    barrel where it used to take two.
+    barrel where it used to take two. On <code>RAMP</code> and <code>PALETTE</code>, added
+    later the same day, an entry carries a whole colour <em>source</em> &mdash; its own stops,
+    its own swept hue, or one flat colour &mdash; while the op keeps the axis, span, seed and
+    scale, so the regions recolour one shared sweep rather than each running one of their own.
 </p>
 
 <div class="note good">
@@ -93,9 +96,19 @@
         <strong>No shipped gene uses the field</strong>, so both coat goldens and
         <code>dead-layers.txt</code> came through <em>untouched</em>: nothing moved a pixel,
         nothing died, and nothing on the ratchet came alive. Parity is green at
-        7&nbsp;171 checks and was <em>proved</em> to see the new field rather than assumed to
-        &mdash; regressing the region lookup on purpose fails 480 checks, and regressing only
-        the lightness inside a region fails 138.
+        7&nbsp;173 checks and was <em>proved</em> to see the new field rather than assumed to,
+        on both halves. On <code>TOWARD</code>/<code>FLAT</code>: regressing the region lookup
+        fails 480 checks, and regressing only the lightness inside a region fails 138. On
+        <code>RAMP</code>/<code>PALETTE</code>: ignoring the region lookup fails
+        <strong>496</strong>, and regressing only a region&rsquo;s own <code>hueSpan</code>
+        fails <strong>108</strong> &mdash; so the per-region span is compared and not just the
+        fact that a region is there.
+    </p>
+    <p>
+        Worth knowing <em>why</em> that was measured twice rather than trusted: the second
+        change moved the parity count by <strong>two</strong>, from 7&nbsp;171 to 7&nbsp;173,
+        which is the schema table&rsquo;s two new entries and nothing else. That is also
+        exactly what a fixture which never looks at the new code path would report.
     </p>
 </div>
 
@@ -105,20 +118,31 @@
         <em>spec</em> after each gesture rather than the picture), and the row renders in the
         right place &mdash; <code>["Layer name", "parts", "Effect", "Colour", "Regions",
         "strength", "opacity"]</code>. But nobody has <em>looked</em> at it. The risk is
-        layout rather than logic: each entry stacks a parts-chip grid, a two-mode colour fork
-        and a remove button inside a single op row, which is more than any other op parameter
-        puts there. Same shape as <a href="known-gaps.html#gap-98">gap 98</a>.</li>
+        layout rather than logic: each entry stacks a parts-chip grid, a colour fork and a
+        remove button inside a single op row, which is more than any other op parameter puts
+        there. Same shape as <a href="known-gaps.html#gap-98">gap 98</a>.
+        <strong>And it got worse on <code>RAMP</code> and <code>PALETTE</code></strong>, where
+        the fork has <em>three</em> modes (its own stops / its own swept hue / one flat colour)
+        and the first of them nests a whole <b>stop-list editor</b> &mdash; add, remove and
+        reorder colours &mdash; inside that same row. Nothing has rendered it. The mode switch
+        also has to <em>delete</em> the keys of the mode it left, because the parser refuses an
+        entry naming two colour sources, so a leftover key would read in the creator as the
+        switch being broken; that path is unexercised too.</li>
     <li><strong>Nothing in the game draws one yet</strong>, and that is the honest state
         rather than an oversight: the first real test is authoring a gene that uses it. The
-        example gene <code>prismatic.json</code> carries one &mdash; paler legs, and a mane in
-        the horse&rsquo;s own hue &mdash; and is visible in the creator, but
-        <code>example-genes/</code> does not ship in the mod, so the horse dimension has
-        nothing to show.</li>
-    <li><strong>The three load errors have tests but have never been read by a person.</strong>
-        A region naming no parts, a region carrying no colour, and a part claimed by two
-        entries are each refused at load with a message naming the part in dispute. Worth one
-        deliberately broken file in <code>run/phc/genes/</code> to watch the message arrive,
-        since the failure these guard against is the silent no-op.</li>
+        example gene <code>prismatic.json</code> carries three &mdash; paler legs with a mane in
+        the horse&rsquo;s own hue, a ramp whose tail, legs and muzzle each take a different
+        source, and a palette that swaps on the mane &mdash; and all are visible in the
+        creator, but <code>example-genes/</code> does not ship in the mod, so the horse
+        dimension has nothing to show.</li>
+    <li><strong>The four load errors have tests but have never been read by a person.</strong>
+        A region naming no parts, a region carrying no colour, <strong>a region naming two
+        colour sources</strong>, and a part claimed by two entries are each refused at load,
+        the last with a message naming the part in dispute. So is a key the op does not have
+        &mdash; <code>hueSpan</code> on a <code>TOWARD</code> region &mdash; and a one-entry
+        <code>colors</code> list, which is refused pointing at <code>color</code> instead.
+        Worth one deliberately broken file in <code>run/phc/genes/</code> to watch the message
+        arrive, since the failure these guard against is the silent no-op.</li>
 </ul>
 
 <h2 id="over-payoff-0917">&sect;0-EY &mdash; Eleven genes stop faking it with subtraction (2026-09-17, NOT played)</h2>

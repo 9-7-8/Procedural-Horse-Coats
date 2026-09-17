@@ -27,6 +27,118 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-ramp-regions">2026-09-17, last of the day &mdash; A ramp or a palette takes its colour source per region</h2>
+
+<p>
+    The entry below left <code>RAMP</code> and <code>PALETTE</code> out, and that remainder
+    was all of <a href="roadmap.html#designer">&sect;10</a> still standing. This finished it.
+</p>
+
+<h3>What does a region even mean on an op that generates its colour?</h3>
+
+<p>
+    That was the whole decision, and it is not answerable from the roadmap entry, which only
+    said &ldquo;the same field&rdquo;. <code>TOWARD</code> and <code>FLAT</code> <em>name</em>
+    a colour, so a region overrides it. <code>RAMP</code> and <code>PALETTE</code>
+    <strong>generate</strong> one &mdash; a stop list walked along an axis, a draw per cell
+    &mdash; so there is no flat colour to override. Three shapes were put to the owner:
+    an entry carrying a whole colour <em>source</em> of its own with a one-stop shorthand
+    (taken), the same without the shorthand, or the cheap one &mdash; reuse the existing
+    <code>Region</code> record verbatim so a named part takes one solid colour and the ramp
+    covers only what is left.
+</p>
+
+<p>
+    <strong>The cheap one was the one to refuse.</strong> It would have made a region
+    <em>less</em> expressive than the op it sits in, which is the exact thing
+    <a href="making-a-gene.html#regions">the field&rsquo;s own doc</a> calls out as wrong, and
+    a flat patch inside a ramp is already writable as a second <code>FLAT</code> layer &mdash;
+    so it would have cost a format change and bought nothing. It also would not have touched
+    the complaint the roadmap actually had: a ramp confined to one region still costing a
+    layer per region.
+</p>
+
+<h3>The op keeps the geometry, and that is the point</h3>
+
+<p>
+    An entry carries exactly one source &mdash; its own <code>colors</code>, its own swept
+    <code>hue</code>, or a single <code>color</code>. What it does <strong>not</strong> carry
+    is the axis, <code>space</code>, <code>from</code>/<code>to</code>, <code>seed</code> or
+    <code>scale</code>: those stay the op&rsquo;s, so the regions recolour <em>one shared
+    sweep</em> rather than each running one of their own. That is the whole advantage over a
+    layer per region &mdash; the sweep cannot drift out of step with itself, because there is
+    only one of it. On a <code>PALETTE</code> the same holds one level down: seed and scale are
+    read <em>before</em> the region is consulted, so the tessellation runs unbroken across a
+    region boundary and only the colours drawn from it change.
+</p>
+
+<p>
+    <strong>A flat region turned out to need no special case.</strong> It is a one-stop ramp:
+    interpolation needs a <em>pair</em> of stops, a list of one has none, and the tail of
+    <code>rampColour</code> already returns the last stop. The parser normalises
+    <code>color</code> to a one-entry list on the way in, so nothing downstream grew a second
+    fork for &ldquo;flat&rdquo; &mdash; and a palette of one hands every cell the same entry
+    for the same reason.
+</p>
+
+<h3>Where the legal keys live, and why that spot</h3>
+
+<p>
+    A region may only spell a colour the way its own op does, so the parser needs to know
+    which keys each op allows &mdash; <code>hueSpan</code> on a <code>TOWARD</code> region is
+    refused rather than stored for nobody to read. Those keys ride in
+    <code>SpecSchema.Param.choices</code>, which is a second meaning for that field and was
+    chosen deliberately: <strong><code>choices</code> is what <code>SpecFixtureTool</code>
+    bakes and <code>parity.js</code> compares.</strong> A sixth record component would have
+    been invisible to parity unless both of those were extended too, so the creator could have
+    offered a region a key the game refuses and nothing would have caught it. This way the
+    vocabulary is compared across the two engines for free. Defaults are read out of the
+    op&rsquo;s own parameter list by name for the same one-copy reason &mdash; which is why
+    <code>hue</code> defaults to &minus;1 on <code>TOWARD</code> and 0 on <code>RAMP</code>
+    without the parser knowing either number.
+</p>
+
+<p>
+    Four load errors now rather than three: no <code>parts</code>, no colour, <strong>two
+    colour sources in one entry</strong>, and a part claimed twice. The third is new and is
+    the same discipline as the fourth &mdash; a region naming both <code>colors</code> and a
+    <code>hue</code> has no answer that is not arbitrary, and the op&rsquo;s own quiet
+    precedence (stops win) is not a rule worth teaching by experiment.
+</p>
+
+<h3>The gate was watched going red, because green meant almost nothing here</h3>
+
+<p>
+    Parity came back green at <strong>7&nbsp;173</strong> checks against 7&nbsp;171 before
+    &mdash; a rise of <em>two</em>, after two whole layers were added to
+    <code>prismatic</code> and a new parameter to two ops. Those two are the schema table&rsquo;s
+    two new entries, which is consistent, but it is exactly the shape a fixture that never
+    looks at the new path would also have. So it was measured: ignoring the region lookup on
+    both ops fails <strong>496 checks</strong>, and regressing <em>only</em> a region&rsquo;s
+    own <code>hueSpan</code> fails <strong>108</strong> &mdash; so the per-region span is
+    compared, not merely the fact that a region exists. Both coat goldens and
+    <code>dead-layers.txt</code> are untouched, because no shipped gene carries the field.
+</p>
+
+<h3>What was deliberately not done</h3>
+
+<ul>
+    <li><strong>No gene was authored to use it.</strong> The field is opt-in and nothing in
+        the game draws one, which is why both goldens sat still. <code>prismatic</code> gains
+        a four-source ramp and a region-swapped palette, but that is a parity fixture rather
+        than a horse anyone meets.</li>
+    <li><strong>The creator&rsquo;s control for it has never been on a screen.</strong> The
+        region editor grew a third mode on the two generating ops (its own stops / its own
+        swept hue / one flat colour), driven off the schema so it cannot offer an illegal
+        key. It is syntax-checked and the designer boots clean, but the
+        <a href="gene-creator/">creator</a> itself was not opened &mdash;
+        <a href="verification.html#regions-0917">&sect;0-EZ</a>.</li>
+    <li><strong><a href="known-gaps.html#gap-164">Gap 164</a> is still open.</strong> A region
+        can now hold its own hue, which is a second independent draw and still not
+        &ldquo;this hue plus 180 degrees&rdquo;. Nothing here brings arithmetic to a
+        parameter slot.</li>
+</ul>
+
 <h2 id="d2026-09-17-regions">2026-09-17, later still &mdash; One layer, a different colour per region</h2>
 
 <p>
@@ -106,7 +218,9 @@
         bypass <code>solidColour</code> for a colour source of their own &mdash; a stop list
         walked along an axis, a colour drawn per cell &mdash; so scoping them is a second
         change rather than the same one. It is the remainder of
-        <a href="roadmap.html#designer">&sect;10</a> now.</li>
+        <a href="roadmap.html#designer">&sect;10</a> now.
+        (<em>Built the same day &mdash; <a href="#d2026-09-17-ramp-regions">the next entry
+        up</a>.</em>)</li>
     <li><strong><a href="known-gaps.html#gap-164">Gap 164</a>&rsquo;s <code>hueOffset</code>
         stays open.</strong> It was floated as a cheap addition once the colour ops were open
         and then left out on purpose, to keep the change one feature.</li>
