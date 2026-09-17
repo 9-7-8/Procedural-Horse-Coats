@@ -643,6 +643,14 @@ window.HG = window.HG || {};
           what.appendChild(opParamRow(layer.op, p));
         });
 
+        // Whether this layer measures from the colour the gene started at (the
+        // default, and what every layer did before the flag) or from what the
+        // layers above it have already painted.
+        if (spec.phase === "magical") {
+          what.appendChild(el("h4", { text: "Stacking" }));
+          what.appendChild(overRow(layer));
+        }
+
         // Glow is a property of the LAYER, not of the op: the same TOWARD that
         // paints a teal spot paints a lit one with this number moved. Magical
         // genes only - pigment does not glow, and the loader refuses it.
@@ -887,6 +895,46 @@ window.HG = window.HG || {};
       }
     });
     return card;
+  }
+
+  /**
+   * <b>Whether this layer paints on top of the layers above it</b>, instead of
+   * measuring its pull from the colour the gene started at and summing.
+   *
+   * <p>Off is the absence of the key, as with the glow: summing is what every
+   * layer did before this flag existed, so a layer nobody ticks exports exactly
+   * what it always did and no shipped gene moves.
+   */
+  function overRow(layer) {
+    var on = !!layer.over;
+    var row = el("div", { class: "row" }, [
+      (function () {
+        var l = el("label", {
+          class: "cover-toggle",
+          title: "Measure against what the layers above this one painted"
+        });
+        var cb = el("input", { type: "checkbox" });
+        cb.checked = on;
+        cb.addEventListener("change", function () {
+          if (cb.checked) layer.over = true;
+          else delete layer.over;
+          changed();
+        });
+        l.appendChild(cb);
+        l.appendChild(el("span", { text: "paints over" }));
+        return l;
+      })()
+    ]);
+    var wrap = el("div", { class: "col" }, [row]);
+    wrap.appendChild(el("p", {
+      class: "hint",
+      text: on
+        ? "This layer reads the coat as the layers above it left it, so a dark core "
+          + "drawn inside a pale shape stays a core instead of adding to it."
+        : "Layers sum by default: each measures its pull from the colour the gene "
+          + "started at, so a dark mark inside a pale one comes out pale-plus-dark."
+    }));
+    return wrap;
   }
 
   /**

@@ -78,6 +78,52 @@
     </p>
 </div>
 
+<h2 id="over-flag-0917">&sect;0-EX &mdash; A layer can paint over the ones above it (2026-09-17, NOT played)</h2>
+
+<p>
+    <code>"over": true</code> on a layer makes it measure against the coat as its own gene
+    has painted it so far, rather than against the colour the gene started at &mdash; so it
+    <em>stacks</em> instead of summing. It is the root cause behind
+    <a href="known-gaps.html#gap-169">gap 169</a>, and is written up on
+    <a href="making-a-gene.html#over">the format page</a>.
+</p>
+
+<p>
+    <strong>Nothing in a world should look different.</strong> The flag is opt-in, no
+    shipped gene sets it, and both coat goldens are unchanged &mdash; that half is settled
+    by test rather than by eye, and is not worth a minute of anybody's session. What no
+    test can see is the creator's new control, and what no gene yet exercises is the flag
+    itself.
+</p>
+
+<ul>
+    <li><strong>The <em>paints over</em> box round-trips</strong>
+        (<a href="gene-creator/index.html">the gene creator</a>, on a magical gene). Tick
+        it under <strong>Stacking</strong> on a layer that overlaps the one above it: the
+        preview should redraw with that layer's own colour instead of a sum. Export and the
+        file carries <code>"over": true</code> on that layer and nothing on the others;
+        load the export back and the box is still ticked. <strong>Untick it and the key
+        must disappear entirely</strong> rather than export as <code>"over": false</code>
+        &mdash; the exporter drops defaults, and a layer nobody touched has to come out
+        byte-identical to what it was before the flag existed.</li>
+    <li><strong>Both refusals name the reason.</strong> Put <code>over</code> on a
+        <code>FLAT</code> layer, and on a natural gene. The creator should lint each before
+        the loader ever sees it, and a drop-in file carrying either should be refused at
+        load with the file, the layer and the fix named.</li>
+    <li><strong>The example gene grew a layer, on purpose.</strong>
+        <code>example-genes/prismatic.json</code> now ends in an <code>over</code> wash
+        across the barrel &mdash; that is what gives the parity fixtures a case which
+        reaches the flag, proven by breaking the creator's port and watching parity go red
+        on 124 checks. It is deliberately crude: dropped into <code>phc/genes/</code> it
+        will read as a flat orange band over everything else on the barrel. That is
+        correct, not a bug.</li>
+    <li><strong>No real gene uses it yet.</strong> Dorsal wing, contour, starburst and the
+        eight nested genes of the 2026-09-10 intake are the candidates
+        (<a href="known-gaps.html#gap-169">gap 169</a>). Each is a look-at-the-horse change
+        rather than a mechanical one, so they were deliberately left out of the commit that
+        built the flag.</li>
+</ul>
+
 <h2 id="tuning-moved-0917">&sect;0-EW &mdash; Tuning and balance questions, moved off the roadmap (2026-09-17, NOT played)</h2>
 
 <p>

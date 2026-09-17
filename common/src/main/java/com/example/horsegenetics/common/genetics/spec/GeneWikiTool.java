@@ -1070,6 +1070,11 @@ public final class GeneWikiTool {
                 }
                 sb.append(" &mdash; ").append(String.join(" &times; ", masks))
                         .append(", painted with <code>").append(layer.op().type()).append("</code>");
+                if (layer.over()) {
+                    // The difference between a core drawn INSIDE a shape and one
+                    // added to it, which the mask list alone does not show.
+                    sb.append(", <strong>over</strong> what the layers above it painted");
+                }
                 if (layer.glows()) {
                     // How brightly, because "glows" beside a horse that is barely
                     // lit reads as a bug - and a glow that varies per horse is the

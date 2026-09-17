@@ -392,6 +392,10 @@ window.HG = window.HG || {};
             && layer.emissive !== false) {
             out.emissive = layer.emissive === true ? 1 : cloneValue(layer.emissive);
           }
+          // Absent unless set: a layer that does not say it paints on top
+          // behaves exactly as every layer did before the flag existed, so an
+          // untouched gene exports byte-for-byte what it always did.
+          if (layer.over) out.over = true;
           return out;
         });
         if (e.effects && e.effects.length) entry.effects = e.effects.map(tidyEffect);
@@ -603,6 +607,12 @@ window.HG = window.HG || {};
       if (!layer.masks || !layer.masks.length) {
         out.push("Layer " + (i + 1) + " has no masks, so it covers the whole horse. "
           + "Add an ALL mask if that is what you meant.");
+      }
+      // The loader refuses this one, so say it here first.
+      if (layer.over && layer.op && layer.op.type === "FLAT") {
+        out.push("Layer " + (i + 1) + " is marked \"paints over\" and uses FLAT. FLAT "
+          + "replaces the texel outright, so it already covers whatever is under it "
+          + "and the flag cannot change anything. Drop one of the two.");
       }
     });
     var names = (spec.knobs || []).map(function (k) { return k.name; });

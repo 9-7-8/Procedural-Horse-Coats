@@ -96,6 +96,20 @@ window.HG = window.HG || {};
   ColorField.prototype.blueAt = function (px, py) { return this.b[py * this.size + px]; };
   ColorField.prototype.opacityAt = function (px, py) { return this.a[py * this.size + px]; };
 
+  // Mirrors ColorField.mutableCopy in Java, `absolute` and `painted` included.
+  // An "over" layer takes one of these mid-gene, and a copy that dropped the
+  // absolute flags would read a FLAT layer under it as an ordinary sum.
+  ColorField.prototype.mutableCopy = function () {
+    var c = new ColorField(this.size);
+    c.r.set(this.r);
+    c.g.set(this.g);
+    c.b.set(this.b);
+    c.a.set(this.a);
+    c.absolute.set(this.absolute);
+    c.painted.set(this.painted);
+    return c;
+  };
+
   ColorField.prototype.add = function (px, py, dr, dg, db) {
     var i = py * this.size + px;
     this.r[i] = this.r[i] + dr;

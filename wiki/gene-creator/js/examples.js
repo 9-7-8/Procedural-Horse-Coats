@@ -1235,6 +1235,28 @@ window.HG.examples = {
               "color": "#9fd6ff",
               "strength": 74
             }
+          },
+          {
+            "name": "a wash across the barrel that paints OVER the layers above it",
+            "over": true,
+            "masks": [
+              {
+                "type": "AXIS",
+                "parts": [
+                  "BODY"
+                ],
+                "axis": "Y",
+                "space": "part",
+                "from": 0.0,
+                "to": 1.0,
+                "softness": 0.5
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#ffb060",
+              "strength": 55
+            }
           }
         ]
       },

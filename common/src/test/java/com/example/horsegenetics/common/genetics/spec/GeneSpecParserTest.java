@@ -283,6 +283,53 @@ class GeneSpecParserTest {
         assertTrue(e.getMessage().contains("never both"), e.getMessage());
     }
 
+    /**
+     * A natural layer already reads the coat as the layer above it left it, so
+     * 'over' there would be a flag that quietly changes nothing - which is the
+     * shape of mistake this parser exists to refuse out loud.
+     */
+    @Test
+    void rejectsOverOnANaturalGene() {
+        String json = gene("""
+                , "phase": "natural",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "over": true, "masks": [],
+                      "op": { "type": "RESTRICT", "black": 0.5 } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "naturalover.json"));
+        assertTrue(e.getMessage().contains("magical-phase property"), e.getMessage());
+        assertTrue(e.getMessage().contains("PIGMENT mask chain"),
+                "the message should say why it is already true there: " + e.getMessage());
+    }
+
+    /** FLAT replaces the texel, so it covers what is beneath it either way. */
+    @Test
+    void rejectsOverOnAFlatLayer() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "over": true, "masks": [],
+                      "op": { "type": "FLAT", "color": "#ff0000" } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "flatover.json"));
+        assertTrue(e.getMessage().contains("FLAT layer cannot be 'over'"), e.getMessage());
+        assertTrue(e.getMessage().contains("TOWARD"),
+                "the message should name what to use instead: " + e.getMessage());
+    }
+
+    /** The flag is absent by default, so no gene written before it exists moves. */
+    @Test
+    void aLayerDoesNotPaintOverUnlessItSaysSo() {
+        GeneSpec spec = GeneSpecParser.parse(example("aurora.json"), "aurora.json");
+        for (GeneSpec.Layer layer : named(spec, "aurora").layers()) {
+            assertFalse(layer.over(), "no shipped layer should default to 'over'");
+        }
+    }
+
     @Test
     void rejectsAnUndeclaredKnobReference() {
         String json = gene("""

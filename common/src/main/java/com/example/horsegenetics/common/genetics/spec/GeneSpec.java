@@ -400,8 +400,24 @@ public record GeneSpec(
      * the cut existed to keep a glow from blooming two body units wider than
      * the shape that drew it, and a falloff does that better by being the
      * falloff the author already drew.
+     *
+     * <p>{@code over} says this layer <b>paints on top of the layers above
+     * it</b>. By default every layer of a gene measures its pull from the
+     * colour the <i>gene</i> started at and the pulls are summed, so a dark core
+     * drawn inside a pale disc comes out pale-plus-dark, and three nested
+     * near-whites clamp to one flat white with nothing inside it. That is what
+     * layers mean nowhere else, so authors - human and model alike - keep
+     * writing the nested thing and getting the sum. With {@code over} the layer
+     * reads the coat as this gene has painted it so far, which is the picture
+     * stacking would have drawn.
+     *
+     * <p>It is <b>opt-in and defaults false</b>, deliberately: every gene
+     * written before the flag existed keeps summing, and not one of them moves.
+     * It is refused on a {@code FLAT} layer, which replaces the texel outright
+     * and so covers what is beneath it either way, and on a natural gene, where
+     * {@code SpecPainter#restrict} already re-reads per layer.
      */
-    public record Layer(String name, List<Mask> masks, Op op, Value emissive) {
+    public record Layer(String name, List<Mask> masks, Op op, Value emissive, boolean over) {
 
         /** Whether this layer glows at all - i.e. whether it declared one. */
         public boolean glows() {

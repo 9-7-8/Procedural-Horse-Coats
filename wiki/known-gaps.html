@@ -816,14 +816,21 @@ layers sum, and that a nested marking has to be written disjoint (each layer mul
 the inverted shape of every layer painted after it, which for hard masks is stacking
 exactly). That is what all eight were rebuilt with.</p>
 
-<p><strong>The root-cause fix, not done and not this session's call:</strong> a per-layer
-<code>"over": true</code> that applies the delta accumulated so far before the layer
-measures. The reason authors keep writing this is that the format <em>cannot say</em>
-"paint this on top of that", so they write the thing that looks like it and get summing.
-With <code>over</code>, dorsal wing's original file would have been correct as written.
-It is a format change and therefore the <a href="making-a-gene.html#contracts">five-file
-contract</a> - engine, schema, fixtures, the creator's JS twin, the designer - plus every
-golden, so it wants deciding rather than doing.</p>
+<p><strong>The root-cause fix shipped 2026-09-17:</strong> a per-layer
+<code>"over": true</code> applies the delta accumulated so far before the layer measures, so
+the format can now say "paint this on top of that" - <a href="making-a-gene.html#over">the
+format page</a>. It is opt-in and defaults false, so every gene written before it keeps
+summing and <em>neither golden moved</em>. The change was smaller than the
+<a href="making-a-gene.html#contracts">five-file contract</a> implied: <code>SpecSchema</code>
+holds mask and op parameters only, so a layer's allowed keys live in
+<code>GeneSpecParser</code>, and the designer inherits <code>common/</code> through TeaVM.
+The port is covered - breaking the creator's <code>over</code> branch on purpose turned
+parity red on 124 checks.</p>
+
+<p><strong>Everything above is still true of every shipped gene</strong>, because none of them
+uses the flag yet. Rewriting dorsal wing, contour, starburst and the eight nested genes of the
+2026-09-10 intake to use it is a per-gene change that has to be judged on a horse, and has not
+been started.</p>
 
 <p><strong>The 29 are a ratchet, not a backlog that can rot.</strong>
 <code>common/src/test/resources/dead-layers.txt</code> fails the test if anything new

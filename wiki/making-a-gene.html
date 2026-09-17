@@ -1657,6 +1657,58 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
     list instead: name stops and it uses them, leave it out and it sweeps the hue.
 </p>
 
+<h3 id="over">Painting over the layers above</h3>
+
+<p>
+    By default every layer of a gene measures its pull from the colour the
+    <strong>gene</strong> started at, and the pulls are <strong>summed</strong>. Two
+    layers that overlap therefore add: a dark core drawn inside a pale disc comes out
+    pale-plus-dark, and three near-whites nested one inside the next clamp to a single
+    flat white with nothing inside it.
+</p>
+
+<p>
+    <code>"over": true</code> makes a layer read the coat as <em>this gene</em> has
+    painted it so far instead, so it <strong>stacks</strong> on the layers above it
+    &mdash; which is what layers mean in every other drawing tool, and what authors kept
+    writing before the format could say it.
+</p>
+
+<pre><code class="language-json">"layers": [
+  { "name": "the pale disc",
+    "masks": [ ... ], "op": { "type": "TOWARD", "color": "#ffffff" } },
+  { "name": "the dark core", "over": true,
+    "masks": [ ... ], "op": { "type": "TOWARD", "color": "#201020" } }
+]</code></pre>
+
+<div class="note">
+    <span class="label">It is opt-in, and that is the point</span>
+    <p>
+        A layer with no <code>over</code> behaves exactly as every layer did before the
+        flag existed, so <strong>no shipped gene moves</strong> and neither golden file
+        changes. That is what made it worth adding rather than changing the default: the
+        summing behaviour is load-bearing in the genes whose colours were tuned around
+        it.
+    </p>
+    <p>
+        The older way still works, and is what every shipped gene does &mdash; write the
+        marking <strong>disjoint</strong>, each layer multiplying in the inverted shape of
+        every layer painted after it (a disc minus the ring minus the core; a ring minus
+        the core). For hard-edged masks that draws the same picture.
+        <code>over</code> is the cheaper way to say it, and the one that does not quietly
+        go wrong when somebody edits the shapes later.
+    </p>
+</div>
+
+<p>
+    Two refusals, both load errors that name the reason. <strong>A natural gene cannot
+    use it</strong>: the natural pass already re-reads the coat between layers &mdash;
+    that is what lets a <code>PIGMENT</code> mask chain &mdash; so the flag would change
+    nothing there. And <strong>a <code>FLAT</code> layer cannot</strong>, because
+    <code>FLAT</code> replaces the texel outright and so covers whatever is beneath it
+    either way.
+</p>
+
 <h3 id="emissive">Glow</h3>
 
 <p>
@@ -4371,11 +4423,14 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
 <p>
     Mask modifiers: <code>combine</code> (<code>MULTIPLY</code> default, <code>MAX</code>,
     <code>MIN</code>, <code>ADD</code>, <code>SUBTRACT</code>) and <code>invert</code>
-    (boolean, applied before <code>spread</code>). Layer modifier:
+    (boolean, applied before <code>spread</code>). Layer modifiers:
     <code>emissive</code> (how brightly it glows: <code>true</code> for full, or any
     number / <code>$knob</code> in <code>[0, 1]</code>, scaled by the mask's coverage;
     magical phase only, and incompatible with a <code>PIGMENT</code> or
-    <code>LUMA</code> mask).
+    <code>LUMA</code> mask), and <a href="#over"><code>over</code></a> (boolean,
+    default false: measure against what the layers above this one painted rather than
+    against the colour the gene started at &mdash; magical phase only, and refused on a
+    <code>FLAT</code> layer, which replaces the texel anyway).
 </p>
 
 <p>
@@ -4557,20 +4612,26 @@ RULES THAT ARE NOT OPTIONAL
    invert; "spreadFrom" restricts the direction, and "above" grows the selection
    DOWNWARD - which is how a marking drips. LUMA is MAGICAL-phase only and never
    emissive; the loader refuses both.
-8. A LAYER CANNOT SEE WHAT THE LAYER ABOVE IT PAINTED. Every layer of a magical
-   gene gets the coat as it was before this gene started, so "paint X, then mask
-   on X" does not work in the obvious order - write the second mask as the union
-   of both conditions instead.
-   The same fact means LAYERS DO NOT STACK, THEY SUM. Where two layers overlap,
-   each one's pull toward its colour is measured from the ORIGINAL coat and the
-   pulls are added, so a dark core painted inside a pale disc gives pale-plus-
-   dark, and three near-whites nested one inside the next clamp to one flat
-   white with nothing inside it. Every nested marking - eyes, bands, a flame's
-   tones, bars on a wing - must be written DISJOINT: each layer multiplies in
-   the INVERTED shape of every layer painted after it (a disc minus the ring
-   minus the core; a ring minus the core). For hard-edged masks that is exactly
-   the picture stacking would have drawn. Eight genes of one batch arrived
-   nested and every pale form came out a blank white shape.
+8. A LAYER CANNOT SEE WHAT THE LAYER ABOVE IT PAINTED, UNLESS IT SAYS SO. By
+   default every layer of a magical gene gets the coat as it was before this
+   gene started, so "paint X, then mask on X" does not work in the obvious
+   order - write the second mask as the union of both conditions instead.
+   The same default means LAYERS SUM RATHER THAN STACK. Where two layers
+   overlap, each one's pull toward its colour is measured from the ORIGINAL
+   coat and the pulls are added, so a dark core painted inside a pale disc
+   gives pale-plus-dark, and three near-whites nested one inside the next clamp
+   to one flat white with nothing inside it. Eight genes of one batch arrived
+   nested, expecting stacking, and every pale form came out a blank white
+   shape.
+   A LAYER MAY SET "over": true, and then it measures against the coat as THIS
+   GENE has painted it so far - it stacks on the layers above it, which is the
+   picture a nested marking is trying to draw. Use it for eyes, bands, a
+   flame's tones, bars on a wing. Magical phase only, and refused on a FLAT
+   layer, which replaces the texel anyway.
+   The other way still works and is what every shipped gene does: write the
+   marking DISJOINT, each layer multiplying in the INVERTED shape of every
+   layer painted after it (a disc minus the ring minus the core; a ring minus
+   the core). For hard-edged masks that draws exactly the same picture.
 9. The NECK, HEAD, MUZZLE, MANE, EARS and TAIL are PITCHED, so their bounding
    box is not their box and a "part"-space band across one is a horizontal
    slice - a COLLAR wrapping crest and throat alike. Use space "local", which
@@ -5037,7 +5098,10 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     dead layers across the shipped genes (empty folds, deltas clamped away by an overlapping layer, features smaller than
     a texel), and flags the pre-fix dorsal wing on exactly its two invisible layers.
     <code>common/src/test/resources/dead-layers.txt</code> is a ratchet: it fails on a new entry and on an entry that has
-    come alive. What it cannot catch is <a href="known-gaps.html#gap-169">gap 169</a>.
+    come alive. What it cannot catch is <a href="known-gaps.html#gap-169">gap 169</a> &mdash; a
+    layer summed into the wrong colour rather than thrown away. Since 2026-09-17 a layer can
+    opt out of the summing with <a href="#over"><code>"over": true</code></a>, but no shipped
+    gene uses it yet, so the caveat still describes every gene in the mod.
 </p>
 
 <ul id="verified-drop-in">

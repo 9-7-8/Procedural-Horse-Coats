@@ -1377,10 +1377,18 @@ window.HG = window.HG || {};
     var delta = new HG.fields.ColorField(geo.SHEET_SIZE);
     (layers || []).forEach(function (layer, i) {
       var seed = layerSeed(spec, i);
+      // "over": read the coat as THIS GENE has painted it so far rather than as
+      // it was before the gene started, so the layer stacks on the ones above it
+      // instead of summing with them. Mirrors SpecPainter.tint.
+      var read = colour;
+      if (layer.over) {
+        read = colour.mutableCopy();
+        read.apply(delta);
+      }
       geo.forEachTexel(skin, function (px, py, part, face, point) {
         var leg = geo.legIndex(part);
-        var k = coverage(layer, values, skin, part, face, point, coat, colour, px, py, leg, seed);
-        if (k > 0) applyColour(layer.op, values, delta, colour, skin, part, point, px, py, leg, k, seed);
+        var k = coverage(layer, values, skin, part, face, point, coat, read, px, py, leg, seed);
+        if (k > 0) applyColour(layer.op, values, delta, read, skin, part, point, px, py, leg, k, seed);
       });
     });
     return delta;

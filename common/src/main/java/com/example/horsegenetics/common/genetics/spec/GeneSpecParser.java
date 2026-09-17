@@ -918,8 +918,15 @@ public final class GeneSpecParser {
 
     private static Layer readLayer(Map<String, Object> o, String where, boolean natural,
                                    List<Knob> knobs, Map<String, Integer> knobIndex) {
-        expectKeys(o, where, "name", "masks", "op", "emissive");
+        expectKeys(o, where, "name", "masks", "op", "emissive", "over");
         String name = string(o, "name", where);
+        boolean over = flag(o, "over", false);
+        if (over && natural) {
+            throw new IllegalArgumentException(where + ": 'over' is a magical-phase property. A "
+                    + "natural layer already reads the coat as the layer above it left it - that is "
+                    + "what lets a PIGMENT mask chain - so the flag would change nothing here. "
+                    + "Drop it.");
+        }
         Value emissive = readEmissive(o.get("emissive"), where, knobs, knobIndex);
         if (emissive != null && natural) {
             throw new IllegalArgumentException(where + ": 'emissive' is a magical-phase property - a "
@@ -985,7 +992,17 @@ public final class GeneSpecParser {
                 }
             }
         }
-        return new Layer(name, List.copyOf(masks), new Op(opType, params), emissive);
+        // FLAT sets the texel absolutely rather than adding to it, so it already
+        // covers whatever is under it. 'over' on one cannot move a single pixel,
+        // and a flag that quietly means nothing is how an author talks himself
+        // into believing a layer does something it does not.
+        if (over && opType == OpType.FLAT) {
+            throw new IllegalArgumentException(where + ": a FLAT layer cannot be 'over'. FLAT "
+                    + "replaces the texel outright, so it already paints over what is beneath it "
+                    + "and the flag would change nothing. Drop 'over' - or use TOWARD at full "
+                    + "strength if what you wanted was to stack on the layers above.");
+        }
+        return new Layer(name, List.copyOf(masks), new Op(opType, params), emissive, over);
     }
 
     /**

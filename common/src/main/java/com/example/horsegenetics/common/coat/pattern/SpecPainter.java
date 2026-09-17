@@ -117,17 +117,39 @@ public final class SpecPainter {
         for (int i = 0; i < layers.size(); i++) {
             Layer layer = layers.get(i);
             long fallbackSeed = layerSeed(spec, i);
+            // Every layer measures against the colour the GENE started from and
+            // the deltas sum, which is why a dark core inside a pale disc comes
+            // out pale-plus-dark. A layer marked "over" reads the coat as this
+            // gene has painted it so far instead, so it stacks on the layers
+            // above it - see GeneSpec.Layer.
+            ColorView asRead = layer.over() ? paintedSoFar(colour, delta) : colour;
             HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
                 int leg = legIndex(part);
-                double k = coverage(layer, values, skin, bounds, part, face, point, coat, colour,
+                double k = coverage(layer, values, skin, bounds, part, face, point, coat, asRead,
                         px, py, leg, fallbackSeed);
                 if (k > 0) {
-                    applyColour(layer.op(), values, delta, colour, skin, bounds, part, point,
+                    applyColour(layer.op(), values, delta, asRead, skin, bounds, part, point,
                             px, py, leg, k, fallbackSeed);
                 }
             });
         }
         return delta;
+    }
+
+    /**
+     * The coat as this gene has painted it <i>so far</i> - what an {@code over}
+     * layer reads instead of the colour the gene started at.
+     *
+     * <p>It goes through {@link ColorField#apply} rather than adding the
+     * channels by hand, so a {@code FLAT} layer underneath is read as the flat
+     * colour it set rather than as a sum - exactly how the composer will fold
+     * the finished delta. Only the layers that ask for it pay for the copy;
+     * {@link #restrict} takes one on every layer unconditionally.
+     */
+    private static ColorView paintedSoFar(ColorView colour, ColorField delta) {
+        ColorField painted = colour.mutableCopy();
+        painted.apply(delta);
+        return painted;
     }
 
     // ------------------------------------------------------------------
