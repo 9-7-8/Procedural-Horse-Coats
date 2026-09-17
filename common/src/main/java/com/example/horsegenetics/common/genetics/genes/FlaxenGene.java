@@ -3,9 +3,13 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.BodyNoise;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Axis;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.BodyPoint;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
@@ -102,6 +106,30 @@ public final class FlaxenGene implements Gene {
 
     /** Fixed - the strand field is a texture of hair, not something a horse rolls. */
     private static final long STRAND_SEED = 0x51F1A7E2C0DDB19FL;
+
+    // --- root to tip ---------------------------------------------------
+
+    /**
+     * <b>How much of the lightening the root gives up</b> at full depth. A real
+     * flaxen mane is darkest where it leaves the crest and palest at the ends,
+     * which is the one thing a uniform wash cannot look like however well the
+     * strands are mixed.
+     *
+     * <p>Stored on the allele rather than fixed, so it inherits with the copy and
+     * varies: some flaxen manes are nearly two-tone and some are almost even, and
+     * a line can be bred toward either. Runs down to zero, which is the coat this
+     * gene drew before today.
+     */
+    public static final String ROOT_DEPTH = "rootDepth";
+    private static final double ROOT_DEPTH_MAX = 0.55;
+
+    /**
+     * Where along the hair the root shading gives way, in the same units
+     * {@link #rootFraction} produces. Kept close to the root: the dark is a band
+     * at the crest, not half the mane.
+     */
+    private static final double ROOT_FROM = 0.08;
+    private static final double ROOT_TO = 0.38;
 
     public final Allele Fl2 = new Allele(KEY, 0, "Fl2", "Flaxen, strong (Fl2)");
     public final Allele Fl1 = new Allele(KEY, 1, "Fl1", "Flaxen, mild (Fl1)");
@@ -251,7 +279,30 @@ public final class FlaxenGene implements Gene {
     public EpiSchema epiSchema() {
         return EpiSchema.of(
                 EpiValue.uniform("expression", -EXPRESSION_RANGE, EXPRESSION_RANGE),
-                EpiValue.uniform("tail_offset", -TAIL_OFFSET, TAIL_OFFSET));
+                EpiValue.uniform("tail_offset", -TAIL_OFFSET, TAIL_OFFSET),
+                EpiValue.uniform(ROOT_DEPTH, 0, ROOT_DEPTH_MAX));
+    }
+
+    /**
+     * <b>0 at the root of the hair, 1 at the tip.</b>
+     *
+     * <p>The axis is {@link HairPattern#axesBySpan}' second, which is what
+     * {@code GreyCoat.hairRootLead} uses and what the
+     * <a href="gene-dun.html">midtstol</a> is centred in: on both the mane and
+     * the tail it runs root to tip, and the <i>middle</i> of the box is the root.
+     * Three genes now agree on that one axis, deliberately - a second way of
+     * finding the same coordinate is how two genes come to disagree about where
+     * a horse's mane begins.
+     */
+    private static double rootFraction(Skin skin, Part part, BodyPoint point) {
+        Axis across = HairPattern.axesBySpan(skin, part)[1];
+        Bounds b = HorseSkinGeometry.bounds(skin, part);
+        double span = b.span(across);
+        if (span <= 0) {
+            return 1.0;
+        }
+        double centre = (b.min(across) + b.max(across)) * 0.5;
+        return Math.abs(point.along(across) - centre) / span;
     }
 
     private PigmentField paint(CoatBuildContext ctx, PigmentView coat) {
@@ -261,6 +312,7 @@ public final class FlaxenGene implements Gene {
 
         double mane = score(dosage, epi);
         double tail = mane + epi.get("tail_offset");
+        double rootDepth = epi.get(ROOT_DEPTH);
 
         PigmentField out = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
@@ -272,6 +324,16 @@ public final class FlaxenGene implements Gene {
             } else {
                 return;     // the forelock is part of the mane box; nothing else is long hair
             }
+            // Root to tip: the hair is darkest where it leaves the horse and
+            // palest at the ends, so the root gives up part of the lightening.
+            // A second factor on the same score the strands modulate, which is
+            // why the two compose without either knowing about the other.
+            if (rootDepth > 0) {
+                double f = rootFraction(skin, part, point);
+                double root = 1.0 - smooth01((f - ROOT_FROM) / (ROOT_TO - ROOT_FROM));
+                s *= 1.0 - rootDepth * root;
+            }
+
             // Strand mixing: a flaxen mane keeps some darker hairs, and a
             // uniform wash reads as paint rather than as hair.
             double strands = BodyNoise.value(STRAND_SEED, point.x() * STRAND_SCALE,
@@ -282,6 +344,12 @@ public final class FlaxenGene implements Gene {
             }
         });
         return out;
+    }
+
+    /** Smoothstep on an already-normalised {@code t}, clamped at both ends. */
+    private static double smooth01(double t) {
+        double c = t < 0 ? 0 : (t > 1 ? 1 : t);
+        return c * c * (3 - 2 * c);
     }
 
     /** How much red a texel keeps at this local score. Clamped at both ends. */

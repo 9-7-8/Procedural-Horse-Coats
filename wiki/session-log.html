@@ -27,6 +27,69 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-flaxen">2026-09-17, and then &mdash; Flaxen fades from root to tip</h2>
+
+<p>
+    The last shovel-ready item on the natural list. <a href="gene-flaxen.html">Flaxen</a>
+    computed <em>one flat score per part</em> and applied it to every texel of the mane and
+    tail, so its only variation was the strand mixing. A real flaxen mane is darkest at the
+    crest and palest at the ends, and that is the one thing a uniform wash cannot look like
+    however good the strands are.
+</p>
+
+<p>
+    <strong>It was a one-line insertion, because the seam was already there.</strong> The
+    painter modulates its per-part score once already &mdash;
+    <code>s * (1 - STRAND_DEPTH * strands)</code> &mdash; so the gradient is a second factor at
+    exactly that point, and the two compose without either knowing about the other. No new
+    machinery at all.
+</p>
+
+<h3>The coordinate was already solved, twice</h3>
+
+<p>
+    The roadmap said the gradient &ldquo;wants a coordinate along the hair rather than across
+    it&rdquo; and noted <code>HairPattern.axesBySpan</code> as the seam. It was more solved
+    than that: <a href="gene-grey.html">grey</a>&rsquo;s <code>hairRootLead</code> already
+    uses <code>axesBySpan(skin, part)[1]</code> to let a mane grey ahead of the body, and its
+    comment records that this axis runs root to tip on both parts with the <em>middle</em> of
+    the box as the root &mdash; the same axis the <a href="gene-dun.html">midtstol</a> is
+    centred in. So flaxen reads the existing convention rather than deriving its own.
+</p>
+
+<p>
+    That was a deliberate choice and worth the sentence: <strong>a second way of finding the
+    same coordinate is how two genes come to disagree about where a horse&rsquo;s mane
+    begins</strong>, and this repository has already paid for that class of drift today, when
+    <code>CoatSampleTool</code> kept asking grey for an allele the locus had dropped. Three
+    genes and one test now move together if the convention ever changes.
+</p>
+
+<h3>Depth on the allele, and a measurement rather than a look</h3>
+
+<p>
+    How deep the fade runs is epigenetic on the copy, following the precedent set for
+    <a href="gene-silver.html">silver&rsquo;s dapples</a> and
+    <a href="gene-roan.html">roan&rsquo;s corn spots</a>: it inherits, drifts, and runs down to
+    zero &mdash; a horse at zero draws the flat mane the gene drew before, which is a real coat
+    rather than a failure.
+</p>
+
+<p>
+    <code>FlaxenRootToTipTest</code> compares mean surviving red in a band near the root
+    against a band near the tip <b>on the same horse</b>, which the roan test could not do and
+    so had to go statistical. It also checks that depth varies across horses and that nothing
+    outside the mane and tail is touched. All three passed first run, and the goldens moved by
+    <strong>24 of 1092 rows, every one carrying a flaxen allele</strong>.
+</p>
+
+<p>
+    <strong>The direction is the thing most worth checking in game</strong>, and the reason it
+    is first on <a href="verification.html">the checklist</a>: a reversed gradient still looks
+    like a gradient in a screenshot, so the test asserts which end is darker rather than that
+    the two differ.
+</p>
+
 <h2 id="d2026-09-17-corn-spots">2026-09-17, after that &mdash; Roan grows corn spots</h2>
 
 <p>
