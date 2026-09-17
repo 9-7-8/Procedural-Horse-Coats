@@ -59,7 +59,7 @@
 </div>
 
 <div class="note good" id="paused">
-    <span class="label">&sect;10 is down to colour and glow &mdash; the masks, the canvas and the dial are all in</span>
+    <span class="label">&sect;10 is down to the creator&rsquo;s own preview &mdash; colour, glow, the masks, the canvas and the dial are all in</span>
     <p>
         <code>FRACTAL</code> and <code>PATH</code> shipped on both sides in September, and
         <strong>the drawing canvas</strong> that <code>PATH</code> was waiting for is now
@@ -111,11 +111,21 @@
         carries a whole colour <em>source</em> &mdash; its own stops, its own swept hue, or
         one flat colour &mdash; while the op keeps the geometry, so the regions recolour a
         single shared sweep instead of each running one of their own.
-        <strong>What is left of the section is one honest gap: the creator cannot show a
-        glow</strong>. It writes one, validates it and round-trips it, but its preview
-        is a flat sheet with no lighting to be brighter than, so a glow is something
-        you have to go and look at in game. Fixing that means shading in the preview,
-        which is a different job from anything in this section.
+        <strong>Showing a glow shipped on 2026-09-17, everywhere but the creator.</strong>
+        The three surfaces that run the real pipeline &mdash; the
+        <a href="horse-designer/">horse designer</a>, the
+        <a href="breed-designer/">breed designer</a> and every
+        <code>gene-*.html</code> preview &mdash; carry a <strong>lights-out toggle</strong>:
+        the scene dims and the lit texels stay, drawn from the same sheet the mod builds.
+        The fold that makes it one behaviour rather than two now lives in
+        <code>CoatTextureComposer.Baked.glowSheet</code>, so the game and the browser
+        cannot drift; <code>DesignerApi.coatGlow</code> / <code>coatGlowOf</code> carry it
+        across, and the NeoForge texture factory got <em>smaller</em> for it.
+        <strong>What is left is the creator alone</strong>, and it is a different job from
+        the rest of this section: its preview is the hand-written JS port, which has no
+        emissive pass and is not getting one (hard rule 3). Closing it means moving that
+        preview onto the wasm so it can bake an unsaved spec &mdash; which would also end
+        the port's reason to exist, and change what <code>check-parity.mjs</code> compares.
     </p>
 </div>
 
@@ -132,14 +142,15 @@
         unbuilt: <a href="verification.html">To be verified</a> is longer than this whole
         page's top section, and it is the authority on what has actually been seen.
         Nothing on this page competes with it for a session.</li>
-    <li><strong>Show a glow in the creator&rsquo;s preview</strong>
-        (<a href="#designer">&sect;10</a>) &mdash; the last of that section still standing.
-        The creator writes an <code>emissive</code> level, validates it and round-trips it,
-        but its preview is a flat sheet with no lighting to be brighter than, so a glow is
-        the one thing an author has to go and look at in game. Fixing it means shading in
-        the preview, which is a different job from the rest of the section &mdash; the
-        canvas, the dial, the minimal shape, glow intensity, the colour control and
-        per-region colour on all four colour ops have all shipped.</li>
+    <li><strong>Move the creator&rsquo;s preview onto the wasm</strong>
+        (<a href="#designer">&sect;10</a>) &mdash; the last of that section still standing,
+        now that the lights-out toggle has shipped on the horse designer, the breed
+        designer and every gene page. The creator is the one tool whose preview never
+        touches the real pipeline: it is the hand-written JS port, so it cannot show a
+        glow, and it is not to be extended to fake one. A <code>@JSExport</code> that
+        bakes an <em>unsaved</em> spec would close this, end the port&rsquo;s reason to
+        exist, and change what <code>check-parity.mjs</code> is comparing &mdash; which
+        is why it is a job of its own rather than a finish to the last one.</li>
     <li><strong>Deepen the thin science tabs</strong>
         (<a href="#science-tabs">&sect;science</a>) &mdash; every natural gene page now
         has one, so the work is no longer absence but depth: 23 predate the pass that

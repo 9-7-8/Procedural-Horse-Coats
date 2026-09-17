@@ -78,6 +78,77 @@
     </p>
 </div>
 
+<h2 id="glow-preview-0917">&sect;0-FA &mdash; A glow can be seen without the game: lights-out in the browser (2026-09-17, NOT played)</h2>
+
+<p>
+    The <a href="horse-designer/">horse designer</a>, the
+    <a href="breed-designer/">breed designer</a> and <strong>every</strong>
+    <code>gene-*.html</code> preview carry a <strong>lights-out toggle</strong>. The scene
+    dims and the lit texels stay where they are, drawn from the sheet the mod itself
+    builds: <code>CoatTextureComposer.Baked.glowSheet</code> is now the one
+    implementation, reached in game by the texture factory and in the browser by
+    <code>DesignerApi.coatGlow</code> / <code>coatGlowOf</code>. The gene pages reveal the
+    button <em>only</em> when a bake actually returns glow texels, so a gene that cannot
+    glow never offers a dead one. The creator is deliberately excluded &mdash;
+    <a href="roadmap.html#designer">&sect;10</a> says why.
+</p>
+
+<div class="note good">
+    <span class="label">Most of this is settled by measurement &mdash; do not spend eyes on it</span>
+    <p>
+        <strong>Both coat goldens came through untouched</strong>, with
+        <code>GlowIntensityTest</code> and <code>LitGeneTest</code> green: nothing moved a
+        pixel, which is the claim that the fold was <em>lifted</em> rather than rewritten.
+        The NeoForge side got <strong>smaller</strong> for it &mdash;
+        <code>GeneticCoatTextureFactory</code> and <code>GeneticHorseRenderer</code> both
+        shed their copies.
+    </p>
+    <p>
+        <code>GlowSheetTest</code> pins the arithmetic the picture cannot show: a level of
+        0.4 arrives as <strong>alpha 102</strong>, the RGB stays the coat&rsquo;s own colour
+        at that texel, a transparent texel is never lit, a <code>glow</code> effect lights a
+        whole part outright, and an ordinary horse produces <code>null</code> rather than a
+        sheet of zeroes. <code>check-glow-render.mjs</code> pins the browser half, including
+        the one API that was a guess: <strong>three r128 does honour
+        <code>emissiveMap</code></strong> on both the Lambert material the horse designer
+        uses and the Standard material everything else uses. On a real gene page, tron
+        reveals the button and agouti leaves it hidden &mdash; which is the whole chain,
+        export to DOM, proved in a browser.
+    </p>
+</div>
+
+<h3>In the game, with your hands &mdash; the part no test reached</h3>
+
+<ul>
+    <li><strong>A glowing horse still glows in the world.</strong> This change refactored
+        the renderer&rsquo;s glow path, and no golden covers a renderer. Any of
+        <a href="gene-tron.html">tron</a>, <a href="gene-lantern.html">lantern</a> or
+        <a href="gene-emberveins.html">ember veins</a>, at night. If this one is wrong,
+        nothing else here matters.</li>
+    <li><strong>Does the spawn egg already show it?</strong> Open the custom spawn egg on a
+        glowing gene. The preview goes through the real renderer, so
+        <code>EmissiveCoatLayer</code> is already drawing there &mdash; the open question is
+        whether it <em>reads</em> against the GUI&rsquo;s own directional shading, or whether
+        the panel is too bright for a glow to tell. It got no lights-out button on purpose:
+        vanilla&rsquo;s <code>g.entity(...)</code> has no lighting hook, so dimming it means
+        baking a second darkened texture per horse. <strong>Worth doing only if this looks
+        wrong.</strong></li>
+</ul>
+
+<h3>Visual, and therefore last</h3>
+
+<ul>
+    <li><strong>Is the dark dark enough, and not too dark?</strong> The lights-out view does
+        not go to black &mdash; a horse lit by nothing is a silhouette, and you could not
+        tell whether the unlit half of a marking is the shape you drew. The levels are a
+        first guess (<code>NIGHT</code> in <code>scene.js</code> and
+        <code>viewport.js</code>).</li>
+    <li><strong>Does a dim glow read as dim?</strong> Tron&rsquo;s haloes are
+        <code>0.25</code>; lantern runs 0.18&ndash;0.22 with a knob. They should look
+        <em>fainter</em>, not <em>darker</em> &mdash; if a low level reads as a muddy smudge
+        rather than a soft light, the premultiply in <code>setGlow</code> is the suspect.</li>
+</ul>
+
 <h2 id="regions-0917">&sect;0-EZ &mdash; A colour op can paint a different colour per region (2026-09-17, NOT played)</h2>
 
 <p>

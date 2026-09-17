@@ -695,6 +695,22 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
     output.
 </p>
 
+<p>
+    <strong>The fold that builds that mask lives in <code>common/</code></strong>, as
+    <code>CoatTextureComposer.Baked.glowSheet(skin, litParts)</code> &mdash; each texel's
+    level becomes its <strong>alpha</strong> and the coat's own colour stays in the RGB,
+    because the emissive pass blends: 0.4 is four tenths of the full-bright colour over
+    six tenths of the world-lit texel, a <em>dimmer</em> colour rather than a darker one.
+    It folds in both sources of glow, the texel mask a gene wrote in the overlay phase and
+    the whole parts a <code>glow</code> effect lights
+    (<code>CoatTextureComposer.glowParts</code>), and returns <code>null</code> when
+    nothing glows so the renderer skips the pass entirely. It sits here rather than beside
+    the renderer because <strong>the browser tools draw the same glow</strong>: the horse
+    designer, the breed designer and the gene pages reach it through
+    <code>DesignerApi.coatGlow</code> / <code>coatGlowOf</code>, so a horse cannot glow one
+    way in game and another in a preview.
+</p>
+
 <h3 id="bake-budget">When a coat is baked, and how many at once</h3>
 
 <p>

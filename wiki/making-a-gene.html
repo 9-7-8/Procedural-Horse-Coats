@@ -1902,11 +1902,23 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 </p>
 
 <p class="note">
-    <strong>The creator does not render the glow.</strong> It writes it, validates it
-    and keeps it through a round-trip, but the preview beside it is a flat sheet with
-    no lighting to be brighter than &mdash; so a glow is one of the few things you
-    have to go and look at in game. See
-    <a href="session-log.html#glow-confirmed">what to look at</a>.
+    <strong>To see a glow, use the gene page rather than the creator.</strong> Every
+    <code>gene-*.html</code> preview, the <a href="horse-designer/">horse designer</a>
+    and the <a href="breed-designer/">breed designer</a> carry a <strong>lights-out
+    toggle</strong>: the scene dims and the lit texels stay where they are, which is
+    exactly what <code>EmissiveCoatLayer</code> draws in game. They can, because they
+    run the real pipeline &mdash; <code>DesignerApi.coatGlow</code> hands over the same
+    sheet the mod builds, from the same
+    <code>CoatTextureComposer.Baked.glowSheet</code>.
+</p>
+
+<p class="note">
+    <strong>The creator itself still does not render the glow.</strong> It writes it,
+    validates it and keeps it through a round-trip, but its preview is the one engine
+    that never touches the wasm &mdash; it is the hand-written JS port, which has no
+    emissive pass and, per the hard rule against extending those ports, is not getting
+    one. Closing it properly means moving the creator's preview onto the wasm so it can
+    bake an unsaved spec; until then, export the gene and open its page.
 </p>
 
 <h2>Where the numbers actually live</h2>

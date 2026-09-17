@@ -593,6 +593,17 @@ static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregis
         and mark texels emissive &mdash; see
         <a href="pipeline.html#overlay">the pipeline</a>.
     </p>
+    <p>
+        <code>Baked.glowSheet(Skin, Set&lt;Part&gt;)</code> turns that level array into the
+        texture a renderer draws: the coat's own colour per texel with the <strong>level as
+        alpha</strong>, <code>null</code> when nothing glows. <code>glowSheet(Skin,
+        Genotype)</code> resolves the lit parts itself via the static
+        <code>CoatTextureComposer.glowParts(Genotype)</code>, which reports the body parts a
+        <code>glow</code> <em>effect</em> lights outright. Both live here rather than beside
+        the renderer because the browser tools draw the same glow &mdash;
+        <code>GeneticCoatTextureFactory</code> and <code>DesignerApi.coatGlow</code> call
+        one implementation.
+    </p>
 </div>
 
 <h3><code>CoatBuildContext</code> &mdash; the horse, immutable</h3>

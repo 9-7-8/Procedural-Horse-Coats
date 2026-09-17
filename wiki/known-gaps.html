@@ -369,21 +369,26 @@
     a restored rule can protect the gallery and still let the pens be pens. Left off rather
     than narrowed today because the owner asked for them off, and a half-narrowed rule is
     the kind of thing that silently blocks the next test instead.</li>
-<li id="gap-201"><strong>The gene creator cannot show a glow, so the one property
-    it writes blind is the one it writes most often.</strong> Opened 2026-09-12 with
-    <a href="making-a-gene.html#emissive">glow intensity</a>. A layer's
-    <code>emissive</code> is a level now &mdash; a number, a knob, the gene's dial &mdash;
+<li id="gap-201"><strong>The gene <em>creator</em> still cannot show a glow &mdash; and it
+    is now the only thing that cannot.</strong> Opened 2026-09-12 with
+    <a href="making-a-gene.html#emissive">glow intensity</a>; narrowed 2026-09-17. A layer's
+    <code>emissive</code> is a level &mdash; a number, a knob, the gene's dial &mdash;
     and the creator's preview is a flat unlit sheet, so there is nothing for a lit texel to
     be <em>brighter than</em>: a glow at 1.0, a glow at 0.05 and a glow written into the
     wrong layer all draw identically. That is how the glow came to be dropped from the
     creator's export entirely and stay dropped (fixed the same day, and only found by
     reading the exporter). <code>wiki/tools/check-glow-control.mjs</code> covers the
-    model &mdash; what is written, what survives the tidy, what the validator names
-    &mdash; which is the honest substitute, not a fix. A real fix means shading in the
-    preview: light the sheet in the 3D viewport and draw the emissive texels unshaded,
-    which is the only place in either editor where a second material would earn its
-    keep. Until then a glow is authored by arithmetic and confirmed in game
-    (<a href="session-log.html#glow-confirmed">&sect;0-CO</a>).</li>
+    model &mdash; what is written, what survives the tidy, what the validator names.
+    <strong>Everywhere else this is closed</strong>: the horse designer, the breed designer
+    and every gene page carry a lights-out toggle drawing the mod's own sheet
+    (<a href="verification.html#glow-preview-0917">&sect;0-FA</a>), so a glow is authored
+    against a picture now &mdash; export the gene and open its page.
+    <strong>Why the creator is the exception, and what it would actually take</strong>: its
+    preview is the hand-written JS port, which has no emissive pass and must not be given
+    one. So the fix is <em>not</em> a second material, as this entry used to say &mdash; it
+    is moving that preview onto the wasm so it can bake an unsaved spec, which is a job of
+    its own (<a href="roadmap.html#designer">roadmap &sect;10</a>) and would end the port's
+    reason to exist.</li>
 <li id="gap-200"><strong>A third-party Java gene cannot be put back once
     <code>clearLoaded()</code> has dropped it.</strong> Opened 2026-09-11, with the open
     registry. <code>clearLoaded()</code> means "back to the built-ins", and it re-reads the
@@ -980,7 +985,7 @@ A threshold on a noise field is only meaningful relative to that field's own dis
 <li id="gap-41"><strong>The horse designer has never been opened, and its GUI has no automated net.</strong> The genetics are as safe as they can be - the page runs <code>common/</code> compiled to wasm, byte-identical to the JVM, so there is nothing to drift. What is unguarded is everything on top: <code>js/gui.js</code> (a canvas redraw of <code>CustomHorseSpawnScreen</code>, ~450 lines of layout maths), <code>js/scene.js</code> (camera rig, WASD, the sideways framing offset that puts the horse in the gap between the panels) and <code>js/animation.js</code> (the gait, an approximation by construction
 
 <ul>
-<li>vanilla's <code>setupAnim</code> needs <code>walkAnimationPos</code>, which no browser has). Checked headlessly instead: the exported API end to end, and the GUI driven against the real wasm - every right-column button fires its method, a row adds, <code>KIT</code>'s eight alleles open a dropdown and a pick lands. That is logic, not looks. <code>wiki/verification.html</code> §0-I. <strong>The sharpest test when it is opened</strong> is to copy a genotype code out of the page and paste it into the spawn egg in game: the two horses must be identical, and that single check exercises the compile, the facade, the editor model and both UIs at once. <strong>What it still cannot show</strong> is three Minecraft-side things - cutie-mark item icons and particle emitters (both come out of the game's own registries, and the spawn egg previews both) and emissive <code>glow</code> texels. Nothing genetic is missing any more.
+<li>vanilla's <code>setupAnim</code> needs <code>walkAnimationPos</code>, which no browser has). Checked headlessly instead: the exported API end to end, and the GUI driven against the real wasm - every right-column button fires its method, a row adds, <code>KIT</code>'s eight alleles open a dropdown and a pick lands. That is logic, not looks. <code>wiki/verification.html</code> §0-I. <strong>The sharpest test when it is opened</strong> is to copy a genotype code out of the page and paste it into the spawn egg in game: the two horses must be identical, and that single check exercises the compile, the facade, the editor model and both UIs at once. <strong>What it still cannot show</strong> is two Minecraft-side things - cutie-mark item icons and particle emitters, both of which come out of the game's own registries (the spawn egg previews both). <strong>Emissive <code>glow</code> texels came off this list on 2026-09-17</strong>: the designer draws the mod's own glow sheet behind a lights-out toggle, from the same <code>CoatTextureComposer.Baked.glowSheet</code> the game uses (<a href="verification.html#glow-preview-0917">&sect;0-FA</a>). Nothing genetic is missing any more.
 </li>
 </ul>
 
