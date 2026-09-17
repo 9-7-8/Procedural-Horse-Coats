@@ -38,6 +38,7 @@ class SpliceSafetyTest {
         List<Gene> pool = SpliceSafety.pool();
         for (Gene g : List.of(Genes.MET, Genes.MILK, Genes.EDNRB, Genes.SILVER, Genes.MSTN,
                 Genes.ACAN, Genes.B4GALT7, Genes.PLOD1, Genes.RAPGEF5, Genes.ST14, Genes.SHOX,
+                Genes.SLC5A3, Genes.LAMC2, Genes.LAMA3, Genes.RYR1,
                 Genes.MAGIC_HEALTH)) {
             assertFalse(pool.contains(g), g.key() + " can hurt a horse and must not be spliceable");
         }

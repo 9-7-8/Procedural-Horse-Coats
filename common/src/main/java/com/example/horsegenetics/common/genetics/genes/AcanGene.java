@@ -19,8 +19,8 @@ import java.util.Map;
  * <b>ACAN</b> ({@code horsegenetics.acan}) - <b>chondrodysplastic dwarfism</b>,
  * and the gene that proves the combination table was worth building.
  *
- * <p>Five alleles: four independent non-functional variants ({@code D1} to
- * {@code D4}) and one working copy ({@code N}). Fifteen combinations.
+ * <p>Six alleles: five independent non-functional variants ({@code D1} to
+ * {@code D5}) and one working copy ({@code N}). Twenty-one combinations.
  *
  * <table>
  *   <tr><th>combination</th><th>outcome</th></tr>
@@ -49,7 +49,7 @@ import java.util.Map;
  * Built with the multi-allele Hardy-Weinberg helper at a frequency per variant,
  * with <b>every</b> affected combination excluded and the rest rescaled - which
  * is the biology as well as the bookkeeping: a wild-caught horse is an adult
- * that survived, and an affected foal mostly did not. Ten of the fifteen
+ * that survived, and an affected foal mostly did not. Fifteen of the twenty-one
  * combinations therefore have weight zero, and the only way to make one is to
  * breed two carriers.
  */
@@ -75,9 +75,10 @@ public final class AcanGene implements Gene, HealthContribution {
     public final Allele D2 = new Allele(KEY, 1, "D2", "Dwarfism D2");
     public final Allele D3 = new Allele(KEY, 2, "D3", "Dwarfism D3");
     public final Allele D4 = new Allele(KEY, 3, "D4", "Dwarfism D4");
-    public final Allele N = new Allele(KEY, 4, "N", "Wild-type (N)");
+    public final Allele D5 = new Allele(KEY, 4, "D5", "Dwarfism D5");
+    public final Allele N = new Allele(KEY, 5, "N", "Wild-type (N)");
 
-    private final List<Allele> alleles = List.of(D1, D2, D3, D4, N);
+    private final List<Allele> alleles = List.of(D1, D2, D3, D4, D5, N);
 
     private final Expression WILD = Expression.wildType(
             "Two working copies of ACAN. Normal skeletal growth.");
@@ -104,7 +105,8 @@ public final class AcanGene implements Gene, HealthContribution {
         f.put(D2, VARIANT_FREQUENCY);
         f.put(D3, VARIANT_FREQUENCY);
         f.put(D4, VARIANT_FREQUENCY);
-        f.put(N, 1.0 - 4.0 * VARIANT_FREQUENCY);
+        f.put(D5, VARIANT_FREQUENCY);
+        f.put(N, 1.0 - 5.0 * VARIANT_FREQUENCY);
         return f;
     }
 

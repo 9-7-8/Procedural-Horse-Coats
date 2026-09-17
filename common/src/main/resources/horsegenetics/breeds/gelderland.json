@@ -62,6 +62,10 @@
     "horsegenetics.tobiano": [
       { "pair": "To/to", "weight": 5 },
       { "pair": "to/to", "weight": 95 }
+    ],
+    "horsegenetics.plod1": [
+      { "pair": "ffs/N", "weight": 7.63 },
+      { "pair": "N/N", "weight": 92.37 }
     ]
   },
   "notes": [
@@ -70,7 +74,7 @@
     "The white is the point: broad blazes and substantial socks are part of the look, so sabino 1 is heavy at about a third of founders with the W20 booster and a light splash behind it. This is the markings mechanism, not a pinto pool.",
     "Tobiano sits at a twentieth - skewbald is rare but historically present, a memorable find rather than the default.",
     "Cream, pearl, champagne, silver, mushroom, dun, roan and leopard are forced wild - none is central to the reviewed standard. Frame overo is forced wild too, with no evidence for it and lethal white as the cost of guessing.",
-    "Warmblood Fragile Foal Syndrome is the real modern genetic concern in the Dutch warmblood population - the KWPN requires licensed stallions to be tested so carriers are not paired - and the mod has no WFFS locus, so no rate is written. It is on the roadmap. PLOD1 is NOT a substitute: the mod's PLOD1 is Friesian dwarfism and they are different disorders that happen to share a gene name in loose writing.",
+    "Warmblood Fragile Foal Syndrome is the real modern genetic concern in the Dutch warmblood population - the KWPN requires licensed stallions to be tested so carriers are not paired - and the breed now carries it. WFFS is this mod's PLOD1 locus. The rate is the 2020 multi-breed survey's Dutch Warmblood figure, 19 carriers of 249 tested, 7.63%.",
     "Every other disorder is clear; no Gelderlander-specific carrier study was found.",
     "No heat or cold locus - a Dutch lowland carriage horse has no climate history to carry, so it is neutral everywhere.",
     "The Geldersch Paarden Stamboek was founded in 1890 around two goals, an agricultural carriage horse and a luxury one. In 1965 it was one of the two foundation breeds of the Dutch Warmblood with the heavier Groninger, and was later folded under the KWPN; a Classic Gelder studbook won Dutch recognition in 2019 specifically to stop the historical type being absorbed.",

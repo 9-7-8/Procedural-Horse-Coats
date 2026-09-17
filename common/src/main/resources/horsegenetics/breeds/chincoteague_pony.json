@@ -70,6 +70,10 @@
     "horsegenetics.ednrb": [
       { "pair": "O/N", "weight": 4 },
       { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.acan": [
+      { "pair": "D5/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
     ]
   },
   "strains": [
@@ -115,7 +119,7 @@
   "notes": [
     "Tobiano is the signature and splash is the reason for the eyes - a herd should read as pinto ponies from a distance, with blue and part-blue eyes turning up far more often than in a feral population.",
     "Two strains: eight founders in ten are the stocky island type, two in ten the taller privately-bred sport type. The sport type should also be the larger of the two and is not, because a strain can override gene pools but not the stats block.",
-    "ACAN D5 dwarfism is tested for in the real breed and is not here: this mod's ACAN gene declares D1 to D4, and D1 is the severe one, so borrowing a different variant's allele would overstate what it does.",
+    "ACAN D5 dwarfism is tested for in the real breed and the locus now declares a D5 allele, so the breed names it directly instead of borrowing D1 - which is the severe variant and would have overstated what the pony has. The 2% carrier rate is a placeholder, not a measured breed figure.",
     "The association's other listed risks - uveitis, lordosis, EMS, laminitis, DSLD, CIAR - are mostly not single-gene conditions and have no locus here. They are deliberately not stood in for by unrelated disorders.",
     "Salt tolerance, marsh grazing, the dense winter coat, swimming and the pony penning are all outside what the mod models."
   ]

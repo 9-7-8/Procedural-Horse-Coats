@@ -81,6 +81,8 @@ import com.example.horsegenetics.common.genetics.genes.EggLayerGene;
 import com.example.horsegenetics.common.genetics.genes.SingerGene;
 import com.example.horsegenetics.common.genetics.genes.PackLeaderGene;
 import com.example.horsegenetics.common.genetics.genes.SpawnerGene;
+import com.example.horsegenetics.common.genetics.genes.Lama3Gene;
+import com.example.horsegenetics.common.genetics.genes.Lamc2Gene;
 import com.example.horsegenetics.common.genetics.genes.ManchadoGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
@@ -106,6 +108,7 @@ import com.example.horsegenetics.common.genetics.genes.RabicanoGene;
 import com.example.horsegenetics.common.genetics.genes.RainbowDustGene;
 import com.example.horsegenetics.common.genetics.genes.Rapgef5Gene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
+import com.example.horsegenetics.common.genetics.genes.Ryr1Gene;
 import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
 import com.example.horsegenetics.common.genetics.genes.Scn4aGene;
 import com.example.horsegenetics.common.genetics.genes.SexGene;
@@ -113,6 +116,7 @@ import com.example.horsegenetics.common.genetics.genes.ShadeGene;
 import com.example.horsegenetics.common.genetics.genes.ShadowcreatureGene;
 import com.example.horsegenetics.common.genetics.genes.ShoxGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
+import com.example.horsegenetics.common.genetics.genes.Slc5a3Gene;
 import com.example.horsegenetics.common.genetics.genes.SootyGene;
 import com.example.horsegenetics.common.genetics.genes.St14Gene;
 import com.example.horsegenetics.common.genetics.genes.TailColorGene;
@@ -592,6 +596,9 @@ public final class Genes {
     public static final CvmGene CVM = new CvmGene();
     public static final Gbe1Gene GBE1 = new Gbe1Gene();
     public static final MegaesophagusGene MEGAESOPHAGUS = new MegaesophagusGene();
+    public static final Slc5a3Gene SLC5A3 = new Slc5a3Gene();
+    public static final Lamc2Gene LAMC2 = new Lamc2Gene();
+    public static final Lama3Gene LAMA3 = new Lama3Gene();
 
     /**
      * The <b>dominant</b> disorders, and the two exceptions to the paragraph
@@ -603,6 +610,7 @@ public final class Genes {
      */
     public static final Scn4aGene SCN4A = new Scn4aGene();
     public static final Gys1Gene GYS1 = new Gys1Gene();
+    public static final Ryr1Gene RYR1 = new Ryr1Gene();
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
@@ -631,7 +639,8 @@ public final class Genes {
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,
-            PPIB, PRKDC, MYO5A, TOE1, CVM, GBE1, MEGAESOPHAGUS, SCN4A, GYS1);
+            PPIB, PRKDC, MYO5A, TOE1, CVM, GBE1, MEGAESOPHAGUS, SLC5A3, LAMC2, LAMA3,
+            SCN4A, GYS1, RYR1);
 
     /** Ordering: lower priority first, ties broken alphabetically by key. */
     private static final Comparator<Gene> BY_PRIORITY_THEN_KEY =

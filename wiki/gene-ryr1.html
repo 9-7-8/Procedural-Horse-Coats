@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RYR1 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+
+<h1>RYR1 (malignant hyperthermia)</h1>
+
+<p class="lede">
+    The only disorder in this mod that costs an affected horse nothing. One copy is
+    enough to have it, and a horse that has it is a completely ordinary horse until
+    something triggers an episode &mdash; and nothing in this game can.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.ryr1"></div>
+
+<h2>A disorder you can see, and mostly ignore</h2>
+
+<p>
+    <strong>Dominant</strong>, so there is no silent carrier: every horse with a copy
+    shows it on its info panel and on its papers. Unlike
+    <a href="gene-scn4a.html">HYPP</a> and <a href="gene-gys1.html">PSSM1</a> &mdash;
+    the other two dominants &mdash; one copy takes no hearts, no speed and no jump. The
+    horse is sound.
+</p>
+
+<p>
+    That is not the mod being generous. Malignant hyperthermia is
+    <strong>episodic</strong>: the fault only shows under general anaesthesia or
+    extreme stress, and between episodes the animal is genuinely normal. There is no
+    anaesthetic here and no stress model to hang a trigger on, so giving it a permanent
+    heart penalty would invent a symptom the real condition does not have.
+</p>
+
+<p>
+    <strong>Two copies is different.</strong> A horse with no normal channel left is
+    genuinely compromised, and that combination does cost hearts, speed and jump. As
+    with every dominant here, no wild horse is ever born with two &mdash; the worst
+    outcome is always something a player bred.
+</p>
+
+<div class="note">
+    <span class="label">Why a wild horse can have this and a wild horse can never have PLOD1</span>
+    <p>
+        A recessive disorder can be absent from its founder table entirely, because a
+        wild-caught horse is an adult that survived. A <b>dominant</b> has nowhere to
+        hide: if founders could never be affected, the allele could never enter the
+        world and the locus would be dead code. So founders really can be born with one
+        copy. See <a href="gene-scn4a.html">HYPP</a>, which was the first locus in this
+        mod to break that rule.
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.ryr1"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ryr1</dd></div>
+    <div><dt>Priority</dt><dd>105</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">MH</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>malignant-hyperthermia</code>, <code>malignant-hyperthermia-severe</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>1% of founders carry one copy and are therefore affected; <b>none</b> carries two</dd></div>
+    <div><dt>Breed pools</dt><dd>Azteca &mdash; see the breed file</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">The first informational disorder that is not a side effect</span>
+    <p>
+        Two other conditions in the mod cost nothing &mdash; splash deafness and
+        <a href="gene-silver.html">silver&rsquo;s</a> ocular cysts &mdash; but both ride
+        along with a <em>coat</em> gene the player wanted for other reasons. This is the
+        first locus whose entire purpose is to be <b>known</b> rather than felt. Its
+        value is the line on the papers, which is exactly what the American Azteca
+        registry screens breeding stock for.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>MH/N</code></td><td><code>malignant-hyperthermia</code></td><td><b>nothing</b> &mdash; named on the horse, and free</td></tr>
+<tr><td><code>MH/MH</code></td><td><code>malignant-hyperthermia-severe</code></td><td>&minus;6 health, &minus;0.03 speed, &minus;0.10 jump</td></tr>
+</tbody>
+</table>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="at-a-glance">At a glance</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>RYR1</em> &mdash; ryanodine receptor 1, the calcium-release channel of skeletal muscle</td></tr>
+<tr><th>Disorder</th><td>Malignant hyperthermia (MH)</td></tr>
+<tr><th>Inheritance</th><td>Autosomal dominant</td></tr>
+<tr><th>Heterozygote</th><td>Susceptible, and clinically normal between episodes</td></tr>
+<tr><th>Trigger</th><td>Typically general anaesthesia (notably halothane); also extreme exertion or stress</td></tr>
+<tr><th>Coat</th><td>No known effect</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="channel">What breaks</h2>
+
+<p>
+    <em>RYR1</em> encodes the channel that releases calcium from the sarcoplasmic
+    reticulum into the muscle fibre &mdash; the step that actually starts a
+    contraction. The variant channel leaks: it opens too readily and closes too
+    reluctantly.
+</p>
+
+<p>
+    Under ordinary conditions that is compensated for and invisible. Under a trigger it
+    is not. Calcium floods the fibre and will not be pumped back, the muscle contracts
+    continuously, and the metabolic cost of that runaway contraction produces the
+    picture the condition is named for: a very high body temperature, rigid muscles,
+    acidosis, a racing heart and muscle breakdown. Untreated it is frequently fatal,
+    and it develops over minutes rather than hours.
+</p>
+
+<h2 id="episodic">Why &ldquo;affected&rdquo; and &ldquo;unwell&rdquo; are different words here</h2>
+
+<p>
+    This is the part the mod had to take a position on. An MH horse is not a sick horse
+    that occasionally gets sicker. It is a <strong>normal horse with a conditional
+    fault</strong> &mdash; correct temperature, correct muscle function, correct
+    performance, right up until a trigger it may never encounter. Many affected horses
+    live an entire working life without an episode.
+</p>
+
+<p>
+    So the honest model is a condition that is <em>reported and not priced</em>, which
+    is what <code>Condition.informational</code> exists for. The alternative &mdash;
+    docking hearts to represent a risk that is currently zero &mdash; would say
+    something false about the horse standing in front of the player.
+</p>
+
+<h2 id="breeds">Breeds</h2>
+
+<p>
+    The variant is concentrated in <strong>Quarter Horse-derived</strong> lines rather
+    than spread through the species, which is why the global founder rate here is low
+    and the breed pool carries the real weight. The American Azteca registry screens
+    breeding stock for it alongside HYPP, PSSM1, GBED and HERDA &mdash; the four the
+    <a href="breed-book.html">Azteca</a> already carried in this mod, and the reason
+    this locus was the conspicuous absence on that panel.
+</p>
+
+<div class="note">
+    <span class="label">MH and PSSM1 are different things that look alike</span>
+    <p>
+        Both cause exertional muscle damage and both turn up on the same Quarter Horse
+        test panels, so they are easy to conflate. <a href="gene-gys1.html">PSSM1</a> is
+        a glycogen-storage defect and its horse ties up recurrently under ordinary work;
+        MH is a calcium-channel defect whose horse is fine until a specific trigger. A
+        horse can carry both, and in this mod they are separate loci that stack.
+    </p>
+</div>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-scn4a.html">SCN4A (HYPP)</a>
+        <a href="gene-gys1.html">GYS1 (PSSM1)</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Ryr1Gene.java</code>
+</div>
+
+</article>
+</main>
+</body>
+</html>

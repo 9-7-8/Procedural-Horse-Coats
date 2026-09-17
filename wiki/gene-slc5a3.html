@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLC5A3 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+
+<h1>SLC5A3 (foal immunodeficiency syndrome)</h1>
+
+<p class="lede">
+    A recessive lethal that gives you nothing to see. The foal is born looking
+    perfectly healthy, runs with its dam for weeks, and then fails as the antibodies
+    it borrowed from her run out and its own never arrive.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.slc5a3"></div>
+
+<h2>The one disorder that is common</h2>
+
+<p>
+    Every other recessive lethal in this mod is a rarity you meet by accident. This
+    one is not &mdash; not inside the breed it belongs to. Roughly <strong>two Fell
+    Ponies in five carry a copy</strong>, so breeding two Fells together without
+    checking is not unlucky, it is the ordinary case. The
+    <a href="breed-book.html">Dales Pony</a> carries the same mutation.
+</p>
+
+<p>
+    That makes it the clearest argument in the mod for reading a horse&rsquo;s papers
+    before pairing it. With a <a href="carrots.html">gene database</a> entry for both
+    parents the cross is a decision; without one it is a coin you flip twice.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers.</b>
+    </p>
+</div>
+
+<h2>Where you will actually meet it</h2>
+
+<p>
+    An unaffiliated wild horse carries it at well under one in a hundred. A Fell Pony
+    carries it at thirty-eight in a hundred. That gap is deliberate and it is the
+    whole point of per-breed pools: a disorder can be vanishing globally and
+    commonplace inside one population, and a mod that only had one global number
+    could not say so.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.slc5a3"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.slc5a3</dd></div>
+    <div><dt>Priority</dt><dd>102</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">fis</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>slc5a3-carrier</code>, <code>foal-immunodeficiency-syndrome</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>0.8% of unaffiliated founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Breed pools</dt><dd>Fell Pony 38%, Dales Pony 18% &mdash; see the breed files</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that kills a foal, and
+        it is exactly right: <code>wildType</code> means <em>changes nothing about the
+        coat</em>. Because none of the non-coat genes paints,
+        <code>Gene.affectsCoat()</code> is false for all of them and they are left out of
+        a horse&rsquo;s texture key. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>fis/N</code></td><td><code>slc5a3-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>fis/fis</code></td><td><code>foal-immunodeficiency-syndrome</code></td><td>&minus;12 health, &minus;0.04 speed, &minus;0.15 jump &mdash; <b>the foal is born and then dies</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Where the mod and the pathology disagree</span>
+    <p>
+        The real disorder kills over <em>weeks</em>, not seconds: an affected foal
+        nurses, looks well, and declines as maternal antibody wanes. The mod has no age
+        model and no immune model, so it uses the ordinary
+        <code>LETHAL_AT_BIRTH</code> path and the foal dies shortly after being born.
+        <b>That is a real simplification and it loses the cruellest part of the
+        condition</b> &mdash; that the foal appears healthy long enough to be named and
+        hoped for. Flagged here rather than hidden.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="at-a-glance">At a glance</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>SLC5A3</em> &mdash; solute carrier family 5 member 3, a sodium/myo-inositol cotransporter</td></tr>
+<tr><th>Disorder</th><td>Foal immunodeficiency syndrome (FIS); formerly &ldquo;Fell Pony syndrome&rdquo;</td></tr>
+<tr><th>Inheritance</th><td>Autosomal recessive</td></tr>
+<tr><th>Homozygote</th><td>B-lymphocyte failure and progressive anaemia; invariably fatal in the first months</td></tr>
+<tr><th>Heterozygote</th><td>Clinically normal carrier</td></tr>
+<tr><th>Coat</th><td>No known effect</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="what-breaks">What breaks</h2>
+
+<p>
+    Two things fail together, which is what made the condition confusing before the
+    causal variant was found. Affected foals cannot maintain a <strong>B-lymphocyte
+    population</strong>, so they never build antibodies of their own; and they develop
+    a <strong>progressive anaemia</strong> that does not respond to treatment. The
+    combination is what kills them, and neither alone would.
+</p>
+
+<p>
+    The reason a foal looks well at first is <a href="breeding.html">maternal</a>: it
+    absorbs antibody from its dam&rsquo;s colostrum in the first day of life and lives
+    on that borrowed immunity. As it decays over the following weeks, nothing replaces
+    it. The foal then meets ordinary environmental organisms with no defence, and dies
+    of an infection that would not trouble a normal foal.
+</p>
+
+<h2 id="why-common">Why a fatal recessive is this common</h2>
+
+<p>
+    It is the standard answer for a numerically small, closed, geographically isolated
+    breed: a fatal allele that is completely silent in the heterozygote pays no
+    penalty. Selection never sees a carrier, and in a small population drift and a few
+    influential sires do the rest. A foundational screen found <strong>82 carriers in
+    214 Fell Ponies</strong> &mdash; about 38% &mdash; and UC&nbsp;Davis has reported a
+    figure near 40%.
+</p>
+
+<p>
+    That is also why the breed societies were able to act on it. A test has existed
+    since 2010, and because carriers are ordinary healthy ponies the sensible
+    management is not to cull them &mdash; in a breed this small that would be its own
+    disaster &mdash; but to test and never pair two. The mod reproduces exactly that
+    situation: the Fell Pony ships carrying it at the real rate, and the tool for
+    dealing with it is information rather than avoidance.
+</p>
+
+<div class="note">
+    <span class="label">Why the locus is named SLC5A3 and not &ldquo;FIS&rdquo;</span>
+    <p>
+        Because there is a confirmed causal variant to name it after. Two loci in this
+        mod &mdash; <a href="gene-cvm.html">CVM</a> and
+        <a href="gene-megaesophagus.html">megaesophagus</a> &mdash; are keyed on the
+        condition instead, precisely because they have none, and both pages say so. This
+        one does not need that hedge.
+    </p>
+</div>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-plod1.html">PLOD1 (WFFS)</a>
+        <a href="gene-prkdc.html">PRKDC (SCID)</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Slc5a3Gene.java</code>
+</div>
+
+</article>
+</main>
+</body>
+</html>

@@ -60,6 +60,10 @@
     "horsegenetics.scn4a": [
       { "pair": "H/N", "weight": 1 },
       { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.ryr1": [
+      { "pair": "MH/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
     ]
   },
   "strains": [
@@ -102,7 +106,7 @@
     "Two strains, because the two registries disagree about what an Azteca may look like: nine founders in ten are the Mexican solid-coloured standard, one in ten carries the American registry's permitted Paint-derived patterns.",
     "No leopard complex in either strain - the Mexican standard explicitly refuses Appaloosa patterning.",
     "The disorder rates are Quarter Horse-derived risks kept deliberately low. The American registry requires breeding stock to test clear for all of them, which is evidence the loci matter to the breed, not evidence of a carrier rate.",
-    "Malignant hyperthermia (RYR1) is the fifth locus that registry screens, and this mod has no gene for it.",
+    "Malignant hyperthermia (RYR1) is the fifth locus the American registry screens, and it now ships - so all five are modelled. It is dominant, so there is no silent carrier and a wild-caught Azteca can have it. One copy costs the horse nothing at all: the real condition is episodic, triggered by anaesthesia or extreme stress, and between episodes the animal is genuinely normal. The 1% rate is a placeholder, not a measured breed figure.",
     "Foundation-blood percentages, registry inspection and charro training are what actually define the breed, and none of them are modelled: a Quarter Horse bred to an Andalusian here makes a cross, not an Azteca."
   ]
 }

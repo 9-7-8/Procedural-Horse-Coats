@@ -30,14 +30,15 @@ class HealthGenesTest {
     private static final List<RecessiveDisorderGene> DISORDERS = List.of(
             Genes.B4GALT7, Genes.PLOD1, Genes.RAPGEF5, Genes.ST14, Genes.SHOX, Genes.MET,
             Genes.PPIB, Genes.PRKDC, Genes.MYO5A, Genes.TOE1, Genes.CVM, Genes.GBE1,
-            Genes.MEGAESOPHAGUS);
+            Genes.MEGAESOPHAGUS, Genes.SLC5A3, Genes.LAMC2, Genes.LAMA3);
 
     /**
      * The dominant disorders - the deliberate exception to everything below.
      * A dominant has no silent carrier, so an allele that never appeared in a
      * founder could never appear at all.
      */
-    private static final List<DominantDisorderGene> DOMINANTS = List.of(Genes.SCN4A, Genes.GYS1);
+    private static final List<DominantDisorderGene> DOMINANTS =
+            List.of(Genes.SCN4A, Genes.GYS1, Genes.RYR1);
 
     /**
      * <b>A wild-caught horse is an adult that survived.</b> No recessive
@@ -104,7 +105,8 @@ class HealthGenesTest {
                 }
             }
         }
-        double[] want = {Genes.SCN4A.WILD_AFFECTED_PERCENT, Genes.GYS1.WILD_AFFECTED_PERCENT};
+        double[] want = {Genes.SCN4A.WILD_AFFECTED_PERCENT, Genes.GYS1.WILD_AFFECTED_PERCENT,
+                Genes.RYR1.WILD_AFFECTED_PERCENT};
         for (int k = 0; k < DOMINANTS.size(); k++) {
             double got = 100.0 * affected[k] / n;
             assertTrue(Math.abs(got - want[k]) < 0.5,
@@ -210,6 +212,9 @@ class HealthGenesTest {
                 with(new AllelePair(Genes.RAPGEF5.variant, Genes.RAPGEF5.variant)),
                 with(new AllelePair(Genes.ST14.variant, Genes.ST14.variant)),
                 with(new AllelePair(Genes.SHOX.variant, Genes.SHOX.variant)),
+                with(new AllelePair(Genes.SLC5A3.variant, Genes.SLC5A3.variant)),
+                with(new AllelePair(Genes.LAMC2.variant, Genes.LAMC2.variant)),
+                with(new AllelePair(Genes.LAMA3.variant, Genes.LAMA3.variant)),
                 with(new AllelePair(Genes.ACAN.D1, Genes.ACAN.D1)));
         for (Genotype g : lethals) {
             Traits t = HorseTraits.resolve(g);
@@ -261,11 +266,20 @@ class HealthGenesTest {
         assertSame(Viability.VIABLE, both.viability(), "deafness costs the horse nothing");
     }
 
-    /** Silver's ocular defect is homozygous-only - the coat allele hides it. */
+    /**
+     * <b>Silver's ocular defect is dosed, not homozygous-only.</b> One copy is
+     * the cyst phenotype - named on the horse and completely free, which is why
+     * a founder may carry it. Two copies is the malformation, and costs hearts.
+     */
     @Test
-    void mcoaIsHomozygousSilverOnly() {
-        assertTrue(HorseTraits.resolve(with(new AllelePair(Genes.SILVER.Z, Genes.SILVER.z)))
-                .conditions().isEmpty());
+    void mcoaScalesWithTheSilverDose() {
+        Traits het = HorseTraits.resolve(with(new AllelePair(Genes.SILVER.Z, Genes.SILVER.z)));
+        assertEquals(1, het.conditions().size(), "one silver copy declares the cyst phenotype");
+        assertTrue(het.conditions().stream()
+                        .allMatch(c -> c.severity() == Severity.INFORMATIONAL),
+                "a silver carrier's eyes must cost it nothing");
+        assertEquals(HorseTraits.BASE_HEALTH, het.health(), 1e-9);
+
         Traits homo = HorseTraits.resolve(with(new AllelePair(Genes.SILVER.Z, Genes.SILVER.Z)));
         assertEquals(1, homo.conditions().size());
         assertTrue(homo.health() < HorseTraits.BASE_HEALTH);
@@ -276,7 +290,8 @@ class HealthGenesTest {
     void everyDisorderHasCarrierWordingWorthShowing() {
         List<Gene> health = List.of(
                 Genes.ACAN, Genes.B4GALT7, Genes.PLOD1, Genes.RAPGEF5,
-                Genes.ST14, Genes.SHOX, Genes.MET);
+                Genes.ST14, Genes.SHOX, Genes.MET,
+                Genes.SLC5A3, Genes.LAMC2, Genes.LAMA3);
         for (Gene gene : health) {
             boolean carrier = gene.expressions().stream()
                     .anyMatch(e -> e.id().endsWith("-carrier") && !e.description().isBlank());
@@ -290,18 +305,33 @@ class HealthGenesTest {
 
     /**
      * <b>There is no carrier state.</b> The whole difference between the two
-     * disorder shapes in one assertion: one copy of a recessive is silent and
-     * one copy of a dominant is not.
+     * disorder shapes: one copy of a recessive is silent, and one copy of a
+     * dominant is always <i>named</i> on the horse.
+     *
+     * <p><b>Named is not the same as priced</b>, which is what this used to
+     * assume. {@link Genes#RYR1} shows from one copy and costs nothing at all -
+     * malignant hyperthermia is episodic and this game has no trigger for it, so
+     * docking hearts would invent a symptom the condition does not have between
+     * episodes. So the price is checked against what each condition actually
+     * declares rather than assumed: an informational het is free, an impairing
+     * one takes hearts, and a gene that disagrees with its own
+     * {@link com.example.horsegenetics.common.trait.Severity} fails here.
      */
     @Test
-    void oneCopyOfADominantAlreadyCostsTheHorse() {
+    void oneCopyOfADominantAlwaysShowsAndIsPricedAsItClaims() {
         for (DominantDisorderGene gene : DOMINANTS) {
             Traits het = HorseTraits.resolve(
                     Genotype.wildType().with(new AllelePair(gene.variant, gene.baseline)));
             assertTrue(het.conditions().contains(gene.heterozygousCondition()),
                     gene.key() + ": one copy must already be a condition");
-            assertTrue(het.health() < HorseTraits.BASE_HEALTH,
-                    gene.key() + ": one copy must already cost hearts");
+
+            if (gene.heterozygousCondition().severity() == Severity.INFORMATIONAL) {
+                assertEquals(HorseTraits.BASE_HEALTH, het.health(), 1e-9,
+                        gene.key() + ": an informational condition must cost nothing");
+            } else {
+                assertTrue(het.health() < HorseTraits.BASE_HEALTH,
+                        gene.key() + ": one copy must already cost hearts");
+            }
         }
     }
 

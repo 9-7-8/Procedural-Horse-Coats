@@ -77,6 +77,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 20 },
       { "pair": "N/N", "weight": 80 }
+    ],
+    "horsegenetics.plod1": [
+      { "pair": "ffs/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
     ]
   },
   "notes": [
@@ -84,7 +88,7 @@
     "Bay and chestnut dominate, with black and grey established behind them. It is an open performance studbook rather than a colour breed, so cream, dun, tobiano, frame, roan and rabicano all survive at low rates through qualifying ancestry rather than being forced wild - but none of them should be common, and a Selle Francais herd should never read as flashy.",
     "White face and leg markings are common in the breed and come down in part from the Norman foundation, so SW1 sits higher here than the pattern loci around it. It is standing in for ordinary markings, as it does across the mod.",
     "Frame is at one founder in a hundred. That is low enough to be a curiosity rather than a breeding hazard, but O/O is still lethal white and two carriers can still meet.",
-    "WFFS does not ship, and for this breed the evidence was better than for any other warmblood here: a 2022 genetic-marker study reported 6% of tested Selle Francais horses as heterozygous PLOD1 carriers, which is a direct breed figure rather than a warmblood-wide proxy. There is no WFFS locus in the mod. PLOD1 here is Friesian dwarfism and is not a substitute, and the shared gene name is exactly the trap. See the roadmap.",
+    "WFFS now ships as this mod's PLOD1 locus, and for this breed the evidence is better than for most warmbloods: a 2022 genetic-marker study reported 6% of tested Selle Francais horses as heterozygous carriers, a direct breed figure rather than a warmblood-wide proxy. The 2020 multi-breed survey's 5.77% of 52 agrees closely, which is why 6% is the number used.",
     "The leopard complex is forced wild, against the draft, which wanted LP, PATN1 and PATN2 at half a percent each on the strength of a fan-site breed page. That is not enough to put appaloosa spotting into a French warmblood.",
     "Champagne, silver, pearl, mushroom and brindle are forced wild too. An open studbook is a policy about pedigree, not evidence about alleles.",
     "Every other disorder clear. The breed's international sport ancestry does not license importing the Quarter Horse, Arabian or Friesian panels.",

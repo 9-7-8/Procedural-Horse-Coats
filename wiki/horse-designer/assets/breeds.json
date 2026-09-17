@@ -99,13 +99,17 @@
     "horsegenetics.magic_heat": [
       { "pair": "Hsen/n", "weight": 15 },
       { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.lamc2": [
+      { "pair": "jeb/N", "weight": 3 },
+      { "pair": "N/N", "weight": 97 }
     ]
   },
   "notes": [
     "Pale gold coat, amber eyes, pink freckled skin: gold champagne (Ch on a chestnut), not the cream dilution, which the breed does not carry.",
     "EMS / laminitis: age-related, folded into heartiness.",
     "The only draught breed developed in the United States, and traced to one cream foundation mare - Old Granny, foaled about 1911 - with the association formed in 1944. The Livestock Conservancy rates it Critical and the registered population is in the hundreds; it ships as rare here, which is a gameplay call rather than a reading of that status.",
-    "The real association test panel is exactly two loci, and both are clear here. PSSM1 (GYS1) ships as a gene but is not named: presence in the breed is documented and no population frequency is, and a dominant would show on every copy. JEB1 - junctional epidermolysis bullosa, a recessive lethal - has no locus in this mod at all; it is on the roadmap, and is deliberately not stood in for by an unrelated recessive lethal.",
+    "The real association test panel is exactly two loci and both are now modelled. JEB1 - junctional epidermolysis bullosa, a recessive lethal - ships as the LAMC2 locus, the draft-horse variant, kept separate from the Saddlebred's LAMA3 form. PSSM1 (GYS1) ships but is not named here: presence in the breed is documented and no population frequency is, and a dominant would show on every copy. The 3% carrier rate written for LAMC2 is a placeholder chosen to be plausible - no measured frequency for this breed was found.",
     "Champagne here is the real SLC36A1 dominant, and every founder carries a copy: the coat, the amber eye and the pink freckled skin all come off that one locus."
   ]
 },
@@ -386,6 +390,10 @@
       { "pair": "A/A", "weight": 25 },
       { "pair": "A/C", "weight": 50 },
       { "pair": "C/C", "weight": 25 }
+    ],
+    "horsegenetics.lama3": [
+      { "pair": "jeb/N", "weight": 5.14 },
+      { "pair": "N/N", "weight": 94.86 }
     ]
   },
   "notes": [
@@ -393,7 +401,7 @@
     "The registry accepts any colour, and the pool is built to say so rather than to pick one. Chestnut, bay, brown and black are the familiar core; grey, roan, palomino, buckskin, dun, champagne, silver, cremello and pinto all occur in the registered population and all ship here as minorities.",
     "DMRT3 sits at an intermediate rate rather than near-fixed, and that is the point of it. Only some Saddlebreds are five-gaited - the slow gait and the rack are a division, not a breed trait - so about three founders in four carry a gait allele and only a quarter are homozygous. Every other gaited breed here is near-fixed; this one should not be.",
     "Frame ships at a low rate, so this is a lethal-white breed: O/O is the hazard, as it is for the Paint and the Missouri Fox Trotter.",
-    "JEB does not ship, and it is the breed's own documented disorder. American Saddlebred junctional epidermolysis bullosa is a recessive lethal caused by a partial LAMA3 deletion, and a random 2007 foal-crop sample found 9 carriers in 175 foals - a mutant allele frequency of 0.026, which is an unusually solid number by the standards of this book. There is no JEB locus in the mod, so the file names no rate for it. The Belgian-context LAMC2 variant is a different mutation and is not a substitute. See the roadmap.",
+    "JEB now ships and the breed names its own documented rate. American Saddlebred junctional epidermolysis bullosa is a recessive lethal caused by a partial LAMA3 deletion, and a random 2007 foal-crop sample found 9 carriers in 175 foals - a mutant allele frequency of 0.026, which is an unusually solid number by the standards of this book because the cohort was random rather than tested-because-suspected. The Belgian-context LAMC2 variant is a different mutation in a different gene and is a separate locus here, so this breed carries the Saddlebred form only.",
     "Every other disorder clear. No Saddlebred-specific rate was located for anything else on the panel.",
     "Pearl, mushroom, brindle and the leopard complex are forced wild - 'any colour' is the registry's policy about what it will accept, not evidence that every allele is present in an average founder.",
     "Moderate commonness, which is the default and so is not written in the file.",
@@ -949,6 +957,10 @@
     "horsegenetics.scn4a": [
       { "pair": "H/N", "weight": 1 },
       { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.ryr1": [
+      { "pair": "MH/N", "weight": 1 },
+      { "pair": "N/N", "weight": 99 }
     ]
   },
   "strains": [
@@ -991,7 +1003,7 @@
     "Two strains, because the two registries disagree about what an Azteca may look like: nine founders in ten are the Mexican solid-coloured standard, one in ten carries the American registry's permitted Paint-derived patterns.",
     "No leopard complex in either strain - the Mexican standard explicitly refuses Appaloosa patterning.",
     "The disorder rates are Quarter Horse-derived risks kept deliberately low. The American registry requires breeding stock to test clear for all of them, which is evidence the loci matter to the breed, not evidence of a carrier rate.",
-    "Malignant hyperthermia (RYR1) is the fifth locus that registry screens, and this mod has no gene for it.",
+    "Malignant hyperthermia (RYR1) is the fifth locus the American registry screens, and it now ships - so all five are modelled. It is dominant, so there is no silent carrier and a wild-caught Azteca can have it. One copy costs the horse nothing at all: the real condition is episodic, triggered by anaesthesia or extreme stress, and between episodes the animal is genuinely normal. The 1% rate is a placeholder, not a measured breed figure.",
     "Foundation-blood percentages, registry inspection and charro training are what actually define the breed, and none of them are modelled: a Quarter Horse bred to an Andalusian here makes a cross, not an Azteca."
   ]
 },
@@ -1825,6 +1837,10 @@
     "horsegenetics.ednrb": [
       { "pair": "O/N", "weight": 4 },
       { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.acan": [
+      { "pair": "D5/N", "weight": 2 },
+      { "pair": "N/N", "weight": 98 }
     ]
   },
   "strains": [
@@ -1870,7 +1886,7 @@
   "notes": [
     "Tobiano is the signature and splash is the reason for the eyes - a herd should read as pinto ponies from a distance, with blue and part-blue eyes turning up far more often than in a feral population.",
     "Two strains: eight founders in ten are the stocky island type, two in ten the taller privately-bred sport type. The sport type should also be the larger of the two and is not, because a strain can override gene pools but not the stats block.",
-    "ACAN D5 dwarfism is tested for in the real breed and is not here: this mod's ACAN gene declares D1 to D4, and D1 is the severe one, so borrowing a different variant's allele would overstate what it does.",
+    "ACAN D5 dwarfism is tested for in the real breed and the locus now declares a D5 allele, so the breed names it directly instead of borrowing D1 - which is the severe variant and would have overstated what the pony has. The 2% carrier rate is a placeholder, not a measured breed figure.",
     "The association's other listed risks - uveitis, lordosis, EMS, laminitis, DSLD, CIAR - are mostly not single-gene conditions and have no locus here. They are deliberately not stood in for by unrelated disorders.",
     "Salt tolerance, marsh grazing, the dense winter coat, swimming and the pony penning are all outside what the mod models."
   ]
@@ -2435,11 +2451,16 @@
       { "pair": "Ctol/Ctol", "weight": 5 },
       { "pair": "Ctol/n", "weight": 30 },
       { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.slc5a3": [
+      { "pair": "fis/N", "weight": 18 },
+      { "pair": "N/N", "weight": 82 }
     ]
   },
   "notes": [
     "Heavy feathering, dense bone, hardy moorland type - feathering is a roadmap render item.",
-    "EMS / laminitis: age-related, folded into heartiness."
+    "EMS / laminitis: age-related, folded into heartiness.",
+    "Foal Immunodeficiency Syndrome (SLC5A3) is carried here as well as in the Fell Pony - it is the same mutation in a closely related native breed. The Fell's 38% is the well-measured figure; this breed's rate is the lower-confidence one and should be read as an estimate rather than a survey result."
   ]
 },
 {
@@ -3090,6 +3111,10 @@
       { "pair": "Ctol/Ctol", "weight": 5 },
       { "pair": "Ctol/n", "weight": 30 },
       { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.slc5a3": [
+      { "pair": "fis/N", "weight": 38 },
+      { "pair": "N/N", "weight": 62 }
     ]
   },
   "notes": [
@@ -3098,7 +3123,7 @@
     "Chestnut, piebald and skewbald go in Section X rather than the main colour standard, so chestnut sits at about one founder in two hundred and no pinto locus is named at all.",
     "Dark brown is carried by the shade locus, so the shade pool is skewed dark rather than using the house-standard spread.",
     "Cream, pearl, silver, dun, champagne, mushroom, flaxen, roan, rabicano and leopard are all forced wild - none is a standard mainstream Fell colour. Sabino 1 sits at 1% for the permitted star and the odd white hind hoof; extensive facial white and white forelegs are discouraged by the standard.",
-    "Foal Immunodeficiency Syndrome is the breed's defining modern health story and this file cannot carry it: FIS is a fatal autosomal-recessive that the mod has no locus for. A foundational screen found 82 carriers in 214 Fell Ponies - about 38%, and UC Davis has reported near 40% - and the same mutation is present in the Dales Pony. Testing has been available since 2010. The gene is on the roadmap; its absence here is a missing feature, not a claim that the breed is clear.",
+    "Foal Immunodeficiency Syndrome is the breed's defining modern health story and the file now carries it: FIS ships as the SLC5A3 locus, a fatal autosomal recessive, at the measured rate. A foundational screen found 82 carriers in 214 Fell Ponies - about 38%, and UC Davis has reported near 40%. Testing has been available since 2010, and because carriers are ordinary healthy ponies the real management is to test and never pair two rather than to cull. The same mutation is in the Dales Pony.",
     "Every other disorder is clear - no credible Fell-specific evidence was found for any of them.",
     "Cold tolerant partially, as the neighbouring Dales is: a weatherproof hill pony with a dense winter coat.",
     "The Fell Pony Society registry formed in 1922; the RBST puts the type in the Lake District for more than two thousand years.",
@@ -3472,6 +3497,10 @@
     "horsegenetics.tobiano": [
       { "pair": "To/to", "weight": 5 },
       { "pair": "to/to", "weight": 95 }
+    ],
+    "horsegenetics.plod1": [
+      { "pair": "ffs/N", "weight": 7.63 },
+      { "pair": "N/N", "weight": 92.37 }
     ]
   },
   "notes": [
@@ -3480,7 +3509,7 @@
     "The white is the point: broad blazes and substantial socks are part of the look, so sabino 1 is heavy at about a third of founders with the W20 booster and a light splash behind it. This is the markings mechanism, not a pinto pool.",
     "Tobiano sits at a twentieth - skewbald is rare but historically present, a memorable find rather than the default.",
     "Cream, pearl, champagne, silver, mushroom, dun, roan and leopard are forced wild - none is central to the reviewed standard. Frame overo is forced wild too, with no evidence for it and lethal white as the cost of guessing.",
-    "Warmblood Fragile Foal Syndrome is the real modern genetic concern in the Dutch warmblood population - the KWPN requires licensed stallions to be tested so carriers are not paired - and the mod has no WFFS locus, so no rate is written. It is on the roadmap. PLOD1 is NOT a substitute: the mod's PLOD1 is Friesian dwarfism and they are different disorders that happen to share a gene name in loose writing.",
+    "Warmblood Fragile Foal Syndrome is the real modern genetic concern in the Dutch warmblood population - the KWPN requires licensed stallions to be tested so carriers are not paired - and the breed now carries it. WFFS is this mod's PLOD1 locus. The rate is the 2020 multi-breed survey's Dutch Warmblood figure, 19 carriers of 249 tested, 7.63%.",
     "Every other disorder is clear; no Gelderlander-specific carrier study was found.",
     "No heat or cold locus - a Dutch lowland carriage horse has no climate history to carry, so it is neutral everywhere.",
     "The Geldersch Paarden Stamboek was founded in 1890 around two goals, an agricultural carriage horse and a luxury one. In 1965 it was one of the two foundation breeds of the Dutch Warmblood with the heavier Groninger, and was later folded under the KWPN; a Classic Gelder studbook won Dutch recognition in 2019 specifically to stop the historical type being absorbed.",
@@ -6583,13 +6612,17 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 12 },
       { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.plod1": [
+      { "pair": "ffs/N", "weight": 15.53 },
+      { "pair": "N/N", "weight": 84.47 }
     ]
   },
   "notes": [
     "The Oldenburger, from the former Grand Duchy of Oldenburg in Lower Saxony, administered by the Oldenburger Pferdezuchtverband. It began as a heavy carriage and artillery horse and was rebuilt through the twentieth century into a large elastic sport horse on Thoroughbred, Anglo-Norman, Hanoverian, Trakehner, Holsteiner and Dutch Warmblood blood.",
     "An open studbook, and the colour pool says so. Bay, brown, black, chestnut and grey are the classic palette and dominate here, but the Verband does not restrict colour - quality is the only standard that counts - so cream, tobiano and roan all ship as real minorities rather than being forced wild the way a closed colour registry's would be.",
     "Tobiano at one founder in ten is the most distinctive call in the file and it is a judgement, not a measurement. No Oldenburg genotype survey exists for any locus here; these are readings of a documented open-colour policy.",
-    "WFFS does not ship, and it is the breed's real modern concern. Warmblood fragile foal syndrome has no locus in this mod - PLOD1 here is Friesian dwarfism and is emphatically not a substitute - so the file names no rate for it. UC Davis reports an average carrier frequency near 11% across tested warmbloods, which would have been the number. See the roadmap.",
+    "WFFS is the breed's real modern concern and it now ships, as this mod's PLOD1 locus. The rate is measured in this breed specifically rather than borrowed: the 2020 multi-breed survey found 15.53% carriers among 219 Oldenburgs. That replaces the warmblood-wide average near 11% that the draft would have used, and is one of the highest carrier rates in the survey.",
     "Champagne, silver, pearl, mushroom, dun, frame and the leopard complex are forced wild. An open registry is not evidence that every known allele is present in an average founder, and frame in particular would introduce a lethal-white hazard with no breed evidence behind it.",
     "Managed sources only. An international performance studbook with licensed stallions and inspected mares, not a feral population.",
     "Every other disorder clear. The breed's open international pedigree is not a licence to import HYPP, HERDA, GBED or the Arabian panel.",
@@ -7405,7 +7438,7 @@
   "notes": [
     "An American gaited saddle breed from the Appalachian foothills of eastern Kentucky, despite the name - the Rocky Mountain community, not the western range. It traces to a chocolate-coloured gaited colt brought east around 1900 and reinforced with local Kentucky mountain stock, and the RMHA has registered it since 1986.",
     "Chocolate is the signature and it is silver on black: a dark brown body with a pale flaxen-to-silver mane and tail. Silver is deliberately the highest rate of any breed here, and agouti keeps a/a at about a fifth so the allele has black pigment to act on often enough to be recognisable.",
-    "Silver is not cosmetic. The same PMEL variant that makes the chocolate coat causes multiple congenital ocular anomalies - heterozygotes commonly show the cyst phenotype and Z/Z horses are at real risk of severe malformation and impaired vision. The mod does not model that, so a Rocky Mountain Horse here gets the colour without the cost. That is an engine limitation, not a claim about the breed, and it is on the roadmap.",
+    "Silver is not cosmetic, and the mod now prices it. The same PMEL variant that makes the chocolate coat causes multiple congenital ocular anomalies, and the locus models it by dose: one silver copy gives a named ocular-cyst condition that costs the horse nothing, and two copies give the malformation and take hearts. This breed carries silver at the highest rate here because chocolate is its whole identity, so it is precisely the population that pays for it - which is the point.",
     "Every white pattern is forced wild. The RMHA registers solid body colours only and excludes Paint, pinto, Appaloosa, spotted and all-white horses outright, allowing white only as modest face marks and below the knee and hock. A registry rule, not missing evidence - and the same trade the Kentucky Mountain Saddle Horse makes, which is this breed's near neighbour and shares its gene pool.",
     "The rest of the solid palette is the registry's own list: black, bay, brown, chestnut, palomino, buckskin, champagne, dun, grullo, red dun, roan and grey all belong, and several of them need DNA proof for registration in life.",
     "Flaxen ships alongside silver and must not be mistaken for it. Flaxen lightens a chestnut's mane; silver lightens a black-based one. A flaxen chestnut is not a chocolate, and a chestnut carrying Z shows almost nothing.",
@@ -7568,6 +7601,10 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 20 },
       { "pair": "N/N", "weight": 80 }
+    ],
+    "horsegenetics.plod1": [
+      { "pair": "ffs/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
     ]
   },
   "notes": [
@@ -7575,7 +7612,7 @@
     "Bay and chestnut dominate, with black and grey established behind them. It is an open performance studbook rather than a colour breed, so cream, dun, tobiano, frame, roan and rabicano all survive at low rates through qualifying ancestry rather than being forced wild - but none of them should be common, and a Selle Francais herd should never read as flashy.",
     "White face and leg markings are common in the breed and come down in part from the Norman foundation, so SW1 sits higher here than the pattern loci around it. It is standing in for ordinary markings, as it does across the mod.",
     "Frame is at one founder in a hundred. That is low enough to be a curiosity rather than a breeding hazard, but O/O is still lethal white and two carriers can still meet.",
-    "WFFS does not ship, and for this breed the evidence was better than for any other warmblood here: a 2022 genetic-marker study reported 6% of tested Selle Francais horses as heterozygous PLOD1 carriers, which is a direct breed figure rather than a warmblood-wide proxy. There is no WFFS locus in the mod. PLOD1 here is Friesian dwarfism and is not a substitute, and the shared gene name is exactly the trap. See the roadmap.",
+    "WFFS now ships as this mod's PLOD1 locus, and for this breed the evidence is better than for most warmbloods: a 2022 genetic-marker study reported 6% of tested Selle Francais horses as heterozygous carriers, a direct breed figure rather than a warmblood-wide proxy. The 2020 multi-breed survey's 5.77% of 52 agrees closely, which is why 6% is the number used.",
     "The leopard complex is forced wild, against the draft, which wanted LP, PATN1 and PATN2 at half a percent each on the strength of a fan-site breed page. That is not enough to put appaloosa spotting into a French warmblood.",
     "Champagne, silver, pearl, mushroom and brindle are forced wild too. An open studbook is a policy about pedigree, not evidence about alleles.",
     "Every other disorder clear. The breed's international sport ancestry does not license importing the Quarter Horse, Arabian or Friesian panels.",
@@ -8161,6 +8198,10 @@
     "horsegenetics.magic_cold": [
       { "pair": "Ctol/n", "weight": 15 },
       { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.plod1": [
+      { "pair": "ffs/N", "weight": 7.4 },
+      { "pair": "N/N", "weight": 92.6 }
     ]
   },
   "notes": [
@@ -8168,7 +8209,7 @@
     "Solid colours by studbook policy: bay, chestnut, grey and black are the whole population, and grey is the one that carries. Cream sits low enough for an occasional palomino or buckskin, silver and splash lower still.",
     "Roan is forced wild on purpose. The breed references say roan does not occur in the Swedish Warmblood and has to be brought in by crossing, which is exactly what forcing the locus wild means here.",
     "Tobiano is present at a trace rather than absent - supplementary records call it rare, not impossible - and it is the one loud pattern a pure founder can throw.",
-    "WFFS is the breed's real disorder and this file ships clear of it, because the mod has no WFFS locus. PLOD1 here is Friesian dwarfism, not warmblood fragile foal syndrome, and writing the draft's PLOD1 number into it would have seeded dwarfism into a sport horse. The measured figure is on the roadmap: 38 of 511 randomly selected Swedish Warmbloods born in 2017 were carriers, 7.4%, an allele frequency near 0.0385 - better evidence than most of what is already in that section.",
+    "WFFS is the breed's real disorder and it now ships, as this mod's PLOD1 locus. The figure is a good one: 38 of 511 randomly selected Swedish Warmbloods born in 2017 were carriers, 7.4%, an allele frequency near 0.0385. A random cohort rather than a tested-because-suspected one, which makes it better evidence than most of the health layer stands on.",
     "Every other disorder clear; no Swedish-specific carrier survey exists for the rest of the panel.",
     "Cold tolerant lightly - Scandinavian, but a stabled and rugged sport horse rather than a horse that winters out.",
     "Managed only: cowboy, spawn egg and stable, no wild herds. Stallion licensing, mare inspections, young-horse tests and everything else the studbook actually selects on are not modelled."
@@ -9643,7 +9684,7 @@
     "A tall band, running to 17.2 hands at the top. The studbook enforces no height standard at all, which is why it is wide rather than tight.",
     "Colour is not selected on at all, and the pool reflects that rather than forcing solid bay: grey and cream are ordinary, and tobiano, sabino, splash, W20, a trace of frame, roan, rabicano, dun and silver are all reachable. A pinto Z is a real horse, just an unusual one.",
     "Champagne, pearl, mushroom, the leopard complex and brindle stay wild. An open registry is not a reason to give every locus a frequency.",
-    "WFFS is the warmblood disorder this breed would carry and the file ships clear of it, because the mod has no WFFS locus - PLOD1 here is Friesian dwarfism. The draft's own figure was a self-labelled warmblood proxy rather than a Zangersheide measurement, so the rate that went on the roadmap is the Swedish Warmblood's measured one, not this.",
+    "WFFS is the warmblood disorder this breed would carry, and the locus exists in the mod - it is PLOD1. No rate is written here because the draft's own figure was a self-labelled warmblood proxy rather than a Zangersheide measurement, and it was declined. The breed ships clear of it for want of evidence, not because the gene is missing.",
     "Every other disorder clear. An open pedigree is not a licence to import the Quarter Horse or Friesian panel.",
     "Carries neither tolerance locus - a modern international sport horse that lives in a stable, like the other warmbloods here.",
     "Managed only: cowboy, spawn egg and stable, no wild herds."

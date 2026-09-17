@@ -49,10 +49,15 @@
       { "pair": "Ctol/Ctol", "weight": 5 },
       { "pair": "Ctol/n", "weight": 30 },
       { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.slc5a3": [
+      { "pair": "fis/N", "weight": 18 },
+      { "pair": "N/N", "weight": 82 }
     ]
   },
   "notes": [
     "Heavy feathering, dense bone, hardy moorland type - feathering is a roadmap render item.",
-    "EMS / laminitis: age-related, folded into heartiness."
+    "EMS / laminitis: age-related, folded into heartiness.",
+    "Foal Immunodeficiency Syndrome (SLC5A3) is carried here as well as in the Fell Pony - it is the same mutation in a closely related native breed. The Fell's 38% is the well-measured figure; this breed's rate is the lower-confidence one and should be read as an estimate rather than a survey result."
   ]
 }

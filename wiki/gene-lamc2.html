@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAMC2 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+
+<h1>LAMC2 (junctional epidermolysis bullosa, draft)</h1>
+
+<p class="lede">
+    A recessive lethal in the draft breeds. The layer that anchors skin to the body
+    never forms, so the two shear apart wherever the foal takes weight &mdash; and
+    the hoof capsules come away with it.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.lamc2"></div>
+
+<h2>One of two JEB loci, and they are deliberately two</h2>
+
+<p>
+    <a href="gene-lama3.html">LAMA3</a> is the other. They produce the same clinical
+    picture by breaking the same structure in two different places, and in this mod
+    they are <strong>separate genes rather than two alleles of one</strong>. That
+    matters at the stud: a horse can carry one and be genuinely clear of the other, so
+    a draft horse&rsquo;s test result says nothing at all about a
+    <a href="breed-book.html">Saddlebred</a>, and pairing a LAMC2 carrier with a LAMA3
+    carrier is completely safe.
+</p>
+
+<p>
+    Folding them into one locus with two alleles would have made those two mutually
+    exclusive &mdash; the <a href="gene-acan.html">ACAN</a> shape, where any two broken
+    copies leave no working one. That is right for ACAN and wrong here, because these
+    are two genes.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers.</b>
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.lamc2"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.lamc2</dd></div>
+    <div><dt>Priority</dt><dd>103</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">jeb</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>lamc2-carrier</code>, <code>junctional-epidermolysis-bullosa-lamc2</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>0.8% of unaffiliated founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Breed pools</dt><dd>American Cream Draft &mdash; see the breed file</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">Two loci, one condition name &mdash; and two condition <em>ids</em></span>
+    <p>
+        <code>Condition</code> equality is by id alone, so two genes can never quietly
+        declare the same disorder. These two deliberately declare different ids
+        (<code>&hellip;-lamc2</code> and <code>&hellip;-lama3</code>) even though a
+        player would call both &ldquo;JEB&rdquo;. A horse unlucky enough to be affected
+        at both loci reports both, which is correct: they are two separate failures.
+        Contrast <a href="gene-mitf.html">splash deafness</a>, which two loci share on
+        purpose and which is reported once.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>jeb/N</code></td><td><code>lamc2-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>jeb/jeb</code></td><td><code>junctional-epidermolysis-bullosa-lamc2</code></td><td>&minus;13 health, &minus;0.06 speed, &minus;0.20 jump &mdash; <b>the foal is born and then dies</b></td></tr>
+</tbody>
+</table>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="at-a-glance">At a glance</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>LAMC2</em> &mdash; laminin subunit gamma 2, one of the three chains of laminin-332</td></tr>
+<tr><th>Disorder</th><td>Junctional epidermolysis bullosa (JEB); the draft-horse form, reported in Belgian and related breeds</td></tr>
+<tr><th>Inheritance</th><td>Autosomal recessive</td></tr>
+<tr><th>Homozygote</th><td>Skin and hoof separation from birth; not survivable</td></tr>
+<tr><th>Heterozygote</th><td>Clinically normal carrier</td></tr>
+<tr><th>Coat</th><td>No known effect on colour &mdash; though the skin itself fails</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="anchor">What breaks</h2>
+
+<p>
+    Skin is two layers, and they have to be fastened together. The fastening is a
+    protein assembly at the <strong>basement membrane</strong>, the thin sheet between
+    the epidermis above and the dermis below, and one of its central components is
+    <strong>laminin-332</strong> &mdash; a trimer of three chains, of which
+    <em>LAMC2</em> encodes the gamma&nbsp;2.
+</p>
+
+<p>
+    Lose a functional chain and the trimer cannot assemble properly, so the anchoring
+    complex is absent or non-functional. The two layers of skin are then held together
+    by very little. Ordinary mechanical shear &mdash; standing, lying down, nursing,
+    being born &mdash; separates them, and the epidermis lifts away as blisters and
+    then as open wounds.
+</p>
+
+<p>
+    The hooves are the same tissue problem in its most load-bearing form. A hoof
+    capsule is epidermal, attached to the underlying structure by the same kind of
+    junction, and in an affected foal it detaches: the capsules loosen and slough. That
+    sign &mdash; a newborn foal losing its hooves &mdash; is the one that makes the
+    condition unmistakable.
+</p>
+
+<h2 id="outcome">Why it is a lethal rather than a disability</h2>
+
+<p>
+    There is no treatment that restores the missing anchor, the lesions are extensive
+    and continuously renewed by ordinary movement, and they are a route for infection
+    and fluid loss over a large surface. Affected foals are euthanised or die within
+    days. The mod uses the ordinary <code>LETHAL_AT_BIRTH</code> path, which for this
+    condition is a fair representation rather than a simplification &mdash; unlike
+    <a href="gene-slc5a3.html">FIS</a>, where the real timescale is weeks.
+</p>
+
+<h2 id="breeds">Breeds</h2>
+
+<p>
+    This is one of exactly <strong>two loci on the American Cream Draft&rsquo;s real
+    association test panel</strong> &mdash; the other being PSSM1
+    (<a href="gene-gys1.html">GYS1</a>), which already shipped. That is what made its
+    absence the most conspicuous gap on any shipped breed&rsquo;s own panel, and it is
+    why this locus exists.
+</p>
+
+<div class="note">
+    <span class="label">The rate in the breed file is a placeholder</span>
+    <p>
+        The <a href="breed-book.html">American Cream Draft</a> carries this at a figure
+        chosen to be plausible, not one measured in the breed. Said plainly here and in
+        the breed&rsquo;s own notes, because the sibling locus
+        <a href="gene-lama3.html">LAMA3</a> arrives with a genuinely measured number and
+        the two should not be mistaken for equally well evidenced.
+    </p>
+</div>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-lama3.html">LAMA3 (JEB, Saddlebred)</a>
+        <a href="gene-gys1.html">GYS1 (PSSM1)</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Lamc2Gene.java</code>
+</div>
+
+</article>
+</main>
+</body>
+</html>

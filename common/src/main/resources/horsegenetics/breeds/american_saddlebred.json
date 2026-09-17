@@ -90,6 +90,10 @@
       { "pair": "A/A", "weight": 25 },
       { "pair": "A/C", "weight": 50 },
       { "pair": "C/C", "weight": 25 }
+    ],
+    "horsegenetics.lama3": [
+      { "pair": "jeb/N", "weight": 5.14 },
+      { "pair": "N/N", "weight": 94.86 }
     ]
   },
   "notes": [
@@ -97,7 +101,7 @@
     "The registry accepts any colour, and the pool is built to say so rather than to pick one. Chestnut, bay, brown and black are the familiar core; grey, roan, palomino, buckskin, dun, champagne, silver, cremello and pinto all occur in the registered population and all ship here as minorities.",
     "DMRT3 sits at an intermediate rate rather than near-fixed, and that is the point of it. Only some Saddlebreds are five-gaited - the slow gait and the rack are a division, not a breed trait - so about three founders in four carry a gait allele and only a quarter are homozygous. Every other gaited breed here is near-fixed; this one should not be.",
     "Frame ships at a low rate, so this is a lethal-white breed: O/O is the hazard, as it is for the Paint and the Missouri Fox Trotter.",
-    "JEB does not ship, and it is the breed's own documented disorder. American Saddlebred junctional epidermolysis bullosa is a recessive lethal caused by a partial LAMA3 deletion, and a random 2007 foal-crop sample found 9 carriers in 175 foals - a mutant allele frequency of 0.026, which is an unusually solid number by the standards of this book. There is no JEB locus in the mod, so the file names no rate for it. The Belgian-context LAMC2 variant is a different mutation and is not a substitute. See the roadmap.",
+    "JEB now ships and the breed names its own documented rate. American Saddlebred junctional epidermolysis bullosa is a recessive lethal caused by a partial LAMA3 deletion, and a random 2007 foal-crop sample found 9 carriers in 175 foals - a mutant allele frequency of 0.026, which is an unusually solid number by the standards of this book because the cohort was random rather than tested-because-suspected. The Belgian-context LAMC2 variant is a different mutation in a different gene and is a separate locus here, so this breed carries the Saddlebred form only.",
     "Every other disorder clear. No Saddlebred-specific rate was located for anything else on the panel.",
     "Pearl, mushroom, brindle and the leopard complex are forced wild - 'any colour' is the registry's policy about what it will accept, not evidence that every allele is present in an average founder.",
     "Moderate commonness, which is the default and so is not written in the file.",

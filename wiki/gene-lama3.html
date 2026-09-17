@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAMA3 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+
+<h1>LAMA3 (junctional epidermolysis bullosa, Saddlebred)</h1>
+
+<p class="lede">
+    The same disorder as <a href="gene-lamc2.html">LAMC2</a>, in a different gene and a
+    different breed &mdash; and the best-measured disorder frequency in this mod.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.lama3"></div>
+
+<h2>The one number here that was not chosen</h2>
+
+<p>
+    Almost every carrier rate in this mod&rsquo;s health layer is a judgement call
+    &mdash; picked so a wild horse is healthy and an inbred line is not. This one is
+    not picked. A <strong>random 2007 foal-crop sample found 9 carriers in 175
+    foals</strong>, a mutant allele frequency of 0.026, and that is the figure the
+    <a href="breed-book.html">American Saddlebred</a> ships with.
+</p>
+
+<p>
+    The word doing the work is <em>random</em>. Most disorder frequencies in horses come
+    from animals tested <em>because</em> somebody suspected something, which inflates
+    the number in ways nobody can measure afterwards. A random foal crop has no such
+    bias, which makes this a better piece of evidence than most of what the rest of the
+    health layer stands on.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers.</b>
+    </p>
+</div>
+
+<h2>Not interchangeable with LAMC2</h2>
+
+<p>
+    A Saddlebred carrying this is <strong>clear of</strong>
+    <a href="gene-lamc2.html">the draft variant</a>, and vice versa. The two are
+    separate loci that inherit independently, so breeding a carrier of one to a carrier
+    of the other cannot produce an affected foal at all.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.lama3"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.lama3</dd></div>
+    <div><dt>Priority</dt><dd>104</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">jeb</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>lama3-carrier</code>, <code>junctional-epidermolysis-bullosa-lama3</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>1% of unaffiliated founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Breed pools</dt><dd>American Saddlebred 5.14% &mdash; the measured figure</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">Two loci for one condition &mdash; the reasoning is on the sibling page</span>
+    <p>
+        Why JEB is two genes here rather than one gene with two alleles is set out on
+        <a href="gene-lamc2.html">LAMC2</a>, along with what that buys a breeder. The
+        short version: they are genuinely two different genes, and a locus with two
+        variant alleles would wrongly make a horse carrying one of each an affected
+        horse.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>jeb/N</code></td><td><code>lama3-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>jeb/jeb</code></td><td><code>junctional-epidermolysis-bullosa-lama3</code></td><td>&minus;13 health, &minus;0.06 speed, &minus;0.20 jump &mdash; <b>the foal is born and then dies</b></td></tr>
+</tbody>
+</table>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="at-a-glance">At a glance</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Gene</th><td><em>LAMA3</em> &mdash; laminin subunit alpha 3, another chain of the same laminin-332 trimer</td></tr>
+<tr><th>Variant</th><td>A partial deletion, distinct from the <em>LAMC2</em> variant of the draft breeds</td></tr>
+<tr><th>Disorder</th><td>Junctional epidermolysis bullosa (JEB), American Saddlebred form</td></tr>
+<tr><th>Inheritance</th><td>Autosomal recessive</td></tr>
+<tr><th>Measured frequency</th><td>9 carriers in 175 randomly sampled 2007 foals; allele frequency 0.026</td></tr>
+<tr><th>Heterozygote</th><td>Clinically normal carrier</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="same-trimer">The same structure, a different chain</h2>
+
+<p>
+    Laminin-332 is a trimer of three chains &mdash; alpha&nbsp;3, beta&nbsp;3 and
+    gamma&nbsp;2 &mdash; and it is the central anchoring protein holding the epidermis
+    to the basement membrane beneath it. <a href="gene-lamc2.html">LAMC2</a> supplies
+    the gamma chain; this locus supplies the alpha.
+</p>
+
+<p>
+    Break either and the same assembly fails, which is why the two produce a clinically
+    indistinguishable disease: blistering and skin loss at every point of mechanical
+    stress, and detachment of the hoof capsules, from birth. The mechanism is set out
+    in more detail on the LAMC2 page and is not repeated here.
+</p>
+
+<p>
+    The variants themselves are not alike. The Saddlebred form is a <strong>partial
+    deletion</strong> of <em>LAMA3</em>; the draft form is a separate mutation in a
+    separate gene. Two horses can each be &ldquo;a JEB carrier&rdquo; and have nothing
+    genetically in common beyond the sentence.
+</p>
+
+<h2 id="testing">Why the breed societies test</h2>
+
+<p>
+    Because the carrier is invisible and the homozygote is unsalvageable, the only
+    useful intervention happens <em>before</em> the mating. An allele frequency of
+    0.026 sounds small, but it means roughly one Saddlebred in twenty carries a copy
+    &mdash; so two carriers meeting is not a freak event in a population that breeds
+    within itself, and one in four of their foals would be affected.
+</p>
+
+<p>
+    That is the same argument the mod makes with its own machinery: the carrier row
+    costs nothing at all, and the entire cost of the locus sits behind a pairing. It is
+    what makes a <a href="breeding.html">pedigree</a> and a
+    <a href="carrots.html">gene database entry</a> worth keeping rather than flavour
+    text.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-lamc2.html">LAMC2 (JEB, draft)</a>
+        <a href="gene-slc5a3.html">SLC5A3 (FIS)</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Lama3Gene.java</code>
+</div>
+
+</article>
+</main>
+</body>
+</html>

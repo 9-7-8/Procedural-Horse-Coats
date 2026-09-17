@@ -49,6 +49,10 @@
       { "pair": "Ctol/Ctol", "weight": 5 },
       { "pair": "Ctol/n", "weight": 30 },
       { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.slc5a3": [
+      { "pair": "fis/N", "weight": 38 },
+      { "pair": "N/N", "weight": 62 }
     ]
   },
   "notes": [
@@ -57,7 +61,7 @@
     "Chestnut, piebald and skewbald go in Section X rather than the main colour standard, so chestnut sits at about one founder in two hundred and no pinto locus is named at all.",
     "Dark brown is carried by the shade locus, so the shade pool is skewed dark rather than using the house-standard spread.",
     "Cream, pearl, silver, dun, champagne, mushroom, flaxen, roan, rabicano and leopard are all forced wild - none is a standard mainstream Fell colour. Sabino 1 sits at 1% for the permitted star and the odd white hind hoof; extensive facial white and white forelegs are discouraged by the standard.",
-    "Foal Immunodeficiency Syndrome is the breed's defining modern health story and this file cannot carry it: FIS is a fatal autosomal-recessive that the mod has no locus for. A foundational screen found 82 carriers in 214 Fell Ponies - about 38%, and UC Davis has reported near 40% - and the same mutation is present in the Dales Pony. Testing has been available since 2010. The gene is on the roadmap; its absence here is a missing feature, not a claim that the breed is clear.",
+    "Foal Immunodeficiency Syndrome is the breed's defining modern health story and the file now carries it: FIS ships as the SLC5A3 locus, a fatal autosomal recessive, at the measured rate. A foundational screen found 82 carriers in 214 Fell Ponies - about 38%, and UC Davis has reported near 40%. Testing has been available since 2010, and because carriers are ordinary healthy ponies the real management is to test and never pair two rather than to cull. The same mutation is in the Dales Pony.",
     "Every other disorder is clear - no credible Fell-specific evidence was found for any of them.",
     "Cold tolerant partially, as the neighbouring Dales is: a weatherproof hill pony with a dense winter coat.",
     "The Fell Pony Society registry formed in 1922; the RBST puts the type in the Lake District for more than two thousand years.",

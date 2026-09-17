@@ -528,6 +528,26 @@ public final class GeneDescriptions {
                     "GYS1 (PSSM1), tying-up - a dominant disorder, so every copy shows and there is "
                             + "no carrier. Neither combination is lethal, which makes it the mildest "
                             + "and by far the commonest disorder a player will actually meet."),
+            Map.entry("horsegenetics.slc5a3",
+                    "SLC5A3 (FIS), foal immunodeficiency syndrome - a recessive lethal at birth. The "
+                            + "foal is born looking perfectly healthy and fades as its dam's borrowed "
+                            + "antibodies run out. Globally rare, but commonplace inside the Fell and "
+                            + "Dales ponies, where roughly two horses in five carry a copy."),
+            Map.entry("horsegenetics.lamc2",
+                    "LAMC2 (JEB), junctional epidermolysis bullosa, the draft-horse variant - a "
+                            + "recessive lethal: the skin and hoof walls have nothing anchoring them "
+                            + "and come away. A different mutation from LAMA3, so a horse can carry "
+                            + "one and be clear of the other."),
+            Map.entry("horsegenetics.lama3",
+                    "LAMA3 (JEB), junctional epidermolysis bullosa, the American Saddlebred variant - "
+                            + "a recessive lethal with the best-measured frequency in the mod: a "
+                            + "random foal-crop sample found 9 carriers in 175. Separate from the "
+                            + "draft breeds' LAMC2 form."),
+            Map.entry("horsegenetics.ryr1",
+                    "RYR1 (MH), malignant hyperthermia - a dominant disorder, so every copy shows and "
+                            + "there is no silent carrier. It costs the horse nothing day to day: the "
+                            + "real condition is episodic, triggered by anaesthesia or hard stress, "
+                            + "and a horse between episodes is an ordinary horse."),
             Map.entry("horsegenetics.tiger_eye",
                     "A bright amber iris in a horse whose coat is entirely ordinary. It is the first "
                             + "gene in the mod that changes only the eyes, and the reason the "

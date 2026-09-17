@@ -169,7 +169,11 @@ window.HG.pages = {
                 { href: "gene-toe1.html", text: "TOE1 (cerebellar abiotrophy)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-cvm.html", text: "CVM (cervical vertebral malformation)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-gbe1.html", text: "GBE1 (GBED)", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-megaesophagus.html", text: "Megaesophagus", kind: "natural", views: ["gameplay","coding","science"] }
+                { href: "gene-megaesophagus.html", text: "Megaesophagus", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-slc5a3.html", text: "SLC5A3 (foal immunodeficiency syndrome)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-lamc2.html", text: "LAMC2 (junctional epidermolysis bullosa, draft)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-lama3.html", text: "LAMA3 (junctional epidermolysis bullosa, Saddlebred)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-ryr1.html", text: "RYR1 (malignant hyperthermia)", kind: "natural", views: ["gameplay","coding","science"] }
             ]
         },
         {

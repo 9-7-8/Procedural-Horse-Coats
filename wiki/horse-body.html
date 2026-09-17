@@ -404,15 +404,19 @@ public interface GeneEpigenetics {
 <thead><tr><th>severity</th><th>meaning</th><th>who has it</th></tr></thead>
 <tbody>
 <tr><td><code>INFORMATIONAL</code></td><td>Named and shown; no mechanical cost.</td>
-    <td>Splash deafness (<a href="gene-mitf.html">MITF</a> / <a href="gene-pax3.html">PAX3</a>)</td></tr>
+    <td>Splash deafness (<a href="gene-mitf.html">MITF</a> / <a href="gene-pax3.html">PAX3</a>),
+        <a href="gene-silver.html">silver</a> <code>Z/z</code> ocular cysts,
+        <a href="gene-ryr1.html">RYR1</a> <code>MH/N</code></td></tr>
 <tr><td><code>IMPAIRING</code></td><td>Fewer hearts, usually with a smaller body or a lower jump.</td>
     <td><a href="gene-acan.html">ACAN</a> dwarf, <a href="gene-b4galt7.html">B4GALT7</a>,
-        <a href="gene-silver.html">silver</a> MCOA</td></tr>
+        <a href="gene-silver.html">silver</a> <code>Z/Z</code> MCOA,
+        <a href="gene-ryr1.html">RYR1</a> <code>MH/MH</code></td></tr>
 <tr><td><code>LETHAL_AT_BIRTH</code></td><td>Born, named, filed in the pedigree, then dies.</td>
     <td><a href="gene-ednrb.html">EDNRB</a> <code>O/O</code>,
         <a href="gene-plod1.html">PLOD1</a>, <a href="gene-rapgef5.html">RAPGEF5</a>,
         <a href="gene-st14.html">ST14</a>, <a href="gene-shox.html">SHOX</a>,
-        ACAN <code>D1/D1</code></td></tr>
+        <a href="gene-slc5a3.html">SLC5A3</a>, <a href="gene-lamc2.html">LAMC2</a>,
+        <a href="gene-lama3.html">LAMA3</a>, ACAN <code>D1/D1</code></td></tr>
 <tr><td><code>LETHAL_AT_CONCEPTION</code></td><td>No foal is produced at all.</td>
     <td><a href="gene-met.html">MET</a></td></tr>
 </tbody>
@@ -428,21 +432,33 @@ public interface GeneEpigenetics {
     other.
 </p>
 
-<h3>Deafness and MCOA cost nothing that exists</h3>
+<h3>When a condition is worth naming and not worth pricing</h3>
 
 <p>
     A deaf horse and a horse with malformed eyes are both real and both worth telling
     the player about, and the mod has no hearing or vision for a horse to lose. So
-    deafness is <code>INFORMATIONAL</code> &mdash; reported, no cost &mdash; while
-    MCOA is priced the way every sub-lethal disorder here is priced, in hearts. Both
-    are honest; neither pretends to a system the mod does not have.
+    deafness is <code>INFORMATIONAL</code> &mdash; reported, no cost. Silver splits on
+    the same question by <em>dose</em>: <code>Z/z</code> is the cyst phenotype, which is
+    usually harmless, so it is named and free, while <code>Z/Z</code> is the
+    malformation and is priced the way every sub-lethal disorder here is priced, in
+    hearts.
+</p>
+
+<p>
+    <a href="gene-ryr1.html">RYR1</a> is the case that makes the principle explicit,
+    because it is <em>dominant</em> and still free. Malignant hyperthermia is episodic
+    &mdash; triggered by anaesthesia or extreme stress, and between episodes the animal
+    is genuinely normal &mdash; and this game has no trigger for it. Docking hearts
+    would invent a symptom the condition does not have, so one copy is named and costs
+    nothing. Two copies leave no working channel and do cost. Each of these is honest;
+    none pretends to a system the mod does not have.
 </p>
 
 <h2 id="disorder-shapes">The two shapes a disorder comes in</h2>
 
 <p>
-    Sixteen health loci ship, and they divide into two classes that behave
-    differently enough to be separate base classes.
+    The health loci divide into two classes that behave differently enough to be
+    separate base classes.
 </p>
 
 <div class="table-wrap">

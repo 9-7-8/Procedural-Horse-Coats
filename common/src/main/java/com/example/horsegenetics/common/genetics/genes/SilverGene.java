@@ -70,14 +70,28 @@ public final class SilverGene implements Gene, HealthContribution {
      * horse sees badly. The mod has no vision for a horse to lose, so it is
      * priced the way every sub-lethal disorder here is priced - in hearts.
      *
-     * <p>Only {@code Z/Z}. A single silver copy gives the coat with none of the
-     * defect, which is exactly why the disorder survives in the population: the
-     * gene people breed <i>for</i> is the gene that hides it.
+     * <p>The severity splits by dose, the way the real defect does. {@code Z/Z}
+     * is the malformation and costs hearts; a single copy carries {@link #MCOA_CYST}
+     * instead - named, visible in the info panel, and free. That is why the
+     * disorder survives in the population: the gene people breed <i>for</i> is
+     * the gene that hides it.
      */
     public static final Condition MCOA = Condition.impairing(
             "mcoa", "Multiple congenital ocular anomalies",
             "Two silver copies. The eyes are malformed - cysts and a misshapen cornea - and "
                     + "the horse is a little frailer for it.");
+
+    /**
+     * <b>The heterozygote's half</b>, and the commonest eye finding in silver
+     * horses: cysts at the back of the iris, usually harmless. Informational, so
+     * it shows on the horse without costing it anything - and so a founder may
+     * carry it, which is the point. A silver carrier is not a sick horse.
+     */
+    public static final Condition MCOA_CYST = Condition.informational(
+            "mcoa-cyst", "Ocular cysts (silver)",
+            "One silver copy. Small cysts sit at the back of the iris. Common in silver "
+                    + "horses and usually harmless - but it is the same defect that "
+                    + "disables a horse with two copies.");
 
     /** Max health a homozygous silver loses to MCOA. */
     public static final double MCOA_HEALTH_PENALTY = 2.0;
@@ -130,13 +144,16 @@ public final class SilverGene implements Gene, HealthContribution {
     }
 
     /**
-     * Homozygous silver carries {@link #MCOA}. Nothing else on this locus does:
-     * a {@code Z/z} horse is a silver dapple with sound eyes.
+     * Silver's ocular defect, dosed. Two copies is {@link #MCOA} and costs
+     * hearts; one is {@link #MCOA_CYST}, which is named and free. A {@code z/z}
+     * horse has nothing.
      */
     @Override
     public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
         if (pair.homozygousFor(Z)) {
             out.condition(MCOA).addHealth(-MCOA_HEALTH_PENALTY);
+        } else if (pair.has(Z)) {
+            out.condition(MCOA_CYST);
         }
     }
 }

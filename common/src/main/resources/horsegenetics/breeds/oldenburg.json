@@ -70,13 +70,17 @@
     "horsegenetics.mitf": [
       { "pair": "SW1/N", "weight": 12 },
       { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.plod1": [
+      { "pair": "ffs/N", "weight": 15.53 },
+      { "pair": "N/N", "weight": 84.47 }
     ]
   },
   "notes": [
     "The Oldenburger, from the former Grand Duchy of Oldenburg in Lower Saxony, administered by the Oldenburger Pferdezuchtverband. It began as a heavy carriage and artillery horse and was rebuilt through the twentieth century into a large elastic sport horse on Thoroughbred, Anglo-Norman, Hanoverian, Trakehner, Holsteiner and Dutch Warmblood blood.",
     "An open studbook, and the colour pool says so. Bay, brown, black, chestnut and grey are the classic palette and dominate here, but the Verband does not restrict colour - quality is the only standard that counts - so cream, tobiano and roan all ship as real minorities rather than being forced wild the way a closed colour registry's would be.",
     "Tobiano at one founder in ten is the most distinctive call in the file and it is a judgement, not a measurement. No Oldenburg genotype survey exists for any locus here; these are readings of a documented open-colour policy.",
-    "WFFS does not ship, and it is the breed's real modern concern. Warmblood fragile foal syndrome has no locus in this mod - PLOD1 here is Friesian dwarfism and is emphatically not a substitute - so the file names no rate for it. UC Davis reports an average carrier frequency near 11% across tested warmbloods, which would have been the number. See the roadmap.",
+    "WFFS is the breed's real modern concern and it now ships, as this mod's PLOD1 locus. The rate is measured in this breed specifically rather than borrowed: the 2020 multi-breed survey found 15.53% carriers among 219 Oldenburgs. That replaces the warmblood-wide average near 11% that the draft would have used, and is one of the highest carrier rates in the survey.",
     "Champagne, silver, pearl, mushroom, dun, frame and the leopard complex are forced wild. An open registry is not evidence that every known allele is present in an average founder, and frame in particular would introduce a lethal-white hazard with no breed evidence behind it.",
     "Managed sources only. An international performance studbook with licensed stallions and inspected mares, not a feral population.",
     "Every other disorder clear. The breed's open international pedigree is not a licence to import HYPP, HERDA, GBED or the Arabian panel.",
