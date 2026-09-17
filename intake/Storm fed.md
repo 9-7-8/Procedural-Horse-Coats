@@ -4,4 +4,8 @@ In reality, this gene just builds up an interior resoivor of power while a certa
 All alleles are homozygous recessive. 
 The epigenetics in each allele control the rate at which power accrues, the rate at which it decay
 Known alleles, other than wild type:
-Storm: 
+Storm: stores energy during storms
+Rain, Snow
+Lightning: gets a huge burst of energy after being struck by lightining (also, does not take damage from lightning)
+Snow: slowly gains energy while standing on snow
+Water, Lava: see snow
