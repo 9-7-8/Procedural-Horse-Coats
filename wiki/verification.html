@@ -78,6 +78,49 @@
     </p>
 </div>
 
+<h2 id="regions-0917">&sect;0-EZ &mdash; A colour op can paint a different colour per region (2026-09-17, NOT played)</h2>
+
+<p>
+    <code>TOWARD</code> and <code>FLAT</code> take a <code>regions</code> list &mdash;
+    <a href="making-a-gene.html#regions">the format page</a> has the shape. Each entry names
+    <code>parts</code> and the colour they take, so one layer paints the legs paler than the
+    barrel where it used to take two.
+</p>
+
+<div class="note good">
+    <span class="label">The engine half is settled by measurement &mdash; do not spend eyes on it</span>
+    <p>
+        <strong>No shipped gene uses the field</strong>, so both coat goldens and
+        <code>dead-layers.txt</code> came through <em>untouched</em>: nothing moved a pixel,
+        nothing died, and nothing on the ratchet came alive. Parity is green at
+        7&nbsp;171 checks and was <em>proved</em> to see the new field rather than assumed to
+        &mdash; regressing the region lookup on purpose fails 480 checks, and regressing only
+        the lightness inside a region fails 138.
+    </p>
+</div>
+
+<ul>
+    <li><strong>The creator&rsquo;s Regions control has never been on a screen.</strong> It
+        passes <code>check-colour-control.mjs</code> (22 checks, which read back the
+        <em>spec</em> after each gesture rather than the picture), and the row renders in the
+        right place &mdash; <code>["Layer name", "parts", "Effect", "Colour", "Regions",
+        "strength", "opacity"]</code>. But nobody has <em>looked</em> at it. The risk is
+        layout rather than logic: each entry stacks a parts-chip grid, a two-mode colour fork
+        and a remove button inside a single op row, which is more than any other op parameter
+        puts there. Same shape as <a href="known-gaps.html#gap-98">gap 98</a>.</li>
+    <li><strong>Nothing in the game draws one yet</strong>, and that is the honest state
+        rather than an oversight: the first real test is authoring a gene that uses it. The
+        example gene <code>prismatic.json</code> carries one &mdash; paler legs, and a mane in
+        the horse&rsquo;s own hue &mdash; and is visible in the creator, but
+        <code>example-genes/</code> does not ship in the mod, so the horse dimension has
+        nothing to show.</li>
+    <li><strong>The three load errors have tests but have never been read by a person.</strong>
+        A region naming no parts, a region carrying no colour, and a part claimed by two
+        entries are each refused at load with a message naming the part in dispute. Worth one
+        deliberately broken file in <code>run/phc/genes/</code> to watch the message arrive,
+        since the failure these guard against is the silent no-op.</li>
+</ul>
+
 <h2 id="over-payoff-0917">&sect;0-EY &mdash; Eleven genes stop faking it with subtraction (2026-09-17, NOT played)</h2>
 
 <p>

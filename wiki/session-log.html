@@ -27,6 +27,102 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-regions">2026-09-17, later still &mdash; One layer, a different colour per region</h2>
+
+<p>
+    The owner asked what was next on the roadmap. The top of
+    <a href="roadmap.html#start">Where to start</a> is play-testing, which is hers rather than
+    mine, so the next buildable item was &sect;10&rsquo;s last unbuilt piece:
+    <strong>per-region colour</strong>.
+</p>
+
+<h3>Two thirds of it already existed. Again.</h3>
+
+<p>
+    That is the third time this section has given that answer, after the dial and the colour
+    control. <code>SpecPainter</code> already varies a colour by region:
+    <code>applyColour</code> computes <code>leg = legIndex(part)</code> and every knob read
+    goes through <code>v.get(value, leg)</code>, so <strong>a <code>perLeg</code> hue knob
+    paints four legs four hues today</strong>. <code>LEGS</code> and <code>BARREL</code> have
+    been first-class names in <code>PartGroups</code> all along. What was missing was not
+    per-region <em>variation</em> but an authored region&rarr;colour <strong>mapping</strong>,
+    and that distinction was the whole decision: three of the four shapes on offer &mdash; a
+    <code>perPart</code> knob flag generalising <code>perLeg</code>, a <code>partId</code> axis
+    mirroring <code>RAMP</code>&rsquo;s <code>cellId</code>, or a creator gesture writing the
+    layer-per-region idiom &mdash; deliver variation, and none of them removes the duplication
+    the roadmap was actually complaining about. The owner took the authored map.
+</p>
+
+<h3>The shape, and the refusals that replace a precedence rule</h3>
+
+<p>
+    A <code>regions</code> entry carries <strong>the op&rsquo;s four colour parameters again,
+    sentinel and all</strong>, so it can be a literal <code>color</code> or a <code>hue</code>
+    pointed at a knob. A part no entry names falls through to the op&rsquo;s own colour, which
+    is what makes the field additive: adding one cannot move a texel it does not name, and
+    that is why no shipped gene changed. <code>solidColour</code> is the single funnel for
+    <code>TOWARD</code> and <code>FLAT</code>, and <code>applyColour</code> already held
+    <code>part</code> at both call sites, so the engine change was one parameter and a loop.
+</p>
+
+<p>
+    Three load errors rather than a precedence rule: a region naming no <code>parts</code>, a
+    region carrying no colour, and <strong>a part claimed by two entries</strong>. Refusing
+    the third is what lets there be no &ldquo;first entry wins&rdquo; for an author to find
+    out about by experiment &mdash; and it matters because the groups overlap, so
+    <code>POINTS</code> beside <code>LEGS</code> claims all four legs twice without either
+    name looking wrong. The corpus scan the refusal discipline asks for was free here: the
+    parameter is new, so zero of 195 genes can trip any of the three.
+</p>
+
+<h3>The regression that proved nothing, and had to be thrown away</h3>
+
+<p>
+    Parity came back green at 7&nbsp;171 checks, which on this page means nothing until the
+    gate has been watched going red. The first attempt at that <strong>was void and was
+    discarded</strong>: the anchor <code>indexOf(part) &gt;= 0</code> matched
+    <em>two</em> sites, the new region lookup and <code>spec-engine.js:414</code> &mdash; the
+    <code>PARTS</code> mask&rsquo;s own coverage &mdash; so the 984 failures it produced were
+    mostly a different code path, and the first one reported was a <em>pigment</em> mismatch
+    on <code>silver.json</code>, a natural gene the change cannot touch. A regression that
+    breaks two things measures neither.
+</p>
+
+<p>
+    Re-run against one site, the numbers are real and they are two different numbers:
+    <strong>480 checks</strong> see the region lookup, and <strong>138</strong> see a 0.05
+    lightness difference <em>inside</em> a region, confined to mane and tail. That second one
+    is the one that mattered, because it answers the question
+    <a href="making-a-gene.html#contracts">the contract</a> raises about
+    <code>pointsMin</code>: the probes sample four texels per part, and a feature that lands
+    on a flank slips between them. This one does not, so <strong>no answer table was
+    needed</strong> &mdash; the <code>pathSection</code> treatment does not apply.
+</p>
+
+<h3>What was deliberately not done</h3>
+
+<ul>
+    <li><strong><code>RAMP</code> and <code>PALETTE</code> do not take the field.</strong> Both
+        bypass <code>solidColour</code> for a colour source of their own &mdash; a stop list
+        walked along an axis, a colour drawn per cell &mdash; so scoping them is a second
+        change rather than the same one. It is the remainder of
+        <a href="roadmap.html#designer">&sect;10</a> now.</li>
+    <li><strong><a href="known-gaps.html#gap-164">Gap 164</a>&rsquo;s <code>hueOffset</code>
+        stays open.</strong> It was floated as a cheap addition once the colour ops were open
+        and then left out on purpose, to keep the change one feature.</li>
+    <li><strong>No <code>MarkingFactsTool</code> change was needed</strong>, contrary to the
+        first reading. It does not enumerate a gene&rsquo;s declared colour fields &mdash; it
+        renders the coat and <em>measures</em> what moved, so a per-region colour reaches the
+        breed designer&rsquo;s markings filters on its own.</li>
+</ul>
+
+<p class="muted">
+    One trap closed on the way past: the <a href="making-a-gene.html#contracts">spread-out
+    contracts</a> list did not mention the creator&rsquo;s exporter, where an unknown key is
+    dropped <em>silently</em>. The <code>over</code> flag hit that same omission and recorded
+    it only in its own log entry; it is in the list itself now.
+</p>
+
 <h2 id="d2026-09-17-colour-control">2026-09-17, later &mdash; A colour control, and the preview that had been lying about ranges</h2>
 
 <p>

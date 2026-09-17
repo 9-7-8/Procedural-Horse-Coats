@@ -96,14 +96,20 @@
         written as the second texture's alpha and a fraction means something.
     </p>
     <p>
-        What is left of &sect;10 is <strong>per-region colour</strong> &mdash; one layer
-        painting a different colour on the legs than on the barrel. The other two thirds
+        <strong>&sect;10&rsquo;s last piece shipped on 2026-09-17</strong>: a colour op takes a
+        <a href="making-a-gene.html#regions"><code>regions</code></a> list, so one layer paints
+        a different colour on the legs than on the barrel &mdash;
+        <a href="session-log.html#d2026-09-17-regions">the log</a>. The other two thirds
         of the old entry were already built and the entry had not noticed:
         <strong>gradients are <code>RAMP</code></strong>, with six axes and interpolated
         stops, and a <strong>per-horse colour range</strong> is a knob on
         <code>hue</code>, which 160 of the 195 shipped genes already use. What was
         genuinely missing was that the <em>creator</em> showed neither &mdash; fixed
         2026-09-17, see <a href="session-log.html#d2026-09-17-colour-control">the log</a>.
+        <strong>What is left of the section is two things.</strong> The same
+        <code>regions</code> field on <code>RAMP</code> and <code>PALETTE</code>, which take
+        their colour from a stop list or a per-cell draw rather than from the shared
+        <code>solidColour</code>, so scoping them is a second change.
         <strong>And one honest gap beside it: the creator cannot show a
         glow</strong>. It writes one, validates it and round-trips it, but its preview
         is a flat sheet with no lighting to be brighter than, so a glow is something
@@ -127,16 +133,18 @@
         Nothing on this page competes with it for a session.</li>
     <li><strong>What is left of the visual marking designer</strong>
         (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial, the minimal shape,
-        glow intensity and now the colour control have all shipped, so what remains is
-        <strong>per-region colour</strong>: one layer painting a different colour on the
-        legs than on the barrel. <strong>The question this entry used to ask is answered
-        and the answer was no.</strong> A colour does <em>not</em> become a
-        <code>Value</code>: <code>GeneSpecParser.readColor</code> takes a six-hex string,
-        so <code>color</code> can never hold a knob reference &mdash; but it never needed
-        to, because <code>hue</code>, <code>saturation</code> and <code>lightness</code>
-        are <code>Value</code>s already and are how a colour varies per horse. Region
-        scoping today is per <em>mask</em> (<code>parts</code>), never per op, so
-        per-region colour means a layer each, which is the thing to improve on.</li>
+        glow intensity, the colour control and now <strong>per-region colour</strong> have all
+        shipped, so what remains is narrower than the entry it replaces: the same
+        <a href="making-a-gene.html#regions"><code>regions</code></a> field on
+        <code>RAMP</code> and <code>PALETTE</code>. Those two bypass
+        <code>SpecPainter.solidColour</code> for a colour source of their own &mdash; a stop
+        list walked along an axis, a colour drawn per cell &mdash; so scoping them is a second
+        change rather than the same one, and a ramp confined to one region is still a layer
+        per region. <strong>Two questions this entry used to ask are answered.</strong> A
+        colour does <em>not</em> become a <code>Value</code>
+        (<code>GeneSpecParser.readColor</code> takes a six-hex string), and it never needed
+        to, because the HSL triple is how a colour varies per horse; and region scoping is no
+        longer per <em>mask</em> only.</li>
     <li><strong>Deepen the thin science tabs</strong>
         (<a href="#science-tabs">&sect;science</a>) &mdash; every natural gene page now
         has one, so the work is no longer absence but depth: 23 predate the pass that

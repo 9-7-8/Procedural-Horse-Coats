@@ -5007,6 +5007,11 @@ DESCRIPTION: &lt;&lt;your one or two sentences here&gt;&gt;
     <code>js/spec-engine.js</code> &mdash; the creator's mirror of both. The fallbacks
     must be <em>identical</em>: the creator drops any setting equal to its default, so a
     default that differs writes a file that plays differently from how it previewed.
+    <strong>And <code>js/spec-model.js</code>, which the list did not use to name:</strong>
+    its exporter decides what gets written back out, and a kind it does not know about is
+    dropped <em>silently</em> from every file the creator saves. Two changes have now paid
+    for that omission &mdash; <a href="#over"><code>over</code></a> and
+    <a href="#regions"><code>regions</code></a>.
     If the mask needs a <em>new field</em> out of <code>BodyNoise</code> rather than one
     of the ones already there, that is a fifth file &mdash;
     <code>wiki/gene-creator/js/noise.js</code>, which is where the hash arithmetic is
