@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.particle.HoofprintOptions;
@@ -2346,11 +2347,16 @@ public final class GeneAbilityHandler {
             String favourite = horse.isBaby() ? null : FoodPreferenceHandler.favouriteOf(horse);
             boolean isFavourite = favourite != null
                     && favourite.equals(BuiltInRegistries.ITEM.getKey(feed.item()).toString());
+            double hungerBefore =
+                    horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get());
             horse.setData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get(),
-                    com.example.horsegenetics.common.care.Hunger.eat(
-                    horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get()), isFavourite
+                    com.example.horsegenetics.common.care.Hunger.eat(hungerBefore, isFavourite
                             ? com.example.horsegenetics.common.care.Hunger.Food.FAVOURITE
                             : com.example.horsegenetics.common.care.Hunger.Food.HAND));
+            // Food that went into a horse that wanted it, not an idle nibble at full.
+            if (com.example.horsegenetics.common.care.Hunger.seeksFood(hungerBefore)) {
+                HorseProgress.complete(feed.player(), ProgressTask.FEED_HUNGRY_HORSE);
+            }
             HorseRecord record = HorseRecords.of(horse);
             if (!record.hasName()) {
                 continue;

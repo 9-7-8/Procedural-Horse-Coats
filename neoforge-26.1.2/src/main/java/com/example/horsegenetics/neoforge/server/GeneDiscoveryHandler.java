@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -47,6 +48,17 @@ public final class GeneDiscoveryHandler {
                         .getServer()).discoverBreeds(player, java.util.List.of(id));
                 HorseProgress.complete(player, ProgressTask.DISCOVER_BREED);
             });
+            // The two magical ways in, both facts about the label this horse
+            // already carries. "dhampir" is the id in
+            // horsegenetics/breeds/dhampir.json, the one breed file whose kind
+            // is magical; isMagical() is the Magical (Breed) variant label.
+            BreedLineage line = HorseRecords.of(horse).lineage();
+            if (line.components().contains("dhampir")) {
+                HorseProgress.complete(player, ProgressTask.TAME_DHAMPIR);
+            }
+            if (line.isMagical()) {
+                HorseProgress.complete(player, ProgressTask.TAME_MAGICAL_HORSE);
+            }
             try {
                 discoverFrom(player, Genotype.parse(HorseRecords.of(horse).geneticCode()));
             } catch (RuntimeException ignored) {
@@ -74,6 +86,9 @@ public final class GeneDiscoveryHandler {
             tokens.add(pair.second().token());
             db.discover(serverPlayer, gene, tokens);
             HorseProgress.complete(serverPlayer, ProgressTask.DISCOVER_GENE);
+            if (!gene.isNatural()) {
+                HorseProgress.complete(serverPlayer, ProgressTask.MAGICAL_GENE_DISCOVERED);
+            }
         }
     }
 

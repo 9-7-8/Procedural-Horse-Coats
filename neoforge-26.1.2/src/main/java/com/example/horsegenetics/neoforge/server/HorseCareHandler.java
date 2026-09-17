@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.care.Hunger;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
@@ -211,10 +212,33 @@ public final class HorseCareHandler {
                 // simply misses it - the tick has nobody to tell.
                 if (horse.getOwner() instanceof Player healed) {
                     HorseProgress.complete(healed, ProgressTask.HEAL_AT_WATER);
+                    // The stricter sibling: this heal was the one that finished
+                    // the job, read off the health rather than off the amount.
+                    if (horse.getHealth() >= horse.getMaxHealth()) {
+                        HorseProgress.complete(healed, ProgressTask.HEAL_TO_FULL);
+                    }
                 }
             }
         }
         horse.setData(ModAttachments.HUNGER.get(), hunger);
+
+        // --- magical company: being NEAR one is the whole of these two, so the
+        // shared slow tick is their only honest home. The breed label is a
+        // cheap string parse and is asked first, so the watcher scan inside
+        // completeForWatcher only happens for the horses that could tick one.
+        if (HorseRecords.hasRealRecord(horse)) {
+            BreedLineage line = HorseRecords.of(horse).lineage();
+            // "dhampir" is the id in horsegenetics/breeds/dhampir.json - the one
+            // breed file whose kind is magical.
+            if (line.components().contains("dhampir")) {
+                HorseProgress.completeForWatcher(horse, ProgressTask.MEET_DHAMPIR);
+            }
+            // ...and Magical (Breed), the label BreedLineage.magical writes on
+            // a magical variant of an ordinary breed.
+            if (line.isMagical()) {
+                HorseProgress.completeForWatcher(horse, ProgressTask.MEET_MAGICAL_HERD);
+            }
+        }
 
         if (!after.equals(before)) {
             horse.setData(ModAttachments.HORSE_CARE.get(), after);

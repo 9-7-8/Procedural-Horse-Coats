@@ -25,8 +25,16 @@ import java.util.Map;
  * a test: it proves each task is reachable from somewhere, not that it fires at
  * the right moment. See {@code wiki/known-gaps.html#gap-148}.)
  *
+ * <h2>Some tasks are things you watch rather than things you do</h2>
+ * The wild chapter is mostly horses doing things to each other, and a player
+ * cannot <i>perform</i> two horses grooming. Those complete through
+ * {@code HorseProgress.completeForWatcher}, which credits a player who was near
+ * enough to have seen it - so the box ticks because you were there, not because
+ * you pressed anything. A task of that shape must say <i>watch</i> in its
+ * title, or an unticked box reads as something the player failed to find.
+ *
  * <h2>The group is a chapter of the book</h2>
- * {@link Group} is the six chapters of the Getting Started tab, not a filing
+ * {@link Group} is the seven chapters of the Getting Started tab, not a filing
  * system of its own. Every task belongs to the chapter that teaches it, and
  * every <i>sub-chapter</i> of that tab ends in at least one of them - which is
  * what lets a sub-chapter be <i>finished</i> and say so in the contents list.
@@ -40,11 +48,82 @@ import java.util.Map;
  */
 public enum ProgressTask {
 
-    // ---- 1. Husbandry -------------------------------------------------
-    TAME_MARE(Group.HUSBANDRY, "Tame a mare",
+    // ---- 1. Horses in the wild ------------------------------------------
+    // First, because it is what a player meets first: every horse in the
+    // world is wild for as long as it takes to notice that they have a life
+    // of their own. Taming lives here rather than in husbandry for the same
+    // reason - you tame a wild horse, and husbandry starts once it is yours.
+    DISCOVER_BREED(Group.WILD, "Meet a breed",
+            "Tame a horse of any named breed and it joins your breed book. Breeds belong to the country "
+                    + "they came from, so what is out there depends on the biome you are standing in."),
+    BREED_EGG(Group.WILD, "Found a breed from a spawn egg",
+            "The horseman sells breed spawn eggs from his middle ranks. One right-click puts a "
+                    + "foundation horse of that breed in front of you - the quick way to a breed your "
+                    + "own biomes will never give you."),
+    WILD_FOOD_DRIFT(Group.WILD, "Have a wild horse come to you for food",
+            "Hold something a horse will eat and stand within about ten blocks of a wild one. It "
+                    + "ambles over and stops a couple of blocks short. Put the food away and it loses "
+                    + "interest immediately."),
+    WILD_FAVOURITE_RUN(Group.WILD, "Have one run to you for its favourite food",
+            "Every horse has one food it likes above all others, and it notices that one from twenty "
+                    + "blocks rather than ten - and does not walk. A flat gallop at what is in your hand "
+                    + "is how you find a favourite without spending it."),
+    CROUCH_FEED_TAME(Group.WILD, "Tame a horse from the ground",
+            "Crouch, hold food it eats, look at it and keep still. It walks over and takes a mouthful "
+                    + "every couple of seconds, and every mouthful is a chance at taming - no riding and "
+                    + "no bucking. Stand up, look away or walk off and it stops."),
+    TAME_MARE(Group.WILD, "Tame a mare",
             "Ride a wild horse until it stops throwing you off. A mare has a pink symbol after her name."),
-    TAME_STALLION(Group.HUSBANDRY, "Tame a stallion",
+    TAME_STALLION(Group.WILD, "Tame a stallion",
             "The same, for a horse with a blue symbol. You need one of each to breed."),
+    WILD_KICK(Group.WILD, "Get kicked by a wild horse",
+            "Hit one and find out. A wild horse fights back like a wolf does, rears between blows, and "
+                    + "every horse of its band within twenty-four blocks comes for you as well. Break "
+                    + "line of sight for three seconds and they forget it."),
+    WILD_BOLT(Group.WILD, "Watch a horse bolt",
+            "Startle one and it runs. A horse already fighting something stands its ground instead, "
+                    + "and so does a sun-sensitive horse that is alight - it has somewhere better to be."),
+    WILD_READ_SOCIAL(Group.WILD, "Read a wild horse's place in its band",
+            "Open a wild horse and look at Social. It names its role - band stallion, lead mare, "
+                    + "bachelor, on its own - who it grooms with, how many of its band it outranks, and "
+                    + "who it cannot stand."),
+    WILD_SPAR(Group.WILD, "Watch two horses spar",
+            "Two entire stallions who know each other face off, rear in turn and shove at one another "
+                    + "for a few seconds until one gives way and retreats. It settles which of them "
+                    + "outranks the other and does no damage whatever."),
+    WILD_DAM_FOAL(Group.WILD, "Watch a dam and her foal",
+            "A foal keeps within about six blocks of its dam, and she fetches it back from twelve. A "
+                    + "wild foal with no dam of its own adopts the nearest mare in the band. Hurt a wild "
+                    + "foal and she will come for you; a tamed mare never will."),
+    WILD_BAND_STALLION(Group.WILD, "Watch a band stallion at work",
+            "He keeps to the edge of his band rather than the middle. Watch him come round behind a "
+                    + "mare who has wandered too far and drive her in with his ears pinned, or put "
+                    + "himself between his mares and a strange stallion."),
+    WILD_TAKEOVER_FIGHT(Group.WILD, "Watch a stallion lose his band",
+            "A bachelor challenges a band stallion for his mares. It is a real fight with real blows, "
+                    + "and nobody dies: the blow that would take either below about two-fifths health is "
+                    + "the one that ends it. The loser retreats and the winner takes the band."),
+    WILD_DISPLACE(Group.WILD, "Watch one horse push another off water",
+            "Rank decides who drinks first. A higher-ranked horse walks up to one standing at water or "
+                    + "a hay bale, threatens, and it steps aside - then grazes rather than pressing it. "
+                    + "Plain grass is not worth fighting over, so nothing happens there."),
+    WILD_GROOM(Group.WILD, "Watch two horses groom each other",
+            "Two that have become grooming partners stand head to tail and work on each other for a "
+                    + "good while. It forms between two mares, or a dam and her foal - a stallion never "
+                    + "gets one, and a gelding counts as a mare here."),
+    WILD_GRAZE(Group.WILD, "Watch a horse feed itself",
+            "A hungry horse goes looking within about ten blocks and eats what it finds, worst to best; "
+                    + "a less hungry one nibbles whatever it is standing on. Grass and moss turn to dirt "
+                    + "under it, so do not plant your wheat against the paddock fence."),
+    WILD_HUNT(Group.WILD, "Watch a horse hunt",
+            "Not every horse eats plants. A meat-eater with nothing else available goes after cows, "
+                    + "pigs, sheep, chickens and rabbits, kills one and eats what it drops; a fish-eater "
+                    + "goes fishing instead."),
+    FORM_HERD(Group.WILD, "Let your horses form a herd",
+            "Keep two horses within ten blocks of each other for long enough and they band up on their "
+                    + "own. A herd heals twice as fast, and a foal in one learns you twice as fast."),
+
+    // ---- 2. Husbandry ---------------------------------------------------
     NAME_HORSE(Group.HUSBANDRY, "Name a horse",
             "Right-click one of yours with a name tag. Horses come with names already; this makes one yours."),
     BARN_NAME(Group.HUSBANDRY, "Give a horse a barn name",
@@ -57,9 +136,21 @@ public enum ProgressTask {
     FAVOURITE_FOOD(Group.HUSBANDRY, "Find a horse's favourite food",
             "Every horse has one food it likes above all others. Hit on it and you get double the bond, "
                     + "two hearts of healing and a minute of speed - so it is worth working through the list."),
+    HORSE_INJURED(Group.HUSBANDRY, "Have a horse of yours get hurt",
+            "This one will happen without your help. What matters is what does not happen next: "
+                    + "vanilla's slow trickle of healing is switched off for horses, so a hurt horse "
+                    + "stays hurt until you see to it."),
+    FEED_HUNGRY_HORSE(Group.HUSBANDRY, "Put food into a hungry horse",
+            "A horse carries an invisible store of food and spends it on mending - two of it per health "
+                    + "point. Let it eat, or crouch-feed it by hand. A hay bale is the largest single "
+                    + "meal there is, and its favourite is the one thing it will run for."),
     HEAL_AT_WATER(Group.HUSBANDRY, "Heal a hurt horse",
             "A horse only mends within three blocks of water, and being fed is what pays for it. "
                     + "A starving horse cannot heal at all, and a horse in a herd heals twice as fast."),
+    HEAL_TO_FULL(Group.HUSBANDRY, "Mend a horse all the way back up",
+            "Feed it, then leave it standing within three blocks of water. It mends a health point a "
+                    + "second, twice that in a herd, spending its food store as it goes - and stops dead "
+                    + "when that runs out. Watch one the whole way from hurt to full."),
     SHEAR_HORSE(Group.HUSBANDRY, "Groom a horse for hair",
             "Right-click one with shears. You are brushing it, not shearing it - the horse enjoys "
                     + "it, and the loose hair that comes away in the brush is the base material "
@@ -123,7 +214,7 @@ public enum ProgressTask {
     MILK_MARE(Group.HUSBANDRY, "Milk a mare",
             "Right-click a tamed adult mare with an empty bucket. Stallions decline, at some length."),
 
-    // ---- 2. Basic breeding --------------------------------------------
+    // ---- 3. Basic breeding --------------------------------------------
     NATURAL_COVER(Group.BASIC_BREEDING, "Let a stallion cover a mare",
             "Leave an entire stallion with a mare while she is in heat, both above nine-tenths health, "
                     + "neither ridden nor on a lead, and fewer than eight horses crowding her. He courts "
@@ -153,7 +244,7 @@ public enum ProgressTask {
                     + "would, which is the whole practical argument for gelding one you mean to ride "
                     + "rather than breed."),
 
-    // ---- 3. Genetics ---------------------------------------------------
+    // ---- 4. Genetics ---------------------------------------------------
     GENE_BOOK(Group.GENETICS, "Research a gene with a book",
             "Right-click any horse while holding a book. The book records one of its genes at random - the horse keeps it."),
     DISCOVER_GENE(Group.GENETICS, "Discover a gene",
@@ -190,8 +281,6 @@ public enum ProgressTask {
                     + "than recolour it."),
     CARROT_PERFORMANCE(Group.GENETICS, "Use a performance splice carrot",
             "Speed, jump and height - and only ever upward."),
-    CARROT_MAGICAL(Group.GENETICS, "Use a magical splice carrot",
-            "Everything a real horse could not do."),
     LIGHT_PORTAL(Group.GENETICS, "Light a hay portal",
             "Build a frame of hay bales like a nether portal and right-click it with a golden carrot."),
     ENTER_DIMENSION(Group.GENETICS, "Visit the horse dimension",
@@ -200,7 +289,42 @@ public enum ProgressTask {
     BRING_HORSE_HOME(Group.GENETICS, "Bring a horse back from it",
             "Lead or ride one into the return portal. It comes home with you."),
 
-    // ---- 4. Breeding projects -------------------------------------------
+    // ---- 5. Magical horses ----------------------------------------------
+    // The magic is its own chapter rather than a corner of genetics: a
+    // magical gene paints in a different phase, arrives by different routes,
+    // and is most of the reason somebody goes looking at horses at all.
+    MAGICAL_GENE_DISCOVERED(Group.MAGIC, "Discover a magical gene",
+            "Own a living horse carrying one. A magical gene adds colour after the coat has already "
+                    + "resolved rather than restricting pigment on the way - which is why it can find "
+                    + "the black or the white, and why it can do things no pigment could."),
+    CARROT_MAGICAL(Group.MAGIC, "Use a magical splice carrot",
+            "Everything a real horse could not do. It narrows the roll to the magical genes - the "
+                    + "deliberate way in, once you know one exists."),
+    MEET_DHAMPIR(Group.MAGIC, "Find a dhampir",
+            "A rare breed that founds its herds at night, in thirteen biomes. Nine in ten are seal "
+                    + "brown with red eyes and little else; one in ten is the whole animal - white, "
+                    + "burning in daylight, drinking blood, and three times as hard to kill."),
+    TAME_DHAMPIR(Group.MAGIC, "Tame a dhampir",
+            "A seal brown one tames like any other horse. A white one will not take food from your "
+                    + "hand at all - it does not eat food - so riding it out is the only way in, and it "
+                    + "has to be done after dark."),
+    MEET_MAGICAL_HERD(Group.MAGIC, "Find a magical herd",
+            "About one wild herd in twenty is a magical version of an ordinary breed: every horse in "
+                    + "it carries the same single magical gene, and every one of them shows it rather "
+                    + "than carrying it silently. Its papers read Magical and name the breed."),
+    TAME_MAGICAL_HORSE(Group.MAGIC, "Tame a horse out of a magical herd",
+            "Take one home and that gene is yours to breed from. Magical crossed back into its own "
+                    + "breed stays magical; crossed with anything else it is an ordinary cross."),
+    SUN_SENSITIVE_SEEN(Group.MAGIC, "Watch a horse run from the sun",
+            "A sun-sensitive horse catches fire in daylight and loses half a heart every couple of "
+                    + "seconds. Watch one break for the deepest shade it can reach and hold there until "
+                    + "dark. Rain, water and a roof all save it."),
+    BLOOD_BITE_SEEN(Group.MAGIC, "Watch a horse drink blood",
+            "A blood-drinker cannot mend beside water and nothing in your hand will feed it. It bites "
+                    + "something living for half a heart, feeds off it, and leaves that animal alone for "
+                    + "a day afterwards. It will not hunt while the sun is on it."),
+
+    // ---- 6. Breeding projects -------------------------------------------
     FOAL_HETEROZYGOUS(Group.PROJECTS, "Breed a foal carrying something it does not show",
             "Two different alleles at one locus. Most foals manage this without being asked - and it "
                     + "is the whole reason a plain-looking horse is worth keeping."),
@@ -210,19 +334,7 @@ public enum ProgressTask {
             "Two copies of something neither parent necessarily showed. This is where the surprises are, "
                     + "and what breeding a line back together is for."),
 
-    // ---- 5. Horses in the wild -------------------------------------------
-    DISCOVER_BREED(Group.WILD, "Meet a breed",
-            "Tame a horse of any named breed and it joins your breed book. Breeds belong to the country "
-                    + "they came from, so what is out there depends on the biome you are standing in."),
-    BREED_EGG(Group.WILD, "Found a breed from a spawn egg",
-            "The horseman sells breed spawn eggs from his middle ranks. One right-click puts a "
-                    + "foundation horse of that breed in front of you - the quick way to a breed your "
-                    + "own biomes will never give you."),
-    FORM_HERD(Group.WILD, "Let your horses form a herd",
-            "Keep two horses within ten blocks of each other for long enough and they band up on their "
-                    + "own. A herd heals twice as fast, and a foal in one learns you twice as fast."),
-
-    // ---- 6. The villagers -------------------------------------------------
+    // ---- 7. The villagers -------------------------------------------------
     TRADE_HORSEMAN(Group.PEOPLE, "Trade with a horseman",
             "Put a Horseman's Table near an unemployed villager. He deals in research papers, carrots, "
                     + "tack and breed spawn eggs, and buys horse hair off you from his first day."),
@@ -232,13 +344,14 @@ public enum ProgressTask {
     TRANSFER_PAPER(Group.PEOPLE, "Sign a transfer paper",
             "How a horse changes hands: sign it against one you own and whoever holds it can claim the horse.");
 
-    /** The headings the checklist is grouped under, in order - the book's six chapters. */
+    /** The headings the checklist is grouped under, in order - the book's seven chapters. */
     public enum Group {
+        WILD("Horses in the wild"),
         HUSBANDRY("Husbandry"),
         BASIC_BREEDING("Basic breeding"),
         GENETICS("Genetics"),
+        MAGIC("Magical horses"),
         PROJECTS("Breeding projects"),
-        WILD("Horses in the wild"),
         PEOPLE("The villagers");
 
         private final String title;

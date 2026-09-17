@@ -15,20 +15,32 @@ import java.util.List;
  * <b>The Getting Started tab's content.</b> What a new player has to be told, in
  * the order they will need it, with something to look at beside every step.
  *
- * <h2>Six chapters, and every sub-chapter ends in something to do</h2>
- * The page is <b>chapters of sub-chapters</b> (owner, roadmap &sect;24.5):
- * husbandry, basic breeding, genetics, breeding projects, horses in the wild,
- * the villagers. Each sub-chapter carries <b>at least one {@link ProgressTask}</b>
- * - the checklist is not a separate page any more, it is the last thing in the
- * sub-chapter that teaches it. That is what lets a sub-chapter be <i>finished</i>
- * and say so in the contents list, and it is why a reader who has just been told
- * how to hang a stall sign finds the box for it directly underneath rather than
- * on a tab they have to know to look at.
+ * <h2>Seven chapters, and every sub-chapter ends in something to do</h2>
+ * The page is <b>chapters of sub-chapters</b> (owner, roadmap &sect;24.5): horses
+ * in the wild, husbandry, basic breeding, genetics, magical horses, breeding
+ * projects, the villagers. Each sub-chapter carries <b>at least one
+ * {@link ProgressTask}</b> - the checklist is not a separate page any more, it is
+ * the last thing in the sub-chapter that teaches it. That is what lets a
+ * sub-chapter be <i>finished</i> and say so in the contents list, and it is why a
+ * reader who has just been told how to hang a stall sign finds the box for it
+ * directly underneath rather than on a tab they have to know to look at.
  *
- * <p>The chapter order is a teaching order, not a difficulty order. Husbandry
- * comes first and mentions breeding nowhere: keeping a horse alive and content
- * is a whole game before genetics is, and a player who meets heats and punnett
- * squares in their first ten minutes puts the mod down.
+ * <p>The chapter order is a teaching order, not a difficulty order. <b>The wild
+ * comes first</b>, because every horse a player meets is wild for as long as it
+ * takes them to notice that horses here have a life of their own - bands, ranks,
+ * grooming partners, stallions driving a mare back in. Taming lives in that
+ * chapter for the same reason: you tame a <i>wild</i> horse, and husbandry is
+ * what starts once it is yours. Husbandry then mentions breeding nowhere, because
+ * keeping a horse alive and content is a whole game before genetics is, and a
+ * player who meets heats and punnett squares in their first ten minutes puts the
+ * mod down.
+ *
+ * <h2>Some boxes tick because you watched, not because you acted</h2>
+ * Most of the wild chapter is horses doing things to each other, which a player
+ * cannot perform. Those tasks complete through
+ * {@code HorseProgress.completeForWatcher} - you were near enough, and looking.
+ * Their titles say <i>watch</i> for that reason: an unticked box that reads like
+ * an instruction, for something you cannot instruct, reads as a bug.
  *
  * <h2>Why the pictures are entities and items, not art</h2>
  * Everything illustrated here is drawn from the game: item stacks through the
@@ -47,12 +59,14 @@ import java.util.List;
  *
  * <h2>Only what is in the game</h2>
  * Every claim here was checked against the code rather than the wiki, which is
- * stale in several places. Three worth keeping straight, because the obvious
- * thing to write is wrong: a natural cover needs <b>nine-tenths</b> health and
- * not full health; a horse heals only near <b>water</b> and the food half of
- * that gate is gone; and there is <b>no inbreeding penalty of any kind</b>, so
- * the line-breeding sub-chapter says so outright rather than implying a
- * mechanic that does not exist.
+ * stale in several places. Worth keeping straight, because the obvious thing to
+ * write is wrong: a natural cover needs <b>nine-tenths</b> health and not full
+ * health; a horse heals only near <b>water</b> and the food half of that gate is
+ * gone; there is <b>no inbreeding penalty of any kind</b>, so the line-breeding
+ * sub-chapter says so outright; sparring and displacement do <b>no damage
+ * whatever</b>; a takeover fight is capped rather than lethal; and nine dhampirs
+ * in ten are the seal brown strain, so "a dhampir burns in daylight" is true of
+ * only one in ten of them.
  */
 public final class TutorialPage {
 
@@ -88,7 +102,7 @@ public final class TutorialPage {
     private TutorialPage() {
     }
 
-    /** The six chapters, in page order. Built once per session; item stacks need the registry. */
+    /** The seven chapters, in page order. Built once per session; item stacks need the registry. */
     public static List<Chapter> chapters() {
         if (chapters == null) {
             chapters = build();
@@ -131,22 +145,221 @@ public final class TutorialPage {
         List<Chapter> out = new ArrayList<>();
 
         // ------------------------------------------------------------------
-        // 1. Husbandry - keeping a horse, and nothing about breeding.
+        // 1. Horses in the wild - what is out there before any of it is
+        // yours, and how to get the first one. Most of this chapter is
+        // watched rather than done.
+        // ------------------------------------------------------------------
+        List<Step> wild = new ArrayList<>();
+
+        wild.add(new Step("Where the breeds are",
+                List.of("Wild herds are not the same everywhere. Breeds belong to the country they "
+                                + "came from, and that country decides which biomes they turn up in - "
+                                + "the heavy horses to the cold north, the desert breeds to the "
+                                + "savanna, the ponies to the hills. A horse you cannot find at home "
+                                + "may be three biomes away, and some of them only come out at a "
+                                + "particular time of day.",
+                        "Tame one of a named breed and it joins your breed book on this screen. "
+                                + "Everything you have not met yet sits under question marks until you "
+                                + "do.",
+                        "There are stables out there too, generated with the world and already full of "
+                                + "horses somebody else bred. They are worth finding: the animals in "
+                                + "them are better than anything wandering loose, and nothing whatever "
+                                + "stops you simply taking them.",
+                        "If your own corner of the world will not give you a breed, the horseman "
+                                + "sells breed spawn eggs from his middle ranks - one right-click, one "
+                                + "foundation horse of that breed, and a line to build from."),
+                List.of(new ItemStack(ModItems.BREED_SPAWN_EGG.get())), Art.NONE,
+                List.of(ProgressTask.DISCOVER_BREED, ProgressTask.BREED_EGG)));
+
+        wild.add(new Step("Coming to food",
+                List.of("A wild horse notices food in your hand from about ten blocks and drifts over "
+                                + "to it, stopping a couple of blocks short. Put the food away and it "
+                                + "loses interest that instant - it was never coming to you, it was "
+                                + "coming to the wheat.",
+                        "Every horse also has one food it likes above all others, and that one it "
+                                + "notices from twice as far. It does not amble for a favourite. A horse "
+                                + "crossing twenty blocks at a flat gallop because of what is in your "
+                                + "hand is how you find out what a particular animal loves, and it is "
+                                + "worth knowing: a favourite is double the bond, two hearts of "
+                                + "healing, and a minute of being quick on its feet.",
+                        "What a horse will eat at all is genetic. Most eat what you would expect, but "
+                                + "there are horses that want only meat, or only fish, or only metal, "
+                                + "and one kind that ignores everything you could possibly be holding. "
+                                + "A horse that will not look at a carrot is telling you something "
+                                + "about itself."),
+                List.of(new ItemStack(Items.WHEAT), new ItemStack(Items.GOLDEN_CARROT),
+                        new ItemStack(Items.APPLE)), Art.NONE,
+                List.of(ProgressTask.WILD_FOOD_DRIFT, ProgressTask.WILD_FAVOURITE_RUN)));
+
+        wild.add(new Step("Taming a wild horse",
+                List.of("The old way works. Find a wild horse and get on it with nothing in your hand. "
+                                + "It will throw you off. Get back on. Keep getting back on until hearts "
+                                + "appear. Feeding it first makes it quicker to convince, and a saddle "
+                                + "lets you steer it once it is yours.",
+                        "There is a quieter way that never involves being thrown at all. Crouch, hold "
+                                + "food the horse eats, look at it, and stand still. It will walk over "
+                                + "of its own accord and take a mouthful every couple of seconds, and "
+                                + "every mouthful is a chance at taming - the same chance the riding "
+                                + "does. Stand up, look away, or walk off and it stops coming.",
+                        "Foals cannot be tamed by either method. They can be bred, bought and led, but "
+                                + "a foal is too young to be anybody's."),
+                List.of(new ItemStack(Items.SADDLE), new ItemStack(Items.WHEAT),
+                        new ItemStack(Items.GOLDEN_APPLE)), Art.NONE,
+                List.of(ProgressTask.TAME_MARE, ProgressTask.TAME_STALLION,
+                        ProgressTask.CROUCH_FEED_TAME)));
+
+        wild.add(new Step("When it turns on you",
+                List.of("A wild horse is not livestock. Hit one and it fights back the way a wolf "
+                                + "would: it comes for you, kicks about twice as often as a zombie "
+                                + "swings, and rears after every blow that lands. It hits harder at "
+                                + "monsters than at people, which is worth remembering the first time "
+                                + "one saves you from a zombie without being asked.",
+                        "It does not come alone. Every horse of that band within twenty-four blocks "
+                                + "turns on you at the same moment, which is how a bad decision in the "
+                                + "middle of a herd becomes a very bad one. Break line of sight for "
+                                + "three seconds and they forget it entirely - there is no lasting "
+                                + "grudge.",
+                        "Frighten one instead and it simply runs. A horse already in a fight stands its "
+                                + "ground rather than bolting out of it, and so does a sun-sensitive "
+                                + "horse that has caught fire, because it has somewhere better to be.",
+                        "None of this happens to a tamed horse of your own, and a tamed mare will never "
+                                + "go for you even when you have hurt her foal."),
+                List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.SHIELD)), Art.NONE,
+                List.of(ProgressTask.WILD_KICK, ProgressTask.WILD_BOLT)));
+
+        wild.add(new Step("Reading a wild horse",
+                List.of("You do not have to own a horse to open it. Right-click any wild one and it "
+                                + "stands still for you while you read it - and it really does stand "
+                                + "still, so a horse you are inspecting is a horse you can look at "
+                                + "properly.",
+                        "The Social section is the one to read out here. It names the horse's role in "
+                                + "its band - band stallion, lead mare, band mare, youngster, foal, "
+                                + "bachelor lead, bachelor, or on its own - how many of the band-mates "
+                                + "nearby it outranks, which horses it keeps company with, which of "
+                                + "those is its grooming partner, and which single horse it cannot "
+                                + "stand.",
+                        "Read two or three horses of one band and the shape of the thing appears: who "
+                                + "is in charge, who is on the way out, and which two are inseparable. "
+                                + "Everything the rest of this chapter describes is already written "
+                                + "there before you see it happen."),
+                List.of(), Art.NONE,
+                List.of(ProgressTask.WILD_READ_SOCIAL)));
+
+        wild.add(new Step("Sparring",
+                List.of("Two entire stallions who already know each other will square up, rear at one "
+                                + "another in turn, and shove, for a few seconds at a time. Then one of "
+                                + "them gives way and retreats a few blocks, and both of them remember "
+                                + "how it went.",
+                        "It does no damage. Not a little damage - none at all. Sparring is how rank "
+                                + "gets settled without anybody getting hurt, and rank is what decides "
+                                + "the next argument about water. Who wins is not random either: "
+                                + "condition, size, age and current standing all weigh on it.",
+                        "Your own tamed stallions do this too, once they know each other well enough."),
+                List.of(), Art.NONE,
+                List.of(ProgressTask.WILD_SPAR)));
+
+        wild.add(new Step("Dams and foals",
+                List.of("A foal keeps close to its dam - within about six blocks - and if it strays "
+                                + "twice that far she breaks off whatever she was doing and goes to "
+                                + "fetch it.",
+                        "A wild foal that has lost its dam, or never knew her, adopts the nearest mare "
+                                + "of its band, and she takes it on. There is no ceremony to it; the "
+                                + "foal simply starts following somebody.",
+                        "Hurt a foal in front of its dam and she will come for you, and she will keep "
+                                + "coming for a while afterwards. A tamed mare defends her foal against "
+                                + "everything in the world except you."),
+                List.of(), Art.NONE,
+                List.of(ProgressTask.WILD_DAM_FOAL)));
+
+        wild.add(new Step("What a band stallion does",
+                List.of("A family band is a stallion, his mares, and their foals, and it goes wherever "
+                                + "its eldest mare goes. He does not lead it. He works the edges of it, "
+                                + "further back than everybody else, and he has two jobs.",
+                        "The first is keeping it together. When a mare wanders too far out he comes "
+                                + "round <i>behind</i> her rather than at her, ears pinned, and drives "
+                                + "her back in until she is where he wants her. The second is keeping "
+                                + "other stallions off it: he puts himself physically between his mares "
+                                + "and any strange stallion who comes within sixteen blocks, and if that "
+                                + "stallion presses closer he charges him off.",
+                        "Sooner or later a bachelor challenges him for the lot. That one is a real "
+                                + "fight with real blows - and still nobody dies: the blow that would "
+                                + "take either horse much below two-fifths of its health is the blow "
+                                + "that ends the fight instead. The loser walks away sixteen blocks and "
+                                + "is a bachelor from then on; the winner takes the band, mares and "
+                                + "foals and all. A band whose stallion is simply gone is claimed with "
+                                + "no fight at all.",
+                        "Stallions with no mares of their own run together in bachelor bands, which is "
+                                + "where the challengers come from, and where the losers go back to."),
+                List.of(), Art.NONE,
+                List.of(ProgressTask.WILD_BAND_STALLION, ProgressTask.WILD_TAKEOVER_FIGHT)));
+
+        wild.add(new Step("Rank at the water",
+                List.of("Rank is not decoration - it decides who drinks. A horse standing at water, or "
+                                + "at a hay bale or a crop, can be walked up to by a horse that outranks "
+                                + "it clearly enough; the higher one threatens, and the lower one steps "
+                                + "aside.",
+                        "Then it stops. One shove and the winner settles down to eat rather than "
+                                + "pressing its advantage, and it will not try again on the same horse "
+                                + "for a good half-minute. Like sparring, it costs nobody any health.",
+                        "Plain grass is deliberately exempt. If every tuft in a field were worth "
+                                + "arguing over, a band would do nothing else all day."),
+                List.of(new ItemStack(Items.WATER_BUCKET), new ItemStack(Items.HAY_BLOCK)), Art.NONE,
+                List.of(ProgressTask.WILD_DISPLACE)));
+
+        wild.add(new Step("Grooming and company",
+                List.of("Horses keep opinions of each other as well as of you: who they know, who they "
+                                + "groom with, who gives way to whom, and who they cannot stand.",
+                        "Two horses who have grown close enough become grooming partners, and you will "
+                                + "see it happen: they walk together, turn to stand head to tail, and "
+                                + "work on each other for a long unhurried while. It forms between two "
+                                + "adult mares, or between a dam and her foal - a stallion never gets "
+                                + "one, and for this purpose a gelding counts as a mare, which is one of "
+                                + "the quieter arguments for gelding a horse you mean to keep.",
+                        "Young horses leave home a few days after they grow up: colts to the bachelors, "
+                                + "fillies to another band - and a filly will not take a suitor who "
+                                + "shares a parent with her, which will be her own brother who left the "
+                                + "same band a minute earlier. Mares move between bands now and then, to "
+                                + "wherever they know the most horses.",
+                        "Your own horses band up too. Leave two of them standing together long enough "
+                                + "and they form a herd, which mends twice as fast and teaches a foal "
+                                + "twice as quickly."),
+                List.of(new ItemStack(Items.HAY_BLOCK), new ItemStack(Items.LEAD)), Art.NONE,
+                List.of(ProgressTask.WILD_GROOM, ProgressTask.FORM_HERD)));
+
+        wild.add(new Step("Eating, and hunting",
+                List.of("A horse feeds itself. A hungry one goes looking within about ten blocks and "
+                                + "eats the best thing it can reach - a hay bale for preference, then a "
+                                + "cake if you were careless, then crops, then grass and moss and "
+                                + "mushrooms and flowers. A horse that is only a little hungry nibbles "
+                                + "whatever it happens to be standing on instead.",
+                        "What it eats is gone. Grass and moss turn to dirt under a grazing horse the "
+                                + "way they do under a sheep, and a crop is simply destroyed - so do not "
+                                + "plant your wheat against the paddock fence.",
+                        "And not every horse eats plants. A meat-eater with nothing available goes "
+                                + "hunting: it walks down a cow or a pig or a chicken, kills it, and "
+                                + "eats what drops. A fish-eater goes fishing. This is worth seeing "
+                                + "once, and worth knowing before you put one in a paddock with your "
+                                + "chickens."),
+                List.of(new ItemStack(Items.HAY_BLOCK), new ItemStack(Items.WHEAT),
+                        new ItemStack(Items.BEEF), new ItemStack(Items.COD)), Art.NONE,
+                List.of(ProgressTask.WILD_GRAZE, ProgressTask.WILD_HUNT)));
+
+        out.add(new Chapter("Horses in the wild", List.copyOf(wild)));
+
+        // ------------------------------------------------------------------
+        // 2. Husbandry - keeping a horse, and nothing about breeding.
         // ------------------------------------------------------------------
         List<Step> husbandry = new ArrayList<>();
 
-        husbandry.add(new Step("Taming, and what a horse is",
+        husbandry.add(new Step("What a horse is",
                 List.of("Horses in this world are not four colours and a saddle. Each one carries a "
                                 + "full set of genes, inherited from its parents the way a real horse's "
                                 + "are, and its coat is painted from them - so no two are quite alike "
                                 + "and none of them was drawn by hand.",
                         "Some of them are not entirely ordinary, either. There are horses that glow, "
                                 + "horses that walk on water, and horses that are perfectly friendly "
-                                + "until the sun goes down. You will know one when you meet it.",
-                        "To tame one, find a wild horse and get on it with nothing in your hand. It "
-                                + "will throw you off. Get back on. Keep getting back on until hearts "
-                                + "appear. Feeding it first makes it quicker to convince, and a saddle "
-                                + "lets you steer it once it is yours.",
+                                + "until the sun goes down. There is a whole chapter on them further "
+                                + "down; you will know one when you meet it.",
                         "Every horse is a mare or a stallion, and it is a gene like any other - a foal "
                                 + "inherits its sex rather than being assigned one. Look at the name "
                                 + "above its head: a pink ♀ is a mare, a blue ♂ is a stallion, "
@@ -157,10 +370,8 @@ public final class TutorialPage {
                                 + "hanging off the left of the window, and type into the box on "
                                 + "Overview. That is what you actually call it; the name it was born "
                                 + "with stays as it is."),
-                List.of(new ItemStack(Items.SADDLE), new ItemStack(Items.WHEAT),
-                        new ItemStack(Items.NAME_TAG)), Art.NONE,
-                List.of(ProgressTask.TAME_MARE, ProgressTask.TAME_STALLION,
-                        ProgressTask.NAME_HORSE, ProgressTask.BARN_NAME)));
+                List.of(new ItemStack(Items.NAME_TAG), new ItemStack(Items.SADDLE)), Art.NONE,
+                List.of(ProgressTask.NAME_HORSE, ProgressTask.BARN_NAME)));
 
         husbandry.add(new Step("Food, water and healing",
                 List.of("A horse gets hungry, and it feeds itself. A hungry one goes looking within "
@@ -185,6 +396,36 @@ public final class TutorialPage {
                         new ItemStack(Items.WHEAT), new ItemStack(Items.GOLDEN_APPLE)), Art.NONE,
                 List.of(ProgressTask.FEED_BY_HAND, ProgressTask.FAVOURITE_FOOD,
                         ProgressTask.HEAL_AT_WATER)));
+
+        husbandry.add(new Step("Hurt, hungry, and mended",
+                List.of("Sooner or later a horse of yours gets hurt, and nothing will quietly fix it "
+                                + "for you. This is the one piece of husbandry the mod genuinely "
+                                + "changes: vanilla's slow regeneration is switched off for horses, so "
+                                + "a hurt horse stays exactly as hurt as it is until you do something "
+                                + "about it.",
+                        "What it spends on mending is food. Every horse carries an invisible store of "
+                                + "it, and healing costs two of that store per health point - so half a "
+                                + "heart of damage is a mouthful of grass, and a badly hurt horse is a "
+                                + "hay bale. Fill it up first: let the horse eat, or crouch and feed it "
+                                + "by hand. A hay bale is the biggest single meal there is, and its "
+                                + "favourite food is the one thing it will run across a field for.",
+                        "Then stand it within three blocks of water and leave it alone. It mends about "
+                                + "a health point a second - twice that if it is in a herd - and it "
+                                + "stops dead the moment its food runs out, however much water is in "
+                                + "front of it. A starving horse parked beside a lake will sit there "
+                                + "hurt indefinitely, and that is the single most common reason somebody "
+                                + "thinks healing is broken.",
+                        "Two horses will not mend this way at all. A blood-drinker has to bite "
+                                + "something living, and a horse on one of the narrow diets is fed "
+                                + "straight back to full by its own food instead - one bar of gold, one "
+                                + "cake, one potion or one bucket of lava, depending on the animal. "
+                                + "Those horses do not need the water at all.",
+                        "The vet's kit does not heal anything, and never has. It reads a mare and it "
+                                + "gelds a stallion."),
+                List.of(new ItemStack(Items.HAY_BLOCK), new ItemStack(Items.WATER_BUCKET),
+                        new ItemStack(Items.GOLDEN_CARROT)), Art.NONE,
+                List.of(ProgressTask.HORSE_INJURED, ProgressTask.FEED_HUNGRY_HORSE,
+                        ProgressTask.HEAL_TO_FULL)));
 
         husbandry.add(new Step("Grooming, and horse hair",
                 List.of("Right-click an adult horse with shears. You are brushing it rather than "
@@ -333,7 +574,7 @@ public final class TutorialPage {
         out.add(new Chapter("Husbandry", List.copyOf(husbandry)));
 
         // ------------------------------------------------------------------
-        // 2. Basic breeding - heats, covering and jars. No golden carrots:
+        // 3. Basic breeding - heats, covering and jars. No golden carrots:
         // the owner's call, so the first breeding a player does is the one the
         // horses arrange themselves.
         // ------------------------------------------------------------------
@@ -428,7 +669,7 @@ public final class TutorialPage {
         out.add(new Chapter("Basic breeding", List.copyOf(breeding)));
 
         // ------------------------------------------------------------------
-        // 3. Genetics.
+        // 4. Genetics.
         // ------------------------------------------------------------------
         List<Step> genetics = new ArrayList<>();
 
@@ -505,9 +746,9 @@ public final class TutorialPage {
                         "Nothing random can hurt a foal: the random splices draw from a pool that "
                                 + "excludes the lethal genes. The deliberate route to a dangerous one "
                                 + "is the named carrot, which is as it should be.",
-                        "Five more splice carrots narrow the roll to a theme - the dilutions, the "
-                                + "white and spotting genes, the markings, performance, or the magical "
-                                + "genes."),
+                        "Four more narrow the roll to a theme - the dilutions, the white and spotting "
+                                + "genes, the markings, or performance. There is a fifth for the "
+                                + "magical genes, and it belongs to the next chapter."),
                 List.of(new ItemStack(ModItems.STABILIZER_CARROT.get()),
                         new ItemStack(ModItems.MAGNIFIER_CARROT.get()),
                         new ItemStack(ModItems.UNKNOWN_GENE_SPLICE_CARROT.get()),
@@ -515,8 +756,7 @@ public final class TutorialPage {
                 List.of(ProgressTask.CARROT_STABILIZER, ProgressTask.CARROT_MAGNIFIER,
                         ProgressTask.CARROT_UNKNOWN_GENE, ProgressTask.CARROT_UNKNOWN_EPIGENETIC,
                         ProgressTask.CARROT_DILUTION, ProgressTask.CARROT_WHITE,
-                        ProgressTask.CARROT_MARKING, ProgressTask.CARROT_PERFORMANCE,
-                        ProgressTask.CARROT_MAGICAL)));
+                        ProgressTask.CARROT_MARKING, ProgressTask.CARROT_PERFORMANCE)));
 
         genetics.add(new Step("A door made of hay",
                 List.of("Build a frame of hay bales the way you would build a nether portal, light it "
@@ -534,7 +774,107 @@ public final class TutorialPage {
         out.add(new Chapter("Genetics", List.copyOf(genetics)));
 
         // ------------------------------------------------------------------
-        // 4. Breeding projects - doing it on purpose.
+        // 5. Magical horses - its own chapter, not a corner of genetics: a
+        // magical gene paints in a different phase, arrives by different
+        // routes, and is most of the reason anybody goes looking at horses.
+        // ------------------------------------------------------------------
+        List<Step> magic = new ArrayList<>();
+
+        magic.add(new Step("What a magical gene is",
+                List.of("Every gene so far has worked the same way: it decides which pigment a patch "
+                                + "of horse is allowed, and the coat is painted from what survives. A "
+                                + "magical gene does not do that. It waits until the coat has been "
+                                + "painted and then adds colour on top of the finished animal.",
+                        "That is why a magical gene can do things no real pigment could. It can find "
+                                + "the black parts of a horse and only touch those; it can find "
+                                + "somebody else's white markings and recolour them; it can glow. Some "
+                                + "of them change nothing about the coat at all and instead make the "
+                                + "horse swim, breathe underwater, fight, drop something when it dies, "
+                                + "or watch you from across a field at night.",
+                        "They are ordinary genes in every other respect. Two copies, inherited one "
+                                + "from each parent, written on the record, readable off the Genes tab, "
+                                + "and they join your database the same way anything else does - by "
+                                + "your owning a living horse that carries one.",
+                        "The magical splice carrot is the deliberate way in once you know one exists: "
+                                + "it narrows the random roll to the magical genes and nothing else. "
+                                + "The census page on the wiki lists every gene in the mod with what "
+                                + "each combination of its alleles actually does, magical and natural "
+                                + "together, which is the shortest route to knowing what is out there."),
+                List.of(new ItemStack(Items.GOLDEN_CARROT), new ItemStack(Items.AMETHYST_SHARD),
+                        new ItemStack(Items.GLOWSTONE_DUST)), Art.NONE,
+                List.of(ProgressTask.MAGICAL_GENE_DISCOVERED, ProgressTask.CARROT_MAGICAL)));
+
+        magic.add(new Step("The dhampir",
+                List.of("There is one breed in the mod that is magical by description rather than by "
+                                + "accident. Dhampirs are rare, they found their herds at night, and "
+                                + "they turn up in about a dozen biomes - plains and meadows, forests "
+                                + "and taiga, savanna, snowy plains, cherry groves.",
+                        "They come in two strains and never a mix of the two, which is the thing to "
+                                + "understand before you go looking. Nine in ten are seal brown: red "
+                                + "eyes, a single silent copy of each of the family traits, and "
+                                + "otherwise a perfectly manageable horse. One in ten is the whole "
+                                + "animal - white-coated, three times as tough as a horse has any right "
+                                + "to be, half again as fast, twice the jump.",
+                        "The full one also burns in daylight and drinks blood, and those two facts are "
+                                + "most of what owning one is like. Two seal browns will throw a "
+                                + "white-coated foal about one time in four; getting the entire package "
+                                + "back out of them is a project measured in thousands.",
+                        "Taming depends on which one you have found. A seal brown eats ordinary food "
+                                + "and tames like anything else, by hand or from the saddle. A white "
+                                + "one will not take food from your hand at all - it does not eat food "
+                                + "- so there is no crouch-feeding it, and riding it out is the only "
+                                + "way. Do that after dark, for its sake rather than yours."),
+                List.of(new ItemStack(Items.REDSTONE), new ItemStack(Items.SADDLE)), Art.NONE,
+                List.of(ProgressTask.MEET_DHAMPIR, ProgressTask.TAME_DHAMPIR)));
+
+        magic.add(new Step("A magical herd",
+                List.of("The other way magic arrives in the wild is not a breed at all. About one wild "
+                                + "herd in twenty is a magical version of an ordinary breed - a herd of "
+                                + "Friesians, or Shires, or Fell ponies, in which every single horse "
+                                + "carries the same one magical gene.",
+                        "Two things make it worth stopping for. Every horse in the herd carries it, so "
+                                + "you are not hunting one animal in a field; and every one of them "
+                                + "<i>shows</i> it rather than carrying it silently, so you can see "
+                                + "what you are being offered before you commit to taming anything.",
+                        "Their papers say so. The breed reads Magical and names the breed underneath, "
+                                + "and it breeds on: a magical horse crossed back into its own breed "
+                                + "stays magical, while crossed with anything else it is an ordinary "
+                                + "cross like any other.",
+                        "Only wild herds are ever magical this way. A cowboy's string, a generated "
+                                + "stable and a breed spawn egg all give you ordinary horses of the "
+                                + "breed, and the gene a magical herd carries is never one of the body "
+                                + "stats and never a disorder - a magical herd is not a sick one."),
+                List.of(), Art.NONE,
+                List.of(ProgressTask.MEET_MAGICAL_HERD, ProgressTask.TAME_MAGICAL_HORSE)));
+
+        magic.add(new Step("Sunlight, and blood",
+                List.of("Two magical traits change how you have to keep a horse, and they are worth "
+                                + "meeting before you own one rather than afterwards.",
+                        "A sun-sensitive horse catches fire in daylight and loses about half a heart "
+                                + "every couple of seconds while the sky can see it. It knows this, and "
+                                + "it will run - properly run, at more than a gallop - for the deepest "
+                                + "shade it can reach, press against a fence to get there, and hold "
+                                + "that spot until dark rather than wandering back out. Rain saves it, "
+                                + "water saves it, and a roof saves it. A stable is not decoration for "
+                                + "this horse.",
+                        "A blood-drinker cannot be fed and cannot be healed the ordinary way. No food "
+                                + "in your hand means anything to it, standing it beside water does "
+                                + "nothing at all, and the only way it mends is by biting something "
+                                + "living - half a heart off a cow, and then it leaves that particular "
+                                + "animal alone for a day. It will not hunt while the sun is on it "
+                                + "either, so a sunlit blood-drinker is doing nothing but looking for "
+                                + "shade.",
+                        "Both of these are genes rather than breeds. The dhampir is where you will "
+                                + "meet them first, but they turn up on their own, and a horse you bred "
+                                + "yourself can inherit either one."),
+                List.of(new ItemStack(Items.TORCH), new ItemStack(Items.WATER_BUCKET),
+                        new ItemStack(Items.BEEF)), Art.NONE,
+                List.of(ProgressTask.SUN_SENSITIVE_SEEN, ProgressTask.BLOOD_BITE_SEEN)));
+
+        out.add(new Chapter("Magical horses", List.copyOf(magic)));
+
+        // ------------------------------------------------------------------
+        // 6. Breeding projects - doing it on purpose.
         // ------------------------------------------------------------------
         List<Step> projects = new ArrayList<>();
 
@@ -587,59 +927,7 @@ public final class TutorialPage {
         out.add(new Chapter("Breeding projects", List.copyOf(projects)));
 
         // ------------------------------------------------------------------
-        // 5. Horses in the wild.
-        // ------------------------------------------------------------------
-        List<Step> wild = new ArrayList<>();
-
-        wild.add(new Step("Where the breeds are",
-                List.of("Wild herds are not the same everywhere. Breeds belong to the country they "
-                                + "came from, and that country decides which biomes they turn up in - "
-                                + "the heavy horses to the cold north, the desert breeds to the "
-                                + "savanna, the ponies to the hills. A horse you cannot find at home "
-                                + "may be three biomes away, and some of them only come out at a "
-                                + "particular time of day.",
-                        "Tame one of a named breed and it joins your breed book on this screen. "
-                                + "Everything you have not met yet sits under question marks until you "
-                                + "do.",
-                        "There are stables out there too, generated with the world and already full of "
-                                + "horses somebody else bred. They are worth finding: the animals in "
-                                + "them are better than anything wandering loose, and nothing whatever "
-                                + "stops you simply taking them.",
-                        "If your own corner of the world will not give you a breed, the horseman "
-                                + "sells breed spawn eggs from his middle ranks - one right-click, one "
-                                + "foundation horse of that breed, and a line to build from."),
-                List.of(new ItemStack(ModItems.BREED_SPAWN_EGG.get())), Art.NONE,
-                List.of(ProgressTask.DISCOVER_BREED, ProgressTask.BREED_EGG)));
-
-        wild.add(new Step("Bands, and horses that know each other",
-                List.of("Horses keep opinions of each other as well as of you: who they know, who "
-                                + "they groom with, who gives way to whom, and who they cannot stand. "
-                                + "The Social section of a horse's information screen shows its place "
-                                + "in its band, its closest companions and its rival.",
-                        "Wild horses live the way free-roaming horses do. A family band is a stallion "
-                                + "with his mares and their foals, and it goes where its eldest mare "
-                                + "goes - he keeps to the edge, fetches a mare who wanders off, and "
-                                + "stands between his mares and any other stallion. Stallions without "
-                                + "mares run together as bachelors.",
-                        "Young horses leave home a few days after they grow up: colts to the "
-                                + "bachelors, fillies to another band - and a filly will not take a "
-                                + "suitor who shares a parent with her. Now and then a bachelor "
-                                + "challenges a band stallion for his mares. It is a real fight, but "
-                                + "nobody dies: the loser yields well before it gets that far and walks "
-                                + "away, and the winner takes the band.",
-                        "Your own horses band up too. Leave two of them standing together long enough "
-                                + "and they form a herd, which mends twice as fast and teaches a foal "
-                                + "twice as quickly. Tamed stallions who know each other spar without "
-                                + "doing harm, grooming partners stand head to tail, and a mare will go "
-                                + "for anything that hurts her foal - though a tamed one will never go "
-                                + "for you."),
-                List.of(new ItemStack(Items.HAY_BLOCK), new ItemStack(Items.LEAD)), Art.NONE,
-                List.of(ProgressTask.FORM_HERD)));
-
-        out.add(new Chapter("Horses in the wild", List.copyOf(wild)));
-
-        // ------------------------------------------------------------------
-        // 6. The villagers.
+        // 7. The villagers.
         // ------------------------------------------------------------------
         List<Step> people = new ArrayList<>();
 

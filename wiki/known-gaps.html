@@ -57,6 +57,51 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-264"><strong>Open, found 2026-09-17: a dhampir biting you also ticks <em>Get kicked by a wild horse</em>, and the two are indistinguishable where it is credited.</strong>
+    The task is credited from the incoming-damage event rather than from
+    <code>HorseMeleeGoal</code>, and that was the right call of the two available: the goal knows it
+    <em>swung</em>, not that it connected, so crediting there would tick the box for a kick at a
+    creative player who took nothing. The price is this one. <code>BloodHuntGoal</code>'s bite is
+    also a <code>mob_attack</code> from an untamed horse, carries no marker of its own, and so
+    reaches the same handler looking identical. It is arguably not even false &mdash; a wild horse
+    did hurt you &mdash; which is why it was recorded rather than bodged, and the horse that does it
+    is rare. The fix is a damage source (or a tag on the existing one) for the bite, which would
+    also let <em>Watch a horse drink blood</em> be credited off the damage instead of from inside
+    the goal. Until then one event can tick two boxes.</li>
+
+<li id="gap-265"><strong>Open, found 2026-09-17: the dhampir is identified by a bare string, spelled out in two separate files, with no constant anywhere in Java.</strong>
+    Two checklist hooks test <code>lineage().components().contains("dhampir")</code> &mdash; one on
+    <code>HorseCareHandler</code>'s slow tick, one in <code>GeneDiscoveryHandler</code>'s tame
+    handler &mdash; because there is no Java constant for the breed to use: it exists as
+    <code>breeds/dhampir.json</code> and as a literal in <code>DhampirBreedTest</code>, and nowhere
+    else. Rename that breed file and both hooks stop firing with nothing going red, because
+    <code>check-progress-tasks.mjs</code> proves only that a task is <em>reachable</em>, never that
+    its condition can become true (<a href="#gap-148">gap 148</a>) &mdash; so the two boxes would
+    simply never tick again and would read as "I have not found one yet". No shared home was
+    invented for the constant when the hooks were written, on the grounds that guessing where a
+    breed id belongs is worse than recording it; a comment at each site names the breed file. The
+    equivalent test for magical herds is safe, because it goes through
+    <code>BreedLineage.isMagical()</code> rather than a spelling.</li>
+
+<li id="gap-266"><strong>Open, found 2026-09-17: two pages describe wild-herd and healing behaviour that the code does not do, and one of them contradicts itself.</strong>
+    Found by writing the Getting started wild chapter from the source rather than from the wiki,
+    which is why the tutorial does not inherit any of it.
+    <a href="breeds.html">Breeds</a> says a herd's founder <em>is the lead stallion</em>, where
+    <code>HerdManager</code> elects the <strong>lowest-UUID member</strong> and seeds the band's
+    breed off that member so every joiner agrees; it calls the band type a "70/30 coin" where the
+    code uses the breed's own <code>bachelorChance()</code>; it puts the wild kick at
+    <em>4 damage</em> where the baseline is <code>MagicFighterGene.BASELINE_DAMAGE</code> &mdash; 3,
+    a zombie's hit &mdash; with a &times;2 multiplier that applies only against <code>Enemy</code>
+    mobs and not against players; and it claims generated stables add their own extra magic on top
+    of the breeds they place, which has no corresponding match anywhere in
+    <code>StablePopulator</code>. <a href="horse-care.html">Horse care</a>'s "Tamed herds" still
+    describes the pre-hunger model (&ldquo;+2 per scan instead of +1 when the water/food gate is
+    met&rdquo;) while &sect;1 of the same page carries the current rule of a health point a second
+    and two in a herd, so the page disagrees with itself depending on where you start reading.
+    Smaller, same shape: <code>HerdGoals.java:32</code> says <em>five goals</em> over a table of
+    six. None of this is a code defect. All of it is the kind of claim that gets copied forward
+    into something a player reads.</li>
+
 <li id="gap-263"><strong>Open, found 2026-09-17: <code>check-path-canvas.mjs</code> has been failing, and it fails by <em>throwing</em>, which is why nobody knew.</strong>
     It dies at <code>no canvas to drive</code> &mdash; it picks <code>PATH</code> on the first
     <code>#layers-panel</code> select, waits, and finds no <code>.path-canvas</code> with a usable size.

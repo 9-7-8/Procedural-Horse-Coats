@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.HorseDiet;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -148,6 +149,18 @@ public final class FoodTemptGoal extends Goal {
     @Override
     public boolean requiresUpdateEveryTick() {
         return true;
+    }
+
+    @Override
+    public void start() {
+        // On the transition and not in canUse() / tick(), both of which run
+        // every tick for every horse: this is the one moment the animal decides
+        // to come over. Untamed only - the wild chapter's task is a *wild* horse
+        // coming to you, not your own horse walking to its wheat.
+        if (!horse.isTamed()) {
+            HorseProgress.complete(player,
+                    running ? ProgressTask.WILD_FAVOURITE_RUN : ProgressTask.WILD_FOOD_DRIFT);
+        }
     }
 
     @Override

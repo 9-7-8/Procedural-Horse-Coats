@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.herd.HerdRules;
 import com.example.horsegenetics.common.herd.Relationship;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.HorseSocialAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
@@ -165,6 +166,10 @@ public final class HerdGoals {
         @Override
         public void start() {
             beat = 0;
+            // The bout itself, not the candidate search canUse() does on a
+            // cooldown. Both horses of the pair run their own Spar goal and so
+            // both say this; completing twice is idempotent.
+            HorseProgress.completeForWatcher(horse, ProgressTask.WILD_SPAR);
         }
 
         @Override
@@ -302,6 +307,13 @@ public final class HerdGoals {
         }
 
         @Override
+        public void start() {
+            // A dam setting off for her foal, or a foal after its dam: the walk
+            // beginning, not the scan that chose it.
+            HorseProgress.completeForWatcher(horse, ProgressTask.WILD_DAM_FOAL);
+        }
+
+        @Override
         public void tick() {
             if (other != null && horse.getNavigation().isDone()) {
                 horse.getNavigation().moveTo(other, horse.isBaby() ? 1.15 : 1.0);
@@ -389,6 +401,13 @@ public final class HerdGoals {
         @Override
         public boolean canContinueToUse() {
             return subject != null && subject.isAlive() && free(horse) && horse.distanceToSqr(subject) < 48.0 * 48.0;
+        }
+
+        @Override
+        public void start() {
+            // Either branch of canUse(): driving a stray mare back in, or
+            // putting himself between his mares and an outside stallion.
+            HorseProgress.completeForWatcher(horse, ProgressTask.WILD_BAND_STALLION);
         }
 
         @Override
@@ -512,6 +531,7 @@ public final class HerdGoals {
                 BandLife.settle(horse, subject, HerdRules.STAKES_DISPLACEMENT, level.getGameTime());
                 ActionTrace.log("herd", ActionTrace.describeShort(horse) + " displaced "
                         + ActionTrace.describeShort(subject) + " at food or water");
+                HorseProgress.completeForWatcher(horse, ProgressTask.WILD_DISPLACE);
                 subject = null;
                 checkCooldown = 600;    // one shove, then graze
             }
@@ -659,6 +679,8 @@ public final class HerdGoals {
         private Horse partner;
         private int remaining;
         private int checkCooldown;
+        /** Whether this pair has already settled head to tail - see {@link #tick()}. */
+        private boolean settled;
 
         GroomAndRest(Horse horse) {
             this.horse = horse;
@@ -684,6 +706,7 @@ public final class HerdGoals {
             }
             partner = p;
             remaining = 120 + horse.getRandom().nextInt(120);
+            settled = false;
             ActionTrace.log("herd", ActionTrace.describeShort(horse) + " went to rest head to tail with "
                     + ActionTrace.describeShort(p));
             return true;
@@ -706,6 +729,13 @@ public final class HerdGoals {
                 return;
             }
             horse.getNavigation().stop();
+            if (!settled) {
+                // ONCE per bout, not every tick of it: the rest of this block
+                // runs for as long as the pair stands there, and a watcher
+                // lookup plus a saved-data read every tick is a hot path.
+                settled = true;
+                HorseProgress.completeForWatcher(horse, ProgressTask.WILD_GROOM);
+            }
             // Head to tail: face the opposite way to the partner.
             horse.setYRot(partner.getYRot() + 180.0F);
             horse.setYBodyRot(horse.getYRot());

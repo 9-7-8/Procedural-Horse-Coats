@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -85,6 +86,8 @@ public final class SunSensitivityHandler {
         level.sendParticles(ParticleTypes.SMOKE,
                 horse.getX(), horse.getY() + horse.getBbHeight() * 0.7, horse.getZ(),
                 5, 0.3, 0.3, 0.3, 0.01);
+        // Only on a burn, which is already one tick in SUN_INTERVAL.
+        HorseProgress.completeForWatcher(horse, ProgressTask.SUN_SENSITIVE_SEEN);
     }
 
     /**

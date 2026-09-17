@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.herd.HerdRules;
 import com.example.horsegenetics.common.herd.Relationship;
 import com.example.horsegenetics.common.herd.SocialLedger;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.HorseSocialAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
@@ -201,6 +202,9 @@ public final class BandLife {
         stallion.setTarget(bachelor);
         ActionTrace.log("herd", ActionTrace.describeShort(bachelor) + " challenged "
                 + ActionTrace.describeShort(stallion) + " for band " + HerdSocialHandler.short8(herd));
+        // The challenge, which is where the fight starts. A vacant band taken
+        // without one (above) is not a fight to watch.
+        HorseProgress.completeForWatcher(bachelor, ProgressTask.WILD_TAKEOVER_FIGHT);
     }
 
     /**

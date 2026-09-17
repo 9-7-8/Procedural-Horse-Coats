@@ -719,42 +719,74 @@
         should be uncommon and carrying two should never happen.</li>
 </ul>
 
-<h2 id="tutorial-chapters-0916">&sect;0-EO &mdash; Getting started, rebuilt as six chapters (2026-09-16, NOT played)</h2>
+<h2 id="tutorial-chapters-0916">&sect;0-EO &mdash; Getting started, now seven chapters (2026-09-17, NOT played)</h2>
+
+<div class="note danger">
+    <span class="label">Thirteen tasks now tick because you were <em>watching</em>, and that is the whole risk</span>
+    <p>
+        Most of the new wild chapter is horses doing things to each other, which a player cannot
+        perform, so those tasks are credited by
+        <code>HorseProgress.completeForWatcher</code>: the <strong>nearest</strong> player within
+        <code>WATCH_RADIUS</code> (24 blocks) who <strong>has line of sight</strong>. Nothing
+        else in the mod is credited that way, and it can fail in both directions at once &mdash;
+        never firing because the chosen nearest player was the one behind a tree, or firing for
+        something that happened off-screen.
+    </p>
+    <p>
+        <strong>The one test that covers the mechanism:</strong> stand in the open beside a wild
+        band and wait for a spar or a grooming pair, and confirm a chat line arrives. Then put a
+        solid wall between you and a band at the same distance and confirm <em>nothing</em>
+        arrives. If the second one ticks, <code>hasLineOfSight</code> is not doing what the
+        comment in <code>HorseProgress</code> says it does &mdash; it is flagged there as
+        unverified on this NeoForge version.
+    </p>
+</div>
 
 <div class="note warn">
-    <span class="label">Two of the new tasks tick with no player action at all</span>
+    <span class="label">A dhampir biting you also ticks <em>Get kicked by a wild horse</em></span>
     <p>
-        <strong>Heal a horse at water</strong> and <strong>Let your horses form a herd</strong>
-        are credited from the shared slow tick, to <code>horse.getOwner()</code> when that owner
-        happens to be a loaded player. Every other task in the mod is credited from something
-        the player did, so these two are the ones that can fail <em>invisibly, in both
-        directions</em> &mdash; never firing because the owner was out of range or offline, or
-        firing the moment any horse anywhere is scratched. <strong>Hurt a horse of yours beside
-        water, stand next to it, and watch for the one chat line. Then walk a long way off, hurt
-        another, and confirm nothing arrives.</strong>
+        Known and deliberate, and the cheaper of two bad options. <em>Get kicked</em> is credited
+        from the damage event rather than from <code>HorseMeleeGoal</code>, because the goal knows
+        it swung and not that anything was hit &mdash; a creative player gets kicked at and takes
+        nothing, and ticking that box would be a lie. But a blood-drinker's bite is also a
+        <code>mob_attack</code> from an untamed horse and is indistinguishable at that event.
+        Excluding it needs a marker on the bite's damage source
+        (<a href="known-gaps.html#gap-264">gap 264</a>).
     </p>
 </div>
 
 <p>
-    <strong>The tab is six chapters of sub-chapters now</strong> &mdash; Husbandry, Basic
-    breeding, Genetics, Breeding projects, Horses in the wild, The villagers &mdash; and the
-    checklist is no longer a section of its own. Every task sits under the sub-chapter that
-    teaches it, and a <em>Checklist</em> section at the end carries the running total and
-    <em>only what is still outstanding</em>. <strong>Pass:</strong> the contents list shows six
+    <strong>The tab is seven chapters of sub-chapters now</strong> &mdash; Horses in the wild,
+    Husbandry, Basic breeding, Genetics, Magical horses, Breeding projects, The villagers &mdash;
+    and the checklist is no longer a section of its own. Every task sits under the sub-chapter
+    that teaches it, and a <em>Checklist</em> section at the end carries the running total and
+    <em>only what is still outstanding</em>. <strong>Pass:</strong> the contents list shows seven
     chapter headings with their sub-chapters indented beneath, every sub-chapter opens, and
-    nothing runs off the panel at GUI scale 4.
+    nothing runs off the panel at GUI scale 4 &mdash; which is a real risk now that one chapter
+    carries <strong>eleven</strong> sub-chapters where the longest used to carry eight.
+</p>
+
+<p>
+    <strong>The wild chapter moved to the front, and taming moved into it.</strong> That is a
+    teaching-order change with one visible consequence: <em>Tame a mare</em> and <em>Tame a
+    stallion</em> are in the <em>Horses in the wild</em> group now, so they appear under that
+    heading in the Checklist summary rather than under Husbandry. Their ids did not change, so an
+    existing save keeps its ticks &mdash; <strong>confirm that on a world that already had them
+    ticked</strong>, because a task id is what is saved and a mistaken rename here would silently
+    blank somebody's progress.
 </p>
 
 <p>
     <strong>A sub-chapter whose every box is ticked is painted amber in the contents list.</strong>
-    That is the one genuinely new piece of feedback, and the easy thing to get subtly wrong is
-    the overlap: the selected row is drawn <em>over</em> the amber, so check that a finished
-    sub-chapter still reads as selected when you click it, and that the hover still shows.
-    <em>Milk a mare</em> is the cheapest one to finish &mdash; it carries a single task.
+    The easy thing to get subtly wrong is the overlap: the selected row is drawn <em>over</em> the
+    amber, so check that a finished sub-chapter still reads as selected when you click it, and
+    that the hover still shows. <em>Milk a mare</em> is the cheapest one to finish &mdash; it
+    carries a single task.
 </p>
 
 <p>
-    <strong>Twenty-six tasks are new</strong>, and
+    <strong>Twenty-four tasks are new</strong> (the count itself is
+    <code>ProgressTask.values().length</code>), and
     <code>tools/check-progress-tasks.mjs</code> proves only that something can reach each one,
     never that it fires at the right moment
     (<a href="known-gaps.html#gap-148">gap 148</a>). In rough order of how quietly each could
@@ -762,14 +794,56 @@
 </p>
 
 <ul>
+    <li><strong>The four hooks that needed a firing guard.</strong> Each fires once per event by
+        a condition rather than by the event existing, so each can stick on or off.
+        <em>Watch two horses groom each other</em> hangs off a new <code>settled</code> flag in
+        <code>GroomAndRest</code>, because that goal re-sets the pair's rotation every tick for
+        the whole 6&ndash;12 second rest; <em>Watch a horse hunt</em> sits inside the existing
+        kill branch, because <code>hunt()</code> runs once a swing; <em>Put food into a hungry
+        horse</em> is gated on <code>Hunger.seeksFood</code> being true <em>beforehand</em> at all
+        three feeding sites, so an idle nibble at full does not count; and <em>Mend a horse all
+        the way back up</em> is gated on health having reached max. <strong>The grooming one is
+        the one to watch: if it never ticks, the flag is never being reset.</strong></li>
+    <li><strong><em>Watch two horses spar</em> completes twice per bout</strong>, because both
+        horses run their own <code>Spar</code> goal. Completing is idempotent so only the first
+        says anything in chat &mdash; confirm you get <em>one</em> chat line, not two.</li>
+    <li><strong>The two <em>find</em> tasks ride the 30-tick care tick</strong> &mdash;
+        <em>Find a dhampir</em> and <em>Find a magical herd</em>. Both test a breed label
+        (<code>lineage().components().contains("dhampir")</code>, and
+        <code>BreedLineage.isMagical()</code>) before doing any player scan. The dhampir test is
+        a <strong>string spelled in two files</strong> with no shared constant
+        (<a href="known-gaps.html#gap-265">gap 265</a>), so a breed-file rename breaks it
+        silently. Confirm both tick, and that a spliced or magical-variant dhampir line still
+        counts.</li>
+    <li><strong>A wild-chapter box must not tick for your own horse.</strong>
+        <em>Have a wild horse come to you for food</em> and <em>Have one run to you for its
+        favourite food</em> are gated on <code>!horse.isTamed()</code> because
+        <code>FoodTemptGoal</code> serves tamed horses too. Hold wheat near a tamed horse of
+        yours and confirm neither ticks.</li>
+    <li><strong><em>Read a wild horse's place in its band</em> rides the inspect lease</strong>,
+        once a second per viewer, and is gated to untamed horses. Opening one of your own must
+        tick nothing.</li>
+    <li><strong>The slow-tick husbandry pair</strong> &mdash; <em>Heal a hurt horse</em> and
+        <em>Let your horses form a herd</em> &mdash; are credited to
+        <code>horse.getOwner()</code> when that owner happens to be loaded, so they can fail by
+        never firing (owner out of range or offline) or by firing when any horse anywhere is
+        scratched. <strong>Hurt a horse of yours beside water, stand next to it, watch for the one
+        chat line; then walk a long way off, hurt another, and confirm nothing arrives.</strong></li>
+    <li><strong>The three rarest things to see at all.</strong> <em>Watch a stallion lose his
+        band</em> needs a bachelor challenge (0.35 per band per day), <em>Watch one horse push
+        another off water</em> needs a rank gap of 0.15 at water or hay and never at plain grass,
+        and <em>Watch a colt disperse</em>-shaped behaviour needs 1&ndash;3 adult days. These are
+        the ones most likely to read as broken when they are merely rare &mdash; check the log
+        before concluding anything.</li>
     <li><strong>Dyeing tack ticks only when a colour actually changed.</strong> Put a saddle in
         the bench, type a name and change no row, and take it: the box must <em>not</em> tick.
         Change one row and take it: it must.</li>
     <li><strong>A natural cover is credited to the mare's owner</strong>, so a cover in a wild
         band must tick nothing at all.</li>
-    <li><strong>The five themed splice carrots tick twice</strong> &mdash; their own box and
+    <li><strong>The four themed splice carrots tick twice</strong> &mdash; their own box and
         <em>Use an unknown gene splice carrot</em>, because a themed splice is a narrowed one
-        and shares its effect token. Feed a dilution carrot and confirm both.</li>
+        and shares its effect token. Feed a dilution carrot and confirm both. The magical splice
+        is in the Magical horses chapter now rather than beside them.</li>
     <li><strong>The three written tickets tick per tier.</strong> A basic ticket ticks only
         <em>Send a horse to its stall</em>; a bound and an interdimensional one each also tick
         their own.</li>
@@ -787,6 +861,17 @@
     <strong>Every item in the mod is now named by at least one task</strong>, bar the custom and
     preset horse spawn eggs, which have no recipe and no trade. Worth re-checking whenever an
     item is added.
+</p>
+
+<p>
+    <strong>The prose is unread as well as unplayed.</strong> Eleven new sub-chapters of wild
+    behaviour, a magic chapter of four, and a rewritten husbandry opener were all written from the
+    code rather than from the wiki &mdash; deliberately, because
+    <a href="breeds.html">breeds</a> and <a href="horse-care.html">horse care</a> both carry
+    claims the code contradicts (<a href="known-gaps.html#gap-266">gap 266</a>). Read the new
+    chapters once in game at the width they actually render: a claim that is wrong in a tutorial
+    is worse than one that is wrong in a wiki, because the tutorial is what a new player
+    believes.
 </p>
 
 <h2 id="dyeable-armour-0916">&sect;0-EN &mdash; Dyeable leather horse armour (2026-09-16, NOT played)</h2>

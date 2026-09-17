@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.HorseDiet;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -152,11 +153,15 @@ public final class CrouchFeedGoal extends Goal {
         String favourite = horse.isBaby() ? null : FoodPreferenceHandler.favouriteOf(horse);
         boolean isFavourite = favourite != null && favourite.equals(
                 net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(food.getItem()).toString());
+        double hungerBefore = horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get());
         horse.setData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get(),
-                com.example.horsegenetics.common.care.Hunger.eat(
-                        horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get()),
+                com.example.horsegenetics.common.care.Hunger.eat(hungerBefore,
                         isFavourite ? com.example.horsegenetics.common.care.Hunger.Food.FAVOURITE
                                 : com.example.horsegenetics.common.care.Hunger.Food.HAND));
+        // Food that a horse actually needed, not an idle mouthful off a full one.
+        if (com.example.horsegenetics.common.care.Hunger.seeksFood(hungerBefore)) {
+            HorseProgress.complete(player, ProgressTask.FEED_HUNGRY_HORSE);
+        }
         if (!player.getAbilities().instabuild) {
             food.shrink(1);
         }
@@ -174,6 +179,8 @@ public final class CrouchFeedGoal extends Goal {
                 && !net.neoforged.neoforge.event.EventHooks.onAnimalTame(horse, player)) {
             horse.tameWithName(player);
             level.broadcastEntityEvent(horse, (byte) 7); // hearts
+            // The mouthful that tamed it, not every mouthful on the way there.
+            HorseProgress.complete(player, ProgressTask.CROUCH_FEED_TAME);
         } else {
             horse.modifyTemper(TEMPER_PER_FEED);
             level.broadcastEntityEvent(horse, (byte) 6); // smoke

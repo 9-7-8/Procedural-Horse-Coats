@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Enemy;
@@ -165,6 +166,40 @@ public final class HorseAggroHandler {
         if (event.getSource().getDirectEntity() instanceof Horse
                 && event.getSource().is(DamageTypes.MOB_ATTACK)) {
             event.setAmount(event.getAmount() * HOSTILE_KICK_MULTIPLIER);
+        }
+    }
+
+    /**
+     * <b>A kick that landed.</b> Here rather than in {@link HorseMeleeGoal},
+     * which knows it swung but not whether the blow reached anybody - a creative
+     * player is targeted and kicked at and takes nothing, and a box that ticks
+     * for that is telling the player they have been kicked when they have not.
+     */
+    @SubscribeEvent
+    static void onPlayerKicked(LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Player hit)) {
+            return;
+        }
+        if (event.getSource().getDirectEntity() instanceof Horse kicker && !kicker.isTamed()
+                && event.getSource().is(DamageTypes.MOB_ATTACK)) {
+            HorseProgress.complete(hit, ProgressTask.WILD_KICK);
+        }
+    }
+
+    /**
+     * A tamed horse taking damage, credited to its owner. What the task is
+     * really about is what does <i>not</i> happen next - vanilla's trickle of
+     * healing is off for horses - so the hurt itself is the whole trigger.
+     */
+    @SubscribeEvent
+    static void onTamedHorseHurt(LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Horse horse) || !horse.isTamed()) {
+            return;
+        }
+        // getOwner() is null for an owner who is not loaded here, and
+        // HorseProgress ignores anything that is not a ServerPlayer.
+        if (horse.getOwner() instanceof Player owner) {
+            HorseProgress.complete(owner, ProgressTask.HORSE_INJURED);
         }
     }
 

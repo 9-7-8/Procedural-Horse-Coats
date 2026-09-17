@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.progress.ProgressTask;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.animal.equine.Horse;
 
@@ -45,6 +46,13 @@ public final class HorsePanicGoal extends PanicGoal {
     public HorsePanicGoal(Horse horse, double speed) {
         super(horse, speed);
         this.horse = horse;
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        // The moment it bolts, rather than every tick of the flight.
+        HorseProgress.completeForWatcher(horse, ProgressTask.WILD_BOLT);
     }
 
     @Override

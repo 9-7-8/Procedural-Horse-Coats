@@ -7,6 +7,7 @@ import com.example.horsegenetics.common.herd.Relationship;
 import com.example.horsegenetics.common.herd.SocialLedger;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.HorseSocialAttachment;
@@ -360,6 +361,13 @@ public final class HerdSocialHandler {
         boolean inBand = !horse.isTamed() && care.inWildHerd();
         UUID herd = care.herd().orElse(null);
         BandRole role = roleOf(level, horse);
+
+        if (!horse.isTamed()) {
+            // Reading a WILD horse's place in its band. There is no separate
+            // "screen opened" event - this runs once a second on the inspect
+            // lease, which is the least often it can be asked.
+            HorseProgress.complete(player, ProgressTask.WILD_READ_SOCIAL);
+        }
 
         String standing = "";
         if (inBand) {

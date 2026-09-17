@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.care.Hunger;
 import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.common.genetics.HorseDiet;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -434,8 +436,16 @@ public final class HungerFoodGoal extends Goal {
     }
 
     private void fed(ServerLevel level, Hunger.Food food, String what, BlockPos pos, boolean grazing) {
-        double after = Hunger.eat(hunger(), food);
+        double before = hunger();
+        double after = Hunger.eat(before, food);
         horse.setData(ModAttachments.HUNGER.get(), after);
+        // A horse feeding itself - watched, since nobody did it.
+        HorseProgress.completeForWatcher(horse, ProgressTask.WILD_GRAZE);
+        // The husbandry half of the same mouthful: food into a horse that
+        // wanted it. Credited to the owner, who arranged what it found.
+        if (Hunger.seeksFood(before) && horse.getOwner() instanceof Player keeper) {
+            HorseProgress.complete(keeper, ProgressTask.FEED_HUNGRY_HORSE);
+        }
         level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                 SoundEvents.HORSE_EAT, SoundSource.NEUTRAL, 0.8F, 1.0F);
         if (!grazing) {
@@ -461,6 +471,8 @@ public final class HungerFoodGoal extends Goal {
             ActionTrace.log("hunger", ActionTrace.describeShort(horse) + " hunted "
                     + BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()) + " at "
                     + target.blockPosition().toShortString() + " - its drops are next");
+            // The kill, rather than each of the swings on the way to it.
+            HorseProgress.completeForWatcher(horse, ProgressTask.WILD_HUNT);
             prey = null;
             searchCooldown = 0;
         }

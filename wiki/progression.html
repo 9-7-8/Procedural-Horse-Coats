@@ -32,8 +32,8 @@
     Getting started that teaches it</strong> &mdash; the box for hanging a stall sign is
     directly beneath the paragraphs about hanging one &mdash; and each unticked one carries
     a line saying what to actually do. The count is
-    <code>ProgressTask.values().length</code>, across the six chapters, from taming your
-    first mare to signing a transfer paper.
+    <code>ProgressTask.values().length</code>, across the chapters below, from watching a
+    wild band to signing a transfer paper.
 </p>
 
 <p>
@@ -66,11 +66,21 @@
 </p>
 
 <ul>
-    <li><strong>Husbandry</strong> &mdash; taming and naming, feeding and watering and
-        healing, grooming and what horse hair becomes, bonding to each of its three tiers
-        and the two things riding bare teaches you &mdash; that it bonds exactly as well as
-        a saddled ride, and that at the top tier the horse steers without tack &mdash;
-        stalls and holding pens and the four tickets, the four whistles,
+    <li><strong>Horses in the wild</strong> &mdash; first, because every horse a player
+        meets is wild until they tame one. Where the breeds are and founding one from a
+        spawn egg; a wild horse drifting over to food and galloping for its favourite;
+        taming from the saddle and from the ground; being kicked by one, and watching one
+        bolt; reading a wild horse's place in its band. Then the band itself &mdash;
+        sparring, a dam fetching her foal, a stallion driving a stray mare back in and
+        later losing the band to a challenger, rank settled at the water, grooming
+        partners standing head to tail, grazing, and a meat-eater hunting.</li>
+    <li><strong>Husbandry</strong> &mdash; what a horse is and naming it, feeding and
+        watering and healing, then the whole injury-to-mended thread &mdash; a horse of
+        yours getting hurt, putting food into a hungry one, and seeing it the rest of the
+        way back to full &mdash; grooming and what horse hair becomes, bonding to each of
+        its three tiers and the two things riding bare teaches you (that it bonds exactly
+        as well as a saddled ride, and that at the top tier the horse steers without
+        tack), stalls and holding pens and the four tickets, the four whistles,
         <a href="item-equestrian-bench.html">dyeing your tack</a>, and milking a mare.
         Nothing about breeding at all: keeping a horse is a whole game before genetics
         is.</li>
@@ -81,15 +91,35 @@
         <em>No golden carrots</em>: the first breeding a player does is the
         one the horses arrange themselves.</li>
     <li><strong>Genetics</strong> &mdash; taking a gene off a horse with a book, earning
-        one into your database, the research shelf, the gene carrot, the nine splice
-        carrots, and the hay portal as a showroom for genes you have not bred yet.</li>
+        one into your database, the research shelf, the gene carrot, the splice carrots,
+        and the hay portal as a showroom for genes you have not bred yet.</li>
+    <li><strong>Magical horses</strong> &mdash; its own chapter rather than a corner of
+        genetics, because a magical gene paints <em>after</em> the coat has resolved
+        instead of restricting pigment on the way, and it arrives by its own routes. What
+        one is and the magical splice carrot; finding and taming a
+        <a href="breeds.html">dhampir</a> of either strain, the seal brown nine in ten
+        and the white one in ten; a magical herd, where every horse carries and
+        <em>shows</em> the same single magical gene; and the two traits that change how
+        you keep a horse at all &mdash; burning in daylight, and drinking blood.</li>
     <li><strong>Breeding projects</strong> &mdash; a foal carrying something it does not
         show, one that breeds true, and line breeding for a recessive.</li>
-    <li><strong>Horses in the wild</strong> &mdash; meeting a breed and founding one from
-        a spawn egg, and letting your own horses form a herd.</li>
     <li><strong>The villagers</strong> &mdash; trade with a horseman, meet a cowboy, sign
         a transfer paper.</li>
 </ul>
+
+<div class="note">
+    <span class="label">Some boxes tick because you watched</span>
+    <p>
+        Most of the wild chapter is horses doing things to <em>each other</em>, which a
+        player cannot perform. Those tasks complete through
+        <code>HorseProgress.completeForWatcher</code> &mdash; the nearest player within
+        twenty-four blocks, with line of sight, is credited. Their titles say
+        <strong>watch</strong> for that reason: an unticked box phrased as an instruction,
+        for something nobody can instruct, reads as a bug. The line-of-sight test is
+        deliberate too &mdash; a box that ticked for a fight behind a hill would be
+        claiming you had seen something you had not.
+    </p>
+</div>
 
 <div class="note">
     <span class="label">Every item in the mod has a task</span>
@@ -149,7 +179,7 @@
 </p>
 
 <p>
-    <code>ProgressTask.Group</code> is <strong>the six chapters of the book</strong>, not a
+    <code>ProgressTask.Group</code> is <strong>the chapters of the book</strong>, not a
     filing system of its own, and it is only used for grouping the summary section. Which
     <em>sub-chapter</em> a task belongs to is held the other way round, in
     <code>TutorialPage.Step.tasks()</code> &mdash; the page owns the mapping because the page

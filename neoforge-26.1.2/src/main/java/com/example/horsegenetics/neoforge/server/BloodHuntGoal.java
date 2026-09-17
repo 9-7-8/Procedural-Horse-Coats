@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.care.Hunger;
 import com.example.horsegenetics.common.genetics.Diet;
+import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.HorseCooldownsAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.particles.ParticleTypes;
@@ -227,6 +228,8 @@ public final class BloodHuntGoal extends Goal {
                 prey.getX(), prey.getY() + prey.getBbHeight() * 0.6, prey.getZ(),
                 6, 0.2, 0.2, 0.2, 0.0);
 
+        // One bite per prey per day, so this fires on the bite and not on a tick.
+        HorseProgress.completeForWatcher(horse, ProgressTask.BLOOD_BITE_SEEN);
         prey = null;    // one bite, then look elsewhere
         horse.getNavigation().stop();
     }
