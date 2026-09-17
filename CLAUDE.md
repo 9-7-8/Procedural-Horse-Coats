@@ -1,5 +1,4 @@
 # Horse Genetics - NeoForge 26.1.2 Mod
-
 Procedural horses. A Mendelian genotype of **allele objects** drives a
 **generated coat texture** - genes restrict red/black pigment per pixel, the
 survivors are looked up in a gradient and multiplied onto a white-horse
@@ -12,16 +11,12 @@ Long-term aim is a 1.12.2 backport, which is why the logic is quarantined in a
 game-free module.
 
 ---
-
 ## Keep this file small
-
 **This file is the standing rules. It is not a log, a reference, or a record of
 what was built.** It was thousands of lines once, almost all of it material with
 a wiki page of its own, and the cost was that the rules nobody may break sat
 buried under session history.
-
 **The budget is 300 lines.** Before adding anything here, apply the test:
-
 > **Would I need this on *every* task, before I know what the task is?**
 
 If no, it goes in the wiki and gets a pointer here at most. In particular:
@@ -40,14 +35,11 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 **That last row is a repeat offender** - three sessions running found stale ones
 by hand (`wiki/known-gaps.html#gap-13`). Name the accessor
 (`Genes.codeOrder().size()`), never quote its value.
-
 **When you add a line here, look for one to delete.** If this file grows past
 300 lines, that is the signal to move a section out, not to let it ride.
 
 ---
-
 ## Where everything is written
-
 The only two markdown files in the repo are `README.md` and this one.
 **Everything else is the wiki**: `index.html` (the hub) + `wiki/*.html`.
 Each page below is the **single source of truth** for its subject - update it in
@@ -85,9 +77,7 @@ the same change as the code, and never copy it back into here.
 
 `README.md` is **user-facing only** - what the mod does, how to play it,
 install, licence. No status, no architecture, no API notes.
-
 Two rules about the backlog page, both learned the hard way:
-
 - **Link the roadmap by anchor, never by `§` number** (`#defects`,
   `#health-genes`, `#settled`). It was renumbered once and will be again.
 - **Only unbuilt work lives there.** When something ships, *delete* it and write
@@ -95,9 +85,7 @@ Two rules about the backlog page, both learned the hard way:
   keeps one source of truth.
 
 ---
-
 ## Hard rules
-
 1. **`common/` imports nothing from Minecraft or NeoForge.** Not even DFU
    codecs. This is what makes the backport cheap; if you want to import
    something Minecraft-related there, stop and put it in the NeoForge module.
@@ -144,12 +132,10 @@ Two rules about the backlog page, both learned the hard way:
    from `wiki/known-gaps.html` and `wiki/verification.html` in the same change, and put what
    was verified, when and on what evidence in the **coding tab of that thing's own page**.
    No "Closed" entries or "Confirmed" notes left behind: those two pages only shrink. (Owner.)
-
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
 or five files each, and the game and the tools drift silently if you miss one.**
 The four lists are on `wiki/making-a-gene.html#contracts` - read it before you
 start, not after.
-
 - **A gene or item page is three tabs** - `<section class="tab-panel"
   data-tab="gameplay|coding|science">` inside `article.doc`, per
   `wiki/tabs.js`. Gameplay is the default, is written for a player who does not
@@ -157,27 +143,22 @@ start, not after.
   goes on **Science**, not Coding. A page with no panels is left alone.
 
 ---
-
 ## Architecture in one screen
-
 Three Gradle modules - `common/` (pure Java: the whole genetics / coat / trait
 / breed model, the part that survives a version port), `neoforge-26.1.2/`
 (everything Minecraft-specific, whose job is to **translate**), and `web/`
 (`common/` compiled to WebAssembly by TeaVM for the wiki, not shipped in the
 mod). Packages, data flow and the build: `wiki/architecture.html`.
-
 **When adding a feature, put as much as possible in `common/` and keep the
 NeoForge module thin.** That is what makes a future `forge-1.12.2/` cheap.
 
 ---
-
 ## Build & test
 
 ```bash
 ./gradlew :common:test --tests '*XTest'  # one class, seconds - the working loop (see below)
 ./gradlew :neoforge-26.1.2:build     # full compile + jar
 ./gradlew :neoforge-26.1.2:runClient  # launch the game (runServer too - architecture.html#running)
-
 ./gradlew :common:bakeSpecFixtures             # what the real Java spec engine produces...
 node wiki/gene-creator/tools/check-parity.mjs  # ...and does the creator's JS agree?
 ./gradlew :web:bakeDesignerAssets              # recompile common/ to wasm for the designer
@@ -185,19 +166,15 @@ node wiki/tools/check-links.mjs                # every href, #fragment and id in
 node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same inputs
 node wiki/tools/check-gene-tabs.mjs             # a new natural gene page brings a science tab
 ```
-
 Requires JDK 25 (auto-provisioned). Crash reports: `neoforge-26.1.2/run/crash-reports/`.
-
 **Never run the full `:common:test` unless the owner asks.** It is ten minutes and
 they will not wait through it; run one class with `--tests` instead, and say in the
 summary what a full run would still need to check. (Owner's rule, stated outright.)
-
 **The owner's last play session is on disk - read it rather than asking.**
 `neoforge-26.1.2/run/logs/latest.log`, and `debug.log` beside it for more.
 A bug report of the shape "it still doesn't work" is usually answerable from
 there directly, and `server/DebugAnnounce` writes this mod's own diagnostics to
 both the log and chat so they survive the chat scrolling away.
-
 **Regenerate what you invalidate.** Every artefact below is derived, checked in,
 and fails *silently* when stale:
 
@@ -227,11 +204,8 @@ exchanged. Likewise, a `git status` showing `common/` changed and
 mod.
 
 ---
-
 ## Status
-
 Pointers only - the numbers live in the code, the detail on a page.
-
 - **`common/`** compiles, the suite is green, **`neoforge-26.1.2/`** assembles,
   **`runServer`** boots clean, **creator parity** green. Confirm, don't trust.
 - **What has actually been seen in-game is a small fraction of what is built.**
@@ -239,13 +213,10 @@ Pointers only - the numbers live in the code, the detail on a page.
   thing to read before claiming something works.
 
 ---
-
 ## Ending a session
-
 The routine for **"end the session"** / "wrap up" / "we're done for today". It
 is a fixed order - the docs pass comes *after* the code is pushed, so it reviews
 where the session actually landed rather than narrating it mid-change.
-
 1. **Regenerate what the session invalidated** (the table under Build & test),
    then **fix the twin** if `CustomHorseSpawnScreen` or the designer changed
    (hard rule 5).
@@ -270,7 +241,6 @@ where the session actually landed rather than narrating it mid-change.
    git diff HEAD~1 -- CLAUDE.md               # what did this session add?
    grep -nE '20[0-9]{2}-[0-9]{2}-[0-9]{2}|[0-9]{3,}' CLAUDE.md   # dates + derived numbers
    ```
-
    Then run **every line the session added here** through the test and the
    routing table at the top, and move what fails: a date means session-log
    material, a long number a derived value that should be an accessor name.
@@ -291,9 +261,7 @@ where the session actually landed rather than narrating it mid-change.
    first. Then stop: no new work, no "while I'm here" refactors.
 
 ---
-
 ## License
-
 CC BY-NC 4.0 (see `LICENSE`). Forks and derivatives are welcome without asking
 but must credit the original repo and link back, and no portion may appear in a
 paid derivative with no free version available. Donations on an otherwise-free
