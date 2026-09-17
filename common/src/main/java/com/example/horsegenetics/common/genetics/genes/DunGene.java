@@ -53,13 +53,27 @@ import java.util.List;
  *       blue-grey one;</li>
  *   <li>the <b>dorsal stripe</b>, poll to dock and into the tail, on both
  *       marked outcomes;</li>
- *   <li>and, on {@code D} only, the accessory markings - <b>leg bars</b>, a
- *       <b>shoulder bar</b>, and a <b>face mask</b> or <b>cobwebbing</b>.</li>
+ *   <li>the <b>leg bars</b> and the <b>shoulder bar</b>, on both marked
+ *       outcomes;</li>
+ *   <li>and, on {@code D} only, a <b>face mask</b> or <b>cobwebbing</b> - the
+ *       one accessory that stays dun-exclusive, because a masked or cobwebbed
+ *       face is a strong-dun feature rather than something a non-dun carries.</li>
  * </ul>
  *
  * <p>Both marked outcomes therefore run the <b>same painter</b> and differ only
- * in their constants and in how much of that list they draw. That keeps the
- * whole locus inside the restrict-only contract with no special case anywhere.
+ * in their constants and in whether they draw the face. That keeps the whole
+ * locus inside the restrict-only contract with no special case anywhere.
+ *
+ * <p><b>The bars need no allele check</b>, which is the part worth knowing.
+ * {@code d1} takes 5% off the <i>visible</i> red and never touches black, so a
+ * bar it draws is a countershade against whatever red that texel had spare. A
+ * chestnut or a bay's barrel has plenty and the bar reads; a black coat and a
+ * bay's absolute points ({@code red = 0, black = 1}) have none, and there
+ * {@link PigmentField#diluteNeutral} finds {@code room == 0} and never writes
+ * red at all. So the markings appear on exactly the bases that can show them
+ * and vanish on exactly the ones that cannot, by arithmetic rather than by a
+ * branch - and a real non-dun black showing no primitive markings is the
+ * correct answer, not a gap.
  *
  * <h2>Grullo, and the order the two pigments come off in</h2>
  * The dilution is {@link PigmentField#diluteNeutral}, not the warm
@@ -128,9 +142,12 @@ public final class DunGene implements Gene {
      * is the whole of what "non-dun" means here: taking black off is the half
      * of the dilution that actually changes a horse's colour, so an allele that
      * does not dilute must not do it. What is left is a whisper off the visible
-     * red - enough for a spine line on a chestnut or a bay, and nothing at all
-     * on a true black or a bay's points. That last one is not a gap but the
-     * answer: a real non-dun black shows no primitive markings either.
+     * red - and that one whisper carries <i>all</i> of this allele's markings,
+     * the spine line and the leg bars and the shoulder shadow alike, on a
+     * chestnut or a bay. On a true black or a bay's points it carries none of
+     * them, because there is no visible red for it to take. That last one is
+     * not a gap but the answer: a real non-dun black shows no primitive
+     * markings either.
      */
     private static final float MARKED_KEEP_RED = 0.95f;
     private static final float MARKED_KEEP_BLACK = 1.0f;
@@ -186,8 +203,10 @@ public final class DunGene implements Gene {
 
     private final Expression MARKED = Expression.of("primitive-marks", "Primitive markings")
             .describe("No real dilution - the horse is its base colour - but a dorsal stripe still runs "
-                    + "from poll to tail, a shade darker than the body around it. One d1 copy is "
-                    + "enough; it is how a plain bay or black ends up with a spine line and no dun.")
+                    + "from poll to tail, a shade darker than the body around it, and faint leg bars "
+                    + "and a shoulder shadow may come with it on any base pale enough to show them. "
+                    + "One d1 copy is enough; it is how a plain bay or chestnut ends up with primitive "
+                    + "markings and no dun.")
             .varies()
             .restrict(primitive(MARKED_KEEP_RED, MARKED_KEEP_BLACK, false));
 
@@ -293,10 +312,10 @@ public final class DunGene implements Gene {
      * same set every session and a foal that inherits the copy inherits its
      * dam's markings.
      *
-     * <p>Both marked outcomes read the same stored values even though
-     * {@code d1} only uses the seed and the dorsal width, so a {@code d1} horse
-     * that later gains a {@code D} copy keeps the stripe it had and gains the
-     * accessories it was always carrying.
+     * <p>Both marked outcomes read <i>all</i> of these values - only
+     * {@code face} is left unread by {@code d1} - so a {@code d1} horse that
+     * later gains a {@code D} copy keeps the stripe and the bars it had, and
+     * gains the face marking it was always carrying.
      */
     private record Markings(long seed, double dorsalHalfWidth, double shoulder, double face,
                             boolean cobweb, double[] bars) {}
@@ -334,11 +353,15 @@ public final class DunGene implements Gene {
      * The one painter both marked outcomes use: dilute everything, then lerp
      * the dilution back off wherever the marking mask says so.
      *
-     * @param accessories whether to draw the {@code D}-only markings - leg bars,
-     *                    the shoulder bar and the face - as well as the points
-     *                    and the dorsal stripe
+     * @param drawFace whether to draw the {@code D}-only face mask /
+     *                 cobwebbing. The leg bars and the shoulder bar are drawn
+     *                 on <i>both</i> marked outcomes and need no flag: where a
+     *                 {@code d1} horse has no visible red to give up they are
+     *                 already a no-op. Named {@code drawFace} rather than
+     *                 {@code face} because the texel lambda below already binds
+     *                 {@code face} for the cube face - do not "tidy" it back.
      */
-    private static Expression.Pigment primitive(float keepRedBody, float keepBlackBody, boolean accessories) {
+    private static Expression.Pigment primitive(float keepRedBody, float keepBlackBody, boolean drawFace) {
         return (ctx, coat) -> {
             Skin skin = ctx.skin();
             Markings m = roll(ctx.epigeneticsFor(KEY));
@@ -347,16 +370,30 @@ public final class DunGene implements Gene {
                 double mark = CoatRegions.dorsalStripe(skin, part, point, m.dorsalHalfWidth());
                 mark = Math.max(mark, pointRegion(skin, part, point));
                 mark = Math.max(mark, alreadyAPoint(f.red(px, py), f.black(px, py)));
-                if (accessories) {
-                    mark = Math.max(mark, m.shoulder() * SHOULDER_DEPTH * CoatRegions.shoulderBar(
-                            skin, part, point, m.seed(), SHOULDER_CENTRE, SHOULDER_HALF_WIDTH, SHOULDER_LEAN));
+                // Bars and the shoulder bar run on BOTH marked outcomes, at the
+                // same depths. Nothing here needs to know which allele it is:
+                // the mask is a countershade, and d1's dilution is 5% off the
+                // VISIBLE red with black untouched, so where a d1 horse has no
+                // visible red to give up the bar it drew is arithmetically a
+                // no-op. On a black coat and on a bay's absolute points
+                // (red = 0, black = 1) diluteNeutral's `room` is 0 and red is
+                // never written at all - which is exactly right, because a real
+                // non-dun black shows no primitive markings either. So the bars
+                // appear on the bases with red to spare and vanish on the ones
+                // without, with no special case doing it.
+                mark = Math.max(mark, m.shoulder() * SHOULDER_DEPTH * CoatRegions.shoulderBar(
+                        skin, part, point, m.seed(), SHOULDER_CENTRE, SHOULDER_HALF_WIDTH, SHOULDER_LEAN));
+                int leg = CoatRegions.LEGS.indexOf(part);
+                if (leg >= 0 && m.bars()[leg] > 0) {
+                    mark = Math.max(mark, m.bars()[leg] * BAR_DEPTH * CoatRegions.legBar(
+                            skin, part, point, m.seed() + leg * 0x9E3779B97F4A7C15L,
+                            BAR_JOINT, BAR_SPREAD, BAR_SPACING, BAR_DUTY));
+                }
+                // The face is the one thing that stays D-only: a mask or
+                // cobwebbing is a strong-dun feature, and neither the roadmap
+                // row nor the reference puts one on a non-dun horse.
+                if (drawFace) {
                     mark = Math.max(mark, m.face() * faceMarking(skin, part, point, m));
-                    int leg = CoatRegions.LEGS.indexOf(part);
-                    if (leg >= 0 && m.bars()[leg] > 0) {
-                        mark = Math.max(mark, m.bars()[leg] * BAR_DEPTH * CoatRegions.legBar(
-                                skin, part, point, m.seed() + leg * 0x9E3779B97F4A7C15L,
-                                BAR_JOINT, BAR_SPREAD, BAR_SPACING, BAR_DUTY));
-                    }
                 }
                 if (part == Part.MANE || part == Part.TAIL) {
                     // On the long hair the midtstol is the AUTHORITY, so cap

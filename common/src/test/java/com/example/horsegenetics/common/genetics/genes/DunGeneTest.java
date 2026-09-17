@@ -424,12 +424,17 @@ class DunGeneTest {
     }
 
     /**
-     * Barring belongs to {@code D} alone. Bars are a <i>black</i> effect, so a
-     * black coat is where to look: {@code D} leaves the leg holding a range of
-     * black values (body, bar, point), {@code d1} leaves it flat.
+     * <b>On a black coat</b>, barring belongs to {@code D} alone - and that is
+     * a fact about the base, not about the allele. Both marked outcomes now
+     * draw bars, but {@code d1} never takes black off, so on a coat with no
+     * visible red to give up its bars have nothing to countershade against:
+     * {@link PigmentField#diluteNeutral} finds {@code room == 0} and writes
+     * nothing. {@code D} leaves the leg holding a range of black values (body,
+     * bar, point); {@code d1} leaves it flat, which is what a real non-dun
+     * black looks like. {@link #d1BarsAChestnutLeg} is the other half.
      */
     @Test
-    void onlyDunBarsTheLegs() {
+    void onlyDunBarsTheLegsOfABlackHorse() {
         PigmentField dun = painted("D/d2", new PigmentField(N));
         PigmentField marked = painted("d1/d2", new PigmentField(N));
         float[] dunRange = {1f, 0f};      // min, max
@@ -444,7 +449,43 @@ class DunGeneTest {
             markedRange[1] = Math.max(markedRange[1], marked.black(px, py));
         });
         assertTrue(dunRange[1] - dunRange[0] > 0.05f, "D should band the legs");
-        assertEquals(markedRange[0], markedRange[1], 1e-6, "d1 should not band the legs");
+        assertEquals(markedRange[0], markedRange[1], 1e-6,
+                "d1 should not band a BLACK leg - there is no visible red to give up");
+    }
+
+    /**
+     * The other half of {@link #onlyDunBarsTheLegsOfABlackHorse}: where a
+     * {@code d1} horse <i>does</i> have visible red to give up, it carries the
+     * faint leg barring a real {@code nd1} horse can show. A chestnut is the
+     * base to look at - all red, no black - and the sample is taken well above
+     * the point mask's fade ({@code POINT_LEG_SOLID + POINT_LEG_FADE = 0.42}),
+     * so the only thing that can still vary up there is a bar.
+     *
+     * <p>The contrast is small on purpose and needs no scaling to make it so:
+     * {@code d1} only ever moves the red 5%, so a bar at full depth is still
+     * far fainter than a dun's, which countershades against a 58% black take.
+     */
+    @Test
+    void d1BarsAChestnutLeg() {
+        Bounds b = HorseSkinGeometry.bounds(Skin.ADULT, Part.LEFT_FRONT_LEG);
+        int barred = 0;
+        for (long seed = 0; seed < 24; seed++) {
+            PigmentField out = painted("d1/d2", seed, chestnut());
+            float[] range = {1f, 0f};   // min, max
+            HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+                if (part == Part.LEFT_FRONT_LEG
+                        && (point.y() - b.yMin()) / b.span(Axis.Y) > 0.50) {
+                    range[0] = Math.min(range[0], out.red(px, py));
+                    range[1] = Math.max(range[1], out.red(px, py));
+                }
+            });
+            if (range[1] - range[0] > 0.01f) {
+                barred++;
+            }
+        }
+        // BAR_CHANCE is 0.82 per leg, so most seeds should draw one; this is a
+        // majority rather than an absolute because a leg may roll none at all.
+        assertTrue(barred > 12, "a d1 chestnut should usually carry leg bars, got " + barred + "/24");
     }
 
     /**

@@ -42,9 +42,9 @@
 <table>
 <thead><tr><th>Base</th><th>With <code>D</code></th><th>With <code>d1</code> only</th></tr></thead>
 <tbody>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body (all of it the black coming off, none of it the red moving), black points that survive the dilution intact, a black-centred mane and tail with pale guard hair either side, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine</td></tr>
-<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; a blue-grey slate body on the gradient&rsquo;s neutral column, black lower legs, a black-centred mane and tail, near-black dorsal stripe and bars</td><td>plain black &mdash; nothing visible</td></tr>
-<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; a chestnut, very slightly lifted, carrying red-brown rather than black points and markings. The subtlest of the three by a long way.</td><td>ordinary chestnut with a faintly redder dorsal line</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body (all of it the black coming off, none of it the red moving), black points that survive the dilution intact, a black-centred mane and tail with pale guard hair either side, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine, and &mdash; where the barrel and the upper legs are still red rather than black &mdash; faint leg bars and a shoulder shadow</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; a blue-grey slate body on the gradient&rsquo;s neutral column, black lower legs, a black-centred mane and tail, near-black dorsal stripe and bars</td><td>plain black &mdash; nothing visible. The bars and the shoulder bar <em>are</em> drawn, but a black coat has no visible red for them to countershade against, so they resolve to nothing. A real non-dun black looks the same way.</td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; a chestnut, very slightly lifted, carrying red-brown rather than black points and markings. The subtlest of the three by a long way.</td><td>ordinary chestnut with a faintly redder dorsal line, faint leg bars above the knee and hock, and sometimes a shoulder shadow &mdash; the base that shows <code>d1</code> most completely, because all of its pigment is red and none of it is locked up as a point</td></tr>
 </tbody>
 </table>
 </div>
@@ -79,7 +79,8 @@
     <div><dt>keep red / black (<code>D</code>)</dt><dd>0.93 of the <em>visible</em> red; 0.42 of the black</dd></div>
     <div><dt>keep red / black (<code>d1</code>)</dt><dd>0.95 of the visible red; black never touched</dd></div>
     <div><dt>dorsal half-width</dt><dd>1.5 body units, &times;0.80&ndash;1.30 per horse</dd></div>
-    <div><dt>leg bars</dt><dd>joint 0.56, spread 0.48, spacing 3.2, duty 0.42 &mdash; <code>D</code> only, per leg</dd></div>
+    <div><dt>leg bars</dt><dd>joint 0.56, spread 0.48, spacing 3.2, duty 0.42 &mdash; both marked outcomes, per leg</dd></div>
+    <div><dt><code>D</code>-only marking</dt><dd>the face mask / cobwebbing, and nothing else</dd></div>
     <div><dt>accessory chances</dt><dd>bars 0.82 per leg, shoulder bar 0.55, face 0.40</dd></div>
 </dl>
 
@@ -97,8 +98,8 @@
 <table>
 <thead><tr><th>Combination</th><th>Outcome</th><th>Dilutes?</th><th>Dorsal stripe?</th><th>Accessory markings?</th></tr></thead>
 <tbody>
-<tr><td><code>D/D</code>, <code>D/d1</code>, <code>D/d2</code></td><td><code>dun</code></td><td>yes</td><td>yes</td><td>rolled per horse</td></tr>
-<tr><td><code>d1/d1</code>, <code>d1/d2</code></td><td><code>primitive-marks</code></td><td>no</td><td>yes</td><td>no</td></tr>
+<tr><td><code>D/D</code>, <code>D/d1</code>, <code>D/d2</code></td><td><code>dun</code></td><td>yes</td><td>yes</td><td>bars, shoulder <em>and face</em>, rolled per horse</td></tr>
+<tr><td><code>d1/d1</code>, <code>d1/d2</code></td><td><code>primitive-marks</code></td><td>no</td><td>yes</td><td>bars and shoulder, rolled per horse; no face</td></tr>
 <tr><td><code>d2/d2</code></td><td>wild type</td><td>no</td><td>no</td><td>no</td></tr>
 </tbody>
 </table>
@@ -129,22 +130,31 @@
 <pre><code class="language-java">double mark = CoatRegions.dorsalStripe(skin, part, point, m.dorsalHalfWidth());
 mark = Math.max(mark, pointRegion(skin, part, point));            // midtstol, ears, muzzle, lower leg
 mark = Math.max(mark, alreadyAPoint(f.red(px, py), f.black(px, py)));   // a bay&#39;s black, wherever it climbed
-if (accessories) {
-    mark = Math.max(mark, m.shoulder() * SHOULDER_DEPTH * CoatRegions.shoulderBar(...));
-    mark = Math.max(mark, m.face()     * faceMarking(skin, part, point, m));
-    int leg = CoatRegions.LEGS.indexOf(part);
-    if (leg &gt;= 0 &amp;&amp; m.bars()[leg] &gt; 0) {
-        mark = Math.max(mark, m.bars()[leg] * BAR_DEPTH * CoatRegions.legBar(...));
-    }
+mark = Math.max(mark, m.shoulder() * SHOULDER_DEPTH * CoatRegions.shoulderBar(...));
+int leg = CoatRegions.LEGS.indexOf(part);
+if (leg &gt;= 0 &amp;&amp; m.bars()[leg] &gt; 0) {
+    mark = Math.max(mark, m.bars()[leg] * BAR_DEPTH * CoatRegions.legBar(...));
+}
+if (drawFace) {                                                   // D only
+    mark = Math.max(mark, m.face() * faceMarking(skin, part, point, m));
 }
 f.diluteNeutral(px, py, lerp(keepRedBody, 1f, (float) mark),
                         lerp(keepBlackBody, 1f, (float) mark));</code></pre>
 </div>
 
 <p>
-    Both marked outcomes run that same painter and differ only in their constants and in how
-    much of the list they draw. There is no special case anywhere, and the whole locus stays
+    Both marked outcomes run that same painter and differ only in their constants and in
+    whether they draw the face. There is no special case anywhere, and the whole locus stays
     inside the restrict-only contract.
+</p>
+
+<p>
+    <strong>Note what is <em>not</em> in that listing: any test for which allele is painting
+    the bars.</strong> There does not need to be one. The mask is a countershade, so a bar is
+    only ever &ldquo;take less of the dilution off here&rdquo; &mdash; and a
+    <a href="#d1"><code>d1</code></a> horse whose base has no visible red to give up has no
+    dilution there to take off. The marking resolves to nothing on its own, by arithmetic. See
+    <a href="#d1"><code>d1</code>: a marking with no dilution</a>.
 </p>
 
 <h2 id="grullo">Grullo, and the order the two pigments come off in</h2>
@@ -389,17 +399,17 @@ f.diluteNeutral(px, py,
 <tr>
     <td><strong>Legs</strong></td>
     <td>Short transverse <em>strokes</em>, not bracelets: uneven, often broken part-way round, concentrated at and just above the knee and hock, asymmetric between legs.</td>
-    <td><a href="#bars"><code>CoatRegions.legBar</code></a>, rolled and seeded per leg. <code>D</code> only.</td>
+    <td><a href="#bars"><code>CoatRegions.legBar</code></a>, rolled and seeded per leg, on <a href="#d1">both marked outcomes</a> &mdash; faint on a <code>d1</code> horse, and absent on any leg that is already a black point.</td>
 </tr>
 <tr>
     <td><strong>Shoulder</strong></td>
     <td>A bar crossing the shoulder from the withers, down and back &mdash; often just a smudgy shadow, sometimes several fine lines. Highly variable.</td>
-    <td><code>CoatRegions.shoulderBar</code>: <em>one</em> noise-warped diagonal stroke on the front of the barrel. At two texels to the body unit a fan of fine lines is three pixels of noise.</td>
+    <td><code>CoatRegions.shoulderBar</code>: <em>one</em> noise-warped diagonal stroke on the front of the barrel, on <a href="#d1">both marked outcomes</a>. At two texels to the body unit a fan of fine lines is three pixels of noise.</td>
 </tr>
 <tr>
     <td><strong>Head</strong></td>
     <td>A darker forehead or full face mask, or &ldquo;cobwebbing&rdquo; &mdash; fine radiating, branching rings on the forehead. A strong mask tends to replace the web rather than join it.</td>
-    <td><code>CoatRegions.faceMask</code> (a radial falloff from the forehead) or <code>faceCobweb</code> (noise-warped rings inside that same falloff). One roll picks which; the stronger half of its range goes to the plain mask.</td>
+    <td><code>CoatRegions.faceMask</code> (a radial falloff from the forehead) or <code>faceCobweb</code> (noise-warped rings inside that same falloff). One roll picks which; the stronger half of its range goes to the plain mask. <strong>The one <code>D</code>-only marking</strong> &mdash; a masked or cobwebbed face is a strong-dun feature, not something a non-dun carries.</td>
 </tr>
 <tr>
     <td><strong>Neck</strong></td>
@@ -518,14 +528,51 @@ private static double accessory(float roll, double chance) {
         whisper, a bay body less, a true black or a bay&rsquo;s points not at all.</li>
 </ul>
 
+<h3 id="d1-accessories">It draws the bars and the shoulder bar too</h3>
+
+<p>
+    <code>d1</code> runs <strong>every accessory except the face</strong> &mdash; leg bars and
+    a shoulder shadow, rolled per horse exactly as a dun&rsquo;s are, and at <em>the same
+    depths</em>. There is no separate &ldquo;faint&rdquo; constant and no allele check in the
+    painter, and both of those absences are deliberate.
+</p>
+
+<p>
+    <strong>The faintness is free.</strong> A bar is a countershade &mdash; &ldquo;take less of
+    the dilution off here&rdquo; &mdash; so its contrast can never exceed the dilution it is
+    countershading against. For <code>D</code> that is a 58% black take; for <code>d1</code> it
+    is 5% off the visible red. The same constant therefore produces a bar an order of magnitude
+    softer on a <code>d1</code> horse without anything scaling it:
+</p>
+
+<div class="codebox">
+<div class="filename">a chestnut leg, above the point fade</div>
+<pre><code>d1   body  red = 1.00 &times; 0.95 = 0.950
+     bar   red = 1.00 &times; 1.00 = 1.000   &rarr; delta 0.050
+
+D    body  red = 1.00 &times; 0.93 = 0.930, black &times; 0.42
+     bar   red = 1.00 &times; 1.00 = 1.000, black &times; 1.00</code></pre>
+</div>
+
+<p>
+    <strong>And the invisibility is free.</strong> Where a <code>d1</code> horse has no visible
+    red to give up, <code>diluteNeutral</code> computes <code>room = 1 - black</code> as zero
+    and never writes red at all &mdash; so on a solid black coat, and on a bay&rsquo;s absolute
+    points (<code>red = 0, black = 1</code>), the bar the horse rolled resolves to nothing.
+    That is the correct answer rather than a missing feature: a real non-dun black shows no
+    primitive markings either. No branch produces it; the arithmetic does.
+</p>
+
 <div class="note">
     <span class="label">A no-op is the right answer here</span>
     <p>
         A <code>d1</code> horse on a solid black base is composed <strong>byte-identically</strong>
-        to a plain black one &mdash; there is no visible red to take and black is untouched.
-        That is not a gap: a real non-dun black shows no visible primitive markings either. The
-        marking appears on the bases that have red to give up &mdash; chestnut, bay, and
-        everything downstream of them. <code>DunGeneTest</code> pins both halves.
+        to a plain black one &mdash; there is no visible red to take and black is untouched,
+        whatever markings it drew. That is not a gap: a real non-dun black shows no visible
+        primitive markings either. The markings appear on the bases that have red to give up
+        &mdash; chestnut, bay, and everything downstream of them. <code>DunGeneTest</code> pins
+        both halves: <code>onlyDunBarsTheLegsOfABlackHorse</code> and
+        <code>d1BarsAChestnutLeg</code>.
     </p>
 </div>
 
@@ -561,14 +608,6 @@ private static double accessory(float roll, double chance) {
 
 <div class="note">
     <span class="label">Still simplified</span>
-    <p>
-        <strong>Bars belong to <code>D</code> alone.</strong> A real <code>nd1</code> horse can
-        show faint leg barring and shoulder shadowing as well as the dorsal stripe; here it
-        gets the stripe only. The reason is structural rather than lazy: <code>d1</code> does
-        not dilute, so a marking on it is a countershade against a body that barely moved, and
-        on a <code>d1</code> horse&rsquo;s legs &mdash; the part of it most likely to be a
-        black point already &mdash; there is nothing to countershade against.
-    </p>
     <p>
         Not drawn at all: <strong>flank mottling and rib shading</strong> (see the checklist
         above) and <strong>ear edging</strong> beyond the ears being points. See
