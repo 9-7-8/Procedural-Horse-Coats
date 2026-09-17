@@ -27,6 +27,151 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-colour-control">2026-09-17, later &mdash; A colour control, and the preview that had been lying about ranges</h2>
+
+<p>
+    The session began as <a href="roadmap.html#designer">&sect;10</a>&rsquo;s last bullet
+    &mdash; &ldquo;per-region colour ranges and gradients&rdquo;, with the roadmap asking
+    whether a colour should become a <code>Value</code>. <strong>The answer is no, and
+    two thirds of the bullet was already built.</strong> Gradients are <code>RAMP</code>,
+    which has shipped for weeks with six axes and interpolated stops. A per-horse colour
+    range is a knob on <code>hue</code>, and <strong>160 of the 195 shipped genes already
+    do it</strong> (<code>"$hue"</code> alone appears 396 times). A colour
+    <em>cannot</em> become a <code>Value</code>: <code>GeneSpecParser.readColor</code>
+    matches a six-hex string, so <code>"color": "$tint"</code> is a load error. The HSL
+    triple is not a workaround for the missing feature &mdash; it <em>is</em> the feature.
+</p>
+
+<p>
+    So what was actually missing was the tool, and the owner&rsquo;s call was to fix that
+    and touch no format. It turned out to be the same shape as the dial: a channel that
+    existed and a creator that showed no sign of it.
+</p>
+
+<h3>The colour well that was dead and still looked alive</h3>
+
+<p>
+    A colour op&rsquo;s fork is exclusive &mdash; <code>SpecPainter.solidColour</code>
+    paints <code>color</code> while <code>hue</code> is below zero and the HSL triple the
+    moment it is not &mdash; and the creator admitted none of it. The well stayed live and
+    editable after a hue took over, and the three parameters that had taken over sat
+    further down the form looking like unrelated numbers. The failure mode is nasty
+    because <em>every frame of it looks right</em>: you set a colour, the preview changes
+    (the hue is painting), and you export a gene whose <code>color</code> is never read.
+</p>
+
+<p>
+    A colour op is one <strong>Colour</strong> control now &mdash; <em>one fixed
+    colour</em> against <em>hue, saturation &amp; lightness</em>, the triple folded inside
+    it rather than beside it, and a <strong>strip showing the span a varying hue can
+    draw</strong>. That strip is the part that was missing rather than merely hidden: a
+    hue pointed at a knob is a <em>range</em>, and the horse in the preview can only ever
+    be one draw from it. A ramp gets the same question as <em>named stops</em> against
+    <em>a swept hue</em>, which is the same fork spelled as a stop list.
+</p>
+
+<h3>Underneath it, a preview that had been lying &mdash; and could not have been caught</h3>
+
+<p>
+    Building &ldquo;a colour that varies&rdquo; meant leaning on the value editor&rsquo;s
+    <strong>Random</strong> mode, which turned out not to work. Random wrote an inline
+    <code>{min,max}</code> range &mdash; legal in the format, since
+    <code>GeneSpecParser.readValue</code> hoists one into an anonymous
+    <code>inline#N</code> knob &mdash; but <em>this tool&rsquo;s own engine never learned
+    to</em>: <code>drawValues</code> walks <code>spec.knobs</code> only and
+    <code>resolveValue</code> has no branch for an inline object, so it fell through to
+    the parameter&rsquo;s fallback. <strong>The preview drew a constant while the game
+    drew a real range.</strong>
+</p>
+
+<p>
+    It was proved rather than argued, in headless Chrome, with control groups so the
+    result was attributable: a plain number resolved to itself, a <code>"$knob"</code>
+    resolved inside its range, a <code>perDose</code> triple resolved at the dose, and the
+    inline range came back <code>-1</code> &mdash; the fallback &mdash; on its own.
+</p>
+
+<div class="note">
+    <span class="label">Why it survived: nothing could have noticed</span>
+    <p>
+        <strong>No shipped gene uses an inline range in a parameter slot</strong> &mdash;
+        zero of 195, checked by parsing every file rather than grepping, since a naive
+        search for <code>"min"</code> matches all 189 genes that merely <em>declare</em> a
+        knob. So nothing in game was wrong, and the defect was waiting for the first
+        author who reached for the mode the tool openly offered. Parity could not see it
+        either: <code>SpecFixtureTool</code> bakes five fixed genes
+        (<code>silver</code>, <code>dun</code>, <code>tobiano</code>, <code>aurora</code>,
+        <code>prismatic</code>), none of which contains one, so the oracle is silent on
+        the case by construction. A mode used by zero genes is itself the tell &mdash;
+        people probably tried it, saw nothing happen, and backed out.
+    </p>
+</div>
+
+<p>
+    <strong>Random declares a real named knob now</strong>, named after the parameter, and
+    points the value at it. The alternative &mdash; hoisting anonymously to match Java
+    &mdash; was rejected deliberately: the knob&rsquo;s index is its parse-order append
+    position, so a walk order that disagreed with the parser&rsquo;s would make the
+    preview draw the <em>wrong</em> number instead of an obvious fallback, and there is no
+    fixture that would catch it. A named knob has no ordering to get wrong, shows up in
+    <em>What this horse drew</em>, and can be pointed at twice.
+</p>
+
+<h3>The hue that varied by never applying</h3>
+
+<p>
+    One more defect fell out of the same control. <code>hue</code>&rsquo;s
+    <code>ui.min</code> is <code>&minus;1</code> &mdash; the &ldquo;not set&rdquo;
+    sentinel &mdash; and Random seeded its range from <code>ui.min</code>, so picking
+    Random on a <code>TOWARD</code> or <code>FLAT</code> hue wrote
+    <code>{min:-1, max:-1}</code>: <em>a colour asked to vary, written as one that never
+    applies</em>. A knob now starts from a new creator-only <code>ui.varyFrom</code>,
+    which is 0 on a hue, so the range is 0&ndash;360. Creator-only is safe and was
+    confirmed by running it rather than reasoning about it &mdash;
+    <code>SpecSchema</code> carries no <code>ui</code> block and
+    <code>SpecFixtureTool</code> emits only kind, fallback and choices.
+</p>
+
+<h3>Two blind spots in the delete guard, found by needing it</h3>
+
+<p>
+    <code>knobUses</code> counts the references that stand between you and deleting a
+    knob, and it walked <code>layersOf</code> &mdash; <em>the one expression the forms
+    edit</em> &mdash; checking masks and ops only. So a knob used solely by a layer&rsquo;s
+    <code>emissive</code> (a glow is written <code>"$burn"</code> like anything else), or
+    solely by a second expression in a pasted gene, reported <strong>zero uses and was
+    deleted without the warning the function exists to raise</strong>. It walks every
+    expression and counts <code>emissive</code> now. Over-counting is the safe direction:
+    the number only ever guards a destructive action.
+</p>
+
+<h3>What is left, and one thing that was already broken</h3>
+
+<p>
+    The route taken leaves one path unfixed on purpose: a <strong>pasted</strong> gene
+    carrying an inline range still previews as the fallback, because the engine was
+    deliberately not touched (that is what kept parity risk at zero &mdash; it still
+    passes at 7&nbsp;169 checks across 60 cases). The mitigation is a validator rule that
+    names the layer, the mask or op, and the parameter, and it was checked <em>firing</em>
+    rather than merely checked for false positives &mdash; an unfired validator rule is
+    worth nothing.
+</p>
+
+<p>
+    And <strong><code>check-path-canvas.mjs</code> is failing</strong>, which was found
+    while checking whether this work had broken it. It has not: a detached worktree at
+    <code>HEAD</code> reproduces the identical error with none of these changes.
+    <a href="known-gaps.html#gap-263">Gap 263</a>, left alone deliberately rather than
+    folded into an unrelated session.
+</p>
+
+<p class="muted">
+    New: <code>wiki/tools/check-colour-control.mjs</code>, 22 checks, asserting on the
+    <em>spec</em> after each gesture rather than on the picture &mdash; which is the only
+    kind of evidence that would have caught the old behaviour, since the old behaviour
+    looked fine.
+</p>
+
 <h2 id="d2026-09-17-over-payoff">2026-09-17, after the flag &mdash; Eleven genes stop faking it with subtraction</h2>
 
 <p>

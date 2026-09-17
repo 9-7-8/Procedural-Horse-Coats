@@ -170,8 +170,23 @@ window.HG = window.HG || {};
   //
   // Every numeric parameter can be four things. Rather than hide that, the
   // editor names them: Fixed, Knob, Random and Per dose. "Random" is the one
-  // that makes a gene look alive - and it writes an inline knob, which is
-  // exactly what the file format calls it.
+  // that makes a gene look alive.
+  //
+  // Random used to write an INLINE {min,max} range, which the file format does
+  // accept - GeneSpecParser hoists one into an anonymous `inline#N` knob. The
+  // trouble was that this tool's own engine never learned to: drawValues walks
+  // spec.knobs only and resolveValue has no branch for an inline object, so it
+  // fell through to the parameter's fallback. The preview showed a constant
+  // while the game drew a real range, and nothing caught it - no shipped gene
+  // used one, and the five fixture genes give parity nothing to compare.
+  //
+  // So Random now declares a REAL knob and points the parameter at it. Same
+  // meaning, and three things follow: it previews, it appears in "What this
+  // horse drew" where you can see the number, and it has a name to point a
+  // second parameter at. Hoisting anonymously would have matched the old file
+  // shape, but the knob's index is its parse-order append position - get that
+  // order wrong and the preview draws the WRONG number rather than an obvious
+  // fallback, with no oracle to catch it.
 
   function valueMode(v) {
     if (typeof v === "string" && v.charAt(0) === "$") return "knob";
@@ -194,8 +209,21 @@ window.HG = window.HG || {};
 
     wrap.appendChild(select(modes, mode, function (m) {
       if (m === "fixed") owner[key] = typeof current === "number" ? current : start;
-      else if (m === "random") owner[key] = { min: ui.min === undefined ? 0 : ui.min, max: start, per: "horse", spread: 0 };
-      else if (m === "dose") owner[key] = { perDose: [0, start, start] };
+      else if (m === "random") {
+        // The knob spans the parameter's own range, not the generic 0.2-0.8.
+        // `varyFrom` overrides the floor where a parameter's ui.min is a
+        // sentinel rather than a value (hue's -1 means "not set"), and the top
+        // stays the parameter's default where that is a usable number, so an
+        // ordinary knob opens on the same min-to-default span Random always
+        // gave and only the degenerate cases reach for ui.max.
+        var lo = ui.varyFrom !== undefined ? ui.varyFrom : (ui.min === undefined ? 0 : ui.min);
+        var hi = typeof start === "number" && start > lo
+          ? start
+          : (ui.max === undefined ? lo + 1 : ui.max);
+        var made = model.newKnob(state.spec, "range", param.name, { min: lo, max: hi });
+        state.spec.knobs.push(made);
+        owner[key] = "$" + made.name;
+      } else if (m === "dose") owner[key] = { perDose: [0, start, start] };
       else owner[key] = "$" + state.spec.knobs[0].name;
       onChange();
     }));
@@ -640,7 +668,10 @@ window.HG = window.HG || {};
           changed();
         }), schema.OPS[layer.op.type].blurb));
         schema.OPS[layer.op.type].params.forEach(function (p) {
-          what.appendChild(opParamRow(layer.op, p));
+          // Null when the colour control has already taken the parameter: the
+          // HSL trio is presented inside it rather than as rows beside it.
+          var row = opParamRow(layer.op, p);
+          if (row) what.appendChild(row);
         });
 
         // Whether this layer measures from the colour the gene started at (the
@@ -982,15 +1013,163 @@ window.HG = window.HG || {};
     return wrap;
   }
 
+  // The parameters colourRow presents itself, so they do not also appear as
+  // rows of their own beside it. opParamRow returns null for these and the
+  // caller skips them.
+  var FOLDED_INTO_COLOUR = {
+    hue: true, saturation: true, lightness: true, hueSpan: true, hueSpread: true
+  };
+
+  function opTakesAColour(op) {
+    var ps = schema.OPS[op.type].params;
+    for (var i = 0; i < ps.length; i++) {
+      if (ps[i].kind === "COLOR" || ps[i].kind === "COLORS") return true;
+    }
+    return false;
+  }
+
+  /**
+   * <b>The colour a layer paints</b> - as one control, rather than a colour well
+   * sitting beside three parameters that silently overrule it.
+   *
+   * <p>The fork is the format's own and it is exclusive:
+   * {@code SpecPainter.solidColour} paints {@code color} while {@code hue} is
+   * below zero and the HSL triple the moment it is not. It is also the ONLY way
+   * a colour can vary per horse - {@code color} is parsed by a six-hex regex, so
+   * it can never hold a knob reference - which is why "a colour that varies"
+   * means "leave the well behind and say it in hue, saturation and lightness".
+   *
+   * <p>Until now nothing said so. The well stayed visible and editable while a
+   * hue set above zero made it dead, and the three parameters that had taken
+   * over sat further down the form looking like unrelated numbers.
+   *
+   * <p>Built with {@link #fieldBlock} rather than {@link #field}: a label
+   * forwards a click anywhere inside it to the first control it holds, which
+   * would make every click on this row press the colour well.
+   */
+  function colourRow(op, p) {
+    var list = p.kind === "COLORS";
+    // For a ramp or a palette the switch is the stop list; for TOWARD and FLAT
+    // it is the hue sentinel. Two spellings of one question.
+    var varying = list
+      ? !(op[p.name] && op[p.name].length)
+      : !(op.hue === undefined || (typeof op.hue === "number" && op.hue < 0));
+
+    var wrap = el("div", { class: "col" });
+    wrap.appendChild(select(
+      list
+        ? [{ value: "fixed", label: "Named stops" }, { value: "varies", label: "A swept hue" }]
+        : [{ value: "fixed", label: "One fixed colour" }, { value: "varies", label: "Hue, saturation & lightness" }],
+      varying ? "varies" : "fixed",
+      function (m) {
+        if (m === "varies") {
+          if (list) op[p.name] = [];
+          else if (op.hue === undefined || (typeof op.hue === "number" && op.hue < 0)) op.hue = 0;
+        } else {
+          if (list) op[p.name] = ["#ff69b4", "#69b4ff"];
+          else op.hue = -1;
+        }
+        changed();
+      }
+    ));
+
+    if (!varying) {
+      if (list) {
+        wrap.appendChild(colorListEditor(op, p.name));
+      } else {
+        var well = el("input", { type: "color", value: op[p.name] || "#ffffff" });
+        well.addEventListener("input", function () { op[p.name] = well.value; changed(); });
+        wrap.appendChild(well);
+      }
+    } else {
+      schema.OPS[op.type].params.forEach(function (q) {
+        if (!FOLDED_INTO_COLOUR[q.name]) return;
+        wrap.appendChild(field(q.name, valueEditor(op, q.name, q, changed), q.doc));
+      });
+      wrap.appendChild(hueRangeStrip(op));
+    }
+
+    wrap.appendChild(el("p", {
+      class: "hint",
+      text: varying
+        ? (list
+          ? "The stops are gone, so the colour sweeps hueSpan degrees from hue. Point hue at a "
+            + "knob and every horse gets its own sweep."
+          : "The colour well is not read while a hue is set - this is what the layer paints. "
+            + "Set hue to Random or Knob and the colour is something each horse draws for itself.")
+        : (list
+          ? "Every horse gets these same stops. Switch above to sweep a hue instead, which is the "
+            + "only form a ramp can vary per horse."
+          : "Every horse carrying this gene paints exactly this colour. A colour cannot be pointed "
+            + "at a knob, so varying it per horse means saying it as hue, saturation and lightness.")
+    }));
+    return fieldBlock(list ? "Colours" : "Colour", wrap, p.doc);
+  }
+
+  /**
+   * The span of colours a varying hue can actually draw, as a strip.
+   *
+   * <p>This is the bit that was missing rather than merely hidden: a hue
+   * pointed at a knob is a RANGE, and the preview beside it can only ever show
+   * the one horse it drew. The strip shows the whole range at once, so "what
+   * will this line of horses look like" stops being a question you answer by
+   * re-rolling. CSS hsl() is used directly rather than ported arithmetic - it
+   * is a legend for a range, not a claim about a texel.
+   */
+  function hueRangeStrip(op) {
+    var lo = null, hi = null;
+    if (typeof op.hue === "number" && op.hue >= 0) { lo = op.hue; hi = op.hue; }
+    else if (typeof op.hue === "string" && op.hue.charAt(0) === "$") {
+      state.spec.knobs.forEach(function (k) {
+        if (k.name === op.hue.slice(1) && k.type !== "seed") { lo = Number(k.min); hi = Number(k.max); }
+      });
+    } else if (op.hue && op.hue.perDose) {
+      var d = op.hue.perDose.filter(function (n) { return Number(n) >= 0; });
+      if (d.length) { lo = Math.min.apply(null, d); hi = Math.max.apply(null, d); }
+    }
+    if (lo === null) return el("span", { class: "hint", text: "" });
+
+    // Saturation and lightness can vary per horse too, and the strip can only
+    // draw one of each. Say so rather than presenting a slice as the whole: a
+    // legend that quietly picks a default is worse than no legend, because it
+    // looks authoritative.
+    var fixedSat = typeof op.saturation === "number";
+    var fixedLight = typeof op.lightness === "number";
+    var sat = fixedSat ? op.saturation : 0.8;
+    var light = fixedLight ? op.lightness : 0.55;
+    var alsoVary = [fixedSat ? null : "saturation", fixedLight ? null : "lightness"]
+      .filter(function (n) { return n; });
+    var strip = el("div", { class: "row wrap" });
+    var steps = lo === hi ? 1 : 9;
+    for (var i = 0; i < steps; i++) {
+      var h = steps === 1 ? lo : lo + (hi - lo) * (i / (steps - 1));
+      strip.appendChild(el("span", {
+        class: "swatch-cell",
+        title: Math.round(h) + "°",
+        style: "background: hsl(" + h + "deg " + Math.round(sat * 100) + "% "
+          + Math.round(light * 100) + "%); width: 1.4rem; height: 1.4rem; display: inline-block;"
+      }));
+    }
+    var wrap = el("div", { class: "col" }, [strip]);
+    wrap.appendChild(el("span", {
+      class: "hint",
+      text: (lo === hi
+        ? "The one colour this paints."
+        : "What this gene can draw, " + Math.round(lo) + "° to " + Math.round(hi)
+          + "°. The horse beside you is one draw from this range.")
+        + (alsoVary.length
+          ? " " + alsoVary.join(" and ") + " vary too, and this strip can only show one "
+            + "of each - it is drawn at " + Math.round(sat * 100) + "% and "
+            + Math.round(light * 100) + "%, so the real span is wider than this."
+          : "")
+    }));
+    return wrap;
+  }
+
   function opParamRow(op, p) {
-    if (p.kind === "COLOR") {
-      var input = el("input", { type: "color", value: op[p.name] || "#ffffff" });
-      input.addEventListener("input", function () { op[p.name] = input.value; changed(); });
-      return field(p.name, input, p.doc);
-    }
-    if (p.kind === "COLORS") {
-      return field(p.name, colorListEditor(op, p.name), p.doc);
-    }
+    if (p.kind === "COLOR" || p.kind === "COLORS") return colourRow(op, p);
+    // Folded into the colour control above, when there is one to fold them into.
+    if (FOLDED_INTO_COLOUR[p.name] && opTakesAColour(op)) return null;
     if (p.kind === "CHOICE") {
       return field(p.name, select(p.choices, op[p.name] || p.fallback,
         function (v) { op[p.name] = v; changed(); }), p.doc);

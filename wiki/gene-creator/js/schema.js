@@ -46,7 +46,15 @@ window.HG = window.HG || {};
   // the ops is the kind of divergence nobody notices until a horse is wrong.
   function hueParams(hueDoc, unset) {
     return [
-      v("hue", unset ? -1 : 0, hueDoc, { min: unset ? -1 : 0, max: 360, step: 1 }),
+      // `varyFrom` is where the range starts when this parameter is set to VARY,
+      // as against where its fixed value may start. The two differ here and
+      // nowhere else: on TOWARD and FLAT a hue of -1 is the "not set" sentinel
+      // that makes the layer paint `color` instead, so a hue told to vary across
+      // its ui.min would draw a range whose every negative value silently means
+      // "no hue at all" - a colour asked to vary, written as one that never
+      // applies. Creator-only: SpecSchema has no ui block and parity compares
+      // none of it.
+      v("hue", unset ? -1 : 0, hueDoc, { min: unset ? -1 : 0, max: 360, step: 1, varyFrom: 0 }),
       v("saturation", 0.8, "saturation 0 to 1; read only when 'hue' is set"),
       v("lightness", 0.55, "lightness 0 to 1; read only when 'hue' is set")
     ];

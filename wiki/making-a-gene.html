@@ -1657,6 +1657,28 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
     list instead: name stops and it uses them, leave it out and it sweeps the hue.
 </p>
 
+<div class="note">
+    <span class="label">The gene creator says this out loud now</span>
+    <p>
+        The fork above is <strong>exclusive</strong>, and until 2026-09-17 nothing in the
+        tool admitted it: the colour well stayed live and editable while a hue set at or
+        above 0 made it dead, and the three parameters that had taken over sat further down
+        the form looking like unrelated numbers. A colour op is one <em>Colour</em> control
+        now &mdash; <em>one fixed colour</em> or <em>hue, saturation &amp; lightness</em>,
+        with the triple folded inside it and a strip showing the span a varying hue can
+        actually draw. A ramp gets the same question as <em>named stops</em> against
+        <em>a swept hue</em>.
+    </p>
+    <p>
+        Worth knowing while you write one by hand: <strong>a colour cannot point at a
+        knob.</strong> <code>GeneSpecParser.readColor</code> matches a six-hex string, so
+        <code>"color": "$tint"</code> is a load error, not a variable colour. The HSL triple
+        is the only way a colour varies per horse &mdash; which is what
+        &ldquo;<code>hue</code> is an ordinary number parameter&rdquo; above is really
+        saying.
+    </p>
+</div>
+
 <h3 id="over">Painting over the layers above</h3>
 
 <p>

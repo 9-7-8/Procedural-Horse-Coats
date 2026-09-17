@@ -57,6 +57,24 @@
 <p>Design follow-ups (not just "go look at it"):</p>
 
 <ol>
+<li id="gap-263"><strong>Open, found 2026-09-17: <code>check-path-canvas.mjs</code> has been failing, and it fails by <em>throwing</em>, which is why nobody knew.</strong>
+    It dies at <code>no canvas to drive</code> &mdash; it picks <code>PATH</code> on the first
+    <code>#layers-panel</code> select, waits, and finds no <code>.path-canvas</code> with a usable size.
+    <strong>This is not new damage.</strong> It was found while checking whether the colour-control work had
+    broken it, and the way that was settled is worth copying: a detached worktree at <code>HEAD</code>
+    (<code>git worktree add --detach</code>), the same guard run inside it, the identical error. Nothing
+    in this session touched the mask half of the layer body, and the baseline says so rather than the
+    reasoning saying so.
+    <strong>What hides it is the shape of the failure.</strong> The other guards collect claims and call
+    <code>checks().report()</code>; this one <code>throw</code>s mid-run, so it exits non-zero with no
+    summary, no count, and no list of what did pass &mdash; and since these checks are run by hand rather
+    than gated on, an exception reads like a broken script rather than a broken tool. Two things to do and
+    they are separable: find out why the canvas is absent (a starter gene whose first mask is no longer
+    the one the guard assumes is the likeliest cause, since it hard-codes <code>masks[0]</code>), and make
+    the guard <em>report</em> the failure like its five siblings instead of throwing, so the next one is
+    legible. Until then <code>wiki/coding-notes.html</code>&rsquo;s browser-check list is advertising a
+    check that cannot pass.</li>
+
 <li id="gap-262"><strong>Open, noticed 2026-09-16: the test yard fails its own soundness check on every boot, and nobody has looked.</strong>
     Every launch logs <code>test yard is NOT sound: 0 spot(s) with no floor, 1 blocked at head height, around x=3</code>.
     It appeared in four separate client sessions in one morning and was set aside each time as

@@ -317,13 +317,27 @@ window.HG = window.HG || {};
     return out;
   }
 
-  function newKnob(spec, type) {
-    var base = type === "seed" ? "seed" : "amount";
-    var name = base, i = 2;
-    while (spec.knobs.some(function (k) { return k.name === name; })) name = base + i++;
-    return type === "seed"
-      ? { name: name, type: "seed" }
-      : { name: name, min: 0.2, max: 0.8, per: "horse", spread: 0 };
+  /**
+   * A fresh knob, named uniquely.
+   *
+   * <p>`base` lets whatever asked for it choose the stem, so a parameter that
+   * has just been set to vary calls its knob "hue" rather than "amount" - the
+   * name is what every reference to it reads as, and "amount3" tells a later
+   * author nothing. `range` gives it that parameter's own span instead of the
+   * generic 0.2-0.8, which is meaningless on a hue in degrees.
+   */
+  function newKnob(spec, type, base, range) {
+    var stem = type === "seed" ? "seed" : (base || "amount");
+    var name = stem, i = 2;
+    while (spec.knobs.some(function (k) { return k.name === name; })) name = stem + i++;
+    if (type === "seed") return { name: name, type: "seed" };
+    return {
+      name: name,
+      min: range && range.min !== undefined ? range.min : 0.2,
+      max: range && range.max !== undefined ? range.max : 0.8,
+      per: "horse",
+      spread: 0
+    };
   }
 
   /**
@@ -638,6 +652,31 @@ window.HG = window.HG || {};
           + "worth of \"how much of itself this horse shows\" is not one number.");
       }
     });
+    // An inline {min,max} range is legal in the file - the game hoists one into
+    // an anonymous knob and draws it properly - but this tool's preview engine
+    // resolves only a number, a "$knob" and a perDose triple, so it falls back
+    // to the parameter's default and the horse beside you is not the horse the
+    // game paints. The creator no longer writes one (a parameter set to vary
+    // declares a named knob instead), so this only ever fires on a file written
+    // by hand or pasted in - which is exactly when nobody would suspect it.
+    (spec.expressions || []).forEach(function (e) {
+      (e.layers || []).forEach(function (layer, li) {
+        var scan = function (owner, what) {
+          Object.keys(owner || {}).forEach(function (k) {
+            var val = owner[k];
+            if (val && typeof val === "object" && !Array.isArray(val)
+              && val.min !== undefined && !val.perDose) {
+              out.push("Layer " + (li + 1) + "'s " + what + " sets \"" + k + "\" to an inline "
+                + "range. The game draws that, but this preview cannot - it falls back to the "
+                + "default, so what you see here is not what the horse gets. Declare a knob and "
+                + "point \"" + k + "\" at it instead.");
+            }
+          });
+        };
+        (layer.masks || []).forEach(function (m) { scan(m, m.type + " mask"); });
+        scan(layer.op, (layer.op || {}).type + " op");
+      });
+    });
     layers.forEach(function (layer, i) {
       (layer.masks || []).forEach(function (m) {
         if (m.type !== "PATH" || !m.pointsMin) return;
@@ -701,15 +740,28 @@ window.HG = window.HG || {};
     return out;
   }
 
-  /** Every "$knob" reference anywhere in the spec, for the rename / delete guard. */
+  /**
+   * Every "$knob" reference anywhere in the spec, for the rename / delete guard.
+   *
+   * <p>It walks EVERY expression rather than the one the forms edit, and counts
+   * a layer's `emissive` beside its masks and its op. Both were blind spots: a
+   * glow is written "$burn" like any other reference, and a pasted gene can
+   * carry outcomes the forms never show - so a knob used only by a glow, or
+   * only by a second expression, reported zero uses and was deleted without the
+   * warning this function exists to raise. Over-counting is the safe direction
+   * here; the count only ever guards a destructive action.
+   */
   function knobUses(spec, name) {
     var uses = 0;
     var ref = "$" + name;
-    layersOf(spec).forEach(function (layer) {
-      (layer.masks || []).forEach(function (m) {
-        Object.keys(m).forEach(function (k) { if (m[k] === ref) uses++; });
+    (spec.expressions || []).forEach(function (e) {
+      (e.layers || []).forEach(function (layer) {
+        (layer.masks || []).forEach(function (m) {
+          Object.keys(m).forEach(function (k) { if (m[k] === ref) uses++; });
+        });
+        Object.keys(layer.op || {}).forEach(function (k) { if (layer.op[k] === ref) uses++; });
+        if (layer.emissive === ref) uses++;
       });
-      Object.keys(layer.op || {}).forEach(function (k) { if (layer.op[k] === ref) uses++; });
     });
     return uses;
   }

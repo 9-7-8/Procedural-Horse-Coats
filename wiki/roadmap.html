@@ -96,8 +96,15 @@
         written as the second texture's alpha and a fraction means something.
     </p>
     <p>
-        What is left of &sect;10 is <strong>per-region colour ranges and gradients</strong>
-        &mdash; and one honest gap beside it: <strong>the creator cannot show a
+        What is left of &sect;10 is <strong>per-region colour</strong> &mdash; one layer
+        painting a different colour on the legs than on the barrel. The other two thirds
+        of the old entry were already built and the entry had not noticed:
+        <strong>gradients are <code>RAMP</code></strong>, with six axes and interpolated
+        stops, and a <strong>per-horse colour range</strong> is a knob on
+        <code>hue</code>, which 160 of the 195 shipped genes already use. What was
+        genuinely missing was that the <em>creator</em> showed neither &mdash; fixed
+        2026-09-17, see <a href="session-log.html#d2026-09-17-colour-control">the log</a>.
+        <strong>And one honest gap beside it: the creator cannot show a
         glow</strong>. It writes one, validates it and round-trips it, but its preview
         is a flat sheet with no lighting to be brighter than, so a glow is something
         you have to go and look at in game. Fixing that means shading in the preview,
@@ -119,11 +126,17 @@
         page's top section, and it is the authority on what has actually been seen.
         Nothing on this page competes with it for a session.</li>
     <li><strong>What is left of the visual marking designer</strong>
-        (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial, the minimal shape
-        and glow intensity have all shipped, so what remains is <strong>per-region
-        colour ranges and gradients</strong>: colours are literals in the format today
-        rather than <code>Value</code>s, so the first question is whether a colour
-        becomes knob-drivable at all.</li>
+        (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial, the minimal shape,
+        glow intensity and now the colour control have all shipped, so what remains is
+        <strong>per-region colour</strong>: one layer painting a different colour on the
+        legs than on the barrel. <strong>The question this entry used to ask is answered
+        and the answer was no.</strong> A colour does <em>not</em> become a
+        <code>Value</code>: <code>GeneSpecParser.readColor</code> takes a six-hex string,
+        so <code>color</code> can never hold a knob reference &mdash; but it never needed
+        to, because <code>hue</code>, <code>saturation</code> and <code>lightness</code>
+        are <code>Value</code>s already and are how a colour varies per horse. Region
+        scoping today is per <em>mask</em> (<code>parts</code>), never per op, so
+        per-region colour means a layer each, which is the thing to improve on.</li>
     <li><strong>Deepen the thin science tabs</strong>
         (<a href="#science-tabs">&sect;science</a>) &mdash; every natural gene page now
         has one, so the work is no longer absence but depth: 23 predate the pass that
@@ -486,8 +499,18 @@
 </div>
 
 <ul>
-    <li><strong>Draw the mask &mdash; done.</strong> Still unbuilt beside it: per-region
-        colour ranges and gradients.</li>
+    <li><strong>Draw the mask &mdash; done. Colour ranges and gradients &mdash;
+        shipped, and mostly already were.</strong> <code>RAMP</code> is the gradient, and
+        a colour that varies per horse is a knob on <code>hue</code> (160 of 195 genes do
+        it). The missing half was the tool: the creator showed a live colour well beside
+        three parameters that silently overruled it, since
+        <code>SpecPainter.solidColour</code> reads <code>color</code> only while
+        <code>hue</code> is below zero. That fork is one control now, with a strip showing
+        the span a varying hue can draw &mdash;
+        <a href="session-log.html#d2026-09-17-colour-control">2026-09-17</a>.
+        <strong>Still unbuilt: per-region colour</strong>, one layer painting the legs a
+        different colour from the barrel. <code>parts</code> scopes a mask, not an op, so
+        today that is a layer each.</li>
     <li><strong>Glow intensity &mdash; shipped.</strong> <code>CoatOverlay</code> holds a
         level per texel instead of a bit, the composer and the NeoForge texture factory
         carry it through as the emissive texture's alpha, and a layer's

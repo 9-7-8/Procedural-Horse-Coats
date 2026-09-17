@@ -379,8 +379,9 @@
 </p>
 
 <div class="codebox">
-<pre><code>node wiki/tools/check-path-canvas.mjs      # drive the PATH drawing canvas
+<pre><code>node wiki/tools/check-path-canvas.mjs      # drive the PATH drawing canvas (failing - gap 263)
 node wiki/tools/check-glow-control.mjs     # a layer's glow, which nothing can draw
+node wiki/tools/check-colour-control.mjs   # the literal / HSL fork, which looks fine either way
 node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</code></pre>
 </div>
 
@@ -407,6 +408,28 @@ node wiki/tools/check-designer-boots.mjs   # did the wasm instantiate at all?</c
         exporting it again silently put the light out, and no amount of staring at the
         tool would have said so. Where a control has no picture, the check <em>is</em>
         the feedback.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The other best case is a control that looks right and is not</span>
+    <p>
+        <code>check-colour-control.mjs</code> is the opposite failure to the glow, and the
+        harder one to catch by eye. A colour op&rsquo;s fork is <em>exclusive</em>:
+        <code>SpecPainter.solidColour</code> paints <code>color</code> only while
+        <code>hue</code> is below zero, and the hue/saturation/lightness triple the moment it
+        is not. The creator used to show a live, editable colour well beside three parameters
+        that silently overruled it &mdash; so you could set a colour, watch the preview
+        <em>change</em> (because the hue was doing the painting), and export a gene whose
+        <code>color</code> was never read. Every frame of that looks correct.
+    </p>
+    <p>
+        So the checks read back <strong>the spec</strong> after each gesture, never the
+        canvas: that the sentinel is restored when you go back to a fixed colour, that
+        &ldquo;Random&rdquo; writes a named knob rather than an inline range the preview
+        cannot resolve, and that a ramp switched to a swept hue empties its stop list
+        &mdash; which is how the engine reads &ldquo;sweep&rdquo; &mdash; and gets a usable
+        pair back when you switch away, rather than the empty list the loader refuses.
     </p>
 </div>
 
