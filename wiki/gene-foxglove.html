@@ -127,7 +127,7 @@
 
 <p>Arrived at priority 156. Moved to 297: fields and regions, beside the barrel drawings - one figure standing on each flank. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.</p>
 
-<p>LAYERS MADE DISJOINT on the way in. The pale bells came out as plain white blobs: the ringed throats, the stipple and the lit shoulder were all being added to the pale bell beneath them and clamped, so the only form that showed them was the dark one. The stem is left out of this - it is a different PATH from the region the bells hang in, so no single inverted mask describes where a bell covers it, and a stroke that thin barely meets a bell anyway. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.</p>
+<p>LAYERS STACK, AND THE ORDER IS THE MECHANISM. The pale bells came out as plain white blobs: the ringed throats, the stipple and the lit shoulder were all being added to the pale bell beneath them and clamped, so the only form that showed them was the dark one. The stem is left out of this - it is a different PATH from the region the bells hang in, so no single inverted mask describes where a bell covers it, and a stroke that thin barely meets a bell anyway. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. The throats, the stipple and the lit shoulder now carry &quot;over&quot;: true and paint straight over the bell beneath them.</p>
 
 <h2 id="layers">What it paints</h2>
 
@@ -144,10 +144,10 @@
 
 <ol>
 <li>the stem &mdash; <code>PARTS</code> &times; <code>PATH</code>, painted with <code>TOWARD</code></li>
-<li>the nodding bells &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS inverted</code> &times; <code>SPECKLE inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the ringed throat spots &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS</code> &times; <code>SPECKLE inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the stipple in the throats &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>SPECKLE</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the lit shoulder of each bell &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the nodding bells &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the ringed throat spots &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the stipple in the throats &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the lit shoulder of each bell &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Nightbell</h3>
@@ -156,10 +156,10 @@
 
 <ol>
 <li>the stem &mdash; <code>PARTS</code> &times; <code>PATH</code>, painted with <code>TOWARD</code></li>
-<li>the nodding bells &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS inverted</code> &times; <code>SPECKLE inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the ringed throat spots &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS</code> &times; <code>SPECKLE inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the stipple in the throats &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>SPECKLE</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the lit shoulder of each bell &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the nodding bells &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the ringed throat spots &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the stipple in the throats &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the lit shoulder of each bell &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Coloured bells</h3>
@@ -168,10 +168,10 @@
 
 <ol>
 <li>the stem &mdash; <code>PARTS</code> &times; <code>PATH</code>, painted with <code>TOWARD</code></li>
-<li>the nodding bells &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS inverted</code> &times; <code>SPECKLE inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the ringed throat spots &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS</code> &times; <code>SPECKLE inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the stipple in the throats &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>SPECKLE</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>the lit shoulder of each bell &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the nodding bells &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>the ringed throat spots &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the stipple in the throats &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code> &times; <code>SPECKLE</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the lit shoulder of each bell &mdash; <code>PARTS</code> &times; <code>PATH</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Wild type</h3>

@@ -127,7 +127,7 @@
 
 <p>Arrived at priority 360. Moved to 295: fields and regions, with the other barrel drawings beside moonwing (283). The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.</p>
 
-<p>LAYERS MADE DISJOINT on the way in. The flame came out as one white sliver and the spark painted nothing at all - four near-white tones, each inside the one before, sum straight past white, and the spark was clamped away entirely. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of every shape painted after it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.</p>
+<p>LAYERS STACK, AND THE ORDER IS THE MECHANISM. The flame came out as one white sliver and the spark painted nothing at all - four near-white tones, each inside the one before, sum straight past white, and the spark was clamped away entirely. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. The body, the foot and the spark now carry &quot;over&quot;: true and paint straight over the tone outside them. Each layer used to multiply in an inverted copy of every shape painted after it: the outer skin alone cost four SVG paths where it now costs one.</p>
 
 <p>The spark is drawn at twice the size it was traced at, scaled about its own centre by the mask's transform - translate(313.1 389.1) scale(2) translate(-313.1 -389.1). At the traced size it was two texels on the horse and the check could not find it on any coat; the rest of the flame is untouched, and the other layers cut their hole for it from the same transformed shape.</p>
 
@@ -149,10 +149,10 @@
 <p>A grey taper flame on the ribs, palest at its foot.</p>
 
 <ol>
-<li>outer skin &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>body &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>foot &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>spark &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>outer skin &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>body &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>foot &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>spark &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Black flame</h3>
@@ -160,10 +160,10 @@
 <p>A near-black taper flame on the ribs, stepped up to a mid-grey foot.</p>
 
 <ol>
-<li>outer skin &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>body &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>foot &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>spark &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>outer skin &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>body &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>foot &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>spark &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Coloured flame</h3>
@@ -171,10 +171,10 @@
 <p>A taper flame in the line's own colour, with a spark of a second near the tip.</p>
 
 <ol>
-<li>outer skin &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>body &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>foot &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>spark &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>outer skin &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>body &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>foot &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>spark &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Wild type</h3>

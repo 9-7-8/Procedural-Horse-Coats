@@ -124,7 +124,7 @@
 
 <p>The rust and the pink share seed, spacing, stretch, vary and chance and differ only in radius, which is what keeps each pink cell inside its own rust patch. At radius 2.2 and 1.1 the rust surviving around the pink is 0.55 body units - a hair over a texel - and spacing 6.0 leaves 1.6 units of dark between neighbouring marks. Closing that spacing packs them until the wing reads as solid rust.</p>
 
-<p>The four layers are DISJOINT and have to be. A magical gene's layers each measure their delta against the colour the gene started from, and the deltas are summed - so a TINT of -200 on every channel under a TOWARD teal does not give teal, it gives teal minus 200. As imported the ground was painted over the whole butterfly with the margin, the squiggles and the cells on top of it, and the horse came out solid near-black: 484 texels moved on a bay and not one of them teal, rust or pink. The ground now paints the inner shape MINUS the rust patches, and the rust paints its patches MINUS the pink cells, which is the nesting the notes above already describe - it just has to be written as subtraction rather than as stacking.</p>
+<p>The four layers are NESTED, and the order is the mechanism. A magical gene's layers measure their delta against the colour the gene started from and the deltas are SUMMED by default - so a TINT of -200 on every channel under a TOWARD teal does not give teal, it gives teal minus 200. As imported the ground was painted over the whole butterfly with the margin, the squiggles and the cells on top of it, and the horse came out solid near-black: 484 texels moved on a bay and not one of them teal, rust or pink. The squiggles and the cells now carry &quot;over&quot;: true and paint straight over what is beneath them, so the ground no longer subtracts the rust patches nor the rust the pink cells. THE MARGIN BAND IS THE EXCEPTION and still subtracts the inner shape: the ground it must not cover is painted BEFORE it, and &quot;over&quot;: true cannot say that.</p>
 
 <p>The wings are drawn HALF AGAIN as wide as the horse and centred on the spine - sizeV 1.5, originV -0.25 - so the outer part of each wing falls off the edge of the back and onto the flank instead of stopping at the top. The NORMAL mask was opened up to match, from 0.15 down to -0.75 at round 0.85, which carries it to about halfway down the barrel. Both numbers move together: widening the drawing without opening the NORMAL just clips more of the wing away, and opening the NORMAL without widening the drawing puts bare flank in the vertical bands the note above warns about.</p>
 
@@ -148,10 +148,10 @@
 <p>Layer order is ground, margin, squiggle, cell: each is drawn inside the one before it, so reversing any pair loses the inner colour entirely.</p>
 
 <ol>
-<li>the wing, dark &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TINT</code></li>
-<li>the margin band &mdash; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
-<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
-<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the wing, dark &mdash; <code>SVG</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TINT</code></li>
+<li>the margin band &mdash; <code>SVG</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Coloured dorsal wing</h3>
@@ -161,10 +161,10 @@
 <p>The recessive coloured half of the usual pair. Two hue knobs, because the source's margin is on the far side of the wheel from its wing markings and one hue driving both would lose the edge. The wing's own two - 0.3 and 0.68 lightness - stay on one hue, since there the pink genuinely is the rust lit brighter.</p>
 
 <ol>
-<li>the wing, dark &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TINT</code></li>
-<li>the margin band &mdash; <code>SVG</code> &times; <code>SVG inverted</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
-<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
-<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the wing, dark &mdash; <code>SVG</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TINT</code></li>
+<li>the margin band &mdash; <code>SVG</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the squiggles inside the wing &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>the bright cells inside the squiggles &mdash; <code>SVG</code> &times; <code>SPOTS</code> &times; <code>NORMAL</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Wild type</h3>

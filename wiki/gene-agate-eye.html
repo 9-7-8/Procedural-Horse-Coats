@@ -112,7 +112,7 @@
 
 <p>Arrived at priority 120. Moved to 325: spots and rings, after moth eyes (324) - a few banded eyes on the haunch. The arriving number was taken, or sat in a band whose family does not describe this marking - priority is both the paint order and the family the sidebar files a gene under.</p>
 
-<p>LAYERS MADE DISJOINT on the way in. The eyes came out as pale blurs with no bands in them - the two blue bands were being added to the pale rim beneath them rather than painted over it. The rim now leaves holes where the bands and the core go; the bands and the core never overlapped each other. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of every shape painted after it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism. The core also went from radius 0.8 to 1.3, and now fills everything inside the inner band rather than floating in a pale gap within it - the band leaves a hole for it the way the rim leaves holes for both bands. At 0.8, and again at 1.0, it landed on the skin so rarely that no horse the check tried showed one: a spot on a three-dimensional lattice only reaches the surface where its centre is within its radius of it, so how often a centre mark shows falls away roughly as the cube of its size.</p>
+<p>LAYERS STACK, AND THE ORDER IS THE MECHANISM. The eyes came out as pale blurs with no bands in them - the two blue bands were being added to the pale rim beneath them rather than painted over it. The bands and the core now carry &quot;over&quot;: true and paint straight over the rim, which used to leave holes for all three and carried three extra masks to do it. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. The order in the file still reads as the order of the marking, and now it is the mechanism too. The core also went from radius 0.8 to 1.3, and now fills everything inside the inner band rather than floating in a pale gap within it - the band leaves a hole for it the way the rim leaves holes for both bands. At 0.8, and again at 1.0, it landed on the skin so rarely that no horse the check tried showed one: a spot on a three-dimensional lattice only reaches the surface where its centre is within its radius of it, so how often a centre mark shows falls away roughly as the cube of its size.</p>
 
 <p>chance went from 0.5 to 0.85 on every mask (they must match, or the bands stop being concentric with the rim). At 0.5, three horses in eight rendered with no eye on the near haunch at all - the haunch only holds a cell or two at spacing 9, so half of them empty often means all of them. It is still a few eyes; it is no longer sometimes none.</p>
 
@@ -134,10 +134,10 @@
 <p>chance 0.5 at spacing 9 is the whole of the restraint here: it leaves roughly two or three marks on the haunch rather than tiling it.</p>
 
 <ol>
-<li>pale outer rim &mdash; <code>AXIS</code> &times; <code>SPOTS</code> &times; <code>RINGS inverted</code> &times; <code>RINGS inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>outer band &mdash; <code>AXIS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code></li>
-<li>inner band &mdash; <code>AXIS</code> &times; <code>RINGS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>dark core &mdash; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>pale outer rim &mdash; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>outer band &mdash; <code>AXIS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>inner band &mdash; <code>AXIS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>dark core &mdash; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Agate eye, coloured</h3>
@@ -145,10 +145,10 @@
 <p>The same banded eyes in whatever colour this line runs to.</p>
 
 <ol>
-<li>pale outer rim &mdash; <code>AXIS</code> &times; <code>SPOTS</code> &times; <code>RINGS inverted</code> &times; <code>RINGS inverted</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>outer band &mdash; <code>AXIS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code></li>
-<li>inner band &mdash; <code>AXIS</code> &times; <code>RINGS</code> &times; <code>SPOTS inverted</code>, painted with <code>TOWARD</code></li>
-<li>dark core &mdash; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>pale outer rim &mdash; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
+<li>outer band &mdash; <code>AXIS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>inner band &mdash; <code>AXIS</code> &times; <code>RINGS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
+<li>dark core &mdash; <code>AXIS</code> &times; <code>SPOTS</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Wild type</h3>

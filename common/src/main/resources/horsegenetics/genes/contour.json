@@ -6,8 +6,8 @@
   "rarity": "RARE",
   "blurb": "The coat reads as a contour map: six bands of a landscape stacked one inside the next, from deep green at the low ground through yellow and gold to a red-brown at the summits, with a drawn contour line ruled through the middle level. The coloured form runs the low ground and the high ground off two independent hues instead.",
   "notes": [
-    "THE BANDS ARE DISJOINT AND HAVE TO BE. Each band is a threshold on one FRACTAL field, so band 0.38 sits entirely INSIDE band 0.30 - and a magical gene's layers each measure their delta against the colour the gene started from and then sum, so six nested TOWARDs do not paint six bands. They paint one colour, which is whatever six deltas add up to, and six pale deltas add up to white. That is exactly how this gene shipped: an almost-white horse with a brown patch, and the pastel palette it was given was the author compensating for a wash they could not see the cause of.",
-    "So every band now subtracts the threshold above it and paints only the ring between the two. Once they are disjoint the colours can be what a contour map actually looks like - a hypsometric ramp with real chroma in it - rather than six tints chosen to survive being added together.",
+    "THE BANDS ARE NESTED, AND THE ORDER IS THE MECHANISM. Each band is a threshold on one FRACTAL field, so band 0.38 sits entirely INSIDE band 0.30 - and a magical gene's layers measure their delta against the colour the gene started from and SUM by default, so six nested TOWARDs do not paint six bands. They paint one colour, which is whatever six deltas add up to, and six pale deltas add up to white. That is exactly how this gene shipped: an almost-white horse with a brown patch, and the pastel palette it was given was the author compensating for a wash they could not see the cause of.",
+    "Every band after the first now carries \"over\": true, so it measures against the coat as this gene has painted it so far and paints straight over the band below. They are drawn lowest threshold first, so each covers the middle of the one before and survives as the ring the next does not reach; they used to subtract the threshold above them instead, which is six extra FRACTAL masks for the same shapes. THE DRAWN CONTOUR LINE KEEPS ITS SUBTRACTION, because the bands it must not cover are painted BEFORE it and \"over\": true cannot say that. The colours are a hypsometric ramp with real chroma rather than six tints chosen to survive being added together - and note that at strength 93 the stacked bands COMPOUND, each keeping a little of the one beneath, so this is a visibly different horse from the disjoint version and was chosen deliberately.",
     "The 0.52 band is missing on purpose: that is where the drawn contour line goes. The line is 0.52 minus 0.56, so the band above it starts at 0.56 and the two do not overlap either.",
     "TWO hue knobs, not one plus an offset. The coloured form wants the low ground and the high ground to be different colours, and a knob cannot be offset by a constant in this format - there is no '$inkHue + 120'. inkHue and highHue are therefore INDEPENDENT draws, which means a horse can roll two hues that sit next to each other and come out nearly monochrome. That is the honest cost of the missing arithmetic and it is a good deal less bad than one flat hue."
   ],
@@ -75,16 +75,6 @@
               "warp": 0.5,
               "threshold": 0.3,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.38,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -96,6 +86,7 @@
         },
         {
           "name": "the band from 0.38 to 0.44",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -105,16 +96,6 @@
               "warp": 0.5,
               "threshold": 0.38,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.44,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -126,6 +107,7 @@
         },
         {
           "name": "the band from 0.44 to 0.52",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -135,16 +117,6 @@
               "warp": 0.5,
               "threshold": 0.44,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.52,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -165,16 +137,6 @@
               "warp": 0.5,
               "threshold": 0.56,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.6,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -186,6 +148,7 @@
         },
         {
           "name": "the band from 0.60 to 0.68",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -195,16 +158,6 @@
               "warp": 0.5,
               "threshold": 0.6,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.68,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -216,6 +169,7 @@
         },
         {
           "name": "the band from 0.68 to the top",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -236,6 +190,7 @@
         },
         {
           "name": "the drawn contour line at the middle level",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -288,16 +243,6 @@
               "warp": 0.5,
               "threshold": 0.3,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.38,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -311,6 +256,7 @@
         },
         {
           "name": "the band from 0.38 to 0.44",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -320,16 +266,6 @@
               "warp": 0.5,
               "threshold": 0.38,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.44,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -343,6 +279,7 @@
         },
         {
           "name": "the band from 0.44 to 0.52",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -352,16 +289,6 @@
               "warp": 0.5,
               "threshold": 0.44,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.52,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -384,16 +311,6 @@
               "warp": 0.5,
               "threshold": 0.56,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.6,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -407,6 +324,7 @@
         },
         {
           "name": "the band from 0.60 to 0.68",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -416,16 +334,6 @@
               "warp": 0.5,
               "threshold": 0.6,
               "softness": 0.05
-            },
-            {
-              "type": "FRACTAL",
-              "seed": "$landSeed",
-              "scale": "$landScale",
-              "octaves": 3,
-              "warp": 0.5,
-              "threshold": 0.68,
-              "softness": 0.05,
-              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -439,6 +347,7 @@
         },
         {
           "name": "the band from 0.68 to the top",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",
@@ -461,6 +370,7 @@
         },
         {
           "name": "the drawn contour line at the middle level",
+          "over": true,
           "masks": [
             {
               "type": "FRACTAL",

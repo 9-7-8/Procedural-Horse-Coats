@@ -127,7 +127,7 @@
 
 <p>Over the SVG point ceiling on arrival - the engine flattens every curve to sixteen segments, so a traced outline costs its command count rather than its size. Brought under it with intake/tools/fit-svg.mjs: flattened the way the engine flattens, Ramer-Douglas-Peucker to a point budget, re-emitted as polylines. The wing ground 5260 to 700 and the bars 5206 to 700, 0.2% of the viewBox changing side, measured through the engine's own inside test on a 400-sample grid. The whole viewBox is a few dozen texels across on the horse, so none of that reaches a texel. The d strings are therefore no longer the ones the trace produced. Gap 168 is the engine-side fix.</p>
 
-<p>LAYERS MADE DISJOINT on the way in. The pale wing came out a flat white shape with no bars in it: the bars were being added to the pale ground beneath them rather than painted over it. The black form hid the problem, because dark on dark sums to something that still looks like bars. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. Each layer now multiplies in an inverted copy of the shape that sets every later layer apart from it, which for hard-edged masks is exactly the picture stacking would have given - the order in the file still reads as the order of the marking, it just no longer has to be the mechanism.</p>
+<p>LAYERS STACK, AND THE ORDER IS THE MECHANISM. The pale wing came out a flat white shape with no bars in it: the bars were being added to the pale ground beneath them rather than painted over it. The black form hid the problem, because dark on dark sums to something that still looks like bars. A gene's layers do not stack: each measures its delta against the colour the GENE started from and the deltas are summed (gap 169), so nested marks at full strength add up and clamp. The bars now carry &quot;over&quot;: true and paint straight over the ground, which used to subtract the bars' own 9 KB SVG and no longer carries it.</p>
 
 <p>PLACED BY THE HORSE, NOT THE FILE (2026-09-11). originU is the posU knob, 0.12-0.40, so the viewport's centre runs from about x 12.7 to x 24.2 and the drawing lands anywhere from shoulder to hip. It used to be a constant 0.27, shared with the other five barrel drawings, and the owner's first look at the intake found six different drawings all standing in the same place on every horse. The range keeps every one of the six on BODY with two units to spare at either end - the widest, candelabra, is 6.2 units - checked on a side-view render at six seeds each. originV stays fixed: these are sized to the barrel's full height and there is no room to move up or down.</p>
 
@@ -145,8 +145,8 @@
 <p>Grey wings across the ribs, barred in white.</p>
 
 <ol>
-<li>wing ground &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>bars &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>wing ground &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>bars &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Black wing</h3>
@@ -154,8 +154,8 @@
 <p>Near-black wings across the ribs, barred in a mid grey.</p>
 
 <ol>
-<li>wing ground &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>bars &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>wing ground &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>bars &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Coloured wing</h3>
@@ -163,8 +163,8 @@
 <p>Wings in the line's own colour, barred in a second.</p>
 
 <ol>
-<li>wing ground &mdash; <code>PARTS</code> &times; <code>SVG</code> &times; <code>SVG inverted</code>, painted with <code>TOWARD</code></li>
-<li>bars &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>wing ground &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code></li>
+<li>bars &mdash; <code>PARTS</code> &times; <code>SVG</code>, painted with <code>TOWARD</code>, <strong>over</strong> what the layers above it painted</li>
 </ol>
 
 <h3>Wild type</h3>
