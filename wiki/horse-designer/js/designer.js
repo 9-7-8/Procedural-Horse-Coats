@@ -12,6 +12,19 @@ window.HG = window.HG || {};
 
   var $ = function (id) { return document.getElementById(id); };
 
+  /** An ARGB sheet from the wasm, as pixels a canvas texture can take. */
+  function unpackSheet(pixels, n) {
+    var img = new ImageData(n, n);
+    for (var i = 0; i < n * n; i++) {
+      var p = pixels[i];
+      img.data[i * 4] = (p >> 16) & 0xFF;
+      img.data[i * 4 + 1] = (p >> 8) & 0xFF;
+      img.data[i * 4 + 2] = p & 0xFF;
+      img.data[i * 4 + 3] = (p >>> 24) & 0xFF;
+    }
+    return img;
+  }
+
   function start() {
     var scene = HG.designerScene.create($("field"));
     var gui = HG.gui.create($("gui"), {
@@ -27,6 +40,21 @@ window.HG = window.HG || {};
     });
 
     var anim = scene ? HG.designerAnimation.create(scene) : null;
+
+    // Lights out over the field. Deliberately an HTML button rather than a
+    // control on the #gui canvas: that canvas mirrors CustomHorseSpawnScreen
+    // panel for panel, and the spawn screen has no such button - putting one
+    // there would break the twin. Nothing is re-baked; the glow sheet is
+    // already on the material, so this only turns the world down around it.
+    var lightsBtn = $("lights");
+    if (lightsBtn && scene) {
+      lightsBtn.addEventListener("click", function () {
+        var night = lightsBtn.getAttribute("aria-pressed") !== "true";
+        lightsBtn.setAttribute("aria-pressed", night ? "true" : "false");
+        lightsBtn.textContent = night ? "☼ Lights on" : "☾ Lights out";
+        scene.setNight(night);
+      });
+    }
     var wander = true;
     var state = null;
     var genes = [];
@@ -113,20 +141,17 @@ window.HG = window.HG || {};
       state.wander = wander;
       gui.setState(state);
 
-      var pixels = api.coat(!state.baby);
       var n = api.sheetSize();
-      var img = new ImageData(n, n);
-      for (var i = 0; i < n * n; i++) {
-        var p = pixels[i];
-        img.data[i * 4] = (p >> 16) & 0xFF;
-        img.data[i * 4 + 1] = (p >> 8) & 0xFF;
-        img.data[i * 4 + 2] = p & 0xFF;
-        img.data[i * 4 + 3] = (p >>> 24) & 0xFF;
-      }
+      var img = unpackSheet(api.coat(!state.baby), n);
       if (scene) {
         scene.setSkin(state.baby ? "BABY" : "ADULT");
         scene.setSize(state.scale);
         scene.setImage(img);
+        // Empty on almost every horse - only a gene with an emissive layer or a
+        // glow effect fills it, so the unpack is skipped rather than run over
+        // 16 384 transparent texels.
+        var glow = api.coatGlow(!state.baby);
+        scene.setGlow(glow.length ? unpackSheet(glow, n) : null);
       }
       gui.draw();
       describeConditions();

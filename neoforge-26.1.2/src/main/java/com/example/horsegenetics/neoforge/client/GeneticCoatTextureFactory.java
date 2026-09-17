@@ -383,46 +383,15 @@ public final class GeneticCoatTextureFactory {
     private static @Nullable Identifier buildGlow(boolean baby, Set<Part> parts, String key,
                                                   CoatTextureComposer.Baked baked) {
         Skin skin = baby ? Skin.BABY : Skin.ADULT;
-        int[] argb = baked.argb();
-        float[] byGene = baked.emissive();
-
-        if (parts.isEmpty() && byGene == null) {
-            return null; // nothing on this horse glows - cached as a real, free entry
-        }
-
-        int[] mask = new int[N * N];
-        boolean[] any = {false};
-        if (byGene != null) {
-            for (int i = 0; i < mask.length; i++) {
-                int c = argb[i];
-                // The gene's intensity becomes this texel's ALPHA. The emissive
-                // pass blends (BlendFunction.TRANSLUCENT) over the coat as the
-                // world lit it, so alpha 0.4 is four tenths of the full-bright
-                // colour over six tenths of the ordinary one - a dimmer, not a
-                // darker colour. Scaling the RGB instead would blend toward
-                // black and a dim glow would read as a smudge.
-                int alpha = Math.round(byGene[i] * 255f);
-                if (alpha > 0 && (c >>> 24) != 0) {
-                    mask[i] = (alpha << 24) | (c & 0xFFFFFF);
-                    any[0] = true;
-                }
-            }
-        }
-        for (Part part : parts) {
-            HorseSkinGeometry.forEachTexel(skin, part, (px, py, p2, face, point) -> {
-                int i = py * N + px;
-                int c = argb[i];
-                // A whole part named by a `glow` effect is lit outright - the
-                // effect has no intensity of its own, and full bright is what
-                // "this part glows" has always meant.
-                if ((c >>> 24) != 0) {
-                    mask[i] = 0xFF000000 | (c & 0xFFFFFF);
-                    any[0] = true;
-                }
-            });
-        }
-        if (!any[0]) {
-            return null; // e.g. a mane glow on a foal, which has no mane
+        // The fold itself lives in common/ (CoatTextureComposer.Baked#glowSheet),
+        // because the browser tools draw the same glow and a second copy of
+        // "intensity becomes alpha" here would be a copy free to drift.
+        int[] mask = baked.glowSheet(skin, parts);
+        if (mask == null) {
+            // Nothing on this horse glows, or the only thing that would have is
+            // a part this skin has not got (a mane glow on a foal). Either way a
+            // null is cached as a real, free entry.
+            return null;
         }
 
         NativeImage image = new NativeImage(N, N, false);

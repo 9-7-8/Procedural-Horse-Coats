@@ -97,6 +97,16 @@ window.HG = window.HG || {};
       if (current === bd.steps.length - 1) exportJson(); else go(current + 1);
     });
     $("btn-reroll").addEventListener("click", function () { seed = (seed + 1) | 0; renderFounders(); });
+    // Nothing is re-rolled or re-baked: the glow sheet is already on the
+    // material, so this only turns the scene down around it.
+    $("btn-lights").addEventListener("click", function () {
+      var btn = $("btn-lights");
+      var night = btn.getAttribute("aria-pressed") !== "true";
+      btn.setAttribute("aria-pressed", night ? "true" : "false");
+      btn.innerHTML = night ? "☼ Lights on" : "☾ Lights out";
+      var v = ensureView();
+      if (v) v.setNight(night);
+    });
     $("btn-export").addEventListener("click", exportJson);
     $("file-input").addEventListener("change", function (e) {
       var file = e.target.files && e.target.files[0];
@@ -270,7 +280,14 @@ window.HG = window.HG || {};
       return;
     }
     var v = ensureView();
-    if (v) v.setImage(toImageData(bd.api.coatOf(one.genotype, one.epigenome, true)));
+    if (v) {
+      v.setImage(toImageData(bd.api.coatOf(one.genotype, one.epigenome, true)));
+      // Only the 3D founder gets a glow. The herd strip below is six coat
+      // SHEETS at 76px, not six horses - there is no lighting on a flat sheet
+      // for a glow to be brighter than, so lighting them would be decoration.
+      var glow = bd.api.coatGlowOf(one.genotype, one.epigenome, true);
+      v.setGlow(glow.length ? toImageData(glow) : null);
+    }
     var t = JSON.parse(bd.api.traitsOfJson(one.genotype, one.epigenome));
     info.innerHTML = "";
     info.appendChild(stat("Size", t.scale.toFixed(2) + "x", bd.api.handsLabel(t.scale), t.scale));

@@ -107,6 +107,10 @@ window.HG = window.HG || {};
 
   // ---- one window ------------------------------------------------------
 
+  var MOON = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+    + '<path fill="currentColor" d="M20.4 15.2A8.6 8.6 0 0 1 8.8 3.6a8.6 8.6 0 1 0 11.6 11.6z"/>'
+    + '</svg>';
+
   var DICE = '<svg viewBox="0 0 24 24" aria-hidden="true">'
     + '<rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"/>'
     + '<circle cx="8" cy="8" r="1.6" fill="currentColor"/>'
@@ -151,6 +155,14 @@ window.HG = window.HG || {};
       + '<div class="gp-group gp-outcomes" role="group" aria-label="Outcome"></div>'
       + '<button type="button" class="gp-dice" title="Reroll this horse&rsquo;s epigenetics"'
       + ' aria-label="Reroll epigenetics">' + DICE + '</button>'
+      // Hidden until a bake proves this horse actually lights up - see
+      // render(). Asking the pipeline beats a per-gene flag: it is right for a
+      // built-in Java gene painting emissive texels in overlay(), for a spec
+      // gene's emissive layer and for a glow effect alike - and it is right per
+      // OUTCOME, so a heterozygote under its minDose offers no dead button.
+      + '<button type="button" class="gp-lights" aria-pressed="false" hidden'
+      + ' title="Lights out - see what this gene glows in the dark"'
+      + ' aria-label="Lights out">' + MOON + '</button>'
       + '</div>'
       + (gene.modifiers.length ? '<div class="gp-mods"></div>' : "")
       + '<div class="gp-stage"><div class="gp-view"></div></div>'
@@ -238,6 +250,18 @@ window.HG = window.HG || {};
       render();
     });
 
+    // Lights out. Nothing is re-baked - the glow sheet is already on the
+    // material - so this only turns the scene down around it.
+    var lightsBtn = host.querySelector(".gp-lights");
+    if (lightsBtn) {
+      lightsBtn.addEventListener("click", function () {
+        var night = lightsBtn.getAttribute("aria-pressed") !== "true";
+        lightsBtn.setAttribute("aria-pressed", night ? "true" : "false");
+        lightsBtn.title = night ? "Lights on" : "Lights out - see what this gene glows in the dark";
+        view.setNight(night);
+      });
+    }
+
     var codeEl = host.querySelector(".gp-code");
     var condEl = host.querySelector(".gp-conditions");
 
@@ -256,6 +280,21 @@ window.HG = window.HG || {};
         return;
       }
       view.setImage(toImageData(api.coatOf(code, state.epigenome, true)));
+      // Empty on almost every horse - only a gene with an emissive layer or a
+      // glow effect fills it, so the unpack is skipped rather than run over
+      // 16 384 transparent texels.
+      var glow = api.coatGlowOf(code, state.epigenome, true);
+      view.setGlow(glow.length ? toImageData(glow) : null);
+      // Switching to an outcome that does not glow puts the lights back on,
+      // rather than leaving the reader in the dark with the way out hidden.
+      if (lightsBtn) {
+        lightsBtn.hidden = !glow.length;
+        if (!glow.length && lightsBtn.getAttribute("aria-pressed") === "true") {
+          lightsBtn.setAttribute("aria-pressed", "false");
+          lightsBtn.title = "Lights out - see what this gene glows in the dark";
+          view.setNight(false);
+        }
+      }
 
       var baseIndex = indexOfBase(bases, state.base);
       codeEl.textContent = [bases[baseIndex].name, tokens]

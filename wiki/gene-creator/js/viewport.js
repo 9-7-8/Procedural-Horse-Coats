@@ -19,8 +19,10 @@ window.HG = window.HG || {};
     if (!THREE) return null;
 
     var scene = new THREE.Scene();
-    scene.background = new THREE.Color(
-      opts.background === undefined ? 0x11161f : opts.background);
+    // Held, not just applied, so the lights-out view can put it back - and so
+    // the two callers keep their own backdrops (see the note at the top).
+    var dayBackground = opts.background === undefined ? 0x11161f : opts.background;
+    scene.background = new THREE.Color(dayBackground);
 
     var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     // Re-aimed by frame() once the horse is built; these are only a first pose
@@ -39,11 +41,21 @@ window.HG = window.HG || {};
       controls.target.set(0, 1, 0);
     }
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-    var key = new THREE.DirectionalLight(0xffffff, 0.85);
+    // Kept as variables, not inlined, because the lights-out view turns them
+    // down - see setNight().
+    var DAY = { ambient: 0.75, key: 0.85, fill: 0.35 };
+    // Not zero. A glow is the only thing that should read at night, but a horse
+    // lit by nothing at all is a silhouette, and you cannot tell whether the
+    // unlit half of a marking is the shape you drew.
+    var NIGHT = { ambient: 0.08, key: 0.06, fill: 0.04 };
+    var NIGHT_BG = 0x05070c;
+
+    var ambient = new THREE.AmbientLight(0xffffff, DAY.ambient);
+    scene.add(ambient);
+    var key = new THREE.DirectionalLight(0xffffff, DAY.key);
     key.position.set(4, 6, 4);
     scene.add(key);
-    var fill = new THREE.DirectionalLight(0x93b7ff, 0.35);
+    var fill = new THREE.DirectionalLight(0x93b7ff, DAY.fill);
     fill.position.set(-5, 2, -4);
     scene.add(fill);
     // The horse stands on y = 0 (see model3d), so the grid is the ground.
@@ -65,9 +77,31 @@ window.HG = window.HG || {};
     // The sheet's v runs top-down, like the texel grid, so don't let three flip it.
     texture.flipY = false;
 
+    // ---- the glow ------------------------------------------------------
+    // A second sheet: the coat's own colours, keyed by how brightly each texel
+    // glows. It is the material's emissive map, which three adds on top of the
+    // lit colour and does NOT attenuate by the lights - so turning the lights
+    // down leaves exactly the glowing texels standing, which is what the game's
+    // EmissiveCoatLayer does with RenderTypes.eyes at FULL_BRIGHT.
+    var glowSheet = document.createElement("canvas");
+    glowSheet.width = N;
+    glowSheet.height = N;
+    var glowCtx = glowSheet.getContext("2d", { willReadFrequently: true });
+    var glowTex = new THREE.CanvasTexture(glowSheet);
+    glowTex.magFilter = THREE.NearestFilter;
+    glowTex.minFilter = THREE.NearestFilter;
+    glowTex.generateMipmaps = false;
+    glowTex.flipY = false;
+
+    // emissiveMap on a Standard material: CONFIRMED on the pinned three r128 by
+    // check-glow-render.mjs (2026-09-17) - the property survives construction,
+    // and so does the white `emissive` that multiplies it. Asserted rather than
+    // trusted because a material quietly dropping either fails INVISIBLY: a
+    // perfectly good horse that simply never lights up.
     var material = new THREE.MeshStandardMaterial({
       map: texture, roughness: 0.85, metalness: 0.0,
-      transparent: true, alphaTest: 0.05, side: THREE.DoubleSide
+      transparent: true, alphaTest: 0.05, side: THREE.DoubleSide,
+      emissive: 0xffffff, emissiveMap: glowTex
     });
 
     var mesh = null;
@@ -110,6 +144,46 @@ window.HG = window.HG || {};
     function setImage(imageData) {
       sheetCtx.putImageData(imageData, 0, 0);
       texture.needsUpdate = true;
+    }
+
+    /**
+     * The glow sheet, as DesignerApi.coatGlow hands it over - or null/an empty
+     * ImageData when nothing on this horse glows.
+     *
+     * <p>The mod writes the glow level as the texel's ALPHA, because its
+     * emissive pass blends. An emissive map is read RGB-only, with no alpha to
+     * honour, so the level is folded into the colour here instead: RGB x level,
+     * opaque. Same result - a dimmer colour, not a darker one - arrived at the
+     * way this renderer can express it. This is the one deliberate divergence
+     * from the texture GeneticCoatTextureFactory.buildGlow hands the game.
+     */
+    function setGlow(imageData) {
+      glowCtx.clearRect(0, 0, N, N);
+      if (imageData && imageData.width) {
+        var d = imageData.data;
+        for (var i = 0; i < d.length; i += 4) {
+          var level = d[i + 3] / 255;
+          d[i] = d[i] * level;
+          d[i + 1] = d[i + 1] * level;
+          d[i + 2] = d[i + 2] * level;
+          d[i + 3] = 255;
+        }
+        glowCtx.putImageData(imageData, 0, 0);
+      }
+      glowTex.needsUpdate = true;
+    }
+
+    /**
+     * Lights out. The glow is always drawn - in daylight it is simply lost in
+     * an already-bright coat, exactly as it is in game - so this turns the
+     * scene down rather than turning the glow up.
+     */
+    function setNight(on) {
+      var night = !!on;
+      ambient.intensity = night ? NIGHT.ambient : DAY.ambient;
+      key.intensity = night ? NIGHT.key : DAY.key;
+      fill.intensity = night ? NIGHT.fill : DAY.fill;
+      scene.background.set(night ? NIGHT_BG : dayBackground);
     }
 
     function resize() {
@@ -165,6 +239,8 @@ window.HG = window.HG || {};
     return {
       setSkin: setSkin,
       setImage: setImage,
+      setGlow: setGlow,
+      setNight: setNight,
       resize: resize,
       available: true,
       /** The OrbitControls instance, or null - so a caller can set its limits. */

@@ -10,6 +10,13 @@
 // glowing gene and exporting it again silently put the light out, and nothing
 // in the tool could have told you.
 //
+// Still true of the CREATOR, and only of it: its preview is the hand-written JS
+// port, which has no emissive pass. Everywhere that runs the real pipeline - the
+// horse designer, the breed designer, every gene page - now has a lights-out
+// toggle that draws the mod's own glow sheet, and check-glow-render.mjs covers
+// that side. So a glow is checkable in a browser now; export the gene and open
+// its page. This file stays pointed at what the creator can still get wrong.
+//
 // So this checks the parts that ARE observable: that the control writes what it
 // says, that the value survives the export tidy (which drops anything equal to
 // a default and is where the glow was being lost), and that an impossible level

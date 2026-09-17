@@ -1,9 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
-import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
-import com.example.horsegenetics.common.genetics.spec.GeneAbility;
-import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
+import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
@@ -16,8 +14,6 @@ import net.minecraft.client.renderer.entity.state.HorseRenderState;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.equine.Horse;
-
-import java.util.EnumSet;
 
 /**
  * Vanilla's {@code HorseRenderer} is {@code final} in 26.1.2, so we extend
@@ -101,7 +97,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                     ClientHorseRecordCache.get(horse.getId());
             geneticState.breedLabel = rec == null ? null : rec.lineage().displayName();
             GeneticCoatTextureFactory.Resolved textures = GeneticCoatTextureFactory.resolve(
-                    geneticState.coatData, renderState.isBaby, emissivePartsOf(geneticState.coatData),
+                    geneticState.coatData, renderState.isBaby, CoatTextureComposer.glowParts(geneticState.coatData.genotype()),
                     geneticState.breedLabel, withinDetailDistance(renderState));
             geneticState.coatId = textures.coat();
             geneticState.emissiveCoatId = textures.glow();
@@ -158,25 +154,6 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         if (scale > 0.0F && scale != 1.0F) {
             renderState.walkAnimationPos /= scale;
         }
-    }
-
-    /**
-     * The body parts a {@code glow} effect lights outright on this horse -
-     * usually none. A handful of allele checks, and part of the glow cache key.
-     *
-     * <p>The factory is asked for a mask <b>every</b> time, even with an empty
-     * list, because a built-in gene writes its emissive texels in the coat bake
-     * rather than declaring body parts here - which is what lets the light locus
-     * glow four hooves and two eyes instead of four whole legs and a head.
-     */
-    private static EnumSet<Part> emissivePartsOf(CoatData coatData) {
-        EnumSet<Part> parts = EnumSet.noneOf(Part.class);
-        for (HorseAbilities.Active active : HorseAbilities.activeFor(coatData.genotype())) {
-            if (active.ability() instanceof GeneAbility.Glow glow) {
-                parts.addAll(glow.emissiveParts());
-            }
-        }
-        return parts;
     }
 
     @Override

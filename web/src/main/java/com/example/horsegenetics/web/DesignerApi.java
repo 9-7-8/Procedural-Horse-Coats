@@ -208,6 +208,36 @@ public final class DesignerApi {
                 new LutSet(baseLut, altLuts));
     }
 
+    /**
+     * <b>The glow sheet for the horse as it currently stands</b> - the same
+     * 128x128 grid as {@link #coat}, holding this coat's own colours with each
+     * texel's emissive level as its alpha, and transparent where nothing glows.
+     *
+     * <p>Handed to the page as the material's emissive map, so the lights-out
+     * view shows exactly what {@code EmissiveCoatLayer} draws in game. Both
+     * sources of glow are folded in - a gene's emissive layers and the whole
+     * parts a {@code glow} effect lights - because
+     * {@link CoatTextureComposer.Baked#glowSheet} is the mod's own
+     * implementation rather than a second one written for the browser.
+     *
+     * @return the sheet, or an <b>empty array</b> when nothing on this horse
+     *         glows - which is the ordinary case, and lets the page skip the
+     *         whole emissive pass without scanning 16 384 transparent texels
+     */
+    @JSExport
+    public static int[] coatGlow(boolean adult) {
+        if (!ready()) {
+            return new int[0];
+        }
+        Skin skin = adult ? Skin.ADULT : Skin.BABY;
+        int[] glow = CoatTextureComposer.bake(
+                        editor().genotype(), editor().epigenome(), skin, adult,
+                        adult ? adultTemplate : babyTemplate,
+                        new LutSet(baseLut, altLuts))
+                .glowSheet(skin, editor().genotype());
+        return glow == null ? new int[0] : glow;
+    }
+
     @JSExport
     public static int sheetSize() {
         return HorseSkinGeometry.SHEET_SIZE;
@@ -858,6 +888,34 @@ public final class DesignerApi {
                     new LutSet(baseLut, altLuts));
         } catch (RuntimeException bad) {
             return new int[blank];
+        }
+    }
+
+    /**
+     * {@link #coatGlow} for any horse at all - the glow sheet beside
+     * {@link #coatOf}'s coat, for the gene pages, the breed designer and the
+     * LUT lab, which all bake a horse they are handed rather than the one being
+     * edited.
+     *
+     * @return the sheet, or an <b>empty array</b> when nothing glows or either
+     *         code failed to parse
+     */
+    @JSExport
+    public static int[] coatGlowOf(String genotypeCode, String epigenomeCode, boolean adult) {
+        if (!ready()) {
+            return new int[0];
+        }
+        try {
+            Genotype genotype = Genotype.parse(genotypeCode);
+            Skin skin = adult ? Skin.ADULT : Skin.BABY;
+            int[] glow = CoatTextureComposer.bake(
+                            genotype, Epigenome.parse(epigenomeCode), skin, adult,
+                            adult ? adultTemplate : babyTemplate,
+                            new LutSet(baseLut, altLuts))
+                    .glowSheet(skin, genotype);
+            return glow == null ? new int[0] : glow;
+        } catch (RuntimeException bad) {
+            return new int[0];
         }
     }
 

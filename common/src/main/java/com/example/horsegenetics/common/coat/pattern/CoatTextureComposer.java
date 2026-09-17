@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.coat.pattern;
 
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
@@ -20,8 +21,13 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.LutContribution;
 import com.example.horsegenetics.common.genetics.WhiteLockContribution;
+import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The three-phase coat pipeline. Turns a {@link Genotype} + its
@@ -136,6 +142,86 @@ public final class CoatTextureComposer {
         public boolean hasEmissive() {
             return emissive != null;
         }
+
+        /**
+         * <b>The glow sheet</b>: this coat's own colours, with each texel's
+         * emissive level as its <b>alpha</b>, transparent everywhere else -
+         * or {@code null} when nothing on this horse glows.
+         *
+         * <p>The alpha is the level because the emissive pass <i>blends</i>
+         * rather than replacing: 0.4 is four tenths of the full-bright colour
+         * over six tenths of the texel as the world lit it, which is a
+         * <i>dimmer</i> colour. Scaling the RGB instead would blend toward
+         * black and a faint glow would read as a smudge.
+         *
+         * <p>Two sources fold together, because both kinds of gene can ask for
+         * one: the texel mask the bake itself produced ({@link #emissive}),
+         * which is how the light locus lights four hooves and two eyes rather
+         * than four whole legs and a head; and whole body parts named by a
+         * {@code glow} effect, which has no intensity of its own and so lights
+         * outright. {@code null} also covers the case where the only thing that
+         * would have glowed is a part this skin does not have - a mane glow on
+         * a foal.
+         *
+         * <p><b>This is the one implementation.</b> The mod's texture factory
+         * and the browser tools both call it, so a horse cannot glow one way in
+         * game and another in the designer.
+         */
+        public int[] glowSheet(Skin skin, Set<Part> litParts) {
+            if (emissive == null && litParts.isEmpty()) {
+                return null;
+            }
+            int n = HorseSkinGeometry.SHEET_SIZE;
+            int[] mask = new int[n * n];
+            boolean[] any = {false};
+            if (emissive != null) {
+                for (int i = 0; i < mask.length; i++) {
+                    int c = argb[i];
+                    int alpha = Math.round(emissive[i] * 255f);
+                    if (alpha > 0 && (c >>> 24) != 0) {
+                        mask[i] = (alpha << 24) | (c & 0xFFFFFF);
+                        any[0] = true;
+                    }
+                }
+            }
+            for (Part part : litParts) {
+                HorseSkinGeometry.forEachTexel(skin, part, (px, py, p, face, point) -> {
+                    int i = py * n + px;
+                    int c = argb[i];
+                    if ((c >>> 24) != 0) {
+                        mask[i] = 0xFF000000 | (c & 0xFFFFFF);
+                        any[0] = true;
+                    }
+                });
+            }
+            return any[0] ? mask : null;
+        }
+
+        /** {@link #glowSheet(Skin, Set)}, resolving the horse's own {@code glow} effects. */
+        public int[] glowSheet(Skin skin, Genotype genotype) {
+            return glowSheet(skin, glowParts(genotype));
+        }
+    }
+
+    /**
+     * The body parts a {@code glow} effect lights outright on this horse -
+     * usually none, and a handful of allele checks when not.
+     *
+     * <p>Lives here rather than beside the renderer because the browser tools
+     * need the same answer: a horse whose glow comes from an effect rather than
+     * from an emissive layer has to light up in the designer too.
+     */
+    public static Set<Part> glowParts(Genotype genotype) {
+        Set<Part> parts = null;
+        for (HorseAbilities.Active active : HorseAbilities.activeFor(genotype)) {
+            if (active.ability() instanceof GeneAbility.Glow glow) {
+                if (parts == null) {
+                    parts = new LinkedHashSet<>();
+                }
+                parts.addAll(glow.emissiveParts());
+            }
+        }
+        return parts == null ? Collections.emptySet() : parts;
     }
 
     /** {@link #bake}'s pixels alone - what every caller but the emissive layer wants. */
