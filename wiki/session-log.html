@@ -27,6 +27,122 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-health-loci">2026-09-17 &mdash; The health batch, and the locus that was there the whole time</h2>
+
+<p>
+    <strong>&ldquo;Let&rsquo;s add all the rest of the genes from the roadmap.&rdquo;</strong>
+    Scoped down on the owner&rsquo;s instruction to <em>all of health</em>, with everything
+    else to be checked for existence and put back to her one at a time before building.
+    That instruction is the reason this entry exists in the shape it does: auditing before
+    writing found that a third of the section was already built.
+</p>
+
+<h3>WFFS never needed a gene, and five breed files were carrying the error</h3>
+
+<p>
+    The roadmap called WFFS &ldquo;the most-wanted health locus in the mod&rdquo;, and five
+    breed files repeated a warning against confusing it with
+    <a href="gene-plod1.html"><code>PLOD1</code></a>: <em>&ldquo;PLOD1 here is Friesian
+    dwarfism and is emphatically not a substitute.&rdquo;</em> That sentence was itself the
+    mistake it warned about. This mod&rsquo;s <code>PLOD1</code> <b>is</b> warmblood fragile
+    foal syndrome &mdash; its condition id is <code>fragile-foal-syndrome</code> and its
+    science tab is <em>PLOD1</em> c.2032G&gt;A throughout &mdash; while Friesian dwarfism is
+    <a href="gene-b4galt7.html"><code>B4GALT7</code></a>, a different gene entirely. Somebody
+    conflated the two when writing those notes, and four breeds then shipped clear of a
+    disorder the mod had had all along.
+</p>
+
+<p>
+    The fix was wiring, not building. Gelderland, Oldenburg, Selle Fran&ccedil;ais and
+    Swedish Warmblood now carry <code>PLOD1</code> at rates measured in those breeds
+    (7.63 / 15.53 / 6.0 / 7.4%), three of which came out of the survey table already sitting
+    on the PLOD1 page &mdash; better evidence than the warmblood-wide ~11% proxy the roadmap
+    had been holding. Zangersheide stays clear, because its only figure was a self-declared
+    proxy that had already been declined.
+</p>
+
+<h3>Four loci that genuinely did not exist</h3>
+
+<p>
+    <a href="gene-slc5a3.html">SLC5A3</a> (foal immunodeficiency syndrome),
+    <a href="gene-lamc2.html">LAMC2</a> and <a href="gene-lama3.html">LAMA3</a> (junctional
+    epidermolysis bullosa) and <a href="gene-ryr1.html">RYR1</a> (malignant hyperthermia),
+    plus a <code>D5</code> allele on <a href="gene-acan.html">ACAN</a>. Two calls in that set
+    are worth keeping:
+</p>
+
+<p>
+    <strong>JEB is two loci, not one locus with two alleles</strong> (owner&rsquo;s call).
+    The draft variant is <em>LAMC2</em> and the Saddlebred&rsquo;s is a partial <em>LAMA3</em>
+    deletion &mdash; genuinely different genes. One locus carrying both as alleles would have
+    made them mutually exclusive in the <a href="gene-acan.html">ACAN</a> shape, where any two
+    broken copies leave no working one; here a horse can carry one and be clear of the other,
+    and pairing a carrier of each is completely safe.
+</p>
+
+<p>
+    <strong>RYR1 is dominant and costs nothing</strong>, which is a first. Every other
+    disorder here is a standing condition, but malignant hyperthermia is episodic &mdash;
+    triggered by anaesthesia or extreme stress, and between episodes the horse is genuinely
+    normal. There is no trigger in this game, so pricing it in hearts would invent a symptom
+    the real condition does not have. One copy is <code>INFORMATIONAL</code>; the homozygote,
+    which has no working channel left, does pay. It is the first locus whose entire value is
+    being <em>known</em> rather than felt, which is precisely what the registries screen for.
+</p>
+
+<p>
+    That decision broke <code>oneCopyOfADominantAlreadyCostsTheHorse</code>, which asserted
+    every dominant takes hearts on one copy. Rather than carve out an exception, the test now
+    checks the price against what each condition <em>declares</em> &mdash; informational must
+    be free, impairing must cost &mdash; so a gene disagreeing with its own severity fails.
+    Stronger than what it replaced.
+</p>
+
+<h3>Silver stops getting its colour for free</h3>
+
+<p>
+    <a href="gene-silver.html">Silver</a>&rsquo;s MCOA already shipped as
+    homozygous-only. It is now dosed: <code>Z/z</code> carries the cyst phenotype &mdash;
+    named on the horse and costing nothing &mdash; and <code>Z/Z</code> keeps its two hearts.
+    The <a href="breed-book.html">Rocky Mountain Horse</a> is where it lands hardest, at 12%
+    <code>Z/Z</code> and 46% <code>Z/z</code>, which is correct: chocolate is the breed&rsquo;s
+    whole identity, so it is the population that should pay for it.
+</p>
+
+<h3>The goldens moved and nothing changed</h3>
+
+<p>
+    Adding four loci rewrote 1056 rows of <code>coat-golden.txt</code>, which looks alarming
+    and was not. <code>coat-bake-golden.txt</code> gained nine rows and <b>deleted none</b>,
+    and comparing the hash column before and after found <b>zero</b> of the 1056 hashes
+    changed. The entire diff was the code-string column growing new locus segments. Worth
+    recording as the method as much as the result: a golden that moves wholesale is worth
+    decomposing by column before it is copied back, because &ldquo;every row moved&rdquo; and
+    &ldquo;every coat changed&rdquo; look identical in <code>git diff --stat</code>.
+</p>
+
+<h3>What the audit found that was not asked about</h3>
+
+<p>
+    The roadmap was stale in both directions. <a href="gene-lut.html">LUT</a> ships
+    <em>two</em> palettes and the roadmap said one; <a href="gene-dun.html">dun</a>&rsquo;s
+    guard hairs ship and the roadmap listed them as missing. Both corrected. In the other
+    direction, <strong>polygenic face and leg white is <em>not</em> built</strong>, contrary
+    to an expectation at the start of the session &mdash; no markings locus is registered,
+    nothing outside the four allele-gated white loci calls
+    <code>WhitePattern.faceMarking</code>, and <code>MitfGene</code> still holds
+    <code>WILD_SW1_PERCENT = 55.0</code> with a comment saying in as many words that
+    <code>SW1</code> is standing in for a system the mod does not have.
+</p>
+
+<p>
+    Also found, and <em>not</em> fixed: <code>GeneDescriptionCoverageTest</code> is red for
+    <code>dmrt3</code>, <code>magic_heat</code> and <code>magic_cold</code>. Confirmed
+    pre-existing by checking <code>HEAD</code> &mdash; all three were registered with no
+    description before this session touched anything. Left alone as out of scope rather than
+    folded in silently; it is three map entries whenever somebody wants it.
+</p>
+
 <h2 id="d2026-09-16-tutorial-chapters">2026-09-16, later &mdash; Getting started becomes a book, and every item gets a box</h2>
 
 <p>
