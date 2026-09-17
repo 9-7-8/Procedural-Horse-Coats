@@ -543,6 +543,26 @@ public final class GeneDescriptions {
                             + "a recessive lethal with the best-measured frequency in the mod: a "
                             + "random foal-crop sample found 9 carriers in 175. Separate from the "
                             + "draft breeds' LAMC2 form."),
+            Map.entry("horsegenetics.dmrt3",
+                    "DMRT3, the gait keeper - the stop mutation behind ambling and pacing. It is "
+                            + "permissive rather than dominant or recessive: it lets a horse perform "
+                            + "the extra gaits, and other genes and training decide which one "
+                            + "appears. One copy helps the tolt and keeps a good walk, trot and "
+                            + "canter; two give the best tolt and pace and cost the diagonal gaits. "
+                            + "It changes nothing about movement yet - the locus, its inheritance "
+                            + "and every breed's share are modelled and shown, but the gait itself "
+                            + "waits on animation."),
+            Map.entry("horsegenetics.magic_heat",
+                    "Magic heat tolerance - a horse that does better or worse in a hot biome. A "
+                            + "tolerant allele, a sensitive allele and a neutral wild type; how much "
+                            + "each copy is worth, and whether it goes to speed, jump or both, is "
+                            + "written on the copy itself. The twin of magic cold tolerance."),
+            Map.entry("horsegenetics.magic_cold",
+                    "Magic cold tolerance - a horse that does better or worse in a cold biome, "
+                            + "which here means anything with snow. A tolerant allele, a sensitive "
+                            + "allele and a neutral wild type; how much each copy is worth, and "
+                            + "whether it goes to speed, jump or both, is written on the copy "
+                            + "itself. The twin of magic heat tolerance."),
             Map.entry("horsegenetics.markings",
                     "Ordinary white markings - the star, stripe, snip, sock and stocking a horse "
                             + "can have without carrying any white pattern gene at all. An additive "

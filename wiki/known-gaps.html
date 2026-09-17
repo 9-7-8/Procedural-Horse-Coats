@@ -178,16 +178,6 @@
     is still unbuilt</strong>, on <a href="roadmap.html#natural-genes">the roadmap</a>, which is where
     unbuilt work belongs (owner, 2026-09-15). The curly coat stays there because it is blocked on a
     coat-structure axis the pipeline does not have, not on anyone writing the gene.</li>
-<li id="gap-263"><strong>Open, found 2026-09-17: three registered genes have no <code>GeneDescriptions</code> entry, and
-    the suite has been red for it.</strong> <code>GeneDescriptionCoverageTest.everyRegisteredGeneHasADescription</code>
-    fails naming <code>horsegenetics.dmrt3</code>, <code>horsegenetics.magic_heat</code> and
-    <code>horsegenetics.magic_cold</code>. <strong>It predates this session</strong> &mdash; confirmed by checking
-    <code>HEAD</code>, where all three were already registered with no description &mdash; and it was found only because
-    adding four health loci made that test run. That is the interesting part: <code>CLAUDE.md</code> forbids running the
-    full <code>:common:test</code>, so a class nobody's change happens to touch can sit red indefinitely and no session
-    is at fault. <strong>The fix is three <code>Map.entry</code> lines</strong>; the gap is worth keeping open until
-    somebody decides whether a cheap always-run subset of the suite should exist, because this will happen again and the
-    next one may not be cosmetic. Left unfixed deliberately rather than folded into an unrelated batch.</li>
 <li id="gap-255"><strong>Open, found 2026-09-15: two constants that exist on one side of the twin only.</strong> Also from
     the rule 5 audit. <code>CustomHorseSpawnScreen</code> appends <code>" (preview capped)"</code> to its size readout past
     <code>PREVIEW_SCALE_CAP</code>; the browser has neither the suffix nor the constant, so a very large horse reads there

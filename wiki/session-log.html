@@ -27,6 +27,40 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-gap-263">2026-09-17, last &mdash; The one red test in the project, closed</h2>
+
+<p>
+    <strong>Owner&rsquo;s call: close out gap 263 before the next gene.</strong> Three
+    registered genes &mdash; <a href="gene-dmrt3.html">DMRT3</a>,
+    <a href="gene-magic-heat.html">magic heat tolerance</a> and
+    <a href="gene-magic-cold.html">magic cold tolerance</a> &mdash; had no
+    <code>GeneDescriptions</code> entry, so
+    <code>GeneDescriptionCoverageTest.everyRegisteredGeneHasADescription</code> had been
+    failing since before this session. Three <code>Map.entry</code> lines. The project now
+    has no red test.
+</p>
+
+<p>
+    The descriptions were written from each gene&rsquo;s source rather than from its name,
+    which matters most for DMRT3: its own javadoc records (owner, 2026-09-15) that
+    <strong>it changes nothing about movement yet</strong> &mdash; every outcome is a wild
+    type and the gait waits on animation &mdash; so a description implying that horses amble
+    today would have been a plausible-sounding lie about shipped behaviour. That is the same
+    failure as the WFFS/PLOD1 warning this morning, in miniature: prose about a gene, written
+    without reading the gene.
+</p>
+
+<p>
+    <strong>Why it sat red, which is the part worth keeping.</strong> Nobody was at fault.
+    <code>CLAUDE.md</code> forbids running the full <code>:common:test</code>, so a class that
+    no session&rsquo;s change happens to touch can stay red indefinitely and every individual
+    session is behaving correctly. It surfaced only because adding four health loci made that
+    class run. The same shape broke <code>CoatSampleTool</code>, which had been rendering 11
+    of its 122 samples for months. <strong>The open question the gap raised is not closed by
+    fixing it</strong>: whether a cheap always-run subset of the suite should exist. Nothing
+    currently catches the next one, and the next one may not be cosmetic.
+</p>
+
 <h2 id="d2026-09-17-dapples">2026-09-17, later still &mdash; Silver draws its dapples, and a render that could not settle it</h2>
 
 <p>
@@ -97,7 +131,7 @@
     <code>G3/G3</code> nearly white) and all 122 samples render again. The file&rsquo;s own
     comment already warned that <em>&ldquo;a sample list is a poor place to keep a claim about
     how a gene works&rdquo;</em> &mdash; it now carries the cost of having been right. The
-    wider lesson is the one in <a href="known-gaps.html">gap 263</a>: a tool or test that
+    wider lesson is the one that closed gap 263 later the same day: a tool or test that
     nobody&rsquo;s change happens to run can stay broken indefinitely with no session at fault.
 </p>
 
