@@ -543,6 +543,12 @@ public final class GeneDescriptions {
                             + "a recessive lethal with the best-measured frequency in the mod: a "
                             + "random foal-crop sample found 9 carriers in 175. Separate from the "
                             + "draft breeds' LAMC2 form."),
+            Map.entry("horsegenetics.markings",
+                    "Ordinary white markings - the star, stripe, snip, sock and stocking a horse "
+                            + "can have without carrying any white pattern gene at all. An additive "
+                            + "dosage locus: more copies means more white, from a coronet up to a "
+                            + "broad blaze and high stockings. It runs before every pattern locus, "
+                            + "so sabino and splash stack their white on top of it."),
             Map.entry("horsegenetics.ryr1",
                     "RYR1 (MH), malignant hyperthermia - a dominant disorder, so every copy shows and "
                             + "there is no silent carrier. It costs the horse nothing day to day: the "

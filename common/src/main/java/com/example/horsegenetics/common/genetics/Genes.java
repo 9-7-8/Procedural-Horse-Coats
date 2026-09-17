@@ -85,6 +85,7 @@ import com.example.horsegenetics.common.genetics.genes.Lama3Gene;
 import com.example.horsegenetics.common.genetics.genes.Lamc2Gene;
 import com.example.horsegenetics.common.genetics.genes.ManchadoGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
+import com.example.horsegenetics.common.genetics.genes.MarkingsGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
 import com.example.horsegenetics.common.genetics.genes.MegaesophagusGene;
 import com.example.horsegenetics.common.genetics.genes.MetGene;
@@ -552,6 +553,14 @@ public final class Genes {
     public static final ShadowcreatureGene SHADOWCREATURE = new ShadowcreatureGene();
 
     /**
+     * <b>Ordinary white markings</b>, which every other white locus stacks on
+     * top of. It runs before all of them (priority 65 against tobiano's 72), and
+     * it is what lets a horse carrying no pattern gene at all still have a star
+     * and a sock - the job {@link MitfGene#SW1} used to be doing.
+     */
+    public static final MarkingsGene MARKINGS = new MarkingsGene();
+
+    /**
      * The <b>non-coat genes</b> - performance, size and health. They occupy the
      * top of the natural band ({@code 80}-{@code 99}), after every gene that
      * paints, because <b>none of them paints anything</b>: every combination
@@ -621,7 +630,7 @@ public final class Genes {
             EYE_SECTOR_COLOUR_RIGHT, EYE_SECTOR_COLOUR_LEFT, EYE_SCLERA_RIGHT, EYE_SCLERA_LEFT,
             EYE_GLOW_IRIS_RIGHT, EYE_GLOW_IRIS_LEFT, EYE_GLOW_SCLERA_RIGHT, EYE_GLOW_SCLERA_LEFT,
             THIRD_EYE,
-            NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
+            NATURAL_ZEBRA, MARKINGS, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,

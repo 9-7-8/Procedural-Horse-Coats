@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markings &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
+<h1>Markings &mdash; the star and the sock</h1>
+
+<p class="lede">
+    The ordinary white a horse can have without carrying any pattern gene at all: a
+    star, a stripe, a snip, a coronet, a sock, a stocking. Most marked horses in life
+    are marked by this and not by splash or sabino, and until now the mod had no way
+    to say so.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.markings"></div>
+
+<h2>More copies, more white</h2>
+
+<p>
+    An <strong>additive dosage</strong> locus, the same shape as
+    <a href="gene-sooty.html">sooty</a> and <a href="gene-shade.html">shade</a>: two
+    working alleles that stack, so what matters is how many copies and how strong,
+    not which parent they came from.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>combination</th><th>dosage</th><th>what shows</th></tr></thead>
+<tbody>
+<tr><td><code>m/m</code></td><td>0</td><td>clean &mdash; no white anywhere</td></tr>
+<tr><td><code>M1/m</code></td><td>1</td><td>a star, or a coronet or two above the hooves</td></tr>
+<tr><td><code>M1/M1</code>, <code>M2/m</code></td><td>2</td><td>a star and often a snip, socks on a leg or two</td></tr>
+<tr><td><code>M2/M1</code></td><td>3</td><td>a stripe or a narrow blaze, and socks</td></tr>
+<tr><td><code>M2/M2</code></td><td>4</td><td>a broad blaze and high stockings</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Two horses of the same dosage still differ, because each carries its own stored
+    offset and its own face and leg rolls. That is what stops a herd of
+    <code>M1/m</code> horses all wearing the same star.
+</p>
+
+<h2>Not every leg is marked</h2>
+
+<p>
+    Each leg rolls separately and has to clear a threshold before it whitens anything,
+    which is why a three-socked horse with one clean leg is common and four identical
+    socks are not. The rolls are <strong>stored, not rolled fresh</strong>, so a horse
+    marks the same way every time it is drawn &mdash; and its foals inherit the
+    tendency.
+</p>
+
+<div class="note">
+    <span class="label">Pattern genes stack on top of this</span>
+    <p>
+        Markings runs at priority 65, <em>before</em> every white pattern locus
+        (<a href="gene-tobiano.html">tobiano</a> is 72, and
+        <a href="gene-kit.html">KIT</a>, <a href="gene-mitf.html">MITF</a>,
+        <a href="gene-pax3.html">PAX3</a> and <a href="gene-ednrb.html">EDNRB</a> run
+        after it). So a sabino horse that also carries three markings copies is a horse
+        with a blaze that its sabino then widens, rather than two genes fighting over
+        the same face.
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.markings"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.markings</dd></div>
+    <div><dt>Priority</dt><dd>65 &mdash; before every white pattern locus</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">M2</span> <span class="allele dom">M1</span> <span class="allele wild">m</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>minimal-markings</code>, <code>markings</code>, <code>bold-markings</code>, <code>broad-markings</code></dd></div>
+    <div><dt>Coat effect</dt><dd>whitens the face marking and the lower legs</dd></div>
+    <div><dt>Default allele</dt><dd>m</dd></div>
+    <div><dt>Founder draws</dt><dd>0 &mdash; every decision is stored epigenetics</dd></div>
+</dl>
+
+<h2>It consumes no randomness at paint time</h2>
+
+<p>
+    Unlike <a href="gene-sooty.html">sooty</a>, which spends a <code>nextFloat()</code>
+    on its expression roll, every choice this gene makes is already in the
+    <a href="genetics-model.html">epigenome</a>: the face seed and its star, stripe and
+    snip rolls come from the shared <code>WhitePattern.faceSchema()</code>, and each
+    leg has its own <code>EpiValue.perLeg</code> entry. The horse therefore marks
+    identically every time it is drawn, and a foal inherits the <em>tendency</em>
+    rather than re-rolling from scratch.
+</p>
+
+<h2>The face vocabulary is shared, deliberately</h2>
+
+<p>
+    The blaze is drawn by <code>WhitePattern.faceMarking</code> &mdash; the same call
+    <a href="gene-ednrb.html">EDNRB</a>, <a href="gene-kit.html">KIT</a>,
+    <a href="gene-mitf.html">MITF</a> and <a href="gene-pax3.html">PAX3</a> use. A
+    markings blaze and a sabino blaze are therefore the same code with a different
+    <code>jag</code>, and cannot drift apart. This locus passes a small jag, because
+    ordinary markings have the clean edge of a splash rather than the torn, roaned
+    margin of a sabino.
+</p>
+
+<div class="note warn">
+    <span class="label">One locus is not what &ldquo;polygenic&rdquo; means</span>
+    <p>
+        Real ordinary markings are many small-effect variants plus developmental
+        noise. This is a single additive locus <em>standing in</em> for that family,
+        in the same way <a href="gene-sooty.html">sooty</a> and
+        <a href="gene-shade.html">shade</a> stand in for a chromosome-22 signal whose
+        causal mutation nobody has identified. What the locus buys over an allele-free
+        per-horse roll is that a breeder can <strong>select</strong> for it: the dosage
+        is inherited Mendelianly, shows in the genotype code, and prints on a paper.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="at-a-glance">At a glance</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Trait</th><td>Ordinary white face and leg markings &mdash; star, stripe, snip, blaze, coronet, sock, stocking</td></tr>
+<tr><th>Genetics</th><td><b>Polygenic</b>: many small-effect loci, with no single causal variant</td></tr>
+<tr><th>Also</th><td>Substantial non-genetic developmental variation in how far pigment cells migrated</td></tr>
+<tr><th>Testable</th><td>No commercial test, because there is no one locus to test</td></tr>
+<tr><th>Health</th><td>None. White hair is not a disorder; the deafness risk belongs to the splash alleles specifically</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="why">Why this is its own thing and not splash</h2>
+
+<p>
+    The single most useful finding here is a negative one. The study that identified
+    <a href="gene-mitf.html"><code>SW1</code></a> deliberately assembled 112 horses
+    with <strong>minimal white markings</strong> &mdash; the population you would
+    expect a minimally-expressed splash allele to be hiding in &mdash; and found
+    <strong>no splash allele at all</strong>. Ordinary stars and socks are simply not
+    splash.
+</p>
+
+<p>
+    They are also not one gene. Marking extent behaves like a quantitative trait:
+    continuously distributed, moderately heritable, and responsive to selection, which
+    is the signature of many loci of small effect rather than one locus with big ones.
+    Breeders have selected both for and against white for centuries and moved the
+    population gradually in both directions, which is exactly what you cannot do with a
+    single dominant.
+</p>
+
+<p>
+    On top of the genetics sits genuine developmental noise. Pigment cells migrate from
+    the neural crest during gestation, and how far they get before the coat is fixed is
+    not fully determined by the genome &mdash; which is why full siblings, and even
+    clones, differ in their markings, and why a marking is usable as an individual
+    identifier on a registration diagram at all.
+</p>
+
+<h2 id="the-confusion">The confusion this locus reproduces on purpose</h2>
+
+<p>
+    At its top end this gene draws a broad blaze and high stockings, which is very hard
+    to tell from a minimally expressed <a href="gene-kit.html">sabino</a> or
+    <a href="gene-mitf.html">splash</a> by eye. That ambiguity is not a shortcoming of
+    the model &mdash; it is the thing the literature keeps saying out loud, and the
+    reason testing exists. A horse with four white legs and a bald face may be a
+    heavily marked ordinary horse or a minimally marked pattern carrier, and only its
+    genotype settles it.
+</p>
+
+<p>
+    In the mod that distinction is real and checkable: the info panel and a
+    <a href="carrots.html">research paper</a> name the locus, so two horses that look
+    alike can be told apart by what they will actually throw.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-mitf.html">MITF (splash)</a>
+        <a href="gene-kit.html">KIT (sabino)</a>
+        <a href="gene-sooty.html">Sooty</a>
+        <a href="pipeline.html">The coat pipeline</a>
+    </div>
+    Source: <code>common/genetics/genes/MarkingsGene.java</code>
+</div>
+
+</article>
+</main>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

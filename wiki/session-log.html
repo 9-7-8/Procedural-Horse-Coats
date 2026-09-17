@@ -27,6 +27,86 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-17-markings">2026-09-17, later &mdash; Ordinary markings get a locus, and SW1 gives back a job</h2>
+
+<p>
+    <strong>&ldquo;Roadmap natural genes&rdquo;</strong>, taken one at a time per the
+    owner&rsquo;s instruction, starting with the biggest: the star, stripe, snip, sock and
+    stocking that a horse can have <em>without</em> carrying any white pattern gene. The
+    audit at the start of the day had established these did not exist, contrary to
+    expectation &mdash; no markings locus was registered, and nothing outside the four
+    allele-gated white loci drew a star.
+</p>
+
+<h3>An additive locus, not an allele-free roll</h3>
+
+<p>
+    <a href="gene-markings.html">Markings</a> is a dosage locus in the
+    <a href="gene-sooty.html">sooty</a> / <a href="gene-shade.html">shade</a> shape:
+    <code>M2</code>, <code>M1</code> and <code>m</code> stacking to a score from a coronet
+    up to a broad blaze and high stockings. The alternative considered and rejected was an
+    allele-free per-horse score, which would have been cheaper and carried no genotype-code
+    slot. <strong>The locus won because a breeder can select for it</strong> &mdash; the
+    dosage inherits Mendelianly, shows in the code and prints on a paper &mdash; and because
+    an allele-free marking could only be inherited through epigenetic drift.
+</p>
+
+<p>
+    It runs at <strong>priority 65</strong>, before every white pattern locus (tobiano is
+    72, and the rest run to 79), so <a href="gene-kit.html">KIT</a>,
+    <a href="gene-mitf.html">MITF</a>, <a href="gene-pax3.html">PAX3</a> and
+    <a href="gene-ednrb.html">EDNRB</a> stack their white <em>on top of</em> it. A sabino
+    horse with three markings copies is a horse with a blaze that its sabino then widens,
+    which is the right relationship and not two genes fighting over one face.
+</p>
+
+<p>
+    The face is drawn with <code>WhitePattern.faceMarking</code> &mdash; the same call the
+    white loci use, so a markings blaze and a sabino blaze cannot drift apart; only the
+    <code>jag</code> differs, small here because ordinary markings have a clean edge rather
+    than a sabino&rsquo;s roaned one. Legs use <code>EpiValue.perLeg</code> with a threshold,
+    which is what leaves a three-socked horse one clean leg instead of dressing every horse
+    in four matching socks. The gene consumes <strong>no</strong> <code>nextFloat()</code>:
+    every decision is stored epigenetics, so a horse marks identically every time it is drawn.
+</p>
+
+<h3>SW1 stops doing two jobs</h3>
+
+<p>
+    <a href="gene-mitf.html"><code>SW1</code></a> was at <strong>55% of founders</strong>
+    purely because it was standing in for this system &mdash; a majority of horses carried a
+    splash allele so that the world would contain ordinary marked horses. It is now
+    <strong>6%</strong>, a rate its own evidence supports: the study that identified it found
+    no splash allele at all in 112 horses picked for minimal white. An ordinary star is now
+    far more likely to be markings than a splash carrier, which is the real-world situation.
+</p>
+
+<h3>The golden covered every natural gene except the new one</h3>
+
+<p>
+    Worth recording as a method. <code>CoatPipelineGoldenTest</code>&rsquo;s javadoc says its
+    codes are &ldquo;chosen to hit every natural gene&rdquo;, and when the golden moved,
+    decomposing the diff by column showed <strong>zero of 1056 coat hashes changed</strong>
+    and all 1056 fixtures reading <code>markings=m/m</code>. The gene painted nothing in the
+    entire regression suite: the file had moved only in its code-string column. Six fixtures
+    were added &mdash; three dosages on a bay, one on a chestnut, one under sabino and one
+    beside splash &mdash; taking the golden to 1092 rows, 36 of which now carry a markings
+    allele. <strong>A golden that moves wholesale can still be testing nothing</strong>, and
+    the column decomposition is what tells the difference.
+</p>
+
+<h3>A defect this session introduced, found the same way</h3>
+
+<p>
+    The four health gene pages written earlier in the day were missing
+    <code>gene-inheritance.js</code> and <code>gene-carrot.js</code>, which every other gene
+    page carries, so their inheritance and punnett widgets were inert on the live wiki. Found
+    by reading <a href="gene-sooty.html">sooty</a>&rsquo;s page as a template for the markings
+    one and noticing two script tags that the PLOD1 page&rsquo;s foot had not shown. Fixed on
+    all four. The lesson is narrow and practical: <strong>copy a page template from its
+    end as well as its beginning.</strong>
+</p>
+
 <h2 id="d2026-09-17-health-loci">2026-09-17 &mdash; The health batch, and the locus that was there the whole time</h2>
 
 <p>
@@ -8877,7 +8957,7 @@ one.</li>
 <ul>
 <li><strong>The two genes were right and the two alleles were the wrong way round.</strong> <code>PAX3</code> carried the mod's near-ubiquitous minimal splash allele - 90% of founders were <code>SW2/N</code> - on the reasoning that a mild splash allele is what gives an ordinary horse its socks and its blaze. The reasoning was right and the allele was wrong. <code>SW1</code> on <code>MITF</code> is the widespread one: a several-hundred-year-old promoter change predating most modern breeds, found across a dozen of them. <code>SW2</code> is a <em>PAX3</em> coding change found chiefly in Quarter Horses and American Paints. So the common-allele job moved next door and <code>PAX3</code> became rare and breed-clustered.</li>
 <li><strong><code>SW1/N</code> is painted over a <em>range</em>, and it is the only outcome in the white loci that is.</strong> That is the reference's central claim about the allele: one copy can be a snip and one white foot, or a full blue-eyed splash, <em>on the same genotype</em> - the paper that identified it says a minimally expressed splash cannot be told from common white markings by eye. Painting it at a fixed strength would make the widespread splash allele the one thing it is documented not to be, which is predictable. <code>WhitePattern.splash</code> gained a two-strength overload; the horse's roll picks a point in the range and then sets the waterline, so it costs no extra draws.</li>
-<li><strong>Being honest about the cost: <code>SW1</code> is now doing two jobs.</strong> Ordinary markings in life are polygenic, and the same study found no splash allele at all in 112 horses picked for minimal white. The mod has no markings system, so the one allele that genuinely does hide in plain sight is standing in for one. The honest fix is a small markings contribution running before the white loci - <a href="roadmap.html#ordinary-markings">roadmap &sect;10.2b</a>, and a new system, which is why it is there and not in the gene.</li>
+<li><strong>Being honest about the cost: <code>SW1</code> is now doing two jobs.</strong> Ordinary markings in life are polygenic, and the same study found no splash allele at all in 112 horses picked for minimal white. The mod has no markings system, so the one allele that genuinely does hide in plain sight is standing in for one. The honest fix is a small markings contribution running before the white loci - roadmap &sect;10.2b, and a new system, which is why it is there and not in the gene. <em>(Shipped 2026-09-17 as <a href="gene-markings.html">the markings gene</a>, at priority 65; that roadmap section is deleted.)</em></li>
 <li><strong><code>PAX3</code>&rsquo;s javadoc and wiki page both still said deafness was not modelled.</strong> It has been for some time - the shared informational <code>splash-deafness</code> condition comes from both loci. Corrected; no behaviour change. A mangled paragraph in <code>genetics-model.html</code> about founder tables was repaired while it was being updated.</li>
 </ul>
 

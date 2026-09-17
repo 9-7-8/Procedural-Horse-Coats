@@ -78,6 +78,94 @@
     </p>
 </div>
 
+<h2 id="markings-0917">&sect;0-EQ &mdash; Ordinary markings get a locus, and SW1 drops to a sixth of what it was (2026-09-17, NOT played)</h2>
+
+<p>
+    <a href="gene-markings.html">Markings</a> ships at priority 65, and
+    <a href="gene-mitf.html"><code>SW1</code></a> falls from <strong>55% of founders to
+    6%</strong>. <strong>This changes what a large fraction of horses look like</strong>,
+    so it is the highest-consequence visual change in the project so far &mdash; but most of
+    what can go wrong here is still invisible, so the looking comes last.
+</p>
+<ul>
+    <li><strong>The SW1 drop actually took.</strong> Spawn a large batch of wild horses and
+        count splash. Before today a <em>majority</em> carried <code>SW1</code>; it should now
+        be roughly one in sixteen. <strong>If splash still looks common, the founder table did
+        not pick up the constant</strong> &mdash; which would be invisible except as "the world
+        looks like it did yesterday", and is the single most likely failure in this batch.</li>
+    <li><strong>Markings reaches founders at all.</strong> The same batch should show most
+        horses carrying <em>some</em> white &mdash; a star, a coronet, a sock. A herd of
+        entirely clean-faced horses means the locus is registered but its founder table is not
+        reaching the draw.</li>
+    <li><strong>Sock counts vary.</strong> Each leg rolls independently against a threshold, so
+        three socks and one clean leg should be common. <strong>If every marked horse has
+        exactly four matching socks, or exactly none, the per-leg threshold is broken</strong>
+        and the leg rolls are not being read per leg.</li>
+    <li><strong>The same horse marks identically every time.</strong> The gene consumes no
+        <code>nextFloat()</code> &mdash; every decision is stored epigenetics. Note a marked
+        horse, leave and rejoin the world, and confirm the markings are identical. A horse whose
+        blaze moves between reloads means something is rolling at paint time.</li>
+    <li><strong>Pattern genes stack rather than fight.</strong> Spawn
+        <code>markings=M2/M2</code> with <code>kit=SB1/N</code>: the sabino should <em>widen</em>
+        an existing blaze, not overwrite or double-draw it. Same with
+        <code>mitf=SW1/N</code> beside it. Both are in the coat golden now, so a mismatch here
+        means the game and the golden disagree.</li>
+    <li><strong>Foals inherit the tendency.</strong> Breed two heavily marked horses and confirm
+        the foals trend marked, and that two clean <code>m/m</code> parents never throw a marked
+        foal at all.</li>
+    <li class="muted"><strong>Lowest priority, purely visual:</strong> whether a broad blaze and
+        high stockings actually read as a normal marked riding horse rather than as a pinto, and
+        whether a markings blaze is distinguishable from a minimally-expressed sabino &mdash;
+        which it deliberately is <em>not</em>, so the test is really "does it look plausible",
+        not "can I tell them apart".</li>
+</ul>
+
+<h2 id="health-loci-0917">&sect;0-EP &mdash; Four health loci, ACAN D5, and silver's MCOA dosed (2026-09-17, NOT played)</h2>
+
+<p>
+    <a href="gene-slc5a3.html">SLC5A3</a> (FIS), <a href="gene-lamc2.html">LAMC2</a> and
+    <a href="gene-lama3.html">LAMA3</a> (JEB), <a href="gene-ryr1.html">RYR1</a> (malignant
+    hyperthermia), a <code>D5</code> allele on <a href="gene-acan.html">ACAN</a>, and
+    <a href="gene-silver.html">silver</a>&rsquo;s MCOA split by dose. Twelve breed files
+    changed. <strong>None of it has been seen in a world.</strong> The quickest way in is the
+    custom spawn egg: adding a health gene defaults it to the affected genotype.
+</p>
+<ul>
+    <li><strong>RYR1 must cost an affected horse nothing.</strong> This is first because it is
+        the one designed to look like a bug. A wild Azteca can be born with <code>MH/N</code>
+        and will <em>name</em> malignant hyperthermia on its panel while having <b>full hearts,
+        full speed and full jump</b>. <strong>If an <code>MH/N</code> horse is short even one
+        heart, the informational path is broken</strong> &mdash; and nothing else would reveal
+        it. <code>MH/MH</code> should cost six health, and no founder should ever have it.</li>
+    <li><strong>Silver's dose split.</strong> On a <a href="breed-book.html">Rocky Mountain
+        Horse</a> (12% <code>Z/Z</code>, 46% <code>Z/z</code>): a <code>Z/z</code> horse names
+        ocular cysts and loses <b>nothing</b>; a <code>Z/Z</code> horse names the ocular
+        anomalies and is down two hearts. A <code>Z/z</code> horse short a heart means the dose
+        split is inverted or collapsed.</li>
+    <li><strong>The two JEB loci are genuinely independent.</strong> Breed a
+        <code>lamc2</code> carrier to a <code>lama3</code> carrier repeatedly: <b>no affected
+        foal may ever appear.</b> If one does, the two have been folded into one locus and the
+        whole point of splitting them is lost.</li>
+    <li><strong>FIS at a real breed rate.</strong> Roughly two <a href="breed-book.html">Fell
+        Ponies</a> in five should carry <code>slc5a3</code>, and the
+        <a href="breed-book.html">Dales</a> about one in five. Breed two Fell carriers and
+        confirm a foal is born and then dies naming foal immunodeficiency syndrome. No wild
+        horse of any breed may ever be born affected.</li>
+    <li><strong>WFFS reaches the four warmbloods, and Friesian dwarfism does not.</strong> The
+        premise of the old check was backwards: <code>PLOD1</code> <em>is</em> WFFS. Check a
+        spread of <a href="breed-book.html">Oldenburg</a> founders for <code>plod1</code>
+        carriers near 15.5%, Selle Fran&ccedil;ais near 6%, Swedish Warmblood near 7.4% and
+        Gelderland near 7.6% &mdash; while <code>b4galt7</code> reads clear on every one of
+        them. A dwarf foal out of two warmbloods is the catastrophic failure here.</li>
+    <li><strong>ACAN D5 is not the severe variant.</strong> A <code>D5/D5</code> or
+        <code>D5/D2</code> horse should be a surviving dwarf, not a dead foal &mdash; only
+        <code>D1/D1</code> is lethal. Chincoteague founders should carry <code>D5</code> at
+        about 2%.</li>
+    <li><strong>Carrier rates do not leak into the wild generally.</strong> All four new loci
+        are rare outside their breeds (0.8&ndash;1%), so an unaffiliated wild horse carrying one
+        should be uncommon and carrying two should never happen.</li>
+</ul>
+
 <h2 id="tutorial-chapters-0916">&sect;0-EO &mdash; Getting started, rebuilt as six chapters (2026-09-16, NOT played)</h2>
 
 <div class="note warn">

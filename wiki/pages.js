@@ -182,7 +182,8 @@ window.HG.pages = {
                 { href: "gene-sex.html", text: "Sex", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-fertility.html", text: "Fertility", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-diet.html", text: "Diet", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-tiger-eye.html", text: "Tiger eye (SLC24A5)", kind: "natural", views: ["gameplay","coding","science"] }
+                { href: "gene-tiger-eye.html", text: "Tiger eye (SLC24A5)", kind: "natural", views: ["gameplay","coding","science"] },
+                { href: "gene-markings.html", text: "Markings", kind: "natural", views: ["gameplay","coding","science"] }
             ]
         },
         {

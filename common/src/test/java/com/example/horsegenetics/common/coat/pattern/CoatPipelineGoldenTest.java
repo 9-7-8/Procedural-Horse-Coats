@@ -94,6 +94,14 @@ class CoatPipelineGoldenTest {
             override("pangare=Pa2/Pa2"),                                 // a black - unchanged
             override("agouti=A/a", "sooty=S2/S2", "pangare=Pa2/Pa2"),    // both halves at once
             override("agouti=A/A", "shade=ShD/ShD", "extension=E/E"),    // seal - the inner limb
+            // markings: the ordinary star and sock that need no pattern gene, and
+            // the pattern loci stacking their white on top of it
+            override("agouti=A/a", "markings=M1/m"),
+            override("agouti=A/a", "markings=M2/M1"),
+            override("agouti=A/a", "markings=M2/M2"),
+            override("extension=e/e", "markings=M2/M2"),                 // white over red
+            override("agouti=A/a", "markings=M2/M2", "kit=SB1/N"),       // sabino widens the blaze
+            override("agouti=A/a", "markings=M2/M2", "mitf=SW1/N"),      // and splash beside it
             // rabicano: tail and flank first, and not classic roan
             override("agouti=A/a", "rabicano=Rb/rb"),
             override("agouti=A/a", "rabicano=Rb/Rb"),

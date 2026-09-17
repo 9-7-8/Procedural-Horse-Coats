@@ -11,6 +11,7 @@ pangare
 matp
 champagne
 grey
+markings
 natural_zebra
 roan
 rabicano

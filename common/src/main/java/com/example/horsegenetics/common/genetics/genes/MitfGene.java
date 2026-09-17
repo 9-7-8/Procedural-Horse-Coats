@@ -57,14 +57,16 @@ import java.util.List;
  * says outright that a minimally expressed splash cannot be told from common
  * white markings by eye.
  *
- * <p>So {@code SW1} carries the mod's population of ordinary-looking marked
- * horses: {@value #WILD_SW1_PERCENT}% of founders have one copy, and one copy
- * is {@link #MINIMAL}. <b>That is a stand-in, and worth being honest about.</b>
- * In life most stars and socks are <i>not</i> splash - they are polygenic, and
- * the same study found no splash allele at all in 112 deliberately
- * minimally-marked horses. The mod has no polygenic markings system, so the one
- * allele that genuinely does hide in plain sight is doing that job as well as
- * its own. The honest fix is a markings system; see {@code wiki/roadmap.html}.
+ * <p><b>{@code SW1} used to carry the mod's whole population of
+ * ordinary-looking marked horses</b>, at 55% of founders, because there was
+ * nothing else to draw a star with. That was a stand-in and it is now over:
+ * {@link MarkingsGene} owns ordinary markings, and this allele has dropped to
+ * {@value #WILD_SW1_PERCENT}% - a rate its own evidence supports rather than one
+ * chosen to populate a world. In life most stars and socks are <i>not</i> splash;
+ * they are polygenic, and the same study found no splash allele at all in 112
+ * deliberately minimally-marked horses. One copy is still {@link #MINIMAL}, and
+ * it is still the one splash that genuinely hides in plain sight - but it is no
+ * longer doing another locus's job as well as its own.
  *
  * <p><b>{@code SW6}, {@code SW7} and {@code SW8} are deliberately folded into
  * {@code SW5}.</b> The papers no longer describe them identically - deletions of
@@ -195,7 +197,7 @@ public final class MitfGene implements Gene, HealthContribution, EyeRequestContr
      * like an ordinary horse with a star and a sock. So most horses have it,
      * and most horses wearing it are not what anyone would call a splash.
      */
-    public static final double WILD_SW1_PERCENT = 55.0;
+    public static final double WILD_SW1_PERCENT = 6.0;
     /** Rare, family-limited, and loud when it turns up. */
     public static final double WILD_SW3_PERCENT = 0.4;
     /** {@code SW5} stands for the rare {@code MITF} deletions as a group. */
