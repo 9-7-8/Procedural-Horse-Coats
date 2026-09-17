@@ -721,6 +721,19 @@ public record GeneSpec(
     /** What the layer does where its masks say. */
     public record Op(OpType type, Params params) {}
 
+    /**
+     * One entry of a colour op's {@code regions} list - the parts it claims, and
+     * the colour those parts take instead of the op's own.
+     *
+     * <p>The fields are the op's four colour parameters again, sentinel and all,
+     * so a region is exactly as expressive as the op containing it: it can name
+     * a literal colour, or point {@code hue} at a knob and vary down a line of
+     * horses. That symmetry is deliberate - a region that could do less would
+     * send an author back to writing a layer each, which is the duplication the
+     * field exists to remove.
+     */
+    public record Region(List<Part> parts, int color, Value hue, Value saturation, Value lightness) {}
+
     public enum OpType {
         /** Natural: {@code PigmentField.dilute} - the dilution move. */
         DILUTE,
@@ -817,6 +830,16 @@ public record GeneSpec(
         public int color(String name, int fallback) {
             Object o = raw.get(name);
             return o == null ? fallback : (Integer) o;
+        }
+
+        /**
+         * A colour op's per-region overrides, in the order the file named them;
+         * empty when absent, which is every op that does not use the field.
+         */
+        @SuppressWarnings("unchecked")
+        public List<Region> regions(String name) {
+            Object o = raw.get(name);
+            return o == null ? List.of() : (List<Region>) o;
         }
 
         /**

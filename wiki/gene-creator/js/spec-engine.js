@@ -1155,11 +1155,28 @@ window.HG = window.HG || {};
   // above. A negative sentinel rather than a presence test, because the creator
   // carries every parameter at its default whether or not you touched one - see
   // the note on SpecPainter.solidColour.
-  function solidColour(op, values, legIndex) {
-    var hue = get(values, op.hue, -1, legIndex);
-    if (hue < 0) return hexToRgb(op.color);
-    return hsl(hue, get(values, op.saturation, 0.8, legIndex),
-      get(values, op.lightness, 0.55, legIndex));
+  //
+  // A `regions` entry claiming this texel's part answers first, and answers the
+  // same way: it carries the identical four parameters, sentinel included. A
+  // part no entry claims falls through to the op's own colour.
+  function solidColour(op, values, legIndex, part) {
+    var regions = op.regions || [];
+    for (var i = 0; i < regions.length; i++) {
+      // Expanded per texel, exactly as excludedByParts does it - the list on a
+      // region is the author's spelling, groups and all, not a resolved set.
+      if (HG.schema.expandParts(regions[i].parts).indexOf(part) >= 0) {
+        return forkedColour(regions[i], values, legIndex);
+      }
+    }
+    return forkedColour(op, values, legIndex);
+  }
+
+  /** The hue < 0 fork itself, shared by an op's own colour and by each region. */
+  function forkedColour(src, values, legIndex) {
+    var hue = get(values, src.hue, -1, legIndex);
+    if (hue < 0) return hexToRgb(src.color);
+    return hsl(hue, get(values, src.saturation, 0.8, legIndex),
+      get(values, src.lightness, 0.55, legIndex));
   }
 
   function mixRgb(a, b, t) {
@@ -1259,7 +1276,8 @@ window.HG = window.HG || {};
         delta.addOpacity(px, py, percentToChannel(get(values, op.opacity, 100, legIndex) * k));
         break;
       case "TOWARD":
-        towardColour(delta, colour, op, values, legIndex, px, py, k, solidColour(op, values, legIndex));
+        towardColour(delta, colour, op, values, legIndex, px, py, k,
+          solidColour(op, values, legIndex, part));
         break;
       case "RAMP":
         towardColour(delta, colour, op, values, legIndex, px, py, k,
@@ -1282,7 +1300,7 @@ window.HG = window.HG || {};
         break;
       }
       case "FLAT": {
-        var c = solidColour(op, values, legIndex);
+        var c = solidColour(op, values, legIndex, part);
         var wantOpacity = percentToChannel(get(values, op.opacity, 100, legIndex));
         delta.set(px, py,
           Math.round(lerp(colour.opacityAt(px, py), wantOpacity, k)),

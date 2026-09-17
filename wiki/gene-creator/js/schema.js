@@ -40,6 +40,10 @@ window.HG = window.HG || {};
   function svg(name, doc) { return { name: name, kind: "SVG", doc: doc }; }
   function text(name, doc) { return { name: name, kind: "TEXT", fallback: "", doc: doc }; }
   function box(name, doc) { return { name: name, kind: "BOX", doc: doc }; }
+  // Per-region colour overrides - the mirror of SpecSchema.Kind.REGIONS, and the
+  // only kind that nests. Region scoping belongs to a mask and never belonged to
+  // a colour, so painting the legs differently from the barrel cost a layer each.
+  function regions(name, doc) { return { name: name, kind: "REGIONS", doc: doc }; }
 
   // The three that turn any colour op into an epigenetic one. They repeat on
   // four ops, so they are built rather than retyped - a hue that drifts between
@@ -61,6 +65,9 @@ window.HG = window.HG || {};
   }
   var HUE_DOC = "hue in degrees - 0 red, 120 green, 240 blue. Below 0 means \"not set\", "
     + "so the layer paints 'color' instead. Point it at a knob to give every horse its own.";
+  var REGIONS_DOC = "per-region colour overrides: each entry names 'parts' and either a "
+    + "'color' or a hue/saturation/lightness of its own. A part an entry names takes that "
+    + "colour; a part no entry names takes the op's own. Each part may be named once.";
 
   // How many straight sub-segments each span of a smoothed PATH is walked in.
   // Must equal SpecSchema.PATH_CURVE_SAMPLES; parity.js compares them, because
@@ -532,6 +539,7 @@ window.HG = window.HG || {};
       params: [
         color("color", "the colour to walk toward")
       ].concat(hueParams(HUE_DOC, true), [
+        regions("regions", REGIONS_DOC),
         v("strength", 100, "percent of the way there", { min: 0, max: 100, step: 1 }, 82),
         v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
       ])
@@ -542,6 +550,7 @@ window.HG = window.HG || {};
       params: [
         color("color", "flat paint")
       ].concat(hueParams(HUE_DOC, true), [
+        regions("regions", REGIONS_DOC),
         v("opacity", 100, "percent opacity", { min: 0, max: 100, step: 1 })
       ])
     },

@@ -207,6 +207,11 @@ window.HG = window.HG || {};
         // a RAMP empty would work - it would fall through to the hue sweep -
         // but then the stop list only appears once you already knew it existed.
         op[p.name] = ["#ff69b4", "#69b4ff"];
+      } else if (p.kind === "REGIONS") {
+        // Empty: a new op paints one colour everywhere, and a region is a thing
+        // you add on purpose. There is nothing safe to pre-fill one with either -
+        // a region carrying no colour is a load error, not a blank to fill in.
+        op[p.name] = [];
       } else {
         op[p.name] = initial(p);
       }
@@ -516,10 +521,37 @@ window.HG = window.HG || {};
         if (v.length) {
           out[p.name] = v.map(String);
         }
+      } else if (p.kind === "REGIONS") {
+        // Never trimmed to a default: a region's whole purpose is to differ from
+        // the op around it, so there is no default to compare it against. An
+        // empty list is dropped, because the game reads absence and an empty
+        // list identically - and an unknown key here is dropped SILENTLY, which
+        // is why this branch has to exist rather than falling through.
+        if (v.length) out[p.name] = v.map(tidyRegion);
       } else {
         out[p.name] = tidyValue(v);
       }
     });
+    return out;
+  }
+
+  /**
+   * One per-region colour override. The fork inside a region is the op's own
+   * fork again - a literal colour, or a hue that may point at a knob - so it is
+   * written the same way, and the hue sentinel decides which half survives.
+   * Writing both would export a colour the game never reads.
+   */
+  function tidyRegion(region) {
+    var out = { parts: (region.parts || []).slice() };
+    var varying = !(region.hue === undefined
+      || (typeof region.hue === "number" && region.hue < 0));
+    if (varying) {
+      out.hue = tidyValue(region.hue);
+      if (region.saturation !== undefined) out.saturation = tidyValue(region.saturation);
+      if (region.lightness !== undefined) out.lightness = tidyValue(region.lightness);
+    } else {
+      out.color = String(region.color || "#ffffff");
+    }
     return out;
   }
 

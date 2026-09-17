@@ -1166,8 +1166,77 @@ window.HG = window.HG || {};
     return wrap;
   }
 
+  /**
+   * <b>Per-region colour overrides</b> - the legs a different colour from the
+   * barrel, in one layer.
+   *
+   * <p>Region scoping is a property of a MASK, so this used to cost a layer
+   * each: two layers agreeing about every mask between them and differing in
+   * one colour, which drift the moment somebody edits one of them.
+   *
+   * <p>Each entry reuses {@link #partsEditor} - it reads and writes
+   * {@code owner.parts}, and a region is just another owner - and repeats the
+   * op's own colour fork, because the parser wants exactly one of the two
+   * halves and refuses an entry carrying neither.
+   */
+  function regionsRow(op, p) {
+    var list = op.regions || (op.regions = []);
+    var wrap = el("div", { class: "col" });
+
+    list.forEach(function (region, i) {
+      var box = el("div", { class: "region-entry" });
+      box.appendChild(partsEditor(region, changed));
+
+      var varying = !(region.hue === undefined
+        || (typeof region.hue === "number" && region.hue < 0));
+      box.appendChild(select(
+        [{ value: "fixed", label: "One fixed colour" },
+          { value: "varies", label: "Hue, saturation & lightness" }],
+        varying ? "varies" : "fixed",
+        function (m) {
+          region.hue = m === "varies" ? 0 : -1;
+          changed();
+        }
+      ));
+
+      if (!varying) {
+        var well = el("input", { type: "color", value: region.color || "#ffffff" });
+        well.addEventListener("input", function () { region.color = well.value; changed(); });
+        box.appendChild(well);
+      } else {
+        schema.OPS[op.type].params.forEach(function (q) {
+          if (q.name !== "hue" && q.name !== "saturation" && q.name !== "lightness") return;
+          box.appendChild(field(q.name, valueEditor(region, q.name, q, changed), q.doc));
+        });
+      }
+
+      box.appendChild(el("button", {
+        type: "button", class: "chip", text: "remove this region",
+        onclick: function () { list.splice(i, 1); changed(); }
+      }));
+      wrap.appendChild(box);
+    });
+
+    wrap.appendChild(el("button", {
+      type: "button", class: "chip", text: "add a region",
+      onclick: function () { list.push({ parts: [], color: "#ff69b4", hue: -1 }); changed(); }
+    }));
+
+    wrap.appendChild(el("p", {
+      class: "hint",
+      text: list.length
+        ? "A part an entry names takes that entry's colour; every other part takes the colour "
+          + "above. Name one part in two entries and the gene will not load - the groups "
+          + "overlap, so points and legs together claim all four legs twice."
+        : "Nothing here yet, so this op paints one colour everywhere. Add a region to paint "
+          + "the legs, the mane or the face differently without a second layer."
+    }));
+    return fieldBlock("Regions", wrap, p.doc);
+  }
+
   function opParamRow(op, p) {
     if (p.kind === "COLOR" || p.kind === "COLORS") return colourRow(op, p);
+    if (p.kind === "REGIONS") return regionsRow(op, p);
     // Folded into the colour control above, when there is one to fold them into.
     if (FOLDED_INTO_COLOUR[p.name] && opTakesAColour(op)) return null;
     if (p.kind === "CHOICE") {

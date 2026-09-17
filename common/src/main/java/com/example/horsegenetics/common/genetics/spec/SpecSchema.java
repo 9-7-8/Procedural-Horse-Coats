@@ -72,7 +72,20 @@ public final class SpecSchema {
          * Four numbers read as {@code [minU, minV, width, height]} - an SVG
          * {@code viewBox}, in the order and the meaning that file writes them.
          */
-        BOX
+        BOX,
+        /**
+         * A list of <b>per-region colour overrides</b> - each an object naming
+         * {@code parts} plus the colour they take, in the same spelling the op
+         * itself uses.
+         *
+         * <p>The only kind that nests: every other parameter here is one number,
+         * word, colour or flat array, and this one carries a short list of
+         * objects. It exists because region scoping belonged to a {@code mask}
+         * and never to a colour, so a horse with paler legs than barrel cost a
+         * layer each - and two layers that must agree about every mask between
+         * them are two layers that drift.
+         */
+        REGIONS
     }
 
     /**
@@ -138,6 +151,10 @@ public final class SpecSchema {
 
         static Param box(String name, String doc) {
             return new Param(name, Kind.BOX, 0, List.of(), doc);
+        }
+
+        static Param regions(String name, String doc) {
+            return new Param(name, Kind.REGIONS, 0, List.of(), doc);
         }
     }
 
@@ -395,6 +412,17 @@ public final class SpecSchema {
                     + "difference between a fixed palette and an epigenetic one.";
     private static final String SATURATION_DOC = "saturation 0 to 1; read only when 'hue' is set";
     private static final String LIGHTNESS_DOC = "lightness 0 to 1; read only when 'hue' is set";
+
+    /**
+     * Region scoping is a property of a {@code mask}, so painting the legs a
+     * different colour from the barrel used to mean a layer each - two layers
+     * agreeing about every mask between them and differing in one colour.
+     */
+    private static final String REGIONS_DOC =
+            "per-region colour overrides: a list of { \"parts\": [..], and either \"color\" or "
+                    + "\"hue\"/\"saturation\"/\"lightness\" } entries. A part an entry names takes "
+                    + "that colour; a part no entry names takes the op's own. Each part may be "
+                    + "named once - the groups overlap, so POINTS and LEGS together claim the legs twice.";
 
     /**
      * The most octaves a {@code FRACTAL} mask will take. Every octave is a full
@@ -861,6 +889,7 @@ public final class SpecSchema {
                 Param.value("hue", -1, HUE_DOC),
                 Param.value("saturation", 0.8, SATURATION_DOC),
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
+                Param.regions("regions", REGIONS_DOC),
                 Param.value("strength", 100.0, "percent of the way there"),
                 Param.value("opacity", 100.0, "percent opacity the texel ends at")));
 
@@ -869,6 +898,7 @@ public final class SpecSchema {
                 Param.value("hue", -1, HUE_DOC),
                 Param.value("saturation", 0.8, SATURATION_DOC),
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
+                Param.regions("regions", REGIONS_DOC),
                 Param.value("opacity", 100.0, "percent opacity")));
 
         OPS.put(OpType.RAMP, List.of(

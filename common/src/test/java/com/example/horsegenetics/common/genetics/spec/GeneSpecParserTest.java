@@ -256,6 +256,96 @@ class GeneSpecParserTest {
         assertEquals(2, GeneSpecParser.parse(json, "ramp.json").expressions().size());
     }
 
+    /**
+     * A region names parts and a colour of its own, and the group aliases
+     * expand the same way a mask's 'parts' does - so "LEGS" is four parts here
+     * too, and a region's hue may point at a knob, which is the whole reason it
+     * is not simply a colour.
+     */
+    @Test
+    void readsPerRegionColoursOnAColourOp() {
+        String json = gene("""
+                , "phase": "magical",
+                  "knobs": [ { "name": "coreHue", "min": 0, "max": 360 } ],
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "TOWARD", "color": "#112233", "regions": [
+                          { "parts": ["LEGS"], "color": "#ffffff" },
+                          { "parts": ["HAIR"], "hue": "$coreHue" } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        GeneSpec spec = GeneSpecParser.parse(json, "regions.json");
+        List<GeneSpec.Region> regions =
+                named(spec, "v").layers().get(0).op().params().regions("regions");
+        assertEquals(2, regions.size());
+        assertEquals(4, regions.get(0).parts().size(), "LEGS expands to four parts");
+        assertTrue(regions.get(0).parts().contains(Part.LEFT_HIND_LEG),
+                "LEGS includes the hind legs: " + regions.get(0).parts());
+        assertEquals(0xFFFFFF, regions.get(0).color());
+        assertEquals(List.of(Part.MANE, Part.TAIL), regions.get(1).parts());
+        assertTrue(regions.get(1).hue() instanceof GeneSpec.Value.FromKnob,
+                "a region's hue must be able to point at a knob");
+    }
+
+    /** A region naming no parts cannot paint, so it is refused rather than ignored. */
+    @Test
+    void rejectsARegionThatNamesNoParts() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "TOWARD", "color": "#112233",
+                              "regions": [ { "color": "#ffffff" } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "noparts.json"));
+        assertTrue(e.getMessage().contains("names no 'parts'"), e.getMessage());
+    }
+
+    /**
+     * Without a colour a region would paint white over parts the op was already
+     * colouring - which looks exactly like the feature not working.
+     */
+    @Test
+    void rejectsARegionWithNoColour() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "TOWARD", "color": "#112233",
+                              "regions": [ { "parts": ["LEGS"] } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "nocolour.json"));
+        assertTrue(e.getMessage().contains("a region needs a colour"), e.getMessage());
+    }
+
+    /**
+     * The groups overlap, so POINTS beside LEGS claims all four legs twice
+     * without either name looking wrong - and a part claimed twice has no
+     * answer that is not arbitrary. Refusing it is what lets there be no
+     * "first entry wins" rule for an author to discover by experiment.
+     */
+    @Test
+    void rejectsAPartClaimedByTwoRegions() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "TOWARD", "color": "#112233", "regions": [
+                          { "parts": ["POINTS"], "color": "#ffffff" },
+                          { "parts": ["LEGS"], "color": "#000000" } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "twice.json"));
+        assertTrue(e.getMessage().contains("already claimed by"), e.getMessage());
+        assertTrue(e.getMessage().contains("LEFT_FRONT_LEG"),
+                "the message should name the part in dispute: " + e.getMessage());
+    }
+
     @Test
     void rejectsAnUnknownParameter() {
         String json = gene("""

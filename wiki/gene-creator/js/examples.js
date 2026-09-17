@@ -1257,6 +1257,40 @@ window.HG.examples = {
               "color": "#ffb060",
               "strength": 55
             }
+          },
+          {
+            "name": "one wash, three colours: paler legs and a mane in the horse's own hue",
+            "masks": [
+              {
+                "type": "PARTS",
+                "parts": [
+                  "BARREL",
+                  "LEGS",
+                  "HAIR"
+                ]
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#6a5acd",
+              "regions": [
+                {
+                  "parts": [
+                    "LEGS"
+                  ],
+                  "color": "#f0e8ff"
+                },
+                {
+                  "parts": [
+                    "HAIR"
+                  ],
+                  "hue": "$coreHue",
+                  "saturation": 0.8,
+                  "lightness": 0.5
+                }
+              ],
+              "strength": 55
+            }
           }
         ]
       },

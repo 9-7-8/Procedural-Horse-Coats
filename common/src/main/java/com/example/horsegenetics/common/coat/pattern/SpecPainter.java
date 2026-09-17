@@ -12,6 +12,8 @@ import com.example.horsegenetics.common.genetics.spec.GeneSpec.Layer;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Mask;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Op;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Params;
+import com.example.horsegenetics.common.genetics.spec.GeneSpec.Region;
+import com.example.horsegenetics.common.genetics.spec.GeneSpec.Value;
 import com.example.horsegenetics.common.genetics.spec.SpecSchema;
 import com.example.horsegenetics.common.genetics.spec.SpecValues;
 
@@ -207,7 +209,7 @@ public final class SpecPainter {
                         percentToChannel(v.get(p.value("blue", 0.0), leg) * k));
                 delta.addOpacity(px, py, percentToChannel(v.get(p.value("opacity", 100.0), leg) * k));
             }
-            case TOWARD -> towardColour(delta, colour, p, v, leg, px, py, k, solidColour(op, v, leg));
+            case TOWARD -> towardColour(delta, colour, p, v, leg, px, py, k, solidColour(op, v, leg, part));
             case RAMP -> {
                 int rgb = rampColour(op, v, leg,
                         axisPosition(op, v, leg, skin, bounds, part, point, seedBase));
@@ -231,7 +233,7 @@ public final class SpecPainter {
                 delta.addOpacity(px, py, (int) Math.round((wantOpacity - colour.opacity(px, py)) * k));
             }
             case FLAT -> {
-                int rgb = solidColour(op, v, leg);
+                int rgb = solidColour(op, v, leg, part);
                 int wantOpacity = percentToChannel(v.get(p.value("opacity", 100.0), leg));
                 delta.set(px, py,
                         (int) Math.round(lerp(colour.opacity(px, py), wantOpacity, k)),
@@ -272,15 +274,34 @@ public final class SpecPainter {
      * present", because the gene creator carries every parameter at its default
      * whether or not the author touched it. A presence test would have the
      * preview take the HSL path and the exported file take the colour one.
+     *
+     * <p>A {@code regions} entry claiming this texel's part answers first, and
+     * answers the same way - it carries the identical four parameters, sentinel
+     * included, so a region may be a literal colour while the op it sits in
+     * varies per horse, or the other way round. A part no entry claims falls
+     * through to the op's own colour, which is what makes the field additive:
+     * adding one to a gene cannot move a texel it does not name.
      */
-    private static int solidColour(Op op, SpecValues v, int leg) {
+    private static int solidColour(Op op, SpecValues v, int leg, Part part) {
         Params p = op.params();
-        double hue = v.get(p.value("hue", -1), leg);
-        if (hue < 0) {
-            return p.color("color", 0xFFFFFF);
+        for (Region region : p.regions("regions")) {
+            if (region.parts().contains(part)) {
+                return colourOf(region.color(), region.hue(), region.saturation(),
+                        region.lightness(), v, leg);
+            }
         }
-        return hsl(hue, v.get(p.value("saturation", 0.8), leg),
-                v.get(p.value("lightness", 0.55), leg));
+        return colourOf(p.color("color", 0xFFFFFF), p.value("hue", -1),
+                p.value("saturation", 0.8), p.value("lightness", 0.55), v, leg);
+    }
+
+    /** The {@code hue < 0} fork itself, shared by an op's own colour and by each of its regions. */
+    private static int colourOf(int color, Value hue, Value saturation, Value lightness,
+                                SpecValues v, int leg) {
+        double h = v.get(hue, leg);
+        if (h < 0) {
+            return color;
+        }
+        return hsl(h, v.get(saturation, leg), v.get(lightness, leg));
     }
 
     /**

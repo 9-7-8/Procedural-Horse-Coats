@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics.spec;
 
 import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.coat.pattern.SvgPath;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.AlleleSpec;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Combine;
@@ -14,6 +15,7 @@ import com.example.horsegenetics.common.genetics.spec.GeneSpec.MaskType;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Op;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.OpType;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Params;
+import com.example.horsegenetics.common.genetics.spec.GeneSpec.Region;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Value;
 
 import java.util.ArrayList;
@@ -1264,6 +1266,7 @@ public final class GeneSpecParser {
                 case FLAG -> asBoolean(raw, where + " '" + p.name() + "'");
                 case COLOR -> readColor(raw, where + " '" + p.name() + "'");
                 case COLORS -> readColors(raw, where + " '" + p.name() + "'");
+                case REGIONS -> readRegions(raw, where + " '" + p.name() + "'", knobs, knobIndex);
                 case POINTS -> readPoints(raw, where + " '" + p.name() + "'");
                 case TEXT -> asString(raw, where + " '" + p.name() + "'");
                 case BOX -> readBox(raw, where + " '" + p.name() + "'");
@@ -1352,6 +1355,69 @@ public final class GeneSpecParser {
         Map<String, Object> copy = new LinkedHashMap<>(o);
         copy.put("name", name);
         return copy;
+    }
+
+    /**
+     * A colour op's {@code regions} list: each entry the {@code parts} it claims
+     * and the colour they take, spelled exactly as the op spells its own - a
+     * literal {@code color}, or a {@code hue} that may point at a knob.
+     *
+     * <p>Three refusals here rather than a precedence rule. An entry with no
+     * parts cannot paint; an entry with no colour would paint white over texels
+     * the op was already covering; and a part claimed twice has no answer that
+     * is not arbitrary. Refusing the third is what lets there be no "first entry
+     * wins" for an author to discover by experiment - which matters because the
+     * groups overlap, and {@code POINTS} beside {@code LEGS} claims all four
+     * legs twice without either name looking wrong.
+     */
+    private static List<Region> readRegions(Object raw, String where,
+                                            List<Knob> knobs, Map<String, Integer> knobIndex) {
+        List<Region> out = new ArrayList<>();
+        Map<Part, Integer> claimedBy = new LinkedHashMap<>();
+        List<Object> entries = asArray(raw, where);
+        for (int i = 0; i < entries.size(); i++) {
+            String at = where + " [" + i + "]";
+            Map<String, Object> o = asObject(entries.get(i), at);
+            expectKeys(o, at, "parts", "color", "hue", "saturation", "lightness");
+            if (!o.containsKey("parts")) {
+                throw new IllegalArgumentException(at + ": a region names no 'parts', so there is "
+                        + "nothing for it to paint. Name the parts it covers, or drop the entry and "
+                        + "let the op's own colour have those texels.");
+            }
+            List<Part> parts = PartGroups.expand(strings(o.get("parts"), at + " 'parts'"));
+            if (parts.isEmpty()) {
+                throw new IllegalArgumentException(at + ": a region's 'parts' is empty, so there is "
+                        + "nothing for it to paint.");
+            }
+            if (!o.containsKey("color") && !o.containsKey("hue")) {
+                throw new IllegalArgumentException(at + ": a region needs a colour - either "
+                        + "\"color\": \"#rrggbb\" or a \"hue\" (with 'saturation' and 'lightness' "
+                        + "beside it). Without one it would paint white over parts the op was "
+                        + "already colouring, which is never what naming a region is for.");
+            }
+            for (Part part : parts) {
+                Integer first = claimedBy.put(part, i);
+                if (first != null) {
+                    throw new IllegalArgumentException(at + ": " + part + " is already claimed by "
+                            + "region [" + first + "], so its colour would depend on which entry "
+                            + "the painter read first. Name each part once - the groups overlap, so "
+                            + "'POINTS' and 'LEGS' together claim all four legs twice.");
+                }
+            }
+            out.add(new Region(parts,
+                    o.containsKey("color") ? readColor(o.get("color"), at + " 'color'") : 0xFFFFFF,
+                    regionValue(o, "hue", -1, at, knobs, knobIndex),
+                    regionValue(o, "saturation", 0.8, at, knobs, knobIndex),
+                    regionValue(o, "lightness", 0.55, at, knobs, knobIndex)));
+        }
+        return List.copyOf(out);
+    }
+
+    private static Value regionValue(Map<String, Object> o, String key, double fallback, String at,
+                                     List<Knob> knobs, Map<String, Integer> knobIndex) {
+        return o.containsKey(key)
+                ? readValue(o.get(key), at + " '" + key + "'", knobs, knobIndex)
+                : new Value.Const(fallback);
     }
 
     private static int readColor(Object raw, String where) {
