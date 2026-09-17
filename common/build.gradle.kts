@@ -109,6 +109,19 @@ tasks.register<JavaExec>("bakeMarkingFacts") {
     args(rootProject.layout.projectDirectory.file("wiki/breed-designer/assets/marking-facts.json").asFile.absolutePath)
 }
 
+// One row per allele presentation of every registered gene - including the
+// wild types and the loci that paint nothing, which the markings facts leave
+// out on purpose. The page it fills is written to be fed to an AI whole; see
+// GeneCensusTool.
+tasks.register<JavaExec>("bakeGeneCensus") {
+    group = "horsegenetics"
+    description = "Write the generated table of wiki/gene-census.html - every outcome of every gene"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.genetics.spec.GeneCensusTool")
+    args(rootProject.layout.projectDirectory.dir("wiki").asFile.absolutePath)
+}
+
 // Which genes nobody has confirmed by eye, worst-first - read off the wiki's own
 // Verified blocks (hard rule 9) so the horse dimension's coat-check column does
 // not need a second, drifting list. See UnverifiedGeneTool.

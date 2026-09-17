@@ -116,7 +116,7 @@ public final class MagicNightWatchGene implements Gene, AbilityContribution {
                     "Two copies. It gets as close behind you as it can and stays there - "
                             + "but only while you are not looking at it. Turn round and it is "
                             + "an ordinary horse again, which is the whole point of it. "
-                            + "silently, all night. It is the last step of the progression and "
+                            + "It is the last step of the progression and "
                             + "the one people ask for."));
 
     private final List<Allele> alleles;
