@@ -527,7 +527,9 @@ window.HG = window.HG || {};
         // empty list is dropped, because the game reads absence and an empty
         // list identically - and an unknown key here is dropped SILENTLY, which
         // is why this branch has to exist rather than falling through.
-        if (v.length) out[p.name] = v.map(tidyRegion);
+        if (v.length) {
+          out[p.name] = v.map(function (r) { return tidyRegion(r, p); });
+        }
       } else {
         out[p.name] = tidyValue(v);
       }
@@ -537,21 +539,43 @@ window.HG = window.HG || {};
 
   /**
    * One per-region colour override. The fork inside a region is the op's own
-   * fork again - a literal colour, or a hue that may point at a knob - so it is
-   * written the same way, and the hue sentinel decides which half survives.
-   * Writing both would export a colour the game never reads.
+   * fork again, so it is written the same way and exactly ONE source survives -
+   * the parser refuses an entry naming two, so writing a second would export a
+   * gene that no longer loads.
+   *
+   * On TOWARD and FLAT that fork is the hue sentinel. On RAMP and PALETTE,
+   * which generate a colour rather than naming one, it is which of the three
+   * sources the region carries: its own stops, one flat `color` (the one-stop
+   * shorthand, written back exactly as it was read), or its own swept hue.
+   *
+   * The trailing keys are driven off `p.choices` - the op's own colour
+   * vocabulary - rather than listed here, so a region can never be written with
+   * a key the op it sits in would refuse.
    */
-  function tidyRegion(region) {
+  function tidyRegion(region, p) {
     var out = { parts: (region.parts || []).slice() };
-    var varying = !(region.hue === undefined
-      || (typeof region.hue === "number" && region.hue < 0));
-    if (varying) {
-      out.hue = tidyValue(region.hue);
-      if (region.saturation !== undefined) out.saturation = tidyValue(region.saturation);
-      if (region.lightness !== undefined) out.lightness = tidyValue(region.lightness);
-    } else {
-      out.color = String(region.color || "#ffffff");
+    var keys = p.choices || [];
+    var generated = keys.indexOf("colors") >= 0;
+
+    if (generated && region.colors && region.colors.length) {
+      out.colors = region.colors.map(String);
+      return out;
     }
+    if (generated && region.color) {
+      out.color = String(region.color);
+      return out;
+    }
+    var varying = generated || !(region.hue === undefined
+      || (typeof region.hue === "number" && region.hue < 0));
+    if (!varying) {
+      out.color = String(region.color || "#ffffff");
+      return out;
+    }
+    out.hue = tidyValue(region.hue === undefined ? 0 : region.hue);
+    keys.forEach(function (k) {
+      if (k === "color" || k === "colors" || k === "hue") return;
+      if (region[k] !== undefined) out[k] = tidyValue(region[k]);
+    });
     return out;
   }
 

@@ -106,11 +106,12 @@
         <code>hue</code>, which 160 of the 195 shipped genes already use. What was
         genuinely missing was that the <em>creator</em> showed neither &mdash; fixed
         2026-09-17, see <a href="session-log.html#d2026-09-17-colour-control">the log</a>.
-        <strong>What is left of the section is two things.</strong> The same
-        <code>regions</code> field on <code>RAMP</code> and <code>PALETTE</code>, which take
-        their colour from a stop list or a per-cell draw rather than from the shared
-        <code>solidColour</code>, so scoping them is a second change.
-        <strong>And one honest gap beside it: the creator cannot show a
+        <strong>And later the same day the rest of it went too</strong>:
+        <code>RAMP</code> and <code>PALETTE</code> take the same field, where an entry
+        carries a whole colour <em>source</em> &mdash; its own stops, its own swept hue, or
+        one flat colour &mdash; while the op keeps the geometry, so the regions recolour a
+        single shared sweep instead of each running one of their own.
+        <strong>What is left of the section is one honest gap: the creator cannot show a
         glow</strong>. It writes one, validates it and round-trips it, but its preview
         is a flat sheet with no lighting to be brighter than, so a glow is something
         you have to go and look at in game. Fixing that means shading in the preview,
@@ -131,20 +132,14 @@
         unbuilt: <a href="verification.html">To be verified</a> is longer than this whole
         page's top section, and it is the authority on what has actually been seen.
         Nothing on this page competes with it for a session.</li>
-    <li><strong>What is left of the visual marking designer</strong>
-        (<a href="#designer">&sect;10</a>) &mdash; the canvas, the dial, the minimal shape,
-        glow intensity, the colour control and now <strong>per-region colour</strong> have all
-        shipped, so what remains is narrower than the entry it replaces: the same
-        <a href="making-a-gene.html#regions"><code>regions</code></a> field on
-        <code>RAMP</code> and <code>PALETTE</code>. Those two bypass
-        <code>SpecPainter.solidColour</code> for a colour source of their own &mdash; a stop
-        list walked along an axis, a colour drawn per cell &mdash; so scoping them is a second
-        change rather than the same one, and a ramp confined to one region is still a layer
-        per region. <strong>Two questions this entry used to ask are answered.</strong> A
-        colour does <em>not</em> become a <code>Value</code>
-        (<code>GeneSpecParser.readColor</code> takes a six-hex string), and it never needed
-        to, because the HSL triple is how a colour varies per horse; and region scoping is no
-        longer per <em>mask</em> only.</li>
+    <li><strong>Show a glow in the creator&rsquo;s preview</strong>
+        (<a href="#designer">&sect;10</a>) &mdash; the last of that section still standing.
+        The creator writes an <code>emissive</code> level, validates it and round-trips it,
+        but its preview is a flat sheet with no lighting to be brighter than, so a glow is
+        the one thing an author has to go and look at in game. Fixing it means shading in
+        the preview, which is a different job from the rest of the section &mdash; the
+        canvas, the dial, the minimal shape, glow intensity, the colour control and
+        per-region colour on all four colour ops have all shipped.</li>
     <li><strong>Deepen the thin science tabs</strong>
         (<a href="#science-tabs">&sect;science</a>) &mdash; every natural gene page now
         has one, so the work is no longer absence but depth: 23 predate the pass that

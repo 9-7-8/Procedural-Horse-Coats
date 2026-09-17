@@ -1624,9 +1624,9 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 <tr><td><code>TINT</code></td><td><code>red</code>, <code>green</code>, <code>blue</code> (percent, signed), <code>opacity</code> 100</td><td>Adds signed colour. The accumulator is an uncapped <code>int</code>, so <code>-200</code> on all three channels reads black over <em>any</em> coat and <code>+300</code> on blue is blue whatever else the horse carries. That headroom is the point: your gene never has to know what else is there.</td></tr>
 <tr><td><code>TOWARD</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <a href="#regions"><code>regions</code></a>, <code>strength</code> 100, <code>opacity</code> 100</td><td>Walks the texel toward a colour, reading what it already <em>looks</em> like &mdash; so one number lands the same on a black mane and a cremello one, and keeps the strand shading. The pink-hair move.</td></tr>
 <tr><td><code>FLAT</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <a href="#regions"><code>regions</code></a>, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>masks</code> expression that must look identical on any base.</td></tr>
-<tr><td><code>RAMP</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpan</code> 60), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>axis</code> (X/Y/Z/<strong>noise</strong>/<strong>cell</strong>/<strong>cellId</strong>), <code>space</code> (part/body/units/local), <code>from</code> 0, <code>to</code> 1, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour running <em>along an axis</em> &mdash; a spectral tail, an aurora band, a mane fading root to tip. Give it <code>colors</code> for named stops (it interpolates between them, so the result is continuous rather than banded), or leave <code>colors</code> out and it sweeps <code>hueSpan</code> degrees of the wheel from <code>hue</code>.
+<tr><td><code>RAMP</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpan</code> 60), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <a href="#regions"><code>regions</code></a>, <code>axis</code> (X/Y/Z/<strong>noise</strong>/<strong>cell</strong>/<strong>cellId</strong>), <code>space</code> (part/body/units/local), <code>from</code> 0, <code>to</code> 1, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour running <em>along an axis</em> &mdash; a spectral tail, an aurora band, a mane fading root to tip. Give it <code>colors</code> for named stops (it interpolates between them, so the result is continuous rather than banded), or leave <code>colors</code> out and it sweeps <code>hueSpan</code> degrees of the wheel from <code>hue</code>.
 <p><strong>Three of the six axes are not axes.</strong> A straight line through the horse is monotonic by construction &mdash; the colour sweeps once from one end to the other and never comes back &mdash; and several markings are simply not like that. <code>axis: "noise"</code> reads a smooth field instead, so the colour <em>wanders</em>, doubles back and pools with no hard edge anywhere: an oil slick, marbling, a soap film. <code>axis: "cell"</code> reads the distance from a texel to the middle of its own cell, so every cell of a lattice gets its own independent radial fade at once. <code>axis: "cellId"</code> reads one number drawn <em>per cell</em> and constant across it, so neighbours take unrelated colours and meet at a wall &mdash; which is the difference between iridescence and a gradient, and the only one of the three that has a hard edge in it. All three read <code>seed</code> and <code>scale</code> and ignore <code>space</code>, <code>from</code> and <code>to</code>. <strong>Point <code>scale</code> and <code>seed</code> at the same knobs the layer&rsquo;s mask uses and the colour lines up with the shape</strong>; point them anywhere else and it does not.</p></td></tr>
-<tr><td><code>PALETTE</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpread</code> 40), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour drawn <em>per cell</em> &mdash; opal, nebula, galaxy. Adjacent cells take unrelated entries and meet at a wall, which is exactly what separates "iridescent" from "gradient"; <code>RAMP</code> is the other one.</td></tr>
+<tr><td><code>PALETTE</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpread</code> 40), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <a href="#regions"><code>regions</code></a>, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour drawn <em>per cell</em> &mdash; opal, nebula, galaxy. Adjacent cells take unrelated entries and meet at a wall, which is exactly what separates "iridescent" from "gradient"; <code>RAMP</code> is the other one.</td></tr>
 <tr><td><code>INVERT</code></td><td><code>amount</code> 100, <code>opacity</code> 100</td><td>The photographic negative of whatever the texel already looks like - white to black, orange to blue, <code>amount: 50</code> to flat grey. The only colour op that is a <em>function of the texel</em> rather than a walk toward a colour, which is why it is also the only one whose place in the paint order really matters: put it late, or it inverts a horse that is not finished yet.</td></tr>
 </tbody>
 </table>
@@ -1690,8 +1690,8 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 </p>
 
 <p>
-    <code>TOWARD</code> and <code>FLAT</code> take a <code>regions</code> list instead. Each
-    entry names <code>parts</code> and the colour they take; a part no entry names takes the
+    <strong>Every colour op takes a <code>regions</code> list instead.</strong> Each entry
+    names <code>parts</code> and the colour they take; a part no entry names takes the
     op&rsquo;s own colour, so adding a region cannot move a texel it does not name.
 </p>
 
@@ -1706,33 +1706,72 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 }</code></pre>
 
 <p>
-    An entry carries <strong>the op&rsquo;s four colour parameters again, sentinel and
+    An entry carries <strong>the op&rsquo;s own colour parameters again, sentinel and
     all</strong>, so a region is exactly as expressive as the op around it: a literal
     <code>color</code>, or a <code>hue</code> pointed at a knob and varying down a line of
     horses. That symmetry is the point &mdash; a region that could do less would send you
     back to writing a layer each.
 </p>
 
+<p>
+    Which is why on <code>RAMP</code> and <code>PALETTE</code>, the two ops that
+    <em>generate</em> a colour rather than naming one, an entry carries a whole colour
+    <strong>source</strong>: its own stops, its own swept hue, or a single
+    <code>color</code> for a region that comes out flat. What it does <strong>not</strong>
+    carry is the geometry &mdash; the axis, <code>space</code>, <code>from</code>/<code>to</code>,
+    <code>seed</code> and <code>scale</code> stay the op&rsquo;s. So the regions recolour
+    <em>one shared sweep</em> rather than each running one of their own, and the sweep
+    cannot drift out of step with itself, because there is only one of it.
+</p>
+
+<pre><code class="language-json">"op": {
+  "type": "RAMP",
+  "colors": [ "#2b2d42", "#edf2f4" ],
+  "axis": "Y", "space": "part",
+  "regions": [
+    { "parts": [ "TAIL" ], "colors": [ "#3a0ca3", "#4cc9f0", "#f72585" ] },
+    { "parts": [ "LEGS" ], "hue": "$coreHue", "hueSpan": 90 },
+    { "parts": [ "MUZZLE" ], "color": "#f0e8ff" }
+  ],
+  "strength": 80
+}</code></pre>
+
+<p>
+    One layer. The tail sweeps opal, the legs sweep the horse&rsquo;s own hue, the muzzle is
+    flat, and any part no entry names &mdash; the head, here &mdash; sweeps the op&rsquo;s
+    own grey. <strong>A flat region really is a one-stop ramp</strong> rather than a special
+    case: a ramp interpolates between a <em>pair</em> of stops, a list of one has no pair,
+    so it comes out that colour everywhere. The parser normalises <code>color</code> to that
+    one-entry list on the way in, which is why nothing downstream needed a second fork for
+    &ldquo;flat&rdquo;.
+</p>
+
 <div class="note">
-    <span class="label">Three load errors rather than a precedence rule</span>
+    <span class="label">Four load errors rather than a precedence rule</span>
     <p>
-        A region with no <code>parts</code> cannot paint; one with neither
-        <code>color</code> nor <code>hue</code> would paint white over parts the op was
-        already colouring; and <strong>a part claimed by two entries</strong> has no answer
-        that is not arbitrary. Refusing the third is what lets there be no &ldquo;first
-        entry wins&rdquo; rule for an author to discover by experiment &mdash; which matters
-        because <a href="#the-shape">the groups overlap</a>, and <code>POINTS</code> beside
-        <code>LEGS</code> claims all four legs twice without either name looking wrong.
+        A region with no <code>parts</code> cannot paint; one with no colour at all would
+        paint white over parts the op was already colouring; one naming <strong>two</strong>
+        colour sources has no answer that is not arbitrary; and neither has <strong>a part
+        claimed by two entries</strong>. Refusing the last is what lets there be no
+        &ldquo;first entry wins&rdquo; rule for an author to discover by experiment &mdash;
+        which matters because <a href="#the-shape">the groups overlap</a>, and
+        <code>POINTS</code> beside <code>LEGS</code> claims all four legs twice without
+        either name looking wrong.
+    </p>
+    <p>
+        An entry may also only spell a colour <em>the way the op around it spells one</em>:
+        a <code>hueSpan</code> on a <code>TOWARD</code> region is refused rather than stored
+        for nobody to read, and a one-entry <code>colors</code> list is refused pointing at
+        <code>color</code>, which is how a flat region is written.
     </p>
 </div>
 
 <p class="muted">
-    <strong><code>RAMP</code> and <code>PALETTE</code> do not take it</strong>, deliberately
-    rather than by oversight: both bypass <code>SpecPainter.solidColour</code> for a colour
-    source of their own &mdash; a stop list walked along an axis, a colour drawn per cell
-    &mdash; so region scoping there is a second change rather than the same one. A ramp
-    confined to one region is a layer per region today, exactly as every colour was before
-    this.
+    On a <code>PALETTE</code> the same entry swaps the <em>palette</em> and nothing else:
+    the <code>seed</code> and <code>scale</code> are read before the region is consulted, so
+    the tessellation runs unbroken across a region boundary and only the colours drawn from
+    it change. A region normalised to a single entry hands every one of its cells the same
+    colour, which is again how a flat region is spelled.
 </p>
 
 <h3 id="over">Painting over the layers above</h3>
@@ -4494,9 +4533,9 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
 <tr><td><code>WHITEN</code> <em>natural</em></td><td><code>amount=1</code></td><td>white hair; the only honest way to white in phase 1</td></tr>
 <tr><td><code>TINT</code> <em>magical</em></td><td><code>red=0 green=0 blue=0 opacity=100</code></td><td>signed RGB percent</td></tr>
 <tr><td><code>TOWARD</code> <em>magical</em></td><td><code>color:color hue=-1 saturation=0.8 lightness=0.55 regions:regions strength=100 opacity=100</code></td><td>walk the VISIBLE colour toward one colour. negative strength = away. regions is a list of { parts:parts, and either color:color or hue/saturation/lightness } - a part an entry names takes that colour, a part no entry names takes the op's own. each part may be named ONCE (the groups overlap, so POINTS beside LEGS claims the legs twice and the gene will not load)</td></tr>
-<tr><td><code>FLAT</code> <em>magical</em></td><td><code>color:color hue=-1 saturation=0.8 lightness=0.55 regions:regions opacity=100</code></td><td>replace. regions as on TOWARD. RAMP and PALETTE do NOT take regions - they bypass the shared colour source for one of their own, so a ramp confined to a region is still a layer per region</td></tr>
-<tr><td><code>RAMP</code> <em>magical</em></td><td><code>colors:colors hue=0 hueSpan=60 saturation=0.8 lightness=0.55 axis(X|Y|Z|noise|cell|cellId) space(part|body|units|local) from=0 to=1 seed=0 scale=5 strength=100 opacity=100</code></td><td>sweep along an axis. varies COLOUR, never coverage. space=local runs it along a pitched part's own length. THREE OF THE SIX AXES ARE NOT AXES: X/Y/Z are a straight line and so monotonic - the colour sweeps ONCE and never comes back. noise reads a smooth field, so it wanders and doubles back with no hard edge (oil slick, marbling); cell reads distance to the middle of the texel's OWN cell, so every cell fades independently; cellId reads one key per cell, constant across it, so neighbours take unrelated stops (the difference between iridescent and a gradient). All three read seed+scale and ignore space/from/to - point them at the mask's own seed and scale and the colour lines up with the shape</td></tr>
-<tr><td><code>PALETTE</code> <em>magical</em></td><td><code>colors:colors hue=0 hueSpread=40 saturation=0.8 lightness=0.55 seed=0 scale=5 strength=100 opacity=100</code></td><td>one colour per cell of its OWN lattice - cells meet at a WALL. a hard edge no mask softness can remove</td></tr>
+<tr><td><code>FLAT</code> <em>magical</em></td><td><code>color:color hue=-1 saturation=0.8 lightness=0.55 regions:regions opacity=100</code></td><td>replace. regions as on TOWARD</td></tr>
+<tr><td><code>RAMP</code> <em>magical</em></td><td><code>colors:colors hue=0 hueSpan=60 saturation=0.8 lightness=0.55 regions:regions axis(X|Y|Z|noise|cell|cellId) space(part|body|units|local) from=0 to=1 seed=0 scale=5 strength=100 opacity=100</code></td><td>sweep along an axis. regions is a list of { parts:parts, and exactly ONE of colors:colors (its own stops), hue (+ hueSpan/saturation/lightness, its own sweep) or color:color (one stop, so that region is flat) } - the axis, space, from/to, seed and scale stay the OP's, so every region recolours the SAME sweep. a part no entry names takes the op's own colours; each part may be named ONCE. naming two sources in one entry, or a key the op does not have (hueSpread here), will not load. varies COLOUR, never coverage. space=local runs it along a pitched part's own length. THREE OF THE SIX AXES ARE NOT AXES: X/Y/Z are a straight line and so monotonic - the colour sweeps ONCE and never comes back. noise reads a smooth field, so it wanders and doubles back with no hard edge (oil slick, marbling); cell reads distance to the middle of the texel's OWN cell, so every cell fades independently; cellId reads one key per cell, constant across it, so neighbours take unrelated stops (the difference between iridescent and a gradient). All three read seed+scale and ignore space/from/to - point them at the mask's own seed and scale and the colour lines up with the shape</td></tr>
+<tr><td><code>PALETTE</code> <em>magical</em></td><td><code>colors:colors hue=0 hueSpread=40 saturation=0.8 lightness=0.55 regions:regions seed=0 scale=5 strength=100 opacity=100</code></td><td>one colour per cell of its OWN lattice - cells meet at a WALL. a hard edge no mask softness can remove. regions as on RAMP, with hueSpread in place of hueSpan: an entry swaps the PALETTE only, since seed and scale are read before the region is, so the cells run unbroken across a region boundary</td></tr>
 <tr><td><code>INVERT</code> <em>magical</em></td><td><code>amount=100 opacity=100</code></td><td>negate the visible colour</td></tr>
 </tbody>
 </table>

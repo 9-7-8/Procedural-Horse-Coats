@@ -1160,15 +1160,38 @@ window.HG = window.HG || {};
   // same way: it carries the identical four parameters, sentinel included. A
   // part no entry claims falls through to the op's own colour.
   function solidColour(op, values, legIndex, part) {
+    return forkedColour(regionFor(op, part) || op, values, legIndex);
+  }
+
+  /**
+   * The `regions` entry claiming this part, or null when none does - and then
+   * the op's own colour has it. Mirrors SpecPainter.regionFor, including that
+   * returning the first match is not a precedence rule: the parser refuses a
+   * part claimed twice, so the first match is the only one.
+   */
+  function regionFor(op, part) {
     var regions = op.regions || [];
     for (var i = 0; i < regions.length; i++) {
       // Expanded per texel, exactly as excludedByParts does it - the list on a
       // region is the author's spelling, groups and all, not a resolved set.
-      if (HG.schema.expandParts(regions[i].parts).indexOf(part) >= 0) {
-        return forkedColour(regions[i], values, legIndex);
-      }
+      if (HG.schema.expandParts(regions[i].parts).indexOf(part) >= 0) return regions[i];
     }
-    return forkedColour(op, values, legIndex);
+    return null;
+  }
+
+  /**
+   * A ramp's or palette's stop list, from the op or from one of its regions.
+   *
+   * The format lets a flat region be written as a single `color`, and the Java
+   * parser normalises that to a one-entry list before the painter sees it - so
+   * the port normalises it here, at the one place both engines read stops from.
+   * A list of one has no pair to interpolate between, so it comes out that
+   * colour everywhere, which is what "flat" means with no extra fork for it.
+   */
+  function sourceStops(src) {
+    if (src.colors && src.colors.length) return src.colors;
+    if (typeof src.color === "string" && src.color) return [src.color];
+    return [];
   }
 
   /** The hue < 0 fork itself, shared by an op's own colour and by each region. */
@@ -1183,13 +1206,18 @@ window.HG = window.HG || {};
     return [Math.round(lerp(a[0], b[0], t)), Math.round(lerp(a[1], b[1], t)), Math.round(lerp(a[2], b[2], t))];
   }
 
-  function rampColour(op, values, legIndex, t) {
-    var stops = op.colors || [];
+  // A region claiming this part supplies the whole colour SOURCE - its own
+  // stops, or its own swept hue. What it does not supply is the geometry: `t`
+  // was measured from the op's own axis and span before this was called, so the
+  // regions recolour one shared sweep. Mirrors SpecPainter.rampColour.
+  function rampColour(op, values, legIndex, part, t) {
+    var src = regionFor(op, part) || op;
+    var stops = sourceStops(src);
     if (!stops.length) {
-      var span = get(values, op.hueSpan, 60, legIndex);
-      return hsl(get(values, op.hue, 0, legIndex) + span * t,
-        get(values, op.saturation, 0.8, legIndex),
-        get(values, op.lightness, 0.55, legIndex));
+      var span = get(values, src.hueSpan, 60, legIndex);
+      return hsl(get(values, src.hue, 0, legIndex) + span * t,
+        get(values, src.saturation, 0.8, legIndex),
+        get(values, src.lightness, 0.55, legIndex));
     }
     var scaled = t * (stops.length - 1);
     var i = Math.floor(scaled);
@@ -1234,18 +1262,22 @@ window.HG = window.HG || {};
     return to === from ? 0 : clamp01((t - from) / (to - from));
   }
 
-  function paletteColour(op, values, legIndex, point, seedBase) {
+  // The cells stay the OP's - seed and scale are read before the region is
+  // consulted - so the tessellation runs unbroken across a region boundary and
+  // only the colours drawn from it change. Mirrors SpecPainter.paletteColour.
+  function paletteColour(op, values, legIndex, part, point, seedBase) {
     var seed = getSeed(values, op.seed, seedBase);
     var scale = Math.max(0.05, get(values, op.scale, 5.0, legIndex));
     var c = noise.cell(seed, point.x / scale, point.y / scale, point.z / scale);
-    var palette = op.colors || [];
+    var src = regionFor(op, part) || op;
+    var palette = sourceStops(src);
     if (palette.length) {
       return hexToRgb(palette[Math.min(Math.floor(c.pick * palette.length), palette.length - 1)]);
     }
-    var spread = get(values, op.hueSpread, 40, legIndex);
-    return hsl(get(values, op.hue, 0, legIndex) + (c.pick * 2 - 1) * spread,
-      get(values, op.saturation, 0.8, legIndex),
-      get(values, op.lightness, 0.55, legIndex));
+    var spread = get(values, src.hueSpread, 40, legIndex);
+    return hsl(get(values, src.hue, 0, legIndex) + (c.pick * 2 - 1) * spread,
+      get(values, src.saturation, 0.8, legIndex),
+      get(values, src.lightness, 0.55, legIndex));
   }
 
   function toward(colour, px, py, channel, target, strength) {
@@ -1281,12 +1313,12 @@ window.HG = window.HG || {};
         break;
       case "RAMP":
         towardColour(delta, colour, op, values, legIndex, px, py, k,
-          rampColour(op, values, legIndex,
+          rampColour(op, values, legIndex, part,
             axisPosition(op, values, legIndex, skin, part, point, seedBase)));
         break;
       case "PALETTE":
         towardColour(delta, colour, op, values, legIndex, px, py, k,
-          paletteColour(op, values, legIndex, point, seedBase));
+          paletteColour(op, values, legIndex, part, point, seedBase));
         break;
       case "INVERT": {
         // Against what the texel LOOKS like - see SpecPainter.

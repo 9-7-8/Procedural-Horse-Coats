@@ -211,12 +211,12 @@ public final class SpecPainter {
             }
             case TOWARD -> towardColour(delta, colour, p, v, leg, px, py, k, solidColour(op, v, leg, part));
             case RAMP -> {
-                int rgb = rampColour(op, v, leg,
+                int rgb = rampColour(op, v, leg, part,
                         axisPosition(op, v, leg, skin, bounds, part, point, seedBase));
                 towardColour(delta, colour, p, v, leg, px, py, k, rgb);
             }
             case PALETTE -> {
-                int rgb = paletteColour(op, v, leg, point, seedBase);
+                int rgb = paletteColour(op, v, leg, part, point, seedBase);
                 towardColour(delta, colour, p, v, leg, px, py, k, rgb);
             }
             case INVERT -> {
@@ -284,14 +284,32 @@ public final class SpecPainter {
      */
     private static int solidColour(Op op, SpecValues v, int leg, Part part) {
         Params p = op.params();
-        for (Region region : p.regions("regions")) {
-            if (region.parts().contains(part)) {
-                return colourOf(region.color(), region.hue(), region.saturation(),
-                        region.lightness(), v, leg);
-            }
+        Region region = regionFor(op, part);
+        if (region != null) {
+            return colourOf(region.color(), region.hue(), region.saturation(),
+                    region.lightness(), v, leg);
         }
         return colourOf(p.color("color", 0xFFFFFF), p.value("hue", -1),
                 p.value("saturation", 0.8), p.value("lightness", 0.55), v, leg);
+    }
+
+    /**
+     * The {@code regions} entry claiming this texel's part, or {@code null}
+     * when none does - and then the op's own colour has it, which is what makes
+     * the field additive: adding an entry cannot move a texel it does not name.
+     *
+     * <p>Returning the first match is not a precedence rule. The parser refuses
+     * a part claimed by two entries outright, so the first match is the only
+     * match, and an author never has to learn an order by experiment.
+     */
+    private static Region regionFor(Op op, Part part) {
+        List<Region> regions = op.params().regions("regions");
+        for (int i = 0; i < regions.size(); i++) {
+            if (regions.get(i).parts().contains(part)) {
+                return regions.get(i);
+            }
+        }
+        return null;
     }
 
     /** The {@code hue < 0} fork itself, shared by an op's own colour and by each of its regions. */
@@ -360,15 +378,31 @@ public final class SpecPainter {
         return to == from ? 0 : clamp01((t - from) / (to - from));
     }
 
-    /** The stop, or the swept hue, a {@code RAMP} reaches at position {@code t}. */
-    private static int rampColour(Op op, SpecValues v, int leg, double t) {
+    /**
+     * The stop, or the swept hue, a {@code RAMP} reaches at position {@code t}.
+     *
+     * <p>A {@code regions} entry claiming this part supplies the whole colour
+     * <i>source</i> - its own stops, or its own swept hue - rather than a flat
+     * override, because a region that could only name one colour would be less
+     * expressive than the op around it. What it does <b>not</b> supply is the
+     * geometry: {@code t} was measured once, from the op's own axis and span,
+     * before this method was reached. So the regions recolour a single sweep
+     * instead of each running one of their own, and the sweep cannot drift out
+     * of step with itself - there is only one of it.
+     *
+     * <p>A region normalised to a single stop comes out flat for free: the
+     * interpolation below needs a pair, a list of one has none, and the tail of
+     * the method hands back the last stop.
+     */
+    private static int rampColour(Op op, SpecValues v, int leg, Part part, double t) {
         Params p = op.params();
-        List<Integer> stops = p.colors("colors");
+        Region region = regionFor(op, part);
+        List<Integer> stops = region == null ? p.colors("colors") : region.colors();
         if (stops.isEmpty()) {
-            double span = v.get(p.value("hueSpan", 60.0), leg);
-            return hsl(v.get(p.value("hue", 0), leg) + span * t,
-                    v.get(p.value("saturation", 0.8), leg),
-                    v.get(p.value("lightness", 0.55), leg));
+            double span = v.get(region == null ? p.value("hueSpan", 60.0) : region.span(), leg);
+            return hsl(v.get(region == null ? p.value("hue", 0) : region.hue(), leg) + span * t,
+                    v.get(region == null ? p.value("saturation", 0.8) : region.saturation(), leg),
+                    v.get(region == null ? p.value("lightness", 0.55) : region.lightness(), leg));
         }
         // n stops make n-1 segments; t lands in one and interpolates across it,
         // so the ramp comes out continuous rather than banded.
@@ -385,22 +419,32 @@ public final class SpecPainter {
      * palette, chosen by the cell the texel falls in. Neighbouring cells take
      * unrelated entries and meet at a wall, which is the whole difference
      * between an opal and a gradient.
+     *
+     * <p>A {@code regions} entry claiming this part swaps the palette, the way
+     * it swaps a {@code RAMP}'s stops. The <b>cells</b> stay the op's - the
+     * seed and scale are read before the region is consulted - so the
+     * tessellation runs unbroken across a region boundary and only the colours
+     * drawn from it change. A region normalised to a single entry hands every
+     * one of its cells the same colour, which is how a flat region is spelled.
      */
-    private static int paletteColour(Op op, SpecValues v, int leg, BodyPoint point, long seedBase) {
+    private static int paletteColour(Op op, SpecValues v, int leg, Part part,
+                                     BodyPoint point, long seedBase) {
         Params p = op.params();
         long seed = v.seed(p.value("seed", 0), seedBase);
         double scale = Math.max(0.05, v.get(p.value("scale", 5.0), leg));
         BodyNoise.Cell cell = BodyNoise.cell(seed,
                 point.x() / scale, point.y() / scale, point.z() / scale);
-        List<Integer> palette = p.colors("colors");
+        Region region = regionFor(op, part);
+        List<Integer> palette = region == null ? p.colors("colors") : region.colors();
         if (!palette.isEmpty()) {
             int i = (int) (cell.pick() * palette.size());
             return palette.get(Math.min(i, palette.size() - 1));
         }
-        double spread = v.get(p.value("hueSpread", 40.0), leg);
-        return hsl(v.get(p.value("hue", 0), leg) + (cell.pick() * 2 - 1) * spread,
-                v.get(p.value("saturation", 0.8), leg),
-                v.get(p.value("lightness", 0.55), leg));
+        double spread = v.get(region == null ? p.value("hueSpread", 40.0) : region.span(), leg);
+        return hsl(v.get(region == null ? p.value("hue", 0) : region.hue(), leg)
+                        + (cell.pick() * 2 - 1) * spread,
+                v.get(region == null ? p.value("saturation", 0.8) : region.saturation(), leg),
+                v.get(region == null ? p.value("lightness", 0.55) : region.lightness(), leg));
     }
 
     private static int mixRgb(int a, int b, double t) {

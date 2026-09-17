@@ -43,7 +43,15 @@ window.HG = window.HG || {};
   // Per-region colour overrides - the mirror of SpecSchema.Kind.REGIONS, and the
   // only kind that nests. Region scoping belongs to a mask and never belonged to
   // a colour, so painting the legs differently from the barrel cost a layer each.
-  function regions(name, doc) { return { name: name, kind: "REGIONS", doc: doc }; }
+  // `sourceKeys` is which colour keys ONE ENTRY may carry, and it rides in
+  // `choices` because that is the field parity.js compares against the baked
+  // Java table - so offering a region a key the game would refuse fails the
+  // gate rather than exporting a gene that will not load. They differ per op
+  // because the colour source does: TOWARD and FLAT name a flat colour, while
+  // RAMP and PALETTE generate one and so take a whole stop list or a swept hue.
+  function regions(name, doc, sourceKeys) {
+    return { name: name, kind: "REGIONS", choices: sourceKeys, doc: doc };
+  }
 
   // The three that turn any colour op into an epigenetic one. They repeat on
   // four ops, so they are built rather than retyped - a hue that drifts between
@@ -68,6 +76,17 @@ window.HG = window.HG || {};
   var REGIONS_DOC = "per-region colour overrides: each entry names 'parts' and either a "
     + "'color' or a hue/saturation/lightness of its own. A part an entry names takes that "
     + "colour; a part no entry names takes the op's own. Each part may be named once.";
+  // The same field on the two ops that GENERATE a colour, where an entry
+  // carries a whole colour source of its own. The geometry stays the op's, so
+  // the regions recolour ONE sweep rather than each running one of their own.
+  var RAMP_REGIONS_DOC = "per-region colour sources: each entry names 'parts' and exactly one "
+    + "of its own stops, its own swept hue, or one flat colour. The axis, space, from/to, seed "
+    + "and scale stay the op's, so every region recolours the SAME sweep. A part no entry names "
+    + "takes the op's own colours; each part may be named once.";
+  var PALETTE_REGIONS_DOC = "per-region colour sources: each entry names 'parts' and exactly one "
+    + "of its own palette, its own spread hue, or one flat colour. The seed and scale stay the "
+    + "op's, so the cells line up across regions. A part no entry names takes the op's own "
+    + "palette; each part may be named once.";
 
   // How many straight sub-segments each span of a smoothed PATH is walked in.
   // Must equal SpecSchema.PATH_CURVE_SAMPLES; parity.js compares them, because
@@ -539,7 +558,7 @@ window.HG = window.HG || {};
       params: [
         color("color", "the colour to walk toward")
       ].concat(hueParams(HUE_DOC, true), [
-        regions("regions", REGIONS_DOC),
+        regions("regions", REGIONS_DOC, ["color", "hue", "saturation", "lightness"]),
         v("strength", 100, "percent of the way there", { min: 0, max: 100, step: 1 }, 82),
         v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
       ])
@@ -550,7 +569,7 @@ window.HG = window.HG || {};
       params: [
         color("color", "flat paint")
       ].concat(hueParams(HUE_DOC, true), [
-        regions("regions", REGIONS_DOC),
+        regions("regions", REGIONS_DOC, ["color", "hue", "saturation", "lightness"]),
         v("opacity", 100, "percent opacity", { min: 0, max: 100, step: 1 })
       ])
     },
@@ -562,6 +581,8 @@ window.HG = window.HG || {};
       ].concat(hueParams(HUE_DOC + " On a ramp it names the first stop."), [
         v("hueSpan", 60, "degrees of hue the ramp travels; negative runs the other way",
           { min: -360, max: 360, step: 5 }),
+        regions("regions", RAMP_REGIONS_DOC,
+          ["color", "colors", "hue", "hueSpan", "saturation", "lightness"]),
         choice("axis", ["X", "Y", "Z", "noise", "cell", "cellId"],
           "X, Y or Z is a straight line and so sweeps ONCE. 'noise' reads a smooth field, so the "
           + "colour wanders and doubles back with no hard edge; 'cell' reads distance to the middle "
@@ -588,6 +609,8 @@ window.HG = window.HG || {};
         colors("colors", "the palette; each cell takes one entry whole")
       ].concat(hueParams(HUE_DOC + " On a palette it names the centre hue."), [
         v("hueSpread", 40, "degrees either side of 'hue' a cell may land", { min: 0, max: 180, step: 5 }),
+        regions("regions", PALETTE_REGIONS_DOC,
+          ["color", "colors", "hue", "hueSpread", "saturation", "lightness"]),
         v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
         v("scale", 5.0, "body units across one colour cell", { min: 0.3, max: 30, step: 0.1 }),
         v("strength", 100, "percent of the way to the cell's colour", { min: 0, max: 100, step: 1 }),

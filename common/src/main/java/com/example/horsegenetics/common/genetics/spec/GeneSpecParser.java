@@ -1266,7 +1266,12 @@ public final class GeneSpecParser {
                 case FLAG -> asBoolean(raw, where + " '" + p.name() + "'");
                 case COLOR -> readColor(raw, where + " '" + p.name() + "'");
                 case COLORS -> readColors(raw, where + " '" + p.name() + "'");
-                case REGIONS -> readRegions(raw, where + " '" + p.name() + "'", knobs, knobIndex);
+                // The op's own parameter list rides along so a region's defaults
+                // are SpecSchema's, looked up by name, rather than a second copy
+                // of them in the parser that could drift; p.choices() carries
+                // which colour keys this op's regions may carry at all.
+                case REGIONS -> readRegions(raw, where + " '" + p.name() + "'",
+                        p.choices(), schema, knobs, knobIndex);
                 case POINTS -> readPoints(raw, where + " '" + p.name() + "'");
                 case TEXT -> asString(raw, where + " '" + p.name() + "'");
                 case BOX -> readBox(raw, where + " '" + p.name() + "'");
@@ -1359,26 +1364,48 @@ public final class GeneSpecParser {
 
     /**
      * A colour op's {@code regions} list: each entry the {@code parts} it claims
-     * and the colour they take, spelled exactly as the op spells its own - a
-     * literal {@code color}, or a {@code hue} that may point at a knob.
+     * and the colour source those parts use, spelled exactly as the op spells
+     * its own - a literal {@code color} or a {@code hue} on the two flat ops, a
+     * whole stop list or a swept hue on the two that generate a colour.
      *
-     * <p>Three refusals here rather than a precedence rule. An entry with no
-     * parts cannot paint; an entry with no colour would paint white over texels
-     * the op was already covering; and a part claimed twice has no answer that
-     * is not arbitrary. Refusing the third is what lets there be no "first entry
-     * wins" for an author to discover by experiment - which matters because the
-     * groups overlap, and {@code POINTS} beside {@code LEGS} claims all four
-     * legs twice without either name looking wrong.
+     * <p><b>Four refusals here rather than a precedence rule.</b> An entry with
+     * no parts cannot paint; an entry with no colour would paint white over
+     * texels the op was already covering; an entry naming <i>two</i> colour
+     * sources has no answer that is not arbitrary; and neither has a part
+     * claimed by two entries. Refusing the last is what lets there be no "first
+     * entry wins" for an author to discover by experiment - which matters
+     * because the groups overlap, and {@code POINTS} beside {@code LEGS} claims
+     * all four legs twice without either name looking wrong.
+     *
+     * <p>{@code sourceKeys} is the op's own colour vocabulary, straight off its
+     * {@code regions} parameter, so an entry can never carry a key the op it
+     * sits in would not read: {@code hueSpan} on a {@code TOWARD} region is
+     * refused rather than stored for nobody to read.
+     *
+     * <p>Defaults are looked up in {@code opParams} by name, so a region left
+     * without a {@code saturation} takes the same 0.8 the op around it would.
+     * One copy of every default, in {@link SpecSchema} - a second set written
+     * out here is a second set to drift.
      */
-    private static List<Region> readRegions(Object raw, String where,
+    private static List<Region> readRegions(Object raw, String where, List<String> sourceKeys,
+                                            List<SpecSchema.Param> opParams,
                                             List<Knob> knobs, Map<String, Integer> knobIndex) {
+        // The two ops that GENERATE a colour are exactly the two whose regions
+        // may carry a stop list, so one key tells the two shapes apart.
+        boolean generated = sourceKeys.contains("colors");
+        String spanKey = sourceKeys.contains("hueSpan") ? "hueSpan"
+                : (sourceKeys.contains("hueSpread") ? "hueSpread" : null);
+        List<String> allowed = new ArrayList<>();
+        allowed.add("parts");
+        allowed.addAll(sourceKeys);
+
         List<Region> out = new ArrayList<>();
         Map<Part, Integer> claimedBy = new LinkedHashMap<>();
         List<Object> entries = asArray(raw, where);
         for (int i = 0; i < entries.size(); i++) {
             String at = where + " [" + i + "]";
             Map<String, Object> o = asObject(entries.get(i), at);
-            expectKeys(o, at, "parts", "color", "hue", "saturation", "lightness");
+            expectKeys(o, at, allowed.toArray(new String[0]));
             if (!o.containsKey("parts")) {
                 throw new IllegalArgumentException(at + ": a region names no 'parts', so there is "
                         + "nothing for it to paint. Name the parts it covers, or drop the entry and "
@@ -1389,12 +1416,53 @@ public final class GeneSpecParser {
                 throw new IllegalArgumentException(at + ": a region's 'parts' is empty, so there is "
                         + "nothing for it to paint.");
             }
-            if (!o.containsKey("color") && !o.containsKey("hue")) {
-                throw new IllegalArgumentException(at + ": a region needs a colour - either "
-                        + "\"color\": \"#rrggbb\" or a \"hue\" (with 'saturation' and 'lightness' "
-                        + "beside it). Without one it would paint white over parts the op was "
-                        + "already colouring, which is never what naming a region is for.");
+
+            int sources = (o.containsKey("color") ? 1 : 0)
+                    + (o.containsKey("colors") ? 1 : 0)
+                    + (o.containsKey("hue") ? 1 : 0);
+            if (sources == 0) {
+                throw new IllegalArgumentException(at + ": a region needs a colour - "
+                        + (generated
+                            ? "\"colors\": [..] for stops of its own, a \"hue\" for a sweep of its "
+                                    + "own, or a single \"color\" to come out flat"
+                            : "either \"color\": \"#rrggbb\" or a \"hue\" (with 'saturation' and "
+                                    + "'lightness' beside it)")
+                        + ". Without one it would paint white over parts the op was already "
+                        + "colouring, which is never what naming a region is for.");
             }
+            if (sources > 1) {
+                throw new IllegalArgumentException(at + ": a region names more than one colour "
+                        + "source, and there is no rule here for which of them wins. Name exactly "
+                        + "one of \"color\", \"colors\" or \"hue\" - the same choice the op itself "
+                        + "makes, made once.");
+            }
+
+            List<Integer> colors = List.of();
+            int color = 0xFFFFFF;
+            if (o.containsKey("colors")) {
+                // readColors refuses a one-entry list by telling the author to
+                // use a TOWARD op, which is the wrong advice inside a region:
+                // the one-stop shorthand is right here, so say that instead.
+                if (asArray(o.get("colors"), at + " 'colors'").size() == 1) {
+                    throw new IllegalArgumentException(at + " 'colors': one stop is a flat colour, "
+                            + "so write it as \"color\": \"#rrggbb\" - or give this region a second "
+                            + "stop for the colour to travel to.");
+                }
+                colors = readColors(o.get("colors"), at + " 'colors'");
+            } else if (o.containsKey("color")) {
+                int literal = readColor(o.get("color"), at + " 'color'");
+                // On a generating op a flat region IS a one-stop source: a ramp
+                // interpolates between a pair of stops and a list of one has no
+                // pair, so it comes out that colour everywhere - and a palette
+                // of one hands every cell the same entry. Normalising here is
+                // what spares the painter a second fork for "flat".
+                if (generated) {
+                    colors = List.of(literal);
+                } else {
+                    color = literal;
+                }
+            }
+
             for (Part part : parts) {
                 Integer first = claimedBy.put(part, i);
                 if (first != null) {
@@ -1404,13 +1472,31 @@ public final class GeneSpecParser {
                             + "'POINTS' and 'LEGS' together claim all four legs twice.");
                 }
             }
-            out.add(new Region(parts,
-                    o.containsKey("color") ? readColor(o.get("color"), at + " 'color'") : 0xFFFFFF,
-                    regionValue(o, "hue", -1, at, knobs, knobIndex),
-                    regionValue(o, "saturation", 0.8, at, knobs, knobIndex),
-                    regionValue(o, "lightness", 0.55, at, knobs, knobIndex)));
+            out.add(new Region(parts, color, colors,
+                    regionValue(o, "hue", defaultOf(opParams, "hue", -1), at, knobs, knobIndex),
+                    spanKey == null ? new Value.Const(0)
+                            : regionValue(o, spanKey, defaultOf(opParams, spanKey, 0),
+                                    at, knobs, knobIndex),
+                    regionValue(o, "saturation", defaultOf(opParams, "saturation", 0.8),
+                            at, knobs, knobIndex),
+                    regionValue(o, "lightness", defaultOf(opParams, "lightness", 0.55),
+                            at, knobs, knobIndex)));
         }
         return List.copyOf(out);
+    }
+
+    /**
+     * What the op around a region documents as its default for {@code name} -
+     * so the region and the op it sits in agree about every number neither of
+     * them stated. See {@link #readRegions}.
+     */
+    private static double defaultOf(List<SpecSchema.Param> opParams, String name, double ifAbsent) {
+        for (SpecSchema.Param p : opParams) {
+            if (p.name().equals(name)) {
+                return p.fallback();
+            }
+        }
+        return ifAbsent;
     }
 
     private static Value regionValue(Map<String, Object> o, String key, double fallback, String at,

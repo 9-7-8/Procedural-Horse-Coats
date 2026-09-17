@@ -346,6 +346,105 @@ class GeneSpecParserTest {
                 "the message should name the part in dispute: " + e.getMessage());
     }
 
+    /**
+     * On the two ops that GENERATE a colour a region carries a whole colour
+     * source of its own, because one that could only name a flat colour would
+     * be less expressive than the op around it - and a ramp confined to one
+     * region would still cost a layer per region.
+     *
+     * <p>All three spellings at once: its own stops, its own swept hue, and the
+     * one-stop shorthand a flat region is written as. The fourth region states
+     * only a hue, and so must take the op's own documented span rather than a
+     * second copy of that default living in the parser.
+     */
+    @Test
+    void readsARegionsOwnColourSourceOnARamp() {
+        String json = gene("""
+                , "phase": "magical",
+                  "knobs": [ { "name": "coreHue", "min": 0, "max": 360 } ],
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "RAMP", "colors": ["#000000", "#ffffff"], "regions": [
+                          { "parts": ["TAIL"], "colors": ["#3a0ca3", "#4cc9f0"] },
+                          { "parts": ["LEGS"], "hue": "$coreHue", "hueSpan": 90 },
+                          { "parts": ["MUZZLE"], "color": "#f0e8ff" },
+                          { "parts": ["MANE"], "hue": 200 } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        GeneSpec spec = GeneSpecParser.parse(json, "rampregions.json");
+        List<GeneSpec.Region> regions =
+                named(spec, "v").layers().get(0).op().params().regions("regions");
+        assertEquals(List.of(0x3A0CA3, 0x4CC9F0), regions.get(0).colors(),
+                "a region may carry stops of its own");
+        assertTrue(regions.get(1).colors().isEmpty(), "a swept region carries no stops");
+        assertTrue(regions.get(1).hue() instanceof GeneSpec.Value.FromKnob,
+                "a region's hue must be able to point at a knob");
+        assertEquals(90.0, ((GeneSpec.Value.Const) regions.get(1).span()).v(), 1e-9);
+        assertEquals(List.of(0xF0E8FF), regions.get(2).colors(),
+                "a flat region is normalised to a single stop");
+        assertEquals(60.0, ((GeneSpec.Value.Const) regions.get(3).span()).v(), 1e-9,
+                "an unstated span is the RAMP's own documented default, not a copy of it");
+    }
+
+    /**
+     * Two sources in one entry has no answer that is not arbitrary, so it is
+     * refused rather than given a precedence rule to discover by experiment.
+     */
+    @Test
+    void rejectsARegionNamingTwoColourSources() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "TOWARD", "color": "#112233", "regions": [
+                          { "parts": ["LEGS"], "color": "#ffffff", "hue": 200 } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "twosources.json"));
+        assertTrue(e.getMessage().contains("more than one colour source"), e.getMessage());
+    }
+
+    /**
+     * A region may only spell a colour the way the op around it spells one. A
+     * {@code TOWARD} has no span to sweep, so a {@code hueSpan} on one of its
+     * regions is refused rather than stored for nobody to read.
+     */
+    @Test
+    void rejectsAGeneratingOpsKeyOnAFlatOpsRegion() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "TOWARD", "color": "#112233", "regions": [
+                          { "parts": ["LEGS"], "hue": 200, "hueSpan": 90 } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "notaramp.json"));
+        assertTrue(e.getMessage().contains("hueSpan"), e.getMessage());
+    }
+
+    /**
+     * One stop is a flat colour and the format has a spelling for that, so the
+     * refusal points at it - rather than at {@code readColors}' usual advice to
+     * go and write a {@code TOWARD} op, which is the wrong move inside a region.
+     */
+    @Test
+    void rejectsAOneStopListOnARegion() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [ { "id": "v", "when": ["A/A", "A/a"],
+                    "layers": [ { "masks": [ { "type": "ALL" } ],
+                      "op": { "type": "RAMP", "colors": ["#000000", "#ffffff"], "regions": [
+                          { "parts": ["LEGS"], "colors": ["#ffffff"] } ] } } ] },
+                  { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "onestop.json"));
+        assertTrue(e.getMessage().contains("one stop is a flat colour"), e.getMessage());
+    }
+
     @Test
     void rejectsAnUnknownParameter() {
         String json = gene("""

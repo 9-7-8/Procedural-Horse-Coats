@@ -1181,31 +1181,42 @@ window.HG = window.HG || {};
    */
   function regionsRow(op, p) {
     var list = op.regions || (op.regions = []);
+    // The op's own colour vocabulary, straight off the schema - the same list
+    // the game validates an entry against. RAMP and PALETTE generate a colour
+    // and so let a region carry a whole source of its own; TOWARD and FLAT
+    // name one, and there a region is a colour and nothing else.
+    var keys = p.choices || [];
+    var generated = keys.indexOf("colors") >= 0;
     var wrap = el("div", { class: "col" });
 
     list.forEach(function (region, i) {
       var box = el("div", { class: "region-entry" });
       box.appendChild(partsEditor(region, changed));
 
-      var varying = !(region.hue === undefined
-        || (typeof region.hue === "number" && region.hue < 0));
+      var mode = regionMode(region, generated);
       box.appendChild(select(
-        [{ value: "fixed", label: "One fixed colour" },
-          { value: "varies", label: "Hue, saturation & lightness" }],
-        varying ? "varies" : "fixed",
-        function (m) {
-          region.hue = m === "varies" ? 0 : -1;
-          changed();
-        }
+        generated
+          ? [{ value: "stops", label: "Its own stops" },
+            { value: "varies", label: "Its own swept hue" },
+            { value: "fixed", label: "One flat colour" }]
+          : [{ value: "fixed", label: "One fixed colour" },
+            { value: "varies", label: "Hue, saturation & lightness" }],
+        mode,
+        function (m) { setRegionMode(region, m, generated); changed(); }
       ));
 
-      if (!varying) {
+      if (mode === "stops") {
+        box.appendChild(colorListEditor(region, "colors"));
+      } else if (mode === "fixed") {
         var well = el("input", { type: "color", value: region.color || "#ffffff" });
         well.addEventListener("input", function () { region.color = well.value; changed(); });
         box.appendChild(well);
       } else {
+        // Whatever the op spells its sweep with - hue and the HSL pair, plus
+        // hueSpan on a ramp or hueSpread on a palette. Read off the schema so
+        // the form cannot offer a key the file format would refuse.
         schema.OPS[op.type].params.forEach(function (q) {
-          if (q.name !== "hue" && q.name !== "saturation" && q.name !== "lightness") return;
+          if (keys.indexOf(q.name) < 0 || q.name === "color" || q.name === "colors") return;
           box.appendChild(field(q.name, valueEditor(region, q.name, q, changed), q.doc));
         });
       }
@@ -1219,7 +1230,12 @@ window.HG = window.HG || {};
 
     wrap.appendChild(el("button", {
       type: "button", class: "chip", text: "add a region",
-      onclick: function () { list.push({ parts: [], color: "#ff69b4", hue: -1 }); changed(); }
+      onclick: function () {
+        var region = { parts: [] };
+        setRegionMode(region, generated ? "stops" : "fixed", generated);
+        list.push(region);
+        changed();
+      }
     }));
 
     wrap.appendChild(el("p", {
@@ -1228,10 +1244,50 @@ window.HG = window.HG || {};
         ? "A part an entry names takes that entry's colour; every other part takes the colour "
           + "above. Name one part in two entries and the gene will not load - the groups "
           + "overlap, so points and legs together claim all four legs twice."
-        : "Nothing here yet, so this op paints one colour everywhere. Add a region to paint "
-          + "the legs, the mane or the face differently without a second layer."
+        : (generated
+          ? "Nothing here yet, so one set of colours covers the whole layer. Add a region to give "
+            + "the mane its own stops or the legs their own hue - the sweep itself stays shared, "
+            + "so they all travel together."
+          : "Nothing here yet, so this op paints one colour everywhere. Add a region to paint "
+            + "the legs, the mane or the face differently without a second layer.")
     }));
     return fieldBlock("Regions", wrap, p.doc);
+  }
+
+  /**
+   * Which of a region's colour sources is the live one. The format allows
+   * exactly one, so this reads which key is present rather than storing a mode
+   * of its own - and on a flat op it is the hue sentinel, exactly the fork the
+   * op's own colour uses.
+   */
+  function regionMode(region, generated) {
+    if (generated) {
+      if (region.colors && region.colors.length) return "stops";
+      if (region.color) return "fixed";
+      return "varies";
+    }
+    return (region.hue === undefined || (typeof region.hue === "number" && region.hue < 0))
+      ? "fixed" : "varies";
+  }
+
+  /**
+   * Switch a region to one source and <b>remove the others</b>. The parser
+   * refuses an entry naming two sources, so a key left behind by a mode the
+   * author switched away from is a gene that will not load - and it would look
+   * like the mode switch itself being broken.
+   */
+  function setRegionMode(region, mode, generated) {
+    if (!generated) {
+      region.hue = mode === "varies" ? 0 : -1;
+      if (region.color === undefined) region.color = "#ff69b4";
+      return;
+    }
+    delete region.color;
+    delete region.colors;
+    delete region.hue;
+    if (mode === "stops") region.colors = ["#ff69b4", "#69b4ff"];
+    else if (mode === "fixed") region.color = "#ff69b4";
+    else region.hue = 0;
   }
 
   function opParamRow(op, p) {

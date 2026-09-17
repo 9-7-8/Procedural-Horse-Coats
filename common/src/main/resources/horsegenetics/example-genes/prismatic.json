@@ -1072,6 +1072,91 @@
             ],
             "strength": 55
           }
+        },
+        {
+          "name": "one sweep, four sources: the tail its own stops, the legs the horse's own hue, the muzzle flat, the head the op's own",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "TAIL",
+                "LEGS",
+                "MUZZLE",
+                "HEAD"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "colors": [
+              "#2b2d42",
+              "#edf2f4"
+            ],
+            "axis": "Y",
+            "space": "part",
+            "regions": [
+              {
+                "parts": [
+                  "TAIL"
+                ],
+                "colors": [
+                  "#3a0ca3",
+                  "#4cc9f0",
+                  "#f72585"
+                ]
+              },
+              {
+                "parts": [
+                  "LEGS"
+                ],
+                "hue": "$coreHue",
+                "hueSpan": 90.0,
+                "saturation": 0.8,
+                "lightness": 0.55
+              },
+              {
+                "parts": [
+                  "MUZZLE"
+                ],
+                "color": "#f0e8ff"
+              }
+            ],
+            "strength": 80
+          }
+        },
+        {
+          "name": "and an opal whose palette changes on the mane without its cells breaking step",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MANE",
+                "NECK"
+              ]
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#bfe9ff",
+              "#c8ffe0",
+              "#e3d1ff"
+            ],
+            "seed": "$spotSeed",
+            "scale": 2.5,
+            "regions": [
+              {
+                "parts": [
+                  "MANE"
+                ],
+                "hue": "$coreHue",
+                "hueSpread": 70.0,
+                "saturation": 0.75,
+                "lightness": 0.6
+              }
+            ],
+            "strength": 85
+          }
         }
       ]
     },

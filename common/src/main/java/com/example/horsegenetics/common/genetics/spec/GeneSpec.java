@@ -723,16 +723,32 @@ public record GeneSpec(
 
     /**
      * One entry of a colour op's {@code regions} list - the parts it claims, and
-     * the colour those parts take instead of the op's own.
+     * the colour source those parts use instead of the op's own.
      *
-     * <p>The fields are the op's four colour parameters again, sentinel and all,
-     * so a region is exactly as expressive as the op containing it: it can name
-     * a literal colour, or point {@code hue} at a knob and vary down a line of
-     * horses. That symmetry is deliberate - a region that could do less would
-     * send an author back to writing a layer each, which is the duplication the
-     * field exists to remove.
+     * <p>The fields are the op's own colour parameters again, sentinel and all,
+     * so a region is exactly as expressive as the op containing it. On
+     * {@code TOWARD} and {@code FLAT} that is a literal {@code color}, or a
+     * {@code hue} pointed at a knob and varying down a line of horses. On
+     * {@code RAMP} and {@code PALETTE}, which <i>generate</i> a colour rather
+     * than naming one, it is a whole stop list or a hue swept {@code span}
+     * degrees - because a region that could only name one flat colour would be
+     * less expressive than the op around it, and a ramp confined to one region
+     * would still cost a layer per region. That symmetry is the point: a region
+     * that could do less sends an author back to writing a layer each, which is
+     * the duplication the field exists to remove.
+     *
+     * <p>Only the op's own kind of source is ever read - {@code color} on the
+     * two flat ops, {@code colors} and {@code span} on the two that generate.
+     * The parser refuses the keys an op would not read rather than storing them
+     * for nobody, so nothing here is quietly ignored.
+     *
+     * <p>{@code span} is {@code hueSpan} on a {@code RAMP} and
+     * {@code hueSpread} on a {@code PALETTE}: the same quantity either way -
+     * how much of the wheel the generated colour may cover - spelled the way
+     * the op around it spells it.
      */
-    public record Region(List<Part> parts, int color, Value hue, Value saturation, Value lightness) {}
+    public record Region(List<Part> parts, int color, List<Integer> colors,
+                         Value hue, Value span, Value saturation, Value lightness) {}
 
     public enum OpType {
         /** Natural: {@code PigmentField.dilute} - the dilution move. */

@@ -153,8 +153,23 @@ public final class SpecSchema {
             return new Param(name, Kind.BOX, 0, List.of(), doc);
         }
 
-        static Param regions(String name, String doc) {
-            return new Param(name, Kind.REGIONS, 0, List.of(), doc);
+        /**
+         * A {@code regions} list, plus <b>which colour keys one of its entries
+         * may carry</b>.
+         *
+         * <p>They ride in {@code choices} deliberately: that is the field
+         * {@code SpecFixtureTool} bakes into the fixture and {@code parity.js}
+         * compares, so a creator offering a region a key the game would refuse
+         * fails the parity gate rather than exporting a gene that will not
+         * load. Somewhere else it would be compared by nothing.
+         *
+         * <p>The keys differ per op because the colour source does:
+         * {@code TOWARD} and {@code FLAT} name a flat colour, while
+         * {@code RAMP} and {@code PALETTE} generate one and so take a whole
+         * stop list or a swept hue.
+         */
+        static Param regions(String name, String doc, String... sourceKeys) {
+            return new Param(name, Kind.REGIONS, 0, List.of(sourceKeys), doc);
         }
     }
 
@@ -423,6 +438,33 @@ public final class SpecSchema {
                     + "\"hue\"/\"saturation\"/\"lightness\" } entries. A part an entry names takes "
                     + "that colour; a part no entry names takes the op's own. Each part may be "
                     + "named once - the groups overlap, so POINTS and LEGS together claim the legs twice.";
+
+    /**
+     * The same field on the two ops that <b>generate</b> a colour rather than
+     * naming one, where an entry carries a whole colour source of its own.
+     *
+     * <p>The op's <b>geometry</b> stays the op's - one axis, one from/to, one
+     * seed and scale for the whole layer - so the regions recolour a single
+     * sweep rather than each running one of their own. That is what makes the
+     * field worth having over a layer per region: the sweep cannot drift out of
+     * step with itself, because there is only one of it.
+     */
+    private static final String RAMP_REGIONS_DOC =
+            "per-region colour sources: a list of { \"parts\": [..], and exactly ONE of \"colors\" "
+                    + "(its own stops), \"hue\" (with 'hueSpan'/'saturation'/'lightness' - its own "
+                    + "sweep) or \"color\" (one stop, so that region comes out flat) } entries. The "
+                    + "axis, space, from/to, seed and scale stay the op's, so every region recolours "
+                    + "the SAME sweep. A part no entry names takes the op's own colours; each part "
+                    + "may be named once.";
+
+    /** {@link #RAMP_REGIONS_DOC}, for the op whose colour is drawn per cell. */
+    private static final String PALETTE_REGIONS_DOC =
+            "per-region colour sources: a list of { \"parts\": [..], and exactly ONE of \"colors\" "
+                    + "(its own palette), \"hue\" (with 'hueSpread'/'saturation'/'lightness' - its "
+                    + "own spread) or \"color\" (a one-entry palette, so that region comes out flat) "
+                    + "} entries. The seed and scale stay the op's, so the cells line up across the "
+                    + "regions. A part no entry names takes the op's own palette; each part may be "
+                    + "named once.";
 
     /**
      * The most octaves a {@code FRACTAL} mask will take. Every octave is a full
@@ -889,7 +931,7 @@ public final class SpecSchema {
                 Param.value("hue", -1, HUE_DOC),
                 Param.value("saturation", 0.8, SATURATION_DOC),
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
-                Param.regions("regions", REGIONS_DOC),
+                Param.regions("regions", REGIONS_DOC, "color", "hue", "saturation", "lightness"),
                 Param.value("strength", 100.0, "percent of the way there"),
                 Param.value("opacity", 100.0, "percent opacity the texel ends at")));
 
@@ -898,7 +940,7 @@ public final class SpecSchema {
                 Param.value("hue", -1, HUE_DOC),
                 Param.value("saturation", 0.8, SATURATION_DOC),
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
-                Param.regions("regions", REGIONS_DOC),
+                Param.regions("regions", REGIONS_DOC, "color", "hue", "saturation", "lightness"),
                 Param.value("opacity", 100.0, "percent opacity")));
 
         OPS.put(OpType.RAMP, List.of(
@@ -908,6 +950,8 @@ public final class SpecSchema {
                 Param.value("hueSpan", 60.0, "degrees of hue the ramp travels; negative runs the other way"),
                 Param.value("saturation", 0.8, SATURATION_DOC),
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
+                Param.regions("regions", RAMP_REGIONS_DOC,
+                        "color", "colors", "hue", "hueSpan", "saturation", "lightness"),
                 Param.choice("axis", RAMP_AXES,
                         "X, Y or Z is a straight line through the horse and so sweeps ONCE. 'noise' "
                                 + "reads a smooth field instead, so the colour wanders and doubles "
@@ -938,6 +982,8 @@ public final class SpecSchema {
                 Param.value("hueSpread", 40.0, "degrees either side of 'hue' a cell may land"),
                 Param.value("saturation", 0.8, SATURATION_DOC),
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
+                Param.regions("regions", PALETTE_REGIONS_DOC,
+                        "color", "colors", "hue", "hueSpread", "saturation", "lightness"),
                 Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
                 Param.value("scale", 5.0, "body units across one colour cell"),
                 Param.value("strength", 100.0, "percent of the way to the cell's colour"),
