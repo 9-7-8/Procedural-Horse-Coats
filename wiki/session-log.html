@@ -27,6 +27,96 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-cloudtouched">2026-09-18, after the pull session &mdash; A flying breed that could not fly</h2>
+
+<p>
+    <strong>Cloudtouched</strong>, a second magical breed, from a design a friend of the
+    owner wrote and handed over as JSON. The brief was: make it a base breed, make it
+    super rare, make it a genetic example of a true flyer, and make sure it has
+    bird-boned. See <a href="breed-book.html#cloudtouched">the breed book</a> and the file
+    itself, which carries the reasoning in its <code>notes</code>.
+</p>
+
+<p>
+    <strong>The design pinned no flight gene at all.</strong> That is the whole entry,
+    really. It pinned <a href="gene-barred-wing.html">barred wing</a> &mdash; which is a
+    butterfly marking drawn across the ribs, with two paint layers per expression and zero
+    <code>effects</code> blocks &mdash; and nothing else that leaves the ground. Because
+    <code>flying</code> is registered <code>MAGIC_BEHAVIOUR</code>, and
+    <code>BreedFounder.roll</code> forces every <em>unnamed</em> magical locus to wild
+    type, every founder would have rolled <code>n/n</code>. The breed would have shipped
+    as a fast jumper with a marking that looks like a wing, and nothing in the build would
+    have said a word about it &mdash; no warning, no test, no log line. Worth knowing in
+    general: for coat, magical and disorder loci, omitting a gene is not &ldquo;leave it
+    natural&rdquo;, it is &ldquo;homozygous wild type&rdquo;. Only the natural performance
+    loci fall through to the gene's own founder table.
+</p>
+
+<p>
+    <strong>The flight is a reservoir, not a supply.</strong> The pool seeds
+    <code>El/n</code>, <code>El/Tf</code> and <code>Tf/n</code> and never
+    <code>Tf/Tf</code>, which honours the <a href="gene-flying.html">flying</a> gene's own
+    owner's call from the day before &mdash; true flight is bred for rather than found,
+    and a glider may be carrying it without anyone knowing. Here that carrying actually
+    happens at a findable rate: <code>Tf</code> sits at 28% allele frequency, so two
+    Cloudtouched bred at random throw a true flier about one foal in thirteen and two
+    known gliders one in four. <code>n/n</code> is absent from the pool, so there is no
+    such thing as an ordinary one &mdash; the quiet two-thirds are <code>Tf/n</code>,
+    which expresses nothing at all.
+</p>
+
+<p>
+    <strong>Balanced against the other 122 breeds rather than in isolation</strong>, which
+    is the part that needed the sheets open. Run through
+    <code>BreedStatCurve.factor</code>, the original statline came out
+    &times;1.92 speed, &times;1.50 health and &times;2.94 jump &mdash; near the ceiling on
+    all three at once, which no shipped breed is. The Thoroughbred pays for &times;2.02
+    speed with health 4; the Zangersheide pays for &times;3.43 jump with speed 8. This one
+    paid with nothing, and then also flew. It ships at speed 8, jump 9, health 4, pull 2:
+    hollow-boned, fast, fragile, useless in harness. Speed 8 rather than the 9.5 asked for
+    because airspeed is a pure function of <code>MOVEMENT_SPEED</code> &mdash;
+    <code>HorseFlightMixin</code> cruises at 1.1&times; to 2.5&times; ground speed &mdash;
+    and 9.5 would have put a horse past a rocket-boosted elytra at about 36 blocks a
+    second.
+</p>
+
+<p>
+    <strong>Bird-boned is in at 10% expressing, not the 50% the design asked for.</strong>
+    Its own founder table is <code>CARRIERS_ONLY</code>: no wild horse anywhere expresses
+    it, so this breed is the thing that makes it findable at all. But flight plus
+    bird-boned is unconditional fall immunity that covers the rider too, at zero stat
+    cost, and the two genes' comments say in four separate places that breeding them
+    together is meant to be the point. Handing both to every founder would have retired
+    the combination they were built to reward.
+</p>
+
+<p>
+    <strong>Dropped twelve loci the design pinned at uniform weight.</strong> No other
+    breed pins any of them, and the reason matters: naming a locus does not nudge its
+    frequencies, it <em>replaces</em> the founder table outright and rescales to 100. So
+    &ldquo;every pair at weight 1&rdquo; is a uniform distribution, which is neither the
+    gene's natural rate nor Hardy-Weinberg. <a href="gene-egg-layer.html">Egg layer</a>
+    was the worst of them &mdash; it is deliberately 0% expressing in the wild, because a
+    horse that lays something worth having is meant to come out of the splice layer, and
+    the uniform pool would have had about 18% of Cloudtouched dropping items on a
+    3&ndash;12 minute timer. Kept the cosmetic identity (barred wing, both iris loci, mane
+    and tail colour) and, on the owner's call, the weather affinity &mdash; leant towards
+    storms, since a horse that comes alive in the weather that grounds everything else is
+    the right flavour, with stacked pairs held to single figures because both copies emit
+    their own <code>multiply_total</code>. Added grey at 76%, which is what makes them
+    pale.
+</p>
+
+<p>
+    <strong>Found on the way past:</strong> <code>stats.jump</code> and
+    <code>stats.health</code> accept <code>[lo, hi]</code> syntactically and then silently
+    discard <code>hi</code>, while <code>speed</code>, <code>size</code> and
+    <code>pull</code> honour it and a <em>strain's</em> stats honour all five. The
+    breed-format page says all four take a range. Nothing catches it, because the writer
+    re-emits the collapsed point and the round-trip test passes.
+    <a href="known-gaps.html#gap-278">Gap 278</a>.
+</p>
+
 <h2 id="d2026-09-18-pull">2026-09-18, after the full suite &mdash; A fifth body stat, and the split that copy count cannot say</h2>
 
 <p>

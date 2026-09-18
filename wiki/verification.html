@@ -78,6 +78,68 @@
     </p>
 </div>
 
+<h2 id="cloudtouched-0918">&sect;0-FN &mdash; Cloudtouched, a flying breed (2026-09-18, NOT played)</h2>
+
+<p>
+    A second magical breed, <a href="breed-book.html#cloudtouched">Cloudtouched</a>, is
+    registered and bakes clean, and <strong>not one has ever existed in a world</strong>.
+    It is the first breed to pin <a href="gene-flying.html">flying</a>, the first to pin
+    <a href="gene-bird-boned.html">bird-boned</a>, and the first to pin the weather loci,
+    so several of these checks are the first time that code has met a breed pool at all.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+
+<ul>
+    <li><strong>It spawns at all.</strong> <code>very_rare</code> is 0.75 against a
+        <code>moderate</code> breed's 6.0, and weight is a share <em>within one biome</em>,
+        not an absolute rate. The thinnest biome it lists is
+        <code>cherry_grove</code> (two other breeds), which is where one should turn up
+        soonest; <code>meadow</code> has ninety and is where it should be near-invisible.
+        A breed egg is the honest way to check the <em>horse</em>, but it proves nothing
+        about the spawn weight &mdash; those want a real world and patience, or
+        <code>DebugAnnounce</code>.</li>
+    <li><strong>No founder is a true flier.</strong> The pool seeds no
+        <code>Tf/Tf</code>. Roll a pen of them and check the genotype column: about two in
+        three should read <code>El/n</code> or <code>El/Tf</code>, the rest
+        <code>Tf/n</code>, and <em>none</em> <code>Tf/Tf</code>. If a wild one flies
+        properly rather than gliding, the pool is wrong.</li>
+    <li><strong>Two of them throw a true flier.</strong> The whole point of the breed.
+        About one foal in thirteen from two random Cloudtouched, one in four from two
+        known <code>El/Tf</code> gliders. This is the check that says the breed does what
+        it was built for, and it is a breeding project, not a look.</li>
+    <li><strong>Bird-boned is roughly one in ten, not one in two.</strong> It is the only
+        place in the game where a wild horse expresses it.</li>
+</ul>
+
+<h3>Then the things that can only be wrong in the air</h3>
+
+<ul>
+    <li><strong>A glider actually glides, on a breed horse.</strong> Gliding was broken for
+        three test sessions by the <code>abilityDose</code> bug and is fixed, but it has
+        only ever been checked on a hand-built genome. Ride one off a peak.</li>
+    <li><strong>Speed 8 in the air is fast but not absurd.</strong> Airspeed is
+        <code>MOVEMENT_SPEED</code> &times; 1.1 to 2.5, so this should cruise around 30
+        blocks a second at full ramp &mdash; quick, and meant to stay under a
+        rocket-boosted elytra. If it feels like more than that, the statline is wrong and
+        not the flight code.</li>
+    <li><strong>The stall is survivable only for the one in ten.</strong> A glider that
+        runs out of height and speed should die unless it is also
+        <code>Brd/Brd</code>. If every Cloudtouched walks away from a stall, the two genes
+        have been wired together somewhere they should not be.</li>
+    <li><strong>Health 4 and pull 2 read as a real cost.</strong> It should feel fragile.
+        A breed this strong in the air is only balanced if the ground game is genuinely
+        worse.</li>
+    <li><strong>Storm affinity does something.</strong> Both weather loci lean
+        <code>T+</code>/<code>R+</code>. Wait for thunder and see whether it is noticeably
+        quicker; this is the one locus in the mod you cannot check on demand.</li>
+    <li><strong>The old crash.</strong> <q>Flying through fresh chunks does not crash the
+        server</q> (the <code>DistanceManager.runAllUpdates</code> NPE,
+        <a href="known-gaps.html#gap-31">gap 31</a>) is still open below, and a spawnable
+        flying breed is now the most likely way to meet it. Fly one a long way over
+        unloaded ground.</li>
+</ul>
+
 <h2 id="pull-0918">&sect;0-FM &mdash; Pulling ability (2026-09-18, and there is nothing to look at)</h2>
 
 <p>
