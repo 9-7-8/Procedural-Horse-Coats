@@ -27,6 +27,16 @@ public record Pregnancy(List<Embryo> embryos, long conceivedTick, long dueTick, 
         }
     }
 
+    /**
+     * <b>Identical twins</b>: one zygote that split, so both embryos are the
+     * same genome rather than two draws - the same sex, colour and markings.
+     * Compares the genomes rather than storing a flag, because for an identical
+     * pair {@code Conception} puts the very same embryo in twice.
+     */
+    public boolean identicalTwins() {
+        return twins() && embryos.get(0).foal().equals(embryos.get(1).foal());
+    }
+
     public boolean twins() {
         return embryos.size() > 1;
     }

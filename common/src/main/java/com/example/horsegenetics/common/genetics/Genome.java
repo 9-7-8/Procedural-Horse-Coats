@@ -229,7 +229,12 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
                     first, AlleleEpigenetics.deconflict(first, second, rng)));
         }
 
-        return withForcedEyes(Genotype.of(List.copyOf(pairs.values())), Epigenome.of(copies));
+        // The mutation roll goes here, after every allele is locked, so it cannot
+        // shift another gene's inheritance - and BEFORE the eyes are forced, so a
+        // mutated gene that asks for an eye colour is honoured like any other.
+        Genome drawn = Mutation.mutate(
+                new Genome(Genotype.of(List.copyOf(pairs.values())), Epigenome.of(copies)), rng);
+        return withForcedEyes(drawn.genotype(), drawn.epigenome());
     }
 
     /**

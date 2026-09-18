@@ -221,6 +221,11 @@ public final class HorseBreedingHandler {
                 sireRecord.id(), sireRecord.firstName(), sireRecord.lastName(), sireRecord.generation(),
                 HorseRecords.traitsOf(sireRecord), childTraits,
                 breeder == null ? "" : breeder.getGameProfile().name(), breeder, rng);
+        // Magic out of nowhere: an allele neither parent had to give.
+        if (breeder != null && com.example.horsegenetics.common.genetics.Mutation.happened(
+                childGenome.genotype(), damGenome.genotype(), sireGenome.genotype())) {
+            HorseProgress.complete(breeder, ProgressTask.BREED_MUTATION);
+        }
         return true;
     }
 
@@ -243,6 +248,12 @@ public final class HorseBreedingHandler {
                 HorseTraits.resolve(sire.genotype(), sire.epigenome(), health),
                 HorseTraits.resolve(childGenome.genotype(), childGenome.epigenome(), health),
                 embryo.bredBy(), breeder, rng);
+        // The same roll reaches a foal born from a pregnancy, so the same tick does.
+        if (breeder != null && damRecord.hasGenome()
+                && com.example.horsegenetics.common.genetics.Mutation.happened(
+                        childGenome.genotype(), damRecord.genome().genotype(), sire.genotype())) {
+            HorseProgress.complete(breeder, ProgressTask.BREED_MUTATION);
+        }
     }
 
     /**

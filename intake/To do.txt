@@ -1,5 +1,4 @@
 GEt the release process actually working-- right now, it's still not consistently pushing a new github release
-1/1000 chance of any new horse mutating a new magic gene at heterozygous, 1/1000000 at homozygous. Rolls the first check, if it succeeds, then rolls another 1/1000 check to see if it gets a second magical allele. Doesn't necessarily have to be an allele pair which does things, just guarantees non wild for each success.
 
 The goal is to make a bunch more genes which breed designers can use flavorfully to alter the behavior and abilities of their breeds. We also neeed a gene which detects whether a horse is wearing a saddle or armor, and which kind, and then interacts with that. So maybe we have an allele where the horse slows down like crazy while saddled, or another that supresses all auras while saddled, and so on. 
 

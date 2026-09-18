@@ -68,7 +68,9 @@ import java.util.Set;
 public final class BreedFounder {
 
     /** The four magical body-stat gene keys, handled from the breed's stat bands. */
-    static final Set<String> BODY_STAT_KEYS = Set.of(
+    // Public because Mutation (common.genetics) excludes the same four loci for the
+    // same reason MagicalVariant does, and one list of them is better than two.
+    public static final Set<String> BODY_STAT_KEYS = Set.of(
             "horsegenetics.body_size",
             "horsegenetics.magic_speed",
             "horsegenetics.magic_health",

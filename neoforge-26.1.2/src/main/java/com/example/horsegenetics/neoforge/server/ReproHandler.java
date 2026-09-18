@@ -397,6 +397,13 @@ public final class ReproHandler {
             born.add(foal.getUUID());
             names.add(HorseRecords.of(foal).displayName());
         }
+        // Both foals alive, because a pair the player never gets to see is not a pair
+        // they can tell apart - and telling them apart is the whole of the distinction.
+        if (p.twins() && names.size() == 2 && mare.getOwner() instanceof Player owner) {
+            HorseProgress.complete(owner, p.identicalTwins()
+                    ? com.example.horsegenetics.common.progress.ProgressTask.TWINS_IDENTICAL
+                    : com.example.horsegenetics.common.progress.ProgressTask.TWINS_FRATERNAL);
+        }
         set(mare, r.foaled(now, born));
         lateSpeed(mare, false);
         level.broadcastEntityEvent(mare, (byte) 18); // hearts, like vanilla breeding

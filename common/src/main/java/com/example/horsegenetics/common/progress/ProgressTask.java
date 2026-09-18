@@ -302,6 +302,11 @@ public enum ProgressTask {
             "Own a living horse carrying one. A magical gene adds colour after the coat has already "
                     + "resolved rather than restricting pigment on the way - which is why it can find "
                     + "the black or the white, and why it can do things no pigment could."),
+    BREED_MUTATION(Group.MAGIC, "Breed a mutation",
+            "Now and then a foal bred in captivity is born carrying a magical gene neither of its "
+                    + "parents had - a mutation, out of nowhere. It happens to about one foal in a "
+                    + "thousand, so there is nothing to aim for and nothing you did differently: you "
+                    + "were lucky enough for it to happen to you."),
     CARROT_MAGICAL(Group.MAGIC, "Use a magical splice carrot",
             "Everything a real horse could not do. It narrows the roll to the magical genes - the "
                     + "deliberate way in, once you know one exists."),
@@ -330,6 +335,16 @@ public enum ProgressTask {
                     + "a day afterwards. It will not hunt while the sun is on it."),
 
     // ---- 6. Breeding projects -------------------------------------------
+    TWINS_FRATERNAL(Group.PROJECTS, "Breed fraternal twins",
+            "Two foals out of one pregnancy, drawn separately, and no more alike than any brother "
+                    + "and sister. An ordinary mare carries twins about one pregnancy in fifty; one "
+                    + "with the twinning allele does it far more often, which is the whole of how you "
+                    + "breed for them. Not every twin pregnancy ends with two foals alive."),
+    TWINS_IDENTICAL(Group.PROJECTS, "Breed identical twins",
+            "One egg that split, so the two foals are a single draw rather than two: the same sex, "
+                    + "the same colour, and the same markings down to the last streak. About one twin "
+                    + "pregnancy in ten is this, which makes it a rarity inside a rarity - you cannot "
+                    + "breed for it beyond breeding for twins at all."),
     FOAL_HETEROZYGOUS(Group.PROJECTS, "Breed a foal carrying something it does not show",
             "Two different alleles at one locus. Most foals manage this without being asked - and it "
                     + "is the whole reason a plain-looking horse is worth keeping."),

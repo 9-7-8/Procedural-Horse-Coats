@@ -623,6 +623,12 @@ public final class TutorialPage {
                         "Now and then a pregnancy is twins. Usually both live; sometimes one is lost, "
                                 + "and rarely both. Whether a mare throws twins at all is in her own "
                                 + "genes, so it runs in families.",
+                        "Most twins are fraternal - two separate draws, no more alike than any brother "
+                                + "and sister. About one twin pregnancy in ten is identical instead: "
+                                + "one egg that split, so the two foals are a single draw carried "
+                                + "twice, the same sex and the same colour and the same markings down "
+                                + "to the last streak. There is no breeding for that beyond breeding "
+                                + "for twins at all.",
                         "After foaling she nurses, and comes back into heat shortly afterwards - the "
                                 + "foal heat - so a mare can be covered again quite soon. Keep a foal "
                                 + "far from its dam for a day and she weans it.",
@@ -634,7 +640,8 @@ public final class TutorialPage {
                                 + "about a Minecraft day; turned up, a pregnancy can run most of a real "
                                 + "mare's eleven months."),
                 List.of(), Art.NONE,
-                List.of(ProgressTask.BREED_FOAL)));
+                List.of(ProgressTask.BREED_FOAL, ProgressTask.TWINS_FRATERNAL,
+                        ProgressTask.TWINS_IDENTICAL)));
 
         breeding.add(new Step("Seed jars",
                 List.of("A seed jar lets a stallion sire a foal on a mare he has never met. The empty "
@@ -800,10 +807,16 @@ public final class TutorialPage {
                                 + "it narrows the random roll to the magical genes and nothing else. "
                                 + "The census page on the wiki lists every gene in the mod with what "
                                 + "each combination of its alleles actually does, magical and natural "
-                                + "together, which is the shortest route to knowing what is out there."),
+                                + "together, which is the shortest route to knowing what is out there.",
+                        "There is one way in you cannot arrange at all. Every so often a foal bred in "
+                                + "captivity is simply born with a magical gene neither of its parents "
+                                + "had - a mutation, out of nowhere, about one foal in a thousand. "
+                                + "Nothing you feed them and nothing you pair makes it likelier. If it "
+                                + "happens to you, you were lucky."),
                 List.of(new ItemStack(Items.GOLDEN_CARROT), new ItemStack(Items.AMETHYST_SHARD),
                         new ItemStack(Items.GLOWSTONE_DUST)), Art.NONE,
-                List.of(ProgressTask.MAGICAL_GENE_DISCOVERED, ProgressTask.CARROT_MAGICAL)));
+                List.of(ProgressTask.MAGICAL_GENE_DISCOVERED, ProgressTask.CARROT_MAGICAL,
+                        ProgressTask.BREED_MUTATION)));
 
         magic.add(new Step("The dhampir",
                 List.of("There is one breed in the mod that is magical by description rather than by "
