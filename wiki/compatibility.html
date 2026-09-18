@@ -376,6 +376,59 @@
     taken over the sorted form.
 </p>
 
+<h3 id="generated-naming">Six mods, one steel</h3>
+
+<p>
+    A generated armour is named after the <strong>material</strong> and not after the mod that
+    brought it: <code>steel_horse_armor</code>, because &ldquo;Steel Horse Armor&rdquo; is what
+    a player is looking for and &ldquo;Alltheores Steel Horse Armor&rdquo; is not. That was
+    written when a material meant an item, and <strong>it does not</strong>. On a 319-jar pack,
+    six mods each filed a steel ingot under <code>c:ingots/steel</code>; nineteen material names
+    had more than one claimant. One armour per metal meant six items wanting one registry id,
+    and the second of them threw <code>Duplicate registration</code> out of a static
+    initialiser reached from the mod constructor &mdash; so the mod did not load <em>at all</em>,
+    and took the server with it. That shipped as v0.5.012.
+</p>
+
+<p>
+    So the ids <strong>collapse by material name</strong>, in
+    <code>ModdedMaterials.armourMetals()</code>. Six steels give one Steel Horse Armor. The
+    winner is the lowest item id, so it does not depend on which mod loaded first
+    (<a href="#generated-order">above</a>), and the losers are dropped from <em>that list
+    only</em> &mdash; <code>metals()</code> keeps all of them, because
+    <a href="#generated-bench">the bench</a> colours a fitting from whichever ingot the player
+    actually put in it and has to know every one.
+</p>
+
+<div class="note">
+    <span class="label">Collapsing is the honest answer, not only the safe one</span>
+    <p>
+        Those six steels already share a <code>c:ingots/steel</code> repair tag, which is what
+        the armour is repaired with &mdash; so six separately-registered armours would have
+        been six <em>identical items</em>, differing only in which mod's ingot art their tint
+        was averaged from. The obvious alternative, putting the namespace in the id, is worse
+        on both counts: it gives the player six near-identical entries in the recipe book, and
+        it <strong>would not have fixed the crash</strong>, because ExtendedAE ships an
+        <code>entro_crystal</code> and an <code>entro_ingot</code> that collide inside a single
+        jar.
+    </p>
+    <p>
+        <strong>Every one of the six ingots still forges the armour.</strong> The recipes are
+        written per ingot rather than per armour &mdash; several recipes to one output is
+        ordinary, and vanilla does it for planks &mdash; because the alternative is a dead end
+        the player cannot see: they hold a steel ingot, the recipe book shows a steel armour,
+        and the grid refuses.
+    </p>
+</div>
+
+<p>
+    The same pack turned up <code>bloodmagic:ingot_hellforged</code>, with the affix on the
+    front. Only a suffix was stripped, so it would have been sold as &ldquo;Ingot Hellforged
+    Horse Armor&rdquo;; <code>Metal.material()</code> now takes <code>ingot</code>,
+    <code>gem</code>, <code>crystal</code> and <code>shard</code> off either end, and refuses to
+    strip one that would leave nothing behind.
+</p>
+
 <h3 id="generated-what">What gets generated</h3>
 
 <div class="table-wrap">
@@ -462,9 +515,14 @@
 
 <p>
     The folder carries a <strong>fingerprint</strong> of exactly what it was built from: the
-    woods, the metals, and each metal&rsquo;s colour, so a mod that only repaints its ingot
-    still gets a redrawn armour. On every launch the fingerprint is recomputed from the mods
-    actually present. Same answer, nothing is written. Different answer, the folder is
+    woods, the metals, each metal&rsquo;s colour &mdash; so a mod that only repaints its ingot
+    still gets a redrawn armour &mdash; and a <strong>rules version</strong>, bumped whenever
+    the code that turns that list into files changes. Without that last part the fingerprint
+    answers &ldquo;same mods?&rdquo; when the question is &ldquo;same output?&rdquo;, and a
+    player who upgrades this mod without touching their mod list keeps a folder built by the
+    old rules. That is exactly the silent staleness the folder exists to avoid, and
+    <a href="#generated-naming">the v0.5.013 rename</a> is the first change that would have
+    hit it. On every launch the fingerprint is recomputed from the mods actually present. Same answer, nothing is written. Different answer, the folder is
     <em>wiped</em> and rebuilt from scratch &mdash; not written over, because a stale file for
     a mod that is gone is precisely the thing that then loads and fails for a reason nobody
     can find. No modded materials at all, which is the overwhelmingly common case, and no

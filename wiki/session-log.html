@@ -27,6 +27,101 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-18-collision">2026-09-18, after the carts &mdash; Six mods add a steel, and the mod stops loading</h2>
+
+<p>
+    A tester put v0.5.012 on a 319-jar pack an hour after it was published, and it did not
+    start. Not a broken armour &mdash; <strong>the mod did not load at all</strong>, which on
+    their server meant the server did not come up. They sent back the stack trace, the
+    <code>compat:</code> line above it, a table of every colliding id, and two reproducers.
+    Almost all of the diagnosis in this entry is theirs; the session's work was deciding what
+    the fix should be and finding out what else was hiding behind it.
+</p>
+
+<pre><code>java.lang.IllegalArgumentException: Duplicate registration redstone_alloy_horse_armor
+    at DeferredRegister$Items.registerItem(DeferredRegister.java:714)
+    at ModdedArmour.&lt;clinit&gt;(ModdedArmour.java:93)</code></pre>
+
+<h3>A name that was never unique</h3>
+
+<p>
+    <code>compat/ModdedArmour</code> registered one horse armour per scanned metal, and the id
+    came from the material name alone: <code>steel_horse_armor</code>. Leaving the mod's name
+    out is deliberate &mdash; &ldquo;Steel Horse Armor&rdquo; is what a player searches for
+    &mdash; but it was written as though a material were an item. It is not. The scan dedupes
+    by <code>namespace:path</code>, one level finer than the id it hands to the registry, so
+    <strong>six mods each adding a steel ingot produced six items wanting one name</strong>.
+    Nineteen material names collided on that pack; <code>redstone_alloy</code> was merely the
+    first one the registry reached.
+</p>
+
+<p>
+    The crash lands in a static initialiser reached from the mod constructor, which is what
+    turns a cosmetic clash into an <code>ExceptionInInitializerError</code> and a dead mod.
+    <a href="known-gaps.html#gap-274">Gap 274</a> had actually described this feature already,
+    and got it wrong in a way worth recording: it said &ldquo;the ids differ, so nothing is
+    ambiguous to the <em>game</em>&rdquo;. True of gates, whose ids carry a namespace. False of
+    armour, whose ids did not. The sentence was checked against one half of a feature and
+    written as though it covered both.
+</p>
+
+<h3>Collapsing was the honest fix, not only the cheap one</h3>
+
+<p>
+    Ids now <a href="compatibility.html#generated-naming">collapse by material name</a>: six
+    steels give one Steel Horse Armor, the winner being the lowest item id so load order stays
+    irrelevant. The tempting alternative &mdash; put the namespace in the id &mdash; was
+    rejected twice over. It gives the player six near-identical recipe-book entries, and
+    <strong>it would not have fixed the crash</strong>: the tester had also found
+    <code>extendedae:entro_crystal</code> and <code>extendedae:entro_ingot</code>, which
+    collide inside a single jar. Collapsing is also simply more correct, because those six
+    steels already share a <code>c:ingots/steel</code> repair tag &mdash; six registrations
+    would have been six identical items.
+</p>
+
+<p>
+    The thing that had to be got right alongside it: <strong>all six ingots still forge the
+    armour.</strong> Recipes are written per ingot rather than per armour now, because the
+    alternative is a dead end a player cannot see &mdash; holding a steel ingot, looking at a
+    steel armour in the recipe book, and watching the grid refuse. And
+    <code>metals()</code> deliberately keeps every one of the 167, because the bench colours a
+    fitting from whichever ingot was actually put in it.
+</p>
+
+<h3>Two things found by looking, and one by booting</h3>
+
+<p>
+    The tester's second reproducer, <code>bloodmagic:ingot_hellforged</code>, showed the affix
+    strip was prefix-blind &mdash; it would have been sold as &ldquo;Ingot Hellforged Horse
+    Armor&rdquo;. Both ends are stripped now. Separately, the generated pack's fingerprint
+    turned out to hash <em>what the mods are</em> and not <em>what the rules do</em>, so this
+    very rename would have left upgraders holding a folder built the old way; it carries a
+    rules version now.
+</p>
+
+<p>
+    And the last bug was the session's own. The report asked for a guard so that a compat
+    <code>&lt;clinit&gt;</code> could never again kill mod construction, which was right, and
+    the first version of that guard <strong>declared its <code>Set</code> below the static
+    block that used it</strong>. Static initialisers run in source order, so the field was
+    null and the anti-crash guard crashed at load &mdash; the identical failure shape, in the
+    code added to prevent it. A <code>runServer</code> boot caught it in about ninety seconds;
+    a green <code>build</code> had not, and could not.
+    <a href="coding-notes.html#static-order">Written up</a>, because nothing but a real mod
+    load runs those blocks in anger.
+</p>
+
+<p>
+    Shipped as v0.5.013 with the jar attached. Verified as far as a server can verify it: 5
+    metals scanned, 4 armours registered, <code>entro_horse_armor</code> once,
+    <code>hellforged_horse_armor</code> correctly named. <strong>The per-ingot recipes are not
+    verified at all</strong> &mdash; the synthetic mod registers no items, so every generated
+    recipe still takes the <code>itemExists</code> skip, and that is now the most likely thing
+    in the release to be wrong (<a href="verification.html#compat-collapse-0918">&sect;0-FQ</a>,
+    <a href="known-gaps.html#gap-272">gap 272</a>). The next real question is one only the
+    tester can answer, and it is worth asking for the launch log either way.
+</p>
+
 <h2 id="d2026-09-18-carts">2026-09-18, after Cloudtouched &mdash; Carts, and a stat that finally does something</h2>
 
 <p>

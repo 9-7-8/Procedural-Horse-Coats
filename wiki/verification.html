@@ -78,6 +78,41 @@
     </p>
 </div>
 
+<h2 id="compat-collapse-0918">&sect;0-FQ &mdash; One armour per metal name, after v0.5.012 would not load (2026-09-18, NOT played)</h2>
+
+<p>
+    A tester's 319-jar pack could not start v0.5.012: six of those mods add a steel ingot, the
+    generated horse armour was named after the metal alone, and the second registration threw
+    inside the mod constructor. v0.5.013
+    <a href="compatibility.html#generated-naming">collapses the ids by material name</a>.
+    <strong>What is confirmed</strong> is a <code>runServer</code> boot to <code>Done</code>
+    against a synthetic mod carrying the two single-jar shapes of the bug: 5 metals scanned, 4
+    armours registered, one <code>entro_horse_armor</code> rather than two, and
+    <code>hellforged_horse_armor</code> rather than <code>ingot_hellforged_horse_armor</code>.
+    That is a server, so <em>nothing was drawn</em>, and the tester's pack has not been tried
+    again.
+</p>
+
+<ul>
+    <li><strong>Does the real pack start now?</strong> The one question that matters, and only
+        the tester can answer it. Worth asking for the launch log either way &mdash; the
+        <code>compat:</code> lines would close a good part of
+        <a href="known-gaps.html#gap-271">gap 271</a> on their own.</li>
+    <li><strong>Is there exactly one Steel Horse Armor in the creative menu, and does every
+        mod's steel ingot forge it?</strong> The per-ingot recipes have never been parsed by
+        the game &mdash; the synthetic mod registers no items, so they are still skipped
+        unwritten (<a href="known-gaps.html#gap-272">gap 272</a>). <strong>This is the most
+        likely thing in the release to be wrong</strong>, because it is the only part the
+        server boot could not exercise at all.</li>
+    <li><strong>Does the collapsed armour wear a sensible colour?</strong> It is tinted from
+        the winning ingot's art &mdash; the lowest item id &mdash; so a steel armour may be
+        coloured from a mod the player does not think of as the steel mod.</li>
+    <li><strong>Does <code>phc/generated/</code> rebuild itself on upgrade?</strong> The
+        fingerprint carries a rules version now, so a player upgrading without touching their
+        mod list should see the folder wiped and rewritten. Nothing has tested the upgrade
+        path; both boots here were first runs.</li>
+</ul>
+
 <h2 id="goldencarrot-0918">&sect;0-FP &mdash; Golden carrot seeds (2026-09-18, NOT played)</h2>
 
 <ul>
@@ -291,14 +326,16 @@
         checked here is that the <em>reassurance</em> works, not the load.</li>
 </ol>
 
-<h2 id="compat-0918">&sect;0-FK &mdash; Gates and armour for other mods' materials (2026-09-18, never met a real mod)</h2>
+<h2 id="compat-0918">&sect;0-FK &mdash; Gates and armour for other mods' materials (2026-09-18, one real pack, nothing drawn)</h2>
 
 <p>
     The mod now reads every other mod's jar at startup and generates a
     <a href="item-double-gates.html#modded-woods">double gate</a> per wood they added and a
     horse armour per ingot or gem, into a pack at <code>.minecraft/phc/generated/</code>. All
     of it works &mdash; against a <strong>synthetic</strong> test mod, on a
-    <strong>dedicated server</strong>, where nothing draws.
+    <strong>dedicated server</strong>, where nothing draws. It has met real mods exactly once,
+    on a tester's 319-jar pack, and <a href="#compat-collapse-0918">that run crashed</a>
+    before anything was generated; see &sect;0-FQ for what it did and did not settle.
     <a href="known-gaps.html#gap-271">Gap 271</a> to
     <a href="known-gaps.html#gap-275">275</a> are what that leaves open. The mechanism is on
     <a href="compatibility.html#generated">the compatibility page</a>.

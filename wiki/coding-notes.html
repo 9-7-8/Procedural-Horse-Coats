@@ -930,6 +930,40 @@ done</code></pre>
     </p>
 </div>
 
+<h2 id="static-order">A field used by a static block must be declared above it</h2>
+
+<p>
+    Three things in this mod register themselves from a <code>static { }</code> block &mdash;
+    <code>block/DoubleGates</code>, <code>compat/ModdedArmour</code> and the cart items &mdash;
+    and all three build their ids partly out of <em>other mods'</em> jars. That is a good
+    pattern here and it has one sharp edge: <strong>static initialisers run in source
+    order</strong>, so a field declared below the block is still <code>null</code> while the
+    block runs.
+</p>
+
+<p>
+    This is ordinary Java and it is on this page anyway, because of where it lands. A throw
+    from a static initialiser reached by the mod constructor is an
+    <code>ExceptionInInitializerError</code> during mod loading: not a broken feature but a mod
+    that does not load at all, and on a server, a server that does not start. It cost a boot
+    during the v0.5.013 fix &mdash; a duplicate-id guard whose <code>Set</code> was declared
+    after the loop it guarded, so <strong>the code added to prevent a crash-at-load caused
+    one</strong>. It is also invisible to the compiler and to every unit test, because nothing
+    but a real mod load runs those blocks in anger.
+</p>
+
+<div class="note">
+    <span class="label">What actually catches it</span>
+    <p>
+        <code>./gradlew :neoforge-26.1.2:runServer</code>, which is the session routine's
+        build check before any release for exactly this reason. A green <code>build</code>
+        proves nothing about it: <code>:test</code> does not
+        construct the mod, and the compiler is happy to read a final field before it is
+        assigned when it happens through a method call. Grep for <code>static {</code> in the
+        NeoForge module before trusting a change near one.
+    </p>
+</div>
+
 <h2 id="verified">Verified</h2>
 
 <p id="verified-bake-golden">

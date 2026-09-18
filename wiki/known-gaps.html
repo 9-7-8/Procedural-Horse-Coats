@@ -108,21 +108,25 @@
     whether the keyboard was up. Emulation cannot answer either.
 </li>
 
-<li id="gap-271"><strong>Open, found 2026-09-18: the mod now reads other mods' jars and generates content for them, and it has never met a real third-party mod.</strong>
-    The <a href="compatibility.html#generated">whole compat layer</a> &mdash; the scan, the pack,
-    the gates, the armours, the bench fittings &mdash; was built and exercised against a
-    <strong>synthetic</strong> mod that <code>tools/compat/build-test-mod.mjs</code> writes: one
-    wood, two metals, laid out exactly the way the scanner expects to find them. That was the
-    right thing to build, because doing nothing correctly is indistinguishable from being broken
-    and there was no other way to tell them apart &mdash; but a jar written to be found is not
-    evidence about jars that were not. <strong>Every assumption about how mods actually lay
-    their files out is untested:</strong> that a wood ships a <code>&lt;name&gt;_planks.png</code>
-    at the usual path, that an item model names its texture in <code>layer0</code>, that the
-    per-material <code>c:ingots/*</code> child tag is the one a mod writes, that an ingot's art
-    is in the jar that declared the tag. Each of those has a fallback and none of the fallbacks
-    has been exercised either. The first real mod installed beside this one is the first test of
-    all of it, and the failure is quiet &mdash; a wood that is simply not found looks exactly
-    like a wood the player imagined. <code>wiki/verification.html</code> &sect;0-FK.</li>
+<li id="gap-271"><strong>Open, narrowed 2026-09-18: the compat layer has now met 319 real mods, and what it found there it has only been told about.</strong>
+    This used to say the <a href="compatibility.html#generated">whole compat layer</a> had never
+    met a real third-party mod, having only ever been run against the <strong>synthetic</strong>
+    jar <code>tools/compat/build-test-mod.mjs</code> writes. An outside tester has now put it on
+    a 319-jar pack, and the headline finding was a crash that a jar written to be found could
+    never have produced: an armour id built from the material name alone, colliding six ways on
+    <code>steel</code>. That is <a href="compatibility.html#generated-naming">fixed and
+    released</a> in v0.5.013, and the two single-mod shapes of it are in the synthetic jar now.
+    <strong>What is still open is everything that run could not tell us.</strong> The scan
+    reported 40 woods, 167 metals and 3 dyes and then the mod died in its constructor, so those
+    counts are the <em>only</em> evidence from real jars: nobody has seen a modded gate, a
+    tinted armour or a bench fitting that came out of one, and the per-file assumptions are
+    still assumptions &mdash; that a wood ships a <code>&lt;name&gt;_planks.png</code> at the
+    usual path, that an item model names its texture in <code>layer0</code>, that an ingot's art
+    is in the jar that declared the tag. Each has a fallback and no fallback has been exercised.
+    The failure is quiet: a wood that is simply not found looks exactly like a wood the player
+    imagined. <strong>The cheapest next step is to ask that tester for the 0.5.013 launch log</strong>
+    &mdash; the <code>compat:</code> lines and the uncraftable warnings alone would settle a
+    dozen of these. <code>wiki/verification.html</code> &sect;0-FK.</li>
 
 <li id="gap-272"><strong>Open, found 2026-09-18: no generated recipe has ever successfully parsed.</strong>
     What the test run verified is the <em>skip</em>, not the recipe. The synthetic test mod
@@ -132,7 +136,15 @@
     <em>shape</em> is the same shapeless JSON as the twelve shipped double-gate recipes, which do
     work, and that is the only reason to expect it to; nobody has seen one in a crafting grid,
     and nobody has seen a generated recipe load without the skip in front of it. A test mod that
-    actually registers its declared items would close this without a play session.</li>
+    actually registers its declared items would close this without a play session.
+    <strong>v0.5.013 made this worse rather than better:</strong> armour recipes are now written
+    <em>per ingot</em> rather than per armour, so that all six of a collapsed
+    <a href="compatibility.html#generated-naming">steel</a>'s ingots can forge it &mdash; which
+    means a new filename shape (<code>&lt;id&gt;_from_&lt;ns&gt;_&lt;path&gt;.json</code>) and a
+    new loop, and the 0.5.013 server boot confirmed only that they write nothing when nothing is
+    registered. The several-recipes-one-output shape is ordinary and
+    <code>tools/check-recipes.mjs</code> does not object to it, but no generated armour recipe
+    has still ever been parsed by the game.</li>
 
 <li id="gap-273"><strong>Open, found 2026-09-18: nothing the compat layer generates has ever been drawn.</strong>
     Not a modded double gate in a world, not a tinted horse armour on a horse, not its inventory
@@ -147,15 +159,22 @@
     (<code>bake-double-gates.mjs</code> and <code>compat/GeneratedGates</code>, one contract in
     two languages) and nothing checks that they do. <code>wiki/verification.html</code> &sect;0-FK.</li>
 
-<li id="gap-274"><strong>Open, found 2026-09-18: two mods that both add a &ldquo;maple&rdquo; give you two items with the same name.</strong>
-    A generated gate is labelled from the wood alone &mdash; &ldquo;Maple Double Fence Gate&rdquo;
-    &mdash; and a generated armour from the material alone. The ids differ, so nothing is
-    ambiguous to the <em>game</em>; it is ambiguous to the eye, in a creative search or a
+<li id="gap-274"><strong>Open, corrected 2026-09-18: two mods that both add a &ldquo;maple&rdquo; give you two gates with the same name.</strong>
+    A generated gate is labelled from the wood alone &mdash; &ldquo;Maple Double Fence
+    Gate&rdquo; &mdash; so two wood mods are ambiguous to the eye in a creative search or a
     recipe book. Leaving the mod's name out is deliberate and the alternative is worse for the
-    far commoner case where there is only one maple, so this is recorded as a
-    <strong>known consequence rather than a defect to fix blind</strong>: what is missing is
-    anyone having seen how bad it looks with two wood mods installed. If it does need fixing,
-    the cheap version is to disambiguate only on a clash rather than always.</li>
+    far commoner case where there is only one maple, so this is a <strong>known consequence
+    rather than a defect to fix blind</strong>: what is missing is anyone having seen how bad it
+    looks with two wood mods installed. If it does need fixing, the cheap version is to
+    disambiguate only on a clash rather than always.
+    <br><strong>This entry used to say &ldquo;the ids differ, so nothing is ambiguous to the
+    <em>game</em>&rdquo;, and for armour that was simply false.</strong> A gate id carries its
+    namespace and an armour id did not, so the armour case was not a cosmetic clash at all
+    &mdash; it was a duplicate registration that stopped the mod loading, and it shipped. The
+    lesson worth keeping is that this page said the right words about the wrong half of a
+    feature: the sentence was checked against gates and then written as though it covered both.
+    Armour is <a href="compatibility.html#generated-naming">fixed by collapsing the ids</a>;
+    gates keep the label clash described above.</li>
 
 <li id="gap-279"><strong>Open, found 2026-09-18: a modded wood&rsquo;s carts wear the oak icon in the inventory.</strong>
     Seventy-two painted cart icons ship in the jar, one per vanilla wood per vehicle, and there
@@ -203,7 +222,13 @@
     The ladder itself is the weaker half and says so in its own comment: <strong>where an ore
     generates is not readable from a jar</strong>, so it is a guess from the two weakest signals
     there are (which common tag, and the item's <code>Rarity</code>) and it will sometimes put a
-    mod's endgame metal at Novice or its starter metal at Master.</li>
+    mod's endgame metal at Novice or its starter metal at Master.
+    <br><strong>Since v0.5.013 one mod also answers for several.</strong> Where six mods added a
+    steel, their armours <a href="compatibility.html#generated-naming">collapse to one</a>, and
+    the chestplate consulted is the winner's &mdash; the lowest item id. So one mod's opinion of
+    what steel is worth now stands for all of them. That is a smaller error than it sounds like,
+    given the six are all describing the same metal, but it is a real one and it is unmeasured:
+    nobody has compared what six mods' steel chestplates actually give.</li>
 
 <li id="gap-268"><strong>Open, found 2026-09-17: an aggressive horse under a rider will not go to its target &mdash; only the buck half of the rule works.</strong>
     The owner's call when the aggression locus was built was that a saddle is no
