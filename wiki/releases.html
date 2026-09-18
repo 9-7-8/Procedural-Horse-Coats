@@ -58,6 +58,110 @@
     </p>
 </div>
 
+<h2 id="v0-5-012">0.5.012</h2>
+
+<p class="lede">
+    <strong>Horses that pull things, and a fifth stat that decides how well.</strong> Six
+    horse-drawn vehicles &mdash; a covered wagon you drive from the box seat, a plow, a seed
+    drill, a reaper, a supply cart and an animal cart &mdash; in every wood your modpack has.
+    How fast a horse pulls one is not a setting: <strong>pulling ability sets a ceiling and
+    the horse's own speed decides how close it gets</strong>, so a balanced horse beats both
+    the strongest and the fastest horse you own. Also in this one: a flying breed, a crop that
+    grows golden carrots, and a Getting Started chapter to teach all of it.
+</p>
+
+<h3>Carts</h3>
+
+<ul>
+    <li><strong>Six vehicles, every one horse-drawn.</strong> The <strong>wagon</strong> seats
+        four, grows from 36 to 108 slots as you feed it chests, takes a coloured roof from
+        five carpets, and a passenger on the box seat drives the horse. The <strong>plow</strong>
+        tills, paths or strips logs depending on which tool is inside it. The <strong>seed
+        drill</strong> plants and the <strong>reaper</strong> harvests as the horse walks. The
+        <strong>supply cart</strong> holds 54 stacks and shows you what is in it. The
+        <strong>animal cart</strong> seats two, and small animals climb in by themselves.</li>
+    <li><strong>In every wood, including modded ones.</strong> Vanilla's twelve plus one for
+        every wood any other mod you have installed adds, discovered the same way the double
+        fence gates discover theirs. A modded cart crafts from that mod's own planks. No cart
+        texture ships at all &mdash; each is assembled at load time from the wood you built it
+        out of, so a resource pack that retextures oak planks retextures oak carts for free.</li>
+    <li><strong>Your horse is the whole difference.</strong> A weak horse is capped on a heavy
+        cart however fast you breed it; a very strong slow horse never reaches the ceiling its
+        shoulders could carry. Neither stat can be dumped, and the tooltip on any cart tells
+        you what an ordinary horse keeps pulling it.</li>
+    <li><strong>A horse at pulling 6 or better carries two riders</strong> &mdash; which, with
+        the wagon's box seat, is what lets a carriage have a driver <em>and</em> somebody on
+        the horse.</li>
+    <li><strong>How far a horse has hauled is on its information screen</strong>, and belongs
+        to the horse: it survives being sold, given away or inherited. <strong>Pull</strong>
+        now sits beside Jump with the other body stats, with a word for what the number means.</li>
+    <li>The cart system is derived from <strong>AstikorCarts</strong> by MennoMax, by way of
+        <strong>NiftyCarts</strong> by jmb19905 and the <strong>UsefulCarts</strong> port, used
+        under the MIT Licence and maintained here from now on. Full lineage in
+        <code>THIRD_PARTY_NOTICES.md</code>, which ships inside the jar.</li>
+</ul>
+
+<h3>Pulling ability, the gene behind it</h3>
+
+<ul>
+    <li>A <strong>fifth body stat</strong>, scored 1&ndash;10 like a breed sheet writes its
+        stats, inherited on the allele copies and drifting like every other epigenetic number.
+        Five is an ordinary horse.</li>
+    <li>It is a real breeding target now rather than a number nothing read: carts, the second
+        rider, and the work rate any animal-labour mod can pick up.</li>
+</ul>
+
+<h3>Cloudtouched</h3>
+
+<ul>
+    <li>A <strong>very rare magical breed</strong> built as a reservoir of true flight &mdash;
+        no founder flies, but two of them can throw a foal that does. Bird-boned is roughly one
+        in ten rather than one in two, and it pays for the sky with health and pulling
+        strength.</li>
+</ul>
+
+<h3>Golden carrots, grown</h3>
+
+<ul>
+    <li><strong>Golden carrot seeds</strong> grow golden carrots on ordinary farmland. They
+        cannot be crafted and a golden carrot will not plant &mdash; the equestrian supplier
+        sells seeds at his top rank, and dungeon-grade chests have them. A mature plant gives
+        more seeds than you put in, so the first one is the only hard part.</li>
+    <li><strong>No gold ever comes out of it.</strong> It is a way to grow horse food, not a
+        gold farm.</li>
+</ul>
+
+<h3>Getting Started</h3>
+
+<ul>
+    <li><strong>A new chapter, Farming and haulage</strong>, after Husbandry &mdash; eleven
+        sub-chapters covering hay bales (the actual point of growing wheat), golden carrots,
+        the cart wheel, pulling power taught from scratch, and one per vehicle. Each vehicle's
+        box ticks when you actually drive it.</li>
+</ul>
+
+<h3>Fixes and smaller things</h3>
+
+<ul>
+    <li>The wiki's popups <strong>close on a phone</strong>, and the designers say what they
+        are doing while they boot instead of showing a blank page.</li>
+    <li>The <strong>homestead</strong> is counted rather than guessed at, and turned out never
+        to have been rare; the village decides which way it faces.</li>
+    <li>The path-canvas guard <strong>reports its failures</strong> instead of throwing.</li>
+    <li>Four stale checks fixed &mdash; and in each case the thing the stale check was hiding.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">None of the carts has been played</span>
+    <p>
+        The build is green and a dedicated server boots clean, which is what catches the
+        errors that matter at load &mdash; one mixin in this release did fail to boot and was
+        found that way. But no cart in this release has been hitched to a horse by a human
+        being. If something in it is obviously wrong, that is why, and
+        <code>wiki/verification.html</code> lists what to look at first.
+    </p>
+</div>
+
 <h2 id="v0-5-011">0.5.011</h2>
 
 <p class="lede">
