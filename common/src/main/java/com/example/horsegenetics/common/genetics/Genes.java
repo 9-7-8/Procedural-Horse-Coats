@@ -46,7 +46,6 @@ import com.example.horsegenetics.common.genetics.genes.MagicItemDropGene;
 import com.example.horsegenetics.common.genetics.genes.MagicMeatGene;
 import com.example.horsegenetics.common.genetics.genes.MagicMilkVolumeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicMobAuraGene;
-import com.example.horsegenetics.common.genetics.genes.MagicNightTemperGene;
 import com.example.horsegenetics.common.genetics.genes.MagicNightWatchGene;
 import com.example.horsegenetics.common.genetics.genes.MagicOnDeathGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSwimSpeedGene;
@@ -67,8 +66,10 @@ import com.example.horsegenetics.common.genetics.genes.HolyWardGene;
 import com.example.horsegenetics.common.genetics.genes.EcholocateGene;
 import com.example.horsegenetics.common.genetics.genes.BaseAlarmGene;
 import com.example.horsegenetics.common.genetics.genes.MusicEnjoyerGene;
-import com.example.horsegenetics.common.genetics.genes.GladiatorGene;
+import com.example.horsegenetics.common.genetics.genes.AggressionGene;
 import com.example.horsegenetics.common.genetics.genes.GuardianGene;
+import com.example.horsegenetics.common.genetics.genes.PassificationGene;
+import com.example.horsegenetics.common.genetics.genes.SkittishGene;
 import com.example.horsegenetics.common.genetics.genes.EnderEchoGene;
 import com.example.horsegenetics.common.genetics.genes.EyesightGene;
 import com.example.horsegenetics.common.genetics.genes.MagicColdGene;
@@ -426,26 +427,33 @@ public final class Genes {
     public static final MagicOnDeathGene MAGIC_ON_DEATH = new MagicOnDeathGene();
     public static final MagicMobAuraGene MAGIC_MOB_AURA = new MagicMobAuraGene();
     /**
-     * The <b>night loci</b> - what a horse becomes after dark. Both are unlike
-     * anything else in the registry in one respect: their founder tables are
-     * <b>entirely heterozygous</b>, so every feral horse carries exactly one
-     * variant and none of them expresses it. The plainest outcome each locus has
-     * is the one that cannot be caught. (Owner's call.)
+     * <b>Aggression</b> and <b>skittishness</b> - the one locus that decides what
+     * a horse attacks, and its mirror for what it runs from. They replace three
+     * loci that each answered half the question: the two time-of-day temper
+     * genes, which named a target but welded half the day into the verb, and
+     * gladiator, which named a gate but only ever one target. Every allele on
+     * both is recessive <i>and</i> recessive to the others, so a matched pair
+     * shifts and a mismatched one is an ordinary horse. (Owner's call.)
      *
-     * <p>{@link #MAGIC_NIGHT_TEMPER} supersedes {@link #MAGIC_NIGHT_WATCH}
-     * whenever it has something to act on - a horse cannot both stalk you and
-     * flee from you - and that rule lives in the translator, because which mobs
-     * are nearby is a question only the running game can answer.
+     * <p>Splitting the mood out is what lets a horse be both: "goes for monsters,
+     * runs from riders" is a herd-guard nobody can catch, and the old loci could
+     * not say it.
      */
-    public static final MagicNightTemperGene MAGIC_NIGHT_TEMPER = new MagicNightTemperGene();
-    public static final MagicNightWatchGene MAGIC_NIGHT_WATCH = new MagicNightWatchGene();
+    public static final AggressionGene AGGRESSION = new AggressionGene();
+    public static final SkittishGene SKITTISH = new SkittishGene();
     /**
-     * The <b>daylight twins</b> of the two night loci - the same variants on the
-     * same tokens, active only while it is light, and far rarer in the wild. The
-     * day temper supersedes the day watch by the same rule.
+     * The <b>watch loci</b> - what the horse does about you, as opposed to what
+     * it does to you. Their founder tables are <b>entirely heterozygous</b>, so
+     * every feral horse carries exactly one variant and none of them expresses
+     * it: the plainest outcome each locus has is the one that cannot be caught.
+     * (Owner's call.)
+     *
+     * <p>{@link #AGGRESSION} and {@link #SKITTISH} supersede them whenever they
+     * have something to act on - a horse cannot both stalk you and flee from you
+     * - and that rule lives in the translator, because which mobs are nearby is a
+     * question only the running game can answer.
      */
-    public static final com.example.horsegenetics.common.genetics.genes.MagicDayTemperGene MAGIC_DAY_TEMPER =
-            new com.example.horsegenetics.common.genetics.genes.MagicDayTemperGene();
+    public static final MagicNightWatchGene MAGIC_NIGHT_WATCH = new MagicNightWatchGene();
     public static final com.example.horsegenetics.common.genetics.genes.MagicDayWatchGene MAGIC_DAY_WATCH =
             new com.example.horsegenetics.common.genetics.genes.MagicDayWatchGene();
     public static final ManeColorGene MANE_COLOR = new ManeColorGene();
@@ -493,8 +501,16 @@ public final class Genes {
     public static final EcholocateGene ECHOLOCATE = new EcholocateGene();
     public static final BaseAlarmGene BASE_ALARM = new BaseAlarmGene();
     public static final MusicEnjoyerGene MUSIC_ENJOYER = new MusicEnjoyerGene();
-    public static final GladiatorGene GLADIATOR = new GladiatorGene();
     public static final GuardianGene GUARDIAN = new GuardianGene();
+    /**
+     * <b>Passification</b> - the way in to a horse that would otherwise kill you.
+     * It adds no aggression of its own; it says what you can offer a horse to
+     * make it stop, and it <b>overrides every other source of aggression</b>
+     * while it holds. Without it an allele of {@link #AGGRESSION} that names
+     * players is a dead end wherever it lands: the horse cannot be approached, so
+     * it cannot be fed, so it cannot be tamed.
+     */
+    public static final PassificationGene PASSIFICATION = new PassificationGene();
     public static final EnderEchoGene ENDER_ECHO = new EnderEchoGene();
     public static final EyesightGene EYESIGHT = new EyesightGene();
     public static final WeatherSpeedGene WEATHER_SPEED = new WeatherSpeedGene();
@@ -635,12 +651,12 @@ public final class Genes {
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,
             MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
-            MAGIC_NIGHT_TEMPER, MAGIC_NIGHT_WATCH, MAGIC_DAY_TEMPER, MAGIC_DAY_WATCH, SUN_SENSITIVITY,
+            AGGRESSION, SKITTISH, MAGIC_NIGHT_WATCH, MAGIC_DAY_WATCH, SUN_SENSITIVITY,
             MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, MOLTEN_HOOVES, LYCAN,
             FIREPROOF, BIRD_BONED, OCEAN_BORN, HYDROPHOBIC,
             HOT_BLOODED, DRYAD, INTIMIDATING, MEOWING,
             CLEANSING_LIGHT, HOLY_WARD, ECHOLOCATE, BASE_ALARM,
-            MUSIC_ENJOYER, GLADIATOR, GUARDIAN, ENDER_ECHO,
+            MUSIC_ENJOYER, GUARDIAN, PASSIFICATION, ENDER_ECHO,
             EYESIGHT, WEATHER_SPEED, WEATHER_JUMP, MAGIC_HEAT, MAGIC_COLD,
             FOOD_PREFERENCE, POTION_MILK, EGG_LAYER, SINGER,
             PACK_LEADER, SPAWNER,

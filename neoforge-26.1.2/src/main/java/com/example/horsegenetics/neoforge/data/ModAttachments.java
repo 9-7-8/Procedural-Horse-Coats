@@ -118,6 +118,18 @@ public final class ModAttachments {
                     .sync(CowboyBrand.STREAM_CODEC)
                     .build());
 
+    // Who this horse has stopped wanting to kill, and until when
+    // (data/PassificationAttachment). Per-player: a horse calmed by one player is
+    // still willing to kill their friend. copyOnDeath, so a re-summoned horse
+    // remembers the bargain. Not synced - nothing on the client reads it, and the
+    // horse's behaviour is server-authoritative anyway.
+    public static final Supplier<AttachmentType<PassificationAttachment>> PASSIFICATION =
+            ATTACHMENT_TYPES.register("passification", () -> AttachmentType
+                    .builder(() -> PassificationAttachment.DEFAULT)
+                    .serialize(PassificationAttachment.MAP_CODEC)
+                    .copyOnDeath()
+                    .build());
+
     // The horse a shifted lycanthrope used to be, held on the ANIMAL rather than
     // on a horse - at night there is no horse to hold it. See data/LycanShift.
     // Not copyOnDeath: an animal that dies takes the horse inside it with it.

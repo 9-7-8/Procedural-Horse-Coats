@@ -333,11 +333,14 @@ public final class GeneDescriptions {
                             + "rises while a jukebox plays nearby, with hearts. It answers to the same "
                             + "daily bond ceiling as every other source, so it is a pleasant way to spend "
                             + "a day rather than a shortcut past one."),
-            Map.entry("horsegenetics.gladiator",
-                    "A magical recessive that paints nothing: two copies and the horse attacks "
-                            + "hostile mobs that come within reach - but only while nobody is riding it, "
-                            + "and it holds its ground rather than chasing. It makes the horse willing; "
-                            + "magic fighter is what makes it dangerous."),
+            Map.entry("horsegenetics.aggression",
+                    "What the horse attacks, and when. Fifteen alleles on one grid - by day, after "
+                            + "dark or always, crossed with herds, monsters, riders, horses or "
+                            + "everything - and every one of them needs two matching copies, so two "
+                            + "different aggression alleles show neither. It holds its ground rather "
+                            + "than chasing, and a saddle is no protection: a horse that hunts riders "
+                            + "throws you off first. It makes the horse willing; magic fighter is what "
+                            + "makes it dangerous."),
             Map.entry("horsegenetics.guardian",
                     "A magical recessive that paints nothing: two copies, tamed, and the horse "
                             + "attacks whatever damaged its OWNER within about sixteen blocks. It never "
@@ -621,21 +624,24 @@ public final class GeneDescriptions {
                             + "mobs about ten blocks off; a baiting one makes every hostile that can "
                             + "see it pick it over anything else in range, including its rider. Both "
                             + "take two copies, and one of each cancels outright."),
-            Map.entry("horsegenetics.magic_night_temper",
-                    "What the horse becomes after dark. Eight variants in two families: one hunts and "
-                            + "the other runs, and each names who it feels that about - riders, "
-                            + "passive animals, monsters, or everything. By day every one of them is "
-                            + "an ordinary horse."),
+            Map.entry("horsegenetics.skittish",
+                    "What the horse runs from, and when. The mirror of aggression, allele for allele "
+                            + "and on the same grid, so one horse can hunt monsters and still bolt "
+                            + "from people - which the old combined locus could not say. Being ridden "
+                            + "makes no difference to it, which is what makes a shy horse a problem to "
+                            + "breed out rather than merely to notice."),
             Map.entry("horsegenetics.magic_night_watch",
                     "What the horse does about you after dark. Five variants that are a progression "
                             + "rather than a list, each one a little closer and a little worse - from "
                             + "staring through walls to standing directly behind you. Any of them, "
                             + "homozygous, also makes the horse silent on its feet at night."),
-            Map.entry("horsegenetics.magic_day_temper",
-                    "The daylight twin of magic night temper: the same eight variants - four that "
-                            + "hunt and four that run, from riders, animals, monsters or everything - "
-                            + "active only while the sun is up. Far rarer in the wild than the night "
-                            + "locus."),
+            Map.entry("horsegenetics.passification",
+                    "The way in to a horse that would otherwise kill you. It adds no aggression of "
+                            + "its own; it says what you can offer the animal to make it stop, and "
+                            + "while it holds the horse will not target you for any reason. One copy "
+                            + "is enough, and two different alleles give two different ways in. What "
+                            + "it wants, how much, and how long the calm lasts are written on the "
+                            + "allele copy and inherited with it."),
             Map.entry("horsegenetics.magic_day_watch",
                     "The daylight twin of magic night watch: the same five-rung ladder from staring "
                             + "through walls to standing directly behind you, silent on its feet, "

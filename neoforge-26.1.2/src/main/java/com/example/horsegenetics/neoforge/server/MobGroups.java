@@ -48,9 +48,28 @@ public final class MobGroups {
         return switch (group) {
             case "players" -> candidate instanceof Player;
             case "hostile" -> isHostile(candidate);
-            case "passive", "animals" -> candidate instanceof Animal && !isHostile(candidate);
+            // "passive" LEAVES EQUINES OUT, and "animals" does not. A horse is an
+            // Animal, so the temperament words would otherwise include every other
+            // horse in the herd: a foal that flees "herds" spent 2026-09-14 running
+            // from its own band, 1,578 times (gap 241). That exclusion used to live
+            // in the night handler's private matcher and was lost the moment flee
+            // moved onto the shared temper verb, so it lives here now, where every
+            // caller gets it. A gene that really means "other horses" has its own
+            // group; a healing aura that means "livestock, horses included" says
+            // "animals".
+            case "passive" -> candidate instanceof Animal && !isHostile(candidate)
+                    && !(candidate instanceof AbstractHorse);
+            case "animals" -> candidate instanceof Animal && !isHostile(candidate);
             case "undead" -> candidate.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD);
             case "non_horse" -> !(candidate instanceof AbstractHorse);
+            // The aggression locus names its own kind, so "horses" is a group in
+            // its own right rather than the negation of non_horse. Every equine,
+            // not just Horse: a donkey in the paddock is a horse as far as a
+            // horse that hates them is concerned.
+            case "horses" -> candidate instanceof AbstractHorse;
+            // "all" really does mean all, other horses included - a horse
+            // aggressive to EVERYTHING that spared its own herd would be a
+            // different allele, and the locus already has one for herds.
             case "all" -> true;
             default -> false;
         };

@@ -266,7 +266,10 @@ public final class HerdGoals {
                             && h.getData(ModAttachments.HORSE_SOCIAL.get()).dam().map(horse.getUUID()::equals).orElse(false))) {
                 LivingEntity attacker = foal.getLastHurtByMob();
                 if (attacker != null && attacker.isAlive() && foal.tickCount - foal.getLastHurtByMobTimestamp() < 100
-                        && (!horse.isTamed() || !(attacker instanceof Player))) {
+                        && (!horse.isTamed() || !(attacker instanceof Player))
+                        // Checked here rather than at the setTarget below so a
+                        // passified player does not even generate a trace line.
+                        && !Passification.suppresses(horse, attacker)) {
                     if (horse.getTarget() != attacker) {
                         ActionTrace.log("herd", ActionTrace.describeShort(horse) + " went for "
                                 + ActionTrace.describeShort(attacker) + ", which hurt her foal "

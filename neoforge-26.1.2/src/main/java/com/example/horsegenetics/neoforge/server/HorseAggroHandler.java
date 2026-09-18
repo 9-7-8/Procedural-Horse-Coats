@@ -204,6 +204,14 @@ public final class HorseAggroHandler {
     }
 
     private static void aggro(Horse horse, LivingEntity target) {
+        // PASSIFICATION VETOES EVERY ROUTE TO A TARGET, this one included. A
+        // horse that has taken your offering does not turn on you because you
+        // hit it, and does not join its herd-mates when somebody else does.
+        // "Will not select the player as a target for any reason" only means
+        // anything if each reason asks.
+        if (Passification.suppresses(horse, target)) {
+            return;
+        }
         // A creative / spectator player is still targeted (the horse rears and
         // kicks) but takes no damage - which is the right feedback in testing.
         horse.setTarget(target);

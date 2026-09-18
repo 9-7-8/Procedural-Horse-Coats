@@ -272,9 +272,10 @@ public enum GeneFamily {
 
         // How it acts.
         MAGICAL_OVERRIDES.put("horsegenetics.magic_mob_aura", MAGIC_BEHAVIOUR);
-        MAGICAL_OVERRIDES.put("horsegenetics.magic_night_temper", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.aggression", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.skittish", MAGIC_BEHAVIOUR);
+        MAGICAL_OVERRIDES.put("horsegenetics.passification", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.magic_night_watch", MAGIC_BEHAVIOUR);
-        MAGICAL_OVERRIDES.put("horsegenetics.magic_day_temper", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.magic_day_watch", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.sun_sensitivity", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.lycan", MAGIC_BEHAVIOUR);
@@ -300,7 +301,6 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.echolocate", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.base_alarm", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.music_enjoyer", MAGIC_BEHAVIOUR);
-        MAGICAL_OVERRIDES.put("horsegenetics.gladiator", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.guardian", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.ender_echo", MAGIC_BEHAVIOUR);
         MAGICAL_OVERRIDES.put("horsegenetics.eyesight", MAGIC_BODY);

@@ -256,7 +256,11 @@ public final class GeneReactionHandler {
             for (HorseAbilities.Active active : GeneAbilityHandler.abilitiesOf(horse)) {
                 if (active.ability() instanceof GeneAbility.Temper t
                         && t.trigger() instanceof GeneAbility.Trigger.OnOwnerHurt
-                        && horse.distanceToSqr(living) <= t.radius() * t.radius()) {
+                        && horse.distanceToSqr(living) <= t.radius() * t.radius()
+                        // A guardian that has taken your offering does not answer
+                        // for its owner against YOU - passification vetoes every
+                        // route to a target, and this is one of them.
+                        && !Passification.suppresses(horse, living)) {
                     horse.setTarget(living);
                     break;
                 }

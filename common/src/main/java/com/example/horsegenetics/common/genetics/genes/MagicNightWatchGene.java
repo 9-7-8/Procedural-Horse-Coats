@@ -41,12 +41,11 @@ import java.util.List;
  * The founder table is <b>entirely heterozygous</b> - the five variants split
  * the wild population between them at {@value #WILD_EACH_PERCENT}% each and
  * there is no {@code n/n} row. So a caught horse always carries one of the five
- * and never expresses it. Same design as {@link MagicNightTemperGene}, and the
- * same consequence: the plainest outcome the locus has is the one that cannot
- * be caught.
+ * and never expresses it, with the consequence that the plainest outcome the
+ * locus has is the one that cannot be caught.
  *
  * <h2>The temper locus talks over it</h2>
- * {@link MagicNightTemperGene} <b>supersedes</b> this whenever it has something
+ * {@link AggressionGene} and {@link SkittishGene} <b>supersede</b> this whenever either has something
  * to act on. A horse that is both stalking you and fleeing you is not two
  * behaviours, it is a bug - so while the temper gene has a target in range the
  * watching stands down, and it resumes when the field is empty. The rule lives

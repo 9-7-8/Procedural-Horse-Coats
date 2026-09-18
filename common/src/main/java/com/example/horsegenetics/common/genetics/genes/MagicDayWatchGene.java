@@ -24,8 +24,8 @@ import java.util.List;
  * horse.
  *
  * <p>Rarer than the night locus: {@value #WILD_EACH_PERCENT}% of wild horses carry
- * each variant and the rest are wild type. It yields to {@link MagicDayTemperGene}
- * exactly as the night watch yields to the night temper. Paints nothing.
+ * each variant and the rest are wild type. It yields to {@link AggressionGene}
+ * and {@link SkittishGene} exactly as the night watch does. Paints nothing.
  */
 public final class MagicDayWatchGene implements Gene, AbilityContribution {
 

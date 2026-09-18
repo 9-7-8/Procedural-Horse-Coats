@@ -31,7 +31,7 @@ import java.util.EnumSet;
  *
  * <h2>It yields to the temper locus</h2>
  * {@link NightBehaviourHandler} clears this goal's ability while
- * {@code magic_night_temper} has something to act on, so {@link #canUse()}
+ * {@code aggression} or {@code skittish} has something to act on, so {@link #canUse()}
  * returns false and the horse gets on with hunting or fleeing. A horse that
  * both stalks you and runs from you is not two behaviours, it is a bug.
  *

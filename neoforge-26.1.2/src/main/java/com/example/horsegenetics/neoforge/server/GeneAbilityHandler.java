@@ -201,9 +201,7 @@ public final class GeneAbilityHandler {
                 case GeneAbility.Combat c -> setAttackDamage(c, horse);
                 case GeneAbility.YieldCharges ignored -> { /* read by GeneYieldHandler, on interaction */ }
                 case GeneAbility.OnDeath ignored -> { /* read by GeneDeathHandler, when it dies */ }
-                case GeneAbility.NightTemper ignored -> { /* read by NightBehaviourHandler, after dark */ }
                 case GeneAbility.NightWatch ignored -> { /* read by NightBehaviourHandler, after dark */ }
-                case GeneAbility.DayTemper ignored -> { /* read by NightBehaviourHandler, by day */ }
                 case GeneAbility.DayWatch ignored -> { /* read by NightBehaviourHandler, by day */ }
                 case GeneAbility.ItemDrop ignored -> { /* read by GeneDeathHandler, when it dies */ }
                 case GeneAbility.SelfEffect se -> applyMobEffect(se, horse, active.geneKey());
@@ -2192,13 +2190,23 @@ public final class GeneAbilityHandler {
     // ------------------------------------------------------------------
 
     /**
-     * Night temper with the night gate lifted out - "aggressive toward this
-     * group, while this condition holds".
+     * <b>The whole of temperament</b> - "aggressive (or afraid) toward this
+     * group, while this condition holds". Both aggression loci and the
+     * skittishness locus come through here; so do guardian's owner-hurt
+     * retaliation and anything else that ever uses the {@code temper} verb.
      *
      * <p>{@code hold} is honoured by only ever targeting what is <b>already</b>
      * inside the radius and clearing the target the moment it leaves: the horse
      * never acquires a target it would have to travel to. That is what keeps a
-     * gladiator out of the ravine it would otherwise die in.
+     * hunting horse out of the ravine it would otherwise die in.
+     *
+     * <h2>Fleeing runs here now</h2>
+     * It used to run in {@code NightBehaviourHandler}, because only the night
+     * temper verb could express it. That verb is gone and the skittishness locus
+     * uses this one, so the flee path moved with it. <b>This mattered more than
+     * it looks:</b> this method used to {@code return} on any mood that was not
+     * aggressive, so leaving it alone would have given the new locus a gene that
+     * loads, registers, bakes and does nothing at all.
      */
     private static void temper(GeneAbility.Temper te, Horse horse, ServerLevel level) {
         if (!beat(horse, te.intervalTicks())) {
@@ -2208,8 +2216,9 @@ public final class GeneAbilityHandler {
                 && horse.getTarget().distanceToSqr(horse) > te.radius() * te.radius()) {
             horse.setTarget(null); // it left; do not follow it
         }
-        if (!"aggressive".equals(te.mood())) {
-            return; // 'flee' is handled by the same goal set as night temper's
+        if ("flee".equals(te.mood())) {
+            flee(te, horse, level);
+            return;
         }
         LivingEntity current = horse.getTarget();
         if (current != null && current.isAlive() && horse.hasLineOfSight(current)) {
@@ -2223,9 +2232,8 @@ public final class GeneAbilityHandler {
         double r2 = te.radius() * te.radius();
         LivingEntity best = null;
         LivingEntity attacker = horse.getLastHurtByMob();
-        if (attacker != null && attacker.isAlive() && attacker != horse.getControllingPassenger()
-                && MobGroups.matches(te.towards(), attacker) && attacker.distanceToSqr(horse) <= r2
-                && horse.hasLineOfSight(attacker)) {
+        if (attacker != null && attacker.isAlive() && eligible(horse, attacker, te)
+                && attacker.distanceToSqr(horse) <= r2 && horse.hasLineOfSight(attacker)) {
             best = attacker;
         }
         if (best == null) {
@@ -2233,8 +2241,7 @@ public final class GeneAbilityHandler {
             double bestD = Double.MAX_VALUE;
             int considered = 0;
             for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, box,
-                    c -> c != horse && c.isAlive() && c != horse.getControllingPassenger()
-                            && MobGroups.matches(te.towards(), c))) {
+                    c -> c != horse && c.isAlive() && eligible(horse, c, te))) {
                 if (++considered > te.maxTargets()) {
                     break;
                 }
@@ -2247,9 +2254,112 @@ public final class GeneAbilityHandler {
         }
         if (best != null) {
             horse.setTarget(best);
+            buckIfItIsTheRider(horse, best);
+            NightBehaviourHandler.noteActing(horse);
         } else if (current != null && !current.isAlive()) {
             horse.setTarget(null);
         }
+    }
+
+    /**
+     * May this horse pick that creature?
+     *
+     * <p>Two rules, and the <b>rider is deliberately not one of them</b>. This
+     * used to exclude {@code horse.getControllingPassenger()} outright, which
+     * was right while a horse could only ever be aggressive toward things it was
+     * not carrying. The aggression locus can name riders, and the owner's call
+     * is that being on its back is no protection - so the rider is an ordinary
+     * candidate and {@link #buckIfItIsTheRider} deals with the consequence.
+     */
+    private static boolean eligible(Horse horse, LivingEntity candidate, GeneAbility.Temper te) {
+        return MobGroups.matches(te.towards(), candidate)
+                && !Passification.suppresses(horse, candidate);
+    }
+
+    /**
+     * <b>A horse that has just decided to attack its own rider throws them
+     * off.</b> (Owner: "if they're aggro'd against the player, they should buck
+     * them off".)
+     *
+     * <p>It lives here rather than on the aggression gene because it is true of
+     * <i>every</i> route to targeting a rider, and because "the thing I just
+     * targeted is the thing sitting on me" is a question only the running game
+     * can answer.
+     *
+     * <p><b>Half-built, and flagged rather than hidden.</b> The other half of the
+     * owner's rule - a horse aggressive toward something else "ignores its rider
+     * and goes for it" - does not work from here. A ridden horse's movement is
+     * driven by its passenger, not by its navigation, so the melee goal cannot
+     * walk it anywhere while somebody is aboard: it will turn and swing at what
+     * comes to it and no more. Making it genuinely ignore the reins needs rider
+     * control suppressed while it has a target, which is a mixin on the riding
+     * path in the shape of {@code mixin.HorseRearFightMixin}. Not attempted
+     * here; see wiki/known-gaps.html.
+     */
+    private static void buckIfItIsTheRider(Horse horse, LivingEntity target) {
+        if (target == horse.getControllingPassenger() || horse.hasPassenger(target)) {
+            horse.ejectPassengers();
+        }
+    }
+
+    /** Who each horse is currently running from, so the trace fires on a change only. */
+    private static final java.util.Map<java.util.UUID, java.util.UUID> FLEEING =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** How fast a fleeing horse goes. Faster than a walk - it means it. */
+    private static final double FLEE_SPEED = 1.5;
+
+    /** How far a flee path runs before it is re-picked. */
+    private static final double FLEE_DISTANCE = 12.0;
+
+    /**
+     * Run from the nearest thing in the group: path to a point directly away,
+     * and drop any target it had.
+     *
+     * <p>Ported unchanged from the night handler, including the trace. A flee
+     * that never fired and a flee that fired into a fence four blocks away look
+     * exactly alike from outside, and {@code moveTo} returning false is the
+     * difference (owner, 2026-09-13: "the shy genes don't seem to be doing
+     * anything"). Logged on a CHANGE of quarry rather than per beat, or a penned
+     * horse writes a line a second all night.
+     */
+    private static void flee(GeneAbility.Temper te, Horse horse, ServerLevel level) {
+        double r2 = te.radius() * te.radius();
+        AABB box = horse.getBoundingBox().inflate(te.radius());
+        LivingEntity nearest = null;
+        double best = Double.MAX_VALUE;
+        int considered = 0;
+        for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, box,
+                c -> c != horse && c.isAlive() && MobGroups.matches(te.towards(), c))) {
+            if (++considered > te.maxTargets()) {
+                break; // every radius effect here states a cap
+            }
+            double d = candidate.distanceToSqr(horse);
+            if (d < best && d <= r2) {
+                best = d;
+                nearest = candidate;
+            }
+        }
+        if (nearest == null) {
+            FLEEING.remove(horse.getUUID());
+            return;
+        }
+
+        horse.setTarget(null);
+        net.minecraft.world.phys.Vec3 away = horse.position().subtract(nearest.position());
+        if (away.lengthSqr() < 1.0e-4) {
+            away = new net.minecraft.world.phys.Vec3(1, 0, 0);
+        }
+        net.minecraft.world.phys.Vec3 to = horse.position().add(away.normalize().scale(FLEE_DISTANCE));
+        boolean pathed = horse.getNavigation().moveTo(to.x, to.y, to.z, FLEE_SPEED);
+        // equals, not !=: the map hands back a UUID object, and identity only
+        // held while the entity kept handing out the same instance.
+        if (!nearest.getUUID().equals(FLEEING.put(horse.getUUID(), nearest.getUUID()))) {
+            ActionTrace.log("flee", ActionTrace.describeShort(horse) + " from "
+                    + nearest.getType().builtInRegistryHolder().key().identifier()
+                    + (pathed ? " - path accepted" : " - NO PATH: nowhere to run to"));
+        }
+        NightBehaviourHandler.noteActing(horse);
     }
 
     // ------------------------------------------------------------------

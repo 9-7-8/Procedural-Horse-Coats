@@ -212,20 +212,6 @@ public sealed interface GeneAbility {
                    int maxTargets, Condition when, int minDose) implements GeneAbility {}
 
     /**
-     * <b>How the horse feels about other creatures after dark</b> -
-     * {@code aggressive} or {@code flee}, toward one of the {@code towards}
-     * groups on {@link AbilityType#NIGHT_TEMPER}.
-     *
-     * <p>Night is part of the verb rather than a {@code when} condition, and
-     * that is deliberate: a horse whose temperament merely happened to be
-     * gated on darkness would need the gate written on every allele, and the
-     * one thing this locus is <i>about</i> is that the animal changes when the
-     * sun goes down.
-     */
-    record NightTemper(String mood, String towards, double radius, int intervalTicks,
-                       int maxTargets, Condition when, int minDose) implements GeneAbility {}
-
-    /**
      * <b>What the horse does about the nearest player after dark</b> - one of
      * the {@code mode} choices on {@link AbilityType#NIGHT_WATCH}.
      *
@@ -237,18 +223,6 @@ public sealed interface GeneAbility {
      */
     record NightWatch(String mode, double radius, boolean silentSteps,
                       Condition when, int minDose) implements GeneAbility {}
-
-    /**
-     * <b>How the horse feels about other creatures while it is light</b> - the
-     * mirror of {@link NightTemper}, field for field, and active only by day.
-     *
-     * <p>A second verb rather than a flag on the first, as the night verb's own
-     * note said it would have to be: the time of day is what the verb
-     * <i>means</i>, and a {@code night_temper} that could quietly be a day one
-     * would make every file using it ambiguous.
-     */
-    record DayTemper(String mood, String towards, double radius, int intervalTicks,
-                     int maxTargets, Condition when, int minDose) implements GeneAbility {}
 
     /** <b>What the horse does about the nearest player while it is light</b> - the mirror of {@link NightWatch}. */
     record DayWatch(String mode, double radius, boolean silentSteps,

@@ -70,7 +70,7 @@ final class DebugYardUnattended {
             lycanRoundTrip(level, gy, west, mouthZ + ROW_Z);
             lycanDoomed(level, gy, west + 9, mouthZ + ROW_Z);
             wereCow(level, gy, east, mouthZ + ROW_Z);
-            kick(level, gy, west, mouthZ + ROW_AA, "KICK GLADIATOR", "horsegenetics.gladiator=Gld/Gld");
+            kick(level, gy, west, mouthZ + ROW_AA, "KICK HUNTER", "horsegenetics.aggression=Aah/Aah");
             kick(level, gy, west + 9, mouthZ + ROW_AA, "KICK PLAIN", PLAIN);
             waterborn(level, gy, east, mouthZ + ROW_AA);
             suntouched(level, gy, east + 10, mouthZ + ROW_AA);
@@ -89,8 +89,8 @@ final class DebugYardUnattended {
     /** Gap 241: a night-shy horse flees passive animals after dark, and never its own kind. */
     private static void nightShy(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 18, ROW_X_D, "NIGHT SHY", Blocks.GRASS_BLOCK.defaultBlockState(),
-                List.of("NIGHT SHY", "Flc/Flc + a band", "+ two cows: flees", "cows, never horses"));
-        horse(level, gy, x0 + 3.5, z0 + 6.5, Sex.FEMALE, "horsegenetics.magic_night_temper=Flc/Flc", false, "NIGHT SHY");
+                List.of("NIGHT SHY", "Fnc/Fnc + a band", "+ two cows: flees", "cows, never horses"));
+        horse(level, gy, x0 + 3.5, z0 + 6.5, Sex.FEMALE, "horsegenetics.skittish=Fnc/Fnc", false, "NIGHT SHY");
         horse(level, gy, x0 + 9.5, z0 + 4.5, Sex.MALE, PLAIN, false, "SHY BAND STALLION");
         horse(level, gy, x0 + 10.5, z0 + 7.5, Sex.FEMALE, PLAIN, false, "SHY BAND MARE 1");
         horse(level, gy, x0 + 12.5, z0 + 5.5, Sex.FEMALE, PLAIN, false, "SHY BAND MARE 2");
@@ -431,7 +431,7 @@ final class DebugYardUnattended {
      */
     private static void kick(ServerLevel level, int gy, int x0, int z0, String name, String code) {
         pen(level, gy, x0, z0, 9, ROW_AA_D, name, Blocks.STONE.defaultBlockState(),
-                List.of(name, code.equals(PLAIN) ? "a plain horse and" : "a gladiator and",
+                List.of(name, code.equals(PLAIN) ? "a plain horse and" : "a monster-hunter and",
                         "two husks: blows", "every 10 ticks"));
         horse(level, gy, x0 + 4.5, z0 + 3.5, Sex.MALE, code, true, name);
         AABB box = DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_AA_D);

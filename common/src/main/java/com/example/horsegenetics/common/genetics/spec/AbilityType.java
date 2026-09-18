@@ -100,7 +100,7 @@ public final class AbilityType {
      * that as a negation would need a combinator the vocabulary does not have.
      */
     public static final List<String> MOB_GROUPS = List.of(
-            "players", "passive", "hostile", "undead", "animals", "non_horse", "all");
+            "players", "passive", "hostile", "undead", "animals", "non_horse", "horses", "all");
 
     /**
      * Trigger names. {@code continuous} / {@code on_move} take no argument (and
@@ -642,46 +642,6 @@ public final class AbilityType {
                         radius, interval, maxTargets, v.when, v.minDose);
             }));
 
-    /** Who a {@link #NIGHT_TEMPER} feels something about. */
-    public static final List<String> NIGHT_TARGETS = List.of("players", "passive", "hostile", "all");
-
-
-    /**
-     * <b>How the horse feels about other creatures after dark.</b>
-     *
-     * <p>The night is in the verb rather than in a {@code when} condition. A
-     * temperament that merely happened to be gated on darkness would need that
-     * gate written onto every allele of every gene using it, and the whole
-     * point of the locus this was built for is that the animal is one thing by
-     * day and another after sunset - so the verb says so once.
-     */
-    public static final AbilityType NIGHT_TEMPER = register(new AbilityType("night_temper",
-            List.of(
-                    Param.requiredChoice("mood", List.of("aggressive", "flee"),
-                            "whether the horse goes for them or runs from them"),
-                    Param.requiredChoice("towards", NIGHT_TARGETS,
-                            "who it feels that about - 'passive' is animals, 'hostile' is "
-                                    + "monsters, 'all' is both plus players"),
-                    Param.num("radius", 16, "how far it notices, in blocks, 1-48"),
-                    Param.num("interval", 20, "ticks between scans (at least 1)"),
-                    Param.num("max_targets", 8, "most entities one scan may consider, 1-64")),
-            v -> {
-                double radius = v.num("radius");
-                if (radius < 1 || radius > 48) {
-                    throw v.bad("radius must be 1-48 blocks, got " + radius);
-                }
-                int interval = v.intOf("interval");
-                if (interval < 1) {
-                    throw v.bad("interval must be at least 1 tick, got " + interval);
-                }
-                int maxTargets = v.intOf("max_targets");
-                if (maxTargets < 1 || maxTargets > 64) {
-                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
-                }
-                return new GeneAbility.NightTemper(v.str("mood"), v.str("towards"), radius,
-                        interval, maxTargets, v.when, v.minDose);
-            }));
-
     /**
      * <b>What the horse does about the nearest player after dark.</b>
      *
@@ -709,38 +669,6 @@ public final class AbilityType {
                 }
                 return new GeneAbility.NightWatch(v.str("mode"), radius, v.bool("silent_steps"),
                         v.when, v.minDose);
-            }));
-
-    /**
-     * <b>How the horse feels about other creatures while it is light</b> - the
-     * day mirror of {@link #NIGHT_TEMPER}, with the same fields and the same
-     * bounds. A separate verb, as the night one's note always said it would be.
-     */
-    public static final AbilityType DAY_TEMPER = register(new AbilityType("day_temper",
-            List.of(
-                    Param.requiredChoice("mood", List.of("aggressive", "flee"),
-                            "whether the horse goes for them or runs from them"),
-                    Param.requiredChoice("towards", NIGHT_TARGETS,
-                            "who it feels that about - 'passive' is animals, 'hostile' is "
-                                    + "monsters, 'all' is both plus players"),
-                    Param.num("radius", 16, "how far it notices, in blocks, 1-48"),
-                    Param.num("interval", 20, "ticks between scans (at least 1)"),
-                    Param.num("max_targets", 8, "most entities one scan may consider, 1-64")),
-            v -> {
-                double radius = v.num("radius");
-                if (radius < 1 || radius > 48) {
-                    throw v.bad("radius must be 1-48 blocks, got " + radius);
-                }
-                int interval = v.intOf("interval");
-                if (interval < 1) {
-                    throw v.bad("interval must be at least 1 tick, got " + interval);
-                }
-                int maxTargets = v.intOf("max_targets");
-                if (maxTargets < 1 || maxTargets > 64) {
-                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
-                }
-                return new GeneAbility.DayTemper(v.str("mood"), v.str("towards"), radius,
-                        interval, maxTargets, v.when, v.minDose);
             }));
 
     /** <b>What the horse does about the nearest player while it is light</b> - the day mirror of {@link #NIGHT_WATCH}. */

@@ -9,7 +9,6 @@ horsegenetics.slc5a3
 horsegenetics.dmrt3
 horsegenetics.magic_cold
 horsegenetics.magic_heat
-horsegenetics.magic_day_temper
 horsegenetics.magic_day_watch
 horsegenetics.contour_cells
 horsegenetics.datarain
@@ -248,6 +247,8 @@ horsegenetics.magic_zebra
 horsegenetics.grey
 horsegenetics.extension
 horsegenetics.accretion_field
+horsegenetics.census
 horsegenetics.cleave_side
+horsegenetics.passification
 horsegenetics.shade
 horsegenetics.wing_cloak

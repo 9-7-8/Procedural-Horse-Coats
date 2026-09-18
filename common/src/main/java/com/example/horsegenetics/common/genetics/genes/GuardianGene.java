@@ -21,7 +21,7 @@ import java.util.List;
  * every damage event to every player in the world. The translator establishes
  * cheaply that the hurt player owns a horse at all before it looks anything up.
  *
- * <p>It holds a radius like {@link GladiatorGene}, and for the same reason.
+ * <p>It holds a radius like {@link AggressionGene}, and for the same reason.
  */
 public final class GuardianGene extends AbstractAbilityGene {
 
@@ -38,7 +38,7 @@ public final class GuardianGene extends AbstractAbilityGene {
                 Dominance.RECESSIVE, Founders.CARRIERS_ONLY, 5.0,
                 "The horse watches you get hurt with mild interest.",
                 "Guardian",
-                "Two copies, and the horse must be tamed. Whatever damages its owner within about sixteen blocks gets attacked - only that, and only after the fact. Unlike a gladiator it keeps working while you are riding, and unlike a gladiator it never picks the fight.");
+                "Two copies, and the horse must be tamed. Whatever damages its owner within about sixteen blocks gets attacked - only that, and only after the fact. Unlike the aggression locus it never picks the fight: it starts nothing, and it answers for you rather than for itself.");
     }
 
     @Override
