@@ -51,6 +51,7 @@ window.HG.pages = {
                 { href: "item-seed-jars.html", text: "Seed jars", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-vet-kit.html", text: "Vet's kit", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-whistles.html", text: "Whistles", kind: "core", views: ["gameplay","coding"] },
+                { href: "item-double-gates.html", text: "Double gates", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-stall-signs.html", text: "Stall signs", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-tickets.html", text: "Tickets", kind: "core", views: ["gameplay","coding"] },
                 { href: "item-transfer-papers.html", text: "Transfer papers", kind: "core", views: ["gameplay","coding"] },

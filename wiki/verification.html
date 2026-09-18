@@ -78,6 +78,70 @@
     </p>
 </div>
 
+<h2 id="double-gates-0917">&sect;0-DG &mdash; What the double gates still need looking at (2026-09-17, NOT played)</h2>
+
+<p>
+    The <a href="item-double-gates.html">double gates</a> were played on the day they were built
+    and the pair itself is confirmed &mdash; both halves down, several woods, &ldquo;they look
+    fine&hellip; once both are placed, they look GREAT&rdquo;. Everything below was found
+    <em>by</em> that session and fixed <em>after</em> it. Two of those fixes &mdash; the bamboo
+    texture, and working the gate as fast as a player can click &mdash; were confirmed in the
+    same sitting and now live on
+    <a href="item-double-gates.html#verified">the gate's own page</a>; nothing still listed here
+    has been seen working. <strong>The first item is the one that matters</strong>, because it is
+    the one that made the gates feel broken to place rather than merely wrong to look at.
+</p>
+
+<h3>Nothing here needs looking at to judge &mdash; do these first</h3>
+
+<ul>
+    <li><strong>One click places both halves, wherever you are standing.</strong> Place gates
+        along a wall, into a corner, and out in the open, facing each way in turn.
+        <strong>Pass:</strong> every click that has room for two blocks places two blocks &mdash;
+        never a click that does nothing followed by a second click on the neighbouring block.
+        The partner now takes whichever side is free rather than always the same one.</li>
+    <li><strong>The first half of a new pair is visible immediately.</strong> Place a gate on
+        open ground and do not touch anything else. <strong>Pass:</strong> both blocks are drawn
+        the instant it is placed, with no need to walk away and back or re-log. It used to delete
+        itself client-side before its partner existed.</li>
+    <li><strong>They are named.</strong> Open the Horse Genetics creative tab and hover them.
+        <strong>Pass:</strong> &ldquo;Oak Double Fence Gate&rdquo;, &ldquo;Oak Double Farm
+        Gate&rdquo; and so on for all twelve woods &mdash; not a raw
+        <code>item.horsegenetics.&hellip;</code> key. <code>BlockItem</code> does not defer to its
+        block's name in 26.1.2; the items now ask for the block prefix explicitly.</li>
+</ul>
+
+<h3>In the game, with your hands</h3>
+
+<ul>
+    <li><strong>A stall shut with a double gate binds, and ticks the new checklist step.</strong>
+        Build a stall whose way in is a double gate and hang a bound
+        <a href="item-stall-signs.html">stall sign</a> on it. <strong>Pass:</strong> it binds like
+        any other stall, and <kbd>H</kbd> &rarr; Husbandry &rarr; Stalls shows
+        <em>Hang a stall on a double gate</em> ticked. The gate is the stall's
+        <em>boundary</em> rather than its floor, so the check looks at the cells around each floor
+        column &mdash; a stall whose gate is set back oddly is the case that would miss.</li>
+    <li><strong>Redstone moves the pair, not a half.</strong> Run a lever to one end of a double
+        gate. <strong>Pass:</strong> both leaves open. Vanilla's own rule asks only about its own
+        block, which on a pair would swing one and leave the other shut.</li>
+    <li><strong>Placement refuses cleanly with no room.</strong> Try to place one into a
+        one-block gap. <strong>Pass:</strong> nothing is placed and the item stays in your hand
+        &mdash; never a single half left standing. It refuses <em>silently</em>, which is
+        <a href="known-gaps.html#gap-270">gap 270</a>.</li>
+</ul>
+
+<h3>Visual, and therefore last</h3>
+
+<ul>
+    <li><strong>The in-wall variants sit right.</strong> Put a double gate in a line of
+        <em>walls</em> rather than fences, both styles. <strong>Pass:</strong> it drops to the
+        lower position the way a vanilla gate does, on both halves, at every facing.</li>
+    <li><strong>The farm style reads as a farm gate.</strong> It is four rails and no diagonal
+        brace, and it is an invention rather than a reproduction of anything &mdash;
+        <a href="known-gaps.html#gap-269">gap 269</a>. Worth an opinion on whether it wants the
+        brace.</li>
+</ul>
+
 <h2 id="tester-fixes-0917">&sect;0-FB &mdash; Five fixes from the testers' first day on 0.5.004 (2026-09-17, NOT played)</h2>
 
 <p>

@@ -191,6 +191,7 @@ and fails *silently* when stale:
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs`, then `check-links.mjs` (hrefs + `#fragments`; `--orphans` for unreachable pages) | `wiki/search-index.js` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | any AI goal added, removed or re-prioritised | `node wiki/tools/bake-behaviour-hierarchy.mjs` | `wiki/behaviour-hierarchy.html` |
+| a wood, a style or any geometry of the **double gates** | `node neoforge-26.1.2/tools/bake-double-gates.mjs` - then the recipe row below, since it writes recipes too | the regenerated `blockstates/`, `models/block/`, `items/`, `recipe/`, `loot_table/blocks/`, both `data/minecraft/tags/block/` files **and** the merged `lang/en_us.json` |
 | any file in `data/horsegenetics/recipe/` | `node neoforge-26.1.2/tools/bake-recipe-reference.mjs` | `assets/horsegenetics/recipe_reference.json` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
 | any `tools/stables/*.source.nbt`, **or `bake-stables.py` itself** | `python neoforge-26.1.2/tools/stables/bake-stables.py` | the regenerated `data/horsegenetics/structure/*.nbt` |
